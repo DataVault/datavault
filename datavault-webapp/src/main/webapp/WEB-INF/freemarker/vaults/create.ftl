@@ -6,10 +6,11 @@
 <h1>Create New Vault</h1>
 
 <form>
-    Vault name:<br>
-    <input type="text" name="name">
-    <br>
-    <input type="submit" value="Submit">
+    Vault ID:<input type="text" name="id" /><br />
+    Name:<input type="text" name="name" /><br />
+    Description:<textarea type="text" name="description" rows="6" cols="60"></textarea><br />
+
+    <input type="submit" value="Submit" />
 
 </form>
 

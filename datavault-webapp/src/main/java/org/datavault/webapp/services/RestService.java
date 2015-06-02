@@ -15,10 +15,17 @@ import org.springframework.http.ResponseEntity;
  */
 public class RestService {
 
+
+    private String brokerURL;
+
+    public void setBrokerURL(String brokerURL) {
+        this.brokerURL = brokerURL;
+    }
+
     public Map<String, String> getFilesListing() {
 
         RestTemplate restTemplate = new RestTemplate();
-        Files files = restTemplate.getForObject("http://localhost:8080/datavault-broker/files", Files.class);
+        Files files = restTemplate.getForObject(brokerURL + "/files", Files.class);
 
         return files.getFilesMap();
     }
@@ -27,7 +34,7 @@ public class RestService {
 
         RestTemplate restTemplate = new RestTemplate();
 
-        ResponseEntity<Vault[]> responseEntity = restTemplate.getForEntity("http://localhost:8080/datavault-broker/vaults", Vault[].class);
+        ResponseEntity<Vault[]> responseEntity = restTemplate.getForEntity(brokerURL + "/vaults", Vault[].class);
         Vault[] vaults = responseEntity.getBody();
 
         return vaults;
@@ -37,7 +44,7 @@ public class RestService {
 
         RestTemplate restTemplate = new RestTemplate();
 
-        ResponseEntity<Vault> responseEntity = restTemplate.getForEntity("http://localhost:8080/datavault-broker/vaults/" + id, Vault.class);
+        ResponseEntity<Vault> responseEntity = restTemplate.getForEntity(brokerURL + "/vaults/" + id, Vault.class);
         Vault vault = responseEntity.getBody();
 
         return vault;
