@@ -11,8 +11,5 @@
     <div class="header">
         <h1 class="title">Data Vault</h1>
         <p class="lead description">Keep your research data safe.</p>
-        <div class="jiscLogo"></div>
-        <div class="uomLogo"></div>
-        <div class="uoeLogo"></div>
     </div>
 </div>

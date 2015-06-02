@@ -1,32 +1,38 @@
 <#import "*/layout/defaultlayout.ftl" as layout>
 <@layout.vaultLayout>
-<div class="content">
-    <form>
-        <table>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12 storage">
+        <form>
+            <div class="table-responsive">
+            <table class="table">
 
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Size (bytes)</th>
-                <th>Timestamp</th>
-            </tr>
+                <tr class="tr">
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Size (bytes)</th>
+                    <th>Timestamp</th>
+                </tr>
 
-        <#list vaults as vault>
+                <#list vaults as vault>
+                    <tbody>
+                    <tr class="tr">
+                        <td><a href="${springMacroRequestContext.getRequestUri()}vaults/${vault.getID()}">${vault.getID()}</a></td>
+                        <td>${vault.name}</td>
+                        <td>${vault.description}</td>
+                        <td>${vault.size}</td>
+                        <td>${vault.getCreationTime()?datetime}</td>
+                    </tr>
+                    </tbody>
+                </#list>
+             </table>
+            </div>
+        </form>
 
-            <tr>
-                <td><a href="${springMacroRequestContext.getRequestUri()}vaults/${vault.getID()}">${vault.getID()}</a></td>
-                <td>${vault.name}</td>
-                <td>${vault.description}</td>
-                <td>${vault.size}</td>
-                <td>${vault.getCreationTime()?datetime}</td>
-            </tr>
 
-        </#list>
-
-        </table>
-    </form>
-
-    <a href="${springMacroRequestContext.getRequestUri()}/vaults/create">Create a new Vault</a>
+        <a href="${springMacroRequestContext.getRequestUri()}/vaults/create">Create a new Vault</a>
+        </div>
+    </div>
 </div>
 </@layout.vaultLayout>

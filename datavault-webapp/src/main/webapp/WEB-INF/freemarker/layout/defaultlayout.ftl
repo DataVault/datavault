@@ -4,7 +4,7 @@
 <head>
     <!-- Bootstrap -->
     <link href="<@spring.url '/resources/bootstrap/css/bootstrap.min.css'/>" rel="stylesheet" type="text/css">
-    <link href="<@spring.url '/resources/theme/vault.css'/>" rel="stylesheet type="text/css">
+    <link href="<@spring.url '/resources/theme/css/vault.css'/>" rel="stylesheet type="text/css">
     <script src="<@spring.url '/resources/bootstrap/js/bootstrap.min.js'/>"></script>
 </head>
 <body>
