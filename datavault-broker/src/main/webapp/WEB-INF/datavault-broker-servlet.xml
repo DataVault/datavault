@@ -58,4 +58,11 @@
     
     <bean id="vaultsService" class="org.datavault.broker.services.VaultsService"/>
 
+    <bean id="sender" class="org.datavault.queue.Sender">
+        <property name="queueServer" value="debian-rabbitmq.local"/>
+        <property name="queueName" value="datavault"/>
+        <property name="queueUser" value="datavault"/>
+        <property name="queuePassword" value="datavault"/>
+    </bean>
+
 </beans>

@@ -25,9 +25,7 @@ public class FilesController {
 
     @RequestMapping(method = RequestMethod.GET)
     public String getFilesListing(ModelMap model) {
-
         model.addAttribute("files", restService.getFilesListing());
-
         return "files";
     }
 

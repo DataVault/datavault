@@ -34,7 +34,6 @@
     </bean>
 
     <bean id="vaultsController" class="org.datavault.webapp.controllers.VaultsController">
-
         <property name="restService" ref="restService" />
     </bean>
 
