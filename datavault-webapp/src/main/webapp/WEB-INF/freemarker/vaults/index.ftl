@@ -9,6 +9,7 @@
     <table>
 
         <tr>
+            <th>ID</th>
             <th>Name</th>
             <th>Timestamp</th>
         </tr>
@@ -16,6 +17,7 @@
     <#list vaults as vault>
 
         <tr>
+            <td>${vault.getID()}</td>
             <td>${vault.getName()}</td>
             <td>${vault.getCreationTime()?datetime}</td>
         </tr>

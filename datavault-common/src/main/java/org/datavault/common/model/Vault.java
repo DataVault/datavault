@@ -18,6 +18,9 @@ public class Vault {
 
     // Some demo metadata
     private String name;
+
+    // Vault Identifier
+    private String id;
     
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
@@ -28,7 +31,8 @@ public class Vault {
     private ArrayList<Deposit> deposits;
 
     public Vault() {}
-    public Vault(String name) {
+    public Vault(String ID, String name) {
+        this.id = ID;
         this.name = name;
         this.creationTime = new Date();
         this.deposits = new ArrayList<>();
@@ -45,6 +49,8 @@ public class Vault {
     public Date getCreationTime() {
         return creationTime;
     }
+
+    public String getID() { return id; }
     
     public ArrayList<Deposit> getDeposits() {
         return deposits;

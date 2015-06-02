@@ -16,12 +16,12 @@ public class VaultsService {
         ArrayList<Vault> vaults = new ArrayList<>();
         
         // Some synthetic vault data
-        Vault v1 = new Vault("Demo vault");
+        Vault v1 = new Vault("1", "Demo vault");
         Deposit d1 = new Deposit("Initial deposit");
         v1.addDeposit(d1);
         vaults.add(v1);
         
-        Vault v2 = new Vault("Another demo vault");
+        Vault v2 = new Vault("2", "Another demo vault");
         Deposit d2 = new Deposit("Historical deposit");
         d2.setStatus(Deposit.Status.CLOSED);
         v2.addDeposit(d2);
