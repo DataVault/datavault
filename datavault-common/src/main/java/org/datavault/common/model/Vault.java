@@ -16,11 +16,17 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Vault {
 
-    // Some demo metadata
-    private String name;
-
     // Vault Identifier
     private String id;
+
+    // Name of the vault
+    private String name;
+
+    // Description of the vault
+    private String description;
+
+    // Size of the vault
+    private long vaultSize;
     
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
@@ -37,21 +43,32 @@ public class Vault {
         this.creationTime = new Date();
         this.deposits = new ArrayList<>();
     }
-    
-    public String getName() {
-        return name;
-    }
+
+    public String getID() { return id; }
 
     public void setName(String name) {
         this.name = name;
     }
-    
+
+    public String getName() { return name; }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() { return description; }
+
+    public void setSize(long size) {
+        this.vaultSize = size;
+    }
+
+    public long getSize() { return vaultSize; }
+
     public Date getCreationTime() {
         return creationTime;
     }
 
-    public String getID() { return id; }
-    
+
     public ArrayList<Deposit> getDeposits() {
         return deposits;
     }
