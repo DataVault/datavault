@@ -81,7 +81,7 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/add", method = RequestMethod.POST)
-    public Boolean addDepositFiles(@PathVariable("vaultid") int vaultID,
+    public Boolean addDepositFiles(@PathVariable("vaultid") String vaultID,
                                    @PathVariable("depositid") int depositID,
                                    @RequestBody ArrayList<String> filePaths) {
         
