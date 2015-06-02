@@ -5,6 +5,7 @@ import org.datavault.common.model.Vault;
 import org.datavault.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -30,6 +31,12 @@ public class VaultsController {
     public String getVaultsListing(ModelMap model) {
         model.addAttribute("vaults", restService.getVaultsListing());
         return "vaults/index";
+    }
+
+    @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
+    public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID) {
+        model.addAttribute("vault", restService.getVault(vaultID));
+        return "vaults/vault";
     }
 
     // Return an empty 'create new vault' page

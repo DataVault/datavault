@@ -16,8 +16,6 @@
             <th>Timestamp</th>
         </tr>
 
-    <#list vaults as vault>
-
         <tr>
             <td><a href="${springMacroRequestContext.getRequestUri()}vaults/${vault.getID()}">${vault.getID()}</a></td>
             <td>${vault.getName()}</td>
@@ -25,8 +23,6 @@
             <td>${vault.getSize()}</td>
             <td>${vault.getCreationTime()?datetime}</td>
         </tr>
-
-    </#list>
 
     </table>
 </form>
