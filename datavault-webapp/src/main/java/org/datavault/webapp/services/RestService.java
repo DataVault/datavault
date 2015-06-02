@@ -37,7 +37,7 @@ public class RestService {
 
         RestTemplate restTemplate = new RestTemplate();
 
-        ResponseEntity<Vault> responseEntity = restTemplate.getForEntity("http://localhost:8080/datavault-broker/vaults/id", Vault.class);
+        ResponseEntity<Vault> responseEntity = restTemplate.getForEntity("http://localhost:8080/datavault-broker/vaults/" + id, Vault.class);
         Vault vault = responseEntity.getBody();
 
         return vault;

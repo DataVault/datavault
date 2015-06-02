@@ -1,9 +1,9 @@
 <html>
 <head>
-    <title>Vaults</title>
+    <title>Vault</title>
 </head>
 <body>
-<h1>Vaults</h1>
+<h1>Vault details</h1>
 
 <form>
     <table>
@@ -26,9 +26,6 @@
 
     </table>
 </form>
-
-<a href="${springMacroRequestContext.getRequestUri()}/vaults/create">Create a new Vault</a>
-
 
 </body>
 </html>
