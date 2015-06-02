@@ -34,11 +34,14 @@
     </bean>
 
     <bean id="vaultsController" class="org.datavault.webapp.controllers.VaultsController">
+
         <property name="restService" ref="restService" />
     </bean>
 
     <!-- todo : should the service beans be put into their own config file? -->
 
-    <bean id="restService" class="org.datavault.webapp.services.RestService"/>
+    <bean id="restService" class="org.datavault.webapp.services.RestService">
+        <property name="brokerURL" value="http://localhost:8080/datavault-broker" />
+    </bean>
 
 </beans>
