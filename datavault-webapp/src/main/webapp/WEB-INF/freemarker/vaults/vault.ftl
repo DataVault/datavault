@@ -1,8 +1,5 @@
-<html>
-<head>
-    <title>Vault</title>
-</head>
-<body>
+<#import "*/layout/defaultlayout.ftl" as layout>
+<@layout.vaultLayout>
 <h1>Vault details</h1>
 
 <form>
@@ -18,14 +15,12 @@
 
         <tr>
             <td><a href="${springMacroRequestContext.getRequestUri()}vaults/${vault.getID()}">${vault.getID()}</a></td>
-            <td>${vault.getName()}</td>
-            <td>${vault.getDescription()}</td>
-            <td>${vault.getSize()}</td>
-            <td>${vault.getCreationTime()?datetime}</td>
+            <td>${vault.name}</td>
+            <td>${vault.description}</td>
+            <td>${vault.size}</td>
+            <td>${vault.creationTime?datetime}</td>
         </tr>
 
     </table>
 </form>
-
-</body>
-</html>
+</@layout.vaultLayout>
