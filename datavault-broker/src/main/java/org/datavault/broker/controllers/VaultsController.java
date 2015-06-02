@@ -79,4 +79,25 @@ public class VaultsController {
         deposit.setStatus(status);
         return deposit;
     }
+    
+    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/add", method = RequestMethod.POST)
+    public Boolean addDepositFiles(@PathVariable("vaultid") String vaultID,
+                                   @PathVariable("depositid") int depositID,
+                                   @RequestBody ArrayList<String> filePaths) {
+        
+        Deposit deposit = vaultsService.getVault(vaultID).getDeposit(depositID);
+        
+        try {
+            for (String filePath : filePaths) {
+                org.datavault.queue.Sender.send(filePath);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        
+        // Need to update Deposit object too?
+        
+        return true;
+    }
 }
