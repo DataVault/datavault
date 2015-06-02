@@ -22,14 +22,26 @@ public class RestService {
 
         return files.getFilesMap();
     }
-    
+
     public Vault[] getVaultsListing() {
 
         RestTemplate restTemplate = new RestTemplate();
-        
+
         ResponseEntity<Vault[]> responseEntity = restTemplate.getForEntity("http://localhost:8080/datavault-broker/vaults", Vault[].class);
         Vault[] vaults = responseEntity.getBody();
-        
+
         return vaults;
     }
+
+    public Vault getVault(String id) {
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<Vault> responseEntity = restTemplate.getForEntity("http://localhost:8080/datavault-broker/vaults/id", Vault.class);
+        Vault vault = responseEntity.getBody();
+
+        return vault;
+    }
+
+
 }
