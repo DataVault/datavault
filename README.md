@@ -10,6 +10,7 @@ Who
 Originally developed by:
 
  * Tom Higgins - University of Manchester
+ * Mary McDerby - University of Manchester
  * Robin Taylor - University of Edinburgh
  * Claire Knowles - University of Edinburgh
  * Stuart Lewis - University of Edinburgh
