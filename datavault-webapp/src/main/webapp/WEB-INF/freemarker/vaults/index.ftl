@@ -11,6 +11,8 @@
         <tr>
             <th>ID</th>
             <th>Name</th>
+            <th>Description</th>
+            <th>Size (bytes)</th>
             <th>Timestamp</th>
         </tr>
 
@@ -19,6 +21,8 @@
         <tr>
             <td>${vault.getID()}</td>
             <td>${vault.getName()}</td>
+            <td>${vault.getDescription()}</td>
+            <td>${vault.getSize()}</td>
             <td>${vault.getCreationTime()?datetime}</td>
         </tr>
 

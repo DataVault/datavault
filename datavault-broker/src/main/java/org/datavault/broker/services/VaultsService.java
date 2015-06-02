@@ -17,11 +17,15 @@ public class VaultsService {
         
         // Some synthetic vault data
         Vault v1 = new Vault("1", "Demo vault");
+        v1.setDescription("A example first vault");
+        v1.setSize(987654321);
         Deposit d1 = new Deposit("Initial deposit");
         v1.addDeposit(d1);
         vaults.add(v1);
         
         Vault v2 = new Vault("2", "Another demo vault");
+        v2.setDescription("A vault for testing purposes");
+        v2.setSize(123456789);
         Deposit d2 = new Deposit("Historical deposit");
         d2.setStatus(Deposit.Status.CLOSED);
         v2.addDeposit(d2);
