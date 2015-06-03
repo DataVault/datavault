@@ -2,9 +2,15 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
 
     <context:component-scan base-package="org.datavault.broker.controllers"/>
 
@@ -57,7 +63,9 @@
 
     <bean id="macFilesService" class="org.datavault.broker.services.MacFilesService"/>
     
-    <bean id="vaultsService" class="org.datavault.broker.services.VaultsService"/>
+    <bean id="vaultsService" class="org.datavault.broker.services.VaultsService">
+        <property name="vaultDAO" ref="vaultDAO" />
+    </bean>
 
     <bean id="sender" class="org.datavault.queue.Sender">
         <property name="queueServer" value="debian-rabbitmq.local"/>
@@ -66,4 +74,44 @@
         <property name="queuePassword" value="datavault"/>
     </bean>
 
+    <!-- Hibernate -->
+    
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="url" value="jdbc:mysql://debian-rabbitmq.local:3306/datavault"/>
+        <property name="username" value="datavault" />
+        <property name="password" value="datavault"/>
+    </bean>
+     
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" >
+        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan">
+            <list>
+                <value>org.datavault.common.model</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.format_sql">false</prop>
+                <prop key="hibernate.hbm2ddl.auto">create</prop>
+            </props>
+        </property>
+    </bean>
+ 
+    <bean id="transactionManager"  class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+ 
+    <bean id="persistenceExceptionTranslationPostProcessor" class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>
+
+    <!-- Data Access Objects -->
+    
+    <bean id="vaultDAO" class="org.datavault.common.model.dao.VaultDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    
 </beans>

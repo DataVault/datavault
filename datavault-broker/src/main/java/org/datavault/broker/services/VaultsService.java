@@ -1,10 +1,13 @@
 package org.datavault.broker.services;
 
 import org.datavault.common.model.Vault;
+import org.datavault.common.model.dao.VaultDAO;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
 
 import org.datavault.common.model.Deposit;
+import org.springframework.context.ApplicationContext;
 
 /**
  * User: Tom Higgins
@@ -13,6 +16,8 @@ import org.datavault.common.model.Deposit;
  */
 public class VaultsService {
 
+    private VaultDAO vaultDAO;
+    
     public Hashtable<String, Vault> getVaults() {
 
         Hashtable<String, Vault> vaults = new Hashtable<>();
@@ -39,11 +44,15 @@ public class VaultsService {
     }
     
     public void addVault(Vault vault) {
-        // Persist the new vault metadata ...
+        vaultDAO.save(vault);
     }
     
     public Vault getVault(String vaultID) {
         return getVaults().get(vaultID);
+    }
+    
+    public void setVaultDAO(VaultDAO vaultDAO) {
+        this.vaultDAO = vaultDAO;
     }
 }
 

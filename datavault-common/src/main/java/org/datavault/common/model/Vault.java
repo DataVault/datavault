@@ -4,6 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import org.hibernate.annotations.GenericGenerator;
+
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -14,12 +21,19 @@ import java.util.Date;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Entity
+@Table(name="Vaults")
 public class Vault {
 
     // Vault Identifier
+    @Id
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Column(name = "id", unique = true)
     private String id;
 
     // Name of the vault
+    @Column(name = "name", nullable = false)
     private String name;
 
     // Description of the vault
