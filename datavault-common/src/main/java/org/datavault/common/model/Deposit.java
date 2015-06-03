@@ -1,7 +1,17 @@
 package org.datavault.common.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.ArrayList;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.ManyToOne;
+import org.hibernate.annotations.GenericGenerator;
 
 /**
  * User: Tom Higgins
@@ -10,8 +20,21 @@ import java.util.ArrayList;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Entity
+@Table(name="Deposits")
 public class Deposit {
 
+    // Deposit Identifier
+    @Id
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Column(name = "id", unique = true)
+    private String id;
+    
+    @JsonIgnore
+    @ManyToOne
+    private Vault vault;
+    
     public enum Status {
         OPEN, CLOSED
     }
@@ -29,23 +52,25 @@ public class Deposit {
         this.bagIdentifiers = new ArrayList<>();
     }
     
-    public String getNote() {
-        return note;
+    public String getID() { return id; }
+
+    public Vault getVault() { return vault; }
+    
+    public void setVault(Vault vault) {
+        this.vault = vault;
     }
+    
+    public String getNote() { return note; }
     
     public void setNote(String note) {
         this.note = note;
     }
 
-    public Status getStatus() {
-        return status;
-    }
+    public Status getStatus() { return status; }
 
     public void setStatus(Status status) {
         this.status = status;
     }
     
-    public ArrayList<String> getBagIdentifiers() {
-        return bagIdentifiers;
-    }
+    public ArrayList<String> getBagIdentifiers() { return bagIdentifiers; }
 }
