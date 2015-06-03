@@ -19,7 +19,22 @@
         <spring.version>4.1.4.RELEASE</spring.version>
         <hibernate.version>4.3.10.Final</hibernate.version>
         <mysql.version>5.1.35</mysql.version>
+        <root.basedir>${basedir}</root.basedir>
     </properties>
+
+    <!--
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
+        <filters>
+            <filter>${root.basedir}/target/build.properties</filter>
+        </filters>
+    </build>
+    -->
 
     <dependencyManagement>
         <dependencies>
