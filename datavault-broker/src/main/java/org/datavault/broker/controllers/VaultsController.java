@@ -1,8 +1,6 @@
 package org.datavault.broker.controllers;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.List;
 
 import org.datavault.common.model.Vault;
 import org.datavault.common.model.Deposit;
@@ -36,14 +34,8 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
-    public ArrayList<Vault> getVaults() {
-        Hashtable<String, Vault> vaults = vaultsService.getVaults();
-        Enumeration e = vaults.keys();
-        ArrayList<Vault> theVaults = new ArrayList();
-        while (e.hasMoreElements()) {
-            theVaults.add(vaults.get(e.nextElement()));
-        }
-        return theVaults;
+    public List<Vault> getVaults() {
+        return vaultsService.getVaults();
     }
     
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)
@@ -58,7 +50,7 @@ public class VaultsController {
     }
     
     @RequestMapping(value = "/vaults/{vaultid}/deposits", method = RequestMethod.GET)
-    public ArrayList<Deposit> getDeposits(@PathVariable("vaultid") String vaultID) {
+    public List<Deposit> getDeposits(@PathVariable("vaultid") String vaultID) {
         Vault vault = vaultsService.getVault(vaultID);
         return vault.getDeposits();
     }
@@ -89,7 +81,7 @@ public class VaultsController {
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/add", method = RequestMethod.POST)
     public Boolean addDepositFiles(@PathVariable("vaultid") String vaultID,
                                    @PathVariable("depositid") int depositID,
-                                   @RequestBody ArrayList<String> filePaths) {
+                                   @RequestBody List<String> filePaths) {
         
         Deposit deposit = vaultsService.getVault(vaultID).getDeposit(depositID);
         
