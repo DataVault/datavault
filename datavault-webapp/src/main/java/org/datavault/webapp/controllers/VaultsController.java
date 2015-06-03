@@ -5,10 +5,8 @@ import org.datavault.common.model.Vault;
 import org.datavault.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.Map;
 
 /**
@@ -41,17 +39,20 @@ public class VaultsController {
 
     // Return an empty 'create new vault' page
     @RequestMapping(value = "/vaults/create", method = RequestMethod.GET)
-    public String addVault(ModelMap model) {
-        //model.addAttribute("vaults", restService.getVaultsListing());
+    public String createVault(ModelMap model) {
+        // pass the view an empty Vault since the form expects it
+        model.addAttribute("vault", new Vault());
         return "vaults/create";
     }
 
     // Process the completed 'create new vault' page
-    //@RequestMapping(value = "/vaults", method = RequestMethod.POST)
-    //public String addVault(ModelMap model) {
-    //    model.addAttribute("vaults", restService.getVaultsListing());
-    //    return "vaults";
-   // }
+    @RequestMapping(value = "/vaults/create", method = RequestMethod.POST)
+    public String addVault(@ModelAttribute Vault vault, ModelMap model) {
+        restService.addVault(vault);
+// todo : do something with the returned vault
+        model.addAttribute("vaults", restService.getVaultsListing());
+        return "vaults";
+    }
 
 
 }

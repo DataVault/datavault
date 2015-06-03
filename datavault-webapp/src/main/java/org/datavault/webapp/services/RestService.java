@@ -50,5 +50,13 @@ public class RestService {
         return vault;
     }
 
+    public Vault addVault(Vault vault) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        Vault returnedVault = restTemplate.postForObject(brokerURL + "/vaults/", vault , Vault.class);
+
+        return returnedVault;
+    }
+
 
 }
