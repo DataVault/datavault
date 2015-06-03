@@ -8,6 +8,7 @@ import org.datavault.common.model.Vault;
 import org.datavault.common.model.Deposit;
 import org.datavault.broker.services.VaultsService;
 
+import org.datavault.queue.Sender;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,11 +25,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class VaultsController {
     
     private VaultsService vaultsService;
+    private Sender sender;
 
     public void setVaultsService(VaultsService vaultsService) {
         this.vaultsService = vaultsService;
     }
-    
+
+    public void setSender(Sender sender) {
+        this.sender = sender;
+    }
+
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
     public ArrayList<Vault> getVaults() {
         Hashtable<String, Vault> vaults = vaultsService.getVaults();
@@ -89,7 +95,7 @@ public class VaultsController {
         
         try {
             for (String filePath : filePaths) {
-                org.datavault.queue.Sender.send(filePath);
+                sender.send(filePath);
             }
         } catch (Exception e) {
             e.printStackTrace();

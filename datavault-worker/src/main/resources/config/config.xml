@@ -5,7 +5,7 @@
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="receiver" class="org.datavault.worker.queue.Receiver">
-        <property name="queueServer" value="debian-rabbitmq.local"/>
+        <property name="queueServer" value="${queueServer}"/>
         <property name="queueName" value="datavault"/>
         <property name="queueUser" value="datavault"/>
         <property name="queuePassword" value="datavault"/>

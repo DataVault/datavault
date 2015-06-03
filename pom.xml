@@ -17,7 +17,22 @@
 
     <properties>
         <spring.version>4.1.4.RELEASE</spring.version>
+        <root.basedir>${basedir}</root.basedir>
     </properties>
+
+    <!--
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
+        <filters>
+            <filter>${root.basedir}/target/build.properties</filter>
+        </filters>
+    </build>
+    -->
 
     <dependencyManagement>
         <dependencies>
