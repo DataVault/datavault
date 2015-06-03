@@ -1,12 +1,12 @@
 package org.datavault.broker.services;
 
-import java.util.Date;
 import org.datavault.common.model.Vault;
 import org.datavault.common.model.dao.VaultDAO;
-
-import java.util.List;
-
 import org.datavault.common.model.Deposit;
+import org.datavault.common.model.dao.DepositDAO;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * User: Tom Higgins
@@ -16,6 +16,7 @@ import org.datavault.common.model.Deposit;
 public class VaultsService {
 
     private VaultDAO vaultDAO;
+    private DepositDAO depositDAO;
     
     public List<Vault> getVaults() {
         return vaultDAO.list();

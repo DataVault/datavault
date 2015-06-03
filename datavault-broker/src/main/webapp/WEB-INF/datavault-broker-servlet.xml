@@ -56,6 +56,7 @@
     
     <bean id="vaultsController" class="org.datavault.broker.controllers.VaultsController">
         <property name="vaultsService" ref="vaultsService" />
+        <property name="depositsService" ref="depositsService" />
         <property name="sender" ref="sender" />
     </bean>
 
@@ -65,6 +66,10 @@
     
     <bean id="vaultsService" class="org.datavault.broker.services.VaultsService">
         <property name="vaultDAO" ref="vaultDAO" />
+    </bean>
+    
+    <bean id="depositsService" class="org.datavault.broker.services.DepositsService">
+        <property name="depositDAO" ref="depositDAO" />
     </bean>
 
     <bean id="sender" class="org.datavault.queue.Sender">
@@ -111,6 +116,10 @@
     <!-- Data Access Objects -->
     
     <bean id="vaultDAO" class="org.datavault.common.model.dao.VaultDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="depositDAO" class="org.datavault.common.model.dao.DepositDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
     
