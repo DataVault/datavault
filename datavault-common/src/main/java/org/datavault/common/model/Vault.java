@@ -9,10 +9,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.OneToMany;
+import javax.persistence.FetchType;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import org.hibernate.annotations.GenericGenerator;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Date;
+import javax.persistence.CascadeType;
 
 /**
  * User: Tom Higgins
@@ -44,18 +49,18 @@ public class Vault {
     
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
     
     // A vault can contain a number of deposits
     @JsonIgnore
-    private ArrayList<Deposit> deposits;
+    @OneToMany(targetEntity=Deposit.class, mappedBy="vault", fetch=FetchType.EAGER)
+    private List<Deposit> deposits;
 
     public Vault() {}
-    public Vault(String ID, String name) {
-        this.id = ID;
+    public Vault(String name) {
         this.name = name;
         this.creationTime = new Date();
-        this.deposits = new ArrayList<>();
     }
 
     public String getID() { return id; }
@@ -78,20 +83,19 @@ public class Vault {
 
     public long getSize() { return vaultSize; }
 
+    public void setCreationTime(Date creationTime) {
+        this.creationTime = creationTime;
+    }
+
     public Date getCreationTime() {
         return creationTime;
     }
-
-
-    public ArrayList<Deposit> getDeposits() {
+    
+    public List<Deposit> getDeposits() {
         return deposits;
     }
     
     public void addDeposit(Deposit deposit) {
         this.deposits.add(deposit);
-    }
-    
-    public Deposit getDeposit(int depositID) {
-        return getDeposits().get(depositID);
     }
 }

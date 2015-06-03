@@ -1,12 +1,11 @@
 package org.datavault.broker.controllers;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.List;
 
 import org.datavault.common.model.Vault;
 import org.datavault.common.model.Deposit;
 import org.datavault.broker.services.VaultsService;
+import org.datavault.broker.services.DepositsService;
 
 import org.datavault.queue.Sender;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,10 +24,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class VaultsController {
     
     private VaultsService vaultsService;
+    private DepositsService depositsService;
     private Sender sender;
 
     public void setVaultsService(VaultsService vaultsService) {
         this.vaultsService = vaultsService;
+    }
+    
+    public void setDepositsService(DepositsService depositsService) {
+        this.depositsService = depositsService;
     }
 
     public void setSender(Sender sender) {
@@ -36,14 +40,8 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
-    public ArrayList<Vault> getVaults() {
-        Hashtable<String, Vault> vaults = vaultsService.getVaults();
-        Enumeration e = vaults.keys();
-        ArrayList<Vault> theVaults = new ArrayList();
-        while (e.hasMoreElements()) {
-            theVaults.add(vaults.get(e.nextElement()));
-        }
-        return theVaults;
+    public List<Vault> getVaults() {
+        return vaultsService.getVaults();
     }
     
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)
@@ -58,40 +56,50 @@ public class VaultsController {
     }
     
     @RequestMapping(value = "/vaults/{vaultid}/deposits", method = RequestMethod.GET)
-    public ArrayList<Deposit> getDeposits(@PathVariable("vaultid") String vaultID) {
+    public List<Deposit> getDeposits(@PathVariable("vaultid") String vaultID) {
         Vault vault = vaultsService.getVault(vaultID);
         return vault.getDeposits();
     }
     
+    @RequestMapping(value = "/vaults/{vaultid}/deposits", method = RequestMethod.POST)
+    public Deposit addDeposit(@PathVariable("vaultid") String vaultID,
+                              @RequestBody Deposit deposit) {
+        Vault vault = vaultsService.getVault(vaultID);
+        deposit.setVault(vault);
+        depositsService.addDeposit(deposit);
+        return deposit;
+    }
+    
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}", method = RequestMethod.GET)
     public Deposit getDeposit(@PathVariable("vaultid") String vaultID,
-                              @PathVariable("depositid") int depositID) {
-        Deposit deposit = vaultsService.getVault(vaultID).getDeposit(depositID);
+                              @PathVariable("depositid") String depositID) {
+        Deposit deposit = depositsService.getDeposit(depositID);
         return deposit;
     }
     
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/status", method = RequestMethod.GET)
     public Deposit.Status getDepositState(@PathVariable("vaultid") String vaultID,
-                                          @PathVariable("depositid") int depositID) {
-        Deposit deposit = vaultsService.getVault(vaultID).getDeposit(depositID);
+                                          @PathVariable("depositid") String depositID) {
+        Deposit deposit = depositsService.getDeposit(depositID);
         return deposit.getStatus();
     }
     
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/status", method = RequestMethod.POST)
     public Deposit setDepositState(@PathVariable("vaultid") String vaultID,
-                              @PathVariable("depositid") int depositID,
+                              @PathVariable("depositid") String depositID,
                               @RequestBody Deposit.Status status) {
-        Deposit deposit = vaultsService.getVault(vaultID).getDeposit(depositID);
+        Deposit deposit = depositsService.getDeposit(depositID);
         deposit.setStatus(status);
+        depositsService.updateDeposit(deposit);
         return deposit;
     }
     
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/add", method = RequestMethod.POST)
     public Boolean addDepositFiles(@PathVariable("vaultid") String vaultID,
-                                   @PathVariable("depositid") int depositID,
-                                   @RequestBody ArrayList<String> filePaths) {
+                                   @PathVariable("depositid") String depositID,
+                                   @RequestBody List<String> filePaths) {
         
-        Deposit deposit = vaultsService.getVault(vaultID).getDeposit(depositID);
+        Deposit deposit = depositsService.getDeposit(depositID);
         
         try {
             for (String filePath : filePaths) {

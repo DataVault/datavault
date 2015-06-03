@@ -9,4 +9,6 @@ public interface VaultDAO {
     
     public List<Vault> list();
 
+    public Vault findById(String Id);
+    
 }

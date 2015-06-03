@@ -8,9 +8,9 @@ import org.hibernate.Transaction;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 
-import org.datavault.common.model.Vault;
+import org.datavault.common.model.Deposit;
 
-public class VaultDAOImpl implements VaultDAO {
+public class DepositDAOImpl implements DepositDAO {
 
     private SessionFactory sessionFactory;
  
@@ -19,32 +19,40 @@ public class VaultDAOImpl implements VaultDAO {
     }
      
     @Override
-    public void save(Vault vault) {
+    public void save(Deposit deposit) {
         Session session = this.sessionFactory.openSession();
         Transaction tx = session.beginTransaction();
-        session.persist(vault);
+        session.persist(deposit);
+        tx.commit();
+        session.close();
+    }
+    
+    @Override
+    public void update(Deposit deposit) {
+        Session session = this.sessionFactory.openSession();
+        Transaction tx = session.beginTransaction();
+        session.update(deposit);
         tx.commit();
         session.close();
     }
  
     @SuppressWarnings("unchecked")
     @Override
-    public List<Vault> list() {        
+    public List<Deposit> list() {        
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        List<Vault> vaults = criteria.list();
+        Criteria criteria = session.createCriteria(Deposit.class);
+        List<Deposit> deposits = criteria.list();
         session.close();
-        return vaults;
+        return deposits;
     }
     
     @Override
-    public Vault findById(String Id) {
+    public Deposit findById(String Id) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
+        Criteria criteria = session.createCriteria(Deposit.class);
         criteria.add(Restrictions.eq("id",Id));
-        Vault vault = (Vault)criteria.uniqueResult();
+        Deposit deposit = (Deposit)criteria.uniqueResult();
         session.close();
-        return vault;
+        return deposit;
     }
 }
