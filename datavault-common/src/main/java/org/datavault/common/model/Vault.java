@@ -78,11 +78,14 @@ public class Vault {
 
     public long getSize() { return vaultSize; }
 
+    public void setCreationTime(Date creationTime) {
+        this.creationTime = creationTime;
+    }
+
     public Date getCreationTime() {
         return creationTime;
     }
-
-
+    
     public ArrayList<Deposit> getDeposits() {
         return deposits;
     }

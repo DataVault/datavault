@@ -1,13 +1,12 @@
 package org.datavault.broker.services;
 
+import java.util.Date;
 import org.datavault.common.model.Vault;
 import org.datavault.common.model.dao.VaultDAO;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.List;
 
 import org.datavault.common.model.Deposit;
-import org.springframework.context.ApplicationContext;
 
 /**
  * User: Tom Higgins
@@ -18,37 +17,18 @@ public class VaultsService {
 
     private VaultDAO vaultDAO;
     
-    public Hashtable<String, Vault> getVaults() {
-
-        Hashtable<String, Vault> vaults = new Hashtable<>();
-        
-        // Some synthetic vault data
-        Vault v1 = new Vault("1", "Demo vault");
-        v1.setDescription("A example first vault");
-        v1.setSize(987654321);
-        Deposit d1 = new Deposit("Initial deposit");
-        v1.addDeposit(d1);
-        vaults.put(v1.getID(), v1);
-        
-        Vault v2 = new Vault("2", "Another demo vault");
-        v2.setDescription("A vault for testing purposes");
-        v2.setSize(123456789);
-        Deposit d2 = new Deposit("Historical deposit");
-        d2.setStatus(Deposit.Status.CLOSED);
-        v2.addDeposit(d2);
-        Deposit d3 = new Deposit("A further deposit");
-        v2.addDeposit(d3);
-        vaults.put(v2.getID(), v2);
-        
-        return vaults;
+    public List<Vault> getVaults() {
+        return vaultDAO.list();
     }
     
     public void addVault(Vault vault) {
+        Date d = new Date();
+        vault.setCreationTime(d);
         vaultDAO.save(vault);
     }
     
     public Vault getVault(String vaultID) {
-        return getVaults().get(vaultID);
+        return vaultDAO.findById(vaultID);
     }
     
     public void setVaultDAO(VaultDAO vaultDAO) {
