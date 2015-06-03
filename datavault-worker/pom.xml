@@ -12,6 +12,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
+        <!-- This is the path to the root directory. -->
+        <root.basedir>${basedir}/..</root.basedir>
     </properties>
 
     <dependencies>
@@ -70,20 +72,17 @@
 
     </dependencies>
 
-    <!--
+<!--
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-
-                <configuration>
-                    <includes>
-                        <include>**/config/*</include>
-                    </includes>
-                </configuration>
-            </plugin>
-        </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <filters>
+            <filter>${basedir}/target/build.properties</filter>
+        </filters>
     </build>
     -->
 

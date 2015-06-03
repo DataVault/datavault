@@ -12,6 +12,11 @@
     <artifactId>datavault-webapp</artifactId>
     <packaging>war</packaging>
 
+    <properties>
+        <!-- This is the path to the root directory. -->
+        <root.basedir>${basedir}/..</root.basedir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework</groupId>

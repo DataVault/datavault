@@ -45,6 +45,7 @@
     <!-- todo : should the service beans be put into their own config file? -->
 
     <bean id="restService" class="org.datavault.webapp.services.RestService">
+        <!--<property name="brokerURL" value="http://localhost:8080/datavault-broker" />-->
         <property name="brokerURL" value="http://localhost:8080/datavault-broker" />
     </bean>
 

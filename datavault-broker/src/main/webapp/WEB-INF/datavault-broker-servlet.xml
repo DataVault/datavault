@@ -50,6 +50,7 @@
     
     <bean id="vaultsController" class="org.datavault.broker.controllers.VaultsController">
         <property name="vaultsService" ref="vaultsService" />
+        <property name="sender" ref="sender" />
     </bean>
 
     <!-- todo : should the service beans be put into their own config file? -->
