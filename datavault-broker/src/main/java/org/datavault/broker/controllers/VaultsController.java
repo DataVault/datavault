@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * User: Tom Higgins
  * Date: 11/05/2015
@@ -63,9 +65,25 @@ public class VaultsController {
     
     @RequestMapping(value = "/vaults/{vaultid}/deposits", method = RequestMethod.POST)
     public Deposit addDeposit(@PathVariable("vaultid") String vaultID,
-                              @RequestBody Deposit deposit) {
+                              @RequestBody Deposit deposit) throws Exception {
+
         Vault vault = vaultsService.getVault(vaultID);
+        if (vault == null) {
+            throw new Exception("Vault '" + vaultID + "' does not exist");
+        }
+        
+        // Add the deposit object
         depositsService.addDeposit(vault, deposit);
+        
+        // Ask the worker to process the deposit
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonDeposit = mapper.writeValueAsString(deposit);
+            sender.send(jsonDeposit);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         return deposit;
     }
     
@@ -91,26 +109,5 @@ public class VaultsController {
         deposit.setStatus(status);
         depositsService.updateDeposit(deposit);
         return deposit;
-    }
-    
-    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/add", method = RequestMethod.POST)
-    public Boolean addDepositFiles(@PathVariable("vaultid") String vaultID,
-                                   @PathVariable("depositid") String depositID,
-                                   @RequestBody List<String> filePaths) {
-        
-        Deposit deposit = depositsService.getDeposit(depositID);
-        
-        try {
-            for (String filePath : filePaths) {
-                sender.send(filePath);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        
-        // Need to update Deposit object too?
-        
-        return true;
     }
 }

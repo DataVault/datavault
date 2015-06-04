@@ -6,6 +6,9 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
+import org.datavault.common.model.Deposit;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 public class Receiver {
 
@@ -65,7 +68,10 @@ public class Receiver {
                 String archiveBase = "/Users/tom/datavault/archive";
                 String tempBase = "/Users/tom/datavault/temp";
 
-                java.io.File inputFile = new java.io.File(message);
+                ObjectMapper mapper = new ObjectMapper();
+                Deposit deposit = mapper.readValue(message, Deposit.class);
+                
+                java.io.File inputFile = new java.io.File(deposit.getFilePath());
                 if (inputFile.exists()) {
 
                     // Create a new directory based on a UUID
