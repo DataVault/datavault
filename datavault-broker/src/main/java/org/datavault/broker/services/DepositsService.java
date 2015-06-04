@@ -1,8 +1,11 @@
 package org.datavault.broker.services;
 
+import java.util.Date;
 import org.datavault.common.model.Deposit;
+import org.datavault.common.model.Vault;
 import org.datavault.common.model.dao.DepositDAO;
 
+import java.util.UUID;
 import java.util.List;
 
 public class DepositsService {
@@ -13,7 +16,17 @@ public class DepositsService {
         return depositDAO.list();
     }
     
-    public void addDeposit(Deposit deposit) {
+    public void addDeposit(Vault vault, Deposit deposit) {
+        
+        Date d = new Date();
+        deposit.setCreationTime(d);
+        
+        deposit.setVault(vault);
+        deposit.setStatus(Deposit.Status.OPEN);
+        
+        // Generate a new UUID for this Bag.
+        deposit.setBagId(UUID.randomUUID().toString());
+        
         depositDAO.save(deposit);
     }
     

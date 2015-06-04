@@ -17,7 +17,6 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.util.List;
 import java.util.Date;
-import javax.persistence.CascadeType;
 
 /**
  * User: Tom Higgins
@@ -37,6 +36,11 @@ public class Vault {
     @Column(name = "id", unique = true)
     private String id;
 
+    // Serialise date in ISO 8601 format
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date creationTime;
+    
     // Name of the vault
     @Column(name = "name", nullable = false)
     private String name;
@@ -46,11 +50,6 @@ public class Vault {
 
     // Size of the vault
     private long vaultSize;
-    
-    // Serialise date in ISO 8601 format
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date creationTime;
     
     // A vault can contain a number of deposits
     @JsonIgnore
@@ -65,6 +64,14 @@ public class Vault {
 
     public String getID() { return id; }
 
+    public void setCreationTime(Date creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    public Date getCreationTime() {
+        return creationTime;
+    }
+    
     public void setName(String name) {
         this.name = name;
     }
@@ -82,14 +89,6 @@ public class Vault {
     }
 
     public long getSize() { return vaultSize; }
-
-    public void setCreationTime(Date creationTime) {
-        this.creationTime = creationTime;
-    }
-
-    public Date getCreationTime() {
-        return creationTime;
-    }
     
     public List<Deposit> getDeposits() {
         return deposits;

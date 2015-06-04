@@ -1,9 +1,9 @@
 package org.datavault.common.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import java.util.ArrayList;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,13 +11,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import org.hibernate.annotations.GenericGenerator;
-
-/**
- * User: Tom Higgins
- * Date: 12/05/2015
- * Time: 10:47
- */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -31,6 +27,11 @@ public class Deposit {
     @Column(name = "id", unique = true)
     private String id;
     
+    // Serialise date in ISO 8601 format
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date creationTime;
+    
     @JsonIgnore
     @ManyToOne
     private Vault vault;
@@ -42,18 +43,28 @@ public class Deposit {
     private String note;
     private Status status;
     
-    // A deposit can be related to multiple archive bags.
-    private ArrayList<String> bagIdentifiers;
+    // For now, a deposit relates to a single bag.
+    private String bagId;
+    
+    // Record the file path that the user selected for this deposit.
+    private String filePath;
     
     public Deposit() {}
     public Deposit(String note) {
         this.note = note;
         this.status = Status.OPEN;
-        this.bagIdentifiers = new ArrayList<>();
     }
     
     public String getID() { return id; }
 
+    public void setCreationTime(Date creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    public Date getCreationTime() {
+        return creationTime;
+    }
+    
     public Vault getVault() { return vault; }
     
     public void setVault(Vault vault) {
@@ -72,5 +83,15 @@ public class Deposit {
         this.status = status;
     }
     
-    public ArrayList<String> getBagIdentifiers() { return bagIdentifiers; }
+    public String getBagId() { return bagId; }
+    
+    public void setBagId(String bagId) {
+        this.bagId = bagId;
+    }
+    
+    public String getFilePath() { return filePath; }
+    
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
 }
