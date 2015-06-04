@@ -65,8 +65,7 @@ public class VaultsController {
     public Deposit addDeposit(@PathVariable("vaultid") String vaultID,
                               @RequestBody Deposit deposit) {
         Vault vault = vaultsService.getVault(vaultID);
-        deposit.setVault(vault);
-        depositsService.addDeposit(deposit);
+        depositsService.addDeposit(vault, deposit);
         return deposit;
     }
     
