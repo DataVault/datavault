@@ -25,6 +25,31 @@
                 </tbody>
             </table>
         </div>
+
+        <h1>Deposits</h1>
+
+        <div class="table-responsive">
+            <table class="table">
+                <tr class="tr">
+                    <th>ID</th>
+                    <th>Note</th>
+                    <th>File Path</th>
+                    <th>Timestamp</th>
+                </tr>
+
+                <#list deposits as deposit>
+                    <tbody>
+                    <tr class="tr">
+                        <td><a href="${springMacroRequestContext.getRequestUri()}deposit/${deposit.getID()}">${deposit.getID()}</a></td>
+                        <td>${deposit.note}</td>
+                        <td>${deposit.filePath}</td>
+                        <td>${deposit.getCreationTime()?datetime}</td>
+                    </tr>
+                    </tbody>
+                </#list>
+            </table>
+        </div>
+
     </form>
 
     <a href="${springMacroRequestContext.getRequestUri()}/deposits/create">Add a deposit</a>
