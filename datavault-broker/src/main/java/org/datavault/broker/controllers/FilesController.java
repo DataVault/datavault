@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 public class FilesController {
 
+    String activeBase = "/Users/tom/datavault/active";
+    
     private MacFilesService macFilesService;
 
     public void setMacFilesService(MacFilesService macFilesService) {
@@ -28,15 +30,17 @@ public class FilesController {
     @RequestMapping("/files/**")
     public Files getFilesListing(HttpServletRequest request) {
         
-        // "GET /files/" will display files from the system root e.g. "/"
-        // "GET /files/Users/rtaylor3" will display files from "/Users/rtaylor3"
+        // "GET /files/" will display files from the base directory.
+        // "GET /files/abc" will display files from the "abc" directory under the base.
         
         // TODO: is there a cleaner way to extract the request path?
         String requestPath = (String)request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
         String filePath = requestPath.replaceFirst("^/files", "");
         
         if (filePath.equals("")) {
-            filePath = "/";
+            filePath = activeBase;
+        } else {
+            filePath = activeBase + "/" + filePath; // Must try harder.
         }
         
         return macFilesService.getFilesListing(filePath);
