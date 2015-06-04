@@ -3,6 +3,7 @@ package org.datavault.webapp.services;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.datavault.common.model.Deposit;
 import org.datavault.common.model.Files;
 import org.datavault.common.model.Vault;
 import org.springframework.web.client.RestTemplate;
@@ -56,6 +57,15 @@ public class RestService {
         Vault returnedVault = restTemplate.postForObject(brokerURL + "/vaults/", vault , Vault.class);
 
         return returnedVault;
+    }
+
+    public Deposit addDeposit(String vaultId, Deposit deposit) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        Deposit returnedDeposit = restTemplate.postForObject(brokerURL + "/vaults/" + vaultId + "/deposits", deposit , Deposit.class);
+
+        return returnedDeposit;
+
     }
 
 

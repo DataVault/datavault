@@ -26,6 +26,8 @@
             </table>
         </div>
     </form>
+
+    <a href="${springMacroRequestContext.getRequestUri()}/deposits/create">Add a deposit</a>
 </div>
 </div>
 </div>
