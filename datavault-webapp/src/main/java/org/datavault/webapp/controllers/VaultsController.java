@@ -34,6 +34,7 @@ public class VaultsController {
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
     public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID) {
         model.addAttribute("vault", restService.getVault(vaultID));
+        model.addAttribute("deposits", restService.getDepositsListing(vaultID));
         return "vaults/vault";
     }
 
