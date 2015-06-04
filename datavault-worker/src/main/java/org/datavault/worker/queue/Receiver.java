@@ -74,9 +74,7 @@ public class Receiver {
                 java.io.File inputFile = new java.io.File(deposit.getFilePath());
                 if (inputFile.exists()) {
 
-                    // Create a new directory based on a UUID
-                    java.util.UUID bagID = java.util.UUID.randomUUID();
-                    java.nio.file.Path bagPath = java.nio.file.Paths.get(tempBase, bagID.toString());
+                    java.nio.file.Path bagPath = java.nio.file.Paths.get(tempBase, deposit.getBagId());
                     java.io.File bagDir = bagPath.toFile();
                     bagDir.mkdir();
 
@@ -94,7 +92,7 @@ public class Receiver {
                     org.datavault.worker.operations.Packager.createBag(bagDir);
 
                     // Tar the bag directory
-                    String tarFileName = bagID + ".tar";
+                    String tarFileName = deposit.getBagId() + ".tar";
                     java.nio.file.Path tarPath = java.nio.file.Paths.get(tempBase).resolve(tarFileName);
                     java.io.File tarFile = tarPath.toFile();
                     org.datavault.worker.operations.Tar.createTar(bagDir, tarFile);
