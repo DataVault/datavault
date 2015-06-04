@@ -27,7 +27,9 @@
                     <label class="col-xs-6 control-label">Filepath:</label>
                     <div class="col-xs-6">
                         <@spring.bind "deposit.filePath" />
-                        <textarea type="text" name=filePath" rows="6" cols="60"></textarea>
+
+                        <textarea type="text" name="${spring.status.expression}"
+                                  value="${spring.status.value!""}" rows="6" cols="60"></textarea>
                     </div>
 
                 </div>
