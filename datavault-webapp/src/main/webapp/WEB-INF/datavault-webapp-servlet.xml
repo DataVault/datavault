@@ -42,7 +42,7 @@
         <property name="suffix" value=".ftl"/>
     </bean>
 
-    <bean id="filesController" class="org.datavault.webapp.controllers.FilesController">
+    <bean id="depositsController" class="org.datavault.webapp.controllers.DepositsController">
         <property name="restService" ref="restService" />
     </bean>
 
