@@ -48,10 +48,8 @@ public class VaultsController {
     // Process the completed 'create new vault' page
     @RequestMapping(value = "/vaults/create", method = RequestMethod.POST)
     public String addVault(@ModelAttribute Vault vault, ModelMap model) {
-        restService.addVault(vault);
-// todo : do something with the returned vault
-        model.addAttribute("vaults", restService.getVaultsListing());
-        return "vaults";
+        model.addAttribute("vault", restService.addVault(vault));
+        return "vaults/vault";
     }
 
 
