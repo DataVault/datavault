@@ -2,12 +2,11 @@ package org.datavault.webapp.controllers;
 
 
 import org.datavault.common.model.Vault;
+import org.datavault.common.model.Deposit;
 import org.datavault.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 /**
  * User: Tom Higgins
@@ -50,8 +49,7 @@ public class VaultsController {
     @RequestMapping(value = "/vaults/create", method = RequestMethod.POST)
     public String addVault(@ModelAttribute Vault vault, ModelMap model) {
         model.addAttribute("vault", restService.addVault(vault));
+        model.addAttribute("deposits", new Deposit[0]);
         return "vaults/vault";
     }
-
-
 }
