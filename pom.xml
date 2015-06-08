@@ -22,19 +22,35 @@
         <root.basedir>${basedir}</root.basedir>
     </properties>
 
-    <!--
-    <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>false</filtering>
-            </resource>
-        </resources>
-        <filters>
-            <filter>${root.basedir}/target/build.properties</filter>
-        </filters>
-    </build>
-    -->
+
+    <profiles>
+        <!-- Filter config using build.properties, unless an alternative file is specified with '-Denv" -->
+        <profile>
+            <id>default</id>
+            <activation>
+                <property>
+                    <name>!env</name>
+                </property>
+            </activation>
+            <properties>
+                <filters.file>${root.basedir}/build.properties</filters.file>
+            </properties>
+        </profile>
+
+        <!-- To filter using an alternative file, run "mvn package -Denv=thing" where thing is thing.properties,
+        as opposed to build.properties. -->
+        <profile>
+            <id>environment</id>
+            <activation>
+                <property>
+                    <name>env</name>
+                </property>
+            </activation>
+            <properties>
+                <filters.file>${root.basedir}/${env}.properties</filters.file>
+            </properties>
+        </profile>
+    </profiles>
 
     <dependencyManagement>
         <dependencies>

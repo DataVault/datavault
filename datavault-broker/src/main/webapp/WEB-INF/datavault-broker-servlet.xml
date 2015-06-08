@@ -73,10 +73,10 @@
     </bean>
 
     <bean id="sender" class="org.datavault.queue.Sender">
-        <property name="queueServer" value="debian-rabbitmq.local"/>
-        <property name="queueName" value="datavault"/>
-        <property name="queueUser" value="datavault"/>
-        <property name="queuePassword" value="datavault"/>
+        <property name="queueServer" value="${queueServer}"/>
+        <property name="queueName" value="${queueName}"/>
+        <property name="queueUser" value="${queueUser}"/>
+        <property name="queuePassword" value="${queuePassword}"/>
     </bean>
 
     <!-- Hibernate -->
@@ -85,9 +85,9 @@
     
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.mysql.jdbc.Driver" />
-        <property name="url" value="jdbc:mysql://debian-rabbitmq.local:3306/datavault"/>
-        <property name="username" value="datavault" />
-        <property name="password" value="datavault"/>
+        <property name="url" value="jdbc:mysql://${dbURL}"/>
+        <property name="username" value="${dbUsername}" />
+        <property name="password" value="${dbPassword}"/>
     </bean>
     
     <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" >

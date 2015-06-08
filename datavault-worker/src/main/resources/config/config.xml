@@ -6,9 +6,11 @@
 
     <bean id="receiver" class="org.datavault.worker.queue.Receiver">
         <property name="queueServer" value="${queueServer}"/>
-        <property name="queueName" value="datavault"/>
-        <property name="queueUser" value="datavault"/>
-        <property name="queuePassword" value="datavault"/>
+        <property name="queueName" value="${queueName}"/>
+        <property name="queueUser" value="${queueUser}"/>
+        <property name="queuePassword" value="${queuePassword}"/>
+        <property name="archiveDir" value="${archiveDir}"/>
+        <property name="tempDir" value="${tempDir}"/>
     </bean>
 
 </beans>

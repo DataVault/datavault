@@ -84,18 +84,18 @@
 
     </dependencies>
 
-<!--
     <build>
         <resources>
             <resource>
-                <directory>src/main/resources</directory>
+                <directory>src/main/resources/config</directory>
                 <filtering>true</filtering>
             </resource>
         </resources>
         <filters>
-            <filter>${basedir}/target/build.properties</filter>
+            <filter>${filters.file}</filter>
         </filters>
+
     </build>
-    -->
+
 
 </project>
