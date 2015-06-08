@@ -86,8 +86,13 @@ public class Receiver {
                     // Copy the target file to the bag directory
                     String fileName = inputFile.getName();
                     java.nio.file.Path outputPath = bagPath.resolve(fileName);
-                    org.apache.commons.io.FileUtils.copyFile(inputFile, outputPath.toFile());
-
+                    
+                    if (inputFile.isFile()) {
+                        org.apache.commons.io.FileUtils.copyFile(inputFile, outputPath.toFile());
+                    } else if (inputFile.isDirectory()) {
+                        org.apache.commons.io.FileUtils.copyDirectory(inputFile, outputPath.toFile());
+                    }
+                    
                     // Bag the directory in-place
                     org.datavault.worker.operations.Packager.createBag(bagDir);
 

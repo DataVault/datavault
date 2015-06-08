@@ -65,8 +65,15 @@ public class RestService {
         Deposit returnedDeposit = restTemplate.postForObject(brokerURL + "/vaults/" + vaultId + "/deposits", deposit , Deposit.class);
 
         return returnedDeposit;
-
     }
+    
+    public Deposit[] getDepositsListing(String vaultId) {
 
+        RestTemplate restTemplate = new RestTemplate();
 
+        ResponseEntity<Deposit[]> responseEntity = restTemplate.getForEntity(brokerURL + "/vaults/" + vaultId + "/deposits", Deposit[].class);
+        Deposit[] deposits = responseEntity.getBody();
+
+        return deposits;
+    }
 }
