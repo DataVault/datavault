@@ -12,11 +12,6 @@
     <artifactId>datavault-broker</artifactId>
     <packaging>war</packaging>
 
-    <properties>
-        <!-- This is the path to the root directory. -->
-        <root.basedir>${basedir}/..</root.basedir>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -139,6 +134,28 @@
                     </includes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <filters>
+                        <filter>${basedir}/../build.properties</filter>
+                    </filters>
+                    <!-- This filters the Spring config and copies it over the top of the target version -->
+                    <webResources>
+                        <resource>
+                            <filtering>true</filtering>
+                            <directory>src/main/webapp</directory>
+                            <includes>
+                                <include>WEB-INF/datavault-broker-servlet.xml</include>
+                            </includes>
+                        </resource>
+                    </webResources>
+
+                </configuration>
+
+            </plugin>
+
         </plugins>
     </build>
 
