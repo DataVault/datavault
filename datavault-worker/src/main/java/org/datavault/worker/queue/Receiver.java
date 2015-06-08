@@ -16,6 +16,8 @@ public class Receiver {
     private String queueName;
     private String queueUser;
     private String queuePassword;
+    private String archiveDir;
+    private String tempDir;
 
     public void setQueueServer(String queueServer) {
         this.queueServer = queueServer;
@@ -33,12 +35,15 @@ public class Receiver {
         this.queuePassword = queuePassword;
     }
 
+    public void setArchiveDir(String archiveDir) {
+        this.archiveDir = archiveDir;
+    }
 
-    //private final static String QUEUE_SERVER = "debian-rabbitmq.local";
-    //private final static String QUEUE_NAME = "datavault";
-    //private final static String QUEUE_USER = "datavault";
-    //private final static String QUEUE_PASSWORD = "datavault";
-    
+    public void setTempDir(String tempDir) {
+        this.tempDir = tempDir;
+    }
+
+
     public void receive() throws IOException, InterruptedException, TimeoutException {
 
         ConnectionFactory factory = new ConnectionFactory();
@@ -65,8 +70,6 @@ public class Receiver {
             // Just testing ...
 
             try {
-                String archiveBase = "/Users/tom/datavault/archive";
-                String tempBase = "/Users/tom/datavault/temp";
 
                 ObjectMapper mapper = new ObjectMapper();
                 Deposit deposit = mapper.readValue(message, Deposit.class);
@@ -76,7 +79,7 @@ public class Receiver {
 
                     // Create a new directory based on a UUID
                     java.util.UUID bagID = java.util.UUID.randomUUID();
-                    java.nio.file.Path bagPath = java.nio.file.Paths.get(tempBase, bagID.toString());
+                    java.nio.file.Path bagPath = java.nio.file.Paths.get(tempDir, bagID.toString());
                     java.io.File bagDir = bagPath.toFile();
                     bagDir.mkdir();
 
@@ -90,12 +93,12 @@ public class Receiver {
 
                     // Tar the bag directory
                     String tarFileName = bagID + ".tar";
-                    java.nio.file.Path tarPath = java.nio.file.Paths.get(tempBase).resolve(tarFileName);
+                    java.nio.file.Path tarPath = java.nio.file.Paths.get(tempDir).resolve(tarFileName);
                     java.io.File tarFile = tarPath.toFile();
                     org.datavault.worker.operations.Tar.createTar(bagDir, tarFile);
 
                     // Copy the resulting tar file to the archive area
-                    java.nio.file.Path archivePath = java.nio.file.Paths.get(archiveBase).resolve(tarFileName);
+                    java.nio.file.Path archivePath = java.nio.file.Paths.get(archiveDir).resolve(tarFileName);
                     org.apache.commons.io.FileUtils.copyFile(tarFile, archivePath.toFile());
 
                 } else {

@@ -9,6 +9,8 @@
         <property name="queueName" value="${queueName}"/>
         <property name="queueUser" value="${queueUser}"/>
         <property name="queuePassword" value="${queuePassword}"/>
+        <property name="archiveDir" value="${archiveDir}"/>
+        <property name="tempDir" value="${tempDir}"/>
     </bean>
 
 </beans>
