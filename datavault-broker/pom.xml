@@ -12,6 +12,10 @@
     <artifactId>datavault-broker</artifactId>
     <packaging>war</packaging>
 
+    <properties>
+        <root.basedir>${basedir}/..</root.basedir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -139,7 +143,7 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
                     <filters>
-                        <filter>${basedir}/../build.properties</filter>
+                        <filter>${filters.file}</filter>
                     </filters>
                     <!-- This filters the Spring config and copies it over the top of the target version -->
                     <webResources>
@@ -151,11 +155,8 @@
                             </includes>
                         </resource>
                     </webResources>
-
                 </configuration>
-
             </plugin>
-
         </plugins>
     </build>
 
