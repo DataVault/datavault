@@ -25,23 +25,25 @@ public class MacFilesService {
 
         // Join the requested path to the root of the filesystem.
         // In future this path handling should be part of a filesystem-specific driver.
+        Path basePath = Paths.get(activeDir);
+        Path completePath;
+        
         if (filePath.equals("")) {
-            filePath = activeDir;
+            completePath = basePath;
         } else {
             // A leading '/' will cause the path to be treated as absolute
             while (filePath.startsWith("/")) {
                 filePath = filePath.replaceFirst("/", "");
             }
             
-            java.nio.file.Path basePath = java.nio.file.Paths.get(activeDir);
-            filePath = basePath.resolve(filePath).toString();
+            completePath = basePath.resolve(filePath);
         }
         
         org.datavault.common.model.Files files = new org.datavault.common.model.Files();
 
         Map filesMap = new HashMap<String, String>();
 
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(filePath))) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(completePath)) {
             for (Path entry : stream) {
                 if (Files.isDirectory(entry)) {
                     filesMap.put(entry.toString(), "directory");
