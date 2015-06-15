@@ -15,8 +15,28 @@ import java.util.Map;
  */
 public class MacFilesService {
 
+    private String activeDir;
+
+    public void setactiveDir(String activeDir) {
+        this.activeDir = activeDir;
+    }
+    
     public org.datavault.common.model.Files getFilesListing(String filePath) {
 
+        // Join the requested path to the root of the filesystem.
+        // In future this path handling should be part of a filesystem-specific driver.
+        if (filePath.equals("")) {
+            filePath = activeDir;
+        } else {
+            // A leading '/' will cause the path to be treated as absolute
+            while (filePath.startsWith("/")) {
+                filePath = filePath.replaceFirst("/", "");
+            }
+            
+            java.nio.file.Path basePath = java.nio.file.Paths.get(activeDir);
+            filePath = basePath.resolve(filePath).toString();
+        }
+        
         org.datavault.common.model.Files files = new org.datavault.common.model.Files();
 
         Map filesMap = new HashMap<String, String>();

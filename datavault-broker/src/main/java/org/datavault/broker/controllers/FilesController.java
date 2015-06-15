@@ -18,8 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 public class FilesController {
-
-    String activeBase = "/Users/tom/datavault/active";
     
     private MacFilesService macFilesService;
 
@@ -36,12 +34,6 @@ public class FilesController {
         // TODO: is there a cleaner way to extract the request path?
         String requestPath = (String)request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
         String filePath = requestPath.replaceFirst("^/files", "");
-        
-        if (filePath.equals("")) {
-            filePath = activeBase;
-        } else {
-            filePath = activeBase + "/" + filePath; // Must try harder.
-        }
         
         return macFilesService.getFilesListing(filePath);
     }
