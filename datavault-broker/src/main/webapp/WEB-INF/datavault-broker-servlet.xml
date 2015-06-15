@@ -62,7 +62,9 @@
 
     <!-- todo : should the service beans be put into their own config file? -->
 
-    <bean id="macFilesService" class="org.datavault.broker.services.MacFilesService"/>
+    <bean id="macFilesService" class="org.datavault.broker.services.MacFilesService">
+        <property name="activeDir" value="${activeDir}"/>
+    </bean>
     
     <bean id="vaultsService" class="org.datavault.broker.services.VaultsService">
         <property name="vaultDAO" ref="vaultDAO" />
