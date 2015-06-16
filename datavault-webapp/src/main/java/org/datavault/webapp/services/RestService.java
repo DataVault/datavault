@@ -23,10 +23,15 @@ public class RestService {
         this.brokerURL = brokerURL;
     }
 
-    public Map<String, String> getFilesListing() {
+    public Map<String, String> getFilesListing(String filePath) {
 
         RestTemplate restTemplate = new RestTemplate();
-        Files files = restTemplate.getForObject(brokerURL + "/files", Files.class);
+        
+        if (!filePath.startsWith("/")) {
+            filePath = "/" + filePath;
+        }
+        
+        Files files = restTemplate.getForObject(brokerURL + "/files" + filePath, Files.class);
 
         return files.getFilesMap();
     }
