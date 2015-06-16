@@ -20,33 +20,43 @@
                 <div class="form-group">
                     <label class="control-label">Filepath:</label>
                     <@spring.bind "deposit.filePath" />
-                    <textarea type="text" name="${spring.status.expression}"
-                              class="form-control"
-                              value="${spring.status.value!""}" rows="6" cols="60"></textarea>
+                    <input type="text"
+                            class="form-control file-path"
+                            name="${spring.status.expression}"
+                            value="${spring.status.value!""}"/>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <div id="tree" class="fancytree-radio">
-                      <ul id="treeData" style="display: none;">
-                        <li id="id1">File 1
-                        <li id="id2">File 2
-                        <li id="id3" class="folder">Folder 3
-                          <ul>
-                            <li id="id3.1">File 3.1
-                            <li id="id3.2">File 3.2
-                         </ul>
-                      </ul>
-                    </div>
+                    <div id="tree" class="fancytree-radio"></div>
                 </div>
 
-                <script type="text/javascript">
-                  $(function(){
+                <script>
+                    // Create the tree inside the <div id="tree"> element.
                     $("#tree").fancytree({
+                        source: {
+                                url: "/datavault-webapp/files",
+                                cache: false
+                        },
+                        lazyLoad: function(event, data){
+                            var node = data.node;
+                            // Load child nodes via ajax GET /files?mode=children&parent=1234
+                            data.result = {
+                                url: "/datavault-webapp/files",
+                                data: {mode: "children", parent: node.key},
+                                cache: false
+                            };
+                        },
                         checkbox: true,
-                        selectMode: 1
+                        selectMode: 1,
+                        select: function(event, data) {
+                            var nodes = data.tree.getSelectedNodes();
+                            $(".file-path").val("");
+                            nodes.forEach(function(node) {
+                                $(".file-path").val(node.key);
+                            });
+                        }
                     });
-                  });
                 </script>
 
                 <div class="modal-footer">
