@@ -1,13 +1,15 @@
 package org.datavault.broker.controllers;
 
 import java.util.List;
+import java.util.HashMap;
 
 import org.datavault.common.model.Vault;
 import org.datavault.common.model.Deposit;
+import org.datavault.common.job.Job;
 import org.datavault.broker.services.VaultsService;
 import org.datavault.broker.services.DepositsService;
-
 import org.datavault.queue.Sender;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -77,8 +79,13 @@ public class VaultsController {
         
         // Ask the worker to process the deposit
         try {
+            HashMap<String, String> depositProperties = new HashMap<>();
+            depositProperties.put("bagId", deposit.getBagId());
+            depositProperties.put("filePath", deposit.getFilePath());
+            
+            Job depositJob = new Job("org.datavault.worker.jobs.Deposit", depositProperties);
             ObjectMapper mapper = new ObjectMapper();
-            String jsonDeposit = mapper.writeValueAsString(deposit);
+            String jsonDeposit = mapper.writeValueAsString(depositJob);
             sender.send(jsonDeposit);
         } catch (Exception e) {
             e.printStackTrace();
