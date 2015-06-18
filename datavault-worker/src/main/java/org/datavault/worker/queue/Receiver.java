@@ -6,12 +6,10 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
-import org.datavault.common.model.Deposit;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import org.datavault.common.job.Job;
+import org.datavault.common.job.Context;
 
 public class Receiver {
 
@@ -72,54 +70,18 @@ public class Receiver {
             String message = new String(delivery.getBody());
             System.out.println(" [x] Received '" + message + "'");
 
-            // Dispatch the job ...
-
-            // Just testing ...
+            // Decode and begin the job ...
 
             try {
-
                 ObjectMapper mapper = new ObjectMapper();
-                Deposit deposit = mapper.readValue(message, Deposit.class);
+                Job commonjob = mapper.readValue(message, Job.class);
                 
-                Path basePath = Paths.get(activeDir);
-                File inputFile = basePath.resolve(deposit.getFilePath()).toFile();
+                Class<?> clazz = Class.forName(commonjob.getJobClass());
+                Job concreteJob = (Job)(mapper.readValue(message, clazz));
                 
-                System.out.println("Deposit file: " + inputFile.toString());
+                Context context = new Context(archiveDir, tempDir, activeDir);
+                concreteJob.performAction(context);
                 
-                if (inputFile.exists()) {
-
-                    // Create a new directory based on the broker-generated UUID
-                    String bagID = deposit.getBagId();
-                    java.nio.file.Path bagPath = java.nio.file.Paths.get(tempDir, bagID);
-                    java.io.File bagDir = bagPath.toFile();
-                    bagDir.mkdir();
-
-                    // Copy the target file to the bag directory
-                    String fileName = inputFile.getName();
-                    java.nio.file.Path outputPath = bagPath.resolve(fileName);
-                    
-                    if (inputFile.isFile()) {
-                        org.apache.commons.io.FileUtils.copyFile(inputFile, outputPath.toFile());
-                    } else if (inputFile.isDirectory()) {
-                        org.apache.commons.io.FileUtils.copyDirectory(inputFile, outputPath.toFile());
-                    }
-                    
-                    // Bag the directory in-place
-                    org.datavault.worker.operations.Packager.createBag(bagDir);
-
-                    // Tar the bag directory
-                    String tarFileName = bagID + ".tar";
-                    java.nio.file.Path tarPath = java.nio.file.Paths.get(tempDir).resolve(tarFileName);
-                    java.io.File tarFile = tarPath.toFile();
-                    org.datavault.worker.operations.Tar.createTar(bagDir, tarFile);
-
-                    // Copy the resulting tar file to the archive area
-                    java.nio.file.Path archivePath = java.nio.file.Paths.get(archiveDir).resolve(tarFileName);
-                    org.apache.commons.io.FileUtils.copyFile(tarFile, archivePath.toFile());
-
-                } else {
-                    System.err.println("File does not exist.");
-                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
