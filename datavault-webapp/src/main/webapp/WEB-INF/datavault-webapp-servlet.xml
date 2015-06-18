@@ -47,7 +47,6 @@
 
     <bean id="filesController" class="org.datavault.webapp.controllers.FilesController">
         <property name="restService" ref="restService" />
-        <property name="activeDir" value="${activeDir}"/>
     </bean>
 
     <bean id="depositsController" class="org.datavault.webapp.controllers.DepositsController">

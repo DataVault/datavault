@@ -9,6 +9,9 @@ import java.util.concurrent.TimeoutException;
 import org.datavault.common.model.Deposit;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Receiver {
 
@@ -18,6 +21,7 @@ public class Receiver {
     private String queuePassword;
     private String archiveDir;
     private String tempDir;
+    private String activeDir;
 
     public void setQueueServer(String queueServer) {
         this.queueServer = queueServer;
@@ -42,7 +46,10 @@ public class Receiver {
     public void setTempDir(String tempDir) {
         this.tempDir = tempDir;
     }
-
+    
+    public void setActiveDir(String activeDir) {
+        this.activeDir = activeDir;
+    }
 
     public void receive() throws IOException, InterruptedException, TimeoutException {
 
@@ -74,12 +81,16 @@ public class Receiver {
                 ObjectMapper mapper = new ObjectMapper();
                 Deposit deposit = mapper.readValue(message, Deposit.class);
                 
-                java.io.File inputFile = new java.io.File(deposit.getFilePath());
+                Path basePath = Paths.get(activeDir);
+                File inputFile = basePath.resolve(deposit.getFilePath()).toFile();
+                
+                System.out.println("Deposit file: " + inputFile.toString());
+                
                 if (inputFile.exists()) {
 
-                    // Create a new directory based on a UUID
-                    java.util.UUID bagID = java.util.UUID.randomUUID();
-                    java.nio.file.Path bagPath = java.nio.file.Paths.get(tempDir, bagID.toString());
+                    // Create a new directory based on the broker-generated UUID
+                    String bagID = deposit.getBagId();
+                    java.nio.file.Path bagPath = java.nio.file.Paths.get(tempDir, bagID);
                     java.io.File bagDir = bagPath.toFile();
                     bagDir.mkdir();
 
