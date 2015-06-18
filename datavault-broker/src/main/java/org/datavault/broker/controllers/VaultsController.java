@@ -91,20 +91,6 @@ public class VaultsController {
             e.printStackTrace();
         }
         
-        // Fake retrieval operation
-        try {
-            HashMap<String, String> depositProperties = new HashMap<>();
-            depositProperties.put("bagId", deposit.getBagId());
-            depositProperties.put("filePath", deposit.getFilePath());
-            
-            Job depositJob = new Job("org.datavault.worker.jobs.Retrieve", depositProperties);
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonDeposit = mapper.writeValueAsString(depositJob);
-            sender.send(jsonDeposit);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
         return deposit;
     }
     
