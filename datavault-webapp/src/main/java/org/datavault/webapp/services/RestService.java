@@ -1,11 +1,8 @@
 package org.datavault.webapp.services;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.datavault.common.model.Deposit;
-import org.datavault.common.model.Files;
 import org.datavault.common.model.Vault;
+import org.datavault.common.model.FileInfo;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
 
@@ -23,7 +20,7 @@ public class RestService {
         this.brokerURL = brokerURL;
     }
 
-    public Map<String, String> getFilesListing(String filePath) {
+    public FileInfo[] getFilesListing(String filePath) {
 
         RestTemplate restTemplate = new RestTemplate();
         
@@ -31,9 +28,10 @@ public class RestService {
             filePath = "/" + filePath;
         }
         
-        Files files = restTemplate.getForObject(brokerURL + "/files" + filePath, Files.class);
-
-        return files.getFilesMap();
+        ResponseEntity<FileInfo[]> responseEntity = restTemplate.getForEntity(brokerURL + "/files" + filePath, FileInfo[].class);
+        FileInfo[] files = responseEntity.getBody();
+        
+        return files;
     }
 
     public Vault[] getVaultsListing() {

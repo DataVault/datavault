@@ -5,8 +5,9 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import org.datavault.common.model.FileInfo;
 
 /**
  * User: Robin Taylor
@@ -21,7 +22,7 @@ public class MacFilesService {
         this.activeDir = activeDir;
     }
     
-    public org.datavault.common.model.Files getFilesListing(String filePath) {
+    public List<FileInfo> getFilesListing(String filePath) {
 
         // Join the requested path to the root of the filesystem.
         // In future this path handling should be part of a filesystem-specific driver.
@@ -38,30 +39,31 @@ public class MacFilesService {
             
             completePath = basePath.resolve(filePath);
         }
-        
-        org.datavault.common.model.Files files = new org.datavault.common.model.Files();
 
-        Map filesMap = new HashMap<String, String>();
+        ArrayList<FileInfo> files = new ArrayList<>();
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(completePath)) {
             for (Path entry : stream) {
-                if (Files.isDirectory(entry)) {
-                    filesMap.put(entry.toString(), "directory");
-                } else {
-                    filesMap.put(entry.toString(), "file");
-                }
-
+                
+                String entryFileName = entry.getFileName().toString();
+                String entryAbsolutePath = entry.toString();
+                
+                // The "key" is the path under the base directory.
+                // The API client can use this to request a sub-directory.
+                String entryKey = (basePath.toUri().relativize(entry.toUri())).getPath();
+                
+                FileInfo info = new FileInfo(entryKey,
+                                             entryAbsolutePath,
+                                             entryFileName,
+                                             Files.isDirectory(entry));
+                files.add(info);
             }
 
         } catch (IOException e) {
             System.out.println(e.toString());
         }
 
-        files.setFilesMap(filesMap);
-
         return files;
-
-
     }
 
 

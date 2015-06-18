@@ -1,6 +1,7 @@
 package org.datavault.broker.controllers;
 
-import org.datavault.common.model.Files;
+import java.util.List;
+import org.datavault.common.model.FileInfo;
 import org.datavault.broker.services.MacFilesService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,7 +27,7 @@ public class FilesController {
     }
 
     @RequestMapping("/files/**")
-    public Files getFilesListing(HttpServletRequest request) {
+    public List<FileInfo> getFilesListing(HttpServletRequest request) {
         
         // "GET /files/" will display files from the base directory.
         // "GET /files/abc" will display files from the "abc" directory under the base.
@@ -37,6 +38,4 @@ public class FilesController {
         
         return macFilesService.getFilesListing(filePath);
     }
-
-
 }
