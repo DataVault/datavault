@@ -12,6 +12,7 @@
         <property name="archiveDir" value="${archiveDir}"/>
         <property name="tempDir" value="${tempDir}"/>
         <property name="activeDir" value="${activeDir}"/>
+        <property name="metaDir" value="${metaDir}"/>
     </bean>
 
 </beans>

@@ -2,12 +2,15 @@ package org.datavault.broker.controllers;
 
 import java.util.List;
 import java.util.HashMap;
+import java.io.IOException;
 
 import org.datavault.common.model.Vault;
 import org.datavault.common.model.Deposit;
+import org.datavault.common.model.FileFixity;
 import org.datavault.common.job.Job;
 import org.datavault.broker.services.VaultsService;
 import org.datavault.broker.services.DepositsService;
+import org.datavault.broker.services.MetadataService;
 import org.datavault.queue.Sender;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +32,7 @@ public class VaultsController {
     
     private VaultsService vaultsService;
     private DepositsService depositsService;
+    private MetadataService metadataService;
     private Sender sender;
 
     public void setVaultsService(VaultsService vaultsService) {
@@ -37,6 +41,10 @@ public class VaultsController {
     
     public void setDepositsService(DepositsService depositsService) {
         this.depositsService = depositsService;
+    }
+    
+    public void setMetadataService(MetadataService metadataService) {
+        this.metadataService = metadataService;
     }
 
     public void setSender(Sender sender) {
@@ -99,6 +107,14 @@ public class VaultsController {
                               @PathVariable("depositid") String depositID) {
         Deposit deposit = depositsService.getDeposit(depositID);
         return deposit;
+    }
+    
+    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/manifest", method = RequestMethod.GET)
+    public List<FileFixity> getDepositManifest(@PathVariable("vaultid") String vaultID,
+                                      @PathVariable("depositid") String depositID) throws IOException {
+        Deposit deposit = depositsService.getDeposit(depositID);
+        List<FileFixity> manifest = metadataService.getManifest(deposit.getBagId());
+        return manifest;
     }
     
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/status", method = RequestMethod.GET)
