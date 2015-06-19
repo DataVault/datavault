@@ -57,6 +57,7 @@
     <bean id="vaultsController" class="org.datavault.broker.controllers.VaultsController">
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
+        <property name="metadataService" ref="metadataService" />
         <property name="sender" ref="sender" />
     </bean>
 
@@ -72,6 +73,10 @@
     
     <bean id="depositsService" class="org.datavault.broker.services.DepositsService">
         <property name="depositDAO" ref="depositDAO" />
+    </bean>
+    
+    <bean id="metadataService" class="org.datavault.broker.services.MetadataService">
+        <property name="metaDir" value="${metaDir}"/>
     </bean>
 
     <bean id="sender" class="org.datavault.queue.Sender">

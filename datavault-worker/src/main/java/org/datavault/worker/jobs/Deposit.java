@@ -4,8 +4,12 @@ import java.util.Map;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import org.datavault.common.job.Context;
 import org.datavault.common.job.Job;
+import org.datavault.worker.operations.Tar;
+import org.datavault.worker.operations.Packager;
+import org.apache.commons.io.FileUtils;
 
 public class Deposit extends Job {
 
@@ -30,36 +34,50 @@ public class Deposit extends Job {
             if (inputFile.exists()) {
 
                 // Create a new directory based on the broker-generated UUID
-                java.nio.file.Path bagPath = java.nio.file.Paths.get(context.getTempDir(), bagID);
-                java.io.File bagDir = bagPath.toFile();
+                Path bagPath = Paths.get(context.getTempDir(), bagID);
+                File bagDir = bagPath.toFile();
                 bagDir.mkdir();
 
                 // Copy the target file to the bag directory
                 System.out.println("\tCopying target to bag directory ...");
                 String fileName = inputFile.getName();
-                java.nio.file.Path outputPath = bagPath.resolve(fileName);
+                Path outputPath = bagPath.resolve(fileName);
 
                 if (inputFile.isFile()) {
-                    org.apache.commons.io.FileUtils.copyFile(inputFile, outputPath.toFile());
+                    FileUtils.copyFile(inputFile, outputPath.toFile());
                 } else if (inputFile.isDirectory()) {
-                    org.apache.commons.io.FileUtils.copyDirectory(inputFile, outputPath.toFile());
+                    FileUtils.copyDirectory(inputFile, outputPath.toFile());
                 }
 
                 // Bag the directory in-place
                 System.out.println("\tCreating bag ...");
-                org.datavault.worker.operations.Packager.createBag(bagDir);
+                Packager.createBag(bagDir);
 
                 // Tar the bag directory
                 System.out.println("\tCreating tar file ...");
                 String tarFileName = bagID + ".tar";
-                java.nio.file.Path tarPath = java.nio.file.Paths.get(context.getTempDir()).resolve(tarFileName);
-                java.io.File tarFile = tarPath.toFile();
-                org.datavault.worker.operations.Tar.createTar(bagDir, tarFile);
+                Path tarPath = Paths.get(context.getTempDir()).resolve(tarFileName);
+                File tarFile = tarPath.toFile();
+                Tar.createTar(bagDir, tarFile);
 
+                // Create the meta directory for the bag information
+                Path metaPath = Paths.get(context.getMetaDir(), bagID);
+                File metaDir = metaPath.toFile();
+                metaDir.mkdir();
+                
+                // Copy bag meta files to the meta directory
+                System.out.println("\tCopying meta files ...");
+                Packager.extractMetaFiles(bagDir, metaDir);
+                
                 // Copy the resulting tar file to the archive area
                 System.out.println("\tCopying tar file to archive ...");
-                java.nio.file.Path archivePath = java.nio.file.Paths.get(context.getArchiveDir()).resolve(tarFileName);
-                org.apache.commons.io.FileUtils.copyFile(tarFile, archivePath.toFile());
+                Path archivePath = Paths.get(context.getArchiveDir()).resolve(tarFileName);
+                FileUtils.copyFile(tarFile, archivePath.toFile());
+                
+                // Cleanup
+                System.out.println("\tCleaning up ...");
+                FileUtils.deleteDirectory(bagDir);
+                tarFile.delete();
                 
                 System.out.println("\tDeposit complete: " + archivePath);
             } else {

@@ -20,6 +20,7 @@ public class Receiver {
     private String archiveDir;
     private String tempDir;
     private String activeDir;
+    private String metaDir;
 
     public void setQueueServer(String queueServer) {
         this.queueServer = queueServer;
@@ -47,6 +48,10 @@ public class Receiver {
     
     public void setActiveDir(String activeDir) {
         this.activeDir = activeDir;
+    }
+    
+    public void setMetaDir(String metaDir) {
+        this.metaDir = metaDir;
     }
 
     public void receive() throws IOException, InterruptedException, TimeoutException {
@@ -79,7 +84,7 @@ public class Receiver {
                 Class<?> clazz = Class.forName(commonjob.getJobClass());
                 Job concreteJob = (Job)(mapper.readValue(message, clazz));
                 
-                Context context = new Context(archiveDir, tempDir, activeDir);
+                Context context = new Context(archiveDir, tempDir, activeDir, metaDir);
                 concreteJob.performAction(context);
                 
             } catch (Exception e) {

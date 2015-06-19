@@ -7,12 +7,14 @@ public class Context {
     private String archiveDir;
     private String tempDir;
     private String activeDir;
+    private String metaDir;
     
     public Context() {};
-    public Context(String archiveDir, String tempDir, String activeDir) {
+    public Context(String archiveDir, String tempDir, String activeDir, String metaDir) {
         this.archiveDir = archiveDir;
         this.tempDir = tempDir;
         this.activeDir = activeDir;
+        this.metaDir = metaDir;
     }
 
     public String getArchiveDir() {
@@ -37,5 +39,13 @@ public class Context {
 
     public void setActiveDir(String activeDir) {
         this.activeDir = activeDir;
+    }
+
+    public String getMetaDir() {
+        return metaDir;
+    }
+
+    public void setMetaDir(String metaDir) {
+        this.metaDir = metaDir;
     }
 }
