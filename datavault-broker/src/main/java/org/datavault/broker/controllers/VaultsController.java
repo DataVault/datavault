@@ -157,8 +157,8 @@ public class VaultsController {
             
             Job withdrawJob = new Job("org.datavault.worker.jobs.Withdraw", withdrawProperties);
             ObjectMapper mapper = new ObjectMapper();
-            String jsonDeposit = mapper.writeValueAsString(withdrawJob);
-            sender.send(jsonDeposit);
+            String jsonWithdraw = mapper.writeValueAsString(withdrawJob);
+            sender.send(jsonWithdraw);
         } catch (Exception e) {
             e.printStackTrace();
         }
