@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import org.datavault.common.model.Vault;
 import org.datavault.common.model.Deposit;
+import org.datavault.common.model.Withdrawal;
 import org.datavault.common.model.FileFixity;
 import org.datavault.common.job.Job;
 import org.datavault.broker.services.VaultsService;
@@ -132,5 +133,36 @@ public class VaultsController {
         deposit.setStatus(status);
         depositsService.updateDeposit(deposit);
         return deposit;
+    }
+    
+    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/withdraw", method = RequestMethod.POST)
+    public Boolean withdrawDeposit(@PathVariable("vaultid") String vaultID,
+                                   @PathVariable("depositid") String depositID,
+                                   @RequestBody Withdrawal withdrawal) {
+        
+        Deposit deposit = depositsService.getDeposit(depositID);
+        
+        // Validate the path
+        // TODO: check access too
+        String withdrawalPath = withdrawal.getWithdrawalPath();
+        if (withdrawalPath == null) {
+            throw new IllegalArgumentException("Invalid withdrawalPath");
+        }
+        
+        // Ask the worker to process the withdrawal
+        try {
+            HashMap<String, String> withdrawProperties = new HashMap<>();
+            withdrawProperties.put("bagId", deposit.getBagId());
+            withdrawProperties.put("withdrawalPath", withdrawalPath);
+            
+            Job withdrawJob = new Job("org.datavault.worker.jobs.Withdraw", withdrawProperties);
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonDeposit = mapper.writeValueAsString(withdrawJob);
+            sender.send(jsonDeposit);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return true;
     }
 }
