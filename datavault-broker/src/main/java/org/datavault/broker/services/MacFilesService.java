@@ -24,20 +24,11 @@ public class MacFilesService {
     
     public List<FileInfo> getFilesListing(String filePath) {
 
-        // Join the requested path to the root of the filesystem.
-        // In future this path handling should be part of a filesystem-specific driver.
         Path basePath = Paths.get(activeDir);
-        Path completePath;
-        
-        if (filePath.equals("")) {
-            completePath = basePath;
-        } else {
-            // A leading '/' will cause the path to be treated as absolute
-            while (filePath.startsWith("/")) {
-                filePath = filePath.replaceFirst("/", "");
-            }
-            
-            completePath = basePath.resolve(filePath);
+        Path completePath = getAbsolutePath(filePath);
+
+        if (completePath == null) {
+            throw new IllegalArgumentException("Path invalid");
         }
 
         ArrayList<FileInfo> files = new ArrayList<>();
@@ -66,6 +57,58 @@ public class MacFilesService {
         return files;
     }
 
+    public Path getAbsolutePath(String filePath) {
+        
+        // Join the requested path to the root of the filesystem.
+        // In future this path handling should be part of a filesystem-specific driver.
+        Path base = Paths.get(activeDir);
+        Path absolute;
+        
+        try {
+            if (filePath.equals("")) {
+                absolute = base;
+            } else {
+                // A leading '/' would cause the path to be treated as absolute
+                while (filePath.startsWith("/")) {
+                    filePath = filePath.replaceFirst("/", "");
+                }
 
+                absolute = base.resolve(filePath);
+                absolute = Paths.get(absolute.toFile().getCanonicalPath());
+            }
+
+            if (isValidSubPath(absolute)) {
+                return absolute;
+            } else {
+                // Path is invalid (doesn't exist in base)!
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    public boolean isValidSubPath(Path path) {
+        
+        // Check if the path is valid with respect to the base path.
+        // For example, we don't want to allow path traversal ("../../abc").
+        
+        try {
+            Path base = Paths.get(activeDir);
+            Path canonicalBase = Paths.get(base.toFile().getCanonicalPath());
+            Path canonicalPath = Paths.get(path.toFile().getCanonicalPath());
+            
+            if (canonicalPath.startsWith(canonicalBase)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
 

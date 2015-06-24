@@ -3,6 +3,7 @@ package org.datavault.broker.controllers;
 import java.util.List;
 import java.util.HashMap;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.datavault.common.model.Vault;
 import org.datavault.common.model.Deposit;
@@ -12,6 +13,7 @@ import org.datavault.common.job.Job;
 import org.datavault.broker.services.VaultsService;
 import org.datavault.broker.services.DepositsService;
 import org.datavault.broker.services.MetadataService;
+import org.datavault.broker.services.MacFilesService;
 import org.datavault.queue.Sender;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +36,7 @@ public class VaultsController {
     private VaultsService vaultsService;
     private DepositsService depositsService;
     private MetadataService metadataService;
+    private MacFilesService macFilesService;
     private Sender sender;
 
     public void setVaultsService(VaultsService vaultsService) {
@@ -46,6 +49,10 @@ public class VaultsController {
     
     public void setMetadataService(MetadataService metadataService) {
         this.metadataService = metadataService;
+    }
+    
+    public void setMacFilesService(MacFilesService macFilesService) {
+        this.macFilesService = macFilesService;
     }
 
     public void setSender(Sender sender) {
@@ -83,6 +90,12 @@ public class VaultsController {
             throw new Exception("Vault '" + vaultID + "' does not exist");
         }
         
+        // Check the source file path is valid
+        Path path = macFilesService.getAbsolutePath(deposit.getFilePath());
+        if (path == null) {
+            throw new IllegalArgumentException("Path '" + deposit.getFilePath() + "' is invalid");
+        }
+        
         // Add the deposit object
         depositsService.addDeposit(vault, deposit);
         
@@ -90,7 +103,7 @@ public class VaultsController {
         try {
             HashMap<String, String> depositProperties = new HashMap<>();
             depositProperties.put("bagId", deposit.getBagId());
-            depositProperties.put("filePath", deposit.getFilePath());
+            depositProperties.put("filePath", path.toString()); // The absolute path
             
             Job depositJob = new Job("org.datavault.worker.jobs.Deposit", depositProperties);
             ObjectMapper mapper = new ObjectMapper();
@@ -143,17 +156,21 @@ public class VaultsController {
         Deposit deposit = depositsService.getDeposit(depositID);
         
         // Validate the path
-        // TODO: check access too
         String withdrawalPath = withdrawal.getWithdrawalPath();
         if (withdrawalPath == null) {
-            throw new IllegalArgumentException("Invalid withdrawalPath");
+            throw new IllegalArgumentException("Path was null");
+        }
+        
+        Path path = macFilesService.getAbsolutePath(withdrawalPath);
+        if (path == null) {
+            throw new IllegalArgumentException("Path '" + withdrawalPath + "' is invalid");
         }
         
         // Ask the worker to process the withdrawal
         try {
             HashMap<String, String> withdrawProperties = new HashMap<>();
             withdrawProperties.put("bagId", deposit.getBagId());
-            withdrawProperties.put("withdrawalPath", withdrawalPath);
+            withdrawProperties.put("withdrawalPath", path.toString()); // The absolute path
             
             Job withdrawJob = new Job("org.datavault.worker.jobs.Withdraw", withdrawProperties);
             ObjectMapper mapper = new ObjectMapper();
