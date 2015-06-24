@@ -24,8 +24,7 @@ public class Withdraw extends Job {
         System.out.println("\twithdrawalPath: " + withdrawalPath);
         
         try {
-            Path basePath = Paths.get(context.getActiveDir());
-            Path withdrawPath = basePath.resolve(withdrawalPath);
+            Path withdrawPath = Paths.get(withdrawalPath);
             File withdrawDir = withdrawPath.toFile();
 
             if (!withdrawDir.exists() || !withdrawDir.isDirectory()) {

@@ -25,8 +25,7 @@ public class Deposit extends Job {
         System.out.println("\tbagID: " + bagID);
         System.out.println("\tfilePath: " + filePath);
         
-        Path basePath = Paths.get(context.getActiveDir());
-        File inputFile = basePath.resolve(filePath).toFile();
+        File inputFile = Paths.get(filePath).toFile();
         
         System.out.println("\tDeposit file: " + inputFile.toString());
 

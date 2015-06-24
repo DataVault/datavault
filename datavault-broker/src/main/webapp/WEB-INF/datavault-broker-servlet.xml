@@ -58,6 +58,7 @@
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
         <property name="metadataService" ref="metadataService" />
+        <property name="macFilesService" ref="macFilesService" />
         <property name="sender" ref="sender" />
     </bean>
 
