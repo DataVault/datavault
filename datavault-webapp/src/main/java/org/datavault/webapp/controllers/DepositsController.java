@@ -45,6 +45,15 @@ public class DepositsController {
 
     }
 
+    // View properties of a single deposit
+    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}", method = RequestMethod.GET)
+    public String getDeposit(ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
+        model.addAttribute("vault", restService.getVault(vaultID));
+        model.addAttribute("deposit", restService.getDeposit(vaultID, depositID));
+        model.addAttribute("manifest", restService.getDepositManifest(vaultID, depositID));
+        return "deposits/deposit";
+    }
+    
     /*
     @RequestMapping(value = "/deposits", method = RequestMethod.GET)
     public String createDeposit(ModelMap model) {
