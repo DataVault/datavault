@@ -9,18 +9,30 @@ import org.datavault.common.job.Context;
 import org.datavault.common.job.Job;
 import org.datavault.worker.operations.Tar;
 import org.datavault.worker.operations.Packager;
+import org.datavault.worker.queue.EventSender;
+
 import org.apache.commons.io.FileUtils;
+import org.datavault.common.event.Event;
+import org.datavault.common.event.deposit.NotifySize;
+
 
 public class Deposit extends Job {
 
+    EventSender events;
+    
     @Override
     public void performAction(Context context) {
         
-        System.out.println("\tDeposit job - performAction()");
+        EventSender eventStream = (EventSender)context.getEventStream();
         
+        System.out.println("\tDeposit job - performAction()");
+                
         Map<String, String> properties = getProperties();
+        String depositId = properties.get("depositId");
         String bagID = properties.get("bagId");
         String filePath = properties.get("filePath");
+        
+        eventStream.send(new Event(depositId, "Deposit started"));
         
         System.out.println("\tbagID: " + bagID);
         System.out.println("\tfilePath: " + filePath);
@@ -51,6 +63,8 @@ public class Deposit extends Job {
                     FileUtils.copyDirectory(inputFile, outputFile);
                     bytes = FileUtils.sizeOfDirectory(outputFile);
                 }
+                
+                eventStream.send(new NotifySize(depositId, bytes));
                 
                 System.out.println("\tSize: " + bytes + " bytes (" +  FileUtils.byteCountToDisplaySize(bytes) + ")");
                 

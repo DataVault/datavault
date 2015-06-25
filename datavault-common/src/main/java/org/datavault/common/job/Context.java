@@ -1,6 +1,8 @@
 package org.datavault.common.job;
 
-// Some common file properties needed for all jobs
+import org.datavault.common.event.EventStream;
+
+// Some common properties needed for all jobs
 
 public class Context {
 
@@ -8,13 +10,15 @@ public class Context {
     private String tempDir;
     private String activeDir;
     private String metaDir;
+    private EventStream eventStream;
     
     public Context() {};
-    public Context(String archiveDir, String tempDir, String activeDir, String metaDir) {
+    public Context(String archiveDir, String tempDir, String activeDir, String metaDir, EventStream eventStream) {
         this.archiveDir = archiveDir;
         this.tempDir = tempDir;
         this.activeDir = activeDir;
         this.metaDir = metaDir;
+        this.eventStream = eventStream;
     }
 
     public String getArchiveDir() {
@@ -47,5 +51,13 @@ public class Context {
 
     public void setMetaDir(String metaDir) {
         this.metaDir = metaDir;
+    }
+
+    public EventStream getEventStream() {
+        return eventStream;
+    }
+
+    public void setEventStream(EventStream eventStream) {
+        this.eventStream = eventStream;
     }
 }

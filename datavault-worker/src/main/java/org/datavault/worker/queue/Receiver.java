@@ -54,7 +54,7 @@ public class Receiver {
         this.metaDir = metaDir;
     }
 
-    public void receive() throws IOException, InterruptedException, TimeoutException {
+    public void receive(EventSender events) throws IOException, InterruptedException, TimeoutException {
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(queueServer);
@@ -84,7 +84,7 @@ public class Receiver {
                 Class<?> clazz = Class.forName(commonjob.getJobClass());
                 Job concreteJob = (Job)(mapper.readValue(message, clazz));
                 
-                Context context = new Context(archiveDir, tempDir, activeDir, metaDir);
+                Context context = new Context(archiveDir, tempDir, activeDir, metaDir, events);
                 concreteJob.performAction(context);
                 
             } catch (Exception e) {

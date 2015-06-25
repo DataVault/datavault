@@ -102,6 +102,7 @@ public class VaultsController {
         // Ask the worker to process the deposit
         try {
             HashMap<String, String> depositProperties = new HashMap<>();
+            depositProperties.put("depositId", deposit.getID());
             depositProperties.put("bagId", deposit.getBagId());
             depositProperties.put("filePath", path.toString()); // The absolute path
             

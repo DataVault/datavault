@@ -3,6 +3,7 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context
@@ -10,7 +11,9 @@
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc.xsd
         http://www.springframework.org/schema/tx
-        http://www.springframework.org/schema/tx/spring-tx.xsd">
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/rabbit
+        http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd">
 
     <context:component-scan base-package="org.datavault.broker.controllers"/>
 
@@ -79,6 +82,37 @@
     <bean id="metadataService" class="org.datavault.broker.services.MetadataService">
         <property name="metaDir" value="${metaDir}"/>
     </bean>
+
+    <!-- RabbitMQ -->
+    
+    <bean id="connectionFactory"
+        class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory">
+        <constructor-arg value="${queueServer}" />
+        <property name="username" value="${queueUser}" />
+        <property name="password" value="${queuePassword}" />
+    </bean>
+    
+    <!--
+    <rabbit:template id="amqpTemplate" connection-factory="connectionFactory" />
+    -->
+    
+    <rabbit:admin connection-factory="connectionFactory" />
+    
+    <rabbit:queue id="eventQueue" name="${eventQueueName}" />
+    
+    <!--
+    <rabbit:direct-exchange id="exchange" name="">
+        <rabbit:bindings>
+            <rabbit:binding queue="eventQueue" key="${eventQueueName}"></rabbit:binding>
+        </rabbit:bindings>
+    </rabbit:direct-exchange>
+    -->
+    
+    <rabbit:listener-container connection-factory="connectionFactory" >
+        <rabbit:listener ref="listener" method="listen" queue-names="eventQueue" />
+    </rabbit:listener-container>
+
+    <bean id="listener" class="org.datavault.queue.EventListener" />
 
     <bean id="sender" class="org.datavault.queue.Sender">
         <property name="queueServer" value="${queueServer}"/>

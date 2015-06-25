@@ -17,6 +17,7 @@
 
     <properties>
         <spring.version>4.1.4.RELEASE</spring.version>
+        <spring-rabbit.version>1.4.5.RELEASE</spring-rabbit.version>
         <hibernate.version>4.3.10.Final</hibernate.version>
         <mysql.version>5.1.35</mysql.version>
         <root.basedir>${basedir}</root.basedir>
@@ -115,6 +116,12 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-tx</artifactId>
                 <version>${spring.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.amqp</groupId>
+                <artifactId>spring-rabbit</artifactId>
+                <version>${spring-rabbit.version}</version>
             </dependency>
 
             <dependency>
