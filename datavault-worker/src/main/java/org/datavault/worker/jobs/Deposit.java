@@ -40,14 +40,20 @@ public class Deposit extends Job {
                 // Copy the target file to the bag directory
                 System.out.println("\tCopying target to bag directory ...");
                 String fileName = inputFile.getName();
-                Path outputPath = bagPath.resolve(fileName);
+                File outputFile = bagPath.resolve(fileName).toFile();
 
+                long bytes = 0;
+                
                 if (inputFile.isFile()) {
-                    FileUtils.copyFile(inputFile, outputPath.toFile());
+                    FileUtils.copyFile(inputFile, outputFile);
+                    bytes = FileUtils.sizeOf(outputFile);
                 } else if (inputFile.isDirectory()) {
-                    FileUtils.copyDirectory(inputFile, outputPath.toFile());
+                    FileUtils.copyDirectory(inputFile, outputFile);
+                    bytes = FileUtils.sizeOfDirectory(outputFile);
                 }
-
+                
+                System.out.println("\tSize: " + bytes + " bytes (" +  FileUtils.byteCountToDisplaySize(bytes) + ")");
+                
                 // Bag the directory in-place
                 System.out.println("\tCreating bag ...");
                 Packager.createBag(bagDir);

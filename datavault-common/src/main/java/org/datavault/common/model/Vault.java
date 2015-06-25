@@ -48,7 +48,7 @@ public class Vault {
     // Description of the vault
     private String description;
 
-    // Size of the vault
+    // Size of the vault (in bytes)
     private long vaultSize;
     
     // A vault can contain a number of deposits
