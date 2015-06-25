@@ -19,6 +19,8 @@ nbdist/
 nbactions.xml
 nb-configuration.xml
 META-INF/
+datavault-broker/src/main/webapp/WEB-INF/glassfish-web.xml
+datavault-webapp/src/main/webapp/WEB-INF/glassfish-web.xml
 ## Ignore all *.properties file in root folder, EXCEPT build.properties (the default)
 /*.properties
 !/build.properties
