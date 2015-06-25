@@ -40,7 +40,7 @@
                 <#list deposits as deposit>
                     <tbody>
                     <tr class="tr">
-                        <td><a href="${springMacroRequestContext.getRequestUri()}deposit/${deposit.getID()}">${deposit.getID()}</a></td>
+                        <td><a href="${springMacroRequestContext.getRequestUri()}deposits/${deposit.getID()}">${deposit.getID()}</a></td>
                         <td>${deposit.note}</td>
                         <td>${deposit.filePath}</td>
                         <td>${deposit.getCreationTime()?datetime}</td>

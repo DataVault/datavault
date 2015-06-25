@@ -3,6 +3,7 @@ package org.datavault.webapp.services;
 import org.datavault.common.model.Deposit;
 import org.datavault.common.model.Vault;
 import org.datavault.common.model.FileInfo;
+import org.datavault.common.model.FileFixity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
 
@@ -78,5 +79,26 @@ public class RestService {
         Deposit[] deposits = responseEntity.getBody();
 
         return deposits;
+    }
+    
+    public Deposit getDeposit(String vaultId, String depositID) {
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<Deposit> responseEntity = restTemplate.getForEntity(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID, Deposit.class);
+        Deposit deposit = responseEntity.getBody();
+
+        return deposit;
+    }
+    
+    public FileFixity[] getDepositManifest(String vaultId, String depositID) {
+        
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<FileFixity[]> responseEntity = restTemplate.getForEntity(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/manifest", FileFixity[].class);
+        FileFixity[] manifest = responseEntity.getBody();
+
+        return manifest;
+        
     }
 }
