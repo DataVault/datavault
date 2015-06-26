@@ -9,12 +9,14 @@
                 <tr class="tr">
                     <th>ID</th>
                     <th>Note</th>
+                    <th>Size (bytes)</th>
                     <th>Timestamp</th>
                 </tr>
                 <tbody>
                     <tr class="tr">
                         <td>${deposit.getID()}</td>
                         <td>${deposit.note}</td>
+                        <td>${deposit.size}</td>
                         <td>${deposit.creationTime?datetime}</td>
                     </tr>
                 </tbody>

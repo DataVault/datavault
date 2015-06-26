@@ -49,6 +49,9 @@ public class Deposit {
     // Record the file path that the user selected for this deposit.
     private String filePath;
     
+    // Size of the deposit (in bytes)
+    private long depositSize;
+    
     public Deposit() {}
     public Deposit(String note) {
         this.note = note;
@@ -94,4 +97,10 @@ public class Deposit {
     public void setFilePath(String filePath) {
         this.filePath = filePath;
     }
+    
+    public void setSize(long size) {
+        this.depositSize = size;
+    }
+
+    public long getSize() { return depositSize; }
 }

@@ -27,6 +27,15 @@ public class VaultDAOImpl implements VaultDAO {
         session.close();
     }
  
+    @Override
+    public void update(Vault vault) {
+        Session session = this.sessionFactory.openSession();
+        Transaction tx = session.beginTransaction();
+        session.update(vault);
+        tx.commit();
+        session.close();
+    }
+    
     @SuppressWarnings("unchecked")
     @Override
     public List<Vault> list() {        

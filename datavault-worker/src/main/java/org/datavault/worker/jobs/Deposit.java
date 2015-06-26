@@ -9,18 +9,30 @@ import org.datavault.common.job.Context;
 import org.datavault.common.job.Job;
 import org.datavault.worker.operations.Tar;
 import org.datavault.worker.operations.Packager;
+import org.datavault.worker.queue.EventSender;
+
 import org.apache.commons.io.FileUtils;
+import org.datavault.common.event.Event;
+import org.datavault.common.event.deposit.ComputedSize;
+
 
 public class Deposit extends Job {
 
+    EventSender events;
+    
     @Override
     public void performAction(Context context) {
         
-        System.out.println("\tDeposit job - performAction()");
+        EventSender eventStream = (EventSender)context.getEventStream();
         
+        System.out.println("\tDeposit job - performAction()");
+                
         Map<String, String> properties = getProperties();
+        String depositId = properties.get("depositId");
         String bagID = properties.get("bagId");
         String filePath = properties.get("filePath");
+        
+        eventStream.send(new Event(depositId, "Deposit started"));
         
         System.out.println("\tbagID: " + bagID);
         System.out.println("\tfilePath: " + filePath);
@@ -40,14 +52,22 @@ public class Deposit extends Job {
                 // Copy the target file to the bag directory
                 System.out.println("\tCopying target to bag directory ...");
                 String fileName = inputFile.getName();
-                Path outputPath = bagPath.resolve(fileName);
+                File outputFile = bagPath.resolve(fileName).toFile();
 
+                long bytes = 0;
+                
                 if (inputFile.isFile()) {
-                    FileUtils.copyFile(inputFile, outputPath.toFile());
+                    FileUtils.copyFile(inputFile, outputFile);
+                    bytes = FileUtils.sizeOf(outputFile);
                 } else if (inputFile.isDirectory()) {
-                    FileUtils.copyDirectory(inputFile, outputPath.toFile());
+                    FileUtils.copyDirectory(inputFile, outputFile);
+                    bytes = FileUtils.sizeOfDirectory(outputFile);
                 }
-
+                
+                eventStream.send(new ComputedSize(depositId, bytes));
+                
+                System.out.println("\tSize: " + bytes + " bytes (" +  FileUtils.byteCountToDisplaySize(bytes) + ")");
+                
                 // Bag the directory in-place
                 System.out.println("\tCreating bag ...");
                 Packager.createBag(bagDir);

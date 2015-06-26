@@ -15,4 +15,11 @@
         <property name="metaDir" value="${metaDir}"/>
     </bean>
 
+    <bean id="eventSender" class="org.datavault.worker.queue.EventSender">
+        <property name="queueServer" value="${queueServer}"/>
+        <property name="eventQueueName" value="${eventQueueName}"/>
+        <property name="queueUser" value="${queueUser}"/>
+        <property name="queuePassword" value="${queuePassword}"/>
+    </bean>
+
 </beans>
