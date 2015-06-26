@@ -16,7 +16,7 @@
                     <tr class="tr">
                         <td>${deposit.getID()}</td>
                         <td>${deposit.note}</td>
-                        <td>${vault.size}</td>
+                        <td>${deposit.size}</td>
                         <td>${deposit.creationTime?datetime}</td>
                     </tr>
                 </tbody>

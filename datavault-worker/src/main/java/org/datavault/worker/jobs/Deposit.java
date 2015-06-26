@@ -13,7 +13,7 @@ import org.datavault.worker.queue.EventSender;
 
 import org.apache.commons.io.FileUtils;
 import org.datavault.common.event.Event;
-import org.datavault.common.event.deposit.NotifySize;
+import org.datavault.common.event.deposit.ComputedSize;
 
 
 public class Deposit extends Job {
@@ -64,7 +64,7 @@ public class Deposit extends Job {
                     bytes = FileUtils.sizeOfDirectory(outputFile);
                 }
                 
-                eventStream.send(new NotifySize(depositId, bytes));
+                eventStream.send(new ComputedSize(depositId, bytes));
                 
                 System.out.println("\tSize: " + bytes + " bytes (" +  FileUtils.byteCountToDisplaySize(bytes) + ")");
                 

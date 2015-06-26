@@ -110,7 +110,10 @@
         <rabbit:listener ref="listener" queues="eventQueue" admin="amqpAdmin" />
     </rabbit:listener-container>
 
-    <bean id="listener" class="org.datavault.queue.EventListener" />
+    <bean id="listener" class="org.datavault.queue.EventListener">
+        <property name="vaultsService" ref="vaultsService" />
+        <property name="depositsService" ref="depositsService" />
+    </bean>
 
     <bean id="sender" class="org.datavault.queue.Sender">
         <property name="queueServer" value="${queueServer}"/>

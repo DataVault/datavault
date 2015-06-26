@@ -2,14 +2,14 @@ package org.datavault.common.event.deposit;
 
 import org.datavault.common.event.Event;
 
-public class NotifySize extends Event {
+public class ComputedSize extends Event {
     
     public long bytes;
 
-    NotifySize() {};
-    public NotifySize(String depositId, long bytes) {
+    ComputedSize() {};
+    public ComputedSize(String depositId, long bytes) {
         super(depositId, null);
-        this.eventClass = NotifySize.class.getCanonicalName();
+        this.eventClass = ComputedSize.class.getCanonicalName();
         this.bytes = bytes;
     }
     

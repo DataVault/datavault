@@ -1,5 +1,8 @@
 package org.datavault.common.event;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Event {
     
     // A generic event
@@ -10,7 +13,7 @@ public class Event {
     
     // By default events aren't persisted
     public Boolean persistent = false;
-
+    
     public Event() {};
     public Event(String depositId, String message) {
         this.eventClass = Event.class.getCanonicalName();
