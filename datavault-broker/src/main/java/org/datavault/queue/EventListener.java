@@ -1,8 +1,12 @@
 package org.datavault.queue;
 
-public class EventListener {
-    
-    public void listen(String message) {
-        System.out.println(message);
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageListener;
+
+public class EventListener implements MessageListener {
+
+    @Override
+    public void onMessage(Message msg) {
+        System.out.println("[x] Received '" + new String(msg.getBody()) + "'");
     }
 }

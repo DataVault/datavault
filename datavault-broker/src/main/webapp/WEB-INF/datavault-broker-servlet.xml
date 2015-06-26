@@ -13,7 +13,7 @@
         http://www.springframework.org/schema/tx
         http://www.springframework.org/schema/tx/spring-tx.xsd
         http://www.springframework.org/schema/rabbit
-        http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd">
+        http://www.springframework.org/schema/rabbit/spring-rabbit-1.4.xsd">
 
     <context:component-scan base-package="org.datavault.broker.controllers"/>
 
@@ -92,16 +92,14 @@
         <property name="password" value="${queuePassword}" />
     </bean>
     
-    <!--
     <rabbit:template id="amqpTemplate" connection-factory="connectionFactory" />
-    -->
     
-    <rabbit:admin connection-factory="connectionFactory" />
+    <rabbit:admin id="amqpAdmin" connection-factory="connectionFactory" />
     
-    <rabbit:queue id="eventQueue" name="${eventQueueName}" />
+    <rabbit:queue id="eventQueue" name="${eventQueueName}" durable="false" />
     
     <!--
-    <rabbit:direct-exchange id="exchange" name="">
+    <rabbit:direct-exchange id="exchange">
         <rabbit:bindings>
             <rabbit:binding queue="eventQueue" key="${eventQueueName}"></rabbit:binding>
         </rabbit:bindings>
@@ -109,7 +107,7 @@
     -->
     
     <rabbit:listener-container connection-factory="connectionFactory" >
-        <rabbit:listener ref="listener" method="listen" queue-names="eventQueue" />
+        <rabbit:listener ref="listener" queues="eventQueue" admin="amqpAdmin" />
     </rabbit:listener-container>
 
     <bean id="listener" class="org.datavault.queue.EventListener" />
