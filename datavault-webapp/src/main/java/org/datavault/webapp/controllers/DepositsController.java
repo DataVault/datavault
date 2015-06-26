@@ -2,6 +2,7 @@ package org.datavault.webapp.controllers;
 
 
 import org.datavault.common.model.Deposit;
+import org.datavault.common.model.FileFixity;
 import org.datavault.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -37,12 +38,9 @@ public class DepositsController {
     // Process the completed 'create new deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/create", method = RequestMethod.POST)
     public String addDeposit(@ModelAttribute Deposit deposit, ModelMap model, @PathVariable("vaultid") String vaultID) {
-        restService.addDeposit(vaultID, deposit);
-// todo : do something with the returned deposit
-
-        model.addAttribute("vault", restService.getVault(vaultID));
-        return "vaults/vault";
-
+        Deposit newDeposit = restService.addDeposit(vaultID, deposit);
+        String depositUrl = "/vaults/" + vaultID + "/deposits/" + newDeposit.getID() + "/";
+        return "redirect:" + depositUrl;
     }
 
     // View properties of a single deposit

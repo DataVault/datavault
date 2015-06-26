@@ -48,8 +48,8 @@ public class VaultsController {
     // Process the completed 'create new vault' page
     @RequestMapping(value = "/vaults/create", method = RequestMethod.POST)
     public String addVault(@ModelAttribute Vault vault, ModelMap model) {
-        model.addAttribute("vault", restService.addVault(vault));
-        model.addAttribute("deposits", new Deposit[0]);
-        return "vaults/vault";
+        Vault newVault = restService.addVault(vault);
+        String vaultUrl = "/vaults/" + newVault.getID() + "/";
+        return "redirect:" + vaultUrl;        
     }
 }

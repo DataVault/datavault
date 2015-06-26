@@ -26,30 +26,36 @@ public class MetadataService {
     
     public ArrayList<FileFixity> getManifest(String bagId) throws IOException {
         
-        Path metaBagPath = Paths.get(metaDir, bagId);
-        BagFactory factory = new BagFactory();
-        Bag bag = factory.createBag(metaBagPath.toFile());
-        bag.loadFromFiles();
-        
-        BagPartFactory partFactory = factory.getBagPartFactory();
-        
-        List<Manifest> manifests = bag.getPayloadManifests();
         ArrayList<FileFixity> files = new ArrayList<>();
         
-        for (Manifest manifest : manifests) {
-            
-            Path manifestPath = metaBagPath.resolve(manifest.getFilepath());
-            File manifestFile = manifestPath.toFile();
-            FileInputStream stream = new FileInputStream(manifestFile);
-            
-            // TODO: Can we specify this as StandardCharsets.UTF_8 ?
-            ManifestReader reader = partFactory.createManifestReader(stream, "utf-8");
-            
-            while (reader.hasNext()) {
-                ManifestReader.FilenameFixity file = reader.next();
-                files.add(new FileFixity(file.getFilename(), file.getFixityValue()));
+        try {
+            Path metaBagPath = Paths.get(metaDir, bagId);
+            BagFactory factory = new BagFactory();
+            Bag bag = factory.createBag(metaBagPath.toFile());
+            bag.loadFromFiles();
+
+            BagPartFactory partFactory = factory.getBagPartFactory();
+
+            List<Manifest> manifests = bag.getPayloadManifests();
+
+            for (Manifest manifest : manifests) {
+
+                Path manifestPath = metaBagPath.resolve(manifest.getFilepath());
+                File manifestFile = manifestPath.toFile();
+                FileInputStream stream = new FileInputStream(manifestFile);
+
+                // TODO: Can we specify this as StandardCharsets.UTF_8 ?
+                ManifestReader reader = partFactory.createManifestReader(stream, "utf-8");
+
+                while (reader.hasNext()) {
+                    ManifestReader.FilenameFixity file = reader.next();
+                    files.add(new FileFixity(file.getFilename(), file.getFixityValue()));
+                }
+                reader.close();
             }
-            reader.close();
+        } catch (Exception e) {
+            // TODO: how should we handle "missing data" here?
+            e.printStackTrace();
         }
         
         return files;
