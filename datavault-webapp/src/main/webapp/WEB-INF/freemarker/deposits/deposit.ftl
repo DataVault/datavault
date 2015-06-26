@@ -14,7 +14,7 @@
                 </tr>
                 <tbody>
                     <tr class="tr">
-                        <td>${deposit.getID()}</td>
+                        <td><a href="${springMacroRequestContext.getRequestUri()}">${deposit.getID()}</a></td>
                         <td>${deposit.note}</td>
                         <td>${deposit.size}</td>
                         <td>${deposit.creationTime?datetime}</td>

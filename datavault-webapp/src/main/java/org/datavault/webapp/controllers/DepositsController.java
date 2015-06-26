@@ -2,7 +2,6 @@ package org.datavault.webapp.controllers;
 
 
 import org.datavault.common.model.Deposit;
-import org.datavault.common.model.FileFixity;
 import org.datavault.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;

@@ -16,7 +16,7 @@
                 </tr>
                 <tbody>
                     <tr class="tr">
-                        <td><a href="${springMacroRequestContext.getRequestUri()}vaults/${vault.getID()}">${vault.getID()}</a></td>
+                        <td><a href="${springMacroRequestContext.getRequestUri()}">${vault.getID()}</a></td>
                         <td>${vault.name}</td>
                         <td>${vault.description}</td>
                         <td>${vault.size}</td>
