@@ -92,9 +92,6 @@ h6, .h6 {
  * Block elements
  */
 
-.storage {
-    border-right: 3px solid #FFFFFF;
-}
 
 .box-module {
     padding: 15px;
@@ -128,3 +125,9 @@ h6, .h6 {
     line-height: 0px;
     font-size: 0px;
 }
+
+.tree-box {
+    margin-bottom: 6px;
+
+}
+
