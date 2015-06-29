@@ -2,6 +2,7 @@ package org.datavault.webapp.controllers;
 
 
 import org.datavault.common.model.Deposit;
+import org.datavault.common.model.Withdrawal;
 import org.datavault.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -50,6 +51,25 @@ public class DepositsController {
         model.addAttribute("manifest", restService.getDepositManifest(vaultID, depositID));
         return "deposits/deposit";
     }
+    
+    // Return an 'withdraw deposit' page
+    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/withdraw", method = RequestMethod.GET)
+    public String withdrawDeposit(@ModelAttribute Withdrawal withdrawal, ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
+        model.addAttribute("withdrawal", new Withdrawal());
+        model.addAttribute("deposit", restService.getDeposit(vaultID, depositID));
+        return "deposits/withdraw";
+    }
+    
+    // Process the completed 'withdraw deposit' page
+    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/withdraw", method = RequestMethod.POST)
+    public String processWithdrawal(@ModelAttribute Withdrawal withdrawal, ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
+        
+        Boolean result = restService.withdrawDeposit(vaultID, depositID, withdrawal);
+        
+        String depositUrl = "/vaults/" + vaultID + "/deposits/" + depositID + "/";
+        return "redirect:" + depositUrl;
+    }
+
     
     /*
     @RequestMapping(value = "/deposits", method = RequestMethod.GET)
