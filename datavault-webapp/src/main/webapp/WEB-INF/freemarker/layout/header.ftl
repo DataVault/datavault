@@ -1,7 +1,7 @@
 <div class="masthead">
     <div class="container">
         <nav class="nav">
-            <a class="nav-item active" href="#">Home</a>
+            <a class="nav-item active" href="${springMacroRequestContext.getContextPath()}">Home</a>
             <a class="nav-item" href="#">Help</a>
             <a class="nav-item" href="#">Feedback</a>
         </nav>
