@@ -4,6 +4,7 @@ import org.datavault.common.model.Deposit;
 import org.datavault.common.model.Vault;
 import org.datavault.common.model.FileInfo;
 import org.datavault.common.model.FileFixity;
+import org.datavault.common.model.Withdrawal;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
 
@@ -99,6 +100,14 @@ public class RestService {
         FileFixity[] manifest = responseEntity.getBody();
 
         return manifest;
+    }
+    
+    public Boolean withdrawDeposit(String vaultId, String depositID, Withdrawal withdrawal) {        
         
+        RestTemplate restTemplate = new RestTemplate();
+        
+        Boolean result = restTemplate.postForObject(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/withdraw", withdrawal, Boolean.class);        
+
+        return result;
     }
 }

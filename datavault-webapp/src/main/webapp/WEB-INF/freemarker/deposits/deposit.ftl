@@ -45,6 +45,7 @@
 
     </form>
 
+    <a href="${springMacroRequestContext.getRequestUri()}/withdraw">Withdraw data</a>
 </div>
 </div>
 </div>
