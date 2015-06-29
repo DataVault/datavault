@@ -2,8 +2,7 @@
 <@layout.vaultLayout>
     <#import "/spring.ftl" as spring />
 <div class="container">
-    <div class="row">
-        <div class="col-xs-12 storage">
+
             <h1>Create New Deposit</h1>
 
             <form class="form" role="form" action="" method="post">
@@ -24,12 +23,9 @@
                             class="form-control file-path"
                             name="${spring.status.expression}"
                             value="${spring.status.value!""}"/>
-                    </div>
                 </div>
 
-                <div class="form-group">
-                    <div id="tree" class="fancytree-radio"></div>
-                </div>
+                <div id="tree" class="fancytree-radio tree-box"></div>
 
                 <script>
                     // Create the tree inside the <div id="tree"> element.
@@ -59,12 +55,12 @@
                     });
                 </script>
 
-                <div class="modal-footer">
-                    <input type="submit" class="btn btn-primary" value="Submit"/>
+                <div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
 
+
             </form>
-        </div>
-    </div>
+
 </div>
 </@layout.vaultLayout>
