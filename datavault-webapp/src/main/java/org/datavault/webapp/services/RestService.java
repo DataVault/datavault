@@ -5,6 +5,7 @@ import org.datavault.common.model.Vault;
 import org.datavault.common.model.FileInfo;
 import org.datavault.common.model.FileFixity;
 import org.datavault.common.model.Withdrawal;
+import org.datavault.common.event.Event;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
 
@@ -109,5 +110,15 @@ public class RestService {
         Boolean result = restTemplate.postForObject(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/withdraw", withdrawal, Boolean.class);        
 
         return result;
+    }
+    
+    public Event[] getDepositEvents(String vaultId, String depositID) {
+        
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<Event[]> responseEntity = restTemplate.getForEntity(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/events", Event[].class);
+        Event[] events = responseEntity.getBody();
+
+        return events;
     }
 }

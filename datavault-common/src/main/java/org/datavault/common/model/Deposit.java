@@ -1,18 +1,23 @@
 package org.datavault.common.model;
 
+import org.datavault.common.event.Event;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Date;
-
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.OrderBy;
 import org.hibernate.annotations.GenericGenerator;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -35,6 +40,12 @@ public class Deposit {
     @JsonIgnore
     @ManyToOne
     private Vault vault;
+    
+    // A Deposit can have a number of events
+    @JsonIgnore
+    @OneToMany(targetEntity=Event.class, mappedBy="deposit", fetch=FetchType.LAZY)
+    @OrderBy("timestamp")
+    private List<Event> events;
     
     public enum Status {
         OPEN, CLOSED
@@ -103,4 +114,9 @@ public class Deposit {
     }
 
     public long getSize() { return depositSize; }
+    
+    public List<Event> getEvents() {
+        return events;
+    }
+
 }

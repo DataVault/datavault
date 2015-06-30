@@ -9,11 +9,13 @@ import org.datavault.common.model.Vault;
 import org.datavault.common.model.Deposit;
 import org.datavault.common.model.Withdrawal;
 import org.datavault.common.model.FileFixity;
+import org.datavault.common.event.Event;
 import org.datavault.common.job.Job;
 import org.datavault.broker.services.VaultsService;
 import org.datavault.broker.services.DepositsService;
 import org.datavault.broker.services.MetadataService;
 import org.datavault.broker.services.MacFilesService;
+import org.datavault.broker.services.EventService;
 import org.datavault.queue.Sender;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,6 +39,7 @@ public class VaultsController {
     private DepositsService depositsService;
     private MetadataService metadataService;
     private MacFilesService macFilesService;
+    private EventService eventService;
     private Sender sender;
 
     public void setVaultsService(VaultsService vaultsService) {
@@ -53,6 +56,10 @@ public class VaultsController {
     
     public void setMacFilesService(MacFilesService macFilesService) {
         this.macFilesService = macFilesService;
+    }
+    
+    public void setEventService(EventService eventService) {
+        this.eventService = eventService;
     }
 
     public void setSender(Sender sender) {
@@ -131,7 +138,15 @@ public class VaultsController {
         List<FileFixity> manifest = metadataService.getManifest(deposit.getBagId());
         return manifest;
     }
-    
+
+    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/events", method = RequestMethod.GET)
+    public List<Event> getDepositEvents(@PathVariable("vaultid") String vaultID,
+                                        @PathVariable("depositid") String depositID) {
+        Deposit deposit = depositsService.getDeposit(depositID);
+        List<Event> events = deposit.getEvents(); // eventService.getEvents();
+        return events;
+    }
+
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/status", method = RequestMethod.GET)
     public Deposit.Status getDepositState(@PathVariable("vaultid") String vaultID,
                                           @PathVariable("depositid") String depositID) {
@@ -170,6 +185,7 @@ public class VaultsController {
         // Ask the worker to process the withdrawal
         try {
             HashMap<String, String> withdrawProperties = new HashMap<>();
+            withdrawProperties.put("depositId", deposit.getID());
             withdrawProperties.put("bagId", deposit.getBagId());
             withdrawProperties.put("withdrawalPath", path.toString()); // The absolute path
             

@@ -17,6 +17,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.util.List;
 import java.util.Date;
+import javax.persistence.OrderBy;
 
 /**
  * User: Tom Higgins
@@ -54,6 +55,7 @@ public class Vault {
     // A vault can contain a number of deposits
     @JsonIgnore
     @OneToMany(targetEntity=Deposit.class, mappedBy="vault", fetch=FetchType.EAGER)
+    @OrderBy("creationTime")
     private List<Deposit> deposits;
 
     public Vault() {}
