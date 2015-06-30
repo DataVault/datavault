@@ -3,6 +3,7 @@ package org.datavault.queue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavault.broker.services.DepositsService;
 import org.datavault.broker.services.VaultsService;
+import org.datavault.broker.services.EventService;
 import org.datavault.common.event.Event;
 import org.datavault.common.event.deposit.*;
 import org.datavault.common.model.Deposit;
@@ -14,6 +15,7 @@ public class EventListener implements MessageListener {
 
     private VaultsService vaultsService;
     private DepositsService depositsService;
+    private EventService eventService;
     
     public void setVaultsService(VaultsService vaultsService) {
         this.vaultsService = vaultsService;
@@ -21,6 +23,10 @@ public class EventListener implements MessageListener {
     
     public void setDepositsService(DepositsService depositsService) {
         this.depositsService = depositsService;
+    }
+    
+    public void setEventService(EventService eventService) {
+        this.eventService = eventService;
     }
     
     @Override
@@ -37,9 +43,13 @@ public class EventListener implements MessageListener {
             Class<?> clazz = Class.forName(commonEvent.getEventClass());
             Event concreteEvent = (Event)(mapper.readValue(messageBody, clazz));
             
+            // Get the related deposit
+            Deposit deposit = depositsService.getDeposit(concreteEvent.getDepositId());
+            concreteEvent.setDeposit(deposit);
+            
             if (concreteEvent.getPersistent()) {
                 // Persist the event properties in the database ...
-                System.out.println("Persisting event in DB ...");
+                eventService.addEvent(concreteEvent);
             }
             
             // Maybe perform an action based on the event type ...
@@ -48,7 +58,6 @@ public class EventListener implements MessageListener {
                 
                 // Update the deposit with the computed size
                 ComputedSize computedSizeEvent = (ComputedSize)concreteEvent;
-                Deposit deposit = depositsService.getDeposit(computedSizeEvent.getDepositId());
                 deposit.setSize(computedSizeEvent.getBytes());
                 depositsService.updateDeposit(deposit);
                 

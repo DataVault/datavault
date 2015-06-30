@@ -43,6 +43,28 @@
             </table>
         </div>
 
+        <h1>Events</h1>
+
+        <div class="table-responsive">
+            <table class="table">
+                <tr class="tr">
+                    <th>Event</th>
+                    <th>Message</th>
+                    <th>Timestamp</th>
+                </tr>
+
+                <#list events as event>
+                    <tbody>
+                    <tr class="tr">
+                        <td>${event.eventClass}</td>
+                        <td>${event.message}</td>
+                        <td>${event.timestamp?datetime}</td>
+                    </tr>
+                    </tbody>
+                </#list>
+            </table>
+        </div>
+
     </form>
 
     <a href="${springMacroRequestContext.getRequestUri()}/withdraw">Withdraw data</a>

@@ -62,6 +62,7 @@
         <property name="depositsService" ref="depositsService" />
         <property name="metadataService" ref="metadataService" />
         <property name="macFilesService" ref="macFilesService" />
+        <property name="eventService" ref="eventService" />
         <property name="sender" ref="sender" />
     </bean>
 
@@ -82,6 +83,11 @@
     <bean id="metadataService" class="org.datavault.broker.services.MetadataService">
         <property name="metaDir" value="${metaDir}"/>
     </bean>
+
+    <bean id="eventService" class="org.datavault.broker.services.EventService">
+        <property name="eventDAO" ref="eventDAO" />
+    </bean>
+    
 
     <!-- RabbitMQ -->
     
@@ -113,6 +119,7 @@
     <bean id="listener" class="org.datavault.queue.EventListener">
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
+        <property name="eventService" ref="eventService" />
     </bean>
 
     <bean id="sender" class="org.datavault.queue.Sender">
@@ -138,6 +145,7 @@
         <property name="packagesToScan">
             <list>
                 <value>org.datavault.common.model</value>
+                <value>org.datavault.common.event</value>
             </list>
         </property>
         <property name="hibernateProperties">
@@ -146,6 +154,7 @@
                 <prop key="hibernate.show_sql">false</prop>
                 <prop key="hibernate.format_sql">false</prop>
                 <prop key="hibernate.hbm2ddl.auto">create</prop>
+                <prop key="hibernate.enable_lazy_load_no_trans">true</prop>
             </props>
         </property>
     </bean>
@@ -165,5 +174,10 @@
     <bean id="depositDAO" class="org.datavault.common.model.dao.DepositDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
+    
+    <bean id="eventDAO" class="org.datavault.common.model.dao.EventDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
     
 </beans>

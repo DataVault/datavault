@@ -7,6 +7,9 @@ import java.nio.file.Paths;
 
 import org.datavault.common.job.Context;
 import org.datavault.common.job.Job;
+import org.datavault.worker.queue.EventSender;
+import org.datavault.common.event.Event;
+
 import org.apache.commons.io.FileUtils;
 
 public class Withdraw extends Job {
@@ -14,11 +17,16 @@ public class Withdraw extends Job {
     @Override
     public void performAction(Context context) {
         
+        EventSender eventStream = (EventSender)context.getEventStream();
+        
         System.out.println("\tWithdraw job - performAction()");
         
         Map<String, String> properties = getProperties();
+        String depositId = properties.get("depositId");
         String bagID = properties.get("bagId");
         String withdrawalPath = properties.get("withdrawalPath");
+        
+        eventStream.send(new Event(depositId, "Withdrawal started"));
         
         System.out.println("\tbagID: " + bagID);
         System.out.println("\twithdrawalPath: " + withdrawalPath);
@@ -42,6 +50,9 @@ public class Withdraw extends Job {
             System.out.println("\tCopying tar file from archive ...");
             File withdrawFile = withdrawPath.resolve(tarFileName).toFile();
             FileUtils.copyFile(archiveFile, withdrawFile);
+            
+            System.out.println("\tWithdrawal complete: " + withdrawFile);
+            eventStream.send(new Event(depositId, "Withdrawal complete"));
             
         } catch (Exception e) {
             e.printStackTrace();
