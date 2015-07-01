@@ -11,6 +11,7 @@ import org.datavault.worker.operations.Tar;
 import org.datavault.worker.operations.Packager;
 import org.datavault.worker.queue.EventSender;
 import org.datavault.common.event.Event;
+import org.datavault.common.event.Error;
 import org.datavault.common.event.deposit.ComputedSize;
 
 import org.apache.commons.io.FileUtils;
@@ -102,9 +103,11 @@ public class Deposit extends Job {
                 
             } else {
                 System.err.println("\tFile does not exist.");
+                eventStream.send(new Error(depositId, "Deposit failed: file not found"));
             }
         } catch (Exception e) {
             e.printStackTrace();
+            eventStream.send(new Error(depositId, "Deposit failed: " + e.getMessage()));
         }
     }
 }

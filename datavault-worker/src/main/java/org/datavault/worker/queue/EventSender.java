@@ -14,6 +14,8 @@ public class EventSender implements EventStream {
     private String eventQueueName;
     private String queueUser;
     private String queuePassword;
+    
+    private int sequence = 0;
 
     public void setQueueServer(String queueServer) {
         this.queueServer = queueServer;
@@ -33,6 +35,10 @@ public class EventSender implements EventStream {
     
     @Override
     public void send(Event event) {
+        
+        // Add sequence for event ordering (where timestamp is equal)
+        event.setSequence(sequence);
+        sequence += 1;
         
         try {
             // TODO: should create queue once and keep open?
