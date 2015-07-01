@@ -26,42 +26,42 @@
         <h1>Contents</h1>
 
         <div class="table-responsive">
-            <table class="table">
+            <table class="table table-bordered table-striped">
                 <tr class="tr">
                     <th>File</th>
                     <th>Fixity</th>
                 </tr>
 
+                <tbody>
                 <#list manifest as filefixity>
-                    <tbody>
                     <tr class="tr">
                         <td>${filefixity.file}</td>
                         <td>${filefixity.fixity}</td>
                     </tr>
-                    </tbody>
                 </#list>
+                </tbody>
             </table>
         </div>
 
         <h1>Events</h1>
 
         <div class="table-responsive">
-            <table class="table">
+            <table class="table table-bordered table-striped">
                 <tr class="tr">
                     <th>Event</th>
                     <th>Message</th>
                     <th>Timestamp</th>
                 </tr>
 
+                <tbody>
                 <#list events as event>
-                    <tbody>
                     <tr class="tr">
                         <td>${event.eventClass}</td>
                         <td>${event.message}</td>
                         <td>${event.timestamp?datetime}</td>
                     </tr>
-                    </tbody>
                 </#list>
+                </tbody>
             </table>
         </div>
 
