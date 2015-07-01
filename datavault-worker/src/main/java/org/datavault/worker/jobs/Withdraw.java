@@ -9,6 +9,7 @@ import org.datavault.common.job.Context;
 import org.datavault.common.job.Job;
 import org.datavault.worker.queue.EventSender;
 import org.datavault.common.event.Event;
+import org.datavault.common.event.Error;
 
 import org.apache.commons.io.FileUtils;
 
@@ -56,6 +57,7 @@ public class Withdraw extends Job {
             
         } catch (Exception e) {
             e.printStackTrace();
+            eventStream.send(new Error(depositId, "Withdrawal failed: " + e.getMessage()));
         }
     }
 }

@@ -44,7 +44,7 @@ public class Deposit {
     // A Deposit can have a number of events
     @JsonIgnore
     @OneToMany(targetEntity=Event.class, mappedBy="deposit", fetch=FetchType.LAZY)
-    @OrderBy("timestamp")
+    @OrderBy("timestamp, sequence")
     private List<Event> events;
     
     public enum Status {

@@ -43,6 +43,7 @@ public class Event {
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @Temporal(TemporalType.TIMESTAMP)
     private Date timestamp;
+    public int sequence;
 
     // By default events are persisted
     @Transient
@@ -59,6 +60,7 @@ public class Event {
         this.depositId = depositId;
         this.message = message;
         this.timestamp = new Date();
+        this.sequence = 0;
     }
 
     public String getID() { return id; }
@@ -93,6 +95,14 @@ public class Event {
 
     public void setPersistent(Boolean persistent) {
         this.persistent = persistent;
+    }
+
+    public int getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(int sequence) {
+        this.sequence = sequence;
     }
 
     public Date getTimestamp() {
