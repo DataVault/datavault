@@ -16,20 +16,22 @@
                             value="${spring.status.value!""}"/>
                 </div>
 
-                <div id="tree" class="fancytree-radio tree-box"></div>
+                <div class="form-group">
+                    <div id="tree" class="fancytree-radio tree-box"></div>
+                </div>
 
                 <script>
                     // Create the tree inside the <div id="tree"> element.
                     $("#tree").fancytree({
                         source: {
-                                url: "/datavault-webapp/files",
+                                url: "/datavault-webapp/dir",
                                 cache: false
                         },
                         lazyLoad: function(event, data){
                             var node = data.node;
-                            // Load child nodes via ajax GET /files?mode=children&parent=1234
+                            // Load child nodes via ajax GET /dir?mode=children&parent=1234
                             data.result = {
-                                url: "/datavault-webapp/files",
+                                url: "/datavault-webapp/dir",
                                 data: {mode: "children", parent: node.key},
                                 cache: false
                             };

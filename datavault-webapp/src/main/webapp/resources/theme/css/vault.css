@@ -158,8 +158,3 @@ margin-bottom: 160px;
     padding-top: 20px;
 }
 */
-
-/* Prevent tree view from taking up too much space */
-ul.fancytree-container {
-  max-height: 50%;
-}
