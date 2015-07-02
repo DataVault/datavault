@@ -25,7 +25,9 @@
                             value="${spring.status.value!""}"/>
                 </div>
 
-                <div id="tree" class="fancytree-radio tree-box"></div>
+                <div class="form-group">
+                    <div id="tree" class="fancytree-radio tree-box"></div>
+                </div>
 
                 <script>
                     // Create the tree inside the <div id="tree"> element.

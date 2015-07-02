@@ -22,12 +22,8 @@ public class FilesController {
         this.restService = restService;
     }
 
-    @RequestMapping("/files")
-    public @ResponseBody ArrayList<FancytreeNode> getFilesListing(HttpServletRequest request) {
+    public ArrayList<FancytreeNode> getNodes(String parent, boolean directoryOnly) {
 
-        // Fancytree parameters
-        String mode = request.getParameter("mode");
-        String parent = request.getParameter("parent");
         String filePath = "";
         
         if (parent != null) {
@@ -39,6 +35,10 @@ public class FilesController {
         ArrayList<FancytreeNode> nodes = new ArrayList<>();
         
         for (FileInfo info : files) {
+            
+            if (directoryOnly && !info.getIsDirectory()) {
+                continue;
+            }
             
             FancytreeNode node = new FancytreeNode();
             node.setKey(info.getKey());
@@ -54,4 +54,25 @@ public class FilesController {
         
         return nodes;
     }
+    
+    @RequestMapping("/files")
+    public @ResponseBody ArrayList<FancytreeNode> getFilesListing(HttpServletRequest request) {
+
+        // Fancytree parameters
+        String mode = request.getParameter("mode");
+        String parent = request.getParameter("parent");
+        
+        return getNodes(parent, false);
+    }
+    
+    @RequestMapping("/dir")
+    public @ResponseBody ArrayList<FancytreeNode> getDirListing(HttpServletRequest request) {
+
+        // Fancytree parameters
+        String mode = request.getParameter("mode");
+        String parent = request.getParameter("parent");
+        
+        return getNodes(parent, true);
+    }
+
 }
