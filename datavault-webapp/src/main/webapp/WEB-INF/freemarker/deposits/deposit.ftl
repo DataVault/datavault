@@ -15,7 +15,7 @@
                 <tbody>
                     <tr class="tr">
                         <td><a href="${springMacroRequestContext.getRequestUri()}">${deposit.getID()}</a></td>
-                        <td>${deposit.note}</td>
+                        <td>${deposit.note?html}</td>
                         <td>${deposit.size}</td>
                         <td>${deposit.creationTime?datetime}</td>
                     </tr>
@@ -35,7 +35,7 @@
                 <tbody>
                 <#list manifest as filefixity>
                     <tr class="tr">
-                        <td>${filefixity.file}</td>
+                        <td>${filefixity.file?html}</td>
                         <td style="font-family:monospace;">${filefixity.fixity} <span class="label label-primary">${filefixity.algorithm}</span></td>
                     </tr>
                 </#list>
@@ -56,8 +56,8 @@
                 <tbody>
                 <#list events as event>
                     <tr class="tr">
-                        <td>${event.eventClass}</td>
-                        <td>${event.message}</td>
+                        <td>${event.eventClass?html}</td>
+                        <td>${event.message?html}</td>
                         <td>${event.timestamp?datetime}</td>
                     </tr>
                 </#list>
