@@ -16,7 +16,7 @@
                 </tr>
                 <tbody>
                     <tr class="tr">
-                        <td><a href="${springMacroRequestContext.getRequestUri()}">${vault.getID()}</a></td>
+                        <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}">${vault.getID()}</a></td>
                         <td>${vault.name?html}</td>
                         <td>${vault.description?html}</td>
                         <td>${vault.size}</td>
@@ -40,7 +40,7 @@
                 <#list deposits as deposit>
                     <tbody>
                     <tr class="tr">
-                        <td><a href="${springMacroRequestContext.getRequestUri()}deposits/${deposit.getID()}">${deposit.getID()}</a></td>
+                        <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}">${deposit.getID()}</a></td>
                         <td>${deposit.note?html}</td>
                         <td>${deposit.filePath?html}</td>
                         <td>${deposit.getCreationTime()?datetime}</td>
@@ -52,7 +52,7 @@
 
     </form>
 
-    <a href="${springMacroRequestContext.getRequestUri()}/deposits/create">Add a deposit</a>
+    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create">Add a deposit</a>
 </div>
 </div>
 </div>
