@@ -18,7 +18,7 @@
                 <#list vaults as vault>
                     <tbody>
                     <tr class="tr">
-                        <td><a href="${springMacroRequestContext.getRequestUri()}vaults/${vault.getID()}/">${vault.getID()}</a></td>
+                        <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/">${vault.getID()}</a></td>
                         <td>${vault.name?html}</td>
                         <td>${vault.description?html}</td>
                         <td>${vault.size}</td>
@@ -31,7 +31,7 @@
         </form>
 
 
-        <a href="${springMacroRequestContext.getRequestUri()}/vaults/create">Create a new Vault</a>
+        <a href="${springMacroRequestContext.getContextPath()}/vaults/create">Create a new Vault</a>
         </div>
     </div>
 </div>

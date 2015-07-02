@@ -16,7 +16,7 @@
                 <thead>
                 <tbody>
                     <tr class="tr">
-                        <td><a href="${springMacroRequestContext.getRequestUri()}">${deposit.getID()}</a></td>
+                        <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}">${deposit.getID()}</a></td>
                         <td>${deposit.note?html}</td>
                         <td>${deposit.size}</td>
                         <td>${deposit.creationTime?datetime}</td>
@@ -71,7 +71,7 @@
 
     </form>
 
-    <a href="${springMacroRequestContext.getRequestUri()}/withdraw">Withdraw data</a>
+    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/withdraw">Withdraw data</a>
 </div>
 </div>
 </div>
