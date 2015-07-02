@@ -6,12 +6,14 @@
     <form>
         <div class="table-responsive">
             <table class="table">
-                <tr class="tr">
-                    <th>ID</th>
-                    <th>Note</th>
-                    <th>Size (bytes)</th>
-                    <th>Timestamp</th>
-                </tr>
+                <thead>
+                    <tr class="tr">
+                        <th>ID</th>
+                        <th>Note</th>
+                        <th>Size (bytes)</th>
+                        <th>Timestamp</th>
+                    </tr>
+                <thead>
                 <tbody>
                     <tr class="tr">
                         <td><a href="${springMacroRequestContext.getRequestUri()}">${deposit.getID()}</a></td>
@@ -23,44 +25,46 @@
             </table>
         </div>
 
-        <h1>Contents</h1>
+        <h3>Contents</h3>
 
         <div class="table-responsive">
             <table class="table table-bordered table-striped">
-                <tr class="tr">
-                    <th>File</th>
-                    <th>Fixity</th>
-                </tr>
-
-                <tbody>
-                <#list manifest as filefixity>
+                <thead>
                     <tr class="tr">
-                        <td>${filefixity.file?html}</td>
-                        <td style="font-family:monospace;">${filefixity.fixity} <span class="label label-primary">${filefixity.algorithm}</span></td>
+                        <th>File</th>
+                        <th>Fixity</th>
                     </tr>
-                </#list>
+                </thead>
+                <tbody>
+                    <#list manifest as filefixity>
+                        <tr class="tr">
+                            <td>${filefixity.file?html}</td>
+                            <td style="font-family:monospace;">${filefixity.fixity} <span class="label label-primary">${filefixity.algorithm}</span></td>
+                        </tr>
+                    </#list>
                 </tbody>
             </table>
         </div>
 
-        <h1>Events</h1>
+        <h3>Events</h3>
 
         <div class="table-responsive">
             <table class="table table-bordered table-striped">
-                <tr class="tr">
-                    <th>Event</th>
-                    <th>Message</th>
-                    <th>Timestamp</th>
-                </tr>
-
-                <tbody>
-                <#list events as event>
+                <thead>
                     <tr class="tr">
-                        <td>${event.eventClass?html}</td>
-                        <td>${event.message?html}</td>
-                        <td>${event.timestamp?datetime}</td>
+                        <th>Event</th>
+                        <th>Message</th>
+                        <th>Timestamp</th>
                     </tr>
-                </#list>
+                </thead>
+                <tbody>
+                    <#list events as event>
+                        <tr class="tr">
+                            <td>${event.eventClass?html}</td>
+                            <td>${event.message?html}</td>
+                            <td>${event.timestamp?datetime}</td>
+                        </tr>
+                    </#list>
                 </tbody>
             </table>
         </div>
