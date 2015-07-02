@@ -40,6 +40,8 @@ public class MetadataService {
 
             for (Manifest manifest : manifests) {
 
+                String fixityAlgorithm = manifest.getAlgorithm().bagItAlgorithm;
+                
                 Path manifestPath = metaBagPath.resolve(manifest.getFilepath());
                 File manifestFile = manifestPath.toFile();
                 FileInputStream stream = new FileInputStream(manifestFile);
@@ -49,7 +51,16 @@ public class MetadataService {
 
                 while (reader.hasNext()) {
                     ManifestReader.FilenameFixity file = reader.next();
-                    files.add(new FileFixity(file.getFilename(), file.getFixityValue()));
+                    
+                    String filePath = file.getFilename();
+                    String bagDataPrefix = "data/";
+                    if (filePath.startsWith(bagDataPrefix)) {
+                        filePath = filePath.replaceFirst(bagDataPrefix, "");
+                    }
+                    
+                    files.add(new FileFixity(filePath,
+                                             file.getFixityValue(),
+                                             fixityAlgorithm));
                 }
                 reader.close();
             }
