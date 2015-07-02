@@ -36,7 +36,7 @@
                 <#list manifest as filefixity>
                     <tr class="tr">
                         <td>${filefixity.file}</td>
-                        <td>${filefixity.fixity}</td>
+                        <td style="font-family:monospace;">${filefixity.fixity} <span class="label label-primary">${filefixity.algorithm}</span></td>
                     </tr>
                 </#list>
                 </tbody>
