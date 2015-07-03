@@ -26,7 +26,7 @@
             </table>
         </div>
 
-        <h1>Deposits</h1>
+        <h3>Deposits</h3>
 
         <div class="table-responsive">
             <table class="table">
@@ -50,9 +50,10 @@
             </table>
         </div>
 
+        <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create">Add a deposit</a>
+
     </form>
 
-    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create">Add a deposit</a>
 </div>
 </div>
 </div>

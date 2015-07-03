@@ -69,9 +69,10 @@
             </table>
         </div>
 
+        <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/withdraw">Withdraw data</a>
+
     </form>
 
-    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/withdraw">Withdraw data</a>
 </div>
 </div>
 </div>

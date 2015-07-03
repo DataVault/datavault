@@ -28,10 +28,11 @@
                 </#list>
              </table>
             </div>
+
+            <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/create">Create a new Vault</a>
+
         </form>
 
-
-        <a href="${springMacroRequestContext.getContextPath()}/vaults/create">Create a new Vault</a>
         </div>
     </div>
 </div>
