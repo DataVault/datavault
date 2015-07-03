@@ -30,7 +30,7 @@
 
     </div>
 
-    <a href="${springMacroRequestContext.getContextPath()}/vaults/create">Create a new Vault</a>
+    <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/create">Create a new Vault</a>
 
 </div>
 </@layout.vaultLayout>

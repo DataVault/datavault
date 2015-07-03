@@ -13,6 +13,7 @@ import org.datavault.worker.queue.EventSender;
 import org.datavault.common.event.Event;
 import org.datavault.common.event.Error;
 import org.datavault.common.event.deposit.ComputedSize;
+import org.datavault.common.event.deposit.Complete;
 
 import org.apache.commons.io.FileUtils;
 
@@ -99,7 +100,7 @@ public class Deposit extends Job {
                 tarFile.delete();
                 
                 System.out.println("\tDeposit complete: " + archivePath);
-                eventStream.send(new Event(depositId, "Deposit complete"));
+                eventStream.send(new Complete(depositId));
                 
             } else {
                 System.err.println("\tFile does not exist.");

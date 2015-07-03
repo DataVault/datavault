@@ -67,6 +67,12 @@ public class EventListener implements MessageListener {
                 long vaultSize = vault.getSize();
                 vault.setSize(vaultSize + computedSizeEvent.getBytes());
                 vaultsService.updateVault(vault);
+                
+            } else if (concreteEvent instanceof Complete) {
+                
+                // Update the deposit status
+                deposit.setStatus(Deposit.Status.CLOSED);
+                depositsService.updateDeposit(deposit);
             }
             
         } catch (Exception e) {

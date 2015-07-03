@@ -10,6 +10,7 @@
                     <tr class="tr">
                         <th>ID</th>
                         <th>Note</th>
+                        <th>Status</th>
                         <th>Size (bytes)</th>
                         <th>Timestamp</th>
                     </tr>
@@ -18,6 +19,7 @@
                     <tr class="tr">
                         <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}">${deposit.getID()}</a></td>
                         <td>${deposit.note?html}</td>
+                        <td>${deposit.status}</td>
                         <td>${deposit.size}</td>
                         <td>${deposit.creationTime?datetime}</td>
                     </tr>
