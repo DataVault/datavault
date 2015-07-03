@@ -1,10 +1,8 @@
 <#import "*/layout/defaultlayout.ftl" as layout>
 <@layout.vaultLayout>
 <div class="container">
-    <div class="row">
-        <div class="col-sm-12 storage">
-        <form>
-            <div class="table-responsive">
+
+       <div class="table-responsive">
             <table class="table">
 
                 <tr class="tr">
@@ -27,12 +25,9 @@
                     </tbody>
                 </#list>
              </table>
-            </div>
-        </form>
+       </div>
 
+       <a href="${springMacroRequestContext.getContextPath()}/vaults/create">Create a new Vault</a>
 
-        <a href="${springMacroRequestContext.getContextPath()}/vaults/create">Create a new Vault</a>
-        </div>
-    </div>
 </div>
 </@layout.vaultLayout>
