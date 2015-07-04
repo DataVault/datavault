@@ -14,3 +14,18 @@ Originally developed by:
  * Robin Taylor - University of Edinburgh
  * Claire Knowles - University of Edinburgh
  * Stuart Lewis - University of Edinburgh
+
+Installation
+------------
+
+ *  Clone from Github: https://github.com/DataVault/datavault.git
+ *  Install RabbitMQ: https://www.rabbitmq.com
+ *  Install MySQL: https://www.mysql.com/
+ *  Setup database and username to match those in build.properties
+ *  Go into the data-vault home directory and mvn package
+ *  Start up RabbitMQ - should get a healthy startup message
+ *  RabbitMQ Browser admin tool instructions: https://www.rabbitmq.com/management.html
+ *  Start the worker by cd'ing to the worker target directory and running..
+    java -cp datavault-worker-1.0-SNAPSHOT-jar-with-dependencies.jar org.datavault.worker.Main
+ *  Deploy the datavault-webapp and default-broker to a webserver
+ *  Start webserver
