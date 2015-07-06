@@ -2,7 +2,7 @@ package org.datavault.webapp.controllers;
 
 
 import org.datavault.common.model.Deposit;
-import org.datavault.common.model.Withdrawal;
+import org.datavault.common.model.Restore;
 import org.datavault.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -53,19 +53,19 @@ public class DepositsController {
         return "deposits/deposit";
     }
     
-    // Return an 'withdraw deposit' page
-    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/withdraw", method = RequestMethod.GET)
-    public String withdrawDeposit(@ModelAttribute Withdrawal withdrawal, ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
-        model.addAttribute("withdrawal", new Withdrawal());
+    // Return a 'restore deposit' page
+    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/restore", method = RequestMethod.GET)
+    public String restoreDeposit(@ModelAttribute Restore restore, ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
+        model.addAttribute("restore", new Restore());
         model.addAttribute("deposit", restService.getDeposit(vaultID, depositID));
-        return "deposits/withdraw";
+        return "deposits/restore";
     }
     
-    // Process the completed 'withdraw deposit' page
-    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/withdraw", method = RequestMethod.POST)
-    public String processWithdrawal(@ModelAttribute Withdrawal withdrawal, ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
+    // Process the completed 'restore deposit' page
+    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/restore", method = RequestMethod.POST)
+    public String processRestore(@ModelAttribute Restore restore, ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
         
-        Boolean result = restService.withdrawDeposit(vaultID, depositID, withdrawal);
+        Boolean result = restService.restoreDeposit(vaultID, depositID, restore);
         
         String depositUrl = "/vaults/" + vaultID + "/deposits/" + depositID + "/";
         return "redirect:" + depositUrl;

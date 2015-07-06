@@ -51,7 +51,9 @@
         </table>
     </div>
 
-    <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create">Add a deposit</a>
+    <form>
+        <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create">Add a deposit</a>
+    </form>
 
 </div>
 

@@ -71,7 +71,7 @@
             </table>
         </div>
 
-        <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/withdraw">Withdraw data</a>
+        <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/restore">Restore data</a>
 
     </form>
 
