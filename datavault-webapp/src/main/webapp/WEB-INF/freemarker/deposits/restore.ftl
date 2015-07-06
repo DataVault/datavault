@@ -8,7 +8,7 @@
 
             <form class="form" role="form" action="" method="post">
 
-                <div class="form-group">
+                <div class="form-group" style="display:none;">
                     <label class="control-label">Filepath:</label>
                     <@spring.bind "restore.restorePath" />
                     <input type="text"
@@ -18,6 +18,7 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="control-label">Target directory:</label>
                     <div id="tree" class="fancytree-radio tree-box"></div>
                 </div>
 

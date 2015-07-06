@@ -6,8 +6,7 @@
         <table class="table">
 
             <tr class="tr">
-                <th>ID</th>
-                <th>Name</th>
+                <th>Vault</th>
                 <th>Description</th>
                 <th>Size (bytes)</th>
                 <th>Timestamp</th>
@@ -17,9 +16,8 @@
                 <tbody>
                 <tr class="tr">
                     <td>
-                        <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/">${vault.getID()}</a>
+                        <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/">${vault.name?html}</a>
                     </td>
-                    <td>${vault.name?html}</td>
                     <td>${vault.description?html}</td>
                     <td>${vault.size}</td>
                     <td>${vault.getCreationTime()?datetime}</td>
