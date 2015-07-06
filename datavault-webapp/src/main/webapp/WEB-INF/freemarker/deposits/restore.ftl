@@ -3,13 +3,14 @@
     <#import "/spring.ftl" as spring />
 <div class="container">
 
-            <h1>Withdraw</h1>
+            <h1>Restore</h1>
+            <p class="help-block">Choose a working directory to restore data from the archive</p>
 
             <form class="form" role="form" action="" method="post">
 
                 <div class="form-group">
                     <label class="control-label">Filepath:</label>
-                    <@spring.bind "withdrawal.withdrawalPath" />
+                    <@spring.bind "restore.restorePath" />
                     <input type="text"
                             class="form-control file-path"
                             name="${spring.status.expression}"

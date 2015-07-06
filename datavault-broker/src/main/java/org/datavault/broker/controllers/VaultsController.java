@@ -7,7 +7,7 @@ import java.nio.file.Path;
 
 import org.datavault.common.model.Vault;
 import org.datavault.common.model.Deposit;
-import org.datavault.common.model.Withdrawal;
+import org.datavault.common.model.Restore;
 import org.datavault.common.model.FileFixity;
 import org.datavault.common.event.Event;
 import org.datavault.common.job.Job;
@@ -164,35 +164,35 @@ public class VaultsController {
         return deposit;
     }
     
-    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/withdraw", method = RequestMethod.POST)
-    public Boolean withdrawDeposit(@PathVariable("vaultid") String vaultID,
-                                   @PathVariable("depositid") String depositID,
-                                   @RequestBody Withdrawal withdrawal) {
+    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/restore", method = RequestMethod.POST)
+    public Boolean restoreDeposit(@PathVariable("vaultid") String vaultID,
+                                  @PathVariable("depositid") String depositID,
+                                  @RequestBody Restore restore) {
         
         Deposit deposit = depositsService.getDeposit(depositID);
         
         // Validate the path
-        String withdrawalPath = withdrawal.getWithdrawalPath();
-        if (withdrawalPath == null) {
+        String restorePath = restore.getRestorePath();
+        if (restorePath == null) {
             throw new IllegalArgumentException("Path was null");
         }
         
-        Path path = macFilesService.getAbsolutePath(withdrawalPath);
+        Path path = macFilesService.getAbsolutePath(restorePath);
         if (path == null) {
-            throw new IllegalArgumentException("Path '" + withdrawalPath + "' is invalid");
+            throw new IllegalArgumentException("Path '" + restorePath + "' is invalid");
         }
         
-        // Ask the worker to process the withdrawal
+        // Ask the worker to process the data restore
         try {
-            HashMap<String, String> withdrawProperties = new HashMap<>();
-            withdrawProperties.put("depositId", deposit.getID());
-            withdrawProperties.put("bagId", deposit.getBagId());
-            withdrawProperties.put("withdrawalPath", path.toString()); // The absolute path
+            HashMap<String, String> restoreProperties = new HashMap<>();
+            restoreProperties.put("depositId", deposit.getID());
+            restoreProperties.put("bagId", deposit.getBagId());
+            restoreProperties.put("restorePath", path.toString()); // The absolute path
             
-            Job withdrawJob = new Job("org.datavault.worker.jobs.Withdraw", withdrawProperties);
+            Job restoreJob = new Job("org.datavault.worker.jobs.Restore", restoreProperties);
             ObjectMapper mapper = new ObjectMapper();
-            String jsonWithdraw = mapper.writeValueAsString(withdrawJob);
-            sender.send(jsonWithdraw);
+            String jsonRestore = mapper.writeValueAsString(restoreJob);
+            sender.send(jsonRestore);
         } catch (Exception e) {
             e.printStackTrace();
         }

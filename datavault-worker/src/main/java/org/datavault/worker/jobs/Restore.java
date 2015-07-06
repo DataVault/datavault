@@ -13,30 +13,30 @@ import org.datavault.common.event.Error;
 
 import org.apache.commons.io.FileUtils;
 
-public class Withdraw extends Job {
+public class Restore extends Job {
     
     @Override
     public void performAction(Context context) {
         
         EventSender eventStream = (EventSender)context.getEventStream();
         
-        System.out.println("\tWithdraw job - performAction()");
+        System.out.println("\tRestore job - performAction()");
         
         Map<String, String> properties = getProperties();
         String depositId = properties.get("depositId");
         String bagID = properties.get("bagId");
-        String withdrawalPath = properties.get("withdrawalPath");
+        String restorePath = properties.get("restorePath");
         
-        eventStream.send(new Event(depositId, "Withdrawal started"));
+        eventStream.send(new Event(depositId, "Data restore started"));
         
         System.out.println("\tbagID: " + bagID);
-        System.out.println("\twithdrawalPath: " + withdrawalPath);
+        System.out.println("\trestorePath: " + restorePath);
         
         try {
-            Path withdrawPath = Paths.get(withdrawalPath);
-            File withdrawDir = withdrawPath.toFile();
+            Path path = Paths.get(restorePath);
+            File dir = path.toFile();
 
-            if (!withdrawDir.exists() || !withdrawDir.isDirectory()) {
+            if (!dir.exists() || !dir.isDirectory()) {
                 // Target path must exist and be a directory
                 System.out.println("\tTarget directory not found!");
             }
@@ -47,17 +47,17 @@ public class Withdraw extends Job {
             Path archivePath = Paths.get(context.getArchiveDir()).resolve(tarFileName);
             File archiveFile = archivePath.toFile();
 
-            // Copy the tar file to the withdrawal area
+            // Copy the tar file to the target restore area
             System.out.println("\tCopying tar file from archive ...");
-            File withdrawFile = withdrawPath.resolve(tarFileName).toFile();
-            FileUtils.copyFile(archiveFile, withdrawFile);
+            File restoreFile = path.resolve(tarFileName).toFile();
+            FileUtils.copyFile(archiveFile, restoreFile);
             
-            System.out.println("\tWithdrawal complete: " + withdrawFile);
-            eventStream.send(new Event(depositId, "Withdrawal complete"));
+            System.out.println("\tData restore complete: " + restoreFile);
+            eventStream.send(new Event(depositId, "Data restore completed"));
             
         } catch (Exception e) {
             e.printStackTrace();
-            eventStream.send(new Error(depositId, "Withdrawal failed: " + e.getMessage()));
+            eventStream.send(new Error(depositId, "Data restore failed: " + e.getMessage()));
         }
     }
 }
