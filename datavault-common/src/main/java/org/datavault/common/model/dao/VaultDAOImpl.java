@@ -7,6 +7,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.Order;
 
 import org.datavault.common.model.Vault;
 
@@ -42,6 +43,7 @@ public class VaultDAOImpl implements VaultDAO {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Vault.class);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+        criteria.addOrder(Order.asc("creationTime"));
         List<Vault> vaults = criteria.list();
         session.close();
         return vaults;

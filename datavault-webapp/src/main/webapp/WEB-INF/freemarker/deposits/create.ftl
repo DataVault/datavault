@@ -16,7 +16,7 @@
                            value="${spring.status.value!""}"/>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" style="display:none;">
                     <label class="control-label">Filepath:</label>
                     <@spring.bind "deposit.filePath" />
                     <input type="text"
@@ -26,6 +26,7 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="control-label">Deposit file or directory:</label>
                     <div id="tree" class="fancytree-radio tree-box"></div>
                 </div>
 

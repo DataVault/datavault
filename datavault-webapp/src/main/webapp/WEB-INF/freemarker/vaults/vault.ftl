@@ -6,17 +6,12 @@
     <div class="table-responsive">
         <table class="table">
             <tr class="tr">
-                <th>ID</th>
-                <th>Name</th>
                 <th>Description</th>
                 <th>Size (bytes)</th>
                 <th>Timestamp</th>
             </tr>
             <tbody>
             <tr class="tr">
-                <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}">${vault.getID()}</a>
-                </td>
-                <td>${vault.name?html}</td>
                 <td>${vault.description?html}</td>
                 <td>${vault.size}</td>
                 <td>${vault.creationTime?datetime}</td>
@@ -30,8 +25,7 @@
     <div class="table-responsive">
         <table class="table">
             <tr class="tr">
-                <th>ID</th>
-                <th>Note</th>
+                <th>Deposit</th>
                 <th>File Path</th>
                 <th>Timestamp</th>
             </tr>
@@ -40,9 +34,8 @@
                 <tbody>
                 <tr class="tr">
                     <td>
-                        <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}">${deposit.getID()}</a>
+                        <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}">${deposit.note?html}</a>
                     </td>
-                    <td>${deposit.note?html}</td>
                     <td>${deposit.filePath?html}</td>
                     <td>${deposit.getCreationTime()?datetime}</td>
                 </tr>
