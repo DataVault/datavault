@@ -49,7 +49,7 @@
                             <#list manifest as filefixity>
                                 <tr class="tr">
                                     <td>${filefixity.file?html}</td>
-                                    <td style="font-family:monospace;">${filefixity.fixity} <span class="label label-primary">${filefixity.algorithm}</span></td>
+                                    <td style="font-family:monospace;">${filefixity.fixity}&nbsp<span class="label label-primary">${filefixity.algorithm}</span></td>
                                 </tr>
                             </#list>
                         </tbody>

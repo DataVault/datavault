@@ -29,7 +29,9 @@
     </div>
 
     <form>
-        <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/create">Create a new Vault</a>
+        <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/create">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Create a new Vault
+        </a>
     </form>
 
 </div>

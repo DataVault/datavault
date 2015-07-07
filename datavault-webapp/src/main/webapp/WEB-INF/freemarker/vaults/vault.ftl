@@ -45,7 +45,9 @@
     </div>
 
     <form>
-        <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create">Add a deposit</a>
+        <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create">
+            <span class="glyphicon glyphicon-save" aria-hidden="true"></span> Deposit data
+        </a>
     </form>
 
 </div>
