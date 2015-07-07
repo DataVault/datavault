@@ -20,6 +20,9 @@
     <!-- jQuery UI js -->
     <script src="<@spring.url '/resources/jquery-ui/jquery-ui.min.js'/>"></script>
 
+    <!-- jQuery validate js -->
+    <script src="<@spring.url '/resources/jquery-validate/js/jquery.validate.min.js'/>"></script>
+
     <!-- Fancytree js -->
     <script src="<@spring.url '/resources/fancytree/jquery.fancytree.min.js'/>"></script>
 

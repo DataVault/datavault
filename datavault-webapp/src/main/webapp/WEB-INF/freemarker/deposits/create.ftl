@@ -9,7 +9,7 @@
         <li class="active">Create new deposit</li>
     </ol>
 
-    <form class="form" role="form" action="" method="post">
+    <form id="create-deposit" class="form" role="form" action="" method="post">
 
         <div class="form-group">
             <label class="control-label">Deposit Note:</label>
@@ -68,6 +68,26 @@
 
 
     </form>
-
 </div>
+
+<script>
+    $(document).ready(function () {
+
+        $('#create-deposit').validate({
+            rules: {
+                note: {
+                    required: true
+                }
+            },
+            highlight: function (element) {
+                $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+            },
+            success: function (element) {
+                element.addClass('valid')
+                    .closest('.form-group').removeClass('has-error').addClass('has-success');
+            }
+        });
+    });
+</script>
+
 </@layout.vaultLayout>

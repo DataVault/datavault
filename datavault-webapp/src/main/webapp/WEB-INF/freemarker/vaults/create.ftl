@@ -8,7 +8,7 @@
         <li class="active">Create new vault</li>
     </ol>
 
-    <form class="form" role="form" action="" method="post">
+    <form id="create-vault" class="form" role="form" action="" method="post">
 
         <div class="form-group">
             <label class="control-label">Vault Name:</label>
@@ -34,6 +34,26 @@
 
     </form>
 
-
 </div>
+
+<script>
+    $(document).ready(function () {
+
+        $('#create-vault').validate({
+            rules: {
+                name: {
+                    required: true
+                }
+            },
+            highlight: function (element) {
+                $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+            },
+            success: function (element) {
+                element.addClass('valid')
+                    .closest('.form-group').removeClass('has-error').addClass('has-success');
+            }
+        });
+    });
+</script>
+
 </@layout.vaultLayout>
