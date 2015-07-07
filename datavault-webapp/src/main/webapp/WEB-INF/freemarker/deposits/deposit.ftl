@@ -81,7 +81,9 @@
             </div>
         </div>
 
-        <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/restore">Restore data</a>
+        <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/restore">
+            <span class="glyphicon glyphicon-open" aria-hidden="true"></span> Restore data
+        </a>
 
     </form>
 
