@@ -20,9 +20,10 @@
         </table>
     </div>
 
-    <h3>Deposits</h3>
-
     <#if deposits?has_content>
+
+        <h3>Deposits</h3>
+
         <div class="table-responsive">
             <table class="table">
                 <tr class="tr">
