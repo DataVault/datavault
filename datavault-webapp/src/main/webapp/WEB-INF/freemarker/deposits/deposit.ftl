@@ -3,7 +3,7 @@
 <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}"><b>Vaults</b></a></li>
+        <li><a href="${springMacroRequestContext.getContextPath()}"><b>My Vaults</b></a></li>
         <li><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}"><b>Vault:</b> ${vault.name?html}</a></li>
         <li class="active"><b>Deposit:</b> ${deposit.note?html}</li>
     </ol>
@@ -19,7 +19,7 @@
 
             <div class="tab-pane active" id="deposit">
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table-striped">
                         <thead>
                             <tr class="tr">
                                 <th>Note</th>

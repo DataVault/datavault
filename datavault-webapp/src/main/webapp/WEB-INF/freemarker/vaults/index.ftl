@@ -3,7 +3,7 @@
 <div class="container">
 
     <ol class="breadcrumb">
-        <li class="active"><b>Vaults</b></li>
+        <li class="active"><b>My Vaults</b></li>
     </ol>
 
     <#if vaults?has_content>
