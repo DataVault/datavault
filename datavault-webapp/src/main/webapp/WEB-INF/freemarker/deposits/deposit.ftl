@@ -49,7 +49,7 @@
                             <#list manifest as filefixity>
                                 <tr class="tr">
                                     <td>${filefixity.file?html}</td>
-                                    <td style="font-family:monospace;">${filefixity.fixity} <span class="label label-primary">${filefixity.algorithm}</span></td>
+                                    <td style="font-family:monospace;">${filefixity.fixity}&nbsp<span class="label label-primary">${filefixity.algorithm}</span></td>
                                 </tr>
                             </#list>
                         </tbody>
@@ -81,7 +81,9 @@
             </div>
         </div>
 
-        <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/restore">Restore data</a>
+        <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/restore">
+            <span class="glyphicon glyphicon-open" aria-hidden="true"></span> Restore data
+        </a>
 
     </form>
 
