@@ -20,29 +20,32 @@
         </table>
     </div>
 
-    <h3>Deposits</h3>
+    <#if deposits?has_content>
 
-    <div class="table-responsive">
-        <table class="table">
-            <tr class="tr">
-                <th>Deposit</th>
-                <th>File Path</th>
-                <th>Timestamp</th>
-            </tr>
+        <h3>Deposits</h3>
 
-            <#list deposits as deposit>
-                <tbody>
+        <div class="table-responsive">
+            <table class="table">
                 <tr class="tr">
-                    <td>
-                        <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}">${deposit.note?html}</a>
-                    </td>
-                    <td>${deposit.filePath?html}</td>
-                    <td>${deposit.getCreationTime()?datetime}</td>
+                    <th>Deposit</th>
+                    <th>File Path</th>
+                    <th>Timestamp</th>
                 </tr>
-                </tbody>
-            </#list>
-        </table>
-    </div>
+
+                <#list deposits as deposit>
+                    <tbody>
+                    <tr class="tr">
+                        <td>
+                            <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}">${deposit.note?html}</a>
+                        </td>
+                        <td>${deposit.filePath?html}</td>
+                        <td>${deposit.getCreationTime()?datetime}</td>
+                    </tr>
+                    </tbody>
+                </#list>
+            </table>
+        </div>
+    </#if>
 
     <form>
         <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create">
