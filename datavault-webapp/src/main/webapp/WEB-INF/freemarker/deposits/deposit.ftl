@@ -10,8 +10,8 @@
 
     <ul class="nav nav-tabs">
         <li class="active"><a data-toggle="tab" href="#deposit">Deposit</a></li>
-        <li><a data-toggle="tab" href="#contents">Contents</a></li>
-        <li><a data-toggle="tab" href="#events">Events</a></li>
+        <li><a data-toggle="tab" href="#contents">Contents <span class="badge">${manifest?size}</span></a></li>
+        <li><a data-toggle="tab" href="#events">Events <span class="badge">${events?size}</span></a></li>
     </ul>
 
     <form>
