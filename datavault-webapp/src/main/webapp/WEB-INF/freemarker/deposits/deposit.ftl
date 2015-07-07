@@ -1,8 +1,12 @@
 <#import "*/layout/defaultlayout.ftl" as layout>
 <@layout.vaultLayout>
 <div class="container">
-<div class="row">
-<div class="col-sm-12 storage">
+
+    <ol class="breadcrumb">
+        <li><a href="${springMacroRequestContext.getContextPath()}"><b>My Vaults</b></a></li>
+        <li><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}"><b>Vault:</b> ${vault.name?html}</a></li>
+        <li class="active"><b>Deposit:</b> ${deposit.note?html}</li>
+    </ol>
 
     <ul class="nav nav-tabs">
         <li class="active"><a data-toggle="tab" href="#deposit">Deposit</a></li>
@@ -15,7 +19,7 @@
 
             <div class="tab-pane active" id="deposit">
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table-striped">
                         <thead>
                             <tr class="tr">
                                 <th>Note</th>
@@ -87,8 +91,6 @@
 
     </form>
 
-</div>
-</div>
 </div>
 
 </@layout.vaultLayout>

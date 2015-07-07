@@ -2,6 +2,10 @@
 <@layout.vaultLayout>
 <div class="container">
 
+    <ol class="breadcrumb">
+        <li class="active"><b>My Vaults</b></li>
+    </ol>
+
     <#if vaults?has_content>
         <div class="table-responsive">
             <table class="table table-striped">
