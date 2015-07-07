@@ -3,7 +3,10 @@
     <#import "/spring.ftl" as spring />
 <div class="container">
 
-    <h1>Create New Vault</h1>
+    <ol class="breadcrumb">
+        <li><a href="${springMacroRequestContext.getContextPath()}"><b>Vaults</b></a></li>
+        <li class="active">Create new vault</li>
+    </ol>
 
     <form class="form" role="form" action="" method="post">
 

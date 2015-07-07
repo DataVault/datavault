@@ -1,7 +1,11 @@
 <#import "*/layout/defaultlayout.ftl" as layout>
 <@layout.vaultLayout>
 <div class="container">
-    <h1>Vault: ${vault.name} </h1>
+
+    <ol class="breadcrumb">
+        <li><a href="${springMacroRequestContext.getContextPath()}"><b>Vaults</b></a></li>
+        <li class="active"><b>Vault:</b> ${vault.name?html}</li>
+    </ol>
 
     <div class="table-responsive">
         <table class="table">

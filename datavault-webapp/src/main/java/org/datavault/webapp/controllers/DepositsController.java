@@ -31,7 +31,7 @@ public class DepositsController {
     public String createDeposit(@ModelAttribute Deposit deposit, ModelMap model, @PathVariable("vaultid") String vaultID) {
         // pass the view an empty Deposit since the form expects it
         model.addAttribute("deposit", new Deposit());
-        model.addAttribute("vaultID", vaultID);
+        model.addAttribute("vault", restService.getVault(vaultID));
         return "/deposits/create";
     }
 
@@ -57,6 +57,7 @@ public class DepositsController {
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/restore", method = RequestMethod.GET)
     public String restoreDeposit(@ModelAttribute Restore restore, ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
         model.addAttribute("restore", new Restore());
+        model.addAttribute("vault", restService.getVault(vaultID));
         model.addAttribute("deposit", restService.getDeposit(vaultID, depositID));
         return "deposits/restore";
     }
