@@ -1,12 +1,15 @@
 package org.datavault.webapp.controllers;
 
 
+import org.datavault.common.model.Policy;
 import org.datavault.common.model.Vault;
 import org.datavault.common.model.Deposit;
 import org.datavault.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
 
 /**
  * User: Tom Higgins
@@ -32,8 +35,13 @@ public class VaultsController {
 
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
     public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID) {
-        model.addAttribute("vault", restService.getVault(vaultID));
+        Vault vault = restService.getVault(vaultID);
+
+        model.addAttribute("vault", vault);
+
+        model.addAttribute(restService.getPolicy(vault.getPolicyID()));
         model.addAttribute("deposits", restService.getDepositsListing(vaultID));
+
         return "vaults/vault";
     }
 
@@ -42,6 +50,14 @@ public class VaultsController {
     public String createVault(ModelMap model) {
         // pass the view an empty Vault since the form expects it
         model.addAttribute("vault", new Vault());
+
+        Policy[] policies = restService.getPolicyListing();
+        Map<String, String> policyMap = new HashMap<>();
+        for (Policy policy : policies) {
+            policyMap.put(policy.getID(), policy.getName());
+        }
+        model.addAttribute("policyMap", policyMap);
+
         return "vaults/create";
     }
 
@@ -52,4 +68,8 @@ public class VaultsController {
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
         return "redirect:" + vaultUrl;        
     }
+
+
 }
+
+

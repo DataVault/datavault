@@ -28,6 +28,13 @@
                       rows="6" cols="60"></textarea>
         </div>
 
+        <div class="form-group">
+            <label class="control-label">Policy:</label>
+            <@spring.bind "policyMap" />
+            <@spring.formSingleSelect "vault.policyID", policyMap, " " />
+        </div>
+
+
         <div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </div>

@@ -1,10 +1,6 @@
 package org.datavault.webapp.services;
 
-import org.datavault.common.model.Deposit;
-import org.datavault.common.model.Vault;
-import org.datavault.common.model.FileInfo;
-import org.datavault.common.model.FileFixity;
-import org.datavault.common.model.Restore;
+import org.datavault.common.model.*;
 import org.datavault.common.event.Event;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
@@ -60,7 +56,13 @@ public class RestService {
     public Vault addVault(Vault vault) {
         RestTemplate restTemplate = new RestTemplate();
 
-        Vault returnedVault = restTemplate.postForObject(brokerURL + "/vaults/", vault , Vault.class);
+        //System.out.println("Vault is " + vault.getName());
+        //System.out.println("Vault is " + vault.getPolicyID());
+        //System.out.println("Vault is " + vault.getPolicy());
+        //System.out.println("Vault is " + vault.getPolicy().getName());
+
+
+        Vault returnedVault = restTemplate.postForObject(brokerURL + "/vaults/", vault, Vault.class);
 
         return returnedVault;
     }
@@ -120,5 +122,23 @@ public class RestService {
         Event[] events = responseEntity.getBody();
 
         return events;
+    }
+
+    public Policy[] getPolicyListing() {
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<Policy[]> responseEntity = restTemplate.getForEntity(brokerURL + "/policies", Policy[].class);
+        Policy[] policies = responseEntity.getBody();
+
+        return policies;
+    }
+
+    public Policy getPolicy(String policyId) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<Policy> responseEntity = restTemplate.getForEntity(brokerURL + "/policies/" + policyId, Policy.class);
+        Policy policy = responseEntity.getBody();
+
+        return policy;
     }
 }
