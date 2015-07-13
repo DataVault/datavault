@@ -65,6 +65,10 @@
         <property name="eventService" ref="eventService" />
         <property name="sender" ref="sender" />
     </bean>
+    
+    <bean id="policiesController" class="org.datavault.broker.controllers.PoliciesController">
+        <property name="policiesService" ref="policiesService" />
+    </bean>
 
     <!-- todo : should the service beans be put into their own config file? -->
 
@@ -86,6 +90,10 @@
 
     <bean id="eventService" class="org.datavault.broker.services.EventService">
         <property name="eventDAO" ref="eventDAO" />
+    </bean>
+    
+    <bean id="policiesService" class="org.datavault.broker.services.PoliciesService">
+        <property name="policyDAO" ref="policyDAO" />
     </bean>
     
 
@@ -153,8 +161,10 @@
                 <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
                 <prop key="hibernate.show_sql">false</prop>
                 <prop key="hibernate.format_sql">false</prop>
-                <prop key="hibernate.hbm2ddl.auto">create</prop>
+                <prop key="hibernate.hbm2ddl.auto">create-drop</prop>
                 <prop key="hibernate.enable_lazy_load_no_trans">true</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.hbm2ddl.import_files">/import.sql</prop>
             </props>
         </property>
     </bean>
@@ -178,6 +188,9 @@
     <bean id="eventDAO" class="org.datavault.common.model.dao.EventDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
-
     
+    <bean id="policyDAO" class="org.datavault.common.model.dao.PolicyDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
 </beans>
