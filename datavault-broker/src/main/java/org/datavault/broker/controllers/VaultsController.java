@@ -79,9 +79,14 @@ public class VaultsController {
     }
     
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)
-    public Vault addVault(@RequestBody Vault vault) {
-        Policy policy = policiesService.getPolicy(vault.getPolicyID());
+    public Vault addVault(@RequestBody Vault vault) throws Exception {
+        String policyID = vault.getPolicyID();
+        Policy policy = policiesService.getPolicy(policyID);
+        if (policy == null) {
+            throw new Exception("Policy '" + policyID + "' does not exist");
+        }
         vault.setPolicy(policy);
+        
         vaultsService.addVault(vault);
         return vault;
     }
