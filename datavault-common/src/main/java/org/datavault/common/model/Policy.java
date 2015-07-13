@@ -24,6 +24,12 @@ public class Policy {
     @Column(name = "name", nullable = false)
     private String name;
     
+    // A policy is related to a number of deposits
+    @JsonIgnore
+    @OneToMany(targetEntity=Vault.class, mappedBy="policy", fetch=FetchType.LAZY)
+    @OrderBy("creationTime")
+    private List<Vault> vaults;
+    
     public Policy() {}
     public Policy(String name) {
         this.name = name;
