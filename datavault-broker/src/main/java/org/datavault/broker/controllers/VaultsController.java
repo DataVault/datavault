@@ -9,6 +9,7 @@ import org.datavault.common.model.Vault;
 import org.datavault.common.model.Deposit;
 import org.datavault.common.model.Restore;
 import org.datavault.common.model.FileFixity;
+import org.datavault.common.model.Policy;
 import org.datavault.common.event.Event;
 import org.datavault.common.job.Job;
 import org.datavault.broker.services.VaultsService;
@@ -16,6 +17,7 @@ import org.datavault.broker.services.DepositsService;
 import org.datavault.broker.services.MetadataService;
 import org.datavault.broker.services.MacFilesService;
 import org.datavault.broker.services.EventService;
+import org.datavault.broker.services.PoliciesService;
 import org.datavault.queue.Sender;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +42,7 @@ public class VaultsController {
     private MetadataService metadataService;
     private MacFilesService macFilesService;
     private EventService eventService;
+    private PoliciesService policiesService;
     private Sender sender;
 
     public void setVaultsService(VaultsService vaultsService) {
@@ -61,6 +64,10 @@ public class VaultsController {
     public void setEventService(EventService eventService) {
         this.eventService = eventService;
     }
+    
+    public void setPoliciesService(PoliciesService policiesService) {
+        this.policiesService = policiesService;
+    }
 
     public void setSender(Sender sender) {
         this.sender = sender;
@@ -73,6 +80,8 @@ public class VaultsController {
     
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)
     public Vault addVault(@RequestBody Vault vault) {
+        Policy policy = policiesService.getPolicy(vault.getPolicyID());
+        vault.setPolicy(policy);
         vaultsService.addVault(vault);
         return vault;
     }

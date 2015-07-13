@@ -13,10 +13,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.FetchType;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.CascadeType;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.util.List;
 import java.util.Date;
+import javax.persistence.ManyToOne;
 import javax.persistence.OrderBy;
 
 /**
@@ -57,7 +59,13 @@ public class Vault {
     @OneToMany(targetEntity=Deposit.class, mappedBy="vault", fetch=FetchType.EAGER)
     @OrderBy("creationTime")
     private List<Deposit> deposits;
-
+    
+    @JsonIgnore
+    @ManyToOne
+    private Policy policy;
+    // Raw policy ID
+    private String policyID;
+    
     public Vault() {}
     public Vault(String name) {
         this.name = name;
@@ -98,5 +106,19 @@ public class Vault {
     
     public void addDeposit(Deposit deposit) {
         this.deposits.add(deposit);
+    }
+    
+    public Policy getPolicy() { return policy; }
+    
+    public void setPolicy(Policy policy) {
+        this.policy = policy;
+    }
+
+    public String getPolicyID() {
+        return policyID;
+    }
+
+    public void setPolicyID(String policyID) {
+        this.policyID = policyID;
     }
 }

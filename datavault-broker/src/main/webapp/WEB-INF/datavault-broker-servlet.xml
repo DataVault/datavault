@@ -63,6 +63,7 @@
         <property name="metadataService" ref="metadataService" />
         <property name="macFilesService" ref="macFilesService" />
         <property name="eventService" ref="eventService" />
+        <property name="policiesService" ref="policiesService" />
         <property name="sender" ref="sender" />
     </bean>
     
