@@ -12,6 +12,7 @@
             <thead>
                 <tr class="tr">
                     <th>Description</th>
+                    <th>Policy</th>
                     <th>Size (bytes)</th>
                     <th>Timestamp</th>
                 </tr>
@@ -19,6 +20,7 @@
             <tbody>
                 <tr class="tr">
                     <td>${vault.description?html}</td>
+                    <td>${policy.name}</td>
                     <td>${vault.size}</td>
                     <td>${vault.creationTime?datetime}</td>
                 </tr>
