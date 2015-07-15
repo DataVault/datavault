@@ -45,6 +45,11 @@
         <property name="suffix" value=".ftl"/>
     </bean>
 
+    <!--  static resources -->
+    <mvc:resources mapping="/resources/**" location="/resources/" />
+
+
+
     <bean id="filesController" class="org.datavault.webapp.controllers.FilesController">
         <property name="restService" ref="restService" />
     </bean>
@@ -60,7 +65,6 @@
     <!-- todo : should the service beans be put into their own config file? -->
 
     <bean id="restService" class="org.datavault.webapp.services.RestService">
-        <!--<property name="brokerURL" value="http://localhost:8080/datavault-broker" />-->
         <property name="brokerURL" value="${brokerURL}" />
     </bean>
 
