@@ -6,6 +6,7 @@
 
     <!-- Bootstrap -->
     <link href="<@spring.url '/resources/bootstrap/css/bootstrap.min.css'/>" rel="stylesheet" type="text/css">
+    <link href="<@spring.url '/resources/bootstrap-select/css/bootstrap-select.min.css'/>" rel="stylesheet" type="text/css">
     <link href="<@spring.url '/resources/theme/css/vault.css'/>" rel="stylesheet" type="text/css">
 
     <!-- Fancytree -->
@@ -16,6 +17,9 @@
 
     <!-- Bootstrap js -->
     <script src="<@spring.url '/resources/bootstrap/js/bootstrap.min.js'/>"></script>
+
+    <!-- Bootstrap-select js -->
+    <script src="<@spring.url '/resources/bootstrap-select/js/bootstrap-select.min.js'/>"></script>
 
     <!-- jQuery UI js -->
     <script src="<@spring.url '/resources/jquery-ui/jquery-ui.min.js'/>"></script>
