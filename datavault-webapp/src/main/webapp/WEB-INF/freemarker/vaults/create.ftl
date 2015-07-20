@@ -31,7 +31,7 @@
         <div class="form-group">
             <label class="control-label">Policy:</label>
             <@spring.bind "policyMap" />
-            <@spring.formSingleSelect "vault.policyID", policyMap, " " />
+            <@spring.formSingleSelect "vault.policyID", policyMap, "class='policy-select'" />
         </div>
 
 
@@ -60,6 +60,8 @@
                     .closest('.form-group').removeClass('has-error').addClass('has-success');
             }
         });
+
+        $('.policy-select').selectpicker();
     });
 </script>
 
