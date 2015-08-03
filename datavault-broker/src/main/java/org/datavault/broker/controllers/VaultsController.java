@@ -122,13 +122,20 @@ public class VaultsController {
         
         // Ask the worker to process the deposit
         try {
+            ObjectMapper mapper = new ObjectMapper();
+
             HashMap<String, String> depositProperties = new HashMap<>();
             depositProperties.put("depositId", deposit.getID());
             depositProperties.put("bagId", deposit.getBagId());
             depositProperties.put("filePath", path.toString()); // The absolute path
             
+            // Deposit and Vault metadata
+            // TODO: at the moment we're just serialising the objects to JSON.
+            // In future we'll need a more formal schema/representation (e.g. RDF or JSON-LD).
+            depositProperties.put("depositMetadata", mapper.writeValueAsString(deposit));
+            depositProperties.put("vaultMetadata", mapper.writeValueAsString(vault));
+            
             Job depositJob = new Job("org.datavault.worker.jobs.Deposit", depositProperties);
-            ObjectMapper mapper = new ObjectMapper();
             String jsonDeposit = mapper.writeValueAsString(depositJob);
             sender.send(jsonDeposit);
         } catch (Exception e) {

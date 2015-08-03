@@ -33,6 +33,11 @@ public class Deposit extends Job {
         String bagID = properties.get("bagId");
         String filePath = properties.get("filePath");
         
+        // Deposit and Vault metadata to be stored in the bag
+        // TODO: is there a better way to pass this to the worker?
+        String depositMetadata = properties.get("depositMetadata");
+        String vaultMetadata = properties.get("vaultMetadata");
+        
         eventStream.send(new Event(depositId, "Deposit started"));
         
         System.out.println("\tbagID: " + bagID);
@@ -73,6 +78,9 @@ public class Deposit extends Job {
                 System.out.println("\tCreating bag ...");
                 Packager.createBag(bagDir);
 
+                // Add vault/deposit metadata to the bag
+                Packager.addMetadata(bagDir, depositMetadata, vaultMetadata);
+                
                 // Tar the bag directory
                 System.out.println("\tCreating tar file ...");
                 String tarFileName = bagID + ".tar";
@@ -87,7 +95,7 @@ public class Deposit extends Job {
                 
                 // Copy bag meta files to the meta directory
                 System.out.println("\tCopying meta files ...");
-                Packager.extractMetaFiles(bagDir, metaDir);
+                Packager.extractMetadata(bagDir, metaDir);
                 
                 // Copy the resulting tar file to the archive area
                 System.out.println("\tCopying tar file to archive ...");
