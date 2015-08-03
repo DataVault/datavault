@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
 import gov.loc.repository.bagit.*;
 
@@ -45,12 +46,24 @@ public class Packager {
                 - bagit.txt
                 - manifest-md5.txt
                 - tagmanifest-md5.txt
+                - other metadata files or directories
                 */
                 
                 String entryFileName = entry.getFileName().toString();
+
+                if (Files.isDirectory(entry)) {
+                    // Handle directories
+                    if (entryFileName.equals("data")) {
+                        // Create an empty "data" directory
+                        Path metaDirPath = Paths.get(metaDir.toURI());
+                        File emptyDataDir = metaDirPath.resolve("data").toFile();
+                        emptyDataDir.mkdir();
+                    } else {
+                        FileUtils.copyDirectoryToDirectory(entry.toFile(), metaDir);
+                    }
                 
-                // Copy any regular text files at the top level (but not directories)
-                if (!Files.isDirectory(entry) && entryFileName.endsWith(".txt")) {
+                } else if (!Files.isDirectory(entry)) {
+                    // Handle files
                     FileUtils.copyFileToDirectory(entry.toFile(), metaDir);
                 }
             }
