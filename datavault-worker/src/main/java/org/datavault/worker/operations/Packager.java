@@ -2,15 +2,20 @@ package org.datavault.worker.operations;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.FileInputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
 import gov.loc.repository.bagit.*;
+import gov.loc.repository.bagit.Manifest.Algorithm;
+import java.io.FileNotFoundException;
 
 public class Packager {
 
+    public static final String metadataDirName = "metadata";
+    
     public static final String depositMetaFileName = "deposit.json";
     public static final String vaultMetaFileName = "vault.json";
     
@@ -40,21 +45,18 @@ public class Packager {
             Path bagPath = bagDir.toPath();
 
             // Create an empty "metadata" directory
-            Path metadataDirPath = bagPath.resolve("metadata");
+            Path metadataDirPath = bagPath.resolve(metadataDirName);
             File metadataDir = metadataDirPath.toFile();
             metadataDir.mkdir();
-
-            // Add deposit metadata
-            File depositMetaFile = metadataDirPath.resolve(depositMetaFileName).toFile();
-            FileUtils.writeStringToFile(depositMetaFile, depositMetadata);
-
-            // Add vault metadata
-            File vaultMetaFile = metadataDirPath.resolve(vaultMetaFileName).toFile();
-            FileUtils.writeStringToFile(vaultMetaFile, vaultMetadata);
-
-            // Add to manifest
-            // ...
-
+            
+            // TODO: get the manifest file and algorithm config via bagit library?
+            File tagManifest = bagPath.resolve("tagmanifest-md5.txt").toFile();
+            Algorithm alg = Algorithm.MD5;
+            
+            // Create metadata files and compute/store hashes
+            addMetaFile(tagManifest, metadataDirPath, depositMetaFileName, depositMetadata, alg);
+            addMetaFile(tagManifest, metadataDirPath, vaultMetaFileName, vaultMetadata, alg);
+            
             // Metadata files created
             result = true;
             
@@ -64,6 +66,37 @@ public class Packager {
         }
         
         return result;
+    }
+    
+    // Add a metadata file to the bag metadata directory
+    // Also adds tag information to the tag manifest
+    public static boolean addMetaFile(File tagManifest, Path metadataDirPath, String metadataFileName, String metadata, Algorithm alg) throws IOException {
+        
+        File metadataFile = metadataDirPath.resolve(metadataFileName).toFile();
+        FileUtils.writeStringToFile(metadataFile, metadata);
+        String hash = computeFileHash(metadataFile, alg);
+        FileUtils.writeStringToFile(tagManifest, hash + "  " + metadataDirName + "/" + metadataFileName + "\r\n", true);
+        
+        return true;
+    }
+    
+    // Compute a hash value for file contents
+    public static String computeFileHash(File file, Algorithm alg) throws FileNotFoundException, IOException {
+        String hash = null;
+        FileInputStream fis = new FileInputStream(file);
+
+        if (alg == Algorithm.MD5) {
+            hash = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+        } else if (alg == Algorithm.SHA1) {
+            hash = org.apache.commons.codec.digest.DigestUtils.sha1Hex(fis);
+        } else if (alg == Algorithm.SHA256) {
+            hash = org.apache.commons.codec.digest.DigestUtils.sha256Hex(fis);
+        } else if (alg == Algorithm.SHA512) {
+            hash = org.apache.commons.codec.digest.DigestUtils.sha512Hex(fis);
+        }
+        
+        fis.close();
+        return hash;
     }
     
     // Extract the top-level metadata files from a bag and copy to a new directory.
