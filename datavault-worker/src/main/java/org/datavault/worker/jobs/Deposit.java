@@ -71,25 +71,28 @@ public class Deposit extends Job {
                     bytes = FileUtils.sizeOfDirectory(inputFile);
                 }
                 
+                eventStream.send(new ComputedSize(depositId, bytes));
+                System.out.println("\tSize: " + bytes + " bytes (" +  FileUtils.byteCountToDisplaySize(bytes) + ")");
+                
                 // Progress tracking (threaded)
                 Progress progress = new Progress();
-                ProgressTracker tracker = new ProgressTracker(progress);
+                ProgressTracker tracker = new ProgressTracker(progress, depositId, eventStream);
                 Thread trackerThread = new Thread(tracker);
                 trackerThread.start();
                 
-                // Copy the actual files
-                if (inputFile.isFile()) {
-                    FileCopy.copyFile(progress, inputFile, outputFile);
-                } else if (inputFile.isDirectory()) {
-                    FileCopy.copyDirectory(progress, inputFile, outputFile);
+                try {
+                    // Copy the actual files
+                    if (inputFile.isFile()) {
+                        FileCopy.copyFile(progress, inputFile, outputFile);
+                    } else if (inputFile.isDirectory()) {
+                        FileCopy.copyDirectory(progress, inputFile, outputFile);
+                    }
+                    
+                } finally {
+                    // Stop the tracking thread
+                    tracker.stop();
+                    trackerThread.join();
                 }
-                
-                tracker.stop();
-                trackerThread.join();
-                
-                eventStream.send(new ComputedSize(depositId, bytes));
-                
-                System.out.println("\tSize: " + bytes + " bytes (" +  FileUtils.byteCountToDisplaySize(bytes) + ")");
                 
                 // Bag the directory in-place
                 System.out.println("\tCreating bag ...");

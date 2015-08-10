@@ -8,6 +8,20 @@
         <li class="active"><b>Deposit:</b> ${deposit.note?html}</li>
     </ol>
 
+    <#if deposit.size == 0>
+        <#assign percentComplete = 0>
+    <#else>
+        <#assign percentComplete = (deposit.bytesTransferred / deposit.size) * 100>
+    </#if>
+
+    <#if percentComplete != 100>
+        <div class="progress">
+          <div class="progress-bar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="${percentComplete}" aria-valuemin="0" aria-valuemax="100" style="width: ${percentComplete}%">
+            <span class="sr-only">${percentComplete}% Complete</span>
+          </div>
+        </div>
+    </#if>
+
     <ul class="nav nav-tabs">
         <li class="active"><a data-toggle="tab" href="#deposit">Deposit</a></li>
         <li><a data-toggle="tab" href="#contents">Contents <span class="badge">${manifest?size}</span></a></li>

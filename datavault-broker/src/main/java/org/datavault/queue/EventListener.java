@@ -68,6 +68,13 @@ public class EventListener implements MessageListener {
                 vault.setSize(vaultSize + computedSizeEvent.getBytes());
                 vaultsService.updateVault(vault);
                 
+            } else if (concreteEvent instanceof TransferProgress) {
+                
+                // Update the deposit transfer progress
+                TransferProgress transferProgressEvent = (TransferProgress)concreteEvent;
+                deposit.setBytesTransferred(transferProgressEvent.getBytes());
+                depositsService.updateDeposit(deposit);
+                
             } else if (concreteEvent instanceof Complete) {
                 
                 // Update the deposit status

@@ -1,15 +1,22 @@
 package org.datavault.worker.operations;
 
+import org.datavault.common.event.deposit.TransferProgress;
 import org.datavault.common.io.Progress;
+import org.datavault.worker.queue.EventSender;
 
 public class ProgressTracker implements Runnable {
     
-    private static final int SLEEP_INTERVAL_MS = 100;
+    private static final int SLEEP_INTERVAL_MS = 250;
     private boolean active = true;
-    Progress progress;
     
-    public ProgressTracker(Progress progress) {
+    Progress progress;
+    String depositId;
+    EventSender eventSender;
+    
+    public ProgressTracker(Progress progress, String depositId, EventSender eventSender) {
         this.progress = progress;
+        this.depositId = depositId;
+        this.eventSender = eventSender;
     }
     
     public void stop() {
@@ -17,9 +24,17 @@ public class ProgressTracker implements Runnable {
     }
     
     void reportProgress() {
-        System.out.println("\tCopied: " + progress.dirCount + " dirs, "
-                                        + progress.fileCount + " files, "
-                                        + progress.byteCount + " bytes");
+        
+        long dirCount = progress.dirCount;
+        long fileCount = progress.fileCount;
+        long byteCount = progress.byteCount;
+        
+        System.out.println("\tCopied: " + dirCount + " dirs, "
+                                        + fileCount + " files, "
+                                        + byteCount + " bytes");
+        
+        TransferProgress progressEvent = new TransferProgress(depositId, byteCount);
+        eventSender.send(progressEvent);
     }
     
     @Override

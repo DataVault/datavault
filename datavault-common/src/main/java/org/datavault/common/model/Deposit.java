@@ -63,6 +63,9 @@ public class Deposit {
     // Size of the deposit (in bytes)
     private long depositSize;
     
+    // Number of bytes ingested/transferred
+    private long bytesTransferred;
+    
     public Deposit() {}
     public Deposit(String note) {
         this.note = note;
@@ -114,9 +117,16 @@ public class Deposit {
     }
 
     public long getSize() { return depositSize; }
+
+    public long getBytesTransferred() {
+        return bytesTransferred;
+    }
+
+    public void setBytesTransferred(long bytesTransferred) {
+        this.bytesTransferred = bytesTransferred;
+    }
     
     public List<Event> getEvents() {
         return events;
     }
-
 }
