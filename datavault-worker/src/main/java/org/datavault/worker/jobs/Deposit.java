@@ -16,6 +16,9 @@ import org.datavault.common.event.deposit.ComputedSize;
 import org.datavault.common.event.deposit.Complete;
 
 import org.apache.commons.io.FileUtils;
+import org.datavault.common.io.FileCopy;
+import org.datavault.common.io.Progress;
+import org.datavault.worker.operations.ProgressTracker;
 
 public class Deposit extends Job {
 
@@ -60,15 +63,29 @@ public class Deposit extends Job {
                 String fileName = inputFile.getName();
                 File outputFile = bagPath.resolve(fileName).toFile();
 
+                // Compute bytes to copy
                 long bytes = 0;
-                
                 if (inputFile.isFile()) {
-                    FileUtils.copyFile(inputFile, outputFile);
-                    bytes = FileUtils.sizeOf(outputFile);
+                    bytes = FileUtils.sizeOf(inputFile);
                 } else if (inputFile.isDirectory()) {
-                    FileUtils.copyDirectory(inputFile, outputFile);
-                    bytes = FileUtils.sizeOfDirectory(outputFile);
+                    bytes = FileUtils.sizeOfDirectory(inputFile);
                 }
+                
+                // Progress tracking (threaded)
+                Progress progress = new Progress();
+                ProgressTracker tracker = new ProgressTracker(progress);
+                Thread trackerThread = new Thread(tracker);
+                trackerThread.start();
+                
+                // Copy the actual files
+                if (inputFile.isFile()) {
+                    FileCopy.copyFile(progress, inputFile, outputFile);
+                } else if (inputFile.isDirectory()) {
+                    FileCopy.copyDirectory(progress, inputFile, outputFile);
+                }
+                
+                tracker.stop();
+                trackerThread.join();
                 
                 eventStream.send(new ComputedSize(depositId, bytes));
                 
@@ -100,7 +117,9 @@ public class Deposit extends Job {
                 // Copy the resulting tar file to the archive area
                 System.out.println("\tCopying tar file to archive ...");
                 Path archivePath = Paths.get(context.getArchiveDir()).resolve(tarFileName);
-                FileUtils.copyFile(tarFile, archivePath.toFile());
+                progress = new Progress();
+                FileCopy.copyFile(progress, tarFile, archivePath.toFile());
+                System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
                 
                 // Cleanup
                 System.out.println("\tCleaning up ...");
