@@ -22,7 +22,7 @@ public class DepositsService {
         deposit.setCreationTime(d);
         
         deposit.setVault(vault);
-        deposit.setStatus(Deposit.Status.OPEN);
+        deposit.setStatus(Deposit.Status.NOT_STARTED);
         
         // Generate a new UUID for this Bag.
         deposit.setBagId(UUID.randomUUID().toString());

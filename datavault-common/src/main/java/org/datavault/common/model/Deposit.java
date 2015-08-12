@@ -47,8 +47,14 @@ public class Deposit {
     @OrderBy("timestamp, sequence")
     private List<Event> events;
     
+    // TODO: we need a more robust/generic approach to deposit state
     public enum Status {
-        OPEN, CLOSED
+        NOT_STARTED,
+        CALCULATE_SIZE, // other pre-flight checks?
+        TRANSFER_FILES,
+        CREATE_PACKAGE,
+        STORE_ARCHIVE_PACKAGE,
+        COMPLETE
     }
     
     private String note;
@@ -69,7 +75,7 @@ public class Deposit {
     public Deposit() {}
     public Deposit(String note) {
         this.note = note;
-        this.status = Status.OPEN;
+        this.status = Status.NOT_STARTED;
     }
     
     public String getID() { return id; }

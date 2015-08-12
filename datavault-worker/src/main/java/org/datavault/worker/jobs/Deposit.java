@@ -12,7 +12,10 @@ import org.datavault.worker.operations.Packager;
 import org.datavault.worker.queue.EventSender;
 import org.datavault.common.event.Event;
 import org.datavault.common.event.Error;
+import org.datavault.common.event.deposit.Start;
 import org.datavault.common.event.deposit.ComputedSize;
+import org.datavault.common.event.deposit.TransferComplete;
+import org.datavault.common.event.deposit.PackageComplete;
 import org.datavault.common.event.deposit.Complete;
 
 import org.apache.commons.io.FileUtils;
@@ -41,7 +44,7 @@ public class Deposit extends Job {
         String depositMetadata = properties.get("depositMetadata");
         String vaultMetadata = properties.get("vaultMetadata");
         
-        eventStream.send(new Event(depositId, "Deposit started"));
+        eventStream.send(new Start(depositId));
         
         System.out.println("\tbagID: " + bagID);
         System.out.println("\tfilePath: " + filePath);
@@ -94,6 +97,8 @@ public class Deposit extends Job {
                     trackerThread.join();
                 }
                 
+                eventStream.send(new TransferComplete(depositId));
+                
                 // Bag the directory in-place
                 System.out.println("\tCreating bag ...");
                 Packager.createBag(bagDir);
@@ -108,6 +113,8 @@ public class Deposit extends Job {
                 File tarFile = tarPath.toFile();
                 Tar.createTar(bagDir, tarFile);
 
+                eventStream.send(new PackageComplete(depositId));
+                
                 // Create the meta directory for the bag information
                 Path metaPath = Paths.get(context.getMetaDir(), bagID);
                 File metaDir = metaPath.toFile();
