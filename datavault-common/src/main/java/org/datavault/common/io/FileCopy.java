@@ -225,6 +225,7 @@ public class FileCopy {
                 count = size - pos > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : size - pos;
                 pos += output.transferFrom(input, pos, count);
                 progress.byteCount += count;
+                progress.timestamp = System.currentTimeMillis();
             }
         } finally {
             IOUtils.closeQuietly(output);

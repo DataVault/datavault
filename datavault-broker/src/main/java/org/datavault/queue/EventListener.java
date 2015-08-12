@@ -54,11 +54,18 @@ public class EventListener implements MessageListener {
             
             // Maybe perform an action based on the event type ...
             
-            if (concreteEvent instanceof ComputedSize) {
+            if (concreteEvent instanceof Start) {
+                
+                // Update the deposit status
+                deposit.setStatus(Deposit.Status.CALCULATE_SIZE);
+                depositsService.updateDeposit(deposit);
+                
+            } else if (concreteEvent instanceof ComputedSize) {
                 
                 // Update the deposit with the computed size
                 ComputedSize computedSizeEvent = (ComputedSize)concreteEvent;
                 deposit.setSize(computedSizeEvent.getBytes());
+                deposit.setStatus(Deposit.Status.TRANSFER_FILES);
                 depositsService.updateDeposit(deposit);
                 
                 // Add to the cumulative vault size
@@ -75,10 +82,22 @@ public class EventListener implements MessageListener {
                 deposit.setBytesTransferred(transferProgressEvent.getBytes());
                 depositsService.updateDeposit(deposit);
                 
+            } else if (concreteEvent instanceof TransferComplete) {
+                
+                // Update the deposit status
+                deposit.setStatus(Deposit.Status.CREATE_PACKAGE);
+                depositsService.updateDeposit(deposit);
+                
+            } else if (concreteEvent instanceof PackageComplete) {
+                
+                // Update the deposit status
+                deposit.setStatus(Deposit.Status.STORE_ARCHIVE_PACKAGE);
+                depositsService.updateDeposit(deposit);
+                
             } else if (concreteEvent instanceof Complete) {
                 
                 // Update the deposit status
-                deposit.setStatus(Deposit.Status.CLOSED);
+                deposit.setStatus(Deposit.Status.COMPLETE);
                 depositsService.updateDeposit(deposit);
             }
             
