@@ -80,6 +80,7 @@ public class EventListener implements MessageListener {
                 // Update the deposit transfer progress
                 TransferProgress transferProgressEvent = (TransferProgress)concreteEvent;
                 deposit.setBytesTransferred(transferProgressEvent.getBytes());
+                deposit.setBytesPerSec(transferProgressEvent.getBytesPerSec());
                 depositsService.updateDeposit(deposit);
                 
             } else if (concreteEvent instanceof TransferComplete) {
