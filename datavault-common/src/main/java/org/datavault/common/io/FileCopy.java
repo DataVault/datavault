@@ -70,7 +70,6 @@ public class FileCopy {
      * it is not guaranteed that the operation will succeed.
      * If the modification operation fails, no indication is provided.
      *
-     * @param progress  the progress tracking object
      * @param srcFile  an existing file to copy, must not be {@code null}
      * @param destDir  the directory to place the copy in, must not be {@code null}
      *
@@ -97,7 +96,6 @@ public class FileCopy {
      * not guaranteed that the operation will succeed.
      * If the modification operation fails, no indication is provided.
      *
-     * @param progress  the progress tracking object
      * @param srcFile  an existing file to copy, must not be {@code null}
      * @param destDir  the directory to place the copy in, must not be {@code null}
      * @param preserveFileDate  true if the file date of the copy
@@ -159,7 +157,6 @@ public class FileCopy {
      * not guaranteed that the operation will succeed.
      * If the modification operation fails, no indication is provided.
      *
-     * @param progress  the progress tracking object
      * @param srcFile  an existing file to copy, must not be {@code null}
      * @param destFile  the new file, must not be {@code null}
      * @param preserveFileDate  true if the file date of the copy
@@ -202,7 +199,6 @@ public class FileCopy {
     /**
      * Internal copy file method.
      * 
-     * @param progress  the progress tracking object
      * @param srcFile  the validated source file, must not be {@code null}
      * @param destFile  the validated destination file, must not be {@code null}
      * @param preserveFileDate  whether to preserve the file date
@@ -227,9 +223,8 @@ public class FileCopy {
             long count = 0;
             while (pos < size) {
                 count = size - pos > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : size - pos;
-                long copied = output.transferFrom(input, pos, count);
-                pos += copied;
-                progress.byteCount += copied;
+                pos += output.transferFrom(input, pos, count);
+                progress.byteCount += count;
                 progress.timestamp = System.currentTimeMillis();
             }
         } finally {
@@ -266,7 +261,6 @@ public class FileCopy {
      * it is not guaranteed that those operations will succeed.
      * If the modification operation fails, no indication is provided.
      *
-     * @param progress  the progress tracking object
      * @param srcDir  an existing directory to copy, must not be {@code null}
      * @param destDir  the directory to place the copy in, must not be {@code null}
      *
@@ -307,7 +301,6 @@ public class FileCopy {
      * it is not guaranteed that those operations will succeed.
      * If the modification operation fails, no indication is provided.
      *
-     * @param progress  the progress tracking object
      * @param srcDir  an existing directory to copy, must not be {@code null}
      * @param destDir  the new directory, must not be {@code null}
      *
@@ -336,7 +329,6 @@ public class FileCopy {
      * not guaranteed that those operations will succeed.
      * If the modification operation fails, no indication is provided.
      *
-     * @param progress  the progress tracking object
      * @param srcDir  an existing directory to copy, must not be {@code null}
      * @param destDir  the new directory, must not be {@code null}
      * @param preserveFileDate  true if the file date of the copy
@@ -370,7 +362,7 @@ public class FileCopy {
      * <h4>Example: Copy directories only</h4> 
      *  <pre>
   // only copy the directory structure
-  FileCopy.copyDirectory(progress, srcDir, destDir, DirectoryFileFilter.DIRECTORY);
+  FileCopy.copyDirectory(srcDir, destDir, DirectoryFileFilter.DIRECTORY);
   </pre>
      *
      * <h4>Example: Copy directories and txt files</h4>
@@ -383,10 +375,9 @@ public class FileCopy {
   FileFilter filter = FileFilterUtils.orFileFilter(DirectoryFileFilter.DIRECTORY, txtFiles);
 
   // Copy using the filter
-  FileCopy.copyDirectory(progress, srcDir, destDir, filter);
+  FileCopy.copyDirectory(srcDir, destDir, filter);
   </pre>
      *
-     * @param progress  the progress tracking object
      * @param srcDir  an existing directory to copy, must not be {@code null}
      * @param destDir  the new directory, must not be {@code null}
      * @param filter  the filter to apply, null means copy all directories and files
@@ -421,7 +412,7 @@ public class FileCopy {
      * <h4>Example: Copy directories only</h4> 
      *  <pre>
   // only copy the directory structure
-  FileCopy.copyDirectory(progress, srcDir, destDir, DirectoryFileFilter.DIRECTORY, false);
+  FileCopy.copyDirectory(srcDir, destDir, DirectoryFileFilter.DIRECTORY, false);
   </pre>
      *
      * <h4>Example: Copy directories and txt files</h4>
@@ -434,10 +425,9 @@ public class FileCopy {
   FileFilter filter = FileFilterUtils.orFileFilter(DirectoryFileFilter.DIRECTORY, txtFiles);
 
   // Copy using the filter
-  FileCopy.copyDirectory(progress, srcDir, destDir, filter, false);
+  FileCopy.copyDirectory(srcDir, destDir, filter, false);
   </pre>
      * 
-     * @param progress  the progress tracking object
      * @param srcDir  an existing directory to copy, must not be {@code null}
      * @param destDir  the new directory, must not be {@code null}
      * @param filter  the filter to apply, null means copy all directories and files
@@ -485,7 +475,6 @@ public class FileCopy {
     /**
      * Internal copy directory method.
      * 
-     * @param progress  the progress tracking object
      * @param srcDir  the validated source directory, must not be {@code null}
      * @param destDir  the validated destination directory, must not be {@code null}
      * @param filter  the filter to apply, null means copy all directories and files
