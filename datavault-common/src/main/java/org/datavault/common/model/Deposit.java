@@ -2,6 +2,8 @@ package org.datavault.common.model;
 
 import org.datavault.common.event.Event;
 
+import org.apache.commons.io.FileUtils;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -72,6 +74,9 @@ public class Deposit {
     // Number of bytes ingested/transferred
     private long bytesTransferred;
     
+    // Transfer rate
+    private long bytesPerSec;
+    
     public Deposit() {}
     public Deposit(String note) {
         this.note = note;
@@ -124,12 +129,28 @@ public class Deposit {
 
     public long getSize() { return depositSize; }
 
-    public long getBytesTransferred() {
-        return bytesTransferred;
+    public String getSizeStr() {
+        return FileUtils.byteCountToDisplaySize(depositSize);
+    }
+
+    public long getBytesTransferred() { return bytesTransferred; }
+    
+    public String getBytesTransferredStr() {
+        return FileUtils.byteCountToDisplaySize(bytesTransferred);
     }
 
     public void setBytesTransferred(long bytesTransferred) {
         this.bytesTransferred = bytesTransferred;
+    }
+
+    public long getBytesPerSec() { return bytesPerSec; }
+    
+    public String getBytesPerSecStr() {
+        return FileUtils.byteCountToDisplaySize(bytesPerSec);
+    }
+
+    public void setBytesPerSec(long bytesPerSec) {
+        this.bytesPerSec = bytesPerSec;
     }
     
     public List<Event> getEvents() {

@@ -45,6 +45,7 @@
             </#if>
 
             <#if percentComplete != 100>
+                <span>Copied ${deposit.getBytesTransferredStr()} of ${deposit.getSizeStr()} at ${deposit.getBytesPerSecStr()}/sec</span>
                 <div class="progress">
                   <div class="progress-bar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="${percentComplete}" aria-valuemin="0" aria-valuemax="100" style="width: ${percentComplete}%">
                     <span class="sr-only">${percentComplete}% Complete</span>
