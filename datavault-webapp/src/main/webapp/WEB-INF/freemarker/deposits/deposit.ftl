@@ -51,14 +51,12 @@
             <#assign percentComplete = (deposit.bytesTransferred / deposit.size) * 100>
         </#if>
 
-        <#if percentComplete != 100>
-            <span>Copied ${deposit.getBytesTransferredStr()} of ${deposit.getSizeStr()} at ${deposit.getBytesPerSecStr()}/sec</span>
-            <div class="progress">
-              <div id="progress" class="progress-bar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="${percentComplete}" aria-valuemin="0" aria-valuemax="100" style="width: ${percentComplete}%">
-                <span id="progress-label" class="sr-only">${percentComplete}% Complete</span>
-              </div>
-            </div>
-        </#if>
+        <span id="progress-copied">Copied ${deposit.getBytesTransferredStr()} of ${deposit.getSizeStr()} at ${deposit.getBytesPerSecStr()}/sec</span>
+        <div class="progress">
+          <div id="progress" class="progress-bar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="${percentComplete}" aria-valuemin="0" aria-valuemax="100" style="width: ${percentComplete}%">
+            <span id="progress-label" class="sr-only">${percentComplete}% Complete</span>
+          </div>
+        </div>
     </div>
 
     <ul class="nav nav-tabs">
@@ -150,9 +148,11 @@
         if (deposit.bytesTransferred > 0) {
             percentComplete = (deposit.bytesTransferred / deposit.size) * 100
         }
-        $('#progress-label').textContent = percentComplete + '% Complete'
-        $('#progress').css('width', percentComplete + '%').attr('aria-valuenow', percentComplete);
         
+        $('#progress').css('width', percentComplete + '%').attr('aria-valuenow', percentComplete);
+        $('#progress-label').text(percentComplete + '% Complete')
+        $('#progress-copied').text("Copied " + deposit.bytesTransferredStr + " of " + deposit.sizeStr + " at " + deposit.bytesPerSecStr + "/sec")
+
         if (deposit.status == 'COMPLETE') {
             $('#progress-transfer').hide()
             statusComplete()
