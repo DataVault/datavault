@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * User: Robin Taylor
@@ -51,6 +52,12 @@ public class DepositsController {
         model.addAttribute("manifest", restService.getDepositManifest(vaultID, depositID));
         model.addAttribute("events", restService.getDepositEvents(vaultID, depositID));
         return "deposits/deposit";
+    }
+    
+    // View properties of a single deposit as a JSON object
+    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/json", method = RequestMethod.GET)
+    public @ResponseBody Deposit getDepositJson(@PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
+        return restService.getDeposit(vaultID, depositID);
     }
     
     // Return a 'restore deposit' page

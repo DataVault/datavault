@@ -8,53 +8,56 @@
         <li class="active"><b>Deposit:</b> ${deposit.note?html}</li>
     </ol>
 
+    <#assign calculateSize = "progtrckr-todo">
+    <#assign transferFiles = "progtrckr-todo">
+    <#assign packageData = "progtrckr-todo">
+    <#assign storeInArchive = "progtrckr-todo">
+    <#assign depositComplete = "progtrckr-todo">
+
     <#if deposit.status.ordinal() gt 0>
-
         <#assign calculateSize = "progtrckr-done">
-        <#assign transferFiles = "progtrckr-todo">
-        <#assign packageData = "progtrckr-todo">
-        <#assign storeInArchive = "progtrckr-todo">
-        <#assign depositComplete = "progtrckr-todo">
-
-        <#if deposit.status.ordinal() gt 1>
-            <#assign transferFiles = "progtrckr-done">
-        </#if>
-        <#if deposit.status.ordinal() gt 2>
-            <#assign packageData = "progtrckr-done">
-        </#if>
-        <#if deposit.status.ordinal() gt 3>
-            <#assign storeInArchive = "progtrckr-done">
-        </#if>
-        <#if deposit.status.ordinal() gt 4>
-            <#assign depositComplete = "progtrckr-done">
-        </#if>
-
-        <ol class="progtrckr" data-progtrckr-steps="5">
-            <li class="${calculateSize}">Calculating size</li><!--
-         --><li class="${transferFiles}">Transferring files</li><!--
-         --><li class="${packageData}">Packaging data</li><!--
-         --><li class="${storeInArchive}">Storing in archive</li><!--
-         --><li class="${depositComplete}">Deposit complete</li>
-        </ol>
-
-        <#if deposit.status.ordinal() == 2>
-            <#if deposit.size == 0>
-                <#assign percentComplete = 0>
-            <#else>
-                <#assign percentComplete = (deposit.bytesTransferred / deposit.size) * 100>
-            </#if>
-
-            <#if percentComplete != 100>
-                <span>Copied ${deposit.getBytesTransferredStr()} of ${deposit.getSizeStr()} at ${deposit.getBytesPerSecStr()}/sec</span>
-                <div class="progress">
-                  <div class="progress-bar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="${percentComplete}" aria-valuemin="0" aria-valuemax="100" style="width: ${percentComplete}%">
-                    <span class="sr-only">${percentComplete}% Complete</span>
-                  </div>
-                </div>
-            </#if>
-        </#if>
-
     </#if>
+    <#if deposit.status.ordinal() gt 1>
+        <#assign transferFiles = "progtrckr-done">
+    </#if>
+    <#if deposit.status.ordinal() gt 2>
+        <#assign packageData = "progtrckr-done">
+    </#if>
+    <#if deposit.status.ordinal() gt 3>
+        <#assign storeInArchive = "progtrckr-done">
+    </#if>
+    <#if deposit.status.ordinal() gt 4>
+        <#assign depositComplete = "progtrckr-done">
+    </#if>
+
+    <ol class="progtrckr" data-progtrckr-steps="5">
+        <li id="progress-calculateSize" class="${calculateSize}">Calculating size</li><!--
+     --><li id="progress-transferFiles" class="${transferFiles}">Transferring files</li><!--
+     --><li id="progress-packageData" class="${packageData}">Packaging data</li><!--
+     --><li id="progress-storeInArchive" class="${storeInArchive}">Storing in archive</li><!--
+     --><li id="progress-depositComplete" class="${depositComplete}">Deposit complete</li>
+    </ol>
+
+    <#if deposit.status.ordinal() == 2>
+        <#assign progressTransferStyle = "">
+    <#else>
+        <#assign progressTransferStyle = "display:none;">
+    </#if>
+
+    <div id="progress-transfer" style="${progressTransferStyle}">
+        <#if deposit.size == 0>
+            <#assign percentComplete = 0>
+        <#else>
+            <#assign percentComplete = (deposit.bytesTransferred / deposit.size) * 100>
+        </#if>
+
+        <span id="progress-copied">Copied ${deposit.getBytesTransferredStr()} of ${deposit.getSizeStr()} at ${deposit.getBytesPerSecStr()}/sec</span>
+        <div class="progress">
+          <div id="progress" class="progress-bar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="${percentComplete}" aria-valuemin="0" aria-valuemax="100" style="width: ${percentComplete}%">
+            <span id="progress-label" class="sr-only">${percentComplete}% Complete</span>
+          </div>
+        </div>
+    </div>
 
     <ul class="nav nav-tabs">
         <li class="active"><a data-toggle="tab" href="#deposit">Deposit</a></li>
@@ -137,5 +140,87 @@
     </a>
 
 </div>
+
+<script>
+
+    function updateProgress(deposit) {
+        var percentComplete = 0
+        if (deposit.size > 0 && deposit.bytesTransferred > 0) {
+            percentComplete = (deposit.bytesTransferred / deposit.size) * 100
+        }
+        
+        $('#progress').css('width', percentComplete + '%').attr('aria-valuenow', percentComplete);
+        $('#progress-label').text(percentComplete + '% Complete')
+        $('#progress-copied').text("Copied " + deposit.bytesTransferredStr + " of " + deposit.sizeStr + " at " + deposit.bytesPerSecStr + "/sec")
+
+        if (deposit.status == 'COMPLETE') {
+            $('#progress-transfer').hide()
+            statusComplete()
+        } else if (deposit.status == 'STORE_ARCHIVE_PACKAGE') {
+            $('#progress-transfer').hide()
+            statusStoreInArchive()
+        } else if (deposit.status == 'CREATE_PACKAGE') {
+            $('#progress-transfer').hide()
+            statusPackageData()
+        } else if (deposit.status == 'TRANSFER_FILES') {
+            $('#progress-transfer').show()
+            statusTransferFiles()
+        } else if (deposit.status == 'CALCULATE_SIZE') {
+            $('#progress-transfer').hide()
+            statusCalculateSize()
+        }
+    }
+
+    function statusComplete() {
+        $('#progress-depositComplete').removeClass('progtrckr-todo')
+        $('#progress-depositComplete').addClass('progtrckr-done')
+        
+        statusStoreInArchive()
+    }
+    
+    function statusStoreInArchive() {
+        $('#progress-storeInArchive').removeClass('progtrckr-todo')
+        $('#progress-storeInArchive').addClass('progtrckr-done')
+
+        statusPackageData()
+    }
+
+    function statusPackageData() {
+        $('#progress-packageData').removeClass('progtrckr-todo')
+        $('#progress-packageData').addClass('progtrckr-done')
+
+        statusTransferFiles()
+    }
+
+    function statusTransferFiles() {
+        $('#progress-transferFiles').removeClass('progtrckr-todo')
+        $('#progress-transferFiles').addClass('progtrckr-done')
+
+        statusCalculateSize()
+    }
+
+    function statusCalculateSize() {
+        $('#progress-calculateSize').removeClass('progtrckr-todo')
+        $('#progress-calculateSize').addClass('progtrckr-done')
+    }
+
+    function load() {
+        setTimeout(function () {
+            $.ajax({
+                url: "json",
+                type: "GET",
+                dataType: 'json',  
+                success: function (result) {
+                    updateProgress(result)
+
+                    if (result.status != 'COMPLETE') {
+                        load()
+                    }
+                }
+            });
+        }, 250);
+    }
+    load();
+</script>
 
 </@layout.vaultLayout>
