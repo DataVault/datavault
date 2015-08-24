@@ -145,7 +145,7 @@
 
     function updateProgress(deposit) {
         var percentComplete = 0
-        if (deposit.bytesTransferred > 0) {
+        if (deposit.size > 0 && deposit.bytesTransferred > 0) {
             percentComplete = (deposit.bytesTransferred / deposit.size) * 100
         }
         
