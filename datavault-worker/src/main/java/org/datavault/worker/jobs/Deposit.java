@@ -62,17 +62,10 @@ public class Deposit extends Job {
             return;
         }
         
-        // TODO
-        // Ideally we want to just instruct the "fs" to copy the file(s) on our behalf ...
-        // For now, we're cheating and using the old method
-        
-        Path absoluteFilePath = fs.getAbsolutePath(filePath);
-        File inputFile = absoluteFilePath.toFile();
-        
-        System.out.println("\tDeposit file: " + inputFile.toString());
+        System.out.println("\tDeposit file: " + filePath);
 
         try {
-            if (inputFile.exists()) {
+            if (fs.exists(filePath)) {
 
                 // Create a new directory based on the broker-generated UUID
                 Path bagPath = Paths.get(context.getTempDir(), bagID);
@@ -81,16 +74,11 @@ public class Deposit extends Job {
 
                 // Copy the target file to the bag directory
                 System.out.println("\tCopying target to bag directory ...");
-                String fileName = inputFile.getName();
+                String fileName = fs.getName(filePath);
                 File outputFile = bagPath.resolve(fileName).toFile();
 
                 // Compute bytes to copy
-                long bytes = 0;
-                if (inputFile.isFile()) {
-                    bytes = FileUtils.sizeOf(inputFile);
-                } else if (inputFile.isDirectory()) {
-                    bytes = FileUtils.sizeOfDirectory(inputFile);
-                }
+                long bytes = fs.getSize(filePath);
                 
                 eventStream.send(new ComputedSize(depositId, bytes));
                 System.out.println("\tSize: " + bytes + " bytes (" +  FileUtils.byteCountToDisplaySize(bytes) + ")");
@@ -102,13 +90,8 @@ public class Deposit extends Job {
                 trackerThread.start();
                 
                 try {
-                    // Copy the actual files
-                    if (inputFile.isFile()) {
-                        FileCopy.copyFile(progress, inputFile, outputFile);
-                    } else if (inputFile.isDirectory()) {
-                        FileCopy.copyDirectory(progress, inputFile, outputFile);
-                    }
-                    
+                    // Ask the driver to copy files to our working directory
+                    fs.copyToWorkingSpace(filePath, outputFile, progress);
                 } finally {
                     // Stop the tracking thread
                     tracker.stop();

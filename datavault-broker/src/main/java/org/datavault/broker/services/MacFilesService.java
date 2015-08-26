@@ -38,7 +38,7 @@ public class MacFilesService {
     }
     
     public boolean validPath(String filePath) {
-        return fs.validPath(filePath);
+        return fs.valid(filePath);
     }
 }
 

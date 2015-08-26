@@ -2,6 +2,7 @@ package org.datavault.common.storage.impl;
 
 import org.datavault.common.storage.Device;
 import org.datavault.common.model.FileInfo;
+import org.datavault.common.io.Progress;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,8 +15,9 @@ import java.util.List;
 import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
+import org.datavault.common.io.FileCopy;
 
-public class LocalFileSystem extends Device{
+public class LocalFileSystem extends Device {
 
     private String rootPath = null;
     
@@ -69,14 +71,22 @@ public class LocalFileSystem extends Device{
     }
     
     @Override
-    public boolean validPath(String filePath) {
-        Path path = getAbsolutePath(filePath);
-        return (path != null);
+    public boolean valid(String path) {
+        Path absolutePath = getAbsolutePath(path);
+        return (absolutePath != null);
+    }
+
+    @Override
+    public boolean exists(String path) {
+        Path absolutePath = getAbsolutePath(path);
+        File file = absolutePath.toFile();
+        return file.exists();
     }
     
     @Override
     public long getSize(String path) {
-        File file = new File(path);
+        Path absolutePath = getAbsolutePath(path);
+        File file = absolutePath.toFile();
         
         if (file.isDirectory()) {
             return FileUtils.sizeOfDirectory(file);
@@ -84,11 +94,49 @@ public class LocalFileSystem extends Device{
             return FileUtils.sizeOf(file);
         }
     }
+
+    @Override
+    public boolean isDirectory(String path) {
+        Path absolutePath = getAbsolutePath(path);
+        File file = absolutePath.toFile();
+        return file.isDirectory();
+    }
+    
+    @Override
+    public String getName(String path) {
+        Path absolutePath = getAbsolutePath(path);
+        File file = absolutePath.toFile();
+        return file.getName();
+    }
     
     @Override
     public long getUsableSpace() {
         File file = new File(rootPath);
         return file.getUsableSpace();
+    }
+
+    @Override
+    public void copyToWorkingSpace(String path, File working, Progress progress) throws Exception {
+        Path absolutePath = getAbsolutePath(path);
+        File file = absolutePath.toFile();
+        
+        if (file.isFile()) {
+            FileCopy.copyFile(progress, file, working);
+        } else if (file.isDirectory()) {
+            FileCopy.copyDirectory(progress, file, working);
+        }
+    }
+
+    @Override
+    public void copyFromWorkingSpace(String path, File working, Progress progress) throws Exception {
+        Path absolutePath = getAbsolutePath(path);
+        File restoreFile = absolutePath.resolve(working.getName()).toFile();
+        
+        if (working.isFile()) {
+            FileCopy.copyFile(progress, working, restoreFile);
+        } else if (working.isDirectory()) {
+            FileCopy.copyDirectory(progress, working, restoreFile);
+        }
     }
     
     // TODO should be a private method
