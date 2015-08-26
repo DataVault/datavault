@@ -21,6 +21,7 @@ import org.datavault.common.event.deposit.Complete;
 import org.apache.commons.io.FileUtils;
 import org.datavault.common.io.FileCopy;
 import org.datavault.common.io.Progress;
+import org.datavault.common.storage.impl.LocalFileSystem;
 import org.datavault.worker.operations.ProgressTracker;
 
 public class Deposit extends Job {
@@ -33,7 +34,7 @@ public class Deposit extends Job {
         EventSender eventStream = (EventSender)context.getEventStream();
         
         System.out.println("\tDeposit job - performAction()");
-                
+        
         Map<String, String> properties = getProperties();
         String depositId = properties.get("depositId");
         String bagID = properties.get("bagId");
@@ -49,7 +50,24 @@ public class Deposit extends Job {
         System.out.println("\tbagID: " + bagID);
         System.out.println("\tfilePath: " + filePath);
         
-        File inputFile = Paths.get(filePath).toFile();
+        LocalFileSystem fs;
+        
+        try {
+            String name = "filesystem";
+            String auth = "";
+            fs = new LocalFileSystem(name, auth, context.getActiveDir());
+        } catch (Exception e) {
+            e.printStackTrace();
+            eventStream.send(new Error(depositId, "Deposit failed: could not access active filesystem"));
+            return;
+        }
+        
+        // TODO
+        // Ideally we want to just instruct the "fs" to copy the file(s) on our behalf ...
+        // For now, we're cheating and using the old method
+        
+        Path absoluteFilePath = fs.getAbsolutePath(filePath);
+        File inputFile = absoluteFilePath.toFile();
         
         System.out.println("\tDeposit file: " + inputFile.toString());
 

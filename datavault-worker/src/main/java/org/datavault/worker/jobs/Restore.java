@@ -12,6 +12,7 @@ import org.datavault.common.event.Event;
 import org.datavault.common.event.Error;
 
 import org.apache.commons.io.FileUtils;
+import org.datavault.common.storage.impl.LocalFileSystem;
 
 public class Restore extends Job {
     
@@ -32,9 +33,28 @@ public class Restore extends Job {
         System.out.println("\tbagID: " + bagID);
         System.out.println("\trestorePath: " + restorePath);
         
+        LocalFileSystem fs;
+        
         try {
-            Path path = Paths.get(restorePath);
-            File dir = path.toFile();
+            String name = "filesystem";
+            String auth = "";
+            fs = new LocalFileSystem(name, auth, context.getActiveDir());
+        } catch (Exception e) {
+            e.printStackTrace();
+            eventStream.send(new Error(depositId, "Restore failed: could not access active filesystem"));
+            return;
+        }
+        
+        // Check that there's enough free space ...
+        System.out.println("Free space: " + fs.getUsableSpace() + " bytes");
+        
+        // TODO
+        // Ideally we want to just instruct the "fs" to copy the file(s) on our behalf ...
+        // For now, we're cheating and using the old method
+        Path absoluteFilePath = fs.getAbsolutePath(restorePath);
+        
+        try {
+            File dir = absoluteFilePath.toFile();
 
             if (!dir.exists() || !dir.isDirectory()) {
                 // Target path must exist and be a directory
@@ -49,7 +69,7 @@ public class Restore extends Job {
 
             // Copy the tar file to the target restore area
             System.out.println("\tCopying tar file from archive ...");
-            File restoreFile = path.resolve(tarFileName).toFile();
+            File restoreFile = absoluteFilePath.resolve(tarFileName).toFile();
             FileUtils.copyFile(archiveFile, restoreFile);
             
             System.out.println("\tData restore complete: " + restoreFile);
