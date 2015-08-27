@@ -112,8 +112,7 @@ public class VaultsController {
         }
         
         // Check the source file path is valid
-        Path path = macFilesService.getAbsolutePath(deposit.getFilePath());
-        if (path == null) {
+        if (!macFilesService.validPath(deposit.getFilePath())) {
             throw new IllegalArgumentException("Path '" + deposit.getFilePath() + "' is invalid");
         }
         
@@ -127,7 +126,7 @@ public class VaultsController {
             HashMap<String, String> depositProperties = new HashMap<>();
             depositProperties.put("depositId", deposit.getID());
             depositProperties.put("bagId", deposit.getBagId());
-            depositProperties.put("filePath", path.toString()); // The absolute path
+            depositProperties.put("filePath", deposit.getFilePath()); // Note: no longer an absolute path
             
             // Deposit and Vault metadata
             // TODO: at the moment we're just serialising the objects to JSON.
@@ -197,9 +196,9 @@ public class VaultsController {
         if (restorePath == null) {
             throw new IllegalArgumentException("Path was null");
         }
-        
-        Path path = macFilesService.getAbsolutePath(restorePath);
-        if (path == null) {
+
+        // Check the source file path is valid
+        if (!macFilesService.validPath(restorePath)) {
             throw new IllegalArgumentException("Path '" + restorePath + "' is invalid");
         }
         
@@ -208,7 +207,7 @@ public class VaultsController {
             HashMap<String, String> restoreProperties = new HashMap<>();
             restoreProperties.put("depositId", deposit.getID());
             restoreProperties.put("bagId", deposit.getBagId());
-            restoreProperties.put("restorePath", path.toString()); // The absolute path
+            restoreProperties.put("restorePath", restorePath); // No longer the absolute path
             
             Job restoreJob = new Job("org.datavault.worker.jobs.Restore", restoreProperties);
             ObjectMapper mapper = new ObjectMapper();

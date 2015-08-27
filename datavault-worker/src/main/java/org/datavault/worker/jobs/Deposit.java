@@ -21,6 +21,7 @@ import org.datavault.common.event.deposit.Complete;
 import org.apache.commons.io.FileUtils;
 import org.datavault.common.io.FileCopy;
 import org.datavault.common.io.Progress;
+import org.datavault.common.storage.impl.LocalFileSystem;
 import org.datavault.worker.operations.ProgressTracker;
 
 public class Deposit extends Job {
@@ -33,7 +34,7 @@ public class Deposit extends Job {
         EventSender eventStream = (EventSender)context.getEventStream();
         
         System.out.println("\tDeposit job - performAction()");
-                
+        
         Map<String, String> properties = getProperties();
         String depositId = properties.get("depositId");
         String bagID = properties.get("bagId");
@@ -49,12 +50,22 @@ public class Deposit extends Job {
         System.out.println("\tbagID: " + bagID);
         System.out.println("\tfilePath: " + filePath);
         
-        File inputFile = Paths.get(filePath).toFile();
+        LocalFileSystem fs;
         
-        System.out.println("\tDeposit file: " + inputFile.toString());
+        try {
+            String name = "filesystem";
+            String auth = "";
+            fs = new LocalFileSystem(name, auth, context.getActiveDir());
+        } catch (Exception e) {
+            e.printStackTrace();
+            eventStream.send(new Error(depositId, "Deposit failed: could not access active filesystem"));
+            return;
+        }
+        
+        System.out.println("\tDeposit file: " + filePath);
 
         try {
-            if (inputFile.exists()) {
+            if (fs.exists(filePath)) {
 
                 // Create a new directory based on the broker-generated UUID
                 Path bagPath = Paths.get(context.getTempDir(), bagID);
@@ -63,16 +74,11 @@ public class Deposit extends Job {
 
                 // Copy the target file to the bag directory
                 System.out.println("\tCopying target to bag directory ...");
-                String fileName = inputFile.getName();
+                String fileName = fs.getName(filePath);
                 File outputFile = bagPath.resolve(fileName).toFile();
 
                 // Compute bytes to copy
-                long bytes = 0;
-                if (inputFile.isFile()) {
-                    bytes = FileUtils.sizeOf(inputFile);
-                } else if (inputFile.isDirectory()) {
-                    bytes = FileUtils.sizeOfDirectory(inputFile);
-                }
+                long bytes = fs.getSize(filePath);
                 
                 eventStream.send(new ComputedSize(depositId, bytes));
                 System.out.println("\tSize: " + bytes + " bytes (" +  FileUtils.byteCountToDisplaySize(bytes) + ")");
@@ -84,13 +90,8 @@ public class Deposit extends Job {
                 trackerThread.start();
                 
                 try {
-                    // Copy the actual files
-                    if (inputFile.isFile()) {
-                        FileCopy.copyFile(progress, inputFile, outputFile);
-                    } else if (inputFile.isDirectory()) {
-                        FileCopy.copyDirectory(progress, inputFile, outputFile);
-                    }
-                    
+                    // Ask the driver to copy files to our working directory
+                    fs.copyToWorkingSpace(filePath, outputFile, progress);
                 } finally {
                     // Stop the tracking thread
                     tracker.stop();

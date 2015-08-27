@@ -12,6 +12,9 @@ import org.datavault.common.event.Event;
 import org.datavault.common.event.Error;
 
 import org.apache.commons.io.FileUtils;
+import org.datavault.common.io.Progress;
+import org.datavault.common.storage.impl.LocalFileSystem;
+import org.datavault.worker.operations.ProgressTracker;
 
 public class Restore extends Job {
     
@@ -32,11 +35,23 @@ public class Restore extends Job {
         System.out.println("\tbagID: " + bagID);
         System.out.println("\trestorePath: " + restorePath);
         
+        LocalFileSystem fs;
+        
         try {
-            Path path = Paths.get(restorePath);
-            File dir = path.toFile();
-
-            if (!dir.exists() || !dir.isDirectory()) {
+            String name = "filesystem";
+            String auth = "";
+            fs = new LocalFileSystem(name, auth, context.getActiveDir());
+        } catch (Exception e) {
+            e.printStackTrace();
+            eventStream.send(new Error(depositId, "Restore failed: could not access active filesystem"));
+            return;
+        }
+        
+        // Check that there's enough free space ...
+        System.out.println("Free space: " + fs.getUsableSpace() + " bytes");
+        
+        try {
+            if (!fs.exists(restorePath) || !fs.isDirectory(restorePath)) {
                 // Target path must exist and be a directory
                 System.out.println("\tTarget directory not found!");
             }
@@ -49,10 +64,16 @@ public class Restore extends Job {
 
             // Copy the tar file to the target restore area
             System.out.println("\tCopying tar file from archive ...");
-            File restoreFile = path.resolve(tarFileName).toFile();
-            FileUtils.copyFile(archiveFile, restoreFile);
             
-            System.out.println("\tData restore complete: " + restoreFile);
+            Progress progress = new Progress();
+            // TODO: live progress tracking similar to deposit?
+            // Need a more generalised "Task" db structure (new table?)
+            
+            fs.copyFromWorkingSpace(restorePath, archiveFile, progress);
+            
+            System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+            
+            System.out.println("\tData restore complete: " + restorePath);
             eventStream.send(new Event(depositId, "Data restore completed"));
             
         } catch (Exception e) {
