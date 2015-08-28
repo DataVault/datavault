@@ -1,6 +1,7 @@
 package org.datavault.common.storage.impl;
 
 import org.datavault.common.storage.Device;
+import org.datavault.common.storage.Auth;
 import org.datavault.common.model.FileInfo;
 import org.datavault.common.io.Progress;
 
@@ -13,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.datavault.common.io.FileCopy;
@@ -21,11 +23,11 @@ public class LocalFileSystem extends Device {
 
     private String rootPath = null;
     
-    public LocalFileSystem(String name, String auth, String config) throws FileNotFoundException {
+    public LocalFileSystem(String name, Auth auth, Map<String,String> config) throws FileNotFoundException {
         super(name, auth, config);
         
         // Unpack the config parameters (in an implementation-specific way)
-        rootPath = config;
+        rootPath = config.get("rootPath");
         
         // Verify parameters are correct.
         File file = new File(rootPath);

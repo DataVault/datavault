@@ -4,6 +4,7 @@ import java.util.Map;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 import org.datavault.common.job.Context;
 import org.datavault.common.job.Job;
@@ -21,6 +22,7 @@ import org.datavault.common.event.deposit.Complete;
 import org.apache.commons.io.FileUtils;
 import org.datavault.common.io.FileCopy;
 import org.datavault.common.io.Progress;
+import org.datavault.common.storage.Auth;
 import org.datavault.common.storage.impl.LocalFileSystem;
 import org.datavault.worker.operations.ProgressTracker;
 
@@ -54,8 +56,10 @@ public class Deposit extends Job {
         
         try {
             String name = "filesystem";
-            String auth = "";
-            fs = new LocalFileSystem(name, auth, context.getActiveDir());
+            Auth auth = null;
+            HashMap<String,String> config = new HashMap<>();
+            config.put("rootPath", context.getActiveDir());
+            fs = new LocalFileSystem(name, auth, config);
         } catch (Exception e) {
             e.printStackTrace();
             eventStream.send(new Error(depositId, "Deposit failed: could not access active filesystem"));
