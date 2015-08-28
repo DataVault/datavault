@@ -86,7 +86,7 @@ public class LocalFileSystem extends Device {
     }
     
     @Override
-    public long getSize(String path) {
+    public long getSize(String path) throws Exception {
         Path absolutePath = getAbsolutePath(path);
         File file = absolutePath.toFile();
         
@@ -98,7 +98,7 @@ public class LocalFileSystem extends Device {
     }
 
     @Override
-    public boolean isDirectory(String path) {
+    public boolean isDirectory(String path) throws Exception {
         Path absolutePath = getAbsolutePath(path);
         File file = absolutePath.toFile();
         return file.isDirectory();

@@ -6,6 +6,10 @@ import org.datavault.common.model.FileInfo;
 import org.datavault.common.io.Progress;
 
 import java.io.File;
+import java.io.OutputStream;
+import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedInputStream;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -103,26 +107,65 @@ public class SFTPFileSystem extends Device {
 
     @Override
     public boolean exists(String path) {
-        /* Unimplemented */
-        return true;
+        
+        // TODO: handle symbolic links
+        
+        try {
+            Connect();
+            
+            SftpATTRS attrs = channelSftp.stat(rootPath + PATH_SEPARATOR + path);
+            return true;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            Disconnect();
+        }
     }
     
     @Override
-    public long getSize(String path) {
-        /* Unimplemented */
-        return 0;
+    public long getSize(String path) throws Exception {
+        
+        // TODO: handle directories and special cases
+        
+        try {
+            Connect();
+            
+            SftpATTRS attrs = channelSftp.stat(rootPath + PATH_SEPARATOR + path);
+            return attrs.getSize();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            Disconnect();
+        }
     }
 
     @Override
-    public boolean isDirectory(String path) {
-        /* Unimplemented */
-        return false;
+    public boolean isDirectory(String path) throws Exception {
+        try {
+            Connect();
+            
+            SftpATTRS attrs = channelSftp.stat(rootPath + PATH_SEPARATOR + path);
+            return attrs.isDir();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            Disconnect();
+        }
     }
     
     @Override
     public String getName(String path) {
-        /* Unimplemented */
-        return "";
+        if (path.contains(PATH_SEPARATOR)) {
+            return path.substring(path.lastIndexOf(PATH_SEPARATOR) + 1);
+        } else {
+            return path;
+        }
     }
     
     @Override
@@ -133,7 +176,38 @@ public class SFTPFileSystem extends Device {
 
     @Override
     public void copyToWorkingSpace(String path, File working, Progress progress) throws Exception {
-        /* Unimplemented */
+        
+        // TODO: handle directories and failures
+        
+        // Strip any leading separators (we want a path relative to the current dir)
+        while (path.startsWith(PATH_SEPARATOR)) {
+            path = path.replaceFirst(PATH_SEPARATOR, "");
+        }
+        
+        try {
+            Connect();
+            
+            byte[] buffer = new byte[1024 * 1024];
+            BufferedInputStream bis = new BufferedInputStream(channelSftp.get(path));
+            
+            OutputStream os = new FileOutputStream(working);
+            BufferedOutputStream bos = new BufferedOutputStream(os);
+            
+            int count;
+            while((count = bis.read(buffer)) > 0) {
+                bos.write(buffer, 0, count);
+                progress.byteCount += count;
+                progress.timestamp = System.currentTimeMillis();
+            }
+            
+            bis.close();
+            bos.close();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            Disconnect();
+        }
     }
 
     @Override

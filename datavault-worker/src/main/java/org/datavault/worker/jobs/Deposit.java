@@ -23,7 +23,9 @@ import org.apache.commons.io.FileUtils;
 import org.datavault.common.io.FileCopy;
 import org.datavault.common.io.Progress;
 import org.datavault.common.storage.Auth;
+import org.datavault.common.storage.Device;
 import org.datavault.common.storage.impl.LocalFileSystem;
+import org.datavault.common.storage.impl.SFTPFileSystem;
 import org.datavault.worker.operations.ProgressTracker;
 
 public class Deposit extends Job {
@@ -52,7 +54,7 @@ public class Deposit extends Job {
         System.out.println("\tbagID: " + bagID);
         System.out.println("\tfilePath: " + filePath);
         
-        LocalFileSystem fs;
+        Device fs;
         
         try {
             String name = "filesystem";
@@ -65,6 +67,22 @@ public class Deposit extends Job {
             eventStream.send(new Error(depositId, "Deposit failed: could not access active filesystem"));
             return;
         }
+        
+        /*
+        String name = "sftp";
+        Auth auth = new Auth("username", "password", null);
+        HashMap<String,String> config = new HashMap<>();
+        config.put("host", "example.co.uk");
+        config.put("rootPath", "/home/username/");
+        
+        try {
+            fs = new SFTPFileSystem(name, auth, config);
+        } catch (Exception e) {
+            e.printStackTrace();
+            eventStream.send(new Error(depositId, "Deposit failed: could not access active filesystem"));
+            return;
+        }
+        */
         
         System.out.println("\tDeposit file: " + filePath);
 

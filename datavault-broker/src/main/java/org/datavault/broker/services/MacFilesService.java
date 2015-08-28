@@ -15,11 +15,9 @@ import org.datavault.common.storage.impl.SFTPFileSystem;
  */
 public class MacFilesService {
 
-    private String activeDir;
     private Device fs;
 
     public void setactiveDir(String activeDir) {
-        this.activeDir = activeDir;
         
         String name = "filesystem";
         Auth auth = null; // Local file access doesn't require credentials
@@ -36,7 +34,7 @@ public class MacFilesService {
         String name = "sftp";
         Auth auth = new Auth("username", "password", null);
         HashMap<String,String> config = new HashMap<>();
-        config.put("host", "www.example.co.uk");
+        config.put("host", "example.co.uk");
         config.put("rootPath", "/home/username/");
         
         try {
