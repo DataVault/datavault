@@ -1,6 +1,7 @@
 package org.datavault.worker.jobs;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,10 +12,9 @@ import org.datavault.worker.queue.EventSender;
 import org.datavault.common.event.Event;
 import org.datavault.common.event.Error;
 
-import org.apache.commons.io.FileUtils;
 import org.datavault.common.io.Progress;
+import org.datavault.common.storage.Auth;
 import org.datavault.common.storage.impl.LocalFileSystem;
-import org.datavault.worker.operations.ProgressTracker;
 
 public class Restore extends Job {
     
@@ -39,8 +39,10 @@ public class Restore extends Job {
         
         try {
             String name = "filesystem";
-            String auth = "";
-            fs = new LocalFileSystem(name, auth, context.getActiveDir());
+            Auth auth = null;
+            HashMap<String,String> config = new HashMap<>();
+            config.put("rootPath", context.getActiveDir());
+            fs = new LocalFileSystem(name, auth, config);
         } catch (Exception e) {
             e.printStackTrace();
             eventStream.send(new Error(depositId, "Restore failed: could not access active filesystem"));

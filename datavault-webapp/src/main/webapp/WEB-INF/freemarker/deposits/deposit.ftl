@@ -207,7 +207,7 @@
     function load() {
         setTimeout(function () {
             $.ajax({
-                url: "json",
+                url: "${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/json",
                 type: "GET",
                 dataType: 'json',  
                 success: function (result) {
@@ -218,7 +218,7 @@
                     }
                 }
             });
-        }, 250);
+        }, 500);
     }
     load();
 </script>

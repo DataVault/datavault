@@ -4,6 +4,7 @@ import java.util.Map;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 import org.datavault.common.job.Context;
 import org.datavault.common.job.Job;
@@ -21,7 +22,10 @@ import org.datavault.common.event.deposit.Complete;
 import org.apache.commons.io.FileUtils;
 import org.datavault.common.io.FileCopy;
 import org.datavault.common.io.Progress;
+import org.datavault.common.storage.Auth;
+import org.datavault.common.storage.Device;
 import org.datavault.common.storage.impl.LocalFileSystem;
+import org.datavault.common.storage.impl.SFTPFileSystem;
 import org.datavault.worker.operations.ProgressTracker;
 
 public class Deposit extends Job {
@@ -50,17 +54,35 @@ public class Deposit extends Job {
         System.out.println("\tbagID: " + bagID);
         System.out.println("\tfilePath: " + filePath);
         
-        LocalFileSystem fs;
+        Device fs;
         
         try {
             String name = "filesystem";
-            String auth = "";
-            fs = new LocalFileSystem(name, auth, context.getActiveDir());
+            Auth auth = null;
+            HashMap<String,String> config = new HashMap<>();
+            config.put("rootPath", context.getActiveDir());
+            fs = new LocalFileSystem(name, auth, config);
         } catch (Exception e) {
             e.printStackTrace();
             eventStream.send(new Error(depositId, "Deposit failed: could not access active filesystem"));
             return;
         }
+        
+        /*
+        String name = "sftp";
+        Auth auth = new Auth("username", "password", null);
+        HashMap<String,String> config = new HashMap<>();
+        config.put("host", "example.co.uk");
+        config.put("rootPath", "/home/username/");
+        
+        try {
+            fs = new SFTPFileSystem(name, auth, config);
+        } catch (Exception e) {
+            e.printStackTrace();
+            eventStream.send(new Error(depositId, "Deposit failed: could not access active filesystem"));
+            return;
+        }
+        */
         
         System.out.println("\tDeposit file: " + filePath);
 

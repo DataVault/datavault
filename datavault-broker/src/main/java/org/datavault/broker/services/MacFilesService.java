@@ -1,14 +1,12 @@
 package org.datavault.broker.services;
 
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
 import org.datavault.common.model.FileInfo;
+import org.datavault.common.storage.Auth;
+import org.datavault.common.storage.Device;
 import org.datavault.common.storage.impl.LocalFileSystem;
+import org.datavault.common.storage.impl.SFTPFileSystem;
 
 /**
  * User: Robin Taylor
@@ -17,20 +15,34 @@ import org.datavault.common.storage.impl.LocalFileSystem;
  */
 public class MacFilesService {
 
-    private String activeDir;
-    private LocalFileSystem fs;
+    private Device fs;
 
     public void setactiveDir(String activeDir) {
-        this.activeDir = activeDir;
         
         String name = "filesystem";
-        String auth = ""; // Local file access doesn't require credentials
+        Auth auth = null; // Local file access doesn't require credentials
+        HashMap<String,String> config = new HashMap<>();
+        config.put("rootPath", activeDir);
         
         try {
-            fs = new LocalFileSystem(name, auth, activeDir);
+            fs = new LocalFileSystem(name, auth, config);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
+        /*
+        String name = "sftp";
+        Auth auth = new Auth("username", "password", null);
+        HashMap<String,String> config = new HashMap<>();
+        config.put("host", "example.co.uk");
+        config.put("rootPath", "/home/username/");
+        
+        try {
+            fs = new SFTPFileSystem(name, auth, config);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        */
     }
     
     public List<FileInfo> getFilesListing(String filePath) {

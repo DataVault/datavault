@@ -3,6 +3,7 @@ package org.datavault.common.storage;
 import org.datavault.common.model.FileInfo;
 import org.datavault.common.io.Progress;
 import java.util.List;
+import java.util.Map;
 import java.io.File;
 
 // A generic storage Device/system
@@ -13,10 +14,10 @@ public abstract class Device {
     public String name;
     
     // Some private configuration properties
-    private String auth;
-    private String config;
+    protected Auth auth;
+    protected Map<String,String> config;
     
-    public Device(String name, String auth, String config) {
+    public Device(String name, Auth auth, Map<String,String> config) {
         this.name = name;
         this.auth = auth;
         this.config = config;
@@ -32,13 +33,13 @@ public abstract class Device {
     public abstract boolean exists(String path);
     
     // Get the size of an object (file/dir) in bytes
-    public abstract long getSize(String path);
+    public abstract long getSize(String path) throws Exception;
     
     // Get the name of an object
     public abstract String getName(String path);
     
     // Check if the passed path is a directory/container
-    public abstract boolean isDirectory(String path);
+    public abstract boolean isDirectory(String path) throws Exception;
     
     // How much space is available for storage (in bytes)
     public abstract long getUsableSpace();
