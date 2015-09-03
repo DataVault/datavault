@@ -15,7 +15,7 @@
         http://www.springframework.org/schema/rabbit
         http://www.springframework.org/schema/rabbit/spring-rabbit-1.4.xsd">
 
-    <context:component-scan base-package="org.datavault.broker.controllers"/>
+    <context:component-scan base-package="org.datavaultplatform.broker.controllers"/>
 
     <mvc:annotation-driven />
 
@@ -53,11 +53,11 @@
     </bean>
     -->
 
-    <bean id="filesController" class="org.datavault.broker.controllers.FilesController">
+    <bean id="filesController" class="org.datavaultplatform.broker.controllers.FilesController">
         <property name="macFilesService" ref="macFilesService" />
     </bean>
     
-    <bean id="vaultsController" class="org.datavault.broker.controllers.VaultsController">
+    <bean id="vaultsController" class="org.datavaultplatform.broker.controllers.VaultsController">
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
         <property name="metadataService" ref="metadataService" />
@@ -67,41 +67,41 @@
         <property name="sender" ref="sender" />
     </bean>
     
-    <bean id="policiesController" class="org.datavault.broker.controllers.PoliciesController">
+    <bean id="policiesController" class="org.datavaultplatform.broker.controllers.PoliciesController">
         <property name="policiesService" ref="policiesService" />
     </bean>
     
-    <bean id="usersController" class="org.datavault.broker.controllers.UsersController">
+    <bean id="usersController" class="org.datavaultplatform.broker.controllers.UsersController">
         <property name="usersService" ref="usersService" />
     </bean>
 
     <!-- todo : should the service beans be put into their own config file? -->
 
-    <bean id="macFilesService" class="org.datavault.broker.services.MacFilesService">
+    <bean id="macFilesService" class="org.datavaultplatform.broker.services.MacFilesService">
         <property name="activeDir" value="${activeDir}"/>
     </bean>
     
-    <bean id="vaultsService" class="org.datavault.broker.services.VaultsService">
+    <bean id="vaultsService" class="org.datavaultplatform.broker.services.VaultsService">
         <property name="vaultDAO" ref="vaultDAO" />
     </bean>
     
-    <bean id="depositsService" class="org.datavault.broker.services.DepositsService">
+    <bean id="depositsService" class="org.datavaultplatform.broker.services.DepositsService">
         <property name="depositDAO" ref="depositDAO" />
     </bean>
     
-    <bean id="metadataService" class="org.datavault.broker.services.MetadataService">
+    <bean id="metadataService" class="org.datavaultplatform.broker.services.MetadataService">
         <property name="metaDir" value="${metaDir}"/>
     </bean>
 
-    <bean id="eventService" class="org.datavault.broker.services.EventService">
+    <bean id="eventService" class="org.datavaultplatform.broker.services.EventService">
         <property name="eventDAO" ref="eventDAO" />
     </bean>
     
-    <bean id="policiesService" class="org.datavault.broker.services.PoliciesService">
+    <bean id="policiesService" class="org.datavaultplatform.broker.services.PoliciesService">
         <property name="policyDAO" ref="policyDAO" />
     </bean>
     
-    <bean id="usersService" class="org.datavault.broker.services.UsersService">
+    <bean id="usersService" class="org.datavaultplatform.broker.services.UsersService">
         <property name="userDAO" ref="userDAO" />
     </bean>
 
@@ -132,13 +132,13 @@
         <rabbit:listener ref="listener" queues="eventQueue" admin="amqpAdmin" />
     </rabbit:listener-container>
 
-    <bean id="listener" class="org.datavault.queue.EventListener">
+    <bean id="listener" class="org.datavaultplatform.queue.EventListener">
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
         <property name="eventService" ref="eventService" />
     </bean>
 
-    <bean id="sender" class="org.datavault.queue.Sender">
+    <bean id="sender" class="org.datavaultplatform.queue.Sender">
         <property name="queueServer" value="${queueServer}"/>
         <property name="queueName" value="${queueName}"/>
         <property name="queueUser" value="${queueUser}"/>
@@ -160,8 +160,8 @@
         <property name="dataSource" ref="dataSource"/>
         <property name="packagesToScan">
             <list>
-                <value>org.datavault.common.model</value>
-                <value>org.datavault.common.event</value>
+                <value>org.datavaultplatform.common.model</value>
+                <value>org.datavaultplatform.common.event</value>
             </list>
         </property>
         <property name="hibernateProperties">
@@ -185,23 +185,23 @@
 
     <!-- Data Access Objects -->
     
-    <bean id="vaultDAO" class="org.datavault.common.model.dao.VaultDAOImpl">
+    <bean id="vaultDAO" class="org.datavaultplatform.common.model.dao.VaultDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="depositDAO" class="org.datavault.common.model.dao.DepositDAOImpl">
+    <bean id="depositDAO" class="org.datavaultplatform.common.model.dao.DepositDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
     
-    <bean id="eventDAO" class="org.datavault.common.model.dao.EventDAOImpl">
+    <bean id="eventDAO" class="org.datavaultplatform.common.model.dao.EventDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
     
-    <bean id="policyDAO" class="org.datavault.common.model.dao.PolicyDAOImpl">
+    <bean id="policyDAO" class="org.datavaultplatform.common.model.dao.PolicyDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
     
-    <bean id="userDAO" class="org.datavault.common.model.dao.UserDAOImpl">
+    <bean id="userDAO" class="org.datavaultplatform.common.model.dao.UserDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
