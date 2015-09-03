@@ -11,7 +11,7 @@
         http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
 
-    <context:component-scan base-package="org.datavault.webapp.controllers"/>
+    <context:component-scan base-package="org.datavaultplatform.webapp.controllers"/>
 
     <mvc:annotation-driven />
 
@@ -50,21 +50,21 @@
 
 
 
-    <bean id="filesController" class="org.datavault.webapp.controllers.FilesController">
+    <bean id="filesController" class="org.datavaultplatform.webapp.controllers.FilesController">
         <property name="restService" ref="restService" />
     </bean>
 
-    <bean id="depositsController" class="org.datavault.webapp.controllers.DepositsController">
+    <bean id="depositsController" class="org.datavaultplatform.webapp.controllers.DepositsController">
         <property name="restService" ref="restService" />
     </bean>
 
-    <bean id="vaultsController" class="org.datavault.webapp.controllers.VaultsController">
+    <bean id="vaultsController" class="org.datavaultplatform.webapp.controllers.VaultsController">
         <property name="restService" ref="restService" />
     </bean>
 
     <!-- todo : should the service beans be put into their own config file? -->
 
-    <bean id="restService" class="org.datavault.webapp.services.RestService">
+    <bean id="restService" class="org.datavaultplatform.webapp.services.RestService">
         <property name="brokerURL" value="${brokerURL}" />
     </bean>
 

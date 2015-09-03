@@ -4,11 +4,11 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="workerManager" class="org.datavault.worker.WorkerManager">
+    <bean id="workerManager" class="org.datavaultplatform.worker.WorkerManager">
         <property name="numberOfWorkers" value="${numberOfWorkers}"/>
     </bean>
 
-    <bean id="receiver" class="org.datavault.worker.queue.Receiver">
+    <bean id="receiver" class="org.datavaultplatform.worker.queue.Receiver">
         <property name="queueServer" value="${queueServer}"/>
         <property name="queueName" value="${queueName}"/>
         <property name="queueUser" value="${queueUser}"/>
@@ -19,7 +19,7 @@
         <property name="metaDir" value="${metaDir}"/>
     </bean>
 
-    <bean id="eventSender" class="org.datavault.worker.queue.EventSender">
+    <bean id="eventSender" class="org.datavaultplatform.worker.queue.EventSender">
         <property name="queueServer" value="${queueServer}"/>
         <property name="eventQueueName" value="${eventQueueName}"/>
         <property name="queueUser" value="${queueUser}"/>

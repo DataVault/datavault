@@ -33,6 +33,6 @@ Installation
  *  RabbitMQ Browser admin tool instructions: https://www.rabbitmq.com/management.html
  *  Create a RabbitMQ user in the RabbitMQ admin tool with the username and password as defined in build.properties
  *  Start the worker by cd'ing to the worker target directory and running..
-    java -cp datavault-worker-1.0-SNAPSHOT-jar-with-dependencies.jar org.datavault.worker.WorkerManager
+    java -cp datavault-worker-1.0-SNAPSHOT-jar-with-dependencies.jar org.datavaultplatform.worker.WorkerManager
  *  Deploy the datavault-webapp and default-broker to a webserver
  *  Start webserver
