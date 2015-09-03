@@ -62,13 +62,17 @@
         <property name="depositsService" ref="depositsService" />
         <property name="metadataService" ref="metadataService" />
         <property name="macFilesService" ref="macFilesService" />
-        <property name="eventService" ref="eventService" />
         <property name="policiesService" ref="policiesService" />
+        <property name="usersService" ref="usersService" />
         <property name="sender" ref="sender" />
     </bean>
     
     <bean id="policiesController" class="org.datavault.broker.controllers.PoliciesController">
         <property name="policiesService" ref="policiesService" />
+    </bean>
+    
+    <bean id="usersController" class="org.datavault.broker.controllers.UsersController">
+        <property name="usersService" ref="usersService" />
     </bean>
 
     <!-- todo : should the service beans be put into their own config file? -->
@@ -97,6 +101,9 @@
         <property name="policyDAO" ref="policyDAO" />
     </bean>
     
+    <bean id="usersService" class="org.datavault.broker.services.UsersService">
+        <property name="userDAO" ref="userDAO" />
+    </bean>
 
     <!-- RabbitMQ -->
     
@@ -191,6 +198,10 @@
     </bean>
     
     <bean id="policyDAO" class="org.datavault.common.model.dao.PolicyDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    
+    <bean id="userDAO" class="org.datavault.common.model.dao.UserDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 

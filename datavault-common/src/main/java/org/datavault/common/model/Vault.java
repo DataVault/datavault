@@ -66,6 +66,10 @@ public class Vault {
     // Raw policy ID
     private String policyID;
     
+    @JsonIgnore
+    @ManyToOne
+    private User user;
+    
     public Vault() {}
     public Vault(String name) {
         this.name = name;
@@ -120,5 +124,11 @@ public class Vault {
 
     public void setPolicyID(String policyID) {
         this.policyID = policyID;
+    }
+    
+    public User getUser() { return user; }
+    
+    public void setUser(User user) {
+        this.user = user;
     }
 }

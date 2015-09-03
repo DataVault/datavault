@@ -3,30 +3,31 @@ package org.datavault.broker.controllers;
 import java.util.List;
 import java.util.HashMap;
 import java.io.IOException;
-import java.nio.file.Path;
 
 import org.datavault.common.model.Vault;
 import org.datavault.common.model.Deposit;
 import org.datavault.common.model.Restore;
 import org.datavault.common.model.FileFixity;
 import org.datavault.common.model.Policy;
+import org.datavault.common.model.User;
 import org.datavault.common.event.Event;
 import org.datavault.common.job.Job;
 import org.datavault.broker.services.VaultsService;
 import org.datavault.broker.services.DepositsService;
 import org.datavault.broker.services.MetadataService;
 import org.datavault.broker.services.MacFilesService;
-import org.datavault.broker.services.EventService;
 import org.datavault.broker.services.PoliciesService;
 import org.datavault.queue.Sender;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.datavault.broker.services.UsersService;
 
 /**
  * User: Tom Higgins
@@ -41,8 +42,8 @@ public class VaultsController {
     private DepositsService depositsService;
     private MetadataService metadataService;
     private MacFilesService macFilesService;
-    private EventService eventService;
     private PoliciesService policiesService;
+    private UsersService usersService;
     private Sender sender;
 
     public void setVaultsService(VaultsService vaultsService) {
@@ -61,12 +62,12 @@ public class VaultsController {
         this.macFilesService = macFilesService;
     }
     
-    public void setEventService(EventService eventService) {
-        this.eventService = eventService;
-    }
-    
     public void setPoliciesService(PoliciesService policiesService) {
         this.policiesService = policiesService;
+    }
+    
+    public void setUsersService(UsersService usersService) {
+        this.usersService = usersService;
     }
 
     public void setSender(Sender sender) {
@@ -74,12 +75,13 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
-    public List<Vault> getVaults() {
+    public List<Vault> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
         return vaultsService.getVaults();
     }
     
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)
-    public Vault addVault(@RequestBody Vault vault) throws Exception {
+    public Vault addVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+                          @RequestBody Vault vault) throws Exception {
         String policyID = vault.getPolicyID();
         Policy policy = policiesService.getPolicy(policyID);
         if (policy == null) {
@@ -87,23 +89,32 @@ public class VaultsController {
         }
         vault.setPolicy(policy);
         
+        User user = usersService.getUser(userID);
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+        vault.setUser(user);
+        
         vaultsService.addVault(vault);
         return vault;
     }
 
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
-    public Vault getVault(@PathVariable("vaultid") String vaultID) {
+    public Vault getVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+                          @PathVariable("vaultid") String vaultID) {
         return vaultsService.getVault(vaultID);
     }
     
     @RequestMapping(value = "/vaults/{vaultid}/deposits", method = RequestMethod.GET)
-    public List<Deposit> getDeposits(@PathVariable("vaultid") String vaultID) {
+    public List<Deposit> getDeposits(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                     @PathVariable("vaultid") String vaultID) {
         Vault vault = vaultsService.getVault(vaultID);
         return vault.getDeposits();
     }
     
     @RequestMapping(value = "/vaults/{vaultid}/deposits", method = RequestMethod.POST)
-    public Deposit addDeposit(@PathVariable("vaultid") String vaultID,
+    public Deposit addDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
+                              @PathVariable("vaultid") String vaultID,
                               @RequestBody Deposit deposit) throws Exception {
 
         Vault vault = vaultsService.getVault(vaultID);
@@ -145,39 +156,44 @@ public class VaultsController {
     }
     
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}", method = RequestMethod.GET)
-    public Deposit getDeposit(@PathVariable("vaultid") String vaultID,
+    public Deposit getDeposit(@RequestHeader(value = "X-UserID", required = true) String userID, 
+                              @PathVariable("vaultid") String vaultID,
                               @PathVariable("depositid") String depositID) {
         Deposit deposit = depositsService.getDeposit(depositID);
         return deposit;
     }
     
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/manifest", method = RequestMethod.GET)
-    public List<FileFixity> getDepositManifest(@PathVariable("vaultid") String vaultID,
-                                      @PathVariable("depositid") String depositID) throws IOException {
+    public List<FileFixity> getDepositManifest(@RequestHeader(value = "X-UserID", required = true) String userID, 
+                                               @PathVariable("vaultid") String vaultID,
+                                               @PathVariable("depositid") String depositID) throws IOException {
         Deposit deposit = depositsService.getDeposit(depositID);
         List<FileFixity> manifest = metadataService.getManifest(deposit.getBagId());
         return manifest;
     }
 
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/events", method = RequestMethod.GET)
-    public List<Event> getDepositEvents(@PathVariable("vaultid") String vaultID,
+    public List<Event> getDepositEvents(@RequestHeader(value = "X-UserID", required = true) String userID, 
+                                        @PathVariable("vaultid") String vaultID,
                                         @PathVariable("depositid") String depositID) {
         Deposit deposit = depositsService.getDeposit(depositID);
-        List<Event> events = deposit.getEvents(); // eventService.getEvents();
+        List<Event> events = deposit.getEvents();
         return events;
     }
 
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/status", method = RequestMethod.GET)
-    public Deposit.Status getDepositState(@PathVariable("vaultid") String vaultID,
+    public Deposit.Status getDepositState(@RequestHeader(value = "X-UserID", required = true) String userID, 
+                                          @PathVariable("vaultid") String vaultID,
                                           @PathVariable("depositid") String depositID) {
         Deposit deposit = depositsService.getDeposit(depositID);
         return deposit.getStatus();
     }
     
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/status", method = RequestMethod.POST)
-    public Deposit setDepositState(@PathVariable("vaultid") String vaultID,
-                              @PathVariable("depositid") String depositID,
-                              @RequestBody Deposit.Status status) {
+    public Deposit setDepositState(@RequestHeader(value = "X-UserID", required = true) String userID, 
+                                   @PathVariable("vaultid") String vaultID,
+                                   @PathVariable("depositid") String depositID,
+                                   @RequestBody Deposit.Status status) {
         Deposit deposit = depositsService.getDeposit(depositID);
         deposit.setStatus(status);
         depositsService.updateDeposit(deposit);
@@ -185,7 +201,8 @@ public class VaultsController {
     }
     
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/restore", method = RequestMethod.POST)
-    public Boolean restoreDeposit(@PathVariable("vaultid") String vaultID,
+    public Boolean restoreDeposit(@RequestHeader(value = "X-UserID", required = true) String userID, 
+                                  @PathVariable("vaultid") String vaultID,
                                   @PathVariable("depositid") String depositID,
                                   @RequestBody Restore restore) {
         

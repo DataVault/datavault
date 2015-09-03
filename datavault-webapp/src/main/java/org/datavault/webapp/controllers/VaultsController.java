@@ -2,6 +2,7 @@ package org.datavault.webapp.controllers;
 
 
 import org.datavault.common.model.Policy;
+import org.datavault.common.model.User;
 import org.datavault.common.model.Vault;
 import org.datavault.common.model.Deposit;
 import org.datavault.webapp.services.RestService;
@@ -64,12 +65,11 @@ public class VaultsController {
     // Process the completed 'create new vault' page
     @RequestMapping(value = "/vaults/create", method = RequestMethod.POST)
     public String addVault(@ModelAttribute Vault vault, ModelMap model) {
+        
         Vault newVault = restService.addVault(vault);
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
         return "redirect:" + vaultUrl;        
     }
-
-
 }
 
 
