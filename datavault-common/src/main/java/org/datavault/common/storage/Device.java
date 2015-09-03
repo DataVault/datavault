@@ -42,7 +42,7 @@ public abstract class Device {
     public abstract boolean isDirectory(String path) throws Exception;
     
     // How much space is available for storage (in bytes)
-    public abstract long getUsableSpace();
+    public abstract long getUsableSpace() throws Exception;
     
     // Copy an object (file/dir) to the working space
     // Progress information should be updated for monitoring as the copy occurs

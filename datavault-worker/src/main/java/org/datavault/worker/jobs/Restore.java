@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.apache.commons.io.FileUtils;
 
 import org.datavault.common.job.Context;
 import org.datavault.common.job.Job;
@@ -14,7 +15,9 @@ import org.datavault.common.event.Error;
 
 import org.datavault.common.io.Progress;
 import org.datavault.common.storage.Auth;
+import org.datavault.common.storage.Device;
 import org.datavault.common.storage.impl.LocalFileSystem;
+import org.datavault.common.storage.impl.SFTPFileSystem;
 
 public class Restore extends Job {
     
@@ -35,7 +38,7 @@ public class Restore extends Job {
         System.out.println("\tbagID: " + bagID);
         System.out.println("\trestorePath: " + restorePath);
         
-        LocalFileSystem fs;
+        Device fs;
         
         try {
             String name = "filesystem";
@@ -49,8 +52,21 @@ public class Restore extends Job {
             return;
         }
         
-        // Check that there's enough free space ...
-        System.out.println("Free space: " + fs.getUsableSpace() + " bytes");
+        /*
+        String name = "sftp";
+        Auth auth = new Auth("username", "password", null);
+        HashMap<String,String> config = new HashMap<>();
+        config.put("host", "example.co.uk");
+        config.put("rootPath", "/home/username/");
+        
+        try {
+            fs = new SFTPFileSystem(name, auth, config);
+        } catch (Exception e) {
+            e.printStackTrace();
+            eventStream.send(new Error(depositId, "Deposit failed: could not access active filesystem"));
+            return;
+        }
+        */
         
         try {
             if (!fs.exists(restorePath) || !fs.isDirectory(restorePath)) {
@@ -63,7 +79,20 @@ public class Restore extends Job {
             String tarFileName = bagID + ".tar";
             Path archivePath = Paths.get(context.getArchiveDir()).resolve(tarFileName);
             File archiveFile = archivePath.toFile();
-
+            
+            // Check that there's enough free space ...
+            try {
+                long freespace = fs.getUsableSpace();
+                System.out.println("\tFree space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
+                if (freespace < archiveFile.length()) {
+                    eventStream.send(new Error(depositId, "Not enough free space to restore data!"));
+                    return;
+                }
+            } catch (Exception e) {
+                System.out.println("Unable to determine free space");
+                eventStream.send(new Event(depositId, "Unable to determine free space"));
+            }
+            
             // Copy the tar file to the target restore area
             System.out.println("\tCopying tar file from archive ...");
             
