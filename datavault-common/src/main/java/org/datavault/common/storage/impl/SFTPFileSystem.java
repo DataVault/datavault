@@ -10,19 +10,20 @@ import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Vector;
 
 import com.jcraft.jsch.*;
+import java.io.FileInputStream;
 
 public class SFTPFileSystem extends Device {
 
     private String host = null;
     private String rootPath = null;    
     private Session session = null;
-    private Channel channel = null;
     private ChannelSftp channelSftp = null;
     private final int port = 22;
     private final String PATH_SEPARATOR = "/";
@@ -36,6 +37,7 @@ public class SFTPFileSystem extends Device {
     }
     
     private void Connect() throws Exception {
+        
         JSch jsch = new JSch();
         session = jsch.getSession(auth.getUsername(), host, port);
         session.setPassword(auth.getPassword());
@@ -43,7 +45,9 @@ public class SFTPFileSystem extends Device {
         properties.put("StrictHostKeyChecking", "no");
         session.setConfig(properties);
         session.connect();
-        channel = session.openChannel("sftp");
+        
+        // Start a channel for SFTP
+        Channel channel = session.openChannel("sftp");
         channel.connect();
         channelSftp = (ChannelSftp)channel;
         channelSftp.cd(rootPath);
@@ -56,6 +60,56 @@ public class SFTPFileSystem extends Device {
         
         if (session != null) {
             session.disconnect();
+        }
+    }
+    
+    private String runCommand(String command) throws Exception {
+        
+        ChannelExec channelExec = null;
+        
+        try {
+            Connect();
+            
+            // Start a channel for commands
+            channelExec = (ChannelExec)(session.openChannel("exec"));
+            
+            channelExec.setCommand(command);
+            channelExec.setInputStream(null);
+            channelExec.setErrStream(System.err);
+            InputStream in = channelExec.getInputStream();
+            
+            channelExec.connect();
+            
+            byte[] tmp = new byte[1024];
+            StringBuilder response = new StringBuilder();
+            
+            while(true) {
+                while(in.available() > 0) {
+                int i = in.read(tmp, 0, 1024);
+                if (i < 0) {
+                    break;
+                }
+                response.append(new String(tmp, 0, i));
+            }
+        
+            if (channelExec.isClosed()) {
+                if (in.available() > 0) continue; 
+                    System.out.println("exit-status: " + channelExec.getExitStatus());
+                    break;
+                }
+            }
+            
+            System.out.println("response: " + response);
+            return response.toString();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if (channelExec != null) {
+                channelExec.disconnect();
+            }
+            Disconnect();
         }
     }
     
@@ -169,9 +223,23 @@ public class SFTPFileSystem extends Device {
     }
     
     @Override
-    public long getUsableSpace() {
-        /* Unimplemented */
-        return 0;
+    public long getUsableSpace() throws Exception {
+        try {
+            Connect();
+            
+            // Requires the "statvfs" extension e.g. OpenSSL
+            // getAvailForNonRoot() returns a count of 1k blocks
+            // TODO: is this working correctly with different fragment sizes?
+            // TODO: how widely supported is this extension?
+            SftpStatVFS statVFS = channelSftp.statVFS(rootPath);
+            return statVFS.getAvailForNonRoot() * 1024; // bytes
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            Disconnect();
+        }
     }
 
     @Override
@@ -205,6 +273,7 @@ public class SFTPFileSystem extends Device {
             
         } catch (Exception e) {
             e.printStackTrace();
+            throw e;
         } finally {
             Disconnect();
         }
@@ -212,6 +281,40 @@ public class SFTPFileSystem extends Device {
 
     @Override
     public void copyFromWorkingSpace(String path, File working, Progress progress) throws Exception {
-        /* Unimplemented */
+        
+        // Strip any leading separators (we want a path relative to the current dir)
+        while (path.startsWith(PATH_SEPARATOR)) {
+            path = path.replaceFirst(PATH_SEPARATOR, "");
+        }
+        
+        // Append the archive file name (e.g. tar file)
+        path = path + PATH_SEPARATOR + working.getName();
+        
+        try {
+            Connect();
+            
+            byte[] buffer = new byte[1024 * 1024];
+            FileInputStream fis = new FileInputStream(working);
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            
+            OutputStream os = channelSftp.put(path);
+            BufferedOutputStream bos = new BufferedOutputStream(os);
+            
+            int count;
+            while((count = bis.read(buffer)) > 0) {
+                bos.write(buffer, 0, count);
+                progress.byteCount += count;
+                progress.timestamp = System.currentTimeMillis();
+            }
+            
+            bis.close();
+            bos.close();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            Disconnect();
+        }
     }
 }

@@ -112,7 +112,7 @@ public class LocalFileSystem extends Device {
     }
     
     @Override
-    public long getUsableSpace() {
+    public long getUsableSpace() throws Exception {
         File file = new File(rootPath);
         return file.getUsableSpace();
     }
