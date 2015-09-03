@@ -5,7 +5,7 @@
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="workerManager" class="org.datavault.worker.WorkerManager">
-        <property name="${numberOfWorkers}" value="1"/>
+        <property name="numberOfWorkers" value="${numberOfWorkers}"/>
     </bean>
 
     <bean id="receiver" class="org.datavault.worker.queue.Receiver">
