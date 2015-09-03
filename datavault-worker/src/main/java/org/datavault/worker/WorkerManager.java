@@ -59,14 +59,13 @@ public class WorkerManager {
         while (true) {
             for (DefaultExecuteResultHandler resultHandler : resultHandlers) {
                 if (resultHandler.hasResult()) {
-
-                    // todo : what should I usefully do in this event??
-
-                    System.out.println("Exit value " + resultHandler.getExitValue());
-                    break;
+                    // todo : what should I usefully do in this event?
+                    System.out.println("A handler has failed with exit value " + resultHandler.getExitValue());
+                    return;
                 }
             }
 
+            // Sleep for a while before doing another health check
             Thread.sleep(50L);
         }
 
