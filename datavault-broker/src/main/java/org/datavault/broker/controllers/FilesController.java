@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.HandlerMapping;
 import javax.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 /**
  * User: Robin Taylor
@@ -27,7 +28,8 @@ public class FilesController {
     }
 
     @RequestMapping("/files/**")
-    public List<FileInfo> getFilesListing(HttpServletRequest request) {
+    public List<FileInfo> getFilesListing(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                          HttpServletRequest request) {
         
         // "GET /files/" will display files from the base directory.
         // "GET /files/abc" will display files from the "abc" directory under the base.
