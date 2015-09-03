@@ -4,6 +4,10 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+    <bean id="workerManager" class="org.datavault.worker.WorkerManager">
+        <property name="numberOfWorkers" value="1"/>
+    </bean>
+
     <bean id="receiver" class="org.datavault.worker.queue.Receiver">
         <property name="queueServer" value="${queueServer}"/>
         <property name="queueName" value="${queueName}"/>

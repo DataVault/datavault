@@ -5,7 +5,7 @@ import org.datavault.worker.queue.EventSender;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-public class Main {
+public class WorkerInstance {
 
     private Receiver receiver;
     private EventSender eventSender;
