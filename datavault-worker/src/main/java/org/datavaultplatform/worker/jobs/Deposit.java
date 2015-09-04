@@ -2,6 +2,7 @@ package org.datavaultplatform.worker.jobs;
 
 import java.util.Map;
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -22,7 +23,6 @@ import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.io.FileCopy;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
-import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 
 public class Deposit extends Job {
@@ -54,7 +54,10 @@ public class Deposit extends Job {
         Device fs;
         
         try {
-            fs = new LocalFileSystem(fileStore.getStorageClass(), fileStore.getProperties());
+            Class<?> clazz = Class.forName(fileStore.getStorageClass());
+            Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
+            Object instance = constructor.newInstance(fileStore.getStorageClass(), fileStore.getProperties());
+            fs = (Device)instance;
         } catch (Exception e) {
             e.printStackTrace();
             eventStream.send(new Error(depositId, "Deposit failed: could not access active filesystem"));
