@@ -2,7 +2,7 @@
 <#import "/spring.ftl" as spring />
 <html>
 <head>
-    <link rel="icon" type="image/ico" href="<@spring.url '/resources/favicon.ico'/>"/>
+    <link rel="icon" type="image/ico" href="<@spring.url '/resources/favicon.ico?v=2'/>"/>
 
     <!-- Bootstrap -->
     <link href="<@spring.url '/resources/bootstrap/css/bootstrap.min.css'/>" rel="stylesheet" type="text/css">
