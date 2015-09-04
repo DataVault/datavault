@@ -1,5 +1,6 @@
 DataVault - A long term archive for Research Data
 =================================================
+![alt text](https://raw.github.com/DataVault/datavault/master/datavault-resources/logo-dvsmall.jpg "Data Vault logo")
 
 What
 ----
@@ -18,7 +19,7 @@ Originally developed by:
 Further Information
 -------------------
 
-Project Blog: http://libraryblogs.is.ed.ac.uk/jiscdatavault/
+Project website: http://datavaultplatform.org/
 
 
 Installation
@@ -33,6 +34,6 @@ Installation
  *  RabbitMQ Browser admin tool instructions: https://www.rabbitmq.com/management.html
  *  Create a RabbitMQ user in the RabbitMQ admin tool with the username and password as defined in build.properties
  *  Start the worker by cd'ing to the worker target directory and running..
-    java -cp datavault-worker-1.0-SNAPSHOT-jar-with-dependencies.jar org.datavault.worker.WorkerManager
+    java -cp datavault-worker-1.0-SNAPSHOT-jar-with-dependencies.jar org.datavaultplatform.worker.WorkerManager
  *  Deploy the datavault-webapp and default-broker to a webserver
  *  Start webserver
