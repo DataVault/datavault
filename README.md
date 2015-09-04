@@ -1,5 +1,6 @@
 DataVault - A long term archive for Research Data
 =================================================
+![alt text](https://raw.github.com/DataVault/datavault/master/datavault-resources/logo-dvsmall.jpg "Data Vault logo")
 
 What
 ----
@@ -18,7 +19,7 @@ Originally developed by:
 Further Information
 -------------------
 
-Project Blog: http://libraryblogs.is.ed.ac.uk/jiscdatavault/
+Project website: http://datavaultplatform.org/
 
 
 Installation
