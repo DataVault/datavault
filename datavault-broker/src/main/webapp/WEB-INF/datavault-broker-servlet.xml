@@ -78,6 +78,11 @@
     <bean id="usersController" class="org.datavaultplatform.broker.controllers.UsersController">
         <property name="usersService" ref="usersService" />
     </bean>
+    
+    <bean id="fileStoreController" class="org.datavaultplatform.broker.controllers.FileStoreController">
+        <property name="usersService" ref="usersService" />
+        <property name="fileStoreService" ref="fileStoreService" />
+    </bean>
 
     <!-- todo : should the service beans be put into their own config file? -->
 

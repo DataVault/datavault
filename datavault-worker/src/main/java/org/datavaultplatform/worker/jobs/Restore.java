@@ -1,8 +1,8 @@
 package org.datavaultplatform.worker.jobs;
 
 import java.util.Map;
-import java.util.HashMap;
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
@@ -15,7 +15,6 @@ import org.datavaultplatform.common.event.Error;
 
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
-import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 
 public class Restore extends Job {
     
@@ -39,7 +38,10 @@ public class Restore extends Job {
         Device fs;
         
         try {
-            fs = new LocalFileSystem(fileStore.getStorageClass(), fileStore.getProperties());
+            Class<?> clazz = Class.forName(fileStore.getStorageClass());
+            Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
+            Object instance = constructor.newInstance(fileStore.getStorageClass(), fileStore.getProperties());
+            fs = (Device)instance;
         } catch (Exception e) {
             e.printStackTrace();
             eventStream.send(new Error(depositId, "Restore failed: could not access active filesystem"));
