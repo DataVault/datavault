@@ -55,6 +55,8 @@
 
     <bean id="filesController" class="org.datavaultplatform.broker.controllers.FilesController">
         <property name="filesService" ref="filesService" />
+        <property name="usersService" ref="usersService" />
+        <property name="activeDir" value="${activeDir}" />
     </bean>
     
     <bean id="vaultsController" class="org.datavaultplatform.broker.controllers.VaultsController">
@@ -64,7 +66,9 @@
         <property name="filesService" ref="filesService" />
         <property name="policiesService" ref="policiesService" />
         <property name="usersService" ref="usersService" />
+        <property name="fileStoreService" ref="fileStoreService" />
         <property name="sender" ref="sender" />
+        <property name="activeDir" value="${activeDir}" />
     </bean>
     
     <bean id="policiesController" class="org.datavaultplatform.broker.controllers.PoliciesController">
@@ -78,7 +82,6 @@
     <!-- todo : should the service beans be put into their own config file? -->
 
     <bean id="filesService" class="org.datavaultplatform.broker.services.FilesService">
-        <property name="activeDir" value="${activeDir}"/>
     </bean>
     
     <bean id="vaultsService" class="org.datavaultplatform.broker.services.VaultsService">
@@ -104,7 +107,11 @@
     <bean id="usersService" class="org.datavaultplatform.broker.services.UsersService">
         <property name="userDAO" ref="userDAO" />
     </bean>
-
+    
+    <bean id="fileStoreService" class="org.datavaultplatform.broker.services.FileStoreService">
+        <property name="fileStoreDAO" ref="fileStoreDAO" />
+    </bean>
+    
     <!-- RabbitMQ -->
     
     <bean id="connectionFactory"
@@ -202,6 +209,10 @@
     </bean>
     
     <bean id="userDAO" class="org.datavaultplatform.common.model.dao.UserDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    
+    <bean id="fileStoreDAO" class="org.datavaultplatform.common.model.dao.FileStoreDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 

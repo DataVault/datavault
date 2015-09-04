@@ -19,7 +19,6 @@ public class Receiver {
     private String queuePassword;
     private String archiveDir;
     private String tempDir;
-    private String activeDir;
     private String metaDir;
 
     public void setQueueServer(String queueServer) {
@@ -44,10 +43,6 @@ public class Receiver {
 
     public void setTempDir(String tempDir) {
         this.tempDir = tempDir;
-    }
-    
-    public void setActiveDir(String activeDir) {
-        this.activeDir = activeDir;
     }
     
     public void setMetaDir(String metaDir) {
@@ -76,7 +71,7 @@ public class Receiver {
             System.out.println(" [x] Received '" + message + "'");
 
             // Decode and begin the job ...
-
+            
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 Job commonjob = mapper.readValue(message, Job.class);
@@ -84,7 +79,7 @@ public class Receiver {
                 Class<?> clazz = Class.forName(commonjob.getJobClass());
                 Job concreteJob = (Job)(mapper.readValue(message, clazz));
                 
-                Context context = new Context(archiveDir, tempDir, activeDir, metaDir, events);
+                Context context = new Context(archiveDir, tempDir, metaDir, events);
                 concreteJob.performAction(context);
                 
             } catch (Exception e) {

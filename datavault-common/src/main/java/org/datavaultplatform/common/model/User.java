@@ -30,6 +30,11 @@ public class User {
     @OrderBy("creationTime")
     private List<Vault> vaults;
     
+    // A user is related to a number of file storage systems
+    @JsonIgnore
+    @OneToMany(targetEntity=FileStore.class, mappedBy="user", fetch=FetchType.LAZY)
+    private List<FileStore> fileStores;
+    
     public User() {}
     public User(String name) {
         this.name = name;
@@ -42,4 +47,12 @@ public class User {
     }
 
     public String getName() { return name; }
+
+    public List<Vault> getVaults() {
+        return vaults;
+    }
+
+    public List<FileStore> getFileStores() {
+        return fileStores;
+    }
 }

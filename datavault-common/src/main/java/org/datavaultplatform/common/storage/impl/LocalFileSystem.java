@@ -1,7 +1,6 @@
 package org.datavaultplatform.common.storage.impl;
 
 import org.datavaultplatform.common.storage.Device;
-import org.datavaultplatform.common.storage.Auth;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.io.Progress;
 
@@ -23,8 +22,8 @@ public class LocalFileSystem extends Device {
 
     private String rootPath = null;
     
-    public LocalFileSystem(String name, Auth auth, Map<String,String> config) throws FileNotFoundException {
-        super(name, auth, config);
+    public LocalFileSystem(String name, Map<String,String> config) throws FileNotFoundException {
+        super(name, config);
         
         // Unpack the config parameters (in an implementation-specific way)
         rootPath = config.get("rootPath");
