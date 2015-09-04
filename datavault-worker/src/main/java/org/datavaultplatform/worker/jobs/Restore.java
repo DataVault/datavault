@@ -14,7 +14,6 @@ import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.Error;
 
 import org.datavaultplatform.common.io.Progress;
-import org.datavaultplatform.common.storage.Auth;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 
@@ -40,26 +39,16 @@ public class Restore extends Job {
         Device fs;
         
         try {
-            String name = "filesystem";
-            Auth auth = null;
-            HashMap<String,String> config = new HashMap<>();
-            config.put("rootPath", context.getActiveDir());
-            fs = new LocalFileSystem(name, auth, config);
+            fs = new LocalFileSystem(fileStore.getStorageClass(), fileStore.getProperties());
         } catch (Exception e) {
             e.printStackTrace();
             eventStream.send(new Error(depositId, "Restore failed: could not access active filesystem"));
             return;
         }
         
-        /*
-        String name = "sftp";
-        Auth auth = new Auth("username", "password", null);
-        HashMap<String,String> config = new HashMap<>();
-        config.put("host", "example.co.uk");
-        config.put("rootPath", "/home/username/");
-        
+        /*        
         try {
-            fs = new SFTPFileSystem(name, auth, config);
+            fs = new SFTPFileSystem(fileStore.getStorageClass(), fileStore.getProperties());
         } catch (Exception e) {
             e.printStackTrace();
             eventStream.send(new Error(depositId, "Deposit failed: could not access active filesystem"));

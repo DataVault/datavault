@@ -10,6 +10,7 @@ import org.datavaultplatform.common.model.Restore;
 import org.datavaultplatform.common.model.FileFixity;
 import org.datavaultplatform.common.model.Policy;
 import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.job.Job;
 import org.datavaultplatform.broker.services.VaultsService;
@@ -17,6 +18,7 @@ import org.datavaultplatform.broker.services.DepositsService;
 import org.datavaultplatform.broker.services.MetadataService;
 import org.datavaultplatform.broker.services.FilesService;
 import org.datavaultplatform.broker.services.PoliciesService;
+import org.datavaultplatform.broker.services.FileStoreService;
 import org.datavaultplatform.queue.Sender;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.datavaultplatform.broker.services.FileStoreService;
 import org.datavaultplatform.broker.services.UsersService;
 
 /**
@@ -44,8 +47,11 @@ public class VaultsController {
     private FilesService filesService;
     private PoliciesService policiesService;
     private UsersService usersService;
+    private FileStoreService fileStoreService;
     private Sender sender;
-
+    
+    private String activeDir;
+    
     public void setVaultsService(VaultsService vaultsService) {
         this.vaultsService = vaultsService;
     }
@@ -65,6 +71,10 @@ public class VaultsController {
     public void setPoliciesService(PoliciesService policiesService) {
         this.policiesService = policiesService;
     }
+
+    public void setFileStoreService(FileStoreService fileStoreService) {
+        this.fileStoreService = fileStoreService;
+    }
     
     public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
@@ -72,6 +82,11 @@ public class VaultsController {
 
     public void setSender(Sender sender) {
         this.sender = sender;
+    }
+    
+    // NOTE: this a placeholder and will eventually be handled by per-user config
+    public void setActiveDir(String activeDir) {
+        this.activeDir = activeDir;
     }
 
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
@@ -82,6 +97,7 @@ public class VaultsController {
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)
     public Vault addVault(@RequestHeader(value = "X-UserID", required = true) String userID,
                           @RequestBody Vault vault) throws Exception {
+        
         String policyID = vault.getPolicyID();
         Policy policy = policiesService.getPolicy(policyID);
         if (policy == null) {
@@ -117,13 +133,28 @@ public class VaultsController {
                               @PathVariable("vaultid") String vaultID,
                               @RequestBody Deposit deposit) throws Exception {
 
+        User user = usersService.getUser(userID);
+        
         Vault vault = vaultsService.getVault(vaultID);
         if (vault == null) {
             throw new Exception("Vault '" + vaultID + "' does not exist");
         }
         
+        // File store config ...
+        FileStore store = null;
+        List<FileStore> userStores = user.getFileStores();
+        if (userStores.size() > 0) {
+            // For now, just use the first configured store ...
+            store = userStores.get(0);
+        } else {
+            // For now, use a default store ...
+            HashMap<String,String> storeProperties = new HashMap<String,String>();
+            storeProperties.put("rootPath", activeDir);
+            store = new FileStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties);
+        }
+        
         // Check the source file path is valid
-        if (!filesService.validPath(deposit.getFilePath())) {
+        if (!filesService.validPath(deposit.getFilePath(), store)) {
             throw new IllegalArgumentException("Path '" + deposit.getFilePath() + "' is invalid");
         }
         
@@ -145,7 +176,7 @@ public class VaultsController {
             depositProperties.put("depositMetadata", mapper.writeValueAsString(deposit));
             depositProperties.put("vaultMetadata", mapper.writeValueAsString(vault));
             
-            Job depositJob = new Job("org.datavaultplatform.worker.jobs.Deposit", depositProperties);
+            Job depositJob = new Job("org.datavaultplatform.worker.jobs.Deposit", depositProperties, store);
             String jsonDeposit = mapper.writeValueAsString(depositJob);
             sender.send(jsonDeposit);
         } catch (Exception e) {
@@ -206,6 +237,7 @@ public class VaultsController {
                                   @PathVariable("depositid") String depositID,
                                   @RequestBody Restore restore) {
         
+        User user = usersService.getUser(userID);
         Deposit deposit = depositsService.getDeposit(depositID);
         
         // Validate the path
@@ -214,8 +246,21 @@ public class VaultsController {
             throw new IllegalArgumentException("Path was null");
         }
 
+        // File store config ...
+        FileStore store = null;
+        List<FileStore> userStores = user.getFileStores();
+        if (userStores.size() > 0) {
+            // For now, just use the first configured store ...
+            store = userStores.get(0);
+        } else {
+            // For now, use a default store ...
+            HashMap<String,String> storeProperties = new HashMap<String,String>();
+            storeProperties.put("rootPath", activeDir);
+            store = new FileStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties);
+        }
+        
         // Check the source file path is valid
-        if (!filesService.validPath(restorePath)) {
+        if (!filesService.validPath(restorePath, store)) {
             throw new IllegalArgumentException("Path '" + restorePath + "' is invalid");
         }
         
@@ -226,7 +271,7 @@ public class VaultsController {
             restoreProperties.put("bagId", deposit.getBagId());
             restoreProperties.put("restorePath", restorePath); // No longer the absolute path
             
-            Job restoreJob = new Job("org.datavaultplatform.worker.jobs.Restore", restoreProperties);
+            Job restoreJob = new Job("org.datavaultplatform.worker.jobs.Restore", restoreProperties, store);
             ObjectMapper mapper = new ObjectMapper();
             String jsonRestore = mapper.writeValueAsString(restoreJob);
             sender.send(jsonRestore);

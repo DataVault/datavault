@@ -14,12 +14,10 @@ public abstract class Device {
     public String name;
     
     // Some private configuration properties
-    protected Auth auth;
     protected Map<String,String> config;
     
-    public Device(String name, Auth auth, Map<String,String> config) {
+    public Device(String name, Map<String,String> config) {
         this.name = name;
-        this.auth = auth;
         this.config = config;
     }
     

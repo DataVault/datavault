@@ -8,15 +8,13 @@ public class Context {
 
     private String archiveDir;
     private String tempDir;
-    private String activeDir;
     private String metaDir;
     private EventStream eventStream;
     
     public Context() {};
-    public Context(String archiveDir, String tempDir, String activeDir, String metaDir, EventStream eventStream) {
+    public Context(String archiveDir, String tempDir, String metaDir, EventStream eventStream) {
         this.archiveDir = archiveDir;
         this.tempDir = tempDir;
-        this.activeDir = activeDir;
         this.metaDir = metaDir;
         this.eventStream = eventStream;
     }
@@ -35,14 +33,6 @@ public class Context {
 
     public void setTempDir(String tempDir) {
         this.tempDir = tempDir;
-    }
-
-    public String getActiveDir() {
-        return activeDir;
-    }
-
-    public void setActiveDir(String activeDir) {
-        this.activeDir = activeDir;
     }
 
     public String getMetaDir() {

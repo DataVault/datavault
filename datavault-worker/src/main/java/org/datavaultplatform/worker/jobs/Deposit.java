@@ -21,7 +21,6 @@ import org.datavaultplatform.common.event.deposit.Complete;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.io.FileCopy;
 import org.datavaultplatform.common.io.Progress;
-import org.datavaultplatform.common.storage.Auth;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.worker.operations.ProgressTracker;
@@ -55,11 +54,7 @@ public class Deposit extends Job {
         Device fs;
         
         try {
-            String name = "filesystem";
-            Auth auth = null;
-            HashMap<String,String> config = new HashMap<>();
-            config.put("rootPath", context.getActiveDir());
-            fs = new LocalFileSystem(name, auth, config);
+            fs = new LocalFileSystem(fileStore.getStorageClass(), fileStore.getProperties());
         } catch (Exception e) {
             e.printStackTrace();
             eventStream.send(new Error(depositId, "Deposit failed: could not access active filesystem"));
@@ -67,14 +62,8 @@ public class Deposit extends Job {
         }
         
         /*
-        String name = "sftp";
-        Auth auth = new Auth("username", "password", null);
-        HashMap<String,String> config = new HashMap<>();
-        config.put("host", "example.co.uk");
-        config.put("rootPath", "/home/username/");
-        
         try {
-            fs = new SFTPFileSystem(name, auth, config);
+            fs = new SFTPFileSystem(fileStore.getStorageClass(), fileStore.getProperties());
         } catch (Exception e) {
             e.printStackTrace();
             eventStream.send(new Error(depositId, "Deposit failed: could not access active filesystem"));

@@ -1,7 +1,6 @@
 package org.datavaultplatform.common.storage.impl;
 
 import org.datavaultplatform.common.storage.Device;
-import org.datavaultplatform.common.storage.Auth;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.io.Progress;
 
@@ -22,25 +21,30 @@ import java.io.FileInputStream;
 public class SFTPFileSystem extends Device {
 
     private String host = null;
-    private String rootPath = null;    
+    private String rootPath = null;
+    private String username = null;
+    private String password = null;
+    
     private Session session = null;
     private ChannelSftp channelSftp = null;
     private final int port = 22;
     private final String PATH_SEPARATOR = "/";
     
-    public SFTPFileSystem(String name, Auth auth, Map<String,String> config) throws Exception {
-        super(name, auth, config);
+    public SFTPFileSystem(String name, Map<String,String> config) throws Exception {
+        super(name, config);
         
         // Unpack the config parameters (in an implementation-specific way)
         host = config.get("host");
         rootPath = config.get("rootPath");
+        username = config.get("username");
+        password = config.get("password");
     }
     
     private void Connect() throws Exception {
         
         JSch jsch = new JSch();
-        session = jsch.getSession(auth.getUsername(), host, port);
-        session.setPassword(auth.getPassword());
+        session = jsch.getSession(username, host, port);
+        session.setPassword(password);
         java.util.Properties properties = new java.util.Properties();
         properties.put("StrictHostKeyChecking", "no");
         session.setConfig(properties);
