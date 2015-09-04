@@ -2,7 +2,7 @@ package org.datavaultplatform.broker.controllers;
 
 import java.util.List;
 import org.datavaultplatform.common.model.FileInfo;
-import org.datavaultplatform.broker.services.MacFilesService;
+import org.datavaultplatform.broker.services.FilesService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.HandlerMapping;
@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 @RestController
 public class FilesController {
     
-    private MacFilesService macFilesService;
+    private FilesService filesService;
 
-    public void setMacFilesService(MacFilesService macFilesService) {
-        this.macFilesService = macFilesService;
+    public void setFilesService(FilesService filesService) {
+        this.filesService = filesService;
     }
 
     @RequestMapping("/files/**")
@@ -36,6 +36,6 @@ public class FilesController {
         String requestPath = (String)request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
         String filePath = requestPath.replaceFirst("^/files", "");
         
-        return macFilesService.getFilesListing(filePath);
+        return filesService.getFilesListing(filePath);
     }
 }
