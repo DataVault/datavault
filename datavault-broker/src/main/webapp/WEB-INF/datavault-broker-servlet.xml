@@ -54,14 +54,14 @@
     -->
 
     <bean id="filesController" class="org.datavaultplatform.broker.controllers.FilesController">
-        <property name="macFilesService" ref="macFilesService" />
+        <property name="filesService" ref="filesService" />
     </bean>
     
     <bean id="vaultsController" class="org.datavaultplatform.broker.controllers.VaultsController">
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
         <property name="metadataService" ref="metadataService" />
-        <property name="macFilesService" ref="macFilesService" />
+        <property name="filesService" ref="filesService" />
         <property name="policiesService" ref="policiesService" />
         <property name="usersService" ref="usersService" />
         <property name="sender" ref="sender" />
@@ -77,7 +77,7 @@
 
     <!-- todo : should the service beans be put into their own config file? -->
 
-    <bean id="macFilesService" class="org.datavaultplatform.broker.services.MacFilesService">
+    <bean id="filesService" class="org.datavaultplatform.broker.services.FilesService">
         <property name="activeDir" value="${activeDir}"/>
     </bean>
     

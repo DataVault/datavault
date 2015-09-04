@@ -12,7 +12,7 @@ import org.datavaultplatform.common.storage.impl.LocalFileSystem;
  * Date: 19/03/2015
  * Time: 13:34
  */
-public class MacFilesService {
+public class FilesService {
 
     private Device fs;
 

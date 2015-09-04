@@ -15,7 +15,7 @@ import org.datavaultplatform.common.job.Job;
 import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.broker.services.DepositsService;
 import org.datavaultplatform.broker.services.MetadataService;
-import org.datavaultplatform.broker.services.MacFilesService;
+import org.datavaultplatform.broker.services.FilesService;
 import org.datavaultplatform.broker.services.PoliciesService;
 import org.datavaultplatform.queue.Sender;
 
@@ -41,7 +41,7 @@ public class VaultsController {
     private VaultsService vaultsService;
     private DepositsService depositsService;
     private MetadataService metadataService;
-    private MacFilesService macFilesService;
+    private FilesService filesService;
     private PoliciesService policiesService;
     private UsersService usersService;
     private Sender sender;
@@ -58,8 +58,8 @@ public class VaultsController {
         this.metadataService = metadataService;
     }
     
-    public void setMacFilesService(MacFilesService macFilesService) {
-        this.macFilesService = macFilesService;
+    public void setFilesService(FilesService filesService) {
+        this.filesService = filesService;
     }
     
     public void setPoliciesService(PoliciesService policiesService) {
@@ -123,7 +123,7 @@ public class VaultsController {
         }
         
         // Check the source file path is valid
-        if (!macFilesService.validPath(deposit.getFilePath())) {
+        if (!filesService.validPath(deposit.getFilePath())) {
             throw new IllegalArgumentException("Path '" + deposit.getFilePath() + "' is invalid");
         }
         
@@ -215,7 +215,7 @@ public class VaultsController {
         }
 
         // Check the source file path is valid
-        if (!macFilesService.validPath(restorePath)) {
+        if (!filesService.validPath(restorePath)) {
             throw new IllegalArgumentException("Path '" + restorePath + "' is invalid");
         }
         
