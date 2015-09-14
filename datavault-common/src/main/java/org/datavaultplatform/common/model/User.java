@@ -55,4 +55,27 @@ public class User {
     public List<FileStore> getFileStores() {
         return fileStores;
     }
+    
+    @Override
+    public boolean equals(Object other) {
+        
+        if (this == other) return true;
+        
+        if (!(other instanceof User)) {
+            return false;
+        }
+        
+        final User user = (User)other;
+        
+        if (!user.getID().equals(getID())) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    @Override
+    public int hashCode() {
+        return getID().hashCode();
+    }
 }

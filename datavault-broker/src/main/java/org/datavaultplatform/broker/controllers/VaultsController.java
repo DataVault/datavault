@@ -91,7 +91,9 @@ public class VaultsController {
 
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
     public List<Vault> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
-        return vaultsService.getVaults();
+        
+        User user = usersService.getUser(userID);
+        return user.getVaults();
     }
     
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)
@@ -117,8 +119,16 @@ public class VaultsController {
 
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
     public Vault getVault(@RequestHeader(value = "X-UserID", required = true) String userID,
-                          @PathVariable("vaultid") String vaultID) {
-        return vaultsService.getVault(vaultID);
+                          @PathVariable("vaultid") String vaultID) throws Exception {
+
+        User user = usersService.getUser(userID);
+        Vault vault = vaultsService.getVault(vaultID);
+        
+        if (vault.getUser().equals(user)) {
+            return vault;
+        } else {
+            throw new Exception("Access denied");
+        }
     }
     
     @RequestMapping(value = "/vaults/{vaultid}/deposits", method = RequestMethod.GET)
