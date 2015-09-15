@@ -62,6 +62,8 @@
             });
         </script>
 
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        
         <div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </div>

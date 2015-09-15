@@ -17,6 +17,7 @@
 
             <security:form-login
                 login-page="/auth/login" 
+                login-processing-url="/auth/security_check"
                 authentication-failure-url="/auth/login?error=true" 
                 default-target-url="/"/>
 
@@ -40,7 +41,8 @@
         <security:authentication-manager>
             <security:authentication-provider>
                 <security:user-service>
-                    <security:user name="USER1" password="abc" authorities="ROLE_USER" />
+                    <security:user name="USER1" password="password1" authorities="ROLE_USER" />
+                    <security:user name="USER2" password="password2" authorities="ROLE_USER" />
                 </security:user-service>
             </security:authentication-provider>
 	</security:authentication-manager>
