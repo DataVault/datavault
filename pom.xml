@@ -16,7 +16,8 @@
     </modules>
 
     <properties>
-        <spring.version>4.1.4.RELEASE</spring.version>
+        <spring.version>4.1.6.RELEASE</spring.version>
+        <spring-security.version>4.0.2.RELEASE</spring-security.version>
         <spring-rabbit.version>1.4.5.RELEASE</spring-rabbit.version>
         <hibernate.version>4.3.10.Final</hibernate.version>
         <mysql.version>5.1.35</mysql.version>
@@ -71,6 +72,24 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-webmvc</artifactId>
                 <version>${spring.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-core</artifactId>
+                <version>${spring-security.version}</version>
+            </dependency>
+        
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-config</artifactId>
+                <version>${spring-security.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-web</artifactId>
+                <version>${spring-security.version}</version>
             </dependency>
 
             <dependency>

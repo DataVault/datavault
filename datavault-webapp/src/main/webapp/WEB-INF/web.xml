@@ -11,17 +11,15 @@
         <param-name>contextConfigLocation</param-name>
         <param-value>/WEB-INF/datavaultplatform-service.xml</param-value>
     </context-param>
-
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
     -->
-
+    
     <!-- Now for the normal Spring webapp stuff -->
 
+<!--
     <welcome-file-list>
         <welcome-file>freemarker/index.ftl</welcome-file>
     </welcome-file-list>
+-->
 
     <servlet>
         <servlet-name>datavault-webapp</servlet-name>
@@ -35,23 +33,25 @@
         <url-pattern>/</url-pattern>
     </servlet-mapping>
 
-    <!--
-    <servlet>
-        <servlet-name>default</servlet-name>
-        <servlet-class>
-            org.apache.catalina.servlets.DefaultServlet
-        </servlet-class>
-    </servlet>
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
 
-    <servlet-mapping>
-        <servlet-name>default</servlet-name>
-        <url-pattern>/resources/*</url-pattern>
-    </servlet-mapping>
+    <!-- Spring Security -->
 
-    <servlet-mapping>
-        <servlet-name>default</servlet-name>
-        <url-pattern>*.ico</url-pattern>
-    </servlet-mapping>
-    -->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/spring-security.xml</param-value>
+    </context-param>
+    
+    <filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 
 </web-app>
