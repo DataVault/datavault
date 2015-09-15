@@ -16,6 +16,7 @@
                 <div class="form-group">
                     <input class="btn btn-lg btn-primary btn-block" type="submit" value="Sign in" />
                 </div>
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             </form>
         </div>
     </div>
