@@ -7,10 +7,11 @@
 			http://www.springframework.org/schema/security 
 			http://www.springframework.org/schema/security/spring-security.xsd">
 	
+        <security:http pattern="/resources/**" security="none"/>
+        
 	<security:http auto-config="true" use-expressions="true" >
             
             <security:intercept-url pattern="/auth/**" access="isAnonymous()" />
-            <security:intercept-url pattern="/resources/**" access="isAnonymous()" />
             <security:intercept-url pattern="/**" access="hasRole('ROLE_USER')" />
             
             <security:access-denied-handler error-page="/auth/denied"/>
