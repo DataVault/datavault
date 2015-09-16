@@ -6,6 +6,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * User: Robin Taylor
@@ -17,9 +18,6 @@ public class RestService {
 
     private String brokerURL;
     
-    // TODO Placeholder
-    private String userID = "USER1";
-
     public void setBrokerURL(String brokerURL) {
         this.brokerURL = brokerURL;
     }
@@ -28,7 +26,7 @@ public class RestService {
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", userID);
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
         HttpEntity entity = new HttpEntity(headers);
         
         if (!filePath.startsWith("/")) {
@@ -45,7 +43,7 @@ public class RestService {
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", userID);
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
         HttpEntity entity = new HttpEntity(headers);
         
         HttpEntity<Vault[]> response = restTemplate.exchange(brokerURL + "/vaults", HttpMethod.GET, entity, Vault[].class);
@@ -58,7 +56,7 @@ public class RestService {
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", userID);
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
         HttpEntity entity = new HttpEntity(headers);
         
         HttpEntity<Vault> response = restTemplate.exchange(brokerURL + "/vaults/" + id, HttpMethod.GET, entity, Vault.class);
@@ -71,7 +69,7 @@ public class RestService {
         
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", userID);
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
         HttpEntity entity = new HttpEntity(vault, headers);
         
         HttpEntity<Vault> response = restTemplate.exchange(brokerURL + "/vaults/", HttpMethod.POST, entity, Vault.class);
@@ -84,7 +82,7 @@ public class RestService {
         
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", userID);
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
         HttpEntity entity = new HttpEntity(deposit, headers);
 
         HttpEntity<Deposit> response = restTemplate.exchange(brokerURL + "/vaults/" + vaultId + "/deposits", HttpMethod.POST, entity, Deposit.class);
@@ -97,7 +95,7 @@ public class RestService {
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", userID);
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
         HttpEntity entity = new HttpEntity(headers);
         
         HttpEntity<Deposit[]> response = restTemplate.exchange(brokerURL + "/vaults/" + vaultId + "/deposits", HttpMethod.GET, entity, Deposit[].class);
@@ -110,7 +108,7 @@ public class RestService {
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", userID);
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
         HttpEntity entity = new HttpEntity(headers);
         
         HttpEntity<Deposit> response = restTemplate.exchange(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID, HttpMethod.GET, entity, Deposit.class);
@@ -123,7 +121,7 @@ public class RestService {
         
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", userID);
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
         HttpEntity entity = new HttpEntity(headers);
         
         HttpEntity<FileFixity[]> response = restTemplate.exchange(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/manifest", HttpMethod.GET, entity, FileFixity[].class);
@@ -136,7 +134,7 @@ public class RestService {
         
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", userID);
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
         HttpEntity entity = new HttpEntity(restore, headers);
 
         HttpEntity<Boolean> response = restTemplate.exchange(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/restore", HttpMethod.POST, entity, Boolean.class);
@@ -149,7 +147,7 @@ public class RestService {
         
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", userID);
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
         HttpEntity entity = new HttpEntity(headers);
         
         HttpEntity<Event[]> response = restTemplate.exchange(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/events", HttpMethod.GET, entity, Event[].class);
@@ -162,7 +160,7 @@ public class RestService {
         
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", userID);
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
         HttpEntity entity = new HttpEntity(headers);
         
         HttpEntity<Policy[]> response = restTemplate.exchange(brokerURL + "/policies", HttpMethod.GET, entity, Policy[].class);
@@ -175,7 +173,7 @@ public class RestService {
         
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", userID);
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
         HttpEntity entity = new HttpEntity(headers);
         
         HttpEntity<Policy> response = restTemplate.exchange(brokerURL + "/policies/" + policyId, HttpMethod.GET, entity, Policy.class);
@@ -188,7 +186,7 @@ public class RestService {
         
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", userID);
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
         HttpEntity entity = new HttpEntity(headers);
         
         HttpEntity<User> response = restTemplate.exchange(brokerURL + "/users/" + userId, HttpMethod.GET, entity, User.class);

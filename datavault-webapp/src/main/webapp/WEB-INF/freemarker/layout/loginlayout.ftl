@@ -1,4 +1,4 @@
-<#macro vaultLayout>
+<#macro loginLayout>
 <#import "/spring.ftl" as spring />
 <html>
 <head>
@@ -8,9 +8,7 @@
 </head>
 <body>
 
-    <#include "header.ftl"/>
     <#nested/>
-    <#include "footer.ftl"/>
 
 </body>
 </html>
