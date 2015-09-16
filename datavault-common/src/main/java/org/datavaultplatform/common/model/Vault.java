@@ -131,4 +131,27 @@ public class Vault {
     public void setUser(User user) {
         this.user = user;
     }
+    
+    @Override
+    public boolean equals(Object other) {
+        
+        if (this == other) return true;
+        
+        if (!(other instanceof Vault)) {
+            return false;
+        }
+        
+        final Vault vault = (Vault)other;
+        
+        if (!vault.getID().equals(getID())) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    @Override
+    public int hashCode() {
+        return getID().hashCode();
+    }
 }
