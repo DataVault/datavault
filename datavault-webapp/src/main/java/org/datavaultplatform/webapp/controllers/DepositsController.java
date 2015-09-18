@@ -78,21 +78,4 @@ public class DepositsController {
         String depositUrl = "/vaults/" + vaultID + "/deposits/" + depositID + "/";
         return "redirect:" + depositUrl;
     }
-
-    
-    /*
-    @RequestMapping(value = "/deposits", method = RequestMethod.GET)
-    public String createDeposit(ModelMap model) {
-        model.addAttribute("files", restService.getFilesListing());
-        return "files";
-    }
-
-
-    @RequestMapping(value = "/deposits", method = RequestMethod.GET)
-    public String getFilesListing(ModelMap model) {
-        model.addAttribute("files", restService.getFilesListing());
-        return "files";
-    }
-*/
-
 }

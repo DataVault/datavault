@@ -22,6 +22,19 @@ public class RestService {
         this.brokerURL = brokerURL;
     }
     
+    public FileStore[] getFileStoreListing() {
+        
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
+        HttpEntity entity = new HttpEntity(headers);
+        
+        HttpEntity<FileStore[]> response = restTemplate.exchange(brokerURL + "/filestores", HttpMethod.GET, entity, FileStore[].class);
+        FileStore[] fileStores = response.getBody();
+        
+        return fileStores;
+    }
+    
     public FileInfo[] getFilesListing(String filePath) {
 
         RestTemplate restTemplate = new RestTemplate();
