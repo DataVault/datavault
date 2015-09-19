@@ -6,11 +6,7 @@ import org.datavaultplatform.common.model.Restore;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * User: Robin Taylor
@@ -38,7 +34,13 @@ public class DepositsController {
 
     // Process the completed 'create new deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/create", method = RequestMethod.POST)
-    public String addDeposit(@ModelAttribute Deposit deposit, ModelMap model, @PathVariable("vaultid") String vaultID) {
+    public String addDeposit(@ModelAttribute Deposit deposit, ModelMap model,
+                             @PathVariable("vaultid") String vaultID, @RequestParam String action) {
+        // Was the cancel button pressed?
+        if ("cancel".equals(action)) {
+            return "redirect:/vaults/" + vaultID;
+        }
+
         Deposit newDeposit = restService.addDeposit(vaultID, deposit);
         String depositUrl = "/vaults/" + vaultID + "/deposits/" + newDeposit.getID() + "/";
         return "redirect:" + depositUrl;
