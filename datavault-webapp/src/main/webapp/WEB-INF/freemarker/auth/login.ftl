@@ -13,11 +13,18 @@
         <div class="row">
             <div class="col-sm-4 col-sm-offset-4 col-md-4 col-md-offset-4">
                 <form class="form-signin" action="/datavault-webapp/auth/security_check" method="post">
+                    <#if success?has_content>
+                        <div class="alert alert-success" role="alert">
+                            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                            <span class="sr-only">Success:</span>
+                        ${success}
+                        </div>
+                    </#if>
                     <#if error?has_content>
                         <div class="alert alert-danger" role="alert">
                             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                             <span class="sr-only">Error:</span>
-                            ${error}
+                        ${error}
                         </div>
                     </#if>
                     <div class="form-group">

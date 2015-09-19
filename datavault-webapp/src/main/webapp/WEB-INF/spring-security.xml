@@ -8,25 +8,24 @@
 			http://www.springframework.org/schema/security/spring-security.xsd">
 	
         <security:http pattern="/resources/**" security="none"/>
-        
+
 	<security:http auto-config="true" use-expressions="true" >
-            
-            <security:intercept-url pattern="/auth/**" access="isAnonymous()" />
+
+            <security:intercept-url pattern="/auth/**" access="permitAll" />
             <security:intercept-url pattern="/**" access="hasRole('ROLE_USER')" />
-            
+
             <security:access-denied-handler error-page="/auth/denied"/>
 
             <security:form-login
-                login-page="/auth/login" 
+                login-page="/auth/login"
                 login-processing-url="/auth/security_check"
-                authentication-failure-url="/auth/login?error=true" 
+                authentication-failure-url="/auth/login?error=true"
                 default-target-url="/"/>
 
-            <security:logout 
-                invalidate-session="true" 
-                logout-success-url="/auth/login" 
-                logout-url="/auth/logout"/>
-                
+            <security:logout
+                    logout-url="/auth/logout"
+                    logout-success-url="/auth/login?logout"/>
+
 	</security:http>
 	
         <security:authentication-manager>
