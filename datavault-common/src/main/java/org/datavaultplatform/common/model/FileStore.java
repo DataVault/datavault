@@ -29,6 +29,9 @@ public class FileStore {
     // Class to use for access to storage
     private String storageClass;
     
+    // A textual description of the storage system
+    private String label;
+    
     // Properties to use for this storage system
     // NOTE: this is not a secure mechanism for storing credentials!
     private HashMap<String,String> properties;
@@ -38,9 +41,10 @@ public class FileStore {
     private User user;
     
     public FileStore() {}
-    public FileStore(String storageClass, HashMap<String,String> properties) {
+    public FileStore(String storageClass, HashMap<String,String> properties, String label) {
         this.storageClass = storageClass;
         this.properties = properties;
+        this.label = label;
     }
 
     public String getID() { return id; }
@@ -57,6 +61,12 @@ public class FileStore {
 
     public void setProperties(HashMap<String, String> properties) {
         this.properties = properties;
+    }
+
+    public String getLabel() { return label; }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
     
     public User getUser() { return user; }

@@ -142,6 +142,18 @@ public class VaultsController {
         }
         vault.setUser(user);
         
+        // For testing purposes add a default file store for the user if none exists.
+        // This is an action that will ideally take place at user creation instead.
+        // A template could be used to construct file paths (if configured).
+        List<FileStore> userStores = user.getFileStores();
+        if (userStores.isEmpty()) {
+            HashMap<String,String> storeProperties = new HashMap<String,String>();
+            storeProperties.put("rootPath", activeDir);
+            FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Default filesystem (local)");
+            store.setUser(user);
+            fileStoreService.addFileStore(store);
+        }
+        
         vaultsService.addVault(vault);
         return vault;
     }
@@ -172,22 +184,29 @@ public class VaultsController {
         User user = usersService.getUser(userID);
         Vault vault = getUserVault(user, vaultID);
         
-        // File store config ...
+        String fullPath = deposit.getFilePath();
+        if (!fullPath.contains("/")) {
+            throw new IllegalArgumentException("Path '" + fullPath + "' does not contain a storage ID");
+        }
+        
+        String storageID = fullPath.substring(0, fullPath.indexOf("/"));
+        String storagePath = fullPath.replaceFirst(storageID + "/", "");
+        
         FileStore store = null;
         List<FileStore> userStores = user.getFileStores();
-        if (userStores.size() > 0) {
-            // For now, just use the first configured store ...
-            store = userStores.get(0);
-        } else {
-            // For now, use a default store ...
-            HashMap<String,String> storeProperties = new HashMap<String,String>();
-            storeProperties.put("rootPath", activeDir);
-            store = new FileStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties);
+        for (FileStore userStore : userStores) {
+            if (userStore.getID().equals(storageID)) {
+                store = userStore;
+            }
+        }
+        
+        if (store == null) {
+            throw new IllegalArgumentException("Storage ID '" + storageID + "' is invalid");
         }
         
         // Check the source file path is valid
-        if (!filesService.validPath(deposit.getFilePath(), store)) {
-            throw new IllegalArgumentException("Path '" + deposit.getFilePath() + "' is invalid");
+        if (!filesService.validPath(storagePath, store)) {
+            throw new IllegalArgumentException("Path '" + storagePath + "' is invalid");
         }
         
         // Add the deposit object
@@ -200,7 +219,7 @@ public class VaultsController {
             HashMap<String, String> depositProperties = new HashMap<>();
             depositProperties.put("depositId", deposit.getID());
             depositProperties.put("bagId", deposit.getBagId());
-            depositProperties.put("filePath", deposit.getFilePath()); // Note: no longer an absolute path
+            depositProperties.put("filePath", storagePath); // Path without storage ID
             
             // Deposit and Vault metadata
             // TODO: at the moment we're just serialising the objects to JSON.
@@ -285,23 +304,29 @@ public class VaultsController {
         User user = usersService.getUser(userID);
         Deposit deposit = getUserDeposit(user, vaultID, depositID);
         
-        // Validate the path
-        String restorePath = restore.getRestorePath();
-        if (restorePath == null) {
-            throw new IllegalArgumentException("Path was null");
+        String fullPath = restore.getRestorePath();
+        if (!fullPath.contains("/")) {
+            throw new IllegalArgumentException("Path '" + fullPath + "' does not contain a storage ID");
         }
-
-        // File store config ...
+        
+        String storageID = fullPath.substring(0, fullPath.indexOf("/"));
+        String restorePath = fullPath.replaceFirst(storageID + "/", "");
+        
         FileStore store = null;
         List<FileStore> userStores = user.getFileStores();
-        if (userStores.size() > 0) {
-            // For now, just use the first configured store ...
-            store = userStores.get(0);
-        } else {
-            // For now, use a default store ...
-            HashMap<String,String> storeProperties = new HashMap<String,String>();
-            storeProperties.put("rootPath", activeDir);
-            store = new FileStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties);
+        for (FileStore userStore : userStores) {
+            if (userStore.getID().equals(storageID)) {
+                store = userStore;
+            }
+        }
+        
+        if (store == null) {
+            throw new IllegalArgumentException("Storage ID '" + storageID + "' is invalid");
+        }
+        
+        // Validate the path
+        if (restorePath == null) {
+            throw new IllegalArgumentException("Path was null");
         }
         
         // Check the source file path is valid
