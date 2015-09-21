@@ -47,6 +47,7 @@ public class VaultsController {
     // Return an empty 'create new vault' page
     @RequestMapping(value = "/vaults/create", method = RequestMethod.GET)
     public String createVault(ModelMap model) {
+
         // pass the view an empty Vault since the form expects it
         model.addAttribute("vault", new Vault());
 
@@ -62,8 +63,12 @@ public class VaultsController {
 
     // Process the completed 'create new vault' page
     @RequestMapping(value = "/vaults/create", method = RequestMethod.POST)
-    public String addVault(@ModelAttribute Vault vault, ModelMap model) {
-        
+    public String addVault(@ModelAttribute Vault vault, ModelMap model, @RequestParam String action) {
+        // Was the cancel button pressed?
+        if ("cancel".equals(action)) {
+            return "redirect:/";
+        }
+
         Vault newVault = restService.addVault(vault);
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
         return "redirect:" + vaultUrl;        
