@@ -34,7 +34,7 @@ Installation
   * Follow the RabbitMQ Browser admin tool instructions: https://www.rabbitmq.com/management.html
   * Create a RabbitMQ user in the RabbitMQ admin tool with the username and password as defined in build.properties
   * Grant permissions for the new user to access the '/' virtual host 
-  * Go into the data-vault home directory and run 'mvn package'
+ * Go into the data-vault home directory and run 'mvn package'
  *  Start the worker by:
   * 'cd datavault-worker/target'
   * java -cp datavault-worker-1.0-SNAPSHOT-jar-with-dependencies.jar org.datavaultplatform.worker.WorkerManager

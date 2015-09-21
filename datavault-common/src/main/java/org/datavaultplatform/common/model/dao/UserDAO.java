@@ -12,4 +12,6 @@ public interface UserDAO {
     public List<User> list();
 
     public User findById(String Id);
+
+    public int count();
 }

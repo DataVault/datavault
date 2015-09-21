@@ -19,12 +19,17 @@ public class UsersController {
     public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
     }
-    
+
     @RequestMapping(value = "/users", method = RequestMethod.GET)
     public List<User> getUsers(@RequestHeader(value = "X-UserID", required = true) String userID) {
         return usersService.getUsers();
     }
-    
+
+    @RequestMapping(value = "/users/count", method = RequestMethod.GET)
+    public int getUsersCount(@RequestHeader(value = "X-UserID", required = true) String userID) {
+        return usersService.count();
+    }
+
     @RequestMapping(value = "/users/{userid}", method = RequestMethod.GET)
     public User getUser(@RequestHeader(value = "X-UserID", required = true) String userID, 
                         @PathVariable("userid") String queryUserID) {

@@ -6,6 +6,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.Order;
 
@@ -53,9 +54,15 @@ public class VaultDAOImpl implements VaultDAO {
     public Vault findById(String Id) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Vault.class);
-        criteria.add(Restrictions.eq("id",Id));
+        criteria.add(Restrictions.eq("id", Id));
         Vault vault = (Vault)criteria.uniqueResult();
         session.close();
         return vault;
+    }
+
+    @Override
+    public int count() {
+        Session session = this.sessionFactory.openSession();
+        return (int)(long)(Long)session.createCriteria(Vault.class).setProjection(Projections.rowCount()).uniqueResult();
     }
 }
