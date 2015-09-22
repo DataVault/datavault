@@ -28,5 +28,8 @@ public class UsersService {
     public void setUserDAO(UserDAO userDAO) {
         this.userDAO = userDAO;
     }
+    public int count() {
+        return userDAO.count();
+    }
 }
 

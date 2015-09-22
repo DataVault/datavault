@@ -31,5 +31,9 @@ public class VaultsService {
     public void setVaultDAO(VaultDAO vaultDAO) {
         this.vaultDAO = vaultDAO;
     }
+
+    public int count() {
+        return vaultDAO.count();
+    }
 }
 

@@ -62,6 +62,14 @@
         <property name="restService" ref="restService" />
     </bean>
 
+    <bean id="adminController" class="org.datavaultplatform.webapp.controllers.admin.AdminController">
+        <property name="restService" ref="restService" />
+    </bean>
+
+    <bean id="usersController" class="org.datavaultplatform.webapp.controllers.admin.UsersController">
+        <property name="restService" ref="restService" />
+    </bean>
+
     <!-- todo : should the service beans be put into their own config file? -->
 
     <bean id="restService" class="org.datavaultplatform.webapp.services.RestService">
