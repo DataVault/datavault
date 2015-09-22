@@ -12,5 +12,8 @@ public interface DepositDAO {
     public List<Deposit> list();
 
     public Deposit findById(String Id);
-    
+
+    public int count();
+
+    public Long size();
 }

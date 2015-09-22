@@ -6,6 +6,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import org.datavaultplatform.common.model.User;
@@ -54,5 +55,11 @@ public class UserDAOImpl implements UserDAO {
         User user = (User)criteria.uniqueResult();
         session.close();
         return user;
+    }
+
+    @Override
+    public int count() {
+        Session session = this.sessionFactory.openSession();
+        return (int)(long)(Long)session.createCriteria(User.class).setProjection(Projections.rowCount()).uniqueResult();
     }
 }

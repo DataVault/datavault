@@ -41,5 +41,9 @@ public class DepositsService {
     public void setDepositDAO(DepositDAO depositDAO) {
         this.depositDAO = depositDAO;
     }
+
+    public int count() { return depositDAO.count(); }
+
+    public Long size() { return depositDAO.size(); }
 }
 

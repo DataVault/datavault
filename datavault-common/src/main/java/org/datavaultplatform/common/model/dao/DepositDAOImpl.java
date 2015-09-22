@@ -6,6 +6,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import org.datavaultplatform.common.model.Deposit;
@@ -54,5 +55,17 @@ public class DepositDAOImpl implements DepositDAO {
         Deposit deposit = (Deposit)criteria.uniqueResult();
         session.close();
         return deposit;
+    }
+
+    @Override
+    public int count() {
+        Session session = this.sessionFactory.openSession();
+        return (int)(long)(Long)session.createCriteria(Deposit.class).setProjection(Projections.rowCount()).uniqueResult();
+    }
+
+    @Override
+    public Long size() {
+        Session session = this.sessionFactory.openSession();
+        return (Long)session.createCriteria(Deposit.class).setProjection(Projections.sum("depositSize")).uniqueResult();
     }
 }
