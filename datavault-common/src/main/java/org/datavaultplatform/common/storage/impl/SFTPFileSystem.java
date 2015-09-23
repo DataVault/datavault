@@ -396,15 +396,15 @@ public class SFTPFileSystem extends Device {
                         String remoteFile,
                         final File localFile,
                         final SftpATTRS attrs) throws IOException, SftpException {
+
         String pwd = remoteFile;
-        System.out.println("getDir: " + remoteFile);
+
         if (remoteFile.lastIndexOf('/') != -1) {
             if (remoteFile.length() > 1) {
                 pwd = remoteFile.substring(0, remoteFile.lastIndexOf('/'));
             }
         }
         
-        System.out.println("cd to: " + pwd);
         channel.cd(pwd);
         
         if (attrs.isDir()) {
