@@ -17,6 +17,7 @@ import java.util.Vector;
 
 import com.jcraft.jsch.*;
 import java.io.FileInputStream;
+import java.io.IOException;
 
 public class SFTPFileSystem extends Device {
 
@@ -259,6 +260,16 @@ public class SFTPFileSystem extends Device {
         try {
             Connect();
             
+            path = channelSftp.pwd() + "/" + path;
+            final SftpATTRS attrs = channelSftp.stat(path);
+            
+            if (attrs.isDir() && !path.endsWith("/")) {
+                path = path + "/";
+            }
+            
+            getDir(channelSftp, path, working, attrs);
+            
+            /*
             byte[] buffer = new byte[1024 * 1024];
             BufferedInputStream bis = new BufferedInputStream(channelSftp.get(path));
             
@@ -274,6 +285,7 @@ public class SFTPFileSystem extends Device {
             
             bis.close();
             bos.close();
+            */
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -282,7 +294,7 @@ public class SFTPFileSystem extends Device {
             Disconnect();
         }
     }
-
+    
     @Override
     public void copyFromWorkingSpace(String path, File working, Progress progress) throws Exception {
         
@@ -320,5 +332,88 @@ public class SFTPFileSystem extends Device {
         } finally {
             Disconnect();
         }
+    }
+
+    // Adapted from org.apache.tools.ant.taskdefs.optional.ssh
+    private void getDir(final ChannelSftp channel,
+                        String remoteFile,
+                        final File localFile,
+                        final SftpATTRS attrs) throws IOException, SftpException {
+        String pwd = remoteFile;
+        System.out.println("getDir: " + remoteFile);
+        if (remoteFile.lastIndexOf('/') != -1) {
+            if (remoteFile.length() > 1) {
+                pwd = remoteFile.substring(0, remoteFile.lastIndexOf('/'));
+            }
+        }
+        
+        System.out.println("cd to: " + pwd);
+        channel.cd(pwd);
+        
+        if (attrs.isDir()) {
+            if (!localFile.exists()) {
+                localFile.mkdirs();
+            }
+        }
+        
+        final java.util.Vector files = channel.ls(remoteFile);
+        final int size = files.size();
+        for (int i = 0; i < size; i++) {
+            final ChannelSftp.LsEntry le = (ChannelSftp.LsEntry) files.elementAt(i);
+            final String name = le.getFilename();
+            if (le.getAttrs().isDir()) {
+                if (name.equals(".") || name.equals("..")) {
+                    continue;
+                }
+                getDir(channel,
+                       channel.pwd() + "/" + name + "/",
+                       new File(localFile, le.getFilename()),
+                       le.getAttrs());
+            } else {
+                getFile(channel, le, localFile);
+            }
+        }
+        channel.cd("..");
+    }
+
+    // Adapted from org.apache.tools.ant.taskdefs.optional.ssh
+    private void getFile(final ChannelSftp channel,
+                         final ChannelSftp.LsEntry le,
+                         File localFile) throws IOException, SftpException {
+        final String remoteFile = le.getFilename();
+        if (!localFile.exists()) {
+            final String path = localFile.getAbsolutePath();
+            final int i = path.lastIndexOf(File.pathSeparator);
+            if (i != -1) {
+                if (path.length() > File.pathSeparator.length()) {
+                    new File(path.substring(0, i)).mkdirs();
+                }
+            }
+        }
+
+        if (localFile.isDirectory()) {
+            localFile = new File(localFile, remoteFile);
+        }
+
+        final long startTime = System.currentTimeMillis();
+        final long totalLength = le.getAttrs().getSize();
+
+        SftpProgressMonitor monitor = null;
+        
+        try {
+            System.out.println("Receiving: " + remoteFile + " : " + le.getAttrs().getSize());
+            channel.get(remoteFile, localFile.getAbsolutePath(), monitor);
+        } finally {
+            final long endTime = System.currentTimeMillis();
+            // logStats(startTime, endTime, (int) totalLength);
+        }
+        /*
+        if (getPreserveLastModified()) {
+            FileUtils.getFileUtils().setFileLastModified(localFile,
+                                                         ((long) le.getAttrs()
+                                                          .getMTime())
+                                                         * 1000);
+        }
+        */
     }
 }
