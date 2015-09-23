@@ -31,6 +31,8 @@ public class SFTPFileSystem extends Device {
     private final int port = 22;
     private final String PATH_SEPARATOR = "/";
     
+    private SFTPMonitor monitor = null;
+    
     public SFTPFileSystem(String name, Map<String,String> config) throws Exception {
         super(name, config);
         
@@ -186,13 +188,22 @@ public class SFTPFileSystem extends Device {
     @Override
     public long getSize(String path) throws Exception {
         
-        // TODO: handle directories and special cases
-        
         try {
             Connect();
             
-            SftpATTRS attrs = channelSftp.stat(rootPath + PATH_SEPARATOR + path);
-            return attrs.getSize();
+            path = channelSftp.pwd() + "/" + path;
+            final SftpATTRS attrs = channelSftp.stat(path);
+            
+            if (attrs.isDir()) {
+                if (!path.endsWith("/")) {
+                    path = path + "/";
+                }
+                
+                return calculateSize(channelSftp, path);
+                
+            } else {
+                return attrs.getSize();
+            }
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -250,8 +261,6 @@ public class SFTPFileSystem extends Device {
     @Override
     public void copyToWorkingSpace(String path, File working, Progress progress) throws Exception {
         
-        // TODO: handle directories and failures
-        
         // Strip any leading separators (we want a path relative to the current dir)
         while (path.startsWith(PATH_SEPARATOR)) {
             path = path.replaceFirst(PATH_SEPARATOR, "");
@@ -267,25 +276,9 @@ public class SFTPFileSystem extends Device {
                 path = path + "/";
             }
             
+            monitor = new SFTPMonitor(progress);
+            
             getDir(channelSftp, path, working, attrs);
-            
-            /*
-            byte[] buffer = new byte[1024 * 1024];
-            BufferedInputStream bis = new BufferedInputStream(channelSftp.get(path));
-            
-            OutputStream os = new FileOutputStream(working);
-            BufferedOutputStream bos = new BufferedOutputStream(os);
-            
-            int count;
-            while((count = bis.read(buffer)) > 0) {
-                bos.write(buffer, 0, count);
-                progress.byteCount += count;
-                progress.timestamp = System.currentTimeMillis();
-            }
-            
-            bis.close();
-            bos.close();
-            */
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -333,7 +326,71 @@ public class SFTPFileSystem extends Device {
             Disconnect();
         }
     }
-
+    
+    // Adapted from org.apache.tools.ant.taskdefs.optional.ssh
+    private long calculateSize(final ChannelSftp channel,
+                               String remoteFile) throws IOException, SftpException {
+        
+        long bytes = 0;        
+        String pwd = remoteFile;
+        
+        if (remoteFile.lastIndexOf('/') != -1) {
+            if (remoteFile.length() > 1) {
+                pwd = remoteFile.substring(0, remoteFile.lastIndexOf('/'));
+            }
+        }
+        
+        channel.cd(pwd);
+        
+        final java.util.Vector files = channel.ls(remoteFile);
+        final int size = files.size();
+        for (int i = 0; i < size; i++) {
+            final ChannelSftp.LsEntry le = (ChannelSftp.LsEntry) files.elementAt(i);
+            final String name = le.getFilename();
+            if (le.getAttrs().isDir()) {
+                if (name.equals(".") || name.equals("..")) {
+                    continue;
+                }
+                bytes += calculateSize(channel, channel.pwd() + "/" + name + "/");
+            } else {
+                bytes += le.getAttrs().getSize();
+            }
+        }
+        
+        channel.cd("..");
+        return bytes;
+    }
+    
+    // Adapted from org.apache.tools.ant.taskdefs.optional.ssh
+    private class SFTPMonitor implements SftpProgressMonitor {
+        
+        private final Progress progressTracker;
+        
+        public SFTPMonitor(Progress progressTracker) {
+            this.progressTracker = progressTracker;
+        }
+        
+        @Override
+        public void init(final int op, final String src, final String dest, final long max) {
+            
+        }
+        
+        @Override
+        public boolean count(final long len) {
+            
+            // Inform the generic progress tracker
+            progressTracker.byteCount += len;
+            progressTracker.timestamp = System.currentTimeMillis();
+            
+            return true;
+        }
+        
+        @Override
+        public void end() {
+        
+        }
+    }
+    
     // Adapted from org.apache.tools.ant.taskdefs.optional.ssh
     private void getDir(final ChannelSftp channel,
                         String remoteFile,
@@ -390,23 +447,14 @@ public class SFTPFileSystem extends Device {
                 }
             }
         }
-
+        
         if (localFile.isDirectory()) {
             localFile = new File(localFile, remoteFile);
         }
-
-        final long startTime = System.currentTimeMillis();
-        final long totalLength = le.getAttrs().getSize();
-
-        SftpProgressMonitor monitor = null;
         
-        try {
-            System.out.println("Receiving: " + remoteFile + " : " + le.getAttrs().getSize());
-            channel.get(remoteFile, localFile.getAbsolutePath(), monitor);
-        } finally {
-            final long endTime = System.currentTimeMillis();
-            // logStats(startTime, endTime, (int) totalLength);
-        }
+        System.out.println("Receiving: " + remoteFile + " : " + le.getAttrs().getSize());
+        channel.get(remoteFile, localFile.getAbsolutePath(), monitor);
+        
         /*
         if (getPreserveLastModified()) {
             FileUtils.getFileUtils().setFileLastModified(localFile,
