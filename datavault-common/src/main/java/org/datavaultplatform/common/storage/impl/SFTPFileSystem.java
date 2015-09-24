@@ -3,21 +3,20 @@ package org.datavaultplatform.common.storage.impl;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.io.Progress;
+import org.datavaultplatform.common.storage.impl.ssh.Utility;
 
 import java.io.File;
 import java.io.OutputStream;
-import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.io.FileInputStream;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Vector;
 
 import com.jcraft.jsch.*;
-import java.io.FileInputStream;
-import java.io.IOException;
 
 public class SFTPFileSystem extends Device {
 
@@ -31,7 +30,7 @@ public class SFTPFileSystem extends Device {
     private final int port = 22;
     private final String PATH_SEPARATOR = "/";
     
-    private SFTPMonitor monitor = null;
+    private Utility.SFTPMonitor monitor = null;
     
     public SFTPFileSystem(String name, Map<String,String> config) throws Exception {
         super(name, config);
@@ -199,7 +198,7 @@ public class SFTPFileSystem extends Device {
                     path = path + "/";
                 }
                 
-                return calculateSize(channelSftp, path);
+                return Utility.calculateSize(channelSftp, path);
                 
             } else {
                 return attrs.getSize();
@@ -276,9 +275,9 @@ public class SFTPFileSystem extends Device {
                 path = path + "/";
             }
             
-            monitor = new SFTPMonitor(progress);
+            monitor = new Utility.SFTPMonitor(progress);
             
-            getDir(channelSftp, path, working, attrs);
+            Utility.getDir(channelSftp, path, working, attrs, monitor);
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -325,143 +324,5 @@ public class SFTPFileSystem extends Device {
         } finally {
             Disconnect();
         }
-    }
-    
-    // Adapted from org.apache.tools.ant.taskdefs.optional.ssh
-    private long calculateSize(final ChannelSftp channel,
-                               String remoteFile) throws IOException, SftpException {
-        
-        long bytes = 0;        
-        String pwd = remoteFile;
-        
-        if (remoteFile.lastIndexOf('/') != -1) {
-            if (remoteFile.length() > 1) {
-                pwd = remoteFile.substring(0, remoteFile.lastIndexOf('/'));
-            }
-        }
-        
-        channel.cd(pwd);
-        
-        final java.util.Vector files = channel.ls(remoteFile);
-        final int size = files.size();
-        for (int i = 0; i < size; i++) {
-            final ChannelSftp.LsEntry le = (ChannelSftp.LsEntry) files.elementAt(i);
-            final String name = le.getFilename();
-            if (le.getAttrs().isDir()) {
-                if (name.equals(".") || name.equals("..")) {
-                    continue;
-                }
-                bytes += calculateSize(channel, channel.pwd() + "/" + name + "/");
-            } else {
-                bytes += le.getAttrs().getSize();
-            }
-        }
-        
-        channel.cd("..");
-        return bytes;
-    }
-    
-    // Adapted from org.apache.tools.ant.taskdefs.optional.ssh
-    private class SFTPMonitor implements SftpProgressMonitor {
-        
-        private final Progress progressTracker;
-        
-        public SFTPMonitor(Progress progressTracker) {
-            this.progressTracker = progressTracker;
-        }
-        
-        @Override
-        public void init(final int op, final String src, final String dest, final long max) {
-            
-        }
-        
-        @Override
-        public boolean count(final long len) {
-            
-            // Inform the generic progress tracker
-            progressTracker.byteCount += len;
-            progressTracker.timestamp = System.currentTimeMillis();
-            
-            return true;
-        }
-        
-        @Override
-        public void end() {
-        
-        }
-    }
-    
-    // Adapted from org.apache.tools.ant.taskdefs.optional.ssh
-    private void getDir(final ChannelSftp channel,
-                        String remoteFile,
-                        final File localFile,
-                        final SftpATTRS attrs) throws IOException, SftpException {
-
-        String pwd = remoteFile;
-
-        if (remoteFile.lastIndexOf('/') != -1) {
-            if (remoteFile.length() > 1) {
-                pwd = remoteFile.substring(0, remoteFile.lastIndexOf('/'));
-            }
-        }
-        
-        channel.cd(pwd);
-        
-        if (attrs.isDir()) {
-            if (!localFile.exists()) {
-                localFile.mkdirs();
-            }
-        }
-        
-        final java.util.Vector files = channel.ls(remoteFile);
-        final int size = files.size();
-        for (int i = 0; i < size; i++) {
-            final ChannelSftp.LsEntry le = (ChannelSftp.LsEntry) files.elementAt(i);
-            final String name = le.getFilename();
-            if (le.getAttrs().isDir()) {
-                if (name.equals(".") || name.equals("..")) {
-                    continue;
-                }
-                getDir(channel,
-                       channel.pwd() + "/" + name + "/",
-                       new File(localFile, le.getFilename()),
-                       le.getAttrs());
-            } else {
-                getFile(channel, le, localFile);
-            }
-        }
-        channel.cd("..");
-    }
-
-    // Adapted from org.apache.tools.ant.taskdefs.optional.ssh
-    private void getFile(final ChannelSftp channel,
-                         final ChannelSftp.LsEntry le,
-                         File localFile) throws IOException, SftpException {
-        final String remoteFile = le.getFilename();
-        if (!localFile.exists()) {
-            final String path = localFile.getAbsolutePath();
-            final int i = path.lastIndexOf(File.pathSeparator);
-            if (i != -1) {
-                if (path.length() > File.pathSeparator.length()) {
-                    new File(path.substring(0, i)).mkdirs();
-                }
-            }
-        }
-        
-        if (localFile.isDirectory()) {
-            localFile = new File(localFile, remoteFile);
-        }
-        
-        System.out.println("Receiving: " + remoteFile + " : " + le.getAttrs().getSize());
-        channel.get(remoteFile, localFile.getAbsolutePath(), monitor);
-        
-        /*
-        if (getPreserveLastModified()) {
-            FileUtils.getFileUtils().setFileLastModified(localFile,
-                                                         ((long) le.getAttrs()
-                                                          .getMTime())
-                                                         * 1000);
-        }
-        */
     }
 }
