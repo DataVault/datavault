@@ -3,20 +3,20 @@ package org.datavaultplatform.common.storage.impl;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.io.Progress;
+import org.datavaultplatform.common.storage.impl.ssh.Utility;
 
 import java.io.File;
 import java.io.OutputStream;
-import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.io.FileInputStream;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Vector;
 
 import com.jcraft.jsch.*;
-import java.io.FileInputStream;
 
 public class SFTPFileSystem extends Device {
 
@@ -29,6 +29,8 @@ public class SFTPFileSystem extends Device {
     private ChannelSftp channelSftp = null;
     private final int port = 22;
     private final String PATH_SEPARATOR = "/";
+    
+    private Utility.SFTPMonitor monitor = null;
     
     public SFTPFileSystem(String name, Map<String,String> config) throws Exception {
         super(name, config);
@@ -185,13 +187,22 @@ public class SFTPFileSystem extends Device {
     @Override
     public long getSize(String path) throws Exception {
         
-        // TODO: handle directories and special cases
-        
         try {
             Connect();
             
-            SftpATTRS attrs = channelSftp.stat(rootPath + PATH_SEPARATOR + path);
-            return attrs.getSize();
+            path = channelSftp.pwd() + "/" + path;
+            final SftpATTRS attrs = channelSftp.stat(path);
+            
+            if (attrs.isDir()) {
+                if (!path.endsWith("/")) {
+                    path = path + "/";
+                }
+                
+                return Utility.calculateSize(channelSftp, path);
+                
+            } else {
+                return attrs.getSize();
+            }
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -249,8 +260,6 @@ public class SFTPFileSystem extends Device {
     @Override
     public void copyToWorkingSpace(String path, File working, Progress progress) throws Exception {
         
-        // TODO: handle directories and failures
-        
         // Strip any leading separators (we want a path relative to the current dir)
         while (path.startsWith(PATH_SEPARATOR)) {
             path = path.replaceFirst(PATH_SEPARATOR, "");
@@ -259,21 +268,16 @@ public class SFTPFileSystem extends Device {
         try {
             Connect();
             
-            byte[] buffer = new byte[1024 * 1024];
-            BufferedInputStream bis = new BufferedInputStream(channelSftp.get(path));
+            path = channelSftp.pwd() + "/" + path;
+            final SftpATTRS attrs = channelSftp.stat(path);
             
-            OutputStream os = new FileOutputStream(working);
-            BufferedOutputStream bos = new BufferedOutputStream(os);
-            
-            int count;
-            while((count = bis.read(buffer)) > 0) {
-                bos.write(buffer, 0, count);
-                progress.byteCount += count;
-                progress.timestamp = System.currentTimeMillis();
+            if (attrs.isDir() && !path.endsWith("/")) {
+                path = path + "/";
             }
             
-            bis.close();
-            bos.close();
+            monitor = new Utility.SFTPMonitor(progress);
+            
+            Utility.getDir(channelSftp, path, working, attrs, monitor);
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -282,7 +286,7 @@ public class SFTPFileSystem extends Device {
             Disconnect();
         }
     }
-
+    
     @Override
     public void copyFromWorkingSpace(String path, File working, Progress progress) throws Exception {
         
