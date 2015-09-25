@@ -31,7 +31,7 @@ public class Job {
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date creationTime;
+    private Date timestamp;
     
     @JsonIgnore
     @ManyToOne
@@ -62,12 +62,12 @@ public class Job {
     
     public String getID() { return id; }
 
-    public void setCreationTime(Date creationTime) {
-        this.creationTime = creationTime;
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 
-    public Date getCreationTime() {
-        return creationTime;
+    public Date getTimestamp() {
+        return timestamp;
     }
     
     public Deposit getDeposit() { return deposit; }

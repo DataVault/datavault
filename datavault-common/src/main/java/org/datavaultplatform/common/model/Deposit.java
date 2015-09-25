@@ -51,7 +51,7 @@ public class Deposit {
     
     // A Deposit can have a number of active jobs
     @JsonIgnore
-    @OneToMany(targetEntity=Event.class, mappedBy="deposit", fetch=FetchType.LAZY)
+    @OneToMany(targetEntity=Job.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp")
     private List<Job> jobs;
     
