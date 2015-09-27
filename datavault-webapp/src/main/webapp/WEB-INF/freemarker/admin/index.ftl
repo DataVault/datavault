@@ -10,7 +10,7 @@
                 </div>
                 <div class="panel-body">
                     <ul>
-                        <li>Users: ${usercount} (<a href="users">List users</a>)</li>
+                        <li>Users: <a href="users">${usercount}</a></li>
                     </ul>
                 </div>
             </div>
@@ -22,7 +22,7 @@
                 </div>
                 <div class="panel-body">
                     <ul>
-                        <li>Vaults: ${vaultcount}</li>
+                        <li>Vaults: <a href="vaults">${vaultcount}</a></li>
                     </ul>
                 </div>
             </div>
@@ -34,7 +34,7 @@
                 </div>
                 <div class="panel-body">
                     <ul>
-                        <li>Deposits: ${depositcount}</li>
+                        <li>Deposits: <a href="deposits">${depositcount}</a></li>
                     </ul>
                 </div>
             </div>
