@@ -13,11 +13,13 @@ public class ProgressTracker implements Runnable {
     private long startTime = 0;
     
     Progress progress;
+    String jobId;
     String depositId;
     EventSender eventSender;
     
-    public ProgressTracker(Progress progress, String depositId, EventSender eventSender) {
+    public ProgressTracker(Progress progress, String jobId, String depositId, EventSender eventSender) {
         this.progress = progress;
+        this.jobId = jobId;
         this.depositId = depositId;
         this.eventSender = eventSender;
     }
@@ -52,7 +54,7 @@ public class ProgressTracker implements Runnable {
                                             + "Elapsed time: " + msElapsed + " ms");
             
             // Signal progress to the broker
-            TransferProgress progressEvent = new TransferProgress(depositId, byteCount, bytesPerSec);
+            TransferProgress progressEvent = new TransferProgress(jobId, depositId, byteCount, bytesPerSec);
             lastByteCount = byteCount;
             eventSender.send(progressEvent);
         }

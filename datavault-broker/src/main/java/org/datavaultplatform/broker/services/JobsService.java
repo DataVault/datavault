@@ -21,7 +21,6 @@ public class JobsService {
         job.setTimestamp(d);
         
         job.setDeposit(deposit);
-        job.setStatus(Job.Status.NOT_STARTED);
         
         jobDAO.save(job);
     }

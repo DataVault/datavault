@@ -11,8 +11,8 @@ public class ComputedSize extends Event {
     public long bytes;
 
     ComputedSize() {};
-    public ComputedSize(String depositId, long bytes) {
-        super(depositId, "Deposit size: " + bytes + " bytes");
+    public ComputedSize(String jobId, String depositId, long bytes) {
+        super(jobId, depositId, "Deposit size: " + bytes + " bytes");
         this.eventClass = ComputedSize.class.getCanonicalName();
         this.bytes = bytes;
     }

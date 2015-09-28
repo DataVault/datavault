@@ -4,8 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.broker.services.DepositsService;
 import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.broker.services.EventService;
+import org.datavaultplatform.broker.services.JobsService;
 import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.event.InitStates;
+import org.datavaultplatform.common.event.UpdateState;
 import org.datavaultplatform.common.event.deposit.*;
+import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Vault;
 import org.springframework.amqp.core.Message;
@@ -13,9 +17,18 @@ import org.springframework.amqp.core.MessageListener;
 
 public class EventListener implements MessageListener {
 
+    private JobsService jobsService;
+    private EventService eventService;
     private VaultsService vaultsService;
     private DepositsService depositsService;
-    private EventService eventService;
+
+    public void setJobsService(JobsService jobsService) {
+        this.jobsService = jobsService;
+    }
+    
+    public void setEventService(EventService eventService) {
+        this.eventService = eventService;
+    }
     
     public void setVaultsService(VaultsService vaultsService) {
         this.vaultsService = vaultsService;
@@ -23,10 +36,6 @@ public class EventListener implements MessageListener {
     
     public void setDepositsService(DepositsService depositsService) {
         this.depositsService = depositsService;
-    }
-    
-    public void setEventService(EventService eventService) {
-        this.eventService = eventService;
     }
     
     @Override
@@ -47,6 +56,10 @@ public class EventListener implements MessageListener {
             Deposit deposit = depositsService.getDeposit(concreteEvent.getDepositId());
             concreteEvent.setDeposit(deposit);
             
+            // Get the related job
+            Job job = jobsService.getJob(concreteEvent.getJobId());
+            concreteEvent.setJob(job);
+            
             if (concreteEvent.getPersistent()) {
                 // Persist the event properties in the database ...
                 eventService.addEvent(concreteEvent);
@@ -54,7 +67,21 @@ public class EventListener implements MessageListener {
             
             // Maybe perform an action based on the event type ...
             
-            if (concreteEvent instanceof Start) {
+            if (concreteEvent instanceof InitStates) {
+                
+                // Update the Job state information
+                InitStates initStatesEvent = (InitStates)concreteEvent;
+                job.setStates(initStatesEvent.getStates());
+                jobsService.updateJob(job);
+            
+            } else if (concreteEvent instanceof UpdateState) {
+                
+                // Update the Job state
+                UpdateState updateStateEvent = (UpdateState)concreteEvent;
+                job.setState(updateStateEvent.getState());
+                jobsService.updateJob(job);
+                
+            } else if (concreteEvent instanceof Start) {
                 
                 // Update the deposit status
                 deposit.setStatus(Deposit.Status.CALCULATE_SIZE);

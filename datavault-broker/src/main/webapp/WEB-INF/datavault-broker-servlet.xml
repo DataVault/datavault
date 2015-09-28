@@ -67,6 +67,7 @@
         <property name="policiesService" ref="policiesService" />
         <property name="usersService" ref="usersService" />
         <property name="fileStoreService" ref="fileStoreService" />
+        <property name="jobsService" ref="jobsService" />
         <property name="sender" ref="sender" />
         <property name="activeDir" value="${activeDir}" />
     </bean>
@@ -116,6 +117,10 @@
     <bean id="fileStoreService" class="org.datavaultplatform.broker.services.FileStoreService">
         <property name="fileStoreDAO" ref="fileStoreDAO" />
     </bean>
+
+    <bean id="jobsService" class="org.datavaultplatform.broker.services.JobsService">
+        <property name="jobDAO" ref="jobDAO" />
+    </bean>
     
     <!-- RabbitMQ -->
     
@@ -145,6 +150,7 @@
     </rabbit:listener-container>
 
     <bean id="listener" class="org.datavaultplatform.queue.EventListener">
+        <property name="jobsService" ref="jobsService" />
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
         <property name="eventService" ref="eventService" />
@@ -220,5 +226,9 @@
     <bean id="fileStoreDAO" class="org.datavaultplatform.common.model.dao.FileStoreDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
-
+    
+    <bean id="jobDAO" class="org.datavaultplatform.common.model.dao.JobDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    
 </beans>

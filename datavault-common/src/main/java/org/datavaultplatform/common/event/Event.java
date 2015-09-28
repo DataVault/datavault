@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.ManyToOne;
 import org.hibernate.annotations.GenericGenerator;
 import org.datavaultplatform.common.model.Deposit;
+import org.datavaultplatform.common.model.Job;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -37,6 +38,7 @@ public class Event {
     // Event properties
     public String message;
     public String depositId;
+    public String jobId;
     public String eventClass;
 
     // Serialise date in ISO 8601 format
@@ -54,9 +56,15 @@ public class Event {
     @ManyToOne
     private Deposit deposit;
     
+    // Related job
+    @JsonIgnore
+    @ManyToOne
+    private Job job;
+    
     public Event() {};
-    public Event(String depositId, String message) {
+    public Event(String jobId, String depositId, String message) {
         this.eventClass = Event.class.getCanonicalName();
+        this.jobId = jobId;
         this.depositId = depositId;
         this.message = message;
         this.timestamp = new Date();
@@ -81,6 +89,14 @@ public class Event {
         this.message = message;
     }
 
+    public String getJobId() {
+        return jobId;
+    }
+
+    public void setJobId(String jobId) {
+        this.jobId = jobId;
+    }
+    
     public String getDepositId() {
         return depositId;
     }
@@ -113,6 +129,14 @@ public class Event {
         this.timestamp = timestamp;
     }
 
+    public Job getJob() {
+        return job;
+    }
+
+    public void setJob(Job job) {
+        this.job = job;
+    }
+    
     public Deposit getDeposit() {
         return deposit;
     }

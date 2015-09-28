@@ -10,8 +10,8 @@ import javax.persistence.Table;
 public class Error extends Event {
 
     public Error() { }
-    public Error(String depositId, String message) {
-        super(depositId, message);
+    public Error(String jobId, String depositId, String message) {
+        super(jobId, depositId, message);
         this.eventClass = Error.class.getCanonicalName();
     }
 }

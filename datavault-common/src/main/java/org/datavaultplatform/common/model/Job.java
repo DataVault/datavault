@@ -6,14 +6,20 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import org.datavaultplatform.common.event.Event;
 import org.hibernate.annotations.GenericGenerator;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -37,27 +43,27 @@ public class Job {
     @ManyToOne
     private Deposit deposit;
     
-    // TODO: we need a more robust/generic approach to deposit state
-    // Handle with inheritance?
-    public enum Status {
-        NOT_STARTED,
-        CALCULATE_SIZE, // other pre-flight checks?
-        TRANSFER_FILES,
-        CREATE_PACKAGE,
-        STORE_ARCHIVE_PACKAGE,
-        COMPLETE
-    }
+    // A Job can have a number of events
+    @JsonIgnore
+    @OneToMany(targetEntity=Event.class, mappedBy="job", fetch=FetchType.LAZY)
+    @OrderBy("timestamp, sequence")
+    private List<Event> events;
     
-    private Status status;
+    private String jobClass;
+    
+    // State information will be supplied by the worker task at run time
+    private ArrayList<String> states = new ArrayList<>();
+    private Integer state = null;
     
     // Number of bytes ingested/transferred
     private long bytesTransferred;
     
     // Transfer rate
     private long bytesPerSec;
-    
-    public Job() {
-        this.status = Status.NOT_STARTED;
+
+    public Job() {};
+    public Job(String jobClass) {
+        this.jobClass = jobClass;
     }
     
     public String getID() { return id; }
@@ -76,10 +82,24 @@ public class Job {
         this.deposit = deposit;
     }
 
-    public Status getStatus() { return status; }
+    public String getJobClass() { return jobClass; }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    public void setJobClass(String jobClass) {
+        this.jobClass = jobClass;
+    }
+
+    public ArrayList<String> getStates() { return states; }
+
+    public void setStates(ArrayList<String> states) {
+        this.states = states;
+    }
+    
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
     }
     
     public long getBytesTransferred() { return bytesTransferred; }

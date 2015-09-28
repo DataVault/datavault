@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.queue.Sender;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +28,7 @@ public class VaultsController {
     private PoliciesService policiesService;
     private UsersService usersService;
     private FileStoreService fileStoreService;
+    private JobsService jobsService;
     private Sender sender;
     
     private String activeDir;
@@ -88,6 +90,10 @@ public class VaultsController {
         this.usersService = usersService;
     }
 
+    public void setJobsService(JobsService jobsService) {
+        this.jobsService = jobsService;
+    }
+    
     public void setSender(Sender sender) {
         this.sender = sender;
     }
@@ -221,6 +227,10 @@ public class VaultsController {
         // Add the deposit object
         depositsService.addDeposit(vault, deposit);
         
+        // Create a job to track this deposit
+        Job job = new Job("org.datavaultplatform.worker.tasks.Deposit");
+        jobsService.addJob(deposit, job);
+        
         // Ask the worker to process the deposit
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -236,9 +246,10 @@ public class VaultsController {
             depositProperties.put("depositMetadata", mapper.writeValueAsString(deposit));
             depositProperties.put("vaultMetadata", mapper.writeValueAsString(vault));
             
-            org.datavaultplatform.common.job.Job depositJob = new org.datavaultplatform.common.job.Job("org.datavaultplatform.worker.jobs.Deposit", depositProperties, store);
-            String jsonDeposit = mapper.writeValueAsString(depositJob);
+            Task depositTask = new Task(job, depositProperties, store);
+            String jsonDeposit = mapper.writeValueAsString(depositTask);
             sender.send(jsonDeposit);
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -355,6 +366,10 @@ public class VaultsController {
             throw new IllegalArgumentException("Path '" + restorePath + "' is invalid");
         }
         
+        // Create a job to track this restore
+        Job job = new Job("org.datavaultplatform.worker.jobs.Restore");
+        jobsService.addJob(deposit, job);
+        
         // Ask the worker to process the data restore
         try {
             HashMap<String, String> restoreProperties = new HashMap<>();
@@ -362,9 +377,9 @@ public class VaultsController {
             restoreProperties.put("bagId", deposit.getBagId());
             restoreProperties.put("restorePath", restorePath); // No longer the absolute path
             
-            org.datavaultplatform.common.job.Job restoreJob = new org.datavaultplatform.common.job.Job("org.datavaultplatform.worker.jobs.Restore", restoreProperties, store);
+            Task restoreTask = new Task(job, restoreProperties, store);
             ObjectMapper mapper = new ObjectMapper();
-            String jsonRestore = mapper.writeValueAsString(restoreJob);
+            String jsonRestore = mapper.writeValueAsString(restoreTask);
             sender.send(jsonRestore);
         } catch (Exception e) {
             e.printStackTrace();

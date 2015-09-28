@@ -1,18 +1,21 @@
-package org.datavaultplatform.worker.jobs;
+package org.datavaultplatform.worker.tasks;
 
 import java.util.Map;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.datavaultplatform.common.job.Context;
-import org.datavaultplatform.common.job.Job;
+import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.worker.operations.Tar;
 import org.datavaultplatform.worker.operations.Packager;
 import org.datavaultplatform.worker.queue.EventSender;
 import org.datavaultplatform.common.event.Error;
+import org.datavaultplatform.common.event.InitStates;
+import org.datavaultplatform.common.event.UpdateState;
 import org.datavaultplatform.common.event.deposit.Start;
 import org.datavaultplatform.common.event.deposit.ComputedSize;
 import org.datavaultplatform.common.event.deposit.TransferComplete;
@@ -25,7 +28,7 @@ import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 
-public class Deposit extends Job {
+public class Deposit extends Task {
 
     EventSender events;
     
@@ -46,7 +49,13 @@ public class Deposit extends Job {
         String depositMetadata = properties.get("depositMetadata");
         String vaultMetadata = properties.get("vaultMetadata");
         
-        eventStream.send(new Start(depositId));
+        ArrayList<String> states = new ArrayList<>();
+        states.add("Calculating Size");
+        states.add("Transferring Files");
+        states.add("Complete");
+        eventStream.send(new InitStates(jobID, depositId, states));
+        
+        eventStream.send(new Start(jobID, depositId));
         
         System.out.println("\tbagID: " + bagID);
         System.out.println("\tfilePath: " + filePath);
@@ -60,7 +69,7 @@ public class Deposit extends Job {
             fs = (Device)instance;
         } catch (Exception e) {
             e.printStackTrace();
-            eventStream.send(new Error(depositId, "Deposit failed: could not access active filesystem"));
+            eventStream.send(new Error(jobID, depositId, "Deposit failed: could not access active filesystem"));
             return;
         }
         
@@ -90,14 +99,17 @@ public class Deposit extends Job {
                 File outputFile = bagPath.resolve(fileName).toFile();
 
                 // Compute bytes to copy
+                eventStream.send(new UpdateState(jobID, depositId, 0)); // Debug
                 long bytes = fs.getSize(filePath);
                 
-                eventStream.send(new ComputedSize(depositId, bytes));
+                eventStream.send(new ComputedSize(jobID, depositId, bytes));
                 System.out.println("\tSize: " + bytes + " bytes (" +  FileUtils.byteCountToDisplaySize(bytes) + ")");
+                
+                eventStream.send(new UpdateState(jobID, depositId, 1)); // Debug
                 
                 // Progress tracking (threaded)
                 Progress progress = new Progress();
-                ProgressTracker tracker = new ProgressTracker(progress, depositId, eventStream);
+                ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, eventStream);
                 Thread trackerThread = new Thread(tracker);
                 trackerThread.start();
                 
@@ -110,7 +122,7 @@ public class Deposit extends Job {
                     trackerThread.join();
                 }
                 
-                eventStream.send(new TransferComplete(depositId));
+                eventStream.send(new TransferComplete(jobID, depositId));
                 
                 // Bag the directory in-place
                 System.out.println("\tCreating bag ...");
@@ -126,7 +138,7 @@ public class Deposit extends Job {
                 File tarFile = tarPath.toFile();
                 Tar.createTar(bagDir, tarFile);
 
-                eventStream.send(new PackageComplete(depositId));
+                eventStream.send(new PackageComplete(jobID, depositId));
                 
                 // Create the meta directory for the bag information
                 Path metaPath = Paths.get(context.getMetaDir(), bagID);
@@ -149,16 +161,18 @@ public class Deposit extends Job {
                 FileUtils.deleteDirectory(bagDir);
                 tarFile.delete();
                 
+                eventStream.send(new UpdateState(jobID, depositId, 2)); // Debug
+                
                 System.out.println("\tDeposit complete: " + archivePath);
-                eventStream.send(new Complete(depositId));
+                eventStream.send(new Complete(jobID, depositId));
                 
             } else {
                 System.err.println("\tFile does not exist.");
-                eventStream.send(new Error(depositId, "Deposit failed: file not found"));
+                eventStream.send(new Error(jobID, depositId, "Deposit failed: file not found"));
             }
         } catch (Exception e) {
             e.printStackTrace();
-            eventStream.send(new Error(depositId, "Deposit failed: " + e.getMessage()));
+            eventStream.send(new Error(jobID, depositId, "Deposit failed: " + e.getMessage()));
         }
     }
 }

@@ -9,8 +9,8 @@ import org.datavaultplatform.common.event.Event;
 public class TransferComplete extends Event {
     
     TransferComplete() {};
-    public TransferComplete(String depositId) {
-        super(depositId, "File transfer completed");
+    public TransferComplete(String jobId, String depositId) {
+        super(jobId, depositId, "File transfer completed");
         this.eventClass = TransferComplete.class.getCanonicalName();
     }
 }
