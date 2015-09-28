@@ -104,6 +104,12 @@ public class VaultsController {
         return user.getVaults();
     }
 
+    @RequestMapping(value = "/vaults/all", method = RequestMethod.GET)
+    public List<Vault> getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        return vaultsService.getVaults();
+    }
+
     @RequestMapping(value = "/vaults/count", method = RequestMethod.GET)
     public int getVaultsCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
@@ -120,6 +126,12 @@ public class VaultsController {
     public int getDepositsCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
         return depositsService.count();
+    }
+
+    @RequestMapping(value = "/vaults/deposits", method = RequestMethod.GET)
+    public List<Deposit> getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        return depositsService.getDeposits();
     }
 
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)

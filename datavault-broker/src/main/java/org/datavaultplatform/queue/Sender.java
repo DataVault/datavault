@@ -33,14 +33,14 @@ public class Sender {
     //private final static String QUEUE_NAME = "datavaultplatform";
     //private final static String QUEUE_USER = "datavaultplatform";
     //private final static String QUEUE_PASSWORD = "datavaultplatform";
-    
+
     public void send(String message) throws IOException, TimeoutException {
-        
+
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(queueServer);
         factory.setUsername(queueUser);
         factory.setPassword(queuePassword);
-        
+
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
         
