@@ -50,9 +50,11 @@ public class Deposit extends Task {
         String vaultMetadata = properties.get("vaultMetadata");
         
         ArrayList<String> states = new ArrayList<>();
-        states.add("Calculating Size");
-        states.add("Transferring Files");
-        states.add("Complete");
+        states.add("Calculating size");   // 0
+        states.add("Transferring files"); // 1
+        states.add("Packaging data");     // 2
+        states.add("Storing in archive"); // 3
+        states.add("Deposit complete");   // 4
         eventStream.send(new InitStates(jobID, depositId, states));
         
         eventStream.send(new Start(jobID, depositId));
@@ -72,16 +74,6 @@ public class Deposit extends Task {
             eventStream.send(new Error(jobID, depositId, "Deposit failed: could not access active filesystem"));
             return;
         }
-        
-        /*
-        try {
-            fs = new SFTPFileSystem(fileStore.getStorageClass(), fileStore.getProperties());
-        } catch (Exception e) {
-            e.printStackTrace();
-            eventStream.send(new Error(depositId, "Deposit failed: could not access active filesystem"));
-            return;
-        }
-        */
         
         System.out.println("\tDeposit file: " + filePath);
 
@@ -103,13 +95,12 @@ public class Deposit extends Task {
                 long bytes = fs.getSize(filePath);
                 
                 eventStream.send(new ComputedSize(jobID, depositId, bytes));
+                eventStream.send(new UpdateState(jobID, depositId, 1, 0, bytes)); // Debug
                 System.out.println("\tSize: " + bytes + " bytes (" +  FileUtils.byteCountToDisplaySize(bytes) + ")");
-                
-                eventStream.send(new UpdateState(jobID, depositId, 1)); // Debug
                 
                 // Progress tracking (threaded)
                 Progress progress = new Progress();
-                ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, eventStream);
+                ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, 1, bytes, eventStream);
                 Thread trackerThread = new Thread(tracker);
                 trackerThread.start();
                 
@@ -123,6 +114,7 @@ public class Deposit extends Task {
                 }
                 
                 eventStream.send(new TransferComplete(jobID, depositId));
+                eventStream.send(new UpdateState(jobID, depositId, 2)); // Debug
                 
                 // Bag the directory in-place
                 System.out.println("\tCreating bag ...");
@@ -139,6 +131,7 @@ public class Deposit extends Task {
                 Tar.createTar(bagDir, tarFile);
 
                 eventStream.send(new PackageComplete(jobID, depositId));
+                eventStream.send(new UpdateState(jobID, depositId, 3)); // Debug
                 
                 // Create the meta directory for the bag information
                 Path metaPath = Paths.get(context.getMetaDir(), bagID);
@@ -152,8 +145,21 @@ public class Deposit extends Task {
                 // Copy the resulting tar file to the archive area
                 System.out.println("\tCopying tar file to archive ...");
                 Path archivePath = Paths.get(context.getArchiveDir()).resolve(tarFileName);
+                
+                // Progress tracking (threaded)
                 progress = new Progress();
-                FileCopy.copyFile(progress, tarFile, archivePath.toFile());
+                tracker = new ProgressTracker(progress, jobID, depositId, 3, tarFile.length(), eventStream);
+                trackerThread = new Thread(tracker);
+                trackerThread.start();
+                
+                try {
+                    FileCopy.copyFile(progress, tarFile, archivePath.toFile());
+                } finally {
+                    // Stop the tracking thread
+                    tracker.stop();
+                    trackerThread.join();
+                }
+                
                 System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
                 
                 // Cleanup
@@ -161,10 +167,9 @@ public class Deposit extends Task {
                 FileUtils.deleteDirectory(bagDir);
                 tarFile.delete();
                 
-                eventStream.send(new UpdateState(jobID, depositId, 2)); // Debug
-                
                 System.out.println("\tDeposit complete: " + archivePath);
                 eventStream.send(new Complete(jobID, depositId));
+                eventStream.send(new UpdateState(jobID, depositId, 4)); // Debug
                 
             } else {
                 System.err.println("\tFile does not exist.");

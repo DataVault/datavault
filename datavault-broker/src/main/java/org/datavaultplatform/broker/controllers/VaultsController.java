@@ -367,7 +367,7 @@ public class VaultsController {
         }
         
         // Create a job to track this restore
-        Job job = new Job("org.datavaultplatform.worker.jobs.Restore");
+        Job job = new Job("org.datavaultplatform.worker.tasks.Restore");
         jobsService.addJob(deposit, job);
         
         // Ask the worker to process the data restore

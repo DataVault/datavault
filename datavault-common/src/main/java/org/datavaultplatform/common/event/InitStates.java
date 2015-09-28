@@ -15,6 +15,7 @@ public class InitStates extends Event {
         super(jobId, depositId, "Job states: " + states.size());
         this.eventClass = InitStates.class.getCanonicalName();
         this.states = states;
+        this.persistent = false;
     }
 
     public ArrayList<String> getStates() {

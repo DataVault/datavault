@@ -79,12 +79,14 @@ public class EventListener implements MessageListener {
                 // Update the Job state
                 UpdateState updateStateEvent = (UpdateState)concreteEvent;
                 job.setState(updateStateEvent.getState());
+                job.setProgress(updateStateEvent.getProgress());
+                job.setProgressMax(updateStateEvent.getProgressMax());
                 jobsService.updateJob(job);
                 
             } else if (concreteEvent instanceof Start) {
                 
                 // Update the deposit status
-                deposit.setStatus(Deposit.Status.CALCULATE_SIZE);
+                deposit.setStatus(Deposit.Status.IN_PROGRESS);
                 depositsService.updateDeposit(deposit);
                 
             } else if (concreteEvent instanceof ComputedSize) {
@@ -92,7 +94,6 @@ public class EventListener implements MessageListener {
                 // Update the deposit with the computed size
                 ComputedSize computedSizeEvent = (ComputedSize)concreteEvent;
                 deposit.setSize(computedSizeEvent.getBytes());
-                deposit.setStatus(Deposit.Status.TRANSFER_FILES);
                 depositsService.updateDeposit(deposit);
                 
                 // Add to the cumulative vault size
@@ -101,27 +102,7 @@ public class EventListener implements MessageListener {
                 long vaultSize = vault.getSize();
                 vault.setSize(vaultSize + computedSizeEvent.getBytes());
                 vaultsService.updateVault(vault);
-                
-            } else if (concreteEvent instanceof TransferProgress) {
-                
-                // Update the deposit transfer progress
-                TransferProgress transferProgressEvent = (TransferProgress)concreteEvent;
-                deposit.setBytesTransferred(transferProgressEvent.getBytes());
-                deposit.setBytesPerSec(transferProgressEvent.getBytesPerSec());
-                depositsService.updateDeposit(deposit);
-                
-            } else if (concreteEvent instanceof TransferComplete) {
-                
-                // Update the deposit status
-                deposit.setStatus(Deposit.Status.CREATE_PACKAGE);
-                depositsService.updateDeposit(deposit);
-                
-            } else if (concreteEvent instanceof PackageComplete) {
-                
-                // Update the deposit status
-                deposit.setStatus(Deposit.Status.STORE_ARCHIVE_PACKAGE);
-                depositsService.updateDeposit(deposit);
-                
+
             } else if (concreteEvent instanceof Complete) {
                 
                 // Update the deposit status

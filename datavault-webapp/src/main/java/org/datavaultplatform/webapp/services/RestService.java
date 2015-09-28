@@ -234,6 +234,19 @@ public class RestService {
         
         return events;
     }
+    
+    public Job[] getDepositJobs(String vaultId, String depositID) {
+        
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
+        HttpEntity entity = new HttpEntity(headers);
+        
+        HttpEntity<Job[]> response = restTemplate.exchange(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/jobs", HttpMethod.GET, entity, Job[].class);
+        Job[] jobs = response.getBody();
+        
+        return jobs;
+    }
 
     public Policy[] getPolicyListing() {
         

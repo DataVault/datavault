@@ -11,7 +11,7 @@ import org.datavaultplatform.common.model.Job;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Task {
 
-    protected String jobClass;
+    protected String taskClass;
     protected String jobID;
     Map<String, String> properties;
     protected FileStore fileStore;
@@ -19,7 +19,7 @@ public class Task {
     public Task() {};
     public Task(Job job, Map<String, String> properties, FileStore fileStore) {
         this.jobID = job.getID();
-        this.jobClass = job.getJobClass();
+        this.taskClass = job.getTaskClass();
         this.properties = properties;
         this.fileStore = fileStore;
     }
@@ -29,13 +29,13 @@ public class Task {
     public void setJobID(String jobID) {
         this.jobID = jobID;
     }
-    
-    public String getJobClass() {
-        return jobClass;
+
+    public String getTaskClass() {
+        return taskClass;
     }
 
-    public void setJobClass(String jobClass) {
-        this.jobClass = jobClass;
+    public void setTaskClass(String taskClass) {
+        this.taskClass = taskClass;
     }
 
     public Map<String, String> getProperties() {

@@ -49,21 +49,19 @@ public class Job {
     @OrderBy("timestamp, sequence")
     private List<Event> events;
     
-    private String jobClass;
+    private String taskClass;
     
     // State information will be supplied by the worker task at run time
     private ArrayList<String> states = new ArrayList<>();
     private Integer state = null;
     
-    // Number of bytes ingested/transferred
-    private long bytesTransferred;
+    // A generic indicator of progress
+    private long progress;
+    private long progressMax;
     
-    // Transfer rate
-    private long bytesPerSec;
-
     public Job() {};
-    public Job(String jobClass) {
-        this.jobClass = jobClass;
+    public Job(String taskClass) {
+        this.taskClass = taskClass;
     }
     
     public String getID() { return id; }
@@ -82,12 +80,14 @@ public class Job {
         this.deposit = deposit;
     }
 
-    public String getJobClass() { return jobClass; }
-
-    public void setJobClass(String jobClass) {
-        this.jobClass = jobClass;
+    public String getTaskClass() {
+        return taskClass;
     }
 
+    public void setTaskClass(String taskClass) {
+        this.taskClass = taskClass;
+    }
+    
     public ArrayList<String> getStates() { return states; }
 
     public void setStates(ArrayList<String> states) {
@@ -101,24 +101,20 @@ public class Job {
     public void setState(Integer state) {
         this.state = state;
     }
-    
-    public long getBytesTransferred() { return bytesTransferred; }
-    
-    public String getBytesTransferredStr() {
-        return FileUtils.byteCountToDisplaySize(bytesTransferred);
+
+    public long getProgress() {
+        return progress;
     }
 
-    public void setBytesTransferred(long bytesTransferred) {
-        this.bytesTransferred = bytesTransferred;
+    public void setProgress(long progress) {
+        this.progress = progress;
     }
 
-    public long getBytesPerSec() { return bytesPerSec; }
-    
-    public String getBytesPerSecStr() {
-        return FileUtils.byteCountToDisplaySize(bytesPerSec);
+    public long getProgressMax() {
+        return progressMax;
     }
 
-    public void setBytesPerSec(long bytesPerSec) {
-        this.bytesPerSec = bytesPerSec;
+    public void setProgressMax(long progressMax) {
+        this.progressMax = progressMax;
     }
 }

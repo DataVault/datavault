@@ -2,6 +2,7 @@ package org.datavaultplatform.webapp.controllers;
 
 
 import org.datavaultplatform.common.model.Deposit;
+import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Restore;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
@@ -60,6 +61,12 @@ public class DepositsController {
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/json", method = RequestMethod.GET)
     public @ResponseBody Deposit getDepositJson(@PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
         return restService.getDeposit(vaultID, depositID);
+    }
+    
+    // View jobs related to a single deposit as a JSON object
+    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/jobs", method = RequestMethod.GET)
+    public @ResponseBody Job[] getDepositJobsJson(@PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
+        return restService.getDepositJobs(vaultID, depositID);
     }
     
     // Return a 'restore deposit' page

@@ -74,13 +74,13 @@ public class Receiver {
             
             try {
                 ObjectMapper mapper = new ObjectMapper();
-                Task commonjob = mapper.readValue(message, Task.class);
+                Task commonTask = mapper.readValue(message, Task.class);
                 
-                Class<?> clazz = Class.forName(commonjob.getJobClass());
-                Task concreteJob = (Task)(mapper.readValue(message, clazz));
+                Class<?> clazz = Class.forName(commonTask.getTaskClass());
+                Task concreteTask = (Task)(mapper.readValue(message, clazz));
                 
                 Context context = new Context(archiveDir, tempDir, metaDir, events);
-                concreteJob.performAction(context);
+                concreteTask.performAction(context);
                 
             } catch (Exception e) {
                 e.printStackTrace();
