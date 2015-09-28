@@ -66,7 +66,6 @@ public class Vault {
     // Raw policy ID
     private String policyID;
     
-    @JsonIgnore
     @ManyToOne
     private User user;
     

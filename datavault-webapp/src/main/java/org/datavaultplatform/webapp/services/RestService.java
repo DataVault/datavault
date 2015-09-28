@@ -65,6 +65,19 @@ public class RestService {
         return vaults;
     }
 
+    public Vault[] getVaultsListingAll() {
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
+        HttpEntity entity = new HttpEntity(headers);
+
+        HttpEntity<Vault[]> response = restTemplate.exchange(brokerURL + "/vaults/all", HttpMethod.GET, entity, Vault[].class);
+        Vault[] vaults = response.getBody();
+
+        return vaults;
+    }
+
     public int getVaultsCount() {
 
         RestTemplate restTemplate = new RestTemplate();
@@ -155,6 +168,20 @@ public class RestService {
 
         return deposits;
     }
+
+    public Deposit[] getDepositsListingAll() {
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
+        HttpEntity entity = new HttpEntity(headers);
+
+        HttpEntity<Deposit[]> response = restTemplate.exchange(brokerURL + "/vaults/deposits", HttpMethod.GET, entity, Deposit[].class);
+        Deposit[] deposits = response.getBody();
+
+        return deposits;
+    }
+
 
     public Deposit getDeposit(String vaultId, String depositID) {
 
