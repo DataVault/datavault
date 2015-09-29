@@ -9,8 +9,8 @@ import org.datavaultplatform.common.event.Event;
 public class Complete extends Event {
     
     Complete() {};
-    public Complete(String depositId) {
-        super(depositId, "Deposit completed");
+    public Complete(String jobId, String depositId) {
+        super(jobId, depositId, "Deposit completed");
         this.eventClass = Complete.class.getCanonicalName();
     }
 }

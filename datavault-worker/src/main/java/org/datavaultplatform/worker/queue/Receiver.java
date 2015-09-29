@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.datavaultplatform.common.job.Job;
-import org.datavaultplatform.common.job.Context;
+import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.task.Context;
 
 public class Receiver {
 
@@ -74,13 +74,13 @@ public class Receiver {
             
             try {
                 ObjectMapper mapper = new ObjectMapper();
-                Job commonjob = mapper.readValue(message, Job.class);
+                Task commonTask = mapper.readValue(message, Task.class);
                 
-                Class<?> clazz = Class.forName(commonjob.getJobClass());
-                Job concreteJob = (Job)(mapper.readValue(message, clazz));
+                Class<?> clazz = Class.forName(commonTask.getTaskClass());
+                Task concreteTask = (Task)(mapper.readValue(message, clazz));
                 
                 Context context = new Context(archiveDir, tempDir, metaDir, events);
-                concreteJob.performAction(context);
+                concreteTask.performAction(context);
                 
             } catch (Exception e) {
                 e.printStackTrace();

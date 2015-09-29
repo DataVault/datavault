@@ -49,13 +49,15 @@ public class Deposit {
     @OrderBy("timestamp, sequence")
     private List<Event> events;
     
-    // TODO: we need a more robust/generic approach to deposit state
+    // A Deposit can have a number of active jobs
+    @JsonIgnore
+    @OneToMany(targetEntity=Job.class, mappedBy="deposit", fetch=FetchType.LAZY)
+    @OrderBy("timestamp")
+    private List<Job> jobs;
+    
     public enum Status {
         NOT_STARTED,
-        CALCULATE_SIZE, // other pre-flight checks?
-        TRANSFER_FILES,
-        CREATE_PACKAGE,
-        STORE_ARCHIVE_PACKAGE,
+        IN_PROGRESS,
         COMPLETE
     }
     
@@ -70,12 +72,6 @@ public class Deposit {
     
     // Size of the deposit (in bytes)
     private long depositSize;
-    
-    // Number of bytes ingested/transferred
-    private long bytesTransferred;
-    
-    // Transfer rate
-    private long bytesPerSec;
     
     public Deposit() {}
     public Deposit(String note) {
@@ -132,28 +128,12 @@ public class Deposit {
     public String getSizeStr() {
         return FileUtils.byteCountToDisplaySize(depositSize);
     }
-
-    public long getBytesTransferred() { return bytesTransferred; }
-    
-    public String getBytesTransferredStr() {
-        return FileUtils.byteCountToDisplaySize(bytesTransferred);
-    }
-
-    public void setBytesTransferred(long bytesTransferred) {
-        this.bytesTransferred = bytesTransferred;
-    }
-
-    public long getBytesPerSec() { return bytesPerSec; }
-    
-    public String getBytesPerSecStr() {
-        return FileUtils.byteCountToDisplaySize(bytesPerSec);
-    }
-
-    public void setBytesPerSec(long bytesPerSec) {
-        this.bytesPerSec = bytesPerSec;
-    }
     
     public List<Event> getEvents() {
         return events;
+    }
+
+    public List<Job> getJobs() {
+        return jobs;
     }
 }

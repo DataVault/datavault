@@ -1,4 +1,4 @@
-package org.datavaultplatform.common.job;
+package org.datavaultplatform.common.task;
 
 import org.datavaultplatform.common.event.EventStream;
 

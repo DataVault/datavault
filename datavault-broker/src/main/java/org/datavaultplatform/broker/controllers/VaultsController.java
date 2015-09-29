@@ -2,23 +2,11 @@ package org.datavaultplatform.broker.controllers;
 
 import java.util.List;
 import java.util.HashMap;
-import java.io.IOException;
 
-import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.Restore;
-import org.datavaultplatform.common.model.FileFixity;
-import org.datavaultplatform.common.model.Policy;
-import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.FileStore;
+import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.job.Job;
-import org.datavaultplatform.broker.services.VaultsService;
-import org.datavaultplatform.broker.services.DepositsService;
-import org.datavaultplatform.broker.services.MetadataService;
-import org.datavaultplatform.broker.services.FilesService;
-import org.datavaultplatform.broker.services.PoliciesService;
-import org.datavaultplatform.broker.services.FileStoreService;
+import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.queue.Sender;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,14 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.datavaultplatform.broker.services.FileStoreService;
-import org.datavaultplatform.broker.services.UsersService;
-
-/**
- * User: Tom Higgins
- * Date: 11/05/2015
- * Time: 14:29
- */
 
 @RestController
 public class VaultsController {
@@ -48,6 +28,7 @@ public class VaultsController {
     private PoliciesService policiesService;
     private UsersService usersService;
     private FileStoreService fileStoreService;
+    private JobsService jobsService;
     private Sender sender;
     
     private String activeDir;
@@ -109,6 +90,10 @@ public class VaultsController {
         this.usersService = usersService;
     }
 
+    public void setJobsService(JobsService jobsService) {
+        this.jobsService = jobsService;
+    }
+    
     public void setSender(Sender sender) {
         this.sender = sender;
     }
@@ -242,6 +227,10 @@ public class VaultsController {
         // Add the deposit object
         depositsService.addDeposit(vault, deposit);
         
+        // Create a job to track this deposit
+        Job job = new Job("org.datavaultplatform.worker.tasks.Deposit");
+        jobsService.addJob(deposit, job);
+        
         // Ask the worker to process the deposit
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -257,9 +246,10 @@ public class VaultsController {
             depositProperties.put("depositMetadata", mapper.writeValueAsString(deposit));
             depositProperties.put("vaultMetadata", mapper.writeValueAsString(vault));
             
-            Job depositJob = new Job("org.datavaultplatform.worker.jobs.Deposit", depositProperties, store);
-            String jsonDeposit = mapper.writeValueAsString(depositJob);
+            Task depositTask = new Task(job, depositProperties, store);
+            String jsonDeposit = mapper.writeValueAsString(depositTask);
             sender.send(jsonDeposit);
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -298,6 +288,18 @@ public class VaultsController {
         
         List<Event> events = deposit.getEvents();
         return events;
+    }
+    
+    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/jobs", method = RequestMethod.GET)
+    public List<Job> getDepositJobs(@RequestHeader(value = "X-UserID", required = true) String userID, 
+                                    @PathVariable("vaultid") String vaultID,
+                                    @PathVariable("depositid") String depositID) throws Exception {
+
+        User user = usersService.getUser(userID);
+        Deposit deposit = getUserDeposit(user, vaultID, depositID);
+        
+        List<Job> jobs = deposit.getJobs();
+        return jobs;
     }
 
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/status", method = RequestMethod.GET)
@@ -364,6 +366,10 @@ public class VaultsController {
             throw new IllegalArgumentException("Path '" + restorePath + "' is invalid");
         }
         
+        // Create a job to track this restore
+        Job job = new Job("org.datavaultplatform.worker.tasks.Restore");
+        jobsService.addJob(deposit, job);
+        
         // Ask the worker to process the data restore
         try {
             HashMap<String, String> restoreProperties = new HashMap<>();
@@ -371,9 +377,9 @@ public class VaultsController {
             restoreProperties.put("bagId", deposit.getBagId());
             restoreProperties.put("restorePath", restorePath); // No longer the absolute path
             
-            Job restoreJob = new Job("org.datavaultplatform.worker.jobs.Restore", restoreProperties, store);
+            Task restoreTask = new Task(job, restoreProperties, store);
             ObjectMapper mapper = new ObjectMapper();
-            String jsonRestore = mapper.writeValueAsString(restoreJob);
+            String jsonRestore = mapper.writeValueAsString(restoreTask);
             sender.send(jsonRestore);
         } catch (Exception e) {
             e.printStackTrace();

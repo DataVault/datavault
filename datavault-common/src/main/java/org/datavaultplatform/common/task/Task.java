@@ -1,32 +1,41 @@
-package org.datavaultplatform.common.job;
+package org.datavaultplatform.common.task;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.Map;
 import org.datavaultplatform.common.model.FileStore;
+import org.datavaultplatform.common.model.Job;
 
-// A generic job container
+// A generic task container
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Job {
+public class Task {
 
-    String jobClass;
+    protected String taskClass;
+    protected String jobID;
     Map<String, String> properties;
     protected FileStore fileStore;
 
-    public Job() {};
-    public Job(String jobClass, Map<String, String> properties, FileStore fileStore) {
-        this.jobClass = jobClass;
+    public Task() {};
+    public Task(Job job, Map<String, String> properties, FileStore fileStore) {
+        this.jobID = job.getID();
+        this.taskClass = job.getTaskClass();
         this.properties = properties;
         this.fileStore = fileStore;
     }
 
-    public String getJobClass() {
-        return jobClass;
+    public String getJobID() { return jobID; }
+
+    public void setJobID(String jobID) {
+        this.jobID = jobID;
     }
 
-    public void setJobClass(String jobClass) {
-        this.jobClass = jobClass;
+    public String getTaskClass() {
+        return taskClass;
+    }
+
+    public void setTaskClass(String taskClass) {
+        this.taskClass = taskClass;
     }
 
     public Map<String, String> getProperties() {

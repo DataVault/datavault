@@ -9,8 +9,8 @@ import org.datavaultplatform.common.event.Event;
 public class PackageComplete extends Event {
     
     PackageComplete() {};
-    public PackageComplete(String depositId) {
-        super(depositId, "Packaging completed");
+    public PackageComplete(String jobId, String depositId) {
+        super(jobId, depositId, "Packaging completed");
         this.eventClass = PackageComplete.class.getCanonicalName();
     }
 }

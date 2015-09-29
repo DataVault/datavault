@@ -8,8 +8,8 @@ public class TransferProgress extends Event {
     public long bytesPerSec;
 
     TransferProgress() {};
-    public TransferProgress(String depositId, long bytes, long bytesPerSec) {
-        super(depositId, "Bytes transferred: " + bytes + " bytes");
+    public TransferProgress(String jobId, String depositId, long bytes, long bytesPerSec) {
+        super(jobId, depositId, "Bytes transferred: " + bytes + " bytes");
         this.eventClass = TransferProgress.class.getCanonicalName();
         this.bytes = bytes;
         this.bytesPerSec = bytesPerSec;
