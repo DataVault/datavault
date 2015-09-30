@@ -14,6 +14,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.apache.commons.io.FileUtils;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.util.List;
@@ -102,10 +103,10 @@ public class Vault {
     }
 
     public long getSize() { return vaultSize; }
+
+    public String getSizeStr() { return FileUtils.byteCountToDisplaySize(vaultSize); }
     
-    public List<Deposit> getDeposits() {
-        return deposits;
-    }
+    public List<Deposit> getDeposits() { return deposits; }
     
     public void addDeposit(Deposit deposit) {
         this.deposits.add(deposit);

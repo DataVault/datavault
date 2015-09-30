@@ -123,15 +123,11 @@ public class Deposit {
         this.filePath = filePath;
     }
     
-    public void setSize(long size) {
-        this.depositSize = size;
-    }
+    public void setSize(long size) { this.depositSize = size; }
 
     public long getSize() { return depositSize; }
 
-    public String getSizeStr() {
-        return FileUtils.byteCountToDisplaySize(depositSize);
-    }
+    public String getSizeStr() { return FileUtils.byteCountToDisplaySize(depositSize); }
 
     public long getBytesTransferred() { return bytesTransferred; }
     

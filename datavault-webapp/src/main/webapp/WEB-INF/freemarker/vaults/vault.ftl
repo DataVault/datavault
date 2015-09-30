@@ -13,7 +13,7 @@
                 <tr class="tr">
                     <th>Description</th>
                     <th>Policy</th>
-                    <th>Size (bytes)</th>
+                    <th>Size</th>
                     <th>Timestamp</th>
                 </tr>
             </thead>
@@ -21,7 +21,7 @@
                 <tr class="tr">
                     <td>${vault.description?html}</td>
                     <td>${policy.name}</td>
-                    <td>${vault.size}</td>
+                    <td>${vault.getSizeStr()}</td>
                     <td>${vault.creationTime?datetime}</td>
                 </tr>
             </tbody>
@@ -38,6 +38,7 @@
                     <tr class="tr">
                         <th>Deposit</th>
                         <th>File Path</th>
+                        <th>Size</th>
                         <th>Timestamp</th>
                     </tr>
                 </thead>
@@ -49,6 +50,7 @@
                                 <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}">${deposit.note?html}</a>
                             </td>
                             <td>${deposit.filePath?html}</td>
+                            <td>${deposit.getSizeStr()}</td>
                             <td>${deposit.getCreationTime()?datetime}</td>
                         </tr>
                     </#list>
