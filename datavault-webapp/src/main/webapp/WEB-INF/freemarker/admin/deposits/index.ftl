@@ -15,7 +15,7 @@
                     <th>Status</th>
                     <th>Size</th>
                     <th>File Path</th>
-                   <th>Timestamp</th>
+                    <th>Timestamp</th>
                 </tr>
                 </thead>
 
