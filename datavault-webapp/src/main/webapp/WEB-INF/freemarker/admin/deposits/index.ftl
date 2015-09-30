@@ -13,8 +13,9 @@
                 <tr class="tr">
                     <th>Deposit</th>
                     <th>Status</th>
+                    <th>Size</th>
                     <th>File Path</th>
-                    <th>Timestamp</th>
+                   <th>Timestamp</th>
                 </tr>
                 </thead>
 
@@ -23,6 +24,7 @@
                     <tr class="tr">
                         <td>${deposit.note?html}</a></td>
                         <td>${deposit.status}</td>
+                        <td>${deposit.getSizeStr()}</td>
                         <td>${deposit.filePath?html}</td>
                         <td>${deposit.getCreationTime()?datetime}</td>
                     </tr>
