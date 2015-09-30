@@ -58,8 +58,12 @@
 
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
-        <div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+        <div class="pull-left">
+            <button type="submit" name="action" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-open"></span> Restore data</button>
+        </div>
+
+        <div class="pull-right">
+            <button type="submit" name="action" value="cancel" class="btn btn-danger cancel">Cancel</button>
         </div>
 
 

@@ -14,7 +14,7 @@
                     <tr class="tr">
                         <th>Vault</th>
                         <th>Description</th>
-                        <th>Size (bytes)</th>
+                        <th>Size</th>
                         <th>Timestamp</th>
                     </tr>
                 </thead>
@@ -26,7 +26,7 @@
                                 <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/">${vault.name?html}</a>
                             </td>
                             <td>${vault.description?html}</td>
-                            <td>${vault.size}</td>
+                            <td>${vault.getSizeStr()}</td>
                             <td>${vault.getCreationTime()?datetime}</td>
                         </tr>
                     </#list>
