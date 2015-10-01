@@ -22,15 +22,34 @@ public class RestService {
         this.brokerURL = brokerURL;
     }
     
-    public HttpEntity<?> get(String url, Class clazz) {
+    private HttpEntity<?> exchange(String url, Class clazz, HttpMethod method, Object payload) {
         
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
+
+        HttpEntity entity;
+        if (method == HttpMethod.GET) {
+            entity = new HttpEntity(headers);
+        } else if (method == HttpMethod.POST) {
+            entity = new HttpEntity(payload, headers);
+        } else {
+            throw new IllegalArgumentException("REST method not implemented!");
+        }
         
-        return restTemplate.exchange(url, HttpMethod.GET, entity, clazz);
+        return restTemplate.exchange(url, method, entity, clazz);
+        
     }
+    
+    public HttpEntity<?> get(String url, Class clazz) {
+        return exchange(url, clazz, HttpMethod.GET, null);
+    }
+    
+    public HttpEntity<?> post(String url, Class clazz, Object payload) {
+        return exchange(url, clazz, HttpMethod.POST, payload);
+    }
+    
+    /* GET requests */
     
     public FileStore[] getFileStoreListing() {        
         HttpEntity<?> response = get(brokerURL + "/filestores", FileStore[].class);
@@ -133,42 +152,20 @@ public class RestService {
         return (Integer)response.getBody();
     }
 
+    /* POST requests */
+    
     public Vault addVault(Vault vault) {
-        
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(vault, headers);
-        
-        HttpEntity<Vault> response = restTemplate.exchange(brokerURL + "/vaults/", HttpMethod.POST, entity, Vault.class);
-        Vault returnedVault = response.getBody();
-        
-        return returnedVault;
+        HttpEntity<?> response = post(brokerURL + "/vaults/", Vault.class, vault);
+        return (Vault)response.getBody();
     }
 
     public Deposit addDeposit(String vaultId, Deposit deposit) {
-        
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(deposit, headers);
-
-        HttpEntity<Deposit> response = restTemplate.exchange(brokerURL + "/vaults/" + vaultId + "/deposits", HttpMethod.POST, entity, Deposit.class);
-        Deposit returnedDeposit = response.getBody();
-        
-        return returnedDeposit;
+        HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/deposits", Deposit.class, deposit);
+        return (Deposit)response.getBody();
     }
     
     public Boolean restoreDeposit(String vaultId, String depositID, Restore restore) {        
-        
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(restore, headers);
-
-        HttpEntity<Boolean> response = restTemplate.exchange(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/restore", HttpMethod.POST, entity, Boolean.class);
-        Boolean result = response.getBody();
-        
-        return result;
+        HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/restore", Boolean.class, restore);
+        return (Boolean)response.getBody();
     }
 }
