@@ -35,7 +35,7 @@
                     <tr class="tr">
                         <th>Note</th>
                         <th>Status</th>
-                        <th>Size (bytes)</th>
+                        <th>Size</th>
                         <th>Timestamp</th>
                     </tr>
                     <thead>
@@ -43,7 +43,7 @@
                     <tr class="tr">
                         <td>${deposit.note?html}</td>
                         <td>${deposit.status}</td>
-                        <td>${deposit.size}</td>
+                        <td>${deposit.getSizeStr()}</td>
                         <td>${deposit.creationTime?datetime}</td>
                     </tr>
                     </tbody>

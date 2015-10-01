@@ -80,10 +80,16 @@ public class DepositsController {
     
     // Process the completed 'restore deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/restore", method = RequestMethod.POST)
-    public String processRestore(@ModelAttribute Restore restore, ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
-        
-        Boolean result = restService.restoreDeposit(vaultID, depositID, restore);
-        
+    public String processRestore(@ModelAttribute Restore restore, ModelMap model,
+                                 @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID,
+                                 @RequestParam String action) {
+
+
+        // If the cancel button wasn't pressed, perform the restore
+        if (!"cancel".equals(action)) {
+            Boolean result = restService.restoreDeposit(vaultID, depositID, restore);
+        }
+
         String depositUrl = "/vaults/" + vaultID + "/deposits/" + depositID + "/";
         return "redirect:" + depositUrl;
     }
