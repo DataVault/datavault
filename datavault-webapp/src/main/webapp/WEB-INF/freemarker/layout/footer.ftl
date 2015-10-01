@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-3">
-                <a target="_blank" href="http://www.ed.ac.uk/">
+                <a target="_blank" href="http://datavaultplatform.org/">
                     <img height="72" border="0" src="${springMacroRequestContext.getContextPath()}/resources/theme/images/logo-dvgrey.png" />
                 </a>
             </div>
