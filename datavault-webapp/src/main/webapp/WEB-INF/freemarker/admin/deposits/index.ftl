@@ -14,6 +14,7 @@
                     <th>Deposit</th>
                     <th>Status</th>
                     <th>File Path</th>
+                    <th>Size</th>
                     <th>Timestamp</th>
                 </tr>
                 </thead>
@@ -24,6 +25,7 @@
                         <td>${deposit.note?html}</a></td>
                         <td>${deposit.status}</td>
                         <td>${deposit.filePath?html}</td>
+                        <td>${deposit.getSizeStr()}</td>
                         <td>${deposit.getCreationTime()?datetime}</td>
                     </tr>
                     </#list>
