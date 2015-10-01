@@ -22,112 +22,115 @@ public class RestService {
         this.brokerURL = brokerURL;
     }
     
-    public FileStore[] getFileStoreListing() {
+    public HttpEntity<?> get(String url, Class clazz) {
         
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
         HttpEntity entity = new HttpEntity(headers);
         
-        HttpEntity<FileStore[]> response = restTemplate.exchange(brokerURL + "/filestores", HttpMethod.GET, entity, FileStore[].class);
-        FileStore[] fileStores = response.getBody();
-        
-        return fileStores;
+        return restTemplate.exchange(url, HttpMethod.GET, entity, clazz);
+    }
+    
+    public FileStore[] getFileStoreListing() {        
+        HttpEntity<?> response = get(brokerURL + "/filestores", FileStore[].class);
+        return (FileStore[])response.getBody();
     }
     
     public FileInfo[] getFilesListing(String filePath) {
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
         
         if (!filePath.startsWith("/")) {
             filePath = "/" + filePath;
         }
         
-        HttpEntity<FileInfo[]> response = restTemplate.exchange(brokerURL + "/files" + filePath, HttpMethod.GET, entity, FileInfo[].class);
-        FileInfo[] files = response.getBody();
-        
-        return files;
+        HttpEntity<?> response = get(brokerURL + "/files" + filePath, FileInfo[].class);
+        return (FileInfo[])response.getBody();
     }
 
     public Vault[] getVaultsListing() {
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-
-        HttpEntity<Vault[]> response = restTemplate.exchange(brokerURL + "/vaults", HttpMethod.GET, entity, Vault[].class);
-        Vault[] vaults = response.getBody();
-
-        return vaults;
+        HttpEntity<?> response = get(brokerURL + "/vaults", Vault[].class);
+        return (Vault[])response.getBody();
     }
 
     public Vault[] getVaultsListingAll() {
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-
-        HttpEntity<Vault[]> response = restTemplate.exchange(brokerURL + "/vaults/all", HttpMethod.GET, entity, Vault[].class);
-        Vault[] vaults = response.getBody();
-
-        return vaults;
+        HttpEntity<?> response = get(brokerURL + "/vaults/all", Vault[].class);
+        return (Vault[])response.getBody();
     }
 
     public int getVaultsCount() {
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-
-        HttpEntity<Integer> response = restTemplate.exchange(brokerURL + "/vaults/count", HttpMethod.GET, entity, Integer.class);
-        int count = response.getBody();
-
-        return count;
+        HttpEntity<?> response = get(brokerURL + "/vaults/count", Integer.class);
+        return (Integer)response.getBody();
     }
 
     public Long getVaultsSize() {
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-
-        HttpEntity<Long> response = restTemplate.exchange(brokerURL + "/vaults/size", HttpMethod.GET, entity, Long.class);
-        Long count = response.getBody();
-
-        return count;
+        HttpEntity<?> response = get(brokerURL + "/vaults/size", Long.class);
+        return (Long)response.getBody();
     }
 
     public int getDepositsCount() {
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-
-        HttpEntity<Integer> response = restTemplate.exchange(brokerURL + "/vaults/depositcount", HttpMethod.GET, entity, Integer.class);
-        int count = response.getBody();
-
-        return count;
+        HttpEntity<?> response = get(brokerURL + "/vaults/depositcount", Integer.class);
+        return (Integer)response.getBody();
     }
 
-    public Vault getVault(String id) {
+    public Vault getVault(String id) {        
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + id, Vault.class);
+        return (Vault)response.getBody();
+    }
 
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-        
-        HttpEntity<Vault> response = restTemplate.exchange(brokerURL + "/vaults/" + id, HttpMethod.GET, entity, Vault.class);
-        Vault vault = response.getBody();
-        
-        return vault;
+    public Deposit[] getDepositsListing(String vaultId) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits", Deposit[].class);
+        return (Deposit[])response.getBody();
+    }
+
+    public Deposit[] getDepositsListingAll() {
+        HttpEntity<?> response = get(brokerURL + "/vaults/deposits", Deposit[].class);
+        return (Deposit[])response.getBody();
+    }
+
+
+    public Deposit getDeposit(String vaultId, String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID, Deposit.class);
+        return (Deposit)response.getBody();
+    }
+    
+    public FileFixity[] getDepositManifest(String vaultId, String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/manifest", FileFixity[].class);
+        return (FileFixity[])response.getBody();
+    }
+    
+    public Event[] getDepositEvents(String vaultId, String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/events", Event[].class);
+        return (Event[])response.getBody();
+    }
+    
+    public Job[] getDepositJobs(String vaultId, String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/jobs", Job[].class);
+        return (Job[])response.getBody();
+    }
+
+    public Policy[] getPolicyListing() {
+        HttpEntity<?> response = get(brokerURL + "/policies", Policy[].class);
+        return (Policy[])response.getBody();
+    }
+
+    public Policy getPolicy(String policyId) {
+        HttpEntity<?> response = get(brokerURL + "/policies/" + policyId, Policy.class);
+        return (Policy)response.getBody();
+    }
+
+    public User getUser(String userId) {
+        HttpEntity<?> response = get(brokerURL + "/users/" + userId, User.class);
+        return (User)response.getBody();
+    }
+
+    public User[] getUsers() {
+        HttpEntity<?> response = get(brokerURL + "/users", User[].class);
+        return (User[])response.getBody();
+    }
+
+    public int getUsersCount() {
+        HttpEntity<?> response = get(brokerURL + "/users/count", Integer.class);
+        return (Integer)response.getBody();
     }
 
     public Vault addVault(Vault vault) {
@@ -155,59 +158,6 @@ public class RestService {
         
         return returnedDeposit;
     }
-
-    public Deposit[] getDepositsListing(String vaultId) {
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-
-        HttpEntity<Deposit[]> response = restTemplate.exchange(brokerURL + "/vaults/" + vaultId + "/deposits", HttpMethod.GET, entity, Deposit[].class);
-        Deposit[] deposits = response.getBody();
-
-        return deposits;
-    }
-
-    public Deposit[] getDepositsListingAll() {
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-
-        HttpEntity<Deposit[]> response = restTemplate.exchange(brokerURL + "/vaults/deposits", HttpMethod.GET, entity, Deposit[].class);
-        Deposit[] deposits = response.getBody();
-
-        return deposits;
-    }
-
-
-    public Deposit getDeposit(String vaultId, String depositID) {
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-        
-        HttpEntity<Deposit> response = restTemplate.exchange(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID, HttpMethod.GET, entity, Deposit.class);
-        Deposit deposit = response.getBody();
-
-        return deposit;
-    }
-    
-    public FileFixity[] getDepositManifest(String vaultId, String depositID) {
-        
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-        
-        HttpEntity<FileFixity[]> response = restTemplate.exchange(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/manifest", HttpMethod.GET, entity, FileFixity[].class);
-        FileFixity[] manifest = response.getBody();
-
-        return manifest;
-    }
     
     public Boolean restoreDeposit(String vaultId, String depositID, Restore restore) {        
         
@@ -220,96 +170,5 @@ public class RestService {
         Boolean result = response.getBody();
         
         return result;
-    }
-    
-    public Event[] getDepositEvents(String vaultId, String depositID) {
-        
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-        
-        HttpEntity<Event[]> response = restTemplate.exchange(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/events", HttpMethod.GET, entity, Event[].class);
-        Event[] events = response.getBody();
-        
-        return events;
-    }
-    
-    public Job[] getDepositJobs(String vaultId, String depositID) {
-        
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-        
-        HttpEntity<Job[]> response = restTemplate.exchange(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/jobs", HttpMethod.GET, entity, Job[].class);
-        Job[] jobs = response.getBody();
-        
-        return jobs;
-    }
-
-    public Policy[] getPolicyListing() {
-        
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-        
-        HttpEntity<Policy[]> response = restTemplate.exchange(brokerURL + "/policies", HttpMethod.GET, entity, Policy[].class);
-        Policy[] policies = response.getBody();
-
-        return policies;
-    }
-
-    public Policy getPolicy(String policyId) {
-        
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-        
-        HttpEntity<Policy> response = restTemplate.exchange(brokerURL + "/policies/" + policyId, HttpMethod.GET, entity, Policy.class);
-        Policy policy = response.getBody();
-
-        return policy;
-    }
-
-    public User getUser(String userId) {
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-
-        HttpEntity<User> response = restTemplate.exchange(brokerURL + "/users/" + userId, HttpMethod.GET, entity, User.class);
-        User user = response.getBody();
-
-        return user;
-    }
-
-    public User[] getUsers() {
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-
-        HttpEntity<User[]> response = restTemplate.exchange(brokerURL + "/users", HttpMethod.GET, entity, User[].class);
-        User[] users = response.getBody();
-
-        return users;
-    }
-
-    public int getUsersCount() {
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
-        HttpEntity entity = new HttpEntity(headers);
-
-        HttpEntity<Integer> response = restTemplate.exchange(brokerURL + "/users/count", HttpMethod.GET, entity, Integer.class);
-        int count = response.getBody();
-
-        return count;
     }
 }
