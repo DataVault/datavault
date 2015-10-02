@@ -16,13 +16,17 @@ public class DepositsService {
         return depositDAO.list();
     }
     
-    public void addDeposit(Vault vault, Deposit deposit) {
+    public void addDeposit(Vault vault, Deposit deposit, String shortPath, String origin) {
         
         Date d = new Date();
         deposit.setCreationTime(d);
         
         deposit.setVault(vault);
         deposit.setStatus(Deposit.Status.NOT_STARTED);
+        
+        // Set display values for the deposit path/origin
+        deposit.setShortFilePath(shortPath);
+        deposit.setFileOrigin(origin);
         
         // Generate a new UUID for this Bag.
         deposit.setBagId(UUID.randomUUID().toString());
