@@ -96,7 +96,7 @@
         </div>
     </div>
 
-    <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/restore">
+    <a id="restorebtn" class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/restore">
         <span class="glyphicon glyphicon-open" aria-hidden="true"></span> Restore data
     </a>
 
@@ -152,11 +152,13 @@
                 <!-- a pending job -->
                 updateInterval = 500;
                 $('#progtrckr').hide()
+                $('#restorebtn').hide()
                 
             } else if (job.state != job.states.length - 1) {
                 <!-- an active job -->
                 updateInterval = 500;
                 $('#progtrckr').show()
+                $('#restorebtn').hide()
                 displayJob(job)
                 
             } else {
