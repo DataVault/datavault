@@ -166,6 +166,7 @@
                     displayJob(job)
                     $("#progtrckr").fadeOut(1000, function() {
                         // Animation complete
+                        location.reload(true);
                     });
                 }
             }
