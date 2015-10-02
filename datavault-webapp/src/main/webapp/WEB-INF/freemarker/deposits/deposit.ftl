@@ -104,6 +104,8 @@
 
 <script>
 
+    var updateInterval = 500;
+
     function displayJob(job) {
 
         $('#progtrckr').empty()
@@ -145,23 +147,21 @@
             if (i < jobs.length - 1) {
                 continue;
             }
-            
-            console.log(jobs[i])
 
             if (job.states.length == 0) {
-                console.log("Pending Job")
-                
+                <!-- a pending job -->
+                updateInterval = 500;
                 $('#progtrckr').hide()
                 
             } else if (job.state != job.states.length - 1) {
-                console.log("Active Job")
-
+                <!-- an active job -->
+                updateInterval = 500;
                 $('#progtrckr').show()
                 displayJob(job)
                 
             } else {
-                console.log("Complete Job")
-                
+                <!-- a complete job -->
+                updateInterval = 5000;
                 if ($('#progtrckr').is(":visible")) {
                     displayJob(job)
                     $("#progtrckr").fadeOut(1000, function() {
@@ -186,7 +186,7 @@
                     }
                 }
             });
-        }, 500);
+        }, updateInterval);
     }
     load();
 </script>
