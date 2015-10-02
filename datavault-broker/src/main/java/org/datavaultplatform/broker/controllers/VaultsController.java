@@ -200,12 +200,16 @@ public class VaultsController {
         Vault vault = getUserVault(user, vaultID);
         
         String fullPath = deposit.getFilePath();
+        String storageID, storagePath;
         if (!fullPath.contains("/")) {
-            throw new IllegalArgumentException("Path '" + fullPath + "' does not contain a storage ID");
+            // A request to archive the whole share/device
+            storageID = fullPath;
+            storagePath = "/";
+        } else {
+            // A request to archive a sub-directory
+            storageID = fullPath.substring(0, fullPath.indexOf("/"));
+            storagePath = fullPath.replaceFirst(storageID + "/", "");
         }
-        
-        String storageID = fullPath.substring(0, fullPath.indexOf("/"));
-        String storagePath = fullPath.replaceFirst(storageID + "/", "");
         
         FileStore store = null;
         List<FileStore> userStores = user.getFileStores();

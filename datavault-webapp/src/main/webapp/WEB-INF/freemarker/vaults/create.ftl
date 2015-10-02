@@ -36,11 +36,8 @@
 
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
-        <div class="pull-left">
+        <div class="form-group">
             <button type="submit" name="action" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-folder-close"></span> Create new Vault</button>
-        </div>
-
-        <div class="pull-right">
             <button type="submit" name="action" value="cancel" class="btn btn-danger cancel">Cancel</button>
         </div>
 
