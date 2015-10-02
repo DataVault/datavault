@@ -229,7 +229,7 @@ public class VaultsController {
         }
         
         // Add the deposit object
-        depositsService.addDeposit(vault, deposit);
+        depositsService.addDeposit(vault, deposit, storagePath, store.getLabel());
         
         // Create a job to track this deposit
         Job job = new Job("org.datavaultplatform.worker.tasks.Deposit");

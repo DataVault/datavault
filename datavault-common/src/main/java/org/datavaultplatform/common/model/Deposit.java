@@ -68,6 +68,8 @@ public class Deposit {
     private String bagId;
     
     // Record the file path that the user selected for this deposit.
+    private String fileOrigin;
+    private String shortFilePath;
     private String filePath;
     
     // Size of the deposit (in bytes)
@@ -112,8 +114,24 @@ public class Deposit {
     public void setBagId(String bagId) {
         this.bagId = bagId;
     }
+
+    public String getFileOrigin() {
+        return fileOrigin;
+    }
+
+    public void setFileOrigin(String fileOrigin) {
+        this.fileOrigin = fileOrigin;
+    }
     
     public String getFilePath() { return filePath; }
+
+    public String getShortFilePath() {
+        return shortFilePath;
+    }
+
+    public void setShortFilePath(String shortFilePath) {
+        this.shortFilePath = shortFilePath;
+    }
     
     public void setFilePath(String filePath) {
         this.filePath = filePath;
