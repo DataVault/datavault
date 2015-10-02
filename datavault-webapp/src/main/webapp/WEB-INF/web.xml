@@ -37,6 +37,10 @@
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 
+    <error-page>
+        <location>/error</location>
+    </error-page>
+
     <!-- Spring Security -->
 
     <context-param>

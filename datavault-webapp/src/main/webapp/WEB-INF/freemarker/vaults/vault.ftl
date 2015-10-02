@@ -39,6 +39,7 @@
                         <th>Deposit</th>
                         <th>Origin</th>
                         <th>File Path</th>
+                        <th>Status</th>
                         <th>Size</th>
                         <th>Timestamp</th>
                     </tr>
@@ -52,6 +53,7 @@
                             </td>
                             <td>${deposit.fileOrigin?html}</td>
                             <td>${deposit.shortFilePath?html}</td>
+                            <td>${deposit.status?html}</td>
                             <td>${deposit.getSizeStr()}</td>
                             <td>${deposit.getCreationTime()?datetime}</td>
                         </tr>
