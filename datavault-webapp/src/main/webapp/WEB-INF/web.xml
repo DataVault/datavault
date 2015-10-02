@@ -38,6 +38,7 @@
     </listener>
 
     <error-page>
+        <error-code>500</error-code>
         <location>/error</location>
     </error-page>
 
