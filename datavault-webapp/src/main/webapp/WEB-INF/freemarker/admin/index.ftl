@@ -10,7 +10,7 @@
                 </div>
                 <div class="panel-body">
                     <ul>
-                        <li>Users: <a href="users">${usercount}</a></li>
+                        <li>Users: <a href="${springMacroRequestContext.getContextPath()}/admin/users">${usercount}</a></li>
                     </ul>
                 </div>
             </div>
@@ -22,7 +22,7 @@
                 </div>
                 <div class="panel-body">
                     <ul>
-                        <li>Vaults: <a href="vaults">${vaultcount}</a></li>
+                        <li>Vaults: <a href="${springMacroRequestContext.getContextPath()}/admin/vaults">${vaultcount}</a></li>
                     </ul>
                 </div>
             </div>
@@ -34,7 +34,7 @@
                 </div>
                 <div class="panel-body">
                     <ul>
-                        <li>Deposits: <a href="deposits">${depositcount}</a></li>
+                        <li>Deposits: <a href="${springMacroRequestContext.getContextPath()}/admin/deposits">${depositcount}</a></li>
                     </ul>
                 </div>
             </div>
