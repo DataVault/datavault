@@ -6,6 +6,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import org.datavaultplatform.common.model.Policy;
@@ -41,6 +42,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     public List<Policy> list() {        
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Policy.class);
+        criteria.addOrder(Order.asc("sort"));
         List<Policy> policies = criteria.list();
         session.close();
         return policies;

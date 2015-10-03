@@ -6,7 +6,6 @@ import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;

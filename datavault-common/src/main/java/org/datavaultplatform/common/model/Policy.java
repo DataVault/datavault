@@ -19,11 +19,15 @@ public class Policy {
     @Id
     @Column(name = "id", unique = true)
     private String id;
-    
+
     // Name of the policy
     @Column(name = "name", nullable = false)
     private String name;
-    
+
+    // Sort order of the policy
+    @Column(name = "sort", nullable = false)
+    private int sort;
+
     // A policy is related to a number of deposits
     @JsonIgnore
     @OneToMany(targetEntity=Vault.class, mappedBy="policy", fetch=FetchType.LAZY)
@@ -36,10 +40,14 @@ public class Policy {
     }
 
     public String getID() { return id; }
-    
+
     public void setName(String name) {
         this.name = name;
     }
 
     public String getName() { return name; }
+
+    public void setSort(int sort) { this.sort = sort; }
+
+    public int getSort() { return sort; }
 }
