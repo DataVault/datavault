@@ -23,6 +23,7 @@ public class VaultsController {
     
     private VaultsService vaultsService;
     private DepositsService depositsService;
+    private RestoresService restoresService;
     private MetadataService metadataService;
     private FilesService filesService;
     private PoliciesService policiesService;
@@ -65,11 +66,15 @@ public class VaultsController {
     public void setVaultsService(VaultsService vaultsService) {
         this.vaultsService = vaultsService;
     }
-    
+
     public void setDepositsService(DepositsService depositsService) {
         this.depositsService = depositsService;
     }
-    
+
+    public void setRestoresService(RestoresService restoresService) {
+        this.restoresService = restoresService;
+    }
+
     public void setMetadataService(MetadataService metadataService) {
         this.metadataService = metadataService;
     }
@@ -134,10 +139,22 @@ public class VaultsController {
         return depositsService.count();
     }
 
+    @RequestMapping(value = "/vaults/restorecount", method = RequestMethod.GET)
+    public int getRestoresCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        return restoresService.count();
+    }
+
     @RequestMapping(value = "/vaults/deposits", method = RequestMethod.GET)
     public List<Deposit> getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
         return depositsService.getDeposits();
+    }
+
+    @RequestMapping(value = "/vaults/restores", method = RequestMethod.GET)
+    public List<Restore> getRestoresAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        return restoresService.getRestores();
     }
 
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)
@@ -283,17 +300,29 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/events", method = RequestMethod.GET)
-    public List<Event> getDepositEvents(@RequestHeader(value = "X-UserID", required = true) String userID, 
+    public List<Event> getDepositEvents(@RequestHeader(value = "X-UserID", required = true) String userID,
                                         @PathVariable("vaultid") String vaultID,
                                         @PathVariable("depositid") String depositID) throws Exception {
 
         User user = usersService.getUser(userID);
         Deposit deposit = getUserDeposit(user, vaultID, depositID);
-        
+
         List<Event> events = deposit.getEvents();
         return events;
     }
-    
+
+    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/restores", method = RequestMethod.GET)
+    public List<Restore> getDepositRestores(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                            @PathVariable("vaultid") String vaultID,
+                                            @PathVariable("depositid") String depositID) throws Exception {
+
+        User user = usersService.getUser(userID);
+        Deposit deposit = getUserDeposit(user, vaultID, depositID);
+
+        List<Restore> restores = deposit.getRestores();
+        return restores;
+    }
+
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/jobs", method = RequestMethod.GET)
     public List<Job> getDepositJobs(@RequestHeader(value = "X-UserID", required = true) String userID, 
                                     @PathVariable("vaultid") String vaultID,
@@ -373,7 +402,10 @@ public class VaultsController {
         // Create a job to track this restore
         Job job = new Job("org.datavaultplatform.worker.tasks.Restore");
         jobsService.addJob(deposit, job);
-        
+
+        // Add the restore object
+        restoresService.addRestore(restore, deposit, restorePath);
+
         // Ask the worker to process the data restore
         try {
             HashMap<String, String> restoreProperties = new HashMap<>();

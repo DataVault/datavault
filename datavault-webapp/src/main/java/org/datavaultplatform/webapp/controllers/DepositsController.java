@@ -54,6 +54,7 @@ public class DepositsController {
         model.addAttribute("deposit", restService.getDeposit(vaultID, depositID));
         model.addAttribute("manifest", restService.getDepositManifest(vaultID, depositID));
         model.addAttribute("events", restService.getDepositEvents(vaultID, depositID));
+        model.addAttribute("restores", restService.getDepositRestores(vaultID, depositID));
         return "deposits/deposit";
     }
     

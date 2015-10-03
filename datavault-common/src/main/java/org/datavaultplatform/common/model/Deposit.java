@@ -48,13 +48,19 @@ public class Deposit {
     @OneToMany(targetEntity=Event.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp, sequence")
     private List<Event> events;
-    
+
     // A Deposit can have a number of active jobs
     @JsonIgnore
     @OneToMany(targetEntity=Job.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp")
     private List<Job> jobs;
-    
+
+    // A Deposit can have a number of restores
+    @JsonIgnore
+    @OneToMany(targetEntity=Restore.class, mappedBy="deposit", fetch=FetchType.LAZY)
+    @OrderBy("timestamp")
+    private List<Restore> restores;
+
     public enum Status {
         NOT_STARTED,
         IN_PROGRESS,
@@ -154,4 +160,6 @@ public class Deposit {
     public List<Job> getJobs() {
         return jobs;
     }
+
+    public List<Restore> getRestores() { return restores; }
 }

@@ -91,6 +91,11 @@ public class RestService {
         return (Integer)response.getBody();
     }
 
+    public int getRestoresCount() {
+        HttpEntity<?> response = get(brokerURL + "/vaults/restorecount", Integer.class);
+        return (Integer)response.getBody();
+    }
+
     public Vault getVault(String id) {        
         HttpEntity<?> response = get(brokerURL + "/vaults/" + id, Vault.class);
         return (Vault)response.getBody();
@@ -121,10 +126,15 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/events", Event[].class);
         return (Event[])response.getBody();
     }
-    
+
     public Job[] getDepositJobs(String vaultId, String depositID) {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/jobs", Job[].class);
         return (Job[])response.getBody();
+    }
+
+    public Restore[] getDepositRestores(String vaultId, String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/restores", Restore[].class);
+        return (Restore[])response.getBody();
     }
 
     public Policy[] getPolicyListing() {
