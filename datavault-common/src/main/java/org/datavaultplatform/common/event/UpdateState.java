@@ -14,7 +14,7 @@ public class UpdateState extends Event {
     
     UpdateState() {};
     public UpdateState(String jobId, String depositId, int state) {
-        this(jobId, depositId, state, 0, 0, null);
+        this(jobId, depositId, state, 0, 0, "");
     }
     public UpdateState(String jobId, String depositId, int state, long progress, long progressMax, String progressMessage) {
         super(jobId, depositId, "Job state: " + state);
