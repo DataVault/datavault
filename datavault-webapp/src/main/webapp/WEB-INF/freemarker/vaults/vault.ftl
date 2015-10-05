@@ -37,6 +37,7 @@
                 <thead>
                     <tr class="tr">
                         <th>Deposit</th>
+                        <th>Origin</th>
                         <th>File Path</th>
                         <th>Status</th>
                         <th>Size</th>
@@ -50,7 +51,8 @@
                             <td>
                                 <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}">${deposit.note?html}</a>
                             </td>
-                            <td>${deposit.filePath?html}</td>
+                            <td>${deposit.fileOrigin?html}</td>
+                            <td>${deposit.shortFilePath?html}</td>
                             <td>${deposit.status?html}</td>
                             <td>${deposit.getSizeStr()}</td>
                             <td>${deposit.getCreationTime()?datetime}</td>

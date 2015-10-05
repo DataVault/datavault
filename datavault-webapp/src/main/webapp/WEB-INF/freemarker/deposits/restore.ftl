@@ -10,9 +10,19 @@
         <li class="active">Restore data</li>
     </ol>
 
-    <p class="help-block">Choose a working directory to restore data from the archive</p>
+    <p class="help-block">Desribe the reason for this restore request (who and why) and choose a working directory to restore data from the archive</p>
 
     <form class="form" role="form" action="" method="post">
+
+        <div class="form-group">
+            <label class="control-label">Restore Note:</label>
+            <@spring.bind "restore.note" />
+            <input type="text"
+                   class="form-control"
+                   name="${spring.status.expression}"
+                   value="${spring.status.value!""}"/>
+        </div>
+
 
         <div class="form-group" style="display:none;">
             <label class="control-label">Filepath:</label>
@@ -58,14 +68,10 @@
 
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
-        <div class="pull-left">
+        <div class="form-group">
             <button type="submit" name="action" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-open"></span> Restore data</button>
-        </div>
-
-        <div class="pull-right">
             <button type="submit" name="action" value="cancel" class="btn btn-danger cancel">Cancel</button>
         </div>
-
 
     </form>
 

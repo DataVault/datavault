@@ -24,6 +24,7 @@
         <li class="active"><a data-toggle="tab" href="#deposit">Deposit</a></li>
         <li><a data-toggle="tab" href="#contents">Contents <span class="badge">${manifest?size}</span></a></li>
         <li><a data-toggle="tab" href="#events">Events <span class="badge">${events?size}</span></a></li>
+        <li><a data-toggle="tab" href="#restores">Restores <span class="badge">${restores?size}</span></a></li>
     </ul>
 
     <div id="deposit-tab-content" class="tab-content">
@@ -94,15 +95,40 @@
                 </table>
             </div>
         </div>
+
+        <div class="tab-pane" id="restores">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr class="tr">
+                        <th>Timestamp</th>
+                        <th>Restore path</th>
+                        <th>Restore note</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <#list restores as restore>
+                        <tr class="tr">
+                            <td>${restore.timestamp?datetime}</td>
+                            <td>${restore.restorePath?html}</td>
+                            <td>${restore.note?html}</td>
+                        </tr>
+                        </#list>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/restore">
+    <a id="restorebtn" class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/restore">
         <span class="glyphicon glyphicon-open" aria-hidden="true"></span> Restore data
     </a>
 
 </div>
 
 <script>
+
+    var updateInterval = 500;
 
     function displayJob(job) {
 
@@ -145,27 +171,28 @@
             if (i < jobs.length - 1) {
                 continue;
             }
-            
-            console.log(jobs[i])
 
             if (job.states.length == 0) {
-                console.log("Pending Job")
-                
+                <!-- a pending job -->
+                updateInterval = 500;
                 $('#progtrckr').hide()
+                $('#restorebtn').hide()
                 
             } else if (job.state != job.states.length - 1) {
-                console.log("Active Job")
-
+                <!-- an active job -->
+                updateInterval = 500;
                 $('#progtrckr').show()
+                $('#restorebtn').hide()
                 displayJob(job)
                 
             } else {
-                console.log("Complete Job")
-                
+                <!-- a complete job -->
+                updateInterval = 5000;
                 if ($('#progtrckr').is(":visible")) {
                     displayJob(job)
                     $("#progtrckr").fadeOut(1000, function() {
                         // Animation complete
+                        location.reload(true);
                     });
                 }
             }
@@ -186,7 +213,7 @@
                     }
                 }
             });
-        }, 500);
+        }, updateInterval);
     }
     load();
 </script>

@@ -52,11 +52,7 @@ public class VaultsController {
         model.addAttribute("vault", new Vault());
 
         Policy[] policies = restService.getPolicyListing();
-        Map<String, String> policyMap = new HashMap<>();
-        for (Policy policy : policies) {
-            policyMap.put(policy.getID(), policy.getName());
-        }
-        model.addAttribute("policyMap", policyMap);
+        model.addAttribute("policies", policies);
 
         return "vaults/create";
     }

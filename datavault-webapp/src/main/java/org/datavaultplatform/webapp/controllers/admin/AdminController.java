@@ -31,6 +31,7 @@ public class AdminController {
         model.addAttribute("usercount", restService.getUsersCount());
         model.addAttribute("vaultcount", restService.getVaultsCount());
         model.addAttribute("depositcount", restService.getDepositsCount());
+        model.addAttribute("restorecount", restService.getRestoresCount());
         Long vaultSize = restService.getVaultsSize();
         if (vaultSize == null) vaultSize = new Long(0);
         model.addAttribute("vaultsize", FileUtils.byteCountToDisplaySize(vaultSize));
