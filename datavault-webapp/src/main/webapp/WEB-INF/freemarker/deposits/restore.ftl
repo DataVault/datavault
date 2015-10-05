@@ -10,7 +10,7 @@
         <li class="active">Restore data</li>
     </ol>
 
-    <p class="help-block">Desribe the reason for this restore request (who and why) and choose a working directory to restore data from the archive</p>
+    <p class="help-block">Describe the reason for this restore request (who and why) and choose a working directory to restore data from the archive</p>
 
     <form class="form" role="form" action="" method="post">
 
