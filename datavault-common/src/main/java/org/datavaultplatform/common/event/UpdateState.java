@@ -10,17 +10,19 @@ public class UpdateState extends Event {
     public int state;
     public long progress;
     public long progressMax;
+    public String progressMessage;
     
     UpdateState() {};
     public UpdateState(String jobId, String depositId, int state) {
-        this(jobId, depositId, state, 0, 0);
+        this(jobId, depositId, state, 0, 0, null);
     }
-    public UpdateState(String jobId, String depositId, int state, long progress, long progressMax) {
+    public UpdateState(String jobId, String depositId, int state, long progress, long progressMax, String progressMessage) {
         super(jobId, depositId, "Job state: " + state);
         this.eventClass = UpdateState.class.getCanonicalName();
         this.state = state;
         this.progress = progress;
         this.progressMax = progressMax;
+        this.progressMessage = progressMessage;
         this.persistent = false;
     }
     
@@ -46,5 +48,13 @@ public class UpdateState extends Event {
 
     public void setProgressMax(long progressMax) {
         this.progressMax = progressMax;
+    }
+
+    public String getProgressMessage() {
+        return progressMessage;
+    }
+
+    public void setProgressMessage(String progressMessage) {
+        this.progressMessage = progressMessage;
     }
 }

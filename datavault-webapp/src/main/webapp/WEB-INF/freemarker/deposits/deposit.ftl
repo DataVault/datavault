@@ -159,7 +159,7 @@
             
             $('#progress').css('width', percentComplete + '%').attr('aria-valuenow', percentComplete);
             $('#progress-label').text(percentComplete + '% Complete')
-            $('#progress-copied').text(job.progress + " / " + job.progressMax)
+            $('#progress-copied').text(job.progressMessage)
         }
     }
 
