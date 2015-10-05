@@ -30,8 +30,11 @@
 
         <div class="form-group">
             <label class="control-label">Policy:</label>
-            <@spring.bind "policyMap" />
-            <@spring.formSingleSelect "vault.policyID", policyMap, "class='policy-select'" />
+            <select id="policyID" name="policyID" class='policy-select'>
+                <#list policies as policy>
+                    <option value="${policy.getID()}">${policy.name?html}</option>
+                </#list>
+            </select>
         </div>
 
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
