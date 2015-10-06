@@ -17,6 +17,7 @@
                         <th><a href="?sort=owner">Owner</a></th>
                         <th><a href="?sort=description">Description</a></th>
                         <th><a href="?sort=size">Size</a></th>
+                        <th><a href="?sort=status">Policy</a></th>
                         <th><a href="?sort=timestamp">Timestamp</a></th>
                     </tr>
                 </thead>
@@ -31,6 +32,7 @@
                             <td>${vault.getUser().getID()?html}</td>
                             <td>${vault.description?html}</td>
                             <td>${vault.getSizeStr()}</td>
+                            <td>${vault.policyID?html}</td>
                             <td>${vault.getCreationTime()?datetime}</td>
                         </tr>
                     </#list>
