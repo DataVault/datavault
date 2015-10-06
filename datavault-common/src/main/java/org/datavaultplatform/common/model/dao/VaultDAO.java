@@ -13,5 +13,7 @@ public interface VaultDAO {
 
     public Vault findById(String Id);
 
+    public List<Vault> search(String query);
+
     public int count();
 }
