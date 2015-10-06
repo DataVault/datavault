@@ -2,11 +2,11 @@
 <@layout.vaultLayout>
 <div class="container">
 
-    <ol class="breadcrumb">
-        <li class="active"><b>My Vaults</b></li>
-    </ol>
-
     <#if vaults?has_content>
+        <ol class="breadcrumb">
+            <li class="active"><b>My Vaults</b></li>
+        </ol>
+
         <div class="table-responsive">
             <table class="table table-striped">
 
@@ -33,13 +33,25 @@
                 </tbody>
             </table>
         </div>
+
+        <form>
+            <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/create">
+                <span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span> Create new Vault
+            </a>
+        </form>
+    <#else>
+        <div class="jumbotron">
+            <p>Welcome to the Data Vault!</p>
+            <p>Please use the 'Create new Vault' button below to get started...</p>
+            <p>
+                <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/create">
+                <span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span> Create new Vault
+                </a>
+            </p>
+        </div>
     </#if>
 
-    <form>
-        <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/create">
-            <span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span> Create new Vault
-        </a>
-    </form>
+
 
 </div>
 </@layout.vaultLayout>
