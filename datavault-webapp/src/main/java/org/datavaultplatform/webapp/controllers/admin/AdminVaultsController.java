@@ -31,7 +31,11 @@ public class AdminVaultsController {
 
     @RequestMapping(value = "/admin/vaults", method = RequestMethod.POST)
     public String searchVaults(ModelMap model, @RequestParam String query) {
-        model.addAttribute("vaults", restService.searchVaults(query));
+        if ((query == null) || ("".equals(query))) {
+            model.addAttribute("vaults", restService.getVaultsListingAll());
+        } else {
+            model.addAttribute("vaults", restService.searchVaults(query));
+        }
         return "admin/vaults/index";
     }
 }
