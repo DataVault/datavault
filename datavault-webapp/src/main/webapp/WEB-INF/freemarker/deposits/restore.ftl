@@ -12,7 +12,7 @@
 
     <p class="help-block">Describe the reason for this restore request (who and why) and choose a working directory to restore data from the archive</p>
 
-    <form class="form" role="form" action="" method="post">
+    <form id="restore-deposit" class="form" role="form" action="" method="post">
 
         <div class="form-group">
             <label class="control-label">Restore Note:</label>
@@ -22,7 +22,6 @@
                    name="${spring.status.expression}"
                    value="${spring.status.value!""}"/>
         </div>
-
 
         <div class="form-group" style="display:none;">
             <label class="control-label">Filepath:</label>
@@ -76,4 +75,27 @@
     </form>
 
 </div>
+
+<script>
+    $(document).ready(function () {
+
+        $('#restore-deposit').validate({
+            rules: {
+                note: {
+                    required: true
+                }
+            },
+            highlight: function (element) {
+                $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+            },
+            success: function (element) {
+                element.addClass('valid')
+                    .closest('.form-group').removeClass('has-error').addClass('has-success');
+            }
+        });
+
+        $('.policy-select').selectpicker();
+    });
+</script>
+
 </@layout.vaultLayout>
