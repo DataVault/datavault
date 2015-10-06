@@ -25,7 +25,6 @@ public class Restore {
     @Temporal(TemporalType.TIMESTAMP)
     private Date timestamp;
 
-    @JsonIgnore
     @ManyToOne
     private Deposit deposit;
 
