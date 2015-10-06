@@ -42,14 +42,14 @@
             // Create the tree inside the <div id="tree"> element.
             $("#tree").fancytree({
                 source: {
-                        url: "/datavault-webapp/dir",
+                        url: "${springMacroRequestContext.getContextPath()}/dir",
                         cache: false
                 },
                 lazyLoad: function(event, data){
                     var node = data.node;
                     // Load child nodes via ajax GET /dir?mode=children&parent=1234
                     data.result = {
-                        url: "/datavault-webapp/dir",
+                        url: "${springMacroRequestContext.getContextPath()}/dir",
                         data: {mode: "children", parent: node.key},
                         cache: false
                     };

@@ -12,7 +12,7 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-4 col-sm-offset-4 col-md-4 col-md-offset-4">
-                <form class="form-signin" action="/datavault-webapp/auth/security_check" method="post">
+                <form class="form-signin" action="${springMacroRequestContext.getContextPath()}/auth/security_check" method="post">
                     <#if success?has_content>
                         <div class="alert alert-success" role="alert">
                             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
