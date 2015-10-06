@@ -128,6 +128,13 @@ public class VaultsController {
         return vaultsService.search(query);
     }
 
+    @RequestMapping(value = "/vaults/deposits/search/{query}", method = RequestMethod.GET)
+    public List<Deposit> searchAllDeposits(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                           @PathVariable("query") String query) throws Exception {
+
+        return depositsService.search(query);
+    }
+
     @RequestMapping(value = "/vaults/count", method = RequestMethod.GET)
     public int getVaultsCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
