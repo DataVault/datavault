@@ -81,6 +81,7 @@ public class EventListener implements MessageListener {
                 job.setState(updateStateEvent.getState());
                 job.setProgress(updateStateEvent.getProgress());
                 job.setProgressMax(updateStateEvent.getProgressMax());
+                job.setProgressMessage(updateStateEvent.getProgressMessage());
                 jobsService.updateJob(job);
                 
             } else if (concreteEvent instanceof Start) {

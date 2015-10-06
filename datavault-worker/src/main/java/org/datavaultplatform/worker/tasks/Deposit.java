@@ -94,7 +94,7 @@ public class Deposit extends Task {
                 long bytes = fs.getSize(filePath);
                 
                 eventStream.send(new ComputedSize(jobID, depositId, bytes));
-                eventStream.send(new UpdateState(jobID, depositId, 1, 0, bytes)); // Debug
+                eventStream.send(new UpdateState(jobID, depositId, 1, 0, bytes, "Starting transfer ...")); // Debug
                 System.out.println("\tSize: " + bytes + " bytes (" +  FileUtils.byteCountToDisplaySize(bytes) + ")");
                 
                 // Progress tracking (threaded)

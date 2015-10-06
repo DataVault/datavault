@@ -1,7 +1,5 @@
 package org.datavaultplatform.common.model;
 
-import org.apache.commons.io.FileUtils;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -58,6 +56,7 @@ public class Job {
     // A generic indicator of progress
     private long progress;
     private long progressMax;
+    private String progressMessage;
     
     public Job() {};
     public Job(String taskClass) {
@@ -116,5 +115,13 @@ public class Job {
 
     public void setProgressMax(long progressMax) {
         this.progressMax = progressMax;
+    }
+
+    public String getProgressMessage() {
+        return progressMessage;
+    }
+
+    public void setProgressMessage(String progressMessage) {
+        this.progressMessage = progressMessage;
     }
 }

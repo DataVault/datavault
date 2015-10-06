@@ -87,7 +87,7 @@ public class Restore extends Task {
             
             // Copy the tar file to the target restore area
             System.out.println("\tCopying tar file from archive ...");
-            eventStream.send(new UpdateState(jobID, depositId, 1, 0, archiveFileSize)); // Debug
+            eventStream.send(new UpdateState(jobID, depositId, 1, 0, archiveFileSize, "Starting transfer ...")); // Debug
             
             // Progress tracking (threaded)
             Progress progress = new Progress();
