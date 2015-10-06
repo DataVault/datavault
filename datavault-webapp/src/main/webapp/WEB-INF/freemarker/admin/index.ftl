@@ -19,7 +19,7 @@
                     <h3 class="panel-title"> Users</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><span class="glyphicon glyphicon-user"></span> <a href="${springMacroRequestContext.getContextPath()}/admin/users">${usercount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/users"><span class="glyphicon glyphicon-user"></span> ${usercount}</a></h1>
                 </div>
             </div>
         </div>
@@ -29,7 +29,7 @@
                     <h3 class="panel-title"> Vaults</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><span class="glyphicon glyphicon-folder-close"></span> <a href="${springMacroRequestContext.getContextPath()}/admin/vaults">${vaultcount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/vaults"><span class="glyphicon glyphicon-folder-close"></span> ${vaultcount}</a></h1>
                 </div>
             </div>
         </div>
@@ -42,7 +42,7 @@
                     <h3 class="panel-title"> Deposits</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><span class="glyphicon glyphicon-save"></span> <a href="${springMacroRequestContext.getContextPath()}/admin/deposits">${depositcount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/deposits"><span class="glyphicon glyphicon-save"></span> ${depositcount}</a></h1>
                 </div>
             </div>
         </div>
