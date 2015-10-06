@@ -52,7 +52,7 @@
                     <h3 class="panel-title">Restores</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><span class="glyphicon glyphicon-open"></span> ${restorecount}</h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/restores"><span class="glyphicon glyphicon-open"></span> ${restorecount}</a></h1>
                 </div>
             </div>
         </div>

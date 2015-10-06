@@ -43,7 +43,7 @@ public class RestoreDAOImpl implements RestoreDAO {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Restore.class);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        criteria.addOrder(Order.asc("creationTime"));
+        criteria.addOrder(Order.asc("timestamp"));
         List<Restore> restores = criteria.list();
         session.close();
         return restores;

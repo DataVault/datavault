@@ -96,6 +96,11 @@ public class RestService {
         return (Integer)response.getBody();
     }
 
+    public Restore[] getRestoresListingAll() {
+        HttpEntity<?> response = get(brokerURL + "/vaults/restores", Restore[].class);
+        return (Restore[])response.getBody();
+    }
+
     public Vault getVault(String id) {        
         HttpEntity<?> response = get(brokerURL + "/vaults/" + id, Vault.class);
         return (Vault)response.getBody();
@@ -110,7 +115,6 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/vaults/deposits", Deposit[].class);
         return (Deposit[])response.getBody();
     }
-
 
     public Deposit getDeposit(String vaultId, String depositID) {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID, Deposit.class);
