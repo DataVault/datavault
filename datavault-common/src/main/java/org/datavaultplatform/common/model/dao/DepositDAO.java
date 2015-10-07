@@ -9,13 +9,13 @@ public interface DepositDAO {
     
     public void update(Deposit deposit);
     
-    public List<Deposit> list();
+    public List<Deposit> list(String sort);
 
     public Deposit findById(String Id);
 
     public int count();
 
-    public List<Deposit> search(String query);
+    public List<Deposit> search(String query, String sort);
 
     public Long size();
 }

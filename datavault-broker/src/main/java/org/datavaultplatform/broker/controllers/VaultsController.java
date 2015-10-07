@@ -9,12 +9,7 @@ import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.queue.Sender;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -116,23 +111,30 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults/all", method = RequestMethod.GET)
-    public List<Vault> getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    public List<Vault> getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                    @RequestParam(value = "sort", required = false) String sort) throws Exception {
 
-        return vaultsService.getVaults();
+        if ((sort == null) || ("".equals(sort))) {
+            return vaultsService.getVaults();
+        } else {
+            return vaultsService.getVaults(sort);
+        }
     }
 
-    @RequestMapping(value = "/vaults/search/{query}", method = RequestMethod.GET)
+    @RequestMapping(value = "/vaults/search", method = RequestMethod.GET)
     public List<Vault> searchAllVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                       @PathVariable("query") String query) throws Exception {
+                                       @RequestParam String query,
+                                       @RequestParam(value = "sort", required = false) String sort) throws Exception {
 
-        return vaultsService.search(query);
+        return vaultsService.search(query, sort);
     }
 
-    @RequestMapping(value = "/vaults/deposits/search/{query}", method = RequestMethod.GET)
+    @RequestMapping(value = "/vaults/deposits/search", method = RequestMethod.GET)
     public List<Deposit> searchAllDeposits(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                           @PathVariable("query") String query) throws Exception {
+                                           @RequestParam("query") String query,
+                                           @RequestParam(value = "sort", required = false) String sort) throws Exception {
 
-        return depositsService.search(query);
+        return depositsService.search(query, sort);
     }
 
     @RequestMapping(value = "/vaults/count", method = RequestMethod.GET)
@@ -160,9 +162,10 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults/deposits", method = RequestMethod.GET)
-    public List<Deposit> getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    public List<Deposit> getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                        @RequestParam(value = "sort", required = false) String sort) throws Exception {
 
-        return depositsService.getDeposits();
+        return depositsService.getDeposits(sort);
     }
 
     @RequestMapping(value = "/vaults/restores", method = RequestMethod.GET)
