@@ -65,7 +65,7 @@ public class DropboxFileSystem extends Device {
     }
     
     @Override
-    public boolean valid(String path) throws Exception {
+    public boolean valid(String path) {
         // Unimplemented
         return true;
     }
