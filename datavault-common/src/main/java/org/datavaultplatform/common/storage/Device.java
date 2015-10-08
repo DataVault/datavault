@@ -22,10 +22,10 @@ public abstract class Device {
     }
     
     // List objects available under a given path
-    public abstract List<FileInfo> list(String path) throws Exception;
+    public abstract List<FileInfo> list(String path);
     
     // Check if the passed path or resource key is allowed
-    public abstract boolean valid(String path) throws Exception;
+    public abstract boolean valid(String path);
     
     // Check if an object exists at the specified path
     public abstract boolean exists(String path) throws Exception;
