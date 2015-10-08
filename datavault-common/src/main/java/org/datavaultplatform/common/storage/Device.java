@@ -22,19 +22,19 @@ public abstract class Device {
     }
     
     // List objects available under a given path
-    public abstract List<FileInfo> list(String path);
+    public abstract List<FileInfo> list(String path) throws Exception;
     
     // Check if the passed path or resource key is allowed
-    public abstract boolean valid(String path);
+    public abstract boolean valid(String path) throws Exception;
     
     // Check if an object exists at the specified path
-    public abstract boolean exists(String path);
+    public abstract boolean exists(String path) throws Exception;
     
     // Get the size of an object (file/dir) in bytes
     public abstract long getSize(String path) throws Exception;
     
     // Get the name of an object
-    public abstract String getName(String path);
+    public abstract String getName(String path) throws Exception;
     
     // Check if the passed path is a directory/container
     public abstract boolean isDirectory(String path) throws Exception;
