@@ -20,7 +20,6 @@ import java.util.Locale;
 public class DropboxFileSystem extends Device {
 
     final String dbxAppName = "DataVault/1.0";
-    private String rootPath = "/";
     private final String PATH_SEPARATOR = "/";
     private final DbxRequestConfig dbxConfig;
     private final DbxClient dbxClient;
@@ -43,12 +42,14 @@ public class DropboxFileSystem extends Device {
     @Override
     public List<FileInfo> list(String path) {
         
-        String completePath = rootPath + path;
+        if (!path.startsWith(PATH_SEPARATOR)) {
+            path = PATH_SEPARATOR + path;
+        }
         
         ArrayList<FileInfo> files = new ArrayList<>();
 
         try {
-            DbxEntry.WithChildren listing = dbxClient.getMetadataWithChildren(completePath);
+            DbxEntry.WithChildren listing = dbxClient.getMetadataWithChildren(path);
             for (DbxEntry child : listing.children) {
                 
                 FileInfo info = new FileInfo(child.path,
@@ -73,9 +74,11 @@ public class DropboxFileSystem extends Device {
     @Override
     public boolean exists(String path) throws Exception {
 
-        String completePath = rootPath + path;
+        if (!path.startsWith(PATH_SEPARATOR)) {
+            path = PATH_SEPARATOR + path;
+        }
         
-        DbxEntry entry = dbxClient.getMetadata(completePath);
+        DbxEntry entry = dbxClient.getMetadata(path);
         if (entry != null) {
             return true;
         } else {
@@ -86,9 +89,11 @@ public class DropboxFileSystem extends Device {
     @Override
     public long getSize(String path) throws Exception {
 
-        String completePath = rootPath + path;
+        if (!path.startsWith(PATH_SEPARATOR)) {
+            path = PATH_SEPARATOR + path;
+        }
         
-        DbxEntry entry = dbxClient.getMetadata(completePath);
+        DbxEntry entry = dbxClient.getMetadata(path);
         if (entry == null) {
             throw new FileNotFoundException();
         } else {
@@ -98,7 +103,7 @@ public class DropboxFileSystem extends Device {
                 bytes = ((DbxEntry.File)entry).numBytes;
             
             } else if (entry instanceof DbxEntry.Folder) {
-                DbxEntry.WithChildren listing = dbxClient.getMetadataWithChildren(completePath);
+                DbxEntry.WithChildren listing = dbxClient.getMetadataWithChildren(path);
                 for (DbxEntry child : listing.children) {
                     if (child instanceof DbxEntry.File) {
                         bytes += ((DbxEntry.File)child).numBytes;
@@ -113,9 +118,11 @@ public class DropboxFileSystem extends Device {
     @Override
     public boolean isDirectory(String path) throws Exception {
         
-        String completePath = rootPath + path;
+        if (!path.startsWith(PATH_SEPARATOR)) {
+            path = PATH_SEPARATOR + path;
+        }
         
-        DbxEntry entry = dbxClient.getMetadata(completePath);
+        DbxEntry entry = dbxClient.getMetadata(path);
         if (entry != null) {
             if (entry instanceof DbxEntry.Folder) {
                 return true;
@@ -130,9 +137,11 @@ public class DropboxFileSystem extends Device {
     @Override
     public String getName(String path) throws Exception {
         
-        String completePath = rootPath + path;
+        if (!path.startsWith(PATH_SEPARATOR)) {
+            path = PATH_SEPARATOR + path;
+        }
         
-        DbxEntry entry = dbxClient.getMetadata(completePath);
+        DbxEntry entry = dbxClient.getMetadata(path);
         if (entry == null) {
             return null;
         } else {
@@ -167,13 +176,15 @@ public class DropboxFileSystem extends Device {
     @Override
     public void copyToWorkingSpace(String path, File working, Progress progress) throws Exception {
         
-        String completePath = rootPath + path;
+        if (!path.startsWith(PATH_SEPARATOR)) {
+            path = PATH_SEPARATOR + path;
+        }
         
         // TODO: This is single-file only for now ...
         
         FileOutputStream outputStream = new FileOutputStream(working);
         try {
-            dbxClient.getFile(completePath, null, outputStream);
+            dbxClient.getFile(path, null, outputStream);
         } finally {
             outputStream.close();
         }
