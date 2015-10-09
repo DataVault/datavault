@@ -40,9 +40,24 @@ public class DepositDAOImpl implements DepositDAO {
  
     @SuppressWarnings("unchecked")
     @Override
-    public List<Deposit> list() {        
+    public List<Deposit> list(String sort) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Deposit.class);
+        // See if there is a valid sort option
+        if ("id".equals(sort)) {
+            criteria.addOrder(Order.asc("id"));
+        } else if ("note".equals(sort)) {
+            criteria.addOrder(Order.asc("note"));
+        } else if ("status".equals(sort)) {
+            criteria.addOrder(Order.asc("status"));
+        } else if ("filePath".equals(sort)) {
+            criteria.addOrder(Order.asc("filePath"));
+        } else if ("depositSize".equals(sort)) {
+            criteria.addOrder(Order.asc("depositSize"));
+        } else {
+            criteria.addOrder(Order.asc("creationTime"));
+        }
+
         List<Deposit> deposits = criteria.list();
         session.close();
         return deposits;
@@ -65,12 +80,27 @@ public class DepositDAOImpl implements DepositDAO {
     }
 
     @Override
-    public List<Deposit> search(String query) {
+    public List<Deposit> search(String query, String sort) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Deposit.class);
-        criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("note", "%" + query + "%")));
+        criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("note", "%" + query + "%"), Restrictions.ilike("filePath", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        criteria.addOrder(Order.asc("creationTime"));
+
+        // See if there is a valid sort option
+        if ("id".equals(sort)) {
+            criteria.addOrder(Order.asc("id"));
+        } else if ("note".equals(sort)) {
+            criteria.addOrder(Order.asc("note"));
+        } else if ("status".equals(sort)) {
+            criteria.addOrder(Order.asc("status"));
+        } else if ("filePath".equals(sort)) {
+            criteria.addOrder(Order.asc("filePath"));
+        } else if ("depositSize".equals(sort)) {
+            criteria.addOrder(Order.asc("depositSize"));
+        } else {
+            criteria.addOrder(Order.asc("creationTime"));
+        }
+
         List<Deposit> deposits = criteria.list();
         session.close();
         return deposits;

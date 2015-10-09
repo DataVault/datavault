@@ -37,10 +37,10 @@ public class VaultDAOImpl implements VaultDAO {
         tx.commit();
         session.close();
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
-    public List<Vault> list() {        
+    public List<Vault> list() {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Vault.class);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
@@ -49,7 +49,36 @@ public class VaultDAOImpl implements VaultDAO {
         session.close();
         return vaults;
     }
-    
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Vault> list(String sort) {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Vault.class);
+        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+
+        // See if there is a valid sort option
+        if ("id".equals(sort)) {
+            criteria.addOrder(Order.asc("id"));
+        } else if ("name".equals(sort)) {
+            criteria.addOrder(Order.asc("name"));
+        } else if ("description".equals(sort)) {
+            criteria.addOrder(Order.asc("description"));
+        } else if ("vaultSize".equals(sort)) {
+            criteria.addOrder(Order.asc("vaultSize"));
+        } else if ("user".equals(sort)) {
+            criteria.addOrder(Order.asc("user"));
+        } else if ("policy".equals(sort)) {
+            criteria.addOrder(Order.asc("policy"));
+        } else {
+            criteria.addOrder(Order.asc("creationTime"));
+        }
+
+        List<Vault> vaults = criteria.list();
+        session.close();
+        return vaults;
+    }
+
     @Override
     public Vault findById(String Id) {
         Session session = this.sessionFactory.openSession();
@@ -61,12 +90,29 @@ public class VaultDAOImpl implements VaultDAO {
     }
 
     @Override
-    public List<Vault> search(String query) {
+    public List<Vault> search(String query, String sort) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Vault.class);
         criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        criteria.addOrder(Order.asc("creationTime"));
+
+        // See if there is a valid sort option
+        if ("id".equals(sort)) {
+            criteria.addOrder(Order.asc("id"));
+        } else if ("name".equals(sort)) {
+            criteria.addOrder(Order.asc("name"));
+        } else if ("description".equals(sort)) {
+            criteria.addOrder(Order.asc("description"));
+        } else if ("vaultSize".equals(sort)) {
+            criteria.addOrder(Order.asc("vaultSize"));
+        } else if ("user".equals(sort)) {
+            criteria.addOrder(Order.asc("user"));
+        } else if ("policy".equals(sort)) {
+            criteria.addOrder(Order.asc("policy"));
+        } else {
+            criteria.addOrder(Order.asc("creationTime"));
+        }
+
         List<Vault> vaults = criteria.list();
         session.close();
         return vaults;
