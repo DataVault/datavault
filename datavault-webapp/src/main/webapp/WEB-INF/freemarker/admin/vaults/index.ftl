@@ -6,14 +6,13 @@
         <li class="active"><b>Vaults</b></li>
     </ol>
 
-    <form id="search-vaults" class="form" role="form" action="" method="post">
+    <form id="search-vaults" class="form" role="form" action="" method="get">
         <div class="input-group">
-            <input type="text" class="form-control" name="query" placeholder="Search for...">
+            <input type="text" class="form-control" value="${query}" name="query" placeholder="Search for...">
             <div class="input-group-btn">
                 <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
             </div>
         </div>
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
     </form>
 
     <#if vaults?has_content>
@@ -23,13 +22,13 @@
 
                 <thead>
                     <tr class="tr">
-                        <th><a href="?sort=id">ID</a></th>
-                        <th><a href="?sort=name">Name</a></th>
-                        <th><a href="?sort=description">Description</a></th>
-                        <th><a href="?sort=owner">Owner</a></th>
-                        <th><a href="?sort=size">Size</a></th>
-                        <th><a href="?sort=status">Policy</a></th>
-                        <th><a href="?sort=timestamp">Timestamp</a></th>
+                        <th><a href="?sort=id&query=${query?url}">ID</a></th>
+                        <th><a href="?sort=name&query=${query?url}">Name</a></th>
+                        <th><a href="?sort=description&query=${query?url}">Description</a></th>
+                        <th><a href="?sort=user&query=${query?url}">Owner</a></th>
+                        <th><a href="?sort=vaultSize&query=${query?url}">Size</a></th>
+                        <th><a href="?sort=policy&query=${query?url}">Policy</a></th>
+                        <th><a href="?sort=creationTime&query=${query?url}">Timestamp</a></th>
                     </tr>
                 </thead>
 

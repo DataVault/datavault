@@ -23,21 +23,27 @@ public class AdminDepositsController {
     }
 
     @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)
-    public String getDepositsListing(ModelMap model) {
-        model.addAttribute("deposits", restService.getDepositsListingAll());
-        return "admin/deposits/index";
-    }
-
-    @RequestMapping(value = "/admin/deposits", method = RequestMethod.POST)
-    public String searchDeposits(ModelMap model, @RequestParam String query) {
+    public String getDepositsListing(ModelMap model,
+                                     @RequestParam(value = "query", required = false) String query,
+                                     @RequestParam(value = "sort", required = false) String sort) {
         if ((query == null) || ("".equals(query))) {
-            model.addAttribute("deposits", restService.getDepositsListingAll());
+            if ((sort == null) || ("".equals(sort))) {
+                model.addAttribute("deposits", restService.getDepositsListingAll());
+            } else {
+                model.addAttribute("deposits", restService.getDepositsListingAll(sort));
+            }
+            model.addAttribute("query", "");
         } else {
-            model.addAttribute("deposits", restService.searchDeposits(query));
+            if ((sort == null) || ("".equals(sort))) {
+                model.addAttribute("deposits", restService.searchDeposits(query));
+            } else {
+                model.addAttribute("deposits", restService.searchDeposits(query, sort));
+            }
+            model.addAttribute("query", query);
         }
+
         return "admin/deposits/index";
     }
-
 }
 
 

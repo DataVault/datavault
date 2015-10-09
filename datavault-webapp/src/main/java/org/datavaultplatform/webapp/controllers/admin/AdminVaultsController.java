@@ -24,17 +24,23 @@ public class AdminVaultsController {
     }
 
     @RequestMapping(value = "/admin/vaults", method = RequestMethod.GET)
-    public String getVaultsListing(ModelMap model) {
-        model.addAttribute("vaults", restService.getVaultsListingAll());
-        return "admin/vaults/index";
-    }
-
-    @RequestMapping(value = "/admin/vaults", method = RequestMethod.POST)
-    public String searchVaults(ModelMap model, @RequestParam String query) {
+    public String searchVaults(ModelMap model,
+                               @RequestParam(value = "query", required = false) String query,
+                               @RequestParam(value = "sort", required = false) String sort) {
         if ((query == null) || ("".equals(query))) {
-            model.addAttribute("vaults", restService.getVaultsListingAll());
+            if ((sort == null) || ("".equals(sort))) {
+                model.addAttribute("vaults", restService.getVaultsListingAll());
+            } else {
+                model.addAttribute("vaults", restService.getVaultsListingAll(sort));
+            }
+            model.addAttribute("query", "");
         } else {
-            model.addAttribute("vaults", restService.searchVaults(query));
+            if ((sort == null) || ("".equals(sort))) {
+                model.addAttribute("vaults", restService.searchVaults(query));
+            } else {
+                model.addAttribute("vaults", restService.searchVaults(query, sort));
+            }
+            model.addAttribute("query", query);
         }
         return "admin/vaults/index";
     }

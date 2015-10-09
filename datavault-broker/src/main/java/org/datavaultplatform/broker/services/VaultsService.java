@@ -10,10 +10,10 @@ public class VaultsService {
 
     private VaultDAO vaultDAO;
 
-    public List<Vault> getVaults() {
-        return vaultDAO.list();
-    }
-    
+    public List<Vault> getVaults() { return vaultDAO.list(); }
+
+    public List<Vault> getVaults(String sort) { return vaultDAO.list(sort); }
+
     public void addVault(Vault vault) {
         Date d = new Date();
         vault.setCreationTime(d);
@@ -32,7 +32,7 @@ public class VaultsService {
         this.vaultDAO = vaultDAO;
     }
 
-    public List<Vault> search(String query) { return this.vaultDAO.search(query); }
+    public List<Vault> search(String query, String sort) { return this.vaultDAO.search(query, sort); }
 
     public int count() {
         return vaultDAO.count();
