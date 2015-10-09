@@ -61,9 +61,11 @@ public class Receiver {
 
         channel.queueDeclare(queueName, false, false, false, null);
         System.out.println(" [*] Waiting for messages.");
-        
+
         QueueingConsumer consumer = new QueueingConsumer(channel);
-        channel.basicConsume(queueName, true, consumer);
+
+        channel.basicQos(1);
+        channel.basicConsume(queueName, false, consumer);
 
         while (true) {
             QueueingConsumer.Delivery delivery = consumer.nextDelivery();
@@ -85,6 +87,8 @@ public class Receiver {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
         }
         
         // Unreachable - this demo never terminates
