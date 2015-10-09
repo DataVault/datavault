@@ -1,11 +1,12 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
- 
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
@@ -61,6 +62,18 @@ public class DepositDAOImpl implements DepositDAO {
     public int count() {
         Session session = this.sessionFactory.openSession();
         return (int)(long)(Long)session.createCriteria(Deposit.class).setProjection(Projections.rowCount()).uniqueResult();
+    }
+
+    @Override
+    public List<Deposit> search(String query) {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Deposit.class);
+        criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("note", "%" + query + "%")));
+        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+        criteria.addOrder(Order.asc("creationTime"));
+        List<Deposit> deposits = criteria.list();
+        session.close();
+        return deposits;
     }
 
     @Override

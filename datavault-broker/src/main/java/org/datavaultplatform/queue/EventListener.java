@@ -1,10 +1,7 @@
 package org.datavaultplatform.queue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.datavaultplatform.broker.services.DepositsService;
-import org.datavaultplatform.broker.services.VaultsService;
-import org.datavaultplatform.broker.services.EventService;
-import org.datavaultplatform.broker.services.JobsService;
+import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.InitStates;
 import org.datavaultplatform.common.event.UpdateState;
@@ -21,6 +18,7 @@ public class EventListener implements MessageListener {
     private EventService eventService;
     private VaultsService vaultsService;
     private DepositsService depositsService;
+    private RestoresService restoresService;
 
     public void setJobsService(JobsService jobsService) {
         this.jobsService = jobsService;
@@ -34,10 +32,12 @@ public class EventListener implements MessageListener {
         this.vaultsService = vaultsService;
     }
     
-    public void setDepositsService(DepositsService depositsService) {
-        this.depositsService = depositsService;
+    public void setDepositsService(DepositsService depositsService) { this.depositsService = depositsService; }
+
+    public void setRestoresService(RestoresService restoresService) {
+        this.restoresService = restoresService;
     }
-    
+
     @Override
     public void onMessage(Message msg) {
         
@@ -81,6 +81,7 @@ public class EventListener implements MessageListener {
                 job.setState(updateStateEvent.getState());
                 job.setProgress(updateStateEvent.getProgress());
                 job.setProgressMax(updateStateEvent.getProgressMax());
+                job.setProgressMessage(updateStateEvent.getProgressMessage());
                 jobsService.updateJob(job);
                 
             } else if (concreteEvent instanceof Start) {

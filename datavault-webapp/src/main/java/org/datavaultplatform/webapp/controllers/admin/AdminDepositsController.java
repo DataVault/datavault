@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * User: Stuart Lewis
@@ -26,6 +27,17 @@ public class AdminDepositsController {
         model.addAttribute("deposits", restService.getDepositsListingAll());
         return "admin/deposits/index";
     }
+
+    @RequestMapping(value = "/admin/deposits", method = RequestMethod.POST)
+    public String searchDeposits(ModelMap model, @RequestParam String query) {
+        if ((query == null) || ("".equals(query))) {
+            model.addAttribute("deposits", restService.getDepositsListingAll());
+        } else {
+            model.addAttribute("deposits", restService.searchDeposits(query));
+        }
+        return "admin/deposits/index";
+    }
+
 }
 
 

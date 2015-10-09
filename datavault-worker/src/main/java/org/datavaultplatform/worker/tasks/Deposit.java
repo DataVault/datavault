@@ -6,7 +6,6 @@ import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
@@ -95,7 +94,7 @@ public class Deposit extends Task {
                 long bytes = fs.getSize(filePath);
                 
                 eventStream.send(new ComputedSize(jobID, depositId, bytes));
-                eventStream.send(new UpdateState(jobID, depositId, 1, 0, bytes)); // Debug
+                eventStream.send(new UpdateState(jobID, depositId, 1, 0, bytes, "Starting transfer ...")); // Debug
                 System.out.println("\tSize: " + bytes + " bytes (" +  FileUtils.byteCountToDisplaySize(bytes) + ")");
                 
                 // Progress tracking (threaded)

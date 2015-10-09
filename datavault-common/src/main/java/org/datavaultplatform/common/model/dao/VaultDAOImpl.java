@@ -61,6 +61,18 @@ public class VaultDAOImpl implements VaultDAO {
     }
 
     @Override
+    public List<Vault> search(String query) {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Vault.class);
+        criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
+        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+        criteria.addOrder(Order.asc("creationTime"));
+        List<Vault> vaults = criteria.list();
+        session.close();
+        return vaults;
+    }
+
+    @Override
     public int count() {
         Session session = this.sessionFactory.openSession();
         return (int)(long)(Long)session.createCriteria(Vault.class).setProjection(Projections.rowCount()).uniqueResult();

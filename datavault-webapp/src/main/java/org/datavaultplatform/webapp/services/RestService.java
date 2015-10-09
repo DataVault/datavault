@@ -76,6 +76,11 @@ public class RestService {
         return (Vault[])response.getBody();
     }
 
+    public Vault[] searchVaults(String query) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/search/" + query, Vault[].class);
+        return (Vault[])response.getBody();
+    }
+
     public int getVaultsCount() {
         HttpEntity<?> response = get(brokerURL + "/vaults/count", Integer.class);
         return (Integer)response.getBody();
@@ -89,6 +94,21 @@ public class RestService {
     public int getDepositsCount() {
         HttpEntity<?> response = get(brokerURL + "/vaults/depositcount", Integer.class);
         return (Integer)response.getBody();
+    }
+
+    public Deposit[] searchDeposits(String query) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/deposits/search/" + query, Deposit[].class);
+        return (Deposit[])response.getBody();
+    }
+
+    public int getRestoresCount() {
+        HttpEntity<?> response = get(brokerURL + "/vaults/restorecount", Integer.class);
+        return (Integer)response.getBody();
+    }
+
+    public Restore[] getRestoresListingAll() {
+        HttpEntity<?> response = get(brokerURL + "/vaults/restores", Restore[].class);
+        return (Restore[])response.getBody();
     }
 
     public Vault getVault(String id) {        
@@ -106,7 +126,6 @@ public class RestService {
         return (Deposit[])response.getBody();
     }
 
-
     public Deposit getDeposit(String vaultId, String depositID) {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID, Deposit.class);
         return (Deposit)response.getBody();
@@ -121,10 +140,15 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/events", Event[].class);
         return (Event[])response.getBody();
     }
-    
+
     public Job[] getDepositJobs(String vaultId, String depositID) {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/jobs", Job[].class);
         return (Job[])response.getBody();
+    }
+
+    public Restore[] getDepositRestores(String vaultId, String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/restores", Restore[].class);
+        return (Restore[])response.getBody();
     }
 
     public Policy[] getPolicyListing() {

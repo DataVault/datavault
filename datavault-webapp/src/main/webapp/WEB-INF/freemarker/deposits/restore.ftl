@@ -10,9 +10,18 @@
         <li class="active">Restore data</li>
     </ol>
 
-    <p class="help-block">Choose a working directory to restore data from the archive</p>
+    <p class="help-block">Describe the reason for this restore request (who and why) and choose a working directory to restore data from the archive</p>
 
-    <form class="form" role="form" action="" method="post">
+    <form id="restore-deposit" class="form" role="form" action="" method="post">
+
+        <div class="form-group">
+            <label class="control-label">Restore Note:</label>
+            <@spring.bind "restore.note" />
+            <input type="text"
+                   class="form-control"
+                   name="${spring.status.expression}"
+                   value="${spring.status.value!""}"/>
+        </div>
 
         <div class="form-group" style="display:none;">
             <label class="control-label">Filepath:</label>
@@ -32,14 +41,14 @@
             // Create the tree inside the <div id="tree"> element.
             $("#tree").fancytree({
                 source: {
-                        url: "/datavault-webapp/dir",
+                        url: "${springMacroRequestContext.getContextPath()}/dir",
                         cache: false
                 },
                 lazyLoad: function(event, data){
                     var node = data.node;
                     // Load child nodes via ajax GET /dir?mode=children&parent=1234
                     data.result = {
-                        url: "/datavault-webapp/dir",
+                        url: "${springMacroRequestContext.getContextPath()}/dir",
                         data: {mode: "children", parent: node.key},
                         cache: false
                     };
@@ -58,16 +67,35 @@
 
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
-        <div class="pull-left">
+        <div class="form-group">
             <button type="submit" name="action" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-open"></span> Restore data</button>
-        </div>
-
-        <div class="pull-right">
             <button type="submit" name="action" value="cancel" class="btn btn-danger cancel">Cancel</button>
         </div>
-
 
     </form>
 
 </div>
+
+<script>
+    $(document).ready(function () {
+
+        $('#restore-deposit').validate({
+            rules: {
+                note: {
+                    required: true
+                }
+            },
+            highlight: function (element) {
+                $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+            },
+            success: function (element) {
+                element.addClass('valid')
+                    .closest('.form-group').removeClass('has-error').addClass('has-success');
+            }
+        });
+
+        $('.policy-select').selectpicker();
+    });
+</script>
+
 </@layout.vaultLayout>

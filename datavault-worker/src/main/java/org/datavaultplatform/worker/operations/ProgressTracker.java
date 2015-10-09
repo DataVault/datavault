@@ -49,17 +49,17 @@ public class ProgressTracker implements Runnable {
                 bytesPerSec = (long)((double)byteCount / secondsElapsed);
             }
             
-            System.out.println("\tCopied: " + dirCount + " dirs, "
-                                            + fileCount + " files, "
-                                            + byteCount + " bytes ("
-                                            + FileUtils.byteCountToDisplaySize(byteCount) + ") @ "
-                                            + bytesPerSec + " bytes ("
-                                            + FileUtils.byteCountToDisplaySize(bytesPerSec) + ") / sec. "
-                                            + "Elapsed time: " + msElapsed + " ms");
+            String message = "Transferred " +
+                             FileUtils.byteCountToDisplaySize(byteCount) +
+                             " of " +
+                             FileUtils.byteCountToDisplaySize(expectedBytes) +
+                             " (" + FileUtils.byteCountToDisplaySize(bytesPerSec) + "/sec)";
+            
+            System.out.println("\t" + message);
             
             // Signal progress to the broker
             
-            UpdateState updateState = new UpdateState(jobId, depositId, state, byteCount, expectedBytes);
+            UpdateState updateState = new UpdateState(jobId, depositId, state, byteCount, expectedBytes, message);
             lastByteCount = byteCount;
             eventSender.send(updateState);
         }

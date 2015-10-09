@@ -24,6 +24,7 @@
         <li class="active"><a data-toggle="tab" href="#deposit">Deposit</a></li>
         <li><a data-toggle="tab" href="#contents">Contents <span class="badge">${manifest?size}</span></a></li>
         <li><a data-toggle="tab" href="#events">Events <span class="badge">${events?size}</span></a></li>
+        <li><a data-toggle="tab" href="#restores">Restores <span class="badge">${restores?size}</span></a></li>
     </ul>
 
     <div id="deposit-tab-content" class="tab-content">
@@ -94,11 +95,36 @@
                 </table>
             </div>
         </div>
+
+        <div class="tab-pane" id="restores">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr class="tr">
+                        <th>Timestamp</th>
+                        <th>Restore path</th>
+                        <th>Restore note</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <#list restores as restore>
+                        <tr class="tr">
+                            <td>${restore.timestamp?datetime}</td>
+                            <td>${restore.restorePath?html}</td>
+                            <td>${restore.note?html}</td>
+                        </tr>
+                        </#list>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/restore">
-        <span class="glyphicon glyphicon-open" aria-hidden="true"></span> Restore data
-    </a>
+    <#if deposit.status.name() == "COMPLETE">
+        <a id="restorebtn" class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/restore">
+            <span class="glyphicon glyphicon-open" aria-hidden="true"></span> Restore data
+        </a>
+    </#if>
 
 </div>
 
@@ -133,7 +159,7 @@
             
             $('#progress').css('width', percentComplete + '%').attr('aria-valuenow', percentComplete);
             $('#progress-label').text(percentComplete + '% Complete')
-            $('#progress-copied').text(job.progress + " / " + job.progressMax)
+            $('#progress-copied').text(job.progressMessage)
         }
     }
 
