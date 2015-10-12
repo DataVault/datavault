@@ -9,11 +9,15 @@ import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.queue.Sender;
 
+import org.jsondoc.core.annotation.*;
+import org.jsondoc.core.pojo.ApiVerb;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
+@Api(name="Vaults", description = "Interact with DataVault Vaults")
 public class VaultsController {
     
     private VaultsService vaultsService;
@@ -103,6 +107,16 @@ public class VaultsController {
         this.activeDir = activeDir;
     }
 
+    @ApiMethod(
+            path = "/vaults",
+            verb = ApiVerb.GET,
+            description = "Gets a list of all Vaults for the specified User",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
     public List<Vault> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
 
@@ -110,9 +124,20 @@ public class VaultsController {
         return user.getVaults();
     }
 
+    @ApiMethod(
+            path = "/vaults/all",
+            verb = ApiVerb.GET,
+            description = "Gets a list of all Vaults",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
     @RequestMapping(value = "/vaults/all", method = RequestMethod.GET)
     public List<Vault> getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                    @RequestParam(value = "sort", required = false) String sort) throws Exception {
+                                    @RequestParam(value = "sort", required = false)
+                                    @ApiQueryParam(name = "sort", description = "Vault sort order", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime"}, defaultvalue = "creationTime", required = false) String sort) throws Exception {
 
         if ((sort == null) || ("".equals(sort))) {
             return vaultsService.getVaults();
@@ -120,7 +145,6 @@ public class VaultsController {
             return vaultsService.getVaults(sort);
         }
     }
-
     @RequestMapping(value = "/vaults/search", method = RequestMethod.GET)
     public List<Vault> searchAllVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
                                        @RequestParam String query,

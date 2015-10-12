@@ -26,13 +26,6 @@
     </listener>
     -->
 
-    <!-- Now for the normal Spring webapp stuff -->
-    <!--
-    <welcome-file-list>
-        <welcome-file>freemarker/index.ftl</welcome-file>
-    </welcome-file-list>
-    -->
-
     <servlet>
         <servlet-name>datavault-broker</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
@@ -44,6 +37,5 @@
         <servlet-name>datavault-broker</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
-
 
 </web-app>
