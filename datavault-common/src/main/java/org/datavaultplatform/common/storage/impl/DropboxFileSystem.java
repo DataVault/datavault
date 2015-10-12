@@ -24,7 +24,7 @@ public class DropboxFileSystem extends Device {
 
     private final String dbxAppName = "DataVault/1.0";
     private final String PATH_SEPARATOR = "/";
-    private static final long FILE_COPY_BUFFER_SIZE = FileCopy.ONE_MB;
+    private static final long FILE_COPY_BUFFER_SIZE = FileCopy.ONE_KB * 64;
     
     private final DbxRequestConfig dbxConfig;
     private final DbxClient dbxClient;
@@ -124,8 +124,6 @@ public class DropboxFileSystem extends Device {
     
     public void get(Progress progress, String path, File localFile) throws Exception {
 
-        System.out.println("get '" + path + "' -> '" + localFile.getPath() + "'");
-        
         if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
         }
@@ -178,7 +176,7 @@ public class DropboxFileSystem extends Device {
             long count = 0;
             while (pos < size) {
                 count = size - pos > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : size - pos;
-                long copied = IOUtils.copyLarge(is, fos, pos, count);
+                long copied = IOUtils.copyLarge(is, fos, 0, count);
                 pos += copied;
                 progress.byteCount += copied;
                 progress.timestamp = System.currentTimeMillis();
