@@ -3,6 +3,8 @@ package org.datavaultplatform.common.storage.impl;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.io.Progress;
+import org.datavaultplatform.common.io.FileCopy;
+import org.apache.commons.io.IOUtils;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ import com.dropbox.core.*;
 import java.io.*;
 import java.util.Locale;
 
+
 // Documentation:
 // https://www.dropbox.com/developers-v1/core/start/java
 // https://www.dropbox.com/developers-v1/core/docs
@@ -19,8 +22,10 @@ import java.util.Locale;
 
 public class DropboxFileSystem extends Device {
 
-    final String dbxAppName = "DataVault/1.0";
+    private final String dbxAppName = "DataVault/1.0";
     private final String PATH_SEPARATOR = "/";
+    private static final long FILE_COPY_BUFFER_SIZE = FileCopy.ONE_MB;
+    
     private final DbxRequestConfig dbxConfig;
     private final DbxClient dbxClient;
     
@@ -117,7 +122,7 @@ public class DropboxFileSystem extends Device {
         }
     }
     
-    public void get(String path, File localFile) throws Exception {
+    public void get(Progress progress, String path, File localFile) throws Exception {
 
         System.out.println("get '" + path + "' -> '" + localFile.getPath() + "'");
         
@@ -132,12 +137,7 @@ public class DropboxFileSystem extends Device {
             if (entry instanceof DbxEntry.File) {
                 
                 // Download the contents of this file
-                FileOutputStream outputStream = new FileOutputStream(localFile);
-                try {
-                    dbxClient.getFile(path, null, outputStream);
-                } finally {
-                    outputStream.close();
-                }
+                getFile(progress, path, localFile);
                 
             } else if (entry instanceof DbxEntry.Folder) {
                 
@@ -149,10 +149,46 @@ public class DropboxFileSystem extends Device {
                 // Loop over the children of the folder
                 DbxEntry.WithChildren listing = dbxClient.getMetadataWithChildren(path);
                 for (DbxEntry child : listing.children) {
-                    get(child.path, new File(localFile, child.name));
+                    get(progress, child.path, new File(localFile, child.name));
                 }
+                
+                progress.dirCount += 1;
             }
         }
+    }
+    
+    private void getFile(Progress progress, String path, File localFile) throws Exception {
+        
+        /*
+        FileOutputStream outputStream = new FileOutputStream(localFile);
+        try {
+            dbxClient.getFile(path, null, outputStream);
+        } finally {
+            outputStream.close();
+        }
+        */
+        
+        FileOutputStream fos = new FileOutputStream(localFile);
+        DbxClient.Downloader downloader = dbxClient.startGetFile(path, null);
+        InputStream is = downloader.body;
+        
+        try {
+            long size = downloader.metadata.numBytes;
+            long pos = 0;
+            long count = 0;
+            while (pos < size) {
+                count = size - pos > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : size - pos;
+                long copied = IOUtils.copyLarge(is, fos, pos, count);
+                pos += copied;
+                progress.byteCount += copied;
+                progress.timestamp = System.currentTimeMillis();
+            }
+        } finally {
+            fos.close();
+            is.close();
+        }
+        
+        progress.fileCount += 1;
     }
     
     @Override
@@ -220,7 +256,7 @@ public class DropboxFileSystem extends Device {
             path = PATH_SEPARATOR + path;
         }
         
-        get(path, working);
+        get(progress, path, working);
     }
 
     @Override
