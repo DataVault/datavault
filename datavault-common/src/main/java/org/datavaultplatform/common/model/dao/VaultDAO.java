@@ -8,12 +8,14 @@ public interface VaultDAO {
     public void save(Vault vault);
     
     public void update(Vault vault);
-    
+
     public List<Vault> list();
+
+    public List<Vault> list(String sort);
 
     public Vault findById(String Id);
 
-    public List<Vault> search(String query);
+    public List<Vault> search(String query, String sort);
 
     public int count();
 }

@@ -28,13 +28,13 @@ public abstract class Device {
     public abstract boolean valid(String path);
     
     // Check if an object exists at the specified path
-    public abstract boolean exists(String path);
+    public abstract boolean exists(String path) throws Exception;
     
     // Get the size of an object (file/dir) in bytes
     public abstract long getSize(String path) throws Exception;
     
     // Get the name of an object
-    public abstract String getName(String path);
+    public abstract String getName(String path) throws Exception;
     
     // Check if the passed path is a directory/container
     public abstract boolean isDirectory(String path) throws Exception;
