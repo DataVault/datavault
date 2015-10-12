@@ -107,6 +107,8 @@ public class DropboxFileSystem extends Device {
                 for (DbxEntry child : listing.children) {
                     if (child instanceof DbxEntry.File) {
                         bytes += ((DbxEntry.File)child).numBytes;
+                    } else if (child instanceof DbxEntry.Folder) {
+                        bytes += getSize(child.path);
                     }
                 }
             }
@@ -114,7 +116,45 @@ public class DropboxFileSystem extends Device {
             return bytes;
         }
     }
+    
+    public void get(String path, File localFile) throws Exception {
 
+        System.out.println("get '" + path + "' -> '" + localFile.getPath() + "'");
+        
+        if (!path.startsWith(PATH_SEPARATOR)) {
+            path = PATH_SEPARATOR + path;
+        }
+        
+        DbxEntry entry = dbxClient.getMetadata(path);
+        if (entry == null) {
+            throw new FileNotFoundException();
+        } else {
+            if (entry instanceof DbxEntry.File) {
+                
+                // Download the contents of this file
+                FileOutputStream outputStream = new FileOutputStream(localFile);
+                try {
+                    dbxClient.getFile(path, null, outputStream);
+                } finally {
+                    outputStream.close();
+                }
+                
+            } else if (entry instanceof DbxEntry.Folder) {
+                
+                // Create the local directory
+                if (!localFile.exists()) {
+                    localFile.mkdirs();
+                }
+                
+                // Loop over the children of the folder
+                DbxEntry.WithChildren listing = dbxClient.getMetadataWithChildren(path);
+                for (DbxEntry child : listing.children) {
+                    get(child.path, new File(localFile, child.name));
+                }
+            }
+        }
+    }
+    
     @Override
     public boolean isDirectory(String path) throws Exception {
         
@@ -180,14 +220,7 @@ public class DropboxFileSystem extends Device {
             path = PATH_SEPARATOR + path;
         }
         
-        // TODO: This is single-file only for now ...
-        
-        FileOutputStream outputStream = new FileOutputStream(working);
-        try {
-            dbxClient.getFile(path, null, outputStream);
-        } finally {
-            outputStream.close();
-        }
+        get(path, working);
     }
 
     @Override
