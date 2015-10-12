@@ -116,6 +116,18 @@
             <artifactId>amqp-client</artifactId>
             <version>3.5.2</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.jsondoc</groupId>
+            <artifactId>jsondoc-springmvc</artifactId>
+            <version>1.2.9</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jsondoc</groupId>
+            <artifactId>jsondoc-ui</artifactId>
+            <version>1.2.9</version>
+        </dependency>
         
         <dependency>
             <groupId>datavault</groupId>

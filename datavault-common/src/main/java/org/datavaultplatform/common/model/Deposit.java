@@ -21,56 +21,68 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.OrderBy;
 import org.hibernate.annotations.GenericGenerator;
+import org.jsondoc.core.annotation.ApiObject;
+import org.jsondoc.core.annotation.ApiObjectField;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@ApiObject(name = "Deposit")
 @Entity
 @Table(name="Deposits")
 public class Deposit {
 
     // Deposit Identifier
     @Id
+    @ApiObjectField(description = "Universally Unique Identifier for the Deposit", name="Deposit")
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Column(name = "id", unique = true)
     private String id;
     
     // Serialise date in ISO 8601 format
+    @ApiObjectField(description = "Date that the vault was created")
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
-    
+
+    @ApiObjectField(description = "Vault that this Deposit belongs to")
     @JsonIgnore
     @ManyToOne
     private Vault vault;
     
     // A Deposit can have a number of events
+    @ApiObjectField(description = "Events that have taken place to this Deposit")
     @JsonIgnore
     @OneToMany(targetEntity=Event.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp, sequence")
     private List<Event> events;
 
     // A Deposit can have a number of active jobs
+    @ApiObjectField(description = "Jobs related to this Deposit")
     @JsonIgnore
     @OneToMany(targetEntity=Job.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp")
     private List<Job> jobs;
 
     // A Deposit can have a number of restores
+    @ApiObjectField(description = "Restores of this Deposit")
     @JsonIgnore
     @OneToMany(targetEntity=Restore.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp")
     private List<Restore> restores;
 
+    @ApiObjectField(description = "Status of the Deposit", allowedvalues={"NOT_STARTED", "IN_PROGRESS", "COMPLETE"})
+    private Status status;
     public enum Status {
         NOT_STARTED,
         IN_PROGRESS,
         COMPLETE
     }
-    
+
+    @ApiObjectField(description = "Deposit note to briefly describe the Deposit")
     private String note;
-    private Status status;
-    
+
     // For now, a deposit relates to a single bag.
+    @ApiObjectField(description = "ID of the bag associated with this Deposit")
     private String bagId;
     
     // Record the file path that the user selected for this deposit.
