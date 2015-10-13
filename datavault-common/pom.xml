@@ -17,7 +17,7 @@
         <root.basedir>${basedir}/..</root.basedir>
     </properties>
     
-    <!-- Amazon Glacier -->
+    <!-- Amazon AWS -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -74,7 +74,7 @@
         <!-- Amazon Glacier -->
         <dependency>
             <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-s3</artifactId>
+            <artifactId>aws-java-sdk-glacier</artifactId>
         </dependency>
         
     </dependencies>
