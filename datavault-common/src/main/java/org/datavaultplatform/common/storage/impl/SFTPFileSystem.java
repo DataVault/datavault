@@ -17,8 +17,9 @@ import java.util.Map;
 import java.util.Vector;
 
 import com.jcraft.jsch.*;
+import org.datavaultplatform.common.storage.UserStore;
 
-public class SFTPFileSystem extends Device {
+public class SFTPFileSystem extends Device implements UserStore {
 
     private String host = null;
     private String rootPath = null;

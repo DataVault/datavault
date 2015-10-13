@@ -17,8 +17,10 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.io.FileCopy;
+import org.datavaultplatform.common.storage.ArchiveStore;
+import org.datavaultplatform.common.storage.UserStore;
 
-public class LocalFileSystem extends Device {
+public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
 
     private String rootPath = null;
     

@@ -8,6 +8,7 @@
     </parent>
     <artifactId>datavault-common</artifactId>
     <packaging>jar</packaging>
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
@@ -15,6 +16,20 @@
         <!-- This is the path to the root directory. -->
         <root.basedir>${basedir}/..</root.basedir>
     </properties>
+    
+    <!-- Amazon AWS -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-bom</artifactId>
+                <version>1.10.26</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    
     <dependencies>
         <!-- Jackson JSON Processor -->
         <dependency>
@@ -54,6 +69,12 @@
             <groupId>com.dropbox.core</groupId>
             <artifactId>dropbox-core-sdk</artifactId>
             <version>1.8.1</version>
+        </dependency>
+        
+        <!-- Amazon Glacier -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-glacier</artifactId>
         </dependency>
         
     </dependencies>
