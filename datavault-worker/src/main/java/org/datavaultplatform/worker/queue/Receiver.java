@@ -61,9 +61,11 @@ public class Receiver {
 
         channel.queueDeclare(queueName, false, false, false, null);
         System.out.println(" [*] Waiting for messages.");
-        
+
         QueueingConsumer consumer = new QueueingConsumer(channel);
-        channel.basicConsume(queueName, true, consumer);
+
+        channel.basicQos(1);
+        channel.basicConsume(queueName, false, consumer);
 
         while (true) {
             QueueingConsumer.Delivery delivery = consumer.nextDelivery();
@@ -78,13 +80,20 @@ public class Receiver {
                 
                 Class<?> clazz = Class.forName(commonTask.getTaskClass());
                 Task concreteTask = (Task)(mapper.readValue(message, clazz));
-                
+
+                // Is the message a redelivery?
+                if (delivery.getEnvelope().isRedeliver()) {
+                    concreteTask.setIsRedeliver(true);
+                }
+
                 Context context = new Context(archiveDir, tempDir, metaDir, events);
                 concreteTask.performAction(context);
                 
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
         }
         
         // Unreachable - this demo never terminates
