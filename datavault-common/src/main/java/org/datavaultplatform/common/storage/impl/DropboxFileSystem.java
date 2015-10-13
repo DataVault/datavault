@@ -296,7 +296,6 @@ public class DropboxFileSystem extends Device implements UserStore {
             
         } finally {
             fis.close();
-            os.close();
         }
     }
 }
