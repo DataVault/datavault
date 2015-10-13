@@ -16,6 +16,8 @@ public class Task {
     Map<String, String> properties;
     protected FileStore fileStore;
 
+    private boolean isRedeliver;
+
     public Task() {};
     public Task(Job job, Map<String, String> properties, FileStore fileStore) {
         this.jobID = job.getID();
@@ -52,6 +54,14 @@ public class Task {
 
     public void setFileStore(FileStore fileStore) {
         this.fileStore = fileStore;
+    }
+
+    public boolean isRedeliver() {
+        return isRedeliver;
+    }
+
+    public void setIsRedeliver(boolean isRedeliver) {
+        this.isRedeliver = isRedeliver;
     }
     
     public void performAction(Context context) {}
