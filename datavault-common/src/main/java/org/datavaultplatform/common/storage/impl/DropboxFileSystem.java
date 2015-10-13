@@ -276,11 +276,27 @@ public class DropboxFileSystem extends Device implements UserStore {
         // TODO: This is single-file only for now ...
         
         File inputFile = working;
-        FileInputStream inputStream = new FileInputStream(inputFile);
+        FileInputStream fis = new FileInputStream(inputFile);
+        DbxClient.Uploader uploader = dbxClient.startUploadFile(path, DbxWriteMode.add(), working.length());
+        OutputStream os = uploader.getBody();
+        
         try {
-            dbxClient.uploadFile(path, DbxWriteMode.add(), inputFile.length(), inputStream);
+            long size = working.length();
+            long pos = 0;
+            long count = 0;
+            while (pos < size) {
+                count = size - pos > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : size - pos;
+                long copied = IOUtils.copyLarge(fis, os, 0, count);
+                pos += copied;
+                progress.byteCount += copied;
+                progress.timestamp = System.currentTimeMillis();
+            }
+            
+            uploader.finish();
+            
         } finally {
-            inputStream.close();
+            fis.close();
+            os.close();
         }
     }
 }
