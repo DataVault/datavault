@@ -13,14 +13,14 @@ import java.util.Map;
 import com.dropbox.core.*;
 import java.io.*;
 import java.util.Locale;
-
+import org.datavaultplatform.common.storage.UserStore;
 
 // Documentation:
 // https://www.dropbox.com/developers-v1/core/start/java
 // https://www.dropbox.com/developers-v1/core/docs
 // http://dropbox.github.io/dropbox-sdk-java/api-docs/v1.8.x/com/dropbox/core/DbxClient.html
 
-public class DropboxFileSystem extends Device {
+public class DropboxFileSystem extends Device implements UserStore {
 
     private final String dbxAppName = "DataVault/1.0";
     private final String PATH_SEPARATOR = "/";
