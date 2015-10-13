@@ -42,6 +42,11 @@ public class Deposit extends Task {
         String depositId = properties.get("depositId");
         String bagID = properties.get("bagId");
         String filePath = properties.get("filePath");
+
+        if (this.isRedeliver()) {
+            eventStream.send(new Error(jobID, depositId, "Deposit stopped: the message had been redelivered, please investigate"));
+            return;
+        }
         
         // Deposit and Vault metadata to be stored in the bag
         // TODO: is there a better way to pass this to the worker?

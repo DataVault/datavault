@@ -80,7 +80,12 @@ public class Receiver {
                 
                 Class<?> clazz = Class.forName(commonTask.getTaskClass());
                 Task concreteTask = (Task)(mapper.readValue(message, clazz));
-                
+
+                // Is the message a redelivery?
+                if (delivery.getEnvelope().isRedeliver()) {
+                    concreteTask.setIsRedeliver(true);
+                }
+
                 Context context = new Context(archiveDir, tempDir, metaDir, events);
                 concreteTask.performAction(context);
                 
