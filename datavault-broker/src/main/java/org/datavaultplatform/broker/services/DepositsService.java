@@ -12,8 +12,8 @@ public class DepositsService {
 
     private DepositDAO depositDAO;
     
-    public List<Deposit> getDeposits() {
-        return depositDAO.list();
+    public List<Deposit> getDeposits(String sort) {
+        return depositDAO.list(sort);
     }
     
     public void addDeposit(Vault vault, Deposit deposit, String shortPath, String origin) {
@@ -48,7 +48,7 @@ public class DepositsService {
 
     public int count() { return depositDAO.count(); }
 
-    public List<Deposit> search(String query) { return this.depositDAO.search(query); }
+    public List<Deposit> search(String query, String sort) { return this.depositDAO.search(query, sort); }
 
     public Long size() { return depositDAO.size(); }
 }

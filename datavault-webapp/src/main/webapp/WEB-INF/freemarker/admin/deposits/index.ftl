@@ -6,14 +6,13 @@
         <li class="active"><b>Deposits</b></li>
     </ol>
 
-    <form id="search-vaults" class="form" role="form" action="" method="post">
+    <form id="search-vaults" class="form" role="form" action="" method="get">
         <div class="input-group">
-            <input type="text" class="form-control" name="query" placeholder="Search for...">
+            <input type="text" class="form-control" name="query" value="${query}" placeholder="Search for...">
             <div class="input-group-btn">
                 <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
             </div>
         </div>
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
     </form>
 
     <#if deposits?has_content>
@@ -21,11 +20,11 @@
             <table class="table table-striped">
                 <thead>
                 <tr class="tr">
-                    <th>Deposit</th>
-                    <th>Status</th>
-                    <th>File Path</th>
-                    <th>Size</th>
-                    <th>Timestamp</th>
+                    <th><a href="?sort=note&query=${query?url}">Deposit</a></th>
+                    <th><a href="?sort=status&query=${query?url}">Status</a></th>
+                    <th><a href="?sort=filePath&query=${query?url}">File Path</a></th>
+                    <th><a href="?sort=depositSize&query=${query?url}">Size</a></th>
+                    <th><a href="?sort=creationTime&query=${query?url}">Timestamp</a></th>
                 </tr>
                 </thead>
 

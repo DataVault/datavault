@@ -31,6 +31,11 @@
                 <entry key="xml_escape" value-ref="fmXmlEscape"/>
             </map>
         </property>
+        <property name="freemarkerSettings">
+            <props>
+                <prop key="url_escaping_charset">UTF-8</prop>
+            </props>
+        </property>
     </bean>
 
     <bean id="fmXmlEscape" class="freemarker.template.utility.XmlEscape"/>
