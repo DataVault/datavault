@@ -88,6 +88,8 @@ public class Deposit {
     // Archive properties (e.g. archive storage path or ID)
     private String archiveDevice;
     private String archiveId;
+    // Size of the deposit package (in bytes)
+    private long archiveSize;
     
     // Record the file path that the user selected for this deposit.
     private String fileOrigin;
@@ -151,6 +153,14 @@ public class Deposit {
 
     public void setArchiveId(String archiveId) {
         this.archiveId = archiveId;
+    }
+
+    public long getArchiveSize() {
+        return archiveSize;
+    }
+
+    public void setArchiveSize(long archiveSize) {
+        this.archiveSize = archiveSize;
     }
     
     public String getFileOrigin() {

@@ -155,6 +155,9 @@ public class Deposit extends Task {
                 eventStream.send(new PackageComplete(jobID, depositId));
                 eventStream.send(new UpdateState(jobID, depositId, 3)); // Debug
                 
+                long archiveSize = tarFile.length();
+                System.out.println("\tTar file: " + archiveSize + " bytes");
+                
                 // Create the meta directory for the bag information
                 Path metaPath = Paths.get(context.getMetaDir(), bagID);
                 File metaDir = metaPath.toFile();
@@ -191,7 +194,7 @@ public class Deposit extends Task {
                 tarFile.delete();
                 
                 System.out.println("\tDeposit complete: " + archiveId);
-                eventStream.send(new Complete(jobID, depositId, archiveId));
+                eventStream.send(new Complete(jobID, depositId, archiveId, archiveSize));
                 eventStream.send(new UpdateState(jobID, depositId, 4)); // Debug
                 
             } else {

@@ -10,13 +10,15 @@ import org.datavaultplatform.common.event.Event;
 public class Complete extends Event {
     
     public String archiveId;
+    public long archiveSize;
     
     Complete() {};
-    public Complete(String jobId, String depositId, String archiveId) {
+    public Complete(String jobId, String depositId, String archiveId, long archiveSize) {
         
         super(jobId, depositId, "Deposit completed");
         this.eventClass = Complete.class.getCanonicalName();
         this.archiveId = archiveId;
+        this.archiveSize = archiveSize;
     }
 
     public String getArchiveId() {
@@ -25,5 +27,13 @@ public class Complete extends Event {
 
     public void setArchiveId(String archiveId) {
         this.archiveId = archiveId;
+    }
+
+    public long getArchiveSize() {
+        return archiveSize;
+    }
+
+    public void setArchiveSize(long archiveSize) {
+        this.archiveSize = archiveSize;
     }
 }

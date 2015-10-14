@@ -110,6 +110,7 @@ public class EventListener implements MessageListener {
                 Complete completeEvent = (Complete)concreteEvent;
                 deposit.setStatus(Deposit.Status.COMPLETE);
                 deposit.setArchiveId(completeEvent.getArchiveId());
+                deposit.setArchiveSize(completeEvent.getArchiveSize());
                 depositsService.updateDeposit(deposit);
             }
             

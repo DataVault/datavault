@@ -35,6 +35,7 @@ public class Restore extends Task {
         String bagID = properties.get("bagId");
         String restorePath = properties.get("restorePath");
         String archiveId = properties.get("archiveId");
+        long archiveSize = Long.parseLong(properties.get("archiveSize"));
         
         ArrayList<String> states = new ArrayList<>();
         states.add("Computing free space");    // 0
@@ -86,22 +87,16 @@ public class Restore extends Task {
 
             // Retrieve the archived data
             String tarFileName = bagID + ".tar";
-            
-            // Cheating for now - this only works for local filesystems
-            // TOOD: need to record a byte count for stored bags?
-            Path archivePath = Paths.get(context.getArchiveDir()).resolve(tarFileName);
-            File archiveFile = archivePath.toFile();
-            long archiveFileSize = archiveFile.length();
-            
+                        
             // Copy the tar file from the archive to the temporary area
             Path tarPath = Paths.get(context.getTempDir()).resolve(tarFileName);
             File tarFile = tarPath.toFile();
             
-            eventStream.send(new UpdateState(jobID, depositId, 1, 0, archiveFileSize, "Starting transfer ...")); // Debug
+            eventStream.send(new UpdateState(jobID, depositId, 1, 0, archiveSize, "Starting transfer ...")); // Debug
             
             // Progress tracking (threaded)
             Progress progress = new Progress();
-            ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, 1, archiveFileSize, eventStream);
+            ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, 1, archiveSize, eventStream);
             Thread trackerThread = new Thread(tracker);
             trackerThread.start();
 
@@ -120,7 +115,7 @@ public class Restore extends Task {
             try {
                 long freespace = userFs.getUsableSpace();
                 System.out.println("\tFree space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
-                if (freespace < archiveFileSize) {
+                if (freespace < archiveSize) {
                     eventStream.send(new Error(jobID, depositId, "Not enough free space to restore data!"));
                     return;
                 }
@@ -131,11 +126,11 @@ public class Restore extends Task {
             
             // Copy the tar file to the target restore area
             System.out.println("\tCopying tar file from archive ...");
-            eventStream.send(new UpdateState(jobID, depositId, 2, 0, archiveFileSize, "Starting transfer ...")); // Debug
+            eventStream.send(new UpdateState(jobID, depositId, 2, 0, archiveSize, "Starting transfer ...")); // Debug
             
             // Progress tracking (threaded)
             progress = new Progress();
-            tracker = new ProgressTracker(progress, jobID, depositId, 2, archiveFileSize, eventStream);
+            tracker = new ProgressTracker(progress, jobID, depositId, 2, archiveSize, eventStream);
             trackerThread = new Thread(tracker);
             trackerThread.start();
 
@@ -151,6 +146,10 @@ public class Restore extends Task {
             }
             
             System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+            
+            // Cleanup
+            System.out.println("\tCleaning up ...");
+            tarFile.delete();
             
             System.out.println("\tData restore complete: " + restorePath);
             eventStream.send(new Event(jobID, depositId, "Data restore completed"));
