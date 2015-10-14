@@ -85,6 +85,10 @@ public class Deposit {
     @ApiObjectField(description = "ID of the bag associated with this Deposit")
     private String bagId;
     
+    // Archive properties (e.g. archive storage path or ID)
+    private String archiveDevice;
+    private String archiveId;
+    
     // Record the file path that the user selected for this deposit.
     private String fileOrigin;
     private String shortFilePath;
@@ -133,6 +137,22 @@ public class Deposit {
         this.bagId = bagId;
     }
 
+    public String getArchiveDevice() {
+        return archiveDevice;
+    }
+
+    public void setArchiveDevice(String archiveDevice) {
+        this.archiveDevice = archiveDevice;
+    }
+
+    public String getarchiveId() {
+        return archiveId;
+    }
+
+    public void setArchiveId(String archiveId) {
+        this.archiveId = archiveId;
+    }
+    
     public String getFileOrigin() {
         return fileOrigin;
     }

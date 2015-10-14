@@ -1,6 +1,8 @@
 package org.datavaultplatform.common.storage.impl;
 
 import org.datavaultplatform.common.storage.Device;
+import org.datavaultplatform.common.storage.UserStore;
+import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.io.Progress;
 
@@ -17,8 +19,6 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.io.FileCopy;
-import org.datavaultplatform.common.storage.ArchiveStore;
-import org.datavaultplatform.common.storage.UserStore;
 
 public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
 
@@ -119,7 +119,7 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
     }
 
     @Override
-    public void copyToWorkingSpace(String path, File working, Progress progress) throws Exception {
+    public void retrieve(String path, File working, Progress progress) throws Exception {
         Path absolutePath = getAbsolutePath(path);
         File file = absolutePath.toFile();
         
@@ -131,7 +131,7 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
     }
 
     @Override
-    public void copyFromWorkingSpace(String path, File working, Progress progress) throws Exception {
+    public String store(String path, File working, Progress progress) throws Exception {
         Path absolutePath = getAbsolutePath(path);
         File restoreFile = absolutePath.resolve(working.getName()).toFile();
         
@@ -140,10 +140,11 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
         } else if (working.isDirectory()) {
             FileCopy.copyDirectory(progress, working, restoreFile);
         }
+        
+        return working.getName();
     }
     
-    // TODO should be a private method
-    public Path getAbsolutePath(String filePath) {
+    private Path getAbsolutePath(String filePath) {
         
         // Join the requested path to the root of the filesystem.
         // In future this path handling should be part of a filesystem-specific driver.

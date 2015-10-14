@@ -1,6 +1,7 @@
 package org.datavaultplatform.common.storage.impl;
 
 import org.datavaultplatform.common.storage.Device;
+import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.io.FileCopy;
@@ -13,7 +14,6 @@ import java.util.Map;
 import com.dropbox.core.*;
 import java.io.*;
 import java.util.Locale;
-import org.datavaultplatform.common.storage.UserStore;
 
 // Documentation:
 // https://www.dropbox.com/developers-v1/core/start/java
@@ -248,7 +248,7 @@ public class DropboxFileSystem extends Device implements UserStore {
     }
 
     @Override
-    public void copyToWorkingSpace(String path, File working, Progress progress) throws Exception {
+    public void retrieve(String path, File working, Progress progress) throws Exception {
         
         if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
@@ -258,7 +258,7 @@ public class DropboxFileSystem extends Device implements UserStore {
     }
 
     @Override
-    public void copyFromWorkingSpace(String path, File working, Progress progress) throws Exception {
+    public String store(String path, File working, Progress progress) throws Exception {
 
         // TODO: cleanup path handling - Dropbox paths MUST start with a "/"
         
@@ -297,5 +297,7 @@ public class DropboxFileSystem extends Device implements UserStore {
         } finally {
             fis.close();
         }
+        
+        return path;
     }
 }

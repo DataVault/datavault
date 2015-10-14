@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
-import org.datavaultplatform.common.storage.Device;
+import org.datavaultplatform.common.storage.UserStore;
 
 /**
  * User: Robin Taylor
@@ -14,14 +14,14 @@ import org.datavaultplatform.common.storage.Device;
  */
 public class FilesService {
 
-    private Device fs;
+    private UserStore userStore;
     
     private boolean connect(FileStore fileStore) {
         try {
             Class<?> clazz = Class.forName(fileStore.getStorageClass());
             Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
             Object instance = constructor.newInstance(fileStore.getStorageClass(), fileStore.getProperties());
-            fs = (Device)instance;
+            userStore = (UserStore)instance;
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -31,7 +31,7 @@ public class FilesService {
     
     public List<FileInfo> getFilesListing(String filePath, FileStore fileStore) {
         if (connect(fileStore)) {
-            return fs.list(filePath);
+            return userStore.list(filePath);
         } else {
             return null;
         }
@@ -39,7 +39,7 @@ public class FilesService {
     
     public boolean validPath(String filePath, FileStore fileStore) {
         connect(fileStore);
-        return fs.valid(filePath);
+        return userStore.valid(filePath);
     }
 }
 

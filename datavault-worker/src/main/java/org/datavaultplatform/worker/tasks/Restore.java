@@ -18,6 +18,7 @@ import org.datavaultplatform.common.event.UpdateState;
 
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
+import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 
 public class Restore extends Task {
@@ -47,12 +48,14 @@ public class Restore extends Task {
         System.out.println("\trestorePath: " + restorePath);
         
         Device fs;
+        UserStore userStore;
         
         try {
             Class<?> clazz = Class.forName(fileStore.getStorageClass());
             Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
             Object instance = constructor.newInstance(fileStore.getStorageClass(), fileStore.getProperties());
             fs = (Device)instance;
+            userStore = (UserStore)fs;
         } catch (Exception e) {
             e.printStackTrace();
             eventStream.send(new Error(jobID, depositId, "Restore failed: could not access active filesystem"));
@@ -60,7 +63,7 @@ public class Restore extends Task {
         }
         
         try {
-            if (!fs.exists(restorePath) || !fs.isDirectory(restorePath)) {
+            if (!userStore.exists(restorePath) || !userStore.isDirectory(restorePath)) {
                 // Target path must exist and be a directory
                 System.out.println("\tTarget directory not found!");
             }
@@ -97,7 +100,7 @@ public class Restore extends Task {
 
             try {
                 // Ask the driver to copy files to the user directory
-                fs.copyFromWorkingSpace(restorePath, archiveFile, progress);
+                fs.store(restorePath, archiveFile, progress);
             } finally {
                 // Stop the tracking thread
                 tracker.stop();
