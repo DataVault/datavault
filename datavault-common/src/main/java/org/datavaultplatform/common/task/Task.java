@@ -14,16 +14,21 @@ public class Task {
     protected String taskClass;
     protected String jobID;
     Map<String, String> properties;
-    protected FileStore fileStore;
+    protected FileStore userFileStore;
+    protected FileStore archiveFileStore;
 
     private boolean isRedeliver;
 
     public Task() {};
-    public Task(Job job, Map<String, String> properties, FileStore fileStore) {
+    public Task(Job job,
+                Map<String, String> properties,
+                FileStore userFileStore,
+                FileStore archiveFileStore) {
         this.jobID = job.getID();
         this.taskClass = job.getTaskClass();
         this.properties = properties;
-        this.fileStore = fileStore;
+        this.userFileStore = userFileStore;
+        this.archiveFileStore = archiveFileStore;
     }
 
     public String getJobID() { return jobID; }
@@ -48,12 +53,20 @@ public class Task {
         this.properties = properties;
     }
 
-    public FileStore getFileStore() {
-        return fileStore;
+    public FileStore getUserFileStore() {
+        return userFileStore;
     }
 
-    public void setFileStore(FileStore fileStore) {
-        this.fileStore = fileStore;
+    public void setUserFileStore(FileStore userFileStore) {
+        this.userFileStore = userFileStore;
+    }
+
+    public FileStore getArchiveFileStore() {
+        return archiveFileStore;
+    }
+
+    public void setArchiveFileStore(FileStore archiveFileStore) {
+        this.archiveFileStore = archiveFileStore;
     }
 
     public boolean isRedeliver() {

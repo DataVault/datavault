@@ -64,7 +64,6 @@
     <bean id="filesController" class="org.datavaultplatform.broker.controllers.FilesController">
         <property name="filesService" ref="filesService" />
         <property name="usersService" ref="usersService" />
-        <property name="activeDir" value="${activeDir}" />
     </bean>
     
     <bean id="vaultsController" class="org.datavaultplatform.broker.controllers.VaultsController">
@@ -79,6 +78,7 @@
         <property name="jobsService" ref="jobsService" />
         <property name="sender" ref="sender" />
         <property name="activeDir" value="${activeDir}" />
+        <property name="archiveDir" value="${archiveDir}" />
     </bean>
     
     <bean id="policiesController" class="org.datavaultplatform.broker.controllers.PoliciesController">

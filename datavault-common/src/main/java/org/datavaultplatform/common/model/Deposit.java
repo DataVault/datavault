@@ -145,7 +145,7 @@ public class Deposit {
         this.archiveDevice = archiveDevice;
     }
 
-    public String getarchiveId() {
+    public String getArchiveId() {
         return archiveId;
     }
 

@@ -28,8 +28,6 @@ public class FilesController {
     private FilesService filesService;
     private UsersService usersService;
     
-    private String activeDir;
-    
     public void setFilesService(FilesService filesService) {
         this.filesService = filesService;
     }
@@ -38,11 +36,6 @@ public class FilesController {
         this.usersService = usersService;
     }
     
-    // NOTE: this a placeholder and will eventually be handled by per-user config
-    public void setActiveDir(String activeDir) {
-        this.activeDir = activeDir;
-    }
-
     @RequestMapping("/files")
     public List<FileInfo> getStorageListing(@RequestHeader(value = "X-UserID", required = true) String userID,
                                             HttpServletRequest request) {

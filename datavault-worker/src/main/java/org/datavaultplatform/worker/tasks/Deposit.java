@@ -74,9 +74,9 @@ public class Deposit extends Task {
         
         // Connect to the user storage
         try {
-            Class<?> clazz = Class.forName(fileStore.getStorageClass());
+            Class<?> clazz = Class.forName(userFileStore.getStorageClass());
             Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-            Object instance = constructor.newInstance(fileStore.getStorageClass(), fileStore.getProperties());
+            Object instance = constructor.newInstance(userFileStore.getStorageClass(), userFileStore.getProperties());
             userFs = (Device)instance;
             userStore = (UserStore)userFs;
         } catch (Exception e) {
@@ -87,22 +87,9 @@ public class Deposit extends Task {
         
         // Connect to the archive storage
         try {
-            String archiveStoreClass = "org.datavaultplatform.common.storage.impl.LocalFileSystem";
-            HashMap<String, String> archiveStoreProperties = new HashMap<>();
-            archiveStoreProperties.put("rootPath", context.getArchiveDir());
-            
-            /*
-            String archiveStoreClass = "org.datavaultplatform.common.storage.impl.AmazonGlacier";
-            HashMap<String, String> archiveStoreProperties = new HashMap<>();
-            archiveStoreProperties.put("glacierVault", "datavault-test");
-            archiveStoreProperties.put("awsRegion", "eu-west-1.amazonaws.com");
-            archiveStoreProperties.put("accessKey", "xxxxxx");
-            archiveStoreProperties.put("secretKey", "xxxxxx");
-            */
-            
-            Class<?> clazz = Class.forName(archiveStoreClass);
+            Class<?> clazz = Class.forName(archiveFileStore.getStorageClass());
             Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-            Object instance = constructor.newInstance(archiveStoreClass, archiveStoreProperties);
+            Object instance = constructor.newInstance(archiveFileStore.getStorageClass(), archiveFileStore.getProperties());
             archiveFs = (Device)instance;
         } catch (Exception e) {
             e.printStackTrace();
@@ -204,7 +191,7 @@ public class Deposit extends Task {
                 tarFile.delete();
                 
                 System.out.println("\tDeposit complete: " + archiveId);
-                eventStream.send(new Complete(jobID, depositId, archiveFs.name, archiveId));
+                eventStream.send(new Complete(jobID, depositId, archiveId));
                 eventStream.send(new UpdateState(jobID, depositId, 4)); // Debug
                 
             } else {
