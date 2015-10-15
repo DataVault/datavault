@@ -48,6 +48,8 @@ public class DepositsService {
 
     public int count() { return depositDAO.count(); }
 
+    public int queueCount() { return depositDAO.queueCount(); }
+
     public List<Deposit> search(String query, String sort) { return this.depositDAO.search(query, sort); }
 
     public Long size() { return depositDAO.size(); }

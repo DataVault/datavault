@@ -35,6 +35,8 @@ public class AdminController {
         Long vaultSize = restService.getVaultsSize();
         if (vaultSize == null) vaultSize = new Long(0);
         model.addAttribute("vaultsize", FileUtils.byteCountToDisplaySize(vaultSize));
+        model.addAttribute(("depositqueue"), restService.getDepositsQueue());
+        model.addAttribute(("restorequeue"), restService.getRestoresQueue());
 
         return "admin/index";
     }

@@ -15,4 +15,6 @@ public interface RestoreDAO {
     public Restore findById(String Id);
 
     public int count();
+
+    public int queueCount();
 }
