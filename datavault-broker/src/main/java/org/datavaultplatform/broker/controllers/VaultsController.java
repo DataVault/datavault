@@ -28,6 +28,7 @@ public class VaultsController {
     private PoliciesService policiesService;
     private UsersService usersService;
     private FileStoreService fileStoreService;
+    private ArchiveStoreService archiveStoreService;
     private JobsService jobsService;
     private Sender sender;
     
@@ -89,6 +90,10 @@ public class VaultsController {
 
     public void setFileStoreService(FileStoreService fileStoreService) {
         this.fileStoreService = fileStoreService;
+    }
+    
+    public void setArchiveStoreService(ArchiveStoreService archiveStoreService) {
+        this.archiveStoreService = archiveStoreService;
     }
     
     public void setUsersService(UsersService usersService) {
@@ -233,6 +238,16 @@ public class VaultsController {
             fileStoreService.addFileStore(store);
         }
         
+        // Also configure a default system-level archive store if none exists.
+        // This would normally be part of system configuration.
+        List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
+        if (archiveStores.isEmpty()) {
+            HashMap<String,String> storeProperties = new HashMap<String,String>();
+            storeProperties.put("rootPath", archiveDir);
+            ArchiveStore store = new ArchiveStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Default archive store (local)");
+            archiveStoreService.addArchiveStore(store);
+        }
+        
         vaultsService.addVault(vault);
         return vault;
     }
@@ -275,12 +290,23 @@ public class VaultsController {
             storagePath = fullPath.replaceFirst(storageID + "/", "");
         }
         
+        /*
         HashMap<String,String> archiveStoreProperties = new HashMap<>();
         archiveStoreProperties.put("rootPath", archiveDir);
         FileStore archiveStore = new FileStore("org.datavaultplatform.common.storage.impl.LocalFileSystem",
                                                archiveStoreProperties,
                                                "Default Archive (Local)");
-                
+        */
+        
+        ArchiveStore archiveStore = null;
+        List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
+        if (archiveStores.size() > 0) {
+            // For now, just use the first configured archive store
+            archiveStore = archiveStores.get(0);
+        } else {
+            throw new Exception("No configured archive storage");
+        }
+        
         FileStore userStore = null;
         List<FileStore> userStores = user.getFileStores();
         for (FileStore store : userStores) {
@@ -299,8 +325,7 @@ public class VaultsController {
         }
         
         // Add the deposit object
-        // TODO: also store the archive storage details
-        depositsService.addDeposit(vault, deposit, storagePath, userStore.getLabel());
+        depositsService.addDeposit(vault, deposit, storagePath, userStore.getLabel(), archiveStore.getID());
         
         // Create a job to track this deposit
         Job job = new Job("org.datavaultplatform.worker.tasks.Deposit");
@@ -435,12 +460,12 @@ public class VaultsController {
             restorePath = fullPath.replaceFirst(storageID + "/", "");
         }
         
-        // TODO: lookup based on the properies stored in the deposit
-        HashMap<String,String> archiveStoreProperties = new HashMap<>();
-        archiveStoreProperties.put("rootPath", archiveDir);
-        FileStore archiveStore = new FileStore("org.datavaultplatform.common.storage.impl.LocalFileSystem",
-                                               archiveStoreProperties,
-                                               "Default Archive (Local)");
+        String archiveStoreID = deposit.getArchiveDevice();
+        ArchiveStore archiveStore = archiveStoreService.getArchiveStore(archiveStoreID);
+        
+        if (archiveStore == null) {
+            throw new IllegalArgumentException("Archive store ID '" + archiveStoreID + "' is invalid");
+        }
         
         FileStore userStore = null;
         List<FileStore> userStores = user.getFileStores();

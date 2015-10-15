@@ -89,6 +89,19 @@ public class Restore extends Task {
                 // Target path must exist and be a directory
                 System.out.println("\tTarget directory not found!");
             }
+            
+            // Check that there's enough free space ...
+            try {
+                long freespace = userFs.getUsableSpace();
+                System.out.println("\tFree space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
+                if (freespace < archiveSize) {
+                    eventStream.send(new Error(jobID, depositId, "Not enough free space to restore data!"));
+                    return;
+                }
+            } catch (Exception e) {
+                System.out.println("Unable to determine free space");
+                eventStream.send(new Event(jobID, depositId, "Unable to determine free space"));
+            }
 
             // Retrieve the archived data
             String tarFileName = bagID + ".tar";
@@ -116,19 +129,6 @@ public class Restore extends Task {
             
             System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
             
-            // Check that there's enough free space ...
-            try {
-                long freespace = userFs.getUsableSpace();
-                System.out.println("\tFree space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
-                if (freespace < archiveSize) {
-                    eventStream.send(new Error(jobID, depositId, "Not enough free space to restore data!"));
-                    return;
-                }
-            } catch (Exception e) {
-                System.out.println("Unable to determine free space");
-                eventStream.send(new Event(jobID, depositId, "Unable to determine free space"));
-            }
-            
             // Copy the tar file to the target restore area
             System.out.println("\tCopying tar file from archive ...");
             eventStream.send(new UpdateState(jobID, depositId, 2, 0, archiveSize, "Starting transfer ...")); // Debug
@@ -138,7 +138,7 @@ public class Restore extends Task {
             tracker = new ProgressTracker(progress, jobID, depositId, 2, archiveSize, eventStream);
             trackerThread = new Thread(tracker);
             trackerThread.start();
-
+            
             try {
                 // Ask the driver to copy files to the user directory
                 // TODO this is a direct copy that doesn't use the temp directory.

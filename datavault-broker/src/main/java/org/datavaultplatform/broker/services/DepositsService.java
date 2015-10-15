@@ -3,6 +3,7 @@ package org.datavaultplatform.broker.services;
 import java.util.Date;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.dao.DepositDAO;
 
 import java.util.UUID;
@@ -16,7 +17,11 @@ public class DepositsService {
         return depositDAO.list(sort);
     }
     
-    public void addDeposit(Vault vault, Deposit deposit, String shortPath, String origin) {
+    public void addDeposit(Vault vault,
+                           Deposit deposit,
+                           String shortPath,
+                           String origin,
+                           String archiveDeviceID) {
         
         Date d = new Date();
         deposit.setCreationTime(d);
@@ -30,6 +35,9 @@ public class DepositsService {
         
         // Generate a new UUID for this Bag.
         deposit.setBagId(UUID.randomUUID().toString());
+        
+        // Link the deposit to the archive store
+        deposit.setArchiveDevice(archiveDeviceID);
         
         depositDAO.save(deposit);
     }

@@ -75,6 +75,7 @@
         <property name="policiesService" ref="policiesService" />
         <property name="usersService" ref="usersService" />
         <property name="fileStoreService" ref="fileStoreService" />
+        <property name="archiveStoreService" ref="archiveStoreService" />
         <property name="jobsService" ref="jobsService" />
         <property name="sender" ref="sender" />
         <property name="activeDir" value="${activeDir}" />
@@ -92,6 +93,10 @@
     <bean id="fileStoreController" class="org.datavaultplatform.broker.controllers.FileStoreController">
         <property name="usersService" ref="usersService" />
         <property name="fileStoreService" ref="fileStoreService" />
+    </bean>
+    
+    <bean id="archiveStoreController" class="org.datavaultplatform.broker.controllers.ArchiveStoreController">
+        <property name="archiveStoreService" ref="archiveStoreService" />
     </bean>
 
     <!-- todo : should the service beans be put into their own config file? -->
@@ -129,6 +134,10 @@
     
     <bean id="fileStoreService" class="org.datavaultplatform.broker.services.FileStoreService">
         <property name="fileStoreDAO" ref="fileStoreDAO" />
+    </bean>
+    
+    <bean id="archiveStoreService" class="org.datavaultplatform.broker.services.ArchiveStoreService">
+        <property name="archiveStoreDAO" ref="archiveStoreDAO" />
     </bean>
 
     <bean id="jobsService" class="org.datavaultplatform.broker.services.JobsService">
@@ -242,6 +251,10 @@
     </bean>
     
     <bean id="fileStoreDAO" class="org.datavaultplatform.common.model.dao.FileStoreDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    
+    <bean id="archiveStoreDAO" class="org.datavaultplatform.common.model.dao.ArchiveStoreDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
     
