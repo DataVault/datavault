@@ -33,6 +33,11 @@ public class Restore extends Task {
         String depositId = properties.get("depositId");
         String bagID = properties.get("bagId");
         String restorePath = properties.get("restorePath");
+
+        if (this.isRedeliver()) {
+            eventStream.send(new Error(jobID, depositId, "Restore stopped: the message had been redelivered, please investigate"));
+            return;
+        }
         
         ArrayList<String> states = new ArrayList<>();
         states.add("Computing free space");    // 0
