@@ -72,7 +72,7 @@ public class AmazonGlacier extends Device implements ArchiveStore {
     
     @Override
     public void retrieve(String path, File working, Progress progress) throws Exception {
-        // Unimplemented
+        transferManager.download(glacierVault, path, working);
     }
 
     @Override
