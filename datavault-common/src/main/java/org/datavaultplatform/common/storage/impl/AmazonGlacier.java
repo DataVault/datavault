@@ -9,12 +9,19 @@ import java.io.File;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.event.ProgressEvent;
+import com.amazonaws.event.ProgressEventType;
+import com.amazonaws.event.ProgressListener;
 import com.amazonaws.services.glacier.AmazonGlacierClient;
 import com.amazonaws.services.glacier.transfer.ArchiveTransferManager;
 import com.amazonaws.services.glacier.transfer.UploadResult;
 import com.amazonaws.services.glacier.model.*;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sqs.AmazonSQSClient;
+
+// Documentation:
+// http://docs.aws.amazon.com/amazonglacier/latest/dev/using-aws-sdk-for-java.html
+// http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/glacier/AmazonGlacierClient.html
 
 public class AmazonGlacier extends Device implements ArchiveStore {
     
@@ -76,11 +83,60 @@ public class AmazonGlacier extends Device implements ArchiveStore {
     }
 
     @Override
-    public String store(String path, File working, Progress progress) throws Exception {
+    public String store(String path, File working, final Progress progress) throws Exception {
+        
+        ProgressListener listener = new ProgressListener() {
+
+            final long TIMESTAMP_INTERVAL = 100; // ms
+            
+            boolean httpRequestStarted = false;
+            long streamByteCount = 0;
+            
+            @Override
+            public void progressChanged(ProgressEvent pe) {
+                
+                if (pe.getEventType() == ProgressEventType.HTTP_REQUEST_STARTED_EVENT) {
+                    
+                    // The network transfer has started
+                    System.out.println("\tAmazon Glacier: HTTP_REQUEST_STARTED_EVENT");
+                    httpRequestStarted = true;
+                    
+                    // Reset the timer
+                    progress.startTime = System.currentTimeMillis();
+                    progress.timestamp = System.currentTimeMillis();
+                }
+                
+                if (pe.getEventType() == ProgressEventType.REQUEST_BYTE_TRANSFER_EVENT) {
+                    streamByteCount += pe.getBytesTransferred();
+                } else if (pe.getEventType() == ProgressEventType.HTTP_REQUEST_CONTENT_RESET_EVENT) {
+                    // This will be a negative quantity!
+                    streamByteCount += pe.getBytesTransferred();
+                }
+                
+                if (httpRequestStarted) {
+                    long timestamp = System.currentTimeMillis();
+                    if (timestamp > (progress.timestamp + TIMESTAMP_INTERVAL)) {
+                        progress.byteCount = streamByteCount;
+                        progress.timestamp = timestamp;
+                    }
+                }
+                
+                /*
+                System.out.println("Event: " + pe.getEventType());
+                System.out.println("Byte Count: " + pe.getEventType().isByteCountEvent());
+                System.out.println("Event Bytes Transferred: " + pe.getBytesTransferred());
+                System.out.println("Event Bytes: " + pe.getBytes());
+                System.out.println("Stream Bytes So Far: " + streamByteCount);
+                System.out.println("Transferred Bytes: " + progress.byteCount);
+                System.out.println("");
+                */
+            }
+        };
+        
         // Note: this is using the passed path as the deposit description.
         // We should probably use the deposit UUID instead (do we need a specialised archive method)?
-        String archiveId = transferManager.upload(glacierVault, path, working).getArchiveId();
-
+        String archiveId = transferManager.upload("-", glacierVault, path, working, listener).getArchiveId();
+        
         // Glacier generates a new ID which is required retrieve data.
         return archiveId;
     }
