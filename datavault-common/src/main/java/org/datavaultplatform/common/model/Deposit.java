@@ -44,27 +44,23 @@ public class Deposit {
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
 
-    @ApiObjectField(description = "Vault that this Deposit belongs to")
     @JsonIgnore
     @ManyToOne
     private Vault vault;
     
     // A Deposit can have a number of events
-    @ApiObjectField(description = "Events that have taken place to this Deposit")
     @JsonIgnore
     @OneToMany(targetEntity=Event.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp, sequence")
     private List<Event> events;
 
     // A Deposit can have a number of active jobs
-    @ApiObjectField(description = "Jobs related to this Deposit")
     @JsonIgnore
     @OneToMany(targetEntity=Job.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp")
     private List<Job> jobs;
 
     // A Deposit can have a number of restores
-    @ApiObjectField(description = "Restores of this Deposit")
     @JsonIgnore
     @OneToMany(targetEntity=Restore.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp")
@@ -92,11 +88,15 @@ public class Deposit {
     private long archiveSize;
     
     // Record the file path that the user selected for this deposit.
+    @ApiObjectField(description = "Origin of the deposited filepath")
     private String fileOrigin;
+    @ApiObjectField(description = "Short version of the origin of the deposited filepath")
     private String shortFilePath;
+    @ApiObjectField(description = "Filepath of the origin deposit")
     private String filePath;
     
     // Size of the deposit (in bytes)
+    @ApiObjectField(description = "Size of the depoit (in bytes)")
     private long depositSize;
     
     public Deposit() {}

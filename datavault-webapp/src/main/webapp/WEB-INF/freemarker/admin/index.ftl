@@ -56,7 +56,16 @@
                 </div>
             </div>
         </div>
-        <div class="col-xs-6 col-md-4"></div>
+        <div class="col-xs-6 col-md-4">
+            <div class="panel panel-warning">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Deposit / Restore Queues</h3>
+                </div>
+                <div class="panel-body">
+                    <h1 class="text-center"><a href="#"><span class="glyphicon glyphicon-arrow-down"></span> ${depositqueue}</a> <a href="#"><span class="glyphicon glyphicon-arrow-up"></span> ${restorequeue}</a></h1>
+                </div>
+            </div>
+        </div>
     </div>
 
 
