@@ -14,11 +14,11 @@ import java.util.List;
 public class RestoreDAOImpl implements RestoreDAO {
 
     private SessionFactory sessionFactory;
- 
+
     public void setSessionFactory(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-     
+
     @Override
     public void save(Restore restore) {
         Session session = this.sessionFactory.openSession();
@@ -27,7 +27,7 @@ public class RestoreDAOImpl implements RestoreDAO {
         tx.commit();
         session.close();
     }
- 
+
     @Override
     public void update(Restore restore) {
         Session session = this.sessionFactory.openSession();
@@ -36,7 +36,7 @@ public class RestoreDAOImpl implements RestoreDAO {
         tx.commit();
         session.close();
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public List<Restore> list() {
@@ -48,13 +48,13 @@ public class RestoreDAOImpl implements RestoreDAO {
         session.close();
         return restores;
     }
-    
+
     @Override
     public Restore findById(String Id) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Restore.class);
         criteria.add(Restrictions.eq("id", Id));
-        Restore restore = (Restore)criteria.uniqueResult();
+        Restore restore = (Restore) criteria.uniqueResult();
         session.close();
         return restore;
     }
@@ -62,6 +62,15 @@ public class RestoreDAOImpl implements RestoreDAO {
     @Override
     public int count() {
         Session session = this.sessionFactory.openSession();
-        return (int)(long)(Long)session.createCriteria(Restore.class).setProjection(Projections.rowCount()).uniqueResult();
+        return (int) (long) (Long) session.createCriteria(Restore.class).setProjection(Projections.rowCount()).uniqueResult();
+    }
+
+    @Override
+    public int queueCount() {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Restore.class);
+        criteria.add(Restrictions.eq("status", Restore.Status.NOT_STARTED));
+        criteria.setProjection(Projections.rowCount());
+        return (int)(long)(Long)criteria.uniqueResult();
     }
 }

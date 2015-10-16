@@ -15,6 +15,8 @@ public interface DepositDAO {
 
     public int count();
 
+    public int queueCount();
+
     public List<Deposit> search(String query, String sort);
 
     public Long size();

@@ -34,8 +34,6 @@ public class VaultsService {
 
     public List<Vault> search(String query, String sort) { return this.vaultDAO.search(query, sort); }
 
-    public int count() {
-        return vaultDAO.count();
-    }
+    public int count() { return vaultDAO.count(); }
 }
 
