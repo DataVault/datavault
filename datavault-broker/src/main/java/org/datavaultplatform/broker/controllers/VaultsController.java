@@ -468,6 +468,7 @@ public class VaultsController {
         try {
             HashMap<String, String> restoreProperties = new HashMap<>();
             restoreProperties.put("depositId", deposit.getID());
+            restoreProperties.put("restoreId", restore.getID());
             restoreProperties.put("bagId", deposit.getBagId());
             restoreProperties.put("restorePath", restorePath); // No longer the absolute path
 

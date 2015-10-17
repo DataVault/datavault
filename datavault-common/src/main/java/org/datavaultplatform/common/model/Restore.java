@@ -56,6 +56,8 @@ public class Restore {
     
     public Restore() {};
 
+    public String getID() { return id; };
+
     public String getRestorePath() {
         return restorePath;
     }
