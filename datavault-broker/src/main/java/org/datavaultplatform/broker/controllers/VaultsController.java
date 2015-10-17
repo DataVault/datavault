@@ -186,6 +186,12 @@ public class VaultsController {
         return depositsService.queueCount();
     }
 
+    @RequestMapping(value = "/vaults/depositinprogresscount", method = RequestMethod.GET)
+    public int getDepositsInProgressCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        return depositsService.inProgressCount();
+    }
+
     @RequestMapping(value = "/vaults/restorecount", method = RequestMethod.GET)
     public int getRestoresCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
@@ -196,6 +202,12 @@ public class VaultsController {
     public int getRestoresQueuedCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
         return restoresService.queueCount();
+    }
+
+    @RequestMapping(value = "/vaults/restoreinprogresscount", method = RequestMethod.GET)
+    public int getRestoresInProgressCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        return restoresService.inProgressCount();
     }
 
     @RequestMapping(value = "/vaults/deposits", method = RequestMethod.GET)

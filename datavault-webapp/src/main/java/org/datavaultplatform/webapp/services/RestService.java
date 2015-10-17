@@ -111,6 +111,11 @@ public class RestService {
         return (Integer)response.getBody();
     }
 
+    public int getDepositsInProgress() {
+        HttpEntity<?> response = get(brokerURL + "/vaults/depositinprogresscount", Integer.class);
+        return (Integer)response.getBody();
+    }
+
     public Deposit[] searchDeposits(String query) {
         HttpEntity<?> response = get(brokerURL + "/vaults/deposits/search?query=" + query, Deposit[].class);
         return (Deposit[])response.getBody();
@@ -128,6 +133,11 @@ public class RestService {
 
     public int getRestoresQueue() {
         HttpEntity<?> response = get(brokerURL + "/vaults/restorequeuecount", Integer.class);
+        return (Integer)response.getBody();
+    }
+
+    public int getRestoresInProgress() {
+        HttpEntity<?> response = get(brokerURL + "/vaults/restoreinprogresscount", Integer.class);
         return (Integer)response.getBody();
     }
 

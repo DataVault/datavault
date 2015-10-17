@@ -43,5 +43,7 @@ public class RestoresService {
     public int count() { return restoreDAO.count(); }
 
     public int queueCount() { return restoreDAO.queueCount(); }
+
+    public int inProgressCount() { return restoreDAO.inProgressCount(); }
 }
 

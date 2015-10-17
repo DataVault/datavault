@@ -89,6 +89,15 @@ public class DepositDAOImpl implements DepositDAO {
     }
 
     @Override
+    public int inProgressCount() {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Deposit.class);
+        criteria.add(Restrictions.and(Restrictions.ne("status", Deposit.Status.NOT_STARTED), Restrictions.ne("status", Deposit.Status.COMPLETE)));
+        criteria.setProjection(Projections.rowCount());
+        return (int)(long)(Long)criteria.uniqueResult();
+    }
+
+    @Override
     public List<Deposit> search(String query, String sort) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Deposit.class);
