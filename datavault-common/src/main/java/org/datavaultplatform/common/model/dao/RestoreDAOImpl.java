@@ -73,4 +73,13 @@ public class RestoreDAOImpl implements RestoreDAO {
         criteria.setProjection(Projections.rowCount());
         return (int)(long)(Long)criteria.uniqueResult();
     }
+
+    @Override
+    public int inProgressCount() {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Restore.class);
+        criteria.add(Restrictions.and(Restrictions.ne("status", Restore.Status.NOT_STARTED), Restrictions.ne("status", Restore.Status.COMPLETE)));
+        criteria.setProjection(Projections.rowCount());
+        return (int)(long)(Long)criteria.uniqueResult();
+    }
 }

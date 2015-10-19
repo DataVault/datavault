@@ -38,6 +38,7 @@ public class Event {
     // Event properties
     public String message;
     public String depositId;
+    public String restoreId;
     public String jobId;
     public String eventClass;
 
@@ -71,6 +72,16 @@ public class Event {
         this.sequence = 0;
     }
 
+    public Event(String jobId, String depositId, String restoreId, String message) {
+        this.eventClass = Event.class.getCanonicalName();
+        this.jobId = jobId;
+        this.depositId = depositId;
+        this.restoreId = restoreId;
+        this.message = message;
+        this.timestamp = new Date();
+        this.sequence = 0;
+    }
+
     public String getID() { return id; }
 
     public String getEventClass() {
@@ -96,13 +107,21 @@ public class Event {
     public void setJobId(String jobId) {
         this.jobId = jobId;
     }
-    
+
     public String getDepositId() {
         return depositId;
     }
 
     public void setDepositId(String depositId) {
         this.depositId = depositId;
+    }
+
+    public String getRestoreId() {
+        return restoreId;
+    }
+
+    public void setRestoreId(String restoreId) {
+        this.restoreId = restoreId;
     }
 
     public Boolean getPersistent() {
