@@ -101,17 +101,19 @@
                 <table class="table table-striped">
                     <thead>
                     <tr class="tr">
-                        <th>Timestamp</th>
-                        <th>Restore path</th>
                         <th>Restore note</th>
+                        <th>Status</th>
+                        <th>Restore path</th>
+                        <th>Timestamp</th>
                     </tr>
                     </thead>
                     <tbody>
                         <#list restores as restore>
                         <tr class="tr">
-                            <td>${restore.timestamp?datetime}</td>
-                            <td>${restore.restorePath?html}</td>
                             <td>${restore.note?html}</td>
+                            <td>${restore.status?html}</td>
+                            <td>${restore.restorePath?html}</td>
+                            <td>${restore.timestamp?datetime}</td>
                         </tr>
                         </#list>
                     </tbody>

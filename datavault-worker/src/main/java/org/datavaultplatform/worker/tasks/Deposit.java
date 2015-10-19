@@ -23,7 +23,6 @@ import org.datavaultplatform.common.event.deposit.PackageComplete;
 import org.datavaultplatform.common.event.deposit.Complete;
 
 import org.apache.commons.io.FileUtils;
-import org.datavaultplatform.common.io.FileCopy;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;

@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import org.apache.commons.io.FileUtils;
 
+import org.datavaultplatform.common.event.restore.RestoreComplete;
+import org.datavaultplatform.common.event.restore.RestoreStart;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.worker.queue.EventSender;
@@ -32,6 +34,7 @@ public class Restore extends Task {
         
         Map<String, String> properties = getProperties();
         String depositId = properties.get("depositId");
+        String restoreId = properties.get("restoreId");
         String bagID = properties.get("bagId");
         String restorePath = properties.get("restorePath");
         String archiveId = properties.get("archiveId");
@@ -49,7 +52,7 @@ public class Restore extends Task {
         states.add("Data restore complete");   // 3
         eventStream.send(new InitStates(jobID, depositId, states));
         
-        eventStream.send(new Event(jobID, depositId, "Data restore started"));
+        eventStream.send(new RestoreStart(jobID, depositId, restoreId));
         eventStream.send(new UpdateState(jobID, depositId, 0)); // Debug
         
         System.out.println("\tbagID: " + bagID);
@@ -157,7 +160,7 @@ public class Restore extends Task {
             tarFile.delete();
             
             System.out.println("\tData restore complete: " + restorePath);
-            eventStream.send(new Event(jobID, depositId, "Data restore completed"));
+            eventStream.send(new RestoreComplete(jobID, depositId, restoreId));
             eventStream.send(new UpdateState(jobID, depositId, 3)); // Debug
             
         } catch (Exception e) {

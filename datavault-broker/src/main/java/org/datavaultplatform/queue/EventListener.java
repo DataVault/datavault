@@ -6,8 +6,11 @@ import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.InitStates;
 import org.datavaultplatform.common.event.UpdateState;
 import org.datavaultplatform.common.event.deposit.*;
+import org.datavaultplatform.common.event.restore.RestoreComplete;
+import org.datavaultplatform.common.event.restore.RestoreStart;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Deposit;
+import org.datavaultplatform.common.model.Restore;
 import org.datavaultplatform.common.model.Vault;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
@@ -105,15 +108,27 @@ public class EventListener implements MessageListener {
                 vaultsService.updateVault(vault);
 
             } else if (concreteEvent instanceof Complete) {
-                
+
                 // Update the deposit status and archive properties
                 Complete completeEvent = (Complete)concreteEvent;
                 deposit.setStatus(Deposit.Status.COMPLETE);
                 deposit.setArchiveId(completeEvent.getArchiveId());
                 deposit.setArchiveSize(completeEvent.getArchiveSize());
                 depositsService.updateDeposit(deposit);
+            } else if (concreteEvent instanceof RestoreStart) {
+
+                // Update the Restore status
+                Restore restore = restoresService.getRestore(concreteEvent.getRestoreId());
+                restore.setStatus(Restore.Status.IN_PROGRESS);
+                restoresService.updateRestore(restore);
+            } else if (concreteEvent instanceof RestoreComplete) {
+
+                // Update the Restore status
+                Restore restore = restoresService.getRestore(concreteEvent.getRestoreId());
+                restore.setStatus(Restore.Status.COMPLETE);
+                restoresService.updateRestore(restore);
             }
-            
+
         } catch (Exception e) {
             e.printStackTrace();
         }

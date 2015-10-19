@@ -50,13 +50,13 @@ public class DepositsService {
         return depositDAO.findById(depositID);
     }
     
-    public void setDepositDAO(DepositDAO depositDAO) {
-        this.depositDAO = depositDAO;
-    }
+    public void setDepositDAO(DepositDAO depositDAO) { this.depositDAO = depositDAO; }
 
     public int count() { return depositDAO.count(); }
 
     public int queueCount() { return depositDAO.queueCount(); }
+
+    public int inProgressCount() { return depositDAO.inProgressCount(); }
 
     public List<Deposit> search(String query, String sort) { return this.depositDAO.search(query, sort); }
 

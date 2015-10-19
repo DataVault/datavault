@@ -11,7 +11,8 @@
             <table class="table table-striped">
                 <thead>
                 <tr class="tr">
-                    <th>Deposit</th>
+                    <th>Restore</th>
+                    <th>Status</th>
                     <th>Timestamp</th>
                     <th>Restore path</th>
                     <th>Restore note</th>
@@ -22,6 +23,7 @@
                     <#list restores as restore>
                     <tr class="tr">
                         <td>${restore.getDeposit().getID()?html}</td>
+                        <td>${restore.status?html}</td>
                         <td>${restore.timestamp?datetime}</td>
                         <td>${restore.restorePath?html}</td>
                         <td>${restore.note?html}</td>
