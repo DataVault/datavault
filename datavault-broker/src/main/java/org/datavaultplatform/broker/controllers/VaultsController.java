@@ -28,11 +28,13 @@ public class VaultsController {
     private PoliciesService policiesService;
     private UsersService usersService;
     private FileStoreService fileStoreService;
+    private ArchiveStoreService archiveStoreService;
     private JobsService jobsService;
     private Sender sender;
 
     private String activeDir;
-
+    private String archiveDir;
+    
     // Get the specified Vault object and validate it against the current User
     private Vault getUserVault(User user, String vaultID) throws Exception {
 
@@ -90,6 +92,10 @@ public class VaultsController {
         this.fileStoreService = fileStoreService;
     }
 
+    public void setArchiveStoreService(ArchiveStoreService archiveStoreService) {
+        this.archiveStoreService = archiveStoreService;
+    }
+
     public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
     }
@@ -105,6 +111,11 @@ public class VaultsController {
     // NOTE: this a placeholder and will eventually be handled by per-user config
     public void setActiveDir(String activeDir) {
         this.activeDir = activeDir;
+    }
+    
+    // NOTE: this a placeholder and will eventually be handled by system config
+    public void setArchiveDir(String archiveDir) {
+        this.archiveDir = archiveDir;
     }
 
     @ApiMethod(
@@ -252,6 +263,16 @@ public class VaultsController {
             fileStoreService.addFileStore(store);
         }
 
+        // Also configure a default system-level archive store if none exists.
+        // This would normally be part of system configuration.
+        List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
+        if (archiveStores.isEmpty()) {
+            HashMap<String,String> storeProperties = new HashMap<String,String>();
+            storeProperties.put("rootPath", archiveDir);
+            ArchiveStore store = new ArchiveStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Default archive store (local)");
+            archiveStoreService.addArchiveStore(store);
+        }
+
         vaultsService.addVault(vault);
         return vault;
     }
@@ -294,25 +315,34 @@ public class VaultsController {
             storagePath = fullPath.replaceFirst(storageID + "/", "");
         }
 
-        FileStore store = null;
+        ArchiveStore archiveStore = null;
+        List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
+        if (archiveStores.size() > 0) {
+            // For now, just use the first configured archive store
+            archiveStore = archiveStores.get(0);
+        } else {
+            throw new Exception("No configured archive storage");
+        }
+
+        FileStore userStore = null;
         List<FileStore> userStores = user.getFileStores();
-        for (FileStore userStore : userStores) {
-            if (userStore.getID().equals(storageID)) {
-                store = userStore;
+        for (FileStore store : userStores) {
+            if (store.getID().equals(storageID)) {
+                userStore = store;
             }
         }
 
-        if (store == null) {
+        if (userStore == null) {
             throw new IllegalArgumentException("Storage ID '" + storageID + "' is invalid");
         }
 
         // Check the source file path is valid
-        if (!filesService.validPath(storagePath, store)) {
+        if (!filesService.validPath(storagePath, userStore)) {
             throw new IllegalArgumentException("Path '" + storagePath + "' is invalid");
         }
 
         // Add the deposit object
-        depositsService.addDeposit(vault, deposit, storagePath, store.getLabel());
+        depositsService.addDeposit(vault, deposit, storagePath, userStore.getLabel(), archiveStore.getID());
 
         // Create a job to track this deposit
         Job job = new Job("org.datavaultplatform.worker.tasks.Deposit");
@@ -333,7 +363,7 @@ public class VaultsController {
             depositProperties.put("depositMetadata", mapper.writeValueAsString(deposit));
             depositProperties.put("vaultMetadata", mapper.writeValueAsString(vault));
 
-            Task depositTask = new Task(job, depositProperties, store);
+            Task depositTask = new Task(job, depositProperties, userStore, archiveStore);
             String jsonDeposit = mapper.writeValueAsString(depositTask);
             sender.send(jsonDeposit);
 
@@ -447,15 +477,22 @@ public class VaultsController {
             restorePath = fullPath.replaceFirst(storageID + "/", "");
         }
 
-        FileStore store = null;
+        String archiveStoreID = deposit.getArchiveDevice();
+        ArchiveStore archiveStore = archiveStoreService.getArchiveStore(archiveStoreID);
+
+        if (archiveStore == null) {
+            throw new IllegalArgumentException("Archive store ID '" + archiveStoreID + "' is invalid");
+        }
+
+        FileStore userStore = null;
         List<FileStore> userStores = user.getFileStores();
-        for (FileStore userStore : userStores) {
-            if (userStore.getID().equals(storageID)) {
-                store = userStore;
+        for (FileStore store : userStores) {
+            if (store.getID().equals(storageID)) {
+                userStore = store;
             }
         }
 
-        if (store == null) {
+        if (userStore == null) {
             throw new IllegalArgumentException("Storage ID '" + storageID + "' is invalid");
         }
 
@@ -465,7 +502,7 @@ public class VaultsController {
         }
 
         // Check the source file path is valid
-        if (!filesService.validPath(restorePath, store)) {
+        if (!filesService.validPath(restorePath, userStore)) {
             throw new IllegalArgumentException("Path '" + restorePath + "' is invalid");
         }
 
@@ -483,8 +520,10 @@ public class VaultsController {
             restoreProperties.put("restoreId", restore.getID());
             restoreProperties.put("bagId", deposit.getBagId());
             restoreProperties.put("restorePath", restorePath); // No longer the absolute path
+            restoreProperties.put("archiveId", deposit.getArchiveId());
+            restoreProperties.put("archiveSize", Long.toString(deposit.getArchiveSize()));
 
-            Task restoreTask = new Task(job, restoreProperties, store);
+            Task restoreTask = new Task(job, restoreProperties, userStore, archiveStore);
             ObjectMapper mapper = new ObjectMapper();
             String jsonRestore = mapper.writeValueAsString(restoreTask);
             sender.send(jsonRestore);

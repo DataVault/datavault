@@ -12,7 +12,6 @@ public class ProgressTracker implements Runnable {
     private long lastByteCount = 0;
     private int state = 0;
     private long expectedBytes = 0;
-    private long startTime = 0;
     
     Progress progress;
     String jobId;
@@ -38,6 +37,7 @@ public class ProgressTracker implements Runnable {
         long fileCount = progress.fileCount;
         long byteCount = progress.byteCount;
         long eventTime = progress.timestamp;
+        long startTime = progress.startTime;
         
         if (byteCount != lastByteCount) {
             
@@ -68,7 +68,7 @@ public class ProgressTracker implements Runnable {
     @Override
     public void run() {
         
-        startTime = System.currentTimeMillis();
+        progress.startTime = System.currentTimeMillis();
         
         try {
             while(active) {

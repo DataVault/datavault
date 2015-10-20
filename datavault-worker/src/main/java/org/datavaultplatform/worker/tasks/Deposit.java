@@ -25,6 +25,7 @@ import org.datavaultplatform.common.event.deposit.Complete;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
+import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 
 public class Deposit extends Task {
@@ -67,14 +68,16 @@ public class Deposit extends Task {
         System.out.println("\tfilePath: " + filePath);
         
         Device userFs;
+        UserStore userStore;
         Device archiveFs;
         
         // Connect to the user storage
         try {
-            Class<?> clazz = Class.forName(fileStore.getStorageClass());
+            Class<?> clazz = Class.forName(userFileStore.getStorageClass());
             Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-            Object instance = constructor.newInstance(fileStore.getStorageClass(), fileStore.getProperties());
+            Object instance = constructor.newInstance(userFileStore.getStorageClass(), userFileStore.getProperties());
             userFs = (Device)instance;
+            userStore = (UserStore)userFs;
         } catch (Exception e) {
             e.printStackTrace();
             eventStream.send(new Error(jobID, depositId, "Deposit failed: could not access user filesystem"));
@@ -83,13 +86,9 @@ public class Deposit extends Task {
         
         // Connect to the archive storage
         try {
-            String archiveStoreClass = "org.datavaultplatform.common.storage.impl.LocalFileSystem";
-            HashMap<String, String> archiveStoreProperties = new HashMap<>();
-            archiveStoreProperties.put("rootPath", context.getArchiveDir());
-            
-            Class<?> clazz = Class.forName(archiveStoreClass);
+            Class<?> clazz = Class.forName(archiveFileStore.getStorageClass());
             Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-            Object instance = constructor.newInstance(archiveStoreClass, archiveStoreProperties);
+            Object instance = constructor.newInstance(archiveFileStore.getStorageClass(), archiveFileStore.getProperties());
             archiveFs = (Device)instance;
         } catch (Exception e) {
             e.printStackTrace();
@@ -100,7 +99,7 @@ public class Deposit extends Task {
         System.out.println("\tDeposit file: " + filePath);
 
         try {
-            if (userFs.exists(filePath)) {
+            if (userStore.exists(filePath)) {
 
                 // Create a new directory based on the broker-generated UUID
                 Path bagPath = Paths.get(context.getTempDir(), bagID);
@@ -109,12 +108,12 @@ public class Deposit extends Task {
 
                 // Copy the target file to the bag directory
                 System.out.println("\tCopying target to bag directory ...");
-                String fileName = userFs.getName(filePath);
+                String fileName = userStore.getName(filePath);
                 File outputFile = bagPath.resolve(fileName).toFile();
 
                 // Compute bytes to copy
                 eventStream.send(new UpdateState(jobID, depositId, 0)); // Debug
-                long bytes = userFs.getSize(filePath);
+                long bytes = userStore.getSize(filePath);
                 
                 eventStream.send(new ComputedSize(jobID, depositId, bytes));
                 eventStream.send(new UpdateState(jobID, depositId, 1, 0, bytes, "Starting transfer ...")); // Debug
@@ -128,7 +127,7 @@ public class Deposit extends Task {
                 
                 try {
                     // Ask the driver to copy files to our working directory
-                    userFs.copyToWorkingSpace(filePath, outputFile, progress);
+                    userFs.retrieve(filePath, outputFile, progress);
                 } finally {
                     // Stop the tracking thread
                     tracker.stop();
@@ -155,6 +154,9 @@ public class Deposit extends Task {
                 eventStream.send(new PackageComplete(jobID, depositId));
                 eventStream.send(new UpdateState(jobID, depositId, 3)); // Debug
                 
+                long archiveSize = tarFile.length();
+                System.out.println("\tTar file: " + archiveSize + " bytes");
+                
                 // Create the meta directory for the bag information
                 Path metaPath = Paths.get(context.getMetaDir(), bagID);
                 File metaDir = metaPath.toFile();
@@ -173,8 +175,10 @@ public class Deposit extends Task {
                 trackerThread = new Thread(tracker);
                 trackerThread.start();
                 
+                String archiveId;
+                
                 try {
-                    archiveFs.copyFromWorkingSpace("/", tarFile, progress);
+                    archiveId = archiveFs.store("/", tarFile, progress);
                 } finally {
                     // Stop the tracking thread
                     tracker.stop();
@@ -188,8 +192,8 @@ public class Deposit extends Task {
                 FileUtils.deleteDirectory(bagDir);
                 tarFile.delete();
                 
-                System.out.println("\tDeposit complete");
-                eventStream.send(new Complete(jobID, depositId));
+                System.out.println("\tDeposit complete: " + archiveId);
+                eventStream.send(new Complete(jobID, depositId, archiveId, archiveSize));
                 eventStream.send(new UpdateState(jobID, depositId, 4)); // Debug
                 
             } else {

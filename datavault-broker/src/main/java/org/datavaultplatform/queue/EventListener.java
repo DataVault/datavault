@@ -109,8 +109,11 @@ public class EventListener implements MessageListener {
 
             } else if (concreteEvent instanceof Complete) {
 
-                // Update the deposit status
+                // Update the deposit status and archive properties
+                Complete completeEvent = (Complete)concreteEvent;
                 deposit.setStatus(Deposit.Status.COMPLETE);
+                deposit.setArchiveId(completeEvent.getArchiveId());
+                deposit.setArchiveSize(completeEvent.getArchiveSize());
                 depositsService.updateDeposit(deposit);
             } else if (concreteEvent instanceof RestoreStart) {
 

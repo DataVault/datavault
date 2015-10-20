@@ -1,6 +1,7 @@
 package org.datavaultplatform.common.storage.impl;
 
 import org.datavaultplatform.common.storage.Device;
+import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.impl.ssh.Utility;
@@ -17,7 +18,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import com.jcraft.jsch.*;
-import org.datavaultplatform.common.storage.UserStore;
 
 public class SFTPFileSystem extends Device implements UserStore {
 
@@ -259,7 +259,7 @@ public class SFTPFileSystem extends Device implements UserStore {
     }
 
     @Override
-    public void copyToWorkingSpace(String path, File working, Progress progress) throws Exception {
+    public void retrieve(String path, File working, Progress progress) throws Exception {
         
         // Strip any leading separators (we want a path relative to the current dir)
         while (path.startsWith(PATH_SEPARATOR)) {
@@ -289,7 +289,7 @@ public class SFTPFileSystem extends Device implements UserStore {
     }
     
     @Override
-    public void copyFromWorkingSpace(String path, File working, Progress progress) throws Exception {
+    public String store(String path, File working, Progress progress) throws Exception {
         
         // Strip any leading separators (we want a path relative to the current dir)
         while (path.startsWith(PATH_SEPARATOR)) {
@@ -325,5 +325,7 @@ public class SFTPFileSystem extends Device implements UserStore {
         } finally {
             Disconnect();
         }
+        
+        return path;
     }
 }

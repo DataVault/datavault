@@ -20,6 +20,7 @@ import org.datavaultplatform.common.event.UpdateState;
 
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
+import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 
 public class Restore extends Task {
@@ -36,6 +37,8 @@ public class Restore extends Task {
         String restoreId = properties.get("restoreId");
         String bagID = properties.get("bagId");
         String restorePath = properties.get("restorePath");
+        String archiveId = properties.get("archiveId");
+        long archiveSize = Long.parseLong(properties.get("archiveSize"));
 
         if (this.isRedeliver()) {
             eventStream.send(new Error(jobID, depositId, "Restore stopped: the message had been redelivered, please investigate"));
@@ -44,8 +47,9 @@ public class Restore extends Task {
         
         ArrayList<String> states = new ArrayList<>();
         states.add("Computing free space");    // 0
-        states.add("Transferring files");      // 1
-        states.add("Data restore complete");   // 2
+        states.add("Retrieving from archive"); // 1
+        states.add("Transferring files");      // 2
+        states.add("Data restore complete");   // 3
         eventStream.send(new InitStates(jobID, depositId, states));
         
         eventStream.send(new RestoreStart(jobID, depositId, restoreId));
@@ -54,37 +58,46 @@ public class Restore extends Task {
         System.out.println("\tbagID: " + bagID);
         System.out.println("\trestorePath: " + restorePath);
         
-        Device fs;
+        Device userFs;
+        UserStore userStore;
+        Device archiveFs;
         
+        // Connect to the user storage
         try {
-            Class<?> clazz = Class.forName(fileStore.getStorageClass());
+            Class<?> clazz = Class.forName(userFileStore.getStorageClass());
             Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-            Object instance = constructor.newInstance(fileStore.getStorageClass(), fileStore.getProperties());
-            fs = (Device)instance;
+            Object instance = constructor.newInstance(userFileStore.getStorageClass(), userFileStore.getProperties());
+            userFs = (Device)instance;
+            userStore = (UserStore)userFs;
         } catch (Exception e) {
             e.printStackTrace();
             eventStream.send(new Error(jobID, depositId, "Restore failed: could not access active filesystem"));
             return;
         }
         
+        // Connect to the archive storage
         try {
-            if (!fs.exists(restorePath) || !fs.isDirectory(restorePath)) {
+            Class<?> clazz = Class.forName(archiveFileStore.getStorageClass());
+            Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
+            Object instance = constructor.newInstance(archiveFileStore.getStorageClass(), archiveFileStore.getProperties());
+            archiveFs = (Device)instance;
+        } catch (Exception e) {
+            e.printStackTrace();
+            eventStream.send(new Error(jobID, depositId, "Restore failed: could not access archive filesystem"));
+            return;
+        }
+        
+        try {
+            if (!userStore.exists(restorePath) || !userStore.isDirectory(restorePath)) {
                 // Target path must exist and be a directory
                 System.out.println("\tTarget directory not found!");
             }
-
-            // Find the archived data
-            // TODO: a filesystem driver should transform a bagID to an actual path
-            String tarFileName = bagID + ".tar";
-            Path archivePath = Paths.get(context.getArchiveDir()).resolve(tarFileName);
-            File archiveFile = archivePath.toFile();
-            long archiveFileSize = archiveFile.length();
             
             // Check that there's enough free space ...
             try {
-                long freespace = fs.getUsableSpace();
+                long freespace = userFs.getUsableSpace();
                 System.out.println("\tFree space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
-                if (freespace < archiveFileSize) {
+                if (freespace < archiveSize) {
                     eventStream.send(new Error(jobID, depositId, "Not enough free space to restore data!"));
                     return;
                 }
@@ -92,20 +105,25 @@ public class Restore extends Task {
                 System.out.println("Unable to determine free space");
                 eventStream.send(new Event(jobID, depositId, "Unable to determine free space"));
             }
+
+            // Retrieve the archived data
+            String tarFileName = bagID + ".tar";
+                        
+            // Copy the tar file from the archive to the temporary area
+            Path tarPath = Paths.get(context.getTempDir()).resolve(tarFileName);
+            File tarFile = tarPath.toFile();
             
-            // Copy the tar file to the target restore area
-            System.out.println("\tCopying tar file from archive ...");
-            eventStream.send(new UpdateState(jobID, depositId, 1, 0, archiveFileSize, "Starting transfer ...")); // Debug
+            eventStream.send(new UpdateState(jobID, depositId, 1, 0, archiveSize, "Starting transfer ...")); // Debug
             
             // Progress tracking (threaded)
             Progress progress = new Progress();
-            ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, 1, archiveFileSize, eventStream);
+            ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, 1, archiveSize, eventStream);
             Thread trackerThread = new Thread(tracker);
             trackerThread.start();
 
             try {
-                // Ask the driver to copy files to the user directory
-                fs.copyFromWorkingSpace(restorePath, archiveFile, progress);
+                // Ask the driver to copy files to the temp directory
+                archiveFs.retrieve(archiveId, tarFile, progress);
             } finally {
                 // Stop the tracking thread
                 tracker.stop();
@@ -114,9 +132,36 @@ public class Restore extends Task {
             
             System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
             
+            // Copy the tar file to the target restore area
+            System.out.println("\tCopying tar file from archive ...");
+            eventStream.send(new UpdateState(jobID, depositId, 2, 0, archiveSize, "Starting transfer ...")); // Debug
+            
+            // Progress tracking (threaded)
+            progress = new Progress();
+            tracker = new ProgressTracker(progress, jobID, depositId, 2, archiveSize, eventStream);
+            trackerThread = new Thread(tracker);
+            trackerThread.start();
+            
+            try {
+                // Ask the driver to copy files to the user directory
+                // TODO this is a direct copy that doesn't use the temp directory.
+                // Need to instantiate the archive store and call retrieve()
+                userFs.store(restorePath, tarFile, progress);
+            } finally {
+                // Stop the tracking thread
+                tracker.stop();
+                trackerThread.join();
+            }
+            
+            System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+            
+            // Cleanup
+            System.out.println("\tCleaning up ...");
+            tarFile.delete();
+            
             System.out.println("\tData restore complete: " + restorePath);
             eventStream.send(new RestoreComplete(jobID, depositId, restoreId));
-            eventStream.send(new UpdateState(jobID, depositId, 2)); // Debug
+            eventStream.send(new UpdateState(jobID, depositId, 3)); // Debug
             
         } catch (Exception e) {
             e.printStackTrace();
