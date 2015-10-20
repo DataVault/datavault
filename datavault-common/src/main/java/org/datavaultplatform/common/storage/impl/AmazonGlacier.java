@@ -81,7 +81,8 @@ public class AmazonGlacier extends Device implements ArchiveStore {
 
             final long TIMESTAMP_INTERVAL = 100; // ms
 
-            boolean httpRequestStarted = false;
+            boolean transferStarted = false;
+            boolean httpRequestInProgress = false;
             long requestByteCount = 0;
             long responseByteCount = 0;
 
@@ -94,11 +95,20 @@ public class AmazonGlacier extends Device implements ArchiveStore {
 
                     // The network transfer has started
                     System.out.println("\tAmazon Glacier: HTTP_REQUEST_STARTED_EVENT");
-                    httpRequestStarted = true;
+                    httpRequestInProgress = true;
                     
-                    // Reset the timer
-                    progress.startTime = System.currentTimeMillis();
-                    progress.timestamp = System.currentTimeMillis();
+                    // If this was the first request then reset the timer (data is now flowing)
+                    if (!transferStarted) {
+                        progress.startTime = System.currentTimeMillis();
+                        progress.timestamp = System.currentTimeMillis();
+                        transferStarted = true;
+                    }
+                    
+                } else if (pe.getEventType() == ProgressEventType.HTTP_RESPONSE_COMPLETED_EVENT) {
+                    
+                    // The current network transfer has stopped
+                    System.out.println("\tAmazon Glacier: HTTP_RESPONSE_COMPLETED_EVENT");
+                    httpRequestInProgress = false;
                     
                 } else if (pe.getEventType() == ProgressEventType.REQUEST_BYTE_TRANSFER_EVENT) {
                     requestByteCount += pe.getBytesTransferred();
@@ -112,7 +122,7 @@ public class AmazonGlacier extends Device implements ArchiveStore {
                     responseByteCount += (0 - pe.getBytes());
                 }
 
-                if (httpRequestStarted) {
+                if (httpRequestInProgress) {
                     long timestamp = System.currentTimeMillis();
                     if (timestamp > (progress.timestamp + TIMESTAMP_INTERVAL)) {
                         if (trackResponse) {
@@ -124,15 +134,14 @@ public class AmazonGlacier extends Device implements ArchiveStore {
                     }
                 }
 
-                /*
                 System.out.println("Event: " + pe.getEventType());
                 System.out.println("Byte Count: " + pe.getEventType().isByteCountEvent());
                 System.out.println("Event Bytes Transferred: " + pe.getBytesTransferred());
                 System.out.println("Event Bytes: " + pe.getBytes());
-                System.out.println("Stream Bytes So Far: " + streamByteCount);
+                System.out.println("Request Bytes So Far: " + requestByteCount);
+                System.out.println("Response Bytes So Far: " + responseByteCount);
                 System.out.println("Transferred Bytes: " + progress.byteCount);
                 System.out.println("");
-                */
             }
         };
         
