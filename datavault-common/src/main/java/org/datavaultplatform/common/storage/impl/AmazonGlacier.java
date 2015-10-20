@@ -75,44 +75,56 @@ public class AmazonGlacier extends Device implements ArchiveStore {
         */
     }
     
-    private ProgressListener initProgressListener(final Progress progress) {
+    private ProgressListener initProgressListener(final Progress progress, final boolean trackResponse) {
 
         ProgressListener listener = new ProgressListener() {
 
             final long TIMESTAMP_INTERVAL = 100; // ms
 
             boolean httpRequestStarted = false;
-            long streamByteCount = 0;
+            long requestByteCount = 0;
+            long responseByteCount = 0;
 
             @Override
             public void progressChanged(ProgressEvent pe) {
 
+                // See https://github.com/aws/aws-sdk-java/blob/master/aws-java-sdk-core/src/main/java/com/amazonaws/event/ProgressTracker.java
+                
                 if (pe.getEventType() == ProgressEventType.HTTP_REQUEST_STARTED_EVENT) {
 
                     // The network transfer has started
                     System.out.println("\tAmazon Glacier: HTTP_REQUEST_STARTED_EVENT");
                     httpRequestStarted = true;
-
+                    
                     // Reset the timer
                     progress.startTime = System.currentTimeMillis();
                     progress.timestamp = System.currentTimeMillis();
-                }
-
-                if (pe.getEventType() == ProgressEventType.REQUEST_BYTE_TRANSFER_EVENT) {
-                    streamByteCount += pe.getBytesTransferred();
+                    
+                } else if (pe.getEventType() == ProgressEventType.REQUEST_BYTE_TRANSFER_EVENT) {
+                    requestByteCount += pe.getBytesTransferred();
                 } else if (pe.getEventType() == ProgressEventType.HTTP_REQUEST_CONTENT_RESET_EVENT) {
-                    // This will be a negative quantity!
-                    streamByteCount += pe.getBytesTransferred();
+                    requestByteCount += (0 - pe.getBytes());
+                    
+                } else if (pe.getEventType() == ProgressEventType.RESPONSE_BYTE_TRANSFER_EVENT) {
+                    responseByteCount += pe.getBytesTransferred();
+                } else if (pe.getEventType() == ProgressEventType.HTTP_RESPONSE_CONTENT_RESET_EVENT ||
+                           pe.getEventType() == ProgressEventType.RESPONSE_BYTE_DISCARD_EVENT) {
+                    responseByteCount += (0 - pe.getBytes());
                 }
 
                 if (httpRequestStarted) {
                     long timestamp = System.currentTimeMillis();
                     if (timestamp > (progress.timestamp + TIMESTAMP_INTERVAL)) {
-                        progress.byteCount = streamByteCount;
+                        if (trackResponse) {
+                            progress.byteCount = responseByteCount;
+                        } else {
+                            progress.byteCount = requestByteCount;
+                        }
                         progress.timestamp = timestamp;
                     }
                 }
 
+                /*
                 System.out.println("Event: " + pe.getEventType());
                 System.out.println("Byte Count: " + pe.getEventType().isByteCountEvent());
                 System.out.println("Event Bytes Transferred: " + pe.getBytesTransferred());
@@ -120,6 +132,7 @@ public class AmazonGlacier extends Device implements ArchiveStore {
                 System.out.println("Stream Bytes So Far: " + streamByteCount);
                 System.out.println("Transferred Bytes: " + progress.byteCount);
                 System.out.println("");
+                */
             }
         };
         
@@ -134,7 +147,7 @@ public class AmazonGlacier extends Device implements ArchiveStore {
     @Override
     public void retrieve(String path, File working, Progress progress) throws Exception {
         
-        ProgressListener listener = initProgressListener(progress);
+        ProgressListener listener = initProgressListener(progress, true);
         
         transferManager.download(DEFAULT_ACCOUNT_NAME, glacierVault, path, working, listener);
     }
@@ -142,7 +155,7 @@ public class AmazonGlacier extends Device implements ArchiveStore {
     @Override
     public String store(String path, File working, Progress progress) throws Exception {
         
-        ProgressListener listener = initProgressListener(progress);
+        ProgressListener listener = initProgressListener(progress, false);
         
         // Note: this is using the passed path as the deposit description.
         // We should probably use the deposit UUID instead (do we need a specialised archive method)?
