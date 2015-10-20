@@ -134,6 +134,7 @@ public class AmazonGlacier extends Device implements ArchiveStore {
                     }
                 }
 
+                /*
                 System.out.println("Event: " + pe.getEventType());
                 System.out.println("Byte Count: " + pe.getEventType().isByteCountEvent());
                 System.out.println("Event Bytes Transferred: " + pe.getBytesTransferred());
@@ -142,6 +143,7 @@ public class AmazonGlacier extends Device implements ArchiveStore {
                 System.out.println("Response Bytes So Far: " + responseByteCount);
                 System.out.println("Transferred Bytes: " + progress.byteCount);
                 System.out.println("");
+                */
             }
         };
         
