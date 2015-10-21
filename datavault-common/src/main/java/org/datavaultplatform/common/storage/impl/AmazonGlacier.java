@@ -104,10 +104,10 @@ public class AmazonGlacier extends Device implements ArchiveStore {
                         transferStarted = true;
                     }
                     
-                } else if (pe.getEventType() == ProgressEventType.HTTP_RESPONSE_COMPLETED_EVENT) {
+                } else if (pe.getEventType() == ProgressEventType.HTTP_REQUEST_COMPLETED_EVENT) {
                     
-                    // The current network transfer has stopped
-                    System.out.println("\tAmazon Glacier: HTTP_RESPONSE_COMPLETED_EVENT");
+                    // The current network request has stopped
+                    System.out.println("\tAmazon Glacier: HTTP_REQUEST_COMPLETED_EVENT");
                     httpRequestInProgress = false;
                     
                 } else if (pe.getEventType() == ProgressEventType.REQUEST_BYTE_TRANSFER_EVENT) {
@@ -122,8 +122,11 @@ public class AmazonGlacier extends Device implements ArchiveStore {
                     responseByteCount += (0 - pe.getBytes());
                 }
 
-                if (httpRequestInProgress) {
+                
+                if (trackResponse || httpRequestInProgress) {
+                    
                     long timestamp = System.currentTimeMillis();
+                    
                     if (timestamp > (progress.timestamp + TIMESTAMP_INTERVAL)) {
                         if (trackResponse) {
                             progress.byteCount = responseByteCount;
@@ -133,7 +136,7 @@ public class AmazonGlacier extends Device implements ArchiveStore {
                         progress.timestamp = timestamp;
                     }
                 }
-
+                
                 /*
                 System.out.println("Event: " + pe.getEventType());
                 System.out.println("Byte Count: " + pe.getEventType().isByteCountEvent());
