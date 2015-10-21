@@ -79,8 +79,6 @@ public class AmazonGlacier extends Device implements ArchiveStore {
 
         ProgressListener listener = new ProgressListener() {
 
-            final long TIMESTAMP_INTERVAL = 100; // ms
-
             boolean transferStarted = false;
             boolean httpRequestInProgress = false;
             long requestByteCount = 0;
@@ -122,19 +120,12 @@ public class AmazonGlacier extends Device implements ArchiveStore {
                     responseByteCount += (0 - pe.getBytes());
                 }
 
-                
-                if (trackResponse || httpRequestInProgress) {
-                    
-                    long timestamp = System.currentTimeMillis();
-                    
-                    if (timestamp > (progress.timestamp + TIMESTAMP_INTERVAL)) {
-                        if (trackResponse) {
-                            progress.byteCount = responseByteCount;
-                        } else {
-                            progress.byteCount = requestByteCount;
-                        }
-                        progress.timestamp = timestamp;
-                    }
+                if (trackResponse) {
+                    progress.byteCount = responseByteCount;
+                    progress.timestamp = System.currentTimeMillis();
+                } else if (httpRequestInProgress) {
+                    progress.byteCount = requestByteCount;
+                    progress.timestamp = System.currentTimeMillis();
                 }
                 
                 /*
