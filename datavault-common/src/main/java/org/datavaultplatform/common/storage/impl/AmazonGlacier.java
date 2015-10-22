@@ -79,8 +79,6 @@ public class AmazonGlacier extends Device implements ArchiveStore {
 
         ProgressListener listener = new ProgressListener() {
 
-            final long TIMESTAMP_INTERVAL = 100; // ms
-
             boolean transferStarted = false;
             boolean httpRequestInProgress = false;
             long requestByteCount = 0;
@@ -104,10 +102,10 @@ public class AmazonGlacier extends Device implements ArchiveStore {
                         transferStarted = true;
                     }
                     
-                } else if (pe.getEventType() == ProgressEventType.HTTP_RESPONSE_COMPLETED_EVENT) {
+                } else if (pe.getEventType() == ProgressEventType.HTTP_REQUEST_COMPLETED_EVENT) {
                     
-                    // The current network transfer has stopped
-                    System.out.println("\tAmazon Glacier: HTTP_RESPONSE_COMPLETED_EVENT");
+                    // The current network request has stopped
+                    System.out.println("\tAmazon Glacier: HTTP_REQUEST_COMPLETED_EVENT");
                     httpRequestInProgress = false;
                     
                 } else if (pe.getEventType() == ProgressEventType.REQUEST_BYTE_TRANSFER_EVENT) {
@@ -122,18 +120,14 @@ public class AmazonGlacier extends Device implements ArchiveStore {
                     responseByteCount += (0 - pe.getBytes());
                 }
 
-                if (httpRequestInProgress) {
-                    long timestamp = System.currentTimeMillis();
-                    if (timestamp > (progress.timestamp + TIMESTAMP_INTERVAL)) {
-                        if (trackResponse) {
-                            progress.byteCount = responseByteCount;
-                        } else {
-                            progress.byteCount = requestByteCount;
-                        }
-                        progress.timestamp = timestamp;
-                    }
+                if (trackResponse) {
+                    progress.byteCount = responseByteCount;
+                    progress.timestamp = System.currentTimeMillis();
+                } else if (httpRequestInProgress) {
+                    progress.byteCount = requestByteCount;
+                    progress.timestamp = System.currentTimeMillis();
                 }
-
+                
                 /*
                 System.out.println("Event: " + pe.getEventType());
                 System.out.println("Byte Count: " + pe.getEventType().isByteCountEvent());

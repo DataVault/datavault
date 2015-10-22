@@ -16,7 +16,7 @@ import org.datavaultplatform.worker.queue.EventSender;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.InitStates;
-import org.datavaultplatform.common.event.UpdateState;
+import org.datavaultplatform.common.event.UpdateProgress;
 
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
@@ -52,8 +52,7 @@ public class Restore extends Task {
         states.add("Data restore complete");   // 3
         eventStream.send(new InitStates(jobID, depositId, states));
         
-        eventStream.send(new RestoreStart(jobID, depositId, restoreId));
-        eventStream.send(new UpdateState(jobID, depositId, 0)); // Debug
+        eventStream.send(new RestoreStart(jobID, depositId, restoreId).withNextState(0));
         
         System.out.println("\tbagID: " + bagID);
         System.out.println("\trestorePath: " + restorePath);
@@ -113,11 +112,11 @@ public class Restore extends Task {
             Path tarPath = Paths.get(context.getTempDir()).resolve(tarFileName);
             File tarFile = tarPath.toFile();
             
-            eventStream.send(new UpdateState(jobID, depositId, 1, 0, archiveSize, "Starting transfer ...")); // Debug
+            eventStream.send(new UpdateProgress(jobID, depositId, 0, archiveSize, "Starting transfer ...").withNextState(1));
             
             // Progress tracking (threaded)
             Progress progress = new Progress();
-            ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, 1, archiveSize, eventStream);
+            ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, archiveSize, eventStream);
             Thread trackerThread = new Thread(tracker);
             trackerThread.start();
 
@@ -134,11 +133,11 @@ public class Restore extends Task {
             
             // Copy the tar file to the target restore area
             System.out.println("\tCopying tar file from archive ...");
-            eventStream.send(new UpdateState(jobID, depositId, 2, 0, archiveSize, "Starting transfer ...")); // Debug
+            eventStream.send(new UpdateProgress(jobID, depositId, 0, archiveSize, "Starting transfer ...").withNextState(2));
             
             // Progress tracking (threaded)
             progress = new Progress();
-            tracker = new ProgressTracker(progress, jobID, depositId, 2, archiveSize, eventStream);
+            tracker = new ProgressTracker(progress, jobID, depositId, archiveSize, eventStream);
             trackerThread = new Thread(tracker);
             trackerThread.start();
             
@@ -160,8 +159,7 @@ public class Restore extends Task {
             tarFile.delete();
             
             System.out.println("\tData restore complete: " + restorePath);
-            eventStream.send(new RestoreComplete(jobID, depositId, restoreId));
-            eventStream.send(new UpdateState(jobID, depositId, 3)); // Debug
+            eventStream.send(new RestoreComplete(jobID, depositId, restoreId).withNextState(3));
             
         } catch (Exception e) {
             e.printStackTrace();

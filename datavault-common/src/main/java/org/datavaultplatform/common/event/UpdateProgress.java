@@ -5,35 +5,25 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name="Events")
-public class UpdateState extends Event {
+public class UpdateProgress extends Event {
     
-    public int state;
     public long progress;
     public long progressMax;
     public String progressMessage;
     
-    UpdateState() {};
-    public UpdateState(String jobId, String depositId, int state) {
-        this(jobId, depositId, state, 0, 0, "");
+    UpdateProgress() {};
+    public UpdateProgress(String jobId, String depositId) {
+        this(jobId, depositId, 0, 0, "");
     }
-    public UpdateState(String jobId, String depositId, int state, long progress, long progressMax, String progressMessage) {
-        super(jobId, depositId, "Job state: " + state);
-        this.eventClass = UpdateState.class.getCanonicalName();
-        this.state = state;
+    public UpdateProgress(String jobId, String depositId, long progress, long progressMax, String progressMessage) {
+        super(jobId, depositId, "Job progress update");
+        this.eventClass = UpdateProgress.class.getCanonicalName();
         this.progress = progress;
         this.progressMax = progressMax;
         this.progressMessage = progressMessage;
         this.persistent = false;
     }
     
-    public int getState() {
-        return state;
-    }
-
-    public void setState(int state) {
-        this.state = state;
-    }
-
     public long getProgress() {
         return progress;
     }

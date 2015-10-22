@@ -15,7 +15,7 @@ import org.datavaultplatform.worker.operations.Packager;
 import org.datavaultplatform.worker.queue.EventSender;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.InitStates;
-import org.datavaultplatform.common.event.UpdateState;
+import org.datavaultplatform.common.event.UpdateProgress;
 import org.datavaultplatform.common.event.deposit.Start;
 import org.datavaultplatform.common.event.deposit.ComputedSize;
 import org.datavaultplatform.common.event.deposit.TransferComplete;
@@ -62,7 +62,7 @@ public class Deposit extends Task {
         states.add("Deposit complete");   // 4
         eventStream.send(new InitStates(jobID, depositId, states));
         
-        eventStream.send(new Start(jobID, depositId));
+        eventStream.send(new Start(jobID, depositId).withNextState(0));
         
         System.out.println("\tbagID: " + bagID);
         System.out.println("\tfilePath: " + filePath);
@@ -112,16 +112,16 @@ public class Deposit extends Task {
                 File outputFile = bagPath.resolve(fileName).toFile();
 
                 // Compute bytes to copy
-                eventStream.send(new UpdateState(jobID, depositId, 0)); // Debug
                 long bytes = userStore.getSize(filePath);
                 
                 eventStream.send(new ComputedSize(jobID, depositId, bytes));
-                eventStream.send(new UpdateState(jobID, depositId, 1, 0, bytes, "Starting transfer ...")); // Debug
+                
+                eventStream.send(new UpdateProgress(jobID, depositId, 0, bytes, "Starting transfer ...").withNextState(1));
                 System.out.println("\tSize: " + bytes + " bytes (" +  FileUtils.byteCountToDisplaySize(bytes) + ")");
                 
                 // Progress tracking (threaded)
                 Progress progress = new Progress();
-                ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, 1, bytes, eventStream);
+                ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, bytes, eventStream);
                 Thread trackerThread = new Thread(tracker);
                 trackerThread.start();
                 
@@ -134,8 +134,7 @@ public class Deposit extends Task {
                     trackerThread.join();
                 }
                 
-                eventStream.send(new TransferComplete(jobID, depositId));
-                eventStream.send(new UpdateState(jobID, depositId, 2)); // Debug
+                eventStream.send(new TransferComplete(jobID, depositId).withNextState(2));
                 
                 // Bag the directory in-place
                 System.out.println("\tCreating bag ...");
@@ -151,8 +150,7 @@ public class Deposit extends Task {
                 File tarFile = tarPath.toFile();
                 Tar.createTar(bagDir, tarFile);
 
-                eventStream.send(new PackageComplete(jobID, depositId));
-                eventStream.send(new UpdateState(jobID, depositId, 3)); // Debug
+                eventStream.send(new PackageComplete(jobID, depositId).withNextState(3));
                 
                 long archiveSize = tarFile.length();
                 System.out.println("\tTar file: " + archiveSize + " bytes");
@@ -171,7 +169,7 @@ public class Deposit extends Task {
                 
                 // Progress tracking (threaded)
                 progress = new Progress();
-                tracker = new ProgressTracker(progress, jobID, depositId, 3, tarFile.length(), eventStream);
+                tracker = new ProgressTracker(progress, jobID, depositId, tarFile.length(), eventStream);
                 trackerThread = new Thread(tracker);
                 trackerThread.start();
                 
@@ -193,8 +191,7 @@ public class Deposit extends Task {
                 tarFile.delete();
                 
                 System.out.println("\tDeposit complete: " + archiveId);
-                eventStream.send(new Complete(jobID, depositId, archiveId, archiveSize));
-                eventStream.send(new UpdateState(jobID, depositId, 4)); // Debug
+                eventStream.send(new Complete(jobID, depositId, archiveId, archiveSize).withNextState(4));
                 
             } else {
                 System.err.println("\tFile does not exist.");

@@ -1,7 +1,7 @@
 package org.datavaultplatform.worker.operations;
 
 import org.apache.commons.io.FileUtils;
-import org.datavaultplatform.common.event.UpdateState;
+import org.datavaultplatform.common.event.UpdateProgress;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.worker.queue.EventSender;
 
@@ -10,7 +10,6 @@ public class ProgressTracker implements Runnable {
     private static final int SLEEP_INTERVAL_MS = 250;
     private boolean active = true;
     private long lastByteCount = 0;
-    private int state = 0;
     private long expectedBytes = 0;
     
     Progress progress;
@@ -18,11 +17,10 @@ public class ProgressTracker implements Runnable {
     String depositId;
     EventSender eventSender;
     
-    public ProgressTracker(Progress progress, String jobId, String depositId, int state, long expectedBytes, EventSender eventSender) {
+    public ProgressTracker(Progress progress, String jobId, String depositId, long expectedBytes, EventSender eventSender) {
         this.progress = progress;
         this.jobId = jobId;
         this.depositId = depositId;
-        this.state = state;
         this.expectedBytes = expectedBytes;
         this.eventSender = eventSender;
     }
@@ -59,7 +57,7 @@ public class ProgressTracker implements Runnable {
             
             // Signal progress to the broker
             
-            UpdateState updateState = new UpdateState(jobId, depositId, state, byteCount, expectedBytes, message);
+            UpdateProgress updateState = new UpdateProgress(jobId, depositId, byteCount, expectedBytes, message);
             lastByteCount = byteCount;
             eventSender.send(updateState);
         }

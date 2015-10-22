@@ -41,7 +41,10 @@ public class Event {
     public String restoreId;
     public String jobId;
     public String eventClass;
-
+    
+    @Transient
+    public Integer nextState = null;
+    
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @Temporal(TemporalType.TIMESTAMP)
@@ -162,5 +165,10 @@ public class Event {
 
     public void setDeposit(Deposit deposit) {
         this.deposit = deposit;
+    }
+    
+    public Event withNextState(Integer state) {
+        this.nextState = state;
+        return this;
     }
 }

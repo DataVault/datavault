@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.InitStates;
-import org.datavaultplatform.common.event.UpdateState;
+import org.datavaultplatform.common.event.UpdateProgress;
 import org.datavaultplatform.common.event.deposit.*;
 import org.datavaultplatform.common.event.restore.RestoreComplete;
 import org.datavaultplatform.common.event.restore.RestoreStart;
@@ -68,6 +68,12 @@ public class EventListener implements MessageListener {
                 eventService.addEvent(concreteEvent);
             }
             
+            // Update with next state information (if present)
+            if (concreteEvent.nextState != null) {
+                job.setState(concreteEvent.nextState);
+                jobsService.updateJob(job);
+            }
+            
             // Maybe perform an action based on the event type ...
             
             if (concreteEvent instanceof InitStates) {
@@ -77,11 +83,10 @@ public class EventListener implements MessageListener {
                 job.setStates(initStatesEvent.getStates());
                 jobsService.updateJob(job);
             
-            } else if (concreteEvent instanceof UpdateState) {
+            } else if (concreteEvent instanceof UpdateProgress) {
                 
                 // Update the Job state
-                UpdateState updateStateEvent = (UpdateState)concreteEvent;
-                job.setState(updateStateEvent.getState());
+                UpdateProgress updateStateEvent = (UpdateProgress)concreteEvent;
                 job.setProgress(updateStateEvent.getProgress());
                 job.setProgressMax(updateStateEvent.getProgressMax());
                 job.setProgressMessage(updateStateEvent.getProgressMessage());
