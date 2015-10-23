@@ -65,6 +65,16 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/files" + filePath, FileInfo[].class);
         return (FileInfo[])response.getBody();
     }
+    
+    public String getFilesize(String filePath) {
+        
+        if (!filePath.startsWith("/")) {
+            filePath = "/" + filePath;
+        }
+        
+        HttpEntity<?> response = get(brokerURL + "/filesize" + filePath, String.class);
+        return (String)response.getBody();
+    }
 
     public Vault[] getVaultsListing() {
         HttpEntity<?> response = get(brokerURL + "/vaults", Vault[].class);
