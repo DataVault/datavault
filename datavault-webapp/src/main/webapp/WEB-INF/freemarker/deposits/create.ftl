@@ -20,17 +20,14 @@
                    value="${spring.status.value!""}"/>
         </div>
 
-        <div class="form-group" style="display:none;">
-            <label class="control-label">Filepath:</label>
-            <@spring.bind "deposit.filePath" />
-            <input type="text"
-                    class="form-control file-path"
-                    name="${spring.status.expression}"
-                    value="${spring.status.value!""}"/>
-        </div>
-
         <div class="form-group">
             <label class="control-label">Deposit file or directory:</label>
+            <@spring.bind "deposit.filePath" />
+            <input type="text"
+                   style="display:none;"
+                   class="form-control file-path"
+                   name="${spring.status.expression}"
+                   value="${spring.status.value!""}"/>
             <div id="tree" class="fancytree-radio tree-box"></div>
         </div>
 
@@ -76,8 +73,12 @@
     $(document).ready(function () {
 
         $('#create-deposit').validate({
+            ignore: ".ignore",
             rules: {
                 note: {
+                    required: true
+                },
+                filePath: {
                     required: true
                 }
             },
