@@ -71,5 +71,12 @@ public class FilesController {
         
         return getNodes(parent, true);
     }
+    
+    @RequestMapping("/filesize")
+    public @ResponseBody String getFilesize(HttpServletRequest request) {
 
+        String filepath = request.getParameter("filepath");
+        
+        return restService.getFilesize(filepath);
+    }
 }

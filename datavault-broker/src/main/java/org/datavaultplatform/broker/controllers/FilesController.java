@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.HandlerMapping;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.User;
@@ -97,5 +98,37 @@ public class FilesController {
         }
         
         return files;
+    }
+    
+    @RequestMapping("/filesize/{storageid}/**")
+    public String getFilesize(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                      HttpServletRequest request,
+                                      @PathVariable("storageid") String storageID) throws Exception {
+        
+        User user = usersService.getUser(userID);
+        
+        FileStore store = null;
+        List<FileStore> userStores = user.getFileStores();
+        for (FileStore userStore : userStores) {
+            if (userStore.getID().equals(storageID)) {
+                store = userStore;
+            }
+        }
+        
+        if (store == null) {
+            throw new Exception("Storage device '" + storageID + "' not found!");
+        }
+        
+        // TODO: is there a cleaner way to extract the request path?
+        String requestPath = (String)request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+        String filePath = requestPath.replaceFirst("^/filesize/" + storageID, "");
+        
+        Long size = filesService.getFilesize(filePath, store);
+        
+        if (size == null) {
+            return "File information not available";
+        } else {
+            return FileUtils.byteCountToDisplaySize(size);
+        }
     }
 }
