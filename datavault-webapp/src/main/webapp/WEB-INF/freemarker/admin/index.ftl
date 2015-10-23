@@ -3,7 +3,7 @@
 <div class="container">
 
     <ol class="breadcrumb">
-        <li class="active">Administration</li>
+        <li class="active"><b>Administration</b></li>
     </ol>
 
     <div class="row">
