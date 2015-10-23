@@ -2,6 +2,10 @@
 <@layout.vaultLayout>
 <div class="container">
 
+    <ol class="breadcrumb">
+        <li class="active">Administration</li>
+    </ol>
+
     <div class="row">
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-warning">

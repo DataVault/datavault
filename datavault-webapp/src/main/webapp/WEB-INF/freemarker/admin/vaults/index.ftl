@@ -3,6 +3,7 @@
 <div class="container">
 
     <ol class="breadcrumb">
+        <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
         <li class="active"><b>Vaults</b></li>
     </ol>
 
