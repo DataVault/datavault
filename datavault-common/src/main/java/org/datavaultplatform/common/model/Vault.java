@@ -60,13 +60,19 @@ public class Vault {
     @OneToMany(targetEntity=Deposit.class, mappedBy="vault", fetch=FetchType.EAGER)
     @OrderBy("creationTime")
     private List<Deposit> deposits;
-    
+
     @JsonIgnore
     @ManyToOne
     private Policy policy;
     // Raw policy ID
     private String policyID;
-    
+
+    @JsonIgnore
+    @ManyToOne
+    private Group group;
+    // Raw group ID
+    private String groupID;
+
     @ManyToOne
     private User user;
     
@@ -115,9 +121,9 @@ public class Vault {
     public void addDeposit(Deposit deposit) {
         this.deposits.add(deposit);
     }
-    
+
     public Policy getPolicy() { return policy; }
-    
+
     public void setPolicy(Policy policy) {
         this.policy = policy;
     }
@@ -129,7 +135,21 @@ public class Vault {
     public void setPolicyID(String policyID) {
         this.policyID = policyID;
     }
-    
+
+    public Group getGroup() { return group; }
+
+    public void setGroup(Group group) {
+        this.group = group;
+    }
+
+    public String getGroupID() {
+        return groupID;
+    }
+
+    public void setGroupID(String groupID) {
+        this.groupID = groupID;
+    }
+
     public User getUser() { return user; }
     
     public void setUser(User user) {

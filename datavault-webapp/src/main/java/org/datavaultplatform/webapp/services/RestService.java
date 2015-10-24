@@ -23,7 +23,7 @@ public class RestService {
     }
     
     private HttpEntity<?> exchange(String url, Class clazz, HttpMethod method, Object payload) {
-        
+
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
@@ -223,6 +223,21 @@ public class RestService {
 
     public int getUsersCount() {
         HttpEntity<?> response = get(brokerURL + "/users/count", Integer.class);
+        return (Integer)response.getBody();
+    }
+
+    public Group getGroup(String groupId) {
+        HttpEntity<?> response = get(brokerURL + "/groups/" + groupId, Group.class);
+        return (Group)response.getBody();
+    }
+
+    public Group[] getGroups() {
+        HttpEntity<?> response = get(brokerURL + "/groups", Group[].class);
+        return (Group[])response.getBody();
+    }
+
+    public int getGroupsCount() {
+        HttpEntity<?> response = get(brokerURL + "/groups/count", Integer.class);
         return (Integer)response.getBody();
     }
 
