@@ -148,21 +148,23 @@ public class VaultsController {
     @RequestMapping(value = "/vaults/all", method = RequestMethod.GET)
     public List<Vault> getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
                                     @RequestParam(value = "sort", required = false)
-                                    @ApiQueryParam(name = "sort", description = "Vault sort order", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime"}, defaultvalue = "creationTime", required = false) String sort) throws Exception {
+                                    @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime"}, defaultvalue = "creationTime", required = false) String sort,
+                                    @RequestParam(value = "order", required = false)
+                                    @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order) throws Exception {
 
-        if ((sort == null) || ("".equals(sort))) {
-            return vaultsService.getVaults();
-        } else {
-            return vaultsService.getVaults(sort);
-        }
+        if (sort == null) sort = "";
+        if (order == null) order = "asc";
+        return vaultsService.getVaults(sort, order);
     }
 
     @RequestMapping(value = "/vaults/search", method = RequestMethod.GET)
     public List<Vault> searchAllVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
                                        @RequestParam String query,
-                                       @RequestParam(value = "sort", required = false) String sort) throws Exception {
+                                       @RequestParam(value = "sort", required = false) String sort,
+                                       @RequestParam(value = "order", required = false)
+                                       @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order) throws Exception {
 
-        return vaultsService.search(query, sort);
+        return vaultsService.search(query, sort, order);
     }
 
     @RequestMapping(value = "/vaults/deposits/search", method = RequestMethod.GET)

@@ -23,13 +23,13 @@
 
                 <thead>
                     <tr class="tr">
-                        <th><a href="?sort=id&query=${query?url}">ID</a></th>
-                        <th><a href="?sort=name&query=${query?url}">Name</a></th>
-                        <th><a href="?sort=description&query=${query?url}">Description</a></th>
-                        <th><a href="?sort=user&query=${query?url}">Owner</a></th>
-                        <th><a href="?sort=vaultSize&query=${query?url}">Size</a></th>
-                        <th><a href="?sort=policy&query=${query?url}">Policy</a></th>
-                        <th><a href="?sort=creationTime&query=${query?url}">Timestamp</a></th>
+                        <th><a href="?sort=id&order=${orderid}&query=${query?url}">ID<#if sort == "id"><#if orderid == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
+                        <th><a href="?sort=name&order=${ordername}&query=${query?url}">Name<#if sort == "name"><#if ordername == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
+                        <th><a href="?sort=description&order=${orderdescription}&query=${query?url}">Description<#if sort == "description"><#if orderdescription == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
+                        <th><a href="?sort=user&order=${orderuser}&query=${query?url}">Owner<#if sort == "user"><#if orderuser == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
+                        <th><a href="?sort=vaultSize&order=${ordervaultsize}&query=${query?url}">Size<#if sort == "vaultSize"><#if ordervaultsize == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
+                        <th><a href="?sort=policy&order=${orderpolicy}&query=${query?url}">Policy<#if sort == "policy"><#if orderpolicy == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
+                        <th><a href="?sort=creationTime&order=${ordercreationtime}&query=${query?url}">Timestamp<#if sort == "creationTime"><#if ordercreationtime == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                     </tr>
                 </thead>
 
