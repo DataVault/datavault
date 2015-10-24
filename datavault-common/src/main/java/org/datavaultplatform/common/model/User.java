@@ -20,7 +20,7 @@ public class User {
     @Column(name = "id", unique = true)
     private String id;
     
-    // Name of the policy
+    // Name of the user
     @Column(name = "name", nullable = false)
     private String name;
     

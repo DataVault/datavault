@@ -13,6 +13,7 @@
                 <tr class="tr">
                     <th>Description</th>
                     <th>Policy</th>
+                    <th>Group</th>
                     <th>Size</th>
                     <th>Timestamp</th>
                 </tr>
@@ -20,7 +21,8 @@
             <tbody>
                 <tr class="tr">
                     <td>${vault.description?html}</td>
-                    <td>${policy.name}</td>
+                    <td>${policy.name?html}</td>
+                    <td>${group.name?html}</td>
                     <td>${vault.getSizeStr()}</td>
                     <td>${vault.creationTime?datetime}</td>
                 </tr>
