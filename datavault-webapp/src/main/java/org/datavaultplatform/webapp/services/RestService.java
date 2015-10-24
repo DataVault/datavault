@@ -23,7 +23,7 @@ public class RestService {
     }
     
     private HttpEntity<?> exchange(String url, Class clazz, HttpMethod method, Object payload) {
-        System.out.println("URL: " + url);
+
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
