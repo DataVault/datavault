@@ -52,27 +52,12 @@ public class VaultDAOImpl implements VaultDAO {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Vault> list(String sort) {
+    public List<Vault> list(String sort, String order) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Vault.class);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
-        // See if there is a valid sort option
-        if ("id".equals(sort)) {
-            criteria.addOrder(Order.asc("id"));
-        } else if ("name".equals(sort)) {
-            criteria.addOrder(Order.asc("name"));
-        } else if ("description".equals(sort)) {
-            criteria.addOrder(Order.asc("description"));
-        } else if ("vaultSize".equals(sort)) {
-            criteria.addOrder(Order.asc("vaultSize"));
-        } else if ("user".equals(sort)) {
-            criteria.addOrder(Order.asc("user"));
-        } else if ("policy".equals(sort)) {
-            criteria.addOrder(Order.asc("policy"));
-        } else {
-            criteria.addOrder(Order.asc("creationTime"));
-        }
+        order(sort, order, criteria);
 
         List<Vault> vaults = criteria.list();
         session.close();
@@ -90,28 +75,13 @@ public class VaultDAOImpl implements VaultDAO {
     }
 
     @Override
-    public List<Vault> search(String query, String sort) {
+    public List<Vault> search(String query, String sort, String order) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Vault.class);
         criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
-        // See if there is a valid sort option
-        if ("id".equals(sort)) {
-            criteria.addOrder(Order.asc("id"));
-        } else if ("name".equals(sort)) {
-            criteria.addOrder(Order.asc("name"));
-        } else if ("description".equals(sort)) {
-            criteria.addOrder(Order.asc("description"));
-        } else if ("vaultSize".equals(sort)) {
-            criteria.addOrder(Order.asc("vaultSize"));
-        } else if ("user".equals(sort)) {
-            criteria.addOrder(Order.asc("user"));
-        } else if ("policy".equals(sort)) {
-            criteria.addOrder(Order.asc("policy"));
-        } else {
-            criteria.addOrder(Order.asc("creationTime"));
-        }
+        order(sort, order, criteria);
 
         List<Vault> vaults = criteria.list();
         session.close();
@@ -122,5 +92,58 @@ public class VaultDAOImpl implements VaultDAO {
     public int count() {
         Session session = this.sessionFactory.openSession();
         return (int)(long)(Long)session.createCriteria(Vault.class).setProjection(Projections.rowCount()).uniqueResult();
+    }
+
+    private void order(String sort, String order, Criteria criteria) {
+        // Default to ascending order
+        boolean asc = false;
+        if (!"dec".equals(order)) {
+            asc = true;
+        }
+
+        // See if there is a valid sort option
+        if ("id".equals(sort)) {
+            if (asc) {
+                criteria.addOrder(Order.asc("id"));
+            } else {
+                criteria.addOrder(Order.desc("id"));
+            }
+        } else if ("name".equals(sort)) {
+            if (asc) {
+                criteria.addOrder(Order.asc("name"));
+            } else {
+                criteria.addOrder(Order.desc("name"));
+            }
+        } else if ("description".equals(sort)) {
+            if (asc) {
+                criteria.addOrder(Order.asc("description"));
+            } else {
+                criteria.addOrder(Order.desc("description"));
+            }
+        } else if ("vaultSize".equals(sort)) {
+            if (asc) {
+                criteria.addOrder(Order.asc("description"));
+            } else {
+                criteria.addOrder(Order.desc("description"));
+            }
+        } else if ("user".equals(sort)) {
+            if (asc) {
+                criteria.addOrder(Order.asc("description"));
+            } else {
+                criteria.addOrder(Order.desc("description"));
+            }
+        } else if ("policy".equals(sort)) {
+            if (asc) {
+                criteria.addOrder(Order.asc("policy"));
+            } else {
+                criteria.addOrder(Order.desc("policy"));
+            }
+        } else {
+            if (asc) {
+                criteria.addOrder(Order.asc("creationTime"));
+            } else {
+                criteria.addOrder(Order.desc("creationTime"));
+            }
+        }
     }
 }

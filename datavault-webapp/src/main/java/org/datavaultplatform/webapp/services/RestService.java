@@ -86,8 +86,8 @@ public class RestService {
         return (Vault[])response.getBody();
     }
 
-    public Vault[] getVaultsListingAll(String sort) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/all?sort=" + sort, Vault[].class);
+    public Vault[] getVaultsListingAll(String sort, String order) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/all?sort=" + sort + "&order=" + order, Vault[].class);
         return (Vault[])response.getBody();
     }
 
@@ -96,8 +96,8 @@ public class RestService {
         return (Vault[])response.getBody();
     }
 
-    public Vault[] searchVaults(String query, String sort) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query + "&sort=" + sort, Vault[].class);
+    public Vault[] searchVaults(String query, String sort, String order) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query + "&sort=" + sort + "&order=" + order, Vault[].class);
         return (Vault[])response.getBody();
     }
 

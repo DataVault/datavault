@@ -11,11 +11,11 @@ public interface VaultDAO {
 
     public List<Vault> list();
 
-    public List<Vault> list(String sort);
+    public List<Vault> list(String sort, String order);
 
     public Vault findById(String Id);
 
-    public List<Vault> search(String query, String sort);
+    public List<Vault> search(String query, String sort, String order);
 
     public int count();
 }

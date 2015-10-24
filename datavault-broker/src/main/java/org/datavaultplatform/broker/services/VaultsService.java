@@ -12,7 +12,7 @@ public class VaultsService {
 
     public List<Vault> getVaults() { return vaultDAO.list(); }
 
-    public List<Vault> getVaults(String sort) { return vaultDAO.list(sort); }
+    public List<Vault> getVaults(String sort, String order) { return vaultDAO.list(sort, order); }
 
     public void addVault(Vault vault) {
         Date d = new Date();
@@ -32,7 +32,7 @@ public class VaultsService {
         this.vaultDAO = vaultDAO;
     }
 
-    public List<Vault> search(String query, String sort) { return this.vaultDAO.search(query, sort); }
+    public List<Vault> search(String query, String sort, String order) { return this.vaultDAO.search(query, sort, order); }
 
     public int count() { return vaultDAO.count(); }
 }
