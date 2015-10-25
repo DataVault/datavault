@@ -3,13 +3,7 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -23,13 +17,13 @@ public class User {
     // Name of the user
     @Column(name = "name", nullable = false)
     private String name;
-    
+
     // A user is related to a number of vaults
     @JsonIgnore
     @OneToMany(targetEntity=Vault.class, mappedBy="user", fetch=FetchType.LAZY)
     @OrderBy("creationTime")
     private List<Vault> vaults;
-    
+
     // A user is related to a number of file storage systems
     @JsonIgnore
     @OneToMany(targetEntity=FileStore.class, mappedBy="user", fetch=FetchType.LAZY)

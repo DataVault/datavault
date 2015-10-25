@@ -15,6 +15,7 @@
                     <tr class="tr">
                         <th>ID</th>
                         <th>Name</th>
+                        <th>Owners</th>
                     </tr>
                 </thead>
 
@@ -23,6 +24,13 @@
                         <tr class="tr">
                             <td>${group.ID?html}</td>
                             <td>${group.name?html}</td>
+                            <td>
+                                <ul class="list-group">
+                                    <#list group.getOwners() as user>
+                                        <li class="list-group-item"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> ${user.name?html} (${user.ID?html})</li>
+                                   </#list>
+                                </ul>
+                            </td>
                         </tr>
                     </#list>
                 </tbody>
