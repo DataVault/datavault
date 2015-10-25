@@ -1,6 +1,7 @@
 package org.datavaultplatform.common.model.dao;
 
 import org.datavaultplatform.common.model.Group;
+import org.datavaultplatform.common.model.Vault;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -60,5 +61,11 @@ public class GroupDAOImpl implements GroupDAO {
     public int count() {
         Session session = this.sessionFactory.openSession();
         return (int)(long)(Long)session.createCriteria(Group.class).setProjection(Projections.rowCount()).uniqueResult();
+    }
+
+    @Override
+    public int countVaultsById(String Id) {
+        Session session = this.sessionFactory.openSession();
+        return (int)(long)(Long)session.createCriteria(Vault.class).add(Restrictions.eq("groupID", Id)).setProjection(Projections.rowCount()).uniqueResult();
     }
 }

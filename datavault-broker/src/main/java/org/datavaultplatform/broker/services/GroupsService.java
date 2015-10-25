@@ -30,5 +30,9 @@ public class GroupsService {
     }
 
     public int count() { return groupDAO.count(); }
+
+    public int vaultCount(String groupId) {
+        return groupDAO.countVaultsById(groupId);
+    }
 }
 

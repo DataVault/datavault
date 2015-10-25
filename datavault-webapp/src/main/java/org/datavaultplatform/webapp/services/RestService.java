@@ -241,6 +241,11 @@ public class RestService {
         return (Integer)response.getBody();
     }
 
+    public int getGroupVaultCount(String vaultid) {
+        HttpEntity<?> response = get(brokerURL + "/groups/" + vaultid + "/count", Integer.class);
+        return (Integer)response.getBody();
+    }
+
     /* POST requests */
     
     public Vault addVault(Vault vault) {
