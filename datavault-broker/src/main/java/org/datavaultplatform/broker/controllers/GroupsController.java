@@ -61,7 +61,23 @@ public class GroupsController {
     })
     @RequestMapping(value = "/groups/{groupid}", method = RequestMethod.GET)
     public Group getGroup(@RequestHeader(value = "X-UserID", required = true) String userID,
-                         @PathVariable("groupid") @ApiPathParam(name = "Group ID", description = "The Group ID to retrieve") String queryGroupID) {
+                          @PathVariable("groupid") @ApiPathParam(name = "Group ID", description = "The Group ID to retrieve") String queryGroupID) {
         return groupsService.getGroup(queryGroupID);
+    }
+
+    @ApiMethod(
+            path = "/groups/{groupid}/count",
+            verb = ApiVerb.GET,
+            description = "Get the number of Vaults owned by a Group",
+            produces = { MediaType.TEXT_PLAIN_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
+    @RequestMapping(value = "/groups/{groupid}/count", method = RequestMethod.GET)
+    public int getGroupVaultCount(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                  @PathVariable("groupid") @ApiPathParam(name = "Group ID", description = "The Group ID to retrieve") String queryGroupID) {
+        return groupsService.vaultCount(queryGroupID);
     }
 }

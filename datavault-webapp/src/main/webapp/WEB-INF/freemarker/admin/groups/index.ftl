@@ -15,15 +15,18 @@
                     <tr class="tr">
                         <th>ID</th>
                         <th>Name</th>
+                        <th>Vaults</th>
                         <th>Owners</th>
                     </tr>
                 </thead>
 
                 <tbody>
+                    <#assign counter = 0 >
                     <#list groups as group>
                         <tr class="tr">
                             <td>${group.ID?html}</td>
                             <td>${group.name?html}</td>
+                            <td><span class="badge">${vaultCounts[counter]}<#assign counter = counter + 1></span></td>
                             <td>
                                 <ul class="list-group">
                                     <#list group.getOwners() as user>

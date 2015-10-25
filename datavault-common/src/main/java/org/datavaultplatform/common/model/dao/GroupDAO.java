@@ -14,5 +14,7 @@ public interface GroupDAO {
 
     public Group findById(String Id);
 
+    public int countVaultsById(String Id);
+
     public int count();
 }
