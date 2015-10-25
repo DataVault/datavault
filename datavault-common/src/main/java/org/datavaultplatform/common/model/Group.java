@@ -19,6 +19,17 @@ public class Group {
     @Column(name = "name", nullable = false)
     private String name;
 
+    // A group may be related to a number of users
+    @ManyToMany(cascade=CascadeType.ALL)
+    @JoinTable(name="GroupOwners", joinColumns=@JoinColumn(name="group_id"), inverseJoinColumns=@JoinColumn(name="user_id"))
+    private List<User> owners;
+
+    // A group is related to a number of vaults
+    @JsonIgnore
+    @OneToMany(targetEntity=Vault.class, mappedBy="group", fetch=FetchType.LAZY)
+    @OrderBy("creationTime")
+    private List<Vault> vaults;
+
     public Group() {}
     public Group(String id) {
         this.id = id;
@@ -31,6 +42,10 @@ public class Group {
     public String getName() { return name; }
 
     public String getID() { return id; }
+
+    public List<User> getOwners() {
+        return owners;
+    }
 
     @Override
     public boolean equals(Object other) {
