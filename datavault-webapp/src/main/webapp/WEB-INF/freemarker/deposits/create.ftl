@@ -20,20 +20,18 @@
                    value="${spring.status.value!""}"/>
         </div>
 
-        <div class="form-group" style="display:none;">
-            <label class="control-label">Filepath:</label>
-            <@spring.bind "deposit.filePath" />
-            <input type="text"
-                    class="form-control file-path"
-                    name="${spring.status.expression}"
-                    value="${spring.status.value!""}"/>
-        </div>
-
         <div class="form-group">
             <label class="control-label">Deposit file or directory:</label>
+            <@spring.bind "deposit.filePath" />
+            <input type="text"
+                   style="display:none;"
+                   class="form-control file-path"
+                   name="${spring.status.expression}"
+                   value="${spring.status.value!""}"/>
             <div id="tree" class="fancytree-radio tree-box"></div>
+            <label id="deposit-size" class="text-muted small">No files selected</label>
         </div>
-
+        
         <script>
             // Create the tree inside the <div id="tree"> element.
             $("#tree").fancytree({
@@ -54,10 +52,26 @@
                 selectMode: 1,
                 select: function(event, data) {
                     var nodes = data.tree.getSelectedNodes();
-                    $(".file-path").val("");
-                    nodes.forEach(function(node) {
-                        $(".file-path").val(node.key);
-                    });
+
+                    if (nodes.length == 0) {
+                        $(".file-path").val("");
+                        $("#deposit-size").text("No files selected");
+                    } else {
+                        $("#deposit-size").text("Deposit size: calculating ...");
+                        nodes.forEach(function(node) {
+                            $(".file-path").val(node.key);
+                            $.ajax({
+                                url: "${springMacroRequestContext.getContextPath()}/filesize",
+                                type: "GET",
+                                data: {filepath: node.key},
+                                dataType: 'text',
+                                success: function (result) {
+                                    console.log(result)
+                                    $("#deposit-size").text("Deposit size: " + result);
+                                }
+                            });
+                        });
+                    }
                 }
             });
         </script>
@@ -76,8 +90,12 @@
     $(document).ready(function () {
 
         $('#create-deposit').validate({
+            ignore: ".ignore",
             rules: {
                 note: {
+                    required: true
+                },
+                filePath: {
                     required: true
                 }
             },

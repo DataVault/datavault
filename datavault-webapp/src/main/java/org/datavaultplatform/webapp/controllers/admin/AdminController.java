@@ -29,6 +29,7 @@ public class AdminController {
     @RequestMapping(value = "/admin", method = RequestMethod.GET)
     public String adminIndex(ModelMap model) {
         model.addAttribute("usercount", restService.getUsersCount());
+        model.addAttribute("groupcount", restService.getGroupsCount());
         model.addAttribute("vaultcount", restService.getVaultsCount());
         model.addAttribute("depositcount", restService.getDepositsCount());
         model.addAttribute("restorecount", restService.getRestoresCount());

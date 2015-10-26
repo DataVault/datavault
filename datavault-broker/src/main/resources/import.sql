@@ -38,3 +38,14 @@ insert into Users (id, name) values ('USER27', 'Test user 27');
 insert into Users (id, name) values ('USER28', 'Test user 28');
 insert into Users (id, name) values ('USER29', 'Test user 29');
 insert into Users (id, name) values ('USER30', 'Test user 30');
+
+insert into Groups (id, name) values ('CHSS', 'Humanities and Social Science');
+insert into Groups (id, name) values ('CSE', 'Science and Engineering');
+insert into Groups (id, name) values ('CMVM', 'Medicine and Veterinary Medicine');
+
+insert into GroupOwners (group_id, user_id) values ('CHSS', 'USER1');
+insert into GroupOwners (group_id, user_id) values ('CSE', 'USER1');
+insert into GroupOwners (group_id, user_id) values ('CMVM', 'USER1');
+insert into GroupOwners (group_id, user_id) values ('CHSS', 'USER2');
+insert into GroupOwners (group_id, user_id) values ('CSE', 'USER3');
+insert into GroupOwners (group_id, user_id) values ('CMVM', 'USER4');

@@ -23,7 +23,7 @@ public class RestService {
     }
     
     private HttpEntity<?> exchange(String url, Class clazz, HttpMethod method, Object payload) {
-        
+
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
@@ -65,6 +65,16 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/files" + filePath, FileInfo[].class);
         return (FileInfo[])response.getBody();
     }
+    
+    public String getFilesize(String filePath) {
+        
+        if (!filePath.startsWith("/")) {
+            filePath = "/" + filePath;
+        }
+        
+        HttpEntity<?> response = get(brokerURL + "/filesize" + filePath, String.class);
+        return (String)response.getBody();
+    }
 
     public Vault[] getVaultsListing() {
         HttpEntity<?> response = get(brokerURL + "/vaults", Vault[].class);
@@ -76,8 +86,8 @@ public class RestService {
         return (Vault[])response.getBody();
     }
 
-    public Vault[] getVaultsListingAll(String sort) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/all?sort=" + sort, Vault[].class);
+    public Vault[] getVaultsListingAll(String sort, String order) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/all?sort=" + sort + "&order=" + order, Vault[].class);
         return (Vault[])response.getBody();
     }
 
@@ -86,8 +96,8 @@ public class RestService {
         return (Vault[])response.getBody();
     }
 
-    public Vault[] searchVaults(String query, String sort) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query + "&sort=" + sort, Vault[].class);
+    public Vault[] searchVaults(String query, String sort, String order) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query + "&sort=" + sort + "&order=" + order, Vault[].class);
         return (Vault[])response.getBody();
     }
 
@@ -213,6 +223,26 @@ public class RestService {
 
     public int getUsersCount() {
         HttpEntity<?> response = get(brokerURL + "/users/count", Integer.class);
+        return (Integer)response.getBody();
+    }
+
+    public Group getGroup(String groupId) {
+        HttpEntity<?> response = get(brokerURL + "/groups/" + groupId, Group.class);
+        return (Group)response.getBody();
+    }
+
+    public Group[] getGroups() {
+        HttpEntity<?> response = get(brokerURL + "/groups", Group[].class);
+        return (Group[])response.getBody();
+    }
+
+    public int getGroupsCount() {
+        HttpEntity<?> response = get(brokerURL + "/groups/count", Integer.class);
+        return (Integer)response.getBody();
+    }
+
+    public int getGroupVaultCount(String vaultid) {
+        HttpEntity<?> response = get(brokerURL + "/groups/" + vaultid + "/count", Integer.class);
         return (Integer)response.getBody();
     }
 

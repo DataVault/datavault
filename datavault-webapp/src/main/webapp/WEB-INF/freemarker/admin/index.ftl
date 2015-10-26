@@ -1,6 +1,10 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
+<#import "*/layout/adminlayout.ftl" as layout>
 <@layout.vaultLayout>
 <div class="container">
+
+    <ol class="breadcrumb">
+        <li class="active"><b>Administration</b></li>
+    </ol>
 
     <div class="row">
         <div class="col-xs-6 col-md-4">
@@ -80,6 +84,14 @@
             </div>
         </div>
         <div class="col-xs-6 col-md-4">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Groups</h3>
+                </div>
+                <div class="panel-body">
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/groups"><span class="glyphicon glyphicon-eye-open"></span> ${groupcount}</a></h1>
+                </div>
+            </div>
         </div>
         <div class="col-xs-6 col-md-4">
         </div>

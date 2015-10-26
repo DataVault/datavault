@@ -85,9 +85,13 @@
     <bean id="policiesController" class="org.datavaultplatform.broker.controllers.PoliciesController">
         <property name="policiesService" ref="policiesService" />
     </bean>
-    
+
     <bean id="usersController" class="org.datavaultplatform.broker.controllers.UsersController">
         <property name="usersService" ref="usersService" />
+    </bean>
+
+    <bean id="groupsController" class="org.datavaultplatform.broker.controllers.GroupsController">
+        <property name="groupsService" ref="groupsService" />
     </bean>
 
     <bean id="fileStoreController" class="org.datavaultplatform.broker.controllers.FileStoreController">
@@ -127,11 +131,15 @@
     <bean id="policiesService" class="org.datavaultplatform.broker.services.PoliciesService">
         <property name="policyDAO" ref="policyDAO" />
     </bean>
-    
+
     <bean id="usersService" class="org.datavaultplatform.broker.services.UsersService">
         <property name="userDAO" ref="userDAO" />
     </bean>
-    
+
+    <bean id="groupsService" class="org.datavaultplatform.broker.services.GroupsService">
+        <property name="groupDAO" ref="groupDAO" />
+    </bean>
+
     <bean id="fileStoreService" class="org.datavaultplatform.broker.services.FileStoreService">
         <property name="fileStoreDAO" ref="fileStoreDAO" />
     </bean>
@@ -245,11 +253,15 @@
     <bean id="policyDAO" class="org.datavaultplatform.common.model.dao.PolicyDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
-    
+
     <bean id="userDAO" class="org.datavaultplatform.common.model.dao.UserDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
-    
+
+    <bean id="groupDAO" class="org.datavaultplatform.common.model.dao.GroupDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
     <bean id="fileStoreDAO" class="org.datavaultplatform.common.model.dao.FileStoreDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>

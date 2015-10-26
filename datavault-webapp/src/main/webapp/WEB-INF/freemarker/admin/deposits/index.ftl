@@ -1,8 +1,9 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
+<#import "*/layout/adminlayout.ftl" as layout>
 <@layout.vaultLayout>
 <div class="container">
 
     <ol class="breadcrumb">
+        <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
         <li class="active"><b>Deposits</b></li>
     </ol>
 

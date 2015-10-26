@@ -37,6 +37,19 @@ public class FilesService {
         }
     }
     
+    public Long getFilesize(String filePath, FileStore fileStore) {
+        try {
+            if (connect(fileStore)) {
+                return userStore.getSize(filePath);
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     public boolean validPath(String filePath, FileStore fileStore) {
         connect(fileStore);
         return userStore.valid(filePath);
