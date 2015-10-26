@@ -25,11 +25,16 @@ import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import com.jcraft.jsch.SftpProgressMonitor;
 import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import org.datavaultplatform.common.io.Progress;
 
 public class Utility {
 
+    private static final int DEFAULT_DIR_MODE = 0755;
+    
     public static long calculateSize(final ChannelSftp channel,
                                      String remoteFile) throws IOException, SftpException {
         
@@ -165,5 +170,57 @@ public class Utility {
                                                          * 1000);
         }
         */
+    }
+    
+    public static void sendDirectory(final ChannelSftp channel,
+                                     final Path current,
+                                     SFTPMonitor monitor)
+        throws IOException, SftpException {
+        
+        DirectoryStream<Path> stream = Files.newDirectoryStream(current);
+        
+        for (Path entry : stream) {
+            
+            File entryFile = entry.toFile();
+            
+            if (entryFile.isDirectory()) {
+                sendDirectoryToRemote(channel, entry, monitor);
+            } else {
+                sendFileToRemote(channel, entryFile, null, monitor);
+            }
+        }
+    }
+
+    private static void sendDirectoryToRemote(final ChannelSftp channel,
+                                              final Path directory,
+                                              SFTPMonitor monitor)
+        throws IOException, SftpException {
+        final String dir = directory.toFile().getName();
+        try {
+            channel.stat(dir);
+        } catch (final SftpException e) {
+            // dir does not exist.
+            if (e.id == ChannelSftp.SSH_FX_NO_SUCH_FILE) {
+                channel.mkdir(dir);
+                channel.chmod(DEFAULT_DIR_MODE, dir);
+            }
+        }
+        channel.cd(dir);
+        sendDirectory(channel, directory, monitor);
+        channel.cd("..");
+    }
+
+    private static void sendFileToRemote(final ChannelSftp channel,
+                                         final File localFile,
+                                         String remotePath,
+                                         SFTPMonitor monitor)
+        throws IOException, SftpException {
+        
+        if (remotePath == null) {
+            remotePath = localFile.getName();
+        }
+
+        channel.put(localFile.getAbsolutePath(), remotePath, monitor);
+        channel.chmod(DEFAULT_DIR_MODE, remotePath);
     }
 }

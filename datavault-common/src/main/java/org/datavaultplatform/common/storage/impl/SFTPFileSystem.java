@@ -296,28 +296,22 @@ public class SFTPFileSystem extends Device implements UserStore {
             path = path.replaceFirst(PATH_SEPARATOR, "");
         }
         
-        // Append the archive file name (e.g. tar file)
-        path = path + PATH_SEPARATOR + working.getName();
-        
         try {
             Connect();
             
-            byte[] buffer = new byte[1024 * 1024];
-            FileInputStream fis = new FileInputStream(working);
-            BufferedInputStream bis = new BufferedInputStream(fis);
+            path = channelSftp.pwd() + "/" + path;
+            channelSftp.cd(path);
             
-            OutputStream os = channelSftp.put(path);
-            BufferedOutputStream bos = new BufferedOutputStream(os);
-            
-            int count;
-            while((count = bis.read(buffer)) > 0) {
-                bos.write(buffer, 0, count);
-                progress.byteCount += count;
-                progress.timestamp = System.currentTimeMillis();
+            if (working.isDirectory()) {
+                // Create top-level directory
+                String dirName = working.getName();
+                channelSftp.mkdir(dirName);
+                channelSftp.cd(dirName);
             }
             
-            bis.close();
-            bos.close();
+            monitor = new Utility.SFTPMonitor(progress);
+            
+            Utility.sendDirectory(channelSftp, working.toPath(), monitor);
             
         } catch (Exception e) {
             e.printStackTrace();
