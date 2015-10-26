@@ -22,6 +22,8 @@ import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.worker.operations.ProgressTracker;
+import org.datavaultplatform.worker.operations.Tar;
+import org.datavaultplatform.worker.operations.Packager;
 
 public class Restore extends Task {
     
@@ -48,8 +50,9 @@ public class Restore extends Task {
         ArrayList<String> states = new ArrayList<>();
         states.add("Computing free space");    // 0
         states.add("Retrieving from archive"); // 1
-        states.add("Transferring files");      // 2
-        states.add("Data restore complete");   // 3
+        states.add("Validating data");         // 2
+        states.add("Transferring files");      // 3
+        states.add("Data restore complete");   // 4
         eventStream.send(new InitStates(jobID, depositId, states));
         
         eventStream.send(new RestoreStart(jobID, depositId, restoreId).withNextState(0));
@@ -107,9 +110,10 @@ public class Restore extends Task {
 
             // Retrieve the archived data
             String tarFileName = bagID + ".tar";
-                        
+            
             // Copy the tar file from the archive to the temporary area
-            Path tarPath = Paths.get(context.getTempDir()).resolve(tarFileName);
+            Path tempPath = Paths.get(context.getTempDir());
+            Path tarPath = tempPath.resolve(tarFileName);
             File tarFile = tarPath.toFile();
             
             eventStream.send(new UpdateProgress(jobID, depositId, 0, archiveSize, "Starting transfer ...").withNextState(1));
@@ -131,9 +135,20 @@ public class Restore extends Task {
             
             System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
             
+            System.out.println("\tValidating data ...");
+            eventStream.send(new UpdateProgress(jobID, depositId).withNextState(2));
+            
+            // Decompress to the temporary directory
+            File bagDir = Tar.unTar(tarFile, tempPath);
+            
+            // Validate the bagit directory
+            if (!Packager.validateBag(bagDir)) {
+                throw new Exception("Bag is invalid");
+            }
+            
             // Copy the tar file to the target restore area
             System.out.println("\tCopying tar file from archive ...");
-            eventStream.send(new UpdateProgress(jobID, depositId, 0, archiveSize, "Starting transfer ...").withNextState(2));
+            eventStream.send(new UpdateProgress(jobID, depositId, 0, archiveSize, "Starting transfer ...").withNextState(3));
             
             // Progress tracking (threaded)
             progress = new Progress();
@@ -156,10 +171,11 @@ public class Restore extends Task {
             
             // Cleanup
             System.out.println("\tCleaning up ...");
+            FileUtils.deleteDirectory(bagDir);
             tarFile.delete();
             
             System.out.println("\tData restore complete: " + restorePath);
-            eventStream.send(new RestoreComplete(jobID, depositId, restoreId).withNextState(3));
+            eventStream.send(new RestoreComplete(jobID, depositId, restoreId).withNextState(4));
             
         } catch (Exception e) {
             e.printStackTrace();
