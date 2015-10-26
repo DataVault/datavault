@@ -140,27 +140,30 @@ public class Restore extends Task {
             
             // Decompress to the temporary directory
             File bagDir = Tar.unTar(tarFile, tempPath);
+            long bagDirSize = FileUtils.sizeOfDirectory(bagDir);
             
             // Validate the bagit directory
             if (!Packager.validateBag(bagDir)) {
                 throw new Exception("Bag is invalid");
             }
             
-            // Copy the tar file to the target restore area
-            System.out.println("\tCopying tar file from archive ...");
-            eventStream.send(new UpdateProgress(jobID, depositId, 0, archiveSize, "Starting transfer ...").withNextState(3));
+            // Get the payload data directory
+            // File payloadDir = bagDir.toPath().resolve("data").toFile();
+            // long payloadSize = FileUtils.sizeOfDirectory(payloadDir);
+            
+            // Copy the extracted files to the target restore area
+            System.out.println("\tCopying to user directory ...");
+            eventStream.send(new UpdateProgress(jobID, depositId, 0, bagDirSize, "Starting transfer ...").withNextState(3));
             
             // Progress tracking (threaded)
             progress = new Progress();
-            tracker = new ProgressTracker(progress, jobID, depositId, archiveSize, eventStream);
+            tracker = new ProgressTracker(progress, jobID, depositId, bagDirSize, eventStream);
             trackerThread = new Thread(tracker);
             trackerThread.start();
             
             try {
                 // Ask the driver to copy files to the user directory
-                // TODO this is a direct copy that doesn't use the temp directory.
-                // Need to instantiate the archive store and call retrieve()
-                userFs.store(restorePath, tarFile, progress);
+                userFs.store(restorePath, bagDir, progress);
             } finally {
                 // Stop the tracking thread
                 tracker.stop();
