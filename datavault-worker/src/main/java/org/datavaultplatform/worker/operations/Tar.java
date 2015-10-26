@@ -1,10 +1,13 @@
 package org.datavaultplatform.worker.operations;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.nio.file.Path;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 
@@ -45,5 +48,40 @@ public class Tar {
                 }
             }
         }
+    }
+    
+    // Extract the contents of a TAR archive to a directory.
+    public static File unTar(File input, Path outputDir) throws Exception {
+
+        FileInputStream fis = new FileInputStream(input);
+        BufferedInputStream bis = new BufferedInputStream(fis);
+        TarArchiveInputStream tar = new TarArchiveInputStream(bis);
+        
+        File topDir = null;
+        
+        TarArchiveEntry entry;
+        while ((entry = tar.getNextTarEntry()) != null) {
+            
+            Path path = outputDir.resolve(entry.getName());
+            File entryFile = path.toFile();
+            
+            if (entry.isDirectory()) {
+                // Create a directory
+                entryFile.mkdir();
+                
+                if (topDir == null) {
+                    topDir = entryFile;
+                }
+            } else {
+                // Extract a single file
+                FileOutputStream fos = new FileOutputStream(entryFile);
+                IOUtils.copyLarge(tar, fos, 0, entry.getSize());
+                fos.close();
+            }
+        }
+        
+        tar.close();
+        
+        return topDir;
     }
 }

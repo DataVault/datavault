@@ -36,6 +36,22 @@ public class Packager {
         return result;
     }
     
+    // Validate an existing bag
+    public static boolean validateBag(File dir) throws Exception {
+
+        BagFactory bagFactory = new BagFactory();
+        Bag bag = bagFactory.createBag(dir);
+        
+        boolean result = false;
+        try {
+            result = bag.verifyValid().isSuccess();
+        } finally {
+            bag.close();
+        }
+        
+        return result;
+    }
+    
     // Add vault/deposit metadata
     public static boolean addMetadata(File bagDir, String depositMetadata, String vaultMetadata) {
         
