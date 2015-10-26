@@ -7,12 +7,7 @@ import org.datavaultplatform.broker.services.UsersService;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Api(name="Users", description = "Interact with DataVault Users")
@@ -68,5 +63,22 @@ public class UsersController {
     public User getUser(@RequestHeader(value = "X-UserID", required = true) String userID,
                         @PathVariable("userid") @ApiPathParam(name = "User ID", description = "The User ID to retrieve") String queryUserID) {
         return usersService.getUser(queryUserID);
+    }
+
+    @ApiMethod(
+            path = "/users}",
+            verb = ApiVerb.POST,
+            description = "Create a new DataVault User",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
+    @RequestMapping(value = "/users", method = RequestMethod.POST)
+    public User addUser(@RequestHeader(value = "X-UserID", required = true) String userID,
+                          @RequestBody User user) throws Exception {
+        usersService.addUser(user);
+        return user;
     }
 }
