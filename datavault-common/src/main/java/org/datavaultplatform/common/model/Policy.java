@@ -28,7 +28,7 @@ public class Policy {
     @Column(name = "sort", nullable = false)
     private int sort;
 
-    // A policy is related to a number of deposits
+    // A policy is related to a number of vaults
     @JsonIgnore
     @OneToMany(targetEntity=Vault.class, mappedBy="policy", fetch=FetchType.LAZY)
     @OrderBy("creationTime")

@@ -26,22 +26,41 @@ public class AdminVaultsController {
     @RequestMapping(value = "/admin/vaults", method = RequestMethod.GET)
     public String searchVaults(ModelMap model,
                                @RequestParam(value = "query", required = false) String query,
-                               @RequestParam(value = "sort", required = false) String sort) {
+                               @RequestParam(value = "sort", required = false) String sort,
+                               @RequestParam(value = "order", required = false) String order) {
+        String theSort = sort;
+        String theOrder = order;
+        if (sort == null) theSort = "creationTime";
+        if (order == null) theOrder = "asc";
+
         if ((query == null) || ("".equals(query))) {
-            if ((sort == null) || ("".equals(sort))) {
-                model.addAttribute("vaults", restService.getVaultsListingAll());
-            } else {
-                model.addAttribute("vaults", restService.getVaultsListingAll(sort));
-            }
+            model.addAttribute("vaults", restService.getVaultsListingAll(theSort, theOrder));
             model.addAttribute("query", "");
         } else {
-            if ((sort == null) || ("".equals(sort))) {
-                model.addAttribute("vaults", restService.searchVaults(query));
-            } else {
-                model.addAttribute("vaults", restService.searchVaults(query, sort));
-            }
+            model.addAttribute("vaults", restService.searchVaults(query, theSort, theOrder));
             model.addAttribute("query", query);
         }
+
+        // Pass the sort and order
+        if (sort == null) sort = "";
+        model.addAttribute("sort", sort);
+        model.addAttribute("orderid", "asc");
+        model.addAttribute("ordername", "asc");
+        model.addAttribute("orderdescription", "asc");
+        model.addAttribute("orderuser", "asc");
+        model.addAttribute("ordervaultsize", "asc");
+        model.addAttribute("orderpolicy", "asc");
+        model.addAttribute("ordercreationtime", "asc");
+        if ("asc".equals(order)) {
+            if ("id".equals(sort)) model.addAttribute("orderid", "dec");
+            if ("name".equals(sort)) model.addAttribute("ordername", "dec");
+            if ("description".equals(sort)) model.addAttribute("orderdescription", "dec");
+            if ("user".equals(sort)) model.addAttribute("orderuser", "dec");
+            if ("vaultSize".equals(sort)) model.addAttribute("ordervaultsize", "dec");
+            if ("policy".equals(sort)) model.addAttribute("orderpolicy", "dec");
+            if ("creationTime".equals(sort)) model.addAttribute("ordercreationtime", "dec");
+        }
+
         return "admin/vaults/index";
     }
 }

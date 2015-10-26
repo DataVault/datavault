@@ -37,6 +37,15 @@
             </select>
         </div>
 
+        <div class="form-group">
+            <label class="control-label">Group:</label>
+            <select id="groupID" name="groupID" class='group-select'>
+                <#list groups as group>
+                    <option value="${group.getID()}">${group.name?html}</option>
+                </#list>
+            </select>
+        </div>
+
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
         <div class="form-group">
@@ -70,6 +79,7 @@
         });
 
         $('.policy-select').selectpicker();
+        $('.group-select').selectpicker();
     });
 </script>
 
