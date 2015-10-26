@@ -232,4 +232,9 @@ public class RestService {
         HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/restore", Boolean.class, restore);
         return (Boolean)response.getBody();
     }
+
+    public User addUser(User user) {
+        HttpEntity<?> response = post(brokerURL + "/users/", User.class, user);
+        return (User)response.getBody();
+    }
 }
