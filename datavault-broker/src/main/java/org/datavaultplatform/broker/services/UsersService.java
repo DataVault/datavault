@@ -30,5 +30,9 @@ public class UsersService {
     }
 
     public int count() { return userDAO.count(); }
+
+    public void addUser(User user) {
+        userDAO.save(user);
+    }
 }
 
