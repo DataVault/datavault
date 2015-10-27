@@ -72,7 +72,7 @@ public class Group {
 
     public boolean hasMember(String userID) {
         for (User user : owners) {
-            if (user.getID().equals(userID)) return true;
+            if (user.getId().equals(userID)) return true;
         }
         return false;
     }
