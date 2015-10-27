@@ -75,6 +75,20 @@ public class VaultDAOImpl implements VaultDAO {
     }
 
     @Override
+    public List<Vault> findByGroup(String groupId) {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Vault.class);
+        criteria.add(Restrictions.eq("groupID", groupId));
+        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+
+        //order("", "", criteria);
+
+        List<Vault> vaults = criteria.list();
+        session.close();
+        return vaults;
+    }
+
+    @Override
     public List<Vault> search(String query, String sort, String order) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Vault.class);
