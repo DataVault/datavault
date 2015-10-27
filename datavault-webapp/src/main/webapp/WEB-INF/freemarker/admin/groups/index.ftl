@@ -30,7 +30,7 @@
                             <td>
                                 <ul class="list-group">
                                     <#list group.getOwners() as user>
-                                        <li class="list-group-item"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> ${user.name?html} (${user.ID?html})</li>
+                                        <li class="list-group-item"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> ${user.name?html} (${user.getID()?html})</li>
                                    </#list>
                                 </ul>
                             </td>

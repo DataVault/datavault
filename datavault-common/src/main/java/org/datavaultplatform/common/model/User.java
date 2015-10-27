@@ -34,11 +34,11 @@ public class User {
         this.name = name;
     }
 
-    public void setId(String id) {
+    public void setID(String id) {
         this.id = id;
     }
 
-    public String getId() { return id; }
+    public String getID() { return id; }
     
     public void setName(String name) {
         this.name = name;
@@ -65,7 +65,7 @@ public class User {
         
         final User user = (User)other;
         
-        if (!user.getId().equals(getId())) {
+        if (!user.getID().equals(getID())) {
             return false;
         }
         
@@ -74,6 +74,6 @@ public class User {
     
     @Override
     public int hashCode() {
-        return getId().hashCode();
+        return getID().hashCode();
     }
 }

@@ -33,11 +33,11 @@
                             <tbody>
                                 <#list vaults[counter] as vault>
                                     <tr class="tr">
-                                        <td>${vault.getID()}</td>
+                                        <td>${vault.getID()?html}</td>
                                         <td>${vault.name?html}</td>
                                         <td>${vault.description?html}</td>
-                                        <td>${vault.getUser().getId()?html}</td>
-                                        <td>${vault.getSizeStr()}</td>
+                                        <td>${vault.getUser().getID()?html}</td>
+                                        <td>${vault.getSizeStr()?html}</td>
                                         <td>${vault.policyID?html}</td>
                                         <td>${vault.getCreationTime()?datetime}</td>
                                     </tr>
