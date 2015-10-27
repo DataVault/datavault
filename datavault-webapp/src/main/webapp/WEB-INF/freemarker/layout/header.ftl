@@ -4,6 +4,7 @@
             <a class="nav-item active" href="${springMacroRequestContext.getContextPath()}">Home</a>
             <a class="nav-item" href="#">Help</a>
             <a class="nav-item" href="#">Feedback</a>
+            <a class="nav-item" href="${springMacroRequestContext.getContextPath()}/groups/">Groups</a>
             <a class="nav-item" href="${springMacroRequestContext.getContextPath()}/admin/">Administration</a>
             <a class="nav-item" href="${springMacroRequestContext.getContextPath()}/auth/logout">Logout</a>
         </nav>

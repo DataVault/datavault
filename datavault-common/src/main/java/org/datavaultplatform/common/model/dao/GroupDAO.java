@@ -9,7 +9,7 @@ public interface GroupDAO {
     public void save(Group group);
     
     public void update(Group group);
-    
+
     public List<Group> list();
 
     public Group findById(String Id);

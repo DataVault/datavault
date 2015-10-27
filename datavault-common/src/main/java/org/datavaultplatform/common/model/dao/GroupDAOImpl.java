@@ -46,12 +46,12 @@ public class GroupDAOImpl implements GroupDAO {
         session.close();
         return groups;
     }
-    
+
     @Override
     public Group findById(String Id) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Group.class);
-        criteria.add(Restrictions.eq("id",Id));
+        criteria.add(Restrictions.eq("id", Id));
         Group group = (Group)criteria.uniqueResult();
         session.close();
         return group;
