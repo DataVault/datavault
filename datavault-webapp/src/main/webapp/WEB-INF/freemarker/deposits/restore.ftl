@@ -23,17 +23,14 @@
                    value="${spring.status.value!""}"/>
         </div>
 
-        <div class="form-group" style="display:none;">
-            <label class="control-label">Filepath:</label>
-            <@spring.bind "restore.restorePath" />
-            <input type="text"
-                    class="form-control file-path"
-                    name="${spring.status.expression}"
-                    value="${spring.status.value!""}"/>
-        </div>
-
         <div class="form-group">
             <label class="control-label">Target directory:</label>
+            <@spring.bind "restore.restorePath" />
+            <input type="text"
+                   style="display:none;"
+                   class="form-control file-path"
+                   name="${spring.status.expression}"
+                   value="${spring.status.value!""}"/>
             <div id="tree" class="fancytree-radio tree-box"></div>
         </div>
 
@@ -80,8 +77,12 @@
     $(document).ready(function () {
 
         $('#restore-deposit').validate({
+            ignore: ".ignore",
             rules: {
                 note: {
+                    required: true
+                },
+                restorePath: {
                     required: true
                 }
             },
