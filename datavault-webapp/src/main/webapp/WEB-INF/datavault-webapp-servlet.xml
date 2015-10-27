@@ -91,6 +91,10 @@
         <property name="restService" ref="restService" />
     </bean>
 
+    <bean id="groupVaultsController" class="org.datavaultplatform.webapp.controllers.groups.GroupVaultsController">
+        <property name="restService" ref="restService" />
+    </bean>
+
     <!-- todo : should the service beans be put into their own config file? -->
 
     <bean id="restService" class="org.datavaultplatform.webapp.services.RestService">
