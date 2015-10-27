@@ -1,10 +1,14 @@
 package org.datavaultplatform.broker.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -24,12 +28,33 @@ public class MetadataService {
         this.metaDir = metaDir;
     }
     
+    private HashMap<String, String> getFileTypes(Path bag) {
+       
+        try {
+            HashMap<String, String> fileTypes;
+            File fileTypeMetaFile = bag.resolve("metadata").resolve("filetype.json").toFile();
+            ObjectMapper mapper = new ObjectMapper();
+            TypeReference<HashMap<String,String>> typeRef = new TypeReference<HashMap<String,String>>() {};
+            fileTypes = mapper.readValue(fileTypeMetaFile, typeRef);
+            
+            return fileTypes;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     public ArrayList<FileFixity> getManifest(String bagId) throws IOException {
         
         ArrayList<FileFixity> files = new ArrayList<>();
         
         try {
             Path metaBagPath = Paths.get(metaDir, bagId);
+            
+            // Get the file type metadata
+            HashMap<String, String> fileTypes = getFileTypes(metaBagPath);
+            
             BagFactory factory = new BagFactory();
             Bag bag = factory.createBag(metaBagPath.toFile());
             bag.loadFromFiles();
@@ -58,9 +83,15 @@ public class MetadataService {
                         filePath = filePath.replaceFirst(bagDataPrefix, "");
                     }
                     
+                    String fileType = "";
+                    if (fileTypes.containsKey(filePath)) {
+                        fileType = fileTypes.get(filePath);
+                    }
+                    
                     files.add(new FileFixity(filePath,
                                              file.getFixityValue(),
-                                             fixityAlgorithm));
+                                             fixityAlgorithm,
+                                             fileType));
                 }
                 reader.close();
             }

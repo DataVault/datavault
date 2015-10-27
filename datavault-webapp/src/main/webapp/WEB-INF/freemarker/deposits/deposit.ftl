@@ -58,6 +58,7 @@
                     <thead>
                     <tr class="tr">
                         <th>File</th>
+                        <th>Type</th>
                         <th>Checksum</th>
                     </tr>
                     </thead>
@@ -65,6 +66,7 @@
                         <#list manifest as filefixity>
                         <tr class="tr">
                             <td>${filefixity.file?html}</td>
+                            <td>${filefixity.fileType?html}</td>
                             <td style="font-family:monospace;">${filefixity.fixity}&nbsp<span class="label label-primary">${filefixity.algorithm}</span></td>
                         </tr>
                         </#list>
