@@ -13,6 +13,10 @@ import java.util.Map;
 
 import com.dropbox.core.*;
 import java.io.*;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 
 // Documentation:
@@ -157,15 +161,6 @@ public class DropboxFileSystem extends Device implements UserStore {
     
     private void getFile(Progress progress, String path, File localFile) throws Exception {
         
-        /*
-        FileOutputStream outputStream = new FileOutputStream(localFile);
-        try {
-            dbxClient.getFile(path, null, outputStream);
-        } finally {
-            outputStream.close();
-        }
-        */
-        
         FileOutputStream fos = new FileOutputStream(localFile);
         DbxClient.Downloader downloader = dbxClient.startGetFile(path, null);
         InputStream is = downloader.body;
@@ -184,6 +179,60 @@ public class DropboxFileSystem extends Device implements UserStore {
         } finally {
             fos.close();
             is.close();
+        }
+        
+        progress.fileCount += 1;
+    }
+    
+    public void put(Progress progress, String path, Path basePath, Path localPath) throws Exception {
+        
+        DirectoryStream<Path> stream = Files.newDirectoryStream(localPath);
+        
+        for (Path entry : stream) {
+            
+            File entryFile = entry.toFile();
+            
+            // Compute the remote path
+            String entryKey = (basePath.toUri().relativize(entry.toUri())).getPath();
+            String dropboxPath = path + entryKey;
+            
+            // The dropbox path can't end with a trailing '/'
+            if (dropboxPath.endsWith(PATH_SEPARATOR)) {
+                dropboxPath = dropboxPath.substring(0, dropboxPath.length()-1);
+            }
+            
+            if (entryFile.isDirectory()) {
+                dbxClient.createFolder(dropboxPath);
+                put(progress, path, basePath, entry);
+                progress.dirCount += 1;
+            } else {
+                putFile(progress, dropboxPath, entryFile);
+            }
+        }
+    }
+    
+    private void putFile(Progress progress, String path, File localFile) throws Exception {
+        
+        FileInputStream fis = new FileInputStream(localFile);
+        DbxClient.Uploader uploader = dbxClient.startUploadFile(path, DbxWriteMode.add(), localFile.length());
+        OutputStream os = uploader.getBody();
+        
+        try {
+            long size = localFile.length();
+            long pos = 0;
+            long count = 0;
+            while (pos < size) {
+                count = size - pos > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : size - pos;
+                long copied = IOUtils.copyLarge(fis, os, 0, count);
+                pos += copied;
+                progress.byteCount += copied;
+                progress.timestamp = System.currentTimeMillis();
+            }
+            
+            uploader.finish();
+            
+        } finally {
+            fis.close();
         }
         
         progress.fileCount += 1;
@@ -270,33 +319,14 @@ public class DropboxFileSystem extends Device implements UserStore {
             path = path + PATH_SEPARATOR;
         }
         
-        // Append the archive file name (e.g. tar file)
-        path = path + working.getName();
-        
-        // TODO: This is single-file only for now ...
-        
-        File inputFile = working;
-        FileInputStream fis = new FileInputStream(inputFile);
-        DbxClient.Uploader uploader = dbxClient.startUploadFile(path, DbxWriteMode.add(), working.length());
-        OutputStream os = uploader.getBody();
-        
-        try {
-            long size = working.length();
-            long pos = 0;
-            long count = 0;
-            while (pos < size) {
-                count = size - pos > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : size - pos;
-                long copied = IOUtils.copyLarge(fis, os, 0, count);
-                pos += copied;
-                progress.byteCount += copied;
-                progress.timestamp = System.currentTimeMillis();
-            }
-            
-            uploader.finish();
-            
-        } finally {
-            fis.close();
+        if (working.isDirectory()) {
+            // Create top-level directory
+            path += working.getName();
+            dbxClient.createFolder(path);
+            path += PATH_SEPARATOR;
         }
+        
+        put(progress, path, working.toPath(), working.toPath());
         
         return path;
     }
