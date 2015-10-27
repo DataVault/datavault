@@ -8,11 +8,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.commons.io.FileUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
-import org.datavaultplatform.worker.operations.Tar;
-import org.datavaultplatform.worker.operations.Packager;
-import org.datavaultplatform.worker.queue.EventSender;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.InitStates;
 import org.datavaultplatform.common.event.UpdateProgress;
@@ -21,12 +22,14 @@ import org.datavaultplatform.common.event.deposit.ComputedSize;
 import org.datavaultplatform.common.event.deposit.TransferComplete;
 import org.datavaultplatform.common.event.deposit.PackageComplete;
 import org.datavaultplatform.common.event.deposit.Complete;
-
-import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
+import org.datavaultplatform.worker.operations.Tar;
+import org.datavaultplatform.worker.operations.Packager;
 import org.datavaultplatform.worker.operations.ProgressTracker;
+import org.datavaultplatform.worker.operations.Identifier;
+import org.datavaultplatform.worker.queue.EventSender;
 
 public class Deposit extends Task {
 
@@ -140,8 +143,14 @@ public class Deposit extends Task {
                 System.out.println("\tCreating bag ...");
                 Packager.createBag(bagDir);
 
-                // Add vault/deposit metadata to the bag
-                Packager.addMetadata(bagDir, depositMetadata, vaultMetadata);
+                // Identify the deposit file types
+                Path bagDataPath = bagDir.toPath().resolve("data");
+                HashMap<String, String> fileTypes = Identifier.detectDirectory(bagDataPath);
+                ObjectMapper mapper = new ObjectMapper();
+                String fileTypeMetadata = mapper.writeValueAsString(fileTypes);
+                
+                // Add vault/deposit/type metadata to the bag
+                Packager.addMetadata(bagDir, depositMetadata, vaultMetadata, fileTypeMetadata);
                 
                 // Tar the bag directory
                 System.out.println("\tCreating tar file ...");
