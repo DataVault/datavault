@@ -21,7 +21,7 @@
                 <tbody>
                     <#list users as user>
                         <tr class="tr">
-                            <td>${user.id?html}</td>
+                            <td>${user.getID()?html}</td>
                             <td>${user.name?html}</td>
                         </tr>
                     </#list>
