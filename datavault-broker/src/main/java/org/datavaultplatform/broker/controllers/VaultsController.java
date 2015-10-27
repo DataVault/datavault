@@ -157,6 +157,23 @@ public class VaultsController {
         return vaultsService.getVaults(sort, order);
     }
 
+    @ApiMethod(
+            path = "/vaults/group/{groupid}",
+            verb = ApiVerb.GET,
+            description = "Gets a list of all Vaults owned by a given Group",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
+    @RequestMapping(value = "/vaults/group/{groupid}", method = RequestMethod.GET)
+    public List<Vault> getVaultsForGroup(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                         @PathVariable("groupid") String groupID) throws Exception {
+
+        return vaultsService.getVaultsForGroup(groupID);
+    }
+
     @RequestMapping(value = "/vaults/search", method = RequestMethod.GET)
     public List<Vault> searchAllVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
                                        @RequestParam String query,

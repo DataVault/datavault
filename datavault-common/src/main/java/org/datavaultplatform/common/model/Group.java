@@ -69,4 +69,11 @@ public class Group {
     public int hashCode() {
         return getID().hashCode();
     }
+
+    public boolean hasMember(String userID) {
+        for (User user : owners) {
+            if (user.getID().equals(userID)) return true;
+        }
+        return false;
+    }
 }

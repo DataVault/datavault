@@ -15,6 +15,8 @@ public interface VaultDAO {
 
     public Vault findById(String Id);
 
+    public List<Vault> findByGroup(String groupId);
+
     public List<Vault> search(String query, String sort, String order);
 
     public int count();
