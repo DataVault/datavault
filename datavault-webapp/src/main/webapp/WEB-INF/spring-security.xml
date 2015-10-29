@@ -61,6 +61,8 @@
                 <security:user name="USER28" password="password28" authorities="ROLE_USER" />
                 <security:user name="USER29" password="password29" authorities="ROLE_USER" />
                 <security:user name="USER30" password="password30" authorities="ROLE_USER" />
+                <!-- The following users are not preloaded into the database but can be added using the we app -->
+                <security:user name="USER40" password="password40" authorities="ROLE_USER" />
             </security:user-service>
         </security:authentication-provider>
 	</security:authentication-manager>

@@ -88,6 +88,8 @@
 
     <bean id="usersController" class="org.datavaultplatform.broker.controllers.UsersController">
         <property name="usersService" ref="usersService" />
+        <property name="fileStoreService" ref="fileStoreService" />
+        <property name="activeDir" value="${activeDir}" />
     </bean>
 
     <bean id="groupsController" class="org.datavaultplatform.broker.controllers.GroupsController">
