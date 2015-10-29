@@ -231,3 +231,54 @@ ol.progtrckr li.progtrckr-todo:before {
     border: none;
     border-radius: 1.2em;
 }
+
+/* Additional fancytree styling for the "Lion" theme */
+
+/* Bootrap-style border (matches form controls) */
+ul.fancytree-container {
+  font-size: inherit;
+  font-family: inherit;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+  -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+       -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+          transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+}
+
+/* Bootrap-style highlighting (matches form controls) */
+ul.fancytree-container:focus {
+  border-color: #66afe9;
+  outline: 0;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+          box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+}
+
+/* Hide dotted outline */
+span.fancytree-focused span.fancytree-title {
+  border: 1px solid transparent;
+  outline: 0;
+}
+
+/* Rounded edges for selected nodes */
+span.fancytree-title {
+  border-radius: 3px;
+  outline-radius: 3px;
+}
+
+/* Vertically center icons */
+span.fancytree-icon,
+span.fancytree-checkbox,
+span.fancytree-expander,
+span.fancytree-radio,
+span.fancytree-custom-icon {
+  margin-top: 2px;
+}
+
+/* Always show selected node with a blue background */
+span.fancytree-selected span.fancytree-title,
+span.fancytree-active span.fancytree-title {
+  color: white;
+  background-color: #3875D7;
+}

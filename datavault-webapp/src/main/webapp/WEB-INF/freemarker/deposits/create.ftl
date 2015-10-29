@@ -28,7 +28,7 @@
                    class="form-control file-path"
                    name="${spring.status.expression}"
                    value="${spring.status.value!""}"/>
-            <div id="tree" class="fancytree-radio tree-box"></div>
+            <div id="tree" class="fancytree tree-box"></div>
             <label id="deposit-size" class="text-muted small">No files selected</label>
         </div>
         
@@ -48,29 +48,25 @@
                         cache: false
                     };
                 },
-                checkbox: true,
                 selectMode: 1,
-                select: function(event, data) {
-                    var nodes = data.tree.getSelectedNodes();
+                activate: function(event, data) {
+                    var node = data.tree.getActiveNode();
 
-                    if (nodes.length == 0) {
+                    if (node) {
+                        $("#deposit-size").text("Deposit size: calculating ...");
+                        $(".file-path").val(node.key);
+                        $.ajax({
+                            url: "${springMacroRequestContext.getContextPath()}/filesize",
+                            type: "GET",
+                            data: {filepath: node.key},
+                            dataType: 'text',
+                            success: function (result) {
+                                $("#deposit-size").text("Deposit size: " + result);
+                            }
+                        });
+                    } else {
                         $(".file-path").val("");
                         $("#deposit-size").text("No files selected");
-                    } else {
-                        $("#deposit-size").text("Deposit size: calculating ...");
-                        nodes.forEach(function(node) {
-                            $(".file-path").val(node.key);
-                            $.ajax({
-                                url: "${springMacroRequestContext.getContextPath()}/filesize",
-                                type: "GET",
-                                data: {filepath: node.key},
-                                dataType: 'text',
-                                success: function (result) {
-                                    console.log(result)
-                                    $("#deposit-size").text("Deposit size: " + result);
-                                }
-                            });
-                        });
                     }
                 }
             });

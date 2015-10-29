@@ -31,7 +31,7 @@
                    class="form-control file-path"
                    name="${spring.status.expression}"
                    value="${spring.status.value!""}"/>
-            <div id="tree" class="fancytree-radio tree-box"></div>
+            <div id="tree" class="fancytree tree-box"></div>
         </div>
 
         <script>
@@ -50,14 +50,15 @@
                         cache: false
                     };
                 },
-                checkbox: true,
                 selectMode: 1,
-                select: function(event, data) {
-                    var nodes = data.tree.getSelectedNodes();
-                    $(".file-path").val("");
-                    nodes.forEach(function(node) {
+                activate: function(event, data) {
+                    var node = data.tree.getActiveNode();
+
+                    if (node) {
                         $(".file-path").val(node.key);
-                    });
+                    } else {
+                        $(".file-path").val("");
+                    }
                 }
             });
         </script>
