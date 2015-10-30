@@ -2,6 +2,7 @@ package org.datavaultplatform.broker.services;
 
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.dao.VaultDAO;
+import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
 
 import java.util.Date;
 import java.util.List;
@@ -37,5 +38,24 @@ public class VaultsService {
     public List<Vault> search(String query, String sort, String order) { return this.vaultDAO.search(query, sort, order); }
 
     public int count() { return vaultDAO.count(); }
+
+    public Vault checkPolicy (String vaultID) throws Exception {
+        // Get the vault
+        Vault vault = vaultDAO.findById(vaultID);
+
+        // Get the right policy engine
+        Class clazz = Class.forName(vault.getPolicy().getEngine());
+        RetentionPolicy policy = (RetentionPolicy)clazz.newInstance();
+
+        // Check the policy
+        policy.run(vault);
+
+        // Record we checked it
+        vault.setPolicyLastChecked(new Date());
+
+        // Update and return the policy
+        vaultDAO.update(vault);
+        return vault;
+    }
 }
 
