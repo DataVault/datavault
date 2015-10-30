@@ -166,6 +166,19 @@ public class RestService {
         return (Vault)response.getBody();
     }
 
+    public Vault checkVaultPolicy(String vaultId) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/checkpolicy", Vault.class);
+        return (Vault)response.getBody();
+    }
+
+    public int checkAllVaultPolicies() {
+        Vault[] vaults = getVaultsListingAll();
+        for (Vault vault : vaults) {
+            get(brokerURL + "/vaults/" + vault.getID() + "/checkpolicy", Vault.class);
+        }
+        return vaults.length;
+    }
+
     public Deposit[] getDepositsListing(String vaultId) {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits", Deposit[].class);
         return (Deposit[])response.getBody();

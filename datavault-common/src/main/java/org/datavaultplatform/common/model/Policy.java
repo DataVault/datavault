@@ -24,6 +24,14 @@ public class Policy {
     @Column(name = "name", nullable = false)
     private String name;
 
+    // Description of the policy
+    @Column(name = "description", nullable = false)
+    private String description;
+
+    // Implementation class of the policy
+    @Column(name = "engine", nullable = false)
+    private String engine;
+
     // Sort order of the policy
     @Column(name = "sort", nullable = false)
     private int sort;
@@ -46,6 +54,14 @@ public class Policy {
     }
 
     public String getName() { return name; }
+
+    public void setDescription(String description) { this.description = description; }
+
+    public String getDescription() { return description; }
+
+    public void setEngine(String engine) { this.engine = engine; }
+
+    public String getEngine() { return engine; }
 
     public void setSort(int sort) { this.sort = sort; }
 
