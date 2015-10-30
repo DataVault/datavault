@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.queue.Sender;
 
@@ -302,6 +303,13 @@ public class VaultsController {
 
         User user = usersService.getUser(userID);
         return getUserVault(user, vaultID);
+    }
+
+    @RequestMapping(value = "/vaults/{vaultid}/checkpolicy", method = RequestMethod.GET)
+    public Vault checkVaultPolicy(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                  @PathVariable("vaultid") String vaultID) throws Exception {
+
+        return vaultsService.checkPolicy(vaultID);
     }
 
     @RequestMapping(value = "/vaults/{vaultid}/deposits", method = RequestMethod.GET)

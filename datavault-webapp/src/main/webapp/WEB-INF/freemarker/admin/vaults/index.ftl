@@ -37,7 +37,7 @@
                     <#list vaults as vault>
                         <tr class="tr">
                             <td>
-                                <a href="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}/">${vault.getID()?html}</a>
+                                <a href="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}">${vault.getID()?html}</a>
                             </td>
                             <td>${vault.name?html}</td>
                             <td>${vault.description?html}</td>
