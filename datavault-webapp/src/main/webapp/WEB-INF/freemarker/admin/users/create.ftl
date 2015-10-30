@@ -12,7 +12,7 @@
 
         <div class="form-group">
             <label class="control-label">User ID:</label>
-            <@spring.bind "user.id" />
+            <@spring.bind "user.ID" />
             <input type="text"
                    class="form-control"
                    name="${spring.status.expression}"

@@ -1,7 +1,10 @@
 package org.datavaultplatform.broker.controllers;
 
+import java.util.HashMap;
 import java.util.List;
 
+import org.datavaultplatform.broker.services.FileStoreService;
+import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.broker.services.UsersService;
 import org.jsondoc.core.annotation.*;
@@ -14,9 +17,17 @@ import org.springframework.web.bind.annotation.*;
 public class UsersController {
     
     private UsersService usersService;
-    
+    private FileStoreService fileStoreService;
+    private String activeDir;
+
     public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
+    }
+    public void setFileStoreService(FileStoreService fileStoreService) {
+        this.fileStoreService = fileStoreService;
+    }
+    public void setActiveDir(String activeDir) {
+        this.activeDir = activeDir;
     }
 
     @ApiMethod(
@@ -77,8 +88,19 @@ public class UsersController {
     })
     @RequestMapping(value = "/users", method = RequestMethod.POST)
     public User addUser(@RequestHeader(value = "X-UserID", required = true) String userID,
-                          @RequestBody User user) throws Exception {
+                        @RequestBody User user) throws Exception {
         usersService.addUser(user);
+
+        // Add fileStores for the new user
+        // todo: either this could be injected by Spring, or selected by the user
+
+        HashMap<String,String> storeProperties = new HashMap<String,String>();
+        storeProperties.put("rootPath", activeDir);
+        FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Default filesystem (local)");
+        store.setUser(user);
+        fileStoreService.addFileStore(store);
+
+
         return user;
     }
 }
