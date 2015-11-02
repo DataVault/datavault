@@ -20,4 +20,6 @@ public interface VaultDAO {
     public List<Vault> search(String query, String sort, String order);
 
     public int count();
+
+    public int getPolicyCount(int status);
 }

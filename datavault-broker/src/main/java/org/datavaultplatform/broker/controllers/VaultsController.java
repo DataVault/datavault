@@ -6,7 +6,6 @@ import java.util.HashMap;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.queue.Sender;
 
@@ -239,6 +238,13 @@ public class VaultsController {
     public int getRestoresInProgressCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
         return restoresService.inProgressCount();
+    }
+
+    @RequestMapping(value = "/vaults/policycount/{status}", method = RequestMethod.GET)
+    public int getPolicyStatusCount(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                @PathVariable("status") int status) throws Exception {
+
+        return vaultsService.getPolicyCount(status);
     }
 
     @RequestMapping(value = "/vaults/deposits", method = RequestMethod.GET)

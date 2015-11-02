@@ -4,6 +4,7 @@ package org.datavaultplatform.webapp.controllers.admin;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.model.Policy;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.retentionpolicy.PolicyStatus;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -40,6 +41,7 @@ public class AdminController {
         model.addAttribute("restoresinprogress", restService.getRestoresInProgress());
         model.addAttribute("depositqueue", restService.getDepositsQueue());
         model.addAttribute("restorequeue", restService.getRestoresQueue());
+        model.addAttribute("reviewcount", restService.getPolicyStatusCount(PolicyStatus.REVIEW));
 
         return "admin/index";
     }

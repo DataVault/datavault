@@ -1,7 +1,8 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
- 
+
+import org.datavaultplatform.common.retentionpolicy.PolicyStatus;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -106,6 +107,15 @@ public class VaultDAOImpl implements VaultDAO {
     public int count() {
         Session session = this.sessionFactory.openSession();
         return (int)(long)(Long)session.createCriteria(Vault.class).setProjection(Projections.rowCount()).uniqueResult();
+    }
+
+    @Override
+    public int getPolicyCount(int status) {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Vault.class);
+        criteria.add(Restrictions.eq("policyStatus", status));
+        criteria.setProjection(Projections.rowCount());
+        return (int)(long)(Long)criteria.uniqueResult();
     }
 
     private void order(String sort, String order, Criteria criteria) {
