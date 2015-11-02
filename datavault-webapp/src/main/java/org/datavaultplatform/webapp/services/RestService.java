@@ -179,6 +179,11 @@ public class RestService {
         return vaults.length;
     }
 
+    public int getPolicyStatusCount(int status) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/policycount/" + status, Integer.class);
+        return (Integer)response.getBody();
+    }
+
     public Deposit[] getDepositsListing(String vaultId) {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits", Deposit[].class);
         return (Deposit[])response.getBody();

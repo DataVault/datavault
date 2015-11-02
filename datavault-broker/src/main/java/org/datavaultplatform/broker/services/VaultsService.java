@@ -39,6 +39,8 @@ public class VaultsService {
 
     public int count() { return vaultDAO.count(); }
 
+    public int getPolicyCount(int status) { return vaultDAO.getPolicyCount(status); }
+
     public Vault checkPolicy (String vaultID) throws Exception {
         // Get the vault
         Vault vault = vaultDAO.findById(vaultID);
