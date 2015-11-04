@@ -3,7 +3,7 @@
 <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()/}"><b>My Vaults</b></a></li>
+        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>My Vaults</b></a></li>
         <li class="active"><b>Vault:</b> ${vault.name?html}</li>
     </ol>
 
