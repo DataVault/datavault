@@ -89,6 +89,7 @@
     <bean id="usersController" class="org.datavaultplatform.broker.controllers.UsersController">
         <property name="usersService" ref="usersService" />
         <property name="fileStoreService" ref="fileStoreService" />
+        <property name="userKeyPairService" ref="userKeyPairService" />
         <property name="activeDir" value="${activeDir}" />
     </bean>
 
@@ -148,6 +149,10 @@
     
     <bean id="archiveStoreService" class="org.datavaultplatform.broker.services.ArchiveStoreService">
         <property name="archiveStoreDAO" ref="archiveStoreDAO" />
+    </bean>
+
+    <bean id="userKeyPairService" class="org.datavaultplatform.broker.services.UserKeyPairService">
+        <property name="userKeyPairDAO" ref="userKeyPairDAO" />
     </bean>
 
     <bean id="jobsService" class="org.datavaultplatform.broker.services.JobsService">
@@ -269,6 +274,10 @@
     </bean>
     
     <bean id="archiveStoreDAO" class="org.datavaultplatform.common.model.dao.ArchiveStoreDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="userKeyPairDAO" class="org.datavaultplatform.common.model.dao.UserKeyPairDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
     
