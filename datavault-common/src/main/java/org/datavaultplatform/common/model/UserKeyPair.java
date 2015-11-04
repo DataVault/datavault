@@ -12,9 +12,10 @@ import javax.persistence.*;
  * Time: 09:03
  */
 
+// Todo: Delete the Hibernate related code and associated DAO classes. This object is not currently persisted in the database.
+
 @Table(name="UserKeyPairs")
 public class UserKeyPair {
-
 
     // Deposit Identifier
     @Id
@@ -29,6 +30,14 @@ public class UserKeyPair {
     @Column(name = "publicKey", nullable = false)
     private String publicKey;
 
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getPrivateKey() {
         return privateKey;
@@ -45,7 +54,6 @@ public class UserKeyPair {
     public void setPublicKey(String publicKey) {
         this.publicKey = publicKey;
     }
-
 
 
 }

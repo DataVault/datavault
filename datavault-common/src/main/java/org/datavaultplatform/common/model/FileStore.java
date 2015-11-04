@@ -3,15 +3,11 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import java.sql.Blob;
 import java.util.HashMap;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -34,6 +30,7 @@ public class FileStore {
     
     // Properties to use for this storage system
     // NOTE: this is not a secure mechanism for storing credentials!
+    @Lob
     private HashMap<String,String> properties;
     
     @JsonIgnore
