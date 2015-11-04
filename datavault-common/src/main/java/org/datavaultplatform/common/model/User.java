@@ -18,6 +18,10 @@ public class User {
     @Column(name = "name", nullable = false)
     private String name;
 
+    // Password
+    @Column(name = "password")
+    private String password;
+
     // A user is related to a number of vaults
     @JsonIgnore
     @OneToMany(targetEntity=Vault.class, mappedBy="user", fetch=FetchType.LAZY)
@@ -45,6 +49,14 @@ public class User {
     }
 
     public String getName() { return name; }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public List<Vault> getVaults() {
         return vaults;
