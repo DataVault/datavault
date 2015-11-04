@@ -28,7 +28,7 @@ public class DropboxFileSystem extends Device implements UserStore {
 
     private final String dbxAppName = "DataVault/1.0";
     private final String PATH_SEPARATOR = "/";
-    private static final long FILE_COPY_BUFFER_SIZE = FileCopy.ONE_KB * 32;
+    private static final long FILE_COPY_BUFFER_SIZE = FileCopy.ONE_KB * 64;
     
     private final DbxRequestConfig dbxConfig;
     private final DbxClient dbxClient;
@@ -179,6 +179,7 @@ public class DropboxFileSystem extends Device implements UserStore {
         } finally {
             fos.close();
             is.close();
+            downloader.close();
         }
         
         progress.fileCount += 1;
@@ -233,6 +234,7 @@ public class DropboxFileSystem extends Device implements UserStore {
             
         } finally {
             fis.close();
+            uploader.close();
         }
         
         progress.fileCount += 1;
