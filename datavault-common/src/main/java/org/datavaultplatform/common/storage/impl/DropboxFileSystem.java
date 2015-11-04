@@ -179,6 +179,7 @@ public class DropboxFileSystem extends Device implements UserStore {
         } finally {
             fos.close();
             is.close();
+            downloader.close();
         }
         
         progress.fileCount += 1;
@@ -233,6 +234,7 @@ public class DropboxFileSystem extends Device implements UserStore {
             
         } finally {
             fis.close();
+            uploader.close();
         }
         
         progress.fileCount += 1;
