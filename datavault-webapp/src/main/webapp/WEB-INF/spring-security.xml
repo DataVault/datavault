@@ -71,8 +71,4 @@
         <property name="restService" ref="restService" />
     </bean>
 
-    <bean id="restService" class="org.datavaultplatform.webapp.services.RestService">
-        <property name="brokerURL" value="${brokerURL}" />
-    </bean>
-
 </beans>
