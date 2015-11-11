@@ -77,8 +77,7 @@ public class UsersController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
     @RequestMapping(value = "/users/{userid}", method = RequestMethod.GET)
-    public User getUser(@RequestHeader(value = "X-UserID", required = true) String userID,
-                        @PathVariable("userid") @ApiPathParam(name = "User ID", description = "The User ID to retrieve") String queryUserID) {
+    public User getUser(                        @PathVariable("userid") @ApiPathParam(name = "User ID", description = "The User ID to retrieve") String queryUserID) {
         return usersService.getUser(queryUserID);
     }
 
