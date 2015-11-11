@@ -26,7 +26,11 @@ public class RestService {
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
+
+        // If we have a logged on user then pass that information.
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
+        }
 
         HttpEntity entity;
         if (method == HttpMethod.GET) {
@@ -36,7 +40,7 @@ public class RestService {
         } else {
             throw new IllegalArgumentException("REST method not implemented!");
         }
-        
+
         return restTemplate.exchange(url, method, entity, clazz);
         
     }
