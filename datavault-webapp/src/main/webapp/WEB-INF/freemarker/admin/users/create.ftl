@@ -30,6 +30,15 @@
         </div>
 
         <div class="form-group">
+            <label class="control-label">Password:</label>
+            <@spring.bind "user.password" />
+            <input type="password"
+                   class="form-control"
+                   name="${spring.status.expression}"
+                   value="${spring.status.value!""}"/>
+        </div>
+
+        <div class="form-group">
             <button type="submit" name="action" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-save"></span>Save</button>
             <button type="submit" name="action" value="cancel" class="btn btn-danger cancel">Cancel</button>
         </div>

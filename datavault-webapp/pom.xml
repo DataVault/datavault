@@ -131,6 +131,7 @@
                             <directory>src/main/webapp</directory>
                             <includes>
                                 <include>WEB-INF/datavault-webapp-servlet.xml</include>
+                                <include>WEB-INF/spring-security.xml</include>
                             </includes>
                         </resource>
                     </webResources>

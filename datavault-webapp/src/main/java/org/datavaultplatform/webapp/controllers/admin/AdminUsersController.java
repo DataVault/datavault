@@ -49,9 +49,17 @@ public class AdminUsersController {
             return "redirect:/";
         }
 
-        // todo: check to see if a user with this id already exists
-        User newUser = restService.addUser(user);
-        return "redirect:/admin/users";
+        if (restService.getUser(user.getID()) == null) {
+            User newUser = restService.addUser(user);
+            return "redirect:/admin/users";
+        } else {
+            // User already exists
+            // todo : Return error message
+
+            return "admin/users/create";
+        }
+
+
     }
 }
 
