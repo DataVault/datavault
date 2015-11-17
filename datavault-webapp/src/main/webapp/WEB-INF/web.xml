@@ -53,7 +53,7 @@
         <param-name>contextConfigLocation</param-name>
         <param-value>
             /WEB-INF/datavault-webapp-servlet.xml
-            /WEB-INF/spring-security.xml
+            /WEB-INF/datavault-webapp-security-form.xml
         </param-value>
     </context-param>
     
