@@ -1,10 +1,13 @@
 package org.datavaultplatform.broker.controllers;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.request.*;
+import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.queue.Sender;
@@ -129,10 +132,14 @@ public class VaultsController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
-    public List<Vault> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    public List<GetVaultResponse> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
 
+        List<GetVaultResponse> vaultResponses = new ArrayList<>();
         User user = usersService.getUser(userID);
-        return user.getVaults();
+        for (Vault vault : user.getVaults()) {
+            vaultResponses.add(vault.convertToResponse());
+        }
+        return vaultResponses;
     }
 
     @ApiMethod(
@@ -261,16 +268,22 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)
-    public Vault addVault(@RequestHeader(value = "X-UserID", required = true) String userID,
-                          @RequestBody Vault vault) throws Exception {
-
-        String policyID = vault.getPolicyID();
-        Policy policy = policiesService.getPolicy(policyID);
+    public GetVaultResponse addVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                     @RequestBody CreateVaultRequest createVault) throws Exception {
+        
+        Vault vault = new Vault();
+        vault.setName(createVault.getName());
+        vault.setDescription(createVault.getDescription());
+        
+        Policy policy = policiesService.getPolicy(createVault.getPolicyID());
         if (policy == null) {
-            throw new Exception("Policy '" + policyID + "' does not exist");
+            throw new Exception("Policy '" + createVault.getPolicyID() + "' does not exist");
         }
         vault.setPolicy(policy);
-
+        
+        // TODO: should use group as an object instead?
+        vault.setGroupID(createVault.getGroupID());
+        
         User user = usersService.getUser(userID);
         if (user == null) {
             throw new Exception("User '" + userID + "' does not exist");
@@ -300,15 +313,20 @@ public class VaultsController {
         }
 
         vaultsService.addVault(vault);
-        return vault;
+        return vault.convertToResponse();
     }
 
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
-    public Vault getVault(@RequestHeader(value = "X-UserID", required = true) String userID,
-                          @PathVariable("vaultid") String vaultID) throws Exception {
+    public GetVaultResponse getVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                     @PathVariable("vaultid") String vaultID) throws Exception {
 
         User user = usersService.getUser(userID);
-        return getUserVault(user, vaultID);
+        Vault vault = getUserVault(user, vaultID);
+        if (vault != null) {
+            return vault.convertToResponse();
+        } else {
+            return null;
+        }
     }
 
     @RequestMapping(value = "/vaults/{vaultid}/checkpolicy", method = RequestMethod.GET)

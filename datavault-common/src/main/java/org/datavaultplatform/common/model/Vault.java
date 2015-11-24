@@ -16,6 +16,7 @@ import javax.persistence.TemporalType;
 
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.retentionpolicy.PolicyStatus;
+import org.datavaultplatform.common.response.GetVaultResponse;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.util.ArrayList;
@@ -117,10 +118,6 @@ public class Vault {
     }
 
     public long getSize() { return vaultSize; }
-
-    public String getSizeStr() {
-        return FileUtils.byteCountToDisplaySize(vaultSize);
-    }
     
     public List<Deposit> getDeposits() {
         if (deposits == null) return new ArrayList();
@@ -178,6 +175,17 @@ public class Vault {
     
     public void setUser(User user) {
         this.user = user;
+    }
+    
+    public GetVaultResponse convertToResponse() {
+        return new GetVaultResponse(
+                id,
+                creationTime,
+                name,
+                description,
+                policy.getID(),
+                groupID,
+                vaultSize);
     }
     
     @Override

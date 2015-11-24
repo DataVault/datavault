@@ -1,6 +1,8 @@
 package org.datavaultplatform.webapp.services;
 
 import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.request.*;
+import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.event.Event;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
@@ -80,9 +82,9 @@ public class RestService {
         return (String)response.getBody();
     }
 
-    public Vault[] getVaultsListing() {
-        HttpEntity<?> response = get(brokerURL + "/vaults", Vault[].class);
-        return (Vault[])response.getBody();
+    public GetVaultResponse[] getVaultsListing() {
+        HttpEntity<?> response = get(brokerURL + "/vaults", GetVaultResponse[].class);
+        return (GetVaultResponse[])response.getBody();
     }
 
     public Vault[] getVaultsListingForGroup(String groupID) {
@@ -165,9 +167,9 @@ public class RestService {
         return (Restore[])response.getBody();
     }
 
-    public Vault getVault(String id) {        
-        HttpEntity<?> response = get(brokerURL + "/vaults/" + id, Vault.class);
-        return (Vault)response.getBody();
+    public GetVaultResponse getVault(String id) {        
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + id, GetVaultResponse.class);
+        return (GetVaultResponse)response.getBody();
     }
 
     public Vault checkVaultPolicy(String vaultId) {
@@ -275,9 +277,9 @@ public class RestService {
 
     /* POST requests */
     
-    public Vault addVault(Vault vault) {
-        HttpEntity<?> response = post(brokerURL + "/vaults/", Vault.class, vault);
-        return (Vault)response.getBody();
+    public GetVaultResponse addVault(CreateVaultRequest createVault) {
+        HttpEntity<?> response = post(brokerURL + "/vaults/", GetVaultResponse.class, createVault);
+        return (GetVaultResponse)response.getBody();
     }
 
     public Deposit addDeposit(String vaultId, Deposit deposit) {

@@ -294,6 +294,8 @@
             <list>
                 <value>org.datavaultplatform.broker.controllers</value>
                 <value>org.datavaultplatform.common.model</value>
+                <value>org.datavaultplatform.common.request</value>
+                <value>org.datavaultplatform.common.response</value>
             </list>
         </constructor-arg>
         <property name="playgroundEnabled" value="true" />

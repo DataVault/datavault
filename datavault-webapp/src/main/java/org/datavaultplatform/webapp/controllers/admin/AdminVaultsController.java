@@ -2,6 +2,7 @@ package org.datavaultplatform.webapp.controllers.admin;
 
 
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.response.GetVaultResponse;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
@@ -65,7 +66,7 @@ public class AdminVaultsController {
 
     @RequestMapping(value = "/admin/vaults/{vaultid}", method = RequestMethod.GET)
     public String showVault(ModelMap model, @PathVariable("vaultid") String vaultID) {
-        Vault vault = restService.getVault(vaultID);
+        GetVaultResponse vault = restService.getVault(vaultID);
 
         model.addAttribute("vault", vault);
 
