@@ -153,7 +153,7 @@ public class VaultsController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
     @RequestMapping(value = "/vaults/all", method = RequestMethod.GET)
-    public List<Vault> getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
+    public List<GetVaultResponse> getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
                                     @RequestParam(value = "sort", required = false)
                                     @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime"}, defaultvalue = "creationTime", required = false) String sort,
                                     @RequestParam(value = "order", required = false)
@@ -161,7 +161,12 @@ public class VaultsController {
 
         if (sort == null) sort = "";
         if (order == null) order = "asc";
-        return vaultsService.getVaults(sort, order);
+        
+        List<GetVaultResponse> vaultResponses = new ArrayList<>();
+        for (Vault vault : vaultsService.getVaults(sort, order)) {
+            vaultResponses.add(vault.convertToResponse());
+        }
+        return vaultResponses;
     }
 
     @ApiMethod(
@@ -175,20 +180,28 @@ public class VaultsController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
     @RequestMapping(value = "/vaults/group/{groupid}", method = RequestMethod.GET)
-    public List<Vault> getVaultsForGroup(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                         @PathVariable("groupid") String groupID) throws Exception {
+    public List<GetVaultResponse> getVaultsForGroup(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                                    @PathVariable("groupid") String groupID) throws Exception {
 
-        return vaultsService.getVaultsForGroup(groupID);
+        List<GetVaultResponse> vaultResponses = new ArrayList<>();
+        for (Vault vault : vaultsService.getVaultsForGroup(groupID)) {
+            vaultResponses.add(vault.convertToResponse());
+        }
+        return vaultResponses;
     }
 
     @RequestMapping(value = "/vaults/search", method = RequestMethod.GET)
-    public List<Vault> searchAllVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                       @RequestParam String query,
-                                       @RequestParam(value = "sort", required = false) String sort,
-                                       @RequestParam(value = "order", required = false)
-                                       @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order) throws Exception {
+    public List<GetVaultResponse> searchAllVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                                  @RequestParam String query,
+                                                  @RequestParam(value = "sort", required = false) String sort,
+                                                  @RequestParam(value = "order", required = false)
+                                                  @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order) throws Exception {
 
-        return vaultsService.search(query, sort, order);
+        List<GetVaultResponse> vaultResponses = new ArrayList<>();
+        for (Vault vault : vaultsService.search(query, sort, order)) {
+            vaultResponses.add(vault.convertToResponse());
+        }
+        return vaultResponses;
     }
 
     @RequestMapping(value = "/vaults/deposits/search", method = RequestMethod.GET)

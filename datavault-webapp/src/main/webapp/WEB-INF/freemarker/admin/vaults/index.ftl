@@ -41,7 +41,7 @@
                             </td>
                             <td>${vault.name?html}</td>
                             <td>${vault.description?html}</td>
-                            <td>${vault.getUser().getID()?html}</td>
+                            <td>${vault.getUserID()?html}</td>
                             <td>${vault.getSizeStr()}</td>
                             <td>${vault.policyID?html}</td>
                             <td>${vault.getCreationTime()?datetime}</td>

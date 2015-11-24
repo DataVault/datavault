@@ -87,29 +87,29 @@ public class RestService {
         return (GetVaultResponse[])response.getBody();
     }
 
-    public Vault[] getVaultsListingForGroup(String groupID) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/group/" + groupID, Vault[].class);
-        return (Vault[])response.getBody();
+    public GetVaultResponse[] getVaultsListingForGroup(String groupID) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/group/" + groupID, GetVaultResponse[].class);
+        return (GetVaultResponse[])response.getBody();
     }
 
-    public Vault[] getVaultsListingAll() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/all", Vault[].class);
-        return (Vault[])response.getBody();
+    public GetVaultResponse[] getVaultsListingAll() {
+        HttpEntity<?> response = get(brokerURL + "/vaults/all", GetVaultResponse[].class);
+        return (GetVaultResponse[])response.getBody();
     }
 
-    public Vault[] getVaultsListingAll(String sort, String order) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/all?sort=" + sort + "&order=" + order, Vault[].class);
-        return (Vault[])response.getBody();
+    public GetVaultResponse[] getVaultsListingAll(String sort, String order) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/all?sort=" + sort + "&order=" + order, GetVaultResponse[].class);
+        return (GetVaultResponse[])response.getBody();
     }
 
-    public Vault[] searchVaults(String query) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query, Vault[].class);
-        return (Vault[])response.getBody();
+    public GetVaultResponse[] searchVaults(String query) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query, GetVaultResponse[].class);
+        return (GetVaultResponse[])response.getBody();
     }
 
-    public Vault[] searchVaults(String query, String sort, String order) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query + "&sort=" + sort + "&order=" + order, Vault[].class);
-        return (Vault[])response.getBody();
+    public GetVaultResponse[] searchVaults(String query, String sort, String order) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query + "&sort=" + sort + "&order=" + order, GetVaultResponse[].class);
+        return (GetVaultResponse[])response.getBody();
     }
 
     public int getVaultsCount() {
@@ -178,8 +178,8 @@ public class RestService {
     }
 
     public int checkAllVaultPolicies() {
-        Vault[] vaults = getVaultsListingAll();
-        for (Vault vault : vaults) {
+        GetVaultResponse[] vaults = getVaultsListingAll();
+        for (GetVaultResponse vault : vaults) {
             get(brokerURL + "/vaults/" + vault.getID() + "/checkpolicy", Vault.class);
         }
         return vaults.length;

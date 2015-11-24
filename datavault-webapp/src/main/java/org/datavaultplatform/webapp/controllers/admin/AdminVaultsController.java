@@ -1,9 +1,7 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
-import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.response.GetVaultResponse;
-import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;

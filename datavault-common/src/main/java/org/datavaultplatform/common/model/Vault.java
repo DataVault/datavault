@@ -73,6 +73,8 @@ public class Vault {
     private int policyStatus;
 
     // Date policy was last checked
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date policyLastChecked;
 
     @JsonIgnore
@@ -148,13 +150,6 @@ public class Vault {
 
     public Date getPolicyLastChecked() { return policyLastChecked; }
 
-    public String getPolicyStatusString() {
-        if (policyStatus == PolicyStatus.UNCHECKED) return "Un-checked";
-        else if (policyStatus == PolicyStatus.OK) return "OK";
-        else if (policyStatus == PolicyStatus.REVIEW) return "Review";
-        else return ("Unknown");
-    }
-
     public void setPolicyStatus(int policyStatus) { this.policyStatus = policyStatus; }
 
     public Group getGroup() { return group; }
@@ -180,12 +175,15 @@ public class Vault {
     public GetVaultResponse convertToResponse() {
         return new GetVaultResponse(
                 id,
+                user.getID(),
                 creationTime,
                 name,
                 description,
                 policy.getID(),
                 groupID,
-                vaultSize);
+                vaultSize,
+                policyStatus,
+                policyLastChecked);
     }
     
     @Override

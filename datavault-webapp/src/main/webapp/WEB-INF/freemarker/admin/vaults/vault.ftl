@@ -43,7 +43,7 @@
                 <tr class="tr">
                     <td>${policy.name?html}</td>
                     <td><#if vault.policyLastChecked??>${vault.policyLastChecked?datetime}<#else>Never</#if></td>
-                    <td>${vault.policyStatusString?html}</td>
+                    <td>${vault.policyStatusStr?html}</td>
                     <td>
                         <form action="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}/checkpolicy" method="post">
                             <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update</button>
