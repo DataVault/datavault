@@ -66,8 +66,6 @@ public class Vault {
 
     @ManyToOne
     private Policy policy;
-    // Raw policy ID
-    private String policyID;
 
     // Status of the policy
     private int policyStatus;
@@ -80,8 +78,6 @@ public class Vault {
     @JsonIgnore
     @ManyToOne
     private Group group;
-    // Raw group ID
-    private String groupID;
 
     @ManyToOne
     private User user;
@@ -136,14 +132,6 @@ public class Vault {
         this.policy = policy;
     }
 
-    public String getPolicyID() {
-        return policyID;
-    }
-
-    public void setPolicyID(String policyID) {
-        this.policyID = policyID;
-    }
-
     public int getPolicyStatus() { return policyStatus; }
 
     public void setPolicyLastChecked(Date policyLastChecked) { this.policyLastChecked = policyLastChecked; }
@@ -157,15 +145,7 @@ public class Vault {
     public void setGroup(Group group) {
         this.group = group;
     }
-
-    public String getGroupID() {
-        return groupID;
-    }
-
-    public void setGroupID(String groupID) {
-        this.groupID = groupID;
-    }
-
+    
     public User getUser() { return user; }
     
     public void setUser(User user) {
@@ -180,7 +160,7 @@ public class Vault {
                 name,
                 description,
                 policy.getID(),
-                groupID,
+                group.getID(),
                 vaultSize,
                 policyStatus,
                 policyLastChecked);

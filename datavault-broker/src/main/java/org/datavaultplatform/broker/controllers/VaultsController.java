@@ -29,6 +29,7 @@ public class VaultsController {
     private MetadataService metadataService;
     private FilesService filesService;
     private PoliciesService policiesService;
+    private GroupsService groupsService;
     private UsersService usersService;
     private FileStoreService fileStoreService;
     private ArchiveStoreService archiveStoreService;
@@ -89,6 +90,10 @@ public class VaultsController {
 
     public void setPoliciesService(PoliciesService policiesService) {
         this.policiesService = policiesService;
+    }
+    
+    public void setGroupsService(GroupsService groupsService) {
+        this.groupsService = groupsService;
     }
 
     public void setFileStoreService(FileStoreService fileStoreService) {
@@ -164,27 +169,6 @@ public class VaultsController {
         
         List<GetVaultResponse> vaultResponses = new ArrayList<>();
         for (Vault vault : vaultsService.getVaults(sort, order)) {
-            vaultResponses.add(vault.convertToResponse());
-        }
-        return vaultResponses;
-    }
-
-    @ApiMethod(
-            path = "/vaults/group/{groupid}",
-            verb = ApiVerb.GET,
-            description = "Gets a list of all Vaults owned by a given Group",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
-    })
-    @RequestMapping(value = "/vaults/group/{groupid}", method = RequestMethod.GET)
-    public List<GetVaultResponse> getVaultsForGroup(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                                    @PathVariable("groupid") String groupID) throws Exception {
-
-        List<GetVaultResponse> vaultResponses = new ArrayList<>();
-        for (Vault vault : vaultsService.getVaultsForGroup(groupID)) {
             vaultResponses.add(vault.convertToResponse());
         }
         return vaultResponses;
@@ -294,8 +278,11 @@ public class VaultsController {
         }
         vault.setPolicy(policy);
         
-        // TODO: should use group as an object instead?
-        vault.setGroupID(createVault.getGroupID());
+        Group group = groupsService.getGroup(createVault.getGroupID());
+        if (group == null) {
+            throw new Exception("Group '" + createVault.getGroupID() + "' does not exist");
+        }
+        vault.setGroup(group);
         
         User user = usersService.getUser(userID);
         if (user == null) {

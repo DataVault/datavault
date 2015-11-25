@@ -2,6 +2,7 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.ArrayList;
 
 import javax.persistence.*;
 import java.util.List;
@@ -47,6 +48,14 @@ public class Group {
         return owners;
     }
 
+    public List<Vault> getVaults() {
+        if (vaults == null) {
+            return new ArrayList();
+        } else {
+            return vaults;
+        }
+    }
+    
     @Override
     public boolean equals(Object other) {
         

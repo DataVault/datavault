@@ -73,6 +73,7 @@
         <property name="metadataService" ref="metadataService" />
         <property name="filesService" ref="filesService" />
         <property name="policiesService" ref="policiesService" />
+        <property name="groupsService" ref="groupsService" />
         <property name="usersService" ref="usersService" />
         <property name="fileStoreService" ref="fileStoreService" />
         <property name="archiveStoreService" ref="archiveStoreService" />

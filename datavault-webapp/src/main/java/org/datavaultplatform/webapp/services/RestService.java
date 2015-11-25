@@ -88,7 +88,7 @@ public class RestService {
     }
 
     public GetVaultResponse[] getVaultsListingForGroup(String groupID) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/group/" + groupID, GetVaultResponse[].class);
+        HttpEntity<?> response = get(brokerURL + "/groups/" + groupID + "/vaults", GetVaultResponse[].class);
         return (GetVaultResponse[])response.getBody();
     }
 
