@@ -1,4 +1,5 @@
-<#import "*/layout/adminlayout.ftl" as layout>
+<#import "*/layout/defaultlayout.ftl" as layout>
+<#global nav="admin">
 <@layout.vaultLayout>
 <div class="container">
 
