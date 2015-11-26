@@ -19,7 +19,7 @@
                     <li <#if nav == "home">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/">Home <span class="sr-only">(current)</span></a></li>
                     <li><a href="#">Help</a></li>
                     <li><a href="#">Feedback</a></li>
-                    <li><a href="${springMacroRequestContext.getContextPath()}/groups/">Groups</a></li>
+                    <li <#if nav == "groups">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/groups/">Groups</a></li>
                     <li <#if nav == "admin">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/admin/">Administration</a></li>
                 </ul>
 

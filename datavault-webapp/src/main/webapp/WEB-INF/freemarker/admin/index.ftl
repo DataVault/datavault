@@ -1,6 +1,8 @@
 <#import "*/layout/defaultlayout.ftl" as layout>
+<#-- Specify which navbar element should be flagged as active -->
 <#global nav="admin">
 <@layout.vaultLayout>
+
 <div class="container">
 
     <ol class="breadcrumb">
