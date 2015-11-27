@@ -30,15 +30,20 @@ public class UsersController {
         return "users/edit";
     }
 
-    // Process the completed 'create new vault' page
+    // Process the completed 'edit user' page
     @RequestMapping(value = "/users/edit/{userid}", method = RequestMethod.POST)
-    public String editUser(@ModelAttribute User user, ModelMap model, @RequestParam String action) {
+    public String editUser(@ModelAttribute User user, ModelMap model, @PathVariable("userid") String userID, @RequestParam String action) {
         // Was the cancel button pressed?
         if ("cancel".equals(action)) {
             return "redirect:/";
         }
 
-        //User newVault = restService..addVault(vault);
+        // todo : Is using the userID sensible? Should we use an alternative editUserRequest model? etc
+        // todo: This should be considered hacky test code, no more.
+
+        User existingUser = restService.getUser(userID);
+        existingUser.setName(user.getName());
+        restService.editUser(existingUser);
 
         return "vaults/index";
     }
