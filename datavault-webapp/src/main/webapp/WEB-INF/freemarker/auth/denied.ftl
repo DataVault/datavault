@@ -1,4 +1,6 @@
 <#import "*/layout/defaultlayout.ftl" as layout>
+<#-- Specify which navbar element should be flagged as active -->
+<#global nav="none">
 <@layout.vaultLayout>
     <#import "/spring.ftl" as spring />
 
