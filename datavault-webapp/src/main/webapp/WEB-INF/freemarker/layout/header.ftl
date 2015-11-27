@@ -24,10 +24,10 @@
                 </ul>
 
                 <ul class="nav navbar-nav navbar-right">
-                    <li class="dropdown">
+                    <li class="dropdown<#if nav == "user"> active</#if>">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">${principal.username}<span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            <li><a href="#">Edit profile</a></li>
+                            <li><a href="${springMacroRequestContext.getContextPath()}/users/edit/${principal.username}">Edit profile</a></li>
                             <li><a href="${springMacroRequestContext.getContextPath()}/auth/logout">Logout</a></li>
                         </ul>
                     </li>
