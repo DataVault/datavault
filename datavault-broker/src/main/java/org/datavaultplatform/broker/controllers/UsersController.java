@@ -115,4 +115,24 @@ public class UsersController {
 
         return user;
     }
+
+    @ApiMethod(
+            path = "/users}",
+            verb = ApiVerb.PUT,
+            description = "Edit a DataVault User",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
+    @RequestMapping(value = "/users", method = RequestMethod.PUT)
+    public User editUser(@RequestHeader(value = "X-UserID", required = true) String userID,
+                         @RequestBody User user) throws Exception {
+
+
+        usersService.updateUser(user);
+
+        return user;
+    }
 }
