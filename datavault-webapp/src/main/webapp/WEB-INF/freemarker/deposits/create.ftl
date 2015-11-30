@@ -1,10 +1,12 @@
 <#import "*/layout/defaultlayout.ftl" as layout>
+<#-- Specify which navbar element should be flagged as active -->
+<#global nav="home">
 <@layout.vaultLayout>
     <#import "/spring.ftl" as spring />
 <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}"><b>My Vaults</b></a></li>
+        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>My Vaults</b></a></li>
         <li><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}"><b>Vault:</b> ${vault.name?html}</a></li>
         <li class="active">Create new deposit</li>
     </ol>

@@ -1,13 +1,12 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
+import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * User: Stuart Lewis
@@ -62,6 +61,26 @@ public class AdminVaultsController {
         }
 
         return "admin/vaults/index";
+    }
+
+    @RequestMapping(value = "/admin/vaults/{vaultid}", method = RequestMethod.GET)
+    public String showVault(ModelMap model, @PathVariable("vaultid") String vaultID) {
+        Vault vault = restService.getVault(vaultID);
+
+        model.addAttribute("vault", vault);
+
+        model.addAttribute(restService.getPolicy(vault.getPolicyID()));
+        model.addAttribute(restService.getGroup(vault.getGroupID()));
+        model.addAttribute("deposits", restService.getDepositsListing(vaultID));
+
+        return "admin/vaults/vault";
+    }
+
+    @RequestMapping(value = "/admin/vaults/{vaultid}/checkpolicy", method = RequestMethod.POST)
+    public String checkPolicy(ModelMap model, @PathVariable("vaultid") String vaultID) throws Exception {
+        restService.checkVaultPolicy(vaultID);
+
+        return "redirect:/admin/vaults/" + vaultID;
     }
 }
 

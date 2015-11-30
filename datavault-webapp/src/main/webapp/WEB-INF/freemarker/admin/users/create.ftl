@@ -1,4 +1,6 @@
 <#import "*/layout/defaultlayout.ftl" as layout>
+<#-- Specify which navbar element should be flagged as active -->
+<#global nav="admin">
 <@layout.vaultLayout>
 <#import "/spring.ftl" as spring />
 
@@ -12,7 +14,7 @@
 
         <div class="form-group">
             <label class="control-label">User ID:</label>
-            <@spring.bind "user.id" />
+            <@spring.bind "user.ID" />
             <input type="text"
                    class="form-control"
                    name="${spring.status.expression}"
@@ -24,6 +26,15 @@
             <label class="control-label">User Name:</label>
             <@spring.bind "user.name" />
             <input type="text"
+                   class="form-control"
+                   name="${spring.status.expression}"
+                   value="${spring.status.value!""}"/>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label">Password:</label>
+            <@spring.bind "user.password" />
+            <input type="password"
                    class="form-control"
                    name="${spring.status.expression}"
                    value="${spring.status.value!""}"/>

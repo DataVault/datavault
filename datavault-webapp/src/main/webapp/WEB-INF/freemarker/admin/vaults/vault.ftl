@@ -1,11 +1,12 @@
 <#import "*/layout/defaultlayout.ftl" as layout>
 <#-- Specify which navbar element should be flagged as active -->
-<#global nav="home">
+<#global nav="admin">
 <@layout.vaultLayout>
 <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>My Vaults</b></a></li>
+        <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
+        <li><a href="${springMacroRequestContext.getContextPath()}/admin/vaults"><b>Vaults</b></a></li>
         <li class="active"><b>Vault:</b> ${vault.name?html}</li>
     </ol>
 
@@ -14,7 +15,6 @@
             <thead>
                 <tr class="tr">
                     <th>Description</th>
-                    <th>Policy</th>
                     <th>Group</th>
                     <th>Size</th>
                     <th>Timestamp</th>
@@ -23,10 +23,35 @@
             <tbody>
                 <tr class="tr">
                     <td>${vault.description?html}</td>
-                    <td>${policy.name?html}</td>
                     <td>${group.name?html}</td>
                     <td>${vault.getSizeStr()}</td>
                     <td>${vault.creationTime?datetime}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr class="tr">
+                    <th>Policy</th>
+                    <th>Last checked</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="tr">
+                    <td>${policy.name?html}</td>
+                    <td><#if vault.policyLastChecked??>${vault.policyLastChecked?datetime}<#else>Never</#if></td>
+                    <td>${vault.policyStatusString?html}</td>
+                    <td>
+                        <form action="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}/checkpolicy" method="post">
+                            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update</button>
+                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                        </form>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -66,12 +91,6 @@
             </table>
         </div>
     </#if>
-
-    <form>
-        <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create">
-            <span class="glyphicon glyphicon-save" aria-hidden="true"></span> Deposit data
-        </a>
-    </form>
 
 </div>
 

@@ -15,8 +15,10 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.apache.commons.io.FileUtils;
+import org.datavaultplatform.common.retentionpolicy.PolicyStatus;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 import javax.persistence.ManyToOne;
@@ -61,11 +63,16 @@ public class Vault {
     @OrderBy("creationTime")
     private List<Deposit> deposits;
 
-    @JsonIgnore
     @ManyToOne
     private Policy policy;
     // Raw policy ID
     private String policyID;
+
+    // Status of the policy
+    private int policyStatus;
+
+    // Date policy was last checked
+    private Date policyLastChecked;
 
     @JsonIgnore
     @ManyToOne
@@ -80,6 +87,7 @@ public class Vault {
     public Vault(String name) {
         this.name = name;
         this.creationTime = new Date();
+        policyStatus = PolicyStatus.UNCHECKED;
     }
 
     public String getID() { return id; }
@@ -115,6 +123,7 @@ public class Vault {
     }
     
     public List<Deposit> getDeposits() {
+        if (deposits == null) return new ArrayList();
         return deposits;
     }
     
@@ -135,6 +144,21 @@ public class Vault {
     public void setPolicyID(String policyID) {
         this.policyID = policyID;
     }
+
+    public int getPolicyStatus() { return policyStatus; }
+
+    public void setPolicyLastChecked(Date policyLastChecked) { this.policyLastChecked = policyLastChecked; }
+
+    public Date getPolicyLastChecked() { return policyLastChecked; }
+
+    public String getPolicyStatusString() {
+        if (policyStatus == PolicyStatus.UNCHECKED) return "Un-checked";
+        else if (policyStatus == PolicyStatus.OK) return "OK";
+        else if (policyStatus == PolicyStatus.REVIEW) return "Review";
+        else return ("Unknown");
+    }
+
+    public void setPolicyStatus(int policyStatus) { this.policyStatus = policyStatus; }
 
     public Group getGroup() { return group; }
 

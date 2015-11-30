@@ -51,7 +51,10 @@
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>/WEB-INF/spring-security.xml</param-value>
+        <param-value>
+            /WEB-INF/datavault-webapp-servlet.xml
+            /WEB-INF/datavault-webapp-security-form.xml
+        </param-value>
     </context-param>
     
     <filter>

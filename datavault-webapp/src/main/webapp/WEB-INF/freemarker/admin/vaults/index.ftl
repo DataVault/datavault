@@ -1,4 +1,6 @@
-<#import "*/layout/adminlayout.ftl" as layout>
+<#import "*/layout/defaultlayout.ftl" as layout>
+<#-- Specify which navbar element should be flagged as active -->
+<#global nav="admin">
 <@layout.vaultLayout>
 <div class="container">
 
@@ -37,7 +39,7 @@
                     <#list vaults as vault>
                         <tr class="tr">
                             <td>
-                                <a href="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}/">${vault.getID()?html}</a>
+                                <a href="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}">${vault.getID()?html}</a>
                             </td>
                             <td>${vault.name?html}</td>
                             <td>${vault.description?html}</td>

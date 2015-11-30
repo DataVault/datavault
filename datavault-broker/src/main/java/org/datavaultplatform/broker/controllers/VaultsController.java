@@ -240,6 +240,13 @@ public class VaultsController {
         return restoresService.inProgressCount();
     }
 
+    @RequestMapping(value = "/vaults/policycount/{status}", method = RequestMethod.GET)
+    public int getPolicyStatusCount(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                @PathVariable("status") int status) throws Exception {
+
+        return vaultsService.getPolicyCount(status);
+    }
+
     @RequestMapping(value = "/vaults/deposits", method = RequestMethod.GET)
     public List<Deposit> getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
                                         @RequestParam(value = "sort", required = false) String sort) throws Exception {
@@ -302,6 +309,13 @@ public class VaultsController {
 
         User user = usersService.getUser(userID);
         return getUserVault(user, vaultID);
+    }
+
+    @RequestMapping(value = "/vaults/{vaultid}/checkpolicy", method = RequestMethod.GET)
+    public Vault checkVaultPolicy(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                  @PathVariable("vaultid") String vaultID) throws Exception {
+
+        return vaultsService.checkPolicy(vaultID);
     }
 
     @RequestMapping(value = "/vaults/{vaultid}/deposits", method = RequestMethod.GET)

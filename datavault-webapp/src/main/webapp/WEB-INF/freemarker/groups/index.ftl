@@ -1,4 +1,6 @@
-<#import "*/layout/groupslayout.ftl" as layout>
+<#import "*/layout/defaultlayout.ftl" as layout>
+<#-- Specify which navbar element should be flagged as active -->
+<#global nav="groups">
 <@layout.vaultLayout>
 <div class="container">
 

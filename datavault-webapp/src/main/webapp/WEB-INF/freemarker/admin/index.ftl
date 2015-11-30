@@ -1,5 +1,8 @@
-<#import "*/layout/adminlayout.ftl" as layout>
+<#import "*/layout/defaultlayout.ftl" as layout>
+<#-- Specify which navbar element should be flagged as active -->
+<#global nav="admin">
 <@layout.vaultLayout>
+
 <div class="container">
 
     <ol class="breadcrumb">
@@ -94,6 +97,16 @@
             </div>
         </div>
         <div class="col-xs-6 col-md-4">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Review</h3>
+                </div>
+                <div class="panel-body">
+                    <h1 class="text-center"><a href="#"><span class="glyphicon glyphicon-list-alt"></span> ${reviewcount}</a></h1>
+                </div>
+            </div>
+        </div>
+
         </div>
     </div>
 
