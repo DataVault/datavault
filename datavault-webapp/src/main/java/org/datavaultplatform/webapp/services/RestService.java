@@ -288,8 +288,8 @@ public class RestService {
         return (VaultInfo)response.getBody();
     }
 
-    public Deposit addDeposit(String vaultId, Deposit deposit) {
-        HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/deposits", Deposit.class, deposit);
+    public Deposit addDeposit(String vaultId, CreateDeposit createDeposit) {
+        HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/deposits", Deposit.class, createDeposit);
         return (Deposit)response.getBody();
     }
     

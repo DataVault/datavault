@@ -1,13 +1,23 @@
 package org.datavaultplatform.common.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.jsondoc.core.annotation.ApiObject;
+import org.jsondoc.core.annotation.ApiObjectField;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@ApiObject(name = "CreateVault")
 public class CreateVault {
 
+    @ApiObjectField(description = "A name for the new vault")
     private String name;
+    
+    @ApiObjectField(description = "A description of the vault")
     private String description;
+    
+    @ApiObjectField(description = "The policy that will be applied to this vault")
     private String policyID;
+    
+    @ApiObjectField(description = "The group which is related to this vault")
     private String groupID;
     
     public CreateVault() { }

@@ -349,11 +349,15 @@ public class VaultsController {
     @RequestMapping(value = "/vaults/{vaultid}/deposits", method = RequestMethod.POST)
     public Deposit addDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
                               @PathVariable("vaultid") String vaultID,
-                              @RequestBody Deposit deposit) throws Exception {
+                              @RequestBody CreateDeposit createDeposit) throws Exception {
 
         User user = usersService.getUser(userID);
         Vault vault = getUserVault(user, vaultID);
-
+        
+        Deposit deposit = new Deposit();
+        deposit.setNote(createDeposit.getNote());
+        deposit.setFilePath(createDeposit.getFilePath());
+        
         String fullPath = deposit.getFilePath();
         String storageID, storagePath;
         if (!fullPath.contains("/")) {

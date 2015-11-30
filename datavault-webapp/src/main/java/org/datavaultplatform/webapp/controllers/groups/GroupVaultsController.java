@@ -2,6 +2,7 @@ package org.datavaultplatform.webapp.controllers.groups;
 
 
 import org.datavaultplatform.common.model.Group;
+import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -9,8 +10,6 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.List;
-import org.datavaultplatform.common.response.VaultInfo;
 
 /**
  * User: Stuart Lewis

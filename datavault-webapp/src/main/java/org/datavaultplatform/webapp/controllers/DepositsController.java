@@ -4,6 +4,7 @@ package org.datavaultplatform.webapp.controllers;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Restore;
+import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -26,16 +27,16 @@ public class DepositsController {
 
     // Return an 'create new deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/create", method = RequestMethod.GET)
-    public String createDeposit(@ModelAttribute Deposit deposit, ModelMap model, @PathVariable("vaultid") String vaultID) {
+    public String createDeposit(ModelMap model, @PathVariable("vaultid") String vaultID) {
         // pass the view an empty Deposit since the form expects it
-        model.addAttribute("deposit", new Deposit());
+        model.addAttribute("deposit", new CreateDeposit());
         model.addAttribute("vault", restService.getVault(vaultID));
         return "/deposits/create";
     }
 
     // Process the completed 'create new deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/create", method = RequestMethod.POST)
-    public String addDeposit(@ModelAttribute Deposit deposit, ModelMap model,
+    public String addDeposit(@ModelAttribute CreateDeposit deposit, ModelMap model,
                              @PathVariable("vaultid") String vaultID, @RequestParam String action) {
         // Was the cancel button pressed?
         if ("cancel".equals(action)) {

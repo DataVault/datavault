@@ -5,24 +5,43 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.retentionpolicy.PolicyStatus;
+import org.jsondoc.core.annotation.ApiObject;
+import org.jsondoc.core.annotation.ApiObjectField;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@ApiObject(name = "VaultInfo")
 public class VaultInfo {
     
+    @ApiObjectField(description = "The unique identifier for this vault")
     private String id;
     
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @ApiObjectField(description = "The date and time when this vault was created")
     private Date creationTime;
     
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @ApiObjectField(description = "The date and time when the policy check was last carried out")
     private Date policyLastChecked;
     
+    @ApiObjectField(description = "The name of this vault")
     private String name;
+    
+    @ApiObjectField(description = "The date and time when this vault was created")
     private String description;
+    
+    @ApiObjectField(description = "The policy that applies to this vault")
     private String policyID;
+    
+    @ApiObjectField(description = "The group which is related to this vault")
     private String groupID;
+    
+    @ApiObjectField(description = "The user who owns this vault")
     private String userID;
+    
+    @ApiObjectField(description = "The size of this vault in bytes")
     private long vaultSize;
+    
+    @ApiObjectField(description = "The status of the vault policy")
     private int policyStatus;
     
     public VaultInfo() { }
