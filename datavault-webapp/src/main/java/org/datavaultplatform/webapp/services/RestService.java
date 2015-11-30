@@ -37,6 +37,8 @@ public class RestService {
         HttpEntity entity;
         if (method == HttpMethod.GET) {
             entity = new HttpEntity(headers);
+        } else if (method == HttpMethod.PUT) {
+            entity = new HttpEntity(payload, headers);
         } else if (method == HttpMethod.POST) {
             entity = new HttpEntity(payload, headers);
         } else {
@@ -49,6 +51,10 @@ public class RestService {
     
     public HttpEntity<?> get(String url, Class clazz) {
         return exchange(url, clazz, HttpMethod.GET, null);
+    }
+
+    public HttpEntity<?> put(String url, Class clazz, Object payload) {
+        return exchange(url, clazz, HttpMethod.PUT, payload);
     }
     
     public HttpEntity<?> post(String url, Class clazz, Object payload) {
@@ -294,6 +300,11 @@ public class RestService {
 
     public User addUser(User user) {
         HttpEntity<?> response = post(brokerURL + "/users/", User.class, user);
+        return (User)response.getBody();
+    }
+
+    public User editUser(User user) {
+        HttpEntity<?> response = put(brokerURL + "/users/", User.class, user);
         return (User)response.getBody();
     }
 }

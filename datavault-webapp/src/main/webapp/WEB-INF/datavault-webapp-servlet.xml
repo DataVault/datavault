@@ -67,6 +67,10 @@
         <property name="restService" ref="restService" />
     </bean>
 
+    <bean id="usersController" class="org.datavaultplatform.webapp.controllers.UsersController">
+        <property name="restService" ref="restService" />
+    </bean>
+
     <bean id="adminController" class="org.datavaultplatform.webapp.controllers.admin.AdminController">
         <property name="restService" ref="restService" />
     </bean>
