@@ -7,7 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.retentionpolicy.PolicyStatus;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetVaultResponse {
+public class VaultInfo {
     
     private String id;
     
@@ -25,8 +25,8 @@ public class GetVaultResponse {
     private long vaultSize;
     private int policyStatus;
     
-    public GetVaultResponse() { }
-    public GetVaultResponse(String id, String userID, Date creationTime, String name, String description, String policyID, String groupID, long vaultSize, int policyStatus, Date policyLastChecked) {
+    public VaultInfo() { }
+    public VaultInfo(String id, String userID, Date creationTime, String name, String description, String policyID, String groupID, long vaultSize, int policyStatus, Date policyLastChecked) {
         this.id = id;
         this.userID = userID;
         this.creationTime = creationTime;

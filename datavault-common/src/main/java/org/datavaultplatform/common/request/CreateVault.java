@@ -3,15 +3,15 @@ package org.datavaultplatform.common.request;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CreateVaultRequest {
+public class CreateVault {
 
     private String name;
     private String description;
     private String policyID;
     private String groupID;
     
-    public CreateVaultRequest() { }
-    public CreateVaultRequest(String name, String description, String policyID, String groupID) {
+    public CreateVault() { }
+    public CreateVault(String name, String description, String policyID, String groupID) {
         this.name = name;
         this.description = description;
         this.policyID = policyID;

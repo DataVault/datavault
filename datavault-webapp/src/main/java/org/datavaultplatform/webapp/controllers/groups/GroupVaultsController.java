@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.datavaultplatform.common.response.GetVaultResponse;
+import org.datavaultplatform.common.response.VaultInfo;
 
 /**
  * User: Stuart Lewis
@@ -38,9 +38,9 @@ public class GroupVaultsController {
         }
 
         // Get the vaults for each group
-        ArrayList<GetVaultResponse[]> vaults = new ArrayList<>();
+        ArrayList<VaultInfo[]> vaults = new ArrayList<>();
         for (Group group : members) {
-            GetVaultResponse[] v = restService.getVaultsListingForGroup(group.getID());
+            VaultInfo[] v = restService.getVaultsListingForGroup(group.getID());
             vaults.add(v);
         }
 

@@ -14,9 +14,8 @@ import javax.persistence.FetchType;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.retentionpolicy.PolicyStatus;
-import org.datavaultplatform.common.response.GetVaultResponse;
+import org.datavaultplatform.common.response.VaultInfo;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.util.ArrayList;
@@ -152,8 +151,8 @@ public class Vault {
         this.user = user;
     }
     
-    public GetVaultResponse convertToResponse() {
-        return new GetVaultResponse(
+    public VaultInfo convertToResponse() {
+        return new VaultInfo(
                 id,
                 user.getID(),
                 creationTime,

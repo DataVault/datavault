@@ -88,34 +88,34 @@ public class RestService {
         return (String)response.getBody();
     }
 
-    public GetVaultResponse[] getVaultsListing() {
-        HttpEntity<?> response = get(brokerURL + "/vaults", GetVaultResponse[].class);
-        return (GetVaultResponse[])response.getBody();
+    public VaultInfo[] getVaultsListing() {
+        HttpEntity<?> response = get(brokerURL + "/vaults", VaultInfo[].class);
+        return (VaultInfo[])response.getBody();
     }
 
-    public GetVaultResponse[] getVaultsListingForGroup(String groupID) {
-        HttpEntity<?> response = get(brokerURL + "/groups/" + groupID + "/vaults", GetVaultResponse[].class);
-        return (GetVaultResponse[])response.getBody();
+    public VaultInfo[] getVaultsListingForGroup(String groupID) {
+        HttpEntity<?> response = get(brokerURL + "/groups/" + groupID + "/vaults", VaultInfo[].class);
+        return (VaultInfo[])response.getBody();
     }
 
-    public GetVaultResponse[] getVaultsListingAll() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/all", GetVaultResponse[].class);
-        return (GetVaultResponse[])response.getBody();
+    public VaultInfo[] getVaultsListingAll() {
+        HttpEntity<?> response = get(brokerURL + "/vaults/all", VaultInfo[].class);
+        return (VaultInfo[])response.getBody();
     }
 
-    public GetVaultResponse[] getVaultsListingAll(String sort, String order) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/all?sort=" + sort + "&order=" + order, GetVaultResponse[].class);
-        return (GetVaultResponse[])response.getBody();
+    public VaultInfo[] getVaultsListingAll(String sort, String order) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/all?sort=" + sort + "&order=" + order, VaultInfo[].class);
+        return (VaultInfo[])response.getBody();
     }
 
-    public GetVaultResponse[] searchVaults(String query) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query, GetVaultResponse[].class);
-        return (GetVaultResponse[])response.getBody();
+    public VaultInfo[] searchVaults(String query) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query, VaultInfo[].class);
+        return (VaultInfo[])response.getBody();
     }
 
-    public GetVaultResponse[] searchVaults(String query, String sort, String order) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query + "&sort=" + sort + "&order=" + order, GetVaultResponse[].class);
-        return (GetVaultResponse[])response.getBody();
+    public VaultInfo[] searchVaults(String query, String sort, String order) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query + "&sort=" + sort + "&order=" + order, VaultInfo[].class);
+        return (VaultInfo[])response.getBody();
     }
 
     public int getVaultsCount() {
@@ -173,9 +173,9 @@ public class RestService {
         return (Restore[])response.getBody();
     }
 
-    public GetVaultResponse getVault(String id) {        
-        HttpEntity<?> response = get(brokerURL + "/vaults/" + id, GetVaultResponse.class);
-        return (GetVaultResponse)response.getBody();
+    public VaultInfo getVault(String id) {        
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + id, VaultInfo.class);
+        return (VaultInfo)response.getBody();
     }
 
     public Vault checkVaultPolicy(String vaultId) {
@@ -184,8 +184,8 @@ public class RestService {
     }
 
     public int checkAllVaultPolicies() {
-        GetVaultResponse[] vaults = getVaultsListingAll();
-        for (GetVaultResponse vault : vaults) {
+        VaultInfo[] vaults = getVaultsListingAll();
+        for (VaultInfo vault : vaults) {
             get(brokerURL + "/vaults/" + vault.getID() + "/checkpolicy", Vault.class);
         }
         return vaults.length;
@@ -283,9 +283,9 @@ public class RestService {
 
     /* POST requests */
     
-    public GetVaultResponse addVault(CreateVaultRequest createVault) {
-        HttpEntity<?> response = post(brokerURL + "/vaults/", GetVaultResponse.class, createVault);
-        return (GetVaultResponse)response.getBody();
+    public VaultInfo addVault(CreateVault createVault) {
+        HttpEntity<?> response = post(brokerURL + "/vaults/", VaultInfo.class, createVault);
+        return (VaultInfo)response.getBody();
     }
 
     public Deposit addDeposit(String vaultId, Deposit deposit) {

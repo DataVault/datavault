@@ -137,9 +137,9 @@ public class VaultsController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
-    public List<GetVaultResponse> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    public List<VaultInfo> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
 
-        List<GetVaultResponse> vaultResponses = new ArrayList<>();
+        List<VaultInfo> vaultResponses = new ArrayList<>();
         User user = usersService.getUser(userID);
         for (Vault vault : user.getVaults()) {
             vaultResponses.add(vault.convertToResponse());
@@ -158,16 +158,16 @@ public class VaultsController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
     @RequestMapping(value = "/vaults/all", method = RequestMethod.GET)
-    public List<GetVaultResponse> getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                    @RequestParam(value = "sort", required = false)
-                                    @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime"}, defaultvalue = "creationTime", required = false) String sort,
-                                    @RequestParam(value = "order", required = false)
-                                    @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order) throws Exception {
+    public List<VaultInfo> getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                        @RequestParam(value = "sort", required = false)
+                                        @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime"}, defaultvalue = "creationTime", required = false) String sort,
+                                        @RequestParam(value = "order", required = false)
+                                        @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order) throws Exception {
 
         if (sort == null) sort = "";
         if (order == null) order = "asc";
         
-        List<GetVaultResponse> vaultResponses = new ArrayList<>();
+        List<VaultInfo> vaultResponses = new ArrayList<>();
         for (Vault vault : vaultsService.getVaults(sort, order)) {
             vaultResponses.add(vault.convertToResponse());
         }
@@ -175,13 +175,13 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults/search", method = RequestMethod.GET)
-    public List<GetVaultResponse> searchAllVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
+    public List<VaultInfo> searchAllVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
                                                   @RequestParam String query,
                                                   @RequestParam(value = "sort", required = false) String sort,
                                                   @RequestParam(value = "order", required = false)
                                                   @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order) throws Exception {
 
-        List<GetVaultResponse> vaultResponses = new ArrayList<>();
+        List<VaultInfo> vaultResponses = new ArrayList<>();
         for (Vault vault : vaultsService.search(query, sort, order)) {
             vaultResponses.add(vault.convertToResponse());
         }
@@ -265,8 +265,8 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)
-    public GetVaultResponse addVault(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                     @RequestBody CreateVaultRequest createVault) throws Exception {
+    public VaultInfo addVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+                              @RequestBody CreateVault createVault) throws Exception {
         
         Vault vault = new Vault();
         vault.setName(createVault.getName());
@@ -317,8 +317,8 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
-    public GetVaultResponse getVault(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                     @PathVariable("vaultid") String vaultID) throws Exception {
+    public VaultInfo getVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+                              @PathVariable("vaultid") String vaultID) throws Exception {
 
         User user = usersService.getUser(userID);
         Vault vault = getUserVault(user, vaultID);

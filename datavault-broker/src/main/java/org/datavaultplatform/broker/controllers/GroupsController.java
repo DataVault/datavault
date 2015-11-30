@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.response.GetVaultResponse;
+import org.datavaultplatform.common.response.VaultInfo;
 
 @RestController
 @Api(name="Groups", description = "Interact with DataVault Groups")
@@ -95,10 +95,10 @@ public class GroupsController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
     @RequestMapping(value = "/groups/{groupid}/vaults", method = RequestMethod.GET)
-    public List<GetVaultResponse> getGroupVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                                 @PathVariable("groupid") String groupID) throws Exception {
+    public List<VaultInfo> getGroupVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                          @PathVariable("groupid") String groupID) throws Exception {
 
-        List<GetVaultResponse> vaultResponses = new ArrayList<>();
+        List<VaultInfo> vaultResponses = new ArrayList<>();
         for (Vault vault : groupsService.getGroup(groupID).getVaults()) {
             vaultResponses.add(vault.convertToResponse());
         }
