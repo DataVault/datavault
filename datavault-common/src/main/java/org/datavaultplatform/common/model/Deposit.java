@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.model;
 
+import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.event.Event;
 
 import org.apache.commons.io.FileUtils;
@@ -190,10 +191,6 @@ public class Deposit {
     }
 
     public long getSize() { return depositSize; }
-
-    public String getSizeStr() {
-        return FileUtils.byteCountToDisplaySize(depositSize);
-    }
     
     public List<Event> getEvents() {
         return events;
@@ -204,4 +201,17 @@ public class Deposit {
     }
 
     public List<Restore> getRestores() { return restores; }
+    
+    public DepositInfo convertToResponse() {
+        return new DepositInfo(
+                id,
+                creationTime,
+                status,
+                note,
+                fileOrigin,
+                shortFilePath,
+                filePath,
+                depositSize
+            );
+    }
 }

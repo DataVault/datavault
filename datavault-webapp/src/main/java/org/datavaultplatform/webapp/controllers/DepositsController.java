@@ -1,10 +1,10 @@
 package org.datavaultplatform.webapp.controllers;
 
 
-import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Restore;
 import org.datavaultplatform.common.request.CreateDeposit;
+import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -43,7 +43,7 @@ public class DepositsController {
             return "redirect:/vaults/" + vaultID;
         }
 
-        Deposit newDeposit = restService.addDeposit(vaultID, deposit);
+        DepositInfo newDeposit = restService.addDeposit(vaultID, deposit);
         String depositUrl = "/vaults/" + vaultID + "/deposits/" + newDeposit.getID() + "/";
         return "redirect:" + depositUrl;
     }
@@ -61,7 +61,7 @@ public class DepositsController {
     
     // View properties of a single deposit as a JSON object
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/json", method = RequestMethod.GET)
-    public @ResponseBody Deposit getDepositJson(@PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
+    public @ResponseBody DepositInfo getDepositJson(@PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
         return restService.getDeposit(vaultID, depositID);
     }
     
