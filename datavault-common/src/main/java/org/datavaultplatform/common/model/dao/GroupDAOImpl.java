@@ -62,10 +62,4 @@ public class GroupDAOImpl implements GroupDAO {
         Session session = this.sessionFactory.openSession();
         return (int)(long)(Long)session.createCriteria(Group.class).setProjection(Projections.rowCount()).uniqueResult();
     }
-
-    @Override
-    public int countVaultsById(String Id) {
-        Session session = this.sessionFactory.openSession();
-        return (int)(long)(Long)session.createCriteria(Vault.class).add(Restrictions.eq("groupID", Id)).setProjection(Projections.rowCount()).uniqueResult();
-    }
 }

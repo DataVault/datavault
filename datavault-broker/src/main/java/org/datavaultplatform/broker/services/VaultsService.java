@@ -15,8 +15,6 @@ public class VaultsService {
 
     public List<Vault> getVaults(String sort, String order) { return vaultDAO.list(sort, order); }
 
-    public List<Vault> getVaultsForGroup(String groupID) { return vaultDAO.findByGroup(groupID); }
-
     public void addVault(Vault vault) {
         Date d = new Date();
         vault.setCreationTime(d);

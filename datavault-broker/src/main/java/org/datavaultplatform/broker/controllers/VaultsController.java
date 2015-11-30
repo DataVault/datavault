@@ -1,10 +1,13 @@
 package org.datavaultplatform.broker.controllers;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.request.*;
+import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.queue.Sender;
@@ -26,6 +29,7 @@ public class VaultsController {
     private MetadataService metadataService;
     private FilesService filesService;
     private PoliciesService policiesService;
+    private GroupsService groupsService;
     private UsersService usersService;
     private FileStoreService fileStoreService;
     private ArchiveStoreService archiveStoreService;
@@ -87,6 +91,10 @@ public class VaultsController {
     public void setPoliciesService(PoliciesService policiesService) {
         this.policiesService = policiesService;
     }
+    
+    public void setGroupsService(GroupsService groupsService) {
+        this.groupsService = groupsService;
+    }
 
     public void setFileStoreService(FileStoreService fileStoreService) {
         this.fileStoreService = fileStoreService;
@@ -129,10 +137,14 @@ public class VaultsController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
-    public List<Vault> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    public List<GetVaultResponse> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
 
+        List<GetVaultResponse> vaultResponses = new ArrayList<>();
         User user = usersService.getUser(userID);
-        return user.getVaults();
+        for (Vault vault : user.getVaults()) {
+            vaultResponses.add(vault.convertToResponse());
+        }
+        return vaultResponses;
     }
 
     @ApiMethod(
@@ -146,7 +158,7 @@ public class VaultsController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
     @RequestMapping(value = "/vaults/all", method = RequestMethod.GET)
-    public List<Vault> getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
+    public List<GetVaultResponse> getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
                                     @RequestParam(value = "sort", required = false)
                                     @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime"}, defaultvalue = "creationTime", required = false) String sort,
                                     @RequestParam(value = "order", required = false)
@@ -154,34 +166,26 @@ public class VaultsController {
 
         if (sort == null) sort = "";
         if (order == null) order = "asc";
-        return vaultsService.getVaults(sort, order);
-    }
-
-    @ApiMethod(
-            path = "/vaults/group/{groupid}",
-            verb = ApiVerb.GET,
-            description = "Gets a list of all Vaults owned by a given Group",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
-    })
-    @RequestMapping(value = "/vaults/group/{groupid}", method = RequestMethod.GET)
-    public List<Vault> getVaultsForGroup(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                         @PathVariable("groupid") String groupID) throws Exception {
-
-        return vaultsService.getVaultsForGroup(groupID);
+        
+        List<GetVaultResponse> vaultResponses = new ArrayList<>();
+        for (Vault vault : vaultsService.getVaults(sort, order)) {
+            vaultResponses.add(vault.convertToResponse());
+        }
+        return vaultResponses;
     }
 
     @RequestMapping(value = "/vaults/search", method = RequestMethod.GET)
-    public List<Vault> searchAllVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                       @RequestParam String query,
-                                       @RequestParam(value = "sort", required = false) String sort,
-                                       @RequestParam(value = "order", required = false)
-                                       @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order) throws Exception {
+    public List<GetVaultResponse> searchAllVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                                  @RequestParam String query,
+                                                  @RequestParam(value = "sort", required = false) String sort,
+                                                  @RequestParam(value = "order", required = false)
+                                                  @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order) throws Exception {
 
-        return vaultsService.search(query, sort, order);
+        List<GetVaultResponse> vaultResponses = new ArrayList<>();
+        for (Vault vault : vaultsService.search(query, sort, order)) {
+            vaultResponses.add(vault.convertToResponse());
+        }
+        return vaultResponses;
     }
 
     @RequestMapping(value = "/vaults/deposits/search", method = RequestMethod.GET)
@@ -261,16 +265,25 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)
-    public Vault addVault(@RequestHeader(value = "X-UserID", required = true) String userID,
-                          @RequestBody Vault vault) throws Exception {
-
-        String policyID = vault.getPolicyID();
-        Policy policy = policiesService.getPolicy(policyID);
+    public GetVaultResponse addVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                     @RequestBody CreateVaultRequest createVault) throws Exception {
+        
+        Vault vault = new Vault();
+        vault.setName(createVault.getName());
+        vault.setDescription(createVault.getDescription());
+        
+        Policy policy = policiesService.getPolicy(createVault.getPolicyID());
         if (policy == null) {
-            throw new Exception("Policy '" + policyID + "' does not exist");
+            throw new Exception("Policy '" + createVault.getPolicyID() + "' does not exist");
         }
         vault.setPolicy(policy);
-
+        
+        Group group = groupsService.getGroup(createVault.getGroupID());
+        if (group == null) {
+            throw new Exception("Group '" + createVault.getGroupID() + "' does not exist");
+        }
+        vault.setGroup(group);
+        
         User user = usersService.getUser(userID);
         if (user == null) {
             throw new Exception("User '" + userID + "' does not exist");
@@ -300,15 +313,20 @@ public class VaultsController {
         }
 
         vaultsService.addVault(vault);
-        return vault;
+        return vault.convertToResponse();
     }
 
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
-    public Vault getVault(@RequestHeader(value = "X-UserID", required = true) String userID,
-                          @PathVariable("vaultid") String vaultID) throws Exception {
+    public GetVaultResponse getVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                     @PathVariable("vaultid") String vaultID) throws Exception {
 
         User user = usersService.getUser(userID);
-        return getUserVault(user, vaultID);
+        Vault vault = getUserVault(user, vaultID);
+        if (vault != null) {
+            return vault.convertToResponse();
+        } else {
+            return null;
+        }
     }
 
     @RequestMapping(value = "/vaults/{vaultid}/checkpolicy", method = RequestMethod.GET)

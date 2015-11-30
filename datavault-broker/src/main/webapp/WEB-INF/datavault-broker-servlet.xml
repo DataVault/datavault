@@ -73,6 +73,7 @@
         <property name="metadataService" ref="metadataService" />
         <property name="filesService" ref="filesService" />
         <property name="policiesService" ref="policiesService" />
+        <property name="groupsService" ref="groupsService" />
         <property name="usersService" ref="usersService" />
         <property name="fileStoreService" ref="fileStoreService" />
         <property name="archiveStoreService" ref="archiveStoreService" />
@@ -294,6 +295,8 @@
             <list>
                 <value>org.datavaultplatform.broker.controllers</value>
                 <value>org.datavaultplatform.common.model</value>
+                <value>org.datavaultplatform.common.request</value>
+                <value>org.datavaultplatform.common.response</value>
             </list>
         </constructor-arg>
         <property name="playgroundEnabled" value="true" />

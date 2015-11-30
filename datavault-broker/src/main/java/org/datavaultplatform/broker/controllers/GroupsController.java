@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.controllers;
 
+import java.util.ArrayList;
 import org.datavaultplatform.broker.services.GroupsService;
 import org.datavaultplatform.common.model.Group;
 import org.jsondoc.core.annotation.*;
@@ -8,6 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.response.GetVaultResponse;
 
 @RestController
 @Api(name="Groups", description = "Interact with DataVault Groups")
@@ -77,7 +80,28 @@ public class GroupsController {
     })
     @RequestMapping(value = "/groups/{groupid}/count", method = RequestMethod.GET)
     public int getGroupVaultCount(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                  @PathVariable("groupid") @ApiPathParam(name = "Group ID", description = "The Group ID to retrieve") String queryGroupID) {
-        return groupsService.vaultCount(queryGroupID);
+                                  @PathVariable("groupid") @ApiPathParam(name = "Group ID", description = "The Group ID to retrieve") String groupID) {
+        return groupsService.getGroup(groupID).getVaults().size();
+    }
+    
+    @ApiMethod(
+            path = "/groups/{groupid}/vaults",
+            verb = ApiVerb.GET,
+            description = "Gets a list of all Vaults owned by a given Group",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
+    @RequestMapping(value = "/groups/{groupid}/vaults", method = RequestMethod.GET)
+    public List<GetVaultResponse> getGroupVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                                 @PathVariable("groupid") String groupID) throws Exception {
+
+        List<GetVaultResponse> vaultResponses = new ArrayList<>();
+        for (Vault vault : groupsService.getGroup(groupID).getVaults()) {
+            vaultResponses.add(vault.convertToResponse());
+        }
+        return vaultResponses;
     }
 }
