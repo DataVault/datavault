@@ -71,6 +71,11 @@
         <property name="restService" ref="restService" />
     </bean>
 
+    <bean id="feedbackController" class="org.datavaultplatform.webapp.controllers.FeedbackController">
+        <property name="mailSender" ref="mailSender"/>
+        <property name="templateMessage" ref="templateMessage"/>
+    </bean>
+
     <bean id="adminController" class="org.datavaultplatform.webapp.controllers.admin.AdminController">
         <property name="restService" ref="restService" />
     </bean>
@@ -103,6 +108,28 @@
 
     <bean id="restService" class="org.datavaultplatform.webapp.services.RestService">
         <property name="brokerURL" value="${brokerURL}" />
+    </bean>
+
+    <!-- Email feedback settings -->
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host"><value>${mail.host}</value></property>
+        <property name="port"><value>${mail.port}</value></property>
+        <property name="protocol"><value>smtp</value></property>
+        <property name="username"><value>${mail.username}</value></property>
+        <property name="password"><value>${mail.password}</value></property>
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtp.auth">true</prop>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+                <prop key="mail.smtp.quitwait">false</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="templateMessage" class="org.springframework.mail.SimpleMailMessage">
+        <property name="to" value="${mail.administrator}"/>
+        <property name="from" value="feedback@datavaultplatform.org"/>
+        <property name="subject" value="DataVault feedback"/>
     </bean>
 
 </beans>
