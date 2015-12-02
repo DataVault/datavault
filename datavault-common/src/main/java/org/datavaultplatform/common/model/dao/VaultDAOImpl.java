@@ -2,7 +2,6 @@ package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
 
-import org.datavaultplatform.common.retentionpolicy.PolicyStatus;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -73,20 +72,6 @@ public class VaultDAOImpl implements VaultDAO {
         Vault vault = (Vault)criteria.uniqueResult();
         session.close();
         return vault;
-    }
-
-    @Override
-    public List<Vault> findByGroup(String groupId) {
-        Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
-        criteria.add(Restrictions.eq("groupID", groupId));
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-
-        //order("", "", criteria);
-
-        List<Vault> vaults = criteria.list();
-        session.close();
-        return vaults;
     }
 
     @Override

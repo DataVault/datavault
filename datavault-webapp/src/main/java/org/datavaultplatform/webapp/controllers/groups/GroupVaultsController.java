@@ -2,7 +2,7 @@ package org.datavaultplatform.webapp.controllers.groups;
 
 
 import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -10,7 +10,6 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * User: Stuart Lewis
@@ -30,7 +29,7 @@ public class GroupVaultsController {
     public String getGroupVaultsListing(ModelMap model) {
         // Which groups is this user an owner of
         Group[] groups = restService.getGroups();
-        ArrayList<Group> members = new ArrayList<Group>();
+        ArrayList<Group> members = new ArrayList<>();
         for (Group group : groups) {
             if (group.hasMember(SecurityContextHolder.getContext().getAuthentication().getName())) {
                 members.add(group);
@@ -38,9 +37,9 @@ public class GroupVaultsController {
         }
 
         // Get the vaults for each group
-        ArrayList<Vault[]> vaults = new ArrayList<Vault[]>();
+        ArrayList<VaultInfo[]> vaults = new ArrayList<>();
         for (Group group : members) {
-            Vault[] v = restService.getVaultsListingForGroup(group.getID());
+            VaultInfo[] v = restService.getVaultsListingForGroup(group.getID());
             vaults.add(v);
         }
 

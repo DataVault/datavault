@@ -1,9 +1,10 @@
 package org.datavaultplatform.webapp.controllers;
 
 
-import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Restore;
+import org.datavaultplatform.common.request.CreateDeposit;
+import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -26,23 +27,23 @@ public class DepositsController {
 
     // Return an 'create new deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/create", method = RequestMethod.GET)
-    public String createDeposit(@ModelAttribute Deposit deposit, ModelMap model, @PathVariable("vaultid") String vaultID) {
+    public String createDeposit(ModelMap model, @PathVariable("vaultid") String vaultID) {
         // pass the view an empty Deposit since the form expects it
-        model.addAttribute("deposit", new Deposit());
+        model.addAttribute("deposit", new CreateDeposit());
         model.addAttribute("vault", restService.getVault(vaultID));
         return "/deposits/create";
     }
 
     // Process the completed 'create new deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/create", method = RequestMethod.POST)
-    public String addDeposit(@ModelAttribute Deposit deposit, ModelMap model,
+    public String addDeposit(@ModelAttribute CreateDeposit deposit, ModelMap model,
                              @PathVariable("vaultid") String vaultID, @RequestParam String action) {
         // Was the cancel button pressed?
         if ("cancel".equals(action)) {
             return "redirect:/vaults/" + vaultID;
         }
 
-        Deposit newDeposit = restService.addDeposit(vaultID, deposit);
+        DepositInfo newDeposit = restService.addDeposit(vaultID, deposit);
         String depositUrl = "/vaults/" + vaultID + "/deposits/" + newDeposit.getID() + "/";
         return "redirect:" + depositUrl;
     }
@@ -60,7 +61,7 @@ public class DepositsController {
     
     // View properties of a single deposit as a JSON object
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/json", method = RequestMethod.GET)
-    public @ResponseBody Deposit getDepositJson(@PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
+    public @ResponseBody DepositInfo getDepositJson(@PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
         return restService.getDeposit(vaultID, depositID);
     }
     

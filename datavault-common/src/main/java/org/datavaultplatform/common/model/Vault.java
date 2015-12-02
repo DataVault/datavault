@@ -14,8 +14,8 @@ import javax.persistence.FetchType;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.retentionpolicy.PolicyStatus;
+import org.datavaultplatform.common.response.VaultInfo;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.util.ArrayList;
@@ -65,20 +65,18 @@ public class Vault {
 
     @ManyToOne
     private Policy policy;
-    // Raw policy ID
-    private String policyID;
 
     // Status of the policy
     private int policyStatus;
 
     // Date policy was last checked
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date policyLastChecked;
 
     @JsonIgnore
     @ManyToOne
     private Group group;
-    // Raw group ID
-    private String groupID;
 
     @ManyToOne
     private User user;
@@ -117,10 +115,6 @@ public class Vault {
     }
 
     public long getSize() { return vaultSize; }
-
-    public String getSizeStr() {
-        return FileUtils.byteCountToDisplaySize(vaultSize);
-    }
     
     public List<Deposit> getDeposits() {
         if (deposits == null) return new ArrayList();
@@ -137,26 +131,11 @@ public class Vault {
         this.policy = policy;
     }
 
-    public String getPolicyID() {
-        return policyID;
-    }
-
-    public void setPolicyID(String policyID) {
-        this.policyID = policyID;
-    }
-
     public int getPolicyStatus() { return policyStatus; }
 
     public void setPolicyLastChecked(Date policyLastChecked) { this.policyLastChecked = policyLastChecked; }
 
     public Date getPolicyLastChecked() { return policyLastChecked; }
-
-    public String getPolicyStatusString() {
-        if (policyStatus == PolicyStatus.UNCHECKED) return "Un-checked";
-        else if (policyStatus == PolicyStatus.OK) return "OK";
-        else if (policyStatus == PolicyStatus.REVIEW) return "Review";
-        else return ("Unknown");
-    }
 
     public void setPolicyStatus(int policyStatus) { this.policyStatus = policyStatus; }
 
@@ -165,19 +144,25 @@ public class Vault {
     public void setGroup(Group group) {
         this.group = group;
     }
-
-    public String getGroupID() {
-        return groupID;
-    }
-
-    public void setGroupID(String groupID) {
-        this.groupID = groupID;
-    }
-
+    
     public User getUser() { return user; }
     
     public void setUser(User user) {
         this.user = user;
+    }
+    
+    public VaultInfo convertToResponse() {
+        return new VaultInfo(
+                id,
+                user.getID(),
+                creationTime,
+                name,
+                description,
+                policy.getID(),
+                group.getID(),
+                vaultSize,
+                policyStatus,
+                policyLastChecked);
     }
     
     @Override
