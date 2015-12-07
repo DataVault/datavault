@@ -63,7 +63,7 @@ h6, .h6 {
 .navbar-default .navbar-nav > .open > a,
 .navbar-default .navbar-nav > .open > a:hover,
 .navbar-default .navbar-nav > .open > a:focus {
-    color: #555;
+    color: #fff;
     background-color: #428bca;
 }
 
