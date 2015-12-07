@@ -43,7 +43,7 @@ h6, .h6 {
 
 .navbar-default {
     background-color: #428bca;
-    border-color: #428bca;
+    border: 0;
 }
 
 /* link */
