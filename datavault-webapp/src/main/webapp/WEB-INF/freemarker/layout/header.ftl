@@ -28,6 +28,7 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">${principal.username}<span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="${springMacroRequestContext.getContextPath()}/users/edit/${principal.username}">Edit profile</a></li>
+                            <!--<li><a href="${springMacroRequestContext.getContextPath()}/users/${principal.username}/keys">Add SSH keys</a></li>  -->
                             <li><a href="${springMacroRequestContext.getContextPath()}/auth/logout">Logout</a></li>
                         </ul>
                     </li>
