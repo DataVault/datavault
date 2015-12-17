@@ -8,7 +8,6 @@ import org.datavaultplatform.broker.services.UserKeyPairService;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.broker.services.UsersService;
-import org.datavaultplatform.common.model.UserKeyPair;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.http.MediaType;
@@ -169,15 +168,14 @@ public class UsersController {
     public String addKeyPair(@PathVariable("userid") @ApiPathParam(name = "User ID", description = "Get the Public Key for this user ID") String userID) throws Exception {
 
         User user = usersService.getUser(userID);
-        UserKeyPair userKeyPair = userKeyPairService.generateNewKeyPair();
+        userKeyPairService.generateNewKeyPair();
 
         HashMap<String,String> storeProperties = new HashMap<String,String>();
         storeProperties.put("rootPath", activeDir);
         storeProperties.put("username", user.getName());
         storeProperties.put("password", "");
-        // todo : don't store the keys together!! In fact, don't store the public key at all.
-        storeProperties.put("publicKey", userKeyPair.getPublicKey());
-        storeProperties.put("privateKey", userKeyPair.getPrivateKey());
+        storeProperties.put("publicKey", userKeyPairService.getPublicKey());
+        storeProperties.put("privateKey", userKeyPairService.getPrivateKey());
 
         FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.SFTPFileSystem", storeProperties, "SFTP filesystem");
         store.setUser(user);

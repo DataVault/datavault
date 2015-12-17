@@ -1,8 +1,5 @@
 package org.datavaultplatform.broker.services;
 
-import org.datavaultplatform.common.model.UserKeyPair;
-import org.datavaultplatform.common.model.dao.UserKeyPairDAO;
-
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
@@ -15,48 +12,48 @@ import com.jcraft.jsch.*;
  */
 public class UserKeyPairService {
 
-    private UserKeyPairDAO userKeyPairDAO;
-
     // comment added at the end of public key
     private static final String PUBKEY_COMMENT = "datavault";
+    // Todo : inject this in Spring config, it shouldn't be visible in Github
+    private static final String PASSPHRASE = "datavault";
+    private String privateKey;
+    private String publicKey;
 
-    // todo: set this somewhere else
-    private String passphrase = "datavault";
-
-
-    public UserKeyPairDAO getUserKeyPairDAO() {
-        return userKeyPairDAO;
+    public String getPrivateKey() {
+        return privateKey;
     }
 
-    public void setUserKeyPairDAO(UserKeyPairDAO userKeyPairDAO) {
-        this.userKeyPairDAO = userKeyPairDAO;
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
     }
 
-    public void addUserKeyPair(UserKeyPair userKeyPair) {
-        userKeyPairDAO.save(userKeyPair);
+    public String getPublicKey() {
+        return publicKey;
     }
 
-    public UserKeyPair generateNewKeyPair() {
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public static String getPASSPHRASE() {
+        return PASSPHRASE;
+    }
+
+
+    public void generateNewKeyPair() {
 
         JSch jschClient = new JSch();
 
         try {
             KeyPair keyPair = KeyPair.genKeyPair(jschClient, KeyPair.RSA);
             OutputStream privKeyBaos = new ByteArrayOutputStream();
-            keyPair.writePrivateKey(privKeyBaos, passphrase.getBytes());
+            keyPair.writePrivateKey(privKeyBaos, PASSPHRASE.getBytes());
 
             OutputStream pubKeyBaos = new ByteArrayOutputStream();
             keyPair.writePublicKey(pubKeyBaos, PUBKEY_COMMENT);
 
-            String privateKey = privKeyBaos.toString();
-            String publicKey = pubKeyBaos.toString();
-
-            UserKeyPair userKeyPair = new UserKeyPair();
-            userKeyPair.setPrivateKey(privateKey);
-            userKeyPair.setPublicKey(publicKey);
-
-
-            return userKeyPair;
+            setPrivateKey(privKeyBaos.toString());
+            setPublicKey(pubKeyBaos.toString());
 
         } catch (JSchException e) {
             throw new IllegalArgumentException("problem with generating ssh key", e);
