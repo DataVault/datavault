@@ -25,6 +25,9 @@ public class SFTPFileSystem extends Device implements UserStore {
     private String rootPath = null;
     private String username = null;
     private String password = null;
+    private String privateKey = null;
+    // todo : get this from elsewhere!!!!
+    private String passphrase = "datavault";
     
     private Session session = null;
     private ChannelSftp channelSftp = null;
@@ -41,13 +44,22 @@ public class SFTPFileSystem extends Device implements UserStore {
         rootPath = config.get("rootPath");
         username = config.get("username");
         password = config.get("password");
+        privateKey = config.get("privateKey");
     }
     
     private void Connect() throws Exception {
-
         JSch jsch = new JSch();
         session = jsch.getSession(username, host, port);
-        session.setPassword(password);
+
+        if (password != null && !password.isEmpty()) {
+            session.setPassword(password);
+        } else {
+            jsch.addIdentity(username, privateKey.getBytes(), null, passphrase.getBytes());
+        }
+
+        // todo : check its a known host??
+        //jsch.setKnownHosts(".../.ssh/known_hosts");
+
         java.util.Properties properties = new java.util.Properties();
         properties.put("StrictHostKeyChecking", "no");
         session.setConfig(properties);
@@ -70,24 +82,6 @@ public class SFTPFileSystem extends Device implements UserStore {
         }
     }
 
-    /*
-    private void addPublicKeyIdentity(UserKeyPair userKeyPair, String passphrase) {
-        String privateKey = userKeyPair.getPrivateKey();
-        String publicKey = userKeyPair.getPublicKey();
-        if (passphrase == null) {
-            passphrase = "";
-        }
-        try {
-            jschClient.addIdentity(this.username,
-                    privateKey.getBytes(), publicKey.getBytes(),
-                    passphrase.getBytes());
-        } catch (JSchException e) {
-            log.warn("problem when adding identity for " + username, e);
-            throw new IllegalArgumentException("wrong arguments for setting identity", e);
-        }
-    }
-    */
-    
     private String runCommand(String command) throws Exception {
         
         ChannelExec channelExec = null;
