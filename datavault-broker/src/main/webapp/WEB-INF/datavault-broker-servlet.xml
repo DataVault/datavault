@@ -159,7 +159,7 @@
     <bean id="jobsService" class="org.datavaultplatform.broker.services.JobsService">
         <property name="jobDAO" ref="jobDAO" />
     </bean>
-    
+
     <!-- RabbitMQ -->
     
     <bean id="connectionFactory"

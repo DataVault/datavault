@@ -166,21 +166,20 @@ public class UsersController {
     })
     @RequestMapping(value = "/users/{userid}/keys", method = RequestMethod.POST)
     public String addKeyPair(@PathVariable("userid") @ApiPathParam(name = "User ID", description = "Get the Public Key for this user ID") String userID) throws Exception {
-
         User user = usersService.getUser(userID);
         userKeyPairService.generateNewKeyPair();
 
         HashMap<String,String> storeProperties = new HashMap<String,String>();
+        storeProperties.put("host", "localhost");
         storeProperties.put("rootPath", activeDir);
-        storeProperties.put("username", user.getName());
+        storeProperties.put("username", user.getID());
         storeProperties.put("password", "");
-        storeProperties.put("publicKey", userKeyPairService.getPublicKey());
         storeProperties.put("privateKey", userKeyPairService.getPrivateKey());
 
         FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.SFTPFileSystem", storeProperties, "SFTP filesystem");
         store.setUser(user);
         fileStoreService.addFileStore(store);
 
-        return store.getProperties().get("publicKey");
+        return userKeyPairService.getPublicKey();
     }
 }
