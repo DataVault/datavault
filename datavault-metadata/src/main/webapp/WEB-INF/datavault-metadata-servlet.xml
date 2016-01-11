@@ -61,16 +61,23 @@
         <property name="projectsService" ref="projectsService" />
     </bean>
 
+    <bean id="datasetsController" class="org.datavaultplatform.metadata.controllers.DatasetsController">
+        <property name="datasetsService" ref="datasetsService" />
+    </bean>
+
     <!-- todo : should the service beans be put into their own config file? -->
     
     <bean id="projectsService" class="org.datavaultplatform.metadata.services.ProjectsService">
+    </bean>
+    
+    <bean id="datasetsService" class="org.datavaultplatform.metadata.services.DatasetsService">
     </bean>
 
     <!-- Documentation using jsondoc -->
 
     <bean id="documentationController" class="org.jsondoc.springmvc.controller.JSONDocController">
         <constructor-arg name="version" value="1.0" />
-        <constructor-arg name="basePath" value="${brokerURL}" />
+        <constructor-arg name="basePath" value="${metadataURL}" />
         <constructor-arg name="packages">
             <list>
                 <value>org.datavaultplatform.metadata.controllers</value>
