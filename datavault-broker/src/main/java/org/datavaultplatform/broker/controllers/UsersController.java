@@ -8,7 +8,6 @@ import org.datavaultplatform.broker.services.UserKeyPairService;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.broker.services.UsersService;
-import org.datavaultplatform.common.model.UserKeyPair;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.http.MediaType;
@@ -77,7 +76,7 @@ public class UsersController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
     @RequestMapping(value = "/users/{userid}", method = RequestMethod.GET)
-    public User getUser(                        @PathVariable("userid") @ApiPathParam(name = "User ID", description = "The User ID to retrieve") String queryUserID) {
+    public User getUser(@PathVariable("userid") @ApiPathParam(name = "User ID", description = "The User ID to retrieve") String queryUserID) {
         return usersService.getUser(queryUserID);
     }
 
@@ -96,22 +95,7 @@ public class UsersController {
                         @RequestBody User user) throws Exception {
         usersService.addUser(user);
 
-        // Add fileStores for the new user
-        // todo: either this could be injected by Spring, or selected by the user
-
-        UserKeyPair userKeyPair = userKeyPairService.generateNewKeyPair();
-
-        HashMap<String,String> storeProperties = new HashMap<String,String>();
-        storeProperties.put("rootPath", activeDir);
-        storeProperties.put("username", user.getName());
-        storeProperties.put("password", "");
-        storeProperties.put("publicKey", userKeyPair.getPublicKey());
-        storeProperties.put("privateKey", userKeyPair.getPrivateKey());
-
-        FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.SFTPFileSystem", storeProperties, "SFTP filesystem");
-        store.setUser(user);
-        fileStoreService.addFileStore(store);
-
+        // Add default fileStores for the new user?
 
         return user;
     }
@@ -134,5 +118,68 @@ public class UsersController {
         usersService.updateUser(user);
 
         return user;
+    }
+
+
+    @ApiMethod(
+            path = "/users/{userid}/keys",
+            verb = ApiVerb.GET,
+            description = "Check to see if keys exist for user",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
+    @RequestMapping(value = "/users/{userid}/keys", method = RequestMethod.GET)
+    public Boolean keysExist(@PathVariable("userid") @ApiPathParam(name = "User ID", description = "Do keys already exist for this user ID?") String userID ) throws Exception {
+
+        User user = usersService.getUser(userID);
+
+        FileStore store = null;
+        String privateKey = null;
+        List<FileStore> userStores = user.getFileStores();
+        for (FileStore userStore : userStores) {
+            if (userStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.SFTPFileSystem")) {
+                store = userStore;
+                privateKey = store.getProperties().get("privateKey");
+            }
+        }
+
+        if (privateKey != null) {
+            return true;
+        } else {
+            // todo - should we set the return code to 404?
+            return false;
+        }
+    }
+
+    @ApiMethod(
+            path = "/users/{userid}/keys",
+            verb = ApiVerb.POST,
+            description = "Generate a Key Pair for user",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
+    @RequestMapping(value = "/users/{userid}/keys", method = RequestMethod.POST)
+    public String addKeyPair(@PathVariable("userid") @ApiPathParam(name = "User ID", description = "Get the Public Key for this user ID") String userID) throws Exception {
+        User user = usersService.getUser(userID);
+        userKeyPairService.generateNewKeyPair();
+
+        HashMap<String,String> storeProperties = new HashMap<String,String>();
+        storeProperties.put("host", "localhost");
+        storeProperties.put("rootPath", activeDir);
+        storeProperties.put("username", user.getID());
+        storeProperties.put("password", "");
+        storeProperties.put("privateKey", userKeyPairService.getPrivateKey());
+
+        FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.SFTPFileSystem", storeProperties, "SFTP filesystem");
+        store.setUser(user);
+        fileStoreService.addFileStore(store);
+
+        return userKeyPairService.getPublicKey();
     }
 }

@@ -307,4 +307,15 @@ public class RestService {
         HttpEntity<?> response = put(brokerURL + "/users/", User.class, user);
         return (User)response.getBody();
     }
+
+    public Boolean keysExist(String userId) {
+        HttpEntity<?> response = get(brokerURL + "/users/" + userId + "/keys", Boolean.class);
+        return (Boolean)response.getBody();
+    }
+
+    public String addKeys(String userId) {
+        // Bit odd to POST a null object, but a POST seems appropriate since it is a non-idempotent, create request
+        HttpEntity<?> response = post(brokerURL + "/users/" + userId + "/keys", String.class, null);
+        return (String)response.getBody();
+    }
 }
