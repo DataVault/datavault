@@ -20,7 +20,7 @@ public class MetadataController {
         this.externalMetadataService = externalMetadataService;
     }
     
-    @RequestMapping(value = "/metadata", method = RequestMethod.GET)
+    @RequestMapping(value = "/metadata/datasets", method = RequestMethod.GET)
     public List<Dataset> getDatasets(@RequestHeader(value = "X-UserID", required = true) String userID) {
         return externalMetadataService.getDatasets();
     }
