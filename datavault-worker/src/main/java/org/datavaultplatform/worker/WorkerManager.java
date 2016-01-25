@@ -21,7 +21,7 @@ public class WorkerManager {
 
 
     public static void main(String [] args) throws IOException, InterruptedException {
-        ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"config.xml"});
+        ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"datavault-worker.xml"});
 
         WorkerManager workerManager = context.getBean(WorkerManager.class);
         List<DefaultExecuteResultHandler> resultHandlers = workerManager.startWorkers();
