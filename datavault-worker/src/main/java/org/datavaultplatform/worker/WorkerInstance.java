@@ -12,7 +12,7 @@ public class WorkerInstance {
 
     public static void main(String [] args) {
 
-        ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"config.xml"});
+        ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"datavault-worker.xml"});
 
         EventSender eventSender = context.getBean(EventSender.class);
         Receiver receiver = context.getBean(Receiver.class);
