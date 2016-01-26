@@ -127,27 +127,6 @@
                     </includes>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>2.6</version>
-                <configuration>
-                    <filters>
-                        <filter>${filters.file}</filter>
-                    </filters>
-                    <!-- This filters the Spring config and copies it over the top of the target version -->
-                    <webResources>
-                        <resource>
-                            <filtering>true</filtering>
-                            <directory>src/main/webapp</directory>
-                            <includes>
-                                <include>WEB-INF/datavault-webapp-servlet.xml</include>
-                                <include>WEB-INF/spring-security.xml</include>
-                            </includes>
-                        </resource>
-                    </webResources>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
