@@ -22,7 +22,7 @@ public class MetadataController {
     
     @RequestMapping(value = "/metadata/datasets", method = RequestMethod.GET)
     public List<Dataset> getDatasets(@RequestHeader(value = "X-UserID", required = true) String userID) {
-        return externalMetadataService.getDatasets();
+        return externalMetadataService.getDatasets(userID);
     }
     
     @RequestMapping(value = "/metadata/datasets/{datasetid}", method = RequestMethod.GET)
