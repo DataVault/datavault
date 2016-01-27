@@ -3,8 +3,9 @@ package org.datavaultplatform.common.metadata.impl;
 import org.datavaultplatform.common.metadata.Dataset;
 import org.datavaultplatform.common.metadata.Provider;
 
+import java.io.*;
+import java.net.*;
 import java.util.*;
-import java.io.ByteArrayInputStream;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.*;
@@ -13,8 +14,17 @@ import org.w3c.dom.*;
 
 public class PureProvider implements Provider {
     
+    private final String endpoint = "http://pure-example-url/ws/rest/datasets";
+    
     @Override
     public List<Dataset> getDatasetsForUser(String userID) {
+        try {
+            String response = query(endpoint);
+            return parse(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         return null;
     }
     
@@ -23,8 +33,23 @@ public class PureProvider implements Provider {
         return null;
     }
     
-    // TODO: HTTP request to endpoint
+    // Query the endpoint and retrieve the XML response
     // TODO: Support basic auth
+    private String query(String url) throws Exception {
+       
+        URL queryURL = new URL(url);
+        URLConnection conn = queryURL.openConnection();
+        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        String inputLine;
+       
+        StringBuilder sb = new StringBuilder();
+        while ((inputLine = in.readLine()) != null) {
+            sb.append(inputLine);
+        }
+        in.close();
+       
+        return sb.toString();
+    }
     
     // Handle dataset XML namespace mapping
     static class PureNamespaceContent implements NamespaceContext {
@@ -63,25 +88,19 @@ public class PureProvider implements Provider {
             
             XPath xpath = XPathFactory.newInstance().newXPath();
             xpath.setNamespaceContext(new PureNamespaceContent());
-            XPathExpression resultExpr = xpath.compile("//core:result");
-            XPathExpression contentExpr = xpath.compile("core:content");
+            XPathExpression contentExpr = xpath.compile("//core:content");
             XPathExpression titleExpr = xpath.compile("stab:title/core:localizedString");
             
             // Get a list of datasets
-            NodeList results = (NodeList)resultExpr.evaluate(dom, XPathConstants.NODESET);
+            NodeList contents = (NodeList)contentExpr.evaluate(dom, XPathConstants.NODESET);
             
-            for (int i=0; i<results.getLength(); i++) {
+            for (int i=0; i<contents.getLength(); i++) {
 
                 Dataset dataset = new Dataset();
                 
-                // Get the content element and uuid of this dataset
-                Node content = (Node)contentExpr.evaluate(results.item(i), XPathConstants.NODE);
-                if (content == null) {
-                    // Error - content element not found
-                    break;
-                } else {
-                    dataset.setID(content.getAttributes().getNamedItem("uuid").getTextContent());
-                }
+                // Get the uuid of this dataset
+                Node content = (Node)contents.item(i);
+                dataset.setID(content.getAttributes().getNamedItem("uuid").getTextContent());
                 
                 // Get the title of this dataset
                 Node title = (Node)titleExpr.evaluate(content, XPathConstants.NODE);
