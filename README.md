@@ -1,6 +1,6 @@
 DataVault - A long term archive for Research Data
 =================================================
-![Alt text](/logo-dvsmall.jpg"?raw=true "Data Vault logo")
+![Alt text](/logo-dvsmall.jpg?raw=true "Data Vault logo")
 
 What
 ----
