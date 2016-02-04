@@ -24,10 +24,10 @@
         <param-name>contextConfigLocation</param-name>
         <param-value>
             /WEB-INF/datavault-broker-servlet.xml
+            /WEB-INF/datavault-broker-security.xml
         </param-value>
     </context-param>
 
-    <!--
     <filter>
         <filter-name>springSecurityFilterChain</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
@@ -36,7 +36,6 @@
         <filter-name>springSecurityFilterChain</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-    -->
 
     <listener>
         <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
