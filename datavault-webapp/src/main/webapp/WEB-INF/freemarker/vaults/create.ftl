@@ -31,6 +31,15 @@
         </div>
 
         <div class="form-group">
+            <label class="control-label">Dataset:</label>
+            <select id="datasetID" name="datasetID" class='dataset-select'>
+                <#list datasets as dataset>
+                    <option value="${dataset.getID()}">${dataset.name?html}</option>
+                </#list>
+            </select>
+        </div>
+
+        <div class="form-group">
             <label class="control-label">Policy:</label>
             <select id="policyID" name="policyID" class='policy-select'>
                 <#list policies as policy>
@@ -79,7 +88,8 @@
                     .closest('.form-group').removeClass('has-error').addClass('has-success');
             }
         });
-
+        
+        $('.dataset-select').selectpicker();
         $('.policy-select').selectpicker();
         $('.group-select').selectpicker();
     });

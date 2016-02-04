@@ -107,6 +107,10 @@
     <bean id="archiveStoreController" class="org.datavaultplatform.broker.controllers.ArchiveStoreController">
         <property name="archiveStoreService" ref="archiveStoreService" />
     </bean>
+    
+    <bean id="metadataController" class="org.datavaultplatform.broker.controllers.MetadataController">
+        <property name="externalMetadataService" ref="externalMetadataService" />
+    </bean>
 
     <!-- todo : should the service beans be put into their own config file? -->
 
@@ -159,6 +163,9 @@
 
     <bean id="jobsService" class="org.datavaultplatform.broker.services.JobsService">
         <property name="jobDAO" ref="jobDAO" />
+    </bean>
+    
+    <bean id="externalMetadataService" class="org.datavaultplatform.broker.services.ExternalMetadataService">
     </bean>
 
     <!-- RabbitMQ -->

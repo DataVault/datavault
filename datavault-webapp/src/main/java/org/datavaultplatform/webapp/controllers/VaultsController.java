@@ -1,6 +1,6 @@
 package org.datavaultplatform.webapp.controllers;
 
-
+import org.datavaultplatform.common.metadata.Dataset;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Policy;
 import org.datavaultplatform.common.request.CreateVault;
@@ -52,6 +52,9 @@ public class VaultsController {
         // pass the view an empty Vault since the form expects it
         model.addAttribute("vault", new CreateVault());
 
+        Dataset[] datasets = restService.getDatasets();
+        model.addAttribute("datasets", datasets);
+        
         Policy[] policies = restService.getPolicyListing();
         model.addAttribute("policies", policies);
 
