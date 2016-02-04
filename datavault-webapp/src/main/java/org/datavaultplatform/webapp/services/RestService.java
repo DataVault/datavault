@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.services;
 
+import org.datavaultplatform.common.metadata.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
@@ -281,6 +282,11 @@ public class RestService {
         return (Integer)response.getBody();
     }
 
+    public Dataset[] getDatasets() {
+        HttpEntity<?> response = get(brokerURL + "/metadata/datasets", Dataset[].class);
+        return (Dataset[])response.getBody();
+    }
+    
     /* POST requests */
     
     public VaultInfo addVault(CreateVault createVault) {
