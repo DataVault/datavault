@@ -19,6 +19,10 @@ import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 @RestController
 @Api(name="Vaults", description = "Interact with DataVault Vaults")
 public class VaultsController {
@@ -38,6 +42,8 @@ public class VaultsController {
 
     private String activeDir;
     private String archiveDir;
+
+    private static final Logger logger = LoggerFactory.getLogger(VaultsController.class);
     
     // Get the specified Vault object and validate it against the current User
     private Vault getUserVault(User user, String vaultID) throws Exception {
@@ -138,6 +144,9 @@ public class VaultsController {
     })
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
     public List<VaultInfo> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
+
+        // todo : remove this bit of logging. It was put here as an example of how to do logging.
+        logger.info("Hello World");
 
         List<VaultInfo> vaultResponses = new ArrayList<>();
         User user = usersService.getUser(userID);
