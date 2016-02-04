@@ -129,7 +129,26 @@
             <artifactId>jsondoc-ui</artifactId>
             <version>1.2.9</version>
         </dependency>
-        
+
+        <!-- Note: commons-logging is excluded and slf4j is the replacement bridge to log4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>datavault</groupId>
             <artifactId>datavault-common</artifactId>
