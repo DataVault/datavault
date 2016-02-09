@@ -6,4 +6,4 @@ env:
   - MAVEN_OPTS=-Xmx1024M
 
 script:
-  - "mvn -U clean package"
+  - "travis_wait mvn clean package"
