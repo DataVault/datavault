@@ -6,4 +6,4 @@ env:
   - MAVEN_OPTS=-Xmx1024M
 
 script:
-  - "mvn clean package"
+  - "mvn -U clean package"
