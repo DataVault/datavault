@@ -3,6 +3,6 @@ sudo: false
 
 env:
   # Give Maven 1GB of memory to work with
-  - MAVEN_OPTS=-Xmx1024M
+  - MAVEN_OPTS=-Xmx2048M
 
-script: "travis_wait mvn clean package"
+script: mvn clean package
