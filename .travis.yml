@@ -5,5 +5,4 @@ env:
   # Give Maven 1GB of memory to work with
   - MAVEN_OPTS=-Xmx1024M
 
-script:
-  - "travis_wait mvn clean package"
+script: travis_wait mvn clean package
