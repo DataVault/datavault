@@ -107,10 +107,10 @@
         <property name="restService" ref="restService" />
     </bean>
 
-    <!-- todo : should the service beans be put into their own config file? -->
 
     <bean id="restService" class="org.datavaultplatform.webapp.services.RestService">
         <property name="brokerURL" value="${brokerURL}" />
+        <property name="brokerApiKey" value="${broker.api.key}" />
     </bean>
 
     <!-- Email feedback settings -->

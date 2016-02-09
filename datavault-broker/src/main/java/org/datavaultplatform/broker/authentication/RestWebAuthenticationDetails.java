@@ -16,9 +16,7 @@ public class RestWebAuthenticationDetails extends WebAuthenticationDetails {
     public RestWebAuthenticationDetails(HttpServletRequest request) {
         super(request);
 
-        // todo : setClientKeyRequestHeader by reading the value from the request header
-        setClientKeyRequestHeader("Mywebapp");
-
+        setClientKeyRequestHeader(request.getHeader(ClientKeyRequestHeader));
     }
 
     public String getClientKeyRequestHeader() {

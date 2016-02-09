@@ -1,5 +1,7 @@
 package org.datavaultplatform.broker.authentication;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -22,6 +24,8 @@ import java.util.List;
 
 public class RestAuthenticationProvider implements AuthenticationProvider {
 
+    private static final Logger logger = LoggerFactory.getLogger(RestAuthenticationProvider.class);
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String name = authentication.getName();
@@ -29,7 +33,11 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
         RestWebAuthenticationDetails rwad = (RestWebAuthenticationDetails) authentication.getDetails();
 
-        // todo : set a role depending on the contents of rwad
+
+        logger.info("Client Key is " + rwad.getClientKeyRequestHeader());
+        logger.info("Client IP address is " + rwad.getRemoteAddress());
+
+        // todo : validate the contents of rwad and set a role accordingly
 
         List<GrantedAuthority> grantedAuths = new ArrayList<>();
         grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
