@@ -31,6 +31,9 @@
         <security:authentication-provider ref="restAuthenticationProvider"/>
     </security:authentication-manager>
 
-    <bean id="restAuthenticationProvider" class="org.datavaultplatform.broker.authentication.RestAuthenticationProvider" />
+    <bean id="restAuthenticationProvider" class="org.datavaultplatform.broker.authentication.RestAuthenticationProvider">
+        <property name="clientsService" ref="clientsService" />
+        <property name="validateClient" value="${validateClient}" />
+    </bean>
 
 </beans>
