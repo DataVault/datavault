@@ -20,9 +20,14 @@ public class RestService {
 
 
     private String brokerURL;
+    private String brokerApiKey;
     
     public void setBrokerURL(String brokerURL) {
         this.brokerURL = brokerURL;
+    }
+
+    public void setBrokerApiKey(String brokerApiKey) {
+        this.brokerApiKey = brokerApiKey;
     }
     
     private HttpEntity<?> exchange(String url, Class clazz, HttpMethod method, Object payload) {
@@ -34,6 +39,8 @@ public class RestService {
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
         }
+
+        headers.set("X-Client-Key", brokerApiKey);
 
         HttpEntity entity;
         if (method == HttpMethod.GET) {
