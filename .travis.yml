@@ -1,3 +1,4 @@
 language: java
 sudo: false
 
+install: travis_wait mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
