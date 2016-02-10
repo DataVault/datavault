@@ -1,4 +1,6 @@
 language: java
 sudo: false
 
+before_install: MAVEN_OPTS=-Xmx20484M
+
 install: travis_wait mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
