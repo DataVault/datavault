@@ -39,7 +39,6 @@ public class Event {
     public String message;
     public String depositId;
     public String restoreId;
-    public String jobId;
     public String eventClass;
     
     @Transient
@@ -64,6 +63,10 @@ public class Event {
     @JsonIgnore
     @ManyToOne
     private Job job;
+    
+    // Non-hibernate Job ID set by worker on event creation
+    @Transient
+    public String jobId;
     
     public Event() {};
     public Event(String jobId, String depositId, String message) {
