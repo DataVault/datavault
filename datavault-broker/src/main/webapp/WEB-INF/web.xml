@@ -4,7 +4,6 @@
 	http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
 
-
     <listener>
         <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
     </listener>
@@ -15,25 +14,12 @@
         <param-value>/WEB-INF/log4j.properties</param-value>
     </context-param>
 
-    
+
     <display-name>datavault-broker</display-name>
-
-    <!-- First lets tell Spring about any files other than the default servlet one -->
-    <!--
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>/WEB-INF/datavaultplatform-service.xml</param-value>
-    </context-param>
-
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
-    -->
 
     <servlet>
         <servlet-name>datavault-broker</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-
         <load-on-startup>1</load-on-startup>
     </servlet>
 
@@ -41,5 +27,26 @@
         <servlet-name>datavault-broker</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
+
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            /WEB-INF/datavault-broker-servlet.xml
+            /WEB-INF/datavault-broker-security.xml
+        </param-value>
+    </context-param>
+
+    <filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 
 </web-app>

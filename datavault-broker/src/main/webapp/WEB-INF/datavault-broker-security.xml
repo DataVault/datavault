@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   		http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/security
+			http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <!-- The API JsonDoc stuff shouldn't be behind security -->
+    <security:http pattern="/resources/**" security="none"/>
+
+    <!--  REST service. Each request is discrete, no state required. -->
+    <security:http pattern="/**" create-session="stateless" entry-point-ref="http403EntryPoint">
+        <security:custom-filter position="PRE_AUTH_FILTER" ref="restFilter" />
+        <!-- CSRF not applicable to REST service -->
+        <security:csrf disabled="true"/>
+    </security:http>
+
+    <!-- If user is not authorised for request then throw back a 403 -->
+    <bean id="http403EntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint" />
+
+    <bean id="restFilter" class="org.datavaultplatform.broker.authentication.RestAuthenticationFilter">
+        <property name="authenticationManager" ref="authenticationManager" />
+        <property name="authenticationDetailsSource" ref="restWebAuthenticationDetailsSource" />
+    </bean>
+
+    <bean id="restWebAuthenticationDetailsSource" class="org.datavaultplatform.broker.authentication.RestWebAuthenticationDetailsSource" />
+
+    <security:authentication-manager alias="authenticationManager">
+        <security:authentication-provider ref="restAuthenticationProvider"/>
+    </security:authentication-manager>
+
+    <bean id="restAuthenticationProvider" class="org.datavaultplatform.broker.authentication.RestAuthenticationProvider" />
+
+</beans>
