@@ -1,8 +1,8 @@
 language: java
-sudo: false
+sudo: true
 
-before_script:
+env:
   # Give Maven 1GB of memory to work with
-  - echo "MAVEN_OPTS='-Xmx2g -XX:MaxPermSize=512m'" > ~/.mavenrc
+  - MAVEN_OPTS=-Xmx2048M
 
 script: mvn clean package
