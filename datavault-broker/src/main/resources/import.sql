@@ -43,3 +43,5 @@ insert into GroupOwners (group_id, user_id) values ('CMVM', 'USER1');
 insert into GroupOwners (group_id, user_id) values ('CHSS', 'USER2');
 insert into GroupOwners (group_id, user_id) values ('CSE', 'USER3');
 insert into GroupOwners (group_id, user_id) values ('CMVM', 'USER4');
+
+insert into Clients (id, name, apiKey, ipAddress) values ('datavault-webapp', 'Datavault Webapp', 'datavault-webapp', '127.0.0.1');

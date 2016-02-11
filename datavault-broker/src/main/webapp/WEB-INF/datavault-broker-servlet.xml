@@ -149,6 +149,10 @@
         <property name="groupDAO" ref="groupDAO" />
     </bean>
 
+    <bean id="clientsService" class="org.datavaultplatform.broker.services.ClientsService">
+        <property name="clientDAO" ref="clientDAO" />
+    </bean>
+
     <bean id="fileStoreService" class="org.datavaultplatform.broker.services.FileStoreService">
         <property name="fileStoreDAO" ref="fileStoreDAO" />
     </bean>
@@ -275,6 +279,10 @@
     </bean>
 
     <bean id="groupDAO" class="org.datavaultplatform.common.model.dao.GroupDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="clientDAO" class="org.datavaultplatform.common.model.dao.ClientDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
