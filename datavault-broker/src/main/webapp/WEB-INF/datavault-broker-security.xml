@@ -8,7 +8,10 @@
 			http://www.springframework.org/schema/security/spring-security.xsd">
 
     <!-- The API JsonDoc stuff shouldn't be behind security -->
+    <security:http pattern="/" security="none"/>
     <security:http pattern="/resources/**" security="none"/>
+    <security:http pattern="/jsondoc" security="none"/>
+
 
     <!--  REST service. Each request is discrete, no state required. -->
     <security:http pattern="/**" create-session="stateless" entry-point-ref="http403EntryPoint">
