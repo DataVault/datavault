@@ -81,6 +81,9 @@ public class Vault {
     @ManyToOne
     private User user;
     
+    @ManyToOne
+    private Dataset dataset;
+    
     public Vault() {}
     public Vault(String name) {
         this.name = name;
@@ -150,11 +153,20 @@ public class Vault {
     public void setUser(User user) {
         this.user = user;
     }
+
+    public Dataset getDataset() {
+        return dataset;
+    }
+
+    public void setDataset(Dataset dataset) {
+        this.dataset = dataset;
+    }
     
     public VaultInfo convertToResponse() {
         return new VaultInfo(
                 id,
                 user.getID(),
+                dataset.getID(),
                 creationTime,
                 name,
                 description,

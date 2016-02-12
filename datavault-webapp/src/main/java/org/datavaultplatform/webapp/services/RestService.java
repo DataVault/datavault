@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.services;
 
+import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.metadata.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.*;

@@ -1,6 +1,6 @@
 package org.datavaultplatform.common.metadata.impl;
 
-import org.datavaultplatform.common.metadata.Dataset;
+import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.metadata.Provider;
 
 import java.io.*;
