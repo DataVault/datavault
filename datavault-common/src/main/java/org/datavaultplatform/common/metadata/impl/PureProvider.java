@@ -16,6 +16,8 @@ public class PureProvider implements Provider {
     
     private String endpoint;
     
+    // A metadata provider for the Pure REST API (datasets)
+    
     public PureProvider(String endpoint) {
         this.endpoint = endpoint;
     }
@@ -34,6 +36,16 @@ public class PureProvider implements Provider {
     
     @Override
     public Dataset getDataset(String id) {
+        try {
+            String response = query(endpoint + "?uuids.uuid=" + id + "&rendering=xml_long");
+            List<Dataset> datasets = parse(response);
+            if (datasets.size() == 1) {
+                return datasets.get(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         return null;
     }
     
