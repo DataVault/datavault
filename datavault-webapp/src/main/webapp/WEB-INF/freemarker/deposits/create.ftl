@@ -79,6 +79,7 @@
             <button type="submit" name="action" value="cancel" class="btn btn-danger cancel">Cancel</button>
         </div>
 
+        <input type="hidden" id="submitAction" name="action" value="submit"/>
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
     </form>
@@ -86,6 +87,10 @@
 
 <script>
     $(document).ready(function () {
+
+        $('button[type="submit"]').on("click", function() {
+            $('#submitAction').val($(this).attr('value'));
+        });
 
         $('#create-deposit').validate({
             ignore: ".ignore",
@@ -103,6 +108,10 @@
             success: function (element) {
                 element.addClass('valid')
                     .closest('.form-group').removeClass('has-error').addClass('has-success');
+            },
+            submitHandler: function (form) {
+                $('button[type="submit"]').prop('disabled', true);
+                form.submit();
             }
         });
     });

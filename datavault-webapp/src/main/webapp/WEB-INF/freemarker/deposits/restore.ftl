@@ -65,6 +65,7 @@
             });
         </script>
 
+        <input type="hidden" id="submitAction" name="action" value="submit"/>
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
         <div class="form-group">
@@ -78,6 +79,10 @@
 
 <script>
     $(document).ready(function () {
+
+        $('button[type="submit"]').on("click", function() {
+            $('#submitAction').val($(this).attr('value'));
+        });
 
         $('#restore-deposit').validate({
             ignore: ".ignore",
@@ -95,6 +100,10 @@
             success: function (element) {
                 element.addClass('valid')
                     .closest('.form-group').removeClass('has-error').addClass('has-success');
+            },
+            submitHandler: function (form) {
+                $('button[type="submit"]').prop('disabled', true);
+                form.submit();
             }
         });
 
