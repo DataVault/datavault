@@ -14,7 +14,11 @@ import org.w3c.dom.*;
 
 public class PureProvider implements Provider {
     
-    private final String endpoint = "http://pure-example-url/ws/rest/datasets";
+    private String endpoint;
+    
+    public PureProvider(String endpoint) {
+        this.endpoint = endpoint;
+    }
     
     @Override
     public List<Dataset> getDatasetsForUser(String userID) {

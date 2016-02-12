@@ -170,6 +170,7 @@
     </bean>
     
     <bean id="externalMetadataService" class="org.datavaultplatform.broker.services.ExternalMetadataService">
+        <property name="metadataURL" value="${metadataURL}" />
     </bean>
 
     <!-- RabbitMQ -->
