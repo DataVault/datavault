@@ -75,8 +75,8 @@
         </script>
 
         <div class="form-group">
-            <button type="submit" name="action" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-save"></span> Deposit data</button>
-            <button type="submit" name="action" value="cancel" class="btn btn-danger cancel">Cancel</button>
+            <button type="submit" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-save"></span> Deposit data</button>
+            <button type="submit" value="cancel" class="btn btn-danger cancel">Cancel</button>
         </div>
 
         <input type="hidden" id="submitAction" name="action" value="submit"/>
