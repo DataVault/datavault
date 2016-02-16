@@ -23,6 +23,8 @@
                     <li <#if nav == "admin">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/admin/">Administration</a></li>
                 </ul>
 
+            <!-- If an error has occurred there may be no Principal set, so don't display the User dropdown -->
+            <#if (principal.username)??>
                 <ul class="nav navbar-nav navbar-right">
                     <li class="dropdown<#if nav == "user"> active</#if>">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">${principal.username}<span class="caret"></span></a>
@@ -33,6 +35,7 @@
                         </ul>
                     </li>
                 </ul>
+            </#if>
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>
