@@ -2,7 +2,7 @@ package org.datavaultplatform.common.metadata.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.datavaultplatform.common.metadata.Dataset;
+import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.metadata.Provider;
 
 // This mock metadata provider is for testing purposes only
