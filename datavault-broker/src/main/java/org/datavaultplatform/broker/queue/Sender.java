@@ -1,4 +1,4 @@
-package org.datavaultplatform.queue;
+package org.datavaultplatform.broker.queue;
 
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Connection;
