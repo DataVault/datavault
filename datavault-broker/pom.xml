@@ -136,13 +136,13 @@
         <dependency>
             <groupId>org.jsondoc</groupId>
             <artifactId>jsondoc-springmvc</artifactId>
-            <version>1.2.9</version>
+            <version>1.2.11</version>
         </dependency>
 
         <dependency>
             <groupId>org.jsondoc</groupId>
             <artifactId>jsondoc-ui</artifactId>
-            <version>1.2.9</version>
+            <version>1.2.11</version>
         </dependency>
 
         <!-- Note: commons-logging is excluded and slf4j is the replacement bridge to log4j -->
