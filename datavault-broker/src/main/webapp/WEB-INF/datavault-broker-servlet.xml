@@ -202,7 +202,7 @@
         <rabbit:listener ref="listener" queues="eventQueue" admin="amqpAdmin" />
     </rabbit:listener-container>
 
-    <bean id="listener" class="org.datavaultplatform.queue.EventListener">
+    <bean id="listener" class="org.datavaultplatform.broker.queue.EventListener">
         <property name="jobsService" ref="jobsService" />
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
@@ -210,7 +210,7 @@
         <property name="eventService" ref="eventService" />
     </bean>
 
-    <bean id="sender" class="org.datavaultplatform.queue.Sender">
+    <bean id="sender" class="org.datavaultplatform.broker.queue.Sender">
         <property name="queueServer" value="${queueServer}"/>
         <property name="queueName" value="${queueName}"/>
         <property name="queueUser" value="${queueUser}"/>

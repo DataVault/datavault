@@ -10,7 +10,7 @@ import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.task.Task;
-import org.datavaultplatform.queue.Sender;
+import org.datavaultplatform.broker.queue.Sender;
 
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
