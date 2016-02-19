@@ -13,21 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 
 public class RestWebAuthenticationDetailsSource extends WebAuthenticationDetailsSource {
 
-    // Can be overridden in Spring config
-    private String clientKeyRequestHeader = "X-Client-Key";
-
-    public String getClientKeyRequestHeader() {
-        return clientKeyRequestHeader;
-    }
-
-    public void setClientKeyRequestHeader(String clientKeyRequestHeader) {
-        this.clientKeyRequestHeader = clientKeyRequestHeader;
-    }
-
-
     @Override
     public WebAuthenticationDetails buildDetails(HttpServletRequest context) {
-        return new RestWebAuthenticationDetails(context, getClientKeyRequestHeader());
+        return new RestWebAuthenticationDetails(context);
     }
 
 }
