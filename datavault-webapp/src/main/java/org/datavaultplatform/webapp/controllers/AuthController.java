@@ -15,12 +15,20 @@ import javax.servlet.http.HttpSession;
 @RequestMapping("/auth")
 public class AuthController {
 
+    private String welcome;
+    
+    public void setWelcome(String welcome) {
+        this.welcome = welcome;
+    }
+    
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String getLoginPage(@RequestParam(value="error", required=false) boolean error,
                                @RequestParam(value="logout", required=false) String logout, ModelMap model) {
 
         model.put("success", "");
         model.put("error", "");
+        model.put("welcome", welcome);
+        
         if (logout != null) {
             // Logout
             model.put("success", "You are now logged out");

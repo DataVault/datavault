@@ -20,12 +20,16 @@ public class CreateVault {
     @ApiObjectField(description = "The group which is related to this vault")
     private String groupID;
     
+    @ApiObjectField(description = "A reference to an external metadata record that describes this vault")
+    private String datasetID;
+    
     public CreateVault() { }
-    public CreateVault(String name, String description, String policyID, String groupID) {
+    public CreateVault(String name, String description, String policyID, String groupID, String datasetID) {
         this.name = name;
         this.description = description;
         this.policyID = policyID;
         this.groupID = groupID;
+        this.datasetID = datasetID;
     }
     
     public String getName() {
@@ -58,5 +62,13 @@ public class CreateVault {
 
     public void setGroupID(String groupID) {
         this.groupID = groupID;
+    }
+
+    public String getDatasetID() {
+        return datasetID;
+    }
+
+    public void setDatasetID(String datasetID) {
+        this.datasetID = datasetID;
     }
 }

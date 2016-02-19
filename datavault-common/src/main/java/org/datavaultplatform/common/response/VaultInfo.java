@@ -38,6 +38,9 @@ public class VaultInfo {
     @ApiObjectField(description = "The user who owns this vault")
     private String userID;
     
+    @ApiObjectField(description = "A reference to an external metadata record that describes this vault")
+    private String datasetID;
+    
     @ApiObjectField(description = "The size of this vault in bytes")
     private long vaultSize;
     
@@ -45,9 +48,10 @@ public class VaultInfo {
     private int policyStatus;
     
     public VaultInfo() { }
-    public VaultInfo(String id, String userID, Date creationTime, String name, String description, String policyID, String groupID, long vaultSize, int policyStatus, Date policyLastChecked) {
+    public VaultInfo(String id, String userID, String datasetID, Date creationTime, String name, String description, String policyID, String groupID, long vaultSize, int policyStatus, Date policyLastChecked) {
         this.id = id;
         this.userID = userID;
+        this.datasetID = datasetID;
         this.creationTime = creationTime;
         this.name = name;
         this.description = description;
@@ -72,6 +76,14 @@ public class VaultInfo {
 
     public void setUserID(String userID) {
         this.userID = userID;
+    }
+
+    public String getDatasetID() {
+        return datasetID;
+    }
+
+    public void setDatasetID(String datasetID) {
+        this.datasetID = datasetID;
     }
 
     public Date getCreationTime() {

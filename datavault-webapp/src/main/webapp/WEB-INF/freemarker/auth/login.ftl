@@ -13,6 +13,13 @@
         <div class="row">
             <div class="col-sm-4 col-sm-offset-4 col-md-4 col-md-offset-4">
                 <form class="form-signin" action="${springMacroRequestContext.getContextPath()}/auth/security_check" method="post">
+                    <#if welcome?has_content>
+                        <div class="alert alert-info" role="alert">
+                            <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                            <span class="sr-only">Success:</span>
+                        ${welcome}
+                        </div>
+                    </#if>
                     <#if success?has_content>
                         <div class="alert alert-success" role="alert">
                             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>

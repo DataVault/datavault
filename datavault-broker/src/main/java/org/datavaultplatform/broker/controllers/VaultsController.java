@@ -31,6 +31,7 @@ public class VaultsController {
     private DepositsService depositsService;
     private RestoresService restoresService;
     private MetadataService metadataService;
+    private ExternalMetadataService externalMetadataService;
     private FilesService filesService;
     private PoliciesService policiesService;
     private GroupsService groupsService;
@@ -88,6 +89,10 @@ public class VaultsController {
 
     public void setMetadataService(MetadataService metadataService) {
         this.metadataService = metadataService;
+    }
+    
+    public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
+        this.externalMetadataService = externalMetadataService;
     }
 
     public void setFilesService(FilesService filesService) {
@@ -306,7 +311,18 @@ public class VaultsController {
             throw new Exception("User '" + userID + "' does not exist");
         }
         vault.setUser(user);
-
+        
+        Dataset dataset = externalMetadataService.getCachedDataset(createVault.getDatasetID());
+        if (dataset == null) {
+            dataset = externalMetadataService.getDataset(createVault.getDatasetID());
+            if (dataset == null) {
+                throw new Exception("Dataset metadata record '" + createVault.getDatasetID() + "' does not exist");
+            }
+            
+            externalMetadataService.addCachedDataset(dataset);
+        }
+        vault.setDataset(dataset);
+        
         // For testing purposes add a default file store for the user if none exists.
         // This is an action that will ideally take place at user creation instead.
         // A template could be used to construct file paths (if configured).

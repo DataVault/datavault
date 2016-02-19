@@ -31,7 +31,7 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label">Dataset:</label>
+            <label class="control-label">Relates to: </label>
             <select id="datasetID" name="datasetID" class='dataset-select'>
                 <#list datasets as dataset>
                     <option value="${dataset.getID()}">${dataset.name?html}</option>
@@ -40,7 +40,7 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label">Policy:</label>
+            <label class="control-label">Policy: </label>
             <select id="policyID" name="policyID" class='policy-select'>
                 <#list policies as policy>
                     <option value="${policy.getID()}">${policy.name?html}</option>
@@ -49,7 +49,7 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label">Group:</label>
+            <label class="control-label">Group: </label>
             <select id="groupID" name="groupID" class='group-select'>
                 <#list groups as group>
                     <option value="${group.getID()}">${group.name?html}</option>
@@ -57,11 +57,12 @@
             </select>
         </div>
 
+        <input type="hidden" id="submitAction" name="action" value="submit"/>
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
         <div class="form-group">
-            <button type="submit" name="action" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-folder-close"></span> Create new Vault</button>
-            <button type="submit" name="action" value="cancel" class="btn btn-danger cancel">Cancel</button>
+            <button type="submit" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-folder-close"></span> Create new Vault</button>
+            <button type="submit" value="cancel" class="btn btn-danger cancel">Cancel</button>
         </div>
 
     </form>
@@ -71,6 +72,10 @@
 <script>
     $(document).ready(function () {
 
+        $('button[type="submit"]').on("click", function() {
+            $('#submitAction').val($(this).attr('value'));
+        });
+        
         $('#create-vault').validate({
             rules: {
                 name: {
@@ -86,6 +91,10 @@
             success: function (element) {
                 element.addClass('valid')
                     .closest('.form-group').removeClass('has-error').addClass('has-success');
+            },
+            submitHandler: function (form) {
+                $('button[type="submit"]').prop('disabled', true);
+                form.submit();
             }
         });
         

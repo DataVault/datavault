@@ -1,6 +1,6 @@
 package org.datavaultplatform.common.metadata.impl;
 
-import org.datavaultplatform.common.metadata.Dataset;
+import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.metadata.Provider;
 
 import java.io.*;
@@ -14,7 +14,13 @@ import org.w3c.dom.*;
 
 public class PureProvider implements Provider {
     
-    private final String endpoint = "http://pure-example-url/ws/rest/datasets";
+    private String endpoint;
+    
+    // A metadata provider for the Pure REST API (datasets)
+    
+    public PureProvider(String endpoint) {
+        this.endpoint = endpoint;
+    }
     
     @Override
     public List<Dataset> getDatasetsForUser(String userID) {
@@ -30,6 +36,16 @@ public class PureProvider implements Provider {
     
     @Override
     public Dataset getDataset(String id) {
+        try {
+            String response = query(endpoint + "?uuids.uuid=" + id + "&rendering=xml_long");
+            List<Dataset> datasets = parse(response);
+            if (datasets.size() == 1) {
+                return datasets.get(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         return null;
     }
     

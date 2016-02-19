@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.metadata;
 
+import org.datavaultplatform.common.model.Dataset;
 import java.util.List;
 
 /*
