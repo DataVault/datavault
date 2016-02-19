@@ -1,4 +1,4 @@
-package org.datavaultplatform.queue;
+package org.datavaultplatform.broker.queue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.broker.services.*;
