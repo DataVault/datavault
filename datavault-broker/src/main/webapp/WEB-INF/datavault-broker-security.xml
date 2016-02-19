@@ -18,25 +18,37 @@
         <security:custom-filter position="PRE_AUTH_FILTER" ref="restFilter" />
         <!-- CSRF not applicable to REST service -->
         <security:csrf disabled="true"/>
+        <!-- Note: Currently disabled but maybe we want to configure an Anonymous filter for some login functionality?? -->
+        <security:anonymous enabled="false"/>
     </security:http>
 
     <!-- If user is not authorised for request then throw back a 403 -->
     <bean id="http403EntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint" />
 
     <bean id="restFilter" class="org.datavaultplatform.broker.authentication.RestAuthenticationFilter">
+        <property name="principalRequestHeader" value="X-UserID" />
         <property name="authenticationManager" ref="authenticationManager" />
         <property name="authenticationDetailsSource" ref="restWebAuthenticationDetailsSource" />
+        <property name="authenticationSuccessHandler" ref="authenticationSuccessHandler" />
+        <property name="authenticationFailureHandler" ref="authenticationFailureHandler" />
+        <property name="filterProcessesUrl" value="/**" />
     </bean>
 
-    <bean id="restWebAuthenticationDetailsSource" class="org.datavaultplatform.broker.authentication.RestWebAuthenticationDetailsSource" />
+    <bean id="restWebAuthenticationDetailsSource" class="org.datavaultplatform.broker.authentication.RestWebAuthenticationDetailsSource">
+        <property name="clientKeyRequestHeader" value="X-Client-Key"/>
+    </bean>
 
     <security:authentication-manager alias="authenticationManager">
         <security:authentication-provider ref="restAuthenticationProvider"/>
     </security:authentication-manager>
 
     <bean id="restAuthenticationProvider" class="org.datavaultplatform.broker.authentication.RestAuthenticationProvider">
+        <property name="usersService" ref="usersService" />
         <property name="clientsService" ref="clientsService" />
         <property name="validateClient" value="${validateClient}" />
     </bean>
+
+    <bean id="authenticationSuccessHandler" class="org.datavaultplatform.broker.authentication.RestAuthenticationSuccessHandler" />
+    <bean id="authenticationFailureHandler" class="org.datavaultplatform.broker.authentication.RestAuthenticationFailureHandler" />
 
 </beans>
