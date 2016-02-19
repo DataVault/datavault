@@ -18,9 +18,9 @@
         </div>
 
         <#if keysExist>
-            <p>You have already generated keys, step away from the computer!</p>
+            <p>You have already have already generated a key!</p>
         <#else>
-            <p>Hit the button below to generate keys and thereby sign your life away!</p>
+            <p>Press the button below to generate keys.  Please be aware that using this key will allow the DataVault full access to your files in order to add them to the vault.</p>
         </#if>
 
 
