@@ -106,7 +106,10 @@
     <bean id="groupVaultsController" class="org.datavaultplatform.webapp.controllers.groups.GroupVaultsController">
         <property name="restService" ref="restService" />
     </bean>
-
+    
+    <bean id="authController" class="org.datavaultplatform.webapp.controllers.AuthController">
+        <property name="welcome" value="${webapp.welcome}"/>
+    </bean>
 
     <bean id="restService" class="org.datavaultplatform.webapp.services.RestService">
         <property name="brokerURL" value="${brokerURL}" />

@@ -31,7 +31,7 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label">Dataset:</label>
+            <label class="control-label">Relates to: </label>
             <select id="datasetID" name="datasetID" class='dataset-select'>
                 <#list datasets as dataset>
                     <option value="${dataset.getID()}">${dataset.name?html}</option>
@@ -40,7 +40,7 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label">Policy:</label>
+            <label class="control-label">Policy: </label>
             <select id="policyID" name="policyID" class='policy-select'>
                 <#list policies as policy>
                     <option value="${policy.getID()}">${policy.name?html}</option>
@@ -49,7 +49,7 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label">Group:</label>
+            <label class="control-label">Group: </label>
             <select id="groupID" name="groupID" class='group-select'>
                 <#list groups as group>
                     <option value="${group.getID()}">${group.name?html}</option>
