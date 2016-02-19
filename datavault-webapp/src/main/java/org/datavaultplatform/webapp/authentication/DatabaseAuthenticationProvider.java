@@ -37,7 +37,14 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
 
         // Fetch the existing user
-        User user = restService.getUser(name);
+        User user;
+        try {
+            user = restService.getUser(name);
+        } catch (Exception e) {
+            // Broker auth failure
+            // TODO: log the exception/auth error?
+            user = null;
+        }
 
         if (user == null) {
             throw new UsernameNotFoundException("Invalid user id/name");
