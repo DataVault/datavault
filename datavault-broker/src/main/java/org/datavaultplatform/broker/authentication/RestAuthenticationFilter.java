@@ -2,13 +2,17 @@ package org.datavaultplatform.broker.authentication;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedCredentialsNotFoundException;
 
+import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -36,6 +40,53 @@ public class RestAuthenticationFilter extends AbstractAuthenticationProcessingFi
         this.principalRequestHeader = principalRequestHeader;
     }
 
+
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+            throws IOException, ServletException {
+
+        HttpServletRequest request = (HttpServletRequest) req;
+        HttpServletResponse response = (HttpServletResponse) res;
+
+        if (!requiresAuthentication(request, response)) {
+            chain.doFilter(request, response);
+
+            return;
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Request is to process authentication");
+        }
+
+        Authentication authResult;
+
+        try {
+            authResult = attemptAuthentication(request, response);
+            if (authResult == null) {
+                // return immediately as subclass has indicated that it hasn't completed
+                // authentication
+                return;
+            }
+            //sessionStrategy.onAuthentication(authResult, request, response);
+        }
+        catch (InternalAuthenticationServiceException failed) {
+            logger.error(
+                    "An internal error occurred while trying to authenticate the user.",
+                    failed);
+            unsuccessfulAuthentication(request, response, failed);
+
+            return;
+        }
+        catch (AuthenticationException failed) {
+            // Authentication failed
+            unsuccessfulAuthentication(request, response, failed);
+
+            return;
+        }
+
+        successfulAuthentication(request, response, chain, authResult);
+
+        chain.doFilter(request, response);
+    }
 
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException, IOException, ServletException {
