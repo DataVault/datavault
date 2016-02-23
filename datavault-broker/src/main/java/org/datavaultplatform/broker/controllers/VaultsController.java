@@ -214,40 +214,16 @@ public class VaultsController {
         return depositResponses;
     }
 
-    @RequestMapping(value = "/vaults/count", method = RequestMethod.GET)
-    public int getVaultsCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
-
-        return vaultsService.count();
-    }
-
-    @RequestMapping(value = "/vaults/size", method = RequestMethod.GET)
-    public Long getVaultsSize(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
-
-        return depositsService.size();
-    }
-
-    @RequestMapping(value = "/vaults/depositcount", method = RequestMethod.GET)
-    public int getDepositsCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
-
-        return depositsService.count();
-    }
-
     @RequestMapping(value = "/vaults/depositqueuecount", method = RequestMethod.GET)
     public int getDepositsQueueCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
         return depositsService.queueCount();
     }
 
-    @RequestMapping(value = "/vaults/depositinprogresscount", method = RequestMethod.GET)
-    public int getDepositsInProgressCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    @RequestMapping(value = "/vaults/depositinprogress", method = RequestMethod.GET)
+    public List<Deposit> getDepositsInProgress(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return depositsService.inProgressCount();
-    }
-
-    @RequestMapping(value = "/vaults/restorecount", method = RequestMethod.GET)
-    public int getRestoresCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
-
-        return restoresService.count();
+        return depositsService.inProgress();
     }
 
     @RequestMapping(value = "/vaults/restorequeuecount", method = RequestMethod.GET)
@@ -256,10 +232,10 @@ public class VaultsController {
         return restoresService.queueCount();
     }
 
-    @RequestMapping(value = "/vaults/restoreinprogresscount", method = RequestMethod.GET)
-    public int getRestoresInProgressCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    @RequestMapping(value = "/vaults/restoreinprogress", method = RequestMethod.GET)
+    public List<Restore> getRestoresInProgress(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return restoresService.inProgressCount();
+        return restoresService.inProgress();
     }
 
     @RequestMapping(value = "/vaults/policycount/{status}", method = RequestMethod.GET)

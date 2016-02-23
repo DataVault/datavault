@@ -33,8 +33,8 @@ public class AdminController {
         Long vaultSize = restService.getVaultsSize();
         if (vaultSize == null) vaultSize = new Long(0);
         model.addAttribute("vaultsize", FileUtils.byteCountToDisplaySize(vaultSize));
-        model.addAttribute("depositsinprogress", restService.getDepositsInProgress());
-        model.addAttribute("restoresinprogress", restService.getRestoresInProgress());
+        model.addAttribute("depositsinprogress", restService.getDepositsInProgressCount());
+        model.addAttribute("restoresinprogress", restService.getRestoresInProgressCount());
         model.addAttribute("depositqueue", restService.getDepositsQueue());
         model.addAttribute("restorequeue", restService.getRestoresQueue());
         model.addAttribute("reviewcount", restService.getPolicyStatusCount(PolicyStatus.REVIEW));
