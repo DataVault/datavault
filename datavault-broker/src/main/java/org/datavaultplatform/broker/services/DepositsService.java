@@ -58,6 +58,8 @@ public class DepositsService {
 
     public int inProgressCount() { return depositDAO.inProgressCount(); }
 
+    public List<Deposit> inProgress() { return depositDAO.inProgress(); }
+
     public List<Deposit> search(String query, String sort) { return this.depositDAO.search(query, sort); }
 
     public Long size() { return depositDAO.size(); }

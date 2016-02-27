@@ -128,17 +128,17 @@ public class RestService {
     }
 
     public int getVaultsCount() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/count", Integer.class);
+        HttpEntity<?> response = get(brokerURL + "/statistics/count", Integer.class);
         return (Integer)response.getBody();
     }
 
     public Long getVaultsSize() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/size", Long.class);
+        HttpEntity<?> response = get(brokerURL + "/statistics/size", Long.class);
         return (Long)response.getBody();
     }
 
     public int getDepositsCount() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/depositcount", Integer.class);
+        HttpEntity<?> response = get(brokerURL + "/statistics/depositcount", Integer.class);
         return (Integer)response.getBody();
     }
 
@@ -147,9 +147,14 @@ public class RestService {
         return (Integer)response.getBody();
     }
 
-    public int getDepositsInProgress() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/depositinprogresscount", Integer.class);
+    public int getDepositsInProgressCount() {
+        HttpEntity<?> response = get(brokerURL + "/statistics/depositinprogresscount", Integer.class);
         return (Integer)response.getBody();
+    }
+
+    public Deposit[] getDepositsInProgress() {
+        HttpEntity<?> response = get(brokerURL + "/statistics/depositinprogress", Deposit[].class);
+        return (Deposit[])response.getBody();
     }
 
     public DepositInfo[] searchDeposits(String query) {
@@ -163,7 +168,7 @@ public class RestService {
     }
 
     public int getRestoresCount() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/restorecount", Integer.class);
+        HttpEntity<?> response = get(brokerURL + "/statistics/restorecount", Integer.class);
         return (Integer)response.getBody();
     }
 
@@ -172,9 +177,14 @@ public class RestService {
         return (Integer)response.getBody();
     }
 
-    public int getRestoresInProgress() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/restoreinprogresscount", Integer.class);
+    public int getRestoresInProgressCount() {
+        HttpEntity<?> response = get(brokerURL + "/statistics/restoreinprogresscount", Integer.class);
         return (Integer)response.getBody();
+    }
+
+    public Restore[] getRestoresInProgress() {
+        HttpEntity<?> response = get(brokerURL + "/vaults/restoreinprogress", Restore[].class);
+        return (Restore[])response.getBody();
     }
 
     public Restore[] getRestoresListingAll() {
