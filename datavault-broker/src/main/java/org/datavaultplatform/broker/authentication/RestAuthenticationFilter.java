@@ -1,23 +1,104 @@
 package org.datavaultplatform.broker.authentication;
 
-import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedCredentialsNotFoundException;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
- * Under the covers this builds an PreAuthenticatedAuthenticationToken which is passed to the AuthenticationManager
- * and then on to the AuthenticationProvider(s).
- *
  * User: Robin Taylor
- * Date: 13/11/2015
- * Time: 13:16
+ * Date: 18/02/2016
+ * Time: 10:45
  */
-public class RestAuthenticationFilter extends AbstractPreAuthenticatedProcessingFilter {
+public class RestAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    // todo : set both of these in Spring config?
-    private String UserIdRequestHeader = "X-UserID";
-    private boolean exceptionIfHeaderMissing = true;
+    private static final Logger logger = LoggerFactory.getLogger(RestAuthenticationFilter.class);
+
+    // Can be overridden in Spring config
+    private String principalRequestHeader = "X-UserID";
+
+
+    public RestAuthenticationFilter() {
+        // Doesn't matter what goes in here as it should be overridden in the Spring config
+        super("/dummy");
+    }
+
+
+    public void setPrincipalRequestHeader(String principalRequestHeader) {
+        this.principalRequestHeader = principalRequestHeader;
+    }
+
+
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+            throws IOException, ServletException {
+
+        HttpServletRequest request = (HttpServletRequest) req;
+        HttpServletResponse response = (HttpServletResponse) res;
+
+        if (!requiresAuthentication(request, response)) {
+            chain.doFilter(request, response);
+
+            return;
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Request is to process authentication");
+        }
+
+        Authentication authResult;
+
+        try {
+            authResult = attemptAuthentication(request, response);
+            if (authResult == null) {
+                // return immediately as subclass has indicated that it hasn't completed
+                // authentication
+                return;
+            }
+            //sessionStrategy.onAuthentication(authResult, request, response);
+        }
+        catch (InternalAuthenticationServiceException failed) {
+            logger.error(
+                    "An internal error occurred while trying to authenticate the user.",
+                    failed);
+            unsuccessfulAuthentication(request, response, failed);
+
+            return;
+        }
+        catch (AuthenticationException failed) {
+            // Authentication failed
+            unsuccessfulAuthentication(request, response, failed);
+
+            return;
+        }
+
+        successfulAuthentication(request, response, chain, authResult);
+
+        chain.doFilter(request, response);
+    }
+
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+            throws AuthenticationException, IOException, ServletException {
+
+        Object principal = getPreAuthenticatedPrincipal(request);
+        Object credentials = getPreAuthenticatedCredentials(request);
+
+        PreAuthenticatedAuthenticationToken authRequest = new PreAuthenticatedAuthenticationToken(principal, credentials);
+        authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
+        return this.getAuthenticationManager().authenticate(authRequest);
+
+    }
 
     /**
      * Read and returns the header named by {@code apiKeyRequestHeader} from the
@@ -26,15 +107,8 @@ public class RestAuthenticationFilter extends AbstractPreAuthenticatedProcessing
      * @throws PreAuthenticatedCredentialsNotFoundException if the header is missing and
      * {@code exceptionIfHeaderMissing} is set to {@code true}.
      */
-    protected Object getPreAuthenticatedPrincipal(HttpServletRequest request) {
-        String principal = request.getHeader(UserIdRequestHeader);
-
-        if (principal == null && exceptionIfHeaderMissing) {
-            throw new PreAuthenticatedCredentialsNotFoundException(UserIdRequestHeader
-                    + " header not found in request.");
-        }
-
-        return principal;
+    private Object getPreAuthenticatedPrincipal(HttpServletRequest request) {
+        return request.getHeader(principalRequestHeader);
     }
 
     /**
@@ -42,8 +116,7 @@ public class RestAuthenticationFilter extends AbstractPreAuthenticatedProcessing
      * set, this will be read and used as the credentials value. Otherwise a dummy value
      * will be used.
      */
-    protected Object getPreAuthenticatedCredentials(HttpServletRequest request) {
+    private Object getPreAuthenticatedCredentials(HttpServletRequest request) {
         return "N/A";
     }
-
 }

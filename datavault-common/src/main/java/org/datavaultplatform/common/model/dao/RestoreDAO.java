@@ -18,5 +18,7 @@ public interface RestoreDAO {
 
     public int inProgressCount();
 
+    public List<Restore> inProgress();
+
     public int queueCount();
 }

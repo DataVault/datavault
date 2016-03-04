@@ -11,20 +11,19 @@ import javax.servlet.http.HttpServletRequest;
 
 public class RestWebAuthenticationDetails extends WebAuthenticationDetails {
 
-    private String ClientKeyRequestHeader = "X-Client-Key";
+    private String clientKeyRequestHeader;
 
-    public RestWebAuthenticationDetails(HttpServletRequest request) {
+    public RestWebAuthenticationDetails(HttpServletRequest request, String clientKeyRequestHeader) {
         super(request);
-
-        setClientKeyRequestHeader(request.getHeader(ClientKeyRequestHeader));
+        setClientKeyRequestHeader(request.getHeader(clientKeyRequestHeader));
     }
 
     public String getClientKeyRequestHeader() {
-        return ClientKeyRequestHeader;
+        return clientKeyRequestHeader;
     }
 
     public void setClientKeyRequestHeader(String clientKeyRequestHeader) {
-        ClientKeyRequestHeader = clientKeyRequestHeader;
+        this.clientKeyRequestHeader = clientKeyRequestHeader;
     }
 
 

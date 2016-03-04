@@ -64,7 +64,7 @@
             </security:user-service>
         </security:authentication-provider>
 
-        <security:authentication-provider ref="databaseAuthenticationProvider"/>
+        <!--<security:authentication-provider ref="databaseAuthenticationProvider"/> -->
 	</security:authentication-manager>
 
     <bean id="databaseAuthenticationProvider" class="org.datavaultplatform.webapp.authentication.DatabaseAuthenticationProvider">
