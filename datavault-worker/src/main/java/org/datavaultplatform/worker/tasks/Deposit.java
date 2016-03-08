@@ -58,11 +58,12 @@ public class Deposit extends Task {
         String vaultMetadata = properties.get("vaultMetadata");
         
         ArrayList<String> states = new ArrayList<>();
-        states.add("Calculating size");   // 0
-        states.add("Transferring files"); // 1
-        states.add("Packaging data");     // 2
-        states.add("Storing in archive"); // 3
-        states.add("Deposit complete");   // 4
+        states.add("Calculating size");     // 0
+        states.add("Transferring");         // 1
+        states.add("Packaging");            // 2
+        states.add("Storing in archive");   // 3
+        states.add("Verifying");            // 4
+        states.add("Complete");             // 5
         eventStream.send(new InitStates(jobID, depositId, states));
         
         eventStream.send(new Start(jobID, depositId).withNextState(0));
@@ -199,8 +200,35 @@ public class Deposit extends Task {
                 FileUtils.deleteDirectory(bagDir);
                 tarFile.delete();
                 
-                System.out.println("\tDeposit complete: " + archiveId);
+                // TODO: should be a configurable step?
+                System.out.println("\tValidating data ...");
                 eventStream.send(new Complete(jobID, depositId, archiveId, archiveSize).withNextState(4));
+                
+                // Copy the tar file from the archive back to the temporary area
+                Path tempPath = Paths.get(context.getTempDir());
+                tarPath = tempPath.resolve(tarFileName);
+                tarFile = tarPath.toFile();
+                
+                // Ask the driver to copy files to the temp directory
+                progress = new Progress();
+                archiveFs.retrieve(archiveId, tarFile, progress);
+                System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+
+                // Decompress to the temporary directory
+                bagDir = Tar.unTar(tarFile, tempPath);
+                
+                // Validate the bagit directory
+                if (!Packager.validateBag(bagDir)) {
+                    throw new Exception("Bag is invalid");
+                }
+                
+                // Cleanup
+                System.out.println("\tCleaning up ...");
+                FileUtils.deleteDirectory(bagDir);
+                tarFile.delete();
+                
+                System.out.println("\tDeposit complete: " + archiveId);
+                eventStream.send(new Complete(jobID, depositId, archiveId, archiveSize).withNextState(5));
                 
             } else {
                 System.err.println("\tFile does not exist.");
