@@ -110,4 +110,28 @@ public class StatisticsController {
 
         return restoresService.inProgressCount();
     }
+
+    @RequestMapping(value = "/vaults/depositqueuecount", method = RequestMethod.GET)
+    public int getDepositsQueueCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        return depositsService.queueCount();
+    }
+
+    @RequestMapping(value = "/vaults/depositinprogress", method = RequestMethod.GET)
+    public List<Deposit> getDepositsInProgress(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        return depositsService.inProgress();
+    }
+
+    @RequestMapping(value = "/vaults/restorequeuecount", method = RequestMethod.GET)
+    public int getRestoresQueuedCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        return restoresService.queueCount();
+    }
+
+    @RequestMapping(value = "/vaults/restoreinprogress", method = RequestMethod.GET)
+    public List<Restore> getRestoresInProgress(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        return restoresService.inProgress();
+    }
 }
