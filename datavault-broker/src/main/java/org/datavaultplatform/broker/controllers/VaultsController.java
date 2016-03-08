@@ -37,22 +37,6 @@ public class VaultsController {
 
     private static final Logger logger = LoggerFactory.getLogger(VaultsController.class);
     
-    // Get the specified Vault object and validate it against the current User
-    private Vault getUserVault(User user, String vaultID) throws Exception {
-
-        Vault vault = vaultsService.getVault(vaultID);
-
-        if (vault == null) {
-            throw new Exception("Vault '" + vaultID + "' does not exist");
-        }
-
-        if (!vault.getUser().equals(user)) {
-            throw new Exception("Access denied");
-        }
-
-        return vault;
-    }
-
     public void setVaultsService(VaultsService vaultsService) {
         this.vaultsService = vaultsService;
     }
@@ -176,10 +160,6 @@ public class VaultsController {
         return depositResponses;
     }
 
-
-
-
-
     @RequestMapping(value = "/vaults/deposits", method = RequestMethod.GET)
     public List<DepositInfo> getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
                                             @RequestParam(value = "sort", required = false) String sort) throws Exception {
@@ -265,7 +245,7 @@ public class VaultsController {
                               @PathVariable("vaultid") String vaultID) throws Exception {
 
         User user = usersService.getUser(userID);
-        Vault vault = getUserVault(user, vaultID);
+        Vault vault = vaultsService.getUserVault(user, vaultID);
         if (vault != null) {
             return vault.convertToResponse();
         } else {
@@ -285,7 +265,7 @@ public class VaultsController {
                                          @PathVariable("vaultid") String vaultID) throws Exception {
 
         User user = usersService.getUser(userID);
-        Vault vault = getUserVault(user, vaultID);
+        Vault vault = vaultsService.getUserVault(user, vaultID);
 
         List<DepositInfo> depositResponses = new ArrayList<>();
         for (Deposit deposit : vault.getDeposits()) {

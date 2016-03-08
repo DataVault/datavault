@@ -3,8 +3,6 @@ package org.datavaultplatform.common.model;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.event.Event;
 
-import org.apache.commons.io.FileUtils;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -44,8 +42,7 @@ public class Deposit {
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
-
-    @JsonIgnore
+    
     @ManyToOne
     private Vault vault;
     
@@ -211,7 +208,8 @@ public class Deposit {
                 fileOrigin,
                 shortFilePath,
                 filePath,
-                depositSize
+                depositSize,
+                vault.getID()
             );
     }
 }

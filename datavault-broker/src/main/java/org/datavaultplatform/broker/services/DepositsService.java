@@ -1,9 +1,9 @@
 package org.datavaultplatform.broker.services;
 
 import java.util.Date;
+import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.dao.DepositDAO;
 
 import java.util.UUID;
@@ -63,5 +63,18 @@ public class DepositsService {
     public List<Deposit> search(String query, String sort) { return this.depositDAO.search(query, sort); }
 
     public Long size() { return depositDAO.size(); }
+    
+    // Get the specified Deposit object and validate it against the current User and Vault
+    public Deposit getUserDeposit(User user, String depositID) throws Exception {
+        
+        Deposit deposit = getDeposit(depositID);
+        Vault vault = deposit.getVault();
+
+        if (!vault.equals(deposit.getVault())) {
+            throw new Exception("Invalid Vault ID");
+        }
+
+        return deposit;
+    }
 }
 

@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.services;
 
+import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.dao.VaultDAO;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
@@ -55,6 +56,22 @@ public class VaultsService {
 
         // Update and return the policy
         vaultDAO.update(vault);
+        return vault;
+    }
+    
+    // Get the specified Vault object and validate it against the current User
+    public Vault getUserVault(User user, String vaultID) throws Exception {
+
+        Vault vault = getVault(vaultID);
+
+        if (vault == null) {
+            throw new Exception("Vault '" + vaultID + "' does not exist");
+        }
+
+        if (!vault.getUser().equals(user)) {
+            throw new Exception("Access denied");
+        }
+
         return vault;
     }
 }
