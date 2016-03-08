@@ -63,12 +63,6 @@
                 <security:user name="USER30" password="password30" authorities="ROLE_USER" />
             </security:user-service>
         </security:authentication-provider>
-
-        <!--<security:authentication-provider ref="databaseAuthenticationProvider"/> -->
-	</security:authentication-manager>
-
-    <bean id="databaseAuthenticationProvider" class="org.datavaultplatform.webapp.authentication.DatabaseAuthenticationProvider">
-        <property name="restService" ref="restService" />
-    </bean>
+    </security:authentication-manager>
 
 </beans>
