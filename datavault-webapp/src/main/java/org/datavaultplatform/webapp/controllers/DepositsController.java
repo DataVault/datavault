@@ -42,8 +42,11 @@ public class DepositsController {
         if ("cancel".equals(action)) {
             return "redirect:/vaults/" + vaultID;
         }
+        
+        // Set the Vault ID for the new deposit
+        deposit.setVaultID(vaultID);
 
-        DepositInfo newDeposit = restService.addDeposit(vaultID, deposit);
+        DepositInfo newDeposit = restService.addDeposit(deposit);
         String depositUrl = "/vaults/" + vaultID + "/deposits/" + newDeposit.getID() + "/";
         return "redirect:" + depositUrl;
     }
@@ -52,23 +55,23 @@ public class DepositsController {
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}", method = RequestMethod.GET)
     public String getDeposit(ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
         model.addAttribute("vault", restService.getVault(vaultID));
-        model.addAttribute("deposit", restService.getDeposit(vaultID, depositID));
-        model.addAttribute("manifest", restService.getDepositManifest(vaultID, depositID));
-        model.addAttribute("events", restService.getDepositEvents(vaultID, depositID));
-        model.addAttribute("restores", restService.getDepositRestores(vaultID, depositID));
+        model.addAttribute("deposit", restService.getDeposit(depositID));
+        model.addAttribute("manifest", restService.getDepositManifest(depositID));
+        model.addAttribute("events", restService.getDepositEvents(depositID));
+        model.addAttribute("restores", restService.getDepositRestores(depositID));
         return "deposits/deposit";
     }
     
     // View properties of a single deposit as a JSON object
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/json", method = RequestMethod.GET)
     public @ResponseBody DepositInfo getDepositJson(@PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
-        return restService.getDeposit(vaultID, depositID);
+        return restService.getDeposit(depositID);
     }
     
     // View jobs related to a single deposit as a JSON object
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/jobs", method = RequestMethod.GET)
     public @ResponseBody Job[] getDepositJobsJson(@PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
-        return restService.getDepositJobs(vaultID, depositID);
+        return restService.getDepositJobs(depositID);
     }
     
     // Return a 'restore deposit' page
@@ -76,7 +79,7 @@ public class DepositsController {
     public String restoreDeposit(@ModelAttribute Restore restore, ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
         model.addAttribute("restore", new Restore());
         model.addAttribute("vault", restService.getVault(vaultID));
-        model.addAttribute("deposit", restService.getDeposit(vaultID, depositID));
+        model.addAttribute("deposit", restService.getDeposit(depositID));
         return "deposits/restore";
     }
     
@@ -89,7 +92,7 @@ public class DepositsController {
 
         // If the cancel button wasn't pressed, perform the restore
         if (!"cancel".equals(action)) {
-            Boolean result = restService.restoreDeposit(vaultID, depositID, restore);
+            Boolean result = restService.restoreDeposit(depositID, restore);
         }
 
         String depositUrl = "/vaults/" + vaultID + "/deposits/" + depositID + "/";

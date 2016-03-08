@@ -230,28 +230,28 @@ public class RestService {
         return (DepositInfo[])response.getBody();
     }
 
-    public DepositInfo getDeposit(String vaultId, String depositID) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID, DepositInfo.class);
+    public DepositInfo getDeposit(String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID, DepositInfo.class);
         return (DepositInfo)response.getBody();
     }
     
-    public FileFixity[] getDepositManifest(String vaultId, String depositID) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/manifest", FileFixity[].class);
+    public FileFixity[] getDepositManifest(String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID + "/manifest", FileFixity[].class);
         return (FileFixity[])response.getBody();
     }
     
-    public Event[] getDepositEvents(String vaultId, String depositID) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/events", Event[].class);
+    public Event[] getDepositEvents(String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID + "/events", Event[].class);
         return (Event[])response.getBody();
     }
 
-    public Job[] getDepositJobs(String vaultId, String depositID) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/jobs", Job[].class);
+    public Job[] getDepositJobs(String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID + "/jobs", Job[].class);
         return (Job[])response.getBody();
     }
 
-    public Restore[] getDepositRestores(String vaultId, String depositID) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/restores", Restore[].class);
+    public Restore[] getDepositRestores(String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID + "/restores", Restore[].class);
         return (Restore[])response.getBody();
     }
 
@@ -312,13 +312,13 @@ public class RestService {
         return (VaultInfo)response.getBody();
     }
 
-    public DepositInfo addDeposit(String vaultId, CreateDeposit createDeposit) {
-        HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/deposits", DepositInfo.class, createDeposit);
+    public DepositInfo addDeposit(CreateDeposit createDeposit) {
+        HttpEntity<?> response = post(brokerURL + "/deposits", DepositInfo.class, createDeposit);
         return (DepositInfo)response.getBody();
     }
     
-    public Boolean restoreDeposit(String vaultId, String depositID, Restore restore) {        
-        HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/restore", Boolean.class, restore);
+    public Boolean restoreDeposit(String depositID, Restore restore) {        
+        HttpEntity<?> response = post(brokerURL + "/deposits/" + depositID + "/restore", Boolean.class, restore);
         return (Boolean)response.getBody();
     }
 

@@ -14,10 +14,14 @@ public class CreateDeposit {
     @ApiObjectField(description = "File path of the data to deposit (including device ID)")
     private String filePath;
     
+    @ApiObjectField(description = "The vault which this deposit will be added to")
+    private String vaultID;
+    
     public CreateDeposit() { }
-    public CreateDeposit(String note, String filePath) {
+    public CreateDeposit(String note, String filePath, String vaultID) {
         this.note = note;
         this.filePath = filePath;
+        this.vaultID = vaultID;
     }
 
     public String getNote() {
@@ -34,5 +38,13 @@ public class CreateDeposit {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public String getVaultID() {
+        return vaultID;
+    }
+
+    public void setVaultID(String vaultID) {
+        this.vaultID = vaultID;
     }
 }

@@ -36,12 +36,15 @@ public class DepositInfo {
     @ApiObjectField(description = "Filepath of the origin deposit")
     private String filePath;
     
+    @ApiObjectField(description = "Vault where this deposit was carried out")
+    private String vaultID;
+    
     // Size of the deposit (in bytes)
     @ApiObjectField(description = "Size of the depoit (in bytes)")
     private long depositSize;
     
     public DepositInfo() {}
-    public DepositInfo(String id, Date creationTime, Deposit.Status status, String note, String fileOrigin, String shortFilePath, String filePath, long depositSize) {
+    public DepositInfo(String id, Date creationTime, Deposit.Status status, String note, String fileOrigin, String shortFilePath, String filePath, long depositSize, String vaultID) {
         this.id = id;
         this.creationTime = creationTime;
         this.status = status;
@@ -50,6 +53,7 @@ public class DepositInfo {
         this.shortFilePath = shortFilePath;
         this.filePath = filePath;
         this.depositSize = depositSize;
+        this.vaultID = vaultID;
     }
 
     public String getID() {
@@ -106,6 +110,14 @@ public class DepositInfo {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public String getVaultID() {
+        return vaultID;
+    }
+
+    public void setVaultID(String vaultID) {
+        this.vaultID = vaultID;
     }
 
     public long getDepositSize() {
