@@ -216,12 +216,7 @@ public class VaultsController {
 
 
 
-    @RequestMapping(value = "/vaults/policycount/{status}", method = RequestMethod.GET)
-    public int getPolicyStatusCount(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                @PathVariable("status") int status) throws Exception {
 
-        return vaultsService.getPolicyCount(status);
-    }
 
     @RequestMapping(value = "/vaults/deposits", method = RequestMethod.GET)
     public List<DepositInfo> getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
