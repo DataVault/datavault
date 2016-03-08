@@ -69,7 +69,7 @@ public class AdminController {
     @ApiHeaders(headers={
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
-    @RequestMapping(value = "/vaults/all", method = RequestMethod.GET)
+    @RequestMapping(value = "/admin/vaults", method = RequestMethod.GET)
     public List<VaultInfo> getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
                                         @RequestParam(value = "sort", required = false)
                                         @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime"}, defaultvalue = "creationTime", required = false) String sort,
