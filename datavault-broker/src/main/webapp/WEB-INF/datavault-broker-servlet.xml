@@ -102,6 +102,12 @@
         <property name="usersService" ref="usersService" />
     </bean>
 
+    <bean id="adminController" class="org.datavaultplatform.broker.controllers.AdminController">
+        <property name="vaultsService" ref="vaultsService" />
+        <property name="depositsService" ref="depositsService" />
+        <property name="restoresService" ref="restoresService" />
+    </bean>
+
     <bean id="policiesController" class="org.datavaultplatform.broker.controllers.PoliciesController">
         <property name="policiesService" ref="policiesService" />
     </bean>

@@ -123,32 +123,7 @@ public class VaultsController {
         return vaultResponses;
     }
 
-    @ApiMethod(
-            path = "/vaults/all",
-            verb = ApiVerb.GET,
-            description = "Gets a list of all Vaults",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
-    })
-    @RequestMapping(value = "/vaults/all", method = RequestMethod.GET)
-    public List<VaultInfo> getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                        @RequestParam(value = "sort", required = false)
-                                        @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime"}, defaultvalue = "creationTime", required = false) String sort,
-                                        @RequestParam(value = "order", required = false)
-                                        @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order) throws Exception {
 
-        if (sort == null) sort = "";
-        if (order == null) order = "asc";
-        
-        List<VaultInfo> vaultResponses = new ArrayList<>();
-        for (Vault vault : vaultsService.getVaults(sort, order)) {
-            vaultResponses.add(vault.convertToResponse());
-        }
-        return vaultResponses;
-    }
 
     @RequestMapping(value = "/vaults/search", method = RequestMethod.GET)
     public List<VaultInfo> searchAllVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
@@ -174,27 +149,6 @@ public class VaultsController {
             depositResponses.add(deposit.convertToResponse());
         }
         return depositResponses;
-    }
-
-
-
-
-
-    @RequestMapping(value = "/vaults/deposits", method = RequestMethod.GET)
-    public List<DepositInfo> getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                            @RequestParam(value = "sort", required = false) String sort) throws Exception {
-        
-        List<DepositInfo> depositResponses = new ArrayList<>();
-        for (Deposit deposit : depositsService.getDeposits(sort)) {
-            depositResponses.add(deposit.convertToResponse());
-        }
-        return depositResponses;
-    }
-
-    @RequestMapping(value = "/vaults/restores", method = RequestMethod.GET)
-    public List<Restore> getRestoresAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
-
-        return restoresService.getRestores();
     }
 
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)
