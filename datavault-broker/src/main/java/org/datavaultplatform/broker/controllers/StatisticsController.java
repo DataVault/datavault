@@ -134,4 +134,12 @@ public class StatisticsController {
 
         return restoresService.inProgress();
     }
+
+    
+    @RequestMapping(value = "/vaults/policycount/{status}", method = RequestMethod.GET)
+    public int getPolicyStatusCount(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                    @PathVariable("status") int status) throws Exception {
+
+        return vaultsService.getPolicyCount(status);
+    }
 }
