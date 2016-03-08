@@ -68,6 +68,11 @@ public class DepositsService {
     public Deposit getUserDeposit(User user, String depositID) throws Exception {
         
         Deposit deposit = getDeposit(depositID);
+        
+        if (deposit == null) {
+            throw new Exception("Invalid Deposit ID");
+        }
+        
         Vault vault = deposit.getVault();
 
         if (!vault.equals(deposit.getVault())) {
