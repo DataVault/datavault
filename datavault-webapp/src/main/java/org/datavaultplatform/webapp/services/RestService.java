@@ -108,12 +108,12 @@ public class RestService {
     }
 
     public VaultInfo[] getVaultsListingAll() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/all", VaultInfo[].class);
+        HttpEntity<?> response = get(brokerURL + "/admin/vaults", VaultInfo[].class);
         return (VaultInfo[])response.getBody();
     }
 
     public VaultInfo[] getVaultsListingAll(String sort, String order) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/all?sort=" + sort + "&order=" + order, VaultInfo[].class);
+        HttpEntity<?> response = get(brokerURL + "/admin/vaults?sort=" + sort + "&order=" + order, VaultInfo[].class);
         return (VaultInfo[])response.getBody();
     }
 
@@ -188,7 +188,7 @@ public class RestService {
     }
 
     public Restore[] getRestoresListingAll() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/restores", Restore[].class);
+        HttpEntity<?> response = get(brokerURL + "/admin/restores", Restore[].class);
         return (Restore[])response.getBody();
     }
 
@@ -221,12 +221,12 @@ public class RestService {
     }
 
     public DepositInfo[] getDepositsListingAll() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/deposits", DepositInfo[].class);
+        HttpEntity<?> response = get(brokerURL + "/admin/deposits", DepositInfo[].class);
         return (DepositInfo[])response.getBody();
     }
 
     public DepositInfo[] getDepositsListingAll(String sort) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/deposits?sort=" + sort, DepositInfo[].class);
+        HttpEntity<?> response = get(brokerURL + "/admin/deposits?sort=" + sort, DepositInfo[].class);
         return (DepositInfo[])response.getBody();
     }
 
