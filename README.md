@@ -2,6 +2,10 @@ DataVault - A long term archive for Research Data
 =================================================
 ![Alt text](/logo-dvsmall.jpg?raw=true "Data Vault logo")
 
+Status
+---
+![Alt text](https://travis-ci.org/DataVault/datavault.svg?branch=master "Travis build status")
+
 What
 ----
 A Jisc-funded project to create an archive service for Research Data.  Funded under the 'Research at Risk' Data Spring programme.
