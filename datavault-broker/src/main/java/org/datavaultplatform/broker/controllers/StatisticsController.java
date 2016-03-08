@@ -59,22 +59,6 @@ public class StatisticsController {
     }
 
 
-    // Get the specified Vault object and validate it against the current User
-    private Vault getUserVault(User user, String vaultID) throws Exception {
-
-        Vault vault = vaultsService.getVault(vaultID);
-
-        if (vault == null) {
-            throw new Exception("Vault '" + vaultID + "' does not exist");
-        }
-
-        if (!vault.getUser().equals(user)) {
-            throw new Exception("Access denied");
-        }
-
-        return vault;
-    }
-
     @RequestMapping(value = "/statistics/count", method = RequestMethod.GET)
     public int getVaultsCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
