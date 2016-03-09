@@ -33,18 +33,23 @@ import org.datavaultplatform.worker.queue.EventSender;
 
 public class Deposit extends Task {
 
-    EventSender events;
+    EventSender eventStream;
+    Device userFs;
+    UserStore userStore;
+    Device archiveFs;
+    String depositId;
+    String bagID;
     
     @Override
     public void performAction(Context context) {
         
-        EventSender eventStream = (EventSender)context.getEventStream();
+        eventStream = (EventSender)context.getEventStream();
         
         System.out.println("\tDeposit job - performAction()");
         
         Map<String, String> properties = getProperties();
-        String depositId = properties.get("depositId");
-        String bagID = properties.get("bagId");
+        depositId = properties.get("depositId");
+        bagID = properties.get("bagId");
         String filePath = properties.get("filePath");
 
         if (this.isRedeliver()) {
@@ -70,10 +75,6 @@ public class Deposit extends Task {
         
         System.out.println("\tbagID: " + bagID);
         System.out.println("\tfilePath: " + filePath);
-        
-        Device userFs;
-        UserStore userStore;
-        Device archiveFs;
         
         // Connect to the user storage
         try {
@@ -109,38 +110,14 @@ public class Deposit extends Task {
                 Path bagPath = Paths.get(context.getTempDir(), bagID);
                 File bagDir = bagPath.toFile();
                 bagDir.mkdir();
-
+                
                 // Copy the target file to the bag directory
+                eventStream.send(new UpdateProgress(jobID, depositId).withNextState(1));
                 System.out.println("\tCopying target to bag directory ...");
-                String fileName = userStore.getName(filePath);
-                File outputFile = bagPath.resolve(fileName).toFile();
-
-                // Compute bytes to copy
-                long bytes = userStore.getSize(filePath);
-                
-                eventStream.send(new ComputedSize(jobID, depositId, bytes));
-                
-                eventStream.send(new UpdateProgress(jobID, depositId, 0, bytes, "Starting transfer ...").withNextState(1));
-                System.out.println("\tSize: " + bytes + " bytes (" +  FileUtils.byteCountToDisplaySize(bytes) + ")");
-                
-                // Progress tracking (threaded)
-                Progress progress = new Progress();
-                ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, bytes, eventStream);
-                Thread trackerThread = new Thread(tracker);
-                trackerThread.start();
-                
-                try {
-                    // Ask the driver to copy files to our working directory
-                    userFs.retrieve(filePath, outputFile, progress);
-                } finally {
-                    // Stop the tracking thread
-                    tracker.stop();
-                    trackerThread.join();
-                }
-                
-                eventStream.send(new TransferComplete(jobID, depositId).withNextState(2));
+                copyFromUserStorage(filePath, bagPath);
                 
                 // Bag the directory in-place
+                eventStream.send(new TransferComplete(jobID, depositId).withNextState(2));
                 System.out.println("\tCreating bag ...");
                 Packager.createBag(bagDir);
 
@@ -176,24 +153,7 @@ public class Deposit extends Task {
                 
                 // Copy the resulting tar file to the archive area
                 System.out.println("\tCopying tar file to archive ...");
-                
-                // Progress tracking (threaded)
-                progress = new Progress();
-                tracker = new ProgressTracker(progress, jobID, depositId, tarFile.length(), eventStream);
-                trackerThread = new Thread(tracker);
-                trackerThread.start();
-                
-                String archiveId;
-                
-                try {
-                    archiveId = archiveFs.store("/", tarFile, progress);
-                } finally {
-                    // Stop the tracking thread
-                    tracker.stop();
-                    trackerThread.join();
-                }
-                
-                System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+                String archiveId = copyToArchiveStorage(tarFile);
                 
                 // Cleanup
                 System.out.println("\tCleaning up ...");
@@ -201,31 +161,9 @@ public class Deposit extends Task {
                 tarFile.delete();
                 
                 // TODO: should be a configurable step?
+                eventStream.send(new UpdateProgress(jobID, depositId).withNextState(4));
                 System.out.println("\tValidating data ...");
-                eventStream.send(new Complete(jobID, depositId, archiveId, archiveSize).withNextState(4));
-                
-                // Copy the tar file from the archive back to the temporary area
-                Path tempPath = Paths.get(context.getTempDir());
-                tarPath = tempPath.resolve(tarFileName);
-                tarFile = tarPath.toFile();
-                
-                // Ask the driver to copy files to the temp directory
-                progress = new Progress();
-                archiveFs.retrieve(archiveId, tarFile, progress);
-                System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
-
-                // Decompress to the temporary directory
-                bagDir = Tar.unTar(tarFile, tempPath);
-                
-                // Validate the bagit directory
-                if (!Packager.validateBag(bagDir)) {
-                    throw new Exception("Bag is invalid");
-                }
-                
-                // Cleanup
-                System.out.println("\tCleaning up ...");
-                FileUtils.deleteDirectory(bagDir);
-                tarFile.delete();
+                verifyArchivedTarFile(context, archiveId, tarFileName);
                 
                 System.out.println("\tDeposit complete: " + archiveId);
                 eventStream.send(new Complete(jobID, depositId, archiveId, archiveSize).withNextState(5));
@@ -238,5 +176,83 @@ public class Deposit extends Task {
             e.printStackTrace();
             eventStream.send(new Error(jobID, depositId, "Deposit failed: " + e.getMessage()));
         }
+    }
+    
+    private void copyFromUserStorage(String filePath, Path bagPath) throws Exception {
+
+        String fileName = userStore.getName(filePath);
+        File outputFile = bagPath.resolve(fileName).toFile();
+        
+        // Compute bytes to copy
+        long expectedBytes = userStore.getSize(filePath);
+        eventStream.send(new ComputedSize(jobID, depositId, expectedBytes));
+        
+        // Display progress bar
+        eventStream.send(new UpdateProgress(jobID, depositId, 0, expectedBytes, "Starting transfer ..."));
+        System.out.println("\tSize: " + expectedBytes + " bytes (" +  FileUtils.byteCountToDisplaySize(expectedBytes) + ")");
+        
+        // Progress tracking (threaded)
+        Progress progress = new Progress();
+        ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, expectedBytes, eventStream);
+        Thread trackerThread = new Thread(tracker);
+        trackerThread.start();
+        
+        try {
+            // Ask the driver to copy files to our working directory
+            userFs.retrieve(filePath, outputFile, progress);
+        } finally {
+            // Stop the tracking thread
+            tracker.stop();
+            trackerThread.join();
+        }
+    }
+    
+    private String copyToArchiveStorage(File tarFile) throws Exception {
+
+        // Progress tracking (threaded)
+        Progress progress = new Progress();
+        ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, tarFile.length(), eventStream);
+        Thread trackerThread = new Thread(tracker);
+        trackerThread.start();
+
+        String archiveId;
+
+        try {
+            archiveId = archiveFs.store("/", tarFile, progress);
+        } finally {
+            // Stop the tracking thread
+            tracker.stop();
+            trackerThread.join();
+        }
+
+        System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+        
+        return archiveId;
+    }
+    
+    private void verifyArchivedTarFile(Context context, String archiveId, String tarFileName) throws Exception {
+
+        // Copy the tar file from the archive back to the temporary area
+        Path tempPath = Paths.get(context.getTempDir());
+        Path tarPath = tempPath.resolve(tarFileName);
+        File tarFile = tarPath.toFile();
+        
+        // Ask the driver to copy files to the temp directory
+        Progress progress = new Progress();
+        archiveFs.retrieve(archiveId, tarFile, progress);
+        System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+
+        // Decompress to the temporary directory
+        File bagDir = Tar.unTar(tarFile, tempPath);
+        
+        // Validate the bagit directory
+        if (!Packager.validateBag(bagDir)) {
+            throw new Exception("Bag is invalid");
+        }
+        
+        // Cleanup
+        System.out.println("\tCleaning up ...");
+        FileUtils.deleteDirectory(bagDir);
+        tarFile.delete();
     }
 }
