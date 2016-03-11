@@ -132,11 +132,13 @@ public class Deposit extends Task {
                 Path tarPath = Paths.get(context.getTempDir()).resolve(tarFileName);
                 File tarFile = tarPath.toFile();
                 Tar.createTar(bagDir, tarFile);
+                String tarHash = Verify.getSha1Digest(tarFile);
 
                 eventStream.send(new PackageComplete(jobID, depositId).withNextState(3));
                 
                 long archiveSize = tarFile.length();
                 System.out.println("\tTar file: " + archiveSize + " bytes");
+                System.out.println("\tSHA-1 checksum: " + tarHash);
                 
                 // Create the meta directory for the bag information
                 Path metaPath = Paths.get(context.getMetaDir(), bagID);
@@ -165,7 +167,7 @@ public class Deposit extends Task {
                 if (archiveFs.getVerifyMethod() == Verify.Method.LOCAL_ONLY) {
                     
                     // Verify the contents of the temporary file
-                    verifyTarFile(tempPath, tarFile);
+                    verifyTarFile(tempPath, tarFile, null);
                     
                 } else if (archiveFs.getVerifyMethod() == Verify.Method.COPY_BACK) {
 
@@ -175,8 +177,8 @@ public class Deposit extends Task {
                     // Copy file back from the archive storage
                     copyBackFromArchive(archiveId, tarFile);
                     
-                    // Veriy the contents
-                    verifyTarFile(tempPath, tarFile);
+                    // Verify the contents
+                    verifyTarFile(tempPath, tarFile, tarHash);
                 }
                 
                 System.out.println("\tDeposit complete: " + archiveId);
@@ -252,8 +254,17 @@ public class Deposit extends Task {
         System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
     }
     
-    private void verifyTarFile(Path tempPath, File tarFile) throws Exception {
+    private void verifyTarFile(Path tempPath, File tarFile, String origTarHash) throws Exception {
 
+        if (origTarHash != null) {
+            // Compare the SHA hash
+            String tarHash = Verify.getSha1Digest(tarFile);
+            System.out.println("\tSHA-1 checksum: " + tarHash);
+            if (!tarHash.equals(origTarHash)) {
+                throw new Exception("SHA-1 checksum failed: " + tarHash + " != " + origTarHash);
+            }
+        }
+        
         // Decompress to the temporary directory
         File bagDir = Tar.unTar(tarFile, tempPath);
         
