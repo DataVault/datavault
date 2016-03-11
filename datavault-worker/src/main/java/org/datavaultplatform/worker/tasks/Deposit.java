@@ -23,12 +23,8 @@ import org.datavaultplatform.common.event.deposit.TransferComplete;
 import org.datavaultplatform.common.event.deposit.PackageComplete;
 import org.datavaultplatform.common.event.deposit.Complete;
 import org.datavaultplatform.common.io.Progress;
-import org.datavaultplatform.common.storage.Device;
-import org.datavaultplatform.common.storage.UserStore;
-import org.datavaultplatform.worker.operations.Tar;
-import org.datavaultplatform.worker.operations.Packager;
-import org.datavaultplatform.worker.operations.ProgressTracker;
-import org.datavaultplatform.worker.operations.Identifier;
+import org.datavaultplatform.common.storage.*;
+import org.datavaultplatform.worker.operations.*;
 import org.datavaultplatform.worker.queue.EventSender;
 
 public class Deposit extends Task {
@@ -36,7 +32,7 @@ public class Deposit extends Task {
     EventSender eventStream;
     Device userFs;
     UserStore userStore;
-    Device archiveFs;
+    ArchiveStore archiveFs;
     String depositId;
     String bagID;
     
@@ -94,7 +90,7 @@ public class Deposit extends Task {
             Class<?> clazz = Class.forName(archiveFileStore.getStorageClass());
             Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
             Object instance = constructor.newInstance(archiveFileStore.getStorageClass(), archiveFileStore.getProperties());
-            archiveFs = (Device)instance;
+            archiveFs = (ArchiveStore)instance;
         } catch (Exception e) {
             e.printStackTrace();
             eventStream.send(new Error(jobID, depositId, "Deposit failed: could not access archive filesystem"));
@@ -158,12 +154,30 @@ public class Deposit extends Task {
                 // Cleanup
                 System.out.println("\tCleaning up ...");
                 FileUtils.deleteDirectory(bagDir);
-                tarFile.delete();
                 
-                // TODO: should be a configurable step?
                 eventStream.send(new UpdateProgress(jobID, depositId).withNextState(4));
-                System.out.println("\tValidating data ...");
-                verifyArchivedTarFile(context, archiveId, tarFileName);
+                System.out.println("\tVerifying archive package ...");
+                System.out.println("\tVerification method: " + archiveFs.getVerifyMethod());
+                
+                // Get the tar file
+                Path tempPath = Paths.get(context.getTempDir());
+                
+                if (archiveFs.getVerifyMethod() == Verify.Method.LOCAL_ONLY) {
+                    
+                    // Verify the contents of the temporary file
+                    verifyTarFile(tempPath, tarFile);
+                    
+                } else if (archiveFs.getVerifyMethod() == Verify.Method.COPY_BACK) {
+
+                    // Delete the existing temporary file
+                    tarFile.delete();
+                    
+                    // Copy file back from the archive storage
+                    copyBackFromArchive(archiveId, tarFile);
+                    
+                    // Veriy the contents
+                    verifyTarFile(tempPath, tarFile);
+                }
                 
                 System.out.println("\tDeposit complete: " + archiveId);
                 eventStream.send(new Complete(jobID, depositId, archiveId, archiveSize).withNextState(5));
@@ -218,7 +232,7 @@ public class Deposit extends Task {
         String archiveId;
 
         try {
-            archiveId = archiveFs.store("/", tarFile, progress);
+            archiveId = ((Device)archiveFs).store("/", tarFile, progress);
         } finally {
             // Stop the tracking thread
             tracker.stop();
@@ -230,17 +244,15 @@ public class Deposit extends Task {
         return archiveId;
     }
     
-    private void verifyArchivedTarFile(Context context, String archiveId, String tarFileName) throws Exception {
-
-        // Copy the tar file from the archive back to the temporary area
-        Path tempPath = Paths.get(context.getTempDir());
-        Path tarPath = tempPath.resolve(tarFileName);
-        File tarFile = tarPath.toFile();
+    private void copyBackFromArchive(String archiveId, File tarFile) throws Exception {
         
         // Ask the driver to copy files to the temp directory
         Progress progress = new Progress();
-        archiveFs.retrieve(archiveId, tarFile, progress);
+        ((Device)archiveFs).retrieve(archiveId, tarFile, progress);
         System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+    }
+    
+    private void verifyTarFile(Path tempPath, File tarFile) throws Exception {
 
         // Decompress to the temporary directory
         File bagDir = Tar.unTar(tarFile, tempPath);
@@ -248,6 +260,8 @@ public class Deposit extends Task {
         // Validate the bagit directory
         if (!Packager.validateBag(bagDir)) {
             throw new Exception("Bag is invalid");
+        } else {
+            System.out.println("\tBag is valid");
         }
         
         // Cleanup
