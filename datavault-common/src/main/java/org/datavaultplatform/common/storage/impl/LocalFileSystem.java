@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.io.FileCopy;
+import org.datavaultplatform.common.storage.Verify;
 
 public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
 
@@ -142,6 +143,12 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
         }
         
         return working.getName();
+    }
+    
+    @Override
+    public Verify.Method getVerifyMethod() {
+        // Return the default verification method (copy back and check)
+        return verificationMethod;
     }
     
     private Path getAbsolutePath(String filePath) {
