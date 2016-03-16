@@ -1,14 +1,10 @@
 package org.datavaultplatform.worker;
 
-import org.datavaultplatform.worker.queue.Receiver;
-import org.datavaultplatform.worker.queue.EventSender;
+import org.datavaultplatform.worker.queue.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class WorkerInstance {
-
-    private Receiver receiver;
-    private EventSender eventSender;
 
     public static void main(String [] args) {
 

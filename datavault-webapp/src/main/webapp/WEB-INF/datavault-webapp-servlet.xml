@@ -115,6 +115,8 @@
         <property name="brokerURL" value="${brokerURL}" />
         <property name="brokerApiKey" value="${broker.api.key}" />
     </bean>
+    
+    <bean id="authSuccessHandler" class="org.datavaultplatform.webapp.authentication.AuthenticationSuccess"/>
 
     <!-- Email feedback settings -->
     <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
