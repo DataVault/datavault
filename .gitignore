@@ -21,8 +21,8 @@ nb-configuration.xml
 META-INF/
 datavault-broker/src/main/webapp/WEB-INF/glassfish-web.xml
 datavault-webapp/src/main/webapp/WEB-INF/glassfish-web.xml
-## Ignore all *.properties file in root folder, EXCEPT build.properties (the default)
+## Ignore all *.properties file in root folder, EXCEPT datavault.properties (the default)
 /*.properties
-!/build.properties
+!/datavault.properties
 ##Mac noise
 .DS_Store
