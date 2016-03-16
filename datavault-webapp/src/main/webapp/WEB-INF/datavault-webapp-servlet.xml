@@ -13,7 +13,7 @@
 
     <context:component-scan base-package="org.datavaultplatform.webapp.controllers"/>
 
-    <context:property-placeholder location="file:///${user.home}/datavault-webapp.properties" ignore-resource-not-found="true" ignore-unresolvable="true"/>
+    <context:property-placeholder location="file:///${DATAVAULT_HOME}/config/datavault.properties" ignore-resource-not-found="true" ignore-unresolvable="true"/>
     <context:property-placeholder location="WEB-INF/datavault-webapp.properties"/>
 
     <mvc:annotation-driven />
