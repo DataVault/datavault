@@ -10,7 +10,9 @@ public class Start extends Event {
     
     Start() {};
     public Start(String jobId, String depositId) {
-        super(jobId, depositId, "Deposit started");
+        super("Deposit started");
         this.eventClass = Start.class.getCanonicalName();
+        this.depositId = depositId;
+        this.jobId = jobId;
     }
 }

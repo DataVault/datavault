@@ -1,14 +1,37 @@
 package org.datavaultplatform.broker.controllers;
 
+import org.datavaultplatform.broker.services.EventService;
+import org.datavaultplatform.broker.services.ClientsService;
+import org.datavaultplatform.broker.services.UsersService;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.datavaultplatform.common.request.CreateClientEvent;
+import org.datavaultplatform.common.event.client.*;
+import org.datavaultplatform.common.model.Actor;
+import org.datavaultplatform.common.model.Client;
+import org.datavaultplatform.common.model.User;
 
 @RestController
 @Api(name="Notify", description = "Inform the broker about an event")
 public class NotifyController {
+    
+    private EventService eventService;
+    private ClientsService clientsService;
+    private UsersService usersService;
+    
+    public void setEventService(EventService eventService) {
+        this.eventService = eventService;
+    }
+
+    public void setClientsService(ClientsService clientsService) {
+        this.clientsService = clientsService;
+    }
+    
+    public void setUsersService(UsersService usersService) {
+        this.usersService = usersService;
+    }
     
     @ApiMethod(
             path = "/notify/login}",
@@ -22,10 +45,15 @@ public class NotifyController {
     })
     @RequestMapping(value = "/notify/login", method = RequestMethod.PUT)
     public String login(@RequestHeader(value = "X-UserID", required = true) String userID,
-                           @RequestBody CreateClientEvent clientEvent) throws Exception {
-        System.out.println("Broker login event: " + userID);
-        System.out.println("\tRemote address: " + clientEvent.getRemoteAddress());
-        System.out.println("\tUser agent: " + clientEvent.getUserAgent());
+                        @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
+                        @RequestBody CreateClientEvent clientEvent) throws Exception {
+        
+        Login loginEvent = new Login(clientEvent.getRemoteAddress(), clientEvent.getUserAgent());
+        loginEvent.setUser(usersService.getUser(userID));
+        loginEvent.setActorType(Actor.ActorType.WEB_API);
+        loginEvent.setActor(clientsService.getClientByApiKey(clientKey).getName());
+        eventService.addEvent(loginEvent);
+        
         return "";
     }
     
@@ -41,10 +69,15 @@ public class NotifyController {
     })
     @RequestMapping(value = "/notify/logout", method = RequestMethod.PUT)
     public String logout(@RequestHeader(value = "X-UserID", required = true) String userID,
-                           @RequestBody CreateClientEvent clientEvent) throws Exception {
-        System.out.println("Broker logout event: " + userID);
-        System.out.println("\tRemote address: " + clientEvent.getRemoteAddress());
-        System.out.println("\tUser agent: " + clientEvent.getUserAgent());
+                         @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
+                         @RequestBody CreateClientEvent clientEvent) throws Exception {
+        
+        Logout logoutEvent = new Logout(clientEvent.getRemoteAddress());
+        logoutEvent.setUser(usersService.getUser(userID));
+        logoutEvent.setActorType(Actor.ActorType.WEB_API);
+        logoutEvent.setActor(clientsService.getClientByApiKey(clientKey).getName());
+        eventService.addEvent(logoutEvent);
+        
         return "";
     }
 }

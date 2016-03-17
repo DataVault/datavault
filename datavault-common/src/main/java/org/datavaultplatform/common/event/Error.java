@@ -11,7 +11,11 @@ public class Error extends Event {
 
     public Error() { }
     public Error(String jobId, String depositId, String message) {
-        super(jobId, depositId, message);
+        super(message);
         this.eventClass = Error.class.getCanonicalName();
+        
+        // Optional?
+        this.depositId = depositId;
+        this.jobId = jobId;
     }
 }

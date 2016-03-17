@@ -105,7 +105,7 @@ public class Restore extends Task {
                 }
             } catch (Exception e) {
                 System.out.println("Unable to determine free space");
-                eventStream.send(new Event(jobID, depositId, "Unable to determine free space"));
+                eventStream.send(new Error(jobID, depositId, "Unable to determine free space"));
             }
 
             // Retrieve the archived data

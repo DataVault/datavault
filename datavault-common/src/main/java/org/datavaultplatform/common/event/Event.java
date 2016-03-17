@@ -13,13 +13,14 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.DiscriminatorColumn;
+import javax.persistence.Enumerated;
+import javax.persistence.EnumType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.ManyToOne;
 import org.hibernate.annotations.GenericGenerator;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.Job;
+import org.datavaultplatform.common.model.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -37,7 +38,6 @@ public class Event {
     
     // Event properties
     public String message;
-    public String depositId;
     public String restoreId;
     public String eventClass;
     
@@ -58,26 +58,37 @@ public class Event {
     @JsonIgnore
     @ManyToOne
     private Deposit deposit;
+    @Transient
+    public String depositId;
     
     // Related job
     @JsonIgnore
     @ManyToOne
     private Job job;
-    
-    // Non-hibernate Job ID set by worker on event creation
     @Transient
     public String jobId;
     
+    // Related user
+    @JsonIgnore
+    @ManyToOne
+    private User user;
+    @Transient
+    public String userId;
+    
+    // Event actor
+    private String actor;
+    
+    @Enumerated(EnumType.STRING)
+    private Actor.ActorType actorType;
+    
     public Event() {};
-    public Event(String jobId, String depositId, String message) {
+    public Event(String message) {
         this.eventClass = Event.class.getCanonicalName();
-        this.jobId = jobId;
-        this.depositId = depositId;
         this.message = message;
         this.timestamp = new Date();
         this.sequence = 0;
     }
-
+    
     public Event(String jobId, String depositId, String restoreId, String message) {
         this.eventClass = Event.class.getCanonicalName();
         this.jobId = jobId;
@@ -122,6 +133,30 @@ public class Event {
         this.depositId = depositId;
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getActor() {
+        return actor;
+    }
+
+    public void setActor(String actor) {
+        this.actor = actor;
+    }
+
+    public Actor.ActorType getActorType() {
+        return actorType;
+    }
+
+    public void setActorType(Actor.ActorType actorType) {
+        this.actorType = actorType;
+    }
+    
     public String getRestoreId() {
         return restoreId;
     }
@@ -169,9 +204,22 @@ public class Event {
     public void setDeposit(Deposit deposit) {
         this.deposit = deposit;
     }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
     
     public Event withNextState(Integer state) {
         this.nextState = state;
+        return this;
+    }
+    
+    public Event withUserId(String userId) {
+        this.userId = userId;
         return this;
     }
 }

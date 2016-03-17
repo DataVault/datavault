@@ -2,13 +2,19 @@ package org.datavaultplatform.common.event;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name="Events")
 public class UpdateProgress extends Event {
     
+    @Transient
     public long progress;
+    
+    @Transient
     public long progressMax;
+    
+    @Transient
     public String progressMessage;
     
     UpdateProgress() {};
@@ -16,12 +22,16 @@ public class UpdateProgress extends Event {
         this(jobId, depositId, 0, 0, "");
     }
     public UpdateProgress(String jobId, String depositId, long progress, long progressMax, String progressMessage) {
-        super(jobId, depositId, "Job progress update");
+        super("Job progress update");
         this.eventClass = UpdateProgress.class.getCanonicalName();
         this.progress = progress;
         this.progressMax = progressMax;
         this.progressMessage = progressMessage;
         this.persistent = false;
+        
+        // Optional?
+        this.depositId = depositId;
+        this.jobId = jobId;
     }
     
     public long getProgress() {

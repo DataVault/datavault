@@ -15,10 +15,13 @@ public class Complete extends Event {
     Complete() {};
     public Complete(String jobId, String depositId, String archiveId, long archiveSize) {
         
-        super(jobId, depositId, "Deposit completed");
+        super("Deposit completed");
+        
         this.eventClass = Complete.class.getCanonicalName();
         this.archiveId = archiveId;
         this.archiveSize = archiveSize;
+        this.depositId = depositId;
+        this.jobId = jobId;
     }
 
     public String getArchiveId() {

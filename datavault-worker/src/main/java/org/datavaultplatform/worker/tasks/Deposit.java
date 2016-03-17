@@ -35,6 +35,7 @@ public class Deposit extends Task {
     ArchiveStore archiveFs;
     String depositId;
     String bagID;
+    String userID;
     
     @Override
     public void performAction(Context context) {
@@ -46,10 +47,13 @@ public class Deposit extends Task {
         Map<String, String> properties = getProperties();
         depositId = properties.get("depositId");
         bagID = properties.get("bagId");
+        userID = properties.get("userId");
         String filePath = properties.get("filePath");
+        
 
         if (this.isRedeliver()) {
-            eventStream.send(new Error(jobID, depositId, "Deposit stopped: the message had been redelivered, please investigate"));
+            eventStream.send(new Error(jobID, depositId, "Deposit stopped: the message had been redelivered, please investigate")
+                .withUserId(userID));
             return;
         }
         
@@ -65,9 +69,12 @@ public class Deposit extends Task {
         states.add("Storing in archive");   // 3
         states.add("Verifying");            // 4
         states.add("Complete");             // 5
-        eventStream.send(new InitStates(jobID, depositId, states));
+        eventStream.send(new InitStates(jobID, depositId, states)
+            .withUserId(userID));
         
-        eventStream.send(new Start(jobID, depositId).withNextState(0));
+        eventStream.send(new Start(jobID, depositId)
+            .withUserId(userID)
+            .withNextState(0));
         
         System.out.println("\tbagID: " + bagID);
         System.out.println("\tfilePath: " + filePath);
@@ -81,7 +88,8 @@ public class Deposit extends Task {
             userStore = (UserStore)userFs;
         } catch (Exception e) {
             e.printStackTrace();
-            eventStream.send(new Error(jobID, depositId, "Deposit failed: could not access user filesystem"));
+            eventStream.send(new Error(jobID, depositId, "Deposit failed: could not access user filesystem")
+                .withUserId(userID));
             return;
         }
         
@@ -93,7 +101,8 @@ public class Deposit extends Task {
             archiveFs = (ArchiveStore)instance;
         } catch (Exception e) {
             e.printStackTrace();
-            eventStream.send(new Error(jobID, depositId, "Deposit failed: could not access archive filesystem"));
+            eventStream.send(new Error(jobID, depositId, "Deposit failed: could not access archive filesystem")
+                .withUserId(userID));
             return;
         }
         
@@ -108,12 +117,18 @@ public class Deposit extends Task {
                 bagDir.mkdir();
                 
                 // Copy the target file to the bag directory
-                eventStream.send(new UpdateProgress(jobID, depositId).withNextState(1));
+                eventStream.send(new UpdateProgress(jobID, depositId)
+                    .withUserId(userID)
+                    .withNextState(1));
+                
                 System.out.println("\tCopying target to bag directory ...");
                 copyFromUserStorage(filePath, bagPath);
                 
                 // Bag the directory in-place
-                eventStream.send(new TransferComplete(jobID, depositId).withNextState(2));
+                eventStream.send(new TransferComplete(jobID, depositId)
+                    .withUserId(userID)
+                    .withNextState(2));
+                
                 System.out.println("\tCreating bag ...");
                 Packager.createBag(bagDir);
 
@@ -134,7 +149,9 @@ public class Deposit extends Task {
                 Tar.createTar(bagDir, tarFile);
                 String tarHash = Verify.getSha1Digest(tarFile);
 
-                eventStream.send(new PackageComplete(jobID, depositId).withNextState(3));
+                eventStream.send(new PackageComplete(jobID, depositId)
+                    .withUserId(userID)
+                    .withNextState(3));
                 
                 long archiveSize = tarFile.length();
                 System.out.println("\tTar file: " + archiveSize + " bytes");
@@ -157,7 +174,10 @@ public class Deposit extends Task {
                 System.out.println("\tCleaning up ...");
                 FileUtils.deleteDirectory(bagDir);
                 
-                eventStream.send(new UpdateProgress(jobID, depositId).withNextState(4));
+                eventStream.send(new UpdateProgress(jobID, depositId)
+                    .withUserId(userID)
+                    .withNextState(4));
+                
                 System.out.println("\tVerifying archive package ...");
                 System.out.println("\tVerification method: " + archiveFs.getVerifyMethod());
                 
@@ -182,15 +202,20 @@ public class Deposit extends Task {
                 }
                 
                 System.out.println("\tDeposit complete: " + archiveId);
-                eventStream.send(new Complete(jobID, depositId, archiveId, archiveSize).withNextState(5));
+                
+                eventStream.send(new Complete(jobID, depositId, archiveId, archiveSize)
+                    .withUserId(userID)
+                    .withNextState(5));
                 
             } else {
                 System.err.println("\tFile does not exist.");
-                eventStream.send(new Error(jobID, depositId, "Deposit failed: file not found"));
+                eventStream.send(new Error(jobID, depositId, "Deposit failed: file not found")
+                    .withUserId(userID));
             }
         } catch (Exception e) {
             e.printStackTrace();
-            eventStream.send(new Error(jobID, depositId, "Deposit failed: " + e.getMessage()));
+            eventStream.send(new Error(jobID, depositId, "Deposit failed: " + e.getMessage())
+                .withUserId(userID));
         }
     }
     
@@ -201,10 +226,13 @@ public class Deposit extends Task {
         
         // Compute bytes to copy
         long expectedBytes = userStore.getSize(filePath);
-        eventStream.send(new ComputedSize(jobID, depositId, expectedBytes));
+        eventStream.send(new ComputedSize(jobID, depositId, expectedBytes)
+            .withUserId(userID));
         
         // Display progress bar
-        eventStream.send(new UpdateProgress(jobID, depositId, 0, expectedBytes, "Starting transfer ..."));
+        eventStream.send(new UpdateProgress(jobID, depositId, 0, expectedBytes, "Starting transfer ...")
+            .withUserId(userID));
+        
         System.out.println("\tSize: " + expectedBytes + " bytes (" +  FileUtils.byteCountToDisplaySize(expectedBytes) + ")");
         
         // Progress tracking (threaded)

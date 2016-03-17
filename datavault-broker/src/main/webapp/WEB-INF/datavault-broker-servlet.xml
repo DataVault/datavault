@@ -135,6 +135,12 @@
     <bean id="metadataController" class="org.datavaultplatform.broker.controllers.MetadataController">
         <property name="externalMetadataService" ref="externalMetadataService" />
     </bean>
+    
+    <bean id="notifyController" class="org.datavaultplatform.broker.controllers.NotifyController">
+        <property name="eventService" ref="eventService" />
+        <property name="clientsService" ref="clientsService" />
+        <property name="usersService" ref="usersService" />
+    </bean>
 
     <!-- todo : should the service beans be put into their own config file? -->
 
@@ -231,6 +237,7 @@
         <property name="depositsService" ref="depositsService" />
         <property name="restoresService" ref="restoresService" />
         <property name="eventService" ref="eventService" />
+        <property name="usersService" ref="usersService" />
     </bean>
 
     <bean id="sender" class="org.datavaultplatform.broker.queue.Sender">

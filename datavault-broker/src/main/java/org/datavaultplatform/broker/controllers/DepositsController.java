@@ -144,6 +144,7 @@ public class DepositsController {
             depositProperties.put("depositId", deposit.getID());
             depositProperties.put("bagId", deposit.getBagId());
             depositProperties.put("filePath", storagePath); // Path without storage ID
+            depositProperties.put("userId", user.getID());
 
             // Deposit and Vault metadata
             // TODO: at the moment we're just serialising the objects to JSON.
