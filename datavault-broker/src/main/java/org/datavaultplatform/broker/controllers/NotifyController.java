@@ -28,4 +28,23 @@ public class NotifyController {
         System.out.println("\tUser agent: " + clientEvent.getUserAgent());
         return "";
     }
+    
+    @ApiMethod(
+            path = "/notify/logout}",
+            verb = ApiVerb.PUT,
+            description = "Notify the broker about a client logout event",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
+    @RequestMapping(value = "/notify/logout", method = RequestMethod.PUT)
+    public String logout(@RequestHeader(value = "X-UserID", required = true) String userID,
+                           @RequestBody CreateClientEvent clientEvent) throws Exception {
+        System.out.println("Broker logout event: " + userID);
+        System.out.println("\tRemote address: " + clientEvent.getRemoteAddress());
+        System.out.println("\tUser agent: " + clientEvent.getUserAgent());
+        return "";
+    }
 }

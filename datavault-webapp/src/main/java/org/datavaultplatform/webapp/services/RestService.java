@@ -347,4 +347,9 @@ public class RestService {
         HttpEntity<?> response = put(brokerURL + "/notify/login", String.class, clientEvent);
         return (String)response.getBody();
     }
+    
+    public String notifyLogout(CreateClientEvent clientEvent) {
+        HttpEntity<?> response = put(brokerURL + "/notify/logout", String.class, clientEvent);
+        return (String)response.getBody();
+    }
 }
