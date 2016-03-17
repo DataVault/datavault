@@ -342,4 +342,9 @@ public class RestService {
         HttpEntity<?> response = post(brokerURL + "/users/" + userId + "/keys", String.class, null);
         return (String)response.getBody();
     }
+    
+    public String notifyLogin(CreateClientEvent clientEvent) {
+        HttpEntity<?> response = put(brokerURL + "/notify/login", String.class, clientEvent);
+        return (String)response.getBody();
+    }
 }
