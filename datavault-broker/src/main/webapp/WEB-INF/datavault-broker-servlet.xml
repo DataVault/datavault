@@ -17,8 +17,8 @@
 
     <context:component-scan base-package="org.datavaultplatform.broker.controllers"/>
 
-    <context:property-placeholder location="file:///${DATAVAULT_HOME}/config/datavault.properties" ignore-resource-not-found="true" ignore-unresolvable="true"/>
-    <context:property-placeholder location="WEB-INF/datavault-broker.properties"/>
+    <!-- Note:- You need to set DATAVAULT_HOME! -->
+    <context:property-placeholder location="file:///${DATAVAULT_HOME}/config/datavault.properties"/>
 
     <mvc:annotation-driven />
 
