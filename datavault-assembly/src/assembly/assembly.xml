@@ -10,44 +10,10 @@
 
     <fileSets>
         <fileSet>
-            <directory>datavault-home</directory>
+            <directory>src/datavault-home</directory>
             <outputDirectory>datavault-home</outputDirectory>
         </fileSet>
     </fileSets>
-
-    <files>
-        <!--
-        <file>
-            <source>../datavault-webapp/src/main/webapp/WEB-INF/datavault-webapp-security-database.xml</source>
-            <outputDirectory>datavault-home/spring</outputDirectory>
-        </file>
-        <file>
-            <source>../datavault-webapp/src/main/webapp/WEB-INF/datavault-webapp-security-in-memory.xml</source>
-            <outputDirectory>datavault-home/spring</outputDirectory>
-        </file>
-        <file>
-            <source>../datavault-webapp/src/main/webapp/WEB-INF/datavault-webapp-security-shib.xml</source>
-            <outputDirectory>datavault-home/spring</outputDirectory>
-        </file>
-        <file>
-            <source>../datavault-webapp/src/main/webapp/WEB-INF/datavault-webapp-servlet.xml</source>
-            <outputDirectory>datavault-home/spring</outputDirectory>
-        </file>
-        <file>
-            <source>../datavault-broker/src/main/webapp/WEB-INF/datavault-broker-servlet.xml</source>
-            <outputDirectory>datavault-home/spring</outputDirectory>
-        </file>
-        <file>
-            <source>../datavault-worker/src/main/resources/config/datavault-worker.xml</source>
-            <outputDirectory>datavault-home/spring</outputDirectory>
-        </file>
-        -->
-        <file>
-            <source>../datavault.properties</source>
-            <outputDirectory>datavault-home/config</outputDirectory>
-        </file>
-    </files>
-
 
     <dependencySets>
         <dependencySet>
