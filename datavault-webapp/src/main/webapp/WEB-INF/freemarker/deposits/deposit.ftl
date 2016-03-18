@@ -82,6 +82,7 @@
                 <table class="table table-striped">
                     <thead>
                     <tr class="tr">
+                        <th>User</th>
                         <th>Event</th>
                         <th>Message</th>
                         <th>Timestamp</th>
@@ -90,6 +91,7 @@
                     <tbody>
                         <#list events as event>
                         <tr class="tr">
+                            <td>${event.userID?html}</td>
                             <td>${event.eventClass?html}</td>
                             <td>${event.message?html}</td>
                             <td>${event.timestamp?datetime}</td>

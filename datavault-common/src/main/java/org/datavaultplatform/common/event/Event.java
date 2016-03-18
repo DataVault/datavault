@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.ManyToOne;
 import org.hibernate.annotations.GenericGenerator;
 import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.response.EventInfo;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -61,6 +62,13 @@ public class Event {
     @Transient
     public String depositId;
     
+    // Related vault
+    @JsonIgnore
+    @ManyToOne
+    private Vault vault;
+    @Transient
+    public String vaultId;
+    
     // Related job
     @JsonIgnore
     @ManyToOne
@@ -77,6 +85,10 @@ public class Event {
     
     // Event actor
     private String actor;
+    
+    // Web request properties
+    public String remoteAddress;
+    public String userAgent;
     
     @Enumerated(EnumType.STRING)
     private Actor.ActorType actorType;
@@ -133,6 +145,14 @@ public class Event {
         this.depositId = depositId;
     }
 
+    public String getVaultId() {
+        return vaultId;
+    }
+
+    public void setVaultId(String vaultId) {
+        this.vaultId = vaultId;
+    }
+    
     public String getUserId() {
         return userId;
     }
@@ -155,6 +175,22 @@ public class Event {
 
     public void setActorType(Actor.ActorType actorType) {
         this.actorType = actorType;
+    }
+
+    public String getRemoteAddress() {
+        return remoteAddress;
+    }
+
+    public void setRemoteAddress(String remoteAddress) {
+        this.remoteAddress = remoteAddress;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
     
     public String getRestoreId() {
@@ -205,6 +241,14 @@ public class Event {
         this.deposit = deposit;
     }
 
+    public Vault getVault() {
+        return vault;
+    }
+
+    public void setVault(Vault vault) {
+        this.vault = vault;
+    }
+
     public User getUser() {
         return user;
     }
@@ -221,5 +265,19 @@ public class Event {
     public Event withUserId(String userId) {
         this.userId = userId;
         return this;
+    }
+    
+    public EventInfo convertToResponse() {
+        return new EventInfo(id,
+                timestamp,
+                message,
+                user != null ? user.getID() : null,
+                vault != null ? vault.getID() : null,
+                eventClass,
+                deposit != null ? deposit.getID() : null,
+                actor,
+                actorType != null ? actorType.toString() : null,
+                remoteAddress,
+                userAgent);
     }
 }

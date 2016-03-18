@@ -31,6 +31,7 @@ public class StatisticsController {
     private PoliciesService policiesService;
     private GroupsService groupsService;
     private UsersService usersService;
+    private EventService eventService;
 
     private static final Logger logger = LoggerFactory.getLogger(StatisticsController.class);
 
@@ -57,7 +58,10 @@ public class StatisticsController {
     public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
     }
-
+    
+    public void setEventService(EventService eventService) {
+        this.eventService = eventService;
+    }
 
     @RequestMapping(value = "/statistics/count", method = RequestMethod.GET)
     public int getVaultsCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
@@ -125,5 +129,11 @@ public class StatisticsController {
                                     @PathVariable("status") int status) throws Exception {
 
         return vaultsService.getPolicyCount(status);
+    }
+    
+    @RequestMapping(value = "/statistics/eventcount", method = RequestMethod.GET)
+    public int getEventCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        return eventService.count();
     }
 }

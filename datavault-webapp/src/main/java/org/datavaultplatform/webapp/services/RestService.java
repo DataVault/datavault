@@ -240,9 +240,9 @@ public class RestService {
         return (FileFixity[])response.getBody();
     }
     
-    public Event[] getDepositEvents(String depositID) {
-        HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID + "/events", Event[].class);
-        return (Event[])response.getBody();
+    public EventInfo[] getDepositEvents(String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID + "/events", EventInfo[].class);
+        return (EventInfo[])response.getBody();
     }
 
     public Job[] getDepositJobs(String depositID) {
@@ -303,6 +303,16 @@ public class RestService {
     public Dataset[] getDatasets() {
         HttpEntity<?> response = get(brokerURL + "/metadata/datasets", Dataset[].class);
         return (Dataset[])response.getBody();
+    }
+    
+    public EventInfo[] getEvents() {
+        HttpEntity<?> response = get(brokerURL + "/admin/events?sort=timestamp", EventInfo[].class);
+        return (EventInfo[])response.getBody();
+    }
+    
+    public int getEventCount() {
+        HttpEntity<?> response = get(brokerURL + "/statistics/eventcount", Integer.class);
+        return (Integer)response.getBody();
     }
     
     /* POST requests */

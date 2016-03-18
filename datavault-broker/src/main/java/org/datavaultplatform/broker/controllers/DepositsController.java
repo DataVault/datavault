@@ -1,6 +1,7 @@
 package org.datavaultplatform.broker.controllers;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.datavaultplatform.broker.services.*;
@@ -175,13 +176,18 @@ public class DepositsController {
     }
 
     @RequestMapping(value = "/deposits/{depositid}/events", method = RequestMethod.GET)
-    public List<Event> getDepositEvents(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                        @PathVariable("depositid") String depositID) throws Exception {
+    public List<EventInfo> getDepositEvents(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                            @PathVariable("depositid") String depositID) throws Exception {
 
         User user = usersService.getUser(userID);
         Deposit deposit = depositsService.getUserDeposit(user, depositID);
 
-        List<Event> events = deposit.getEvents();
+        List<EventInfo> events = new ArrayList<>();
+        
+        for (Event event : deposit.getEvents()) {
+            events.add(event.convertToResponse());
+        }
+        
         return events;
     }
 

@@ -102,6 +102,10 @@
     <bean id="adminRestoresController" class="org.datavaultplatform.webapp.controllers.admin.AdminRestoresController">
         <property name="restService" ref="restService" />
     </bean>
+    
+    <bean id="adminEventsController" class="org.datavaultplatform.webapp.controllers.admin.AdminEventsController">
+        <property name="restService" ref="restService" />
+    </bean>
 
     <bean id="groupVaultsController" class="org.datavaultplatform.webapp.controllers.groups.GroupVaultsController">
         <property name="restService" ref="restService" />

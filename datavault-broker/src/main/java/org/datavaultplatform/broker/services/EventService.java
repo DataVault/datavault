@@ -13,6 +13,10 @@ public class EventService {
         return eventDAO.list();
     }
     
+    public List<Event> getEvents(String sort) {
+        return eventDAO.list(sort);
+    }
+    
     public void addEvent(Event event) {
         eventDAO.save(event);
     }
@@ -24,5 +28,7 @@ public class EventService {
     public void setEventDAO(EventDAO eventDAO) {
         this.eventDAO = eventDAO;
     }
+    
+    public int count() { return eventDAO.count(); }
 }
 

@@ -8,8 +8,6 @@ import org.datavaultplatform.common.event.Event;
 @Table(name="Events")
 public class Logout extends Event {
     
-    String remoteAddress;
-    
     Logout() {};
     public Logout(String remoteAddress) {
         super("Logout");

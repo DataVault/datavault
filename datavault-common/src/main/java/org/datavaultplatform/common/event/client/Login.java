@@ -7,10 +7,7 @@ import org.datavaultplatform.common.event.Event;
 @Entity
 @Table(name="Events")
 public class Login extends Event {
-    
-    String remoteAddress;
-    String userAgent;
-    
+       
     Login() {};
     public Login(String remoteAddress, String userAgent) {
         super("Login");
