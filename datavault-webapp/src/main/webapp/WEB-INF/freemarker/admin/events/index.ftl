@@ -16,6 +16,7 @@
                 <thead>
                     <tr class="tr">
                         <th>Actor</th>
+                        <th>User</th>
                         <th>Event</th>
                         <th>Timestamp</a></th>
                         <th>Vault</th>
@@ -38,6 +39,7 @@
                                 <span class="label label-default">${event.actorType}</span>&nbsp${event.actor}
                             </#if>
                         </td>
+                        <td>${event.userID!}</td>
                         <td>${event.eventClass?html}</a></td>
                         <td>${event.timestamp?datetime}</td>
                         <td>${event.vaultID!}</td>
