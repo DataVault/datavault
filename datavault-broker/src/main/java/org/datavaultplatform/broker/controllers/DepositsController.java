@@ -278,6 +278,7 @@ public class DepositsController {
             restoreProperties.put("restorePath", restorePath); // No longer the absolute path
             restoreProperties.put("archiveId", deposit.getArchiveId());
             restoreProperties.put("archiveSize", Long.toString(deposit.getArchiveSize()));
+            restoreProperties.put("userId", user.getID());
 
             Task restoreTask = new Task(job, restoreProperties, userStore, archiveStore);
             ObjectMapper mapper = new ObjectMapper();
