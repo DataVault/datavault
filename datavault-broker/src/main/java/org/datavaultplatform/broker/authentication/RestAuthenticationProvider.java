@@ -59,7 +59,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         User user = usersService.getUser(name);
         if (user == null) {
             logger.debug("No matching User record found for Id " + name);
-            throw new RestAuthenticationException("No matching User record found for Id " + name);
+            throw new RestAuthenticationException("Invalid user Id : " + name);
         }
 
         // If we got here then we found a matching User record.
@@ -77,13 +77,13 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
             Client client = clientsService.getClientByApiKey(clientApiKey);
             if (client == null) {
                 logger.debug("No matching Client record found for API key " + clientApiKey);
-                throw new RestAuthenticationException("No matching Client record found for API key " + clientApiKey);
+                throw new RestAuthenticationException("Invalid client credentials");
             }
 
             // If we got here then we found a matching Client record, so check the IP addresses.
             if (!ipAddress.equals(client.getIpAddress())) {
                 logger.debug("Invalid IP address on incoming request " + ipAddress);
-                throw new RestAuthenticationException("Invalid IP address on incoming request " + ipAddress);
+                throw new RestAuthenticationException("Invalid client credentials");
             }
 
             grantedAuths.add(new SimpleGrantedAuthority("ROLE_CLIENT_USER"));
