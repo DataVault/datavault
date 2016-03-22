@@ -77,6 +77,8 @@
         <property name="usersService" ref="usersService" />
         <property name="fileStoreService" ref="fileStoreService" />
         <property name="archiveStoreService" ref="archiveStoreService" />
+        <property name="eventService" ref="eventService" />
+        <property name="clientsService" ref="clientsService" />
         <property name="activeDir" value="${activeDir}" />
         <property name="archiveDir" value="${archiveDir}" />
     </bean>
@@ -100,12 +102,14 @@
         <property name="policiesService" ref="policiesService" />
         <property name="groupsService" ref="groupsService" />
         <property name="usersService" ref="usersService" />
+        <property name="eventService" ref="eventService" />
     </bean>
 
     <bean id="adminController" class="org.datavaultplatform.broker.controllers.AdminController">
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
         <property name="restoresService" ref="restoresService" />
+        <property name="eventService" ref="eventService" />
     </bean>
 
     <bean id="policiesController" class="org.datavaultplatform.broker.controllers.PoliciesController">
@@ -134,6 +138,12 @@
     
     <bean id="metadataController" class="org.datavaultplatform.broker.controllers.MetadataController">
         <property name="externalMetadataService" ref="externalMetadataService" />
+    </bean>
+    
+    <bean id="notifyController" class="org.datavaultplatform.broker.controllers.NotifyController">
+        <property name="eventService" ref="eventService" />
+        <property name="clientsService" ref="clientsService" />
+        <property name="usersService" ref="usersService" />
     </bean>
 
     <!-- todo : should the service beans be put into their own config file? -->
@@ -231,6 +241,7 @@
         <property name="depositsService" ref="depositsService" />
         <property name="restoresService" ref="restoresService" />
         <property name="eventService" ref="eventService" />
+        <property name="usersService" ref="usersService" />
     </bean>
 
     <bean id="sender" class="org.datavaultplatform.broker.queue.Sender">

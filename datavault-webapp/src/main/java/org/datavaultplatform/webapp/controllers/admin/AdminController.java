@@ -38,6 +38,7 @@ public class AdminController {
         model.addAttribute("depositqueue", restService.getDepositsQueue());
         model.addAttribute("restorequeue", restService.getRestoresQueue());
         model.addAttribute("reviewcount", restService.getPolicyStatusCount(PolicyStatus.REVIEW));
+        model.addAttribute("eventcount", restService.getEventCount());
 
         return "admin/index";
     }

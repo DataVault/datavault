@@ -6,8 +6,10 @@ import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Restore;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.response.EventInfo;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.http.MediaType;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.datavaultplatform.broker.services.EventService;
 
 /**
  * Created by Robin Taylor on 08/03/2016.
@@ -28,7 +31,8 @@ public class AdminController {
     private VaultsService vaultsService;
     private DepositsService depositsService;
     private RestoresService restoresService;
-
+    private EventService eventService;
+    
     public void setDepositsService(DepositsService depositsService) {
         this.depositsService = depositsService;
     }
@@ -40,7 +44,10 @@ public class AdminController {
     public void setVaultsService(VaultsService vaultsService) {
         this.vaultsService = vaultsService;
     }
-
+    
+    public void setEventService(EventService eventService) {
+        this.eventService = eventService;
+    }
 
     @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)
     public List<DepositInfo> getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
@@ -85,5 +92,15 @@ public class AdminController {
         }
         return vaultResponses;
     }
+    
+    @RequestMapping(value = "/admin/events", method = RequestMethod.GET)
+    public List<EventInfo> getEventsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                        @RequestParam(value = "sort", required = false) String sort) throws Exception {
 
+        List<EventInfo> events = new ArrayList<>();
+        for (Event event : eventService.getEvents(sort)) {
+            events.add(event.convertToResponse());
+        }
+        return events;
+    }
 }

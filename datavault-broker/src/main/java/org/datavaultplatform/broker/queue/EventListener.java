@@ -2,16 +2,10 @@ package org.datavaultplatform.broker.queue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.broker.services.*;
-import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.event.InitStates;
-import org.datavaultplatform.common.event.UpdateProgress;
+import org.datavaultplatform.common.event.*;
 import org.datavaultplatform.common.event.deposit.*;
-import org.datavaultplatform.common.event.restore.RestoreComplete;
-import org.datavaultplatform.common.event.restore.RestoreStart;
-import org.datavaultplatform.common.model.Job;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.Restore;
-import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.event.restore.*;
+import org.datavaultplatform.common.model.*;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
 
@@ -22,6 +16,7 @@ public class EventListener implements MessageListener {
     private VaultsService vaultsService;
     private DepositsService depositsService;
     private RestoresService restoresService;
+    private UsersService usersService;
 
     public void setJobsService(JobsService jobsService) {
         this.jobsService = jobsService;
@@ -39,6 +34,10 @@ public class EventListener implements MessageListener {
 
     public void setRestoresService(RestoresService restoresService) {
         this.restoresService = restoresService;
+    }
+    
+    public void setUsersService(UsersService usersService) {
+        this.usersService = usersService;
     }
 
     @Override
@@ -62,6 +61,10 @@ public class EventListener implements MessageListener {
             // Get the related job
             Job job = jobsService.getJob(concreteEvent.getJobId());
             concreteEvent.setJob(job);
+            
+            // Get the related User
+            User user = usersService.getUser(concreteEvent.getUserId());
+            concreteEvent.setUser(user);
             
             if (concreteEvent.getPersistent()) {
                 // Persist the event properties in the database ...

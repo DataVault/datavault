@@ -102,6 +102,10 @@
     <bean id="adminRestoresController" class="org.datavaultplatform.webapp.controllers.admin.AdminRestoresController">
         <property name="restService" ref="restService" />
     </bean>
+    
+    <bean id="adminEventsController" class="org.datavaultplatform.webapp.controllers.admin.AdminEventsController">
+        <property name="restService" ref="restService" />
+    </bean>
 
     <bean id="groupVaultsController" class="org.datavaultplatform.webapp.controllers.groups.GroupVaultsController">
         <property name="restService" ref="restService" />
@@ -115,7 +119,15 @@
         <property name="brokerURL" value="${brokerURL}" />
         <property name="brokerApiKey" value="${broker.api.key}" />
     </bean>
-
+    
+    <bean id="authSuccessHandler" class="org.datavaultplatform.webapp.authentication.AuthenticationSuccess">
+        <property name="restService" ref="restService" />
+    </bean>
+    
+    <bean id="logoutListener" class="org.datavaultplatform.webapp.controllers.LogoutListener">
+        <property name="restService" ref="restService" />
+    </bean>
+    
     <!-- Email feedback settings -->
     <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
         <property name="host"><value>${mail.host}</value></property>

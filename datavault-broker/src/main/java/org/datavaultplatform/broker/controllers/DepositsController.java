@@ -1,6 +1,7 @@
 package org.datavaultplatform.broker.controllers;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.datavaultplatform.broker.services.*;
@@ -144,6 +145,7 @@ public class DepositsController {
             depositProperties.put("depositId", deposit.getID());
             depositProperties.put("bagId", deposit.getBagId());
             depositProperties.put("filePath", storagePath); // Path without storage ID
+            depositProperties.put("userId", user.getID());
 
             // Deposit and Vault metadata
             // TODO: at the moment we're just serialising the objects to JSON.
@@ -174,13 +176,18 @@ public class DepositsController {
     }
 
     @RequestMapping(value = "/deposits/{depositid}/events", method = RequestMethod.GET)
-    public List<Event> getDepositEvents(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                        @PathVariable("depositid") String depositID) throws Exception {
+    public List<EventInfo> getDepositEvents(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                            @PathVariable("depositid") String depositID) throws Exception {
 
         User user = usersService.getUser(userID);
         Deposit deposit = depositsService.getUserDeposit(user, depositID);
 
-        List<Event> events = deposit.getEvents();
+        List<EventInfo> events = new ArrayList<>();
+        
+        for (Event event : deposit.getEvents()) {
+            events.add(event.convertToResponse());
+        }
+        
         return events;
     }
 
@@ -271,6 +278,7 @@ public class DepositsController {
             restoreProperties.put("restorePath", restorePath); // No longer the absolute path
             restoreProperties.put("archiveId", deposit.getArchiveId());
             restoreProperties.put("archiveSize", Long.toString(deposit.getArchiveSize()));
+            restoreProperties.put("userId", user.getID());
 
             Task restoreTask = new Task(job, restoreProperties, userStore, archiveStore);
             ObjectMapper mapper = new ObjectMapper();

@@ -240,9 +240,9 @@ public class RestService {
         return (FileFixity[])response.getBody();
     }
     
-    public Event[] getDepositEvents(String depositID) {
-        HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID + "/events", Event[].class);
-        return (Event[])response.getBody();
+    public EventInfo[] getDepositEvents(String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID + "/events", EventInfo[].class);
+        return (EventInfo[])response.getBody();
     }
 
     public Job[] getDepositJobs(String depositID) {
@@ -305,6 +305,16 @@ public class RestService {
         return (Dataset[])response.getBody();
     }
     
+    public EventInfo[] getEvents() {
+        HttpEntity<?> response = get(brokerURL + "/admin/events?sort=timestamp", EventInfo[].class);
+        return (EventInfo[])response.getBody();
+    }
+    
+    public int getEventCount() {
+        HttpEntity<?> response = get(brokerURL + "/statistics/eventcount", Integer.class);
+        return (Integer)response.getBody();
+    }
+    
     /* POST requests */
     
     public VaultInfo addVault(CreateVault createVault) {
@@ -340,6 +350,16 @@ public class RestService {
     public String addKeys(String userId) {
         // Bit odd to POST a null object, but a POST seems appropriate since it is a non-idempotent, create request
         HttpEntity<?> response = post(brokerURL + "/users/" + userId + "/keys", String.class, null);
+        return (String)response.getBody();
+    }
+    
+    public String notifyLogin(CreateClientEvent clientEvent) {
+        HttpEntity<?> response = put(brokerURL + "/notify/login", String.class, clientEvent);
+        return (String)response.getBody();
+    }
+    
+    public String notifyLogout(CreateClientEvent clientEvent) {
+        HttpEntity<?> response = put(brokerURL + "/notify/logout", String.class, clientEvent);
         return (String)response.getBody();
     }
 }

@@ -9,6 +9,8 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 
 import org.datavaultplatform.common.event.Event;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 
 public class EventDAOImpl implements EventDAO {
     
@@ -38,6 +40,23 @@ public class EventDAOImpl implements EventDAO {
         return events;
     }
     
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Event> list(String sort) {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Event.class);
+        // See if there is a valid sort option
+        if ("id".equals(sort)) {
+            criteria.addOrder(Order.asc("id"));
+        } else {
+            criteria.addOrder(Order.asc("timestamp"));
+        }
+
+        List<Event> events = criteria.list();
+        session.close();
+        return events;
+    }
+    
     @Override
     public Event findById(String Id) {
         Session session = this.sessionFactory.openSession();
@@ -46,5 +65,11 @@ public class EventDAOImpl implements EventDAO {
         Event event = (Event)criteria.uniqueResult();
         session.close();
         return event;
+    }
+    
+    @Override
+    public int count() {
+        Session session = this.sessionFactory.openSession();
+        return (int)(long)(Long)session.createCriteria(Event.class).setProjection(Projections.rowCount()).uniqueResult();
     }
 }

@@ -40,10 +40,12 @@ public class Restore extends Task {
         String bagID = properties.get("bagId");
         String restorePath = properties.get("restorePath");
         String archiveId = properties.get("archiveId");
+        String userID = properties.get("userId");
         long archiveSize = Long.parseLong(properties.get("archiveSize"));
 
         if (this.isRedeliver()) {
-            eventStream.send(new Error(jobID, depositId, "Restore stopped: the message had been redelivered, please investigate"));
+            eventStream.send(new Error(jobID, depositId, "Restore stopped: the message had been redelivered, please investigate")
+                .withUserId(userID));
             return;
         }
         
@@ -53,9 +55,12 @@ public class Restore extends Task {
         states.add("Validating data");         // 2
         states.add("Transferring files");      // 3
         states.add("Data restore complete");   // 4
-        eventStream.send(new InitStates(jobID, depositId, states));
+        eventStream.send(new InitStates(jobID, depositId, states)
+            .withUserId(userID));
         
-        eventStream.send(new RestoreStart(jobID, depositId, restoreId).withNextState(0));
+        eventStream.send(new RestoreStart(jobID, depositId, restoreId)
+            .withUserId(userID)
+            .withNextState(0));
         
         System.out.println("\tbagID: " + bagID);
         System.out.println("\trestorePath: " + restorePath);
@@ -73,7 +78,8 @@ public class Restore extends Task {
             userStore = (UserStore)userFs;
         } catch (Exception e) {
             e.printStackTrace();
-            eventStream.send(new Error(jobID, depositId, "Restore failed: could not access active filesystem"));
+            eventStream.send(new Error(jobID, depositId, "Restore failed: could not access active filesystem")
+                .withUserId(userID));
             return;
         }
         
@@ -85,7 +91,8 @@ public class Restore extends Task {
             archiveFs = (Device)instance;
         } catch (Exception e) {
             e.printStackTrace();
-            eventStream.send(new Error(jobID, depositId, "Restore failed: could not access archive filesystem"));
+            eventStream.send(new Error(jobID, depositId, "Restore failed: could not access archive filesystem")
+                .withUserId(userID));
             return;
         }
         
@@ -100,12 +107,14 @@ public class Restore extends Task {
                 long freespace = userFs.getUsableSpace();
                 System.out.println("\tFree space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
                 if (freespace < archiveSize) {
-                    eventStream.send(new Error(jobID, depositId, "Not enough free space to restore data!"));
+                    eventStream.send(new Error(jobID, depositId, "Not enough free space to restore data!")
+                        .withUserId(userID));
                     return;
                 }
             } catch (Exception e) {
                 System.out.println("Unable to determine free space");
-                eventStream.send(new Event(jobID, depositId, "Unable to determine free space"));
+                eventStream.send(new Error(jobID, depositId, "Unable to determine free space")
+                    .withUserId(userID));
             }
 
             // Retrieve the archived data
@@ -116,7 +125,9 @@ public class Restore extends Task {
             Path tarPath = tempPath.resolve(tarFileName);
             File tarFile = tarPath.toFile();
             
-            eventStream.send(new UpdateProgress(jobID, depositId, 0, archiveSize, "Starting transfer ...").withNextState(1));
+            eventStream.send(new UpdateProgress(jobID, depositId, 0, archiveSize, "Starting transfer ...")
+                .withUserId(userID)
+                .withNextState(1));
             
             // Progress tracking (threaded)
             Progress progress = new Progress();
@@ -136,7 +147,8 @@ public class Restore extends Task {
             System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
             
             System.out.println("\tValidating data ...");
-            eventStream.send(new UpdateProgress(jobID, depositId).withNextState(2));
+            eventStream.send(new UpdateProgress(jobID, depositId).withNextState(2)
+                .withUserId(userID));
             
             // Decompress to the temporary directory
             File bagDir = Tar.unTar(tarFile, tempPath);
@@ -153,7 +165,9 @@ public class Restore extends Task {
             
             // Copy the extracted files to the target restore area
             System.out.println("\tCopying to user directory ...");
-            eventStream.send(new UpdateProgress(jobID, depositId, 0, bagDirSize, "Starting transfer ...").withNextState(3));
+            eventStream.send(new UpdateProgress(jobID, depositId, 0, bagDirSize, "Starting transfer ...")
+                .withUserId(userID)
+                .withNextState(3));
             
             // Progress tracking (threaded)
             progress = new Progress();
@@ -178,11 +192,13 @@ public class Restore extends Task {
             tarFile.delete();
             
             System.out.println("\tData restore complete: " + restorePath);
-            eventStream.send(new RestoreComplete(jobID, depositId, restoreId).withNextState(4));
+            eventStream.send(new RestoreComplete(jobID, depositId, restoreId).withNextState(4)
+                .withUserId(userID));
             
         } catch (Exception e) {
             e.printStackTrace();
-            eventStream.send(new Error(jobID, depositId, "Data restore failed: " + e.getMessage()));
+            eventStream.send(new Error(jobID, depositId, "Data restore failed: " + e.getMessage())
+                .withUserId(userID));
         }
     }
 }

@@ -106,6 +106,16 @@
                 </div>
             </div>
         </div>
+        <div class="col-xs-6 col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Events</h3>
+                </div>
+                <div class="panel-body">
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/events"><span class="glyphicon glyphicon-time"></span> ${eventcount}</a></h1>
+                </div>
+            </div>
+        </div>
 
         </div>
     </div>

@@ -10,7 +10,9 @@ public class TransferComplete extends Event {
     
     TransferComplete() {};
     public TransferComplete(String jobId, String depositId) {
-        super(jobId, depositId, "File transfer completed");
+        super("File transfer completed");
         this.eventClass = TransferComplete.class.getCanonicalName();
+        this.depositId = depositId;
+        this.jobId = jobId;
     }
 }

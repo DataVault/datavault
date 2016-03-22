@@ -10,7 +10,9 @@ public class PackageComplete extends Event {
     
     PackageComplete() {};
     public PackageComplete(String jobId, String depositId) {
-        super(jobId, depositId, "Packaging completed");
+        super("Packaging completed");
         this.eventClass = PackageComplete.class.getCanonicalName();
+        this.depositId = depositId;
+        this.jobId = jobId;
     }
 }

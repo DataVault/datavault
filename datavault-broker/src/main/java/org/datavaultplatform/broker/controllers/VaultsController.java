@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.common.event.vault.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
@@ -31,7 +32,9 @@ public class VaultsController {
     private UsersService usersService;
     private FileStoreService fileStoreService;
     private ArchiveStoreService archiveStoreService;
-
+    private EventService eventService;
+    private ClientsService clientsService;
+    
     private String activeDir;
     private String archiveDir;
 
@@ -71,6 +74,14 @@ public class VaultsController {
 
     public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
+    }
+    
+    public void setEventService(EventService eventService) {
+        this.eventService = eventService;
+    }
+    
+    public void setClientsService(ClientsService clientsService) {
+        this.clientsService = clientsService;
     }
 
     // NOTE: this a placeholder and will eventually be handled by per-user config
@@ -137,6 +148,7 @@ public class VaultsController {
 
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)
     public VaultInfo addVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+                              @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
                               @RequestBody CreateVault createVault) throws Exception {
         
         Vault vault = new Vault();
@@ -193,8 +205,17 @@ public class VaultsController {
             ArchiveStore store = new ArchiveStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Default archive store (local)");
             archiveStoreService.addArchiveStore(store);
         }
-
+        
         vaultsService.addVault(vault);
+        
+        Create vaultEvent = new Create(vault.getID());
+        vaultEvent.setVault(vault);
+        vaultEvent.setUser(usersService.getUser(userID));
+        vaultEvent.setActorType(Actor.ActorType.WEB_API);
+        vaultEvent.setActor(clientsService.getClientByApiKey(clientKey).getName());
+        
+        eventService.addEvent(vaultEvent);
+        
         return vault.convertToResponse();
     }
 
