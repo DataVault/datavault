@@ -30,15 +30,15 @@ public class AdminController {
 
     private VaultsService vaultsService;
     private DepositsService depositsService;
-    private RetrievesService restoresService;
+    private RetrievesService retrievesService;
     private EventService eventService;
     
     public void setDepositsService(DepositsService depositsService) {
         this.depositsService = depositsService;
     }
 
-    public void setRestoresService(RetrievesService restoresService) {
-        this.restoresService = restoresService;
+    public void setRetrievesService(RetrievesService retrievesService) {
+        this.retrievesService = retrievesService;
     }
 
     public void setVaultsService(VaultsService vaultsService) {
@@ -63,7 +63,7 @@ public class AdminController {
     @RequestMapping(value = "/admin/restores", method = RequestMethod.GET)
     public List<Restore> getRestoresAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return restoresService.getRestores();
+        return retrievesService.getRestores();
     }
 
     @ApiMethod(

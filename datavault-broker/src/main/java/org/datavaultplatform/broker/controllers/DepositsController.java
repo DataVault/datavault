@@ -27,7 +27,7 @@ public class DepositsController {
 
     private VaultsService vaultsService;
     private DepositsService depositsService;
-    private RetrievesService restoresService;
+    private RetrievesService retrievesService;
     private MetadataService metadataService;
     private FilesService filesService;
     private UsersService usersService;
@@ -45,8 +45,8 @@ public class DepositsController {
         this.depositsService = depositsService;
     }
 
-    public void setRestoresService(RetrievesService restoresService) {
-        this.restoresService = restoresService;
+    public void setRetrievesService(RetrievesService retrievesService) {
+        this.retrievesService = retrievesService;
     }
 
     public void setMetadataService(MetadataService metadataService) {
@@ -267,7 +267,7 @@ public class DepositsController {
         jobsService.addJob(deposit, job);
 
         // Add the restore object
-        restoresService.addRestore(restore, deposit, restorePath);
+        retrievesService.addRestore(restore, deposit, restorePath);
 
         // Ask the worker to process the data restore
         try {

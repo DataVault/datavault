@@ -15,7 +15,7 @@ public class StatisticsController {
 
     private VaultsService vaultsService;
     private DepositsService depositsService;
-    private RetrievesService restoresService;
+    private RetrievesService retrievesService;
     private PoliciesService policiesService;
     private GroupsService groupsService;
     private UsersService usersService;
@@ -31,8 +31,8 @@ public class StatisticsController {
         this.depositsService = depositsService;
     }
 
-    public void setRestoresService(RetrievesService restoresService) {
-        this.restoresService = restoresService;
+    public void setRetrievesService(RetrievesService retrievesService) {
+        this.retrievesService = retrievesService;
     }
 
     public void setPoliciesService(PoliciesService policiesService) {
@@ -78,13 +78,13 @@ public class StatisticsController {
     @RequestMapping(value = "/statistics/restorecount", method = RequestMethod.GET)
     public int getRestoresCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return restoresService.count();
+        return retrievesService.count();
     }
 
     @RequestMapping(value = "/statistics/restoreinprogresscount", method = RequestMethod.GET)
     public int getRestoresInProgressCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return restoresService.inProgressCount();
+        return retrievesService.inProgressCount();
     }
 
     @RequestMapping(value = "/vaults/depositqueuecount", method = RequestMethod.GET)
@@ -102,13 +102,13 @@ public class StatisticsController {
     @RequestMapping(value = "/vaults/restorequeuecount", method = RequestMethod.GET)
     public int getRestoresQueuedCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return restoresService.queueCount();
+        return retrievesService.queueCount();
     }
 
     @RequestMapping(value = "/vaults/restoreinprogress", method = RequestMethod.GET)
     public List<Restore> getRestoresInProgress(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return restoresService.inProgress();
+        return retrievesService.inProgress();
     }
 
 

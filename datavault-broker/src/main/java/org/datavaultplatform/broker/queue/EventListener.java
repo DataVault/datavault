@@ -15,7 +15,7 @@ public class EventListener implements MessageListener {
     private EventService eventService;
     private VaultsService vaultsService;
     private DepositsService depositsService;
-    private RetrievesService restoresService;
+    private RetrievesService retrievesService;
     private UsersService usersService;
 
     public void setJobsService(JobsService jobsService) {
@@ -32,8 +32,8 @@ public class EventListener implements MessageListener {
     
     public void setDepositsService(DepositsService depositsService) { this.depositsService = depositsService; }
 
-    public void setRestoresService(RetrievesService restoresService) {
-        this.restoresService = restoresService;
+    public void setRetrievesService(RetrievesService retrievesService) {
+        this.retrievesService = retrievesService;
     }
     
     public void setUsersService(UsersService usersService) {
@@ -126,15 +126,15 @@ public class EventListener implements MessageListener {
             } else if (concreteEvent instanceof RestoreStart) {
 
                 // Update the Restore status
-                Restore restore = restoresService.getRestore(concreteEvent.getRestoreId());
+                Restore restore = retrievesService.getRestore(concreteEvent.getRestoreId());
                 restore.setStatus(Restore.Status.IN_PROGRESS);
-                restoresService.updateRestore(restore);
+                retrievesService.updateRestore(restore);
             } else if (concreteEvent instanceof RestoreComplete) {
 
                 // Update the Restore status
-                Restore restore = restoresService.getRestore(concreteEvent.getRestoreId());
+                Restore restore = retrievesService.getRestore(concreteEvent.getRestoreId());
                 restore.setStatus(Restore.Status.COMPLETE);
-                restoresService.updateRestore(restore);
+                retrievesService.updateRestore(restore);
             }
 
         } catch (Exception e) {
