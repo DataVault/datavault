@@ -27,7 +27,7 @@ public class DepositsController {
 
     private VaultsService vaultsService;
     private DepositsService depositsService;
-    private RestoresService restoresService;
+    private RetrievesService restoresService;
     private MetadataService metadataService;
     private FilesService filesService;
     private UsersService usersService;
@@ -45,7 +45,7 @@ public class DepositsController {
         this.depositsService = depositsService;
     }
 
-    public void setRestoresService(RestoresService restoresService) {
+    public void setRestoresService(RetrievesService restoresService) {
         this.restoresService = restoresService;
     }
 

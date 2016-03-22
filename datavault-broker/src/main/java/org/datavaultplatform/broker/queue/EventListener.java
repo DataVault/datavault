@@ -15,7 +15,7 @@ public class EventListener implements MessageListener {
     private EventService eventService;
     private VaultsService vaultsService;
     private DepositsService depositsService;
-    private RestoresService restoresService;
+    private RetrievesService restoresService;
     private UsersService usersService;
 
     public void setJobsService(JobsService jobsService) {
@@ -32,7 +32,7 @@ public class EventListener implements MessageListener {
     
     public void setDepositsService(DepositsService depositsService) { this.depositsService = depositsService; }
 
-    public void setRestoresService(RestoresService restoresService) {
+    public void setRestoresService(RetrievesService restoresService) {
         this.restoresService = restoresService;
     }
     

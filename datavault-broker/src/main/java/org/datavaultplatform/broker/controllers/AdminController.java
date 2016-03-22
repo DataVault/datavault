@@ -1,7 +1,7 @@
 package org.datavaultplatform.broker.controllers;
 
 import org.datavaultplatform.broker.services.DepositsService;
-import org.datavaultplatform.broker.services.RestoresService;
+import org.datavaultplatform.broker.services.RetrievesService;
 import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Restore;
@@ -30,14 +30,14 @@ public class AdminController {
 
     private VaultsService vaultsService;
     private DepositsService depositsService;
-    private RestoresService restoresService;
+    private RetrievesService restoresService;
     private EventService eventService;
     
     public void setDepositsService(DepositsService depositsService) {
         this.depositsService = depositsService;
     }
 
-    public void setRestoresService(RestoresService restoresService) {
+    public void setRestoresService(RetrievesService restoresService) {
         this.restoresService = restoresService;
     }
 

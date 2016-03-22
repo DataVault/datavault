@@ -159,7 +159,7 @@
         <property name="depositDAO" ref="depositDAO" />
     </bean>
 
-    <bean id="restoresService" class="org.datavaultplatform.broker.services.RestoresService">
+    <bean id="restoresService" class="org.datavaultplatform.broker.services.RetrievesService">
         <property name="restoreDAO" ref="restoreDAO" />
     </bean>
 
