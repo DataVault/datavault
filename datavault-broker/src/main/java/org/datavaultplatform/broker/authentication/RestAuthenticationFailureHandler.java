@@ -22,11 +22,11 @@ public class RestAuthenticationFailureHandler implements AuthenticationFailureHa
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)
             throws IOException, ServletException {
 
-        logger.debug("Authentication Failure - returning " + HttpServletResponse.SC_UNAUTHORIZED);
+        logger.info("Authentication Failure - returning " + HttpServletResponse.SC_UNAUTHORIZED);
+        logger.info(exception.getMessage());
 
-        // Commented out the next line as I'm not sure its good practice to tell unknown user what went wrong
-        //response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Failed: " + exception.getMessage());
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Get thee behind me Satan!");
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Failed: " + exception.getMessage());
+
 
     }
 }
