@@ -7,7 +7,7 @@ import org.datavaultplatform.common.model.dao.RestoreDAO;
 import java.util.Date;
 import java.util.List;
 
-public class RestoresService {
+public class RetrievesService {
 
     private RestoreDAO restoreDAO;
     

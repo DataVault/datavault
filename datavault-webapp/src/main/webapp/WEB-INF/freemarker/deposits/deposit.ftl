@@ -26,7 +26,7 @@
         <li class="active"><a data-toggle="tab" href="#deposit">Deposit</a></li>
         <li><a data-toggle="tab" href="#contents">Contents <span class="badge">${manifest?size}</span></a></li>
         <li><a data-toggle="tab" href="#events">Events <span class="badge">${events?size}</span></a></li>
-        <li><a data-toggle="tab" href="#restores">Restores <span class="badge">${restores?size}</span></a></li>
+        <li><a data-toggle="tab" href="#restores">Retrieves <span class="badge">${restores?size}</span></a></li>
     </ul>
 
     <div id="deposit-tab-content" class="tab-content">
@@ -107,9 +107,9 @@
                 <table class="table table-striped">
                     <thead>
                     <tr class="tr">
-                        <th>Restore note</th>
+                        <th>Retrieve note</th>
                         <th>Status</th>
-                        <th>Restore path</th>
+                        <th>Retrieve path</th>
                         <th>Timestamp</th>
                     </tr>
                     </thead>
@@ -130,7 +130,7 @@
 
     <#if deposit.status.name() == "COMPLETE">
         <a id="restorebtn" class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/restore">
-            <span class="glyphicon glyphicon-open" aria-hidden="true"></span> Restore data
+            <span class="glyphicon glyphicon-open" aria-hidden="true"></span> Retrieve data
         </a>
     </#if>
 

@@ -1,24 +1,12 @@
 package org.datavaultplatform.broker.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.*;
-import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.request.CreateDeposit;
-import org.datavaultplatform.common.request.CreateVault;
-import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.VaultInfo;
-import org.datavaultplatform.common.task.Task;
 import org.jsondoc.core.annotation.*;
-import org.jsondoc.core.pojo.ApiVerb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -27,7 +15,7 @@ public class StatisticsController {
 
     private VaultsService vaultsService;
     private DepositsService depositsService;
-    private RestoresService restoresService;
+    private RetrievesService restoresService;
     private PoliciesService policiesService;
     private GroupsService groupsService;
     private UsersService usersService;
@@ -43,7 +31,7 @@ public class StatisticsController {
         this.depositsService = depositsService;
     }
 
-    public void setRestoresService(RestoresService restoresService) {
+    public void setRestoresService(RetrievesService restoresService) {
         this.restoresService = restoresService;
     }
 

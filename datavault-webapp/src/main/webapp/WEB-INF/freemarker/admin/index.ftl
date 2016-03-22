@@ -23,7 +23,7 @@
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-warning">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Deposits / Restores In Progress</h3>
+                    <h3 class="panel-title">Deposits / Retrieves In Progress</h3>
                 </div>
                 <div class="panel-body">
                     <h1 class="text-center"><a href="#"><span class="glyphicon glyphicon-chevron-down"></span> ${depositsinprogress}</a> <a href="#"><span class="glyphicon glyphicon-chevron-up"></span> ${restoresinprogress}</a></h1>
@@ -33,7 +33,7 @@
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-warning">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Deposit / Restore Queues</h3>
+                    <h3 class="panel-title">Deposit / Retrieve Queues</h3>
                 </div>
                 <div class="panel-body">
                     <h1 class="text-center"><a href="#"><span class="glyphicon glyphicon-arrow-down"></span> ${depositqueue}</a> <a href="#"><span class="glyphicon glyphicon-arrow-up"></span> ${restorequeue}</a></h1>
@@ -66,7 +66,7 @@
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-info">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Restores</h3>
+                    <h3 class="panel-title">Retrieves</h3>
                 </div>
                 <div class="panel-body">
                     <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/restores"><span class="glyphicon glyphicon-open"></span> ${restorecount}</a></h1>
