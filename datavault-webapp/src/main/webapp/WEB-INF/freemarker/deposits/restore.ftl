@@ -9,15 +9,15 @@
         <li><a href="${springMacroRequestContext.getContextPath()}/"><b>My Vaults</b></a></li>
         <li><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}"><b>Vault:</b> ${vault.name?html}</a></li>
         <li><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}"><b>Deposit:</b> ${deposit.note?html}</a></li>
-        <li class="active">Restore data</li>
+        <li class="active">Retrieve data</li>
     </ol>
 
-    <p class="help-block">Describe the reason for this restore request (who and why) and choose a working directory to restore data from the archive</p>
+    <p class="help-block">Describe the reason for this retrieve request (who and why) and choose a working directory to retrieve data from the archive</p>
 
     <form id="restore-deposit" class="form" role="form" action="" method="post">
 
         <div class="form-group">
-            <label class="control-label">Restore Note:</label>
+            <label class="control-label">Retrieve Note:</label>
             <@spring.bind "restore.note" />
             <input type="text"
                    class="form-control"
@@ -69,7 +69,7 @@
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
         <div class="form-group">
-            <button type="submit" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-open"></span> Restore data</button>
+            <button type="submit" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-open"></span> Retrieve data</button>
             <button type="submit" value="cancel" class="btn btn-danger cancel">Cancel</button>
         </div>
 
