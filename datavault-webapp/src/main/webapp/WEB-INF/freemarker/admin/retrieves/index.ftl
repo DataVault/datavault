@@ -10,7 +10,7 @@
         <li class="active"><b>Retrieves</b></li>
     </ol>
 
-    <#if restores?has_content>
+    <#if retrieves?has_content>
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
@@ -24,13 +24,13 @@
                 </thead>
 
                 <tbody>
-                    <#list restores as restore>
+                    <#list retrieves as retrieve>
                     <tr class="tr">
-                        <td>${restore.getDeposit().getID()?html}</td>
-                        <td>${restore.status?html}</td>
-                        <td>${restore.timestamp?datetime}</td>
-                        <td>${restore.restorePath?html}</td>
-                        <td>${restore.note?html}</td>
+                        <td>${retrieve.getDeposit().getID()?html}</td>
+                        <td>${retrieve.status?html}</td>
+                        <td>${retrieve.timestamp?datetime}</td>
+                        <td>${retrieve.retrievePath?html}</td>
+                        <td>${retrieve.note?html}</td>
                     </tr>
                     </#list>
                 </tbody>

@@ -4,7 +4,7 @@ import org.datavaultplatform.broker.services.DepositsService;
 import org.datavaultplatform.broker.services.RetrievesService;
 import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.Restore;
+import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.response.DepositInfo;
@@ -60,10 +60,10 @@ public class AdminController {
         return depositResponses;
     }
 
-    @RequestMapping(value = "/admin/restores", method = RequestMethod.GET)
-    public List<Restore> getRestoresAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    @RequestMapping(value = "/admin/retrieves", method = RequestMethod.GET)
+    public List<Retrieve> getRetrievesAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return retrievesService.getRestores();
+        return retrievesService.getRetrieves();
     }
 
     @ApiMethod(

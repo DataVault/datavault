@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.*;
 import org.datavaultplatform.common.event.deposit.*;
-import org.datavaultplatform.common.event.restore.*;
+import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.model.*;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
@@ -123,18 +123,18 @@ public class EventListener implements MessageListener {
                 deposit.setArchiveId(completeEvent.getArchiveId());
                 deposit.setArchiveSize(completeEvent.getArchiveSize());
                 depositsService.updateDeposit(deposit);
-            } else if (concreteEvent instanceof RestoreStart) {
+            } else if (concreteEvent instanceof RetrieveStart) {
 
-                // Update the Restore status
-                Restore restore = retrievesService.getRestore(concreteEvent.getRestoreId());
-                restore.setStatus(Restore.Status.IN_PROGRESS);
-                retrievesService.updateRestore(restore);
-            } else if (concreteEvent instanceof RestoreComplete) {
+                // Update the Retrieve status
+                Retrieve retrieve = retrievesService.getRetrieve(concreteEvent.getRetrieveId());
+                retrieve.setStatus(Retrieve.Status.IN_PROGRESS);
+                retrievesService.updateRetrieve(retrieve);
+            } else if (concreteEvent instanceof RetrieveComplete) {
 
-                // Update the Restore status
-                Restore restore = retrievesService.getRestore(concreteEvent.getRestoreId());
-                restore.setStatus(Restore.Status.COMPLETE);
-                retrievesService.updateRestore(restore);
+                // Update the Retrieve status
+                Retrieve retrieve = retrievesService.getRetrieve(concreteEvent.getRetrieveId());
+                retrieve.setStatus(Retrieve.Status.COMPLETE);
+                retrievesService.updateRetrieve(retrieve);
             }
 
         } catch (Exception e) {

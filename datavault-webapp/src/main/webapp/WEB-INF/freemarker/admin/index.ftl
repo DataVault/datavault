@@ -26,7 +26,7 @@
                     <h3 class="panel-title">Deposits / Retrieves In Progress</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="#"><span class="glyphicon glyphicon-chevron-down"></span> ${depositsinprogress}</a> <a href="#"><span class="glyphicon glyphicon-chevron-up"></span> ${restoresinprogress}</a></h1>
+                    <h1 class="text-center"><a href="#"><span class="glyphicon glyphicon-chevron-down"></span> ${depositsinprogress}</a> <a href="#"><span class="glyphicon glyphicon-chevron-up"></span> ${retrievesinprogress}</a></h1>
                 </div>
             </div>
         </div>
@@ -36,7 +36,7 @@
                     <h3 class="panel-title">Deposit / Retrieve Queues</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="#"><span class="glyphicon glyphicon-arrow-down"></span> ${depositqueue}</a> <a href="#"><span class="glyphicon glyphicon-arrow-up"></span> ${restorequeue}</a></h1>
+                    <h1 class="text-center"><a href="#"><span class="glyphicon glyphicon-arrow-down"></span> ${depositqueue}</a> <a href="#"><span class="glyphicon glyphicon-arrow-up"></span> ${retrievequeue}</a></h1>
                 </div>
             </div>
         </div>
@@ -69,7 +69,7 @@
                     <h3 class="panel-title">Retrieves</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/restores"><span class="glyphicon glyphicon-open"></span> ${restorecount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/retrieves"><span class="glyphicon glyphicon-open"></span> ${retrievecount}</a></h1>
                 </div>
             </div>
         </div>

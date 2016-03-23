@@ -1,51 +1,51 @@
 package org.datavaultplatform.broker.services;
 
 import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.Restore;
-import org.datavaultplatform.common.model.dao.RestoreDAO;
+import org.datavaultplatform.common.model.Retrieve;
+import org.datavaultplatform.common.model.dao.RetrieveDAO;
 
 import java.util.Date;
 import java.util.List;
 
 public class RetrievesService {
 
-    private RestoreDAO restoreDAO;
+    private RetrieveDAO retrieveDAO;
     
-    public List<Restore> getRestores() {
-        return restoreDAO.list();
+    public List<Retrieve> getRetrieves() {
+        return retrieveDAO.list();
     }
     
-    public void addRestore(Restore restore, Deposit deposit, String restorePath) {
+    public void addRetrieve(Retrieve retrieve, Deposit deposit, String retrievePath) {
         
         Date d = new Date();
-        restore.setTimestamp(d);
+        retrieve.setTimestamp(d);
         
-        restore.setDeposit(deposit);
-        restore.setStatus(Restore.Status.NOT_STARTED);
+        retrieve.setDeposit(deposit);
+        retrieve.setStatus(Retrieve.Status.NOT_STARTED);
         
-        restore.setRestorePath(restorePath);
+        retrieve.setRetrievePath(retrievePath);
         
-        restoreDAO.save(restore);
+        retrieveDAO.save(retrieve);
     }
     
-    public void updateRestore(Restore restore) {
-        restoreDAO.update(restore);
+    public void updateRetrieve(Retrieve retrieve) {
+        retrieveDAO.update(retrieve);
     }
     
-    public Restore getRestore(String restoreID) {
-        return restoreDAO.findById(restoreID);
+    public Retrieve getRetrieve(String retrieveID) {
+        return retrieveDAO.findById(retrieveID);
     }
     
-    public void setRestoreDAO(RestoreDAO restoreDAO) {
-        this.restoreDAO = restoreDAO;
+    public void setRetrieveDAO(RetrieveDAO retrieveDAO) {
+        this.retrieveDAO = retrieveDAO;
     }
 
-    public int count() { return restoreDAO.count(); }
+    public int count() { return retrieveDAO.count(); }
 
-    public int queueCount() { return restoreDAO.queueCount(); }
+    public int queueCount() { return retrieveDAO.queueCount(); }
 
-    public int inProgressCount() { return restoreDAO.inProgressCount(); }
+    public int inProgressCount() { return retrieveDAO.inProgressCount(); }
 
-    public List<Restore>inProgress() { return restoreDAO.inProgress(); }
+    public List<Retrieve>inProgress() { return retrieveDAO.inProgress(); }
 }
 

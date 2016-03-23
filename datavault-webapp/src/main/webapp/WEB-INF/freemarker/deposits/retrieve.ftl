@@ -14,11 +14,11 @@
 
     <p class="help-block">Describe the reason for this retrieve request (who and why) and choose a working directory to retrieve data from the archive</p>
 
-    <form id="restore-deposit" class="form" role="form" action="" method="post">
+    <form id="retrieve-deposit" class="form" role="form" action="" method="post">
 
         <div class="form-group">
             <label class="control-label">Retrieve Note:</label>
-            <@spring.bind "restore.note" />
+            <@spring.bind "retrieve.note" />
             <input type="text"
                    class="form-control"
                    name="${spring.status.expression}"
@@ -27,7 +27,7 @@
 
         <div class="form-group">
             <label class="control-label">Target directory:</label>
-            <@spring.bind "restore.restorePath" />
+            <@spring.bind "retrieve.retrievePath" />
             <input type="text"
                    style="display:none;"
                    class="form-control file-path"
@@ -84,13 +84,13 @@
             $('#submitAction').val($(this).attr('value'));
         });
 
-        $('#restore-deposit').validate({
+        $('#retrieve-deposit').validate({
             ignore: ".ignore",
             rules: {
                 note: {
                     required: true
                 },
-                restorePath: {
+                retrievePath: {
                     required: true
                 }
             },

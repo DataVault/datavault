@@ -134,12 +134,12 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
     @Override
     public String store(String path, File working, Progress progress) throws Exception {
         Path absolutePath = getAbsolutePath(path);
-        File restoreFile = absolutePath.resolve(working.getName()).toFile();
+        File retrieveFile = absolutePath.resolve(working.getName()).toFile();
         
         if (working.isFile()) {
-            FileCopy.copyFile(progress, working, restoreFile);
+            FileCopy.copyFile(progress, working, retrieveFile);
         } else if (working.isDirectory()) {
-            FileCopy.copyDirectory(progress, working, restoreFile);
+            FileCopy.copyDirectory(progress, working, retrieveFile);
         }
         
         return working.getName();

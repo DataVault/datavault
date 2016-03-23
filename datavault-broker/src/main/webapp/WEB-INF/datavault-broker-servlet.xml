@@ -160,7 +160,7 @@
     </bean>
 
     <bean id="retrievesService" class="org.datavaultplatform.broker.services.RetrievesService">
-        <property name="restoreDAO" ref="restoreDAO" />
+        <property name="retrieveDAO" ref="retrieveDAO" />
     </bean>
 
     <bean id="metadataService" class="org.datavaultplatform.broker.services.MetadataService">
@@ -299,7 +299,7 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="restoreDAO" class="org.datavaultplatform.common.model.dao.RestoreDAOImpl">
+    <bean id="retrieveDAO" class="org.datavaultplatform.common.model.dao.RetrieveDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 

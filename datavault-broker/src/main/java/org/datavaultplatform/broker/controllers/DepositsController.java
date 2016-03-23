@@ -191,15 +191,15 @@ public class DepositsController {
         return events;
     }
 
-    @RequestMapping(value = "/deposits/{depositid}/restores", method = RequestMethod.GET)
-    public List<Restore> getDepositRestores(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @RequestMapping(value = "/deposits/{depositid}/retrieves", method = RequestMethod.GET)
+    public List<Retrieve> getDepositRetrieves(@RequestHeader(value = "X-UserID", required = true) String userID,
                                             @PathVariable("depositid") String depositID) throws Exception {
 
         User user = usersService.getUser(userID);
         Deposit deposit = depositsService.getUserDeposit(user, depositID);
 
-        List<Restore> restores = deposit.getRestores();
-        return restores;
+        List<Retrieve> retrieves = deposit.getRetrieves();
+        return retrieves;
     }
 
     @RequestMapping(value = "/deposits/{depositid}/jobs", method = RequestMethod.GET)
@@ -213,24 +213,24 @@ public class DepositsController {
         return jobs;
     }
 
-    @RequestMapping(value = "/deposits/{depositid}/restore", method = RequestMethod.POST)
-    public Boolean restoreDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @RequestMapping(value = "/deposits/{depositid}/retrieve", method = RequestMethod.POST)
+    public Boolean retrieveDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
                                   @PathVariable("depositid") String depositID,
-                                  @RequestBody Restore restore) throws Exception {
+                                  @RequestBody Retrieve retrieve) throws Exception {
 
         User user = usersService.getUser(userID);
         Deposit deposit = depositsService.getUserDeposit(user, depositID);
 
-        String fullPath = restore.getRestorePath();
-        String storageID, restorePath;
+        String fullPath = retrieve.getRetrievePath();
+        String storageID, retrievePath;
         if (!fullPath.contains("/")) {
-            // A request to restore the whole share/device
+            // A request to retrieve the whole share/device
             storageID = fullPath;
-            restorePath = "/";
+            retrievePath = "/";
         } else {
-            // A request to restore a sub-directory
+            // A request to retrieve a sub-directory
             storageID = fullPath.substring(0, fullPath.indexOf("/"));
-            restorePath = fullPath.replaceFirst(storageID + "/", "");
+            retrievePath = fullPath.replaceFirst(storageID + "/", "");
         }
 
         String archiveStoreID = deposit.getArchiveDevice();
@@ -253,37 +253,37 @@ public class DepositsController {
         }
 
         // Validate the path
-        if (restorePath == null) {
+        if (retrievePath == null) {
             throw new IllegalArgumentException("Path was null");
         }
 
         // Check the source file path is valid
-        if (!filesService.validPath(restorePath, userStore)) {
-            throw new IllegalArgumentException("Path '" + restorePath + "' is invalid");
+        if (!filesService.validPath(retrievePath, userStore)) {
+            throw new IllegalArgumentException("Path '" + retrievePath + "' is invalid");
         }
 
-        // Create a job to track this restore
-        Job job = new Job("org.datavaultplatform.worker.tasks.Restore");
+        // Create a job to track this retrieve
+        Job job = new Job("org.datavaultplatform.worker.tasks.Retrieve");
         jobsService.addJob(deposit, job);
 
-        // Add the restore object
-        retrievesService.addRestore(restore, deposit, restorePath);
+        // Add the retrieve object
+        retrievesService.addRetrieve(retrieve, deposit, retrievePath);
 
-        // Ask the worker to process the data restore
+        // Ask the worker to process the data retrieve
         try {
-            HashMap<String, String> restoreProperties = new HashMap<>();
-            restoreProperties.put("depositId", deposit.getID());
-            restoreProperties.put("restoreId", restore.getID());
-            restoreProperties.put("bagId", deposit.getBagId());
-            restoreProperties.put("restorePath", restorePath); // No longer the absolute path
-            restoreProperties.put("archiveId", deposit.getArchiveId());
-            restoreProperties.put("archiveSize", Long.toString(deposit.getArchiveSize()));
-            restoreProperties.put("userId", user.getID());
+            HashMap<String, String> retrieveProperties = new HashMap<>();
+            retrieveProperties.put("depositId", deposit.getID());
+            retrieveProperties.put("retrieveId", retrieve.getID());
+            retrieveProperties.put("bagId", deposit.getBagId());
+            retrieveProperties.put("retrievePath", retrievePath); // No longer the absolute path
+            retrieveProperties.put("archiveId", deposit.getArchiveId());
+            retrieveProperties.put("archiveSize", Long.toString(deposit.getArchiveSize()));
+            retrieveProperties.put("userId", user.getID());
 
-            Task restoreTask = new Task(job, restoreProperties, userStore, archiveStore);
+            Task retrieveTask = new Task(job, retrieveProperties, userStore, archiveStore);
             ObjectMapper mapper = new ObjectMapper();
-            String jsonRestore = mapper.writeValueAsString(restoreTask);
-            sender.send(jsonRestore);
+            String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
+            sender.send(jsonRetrieve);
         } catch (Exception e) {
             e.printStackTrace();
         }

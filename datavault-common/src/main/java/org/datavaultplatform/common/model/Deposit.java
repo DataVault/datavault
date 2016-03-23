@@ -58,11 +58,11 @@ public class Deposit {
     @OrderBy("timestamp")
     private List<Job> jobs;
 
-    // A Deposit can have a number of restores
+    // A Deposit can have a number of retrieves
     @JsonIgnore
-    @OneToMany(targetEntity=Restore.class, mappedBy="deposit", fetch=FetchType.LAZY)
+    @OneToMany(targetEntity=Retrieve.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp")
-    private List<Restore> restores;
+    private List<Retrieve> retrieves;
 
     @ApiObjectField(description = "Status of the Deposit", allowedvalues={"NOT_STARTED", "IN_PROGRESS", "COMPLETE"})
     private Status status;
@@ -197,7 +197,7 @@ public class Deposit {
         return jobs;
     }
 
-    public List<Restore> getRestores() { return restores; }
+    public List<Retrieve> getRetrieves() { return retrieves; }
     
     public DepositInfo convertToResponse() {
         return new DepositInfo(

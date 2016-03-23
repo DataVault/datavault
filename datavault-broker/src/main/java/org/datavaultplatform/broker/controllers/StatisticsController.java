@@ -75,14 +75,14 @@ public class StatisticsController {
         return depositsService.inProgressCount();
     }
 
-    @RequestMapping(value = "/statistics/restorecount", method = RequestMethod.GET)
-    public int getRestoresCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    @RequestMapping(value = "/statistics/retrievecount", method = RequestMethod.GET)
+    public int getRetrievesCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
         return retrievesService.count();
     }
 
-    @RequestMapping(value = "/statistics/restoreinprogresscount", method = RequestMethod.GET)
-    public int getRestoresInProgressCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    @RequestMapping(value = "/statistics/retrieveinprogresscount", method = RequestMethod.GET)
+    public int getRetrievesInProgressCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
         return retrievesService.inProgressCount();
     }
@@ -99,14 +99,14 @@ public class StatisticsController {
         return depositsService.inProgress();
     }
 
-    @RequestMapping(value = "/vaults/restorequeuecount", method = RequestMethod.GET)
-    public int getRestoresQueuedCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    @RequestMapping(value = "/vaults/retrievequeuecount", method = RequestMethod.GET)
+    public int getRetrievesQueuedCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
         return retrievesService.queueCount();
     }
 
-    @RequestMapping(value = "/vaults/restoreinprogress", method = RequestMethod.GET)
-    public List<Restore> getRestoresInProgress(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    @RequestMapping(value = "/vaults/retrieveinprogress", method = RequestMethod.GET)
+    public List<Retrieve> getRetrievesInProgress(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
         return retrievesService.inProgress();
     }
