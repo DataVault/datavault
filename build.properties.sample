@@ -28,3 +28,6 @@ mail.host = smtp.gmail.com
 mail.port = 587
 mail.username = XXX@gmail.com
 mail.password = XXX
+
+describe.system = CRIS
+describe.link = http://cris.example.com/
