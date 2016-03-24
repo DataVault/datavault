@@ -13,6 +13,7 @@
         <module>datavault-broker</module>
         <module>datavault-worker</module>
         <module>datavault-common</module>
+        <module>datavault-assembly</module>
     </modules>
 
     <properties>

@@ -3,8 +3,6 @@ package org.datavaultplatform.common.model;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.event.Event;
 
-import org.apache.commons.io.FileUtils;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -44,8 +42,7 @@ public class Deposit {
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
-
-    @JsonIgnore
+    
     @ManyToOne
     private Vault vault;
     
@@ -61,11 +58,11 @@ public class Deposit {
     @OrderBy("timestamp")
     private List<Job> jobs;
 
-    // A Deposit can have a number of restores
+    // A Deposit can have a number of retrieves
     @JsonIgnore
-    @OneToMany(targetEntity=Restore.class, mappedBy="deposit", fetch=FetchType.LAZY)
+    @OneToMany(targetEntity=Retrieve.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp")
-    private List<Restore> restores;
+    private List<Retrieve> retrieves;
 
     @ApiObjectField(description = "Status of the Deposit", allowedvalues={"NOT_STARTED", "IN_PROGRESS", "COMPLETE"})
     private Status status;
@@ -200,7 +197,7 @@ public class Deposit {
         return jobs;
     }
 
-    public List<Restore> getRestores() { return restores; }
+    public List<Retrieve> getRetrieves() { return retrieves; }
     
     public DepositInfo convertToResponse() {
         return new DepositInfo(
@@ -211,7 +208,8 @@ public class Deposit {
                 fileOrigin,
                 shortFilePath,
                 filePath,
-                depositSize
+                depositSize,
+                vault.getID()
             );
     }
 }

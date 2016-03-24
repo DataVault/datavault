@@ -7,6 +7,7 @@ import com.rabbitmq.client.Channel;
 
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.EventStream;
+import org.datavaultplatform.common.model.Actor;
 
 public class EventSender implements EventStream {
 
@@ -16,6 +17,7 @@ public class EventSender implements EventStream {
     private String queuePassword;
     
     private int sequence = 0;
+    private String workerName;
 
     public void setQueueServer(String queueServer) {
         this.queueServer = queueServer;
@@ -32,6 +34,10 @@ public class EventSender implements EventStream {
     public void setQueuePassword(String queuePassword) {
         this.queuePassword = queuePassword;
     }
+
+    public void setWorkerName(String workerName) {
+        this.workerName = workerName;
+    }
     
     @Override
     public void send(Event event) {
@@ -39,6 +45,10 @@ public class EventSender implements EventStream {
         // Add sequence for event ordering (where timestamp is equal)
         event.setSequence(sequence);
         sequence += 1;
+        
+        // Set common event properties
+        event.setActorType(Actor.ActorType.WORKER);
+        event.setActor(workerName);
         
         try {
             // TODO: should create queue once and keep open?

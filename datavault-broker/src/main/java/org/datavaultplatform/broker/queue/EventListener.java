@@ -2,16 +2,10 @@ package org.datavaultplatform.broker.queue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.broker.services.*;
-import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.event.InitStates;
-import org.datavaultplatform.common.event.UpdateProgress;
+import org.datavaultplatform.common.event.*;
 import org.datavaultplatform.common.event.deposit.*;
-import org.datavaultplatform.common.event.restore.RestoreComplete;
-import org.datavaultplatform.common.event.restore.RestoreStart;
-import org.datavaultplatform.common.model.Job;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.Restore;
-import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.event.retrieve.*;
+import org.datavaultplatform.common.model.*;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
 
@@ -21,7 +15,8 @@ public class EventListener implements MessageListener {
     private EventService eventService;
     private VaultsService vaultsService;
     private DepositsService depositsService;
-    private RestoresService restoresService;
+    private RetrievesService retrievesService;
+    private UsersService usersService;
 
     public void setJobsService(JobsService jobsService) {
         this.jobsService = jobsService;
@@ -37,8 +32,12 @@ public class EventListener implements MessageListener {
     
     public void setDepositsService(DepositsService depositsService) { this.depositsService = depositsService; }
 
-    public void setRestoresService(RestoresService restoresService) {
-        this.restoresService = restoresService;
+    public void setRetrievesService(RetrievesService retrievesService) {
+        this.retrievesService = retrievesService;
+    }
+    
+    public void setUsersService(UsersService usersService) {
+        this.usersService = usersService;
     }
 
     @Override
@@ -62,6 +61,10 @@ public class EventListener implements MessageListener {
             // Get the related job
             Job job = jobsService.getJob(concreteEvent.getJobId());
             concreteEvent.setJob(job);
+            
+            // Get the related User
+            User user = usersService.getUser(concreteEvent.getUserId());
+            concreteEvent.setUser(user);
             
             if (concreteEvent.getPersistent()) {
                 // Persist the event properties in the database ...
@@ -120,18 +123,18 @@ public class EventListener implements MessageListener {
                 deposit.setArchiveId(completeEvent.getArchiveId());
                 deposit.setArchiveSize(completeEvent.getArchiveSize());
                 depositsService.updateDeposit(deposit);
-            } else if (concreteEvent instanceof RestoreStart) {
+            } else if (concreteEvent instanceof RetrieveStart) {
 
-                // Update the Restore status
-                Restore restore = restoresService.getRestore(concreteEvent.getRestoreId());
-                restore.setStatus(Restore.Status.IN_PROGRESS);
-                restoresService.updateRestore(restore);
-            } else if (concreteEvent instanceof RestoreComplete) {
+                // Update the Retrieve status
+                Retrieve retrieve = retrievesService.getRetrieve(concreteEvent.getRetrieveId());
+                retrieve.setStatus(Retrieve.Status.IN_PROGRESS);
+                retrievesService.updateRetrieve(retrieve);
+            } else if (concreteEvent instanceof RetrieveComplete) {
 
-                // Update the Restore status
-                Restore restore = restoresService.getRestore(concreteEvent.getRestoreId());
-                restore.setStatus(Restore.Status.COMPLETE);
-                restoresService.updateRestore(restore);
+                // Update the Retrieve status
+                Retrieve retrieve = retrievesService.getRetrieve(concreteEvent.getRetrieveId());
+                retrieve.setStatus(Retrieve.Status.COMPLETE);
+                retrievesService.updateRetrieve(retrieve);
             }
 
         } catch (Exception e) {

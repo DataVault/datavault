@@ -1,11 +1,9 @@
 package org.datavaultplatform.webapp.services;
 
 import org.datavaultplatform.common.model.Dataset;
-import org.datavaultplatform.common.metadata.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
-import org.datavaultplatform.common.event.Event;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpEntity;
@@ -108,12 +106,12 @@ public class RestService {
     }
 
     public VaultInfo[] getVaultsListingAll() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/all", VaultInfo[].class);
+        HttpEntity<?> response = get(brokerURL + "/admin/vaults", VaultInfo[].class);
         return (VaultInfo[])response.getBody();
     }
 
     public VaultInfo[] getVaultsListingAll(String sort, String order) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/all?sort=" + sort + "&order=" + order, VaultInfo[].class);
+        HttpEntity<?> response = get(brokerURL + "/admin/vaults?sort=" + sort + "&order=" + order, VaultInfo[].class);
         return (VaultInfo[])response.getBody();
     }
 
@@ -167,29 +165,29 @@ public class RestService {
         return (DepositInfo[])response.getBody();
     }
 
-    public int getRestoresCount() {
-        HttpEntity<?> response = get(brokerURL + "/statistics/restorecount", Integer.class);
+    public int getRetrievesCount() {
+        HttpEntity<?> response = get(brokerURL + "/statistics/retrievecount", Integer.class);
         return (Integer)response.getBody();
     }
 
-    public int getRestoresQueue() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/restorequeuecount", Integer.class);
+    public int getRetrievesQueue() {
+        HttpEntity<?> response = get(brokerURL + "/vaults/retrievequeuecount", Integer.class);
         return (Integer)response.getBody();
     }
 
-    public int getRestoresInProgressCount() {
-        HttpEntity<?> response = get(brokerURL + "/statistics/restoreinprogresscount", Integer.class);
+    public int getRetrievesInProgressCount() {
+        HttpEntity<?> response = get(brokerURL + "/statistics/retrieveinprogresscount", Integer.class);
         return (Integer)response.getBody();
     }
 
-    public Restore[] getRestoresInProgress() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/restoreinprogress", Restore[].class);
-        return (Restore[])response.getBody();
+    public Retrieve[] getRetrievesInProgress() {
+        HttpEntity<?> response = get(brokerURL + "/vaults/retrieveinprogress", Retrieve[].class);
+        return (Retrieve[])response.getBody();
     }
 
-    public Restore[] getRestoresListingAll() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/restores", Restore[].class);
-        return (Restore[])response.getBody();
+    public Retrieve[] getRetrievesListingAll() {
+        HttpEntity<?> response = get(brokerURL + "/admin/retrieves", Retrieve[].class);
+        return (Retrieve[])response.getBody();
     }
 
     public VaultInfo getVault(String id) {        
@@ -221,38 +219,38 @@ public class RestService {
     }
 
     public DepositInfo[] getDepositsListingAll() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/deposits", DepositInfo[].class);
+        HttpEntity<?> response = get(brokerURL + "/admin/deposits", DepositInfo[].class);
         return (DepositInfo[])response.getBody();
     }
 
     public DepositInfo[] getDepositsListingAll(String sort) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/deposits?sort=" + sort, DepositInfo[].class);
+        HttpEntity<?> response = get(brokerURL + "/admin/deposits?sort=" + sort, DepositInfo[].class);
         return (DepositInfo[])response.getBody();
     }
 
-    public DepositInfo getDeposit(String vaultId, String depositID) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID, DepositInfo.class);
+    public DepositInfo getDeposit(String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID, DepositInfo.class);
         return (DepositInfo)response.getBody();
     }
     
-    public FileFixity[] getDepositManifest(String vaultId, String depositID) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/manifest", FileFixity[].class);
+    public FileFixity[] getDepositManifest(String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID + "/manifest", FileFixity[].class);
         return (FileFixity[])response.getBody();
     }
     
-    public Event[] getDepositEvents(String vaultId, String depositID) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/events", Event[].class);
-        return (Event[])response.getBody();
+    public EventInfo[] getDepositEvents(String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID + "/events", EventInfo[].class);
+        return (EventInfo[])response.getBody();
     }
 
-    public Job[] getDepositJobs(String vaultId, String depositID) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/jobs", Job[].class);
+    public Job[] getDepositJobs(String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID + "/jobs", Job[].class);
         return (Job[])response.getBody();
     }
 
-    public Restore[] getDepositRestores(String vaultId, String depositID) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/restores", Restore[].class);
-        return (Restore[])response.getBody();
+    public Retrieve[] getDepositRetrieves(String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID + "/retrieves", Retrieve[].class);
+        return (Retrieve[])response.getBody();
     }
 
     public Policy[] getPolicyListing() {
@@ -305,6 +303,16 @@ public class RestService {
         return (Dataset[])response.getBody();
     }
     
+    public EventInfo[] getEvents() {
+        HttpEntity<?> response = get(brokerURL + "/admin/events?sort=timestamp", EventInfo[].class);
+        return (EventInfo[])response.getBody();
+    }
+    
+    public int getEventCount() {
+        HttpEntity<?> response = get(brokerURL + "/statistics/eventcount", Integer.class);
+        return (Integer)response.getBody();
+    }
+    
     /* POST requests */
     
     public VaultInfo addVault(CreateVault createVault) {
@@ -312,13 +320,13 @@ public class RestService {
         return (VaultInfo)response.getBody();
     }
 
-    public DepositInfo addDeposit(String vaultId, CreateDeposit createDeposit) {
-        HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/deposits", DepositInfo.class, createDeposit);
+    public DepositInfo addDeposit(CreateDeposit createDeposit) {
+        HttpEntity<?> response = post(brokerURL + "/deposits", DepositInfo.class, createDeposit);
         return (DepositInfo)response.getBody();
     }
     
-    public Boolean restoreDeposit(String vaultId, String depositID, Restore restore) {        
-        HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/deposits/" + depositID + "/restore", Boolean.class, restore);
+    public Boolean retrieveDeposit(String depositID, Retrieve retrieve) {
+        HttpEntity<?> response = post(brokerURL + "/deposits/" + depositID + "/retrieve", Boolean.class, retrieve);
         return (Boolean)response.getBody();
     }
 
@@ -340,6 +348,16 @@ public class RestService {
     public String addKeys(String userId) {
         // Bit odd to POST a null object, but a POST seems appropriate since it is a non-idempotent, create request
         HttpEntity<?> response = post(brokerURL + "/users/" + userId + "/keys", String.class, null);
+        return (String)response.getBody();
+    }
+    
+    public String notifyLogin(CreateClientEvent clientEvent) {
+        HttpEntity<?> response = put(brokerURL + "/notify/login", String.class, clientEvent);
+        return (String)response.getBody();
+    }
+    
+    public String notifyLogout(CreateClientEvent clientEvent) {
+        HttpEntity<?> response = put(brokerURL + "/notify/logout", String.class, clientEvent);
         return (String)response.getBody();
     }
 }

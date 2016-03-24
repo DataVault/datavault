@@ -1,19 +1,24 @@
 package org.datavaultplatform.common.event.deposit;
 
+import javax.persistence.Transient;
 import org.datavaultplatform.common.event.Event;
 
 public class TransferProgress extends Event {
     
     public long bytes;
+    
+    @Transient
     public long bytesPerSec;
 
     TransferProgress() {};
     public TransferProgress(String jobId, String depositId, long bytes, long bytesPerSec) {
-        super(jobId, depositId, "Bytes transferred: " + bytes + " bytes");
+        super("Bytes transferred: " + bytes + " bytes");
         this.eventClass = TransferProgress.class.getCanonicalName();
         this.bytes = bytes;
         this.bytesPerSec = bytesPerSec;
         this.persistent = false;
+        this.depositId = depositId;
+        this.jobId = jobId;
     }
     
     public long getBytes() {

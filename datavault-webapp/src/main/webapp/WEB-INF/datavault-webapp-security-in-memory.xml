@@ -20,6 +20,7 @@
             login-page="/auth/login"
             login-processing-url="/auth/security_check"
             authentication-failure-url="/auth/login?error=true"
+            authentication-success-handler-ref="authSuccessHandler"
             default-target-url="/"/>
 
         <security:logout
@@ -63,12 +64,6 @@
                 <security:user name="USER30" password="password30" authorities="ROLE_USER" />
             </security:user-service>
         </security:authentication-provider>
-
-        <!--<security:authentication-provider ref="databaseAuthenticationProvider"/> -->
-	</security:authentication-manager>
-
-    <bean id="databaseAuthenticationProvider" class="org.datavaultplatform.webapp.authentication.DatabaseAuthenticationProvider">
-        <property name="restService" ref="restService" />
-    </bean>
+    </security:authentication-manager>
 
 </beans>

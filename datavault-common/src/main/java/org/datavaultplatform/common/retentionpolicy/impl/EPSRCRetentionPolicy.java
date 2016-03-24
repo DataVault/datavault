@@ -1,7 +1,7 @@
 package org.datavaultplatform.common.retentionpolicy.impl;
 
 import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.Restore;
+import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
 import org.datavaultplatform.common.retentionpolicy.PolicyStatus;
@@ -19,22 +19,22 @@ public class EPSRCRetentionPolicy implements RetentionPolicy {
         Date now = new Date();
         Date check;
 
-        // Get all the restore events
-        ArrayList<Restore> restores = new ArrayList();
+        // Get all the retrieve events
+        ArrayList<Retrieve> retrieves = new ArrayList();
         for (Deposit d : v.getDeposits()) {
-            restores.addAll(d.getRestores());
+            retrieves.addAll(d.getRetrieves());
         }
 
-        // Have their been any restores?
-        if (!restores.isEmpty()) {
-            check = restores.get(0).getTimestamp();
-            for (Restore r : restores) {
+        // Have their been any retrieves?
+        if (!retrieves.isEmpty()) {
+            check = retrieves.get(0).getTimestamp();
+            for (Retrieve r : retrieves) {
                 if (r.getTimestamp().after(check)) {
                     check = r.getTimestamp();
                 }
             }
         }
-        // No restores, so use date of last deposit
+        // No retrieves, so use date of last deposit
         else {
             if (v.getDeposits().isEmpty()) {
                 // No deposits, so return an error

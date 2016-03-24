@@ -1,24 +1,12 @@
 package org.datavaultplatform.broker.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.*;
-import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.request.CreateDeposit;
-import org.datavaultplatform.common.request.CreateVault;
-import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.VaultInfo;
-import org.datavaultplatform.common.task.Task;
 import org.jsondoc.core.annotation.*;
-import org.jsondoc.core.pojo.ApiVerb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -27,10 +15,11 @@ public class StatisticsController {
 
     private VaultsService vaultsService;
     private DepositsService depositsService;
-    private RestoresService restoresService;
+    private RetrievesService retrievesService;
     private PoliciesService policiesService;
     private GroupsService groupsService;
     private UsersService usersService;
+    private EventService eventService;
 
     private static final Logger logger = LoggerFactory.getLogger(StatisticsController.class);
 
@@ -42,8 +31,8 @@ public class StatisticsController {
         this.depositsService = depositsService;
     }
 
-    public void setRestoresService(RestoresService restoresService) {
-        this.restoresService = restoresService;
+    public void setRetrievesService(RetrievesService retrievesService) {
+        this.retrievesService = retrievesService;
     }
 
     public void setPoliciesService(PoliciesService policiesService) {
@@ -57,22 +46,9 @@ public class StatisticsController {
     public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
     }
-
-
-    // Get the specified Vault object and validate it against the current User
-    private Vault getUserVault(User user, String vaultID) throws Exception {
-
-        Vault vault = vaultsService.getVault(vaultID);
-
-        if (vault == null) {
-            throw new Exception("Vault '" + vaultID + "' does not exist");
-        }
-
-        if (!vault.getUser().equals(user)) {
-            throw new Exception("Access denied");
-        }
-
-        return vault;
+    
+    public void setEventService(EventService eventService) {
+        this.eventService = eventService;
     }
 
     @RequestMapping(value = "/statistics/count", method = RequestMethod.GET)
@@ -99,15 +75,53 @@ public class StatisticsController {
         return depositsService.inProgressCount();
     }
 
-    @RequestMapping(value = "/statistics/restorecount", method = RequestMethod.GET)
-    public int getRestoresCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    @RequestMapping(value = "/statistics/retrievecount", method = RequestMethod.GET)
+    public int getRetrievesCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return restoresService.count();
+        return retrievesService.count();
     }
 
-    @RequestMapping(value = "/statistics/restoreinprogresscount", method = RequestMethod.GET)
-    public int getRestoresInProgressCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    @RequestMapping(value = "/statistics/retrieveinprogresscount", method = RequestMethod.GET)
+    public int getRetrievesInProgressCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return restoresService.inProgressCount();
+        return retrievesService.inProgressCount();
+    }
+
+    @RequestMapping(value = "/vaults/depositqueuecount", method = RequestMethod.GET)
+    public int getDepositsQueueCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        return depositsService.queueCount();
+    }
+
+    @RequestMapping(value = "/vaults/depositinprogress", method = RequestMethod.GET)
+    public List<Deposit> getDepositsInProgress(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        return depositsService.inProgress();
+    }
+
+    @RequestMapping(value = "/vaults/retrievequeuecount", method = RequestMethod.GET)
+    public int getRetrievesQueuedCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        return retrievesService.queueCount();
+    }
+
+    @RequestMapping(value = "/vaults/retrieveinprogress", method = RequestMethod.GET)
+    public List<Retrieve> getRetrievesInProgress(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        return retrievesService.inProgress();
+    }
+
+
+    @RequestMapping(value = "/vaults/policycount/{status}", method = RequestMethod.GET)
+    public int getPolicyStatusCount(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                    @PathVariable("status") int status) throws Exception {
+
+        return vaultsService.getPolicyCount(status);
+    }
+    
+    @RequestMapping(value = "/statistics/eventcount", method = RequestMethod.GET)
+    public int getEventCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        return eventService.count();
     }
 }

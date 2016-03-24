@@ -18,12 +18,18 @@ import com.amazonaws.services.glacier.transfer.UploadResult;
 import com.amazonaws.services.glacier.model.*;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sqs.AmazonSQSClient;
+import org.datavaultplatform.common.storage.Verify;
 
 // Documentation:
 // http://docs.aws.amazon.com/amazonglacier/latest/dev/using-aws-sdk-for-java.html
 // http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/glacier/AmazonGlacierClient.html
 
 public class AmazonGlacier extends Device implements ArchiveStore {
+    
+    // Amazon Glacier has retrieval costs so a full copy-back is undesirable.
+    // TODO: verify the hashes which are available from a glacier vault inventory.
+    // Vault inventory is carried out every 24 hours.
+    public Verify.Method verificationMethod = Verify.Method.LOCAL_ONLY;
     
     // A reference to the account which is related to the current credentials
     private String DEFAULT_ACCOUNT_NAME = "-";
@@ -168,5 +174,10 @@ public class AmazonGlacier extends Device implements ArchiveStore {
         
         // Glacier generates a new ID which is required retrieve data.
         return archiveId;
+    }
+    
+    @Override
+    public Verify.Method getVerifyMethod() {
+        return verificationMethod;
     }
 }

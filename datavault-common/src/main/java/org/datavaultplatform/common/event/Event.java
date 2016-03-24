@@ -13,13 +13,15 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.DiscriminatorColumn;
+import javax.persistence.Enumerated;
+import javax.persistence.EnumType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.ManyToOne;
 import org.hibernate.annotations.GenericGenerator;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.Job;
+import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.response.EventInfo;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -37,8 +39,7 @@ public class Event {
     
     // Event properties
     public String message;
-    public String depositId;
-    public String restoreId;
+    public String retrieveId;
     public String eventClass;
     
     @Transient
@@ -58,31 +59,53 @@ public class Event {
     @JsonIgnore
     @ManyToOne
     private Deposit deposit;
+    @Transient
+    public String depositId;
+    
+    // Related vault
+    @JsonIgnore
+    @ManyToOne
+    private Vault vault;
+    @Transient
+    public String vaultId;
     
     // Related job
     @JsonIgnore
     @ManyToOne
     private Job job;
-    
-    // Non-hibernate Job ID set by worker on event creation
     @Transient
     public String jobId;
     
+    // Related user
+    @JsonIgnore
+    @ManyToOne
+    private User user;
+    @Transient
+    public String userId;
+    
+    // Event actor
+    private String actor;
+    
+    // Web request properties
+    public String remoteAddress;
+    public String userAgent;
+    
+    @Enumerated(EnumType.STRING)
+    private Actor.ActorType actorType;
+    
     public Event() {};
-    public Event(String jobId, String depositId, String message) {
+    public Event(String message) {
         this.eventClass = Event.class.getCanonicalName();
-        this.jobId = jobId;
-        this.depositId = depositId;
         this.message = message;
         this.timestamp = new Date();
         this.sequence = 0;
     }
-
-    public Event(String jobId, String depositId, String restoreId, String message) {
+    
+    public Event(String jobId, String depositId, String retrieveId, String message) {
         this.eventClass = Event.class.getCanonicalName();
         this.jobId = jobId;
         this.depositId = depositId;
-        this.restoreId = restoreId;
+        this.retrieveId = retrieveId;
         this.message = message;
         this.timestamp = new Date();
         this.sequence = 0;
@@ -122,12 +145,60 @@ public class Event {
         this.depositId = depositId;
     }
 
-    public String getRestoreId() {
-        return restoreId;
+    public String getVaultId() {
+        return vaultId;
     }
 
-    public void setRestoreId(String restoreId) {
-        this.restoreId = restoreId;
+    public void setVaultId(String vaultId) {
+        this.vaultId = vaultId;
+    }
+    
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getActor() {
+        return actor;
+    }
+
+    public void setActor(String actor) {
+        this.actor = actor;
+    }
+
+    public Actor.ActorType getActorType() {
+        return actorType;
+    }
+
+    public void setActorType(Actor.ActorType actorType) {
+        this.actorType = actorType;
+    }
+
+    public String getRemoteAddress() {
+        return remoteAddress;
+    }
+
+    public void setRemoteAddress(String remoteAddress) {
+        this.remoteAddress = remoteAddress;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+    
+    public String getRetrieveId() {
+        return retrieveId;
+    }
+
+    public void setRetrieveId(String retrieveId) {
+        this.retrieveId = retrieveId;
     }
 
     public Boolean getPersistent() {
@@ -169,9 +240,44 @@ public class Event {
     public void setDeposit(Deposit deposit) {
         this.deposit = deposit;
     }
+
+    public Vault getVault() {
+        return vault;
+    }
+
+    public void setVault(Vault vault) {
+        this.vault = vault;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
     
     public Event withNextState(Integer state) {
         this.nextState = state;
         return this;
+    }
+    
+    public Event withUserId(String userId) {
+        this.userId = userId;
+        return this;
+    }
+    
+    public EventInfo convertToResponse() {
+        return new EventInfo(id,
+                timestamp,
+                message,
+                user != null ? user.getID() : null,
+                vault != null ? vault.getID() : null,
+                eventClass,
+                deposit != null ? deposit.getID() : null,
+                actor,
+                actorType != null ? actorType.toString() : null,
+                remoteAddress,
+                userAgent);
     }
 }

@@ -8,7 +8,11 @@ public interface EventDAO {
     public void save(Event event);
     
     public List<Event> list();
+    
+    public List<Event> list(String sort);
 
     public Event findById(String Id);
+    
+    public int count();
     
 }

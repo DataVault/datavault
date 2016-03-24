@@ -13,8 +13,8 @@
 
     <context:component-scan base-package="org.datavaultplatform.webapp.controllers"/>
 
-    <context:property-placeholder location="file:///${user.home}/datavault-webapp.properties" ignore-resource-not-found="true" ignore-unresolvable="true"/>
-    <context:property-placeholder location="WEB-INF/datavault-webapp.properties"/>
+    <!-- Note:- You need to set DATAVAULT_HOME! -->
+    <context:property-placeholder location="file:///${DATAVAULT_HOME}/config/datavault.properties"/>
 
     <mvc:annotation-driven />
 
@@ -104,7 +104,11 @@
         <property name="restService" ref="restService" />
     </bean>
 
-    <bean id="adminRestoresController" class="org.datavaultplatform.webapp.controllers.admin.AdminRestoresController">
+    <bean id="adminRetrievesController" class="org.datavaultplatform.webapp.controllers.admin.AdminRetrievesController">
+        <property name="restService" ref="restService" />
+    </bean>
+    
+    <bean id="adminEventsController" class="org.datavaultplatform.webapp.controllers.admin.AdminEventsController">
         <property name="restService" ref="restService" />
     </bean>
 
@@ -120,7 +124,15 @@
         <property name="brokerURL" value="${brokerURL}" />
         <property name="brokerApiKey" value="${broker.api.key}" />
     </bean>
-
+    
+    <bean id="authSuccessHandler" class="org.datavaultplatform.webapp.authentication.AuthenticationSuccess">
+        <property name="restService" ref="restService" />
+    </bean>
+    
+    <bean id="logoutListener" class="org.datavaultplatform.webapp.controllers.LogoutListener">
+        <property name="restService" ref="restService" />
+    </bean>
+    
     <!-- Email feedback settings -->
     <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
         <property name="host"><value>${mail.host}</value></property>

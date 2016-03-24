@@ -17,8 +17,8 @@
 
     <context:component-scan base-package="org.datavaultplatform.broker.controllers"/>
 
-    <context:property-placeholder location="file:///${user.home}/datavault-broker.properties" ignore-resource-not-found="true" ignore-unresolvable="true"/>
-    <context:property-placeholder location="WEB-INF/datavault-broker.properties"/>
+    <!-- Note:- You need to set DATAVAULT_HOME! -->
+    <context:property-placeholder location="file:///${DATAVAULT_HOME}/config/datavault.properties"/>
 
     <mvc:annotation-driven />
 
@@ -70,28 +70,46 @@
     <bean id="vaultsController" class="org.datavaultplatform.broker.controllers.VaultsController">
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
-        <property name="restoresService" ref="restoresService" />
-        <property name="metadataService" ref="metadataService" />
+        <property name="retrievesService" ref="retrievesService" />
         <property name="externalMetadataService" ref="externalMetadataService" />
-        <property name="filesService" ref="filesService" />
         <property name="policiesService" ref="policiesService" />
         <property name="groupsService" ref="groupsService" />
         <property name="usersService" ref="usersService" />
         <property name="fileStoreService" ref="fileStoreService" />
         <property name="archiveStoreService" ref="archiveStoreService" />
-        <property name="jobsService" ref="jobsService" />
-        <property name="sender" ref="sender" />
+        <property name="eventService" ref="eventService" />
+        <property name="clientsService" ref="clientsService" />
         <property name="activeDir" value="${activeDir}" />
         <property name="archiveDir" value="${archiveDir}" />
+    </bean>
+    
+    <bean id="depositsController" class="org.datavaultplatform.broker.controllers.DepositsController">
+        <property name="vaultsService" ref="vaultsService" />
+        <property name="depositsService" ref="depositsService" />
+        <property name="retrievesService" ref="retrievesService" />
+        <property name="metadataService" ref="metadataService" />
+        <property name="filesService" ref="filesService" />
+        <property name="usersService" ref="usersService" />
+        <property name="archiveStoreService" ref="archiveStoreService" />
+        <property name="jobsService" ref="jobsService" />
+        <property name="sender" ref="sender" />
     </bean>
 
     <bean id="statisticsController" class="org.datavaultplatform.broker.controllers.StatisticsController">
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
-        <property name="restoresService" ref="restoresService" />
+        <property name="retrievesService" ref="retrievesService" />
         <property name="policiesService" ref="policiesService" />
         <property name="groupsService" ref="groupsService" />
         <property name="usersService" ref="usersService" />
+        <property name="eventService" ref="eventService" />
+    </bean>
+
+    <bean id="adminController" class="org.datavaultplatform.broker.controllers.AdminController">
+        <property name="vaultsService" ref="vaultsService" />
+        <property name="depositsService" ref="depositsService" />
+        <property name="retrievesService" ref="retrievesService" />
+        <property name="eventService" ref="eventService" />
     </bean>
 
     <bean id="policiesController" class="org.datavaultplatform.broker.controllers.PoliciesController">
@@ -121,6 +139,12 @@
     <bean id="metadataController" class="org.datavaultplatform.broker.controllers.MetadataController">
         <property name="externalMetadataService" ref="externalMetadataService" />
     </bean>
+    
+    <bean id="notifyController" class="org.datavaultplatform.broker.controllers.NotifyController">
+        <property name="eventService" ref="eventService" />
+        <property name="clientsService" ref="clientsService" />
+        <property name="usersService" ref="usersService" />
+    </bean>
 
     <!-- todo : should the service beans be put into their own config file? -->
 
@@ -135,8 +159,8 @@
         <property name="depositDAO" ref="depositDAO" />
     </bean>
 
-    <bean id="restoresService" class="org.datavaultplatform.broker.services.RestoresService">
-        <property name="restoreDAO" ref="restoreDAO" />
+    <bean id="retrievesService" class="org.datavaultplatform.broker.services.RetrievesService">
+        <property name="retrieveDAO" ref="retrieveDAO" />
     </bean>
 
     <bean id="metadataService" class="org.datavaultplatform.broker.services.MetadataService">
@@ -215,8 +239,9 @@
         <property name="jobsService" ref="jobsService" />
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
-        <property name="restoresService" ref="restoresService" />
+        <property name="retrievesService" ref="retrievesService" />
         <property name="eventService" ref="eventService" />
+        <property name="usersService" ref="usersService" />
     </bean>
 
     <bean id="sender" class="org.datavaultplatform.broker.queue.Sender">
@@ -274,7 +299,7 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="restoreDAO" class="org.datavaultplatform.common.model.dao.RestoreDAOImpl">
+    <bean id="retrieveDAO" class="org.datavaultplatform.common.model.dao.RetrieveDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
