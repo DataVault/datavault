@@ -70,7 +70,7 @@
     <bean id="vaultsController" class="org.datavaultplatform.broker.controllers.VaultsController">
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
-        <property name="restoresService" ref="restoresService" />
+        <property name="retrievesService" ref="retrievesService" />
         <property name="externalMetadataService" ref="externalMetadataService" />
         <property name="policiesService" ref="policiesService" />
         <property name="groupsService" ref="groupsService" />
@@ -86,7 +86,7 @@
     <bean id="depositsController" class="org.datavaultplatform.broker.controllers.DepositsController">
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
-        <property name="restoresService" ref="restoresService" />
+        <property name="retrievesService" ref="retrievesService" />
         <property name="metadataService" ref="metadataService" />
         <property name="filesService" ref="filesService" />
         <property name="usersService" ref="usersService" />
@@ -98,7 +98,7 @@
     <bean id="statisticsController" class="org.datavaultplatform.broker.controllers.StatisticsController">
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
-        <property name="restoresService" ref="restoresService" />
+        <property name="retrievesService" ref="retrievesService" />
         <property name="policiesService" ref="policiesService" />
         <property name="groupsService" ref="groupsService" />
         <property name="usersService" ref="usersService" />
@@ -108,7 +108,7 @@
     <bean id="adminController" class="org.datavaultplatform.broker.controllers.AdminController">
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
-        <property name="restoresService" ref="restoresService" />
+        <property name="retrievesService" ref="retrievesService" />
         <property name="eventService" ref="eventService" />
     </bean>
 
@@ -159,8 +159,8 @@
         <property name="depositDAO" ref="depositDAO" />
     </bean>
 
-    <bean id="restoresService" class="org.datavaultplatform.broker.services.RestoresService">
-        <property name="restoreDAO" ref="restoreDAO" />
+    <bean id="retrievesService" class="org.datavaultplatform.broker.services.RetrievesService">
+        <property name="retrieveDAO" ref="retrieveDAO" />
     </bean>
 
     <bean id="metadataService" class="org.datavaultplatform.broker.services.MetadataService">
@@ -239,7 +239,7 @@
         <property name="jobsService" ref="jobsService" />
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
-        <property name="restoresService" ref="restoresService" />
+        <property name="retrievesService" ref="retrievesService" />
         <property name="eventService" ref="eventService" />
         <property name="usersService" ref="usersService" />
     </bean>
@@ -299,7 +299,7 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="restoreDAO" class="org.datavaultplatform.common.model.dao.RestoreDAOImpl">
+    <bean id="retrieveDAO" class="org.datavaultplatform.common.model.dao.RetrieveDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 

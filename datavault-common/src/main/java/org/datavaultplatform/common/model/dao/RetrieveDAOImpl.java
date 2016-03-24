@@ -1,6 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.Restore;
+import org.datavaultplatform.common.model.Retrieve;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -11,7 +11,7 @@ import org.hibernate.criterion.Restrictions;
 
 import java.util.List;
 
-public class RestoreDAOImpl implements RestoreDAO {
+public class RetrieveDAOImpl implements RetrieveDAO {
 
     private SessionFactory sessionFactory;
 
@@ -20,56 +20,56 @@ public class RestoreDAOImpl implements RestoreDAO {
     }
 
     @Override
-    public void save(Restore restore) {
+    public void save(Retrieve retrieve) {
         Session session = this.sessionFactory.openSession();
         Transaction tx = session.beginTransaction();
-        session.persist(restore);
+        session.persist(retrieve);
         tx.commit();
         session.close();
     }
 
     @Override
-    public void update(Restore restore) {
+    public void update(Retrieve retrieve) {
         Session session = this.sessionFactory.openSession();
         Transaction tx = session.beginTransaction();
-        session.update(restore);
+        session.update(retrieve);
         tx.commit();
         session.close();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Restore> list() {
+    public List<Retrieve> list() {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Restore.class);
+        Criteria criteria = session.createCriteria(Retrieve.class);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         criteria.addOrder(Order.asc("timestamp"));
-        List<Restore> restores = criteria.list();
+        List<Retrieve> retrieves = criteria.list();
         session.close();
-        return restores;
+        return retrieves;
     }
 
     @Override
-    public Restore findById(String Id) {
+    public Retrieve findById(String Id) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Restore.class);
+        Criteria criteria = session.createCriteria(Retrieve.class);
         criteria.add(Restrictions.eq("id", Id));
-        Restore restore = (Restore) criteria.uniqueResult();
+        Retrieve retrieve = (Retrieve) criteria.uniqueResult();
         session.close();
-        return restore;
+        return retrieve;
     }
 
     @Override
     public int count() {
         Session session = this.sessionFactory.openSession();
-        return (int) (long) (Long) session.createCriteria(Restore.class).setProjection(Projections.rowCount()).uniqueResult();
+        return (int) (long) (Long) session.createCriteria(Retrieve.class).setProjection(Projections.rowCount()).uniqueResult();
     }
 
     @Override
     public int queueCount() {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Restore.class);
-        criteria.add(Restrictions.eq("status", Restore.Status.NOT_STARTED));
+        Criteria criteria = session.createCriteria(Retrieve.class);
+        criteria.add(Restrictions.eq("status", Retrieve.Status.NOT_STARTED));
         criteria.setProjection(Projections.rowCount());
         return (int)(long)(Long)criteria.uniqueResult();
     }
@@ -77,20 +77,20 @@ public class RestoreDAOImpl implements RestoreDAO {
     @Override
     public int inProgressCount() {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Restore.class);
-        criteria.add(Restrictions.and(Restrictions.ne("status", Restore.Status.NOT_STARTED), Restrictions.ne("status", Restore.Status.COMPLETE)));
+        Criteria criteria = session.createCriteria(Retrieve.class);
+        criteria.add(Restrictions.and(Restrictions.ne("status", Retrieve.Status.NOT_STARTED), Restrictions.ne("status", Retrieve.Status.COMPLETE)));
         criteria.setProjection(Projections.rowCount());
         return (int)(long)(Long)criteria.uniqueResult();
     }
 
     @Override
-    public List<Restore> inProgress() {
+    public List<Retrieve> inProgress() {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Restore.class);
-        criteria.add(Restrictions.and(Restrictions.ne("status", Restore.Status.NOT_STARTED), Restrictions.ne("status", Restore.Status.COMPLETE)));
+        Criteria criteria = session.createCriteria(Retrieve.class);
+        criteria.add(Restrictions.and(Restrictions.ne("status", Retrieve.Status.NOT_STARTED), Restrictions.ne("status", Retrieve.Status.COMPLETE)));
         criteria.addOrder(Order.asc("timestamp"));
-        List<Restore> restores = criteria.list();
+        List<Retrieve> retrieves = criteria.list();
         session.close();
-        return restores;
+        return retrieves;
     }
 }

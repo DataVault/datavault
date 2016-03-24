@@ -7,30 +7,30 @@
 
     <ol class="breadcrumb">
         <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
-        <li class="active"><b>Restores</b></li>
+        <li class="active"><b>Retrieves</b></li>
     </ol>
 
-    <#if restores?has_content>
+    <#if retrieves?has_content>
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
                 <tr class="tr">
-                    <th>Restore</th>
+                    <th>Retrieve</th>
                     <th>Status</th>
                     <th>Timestamp</th>
-                    <th>Restore path</th>
-                    <th>Restore note</th>
+                    <th>Retrieve path</th>
+                    <th>Retrieve note</th>
                 </tr>
                 </thead>
 
                 <tbody>
-                    <#list restores as restore>
+                    <#list retrieves as retrieve>
                     <tr class="tr">
-                        <td>${restore.getDeposit().getID()?html}</td>
-                        <td>${restore.status?html}</td>
-                        <td>${restore.timestamp?datetime}</td>
-                        <td>${restore.restorePath?html}</td>
-                        <td>${restore.note?html}</td>
+                        <td>${retrieve.getDeposit().getID()?html}</td>
+                        <td>${retrieve.status?html}</td>
+                        <td>${retrieve.timestamp?datetime}</td>
+                        <td>${retrieve.retrievePath?html}</td>
+                        <td>${retrieve.note?html}</td>
                     </tr>
                     </#list>
                 </tbody>

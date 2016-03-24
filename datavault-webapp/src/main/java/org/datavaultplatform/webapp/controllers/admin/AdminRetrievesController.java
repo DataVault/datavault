@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 
 @Controller
-public class AdminRestoresController {
+public class AdminRetrievesController {
 
     private RestService restService;
 
@@ -20,10 +20,10 @@ public class AdminRestoresController {
         this.restService = restService;
     }
 
-    @RequestMapping(value = "/admin/restores", method = RequestMethod.GET)
-    public String getRestoresListing(ModelMap model) {
-        model.addAttribute("restores", restService.getRestoresListingAll());
-        return "admin/restores/index";
+    @RequestMapping(value = "/admin/retrieves", method = RequestMethod.GET)
+    public String getRetrievesListing(ModelMap model) {
+        model.addAttribute("retrieves", restService.getRetrievesListingAll());
+        return "admin/retrieves/index";
     }
 }
 

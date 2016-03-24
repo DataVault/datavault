@@ -39,7 +39,7 @@ public class Event {
     
     // Event properties
     public String message;
-    public String restoreId;
+    public String retrieveId;
     public String eventClass;
     
     @Transient
@@ -101,11 +101,11 @@ public class Event {
         this.sequence = 0;
     }
     
-    public Event(String jobId, String depositId, String restoreId, String message) {
+    public Event(String jobId, String depositId, String retrieveId, String message) {
         this.eventClass = Event.class.getCanonicalName();
         this.jobId = jobId;
         this.depositId = depositId;
-        this.restoreId = restoreId;
+        this.retrieveId = retrieveId;
         this.message = message;
         this.timestamp = new Date();
         this.sequence = 0;
@@ -193,12 +193,12 @@ public class Event {
         this.userAgent = userAgent;
     }
     
-    public String getRestoreId() {
-        return restoreId;
+    public String getRetrieveId() {
+        return retrieveId;
     }
 
-    public void setRestoreId(String restoreId) {
-        this.restoreId = restoreId;
+    public void setRetrieveId(String retrieveId) {
+        this.retrieveId = retrieveId;
     }
 
     public Boolean getPersistent() {

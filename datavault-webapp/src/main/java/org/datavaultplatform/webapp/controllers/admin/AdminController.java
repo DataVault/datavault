@@ -29,14 +29,14 @@ public class AdminController {
         model.addAttribute("groupcount", restService.getGroupsCount());
         model.addAttribute("vaultcount", restService.getVaultsCount());
         model.addAttribute("depositcount", restService.getDepositsCount());
-        model.addAttribute("restorecount", restService.getRestoresCount());
+        model.addAttribute("retrievecount", restService.getRetrievesCount());
         Long vaultSize = restService.getVaultsSize();
         if (vaultSize == null) vaultSize = new Long(0);
         model.addAttribute("vaultsize", FileUtils.byteCountToDisplaySize(vaultSize));
         model.addAttribute("depositsinprogress", restService.getDepositsInProgressCount());
-        model.addAttribute("restoresinprogress", restService.getRestoresInProgressCount());
+        model.addAttribute("retrievesinprogress", restService.getRetrievesInProgressCount());
         model.addAttribute("depositqueue", restService.getDepositsQueue());
-        model.addAttribute("restorequeue", restService.getRestoresQueue());
+        model.addAttribute("retrievequeue", restService.getRetrievesQueue());
         model.addAttribute("reviewcount", restService.getPolicyStatusCount(PolicyStatus.REVIEW));
         model.addAttribute("eventcount", restService.getEventCount());
 
