@@ -20,6 +20,8 @@
         <security:csrf disabled="true"/>
         <!-- Note: Currently disabled but maybe we want to configure an Anonymous filter for some login functionality?? -->
         <security:anonymous enabled="false"/>
+
+        <security:intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')" />
     </security:http>
 
     <!-- If user is not authorised for request then throw back a 403 -->
