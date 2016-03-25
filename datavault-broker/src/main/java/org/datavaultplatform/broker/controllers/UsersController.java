@@ -8,6 +8,7 @@ import org.datavaultplatform.broker.services.UserKeyPairService;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.broker.services.UsersService;
+import org.datavaultplatform.common.request.ValidateUser;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.http.MediaType;
@@ -181,5 +182,12 @@ public class UsersController {
         fileStoreService.addFileStore(store);
 
         return userKeyPairService.getPublicKey();
+    }
+
+
+    @RequestMapping(value = "/auth/users", method = RequestMethod.POST)
+    public Boolean validateUser(@RequestBody ValidateUser validateUser) throws Exception {
+
+        return usersService.validateUser(validateUser.getUserid(), validateUser.getPassword());
     }
 }
