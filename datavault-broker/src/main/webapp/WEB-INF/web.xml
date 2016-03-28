@@ -1,8 +1,11 @@
-<web-app version="2.4"
-         xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
-	http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+                             http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         id="WebApp_ID" version="3.0">
 
+    <display-name>datavault-broker</display-name>
 
     <listener>
         <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
@@ -14,8 +17,12 @@
         <param-value>/WEB-INF/log4j.properties</param-value>
     </context-param>
 
+    <context-param>
+        <param-name>webAppRootKey</param-name>
+        <param-value>broker.root</param-value>
+    </context-param>
 
-    <display-name>datavault-broker</display-name>
+    <!-- Now for the normal Spring webapp stuff -->
 
     <servlet>
         <servlet-name>datavault-broker</servlet-name>

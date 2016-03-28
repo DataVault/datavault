@@ -4,6 +4,8 @@ import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpEntity;
@@ -17,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 public class RestService {
 
+    private static final Logger logger = LoggerFactory.getLogger(RestService.class);
 
     private String brokerURL;
     private String brokerApiKey;
@@ -51,6 +54,8 @@ public class RestService {
         } else {
             throw new IllegalArgumentException("REST method not implemented!");
         }
+
+        logger.debug("Calling Broker with url:" + url);
 
         return restTemplate.exchange(url, method, entity, clazz);
         
@@ -349,6 +354,12 @@ public class RestService {
         // Bit odd to POST a null object, but a POST seems appropriate since it is a non-idempotent, create request
         HttpEntity<?> response = post(brokerURL + "/users/" + userId + "/keys", String.class, null);
         return (String)response.getBody();
+    }
+
+    public Boolean validateUser(ValidateUser validateUser) {
+        // Using a POST because I read somewhere that its somehow more secure to POST credentials, could be nonsense
+        HttpEntity<?> response = post(brokerURL + "/auth/users", Boolean.class, validateUser);
+        return (Boolean)response.getBody();
     }
     
     public String notifyLogin(CreateClientEvent clientEvent) {

@@ -107,9 +107,6 @@ public class VaultsController {
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
     public List<VaultInfo> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
 
-        // todo : remove this bit of logging. It was put here as an example of how to do logging.
-        logger.info("Hello World");
-
         List<VaultInfo> vaultResponses = new ArrayList<>();
         User user = usersService.getUser(userID);
         for (Vault vault : user.getVaults()) {

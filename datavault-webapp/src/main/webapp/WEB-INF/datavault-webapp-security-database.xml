@@ -20,6 +20,7 @@
             login-page="/auth/login"
             login-processing-url="/auth/security_check"
             authentication-failure-url="/auth/login?error=true"
+            authentication-success-handler-ref="authSuccessHandler"
             default-target-url="/"/>
 
         <security:logout
