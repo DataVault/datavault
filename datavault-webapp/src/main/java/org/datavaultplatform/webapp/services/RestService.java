@@ -361,6 +361,12 @@ public class RestService {
         HttpEntity<?> response = post(brokerURL + "/auth/users", Boolean.class, validateUser);
         return (Boolean)response.getBody();
     }
+
+    public Boolean isAdmin(ValidateUser validateUser) {
+        // Using a POST because I read somewhere that its somehow more secure to POST credentials, could be nonsense
+        HttpEntity<?> response = post(brokerURL + "/auth/users/isadmin", Boolean.class, validateUser);
+        return (Boolean)response.getBody();
+    }
     
     public String notifyLogin(CreateClientEvent clientEvent) {
         HttpEntity<?> response = put(brokerURL + "/notify/login", String.class, clientEvent);

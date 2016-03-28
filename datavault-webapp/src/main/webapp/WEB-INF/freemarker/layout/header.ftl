@@ -20,7 +20,9 @@
                     <li><a href="#">Help</a></li>
                     <li <#if nav == "feedback">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/feedback/">Feedback</a></li>
                     <li <#if nav == "groups">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/groups/">Groups</a></li>
+                    <@sec.authorize url="/admin">
                     <li <#if nav == "admin">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/admin/">Administration</a></li>
+                    </@sec.authorize>
                 </ul>
 
             <!-- If an error has occurred there may be no Principal set, so don't display the User dropdown -->

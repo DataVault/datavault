@@ -48,9 +48,13 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
 
         logger.debug("Authentication success for " + name);
 
-        // todo: ask the Broker if this user is an admin and set roles accordingly
-
         List<GrantedAuthority> grantedAuths = new ArrayList<>();
+
+        if (restService.isAdmin(new ValidateUser(name, null))) {
+            logger.debug("user is an admin " + name);
+            grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        }
+
         grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
         return new UsernamePasswordAuthenticationToken(name, password, grantedAuths);
 
