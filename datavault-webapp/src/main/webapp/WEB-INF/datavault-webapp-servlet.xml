@@ -99,7 +99,7 @@
         <property name="restService" ref="restService" />
     </bean>
 
-    <bean id="adminRestoresController" class="org.datavaultplatform.webapp.controllers.admin.AdminRestoresController">
+    <bean id="adminRetrievesController" class="org.datavaultplatform.webapp.controllers.admin.AdminRetrievesController">
         <property name="restService" ref="restService" />
     </bean>
     

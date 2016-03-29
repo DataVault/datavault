@@ -1,11 +1,11 @@
 package org.datavaultplatform.webapp.services;
 
 import org.datavaultplatform.common.model.Dataset;
-import org.datavaultplatform.common.metadata.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
-import org.datavaultplatform.common.event.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpEntity;
@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 public class RestService {
 
+    private static final Logger logger = LoggerFactory.getLogger(RestService.class);
 
     private String brokerURL;
     private String brokerApiKey;
@@ -53,6 +54,8 @@ public class RestService {
         } else {
             throw new IllegalArgumentException("REST method not implemented!");
         }
+
+        logger.debug("Calling Broker with url:" + url);
 
         return restTemplate.exchange(url, method, entity, clazz);
         
@@ -167,29 +170,29 @@ public class RestService {
         return (DepositInfo[])response.getBody();
     }
 
-    public int getRestoresCount() {
-        HttpEntity<?> response = get(brokerURL + "/statistics/restorecount", Integer.class);
+    public int getRetrievesCount() {
+        HttpEntity<?> response = get(brokerURL + "/statistics/retrievecount", Integer.class);
         return (Integer)response.getBody();
     }
 
-    public int getRestoresQueue() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/restorequeuecount", Integer.class);
+    public int getRetrievesQueue() {
+        HttpEntity<?> response = get(brokerURL + "/vaults/retrievequeuecount", Integer.class);
         return (Integer)response.getBody();
     }
 
-    public int getRestoresInProgressCount() {
-        HttpEntity<?> response = get(brokerURL + "/statistics/restoreinprogresscount", Integer.class);
+    public int getRetrievesInProgressCount() {
+        HttpEntity<?> response = get(brokerURL + "/statistics/retrieveinprogresscount", Integer.class);
         return (Integer)response.getBody();
     }
 
-    public Restore[] getRestoresInProgress() {
-        HttpEntity<?> response = get(brokerURL + "/vaults/restoreinprogress", Restore[].class);
-        return (Restore[])response.getBody();
+    public Retrieve[] getRetrievesInProgress() {
+        HttpEntity<?> response = get(brokerURL + "/vaults/retrieveinprogress", Retrieve[].class);
+        return (Retrieve[])response.getBody();
     }
 
-    public Restore[] getRestoresListingAll() {
-        HttpEntity<?> response = get(brokerURL + "/admin/restores", Restore[].class);
-        return (Restore[])response.getBody();
+    public Retrieve[] getRetrievesListingAll() {
+        HttpEntity<?> response = get(brokerURL + "/admin/retrieves", Retrieve[].class);
+        return (Retrieve[])response.getBody();
     }
 
     public VaultInfo getVault(String id) {        
@@ -250,9 +253,9 @@ public class RestService {
         return (Job[])response.getBody();
     }
 
-    public Restore[] getDepositRestores(String depositID) {
-        HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID + "/restores", Restore[].class);
-        return (Restore[])response.getBody();
+    public Retrieve[] getDepositRetrieves(String depositID) {
+        HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID + "/retrieves", Retrieve[].class);
+        return (Retrieve[])response.getBody();
     }
 
     public Policy[] getPolicyListing() {
@@ -327,8 +330,8 @@ public class RestService {
         return (DepositInfo)response.getBody();
     }
     
-    public Boolean restoreDeposit(String depositID, Restore restore) {        
-        HttpEntity<?> response = post(brokerURL + "/deposits/" + depositID + "/restore", Boolean.class, restore);
+    public Boolean retrieveDeposit(String depositID, Retrieve retrieve) {
+        HttpEntity<?> response = post(brokerURL + "/deposits/" + depositID + "/retrieve", Boolean.class, retrieve);
         return (Boolean)response.getBody();
     }
 
@@ -351,6 +354,12 @@ public class RestService {
         // Bit odd to POST a null object, but a POST seems appropriate since it is a non-idempotent, create request
         HttpEntity<?> response = post(brokerURL + "/users/" + userId + "/keys", String.class, null);
         return (String)response.getBody();
+    }
+
+    public Boolean validateUser(ValidateUser validateUser) {
+        // Using a POST because I read somewhere that its somehow more secure to POST credentials, could be nonsense
+        HttpEntity<?> response = post(brokerURL + "/auth/users", Boolean.class, validateUser);
+        return (Boolean)response.getBody();
     }
     
     public String notifyLogin(CreateClientEvent clientEvent) {

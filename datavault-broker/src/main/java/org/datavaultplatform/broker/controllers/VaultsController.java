@@ -25,7 +25,7 @@ public class VaultsController {
 
     private VaultsService vaultsService;
     private DepositsService depositsService;
-    private RestoresService restoresService;
+    private RetrievesService retrievesService;
     private ExternalMetadataService externalMetadataService;
     private PoliciesService policiesService;
     private GroupsService groupsService;
@@ -48,8 +48,8 @@ public class VaultsController {
         this.depositsService = depositsService;
     }
 
-    public void setRestoresService(RestoresService restoresService) {
-        this.restoresService = restoresService;
+    public void setRetrievesService(RetrievesService retrievesService) {
+        this.retrievesService = retrievesService;
     }
     
     public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
@@ -106,9 +106,6 @@ public class VaultsController {
     })
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
     public List<VaultInfo> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
-
-        // todo : remove this bit of logging. It was put here as an example of how to do logging.
-        logger.info("Hello World");
 
         List<VaultInfo> vaultResponses = new ArrayList<>();
         User user = usersService.getUser(userID);

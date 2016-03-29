@@ -1,24 +1,12 @@
 package org.datavaultplatform.broker.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.*;
-import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.request.CreateDeposit;
-import org.datavaultplatform.common.request.CreateVault;
-import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.VaultInfo;
-import org.datavaultplatform.common.task.Task;
 import org.jsondoc.core.annotation.*;
-import org.jsondoc.core.pojo.ApiVerb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -27,7 +15,7 @@ public class StatisticsController {
 
     private VaultsService vaultsService;
     private DepositsService depositsService;
-    private RestoresService restoresService;
+    private RetrievesService retrievesService;
     private PoliciesService policiesService;
     private GroupsService groupsService;
     private UsersService usersService;
@@ -43,8 +31,8 @@ public class StatisticsController {
         this.depositsService = depositsService;
     }
 
-    public void setRestoresService(RestoresService restoresService) {
-        this.restoresService = restoresService;
+    public void setRetrievesService(RetrievesService retrievesService) {
+        this.retrievesService = retrievesService;
     }
 
     public void setPoliciesService(PoliciesService policiesService) {
@@ -87,16 +75,16 @@ public class StatisticsController {
         return depositsService.inProgressCount();
     }
 
-    @RequestMapping(value = "/statistics/restorecount", method = RequestMethod.GET)
-    public int getRestoresCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    @RequestMapping(value = "/statistics/retrievecount", method = RequestMethod.GET)
+    public int getRetrievesCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return restoresService.count();
+        return retrievesService.count();
     }
 
-    @RequestMapping(value = "/statistics/restoreinprogresscount", method = RequestMethod.GET)
-    public int getRestoresInProgressCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    @RequestMapping(value = "/statistics/retrieveinprogresscount", method = RequestMethod.GET)
+    public int getRetrievesInProgressCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return restoresService.inProgressCount();
+        return retrievesService.inProgressCount();
     }
 
     @RequestMapping(value = "/vaults/depositqueuecount", method = RequestMethod.GET)
@@ -111,16 +99,16 @@ public class StatisticsController {
         return depositsService.inProgress();
     }
 
-    @RequestMapping(value = "/vaults/restorequeuecount", method = RequestMethod.GET)
-    public int getRestoresQueuedCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    @RequestMapping(value = "/vaults/retrievequeuecount", method = RequestMethod.GET)
+    public int getRetrievesQueuedCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return restoresService.queueCount();
+        return retrievesService.queueCount();
     }
 
-    @RequestMapping(value = "/vaults/restoreinprogress", method = RequestMethod.GET)
-    public List<Restore> getRestoresInProgress(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    @RequestMapping(value = "/vaults/retrieveinprogress", method = RequestMethod.GET)
+    public List<Retrieve> getRetrievesInProgress(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return restoresService.inProgress();
+        return retrievesService.inProgress();
     }
 
 

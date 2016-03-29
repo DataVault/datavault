@@ -1,7 +1,6 @@
 package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -10,8 +9,8 @@ import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-@Table(name="Restores")
-public class Restore {
+@Table(name="Retrieves")
+public class Retrieve {
 
     // Deposit Identifier
     @Id
@@ -28,15 +27,15 @@ public class Restore {
     @ManyToOne
     private Deposit deposit;
 
-    // A Restore can have a number of events
+    // A Retrieve can have a number of events
     //@JsonIgnore
-    //@OneToMany(targetEntity=Event.class, mappedBy="restore", fetch=FetchType.LAZY)
+    //@OneToMany(targetEntity=Event.class, mappedBy="retrieve", fetch=FetchType.LAZY)
     //@OrderBy("timestamp, sequence")
     //private List<Event> events;
 
-    // A Restore can have a number of active jobs
+    // A Retrieve can have a number of active jobs
     //@JsonIgnore
-    //@OneToMany(targetEntity=Job.class, mappedBy="restore", fetch=FetchType.LAZY)
+    //@OneToMany(targetEntity=Job.class, mappedBy="retrieve", fetch=FetchType.LAZY)
     //@OrderBy("timestamp")
     //private List<Job> jobs;
 
@@ -50,20 +49,20 @@ public class Restore {
 
     private Status status;
 
-    String restorePath;
+    String retrievePath;
     
     // Additional properties might go here - e.g. format
     
-    public Restore() {};
+    public Retrieve() {};
 
     public String getID() { return id; };
 
-    public String getRestorePath() {
-        return restorePath;
+    public String getRetrievePath() {
+        return retrievePath;
     }
 
-    public void setRestorePath(String restorePath) {
-        this.restorePath = restorePath;
+    public void setRetrievePath(String retrievePath) {
+        this.retrievePath = retrievePath;
     }
 
     public void setTimestamp(Date timestamp) {

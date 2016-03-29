@@ -63,8 +63,13 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         }
 
         // If we got here then we found a matching User record.
-        grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
-
+        if (user.isAdmin()) {
+            logger.debug(user.getName() + " is an admin user");
+            grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        } else {
+            logger.debug(user.getName() + " is an ordinary user");
+            grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
+        }
 
         RestWebAuthenticationDetails rwad = (RestWebAuthenticationDetails) authentication.getDetails();
         logger.debug("Client Key is " + rwad.getClientKeyRequestHeader());

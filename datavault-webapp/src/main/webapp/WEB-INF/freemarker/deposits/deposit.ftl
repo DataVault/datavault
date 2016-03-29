@@ -26,7 +26,7 @@
         <li class="active"><a data-toggle="tab" href="#deposit">Deposit</a></li>
         <li><a data-toggle="tab" href="#contents">Contents <span class="badge">${manifest?size}</span></a></li>
         <li><a data-toggle="tab" href="#events">Events <span class="badge">${events?size}</span></a></li>
-        <li><a data-toggle="tab" href="#restores">Restores <span class="badge">${restores?size}</span></a></li>
+        <li><a data-toggle="tab" href="#retrieves">Retrieves <span class="badge">${retrieves?size}</span></a></li>
     </ul>
 
     <div id="deposit-tab-content" class="tab-content">
@@ -102,24 +102,24 @@
             </div>
         </div>
 
-        <div class="tab-pane" id="restores">
+        <div class="tab-pane" id="retrieves">
             <div class="table-responsive">
                 <table class="table table-striped">
                     <thead>
                     <tr class="tr">
-                        <th>Restore note</th>
+                        <th>Retrieve note</th>
                         <th>Status</th>
-                        <th>Restore path</th>
+                        <th>Retrieve path</th>
                         <th>Timestamp</th>
                     </tr>
                     </thead>
                     <tbody>
-                        <#list restores as restore>
+                        <#list retrieves as retrieve>
                         <tr class="tr">
-                            <td>${restore.note?html}</td>
-                            <td>${restore.status?html}</td>
-                            <td>${restore.restorePath?html}</td>
-                            <td>${restore.timestamp?datetime}</td>
+                            <td>${retrieve.note?html}</td>
+                            <td>${retrieve.status?html}</td>
+                            <td>${retrieve.retrievePath?html}</td>
+                            <td>${retrieve.timestamp?datetime}</td>
                         </tr>
                         </#list>
                     </tbody>
@@ -129,8 +129,8 @@
     </div>
 
     <#if deposit.status.name() == "COMPLETE">
-        <a id="restorebtn" class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/restore">
-            <span class="glyphicon glyphicon-open" aria-hidden="true"></span> Restore data
+        <a id="retrievebtn" class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve">
+            <span class="glyphicon glyphicon-open" aria-hidden="true"></span> Retrieve data
         </a>
     </#if>
 
