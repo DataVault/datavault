@@ -1,7 +1,10 @@
 package org.datavaultplatform.webapp.authentication;
 
 import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.webapp.services.RestService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +27,8 @@ import java.util.List;
 @Component
 public class DatabaseAuthenticationProvider implements AuthenticationProvider {
 
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseAuthenticationProvider.class);
+
     private RestService restService;
 
     public void setRestService(RestService restService) {
@@ -36,23 +41,14 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         String name = authentication.getName();
         String password = authentication.getCredentials().toString();
 
-        // Fetch the existing user
-        User user;
-        try {
-            user = restService.getUser(name);
-        } catch (Exception e) {
-            // Broker auth failure
-            // TODO: log the exception/auth error?
-            user = null;
+        if (!restService.validateUser(new ValidateUser(name, password))) {
+            logger.debug("Invalid username or password for " + name);
+            throw new BadCredentialsException("Invalid userid or password");
         }
 
-        if (user == null) {
-            throw new UsernameNotFoundException("Invalid user id/name");
-        }
+        logger.debug("Authentication success for " + name);
 
-        if (!password.equals(user.getPassword())) {
-            throw new BadCredentialsException("Inavalid password");
-        }
+        // todo: ask the Broker if this user is an admin and set roles accordingly
 
         List<GrantedAuthority> grantedAuths = new ArrayList<>();
         grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));

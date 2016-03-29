@@ -22,6 +22,10 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    // Is this user an administrator?
+    @Column(name = "admin", nullable = false)
+    private Boolean admin;
+
     // A user is related to a number of vaults
     @JsonIgnore
     @OneToMany(targetEntity=Vault.class, mappedBy="user", fetch=FetchType.LAZY)
@@ -57,6 +61,15 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public Boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(Boolean admin) {
+        this.admin = admin;
+    }
+
 
     public List<Vault> getVaults() {
         return vaults;
