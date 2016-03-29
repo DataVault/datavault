@@ -190,4 +190,12 @@ public class UsersController {
 
         return usersService.validateUser(validateUser.getUserid(), validateUser.getPassword());
     }
+
+    @RequestMapping(value = "/auth/users/isadmin", method = RequestMethod.POST)
+    public Boolean isAdmin(@RequestBody ValidateUser validateUser) throws Exception {
+        User user = usersService.getUser(validateUser.getUserid());
+        return user.isAdmin();
+    }
+
+
 }

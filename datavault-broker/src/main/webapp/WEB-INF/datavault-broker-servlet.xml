@@ -231,7 +231,7 @@
     </rabbit:direct-exchange>
     -->
     
-    <rabbit:listener-container connection-factory="connectionFactory" >
+    <rabbit:listener-container connection-factory="connectionFactory" concurrency="1" max-concurrency="1" >
         <rabbit:listener ref="listener" queues="eventQueue" admin="amqpAdmin" />
     </rabbit:listener-container>
 
