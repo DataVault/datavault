@@ -161,13 +161,23 @@ public class EventListener implements MessageListener {
                         deposit = depositsService.getDeposit(concreteEvent.getDepositId());
                     }
                 }
-                
+
                 // Add to the cumulative vault size
-                // TODO: locking?
                 Vault vault = deposit.getVault();
-                long vaultSize = vault.getSize();
-                vault.setSize(vaultSize + computedSizeEvent.getBytes());
-                vaultsService.updateVault(vault);
+                
+                success = false;
+                while (!success) {
+                    try {
+                        long vaultSize = vault.getSize();
+                        vault.setSize(vaultSize + computedSizeEvent.getBytes());
+                        vaultsService.updateVault(vault);
+                        success = true;
+                    } catch (org.hibernate.StaleObjectStateException e) {
+                        // Refresh from database and retry
+                        vault = vaultsService.getVault(vault.getID());
+                    }
+                }
+                
 
             } else if (concreteEvent instanceof Complete) {
 
