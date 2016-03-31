@@ -19,6 +19,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.OrderBy;
+import javax.persistence.Version;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
@@ -36,6 +37,10 @@ public class Deposit {
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Column(name = "id", unique = true)
     private String id;
+
+    // Hibernate version
+    @Version
+    private long version;
     
     // Serialise date in ISO 8601 format
     @ApiObjectField(description = "Date that the vault was created")
@@ -105,6 +110,8 @@ public class Deposit {
     
     public String getID() { return id; }
 
+    public long getVersion() { return version; };
+    
     public void setCreationTime(Date creationTime) {
         this.creationTime = creationTime;
     }

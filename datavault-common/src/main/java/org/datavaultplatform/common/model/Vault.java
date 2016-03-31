@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Date;
 import javax.persistence.ManyToOne;
 import javax.persistence.OrderBy;
+import javax.persistence.Version;
 
 /**
  * User: Tom Higgins
@@ -42,6 +43,10 @@ public class Vault {
     @Column(name = "id", unique = true)
     private String id;
 
+    // Hibernate version
+    @Version
+    private long version;
+    
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @Temporal(TemporalType.TIMESTAMP)
@@ -93,6 +98,8 @@ public class Vault {
 
     public String getID() { return id; }
 
+    public long getVersion() { return version; };
+    
     public void setCreationTime(Date creationTime) {
         this.creationTime = creationTime;
     }

@@ -171,7 +171,12 @@ public class DepositsController {
         User user = usersService.getUser(userID);
         Deposit deposit = depositsService.getUserDeposit(user, depositID);
 
-        List<FileFixity> manifest = metadataService.getManifest(deposit.getBagId());
+        List<FileFixity> manifest = new ArrayList<>();
+        
+        if (deposit.getStatus() == Deposit.Status.COMPLETE) {
+            manifest = metadataService.getManifest(deposit.getBagId());
+        }
+        
         return manifest;
     }
 

@@ -17,6 +17,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Version;
 import org.datavaultplatform.common.event.Event;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -31,6 +32,10 @@ public class Job {
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Column(name = "id", unique = true)
     private String id;
+    
+    // Hibernate version
+    @Version
+    private long version;
     
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
@@ -64,7 +69,9 @@ public class Job {
     }
     
     public String getID() { return id; }
-
+    
+    public long getVersion() { return version; };
+    
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
