@@ -73,8 +73,20 @@ public class EventListener implements MessageListener {
             
             // Update with next state information (if present)
             if (concreteEvent.nextState != null) {
-                job.setState(concreteEvent.nextState);
-                jobsService.updateJob(job);
+                
+                Boolean success = false;
+                while (!success) {
+                    try {
+                        if (job.getState() == null || (job.getState() < concreteEvent.nextState)) {
+                            job.setState(concreteEvent.nextState);
+                            jobsService.updateJob(job);
+                        }
+                        success = true;
+                    } catch (org.hibernate.StaleObjectStateException e) {
+                        // Refresh from database and retry
+                        job = jobsService.getJob(concreteEvent.getJobId());
+                    }
+                }
             }
             
             // Maybe perform an action based on the event type ...
@@ -83,30 +95,72 @@ public class EventListener implements MessageListener {
                 
                 // Update the Job state information
                 InitStates initStatesEvent = (InitStates)concreteEvent;
-                job.setStates(initStatesEvent.getStates());
-                jobsService.updateJob(job);
+                
+                Boolean success = false;
+                while (!success) {
+                    try {
+                        job.setStates(initStatesEvent.getStates());
+                        jobsService.updateJob(job);
+                        success = true;
+                    } catch (org.hibernate.StaleObjectStateException e) {
+                        // Refresh from database and retry
+                        job = jobsService.getJob(concreteEvent.getJobId());
+                    }
+                }
             
             } else if (concreteEvent instanceof UpdateProgress) {
                 
                 // Update the Job state
                 UpdateProgress updateStateEvent = (UpdateProgress)concreteEvent;
-                job.setProgress(updateStateEvent.getProgress());
-                job.setProgressMax(updateStateEvent.getProgressMax());
-                job.setProgressMessage(updateStateEvent.getProgressMessage());
-                jobsService.updateJob(job);
+                
+                Boolean success = false;
+                while (!success) {
+                    try {
+                        job.setProgress(updateStateEvent.getProgress());
+                        job.setProgressMax(updateStateEvent.getProgressMax());
+                        job.setProgressMessage(updateStateEvent.getProgressMessage());
+                        jobsService.updateJob(job);
+                        success = true;
+                    } catch (org.hibernate.StaleObjectStateException e) {
+                        // Refresh from database and retry
+                        job = jobsService.getJob(concreteEvent.getJobId());
+                    }
+                }
                 
             } else if (concreteEvent instanceof Start) {
                 
                 // Update the deposit status
-                deposit.setStatus(Deposit.Status.IN_PROGRESS);
-                depositsService.updateDeposit(deposit);
+                
+                Boolean success = false;
+                while (!success) {
+                    try {
+                        if (deposit.getStatus() == null || (deposit.getStatus() != Deposit.Status.COMPLETE)) {
+                            deposit.setStatus(Deposit.Status.IN_PROGRESS);
+                            depositsService.updateDeposit(deposit);
+                        }
+                        success = true;
+                    } catch (org.hibernate.StaleObjectStateException e) {
+                        // Refresh from database and retry
+                        deposit = depositsService.getDeposit(concreteEvent.getDepositId());
+                    }
+                }
                 
             } else if (concreteEvent instanceof ComputedSize) {
                 
                 // Update the deposit with the computed size
                 ComputedSize computedSizeEvent = (ComputedSize)concreteEvent;
-                deposit.setSize(computedSizeEvent.getBytes());
-                depositsService.updateDeposit(deposit);
+                
+                Boolean success = false;
+                while (!success) {
+                    try {
+                        deposit.setSize(computedSizeEvent.getBytes());
+                        depositsService.updateDeposit(deposit);
+                        success = true;
+                    } catch (org.hibernate.StaleObjectStateException e) {
+                        // Refresh from database and retry
+                        deposit = depositsService.getDeposit(concreteEvent.getDepositId());
+                    }
+                }
                 
                 // Add to the cumulative vault size
                 // TODO: locking?
@@ -119,10 +173,21 @@ public class EventListener implements MessageListener {
 
                 // Update the deposit status and archive properties
                 Complete completeEvent = (Complete)concreteEvent;
-                deposit.setStatus(Deposit.Status.COMPLETE);
-                deposit.setArchiveId(completeEvent.getArchiveId());
-                deposit.setArchiveSize(completeEvent.getArchiveSize());
-                depositsService.updateDeposit(deposit);
+                
+                Boolean success = false;
+                while (!success) {
+                    try {
+                        deposit.setStatus(Deposit.Status.COMPLETE);
+                        deposit.setArchiveId(completeEvent.getArchiveId());
+                        deposit.setArchiveSize(completeEvent.getArchiveSize());
+                        depositsService.updateDeposit(deposit);
+                        success = true;
+                    } catch (org.hibernate.StaleObjectStateException e) {
+                        // Refresh from database and retry
+                        deposit = depositsService.getDeposit(concreteEvent.getDepositId());
+                    }
+                }
+                
             } else if (concreteEvent instanceof RetrieveStart) {
 
                 // Update the Retrieve status
