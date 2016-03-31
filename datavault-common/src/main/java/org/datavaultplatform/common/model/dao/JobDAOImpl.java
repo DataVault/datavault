@@ -30,11 +30,25 @@ public class JobDAOImpl implements JobDAO {
     
     @Override
     public void update(Job job) {
-        Session session = this.sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-        session.update(job);
-        tx.commit();
-        session.close();
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = this.sessionFactory.openSession();
+            tx = session.beginTransaction();
+            session.update(job);
+            tx.commit();
+        } catch (RuntimeException e) {
+            if (tx != null) {
+                tx.rollback();
+                System.out.println("Job.update - ROLLBACK");
+            }
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
     }
  
     @SuppressWarnings("unchecked")

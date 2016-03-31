@@ -18,7 +18,7 @@
                 <input type="text"
                        class="form-control"
                        name="name"
-                       value="${principal.username}"
+                       value="${principal}"
                        disabled />
             </div>
         </div>
