@@ -232,7 +232,7 @@
     -->
     
     <rabbit:listener-container connection-factory="connectionFactory" concurrency="1" max-concurrency="1" >
-        <rabbit:listener ref="listener" queues="eventQueue" admin="amqpAdmin" exclusive="true" />
+        <rabbit:listener ref="listener" queues="eventQueue" admin="amqpAdmin" />
     </rabbit:listener-container>
 
     <bean id="listener" class="org.datavaultplatform.broker.queue.EventListener">
