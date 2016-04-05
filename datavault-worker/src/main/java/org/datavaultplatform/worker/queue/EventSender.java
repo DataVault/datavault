@@ -7,7 +7,7 @@ import com.rabbitmq.client.Channel;
 
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.EventStream;
-import org.datavaultplatform.common.model.Actor;
+import org.datavaultplatform.common.model.Agent;
 
 public class EventSender implements EventStream {
 
@@ -47,8 +47,8 @@ public class EventSender implements EventStream {
         sequence += 1;
         
         // Set common event properties
-        event.setActorType(Actor.ActorType.WORKER);
-        event.setActor(workerName);
+        event.setAgentType(Agent.AgentType.WORKER);
+        event.setAgent(workerName);
         
         try {
             // TODO: should create queue once and keep open?
