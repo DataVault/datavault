@@ -93,7 +93,7 @@
         <rabbit:listener ref="listener" queues="eventQueue" />
     </rabbit:listener-container>
 
-    <bean id="listener" class="org.datavaultplatform.broker.queue.EventListener" scope="singleton" >
+    <bean id="listener" class="org.datavaultplatform.broker.queue.EventListener" >
         <property name="jobsService" ref="jobsService" />
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
