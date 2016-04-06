@@ -9,7 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.datavaultplatform.common.request.CreateClientEvent;
 import org.datavaultplatform.common.event.client.*;
-import org.datavaultplatform.common.model.Actor;
+import org.datavaultplatform.common.model.Agent;
 import org.datavaultplatform.common.model.Client;
 import org.datavaultplatform.common.model.User;
 
@@ -50,8 +50,8 @@ public class NotifyController {
         
         Login loginEvent = new Login(clientEvent.getRemoteAddress(), clientEvent.getUserAgent());
         loginEvent.setUser(usersService.getUser(userID));
-        loginEvent.setActorType(Actor.ActorType.WEB_API);
-        loginEvent.setActor(clientsService.getClientByApiKey(clientKey).getName());
+        loginEvent.setAgentType(Agent.AgentType.WEB);
+        loginEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         eventService.addEvent(loginEvent);
         
         return "";
@@ -74,8 +74,8 @@ public class NotifyController {
         
         Logout logoutEvent = new Logout(clientEvent.getRemoteAddress());
         logoutEvent.setUser(usersService.getUser(userID));
-        logoutEvent.setActorType(Actor.ActorType.WEB_API);
-        logoutEvent.setActor(clientsService.getClientByApiKey(clientKey).getName());
+        logoutEvent.setAgentType(Agent.AgentType.WEB);
+        logoutEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         eventService.addEvent(logoutEvent);
         
         return "";

@@ -208,8 +208,8 @@ public class VaultsController {
         Create vaultEvent = new Create(vault.getID());
         vaultEvent.setVault(vault);
         vaultEvent.setUser(usersService.getUser(userID));
-        vaultEvent.setActorType(Actor.ActorType.WEB_API);
-        vaultEvent.setActor(clientsService.getClientByApiKey(clientKey).getName());
+        vaultEvent.setAgentType(Agent.AgentType.BROKER);
+        vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         
         eventService.addEvent(vaultEvent);
         
