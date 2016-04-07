@@ -9,6 +9,9 @@ import org.datavaultplatform.common.model.*;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class EventListener implements MessageListener {
 
     private JobsService jobsService;
@@ -18,6 +21,8 @@ public class EventListener implements MessageListener {
     private RetrievesService retrievesService;
     private UsersService usersService;
 
+    private static final Logger logger = LoggerFactory.getLogger(EventListener.class);
+    
     public void setJobsService(JobsService jobsService) {
         this.jobsService = jobsService;
     }
@@ -44,7 +49,7 @@ public class EventListener implements MessageListener {
     public void onMessage(Message msg) {
         
         String messageBody = new String(msg.getBody());
-        System.out.println("[x] Received '" + messageBody + "'");
+        logger.info("Received '" + messageBody + "'");
         
         try {
             // Decode the event
