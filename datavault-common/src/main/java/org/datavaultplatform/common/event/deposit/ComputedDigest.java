@@ -13,7 +13,7 @@ public class ComputedDigest extends Event {
     
     ComputedDigest() {};
     public ComputedDigest(String jobId, String depositId, String digest, String digestAlgorithm) {
-        super("Deposit digest: " + digest + " (" + digestAlgorithm + ")");
+        super(digestAlgorithm + ": " + digest);
         this.eventClass = ComputedDigest.class.getCanonicalName();
         this.digest = digest;
         this.digestAlgorithm = digestAlgorithm;
