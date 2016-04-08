@@ -1,0 +1,39 @@
+package org.datavaultplatform.common.event.deposit;
+
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import org.datavaultplatform.common.event.Event;
+
+@Entity
+@Table(name="Events")
+public class ComputedDigest extends Event {
+    
+    public String digest;
+    public String digestAlgorithm;
+    
+    ComputedDigest() {};
+    public ComputedDigest(String jobId, String depositId, String digest, String digestAlgorithm) {
+        super("Deposit digest: " + digest + " (" + digestAlgorithm + ")");
+        this.eventClass = ComputedDigest.class.getCanonicalName();
+        this.digest = digest;
+        this.digestAlgorithm = digestAlgorithm;
+        this.depositId = depositId;
+        this.jobId = jobId;
+    }
+
+    public String getDigest() {
+        return digest;
+    }
+
+    public void setDigest(String digest) {
+        this.digest = digest;
+    }
+
+    public String getDigestAlgorithm() {
+        return digestAlgorithm;
+    }
+
+    public void setDigestAlgorithm(String digestAlgorithm) {
+        this.digestAlgorithm = digestAlgorithm;
+    }
+}

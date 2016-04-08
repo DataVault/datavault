@@ -22,6 +22,7 @@ import org.datavaultplatform.common.event.deposit.ComputedSize;
 import org.datavaultplatform.common.event.deposit.TransferComplete;
 import org.datavaultplatform.common.event.deposit.PackageComplete;
 import org.datavaultplatform.common.event.deposit.Complete;
+import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.*;
 import org.datavaultplatform.worker.operations.*;
@@ -147,7 +148,8 @@ public class Deposit extends Task {
                 Path tarPath = Paths.get(context.getTempDir()).resolve(tarFileName);
                 File tarFile = tarPath.toFile();
                 Tar.createTar(bagDir, tarFile);
-                String tarHash = Verify.getSha1Digest(tarFile);
+                String tarHash = Verify.getDigest(tarFile);
+                String tarHashAlgorithm = Verify.getAlgorithm();
 
                 eventStream.send(new PackageComplete(jobID, depositId)
                     .withUserId(userID)
@@ -155,7 +157,11 @@ public class Deposit extends Task {
                 
                 long archiveSize = tarFile.length();
                 System.out.println("\tTar file: " + archiveSize + " bytes");
-                System.out.println("\tSHA-1 checksum: " + tarHash);
+                System.out.println("\tChecksum algorithm: " + tarHashAlgorithm);
+                System.out.println("\tChecksum: " + tarHash);
+                
+                eventStream.send(new ComputedDigest(jobID, depositId, tarHash, tarHashAlgorithm)
+                    .withUserId(userID));
                 
                 // Create the meta directory for the bag information
                 Path metaPath = Paths.get(context.getMetaDir(), bagID);
@@ -286,10 +292,10 @@ public class Deposit extends Task {
 
         if (origTarHash != null) {
             // Compare the SHA hash
-            String tarHash = Verify.getSha1Digest(tarFile);
-            System.out.println("\tSHA-1 checksum: " + tarHash);
+            String tarHash = Verify.getDigest(tarFile);
+            System.out.println("\tChecksum: " + tarHash);
             if (!tarHash.equals(origTarHash)) {
-                throw new Exception("SHA-1 checksum failed: " + tarHash + " != " + origTarHash);
+                throw new Exception("checksum failed: " + tarHash + " != " + origTarHash);
             }
         }
         

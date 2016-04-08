@@ -89,6 +89,9 @@ public class Deposit {
     private String archiveId;
     // Size of the deposit package (in bytes)
     private long archiveSize;
+    // Hash of the deposit package
+    private String archiveDigest;
+    private String archiveDigestAlgorithm;
     
     // Record the file path that the user selected for this deposit.
     @ApiObjectField(description = "Origin of the deposited filepath")
@@ -166,6 +169,22 @@ public class Deposit {
 
     public void setArchiveSize(long archiveSize) {
         this.archiveSize = archiveSize;
+    }
+
+    public String getArchiveDigest() {
+        return archiveDigest;
+    }
+
+    public void setArchiveDigest(String archiveDigest) {
+        this.archiveDigest = archiveDigest;
+    }
+
+    public String getArchiveDigestAlgorithm() {
+        return archiveDigestAlgorithm;
+    }
+
+    public void setArchiveDigestAlgorithm(String archiveDigestAlgorithm) {
+        this.archiveDigestAlgorithm = archiveDigestAlgorithm;
     }
     
     public String getFileOrigin() {
