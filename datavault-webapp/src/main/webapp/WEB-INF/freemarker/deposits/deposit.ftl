@@ -137,7 +137,8 @@
 </div>
 
 <script>
-
+    
+    var depositStatus = "${deposit.status}";
     var updateInterval = 500;
 
     function displayJob(job) {
@@ -200,8 +201,11 @@
                     displayJob(job)
                     $("#progtrckr").fadeOut(1000, function() {
                         // Animation complete
-                        location.reload(true);
+                        location.reload(true)
                     });
+                } else if (depositStatus != "COMPLETE") {
+                    // Refresh the deposit
+                    location.reload(true)
                 }
             }
         }
