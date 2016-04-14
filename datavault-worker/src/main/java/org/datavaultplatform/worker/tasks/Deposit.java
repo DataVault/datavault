@@ -48,7 +48,7 @@ public class Deposit extends Task {
         
         eventStream = (EventSender)context.getEventStream();
         
-        logger.debug("Deposit job - performAction()");
+        logger.info("Deposit job - performAction()");
         
         Map<String, String> properties = getProperties();
         depositId = properties.get("depositId");
@@ -82,8 +82,8 @@ public class Deposit extends Task {
             .withUserId(userID)
             .withNextState(0));
         
-        logger.debug("bagID: " + bagID);
-        logger.debug("filePath: " + filePath);
+        logger.info("bagID: " + bagID);
+        logger.info("filePath: " + filePath);
         
         // Connect to the user storage
         try {
@@ -114,7 +114,7 @@ public class Deposit extends Task {
             return;
         }
         
-        logger.debug("Deposit file: " + filePath);
+        logger.info("Deposit file: " + filePath);
 
         try {
             if (userStore.exists(filePath)) {
@@ -129,7 +129,7 @@ public class Deposit extends Task {
                     .withUserId(userID)
                     .withNextState(1));
                 
-                logger.debug("Copying target to bag directory ...");
+                logger.info("Copying target to bag directory ...");
                 copyFromUserStorage(filePath, bagPath);
                 
                 // Bag the directory in-place
@@ -137,7 +137,7 @@ public class Deposit extends Task {
                     .withUserId(userID)
                     .withNextState(2));
                 
-                logger.debug("Creating bag ...");
+                logger.info("Creating bag ...");
                 Packager.createBag(bagDir);
 
                 // Identify the deposit file types
@@ -150,7 +150,7 @@ public class Deposit extends Task {
                 Packager.addMetadata(bagDir, depositMetadata, vaultMetadata, fileTypeMetadata);
                 
                 // Tar the bag directory
-                logger.debug("Creating tar file ...");
+                logger.info("Creating tar file ...");
                 String tarFileName = bagID + ".tar";
                 Path tarPath = Paths.get(context.getTempDir()).resolve(tarFileName);
                 File tarFile = tarPath.toFile();
@@ -163,9 +163,9 @@ public class Deposit extends Task {
                     .withNextState(3));
                 
                 long archiveSize = tarFile.length();
-                logger.debug("Tar file: " + archiveSize + " bytes");
-                logger.debug("Checksum algorithm: " + tarHashAlgorithm);
-                logger.debug("Checksum: " + tarHash);
+                logger.info("Tar file: " + archiveSize + " bytes");
+                logger.info("Checksum algorithm: " + tarHashAlgorithm);
+                logger.info("Checksum: " + tarHash);
                 
                 eventStream.send(new ComputedDigest(jobID, depositId, tarHash, tarHashAlgorithm)
                     .withUserId(userID));
@@ -176,23 +176,23 @@ public class Deposit extends Task {
                 metaDir.mkdir();
                 
                 // Copy bag meta files to the meta directory
-                logger.debug("Copying meta files ...");
+                logger.info("Copying meta files ...");
                 Packager.extractMetadata(bagDir, metaDir);
                 
                 // Copy the resulting tar file to the archive area
-                logger.debug("Copying tar file to archive ...");
+                logger.info("Copying tar file to archive ...");
                 String archiveId = copyToArchiveStorage(tarFile);
                 
                 // Cleanup
-                logger.debug("Cleaning up ...");
+                logger.info("Cleaning up ...");
                 FileUtils.deleteDirectory(bagDir);
                 
                 eventStream.send(new UpdateProgress(jobID, depositId)
                     .withUserId(userID)
                     .withNextState(4));
                 
-                logger.debug("Verifying archive package ...");
-                logger.debug("Verification method: " + archiveFs.getVerifyMethod());
+                logger.info("Verifying archive package ...");
+                logger.info("Verification method: " + archiveFs.getVerifyMethod());
                 
                 // Get the tar file
                 Path tempPath = Paths.get(context.getTempDir());
@@ -214,7 +214,7 @@ public class Deposit extends Task {
                     verifyTarFile(tempPath, tarFile, tarHash);
                 }
                 
-                logger.debug("Deposit complete: " + archiveId);
+                logger.info("Deposit complete: " + archiveId);
                 
                 eventStream.send(new Complete(jobID, depositId, archiveId, archiveSize)
                     .withUserId(userID)
@@ -247,7 +247,7 @@ public class Deposit extends Task {
         eventStream.send(new UpdateProgress(jobID, depositId, 0, expectedBytes, "Starting transfer ...")
             .withUserId(userID));
         
-        logger.debug("Size: " + expectedBytes + " bytes (" +  FileUtils.byteCountToDisplaySize(expectedBytes) + ")");
+        logger.info("Size: " + expectedBytes + " bytes (" +  FileUtils.byteCountToDisplaySize(expectedBytes) + ")");
         
         // Progress tracking (threaded)
         Progress progress = new Progress();
@@ -283,7 +283,7 @@ public class Deposit extends Task {
             trackerThread.join();
         }
 
-        logger.debug("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+        logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
         
         return archiveId;
     }
@@ -293,7 +293,7 @@ public class Deposit extends Task {
         // Ask the driver to copy files to the temp directory
         Progress progress = new Progress();
         ((Device)archiveFs).retrieve(archiveId, tarFile, progress);
-        logger.debug("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+        logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
     }
     
     private void verifyTarFile(Path tempPath, File tarFile, String origTarHash) throws Exception {
@@ -301,7 +301,7 @@ public class Deposit extends Task {
         if (origTarHash != null) {
             // Compare the SHA hash
             String tarHash = Verify.getDigest(tarFile);
-            logger.debug("Checksum: " + tarHash);
+            logger.info("Checksum: " + tarHash);
             if (!tarHash.equals(origTarHash)) {
                 throw new Exception("checksum failed: " + tarHash + " != " + origTarHash);
             }
@@ -314,11 +314,11 @@ public class Deposit extends Task {
         if (!Packager.validateBag(bagDir)) {
             throw new Exception("Bag is invalid");
         } else {
-            logger.debug("Bag is valid");
+            logger.info("Bag is valid");
         }
         
         // Cleanup
-        logger.debug("Cleaning up ...");
+        logger.info("Cleaning up ...");
         FileUtils.deleteDirectory(bagDir);
         tarFile.delete();
     }
