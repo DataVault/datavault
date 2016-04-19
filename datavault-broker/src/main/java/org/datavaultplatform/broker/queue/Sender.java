@@ -6,6 +6,9 @@ import com.rabbitmq.client.Channel;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Sender {
 
     private String queueServer;
@@ -13,6 +16,8 @@ public class Sender {
     private String queueUser;
     private String queuePassword;
 
+    private static final Logger logger = LoggerFactory.getLogger(Sender.class);
+    
     public void setQueueServer(String queueServer) {
         this.queueServer = queueServer;
     }
@@ -46,7 +51,7 @@ public class Sender {
         
         channel.queueDeclare(queueName, false, false, false, null);
         channel.basicPublish("", queueName, null, message.getBytes());
-        System.out.println(" [x] Sent '" + message + "'");
+        logger.info("Sent '" + message + "'");
         
         channel.close();
         connection.close();

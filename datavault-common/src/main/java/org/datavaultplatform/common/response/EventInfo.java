@@ -22,8 +22,8 @@ public class EventInfo {
     private String vaultID;
     private String eventClass;
     private String depositID;
-    private String actor;
-    private String actorType;
+    private String agent;
+    private String agentType;
     private String remoteAddress;
     private String userAgent;
     
@@ -36,8 +36,8 @@ public class EventInfo {
         this.vaultID = vaultID;
         this.eventClass = eventClass;
         this.depositID = depositID;
-        this.actor = actor;
-        this.actorType = actorType;
+        this.agent = actor;
+        this.agentType = actorType;
         this.remoteAddress = remoteAddress;
         this.userAgent = userAgent;
     }
@@ -98,20 +98,20 @@ public class EventInfo {
         this.depositID = depositID;
     }
 
-    public String getActor() {
-        return actor;
+    public String getAgent() {
+        return agent;
     }
 
-    public void setActor(String actor) {
-        this.actor = actor;
+    public void setAgent(String agent) {
+        this.agent = agent;
     }
 
-    public String getActorType() {
-        return actorType;
+    public String getAgentType() {
+        return agentType;
     }
 
-    public void setActorType(String actorType) {
-        this.actorType = actorType;
+    public void setAgentType(String agentType) {
+        this.agentType = agentType;
     }
 
     public String getRemoteAddress() {

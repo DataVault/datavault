@@ -15,14 +15,14 @@
             <table class="table table-striped text-nowrap">
                 <thead>
                     <tr class="tr">
-                        <th>Actor</th>
+                        <th>Agent</th>
                         <th>User</th>
                         <th>Event</th>
                         <th>Timestamp</a></th>
                         <th>Vault</th>
                         <th>Deposit</th>
                         <th>Remote Address</th>
-                        <th>User Agent</th>
+                        <th>HTTP User Agent</th>
                         <th>Event ID</th>
                     </tr>
                 </thead>
@@ -31,12 +31,12 @@
                     <#list events as event>
                     <tr class="tr">
                         <td>
-                            <#if event.actorType == "WORKER">
-                                <span class="label label-Warning">${event.actorType}</span>&nbsp${event.actor}
-                            <#elseif event.actorType == "WEB_API">
-                                <span class="label label-primary">${event.actorType}</span>&nbsp${event.actor}
-                            <#else> 
-                                <span class="label label-default">${event.actorType}</span>&nbsp${event.actor}
+                            <#if event.agentType == "WORKER">
+                                <span class="label label-Warning">${event.agentType}</span>&nbsp${event.agent}
+                            <#elseif event.agentType == "WEB">
+                                <span class="label label-primary">${event.agentType}</span>&nbsp${event.agent}
+                            <#else>
+                                <span class="label label-default">${event.agentType}</span>&nbsp${event.agent}
                             </#if>
                         </td>
                         <td>${event.userID!}</td>

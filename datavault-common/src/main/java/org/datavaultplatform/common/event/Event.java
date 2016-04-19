@@ -83,15 +83,15 @@ public class Event {
     @Transient
     public String userId;
     
-    // Event actor
-    private String actor;
+    // Event agent
+    private String agent;
     
     // Web request properties
     public String remoteAddress;
     public String userAgent;
     
     @Enumerated(EnumType.STRING)
-    private Actor.ActorType actorType;
+    private Agent.AgentType agentType;
     
     public Event() {};
     public Event(String message) {
@@ -161,20 +161,20 @@ public class Event {
         this.userId = userId;
     }
 
-    public String getActor() {
-        return actor;
+    public String getAgent() {
+        return agent;
     }
 
-    public void setActor(String actor) {
-        this.actor = actor;
+    public void setAgent(String agent) {
+        this.agent = agent;
     }
 
-    public Actor.ActorType getActorType() {
-        return actorType;
+    public Agent.AgentType getAgentType() {
+        return agentType;
     }
 
-    public void setActorType(Actor.ActorType actorType) {
-        this.actorType = actorType;
+    public void setAgentType(Agent.AgentType agentType) {
+        this.agentType = agentType;
     }
 
     public String getRemoteAddress() {
@@ -275,8 +275,8 @@ public class Event {
                 vault != null ? vault.getID() : null,
                 eventClass,
                 deposit != null ? deposit.getID() : null,
-                actor,
-                actorType != null ? actorType.toString() : null,
+                agent,
+                agentType != null ? agentType.toString() : null,
                 remoteAddress,
                 userAgent);
     }
