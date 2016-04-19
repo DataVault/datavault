@@ -327,7 +327,7 @@ span.fancytree-active span.fancytree-title {
 /* Base styles (regardless of theme) */
 .bs-callout {
   padding: 20px;
-  margin: 20px 0;
+  margin: 20px 0px 20px 0px;
   border: 1px solid #eee;
   border-left-width: 5px;
   border-radius: 3px;
@@ -347,18 +347,21 @@ span.fancytree-active span.fancytree-title {
 /* Themes for different contexts */
 .bs-callout-danger {
     border-left-color: #ce4844;
+    margin-left: 50px;
 }
 .bs-callout-warning h4 {
     color: #ce4844;
 }
 .bs-callout-warning {
     border-left-color: #aa6708;
+    margin-left: 50px;
 }
 .bs-callout-warning h4 {
     color: #aa6708;
 }
 .bs-callout-info {
     border-left-color: #1b809e;
+    margin-left: 50px;
 }
 .bs-callout-info h4 {
     color: #1b809e;
