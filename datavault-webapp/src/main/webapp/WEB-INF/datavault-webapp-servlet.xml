@@ -79,6 +79,11 @@
         <property name="templateMessage" ref="templateMessage"/>
     </bean>
 
+    <bean id="helpController" class="org.datavaultplatform.webapp.controllers.HelpController">
+        <property name="system" value="${describe.system}" />
+        <property name="link" value="${describe.link}" />
+    </bean>
+
     <bean id="adminController" class="org.datavaultplatform.webapp.controllers.admin.AdminController">
         <property name="restService" ref="restService" />
     </bean>
