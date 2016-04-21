@@ -124,12 +124,6 @@
             <artifactId>log4j</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>datavault</groupId>
-            <artifactId>datavault-common</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
     </dependencies>
 
     <build>
