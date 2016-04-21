@@ -21,6 +21,10 @@ public class WorkerManager {
 
 
     public static void main(String [] args) throws IOException, InterruptedException {
+        
+        // Bind $DATAVAULT_HOME to a system variable for use by Log4j
+        System.setProperty("datavault-home", System.getenv("DATAVAULT_HOME"));
+        
         ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"datavault-worker.xml"});
 
         WorkerManager workerManager = context.getBean(WorkerManager.class);

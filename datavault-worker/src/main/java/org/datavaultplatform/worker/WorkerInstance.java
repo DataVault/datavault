@@ -7,9 +7,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class WorkerInstance {
 
     public static void main(String [] args) {
-
+        
+        // Bind $DATAVAULT_HOME to a system variable for use by Log4j
+        System.setProperty("datavault-home", System.getenv("DATAVAULT_HOME"));
+        
         ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"datavault-worker.xml"});
-
+        
         EventSender eventSender = context.getBean(EventSender.class);
         
         String workerName = "Default";
