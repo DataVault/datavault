@@ -20,6 +20,7 @@ import org.datavaultplatform.common.event.UpdateProgress;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
+import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 import org.datavaultplatform.worker.operations.Tar;
 import org.datavaultplatform.worker.operations.Packager;
@@ -45,6 +46,9 @@ public class Retrieve extends Task {
         String retrievePath = properties.get("retrievePath");
         String archiveId = properties.get("archiveId");
         String userID = properties.get("userId");
+        String archiveDigest = properties.get("archiveDigest");
+        String archiveDigestAlgorithm = properties.get("archiveDigestAlgorithm");
+        
         long archiveSize = Long.parseLong(properties.get("archiveSize"));
 
         if (this.isRedeliver()) {
@@ -58,7 +62,7 @@ public class Retrieve extends Task {
         states.add("Retrieving from archive"); // 1
         states.add("Validating data");         // 2
         states.add("Transferring files");      // 3
-        states.add("Data retrieve complete");   // 4
+        states.add("Data retrieve complete");  // 4
         eventStream.send(new InitStates(jobID, depositId, states)
             .withUserId(userID));
         
@@ -155,6 +159,20 @@ public class Retrieve extends Task {
             logger.info("Validating data ...");
             eventStream.send(new UpdateProgress(jobID, depositId).withNextState(2)
                 .withUserId(userID));
+            
+            // Verify integrity with deposit checksum
+            String systemAlgorithm = Verify.getAlgorithm();
+            if (!systemAlgorithm.equals(archiveDigestAlgorithm)) {
+                throw new Exception("Unsupported checksum algorithm: " + archiveDigestAlgorithm);
+            }
+            
+            String tarHash = Verify.getDigest(tarFile);
+            logger.info("Checksum algorithm: " + archiveDigestAlgorithm);
+            logger.info("Checksum: " + tarHash);
+            
+            if (!tarHash.equals(archiveDigest)) {
+                throw new Exception("checksum failed: " + tarHash + " != " + archiveDigest);
+            }
             
             // Decompress to the temporary directory
             File bagDir = Tar.unTar(tarFile, tempPath);
