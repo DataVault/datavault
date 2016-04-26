@@ -20,18 +20,24 @@ import org.datavaultplatform.common.event.UpdateProgress;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
+import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 import org.datavaultplatform.worker.operations.Tar;
 import org.datavaultplatform.worker.operations.Packager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Retrieve extends Task {
+    
+    private static final Logger logger = LoggerFactory.getLogger(Retrieve.class);
     
     @Override
     public void performAction(Context context) {
         
         EventSender eventStream = (EventSender)context.getEventStream();
         
-        System.out.println("\tRetrieve job - performAction()");
+        logger.info("Retrieve job - performAction()");
         
         Map<String, String> properties = getProperties();
         String depositId = properties.get("depositId");
@@ -40,6 +46,9 @@ public class Retrieve extends Task {
         String retrievePath = properties.get("retrievePath");
         String archiveId = properties.get("archiveId");
         String userID = properties.get("userId");
+        String archiveDigest = properties.get("archiveDigest");
+        String archiveDigestAlgorithm = properties.get("archiveDigestAlgorithm");
+        
         long archiveSize = Long.parseLong(properties.get("archiveSize"));
 
         if (this.isRedeliver()) {
@@ -53,7 +62,7 @@ public class Retrieve extends Task {
         states.add("Retrieving from archive"); // 1
         states.add("Validating data");         // 2
         states.add("Transferring files");      // 3
-        states.add("Data retrieve complete");   // 4
+        states.add("Data retrieve complete");  // 4
         eventStream.send(new InitStates(jobID, depositId, states)
             .withUserId(userID));
         
@@ -61,8 +70,8 @@ public class Retrieve extends Task {
             .withUserId(userID)
             .withNextState(0));
         
-        System.out.println("\tbagID: " + bagID);
-        System.out.println("\tretrievePath: " + retrievePath);
+        logger.info("bagID: " + bagID);
+        logger.info("retrievePath: " + retrievePath);
         
         Device userFs;
         UserStore userStore;
@@ -76,8 +85,9 @@ public class Retrieve extends Task {
             userFs = (Device)instance;
             userStore = (UserStore)userFs;
         } catch (Exception e) {
-            e.printStackTrace();
-            eventStream.send(new Error(jobID, depositId, "Retrieve failed: could not access active filesystem")
+            String msg = "Retrieve failed: could not access active filesystem";
+            logger.error(msg, e);
+            eventStream.send(new Error(jobID, depositId, msg)
                 .withUserId(userID));
             return;
         }
@@ -89,8 +99,9 @@ public class Retrieve extends Task {
             Object instance = constructor.newInstance(archiveFileStore.getStorageClass(), archiveFileStore.getProperties());
             archiveFs = (Device)instance;
         } catch (Exception e) {
-            e.printStackTrace();
-            eventStream.send(new Error(jobID, depositId, "Retrieve failed: could not access archive filesystem")
+            String msg = "Retrieve failed: could not access archive filesystem";
+            logger.error(msg, e);
+            eventStream.send(new Error(jobID, depositId, msg)
                 .withUserId(userID));
             return;
         }
@@ -98,20 +109,20 @@ public class Retrieve extends Task {
         try {
             if (!userStore.exists(retrievePath) || !userStore.isDirectory(retrievePath)) {
                 // Target path must exist and be a directory
-                System.out.println("\tTarget directory not found!");
+                logger.info("Target directory not found!");
             }
             
             // Check that there's enough free space ...
             try {
                 long freespace = userFs.getUsableSpace();
-                System.out.println("\tFree space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
+                logger.info("Free space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
                 if (freespace < archiveSize) {
                     eventStream.send(new Error(jobID, depositId, "Not enough free space to retrieve data!")
                         .withUserId(userID));
                     return;
                 }
             } catch (Exception e) {
-                System.out.println("Unable to determine free space");
+                logger.info("Unable to determine free space");
                 eventStream.send(new Error(jobID, depositId, "Unable to determine free space")
                     .withUserId(userID));
             }
@@ -143,11 +154,25 @@ public class Retrieve extends Task {
                 trackerThread.join();
             }
             
-            System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+            logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
             
-            System.out.println("\tValidating data ...");
+            logger.info("Validating data ...");
             eventStream.send(new UpdateProgress(jobID, depositId).withNextState(2)
                 .withUserId(userID));
+            
+            // Verify integrity with deposit checksum
+            String systemAlgorithm = Verify.getAlgorithm();
+            if (!systemAlgorithm.equals(archiveDigestAlgorithm)) {
+                throw new Exception("Unsupported checksum algorithm: " + archiveDigestAlgorithm);
+            }
+            
+            String tarHash = Verify.getDigest(tarFile);
+            logger.info("Checksum algorithm: " + archiveDigestAlgorithm);
+            logger.info("Checksum: " + tarHash);
+            
+            if (!tarHash.equals(archiveDigest)) {
+                throw new Exception("checksum failed: " + tarHash + " != " + archiveDigest);
+            }
             
             // Decompress to the temporary directory
             File bagDir = Tar.unTar(tarFile, tempPath);
@@ -163,7 +188,7 @@ public class Retrieve extends Task {
             // long payloadSize = FileUtils.sizeOfDirectory(payloadDir);
             
             // Copy the extracted files to the target retrieve area
-            System.out.println("\tCopying to user directory ...");
+            logger.info("Copying to user directory ...");
             eventStream.send(new UpdateProgress(jobID, depositId, 0, bagDirSize, "Starting transfer ...")
                 .withUserId(userID)
                 .withNextState(3));
@@ -183,20 +208,21 @@ public class Retrieve extends Task {
                 trackerThread.join();
             }
             
-            System.out.println("\tCopied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+            logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
             
             // Cleanup
-            System.out.println("\tCleaning up ...");
+            logger.info("Cleaning up ...");
             FileUtils.deleteDirectory(bagDir);
             tarFile.delete();
             
-            System.out.println("\tData retrieve complete: " + retrievePath);
+            logger.info("Data retrieve complete: " + retrievePath);
             eventStream.send(new RetrieveComplete(jobID, depositId, retrieveId).withNextState(4)
                 .withUserId(userID));
             
         } catch (Exception e) {
-            e.printStackTrace();
-            eventStream.send(new Error(jobID, depositId, "Data retrieve failed: " + e.getMessage())
+            String msg = "Data retrieve failed: " + e.getMessage();
+            logger.error(msg, e);
+            eventStream.send(new Error(jobID, depositId, msg)
                 .withUserId(userID));
         }
     }

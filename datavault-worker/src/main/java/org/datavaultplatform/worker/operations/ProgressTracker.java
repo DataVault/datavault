@@ -5,6 +5,9 @@ import org.datavaultplatform.common.event.UpdateProgress;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.worker.queue.EventSender;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ProgressTracker implements Runnable {
     
     private static final int SLEEP_INTERVAL_MS = 250;
@@ -16,6 +19,8 @@ public class ProgressTracker implements Runnable {
     String jobId;
     String depositId;
     EventSender eventSender;
+    
+    private static final Logger logger = LoggerFactory.getLogger(ProgressTracker.class);
     
     public ProgressTracker(Progress progress, String jobId, String depositId, long expectedBytes, EventSender eventSender) {
         this.progress = progress;
@@ -53,7 +58,7 @@ public class ProgressTracker implements Runnable {
                              FileUtils.byteCountToDisplaySize(expectedBytes) +
                              " (" + FileUtils.byteCountToDisplaySize(bytesPerSec) + "/sec)";
             
-            System.out.println("\t" + message);
+            logger.info(message);
             
             // Signal progress to the broker
             
@@ -78,7 +83,7 @@ public class ProgressTracker implements Runnable {
             reportProgress();
             
         } catch (Exception e) {
-            // ...
+            logger.error("Error in progress tracker", e);
         }
     }
 }

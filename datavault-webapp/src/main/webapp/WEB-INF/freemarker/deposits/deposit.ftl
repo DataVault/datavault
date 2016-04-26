@@ -92,7 +92,7 @@
                         <#list events as event>
                         <tr class="tr">
                             <td>${event.userID?html}</td>
-                            <td>${event.eventClass?html}</td>
+                            <td>${event.eventClass?replace('org.datavaultplatform.common.event.', '')?html}</td>
                             <td>${event.message?html}</td>
                             <td>${event.timestamp?datetime}</td>
                         </tr>

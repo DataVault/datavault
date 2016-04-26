@@ -182,8 +182,25 @@ public class EventListener implements MessageListener {
                         vault = vaultsService.getVault(vault.getID());
                     }
                 }
-                
 
+            } else if (concreteEvent instanceof ComputedDigest) {
+                
+                // Update the deposit with the computed digest
+                ComputedDigest computedDigestEvent = (ComputedDigest)concreteEvent;
+                
+                Boolean success = false;
+                while (!success) {
+                    try {
+                        deposit.setArchiveDigest(computedDigestEvent.getDigest());
+                        deposit.setArchiveDigestAlgorithm(computedDigestEvent.getDigestAlgorithm());
+                        depositsService.updateDeposit(deposit);
+                        success = true;
+                    } catch (org.hibernate.StaleObjectStateException e) {
+                        // Refresh from database and retry
+                        deposit = depositsService.getDeposit(concreteEvent.getDepositId());
+                    }
+                }
+                
             } else if (concreteEvent instanceof Complete) {
 
                 // Update the deposit status and archive properties

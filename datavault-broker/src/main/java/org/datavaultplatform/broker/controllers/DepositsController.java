@@ -284,7 +284,9 @@ public class DepositsController {
             retrieveProperties.put("archiveId", deposit.getArchiveId());
             retrieveProperties.put("archiveSize", Long.toString(deposit.getArchiveSize()));
             retrieveProperties.put("userId", user.getID());
-
+            retrieveProperties.put("archiveDigest", deposit.getArchiveDigest());
+            retrieveProperties.put("archiveDigestAlgorithm", deposit.getArchiveDigestAlgorithm());
+            
             Task retrieveTask = new Task(job, retrieveProperties, userStore, archiveStore);
             ObjectMapper mapper = new ObjectMapper();
             String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
