@@ -74,7 +74,8 @@ public class Deposit {
     public enum Status {
         NOT_STARTED,
         IN_PROGRESS,
-        COMPLETE
+        COMPLETE,
+        FAILED
     }
 
     @ApiObjectField(description = "Deposit note to briefly describe the Deposit")

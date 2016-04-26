@@ -63,6 +63,10 @@ public class Job {
     private long progressMax;
     private String progressMessage;
     
+    // Error information
+    private boolean error;
+    private String errorMessage;
+    
     public Job() {};
     public Job(String taskClass) {
         this.taskClass = taskClass;
@@ -130,5 +134,21 @@ public class Job {
 
     public void setProgressMessage(String progressMessage) {
         this.progressMessage = progressMessage;
+    }
+
+    public boolean isError() {
+        return error;
+    }
+
+    public void setError(boolean error) {
+        this.error = error;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }
