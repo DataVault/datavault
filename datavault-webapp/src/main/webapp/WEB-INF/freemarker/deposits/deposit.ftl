@@ -169,9 +169,14 @@
 
 <script>
     
-    var depositStatus = "${deposit.status}";
+    var depositStatus = "${deposit.status}"
     var updateInterval = 500;
-
+    
+    var depositInProgress = false
+    if (depositStatus == "IN_PROGRESS") {
+        depositInProgress = true
+    }
+    
     function displayJob(job) {
 
         $('#progtrckr').empty()
@@ -241,8 +246,9 @@
                 $('#progtrckr').show()
                 displayJob(job)
                 
-                if (depositStatus == "NOT_STARTED") {
+                if (depositStatus == "NOT_STARTED" && depositInProgress == false) {
                     $("#deposit-status").html("<span class=\"glyphicon glyphicon-refresh glyphicon-refresh-animate\"></span>&nbspIn progress")
+                    depositInProgress = true
                 }
                 
             } else {
