@@ -22,6 +22,12 @@
         </div>
     </div>
 
+    <div id = "job-error" class="alert alert-danger" role="alert" style="display:none;">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Error</span>
+        <span id="error-label">Error details</span>
+    </div>
+
     <ul class="nav nav-tabs">
         <li class="active"><a data-toggle="tab" href="#deposit">Deposit</a></li>
         <li><a data-toggle="tab" href="#contents">Contents <span class="badge">${manifest?size}</span></a></li>
@@ -45,7 +51,32 @@
                     <tbody>
                     <tr class="tr">
                         <td>${deposit.note?html}</td>
-                        <td>${deposit.status}</td>
+                        <td>
+                            <div id="deposit-status">
+                                <#if deposit.status.name() == "COMPLETE">
+                                    <div class="text-success">
+                                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                        Complete
+                                    </div>
+
+                                <#elseif deposit.status.name() == "FAILED">
+                                    <div class="text-danger">
+                                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                        Failed
+                                    </div>
+
+                                <#elseif deposit.status.name() == "NOT_STARTED">
+                                    Not started
+
+                                <#elseif deposit.status.name() == "IN_PROGRESS">
+                                    <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                                    In progress
+
+                                <#else>
+                                    ${deposit.status}
+                                </#if>
+                            </div>
+                        </td>
                         <td>${deposit.getSizeStr()}</td>
                         <td>${deposit.creationTime?datetime}</td>
                     </tr>
@@ -138,9 +169,14 @@
 
 <script>
     
-    var depositStatus = "${deposit.status}";
+    var depositStatus = "${deposit.status}"
     var updateInterval = 500;
-
+    
+    var depositInProgress = false
+    if (depositStatus == "IN_PROGRESS") {
+        depositInProgress = true
+    }
+    
     function displayJob(job) {
 
         $('#progtrckr').empty()
@@ -187,12 +223,33 @@
                 <!-- a pending job -->
                 updateInterval = 500;
                 $('#progtrckr').hide()
+            
+            } else if (job.error == true) {
+                <!-- a job error -->
+                updateInterval = 5000;
+                if ($('#progtrckr').is(":visible")) {
+                    displayJob(job)
+                    $("#progtrckr").fadeOut(1000, function() {
+                        // Animation complete
+                        location.reload(true)
+                    });
+                } else if (depositStatus != "COMPLETE" && depositStatus != "FAILED") {
+                    // Refresh the deposit
+                    location.reload(true)
+                }
+                $('#error-label').text(job.errorMessage)
+                $('#job-error').show()
                 
             } else if (job.state != job.states.length - 1) {
                 <!-- an active job -->
                 updateInterval = 500;
                 $('#progtrckr').show()
                 displayJob(job)
+                
+                if (depositStatus == "NOT_STARTED" && depositInProgress == false) {
+                    $("#deposit-status").html("<span class=\"glyphicon glyphicon-refresh glyphicon-refresh-animate\"></span>&nbspIn progress")
+                    depositInProgress = true
+                }
                 
             } else {
                 <!-- a complete job -->
@@ -229,5 +286,26 @@
     }
     load();
 </script>
+
+<style>
+    .glyphicon-refresh-animate {
+        -animation: spin 2.8s infinite linear;
+        -webkit-animation: spinWebkit 2.8s infinite linear;
+        -moz-animation: spinMoz 2.8s infinite linear;
+    }
+
+    @-webkit-keyframes spinWebkit {
+        from { -webkit-transform: rotate(0deg);}
+        to { -webkit-transform: rotate(360deg);}
+    }
+    @keyframes spinMoz {
+        from { transform: scale(1) rotate(0deg);}
+        to { transform: scale(1) rotate(360deg);}
+    }
+    @keyframes spin {
+        from { transform: scale(1) rotate(0deg);}
+        to { transform: scale(1) rotate(360deg);}
+    }
+</style>
 
 </@layout.vaultLayout>

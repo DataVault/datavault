@@ -3,6 +3,7 @@ package org.datavaultplatform.broker.queue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.*;
+import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.deposit.*;
 import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.model.*;
@@ -217,6 +218,39 @@ public class EventListener implements MessageListener {
                     } catch (org.hibernate.StaleObjectStateException e) {
                         // Refresh from database and retry
                         deposit = depositsService.getDeposit(concreteEvent.getDepositId());
+                    }
+                }
+                
+            } else if (concreteEvent instanceof Error) {
+
+                // Update the deposit status and job properties
+                
+                Error errorEvent = (Error)concreteEvent;
+                
+                if (deposit.getStatus() != Deposit.Status.COMPLETE) {
+                    Boolean success = false;
+                    while (!success) {
+                        try {
+                            deposit.setStatus(Deposit.Status.FAILED);
+                            depositsService.updateDeposit(deposit);
+                            success = true;
+                        } catch (org.hibernate.StaleObjectStateException e) {
+                            // Refresh from database and retry
+                            deposit = depositsService.getDeposit(concreteEvent.getDepositId());
+                        }
+                    }
+                }
+                
+                Boolean success = false;
+                while (!success) {
+                    try {
+                        job.setError(true);
+                        job.setErrorMessage(errorEvent.getMessage());
+                        jobsService.updateJob(job);
+                        success = true;
+                    } catch (org.hibernate.StaleObjectStateException e) {
+                        // Refresh from database and retry
+                        job = jobsService.getJob(concreteEvent.getJobId());
                     }
                 }
                 
