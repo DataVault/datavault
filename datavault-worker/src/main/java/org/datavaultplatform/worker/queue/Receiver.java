@@ -10,9 +10,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.task.Context;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Receiver {
 
+    private static final Logger logger = LoggerFactory.getLogger(Receiver.class);
+    
     private String queueServer;
     private String queueName;
     private String queueUser;
@@ -60,8 +64,8 @@ public class Receiver {
         Channel channel = connection.createChannel();
 
         channel.queueDeclare(queueName, false, false, false, null);
-        System.out.println(" [*] Waiting for messages.");
-
+        logger.info("Waiting for messages");
+        
         QueueingConsumer consumer = new QueueingConsumer(channel);
 
         channel.basicQos(1);
@@ -70,8 +74,11 @@ public class Receiver {
         while (true) {
             QueueingConsumer.Delivery delivery = consumer.nextDelivery();
             String message = new String(delivery.getBody());
-            System.out.println(" [x] Received '" + message + "'");
-
+            
+            // Note that the message body might contain keys/credentials
+            logger.debug("Received " + message.length() + " bytes");
+            logger.debug("Received message body '" + message + "'");
+            
             // Decode and begin the job ...
             
             try {
@@ -90,13 +97,13 @@ public class Receiver {
                 concreteTask.performAction(context);
                 
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Error decoding message", e);
             }
 
             channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
         }
         
-        // Unreachable - this demo never terminates
+        // Unreachable - the receiver never terminates
         // channel.close();
         // connection.close();
     }
