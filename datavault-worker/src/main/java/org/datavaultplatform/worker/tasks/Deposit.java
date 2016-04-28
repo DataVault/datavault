@@ -171,7 +171,7 @@ public class Deposit extends Task {
                     .withUserId(userID));
                 
                 // Create the meta directory for the bag information
-                Path metaPath = context.getTempDir().resolve(bagID);
+                Path metaPath = context.getMetaDir().resolve(bagID);
                 File metaDir = metaPath.toFile();
                 metaDir.mkdir();
                 
