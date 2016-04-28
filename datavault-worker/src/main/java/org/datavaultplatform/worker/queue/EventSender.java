@@ -8,9 +8,13 @@ import com.rabbitmq.client.Channel;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.EventStream;
 import org.datavaultplatform.common.model.Agent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EventSender implements EventStream {
 
+    private static final Logger logger = LoggerFactory.getLogger(EventSender.class);
+    
     private String queueServer;
     private String eventQueueName;
     private String queueUser;
@@ -65,12 +69,14 @@ public class EventSender implements EventStream {
 
             channel.queueDeclare(eventQueueName, false, false, false, null);
             channel.basicPublish("", eventQueueName, null, jsonEvent.getBytes());
-            System.out.println(" [x] Sent '" + jsonEvent + "'");
+            logger.debug("Sent " + jsonEvent.length() + " bytes");
+            logger.debug("Sent message body '" + jsonEvent + "'");
 
             channel.close();
             connection.close();
+            
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error sending message", e);
         }
     }
 }

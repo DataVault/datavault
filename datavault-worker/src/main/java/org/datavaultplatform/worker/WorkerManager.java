@@ -9,6 +9,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class WorkerManager {
@@ -19,11 +21,13 @@ public class WorkerManager {
         this.numberOfWorkers = numberOfWorkers;
     }
 
-
     public static void main(String [] args) throws IOException, InterruptedException {
         
         // Bind $DATAVAULT_HOME to a system variable for use by Log4j
         System.setProperty("datavault-home", System.getenv("DATAVAULT_HOME"));
+        
+        Logger logger = LoggerFactory.getLogger(WorkerManager.class);
+        logger.info("Manager starting");
         
         ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"datavault-worker.xml"});
 
