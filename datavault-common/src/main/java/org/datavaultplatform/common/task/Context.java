@@ -1,45 +1,46 @@
 package org.datavaultplatform.common.task;
 
 import org.datavaultplatform.common.event.EventStream;
+import java.nio.file.Path;
 
 // Some common properties needed for all jobs
 
 public class Context {
 
-    private String archiveDir;
-    private String tempDir;
-    private String metaDir;
+    private Path archiveDir;
+    private Path tempDir;
+    private Path metaDir;
     private EventStream eventStream;
     
     public Context() {};
-    public Context(String archiveDir, String tempDir, String metaDir, EventStream eventStream) {
+    public Context(Path archiveDir, Path tempDir, Path metaDir, EventStream eventStream) {
         this.archiveDir = archiveDir;
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.eventStream = eventStream;
     }
 
-    public String getArchiveDir() {
+    public Path getArchiveDir() {
         return archiveDir;
     }
 
-    public void setArchiveDir(String archiveDir) {
+    public void setArchiveDir(Path archiveDir) {
         this.archiveDir = archiveDir;
     }
 
-    public String getTempDir() {
+    public Path getTempDir() {
         return tempDir;
     }
 
-    public void setTempDir(String tempDir) {
+    public void setTempDir(Path tempDir) {
         this.tempDir = tempDir;
     }
 
-    public String getMetaDir() {
+    public Path getMetaDir() {
         return metaDir;
     }
 
-    public void setMetaDir(String metaDir) {
+    public void setMetaDir(Path metaDir) {
         this.metaDir = metaDir;
     }
 
