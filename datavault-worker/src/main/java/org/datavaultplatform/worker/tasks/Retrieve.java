@@ -131,8 +131,7 @@ public class Retrieve extends Task {
             String tarFileName = bagID + ".tar";
             
             // Copy the tar file from the archive to the temporary area
-            Path tempPath = Paths.get(context.getTempDir());
-            Path tarPath = tempPath.resolve(tarFileName);
+            Path tarPath = context.getTempDir().resolve(tarFileName);
             File tarFile = tarPath.toFile();
             
             eventStream.send(new UpdateProgress(jobID, depositId, 0, archiveSize, "Starting transfer ...")
@@ -175,7 +174,7 @@ public class Retrieve extends Task {
             }
             
             // Decompress to the temporary directory
-            File bagDir = Tar.unTar(tarFile, tempPath);
+            File bagDir = Tar.unTar(tarFile, context.getTempDir());
             long bagDirSize = FileUtils.sizeOfDirectory(bagDir);
             
             // Validate the bagit directory

@@ -5,11 +5,14 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
 import java.io.IOException;
+import java.nio.file.*;
 import java.util.concurrent.TimeoutException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FileUtils;
 
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.worker.WorkerInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,8 +96,19 @@ public class Receiver {
                     concreteTask.setIsRedeliver(true);
                 }
 
-                Context context = new Context(archiveDir, tempDir, metaDir, events);
+                Path archiveDirPath = Paths.get(archiveDir);
+                
+                // Set up the worker temporary directory
+                Path tempDirPath = Paths.get(tempDir, WorkerInstance.getWorkerName());
+                tempDirPath.toFile().mkdir();
+                
+                Path metaDirPath = Paths.get(metaDir);
+                
+                Context context = new Context(archiveDirPath, tempDirPath, metaDirPath, events);
                 concreteTask.performAction(context);
+                
+                // Clean up the temporary directory
+                FileUtils.deleteDirectory(tempDirPath.toFile());
                 
             } catch (Exception e) {
                 logger.error("Error decoding message", e);

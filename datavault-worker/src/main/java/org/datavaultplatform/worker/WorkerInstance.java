@@ -8,6 +8,10 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class WorkerInstance {
 
+    public static String getWorkerName() {
+        return java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+    }
+    
     public static void main(String [] args) {
         
         // Bind $DATAVAULT_HOME to a system variable for use by Log4j
@@ -19,23 +23,13 @@ public class WorkerInstance {
         ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"datavault-worker.xml"});
         
         EventSender eventSender = context.getBean(EventSender.class);
-        
-        String workerName = "Default";
-        try {
-            workerName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
-        } catch (Exception e) {
-            // Error setting the worker name dynamically
-            e.printStackTrace();
-        }
-        eventSender.setWorkerName(workerName);
-        
         Receiver receiver = context.getBean(Receiver.class);
         
         // Listen to the message queue ...
         try {
             receiver.receive(eventSender);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error in receive", e);
         }
     }
 }

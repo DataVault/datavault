@@ -8,6 +8,7 @@ import com.rabbitmq.client.Channel;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.EventStream;
 import org.datavaultplatform.common.model.Agent;
+import org.datavaultplatform.worker.WorkerInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,6 @@ public class EventSender implements EventStream {
     private String queuePassword;
     
     private int sequence = 0;
-    private String workerName;
 
     public void setQueueServer(String queueServer) {
         this.queueServer = queueServer;
@@ -38,10 +38,6 @@ public class EventSender implements EventStream {
     public void setQueuePassword(String queuePassword) {
         this.queuePassword = queuePassword;
     }
-
-    public void setWorkerName(String workerName) {
-        this.workerName = workerName;
-    }
     
     @Override
     public void send(Event event) {
@@ -52,7 +48,7 @@ public class EventSender implements EventStream {
         
         // Set common event properties
         event.setAgentType(Agent.AgentType.WORKER);
-        event.setAgent(workerName);
+        event.setAgent(WorkerInstance.getWorkerName());
         
         try {
             // TODO: should create queue once and keep open?

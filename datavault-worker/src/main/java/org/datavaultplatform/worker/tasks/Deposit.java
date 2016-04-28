@@ -120,7 +120,7 @@ public class Deposit extends Task {
             if (userStore.exists(filePath)) {
 
                 // Create a new directory based on the broker-generated UUID
-                Path bagPath = Paths.get(context.getTempDir(), bagID);
+                Path bagPath = context.getTempDir().resolve(bagID);
                 File bagDir = bagPath.toFile();
                 bagDir.mkdir();
                 
@@ -152,7 +152,7 @@ public class Deposit extends Task {
                 // Tar the bag directory
                 logger.info("Creating tar file ...");
                 String tarFileName = bagID + ".tar";
-                Path tarPath = Paths.get(context.getTempDir()).resolve(tarFileName);
+                Path tarPath = context.getTempDir().resolve(tarFileName);
                 File tarFile = tarPath.toFile();
                 Tar.createTar(bagDir, tarFile);
                 String tarHash = Verify.getDigest(tarFile);
@@ -171,7 +171,7 @@ public class Deposit extends Task {
                     .withUserId(userID));
                 
                 // Create the meta directory for the bag information
-                Path metaPath = Paths.get(context.getMetaDir(), bagID);
+                Path metaPath = context.getTempDir().resolve(bagID);
                 File metaDir = metaPath.toFile();
                 metaDir.mkdir();
                 
@@ -195,12 +195,11 @@ public class Deposit extends Task {
                 logger.info("Verification method: " + archiveFs.getVerifyMethod());
                 
                 // Get the tar file
-                Path tempPath = Paths.get(context.getTempDir());
                 
                 if (archiveFs.getVerifyMethod() == Verify.Method.LOCAL_ONLY) {
                     
                     // Verify the contents of the temporary file
-                    verifyTarFile(tempPath, tarFile, null);
+                    verifyTarFile(context.getTempDir(), tarFile, null);
                     
                 } else if (archiveFs.getVerifyMethod() == Verify.Method.COPY_BACK) {
 
@@ -211,7 +210,7 @@ public class Deposit extends Task {
                     copyBackFromArchive(archiveId, tarFile);
                     
                     // Verify the contents
-                    verifyTarFile(tempPath, tarFile, tarHash);
+                    verifyTarFile(context.getTempDir(), tarFile, tarHash);
                 }
                 
                 logger.info("Deposit complete: " + archiveId);
