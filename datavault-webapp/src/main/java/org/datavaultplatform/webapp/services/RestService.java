@@ -274,12 +274,12 @@ public class RestService {
     }
 
     public User[] getUsers() {
-        HttpEntity<?> response = get(brokerURL + "/users", User[].class);
+        HttpEntity<?> response = get(brokerURL + "/admin/users", User[].class);
         return (User[])response.getBody();
     }
 
     public int getUsersCount() {
-        HttpEntity<?> response = get(brokerURL + "/users/count", Integer.class);
+        HttpEntity<?> response = get(brokerURL + "/admin/users/count", Integer.class);
         return (Integer)response.getBody();
     }
 

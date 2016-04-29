@@ -36,35 +36,6 @@ public class UsersController {
         this.activeDir = activeDir;
     }
 
-    @ApiMethod(
-            path = "/users",
-            verb = ApiVerb.GET,
-            description = "Gets a list of all Users",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
-    })
-    @RequestMapping(value = "/users", method = RequestMethod.GET)
-    public List<User> getUsers(@RequestHeader(value = "X-UserID", required = true) String userID) {
-        return usersService.getUsers();
-    }
-
-    @ApiMethod(
-            path = "/users/count",
-            verb = ApiVerb.GET,
-            description = "Gets the number of Users in the DataVault",
-            produces = { MediaType.TEXT_PLAIN_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
-    })
-    @RequestMapping(value = "/users/count", method = RequestMethod.GET)
-    public int getUsersCount(@RequestHeader(value = "X-UserID", required = true) String userID) {
-        return usersService.count();
-    }
 
     @ApiMethod(
             path = "/users/{userid}",
