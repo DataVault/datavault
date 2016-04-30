@@ -6,7 +6,6 @@ import javax.persistence.Table;
 // A fatal error that caused a job to fail
 
 @Entity
-@Table(name="Events")
 public class Error extends Event {
 
     public Error() { }

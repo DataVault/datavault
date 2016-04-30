@@ -5,7 +5,6 @@ import javax.persistence.Table;
 import org.datavaultplatform.common.event.Event;
 
 @Entity
-@Table(name="Events")
 public class ComputedSize extends Event {
     
     public long bytes;

@@ -6,7 +6,6 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="Events")
 public class RetrieveComplete extends Event {
 
     RetrieveComplete() {};
