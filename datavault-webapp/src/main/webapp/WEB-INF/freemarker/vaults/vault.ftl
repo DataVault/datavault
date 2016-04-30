@@ -15,7 +15,7 @@
             ${vault.description?html}
         </p>
         <p>
-            <b>Policy:</b> ${policy.name?html}<br/>
+            <b>Retention retentionPolicy:</b> ${retentionPolicy.name?html}<br/>
             <b>Group:</b> ${group.name?html}<br/>
             <b>Size:</b> ${vault.getSizeStr()}<br/>
             <b>Created:</b> ${vault.creationTime?datetime}

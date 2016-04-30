@@ -27,7 +27,7 @@ public class VaultsController {
     private DepositsService depositsService;
     private RetrievesService retrievesService;
     private ExternalMetadataService externalMetadataService;
-    private PoliciesService policiesService;
+    private RetentionPoliciesService retentionPoliciesService;
     private GroupsService groupsService;
     private UsersService usersService;
     private FileStoreService fileStoreService;
@@ -56,8 +56,8 @@ public class VaultsController {
         this.externalMetadataService = externalMetadataService;
     }
 
-    public void setPoliciesService(PoliciesService policiesService) {
-        this.policiesService = policiesService;
+    public void setRetentionPoliciesService(RetentionPoliciesService retentionPoliciesService) {
+        this.retentionPoliciesService = retentionPoliciesService;
     }
     
     public void setGroupsService(GroupsService groupsService) {
@@ -152,11 +152,11 @@ public class VaultsController {
         vault.setName(createVault.getName());
         vault.setDescription(createVault.getDescription());
         
-        Policy policy = policiesService.getPolicy(createVault.getPolicyID());
-        if (policy == null) {
-            throw new Exception("Policy '" + createVault.getPolicyID() + "' does not exist");
+        RetentionPolicy retentionPolicy = retentionPoliciesService.getPolicy(createVault.getPolicyID());
+        if (retentionPolicy == null) {
+            throw new Exception("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
         }
-        vault.setPolicy(policy);
+        vault.setRetentionPolicy(retentionPolicy);
         
         Group group = groupsService.getGroup(createVault.getGroupID());
         if (group == null) {
@@ -229,11 +229,11 @@ public class VaultsController {
         }
     }
 
-    @RequestMapping(value = "/vaults/{vaultid}/checkpolicy", method = RequestMethod.GET)
-    public Vault checkVaultPolicy(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                  @PathVariable("vaultid") String vaultID) throws Exception {
+    @RequestMapping(value = "/vaults/{vaultid}/checkretentionpolicy", method = RequestMethod.GET)
+    public Vault checkVaultRetentionPolicy(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                           @PathVariable("vaultid") String vaultID) throws Exception {
 
-        return vaultsService.checkPolicy(vaultID);
+        return vaultsService.checkRetentionPolicy(vaultID);
     }
 
     @RequestMapping(value = "/vaults/{vaultid}/deposits", method = RequestMethod.GET)

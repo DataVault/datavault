@@ -40,10 +40,10 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label">Policy: </label>
-            <select id="policyID" name="policyID" class='policy-select'>
-                <#list policies as policy>
-                    <option value="${policy.getID()}">${policy.name?html}</option>
+            <label class="control-label">Retention Policy: </label>
+            <select id="policyID" name="policyID" class='retentionPolicy-select'>
+                <#list policies as retentionPolicy>
+                    <option value="${retentionPolicy.getID()}">${retentionPolicy.name?html}</option>
                 </#list>
             </select>
         </div>
@@ -99,7 +99,7 @@
         });
         
         $('.dataset-select').selectpicker();
-        $('.policy-select').selectpicker();
+        $('.retentionPolicy-select').selectpicker();
         $('.group-select').selectpicker();
     });
 </script>

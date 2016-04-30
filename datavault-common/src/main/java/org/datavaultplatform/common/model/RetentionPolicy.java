@@ -13,9 +13,9 @@ import javax.persistence.Table;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-@Table(name="Policies")
-public class Policy {
-    // Policy Identifier (not a UUID)
+@Table(name="RetentionPolicies")
+public class RetentionPolicy {
+    // RetentionPolicy Identifier (not a UUID)
     @Id
     @Column(name = "id", unique = true)
     private String id;
@@ -38,12 +38,12 @@ public class Policy {
 
     // A policy is related to a number of vaults
     @JsonIgnore
-    @OneToMany(targetEntity=Vault.class, mappedBy="policy", fetch=FetchType.LAZY)
+    @OneToMany(targetEntity=Vault.class, mappedBy="retentionPolicy", fetch=FetchType.LAZY)
     @OrderBy("creationTime")
     private List<Vault> vaults;
     
-    public Policy() {}
-    public Policy(String name) {
+    public RetentionPolicy() {}
+    public RetentionPolicy(String name) {
         this.name = name;
     }
 

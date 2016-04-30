@@ -107,7 +107,7 @@
             }
         });
 
-        $('.policy-select').selectpicker();
+        $('.retentionPolicy-select').selectpicker();
     });
 </script>
 

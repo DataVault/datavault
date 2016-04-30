@@ -78,7 +78,7 @@
             }
         });
 
-        $('.policy-select').selectpicker();
+        $('.retentionPolicy-select').selectpicker();
         $('.group-select').selectpicker();
     });
 </script>

@@ -44,10 +44,12 @@ public class UsersController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
     })
     @RequestMapping(value = "/users", method = RequestMethod.GET)
-    public List<User> getUsers(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    public List<User> getUsers(@RequestHeader(value = "X-UserID", required = true) String userID,
+                               @RequestHeader(value = "X-Client-Key", required = true) String clientKey) {
         return usersService.getUsers();
     }
 
@@ -59,10 +61,12 @@ public class UsersController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
     })
     @RequestMapping(value = "/users/count", method = RequestMethod.GET)
-    public int getUsersCount(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    public int getUsersCount(@RequestHeader(value = "X-UserID", required = true) String userID,
+                             @RequestHeader(value = "X-Client-Key", required = true) String clientKey) {
         return usersService.count();
     }
 
@@ -74,7 +78,8 @@ public class UsersController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
     })
     @RequestMapping(value = "/users/{userid}", method = RequestMethod.GET)
     public User getUser(@PathVariable("userid") @ApiPathParam(name = "User ID", description = "The User ID to retrieve") String queryUserID) {
@@ -89,7 +94,8 @@ public class UsersController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
     })
     @RequestMapping(value = "/users", method = RequestMethod.POST)
     public User addUser(@RequestHeader(value = "X-UserID", required = true) String userID,
@@ -109,7 +115,8 @@ public class UsersController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
     })
     @RequestMapping(value = "/users", method = RequestMethod.PUT)
     public User editUser(@RequestHeader(value = "X-UserID", required = true) String userID,
@@ -130,7 +137,8 @@ public class UsersController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
     })
     @RequestMapping(value = "/users/{userid}/keys", method = RequestMethod.GET)
     public Boolean keysExist(@PathVariable("userid") @ApiPathParam(name = "User ID", description = "Do keys already exist for this user ID?") String userID ) throws Exception {
@@ -163,7 +171,8 @@ public class UsersController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
     })
     @RequestMapping(value = "/users/{userid}/keys", method = RequestMethod.POST)
     public String addKeyPair(@PathVariable("userid") @ApiPathParam(name = "User ID", description = "Get the Public Key for this user ID") String userID) throws Exception {
@@ -184,7 +193,6 @@ public class UsersController {
         return userKeyPairService.getPublicKey();
     }
 
-
     @RequestMapping(value = "/auth/users", method = RequestMethod.POST)
     public Boolean validateUser(@RequestBody ValidateUser validateUser) throws Exception {
 
@@ -196,6 +204,4 @@ public class UsersController {
         User user = usersService.getUser(validateUser.getUserid());
         return user.isAdmin();
     }
-
-
 }
