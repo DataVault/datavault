@@ -8,6 +8,12 @@
     <artifactId>datavault</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+
+    <organization>
+        <name>DataVault</name>
+        <url>http://datavaultplatform.org/</url>
+    </organization>
+
     <modules>
         <module>datavault-webapp</module>
         <module>datavault-broker</module>
@@ -23,6 +29,7 @@
         <hibernate.version>4.3.10.Final</hibernate.version>
         <mysql.version>5.1.35</mysql.version>
         <root.basedir>${basedir}</root.basedir>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencyManagement>
@@ -56,7 +63,7 @@
                 <artifactId>spring-security-core</artifactId>
                 <version>${spring-security.version}</version>
             </dependency>
-        
+
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-config</artifactId>
@@ -107,7 +114,7 @@
                 <artifactId>spring-jdbc</artifactId>
                 <version>${spring.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-tx</artifactId>
@@ -165,7 +172,7 @@
                 <artifactId>jackson-databind</artifactId>
                 <version>2.5.3</version>
             </dependency>
-            
+
             <!-- MySQL -->
             <dependency>
                 <groupId>mysql</groupId>
