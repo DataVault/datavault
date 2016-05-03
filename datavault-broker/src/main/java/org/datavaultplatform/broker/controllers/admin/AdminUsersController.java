@@ -8,10 +8,7 @@ import org.jsondoc.core.annotation.ApiHeaders;
 import org.jsondoc.core.annotation.ApiMethod;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -59,6 +56,48 @@ public class AdminUsersController {
     @RequestMapping(value = "/admin/users/count", method = RequestMethod.GET)
     public int getUsersCount(@RequestHeader(value = "X-UserID", required = true) String userID) {
         return usersService.count();
+    }
+
+    @ApiMethod(
+            path = "/admin/users}",
+            verb = ApiVerb.POST,
+            description = "Create a new DataVault User",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
+    })
+    @RequestMapping(value = "/admin/users", method = RequestMethod.POST)
+    public User addUser(@RequestHeader(value = "X-UserID", required = true) String userID,
+                        @RequestBody User user) throws Exception {
+        usersService.addUser(user);
+
+        // Add default fileStores for the new user?
+
+        return user;
+    }
+
+    @ApiMethod(
+            path = "/admin/users}",
+            verb = ApiVerb.PUT,
+            description = "Edit a DataVault User",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
+    })
+    @RequestMapping(value = "/admin/users", method = RequestMethod.PUT)
+    public User editUser(@RequestHeader(value = "X-UserID", required = true) String userID,
+                         @RequestBody User user) throws Exception {
+
+
+        usersService.updateUser(user);
+
+        return user;
     }
 
 }
