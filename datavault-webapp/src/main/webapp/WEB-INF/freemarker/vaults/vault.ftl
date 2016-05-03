@@ -10,10 +10,15 @@
     </ol>
 
     <div class="bs-callout">
-        <h2><span class="glyphicon glyphicon-folder-close"></span> ${vault.name?html}</h2>
-        <p>
-            ${vault.description?html}
-        </p>
+        <h2>
+            <span class="glyphicon glyphicon-folder-close"></span> ${vault.name?html}
+        </h2>
+        <h2>
+            <small>
+                ${vault.description?html}
+            </small>
+        </h2>
+        <hr>
         <p>
             <b>Retention Policy:</b> ${retentionPolicy.name?html}<br/>
             <b>Group:</b> ${group.name?html}<br/>
