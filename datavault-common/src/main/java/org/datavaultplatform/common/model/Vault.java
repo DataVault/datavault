@@ -14,7 +14,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.datavaultplatform.common.retentionpolicy.PolicyStatus;
+import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -69,12 +69,12 @@ public class Vault {
     private List<Deposit> deposits;
 
     @ManyToOne
-    private Policy policy;
+    private RetentionPolicy retentionPolicy;
 
-    // Status of the policy
-    private int policyStatus;
+    // Status of the retentionPolicy
+    private int retentionPolicyStatus;
 
-    // Date policy was last checked
+    // Date retention policy was last checked
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @Temporal(TemporalType.TIMESTAMP)
     private Date policyLastChecked;
@@ -93,7 +93,7 @@ public class Vault {
     public Vault(String name) {
         this.name = name;
         this.creationTime = new Date();
-        policyStatus = PolicyStatus.UNCHECKED;
+        retentionPolicyStatus = RetentionPolicyStatus.UNCHECKED;
     }
 
     public String getID() { return id; }
@@ -135,19 +135,19 @@ public class Vault {
         this.deposits.add(deposit);
     }
 
-    public Policy getPolicy() { return policy; }
+    public RetentionPolicy getRetentionPolicy() { return retentionPolicy; }
 
-    public void setPolicy(Policy policy) {
-        this.policy = policy;
+    public void setRetentionPolicy(RetentionPolicy retentionPolicy) {
+        this.retentionPolicy = retentionPolicy;
     }
 
-    public int getPolicyStatus() { return policyStatus; }
+    public int getRetentionPolicyStatus() { return retentionPolicyStatus; }
 
-    public void setPolicyLastChecked(Date policyLastChecked) { this.policyLastChecked = policyLastChecked; }
+    public void setRetentionPolicyLastChecked(Date policyLastChecked) { this.policyLastChecked = policyLastChecked; }
 
-    public Date getPolicyLastChecked() { return policyLastChecked; }
+    public Date getRetentionPolicyLastChecked() { return policyLastChecked; }
 
-    public void setPolicyStatus(int policyStatus) { this.policyStatus = policyStatus; }
+    public void setRetentionPolicyStatus(int policyStatus) { this.retentionPolicyStatus = policyStatus; }
 
     public Group getGroup() { return group; }
 
@@ -177,10 +177,10 @@ public class Vault {
                 creationTime,
                 name,
                 description,
-                policy.getID(),
+                retentionPolicy.getID(),
                 group.getID(),
                 vaultSize,
-                policyStatus,
+                retentionPolicyStatus,
                 policyLastChecked);
     }
     

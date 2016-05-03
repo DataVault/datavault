@@ -2,7 +2,7 @@ package org.datavaultplatform.webapp.controllers;
 
 import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.Policy;
+import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
@@ -38,7 +38,7 @@ public class VaultsController {
 
         model.addAttribute("vault", vault);
 
-        model.addAttribute(restService.getPolicy(vault.getPolicyID()));
+        model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
         model.addAttribute(restService.getGroup(vault.getGroupID()));
         model.addAttribute("deposits", restService.getDepositsListing(vaultID));
 
@@ -55,7 +55,7 @@ public class VaultsController {
         Dataset[] datasets = restService.getDatasets();
         model.addAttribute("datasets", datasets);
         
-        Policy[] policies = restService.getPolicyListing();
+        RetentionPolicy[] policies = restService.getRetentionPolicyListing();
         model.addAttribute("policies", policies);
 
         Group[] groups = restService.getGroups();

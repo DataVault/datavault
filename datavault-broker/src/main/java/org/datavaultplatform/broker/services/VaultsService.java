@@ -38,21 +38,21 @@ public class VaultsService {
 
     public int count() { return vaultDAO.count(); }
 
-    public int getPolicyCount(int status) { return vaultDAO.getPolicyCount(status); }
+    public int getRetentionPolicyCount(int status) { return vaultDAO.getRetentionPolicyCount(status); }
 
-    public Vault checkPolicy (String vaultID) throws Exception {
+    public Vault checkRetentionPolicy (String vaultID) throws Exception {
         // Get the vault
         Vault vault = vaultDAO.findById(vaultID);
 
         // Get the right policy engine
-        Class clazz = Class.forName(vault.getPolicy().getEngine());
+        Class clazz = Class.forName(vault.getRetentionPolicy().getEngine());
         RetentionPolicy policy = (RetentionPolicy)clazz.newInstance();
 
         // Check the policy
         policy.run(vault);
 
         // Record we checked it
-        vault.setPolicyLastChecked(new Date());
+        vault.setRetentionPolicyLastChecked(new Date());
 
         // Update and return the policy
         vaultDAO.update(vault);

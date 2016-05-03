@@ -4,7 +4,7 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.io.FileUtils;
-import org.datavaultplatform.common.retentionpolicy.PolicyStatus;
+import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
@@ -155,9 +155,9 @@ public class VaultInfo {
     }
     
     public String getPolicyStatusStr() {
-        if (policyStatus == PolicyStatus.UNCHECKED) return "Un-checked";
-        else if (policyStatus == PolicyStatus.OK) return "OK";
-        else if (policyStatus == PolicyStatus.REVIEW) return "Review";
+        if (policyStatus == RetentionPolicyStatus.UNCHECKED) return "Un-checked";
+        else if (policyStatus == RetentionPolicyStatus.OK) return "OK";
+        else if (policyStatus == RetentionPolicyStatus.REVIEW) return "Review";
         else return ("Unknown");
     }
 }

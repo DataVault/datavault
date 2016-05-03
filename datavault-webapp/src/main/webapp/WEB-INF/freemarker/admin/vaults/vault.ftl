@@ -43,11 +43,11 @@
             </thead>
             <tbody>
                 <tr class="tr">
-                    <td>${policy.name?html}</td>
+                    <td>${retentionPolicy.name?html}</td>
                     <td><#if vault.policyLastChecked??>${vault.policyLastChecked?datetime}<#else>Never</#if></td>
                     <td>${vault.policyStatusStr?html}</td>
                     <td>
-                        <form action="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}/checkpolicy" method="post">
+                        <form action="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}/checkretentionpolicy" method="post">
                             <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update</button>
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                         </form>

@@ -1,6 +1,6 @@
 package org.datavaultplatform.common.retentionpolicy;
 
-public class PolicyStatus {
+public class RetentionPolicyStatus {
 
     public static final int UNCHECKED = 0;
 

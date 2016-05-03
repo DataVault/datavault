@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import javax.persistence.Transient;
 
 @Entity
-@Table(name="Events")
 public class InitStates extends Event {
 
     @Transient

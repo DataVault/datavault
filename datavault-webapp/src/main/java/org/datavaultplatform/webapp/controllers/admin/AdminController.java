@@ -2,7 +2,7 @@ package org.datavaultplatform.webapp.controllers.admin;
 
 
 import org.apache.commons.io.FileUtils;
-import org.datavaultplatform.common.retentionpolicy.PolicyStatus;
+import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -37,7 +37,7 @@ public class AdminController {
         model.addAttribute("retrievesinprogress", restService.getRetrievesInProgressCount());
         model.addAttribute("depositqueue", restService.getDepositsQueue());
         model.addAttribute("retrievequeue", restService.getRetrievesQueue());
-        model.addAttribute("reviewcount", restService.getPolicyStatusCount(PolicyStatus.REVIEW));
+        model.addAttribute("reviewcount", restService.getRetentionPolicyStatusCount(RetentionPolicyStatus.REVIEW));
         model.addAttribute("eventcount", restService.getEventCount());
 
         return "admin/index";

@@ -108,10 +108,10 @@ public class VaultDAOImpl implements VaultDAO {
     }
 
     @Override
-    public int getPolicyCount(int status) {
+    public int getRetentionPolicyCount(int status) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Vault.class);
-        criteria.add(Restrictions.eq("policyStatus", status));
+        criteria.add(Restrictions.eq("retentionPolicyStatus", status));
         criteria.setProjection(Projections.rowCount());
         return (int)(long)(Long)criteria.uniqueResult();
     }
