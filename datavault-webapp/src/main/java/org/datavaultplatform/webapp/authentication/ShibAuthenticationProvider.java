@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.authentication;
 
 import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -31,14 +32,13 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-
         String name = authentication.getName();
         String password = authentication.getCredentials().toString();
 
-        // Fetch the existing user
-        User user = restService.getUser(name);
+        // todo : why am I looking for a password?? I guess that in Shib auth I shouldn't have it, so take out this bit of code.
 
-        if (user == null) {
+        // Does the user already exist?
+        if (!restService.userExists(new ValidateUser(name, password))) {
             // todo - first time the user has logged on so create a new user account
         } else {
             // todo - something I guess, but I don't know what...

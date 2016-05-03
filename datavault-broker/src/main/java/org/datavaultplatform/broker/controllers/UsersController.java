@@ -36,39 +36,6 @@ public class UsersController {
         this.activeDir = activeDir;
     }
 
-    @ApiMethod(
-            path = "/users",
-            verb = ApiVerb.GET,
-            description = "Gets a list of all Users",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
-            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
-    })
-    @RequestMapping(value = "/users", method = RequestMethod.GET)
-    public List<User> getUsers(@RequestHeader(value = "X-UserID", required = true) String userID,
-                               @RequestHeader(value = "X-Client-Key", required = true) String clientKey) {
-        return usersService.getUsers();
-    }
-
-    @ApiMethod(
-            path = "/users/count",
-            verb = ApiVerb.GET,
-            description = "Gets the number of Users in the DataVault",
-            produces = { MediaType.TEXT_PLAIN_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
-            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
-    })
-    @RequestMapping(value = "/users/count", method = RequestMethod.GET)
-    public int getUsersCount(@RequestHeader(value = "X-UserID", required = true) String userID,
-                             @RequestHeader(value = "X-Client-Key", required = true) String clientKey) {
-        return usersService.count();
-    }
 
     @ApiMethod(
             path = "/users/{userid}",
@@ -193,9 +160,17 @@ public class UsersController {
         return userKeyPairService.getPublicKey();
     }
 
-    @RequestMapping(value = "/auth/users", method = RequestMethod.POST)
-    public Boolean validateUser(@RequestBody ValidateUser validateUser) throws Exception {
+    @RequestMapping(value = "/auth/users/exists", method = RequestMethod.POST)
+    public Boolean exists(@RequestBody ValidateUser validateUser) throws Exception {
+        if (usersService.getUser(validateUser.getUserid()) == null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 
+    @RequestMapping(value = "/auth/users/isvalid", method = RequestMethod.POST)
+    public Boolean validateUser(@RequestBody ValidateUser validateUser) throws Exception {
         return usersService.validateUser(validateUser.getUserid(), validateUser.getPassword());
     }
 
