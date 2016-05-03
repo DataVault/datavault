@@ -1,6 +1,6 @@
-insert into Policies (id, name, engine, description, sort) values ('UNIVERSITY', 'Default University Policy', 'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy', 'Default University policy that flags vaults for review after five years.', 1);
-insert into Policies (id, name, engine, description, sort) values ('EPSRC', 'EPSRC retention policy', 'org.datavaultplatform.common.retentionpolicy.impl.EPSRCRetentionPolicy', 'Vaults are due for review ten years after the date of the last retrieve event or the data the last deposit was made, whichever is the latter.', 2);
-insert into Policies (id, name, engine, description, sort) values ('5MIN', '5 minute test policy', 'org.datavaultplatform.common.retentionpolicy.impl.FiveMinuteRetentionPolicy', 'Test policy that flags for review any vault over 5 minutes old.', 3);
+insert into RetentionPolicies (id, name, engine, description, sort) values ('UNIVERSITY', 'Default University Policy', 'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy', 'Default University policy that flags vaults for review after five years.', 1);
+insert into RetentionPolicies (id, name, engine, description, sort) values ('EPSRC', 'EPSRC retention policy', 'org.datavaultplatform.common.retentionpolicy.impl.EPSRCRetentionPolicy', 'Vaults are due for review ten years after the date of the last retrieve event or the data the last deposit was made, whichever is the latter.', 2);
+insert into RetentionPolicies (id, name, engine, description, sort) values ('5MIN', '5 minute test policy', 'org.datavaultplatform.common.retentionpolicy.impl.FiveMinuteRetentionPolicy', 'Test policy that flags for review any vault over 5 minutes old.', 3);
 
 insert into Users (id, name, password, admin) values ('USER1', 'Test user 1', 'password1', FALSE);
 insert into Users (id, name, password, admin) values ('USER2', 'Test user 2', 'password2', FALSE);
