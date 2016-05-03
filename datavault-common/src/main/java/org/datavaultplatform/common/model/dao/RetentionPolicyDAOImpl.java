@@ -1,7 +1,8 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
- 
+
+import org.datavaultplatform.common.model.RetentionPolicy;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -9,9 +10,7 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import org.datavaultplatform.common.model.Policy;
-
-public class PolicyDAOImpl implements PolicyDAO {
+public class RetentionPolicyDAOImpl implements RetentionPolicyDAO {
 
     private SessionFactory sessionFactory;
  
@@ -20,41 +19,41 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
      
     @Override
-    public void save(Policy policy) {
+    public void save(RetentionPolicy retentionPolicy) {
         Session session = this.sessionFactory.openSession();
         Transaction tx = session.beginTransaction();
-        session.persist(policy);
+        session.persist(retentionPolicy);
         tx.commit();
         session.close();
     }
     
     @Override
-    public void update(Policy policy) {
+    public void update(RetentionPolicy retentionPolicy) {
         Session session = this.sessionFactory.openSession();
         Transaction tx = session.beginTransaction();
-        session.update(policy);
+        session.update(retentionPolicy);
         tx.commit();
         session.close();
     }
  
     @SuppressWarnings("unchecked")
     @Override
-    public List<Policy> list() {        
+    public List<RetentionPolicy> list() {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Policy.class);
+        Criteria criteria = session.createCriteria(RetentionPolicy.class);
         criteria.addOrder(Order.asc("sort"));
-        List<Policy> policies = criteria.list();
+        List<RetentionPolicy> policies = criteria.list();
         session.close();
         return policies;
     }
     
     @Override
-    public Policy findById(String Id) {
+    public RetentionPolicy findById(String Id) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Policy.class);
+        Criteria criteria = session.createCriteria(RetentionPolicy.class);
         criteria.add(Restrictions.eq("id",Id));
-        Policy policy = (Policy)criteria.uniqueResult();
+        RetentionPolicy retentionPolicy = (RetentionPolicy)criteria.uniqueResult();
         session.close();
-        return policy;
+        return retentionPolicy;
     }
 }

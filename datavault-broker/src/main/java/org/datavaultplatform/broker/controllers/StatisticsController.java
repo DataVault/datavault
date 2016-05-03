@@ -16,7 +16,7 @@ public class StatisticsController {
     private VaultsService vaultsService;
     private DepositsService depositsService;
     private RetrievesService retrievesService;
-    private PoliciesService policiesService;
+    private RetentionPoliciesService retentionPoliciesService;
     private GroupsService groupsService;
     private UsersService usersService;
     private EventService eventService;
@@ -35,8 +35,8 @@ public class StatisticsController {
         this.retrievesService = retrievesService;
     }
 
-    public void setPoliciesService(PoliciesService policiesService) {
-        this.policiesService = policiesService;
+    public void setRetentionPoliciesService(RetentionPoliciesService retentionPoliciesService) {
+        this.retentionPoliciesService = retentionPoliciesService;
     }
 
     public void setGroupsService(GroupsService groupsService) {
@@ -112,11 +112,11 @@ public class StatisticsController {
     }
 
 
-    @RequestMapping(value = "/vaults/policycount/{status}", method = RequestMethod.GET)
+    @RequestMapping(value = "/vaults/retentionpolicycount/{status}", method = RequestMethod.GET)
     public int getPolicyStatusCount(@RequestHeader(value = "X-UserID", required = true) String userID,
                                     @PathVariable("status") int status) throws Exception {
 
-        return vaultsService.getPolicyCount(status);
+        return vaultsService.getRetentionPolicyCount(status);
     }
     
     @RequestMapping(value = "/statistics/eventcount", method = RequestMethod.GET)

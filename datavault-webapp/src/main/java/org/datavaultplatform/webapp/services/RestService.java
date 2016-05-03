@@ -200,21 +200,21 @@ public class RestService {
         return (VaultInfo)response.getBody();
     }
 
-    public Vault checkVaultPolicy(String vaultId) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/checkpolicy", Vault.class);
+    public Vault checkVaultRetentionPolicy(String vaultId) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/checkretentionpolicy", Vault.class);
         return (Vault)response.getBody();
     }
 
-    public int checkAllVaultPolicies() {
+    public int checkAllVaultRetentionPolicies() {
         VaultInfo[] vaults = getVaultsListingAll();
         for (VaultInfo vault : vaults) {
-            get(brokerURL + "/vaults/" + vault.getID() + "/checkpolicy", Vault.class);
+            get(brokerURL + "/vaults/" + vault.getID() + "/checkretentionpolicy", Vault.class);
         }
         return vaults.length;
     }
 
-    public int getPolicyStatusCount(int status) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/policycount/" + status, Integer.class);
+    public int getRetentionPolicyStatusCount(int status) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/retentionpolicycount/" + status, Integer.class);
         return (Integer)response.getBody();
     }
 
@@ -258,14 +258,14 @@ public class RestService {
         return (Retrieve[])response.getBody();
     }
 
-    public Policy[] getPolicyListing() {
-        HttpEntity<?> response = get(brokerURL + "/policies", Policy[].class);
-        return (Policy[])response.getBody();
+    public RetentionPolicy[] getRetentionPolicyListing() {
+        HttpEntity<?> response = get(brokerURL + "/retentionpolicies", RetentionPolicy[].class);
+        return (RetentionPolicy[])response.getBody();
     }
 
-    public Policy getPolicy(String policyId) {
-        HttpEntity<?> response = get(brokerURL + "/policies/" + policyId, Policy.class);
-        return (Policy)response.getBody();
+    public RetentionPolicy getRetentionPolicy(String retentionPolicyId) {
+        HttpEntity<?> response = get(brokerURL + "/retentionpolicies/" + retentionPolicyId, RetentionPolicy.class);
+        return (RetentionPolicy)response.getBody();
     }
 
     public User getUser(String userId) {

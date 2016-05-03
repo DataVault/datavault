@@ -5,7 +5,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 @Entity
-@Table(name="Events")
 public class UpdateProgress extends Event {
     
     @Transient

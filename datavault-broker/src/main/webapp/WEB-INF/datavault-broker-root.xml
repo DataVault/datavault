@@ -41,8 +41,8 @@
         <property name="eventDAO" ref="eventDAO" />
     </bean>
     
-    <bean id="policiesService" class="org.datavaultplatform.broker.services.PoliciesService">
-        <property name="policyDAO" ref="policyDAO" />
+    <bean id="retentionPoliciesService" class="org.datavaultplatform.broker.services.RetentionPoliciesService">
+        <property name="retentionPolicyDAO" ref="retentionPolicyDAO" />
     </bean>
 
     <bean id="usersService" class="org.datavaultplatform.broker.services.UsersService">
@@ -165,7 +165,7 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
     
-    <bean id="policyDAO" class="org.datavaultplatform.common.model.dao.PolicyDAOImpl">
+    <bean id="retentionPolicyDAO" class="org.datavaultplatform.common.model.dao.RetentionPolicyDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 

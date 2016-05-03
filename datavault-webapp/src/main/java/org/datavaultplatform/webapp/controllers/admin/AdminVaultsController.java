@@ -68,16 +68,16 @@ public class AdminVaultsController {
 
         model.addAttribute("vault", vault);
 
-        model.addAttribute(restService.getPolicy(vault.getPolicyID()));
+        model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
         model.addAttribute(restService.getGroup(vault.getGroupID()));
         model.addAttribute("deposits", restService.getDepositsListing(vaultID));
 
         return "admin/vaults/vault";
     }
 
-    @RequestMapping(value = "/admin/vaults/{vaultid}/checkpolicy", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/vaults/{vaultid}/checkretentionpolicy", method = RequestMethod.POST)
     public String checkPolicy(ModelMap model, @PathVariable("vaultid") String vaultID) throws Exception {
-        restService.checkVaultPolicy(vaultID);
+        restService.checkVaultRetentionPolicy(vaultID);
 
         return "redirect:/admin/vaults/" + vaultID;
     }

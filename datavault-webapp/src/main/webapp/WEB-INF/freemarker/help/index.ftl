@@ -87,9 +87,9 @@
         details about the data again!
     </p>
     <p>
-        Next you need to select which policy should be used to govern the data.  The choice of policy will usually be related to your funder
-        (if an external funder paid for your research project), or a default university policy.  The policy governs how long the data will
-        be kept in the vault before it needs to be reviewed.  A typical policy might keep the data for 5 or 10 years before requiring a review
+        Next you need to select which retentionPolicy should be used to govern the data.  The choice of retentionPolicy will usually be related to your funder
+        (if an external funder paid for your research project), or a default university retentionPolicy.  The retentionPolicy governs how long the data will
+        be kept in the vault before it needs to be reviewed.  A typical retentionPolicy might keep the data for 5 or 10 years before requiring a review
         that will allow you to decide whether to keep the data for longer or to delete it.
     </p>
     <p>

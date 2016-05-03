@@ -19,5 +19,5 @@ public interface VaultDAO {
 
     public int count();
 
-    public int getPolicyCount(int status);
+    public int getRetentionPolicyCount(int status);
 }

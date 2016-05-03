@@ -4,7 +4,7 @@ import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
-import org.datavaultplatform.common.retentionpolicy.PolicyStatus;
+import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -38,8 +38,8 @@ public class EPSRCRetentionPolicy implements RetentionPolicy {
         else {
             if (v.getDeposits().isEmpty()) {
                 // No deposits, so return an error
-                v.setPolicyStatus(PolicyStatus.ERROR);
-                return PolicyStatus.ERROR;
+                v.setRetentionPolicyStatus(RetentionPolicyStatus.ERROR);
+                return RetentionPolicyStatus.ERROR;
             } else {
                 check = v.getDeposits().get(v.getDeposits().size() - 1).getCreationTime();
             }
@@ -53,11 +53,11 @@ public class EPSRCRetentionPolicy implements RetentionPolicy {
 
         // Is it time for review?
         if (check.before(now)) {
-            v.setPolicyStatus(PolicyStatus.REVIEW);
-            return PolicyStatus.REVIEW;
+            v.setRetentionPolicyStatus(RetentionPolicyStatus.REVIEW);
+            return RetentionPolicyStatus.REVIEW;
         } else {
-            v.setPolicyStatus(PolicyStatus.OK);
-            return PolicyStatus.OK;
+            v.setRetentionPolicyStatus(RetentionPolicyStatus.OK);
+            return RetentionPolicyStatus.OK;
         }
     }
 }
