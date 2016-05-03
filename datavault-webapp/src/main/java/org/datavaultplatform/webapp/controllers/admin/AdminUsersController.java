@@ -1,16 +1,11 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
-import org.datavaultplatform.common.model.Policy;
 import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * User: Stuart Lewis

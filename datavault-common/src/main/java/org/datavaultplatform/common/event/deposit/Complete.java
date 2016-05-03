@@ -6,7 +6,6 @@ import javax.persistence.Table;
 import org.datavaultplatform.common.event.Event;
 
 @Entity
-@Table(name="Events")
 public class Complete extends Event {
     
     public String archiveId;

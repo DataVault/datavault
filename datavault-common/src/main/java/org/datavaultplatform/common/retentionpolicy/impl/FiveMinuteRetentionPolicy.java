@@ -1,7 +1,7 @@
 package org.datavaultplatform.common.retentionpolicy.impl;
 
 import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.retentionpolicy.PolicyStatus;
+import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
 
 import java.util.Calendar;
@@ -24,11 +24,11 @@ public class FiveMinuteRetentionPolicy implements RetentionPolicy {
 
         // Is it time for review?
         if (check.before(now)) {
-            v.setPolicyStatus(PolicyStatus.REVIEW);
-            return PolicyStatus.REVIEW;
+            v.setRetentionPolicyStatus(RetentionPolicyStatus.REVIEW);
+            return RetentionPolicyStatus.REVIEW;
         } else {
-            v.setPolicyStatus(PolicyStatus.OK);
-            return PolicyStatus.OK;
+            v.setRetentionPolicyStatus(RetentionPolicyStatus.OK);
+            return RetentionPolicyStatus.OK;
         }
     }
 }

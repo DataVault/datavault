@@ -23,6 +23,6 @@ public class RestAuthenticationSuccessHandler implements AuthenticationSuccessHa
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
 
-        logger.info("Authentication success!");
+        logger.debug("Authentication success!");
     }
 }

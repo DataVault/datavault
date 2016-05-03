@@ -81,13 +81,13 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
             Client client = clientsService.getClientByApiKey(clientApiKey);
             if (client == null) {
-                logger.debug("No matching Client record found for API key " + clientApiKey);
+                logger.info("No matching Client record found for API key " + clientApiKey);
                 throw new RestAuthenticationException("Invalid client credentials");
             }
 
             // If we got here then we found a matching Client record, so check the IP addresses.
             if (!ipAddress.equals(client.getIpAddress())) {
-                logger.debug("Invalid IP address on incoming request " + ipAddress);
+                logger.info("Invalid IP address on incoming request " + ipAddress);
                 throw new RestAuthenticationException("Invalid client credentials");
             }
 

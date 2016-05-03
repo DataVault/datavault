@@ -5,7 +5,6 @@ import javax.persistence.Table;
 import org.datavaultplatform.common.event.Event;
 
 @Entity
-@Table(name="Events")
 public class Logout extends Event {
     
     Logout() {};

@@ -6,7 +6,6 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="Events")
 public class RetrieveStart extends Event {
 
     RetrieveStart() {};
