@@ -1,4 +1,4 @@
-package org.datavaultplatform.broker.controllers;
+package org.datavaultplatform.broker.controllers.admin;
 
 import org.datavaultplatform.broker.services.DepositsService;
 import org.datavaultplatform.broker.services.RetrievesService;
