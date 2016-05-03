@@ -53,48 +53,6 @@ public class UsersController {
         return usersService.getUser(queryUserID);
     }
 
-    @ApiMethod(
-            path = "/users}",
-            verb = ApiVerb.POST,
-            description = "Create a new DataVault User",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
-            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
-    })
-    @RequestMapping(value = "/users", method = RequestMethod.POST)
-    public User addUser(@RequestHeader(value = "X-UserID", required = true) String userID,
-                        @RequestBody User user) throws Exception {
-        usersService.addUser(user);
-
-        // Add default fileStores for the new user?
-
-        return user;
-    }
-
-    @ApiMethod(
-            path = "/users}",
-            verb = ApiVerb.PUT,
-            description = "Edit a DataVault User",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
-            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
-    })
-    @RequestMapping(value = "/users", method = RequestMethod.PUT)
-    public User editUser(@RequestHeader(value = "X-UserID", required = true) String userID,
-                         @RequestBody User user) throws Exception {
-
-
-        usersService.updateUser(user);
-
-        return user;
-    }
-
 
     @ApiMethod(
             path = "/users/{userid}/keys",

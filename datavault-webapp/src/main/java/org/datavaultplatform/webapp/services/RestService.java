@@ -336,12 +336,12 @@ public class RestService {
     }
 
     public User addUser(User user) {
-        HttpEntity<?> response = post(brokerURL + "/users/", User.class, user);
+        HttpEntity<?> response = post(brokerURL + "/admin/users/", User.class, user);
         return (User)response.getBody();
     }
 
     public User editUser(User user) {
-        HttpEntity<?> response = put(brokerURL + "/users/", User.class, user);
+        HttpEntity<?> response = put(brokerURL + "/admin/users/", User.class, user);
         return (User)response.getBody();
     }
 
