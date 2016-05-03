@@ -41,7 +41,7 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         String name = authentication.getName();
         String password = authentication.getCredentials().toString();
 
-        if (!restService.validateUser(new ValidateUser(name, password))) {
+        if (!restService.isValid(new ValidateUser(name, password))) {
             logger.debug("Invalid username or password for " + name);
             throw new BadCredentialsException("Invalid userid or password");
         }
