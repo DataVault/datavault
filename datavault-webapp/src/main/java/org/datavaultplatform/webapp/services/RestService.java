@@ -356,9 +356,15 @@ public class RestService {
         return (String)response.getBody();
     }
 
-    public Boolean validateUser(ValidateUser validateUser) {
+    public Boolean userExists(ValidateUser validateUser) {
         // Using a POST because I read somewhere that its somehow more secure to POST credentials, could be nonsense
-        HttpEntity<?> response = post(brokerURL + "/auth/users", Boolean.class, validateUser);
+        HttpEntity<?> response = post(brokerURL + "/auth/users/exists", Boolean.class, validateUser);
+        return (Boolean)response.getBody();
+    }
+
+    public Boolean isValid(ValidateUser validateUser) {
+        // Using a POST because I read somewhere that its somehow more secure to POST credentials, could be nonsense
+        HttpEntity<?> response = post(brokerURL + "/auth/users/isvalid", Boolean.class, validateUser);
         return (Boolean)response.getBody();
     }
 

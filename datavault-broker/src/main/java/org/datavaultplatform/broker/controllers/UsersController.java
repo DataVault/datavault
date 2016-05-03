@@ -155,10 +155,17 @@ public class UsersController {
         return userKeyPairService.getPublicKey();
     }
 
+    @RequestMapping(value = "/auth/users/exists", method = RequestMethod.POST)
+    public Boolean exists(@RequestBody ValidateUser validateUser) throws Exception {
+        if (usersService.getUser(validateUser.getUserid()) == null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 
-    @RequestMapping(value = "/auth/users", method = RequestMethod.POST)
+    @RequestMapping(value = "/auth/users/isvalid", method = RequestMethod.POST)
     public Boolean validateUser(@RequestBody ValidateUser validateUser) throws Exception {
-
         return usersService.validateUser(validateUser.getUserid(), validateUser.getPassword());
     }
 
