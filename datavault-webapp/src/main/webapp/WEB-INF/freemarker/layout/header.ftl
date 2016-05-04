@@ -31,7 +31,8 @@
                     <li class="dropdown<#if nav == "user"> active</#if>">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">${principal}<span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            <li><a href="${springMacroRequestContext.getContextPath()}/users/edit/${principal}">Edit profile</a></li>
+                            <!-- Commented out the edit profile function for the moment as the code is a little out of date -->
+                            <!--<li><a href="${springMacroRequestContext.getContextPath()}/users/edit/${principal}">Edit profile</a></li> -->
                             <li><a href="${springMacroRequestContext.getContextPath()}/users/${principal}/keys">Add SSH keys</a></li>
                             <li><a href="${springMacroRequestContext.getContextPath()}/auth/logout">Logout</a></li>
                         </ul>
