@@ -25,6 +25,7 @@ import org.datavaultplatform.common.event.deposit.Complete;
 import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.*;
+import org.datavaultplatform.worker.WorkerInstance;
 import org.datavaultplatform.worker.operations.*;
 import org.datavaultplatform.worker.queue.EventSender;
 
@@ -49,6 +50,7 @@ public class Deposit extends Task {
         eventStream = (EventSender)context.getEventStream();
         
         logger.info("Deposit job - performAction()");
+        logger.info("Open file count: " + WorkerInstance.getOpenFileCount());
         
         Map<String, String> properties = getProperties();
         depositId = properties.get("depositId");
@@ -131,6 +133,7 @@ public class Deposit extends Task {
                 
                 logger.info("Copying target to bag directory ...");
                 copyFromUserStorage(filePath, bagPath);
+                logger.info("Open file count: " + WorkerInstance.getOpenFileCount());
                 
                 // Bag the directory in-place
                 eventStream.send(new TransferComplete(jobID, depositId)
@@ -139,12 +142,15 @@ public class Deposit extends Task {
                 
                 logger.info("Creating bag ...");
                 Packager.createBag(bagDir);
-
+                logger.info("Open file count: " + WorkerInstance.getOpenFileCount());
+                
                 // Identify the deposit file types
+                logger.info("Identifying file types ...");
                 Path bagDataPath = bagDir.toPath().resolve("data");
                 HashMap<String, String> fileTypes = Identifier.detectDirectory(bagDataPath);
                 ObjectMapper mapper = new ObjectMapper();
                 String fileTypeMetadata = mapper.writeValueAsString(fileTypes);
+                logger.info("Open file count: " + WorkerInstance.getOpenFileCount());
                 
                 // Add vault/deposit/type metadata to the bag
                 Packager.addMetadata(bagDir, depositMetadata, vaultMetadata, fileTypeMetadata);
@@ -157,6 +163,7 @@ public class Deposit extends Task {
                 Tar.createTar(bagDir, tarFile);
                 String tarHash = Verify.getDigest(tarFile);
                 String tarHashAlgorithm = Verify.getAlgorithm();
+                logger.info("Open file count: " + WorkerInstance.getOpenFileCount());
 
                 eventStream.send(new PackageComplete(jobID, depositId)
                     .withUserId(userID)
@@ -178,14 +185,17 @@ public class Deposit extends Task {
                 // Copy bag meta files to the meta directory
                 logger.info("Copying meta files ...");
                 Packager.extractMetadata(bagDir, metaDir);
+                logger.info("Open file count: " + WorkerInstance.getOpenFileCount());
                 
                 // Copy the resulting tar file to the archive area
                 logger.info("Copying tar file to archive ...");
                 String archiveId = copyToArchiveStorage(tarFile);
+                logger.info("Open file count: " + WorkerInstance.getOpenFileCount());
                 
                 // Cleanup
                 logger.info("Cleaning up ...");
                 FileUtils.deleteDirectory(bagDir);
+                logger.info("Open file count: " + WorkerInstance.getOpenFileCount());
                 
                 eventStream.send(new UpdateProgress(jobID, depositId)
                     .withUserId(userID)
@@ -214,6 +224,7 @@ public class Deposit extends Task {
                 }
                 
                 logger.info("Deposit complete: " + archiveId);
+                logger.info("Open file count: " + WorkerInstance.getOpenFileCount());
                 
                 eventStream.send(new Complete(jobID, depositId, archiveId, archiveSize)
                     .withUserId(userID)
