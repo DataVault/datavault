@@ -109,6 +109,7 @@ public class Receiver {
                 
                 // Clean up the temporary directory
                 FileUtils.deleteDirectory(tempDirPath.toFile());
+                System.gc();
                 
             } catch (Exception e) {
                 logger.error("Error decoding message", e);
