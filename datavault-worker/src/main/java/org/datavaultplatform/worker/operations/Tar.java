@@ -79,8 +79,10 @@ public class Tar {
                 fos.close();
             }
         }
-        
+
         tar.close();
+        bis.close();
+        fis.close();
         
         return topDir;
     }

@@ -25,6 +25,7 @@ import org.datavaultplatform.common.event.deposit.Complete;
 import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.*;
+import org.datavaultplatform.worker.WorkerInstance;
 import org.datavaultplatform.worker.operations.*;
 import org.datavaultplatform.worker.queue.EventSender;
 
@@ -139,8 +140,9 @@ public class Deposit extends Task {
                 
                 logger.info("Creating bag ...");
                 Packager.createBag(bagDir);
-
+                
                 // Identify the deposit file types
+                logger.info("Identifying file types ...");
                 Path bagDataPath = bagDir.toPath().resolve("data");
                 HashMap<String, String> fileTypes = Identifier.detectDirectory(bagDataPath);
                 ObjectMapper mapper = new ObjectMapper();
