@@ -1,6 +1,7 @@
 package org.datavaultplatform.worker.operations;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -13,15 +14,21 @@ import org.apache.tika.mime.MediaType;
 public class Identifier {
     
     public static String detectFile(File file) {
+        InputStream is = null;
         try {
             TikaConfig tika = new TikaConfig();
             Metadata metadata = new Metadata();
             metadata.set(Metadata.RESOURCE_NAME_KEY, file.toString());
-            MediaType mediaType = tika.getDetector().detect(TikaInputStream.get(file), metadata);
+            is = TikaInputStream.get(file);
+            MediaType mediaType = tika.getDetector().detect(is, metadata);
             return mediaType.toString();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } finally {
+            if (is != null) {
+                try { is.close(); } catch (Exception e) {}
+            }
         }
     }
     
