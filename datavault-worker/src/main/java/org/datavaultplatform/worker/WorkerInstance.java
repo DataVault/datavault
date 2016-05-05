@@ -12,15 +12,6 @@ public class WorkerInstance {
         return java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
     }
     
-    public static Long getOpenFileCount() {
-        java.lang.management.OperatingSystemMXBean os = java.lang.management.ManagementFactory.getOperatingSystemMXBean();
-        if (os instanceof com.sun.management.UnixOperatingSystemMXBean){
-            return ((com.sun.management.UnixOperatingSystemMXBean)os).getOpenFileDescriptorCount();
-        } else {
-            return null;
-        }
-    }
-    
     public static void main(String [] args) {
         
         // Bind $DATAVAULT_HOME to a system variable for use by Log4j
