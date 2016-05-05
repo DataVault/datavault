@@ -33,8 +33,11 @@ public class Identifier {
     }
     
     private static void detectDirectory(Path basePath, Path path, HashMap<String, String> result) {
+        
+        DirectoryStream<Path> stream = null;
+        
         try {
-            DirectoryStream<Path> stream = Files.newDirectoryStream(path);
+            stream = Files.newDirectoryStream(path);
 
             for (Path entry : stream) {
                 
@@ -48,8 +51,13 @@ public class Identifier {
                     result.put(entryKey, detected);
                 }
             }
+            
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (stream != null) {
+                try { stream.close(); } catch (Exception e) {}
+            }
         }
     }
     
