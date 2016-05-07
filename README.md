@@ -8,7 +8,9 @@ Status
 
 What
 ----
-A Jisc-funded project to create an archive service for Research Data.  Funded under the 'Research at Risk' Data Spring programme.
+A Jisc-funded project to create an archive management service for Research Data.  
+
+Funded under the 'Research at Risk' Data Spring programme between March 2015 and August 2016.
 
 Who
 ---
@@ -23,6 +25,7 @@ Originally developed by:
 Further Information
 -------------------
 Project website: http://datavaultplatform.org/
+Email: info@datavaultplatform.org or contact one of the individuals listed above 
 
 Installation
 ------------
