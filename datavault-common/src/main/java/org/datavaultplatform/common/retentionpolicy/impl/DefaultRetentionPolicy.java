@@ -14,13 +14,7 @@ public class DefaultRetentionPolicy implements RetentionPolicy {
 
     public int run(Vault v) {
         Date now = new Date();
-        Date check = v.getCreationTime();
-
-        // Add five years
-        Calendar c = Calendar.getInstance();
-        c.setTime(check);
-        c.add(Calendar.YEAR, 5);
-        check = c.getTime();
+        Date check = getReviewDate(v);
 
         // Is it time for review?
         if (check.before(now)) {
@@ -30,5 +24,17 @@ public class DefaultRetentionPolicy implements RetentionPolicy {
             v.setRetentionPolicyStatus(RetentionPolicyStatus.OK);
             return RetentionPolicyStatus.OK;
         }
+    }
+
+    public Date getReviewDate(Vault v) {
+        Date check = v.getCreationTime();
+
+        // Add five years
+        Calendar c = Calendar.getInstance();
+        c.setTime(check);
+        c.add(Calendar.YEAR, 5);
+        check = c.getTime();
+
+        return check;
     }
 }

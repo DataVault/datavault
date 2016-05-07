@@ -51,7 +51,10 @@ public class VaultsService {
         // Check the policy
         policy.run(vault);
 
-        // Record we checked it
+        // Set the expiry date
+        vault.setRetentionPolicyExpiry(policy.getReviewDate(vault));
+
+        // Record when we checked it
         vault.setRetentionPolicyLastChecked(new Date());
 
         // Update and return the policy

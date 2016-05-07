@@ -14,13 +14,7 @@ public class FiveMinuteRetentionPolicy implements RetentionPolicy {
 
     public int run(Vault v) {
         Date now = new Date();
-        Date check = v.getCreationTime();
-
-        // Add five minutes
-        Calendar c = Calendar.getInstance();
-        c.setTime(check);
-        c.add(Calendar.MINUTE, 5);
-        check = c.getTime();
+        Date check = getReviewDate(v);
 
         // Is it time for review?
         if (check.before(now)) {
@@ -30,5 +24,17 @@ public class FiveMinuteRetentionPolicy implements RetentionPolicy {
             v.setRetentionPolicyStatus(RetentionPolicyStatus.OK);
             return RetentionPolicyStatus.OK;
         }
+    }
+
+    public Date getReviewDate(Vault v) {
+        Date check = v.getCreationTime();
+
+        // Add five minutes
+        Calendar c = Calendar.getInstance();
+        c.setTime(check);
+        c.add(Calendar.MINUTE, 5);
+        check = c.getTime();
+
+        return check;
     }
 }

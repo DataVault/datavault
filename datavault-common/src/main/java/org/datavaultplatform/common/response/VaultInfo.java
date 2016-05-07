@@ -18,11 +18,15 @@ public class VaultInfo {
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @ApiObjectField(description = "The date and time when this vault was created")
     private Date creationTime;
-    
+
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @ApiObjectField(description = "The date and time when the policy will expire")
+    private Date policyExpiry;
+
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @ApiObjectField(description = "The date and time when the policy check was last carried out")
     private Date policyLastChecked;
-    
+
     @ApiObjectField(description = "The name of this vault")
     private String name;
     
@@ -48,7 +52,8 @@ public class VaultInfo {
     private int policyStatus;
     
     public VaultInfo() { }
-    public VaultInfo(String id, String userID, String datasetID, Date creationTime, String name, String description, String policyID, String groupID, long vaultSize, int policyStatus, Date policyLastChecked) {
+
+    public VaultInfo(String id, String userID, String datasetID, Date creationTime, String name, String description, String policyID, String groupID, long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked) {
         this.id = id;
         this.userID = userID;
         this.datasetID = datasetID;
@@ -59,6 +64,7 @@ public class VaultInfo {
         this.groupID = groupID;
         this.vaultSize = vaultSize;
         this.policyStatus = policyStatus;
+        this.policyExpiry = policyExpiry;
         this.policyLastChecked = policyLastChecked;
     }
 
@@ -153,7 +159,15 @@ public class VaultInfo {
     public void setPolicyLastChecked(Date policyLastChecked) {
         this.policyLastChecked = policyLastChecked;
     }
-    
+
+    public Date getPolicyExpiry() {
+        return policyExpiry;
+    }
+
+    public void setPolicyExpiry(Date policyExpiry) {
+        this.policyExpiry = policyExpiry;
+    }
+
     public String getPolicyStatusStr() {
         if (policyStatus == RetentionPolicyStatus.UNCHECKED) return "Un-checked";
         else if (policyStatus == RetentionPolicyStatus.OK) return "OK";
