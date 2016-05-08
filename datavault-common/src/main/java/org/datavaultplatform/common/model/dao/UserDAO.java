@@ -13,5 +13,7 @@ public interface UserDAO {
 
     public User findById(String Id);
 
+    public List<User> search(String query);
+
     public int count();
 }

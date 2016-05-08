@@ -16,6 +16,8 @@ public class UsersService {
     public List<User> getUsers() {
         return userDAO.list();
     }
+
+    public List<User> search(String query) { return this.userDAO.search(query); }
     
     public void addPolicy(User user) {
         userDAO.save(user);
@@ -60,7 +62,6 @@ public class UsersService {
         }
 
         return false;
-
     }
 }
 
