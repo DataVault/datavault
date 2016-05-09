@@ -39,6 +39,7 @@ public class AdminController {
         model.addAttribute("retrievequeue", restService.getRetrievesQueue());
         model.addAttribute("reviewcount", restService.getRetentionPolicyStatusCount(RetentionPolicyStatus.REVIEW));
         model.addAttribute("eventcount", restService.getEventCount());
+        model.addAttribute("policycount", restService.getRetentionPolicyListing().length);
 
         return "admin/index";
     }
