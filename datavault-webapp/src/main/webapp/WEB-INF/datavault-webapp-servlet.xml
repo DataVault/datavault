@@ -107,8 +107,12 @@
     <bean id="adminRetrievesController" class="org.datavaultplatform.webapp.controllers.admin.AdminRetrievesController">
         <property name="restService" ref="restService" />
     </bean>
-    
+
     <bean id="adminEventsController" class="org.datavaultplatform.webapp.controllers.admin.AdminEventsController">
+        <property name="restService" ref="restService" />
+    </bean>
+
+    <bean id="adminRetentionPoliciesController" class="org.datavaultplatform.webapp.controllers.admin.AdminRetentionPoliciesController">
         <property name="restService" ref="restService" />
     </bean>
 

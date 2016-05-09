@@ -36,7 +36,7 @@
             <thead>
                 <tr class="tr">
                     <th>Policy</th>
-                    <th>Last checked</th>
+                    <th>Retention review due</th>
                     <th>Status</th>
                     <th></th>
                 </tr>
@@ -44,7 +44,7 @@
             <tbody>
                 <tr class="tr">
                     <td>${retentionPolicy.name?html}</td>
-                    <td><#if vault.policyLastChecked??>${vault.policyLastChecked?datetime}<#else>Never</#if></td>
+                    <td><#if vault.policyExpiry??>${vault.policyExpiry?datetime}<#else>Unknown</#if> <small>(last checked: <#if vault.policyLastChecked??>${vault.policyLastChecked?datetime}<#else>Never</#if>)</small></td>
                     <td>${vault.policyStatusStr?html}</td>
                     <td>
                         <form action="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}/checkretentionpolicy" method="post">

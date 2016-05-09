@@ -161,6 +161,9 @@ public class DepositsController {
             e.printStackTrace();
         }
 
+        // Check the retention policy of the newly created vault
+        vaultsService.checkRetentionPolicy(vault.getID());
+
         return deposit.convertToResponse();
     }
     
@@ -294,6 +297,9 @@ public class DepositsController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        // Check the retention policy of the newly created vault
+        vaultsService.checkRetentionPolicy(deposit.getVault().getID());
 
         return true;
     }

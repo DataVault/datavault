@@ -106,6 +106,9 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="row">
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -116,6 +119,17 @@
                 </div>
             </div>
         </div>
+        <div class="col-xs-6 col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Retention Policies</h3>
+                </div>
+                <div class="panel-body">
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/retentionpolicies"><span class="glyphicon glyphicon-bell"></span> ${policycount}</a></h1>
+                </div>
+            </div>
+        </div>
+    </div>
 
         </div>
     </div>

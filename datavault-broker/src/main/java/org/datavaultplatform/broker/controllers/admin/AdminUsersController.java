@@ -44,6 +44,22 @@ public class AdminUsersController {
     }
 
     @ApiMethod(
+            path = "/admin/users/search",
+            verb = ApiVerb.GET,
+            description = "Search Users",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
+    @RequestMapping(value = "/admin/users/search", method = RequestMethod.GET)
+    public List<User> getUsers(@RequestHeader(value = "X-UserID", required = true) String userID,
+                               @RequestParam String query) {
+        return usersService.search(query);
+    }
+
+    @ApiMethod(
             path = "/admin/users/count",
             verb = ApiVerb.GET,
             description = "Gets the number of Users in the DataVault",
@@ -93,7 +109,6 @@ public class AdminUsersController {
     @RequestMapping(value = "/admin/users", method = RequestMethod.PUT)
     public User editUser(@RequestHeader(value = "X-UserID", required = true) String userID,
                          @RequestBody User user) throws Exception {
-
 
         usersService.updateUser(user);
 

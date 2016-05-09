@@ -46,7 +46,7 @@ public class UserDAOImpl implements UserDAO {
         session.close();
         return users;
     }
-    
+
     @Override
     public User findById(String Id) {
         Session session = this.sessionFactory.openSession();
@@ -55,6 +55,17 @@ public class UserDAOImpl implements UserDAO {
         User user = (User)criteria.uniqueResult();
         session.close();
         return user;
+    }
+
+    @Override
+    public List<User> search(String query) {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(User.class);
+        criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%")));
+        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+        List<User> users = criteria.list();
+        session.close();
+        return users;
     }
 
     @Override

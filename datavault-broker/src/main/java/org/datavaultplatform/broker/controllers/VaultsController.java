@@ -212,6 +212,9 @@ public class VaultsController {
         vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         
         eventService.addEvent(vaultEvent);
+
+        // Check the retention policy of the newly created vault
+        vaultsService.checkRetentionPolicy(vault.getID());
         
         return vault.convertToResponse();
     }

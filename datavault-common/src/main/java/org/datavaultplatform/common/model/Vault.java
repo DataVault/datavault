@@ -74,10 +74,15 @@ public class Vault {
     // Status of the retentionPolicy
     private int retentionPolicyStatus;
 
+    // Date retention policy will expire
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date retentionPolicyExpiry;
+
     // Date retention policy was last checked
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date policyLastChecked;
+    private Date retentionPolicyLastChecked;
 
     @JsonIgnore
     @ManyToOne
@@ -143,9 +148,13 @@ public class Vault {
 
     public int getRetentionPolicyStatus() { return retentionPolicyStatus; }
 
-    public void setRetentionPolicyLastChecked(Date policyLastChecked) { this.policyLastChecked = policyLastChecked; }
+    public void setRetentionPolicyExpiry(Date retentionPolicyExpiry) { this.retentionPolicyExpiry = retentionPolicyExpiry; }
 
-    public Date getRetentionPolicyLastChecked() { return policyLastChecked; }
+    public Date getRetentionPolicyExpiry() { return retentionPolicyExpiry; }
+
+    public void setRetentionPolicyLastChecked(Date retentionPolicyLastChecked) { this.retentionPolicyLastChecked = retentionPolicyLastChecked; }
+
+    public Date getRetentionPolicyLastChecked() { return retentionPolicyLastChecked; }
 
     public void setRetentionPolicyStatus(int policyStatus) { this.retentionPolicyStatus = policyStatus; }
 
@@ -181,7 +190,8 @@ public class Vault {
                 group.getID(),
                 vaultSize,
                 retentionPolicyStatus,
-                policyLastChecked);
+                retentionPolicyExpiry,
+                retentionPolicyLastChecked);
     }
     
     @Override

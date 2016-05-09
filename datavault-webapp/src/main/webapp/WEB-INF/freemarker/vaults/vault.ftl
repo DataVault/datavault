@@ -23,6 +23,7 @@
             <b>Retention Policy:</b> ${retentionPolicy.name?html}<br/>
             <b>Group:</b> ${group.name?html}<br/>
             <b>Created:</b> ${vault.creationTime?datetime}<br/>
+            <b>Review date:</b> ${vault.policyExpiry?datetime} (Status: ${vault.policyStatusStr?html})<br/>
             <b>Size:</b> ${vault.getSizeStr()}
         </p>
 

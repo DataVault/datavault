@@ -17,6 +17,19 @@ public class EPSRCRetentionPolicy implements RetentionPolicy {
 
     public int run(Vault v) {
         Date now = new Date();
+        Date check = getReviewDate(v);
+
+        // Is it time for review?
+        if (check.before(now)) {
+            v.setRetentionPolicyStatus(RetentionPolicyStatus.REVIEW);
+            return RetentionPolicyStatus.REVIEW;
+        } else {
+            v.setRetentionPolicyStatus(RetentionPolicyStatus.OK);
+            return RetentionPolicyStatus.OK;
+        }
+    }
+
+    public Date getReviewDate(Vault v) {
         Date check;
 
         // Get all the retrieve events
@@ -37,9 +50,8 @@ public class EPSRCRetentionPolicy implements RetentionPolicy {
         // No retrieves, so use date of last deposit
         else {
             if (v.getDeposits().isEmpty()) {
-                // No deposits, so return an error
-                v.setRetentionPolicyStatus(RetentionPolicyStatus.ERROR);
-                return RetentionPolicyStatus.ERROR;
+                // No deposits, so use vault creation date
+                check = v.getCreationTime();
             } else {
                 check = v.getDeposits().get(v.getDeposits().size() - 1).getCreationTime();
             }
@@ -51,13 +63,6 @@ public class EPSRCRetentionPolicy implements RetentionPolicy {
         c.add(Calendar.YEAR, 10);
         check = c.getTime();
 
-        // Is it time for review?
-        if (check.before(now)) {
-            v.setRetentionPolicyStatus(RetentionPolicyStatus.REVIEW);
-            return RetentionPolicyStatus.REVIEW;
-        } else {
-            v.setRetentionPolicyStatus(RetentionPolicyStatus.OK);
-            return RetentionPolicyStatus.OK;
-        }
+        return check;
     }
 }
