@@ -278,6 +278,11 @@ public class RestService {
         return (User[])response.getBody();
     }
 
+    public User[] searchUsers(String query) {
+        HttpEntity<?> response = get(brokerURL + "/admin/users/search?query=" + query, User[].class);
+        return (User[])response.getBody();
+    }
+
     public int getUsersCount() {
         HttpEntity<?> response = get(brokerURL + "/admin/users/count", Integer.class);
         return (Integer)response.getBody();

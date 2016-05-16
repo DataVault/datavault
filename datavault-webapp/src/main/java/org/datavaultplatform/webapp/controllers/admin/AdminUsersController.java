@@ -22,8 +22,16 @@ public class AdminUsersController {
     }
 
     @RequestMapping(value = "/admin/users", method = RequestMethod.GET)
-    public String getUsersListing(ModelMap model) {
-        model.addAttribute("users", restService.getUsers());
+    public String getUsersListing(ModelMap model,
+                                  @RequestParam(value = "query", required = false) String query) {
+        if ((query == null) || ("".equals(query))) {
+            model.addAttribute("users", restService.getUsers());
+            model.addAttribute("query", "");
+        } else {
+            model.addAttribute("users", restService.searchUsers(query));
+            model.addAttribute("query", query);
+        }
+
         return "admin/users/index";
     }
 
