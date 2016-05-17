@@ -13,7 +13,8 @@
     <form id="create-vault" class="form" role="form" action="" method="post">
 
         <div class="form-group">
-            <label class="control-label">Vault Name:</label>
+            <label class="control-label">Vault Name</label>
+            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="A descriptive name for the Vault e.g. the project or experiment."></span>
             <@spring.bind "vault.name" />
             <input type="text"
                    class="form-control"
@@ -22,16 +23,19 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label">Description:</label>
+            <label class="control-label">Description</label>
+            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="A detailed description of the contents or purpose of this Vault."></span>
             <@spring.bind "vault.description" />
             <textarea type="text"
                       class="form-control"
                       name="description"
-                      rows="6" cols="60"></textarea>
+                      rows="4" cols="60"></textarea>
         </div>
 
         <div class="form-group">
-            <label class="control-label">Relates to: </label>
+            <label class="control-label">Relates to</label>
+            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="An external metadata record that describes this Vault. For example, a Dataset record in a CRIS system."></span>
+            <br>
             <select id="datasetID" name="datasetID" class='dataset-select'>
                 <#list datasets as dataset>
                     <option value="${dataset.getID()}">${dataset.name?html}</option>
@@ -40,7 +44,9 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label">Retention Policy: </label>
+            <label class="control-label">Retention Policy</label>
+            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="The set of rules which govern how long this data should be kept. This may correspond to the requirements of a specific organisation or funder."></span>
+            <br>
             <select id="policyID" name="policyID" class='retentionPolicy-select'>
                 <#list policies as retentionPolicy>
                     <option value="${retentionPolicy.getID()}">${retentionPolicy.name?html}</option>
@@ -49,18 +55,20 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label">Group: </label>
+            <label class="control-label">Group</label>
+            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="The Group which is associated with this Vault. A group is used to establish a chain of custody over data in a Vault. A Group administrator will be able to view information about a Vault."></span>
+            <br>
             <select id="groupID" name="groupID" class='group-select'>
                 <#list groups as group>
                     <option value="${group.getID()}">${group.name?html}</option>
                 </#list>
             </select>
         </div>
-
+        
         <input type="hidden" id="submitAction" name="action" value="submit"/>
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
-        <div class="form-group">
+        <div class="btn-toolbar">
             <button type="submit" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-folder-close"></span> Create new Vault</button>
             <button type="submit" value="cancel" class="btn btn-danger cancel">Cancel</button>
         </div>
@@ -101,6 +109,10 @@
         $('.dataset-select').selectpicker();
         $('.retentionPolicy-select').selectpicker();
         $('.group-select').selectpicker();
+        
+        $('[data-toggle="tooltip"]').tooltip({
+            'placement': 'top'
+        });
     });
 </script>
 

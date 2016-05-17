@@ -48,8 +48,10 @@
         <div class="form-group">
             <label class="col-sm-2 control-label"></label>
             <div class="col-sm-10">
-                <button type="submit" name="action" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-bullhorn"></span> Send feedback</button>
-                <button type="submit" name="action" value="cancel" class="btn btn-danger cancel">Cancel</button>
+                <div class="btn-toolbar">
+                    <button type="submit" name="action" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-bullhorn"></span> Send feedback</button>
+                    <button type="submit" name="action" value="cancel" class="btn btn-danger cancel">Cancel</button>
+                </div>
             </div>
         </div>
 
