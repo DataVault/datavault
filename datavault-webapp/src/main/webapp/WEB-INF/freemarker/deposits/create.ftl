@@ -74,7 +74,7 @@
             });
         </script>
 
-        <div class="form-group">
+        <div class="btn-toolbar">
             <button type="submit" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-save"></span> Deposit data</button>
             <button type="submit" value="cancel" class="btn btn-danger cancel">Cancel</button>
         </div>

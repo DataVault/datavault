@@ -68,7 +68,7 @@
         <input type="hidden" id="submitAction" name="action" value="submit"/>
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
-        <div class="form-group">
+        <div class="btn-toolbar">
             <button type="submit" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-open"></span> Retrieve data</button>
             <button type="submit" value="cancel" class="btn btn-danger cancel">Cancel</button>
         </div>
