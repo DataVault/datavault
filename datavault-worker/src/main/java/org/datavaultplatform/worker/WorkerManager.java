@@ -6,6 +6,7 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,15 @@ public class WorkerManager {
     public static void main(String [] args) throws IOException, InterruptedException {
         
         // Bind $DATAVAULT_HOME to a system variable for use by Log4j
+        if (System.getenv("DATAVAULT_HOME") == null) {
+            System.err.println("DATAVAULT_HOME environment variable not set");
+            System.exit(1);
+        }
+        File check = new File(System.getenv("DATAVAULT_HOME"));
+        if (!check.exists()) {
+            System.err.println("DATAVAULT_HOME environment does not exist: " + System.getenv("DATAVAULT_HOME"));
+            System.exit(1);
+        }
         System.setProperty("datavault-home", System.getenv("DATAVAULT_HOME"));
         
         Logger logger = LoggerFactory.getLogger(WorkerManager.class);
