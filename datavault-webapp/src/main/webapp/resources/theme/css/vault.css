@@ -218,6 +218,7 @@ ol.progtrckr li {
     display: inline-block;
     text-align: center;
     line-height: 3em;
+    white-space: nowrap;
 }
 
 ol.progtrckr[data-progtrckr-steps="2"] li { width: 50%; }
