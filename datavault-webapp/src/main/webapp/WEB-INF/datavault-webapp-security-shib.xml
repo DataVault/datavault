@@ -9,13 +9,21 @@
 	
     <security:http pattern="/resources/**" security="none"/>
 
-    <security:http>
+    <security:http entry-point-ref="http403EntryPoint">
+        <security:intercept-url pattern="/auth/**" access="hasRole('N/A_FOR_SHIB')" />
+        <security:intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')" />
+        <security:intercept-url pattern="/**" access="hasRole('ROLE_USER')" />
+
         <security:custom-filter position="PRE_AUTH_FILTER" ref="shibFilter" />
     </security:http>
 
-    <bean id="shibFilter" class="org.datavaultplatform.webapp.authentication.ShibAuthenticationFilter"/>
+    <bean id="shibFilter" class="org.datavaultplatform.webapp.authentication.ShibAuthenticationFilter">
+        <property name="principalRequestHeader" value="eppn"/>
+        <property name="exceptionIfHeaderMissing" value="true"/>
+        <property name="authenticationManager" ref="authenticationManager" />
+    </bean>
 
-    <security:authentication-manager>
+    <security:authentication-manager alias="authenticationManager">
         <security:authentication-provider ref="shibAuthenticationProvider"/>
 	</security:authentication-manager>
 
@@ -23,4 +31,5 @@
         <property name="restService" ref="restService" />
     </bean>
 
+    <bean id="http403EntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint"/>
 </beans>

@@ -33,9 +33,25 @@ public class UsersController {
         this.userKeyPairService = userKeyPairService;
     }
     public void setActiveDir(String activeDir) {
-        this.activeDir = activeDir;
+        this. activeDir = activeDir;
     }
 
+    @ApiMethod(
+            path = "/users}",
+            verb = ApiVerb.POST,
+            description = "Create a new DataVault User",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
+    })
+    @RequestMapping(value = "/users", method = RequestMethod.POST)
+    public User addUser(@RequestBody User user) throws Exception {
+        usersService.addUser(user);
+        return user;
+    }
 
     @ApiMethod(
             path = "/users/{userid}",

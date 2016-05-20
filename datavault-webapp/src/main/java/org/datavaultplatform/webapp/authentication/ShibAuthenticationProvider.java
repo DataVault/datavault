@@ -3,6 +3,8 @@ package org.datavaultplatform.webapp.authentication;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.webapp.services.RestService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -24,6 +26,8 @@ import java.util.List;
 
 public class ShibAuthenticationProvider implements AuthenticationProvider {
 
+    private static final Logger logger = LoggerFactory.getLogger(ShibAuthenticationProvider.class);
+
     private RestService restService;
 
     public void setRestService(RestService restService) {
@@ -33,16 +37,21 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String name = authentication.getName();
-        String password = authentication.getCredentials().toString();
-
-        // todo : why am I looking for a password?? I guess that in Shib auth I shouldn't have it, so take out this bit of code.
+        String password = "N/A";
 
         // Does the user already exist?
         if (!restService.userExists(new ValidateUser(name, password))) {
             // todo - first time the user has logged on so create a new user account
+            User user = new User();
+            user.setID(name);
+            user.setAdmin(false);
+            user.setName("Get this from Shib attributes");
+            restService.addUser(user);
         } else {
             // todo - something I guess, but I don't know what...
         }
+
+        logger.info("Shibboleth authentication success for " + name);
 
         List<GrantedAuthority> grantedAuths = new ArrayList<>();
         grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
