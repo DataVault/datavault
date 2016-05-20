@@ -341,7 +341,7 @@ public class RestService {
     }
 
     public User addUser(User user) {
-        HttpEntity<?> response = post(brokerURL + "/admin/users/", User.class, user);
+        HttpEntity<?> response = post(brokerURL + "/users/", User.class, user);
         return (User)response.getBody();
     }
 

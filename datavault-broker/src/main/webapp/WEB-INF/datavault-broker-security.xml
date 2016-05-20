@@ -17,13 +17,13 @@
 
     <!--  REST service. Each request is discrete, no state required. -->
     <security:http pattern="/**" create-session="stateless" entry-point-ref="http403EntryPoint">
-        <security:custom-filter position="PRE_AUTH_FILTER" ref="restFilter" />
+        <!--<security:custom-filter position="PRE_AUTH_FILTER" ref="restFilter" />-->
         <!-- CSRF not applicable to REST service -->
         <security:csrf disabled="true"/>
         <!-- Note: Currently disabled but maybe we want to configure an Anonymous filter for some login functionality?? -->
-        <security:anonymous enabled="false"/>
+        <!--<security:anonymous enabled="false"/> -->
 
-        <security:intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')" />
+        <!--<security:intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')" /> -->
     </security:http>
 
     <!-- If user is not authorised for request then throw back a 403 -->
