@@ -163,7 +163,7 @@
         </div>
 
         <#if deposit.status.name() == "COMPLETE">
-            <a id="retrievebtn" class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve">
+            <a id="retrievebtn" class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve" disabled='disabled'>
                 <span class="glyphicon glyphicon-open" aria-hidden="true"></span> Retrieve data
             </a>
         </#if>
@@ -249,6 +249,7 @@
                 <!-- an active job -->
                 updateInterval = 500;
                 $('#progtrckr').show()
+                $('#retrievebtn').attr('disabled', 'disabled');
                 displayJob(job)
                 
                 if (depositStatus == "NOT_STARTED" && depositInProgress == false) {
@@ -269,6 +270,7 @@
                     // Refresh the deposit
                     location.reload(true)
                 }
+                $('#retrievebtn').removeAttr('disabled');
             }
         }
     }
