@@ -74,9 +74,13 @@ public class DepositsService {
         }
         
         Vault vault = deposit.getVault();
-
-        if (!vault.equals(deposit.getVault())) {
-            throw new Exception("Invalid Vault ID");
+        
+        if (vault == null) {
+            throw new Exception("Vault does not exist");
+        }
+        
+        if (!vault.getUser().equals(user)) {
+            throw new Exception("Access denied");
         }
 
         return deposit;

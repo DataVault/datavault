@@ -51,7 +51,7 @@
                                 <td>${deposit.fileOrigin?html}</td>
                                 <td>${deposit.shortFilePath?html}</td>
                                 <td>
-                                    <div id="deposit-status">
+                                    <div id="deposit-status" class="job-status">
                                         <#if deposit.status.name() == "COMPLETE">
                                             <div class="text-success">
                                                 <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>&nbsp;Complete
