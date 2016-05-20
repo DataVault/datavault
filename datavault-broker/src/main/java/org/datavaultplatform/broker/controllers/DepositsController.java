@@ -229,6 +229,14 @@ public class DepositsController {
         User user = usersService.getUser(userID);
         Deposit deposit = depositsService.getUserDeposit(user, depositID);
 
+        List<Job> jobs = deposit.getJobs();
+        for (Job job : jobs) {
+            if (job.getState() != job.getStates().size() - 1) {
+                // There's an in-progress job for this deposit
+                throw new IllegalArgumentException("Job in-progress for this Deposit");
+            }
+        }
+        
         String fullPath = retrieve.getRetrievePath();
         String storageID, retrievePath;
         if (!fullPath.contains("/")) {
