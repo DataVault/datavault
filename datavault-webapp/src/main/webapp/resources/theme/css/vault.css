@@ -67,11 +67,13 @@ h6, .h6 {
     background-color: #428bca;
 }
 
-
-
-
-
-
+/* Breadcrumb overflow */
+.breadcrumb li {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 400px;
+}
 
 /* Nav links */
 .nav-item {
