@@ -231,7 +231,7 @@ public class DepositsController {
 
         List<Job> jobs = deposit.getJobs();
         for (Job job : jobs) {
-            if (job.getState() != job.getStates().size() - 1) {
+            if (job.isError() == false && job.getState() != job.getStates().size() - 1) {
                 // There's an in-progress job for this deposit
                 throw new IllegalArgumentException("Job in-progress for this Deposit");
             }

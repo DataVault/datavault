@@ -244,6 +244,7 @@
                 }
                 $('#error-label').text(job.errorMessage)
                 $('#job-error').show()
+                $('#retrievebtn').removeAttr('disabled');
                 
             } else if (job.state != job.states.length - 1) {
                 <!-- an active job -->
