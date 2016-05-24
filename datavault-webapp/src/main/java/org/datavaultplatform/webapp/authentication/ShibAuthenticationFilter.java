@@ -17,9 +17,13 @@ public class ShibAuthenticationFilter extends AbstractPreAuthenticatedProcessing
 
     // Question - Should we extend RequestHeaderAuthenticationFilter instead??
 
-    private String principalRequestHeader = "SHIB_USER";  // todo - make this a variable set in config
-
+    private String principalRequestHeader;
     private boolean exceptionIfHeaderMissing = true;
+
+    public void setPrincipalRequestHeader(String principalRequestHeader) {
+        this.principalRequestHeader = principalRequestHeader;
+    }
+
 
     /**
      * Read and returns the header named by {@code principalRequestHeader} from the
