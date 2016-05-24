@@ -11,7 +11,7 @@
                 <h4 class="modal-title" id="confirmRemovalLabel">Confirm removal of group ownership</h4>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to remove <b><i class="remove-user"></i></b> from the Owners of the <b><i class="remove-group"></i></b> group?</p>
+                <p>Are you sure you want to remove <b><i class="remove-user"></i></b> as an owner of the <b><i class="remove-group"></i></b> group?</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
