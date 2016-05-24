@@ -33,9 +33,18 @@
                             <td>
                                 <ul class="list-group">
                                     <#list group.getOwners() as user>
-                                        <li class="list-group-item"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> ${user.name?html} (${user.getID()?html})</li>
+                                        <li class="list-group-item"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> ${user.name?html} (${user.getID()?html})
+                                            <a class="btn btn-xs btn-danger pull-right" href="${springMacroRequestContext.getContextPath()}/admin/groups/${group.ID}/remove/${user.getID()}">
+                                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
+                                            </a>
+                                        </li>
                                    </#list>
                                 </ul>
+                                <form>
+                                    <a class="btn btn-default" href="${springMacroRequestContext.getContextPath()}/admin/groups/${group.ID}/add">
+                                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Owner
+                                    </a>
+                                </form>
                             </td>
                         </tr>
                     </#list>
@@ -43,6 +52,12 @@
             </table>
         </div>
     </#if>
+
+    <form>
+        <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/admin/groups/create">
+            <span class="glyphicon glyphicon-education" aria-hidden="true"></span> Create new Group
+        </a>
+    </form>
 
 </div>
 </@layout.vaultLayout>
