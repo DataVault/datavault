@@ -36,6 +36,17 @@ public class GroupsController {
     public List<Group> getGroups(@RequestHeader(value = "X-UserID", required = true) String userID) {
         return groupsService.getGroups();
     }
+    
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
+    })
+    @RequestMapping(value = "/groups", method = RequestMethod.POST)
+    public Group addGroup(@RequestHeader(value = "X-UserID", required = true) String userID,
+                          @RequestBody Group group) throws Exception {
+        groupsService.addGroup(group);
+        return group;
+    }
 
     @ApiMethod(
             path = "/groups/count",

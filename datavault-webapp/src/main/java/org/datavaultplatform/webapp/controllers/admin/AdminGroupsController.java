@@ -5,10 +5,7 @@ import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * User: Stuart Lewis
@@ -39,6 +36,28 @@ public class AdminGroupsController {
         model.addAttribute("vaultCounts", vaultCounts);
 
         return "admin/groups/index";
+    }
+    
+    // Return an empty 'create new group' page
+    @RequestMapping(value = "/admin/groups/create", method = RequestMethod.GET)
+    public String createGroup(ModelMap model) {
+
+        // pass the view an empty Group since the form expects it
+        model.addAttribute("group", new Group());
+        
+        return "admin/groups/create";
+    }
+    
+    // Process the completed 'create new group' page
+    @RequestMapping(value = "/admin/groups/create", method = RequestMethod.POST)
+    public String addGroup(@ModelAttribute Group group, ModelMap model, @RequestParam String action) {
+        // Was the cancel button pressed?
+        if ("cancel".equals(action)) {
+            return "redirect:/";
+        }
+
+        Group newGroup = restService.addGroup(group);
+        return "redirect:/admin/groups/";      
     }
 }
 

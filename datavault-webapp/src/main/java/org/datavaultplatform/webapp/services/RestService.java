@@ -335,6 +335,11 @@ public class RestService {
         return (DepositInfo)response.getBody();
     }
     
+    public Group addGroup(Group group) {
+        HttpEntity<?> response = post(brokerURL + "/groups/", Group.class, group);
+        return (Group)response.getBody();
+    }
+    
     public Boolean retrieveDeposit(String depositID, Retrieve retrieve) {
         HttpEntity<?> response = post(brokerURL + "/deposits/" + depositID + "/retrieve", Boolean.class, retrieve);
         return (Boolean)response.getBody();

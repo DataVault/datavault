@@ -13,7 +13,7 @@ public class GroupsService {
         return groupDAO.list();
     }
 
-    public void addPolicy(Group group) {
+    public void addGroup(Group group) {
         groupDAO.save(group);
     }
 
