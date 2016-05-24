@@ -22,6 +22,10 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    // Password
+    @Column(name = "email")
+    private String email;
+
     // Is this user an administrator?
     @Column(name = "admin", nullable = false)
     private Boolean admin;
@@ -60,6 +64,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Boolean isAdmin() {
