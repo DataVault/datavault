@@ -17,7 +17,7 @@ public class GroupsService {
         groupDAO.save(group);
     }
 
-    public void updateUser(Group group) {
+    public void updateGroup(Group group) {
         groupDAO.update(group);
     }
 

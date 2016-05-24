@@ -71,7 +71,17 @@ public class VaultsService {
             throw new Exception("Vault '" + vaultID + "' does not exist");
         }
 
-        if (!vault.getUser().equals(user)) {
+        Boolean userVault = false;
+        if (vault.getUser().equals(user)) {
+            userVault = true;
+        }
+        
+        Boolean groupOwner = false;
+        if (vault.getGroup().getOwners().contains(user)) {
+            groupOwner = true;
+        }
+        
+        if (!userVault && !groupOwner) {
             throw new Exception("Access denied");
         }
 
