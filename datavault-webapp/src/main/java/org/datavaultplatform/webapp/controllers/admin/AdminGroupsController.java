@@ -53,7 +53,7 @@ public class AdminGroupsController {
     public String addGroup(@ModelAttribute Group group, ModelMap model, @RequestParam String action) {
         // Was the cancel button pressed?
         if ("cancel".equals(action)) {
-            return "redirect:/";
+            return "redirect:/admin/groups/";
         }
 
         Group newGroup = restService.addGroup(group);
