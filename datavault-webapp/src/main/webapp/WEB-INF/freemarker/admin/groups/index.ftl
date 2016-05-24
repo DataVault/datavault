@@ -3,6 +3,24 @@
 <#global nav="admin">
 <@layout.vaultLayout>
 
+<div class="modal fade" id="confirm-removal" tabindex="-1" role="dialog" aria-labelledby="confirmRemovalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="confirmRemovalLabel">Confirm removal of group ownership</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to remove <b><i class="remove-user"></i></b> from the Owners of the <b><i class="remove-group"></i></b> group?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger btn-ok">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container">
 
     <ol class="breadcrumb">
@@ -34,7 +52,7 @@
                                 <ul class="list-group">
                                     <#list group.getOwners() as user>
                                         <li class="list-group-item"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> ${user.name?html} (${user.getID()?html})
-                                            <a class="btn btn-xs btn-danger pull-right" href="${springMacroRequestContext.getContextPath()}/admin/groups/${group.ID}/remove/${user.getID()}">
+                                            <a class="btn btn-xs btn-danger pull-right" href="#" data-record-user="${user.getID()}" data-record-group="${group.ID}" data-toggle="modal" data-target="#confirm-removal">
                                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                                             </a>
                                         </li>
@@ -60,4 +78,15 @@
     </form>
 
 </div>
+
+<script>
+    // Bind properties to the removal confirmation dialog
+    $('#confirm-removal').on('show.bs.modal', function(e) {
+        var data = $(e.relatedTarget).data();
+        $('.remove-user', this).text(data.recordUser);
+        $('.remove-group', this).text(data.recordGroup);
+        $('.btn-ok', this).data('recordUser', data.recordUser, 'recordGroup', data.recordGroup);
+    });
+</script>
+
 </@layout.vaultLayout>
