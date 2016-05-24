@@ -5,17 +5,21 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.util.List;
+
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="Groups")
 public class Group {
-    // User Identifier (not a UUID)
+    
+    // Group Identifier (not a UUID)
     @Id
+    @Pattern(regexp = "[a-zA-Z0-9-_/ ]+")
     @Column(name = "id", unique = true)
     private String id;
-
+    
     // Name of the group
     @Column(name = "name", nullable = false)
     private String name;

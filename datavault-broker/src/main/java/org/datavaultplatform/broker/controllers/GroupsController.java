@@ -9,6 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.datavaultplatform.broker.services.UsersService;
+import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.response.VaultInfo;
 
@@ -17,9 +19,14 @@ import org.datavaultplatform.common.response.VaultInfo;
 public class GroupsController {
     
     private GroupsService groupsService;
-    
+    private UsersService usersService;
+
     public void setGroupsService(GroupsService groupsService) {
         this.groupsService = groupsService;
+    }
+    
+    public void setUsersService(UsersService usersService) {
+        this.usersService = usersService;
     }
 
     @ApiMethod(
@@ -44,6 +51,16 @@ public class GroupsController {
     @RequestMapping(value = "/groups", method = RequestMethod.POST)
     public Group addGroup(@RequestHeader(value = "X-UserID", required = true) String userID,
                           @RequestBody Group group) throws Exception {
+
+        User user = usersService.getUser(userID);
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+        
+        if (!user.isAdmin()) {
+            throw new Exception("Access denied");
+        }
+        
         groupsService.addGroup(group);
         return group;
     }

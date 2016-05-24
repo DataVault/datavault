@@ -27,6 +27,7 @@
         <spring-security.version>4.0.2.RELEASE</spring-security.version>
         <spring-rabbit.version>1.4.5.RELEASE</spring-rabbit.version>
         <hibernate.version>4.3.10.Final</hibernate.version>
+        <hibernate-validator.version>4.3.2.Final</hibernate-validator.version>
         <mysql.version>5.1.35</mysql.version>
         <root.basedir>${basedir}</root.basedir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -131,6 +132,12 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>${hibernate.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate-validator.version}</version>
             </dependency>
 
             <dependency>

@@ -52,10 +52,15 @@
             $('#submitAction').val($(this).attr('value'));
         });
         
+        $.validator.addMethod("identifier", function(value, element) {
+            return this.optional(element) || /^[a-zA-Z0-9-_/ ]+$/i.test(value);
+        }, "Group Identifiers must be made up of uppercase letters, lowercase letters, numbers, dashes or underscores.");
+
         $('#create-vault').validate({
             rules: {
                 ID: {
-                    required: true
+                    required: true,
+                    identifier: true
                 },
                 name: {
                     required: true
