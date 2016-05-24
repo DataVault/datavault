@@ -51,6 +51,8 @@ public class RestService {
             entity = new HttpEntity(payload, headers);
         } else if (method == HttpMethod.POST) {
             entity = new HttpEntity(payload, headers);
+        } else if (method == HttpMethod.DELETE) {
+            entity = new HttpEntity(headers);
         } else {
             throw new IllegalArgumentException("REST method not implemented!");
         }
@@ -71,6 +73,10 @@ public class RestService {
     
     public HttpEntity<?> post(String url, Class clazz, Object payload) {
         return exchange(url, clazz, HttpMethod.POST, payload);
+    }
+    
+    public HttpEntity<?> delete(String url, Class clazz) {
+        return exchange(url, clazz, HttpMethod.DELETE, null);
     }
     
     /* GET requests */
@@ -392,5 +398,10 @@ public class RestService {
     public String notifyLogout(CreateClientEvent clientEvent) {
         HttpEntity<?> response = put(brokerURL + "/notify/logout", String.class, clientEvent);
         return (String)response.getBody();
+    }
+    
+    /* DELETE requests */
+    public void removeGroupOwner(String groupId, String userId) {
+        HttpEntity<?> response = delete(brokerURL + "/groups/" + groupId + "/" + userId, String.class);
     }
 }

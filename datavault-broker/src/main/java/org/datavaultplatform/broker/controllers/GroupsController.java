@@ -65,6 +65,34 @@ public class GroupsController {
         return group;
     }
 
+        @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
+    })
+    @RequestMapping(value = "/groups/{groupid}/{owneruserid}", method = RequestMethod.DELETE)
+    public @ResponseBody void removeGroupOwner(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                               @PathVariable("groupid") String groupId,
+                                               @PathVariable("owneruserid") String ownerUserId) throws Exception {
+
+        User user = usersService.getUser(userID);
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+        
+        if (!user.isAdmin()) {
+            throw new Exception("Access denied");
+        }
+        
+        User ownerUser = usersService.getUser(ownerUserId);
+        if (ownerUser == null) {
+            throw new Exception("Owner User '" + ownerUserId + "' does not exist");
+        }
+        
+        Group group = groupsService.getGroup(groupId);
+        group.getOwners().remove(ownerUser);
+        groupsService.updateGroup(group);
+    }
+    
     @ApiMethod(
             path = "/groups/count",
             verb = ApiVerb.GET,

@@ -59,6 +59,14 @@ public class AdminGroupsController {
         Group newGroup = restService.addGroup(group);
         return "redirect:/admin/groups/";      
     }
+    
+    // Remove a group owner
+    @RequestMapping(value = "/admin/groups/{groupid}/{userid}", method = RequestMethod.DELETE)
+    public @ResponseBody void removeGroupOwner(ModelMap model,
+                                               @PathVariable("groupid") String groupId,
+                                               @PathVariable("userid") String userId) {
+        restService.removeGroupOwner(groupId, userId);
+    }
 }
 
 

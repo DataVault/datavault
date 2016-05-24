@@ -52,7 +52,7 @@
                                 <ul class="list-group">
                                     <#list group.getOwners() as user>
                                         <li class="list-group-item"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> ${user.name?html} (${user.getID()?html})
-                                            <a class="btn btn-xs btn-danger pull-right" href="#" data-record-user="${user.getID()}" data-record-group="${group.ID}" data-toggle="modal" data-target="#confirm-removal">
+                                            <a class="btn btn-xs btn-danger pull-right" href="#" data-user="${user.getID()}" data-group="${group.ID}" data-toggle="modal" data-target="#confirm-removal">
                                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                                             </a>
                                         </li>
@@ -80,13 +80,40 @@
 </div>
 
 <script>
-    // Bind properties to the removal confirmation dialog
+    // Bind properties to the user removal confirmation dialog
     $('#confirm-removal').on('show.bs.modal', function(e) {
         var data = $(e.relatedTarget).data();
-        $('.remove-user', this).text(data.recordUser);
-        $('.remove-group', this).text(data.recordGroup);
-        $('.btn-ok', this).data('recordUser', data.recordUser, 'recordGroup', data.recordGroup);
+        $('.remove-user', this).text(data.user);
+        $('.remove-group', this).text(data.group);
+        $('.btn-ok', this).data('user', data.user);
+        $('.btn-ok', this).data('group', data.group);
     });
+    
+    // Bind OK button for user removal confirmation dialog
+    $('#confirm-removal').on('click', '.btn-ok', function(e) {
+        var $modalDiv = $(e.delegateTarget);
+        var user = $(this).data('user');
+        var group = $(this).data('group');
+        
+        $.ajax({
+            url: '${springMacroRequestContext.getContextPath()}/admin/groups/' + group + '/' + user,
+            type: 'DELETE',
+            success: function(result) {
+                $modalDiv.modal('hide');
+                location.reload(true);
+            }
+        });
+    });
+    
+    // Add Spring Security CSRF header to ajax requests
+    $(function () {
+        var token = $("meta[name='_csrf']").attr("content");
+        var header = $("meta[name='_csrf_header']").attr("content");
+        $(document).ajaxSend(function(e, xhr, options) {
+            xhr.setRequestHeader(header, token);
+        });
+    });
+
 </script>
 
 </@layout.vaultLayout>
