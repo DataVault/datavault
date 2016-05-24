@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * In truth this class does not do any true authentication as it is assumed the user was authenticated by the client
@@ -56,19 +57,22 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
         logger.debug("preAuthenticatedPrincipal = " + name + ", trying to authenticate");
 
-        User user = usersService.getUser(name);
-        if (user == null) {
-            logger.debug("No matching User record found for Id " + name);
-            throw new RestAuthenticationException("Invalid user Id : " + name);
-        }
+        // Note: name may be empty in some circumstances eg. a request to add a new user for a first time Shibboleth authenticated user.
+        if ((name != null) && (!name.equals(""))) {
+            User user = usersService.getUser(name);
+            if (user == null) {
+                logger.debug("No matching User record found for Id " + name);
+                throw new RestAuthenticationException("Invalid user Id : " + name);
+            }
 
-        // If we got here then we found a matching User record.
-        if (user.isAdmin()) {
-            logger.debug(user.getName() + " is an admin user");
-            grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-        } else {
-            logger.debug(user.getName() + " is an ordinary user");
-            grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
+            // If we got here then we found a matching User record.
+            if (user.isAdmin()) {
+                logger.debug(user.getName() + " is an admin user");
+                grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            } else {
+                logger.debug(user.getName() + " is an ordinary user");
+                grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
+            }
         }
 
         RestWebAuthenticationDetails rwad = (RestWebAuthenticationDetails) authentication.getDetails();
