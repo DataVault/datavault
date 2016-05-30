@@ -33,8 +33,8 @@
     </bean>
 
     <bean id="shibWebAuthenticationDetailsSource" class="org.datavaultplatform.webapp.authentication.ShibWebAuthenticationDetailsSource">
-        <property name="firstnameRequestHeader" value="sn"/>
-        <property name="lastnameRequestHeader" value="givenName"/>
+        <property name="firstnameRequestHeader" value="givenName"/>
+        <property name="lastnameRequestHeader" value="sn"/>
         <property name="emailRequestHeader" value="mail"/>
     </bean>
 
