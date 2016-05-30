@@ -13,10 +13,14 @@ public class User {
     @Id
     @Column(name = "id", unique = true)
     private String id;
-    
-    // Name of the user
-    @Column(name = "name", nullable = false)
-    private String name;
+
+    // First name of the user
+    @Column(name = "firstname", nullable = false)
+    private String firstname;
+
+    // Last name of the user
+    @Column(name = "lastname", nullable = false)
+    private String lastname;
 
     // Password
     @Column(name = "password")
@@ -42,21 +46,28 @@ public class User {
     private List<FileStore> fileStores;
     
     public User() {}
-    public User(String name) {
-        this.name = name;
-    }
 
     public void setID(String id) {
         this.id = id;
     }
 
     public String getID() { return id; }
-    
-    public void setName(String name) {
-        this.name = name;
+
+    public String getFirstname() {
+        return firstname;
     }
 
-    public String getName() { return name; }
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
+    }
 
     public String getPassword() {
         return password;

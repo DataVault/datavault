@@ -83,7 +83,7 @@ public class AdminUsersController {
         // todo: This should be considered hacky test code, no more.
 
         User existingUser = restService.getUser(userID);
-        existingUser.setName(user.getName());
+        //existingUser.setName(user.getName());
         restService.editUser(existingUser);
 
         return "vaults/index";
