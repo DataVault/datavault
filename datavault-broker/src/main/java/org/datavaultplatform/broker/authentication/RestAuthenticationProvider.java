@@ -67,10 +67,10 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
             // If we got here then we found a matching User record.
             if (user.isAdmin()) {
-                logger.debug(user.getName() + " is an admin user");
+                logger.debug(user.getID() + " is an admin user");
                 grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
             } else {
-                logger.debug(user.getName() + " is an ordinary user");
+                logger.debug(user.getID() + " is an ordinary user");
                 grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
             }
         }

@@ -39,13 +39,17 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
         String name = authentication.getName();
         String password = "N/A";
 
+        ShibWebAuthenticationDetails swad = (ShibWebAuthenticationDetails) authentication.getDetails();
+
         // Does the user already exist?
         if (!restService.userExists(new ValidateUser(name, password))) {
-            // todo - first time the user has logged on so create a new user account
+            // First time the user has logged on so create a new user account
             User user = new User();
             user.setID(name);
             user.setAdmin(false);
-            user.setName("Get this from Shib attributes");
+            user.setFirstname(swad.getFirstname());
+            user.setLastname(swad.getLastname());
+            user.setEmail(swad.getEmail());
             restService.addUser(user);
         } else {
             // todo - something I guess, but I don't know what...

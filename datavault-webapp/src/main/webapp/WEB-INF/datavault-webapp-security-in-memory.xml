@@ -32,37 +32,37 @@
     <security:authentication-manager>
         <security:authentication-provider>
             <security:user-service>
-                <security:user name="USER1" password="password1" authorities="ROLE_USER" />
-                <security:user name="USER2" password="password2" authorities="ROLE_USER" />
-                <security:user name="USER3" password="password3" authorities="ROLE_USER" />
-                <security:user name="USER4" password="password4" authorities="ROLE_USER" />
-                <security:user name="USER5" password="password5" authorities="ROLE_USER" />
-                <security:user name="USER6" password="password6" authorities="ROLE_USER" />
-                <security:user name="USER7" password="password7" authorities="ROLE_USER" />
-                <security:user name="USER8" password="password8" authorities="ROLE_USER" />
-                <security:user name="USER9" password="password9" authorities="ROLE_USER" />
-                <security:user name="USER10" password="password10" authorities="ROLE_USER" />
-                <security:user name="USER11" password="password11" authorities="ROLE_USER" />
-                <security:user name="USER12" password="password12" authorities="ROLE_USER" />
-                <security:user name="USER13" password="password13" authorities="ROLE_USER" />
-                <security:user name="USER14" password="password14" authorities="ROLE_USER" />
-                <security:user name="USER15" password="password15" authorities="ROLE_USER" />
-                <security:user name="USER16" password="password16" authorities="ROLE_USER" />
-                <security:user name="USER17" password="password17" authorities="ROLE_USER" />
-                <security:user name="USER18" password="password18" authorities="ROLE_USER" />
-                <security:user name="USER19" password="password19" authorities="ROLE_USER" />
-                <security:user name="USER20" password="password20" authorities="ROLE_USER" />
-                <security:user name="USER21" password="password21" authorities="ROLE_USER" />
-                <security:user name="USER22" password="password22" authorities="ROLE_USER" />
-                <security:user name="USER23" password="password23" authorities="ROLE_USER" />
-                <security:user name="USER24" password="password24" authorities="ROLE_USER" />
-                <security:user name="USER25" password="password25" authorities="ROLE_USER" />
-                <security:user name="USER26" password="password26" authorities="ROLE_USER" />
-                <security:user name="USER27" password="password27" authorities="ROLE_USER" />
-                <security:user name="USER28" password="password28" authorities="ROLE_USER" />
-                <security:user name="USER29" password="password29" authorities="ROLE_USER" />
-                <security:user name="USER30" password="password30" authorities="ROLE_USER" />
-                <security:user name="ADMIN1" password="password1" authorities="ROLE_USER" />
+                <security:user name="user1" password="password1" authorities="ROLE_USER" />
+                <security:user name="user2" password="password2" authorities="ROLE_USER" />
+                <security:user name="user3" password="password3" authorities="ROLE_USER" />
+                <security:user name="user4" password="password4" authorities="ROLE_USER" />
+                <security:user name="user5" password="password5" authorities="ROLE_USER" />
+                <security:user name="user6" password="password6" authorities="ROLE_USER" />
+                <security:user name="user7" password="password7" authorities="ROLE_USER" />
+                <security:user name="user8" password="password8" authorities="ROLE_USER" />
+                <security:user name="user9" password="password9" authorities="ROLE_USER" />
+                <security:user name="user10" password="password10" authorities="ROLE_USER" />
+                <security:user name="user11" password="password11" authorities="ROLE_USER" />
+                <security:user name="user12" password="password12" authorities="ROLE_USER" />
+                <security:user name="user13" password="password13" authorities="ROLE_USER" />
+                <security:user name="user14" password="password14" authorities="ROLE_USER" />
+                <security:user name="user15" password="password15" authorities="ROLE_USER" />
+                <security:user name="user16" password="password16" authorities="ROLE_USER" />
+                <security:user name="user17" password="password17" authorities="ROLE_USER" />
+                <security:user name="user18" password="password18" authorities="ROLE_USER" />
+                <security:user name="user19" password="password19" authorities="ROLE_USER" />
+                <security:user name="user20" password="password20" authorities="ROLE_USER" />
+                <security:user name="user21" password="password21" authorities="ROLE_USER" />
+                <security:user name="user22" password="password22" authorities="ROLE_USER" />
+                <security:user name="user23" password="password23" authorities="ROLE_USER" />
+                <security:user name="user24" password="password24" authorities="ROLE_USER" />
+                <security:user name="user25" password="password25" authorities="ROLE_USER" />
+                <security:user name="user26" password="password26" authorities="ROLE_USER" />
+                <security:user name="user27" password="password27" authorities="ROLE_USER" />
+                <security:user name="user28" password="password28" authorities="ROLE_USER" />
+                <security:user name="user29" password="password29" authorities="ROLE_USER" />
+                <security:user name="user30" password="password30" authorities="ROLE_USER" />
+                <security:user name="admin1" password="password1" authorities="ROLE_ADMIN" />
             </security:user-service>
         </security:authentication-provider>
     </security:authentication-manager>
