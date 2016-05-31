@@ -60,6 +60,14 @@ public class AdminGroupsController {
         return "redirect:/admin/groups/";      
     }
     
+    // Add a group owner
+    @RequestMapping(value = "/admin/groups/{groupid}/{userid}", method = RequestMethod.PUT)
+    public @ResponseBody void addGroupOwner(ModelMap model,
+                                            @PathVariable("groupid") String groupId,
+                                            @PathVariable("userid") String userId) {
+        restService.addGroupOwner(groupId, userId);
+    }
+    
     // Remove a group owner
     @RequestMapping(value = "/admin/groups/{groupid}/{userid}", method = RequestMethod.DELETE)
     public @ResponseBody void removeGroupOwner(ModelMap model,

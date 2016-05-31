@@ -21,6 +21,30 @@
     </div>
 </div>
 
+<div class="modal fade" id="add-group-owner" tabindex="-1" role="dialog" aria-labelledby="addGroupOwnerLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="addGroupOwnerLabel">Add group owner</h4>
+            </div>
+            <div class="modal-body">
+                <p>Add a new owner to the <b class="add-owner-group"></b> group</p>
+                <form class="form" role="form">
+                    <div class="form-group">
+                        <label class="control-label">User ID</label>
+                        <input id="add-group-owner-user" type="text" class="form-control"/>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary btn-ok">Add owner</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container">
 
     <ol class="breadcrumb">
@@ -59,7 +83,7 @@
                                    </#list>
                                 </ul>
                                 <form>
-                                    <a class="btn btn-default" href="${springMacroRequestContext.getContextPath()}/admin/groups/${group.ID}/add">
+                                     <a class="btn btn-default" href="#" data-group="${group.ID}" data-toggle="modal" data-target="#add-group-owner">
                                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Owner
                                     </a>
                                 </form>
@@ -104,7 +128,30 @@
             }
         });
     });
+
+    // Bind properties to the add group owner dialog
+    $('#add-group-owner').on('show.bs.modal', function(e) {
+        var data = $(e.relatedTarget).data();
+        $('.add-owner-group', this).text(data.group);
+        $('.btn-ok', this).data('group', data.group);
+    });
     
+    // Bind OK button for the add group owner dialog
+    $('#add-group-owner').on('click', '.btn-ok', function(e) {
+        var $modalDiv = $(e.delegateTarget);
+        var user = $('#add-group-owner-user').val();
+        var group = $(this).data('group');
+        
+        $.ajax({
+            url: '${springMacroRequestContext.getContextPath()}/admin/groups/' + group + '/' + user,
+            type: 'PUT',
+            success: function(result) {
+                $modalDiv.modal('hide');
+                location.reload(true);
+            }
+        });
+    });
+
     // Add Spring Security CSRF header to ajax requests
     $(function () {
         var token = $("meta[name='_csrf']").attr("content");
