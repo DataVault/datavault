@@ -11,7 +11,7 @@
                 <h4 class="modal-title" id="confirmRemovalLabel">Confirm removal of group ownership</h4>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to remove <b><i class="remove-user"></i></b> as an owner of the <b><i class="remove-group"></i></b> group?</p>
+                <p>Are you sure you want to remove <b class="remove-user"></b> as an owner of the <b class="remove-group"></b> group?</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -51,7 +51,7 @@
                             <td>
                                 <ul class="list-group">
                                     <#list group.getOwners() as user>
-                                        <li class="list-group-item"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> ${user.name?html} (${user.getID()?html})
+                                        <li class="list-group-item"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> ${user.firstname?html} ${user.lastname?html} (${user.getID()?html})
                                             <a class="btn btn-xs btn-danger pull-right" href="#" data-user="${user.getID()}" data-group="${group.ID}" data-toggle="modal" data-target="#confirm-removal">
                                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                                             </a>
