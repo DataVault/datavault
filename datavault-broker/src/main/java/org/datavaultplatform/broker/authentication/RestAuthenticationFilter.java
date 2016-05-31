@@ -21,6 +21,11 @@ import java.io.IOException;
  * User: Robin Taylor
  * Date: 18/02/2016
  * Time: 10:45
+ *
+ * Note - Although we don't do any real authentication of the user, and in fact could have a null user, we couldn't
+ * extend the AbstractPreAuthenticatedProcessingFilter because a null user would have caused it to return immediately,
+ * whilst we still need to validate the client app in our provider.
+ *
  */
 public class RestAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 

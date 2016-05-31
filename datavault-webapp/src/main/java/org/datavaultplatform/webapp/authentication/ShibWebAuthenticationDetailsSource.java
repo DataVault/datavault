@@ -13,16 +13,25 @@ import javax.servlet.http.HttpServletRequest;
 
 public class ShibWebAuthenticationDetailsSource extends WebAuthenticationDetailsSource {
 
-    // Can be overridden in Spring config
-    private String nameRequestHeader = "cn";
-    private String emailRequestHeader = "email";
+    // todo - throw an exception if these headers are not present?
+    private String firstnameRequestHeader;
+    private String lastnameRequestHeader;
+    private String emailRequestHeader;
 
-    public String getNameRequestHeader() {
-        return nameRequestHeader;
+    public String getFirstnameRequestHeader() {
+        return firstnameRequestHeader;
     }
 
-    public void setNameRequestHeader(String nameRequestHeader) {
-        this.nameRequestHeader = nameRequestHeader;
+    public void setFirstnameRequestHeader(String firstnameRequestHeader) {
+        this.firstnameRequestHeader = firstnameRequestHeader;
+    }
+
+    public String getLastnameRequestHeader() {
+        return lastnameRequestHeader;
+    }
+
+    public void setLastnameRequestHeader(String lastnameRequestHeader) {
+        this.lastnameRequestHeader = lastnameRequestHeader;
     }
 
     public String getEmailRequestHeader() {
@@ -35,7 +44,7 @@ public class ShibWebAuthenticationDetailsSource extends WebAuthenticationDetails
 
     @Override
     public WebAuthenticationDetails buildDetails(HttpServletRequest context) {
-        return new ShibWebAuthenticationDetails(context, getNameRequestHeader(), getEmailRequestHeader());
+        return new ShibWebAuthenticationDetails(context, getFirstnameRequestHeader(), getLastnameRequestHeader(), getEmailRequestHeader());
     }
 
 }

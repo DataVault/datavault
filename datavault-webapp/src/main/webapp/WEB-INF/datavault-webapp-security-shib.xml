@@ -18,9 +18,10 @@
     </security:http>
 
     <bean id="shibFilter" class="org.datavaultplatform.webapp.authentication.ShibAuthenticationFilter">
-        <property name="principalRequestHeader" value="eppn"/>
+        <property name="principalRequestHeader" value="uid"/>
         <property name="exceptionIfHeaderMissing" value="true"/>
         <property name="authenticationManager" ref="authenticationManager" />
+        <property name="authenticationDetailsSource" ref="shibWebAuthenticationDetailsSource" />
     </bean>
 
     <security:authentication-manager alias="authenticationManager">
@@ -29,6 +30,12 @@
 
     <bean id="shibAuthenticationProvider" class="org.datavaultplatform.webapp.authentication.ShibAuthenticationProvider">
         <property name="restService" ref="restService" />
+    </bean>
+
+    <bean id="shibWebAuthenticationDetailsSource" class="org.datavaultplatform.webapp.authentication.ShibWebAuthenticationDetailsSource">
+        <property name="firstnameRequestHeader" value="givenName"/>
+        <property name="lastnameRequestHeader" value="sn"/>
+        <property name="emailRequestHeader" value="mail"/>
     </bean>
 
     <bean id="http403EntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint"/>

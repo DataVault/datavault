@@ -39,19 +39,21 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
         String name = authentication.getName();
         String password = "N/A";
 
-        // Does the user already exist?
+        ShibWebAuthenticationDetails swad = (ShibWebAuthenticationDetails) authentication.getDetails();
+
         if (!restService.userExists(new ValidateUser(name, password))) {
-            // todo - first time the user has logged on so create a new user account
+            logger.info("Creating new account for new user " + name);
+            // First time the user has logged on so create a new user account
             User user = new User();
             user.setID(name);
             user.setAdmin(false);
-            user.setName("Get this from Shib attributes");
+            user.setFirstname(swad.getFirstname());
+            user.setLastname(swad.getLastname());
+            user.setEmail(swad.getEmail());
             restService.addUser(user);
         } else {
-            // todo - something I guess, but I don't know what...
+            logger.info("Existing user " + name);
         }
-
-        logger.info("Shibboleth authentication success for " + name);
 
         List<GrantedAuthority> grantedAuths = new ArrayList<>();
         grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));

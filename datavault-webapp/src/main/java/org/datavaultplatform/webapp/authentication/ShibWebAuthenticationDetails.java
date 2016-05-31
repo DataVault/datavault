@@ -12,21 +12,31 @@ import javax.servlet.http.HttpServletRequest;
 
 public class ShibWebAuthenticationDetails extends WebAuthenticationDetails {
 
-    private String name;
+    private String firstname;
+    private String lastname;
     private String email;
 
-    public ShibWebAuthenticationDetails(HttpServletRequest request, String nameRequestHeader, String emailRequestHeader) {
+    public ShibWebAuthenticationDetails(HttpServletRequest request, String firstnameRequestHeader, String lastnameRequestHeader, String emailRequestHeader) {
         super(request);
-        setName(request.getHeader(nameRequestHeader));
+        setFirstname(request.getHeader(firstnameRequestHeader));
+        setLastname(request.getHeader(lastnameRequestHeader));
         setEmail(request.getHeader(emailRequestHeader));
     }
 
-    public String getName() {
-        return name;
+    public String getFirstname() {
+        return firstname;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
     }
 
     public String getEmail() {
