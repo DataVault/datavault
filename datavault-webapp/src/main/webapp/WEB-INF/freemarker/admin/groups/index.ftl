@@ -29,8 +29,8 @@
                 <h4 class="modal-title" id="addGroupOwnerLabel">Add group owner</h4>
             </div>
             <div class="modal-body">
-                <p>Add a new owner to the <b class="add-owner-group"></b> group</p>
-                <form class="form" role="form">
+                <p>Add a new Owner to the <b class="add-owner-group"></b> group</p>
+                <form id="add-group-owner-form">
                     <div class="form-group">
                         <label class="control-label">User ID</label>
                         <input id="add-group-owner-user" type="text" class="form-control"/>
@@ -39,7 +39,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary btn-ok">Add owner</button>
+                <button form="add-group-owner-form" type="submit" class="btn btn-primary btn-ok">Add Owner</button>
             </div>
         </div>
     </div>
@@ -133,12 +133,15 @@
     $('#add-group-owner').on('show.bs.modal', function(e) {
         var data = $(e.relatedTarget).data();
         $('.add-owner-group', this).text(data.group);
-        $('.btn-ok', this).data('group', data.group);
+        $('#add-group-owner-form').data('group', data.group);
+        $('#add-group-owner-user').val('');
+    });
+    $('#add-group-owner').on('shown.bs.modal', function(e) {
+        $('#add-group-owner-user').focus();
     });
     
-    // Bind OK button for the add group owner dialog
-    $('#add-group-owner').on('click', '.btn-ok', function(e) {
-        var $modalDiv = $(e.delegateTarget);
+    // Bind form for the add group owner dialog
+    $('#add-group-owner-form').on('submit', function(e) {
         var user = $('#add-group-owner-user').val();
         var group = $(this).data('group');
         
@@ -146,10 +149,15 @@
             url: '${springMacroRequestContext.getContextPath()}/admin/groups/' + group + '/' + user,
             type: 'PUT',
             success: function(result) {
-                $modalDiv.modal('hide');
+                $('#add-group-owner').modal('hide');
                 location.reload(true);
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                alert('Error: unable to add new owner');
             }
         });
+        
+        e.preventDefault();
     });
 
     // Add Spring Security CSRF header to ajax requests
