@@ -41,8 +41,8 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
 
         ShibWebAuthenticationDetails swad = (ShibWebAuthenticationDetails) authentication.getDetails();
 
-        // Does the user already exist?
         if (!restService.userExists(new ValidateUser(name, password))) {
+            logger.info("Creating new account for new user " + name);
             // First time the user has logged on so create a new user account
             User user = new User();
             user.setID(name);
@@ -52,10 +52,8 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
             user.setEmail(swad.getEmail());
             restService.addUser(user);
         } else {
-            // todo - something I guess, but I don't know what...
+            logger.info("Existing user " + name);
         }
-
-        logger.info("Shibboleth authentication success for " + name);
 
         List<GrantedAuthority> grantedAuths = new ArrayList<>();
         grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
