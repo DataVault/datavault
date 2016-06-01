@@ -92,7 +92,7 @@
                     <h3 class="panel-title">Groups</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/groups"><span class="glyphicon glyphicon-eye-open"></span> ${groupcount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/groups"><span class="glyphicon glyphicon-education"></span> ${groupcount}</a></h1>
                 </div>
             </div>
         </div>

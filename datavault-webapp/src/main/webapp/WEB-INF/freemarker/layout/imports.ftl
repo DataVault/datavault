@@ -23,3 +23,7 @@
 
     <!-- Fancytree js -->
     <script src="<@spring.url '/resources/fancytree/jquery.fancytree-all.min.js'/>"></script>
+
+    <!-- Spring Security CSRF (ajax) -->
+    <meta name="_csrf" content="${_csrf.token}"/>
+    <meta name="_csrf_header" content="${_csrf.headerName}"/>

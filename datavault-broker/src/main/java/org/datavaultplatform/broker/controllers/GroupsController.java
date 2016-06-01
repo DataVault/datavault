@@ -9,6 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.datavaultplatform.broker.services.UsersService;
+import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.response.VaultInfo;
 
@@ -17,9 +19,14 @@ import org.datavaultplatform.common.response.VaultInfo;
 public class GroupsController {
     
     private GroupsService groupsService;
-    
+    private UsersService usersService;
+
     public void setGroupsService(GroupsService groupsService) {
         this.groupsService = groupsService;
+    }
+    
+    public void setUsersService(UsersService usersService) {
+        this.usersService = usersService;
     }
 
     @ApiMethod(
@@ -36,7 +43,88 @@ public class GroupsController {
     public List<Group> getGroups(@RequestHeader(value = "X-UserID", required = true) String userID) {
         return groupsService.getGroups();
     }
+    
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
+    })
+    @RequestMapping(value = "/groups", method = RequestMethod.POST)
+    public Group addGroup(@RequestHeader(value = "X-UserID", required = true) String userID,
+                          @RequestBody Group group) throws Exception {
 
+        User user = usersService.getUser(userID);
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+        
+        if (!user.isAdmin()) {
+            throw new Exception("Access denied");
+        }
+        
+        groupsService.addGroup(group);
+        return group;
+    }
+
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
+    })
+    @RequestMapping(value = "/groups/{groupid}/{owneruserid}", method = RequestMethod.PUT)
+    public @ResponseBody void addGroupOwner(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                            @PathVariable("groupid") String groupId,
+                                            @PathVariable("owneruserid") String ownerUserId) throws Exception {
+
+        User user = usersService.getUser(userID);
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+        
+        if (!user.isAdmin()) {
+            throw new Exception("Access denied");
+        }
+        
+        User ownerUser = usersService.getUser(ownerUserId);
+        if (ownerUser == null) {
+            throw new Exception("Owner User '" + ownerUserId + "' does not exist");
+        }
+        
+        Group group = groupsService.getGroup(groupId);
+        List<User> owners = group.getOwners();
+        
+        if (!owners.contains(ownerUser)) {
+            owners.add(ownerUser);
+            groupsService.updateGroup(group);
+        }
+    }
+
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
+    })
+    @RequestMapping(value = "/groups/{groupid}/{owneruserid}", method = RequestMethod.DELETE)
+    public @ResponseBody void removeGroupOwner(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                               @PathVariable("groupid") String groupId,
+                                               @PathVariable("owneruserid") String ownerUserId) throws Exception {
+
+        User user = usersService.getUser(userID);
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+        
+        if (!user.isAdmin()) {
+            throw new Exception("Access denied");
+        }
+        
+        User ownerUser = usersService.getUser(ownerUserId);
+        if (ownerUser == null) {
+            throw new Exception("Owner User '" + ownerUserId + "' does not exist");
+        }
+        
+        Group group = groupsService.getGroup(groupId);
+        group.getOwners().remove(ownerUser);
+        groupsService.updateGroup(group);
+    }
+    
     @ApiMethod(
             path = "/groups/count",
             verb = ApiVerb.GET,
