@@ -32,8 +32,14 @@
                 <p>Add a new Owner to the <b class="add-owner-group"></b> group</p>
                 <form id="add-group-owner-form">
                     <div class="form-group">
-                        <label class="control-label">User ID</label>
-                        <input id="add-group-owner-user" type="text" class="form-control"/>
+                        <label class="control-label">User:</label>
+                        <br>
+                        <select id='add-group-owner-user' class='user-select' data-live-search='true'>
+                            <option selected disabled style='display: none' value=''></option>
+                            <#list users as user>
+                                <option value="${user.getID()}">${user.firstname?html} ${user.lastname?html}</option>
+                            </#list>
+                        </select>
                     </div>
                 </form>
             </div>
@@ -168,6 +174,8 @@
             xhr.setRequestHeader(header, token);
         });
     });
+
+    $('.user-select').selectpicker();
 
 </script>
 
