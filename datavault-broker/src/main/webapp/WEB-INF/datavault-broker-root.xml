@@ -159,7 +159,7 @@
     <task:scheduler id="scheduler" pool-size="1" />
 
     <task:scheduled-tasks scheduler="scheduler">
-        <task:scheduled ref="checkRetentionPolicies" method="checkAll" cron="0 * * * * *" />
+        <task:scheduled ref="checkRetentionPolicies" method="checkAll" cron="${retentioncheck.schedule}" />
     </task:scheduled-tasks>
 
     <!-- Data Access Objects -->
