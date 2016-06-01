@@ -32,8 +32,14 @@
                 <p>Add a new Owner to the <b class="add-owner-group"></b> group</p>
                 <form id="add-group-owner-form">
                     <div class="form-group">
-                        <label class="control-label">User ID</label>
-                        <input id="add-group-owner-user" type="text" class="form-control"/>
+                        <label class="control-label">User:</label>
+                        <br>
+                        <select id='add-group-owner-user' class='user-select' data-live-search='true'>
+                            <option selected disabled style='display: none' value=''></option>
+                            <#list users as user>
+                                <option value="${user.getID()?js_string}" data-tokens="${user.getID()?js_string}">${user.firstname?html} ${user.lastname?html}</option>
+                            </#list>
+                        </select>
                     </div>
                 </form>
             </div>
@@ -145,17 +151,21 @@
         var user = $('#add-group-owner-user').val();
         var group = $(this).data('group');
         
-        $.ajax({
-            url: '${springMacroRequestContext.getContextPath()}/admin/groups/' + group + '/' + user,
-            type: 'PUT',
-            success: function(result) {
-                $('#add-group-owner').modal('hide');
-                location.reload(true);
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-                alert('Error: unable to add new owner');
-            }
-        });
+        if (!user) {
+            alert('Please choose a user');
+        } else {
+            $.ajax({
+                url: '${springMacroRequestContext.getContextPath()}/admin/groups/' + group + '/' + user,
+                type: 'PUT',
+                success: function(result) {
+                    $('#add-group-owner').modal('hide');
+                    location.reload(true);
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                    alert('Error: unable to add new owner');
+                }
+            });
+        }
         
         e.preventDefault();
     });
@@ -168,6 +178,8 @@
             xhr.setRequestHeader(header, token);
         });
     });
+
+    $('.user-select').selectpicker();
 
 </script>
 

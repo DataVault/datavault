@@ -35,6 +35,9 @@ public class AdminGroupsController {
         }
         model.addAttribute("vaultCounts", vaultCounts);
 
+        // Get list of all users
+        model.addAttribute("users", restService.getUsers());
+        
         return "admin/groups/index";
     }
     
