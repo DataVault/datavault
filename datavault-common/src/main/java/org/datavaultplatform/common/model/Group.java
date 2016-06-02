@@ -24,6 +24,10 @@ public class Group {
     @Column(name = "name", nullable = false)
     private String name;
 
+    // Whether the group is enabled (e.g. can be used for new vaults)
+    @Column(name = "enabled", nullable = false)
+    private Boolean enabled;
+    
     // A group may be related to a number of users
     @ManyToMany(cascade=CascadeType.ALL)
     @JoinTable(name="GroupOwners", joinColumns=@JoinColumn(name="group_id"), inverseJoinColumns=@JoinColumn(name="user_id"))
@@ -50,6 +54,14 @@ public class Group {
 
     public String getName() { return name; }
 
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+    
     public String getID() { return id; }
 
     public List<User> getOwners() {

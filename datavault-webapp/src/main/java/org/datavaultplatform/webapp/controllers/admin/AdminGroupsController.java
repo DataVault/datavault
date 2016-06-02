@@ -63,8 +63,22 @@ public class AdminGroupsController {
         return "redirect:/admin/groups/";      
     }
     
+    // Enable a group
+    @RequestMapping(value = "/admin/groups/{groupid}/enable", method = RequestMethod.PUT)
+    public @ResponseBody void enableGroup(ModelMap model,
+                                          @PathVariable("groupid") String groupId) {
+        restService.enableGroup(groupId);
+    }
+    
+    // Disable a group
+    @RequestMapping(value = "/admin/groups/{groupid}/disable", method = RequestMethod.PUT)
+    public @ResponseBody void disableGroup(ModelMap model,
+                                           @PathVariable("groupid") String groupId) {
+        restService.disableGroup(groupId);
+    }
+    
     // Add a group owner
-    @RequestMapping(value = "/admin/groups/{groupid}/{userid}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/admin/groups/{groupid}/users/{userid}", method = RequestMethod.PUT)
     public @ResponseBody void addGroupOwner(ModelMap model,
                                             @PathVariable("groupid") String groupId,
                                             @PathVariable("userid") String userId) {
@@ -72,7 +86,7 @@ public class AdminGroupsController {
     }
     
     // Remove a group owner
-    @RequestMapping(value = "/admin/groups/{groupid}/{userid}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/admin/groups/{groupid}/users/{userid}", method = RequestMethod.DELETE)
     public @ResponseBody void removeGroupOwner(ModelMap model,
                                                @PathVariable("groupid") String groupId,
                                                @PathVariable("userid") String userId) {

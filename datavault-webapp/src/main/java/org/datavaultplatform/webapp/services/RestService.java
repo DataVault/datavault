@@ -400,13 +400,23 @@ public class RestService {
         return (String)response.getBody();
     }
     
+    public String enableGroup(String groupId) {
+        HttpEntity<?> response = put(brokerURL + "/groups/" + groupId + "/enable", String.class, null);
+        return (String)response.getBody();
+    }
+    
+    public String disableGroup(String groupId) {
+        HttpEntity<?> response = put(brokerURL + "/groups/" + groupId + "/disable", String.class, null);
+        return (String)response.getBody();
+    }
+    
     public String addGroupOwner(String groupId, String userId) {
-        HttpEntity<?> response = put(brokerURL + "/groups/" + groupId + "/" + userId, String.class, null);
+        HttpEntity<?> response = put(brokerURL + "/groups/" + groupId + "/users/" + userId, String.class, null);
         return (String)response.getBody();
     }
     
     /* DELETE requests */
     public void removeGroupOwner(String groupId, String userId) {
-        HttpEntity<?> response = delete(brokerURL + "/groups/" + groupId + "/" + userId, String.class);
+        delete(brokerURL + "/groups/" + groupId + "/users/" + userId, String.class);
     }
 }

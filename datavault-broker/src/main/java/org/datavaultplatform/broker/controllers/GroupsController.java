@@ -69,7 +69,51 @@ public class GroupsController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
             @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
     })
-    @RequestMapping(value = "/groups/{groupid}/{owneruserid}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/groups/{groupid}/enable", method = RequestMethod.PUT)
+    public @ResponseBody void enableGroup(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                          @PathVariable("groupid") String groupId) throws Exception {
+
+        User user = usersService.getUser(userID);
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+        
+        if (!user.isAdmin()) {
+            throw new Exception("Access denied");
+        }
+        
+        Group group = groupsService.getGroup(groupId);
+        group.setEnabled(true);
+        groupsService.updateGroup(group);
+    }
+    
+        @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
+    })
+    @RequestMapping(value = "/groups/{groupid}/disable", method = RequestMethod.PUT)
+    public @ResponseBody void disableGroup(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                           @PathVariable("groupid") String groupId) throws Exception {
+
+        User user = usersService.getUser(userID);
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+        
+        if (!user.isAdmin()) {
+            throw new Exception("Access denied");
+        }
+        
+        Group group = groupsService.getGroup(groupId);
+        group.setEnabled(false);
+        groupsService.updateGroup(group);
+    }
+    
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
+    })
+    @RequestMapping(value = "/groups/{groupid}/users/{owneruserid}", method = RequestMethod.PUT)
     public @ResponseBody void addGroupOwner(@RequestHeader(value = "X-UserID", required = true) String userID,
                                             @PathVariable("groupid") String groupId,
                                             @PathVariable("owneruserid") String ownerUserId) throws Exception {
@@ -101,7 +145,7 @@ public class GroupsController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
             @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
     })
-    @RequestMapping(value = "/groups/{groupid}/{owneruserid}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/groups/{groupid}/users/{owneruserid}", method = RequestMethod.DELETE)
     public @ResponseBody void removeGroupOwner(@RequestHeader(value = "X-UserID", required = true) String userID,
                                                @PathVariable("groupid") String groupId,
                                                @PathVariable("owneruserid") String ownerUserId) throws Exception {

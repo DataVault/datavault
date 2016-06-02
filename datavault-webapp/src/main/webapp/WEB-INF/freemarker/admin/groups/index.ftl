@@ -64,6 +64,7 @@
 
                 <thead>
                     <tr class="tr">
+                        <th></th>
                         <th>ID</th>
                         <th>Name</th>
                         <th>Vaults</th>
@@ -75,6 +76,9 @@
                     <#assign counter = 0 >
                     <#list groups as group>
                         <tr class="tr">
+                            <td>
+                                <input type="checkbox" class="toggleGroupEnabled" data-group="${group.ID}" <#if group.getEnabled()>checked</#if>>
+                            </td>
                             <td>${group.ID?html}</td>
                             <td>${group.name?html}</td>
                             <td><span class="badge">${vaultCounts[counter]}<#assign counter = counter + 1></span></td>
@@ -90,7 +94,7 @@
                                 </ul>
                                 <form>
                                      <a class="btn btn-default" href="#" data-group="${group.ID}" data-toggle="modal" data-target="#add-group-owner">
-                                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Owner
+                                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Group Owner
                                     </a>
                                 </form>
                             </td>
@@ -126,7 +130,7 @@
         var group = $(this).data('group');
         
         $.ajax({
-            url: '${springMacroRequestContext.getContextPath()}/admin/groups/' + group + '/' + user,
+            url: '${springMacroRequestContext.getContextPath()}/admin/groups/' + group + '/users/' + user,
             type: 'DELETE',
             success: function(result) {
                 $modalDiv.modal('hide');
@@ -155,7 +159,7 @@
             alert('Please choose a user');
         } else {
             $.ajax({
-                url: '${springMacroRequestContext.getContextPath()}/admin/groups/' + group + '/' + user,
+                url: '${springMacroRequestContext.getContextPath()}/admin/groups/' + group + '/users/' + user,
                 type: 'PUT',
                 success: function(result) {
                     $('#add-group-owner').modal('hide');
@@ -178,8 +182,30 @@
             xhr.setRequestHeader(header, token);
         });
     });
+    
+    // Handle enable/disable groups
+    $('.toggleGroupEnabled').click(function() {
+
+        var command;
+        var group = $(this).data('group');
+        
+        if ($(this).prop("checked")) {
+            command = 'enable';
+        } else {
+            command = 'disable';
+        }
+
+        $.ajax({
+            url: '${springMacroRequestContext.getContextPath()}/admin/groups/' + group + '/' + command,
+            type: 'PUT',
+            error: function(xhr, ajaxOptions, thrownError) {
+                alert('Error: unable to update group');
+            }
+        });
+    });
 
     $('.user-select').selectpicker();
+    $('.enabled-select').selectpicker();
 
 </script>
 
