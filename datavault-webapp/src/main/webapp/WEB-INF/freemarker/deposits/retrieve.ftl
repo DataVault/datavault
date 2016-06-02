@@ -18,6 +18,7 @@
 
         <div class="form-group">
             <label class="control-label">Retrieve Note:</label>
+            <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Explain the reason why this Deposit is being retrieved."></span></span>
             <@spring.bind "retrieve.note" />
             <input type="text"
                    class="form-control"
@@ -27,6 +28,7 @@
 
         <div class="form-group">
             <label class="control-label">Target directory:</label>
+            <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Select the destination directory where you wish the data to be saved to."></span></span>
             <@spring.bind "retrieve.retrievePath" />
             <input type="text"
                    style="display:none;"
