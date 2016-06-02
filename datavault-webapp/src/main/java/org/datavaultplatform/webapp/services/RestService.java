@@ -324,7 +324,13 @@ public class RestService {
     }
     
     /* POST requests */
-    
+
+
+    public FileStore addFileStore(FileStore fileStore) {
+        HttpEntity<?> response = post(brokerURL + "/filestores/", FileStore.class, fileStore);
+        return (FileStore)response.getBody();
+    }
+
     public VaultInfo addVault(CreateVault createVault) {
         HttpEntity<?> response = post(brokerURL + "/vaults/", VaultInfo.class, createVault);
         return (VaultInfo)response.getBody();

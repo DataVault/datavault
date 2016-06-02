@@ -1,14 +1,19 @@
 package org.datavaultplatform.webapp.controllers;
 
 import org.datavaultplatform.common.model.Dataset;
+import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * User: Tom Higgins
@@ -28,8 +33,31 @@ public class VaultsController {
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String getVaultsListing(ModelMap model) {
-        model.addAttribute("vaults", restService.getVaultsListing());
-        return "vaults/index";
+        // Decide what page the user should see, is it the first time they have logged on?
+        FileStore[] userStores = restService.getFileStoreListing();
+        if (userStores.length == 0) {
+            return "users/storage";
+        } else {
+            model.addAttribute("vaults", restService.getVaultsListing());
+            return "vaults/index";
+        }
+
+        //String username;
+        //Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        //if (principal instanceof UserDetails) {
+         ///   username = ((UserDetails)principal).getUsername();
+        //} else {
+        //    username = principal.toString();
+        //}
+
+        //if (!restService.keysExist(username)) {
+        //    model.addAttribute("publicKey", restService.addKeys(username));
+        //    model.addAttribute("userID", username);
+        //    return "users/storage";
+        //}
+
+
     }
 
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)

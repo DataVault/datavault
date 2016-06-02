@@ -1,12 +1,15 @@
 package org.datavaultplatform.webapp.controllers;
 
+import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.webapp.services.RestService;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
 
 /**
  * User: Robin Taylor
@@ -14,14 +17,15 @@ import org.springframework.web.bind.annotation.*;
  * Time: 11:00
  */
 @Controller
-public class UsersController {
+public class FileStoreController {
+
+    private static final Logger logger = LoggerFactory.getLogger(FileStoreController.class);
 
     private RestService restService;
 
     public void setRestService(RestService restService) {
         this.restService = restService;
     }
-
 
 
     // Return an 'add keys' page
@@ -48,6 +52,17 @@ public class UsersController {
     }
 
 
+    // Process the 'add local FileStore' Ajax request
+    @RequestMapping(value = "/filestores/local", method = RequestMethod.POST)
+    @ResponseBody
+    public String addLocalFilestore(@RequestParam String dirname, @RequestParam String action) {
+        HashMap<String,String> storeProperties = new HashMap<String,String>();
+        storeProperties.put("rootPath", dirname);
+        FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Filesystem (local)");
+        restService.addFileStore(store);
+
+        return null;
+    }
 
 
 
