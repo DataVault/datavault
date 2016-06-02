@@ -116,9 +116,9 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.5.5</version>
                 <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    <descriptors>
+                        <descriptor>src/main/assembly/jar-with-dependencies-spring.xml</descriptor>
+                    </descriptors>
                 </configuration>
                 <executions>
                     <execution>
