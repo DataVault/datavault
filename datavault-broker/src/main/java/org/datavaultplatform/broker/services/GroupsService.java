@@ -14,6 +14,10 @@ public class GroupsService {
     }
 
     public void addGroup(Group group) {
+        
+        // Default required "enabled" property
+        group.setEnabled(Boolean.TRUE);
+        
         groupDAO.save(group);
     }
 

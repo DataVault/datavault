@@ -35,9 +35,9 @@ insert into Users (id, firstname, lastname, password, admin) values ('user30', '
 
 insert into Users (id, firstname, lastname, password, admin) values ('admin1', 'admin user 1', 'Test', 'password1', TRUE);
 
-insert into Groups (id, name) values ('CHSS', 'Humanities and Social Science');
-insert into Groups (id, name) values ('CSE', 'Science and Engineering');
-insert into Groups (id, name) values ('CMVM', 'Medicine and Veterinary Medicine');
+insert into Groups (id, name, enabled) values ('CHSS', 'Humanities and Social Science', 1);
+insert into Groups (id, name, enabled) values ('CSE', 'Science and Engineering', 1);
+insert into Groups (id, name, enabled) values ('CMVM', 'Medicine and Veterinary Medicine', 1);
 
 insert into GroupOwners (group_id, user_id) values ('CHSS', 'user1');
 insert into GroupOwners (group_id, user_id) values ('CSE', 'user1');
