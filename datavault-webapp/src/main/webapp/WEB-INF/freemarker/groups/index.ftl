@@ -17,6 +17,14 @@
                     <h3 class="panel-title"><span class="glyphicon glyphicon-education"></span> ${group.name?html} (${group.getID()?html})</h3>
                 </div>
                 <div class="panel-body">
+
+                    <#if !group.enabled>
+                        <div class="alert alert-warning" role="alert">
+                            <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+                            This group is disabled and cannot be used for new Vaults
+                        </div>
+                    </#if>
+
                     <div class="table-responsive">
                         <table class="table table-striped">
 
