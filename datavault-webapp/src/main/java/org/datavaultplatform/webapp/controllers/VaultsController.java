@@ -33,7 +33,7 @@ public class VaultsController {
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String getVaultsListing(ModelMap model) {
-        // Decide what page the user should see, is it the first time they have logged on?
+        // Decide what page the user should see. Is it the first time they have logged on?
         FileStore[] userStores = restService.getFileStoreListing();
         if (userStores.length == 0) {
             return "users/storage";
@@ -41,22 +41,6 @@ public class VaultsController {
             model.addAttribute("vaults", restService.getVaultsListing());
             return "vaults/index";
         }
-
-        //String username;
-        //Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        //if (principal instanceof UserDetails) {
-         ///   username = ((UserDetails)principal).getUsername();
-        //} else {
-        //    username = principal.toString();
-        //}
-
-        //if (!restService.keysExist(username)) {
-        //    model.addAttribute("publicKey", restService.addKeys(username));
-        //    model.addAttribute("userID", username);
-        //    return "users/storage";
-        //}
-
 
     }
 
