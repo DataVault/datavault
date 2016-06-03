@@ -367,6 +367,12 @@ public class RestService {
         return (String)response.getBody();
     }
 
+    public String addKeys() {
+        // Bit odd to POST a null object, but a POST seems appropriate since it is a non-idempotent, create request
+        HttpEntity<?> response = post(brokerURL + "/filestores/keys", String.class, null);
+        return (String)response.getBody();
+    }
+
     public Boolean userExists(ValidateUser validateUser) {
         // Using a POST because I read somewhere that its somehow more secure to POST credentials, could be nonsense
         HttpEntity<?> response = post(brokerURL + "/auth/users/exists", Boolean.class, validateUser);

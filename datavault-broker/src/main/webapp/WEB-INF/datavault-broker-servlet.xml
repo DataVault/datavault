@@ -109,6 +109,7 @@
     <bean id="fileStoreController" class="org.datavaultplatform.broker.controllers.FileStoreController">
         <property name="usersService" ref="usersService" />
         <property name="fileStoreService" ref="fileStoreService" />
+        <property name="userKeyPairService" ref="userKeyPairService" />
     </bean>
     
     <bean id="archiveStoreController" class="org.datavaultplatform.broker.controllers.ArchiveStoreController">

@@ -64,6 +64,16 @@ public class FileStoreController {
         return null;
     }
 
+    // Process the 'add keys' Ajax request
+    @RequestMapping(value = "/filestores/keys", method = RequestMethod.POST)
+    @ResponseBody
+    public String addKeys(@RequestParam String action) {
+        String publicKey = restService.addKeys();
+
+        return publicKey;
+    }
+
+
 
 
 }

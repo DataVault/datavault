@@ -66,7 +66,7 @@
     </bean>
 
     <bean id="userKeyPairService" class="org.datavaultplatform.broker.services.UserKeyPairService">
-
+        <property name="passphrase" value="${passphrase}"/>
     </bean>
 
     <bean id="jobsService" class="org.datavaultplatform.broker.services.JobsService">

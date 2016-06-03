@@ -29,7 +29,16 @@
 
     <h2>SFTP storage</h2>
 
-    <p>etc etc</p>
+    <form id="sftpForm" action="${springMacroRequestContext.getContextPath()}/filestores/keys" method="post">
+        <fieldset class="form-group">
+            <label>Please click here to generate a private/public keypair:</label>
+        </fieldset>
+
+        <button type="submit" value="submit" class="btn btn-primary">Add</button>
+
+        <input type="hidden" id="submitAction" name="action" value="submit"/>
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+    </form>
 
     <br/>
 
@@ -38,6 +47,7 @@
     <p>etc etc</p>
 
     <a href="${springMacroRequestContext.getContextPath()}" class="btn btn-primary" role="button">Continue</a>
+
 
 
     <script type="text/javascript">
@@ -55,6 +65,29 @@
             ev.preventDefault();
         });
     </script>
+
+    <script type="text/javascript">
+        var frm = $('#sftpForm');
+        frm.submit(function (ev) {
+            $.ajax({
+                type: frm.attr('method'),
+                url: frm.attr('action'),
+                data: frm.serialize(),
+                success: function (data) {
+                    alert('Public key is ' + data);
+                }
+
+
+            });
+
+            ev.preventDefault();
+        });
+
+
+    </script>
+
+
+
 
 </div>
 

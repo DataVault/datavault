@@ -34,13 +34,13 @@ public class VaultsController {
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String getVaultsListing(ModelMap model) {
         // Decide what page the user should see. Is it the first time they have logged on?
-        FileStore[] userStores = restService.getFileStoreListing();
-        if (userStores.length == 0) {
-            return "users/storage";
-        } else {
+        //FileStore[] userStores = restService.getFileStoreListing();
+        //if (userStores.length == 0) {
+        //    return "users/storage";
+        //} else {
             model.addAttribute("vaults", restService.getVaultsListing());
             return "vaults/index";
-        }
+        //}
 
     }
 
