@@ -142,7 +142,6 @@
                 <prop key="hibernate.format_sql">false</prop>
                 <prop key="hibernate.hbm2ddl.auto">create-drop</prop>
                 <prop key="hibernate.enable_lazy_load_no_trans">true</prop>
-                <prop key="hibernate.show_sql">true</prop>
                 <prop key="hibernate.hbm2ddl.import_files">/import.sql</prop>
             </props>
         </property>
@@ -159,7 +158,7 @@
     <task:scheduler id="scheduler" pool-size="1" />
 
     <task:scheduled-tasks scheduler="scheduler">
-        <task:scheduled ref="checkRetentionPolicies" method="checkAll" cron="0 * * * * *" />
+        <task:scheduled ref="checkRetentionPolicies" method="checkAll" cron="${retentioncheck.schedule}" />
     </task:scheduled-tasks>
 
     <!-- Data Access Objects -->
