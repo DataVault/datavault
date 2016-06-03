@@ -330,7 +330,13 @@ public class RestService {
     }
     
     /* POST requests */
-    
+
+
+    public FileStore addFileStore(FileStore fileStore) {
+        HttpEntity<?> response = post(brokerURL + "/filestores/", FileStore.class, fileStore);
+        return (FileStore)response.getBody();
+    }
+
     public VaultInfo addVault(CreateVault createVault) {
         HttpEntity<?> response = post(brokerURL + "/vaults/", VaultInfo.class, createVault);
         return (VaultInfo)response.getBody();
@@ -369,6 +375,12 @@ public class RestService {
     public String addKeys(String userId) {
         // Bit odd to POST a null object, but a POST seems appropriate since it is a non-idempotent, create request
         HttpEntity<?> response = post(brokerURL + "/users/" + userId + "/keys", String.class, null);
+        return (String)response.getBody();
+    }
+
+    public String addKeys() {
+        // Bit odd to POST a null object, but a POST seems appropriate since it is a non-idempotent, create request
+        HttpEntity<?> response = post(brokerURL + "/filestores/keys", String.class, null);
         return (String)response.getBody();
     }
 
