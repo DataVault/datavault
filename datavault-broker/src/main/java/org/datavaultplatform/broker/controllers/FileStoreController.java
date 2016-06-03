@@ -1,16 +1,20 @@
 package org.datavaultplatform.broker.controllers;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.datavaultplatform.broker.services.UserKeyPairService;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.FileStore;
 
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.jsondoc.core.annotation.ApiHeader;
+import org.jsondoc.core.annotation.ApiHeaders;
+import org.jsondoc.core.annotation.ApiMethod;
+import org.jsondoc.core.annotation.ApiPathParam;
+import org.jsondoc.core.pojo.ApiVerb;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 
 import org.datavaultplatform.broker.services.FileStoreService;
 import org.datavaultplatform.broker.services.UsersService;
@@ -20,6 +24,7 @@ public class FileStoreController {
     
     private UsersService usersService;
     private FileStoreService fileStoreService;
+    private UserKeyPairService userKeyPairService;
     
     public void setFileStoreService(FileStoreService fileStoreService) {
         this.fileStoreService = fileStoreService;
@@ -28,7 +33,11 @@ public class FileStoreController {
     public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
     }
-    
+
+    public void setUserKeyPairService(UserKeyPairService userKeyPairService) {
+        this.userKeyPairService = userKeyPairService;
+    }
+
     @RequestMapping(value = "/filestores", method = RequestMethod.GET)
     public List<FileStore> getFileStores(@RequestHeader(value = "X-UserID", required = true) String userID) {
         User user = usersService.getUser(userID);
@@ -50,5 +59,27 @@ public class FileStoreController {
         store.setUser(user);
         fileStoreService.addFileStore(store);
         return store;
+    }
+
+    @RequestMapping(value = "/filestores/keys", method = RequestMethod.POST)
+    public String addKeyPair(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+        User user = usersService.getUser(userID);
+
+        userKeyPairService.generateNewKeyPair();
+
+        HashMap<String,String> storeProperties = new HashMap<String,String>();
+        storeProperties.put("host", "localhost");
+        // todo : set this to something other than root?
+        storeProperties.put("rootPath", "/");
+        storeProperties.put("username", user.getID());
+        storeProperties.put("password", "");
+        storeProperties.put("publicKey", userKeyPairService.getPublicKey());
+        storeProperties.put("privateKey", userKeyPairService.getPrivateKey());
+
+        FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.SFTPFileSystem", storeProperties, "SFTP filesystem");
+        store.setUser(user);
+        fileStoreService.addFileStore(store);
+
+        return userKeyPairService.getPublicKey();
     }
 }
