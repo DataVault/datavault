@@ -111,6 +111,10 @@
         <property name="usersService" ref="usersService" />
         <property name="fileStoreService" ref="fileStoreService" />
         <property name="userKeyPairService" ref="userKeyPairService" />
+        <property name="host" value="${host}"/>
+        <property name="port" value="${port}"/>
+        <property name="rootPath" value="${rootPath}"/>
+        <property name="passphrase" value="${passphrase}"/>
     </bean>
     
     <bean id="archiveStoreController" class="org.datavaultplatform.broker.controllers.ArchiveStoreController">
