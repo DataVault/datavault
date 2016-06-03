@@ -25,6 +25,10 @@ public class FileStoreController {
     private UsersService usersService;
     private FileStoreService fileStoreService;
     private UserKeyPairService userKeyPairService;
+    private String host;
+    private String port;
+    private String rootPath;
+    private String passphrase;
     
     public void setFileStoreService(FileStoreService fileStoreService) {
         this.fileStoreService = fileStoreService;
@@ -36,6 +40,22 @@ public class FileStoreController {
 
     public void setUserKeyPairService(UserKeyPairService userKeyPairService) {
         this.userKeyPairService = userKeyPairService;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public void setPort(String port) {
+        this.port = port;
+    }
+
+    public void setRootPath(String rootPath) {
+        this.rootPath = rootPath;
+    }
+
+    public void setPassphrase(String passphrase) {
+        this.passphrase = passphrase;
     }
 
     @RequestMapping(value = "/filestores", method = RequestMethod.GET)
@@ -68,13 +88,14 @@ public class FileStoreController {
         userKeyPairService.generateNewKeyPair();
 
         HashMap<String,String> storeProperties = new HashMap<String,String>();
-        storeProperties.put("host", "localhost");
-        // todo : set this to something other than root?
-        storeProperties.put("rootPath", "/");
+        storeProperties.put("host", host);
+        storeProperties.put("port", port);
+        storeProperties.put("rootPath", rootPath);
         storeProperties.put("username", user.getID());
         storeProperties.put("password", "");
         storeProperties.put("publicKey", userKeyPairService.getPublicKey());
         storeProperties.put("privateKey", userKeyPairService.getPrivateKey());
+        storeProperties.put("passphrase", passphrase);
 
         FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.SFTPFileSystem", storeProperties, "SFTP filesystem");
         store.setUser(user);
