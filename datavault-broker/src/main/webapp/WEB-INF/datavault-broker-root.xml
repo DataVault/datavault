@@ -3,6 +3,7 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:task="http://www.springframework.org/schema/task"
        xmlns:rabbit="http://www.springframework.org/schema/rabbit"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd
@@ -10,6 +11,8 @@
         http://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task.xsd
         http://www.springframework.org/schema/tx
         http://www.springframework.org/schema/tx/spring-tx.xsd
         http://www.springframework.org/schema/rabbit
@@ -78,6 +81,10 @@
         <property name="datasetDAO" ref="datasetDAO" />
     </bean>
 
+    <bean id="checkRetentionPolicies" class="org.datavaultplatform.broker.scheduled.CheckRetentionPolicies">
+        <property name="vaultsService" ref="vaultsService" />
+    </bean>
+
     <!-- RabbitMQ -->
     
     <bean id="connectionFactory"
@@ -135,7 +142,6 @@
                 <prop key="hibernate.format_sql">false</prop>
                 <prop key="hibernate.hbm2ddl.auto">create-drop</prop>
                 <prop key="hibernate.enable_lazy_load_no_trans">true</prop>
-                <prop key="hibernate.show_sql">true</prop>
                 <prop key="hibernate.hbm2ddl.import_files">/import.sql</prop>
             </props>
         </property>
@@ -146,6 +152,14 @@
     </bean>
  
     <bean id="persistenceExceptionTranslationPostProcessor" class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>
+
+    <!-- Retention Policy scheduler settings -->
+
+    <task:scheduler id="scheduler" pool-size="1" />
+
+    <task:scheduled-tasks scheduler="scheduler">
+        <task:scheduled ref="checkRetentionPolicies" method="checkAll" cron="${retentioncheck.schedule}" />
+    </task:scheduled-tasks>
 
     <!-- Data Access Objects -->
     

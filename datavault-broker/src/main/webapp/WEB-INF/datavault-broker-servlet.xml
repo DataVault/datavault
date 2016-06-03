@@ -104,6 +104,7 @@
 
     <bean id="groupsController" class="org.datavaultplatform.broker.controllers.GroupsController">
         <property name="groupsService" ref="groupsService" />
+        <property name="usersService" ref="usersService" />
     </bean>
 
     <bean id="fileStoreController" class="org.datavaultplatform.broker.controllers.FileStoreController">

@@ -5,21 +5,29 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.util.List;
+
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="Groups")
 public class Group {
-    // User Identifier (not a UUID)
+    
+    // Group Identifier (not a UUID)
     @Id
+    @Pattern(regexp = "[a-zA-Z0-9-_/ ]+")
     @Column(name = "id", unique = true)
     private String id;
-
+    
     // Name of the group
     @Column(name = "name", nullable = false)
     private String name;
 
+    // Whether the group is enabled (e.g. can be used for new vaults)
+    @Column(name = "enabled", nullable = false)
+    private Boolean enabled;
+    
     // A group may be related to a number of users
     @ManyToMany(cascade=CascadeType.ALL)
     @JoinTable(name="GroupOwners", joinColumns=@JoinColumn(name="group_id"), inverseJoinColumns=@JoinColumn(name="user_id"))
@@ -36,12 +44,24 @@ public class Group {
         this.id = id;
     }
 
+    public void setID(String id) {
+        this.id = id;
+    }
+    
     public void setName(String name) {
         this.name = name;
     }
 
     public String getName() { return name; }
 
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+    
     public String getID() { return id; }
 
     public List<User> getOwners() {

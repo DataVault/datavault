@@ -14,16 +14,23 @@
         <#list groups as group>
             <div class="panel panel-success">
                 <div class="panel-heading">
-                    <h3 class="panel-title"><span class="glyphicon glyphicon-eye-open"></span> ${group.name?html} (${group.getID()?html})</h3>
+                    <h3 class="panel-title"><span class="glyphicon glyphicon-education"></span> ${group.name?html} (${group.getID()?html})</h3>
                 </div>
                 <div class="panel-body">
+
+                    <#if !group.enabled>
+                        <div class="alert alert-warning" role="alert">
+                            <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+                            This group is disabled and cannot be used for new Vaults
+                        </div>
+                    </#if>
+
                     <div class="table-responsive">
                         <table class="table table-striped">
 
                             <thead>
                                 <tr class="tr">
-                                    <th>ID</th>
-                                    <th>Name</th>
+                                    <th>Vault</th>
                                     <th>Description</th>
                                     <th>Owner</th>
                                     <th>Size</th>
@@ -35,8 +42,7 @@
                             <tbody>
                                 <#list vaults[counter] as vault>
                                     <tr class="tr">
-                                        <td>${vault.getID()?html}</td>
-                                        <td>${vault.name?html}</td>
+                                        <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/">${vault.name?html}</a></td>
                                         <td>${vault.description?html}</td>
                                         <td>${vault.userID?html}</td>
                                         <td>${vault.getSizeStr()?html}</td>

@@ -15,6 +15,7 @@
 
         <div class="form-group">
             <label class="control-label">Deposit Note:</label>
+            <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="A descriptive name for this particular Deposit to the Vault, to set it apart from other parts of the data."></span></span>
             <@spring.bind "deposit.note" />
             <input type="text"
                    class="form-control"
@@ -24,6 +25,7 @@
 
         <div class="form-group">
             <label class="control-label">Deposit file or directory:</label>
+            <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Select a single file, or a directory to add to the Vault."></span></span>
             <@spring.bind "deposit.filePath" />
             <input type="text"
                    style="display:none;"

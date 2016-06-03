@@ -20,6 +20,7 @@
         </h2>
         <hr>
         <p>
+            <b>Owner:</b> ${vault.userID?html}<br/>
             <b>Retention Policy:</b> ${retentionPolicy.name?html}<br/>
             <b>Group:</b> ${group.name?html}<br/>
             <b>Created:</b> ${vault.creationTime?datetime}<br/>

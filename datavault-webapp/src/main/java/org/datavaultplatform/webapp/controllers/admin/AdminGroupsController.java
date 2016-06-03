@@ -5,10 +5,7 @@ import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * User: Stuart Lewis
@@ -38,7 +35,62 @@ public class AdminGroupsController {
         }
         model.addAttribute("vaultCounts", vaultCounts);
 
+        // Get list of all users
+        model.addAttribute("users", restService.getUsers());
+        
         return "admin/groups/index";
+    }
+    
+    // Return an empty 'create new group' page
+    @RequestMapping(value = "/admin/groups/create", method = RequestMethod.GET)
+    public String createGroup(ModelMap model) {
+
+        // pass the view an empty Group since the form expects it
+        model.addAttribute("group", new Group());
+        
+        return "admin/groups/create";
+    }
+    
+    // Process the completed 'create new group' page
+    @RequestMapping(value = "/admin/groups/create", method = RequestMethod.POST)
+    public String addGroup(@ModelAttribute Group group, ModelMap model, @RequestParam String action) {
+        // Was the cancel button pressed?
+        if ("cancel".equals(action)) {
+            return "redirect:/admin/groups/";
+        }
+
+        Group newGroup = restService.addGroup(group);
+        return "redirect:/admin/groups/";      
+    }
+    
+    // Enable a group
+    @RequestMapping(value = "/admin/groups/{groupid}/enable", method = RequestMethod.PUT)
+    public @ResponseBody void enableGroup(ModelMap model,
+                                          @PathVariable("groupid") String groupId) {
+        restService.enableGroup(groupId);
+    }
+    
+    // Disable a group
+    @RequestMapping(value = "/admin/groups/{groupid}/disable", method = RequestMethod.PUT)
+    public @ResponseBody void disableGroup(ModelMap model,
+                                           @PathVariable("groupid") String groupId) {
+        restService.disableGroup(groupId);
+    }
+    
+    // Add a group owner
+    @RequestMapping(value = "/admin/groups/{groupid}/users/{userid}", method = RequestMethod.PUT)
+    public @ResponseBody void addGroupOwner(ModelMap model,
+                                            @PathVariable("groupid") String groupId,
+                                            @PathVariable("userid") String userId) {
+        restService.addGroupOwner(groupId, userId);
+    }
+    
+    // Remove a group owner
+    @RequestMapping(value = "/admin/groups/{groupid}/users/{userid}", method = RequestMethod.DELETE)
+    public @ResponseBody void removeGroupOwner(ModelMap model,
+                                               @PathVariable("groupid") String groupId,
+                                               @PathVariable("userid") String userId) {
+        restService.removeGroupOwner(groupId, userId);
     }
 }
 
