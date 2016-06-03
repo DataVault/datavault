@@ -51,12 +51,12 @@
 
 
     <script type="text/javascript">
-        var frm = $('#localForm');
-        frm.submit(function (ev) {
+        var localFrm = $('#localForm');
+        localFrm.submit(function (ev) {
             $.ajax({
-                type: frm.attr('method'),
-                url: frm.attr('action'),
-                data: frm.serialize(),
+                type: localFrm.attr('method'),
+                url: localFrm.attr('action'),
+                data: localFrm.serialize(),
                 success: function (data) {
                     alert('filestore added');
                 }
@@ -67,12 +67,12 @@
     </script>
 
     <script type="text/javascript">
-        var frm = $('#sftpForm');
-        frm.submit(function (ev) {
+        var sftpFrm = $('#sftpForm');
+        sftpFrm.submit(function (ev) {
             $.ajax({
-                type: frm.attr('method'),
-                url: frm.attr('action'),
-                data: frm.serialize(),
+                type: sftpFrm.attr('method'),
+                url: sftpFrm.attr('action'),
+                data: sftpFrm.serialize(),
                 success: function (data) {
                     alert('Public key is ' + data);
                 }
