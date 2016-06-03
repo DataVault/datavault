@@ -14,10 +14,17 @@ public class UserKeyPairService {
 
     // comment added at the end of public key
     private static final String PUBKEY_COMMENT = "datavault";
-    // Todo : inject this in Spring config, it shouldn't be visible in Github
-    private static final String PASSPHRASE = "datavault";
+    private String passphrase;
     private String privateKey;
     private String publicKey;
+
+    public String getPassphrase() {
+        return passphrase;
+    }
+
+    public void setPassphrase(String passphrase) {
+        this.passphrase = passphrase;
+    }
 
     public String getPrivateKey() {
         return privateKey;
@@ -35,10 +42,6 @@ public class UserKeyPairService {
         this.publicKey = publicKey;
     }
 
-    public static String getPASSPHRASE() {
-        return PASSPHRASE;
-    }
-
 
     public void generateNewKeyPair() {
 
@@ -47,7 +50,7 @@ public class UserKeyPairService {
         try {
             KeyPair keyPair = KeyPair.genKeyPair(jschClient, KeyPair.RSA);
             OutputStream privKeyBaos = new ByteArrayOutputStream();
-            keyPair.writePrivateKey(privKeyBaos, PASSPHRASE.getBytes());
+            keyPair.writePrivateKey(privKeyBaos, passphrase.getBytes());
 
             OutputStream pubKeyBaos = new ByteArrayOutputStream();
             keyPair.writePublicKey(pubKeyBaos, PUBKEY_COMMENT);
