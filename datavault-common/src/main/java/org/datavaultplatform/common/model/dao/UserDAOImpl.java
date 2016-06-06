@@ -61,7 +61,7 @@ public class UserDAOImpl implements UserDAO {
     public List<User> search(String query) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(User.class);
-        criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%")));
+        criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("firstname", "%" + query + "%"), Restrictions.ilike("lastname", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         List<User> users = criteria.list();
         session.close();
