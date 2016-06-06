@@ -150,6 +150,12 @@
             <version>1.2.11</version>
         </dependency>
 
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.7</version>
+        </dependency>
+
         <!-- Note: commons-logging is excluded and slf4j is the replacement bridge to log4j -->
         <dependency>
             <groupId>org.slf4j</groupId>
