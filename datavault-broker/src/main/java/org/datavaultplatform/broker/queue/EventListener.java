@@ -21,30 +21,17 @@ public class EventListener implements MessageListener {
     private DepositsService depositsService;
     private RetrievesService retrievesService;
     private UsersService usersService;
+    private EmailService emailService;
 
     private static final Logger logger = LoggerFactory.getLogger(EventListener.class);
     
-    public void setJobsService(JobsService jobsService) {
-        this.jobsService = jobsService;
-    }
-    
-    public void setEventService(EventService eventService) {
-        this.eventService = eventService;
-    }
-    
-    public void setVaultsService(VaultsService vaultsService) {
-        this.vaultsService = vaultsService;
-    }
-    
+    public void setJobsService(JobsService jobsService) { this.jobsService = jobsService; }
+    public void setEventService(EventService eventService) { this.eventService = eventService; }
+    public void setVaultsService(VaultsService vaultsService) { this.vaultsService = vaultsService; }
     public void setDepositsService(DepositsService depositsService) { this.depositsService = depositsService; }
-
-    public void setRetrievesService(RetrievesService retrievesService) {
-        this.retrievesService = retrievesService;
-    }
-    
-    public void setUsersService(UsersService usersService) {
-        this.usersService = usersService;
-    }
+    public void setRetrievesService(RetrievesService retrievesService) { this.retrievesService = retrievesService; }
+    public void setUsersService(UsersService usersService) { this.usersService = usersService; }
+    public void setEmailService(EmailService emailService) { this.emailService = emailService; }
 
     @Override
     public void onMessage(Message msg) {
@@ -218,6 +205,26 @@ public class EventListener implements MessageListener {
                     } catch (org.hibernate.StaleObjectStateException e) {
                         // Refresh from database and retry
                         deposit = depositsService.getDeposit(concreteEvent.getDepositId());
+                    }
+                }
+                
+                // Send email to group owners
+                Vault vault = deposit.getVault();
+                Group group = vault.getGroup();
+                
+                String subject = "Data Vault - new deposit for [" + group.getName() + "]";
+                
+                String message =
+                        "Deposit Note: " + deposit.getNote() + "\n" +
+                        "Deposit ID: " + deposit.getID() + "\n" +
+                        "Vault ID: " + vault.getID() + "\n" +
+                        "User ID: " + completeEvent.getUserId() + "\n" +
+                        "Size: " + deposit.getArchiveSize() + " bytes" + "\n" +
+                        "Timestamp: " + completeEvent.getTimestamp();
+                
+                for (User groupAdmin : group.getOwners()) {
+                    if (groupAdmin.getEmail() != null) {
+                        emailService.sendMail(groupAdmin.getEmail(), subject, message);
                     }
                 }
                 
