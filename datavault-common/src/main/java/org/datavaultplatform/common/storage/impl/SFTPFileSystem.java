@@ -18,20 +18,22 @@ import java.util.Map;
 import java.util.Vector;
 
 import com.jcraft.jsch.*;
+import org.slf4j.*;
 
 public class SFTPFileSystem extends Device implements UserStore {
+
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(SFTPFileSystem.class);
 
     private String host = null;
     private String rootPath = null;
     private String username = null;
     private String password = null;
     private String privateKey = null;
-    // todo : get this from elsewhere!!!!
-    private String passphrase = "datavault";
+    private String passphrase = null;
     
     private Session session = null;
     private ChannelSftp channelSftp = null;
-    private final int port = 22;
+    private int port;
     private final String PATH_SEPARATOR = "/";
     
     private Utility.SFTPMonitor monitor = null;
@@ -41,10 +43,12 @@ public class SFTPFileSystem extends Device implements UserStore {
         
         // Unpack the config parameters (in an implementation-specific way)
         host = config.get("host");
+        port = Integer.parseInt(config.get("port"));
         rootPath = config.get("rootPath");
         username = config.get("username");
         password = config.get("password");
         privateKey = config.get("privateKey");
+        passphrase = config.get("passphrase");
     }
     
     private void Connect() throws Exception {
