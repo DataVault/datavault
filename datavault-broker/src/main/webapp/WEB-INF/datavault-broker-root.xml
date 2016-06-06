@@ -81,8 +81,30 @@
         <property name="datasetDAO" ref="datasetDAO" />
     </bean>
 
+    <bean id="emailService" class="org.datavaultplatform.broker.services.EmailService">
+        <property name="mailSender" ref="mailSender"/>
+        <property name="mailAdministrator" value="${mail.administrator}" />
+    </bean>
+
     <bean id="checkRetentionPolicies" class="org.datavaultplatform.broker.scheduled.CheckRetentionPolicies">
         <property name="vaultsService" ref="vaultsService" />
+    </bean>
+
+    <!-- Email -->
+    
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host"><value>${mail.host}</value></property>
+        <property name="port"><value>${mail.port}</value></property>
+        <property name="protocol"><value>smtp</value></property>
+        <property name="username"><value>${mail.username}</value></property>
+        <property name="password"><value>${mail.password}</value></property>
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtp.auth">true</prop>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+                <prop key="mail.smtp.quitwait">false</prop>
+            </props>
+        </property>
     </bean>
 
     <!-- RabbitMQ -->
@@ -107,6 +129,7 @@
         <property name="retrievesService" ref="retrievesService" />
         <property name="eventService" ref="eventService" />
         <property name="usersService" ref="usersService" />
+        <property name="emailService" ref="emailService" />
     </bean>
 
     <bean id="sender" class="org.datavaultplatform.broker.queue.Sender">
@@ -115,7 +138,7 @@
         <property name="queueUser" value="${queueUser}"/>
         <property name="queuePassword" value="${queuePassword}"/>
     </bean>
-
+    
     <!-- Hibernate -->
     
     <tx:annotation-driven transaction-manager="transactionManager"/>
