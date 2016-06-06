@@ -109,7 +109,9 @@
             }
         });
 
-        $('.retentionPolicy-select').selectpicker();
+        $('[data-toggle="tooltip"]').tooltip({
+            'placement': 'top'
+        });
     });
 </script>
 
