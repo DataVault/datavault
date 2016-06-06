@@ -1,4 +1,4 @@
-package org.datavaultplatform.common.retentionpolicy.impl;
+package org.datavaultplatform.common.retentionpolicy.impl.uk;
 
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Retrieve;
