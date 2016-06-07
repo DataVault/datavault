@@ -9,9 +9,9 @@ import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.model.*;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.HashMap;
 
 public class EventListener implements MessageListener {
 
@@ -214,17 +214,21 @@ public class EventListener implements MessageListener {
                 
                 String subject = "Data Vault - new deposit for [" + group.getName() + "]";
                 
-                String message =
-                        "Deposit Note: " + deposit.getNote() + "\n" +
-                        "Deposit ID: " + deposit.getID() + "\n" +
-                        "Vault ID: " + vault.getID() + "\n" +
-                        "User ID: " + completeEvent.getUserId() + "\n" +
-                        "Size: " + deposit.getArchiveSize() + " bytes" + "\n" +
-                        "Timestamp: " + completeEvent.getTimestamp();
+                HashMap model = new HashMap();
+                model.put("group-name", group.getName());
+                model.put("deposit-note", deposit.getNote());
+                model.put("deposit-id", deposit.getID());
+                model.put("vault-id", vault.getID());
+                model.put("user-id", completeEvent.getUserId());
+                model.put("size-bytes", deposit.getArchiveSize());
+                model.put("timestamp", completeEvent.getTimestamp());
                 
                 for (User groupAdmin : group.getOwners()) {
                     if (groupAdmin.getEmail() != null) {
-                        emailService.sendMail(groupAdmin.getEmail(), subject, message);
+                        emailService.sendTemplateMail(groupAdmin.getEmail(),
+                                subject,
+                                "group-admin-deposit-complete.vm",
+                                model);
                     }
                 }
                 
