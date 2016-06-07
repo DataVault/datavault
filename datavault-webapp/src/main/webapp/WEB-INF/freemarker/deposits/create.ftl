@@ -116,6 +116,10 @@
                 form.submit();
             }
         });
+
+        $('[data-toggle="tooltip"]').tooltip({
+            'placement': 'top'
+        });
     });
 </script>
 
