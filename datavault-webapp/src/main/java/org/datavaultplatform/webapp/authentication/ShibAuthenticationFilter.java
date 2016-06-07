@@ -15,8 +15,6 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class ShibAuthenticationFilter extends AbstractPreAuthenticatedProcessingFilter {
 
-    // Question - Should we extend RequestHeaderAuthenticationFilter instead??
-
     private String principalRequestHeader;
     private boolean exceptionIfHeaderMissing = true;
 
@@ -63,6 +61,4 @@ public class ShibAuthenticationFilter extends AbstractPreAuthenticatedProcessing
         this.exceptionIfHeaderMissing = exceptionIfHeaderMissing;
     }
 
-
-     // todo - how do we add other stuff to the Authentication token????? Answer - A WebAuthenticationDetails object.
 }
