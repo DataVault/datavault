@@ -81,9 +81,34 @@ public class FileStoreController {
         return store;
     }
 
+    @RequestMapping(value = "/filestores/keys", method = RequestMethod.GET)
+    public String getPublicKey(@RequestHeader(value = "X-UserID", required = true) String userID) {
+        User user = usersService.getUser(userID);
+
+        // Note: - There should only be one SFTP FileStore.
+        String publicKey = null;
+        List<FileStore> userStores = user.getFileStores();
+        for (FileStore userStore : userStores) {
+            if (userStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.SFTPFileSystem")) {
+                publicKey = userStore.getProperties().get("publicKey");
+                break;
+            }
+        }
+
+        return publicKey;
+    }
+
     @RequestMapping(value = "/filestores/keys", method = RequestMethod.POST)
     public String addKeyPair(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
         User user = usersService.getUser(userID);
+
+        // At the moment we can only cope with one SFTP FileStore, so if one already exists, throw an Exception.
+        List<FileStore> userStores = user.getFileStores();
+        for (FileStore userStore : userStores) {
+            if (userStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.SFTPFileSystem")) {
+                throw new Exception("Can't create SFTP FileStore as one already exists");
+            }
+        }
 
         userKeyPairService.generateNewKeyPair();
 
