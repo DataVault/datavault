@@ -34,7 +34,7 @@
                     <#list users as user>
                         <tr class="tr">
                             <td>${user.getID()?html}</td>
-                            <td>${user.name?html}</td>
+                            <td>${user.lastname?html}, ${user.firstname?html}</td>
                         </tr>
                     </#list>
                 </tbody>

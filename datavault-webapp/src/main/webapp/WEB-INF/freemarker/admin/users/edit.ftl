@@ -17,14 +17,22 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label">User Name:</label>
-            <@spring.bind "user.name" />
+            <label class="control-label">First Name:</label>
+            <@spring.bind "user.firstname" />
             <input type="text"
                    class="form-control"
                    name="${spring.status.expression}"
                    value="${spring.status.value!""}"/>
         </div>
 
+        <div class="form-group">
+            <label class="control-label">Last Name:</label>
+            <@spring.bind "user.lastname" />
+            <input type="text"
+                   class="form-control"
+                   name="${spring.status.expression}"
+                   value="${spring.status.value!""}"/>
+        </div>
 
         <div class="form-group">
             <button type="submit" name="action" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
