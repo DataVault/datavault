@@ -83,6 +83,7 @@
 
     <bean id="emailService" class="org.datavaultplatform.broker.services.EmailService">
         <property name="mailSender" ref="mailSender"/>
+        <property name="velocityEngine" ref="velocityEngine"/>
         <property name="mailAdministrator" value="${mail.administrator}" />
     </bean>
 
@@ -98,11 +99,25 @@
         <property name="protocol"><value>smtp</value></property>
         <property name="username"><value>${mail.username}</value></property>
         <property name="password"><value>${mail.password}</value></property>
+        <property name="defaultEncoding" value="UTF-8"/>
         <property name="javaMailProperties">
             <props>
                 <prop key="mail.smtp.auth">true</prop>
                 <prop key="mail.smtp.starttls.enable">true</prop>
                 <prop key="mail.smtp.quitwait">false</prop>
+            </props>
+        </property>
+    </bean>
+    
+    <bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
+        <property name="velocityProperties">
+            <props>
+                <prop key="resource.loader">file</prop>
+                <prop key="file.resource.loader.class">
+                    org.apache.velocity.runtime.resource.loader.FileResourceLoader
+                </prop>
+                <prop key="file.resource.loader.path">${DATAVAULT_HOME}/config/mail-templates</prop>
+                <prop key="file.resource.loader.cache">false</prop>
             </props>
         </property>
     </bean>
