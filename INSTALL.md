@@ -1,7 +1,7 @@
 @@ -0,0 +1,48 @@
-# Data Vault Installation instructions (Debian/Ubuntu)
+# Data Vault installation guide (Debian/Ubuntu)
 
-## Pre-requisites
+## Prerequisites
 
 ### Java (1.7)
 ```
