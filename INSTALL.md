@@ -28,13 +28,14 @@ sudo apt-get install mysql-server
 
 ### Configure MySQL database
 ```
-# Start an MySQL shell session
+# Start MySQL shell session
 mysql -i -u root -p
 
 # Create a new database user and database
 CREATE USER 'datavault'@'localhost' IDENTIFIED BY 'datavault';
 GRANT ALL PRIVILEGES ON *.* TO 'datavault'@'localhost';
 CREATE DATABASE datavault;
+EXIT;
 ```
 
 ### RabbitMQ
@@ -73,7 +74,7 @@ export MAVEN_OPTS="-Xmx1024m"
 mvn package
 ```
 
-### Set up the Data Vault home directory
+### Configure the Data Vault home directory
 ```
 # Copy the generated datavault home directory
 cd ~/datavault
@@ -85,11 +86,13 @@ sudo chown -R www-data /opt/datavault
 # set read/write permissions on the logging directory
 sudo chmod 666 /opt/datavault/logs
 
-# Set the $DATAVAULT_HOME environment variable (for users)
-
+# Set the $DATAVAULT_HOME environment variable (for the current shell user)
+# add the following line to your ~/.profile
+# export DATAVAULT_HOME=/opt/datavault
 
 # Set the $DATAVAULT_HOME environment variable (for tomcat)
-
+# add the following line to /usr/share/tomcat7/bin/setenv.sh
+# export DATAVAULT_HOME=/opt/datavault
 ```
 
 ### Configuration
@@ -116,3 +119,8 @@ sudo cp datavault-webapp/target/datavault-webapp.war /var/lib/tomcat7/webapps/RO
 ```
 ...
 ```
+
+### Other considerations
+* HTTPS (for both tomcat and RabbitMQ connections)
+* Shibboleth authentication
+* SFTP and storage configuration
