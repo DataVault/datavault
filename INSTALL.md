@@ -99,6 +99,7 @@ sudo chown -R www-data /opt/datavault
 sudo chmod 777 /opt/datavault/logs
 
 # Set the $DATAVAULT_HOME environment variable (for the current shell user)
+nano ~/.profile
 # Add the following line to your ~/.profile
 # export DATAVAULT_HOME=/opt/datavault
 
@@ -107,6 +108,7 @@ source ~/.profile
 echo $DATAVAULT_HOME
 
 # Set the $DATAVAULT_HOME environment variable (for tomcat)
+sudo nano /usr/share/tomcat7/bin/setenv.sh
 # Add the following line to /usr/share/tomcat7/bin/setenv.sh
 # export DATAVAULT_HOME=/opt/datavault
 
@@ -117,7 +119,7 @@ sudo chmod 755 /usr/share/tomcat7/bin/setenv.sh
 ### Configuration (datavault.properties)
 ```
 # Edit the $DATAVAULT_HOME/config/datavault.properties file
-# Properties are described in the table below
+sudo nano $DATAVAULT_HOME/config/datavault.properties
 ```
 
 | Name | Description |
