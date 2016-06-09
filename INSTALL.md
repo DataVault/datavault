@@ -65,14 +65,31 @@ sudo /etc/init.d/tomcat7 start
 
 ## Data Vault
 
-### Download and installation
+### Download and build the Data Vault code
 ```
-...
+git clone https://github.com/DataVault/datavault.git
+cd datavault
+export MAVEN_OPTS="-Xmx1024m"
+mvn package
 ```
 
-### Setting up the Data Vault home directory
+### Set up the Data Vault home directory
 ```
-...
+# Copy the generated datavault home directory
+cd ~/datavault
+sudo cp -R datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home /opt/datavault
+
+# change ownership of the home directory
+sudo chown -R www-data /opt/datavault
+
+# set read/write permissions on the logging directory
+sudo chmod 666 /opt/datavault/logs
+
+# Set the $DATAVAULT_HOME environment variable (for users)
+
+
+# Set the $DATAVAULT_HOME environment variable (for tomcat)
+
 ```
 
 ### Configuration
@@ -80,9 +97,22 @@ sudo /etc/init.d/tomcat7 start
 ...
 ```
 
-### Properties
+### datavault.properties file
 
 | Name | Description |
 | ------------- | ------------- |
 | Abc  | 123  |
 | Def  | 456  |
+
+### Install web applications
+```
+# deploy generated war files to the tomcat directory
+cd ~/datavault
+sudo cp datavault-broker/target/datavault-broker.war /var/lib/tomcat7/webapps
+sudo cp datavault-webapp/target/datavault-webapp.war /var/lib/tomcat7/webapps/ROOT.war
+```
+
+### Start the worker processes
+```
+...
+```
