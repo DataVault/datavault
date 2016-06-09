@@ -28,7 +28,10 @@ sudo apt-get install mysql-server
 
 ### Configure MySQL database
 ```
+# Start an MySQL shell session
 mysql -i -u root -p
+
+# Create a new database user and database
 CREATE USER 'datavault'@'localhost' IDENTIFIED BY 'datavault';
 GRANT ALL PRIVILEGES ON *.* TO 'datavault'@'localhost';
 CREATE DATABASE datavault;
