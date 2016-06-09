@@ -117,7 +117,8 @@ sudo cp datavault-webapp/target/datavault-webapp.war /var/lib/tomcat7/webapps/RO
 
 ### Start the worker processes
 ```
-...
+cd ~/datavault/datavault-worker/target
+nohup java -cp datavault-worker-1.0-SNAPSHOT.jar:./* org.datavaultplatform.worker.WorkerManager > /dev/null 2>&1 &
 ```
 
 ### Other considerations
