@@ -106,7 +106,7 @@ sudo chmod 666 /opt/datavault/logs
 | Name | Description |
 | ------------- | ------------- |
 | brokerURL  | The URL of the broker API for use by the default web application (localhost in this simple example) |
-| metadataURL | The URL of the external metadata service (for example, a Pure CRIS API endpoint) <br> - **work in progress** |
+| metadataURL | The URL of the external metadata service (for example, a Pure CRIS API endpoint). Leave this blank to use a mock provider <br> - **work in progress** |
 | dbURL | The location of the MySQL database (localhost in this simple example) |
 | dbUsername | The MySQL username - should match the created MySQL user |
 | dbPassword | The MySQL password - should match the created MySQL user |
