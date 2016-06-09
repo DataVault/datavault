@@ -106,7 +106,7 @@ sudo chmod 666 /opt/datavault/logs
 | Name | Description |
 | ------------- | ------------- |
 | brokerURL  | The URL of the broker API for use by the default web application (localhost in this simple example) |
-| metadataURL | The URL of the external metadata service (for example, a Pure CRIS API endpoint) - **work in progress** |
+| metadataURL | The URL of the external metadata service (for example, a Pure CRIS API endpoint) <br> - **work in progress** |
 | dbURL | The location of the MySQL database (localhost in this simple example) |
 | dbUsername | The MySQL username - should match the created MySQL user |
 | dbPassword | The MySQL password - should match the created MySQL user |
@@ -116,7 +116,7 @@ sudo chmod 666 /opt/datavault/logs
 | queueUser | The RabbitMQ username - should match the created RabbitMQ user |
 | queuePassword | The RabbitMQ password - should match the created RabbitMQ user's password |
 | numberOfWorkers | The number of concurrent workers to start |
-| activeDir | A default directory for sample user data (if per-user storage is not configured) - **for demonstration only** |
+| activeDir | A default directory for sample user data (if per-user storage is not configured) <br> - **for demonstration only** |
 | archiveDir | Directory for archive data (if using 'local storage') |
 | tempDir | A temporary directory for workers to process files before storing in the archive |
 | metaDir | A directory for storing archive metadata |
@@ -126,15 +126,15 @@ sudo chmod 666 /opt/datavault/logs
 | mail.username | SMTP account name for sending mail |
 | mail.password | SMTP password for sending mail |
 | webapp.welcome | Welcome message (HTML) displayed by the (non-shibboleth) login page |
-| broker.api.key | API key for the default web client - **you should change this value** |
+| broker.api.key | API key for the default web client <br> - **you should change this value** |
 | validateClient | Debug setting to disable API authentication |
 | describe.system | Name displayed in the help page for the institutional CRIS or external metadata system |
 | describe.link | URL displayed in the help page for the institutional CRIS or external metadata system |
 | retentioncheck.schedule | How frequently the retention policy check job is run (in 'cron' format) |
-| host | Default SFTP host - **work in progress** |
-| port | Default SFTP port - **work in progress** |
-| rootPath | Default SFTP path - **work in progress** |
-| passphrase | Default SFTP key passphrase - **work in progress** |
+| host | Default SFTP host <br> - **work in progress** |
+| port | Default SFTP port <br> - **work in progress** |
+| rootPath | Default SFTP path <br> - **work in progress** |
+| passphrase | Default SFTP key passphrase <br> - **work in progress** |
 
 ### Deploy web applications
 ```
