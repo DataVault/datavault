@@ -23,11 +23,15 @@ sudo apt-get install git
 # Install package
 sudo apt-get install mysql-server
 
-# Set root password
-...
+# Set a root password when prompted by the installer.
+```
 
-# Configure database
-...
+### Configure MySQL database
+```
+mysql -i -u root -p
+CREATE USER 'datavault'@'localhost' IDENTIFIED BY 'datavault';
+GRANT ALL PRIVILEGES ON *.* TO 'datavault'@'localhost';
+CREATE DATABASE datavault;
 ```
 
 ### RabbitMQ
@@ -42,7 +46,9 @@ sudo apt-get update
 sudo apt-get install rabbitmq-server
 
 # Configure RabbitMQ users
-...
+sudo rabbitmqctl add_user datavault datavault
+sudo rabbitmqctl set_user_tags datavault administrator
+sudo rabbitmqctl set_permissions -p / datavault ".*" ".*" ".*"
 ```
 
 ### Apache & Tomcat
