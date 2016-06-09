@@ -95,24 +95,26 @@ sudo chmod 666 /opt/datavault/logs
 # export DATAVAULT_HOME=/opt/datavault
 ```
 
-### Configuration
+### Configuration (datavault.properties)
 ```
 # edit the $DATAVAULT_HOME/config/datavault.properties file
 # each property is described in the table below
 ```
-
-### datavault.properties file
 
 | Name | Description |
 | ------------- | ------------- |
 | Abc  | 123  |
 | Def  | 456  |
 
-### Install web applications
+### Deploy web applications
 ```
 # deploy generated war files to the tomcat directory
 cd ~/datavault
+
+# Deploy the broker (REST API)
 sudo cp datavault-broker/target/datavault-broker.war /var/lib/tomcat7/webapps
+
+# Deploy the sample web application
 sudo cp datavault-webapp/target/datavault-webapp.war /var/lib/tomcat7/webapps/ROOT.war
 ```
 
