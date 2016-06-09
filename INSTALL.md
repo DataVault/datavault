@@ -198,13 +198,7 @@ pkill -f datavault-worker
 nohup java -cp datavault-worker-1.0-SNAPSHOT.jar:./* org.datavaultplatform.worker.WorkerManager > /dev/null 2>&1 &
 ```
 
-### Other considerations
-* HTTPS (for both tomcat and RabbitMQ connections)
-* Shibboleth authentication
-* SFTP and storage configuration
-* Customisation using spring configuration files
-
-## Troubleshooting
+### Troubleshooting
 
 Check the various logfiles:
 * $DATAVAULT_HOME/logs
@@ -215,4 +209,10 @@ Ensure that directories referenced in datavault.properties have been created and
 * archiveDir
 * tempDir
 * metaDir
+
+## Other considerations
+* HTTPS (for both tomcat and RabbitMQ connections)
+* Shibboleth authentication
+* SFTP and storage configuration
+* Customisation using spring configuration files
 
