@@ -155,6 +155,9 @@ sudo chmod 755 /usr/share/tomcat7/bin/setenv.sh
 
 ### Deploy web applications
 ```
+# Remove the default tomcat webapp
+sudo rm -rf /var/lib/tomcat7/webapps/ROOT
+
 # Deploy the generated war files to the tomcat directory
 cd ~/datavault
 
