@@ -32,6 +32,7 @@ sudo apt-get install mysql-server
 mysql -i -u root -p
 
 # Create a new database user and database
+# In this example the password is 'datavault' and MySQL is running on the same machine as the broker
 CREATE USER 'datavault'@'localhost' IDENTIFIED BY 'datavault';
 GRANT ALL PRIVILEGES ON *.* TO 'datavault'@'localhost';
 CREATE DATABASE datavault;
@@ -50,6 +51,7 @@ sudo apt-get update
 sudo apt-get install rabbitmq-server
 
 # Configure RabbitMQ users
+# In this example the password is 'datavault'
 sudo rabbitmqctl add_user datavault datavault
 sudo rabbitmqctl set_user_tags datavault administrator
 sudo rabbitmqctl set_permissions -p / datavault ".*" ".*" ".*"
