@@ -69,7 +69,7 @@ sudo rabbitmqctl set_permissions -p / datavault ".*" ".*" ".*"
 sudo apt-get install tomcat7-admin
 sudo apt-get install tomcat7
 
-# Start tomcat
+# Tomcat will start automatically - you can also start it using the following command:
 sudo /etc/init.d/tomcat7 start
 ```
 
