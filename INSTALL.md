@@ -95,8 +95,8 @@ sudo cp -R datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/da
 # Change ownership of the home directory
 sudo chown -R www-data /opt/datavault
 
-# Set read/write permissions on the logging directory
-sudo chmod 666 /opt/datavault/logs
+# Set permissions on the logging directory
+sudo chmod 777 /opt/datavault/logs
 
 # Set the $DATAVAULT_HOME environment variable (for the current shell user)
 # Add the following line to your ~/.profile
