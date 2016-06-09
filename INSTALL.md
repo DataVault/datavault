@@ -97,7 +97,8 @@ sudo chmod 666 /opt/datavault/logs
 
 ### Configuration
 ```
-...
+# edit the $DATAVAULT_HOME/config/datavault.properties file
+# each property is described in the table below
 ```
 
 ### datavault.properties file
