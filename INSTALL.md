@@ -1,6 +1,12 @@
 @@ -0,0 +1,48 @@
 # Data Vault installation guide (Debian/Ubuntu)
 
+## Before you start
+```
+# Make sure your packages are up to date
+sudo apt-get update
+```
+
 ## Prerequisites
 
 ### Java (1.7)
