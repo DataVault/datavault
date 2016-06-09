@@ -179,7 +179,8 @@ sudo /etc/init.d/tomcat7 restart
 
 ### Update web application API Key
 ```
-# If you changed the api key for the default web application you'll also need to update it in the database
+# If you changed the api key for the default web application you'll also need to update it in the database.
+# By default the broker API can only be accessed from the same machine as the broker.
 
 # Start MySQL shell session
 mysql -i -u root -p
@@ -202,3 +203,16 @@ nohup java -cp datavault-worker-1.0-SNAPSHOT.jar:./* org.datavaultplatform.worke
 * Shibboleth authentication
 * SFTP and storage configuration
 * Customisation using spring configuration files
+
+## Troubleshooting
+
+Check the various logfiles:
+* $DATAVAULT_HOME/logs
+* /var/log/tomcat7/catalina.out
+
+Ensure that directories referenced in datavault.properties have been created and have the correct permissions:
+* activeDir
+* archiveDir
+* tempDir
+* metaDir
+
