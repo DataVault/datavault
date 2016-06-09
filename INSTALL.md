@@ -67,6 +67,7 @@ sudo rabbitmqctl set_permissions -p / datavault ".*" ".*" ".*"
 ```
 # Install packages
 sudo apt-get install tomcat7-admin
+sudo apt-get install tomcat7
 
 # Start tomcat
 sudo /etc/init.d/tomcat7 start
