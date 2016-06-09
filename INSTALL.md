@@ -80,25 +80,25 @@ mvn package
 cd ~/datavault
 sudo cp -R datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home /opt/datavault
 
-# change ownership of the home directory
+# Change ownership of the home directory
 sudo chown -R www-data /opt/datavault
 
-# set read/write permissions on the logging directory
+# Set read/write permissions on the logging directory
 sudo chmod 666 /opt/datavault/logs
 
 # Set the $DATAVAULT_HOME environment variable (for the current shell user)
-# add the following line to your ~/.profile
+# Add the following line to your ~/.profile
 # export DATAVAULT_HOME=/opt/datavault
 
 # Set the $DATAVAULT_HOME environment variable (for tomcat)
-# add the following line to /usr/share/tomcat7/bin/setenv.sh
+# Add the following line to /usr/share/tomcat7/bin/setenv.sh
 # export DATAVAULT_HOME=/opt/datavault
 ```
 
 ### Configuration (datavault.properties)
 ```
-# edit the $DATAVAULT_HOME/config/datavault.properties file
-# each property is described in the table below
+# Edit the $DATAVAULT_HOME/config/datavault.properties file
+# Properties are described in the table below
 ```
 
 | Name | Description |
@@ -108,7 +108,7 @@ sudo chmod 666 /opt/datavault/logs
 
 ### Deploy web applications
 ```
-# deploy generated war files to the tomcat directory
+# Deploy the generated war files to the tomcat directory
 cd ~/datavault
 
 # Deploy the broker (REST API)
