@@ -193,6 +193,7 @@ EXIT;
 ### Start the worker processes
 ```
 cd ~/datavault/datavault-worker/target
+pkill -f datavault-worker
 nohup java -cp datavault-worker-1.0-SNAPSHOT.jar:./* org.datavaultplatform.worker.WorkerManager > /dev/null 2>&1 &
 ```
 
