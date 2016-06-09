@@ -171,6 +171,9 @@ sudo cp datavault-webapp/target/datavault-webapp.war /var/lib/tomcat7/webapps/RO
 
 # Restart tomcat
 sudo /etc/init.d/tomcat7 restart
+
+# You should now be able to navigate to http://my-server:8080 and see the Data Vault login page.
+# You can also to navigate to http://my-server:8080/datavault-broker/ and see the API documentation.
 ```
 
 ### Start the worker processes
