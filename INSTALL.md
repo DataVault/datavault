@@ -163,6 +163,9 @@ sudo cp datavault-broker/target/datavault-broker.war /var/lib/tomcat7/webapps
 
 # Deploy the sample web application
 sudo cp datavault-webapp/target/datavault-webapp.war /var/lib/tomcat7/webapps/ROOT.war
+
+# Restart tomcat
+sudo /etc/init.d/tomcat7 restart
 ```
 
 ### Start the worker processes
