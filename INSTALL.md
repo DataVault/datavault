@@ -109,6 +109,9 @@ echo $DATAVAULT_HOME
 # Set the $DATAVAULT_HOME environment variable (for tomcat)
 # Add the following line to /usr/share/tomcat7/bin/setenv.sh
 # export DATAVAULT_HOME=/opt/datavault
+
+# If you created /usr/share/tomcat7/bin/setenv.sh make sure tomcat has read/execute permissions on the new file
+sudo chmod 755 /usr/share/tomcat7/bin/setenv.sh
 ```
 
 ### Configuration (datavault.properties)
