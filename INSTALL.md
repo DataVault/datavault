@@ -71,6 +71,9 @@ sudo apt-get install tomcat7
 
 # Tomcat will start automatically - you can also start it using the following command:
 sudo /etc/init.d/tomcat7 start
+
+# Ensure that port 8080 is open your firewall.
+# You should now be able to navigate to http://my-server:8080 and see the default tomcat welcome page.
 ```
 
 ## Data Vault
