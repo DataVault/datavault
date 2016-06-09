@@ -164,6 +164,7 @@ sudo rm -rf /var/lib/tomcat7/webapps/ROOT
 cd ~/datavault
 
 # Deploy the broker (REST API)
+# Deploying the broker application will cause Hibernate to construct the database tables and load some sample user data.
 sudo cp datavault-broker/target/datavault-broker.war /var/lib/tomcat7/webapps
 
 # Deploy the sample web application
@@ -174,6 +175,19 @@ sudo /etc/init.d/tomcat7 restart
 
 # You should now be able to navigate to http://my-server:8080 and see the Data Vault login page.
 # You can also to navigate to http://my-server:8080/datavault-broker/ and see the API documentation.
+```
+
+### Update web application API Key
+```
+# If you changed the api key for the default web application you'll also need to update it in the database
+
+# Start MySQL shell session
+mysql -i -u root -p
+
+# In this example the new API key is '123456'
+USE DATAVAULT
+UPDATE Clients SET apiKey = '123456' WHERE id = 'datavault-webapp';
+EXIT;
 ```
 
 ### Start the worker processes
