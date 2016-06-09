@@ -185,7 +185,7 @@ sudo /etc/init.d/tomcat7 restart
 mysql -i -u root -p
 
 # In this example the new API key is '123456'
-USE DATAVAULT
+USE datavault
 UPDATE Clients SET apiKey = '123456' WHERE id = 'datavault-webapp';
 EXIT;
 ```
