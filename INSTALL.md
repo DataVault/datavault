@@ -164,6 +164,7 @@ sudo rm -rf /var/lib/tomcat7/webapps/ROOT
 cd ~/datavault
 
 # Deploy the broker (REST API)
+# Deploying the broker application will cause Hibernate to construct the database tables and load some sample user data.
 sudo cp datavault-broker/target/datavault-broker.war /var/lib/tomcat7/webapps
 
 # Deploy the sample web application
@@ -176,14 +177,42 @@ sudo /etc/init.d/tomcat7 restart
 # You can also to navigate to http://my-server:8080/datavault-broker/ and see the API documentation.
 ```
 
+### Update web application API Key
+```
+# If you changed the api key for the default web application you'll also need to update it in the database.
+# By default the broker API can only be accessed from the same machine as the broker.
+
+# Start MySQL shell session
+mysql -i -u root -p
+
+# In this example the new API key is '123456'
+USE datavault
+UPDATE Clients SET apiKey = '123456' WHERE id = 'datavault-webapp';
+EXIT;
+```
+
 ### Start the worker processes
 ```
 cd ~/datavault/datavault-worker/target
+pkill -f datavault-worker
 nohup java -cp datavault-worker-1.0-SNAPSHOT.jar:./* org.datavaultplatform.worker.WorkerManager > /dev/null 2>&1 &
 ```
 
-### Other considerations
+### Troubleshooting
+
+Check the various logfiles:
+* $DATAVAULT_HOME/logs
+* /var/log/tomcat7/catalina.out
+
+Ensure that directories referenced in datavault.properties have been created and have the correct permissions:
+* activeDir
+* archiveDir
+* tempDir
+* metaDir
+
+## Other considerations
 * HTTPS (for both tomcat and RabbitMQ connections)
 * Shibboleth authentication
 * SFTP and storage configuration
 * Customisation using spring configuration files
+
