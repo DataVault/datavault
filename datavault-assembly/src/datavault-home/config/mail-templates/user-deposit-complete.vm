@@ -16,5 +16,7 @@
 			<li>Timestamp: ${timestamp}</li>
 		</ul>
 		
+		<p>Data in this Vault will be retained until at least ${vault-retention-expiry} when a review will be carried out.</p>
+		
 	</body>
 </html>
