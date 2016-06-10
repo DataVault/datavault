@@ -13,6 +13,8 @@ import org.jsondoc.core.annotation.ApiHeaders;
 import org.jsondoc.core.annotation.ApiMethod;
 import org.jsondoc.core.annotation.ApiPathParam;
 import org.jsondoc.core.pojo.ApiVerb;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +23,9 @@ import org.datavaultplatform.broker.services.UsersService;
 
 @RestController
 public class FileStoreController {
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(FileStoreController.class);
+
     private UsersService usersService;
     private FileStoreService fileStoreService;
     private UserKeyPairService userKeyPairService;
@@ -70,7 +74,7 @@ public class FileStoreController {
         
         return userStores;
     }
-    
+
     @RequestMapping(value = "/filestores", method = RequestMethod.POST)
     public FileStore addFileStore(@RequestHeader(value = "X-UserID", required = true) String userID,
                                   @RequestBody FileStore store) throws Exception {
@@ -81,34 +85,43 @@ public class FileStoreController {
         return store;
     }
 
-    @RequestMapping(value = "/filestores/keys", method = RequestMethod.GET)
-    public String getPublicKey(@RequestHeader(value = "X-UserID", required = true) String userID) {
-        User user = usersService.getUser(userID);
+    @RequestMapping(value = "/filestores/{filestoreid}", method = RequestMethod.GET)
+    public FileStore getPublicKey(@RequestHeader(value = "X-UserID", required = true) String userID,
+                               @PathVariable("filestoreid") String filestoreid) {
 
-        // Note: - There should only be one SFTP FileStore.
-        String publicKey = null;
-        List<FileStore> userStores = user.getFileStores();
-        for (FileStore userStore : userStores) {
-            if (userStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.SFTPFileSystem")) {
-                publicKey = userStore.getProperties().get("publicKey");
-                break;
-            }
-        }
-
-        return publicKey;
+        FileStore store = fileStoreService.getFileStore(filestoreid);
+        return store;
     }
 
-    @RequestMapping(value = "/filestores/keys", method = RequestMethod.POST)
-    public String addKeyPair(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    @RequestMapping(value = "filestores/{filestoreid}", method = RequestMethod.DELETE)
+    public @ResponseBody void deleteFileStore(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                               @PathVariable("filestoreid") String filestoreid) {
+
+        fileStoreService.deleteFileStore(filestoreid);
+
+    }
+
+
+    @RequestMapping(value = "/filestores/local", method = RequestMethod.GET)
+    public List<FileStore> getFileStoresLocal(@RequestHeader(value = "X-UserID", required = true) String userID) {
         User user = usersService.getUser(userID);
 
-        // At the moment we can only cope with one SFTP FileStore, so if one already exists, throw an Exception.
         List<FileStore> userStores = user.getFileStores();
+        List<FileStore> localStores = new ArrayList<>();
+
         for (FileStore userStore : userStores) {
-            if (userStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.SFTPFileSystem")) {
-                throw new Exception("Can't create SFTP FileStore as one already exists");
+            if (userStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.LocalFileSystem")) {
+                localStores.add(userStore);
             }
         }
+
+        return localStores;
+    }
+
+
+    @RequestMapping(value = "/filestores/sftp", method = RequestMethod.POST)
+    public FileStore addKeyPair(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+        User user = usersService.getUser(userID);
 
         userKeyPairService.generateNewKeyPair();
 
@@ -126,6 +139,32 @@ public class FileStoreController {
         store.setUser(user);
         fileStoreService.addFileStore(store);
 
-        return userKeyPairService.getPublicKey();
+        // Remove sensitive information that should only be held server side.
+        storeProperties = store.getProperties();
+        storeProperties.remove("password");
+        storeProperties.remove("privateKey");
+        storeProperties.remove("passphrase");
+        store.setProperties(storeProperties);
+
+        return store;
     }
+
+    @RequestMapping(value = "/filestores/sftp/{filestoreid}", method = RequestMethod.GET)
+    public FileStore getSftpFilestore(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                   @PathVariable("filestoreid") String filestoreid) {
+
+        FileStore store = fileStoreService.getFileStore(filestoreid);
+
+        // Remove sensitive information that should only be held server side.
+        HashMap<String,String> storeProperties = store.getProperties();
+        storeProperties.remove("password");
+        storeProperties.remove("privateKey");
+        storeProperties.remove("passphrase");
+        store.setProperties(storeProperties);
+
+        return store;
+
+    }
+
+
 }

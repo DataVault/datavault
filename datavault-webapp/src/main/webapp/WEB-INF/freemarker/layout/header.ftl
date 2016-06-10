@@ -33,7 +33,7 @@
                         <ul class="dropdown-menu">
                             <!-- Commented out the edit profile function for the moment as the code is a little out of date -->
                             <!--<li><a href="${springMacroRequestContext.getContextPath()}/users/edit/${principal}">Edit profile</a></li> -->
-                            <li><a href="${springMacroRequestContext.getContextPath()}/users/${principal}/keys">Add SSH keys</a></li>
+                            <li><a href="${springMacroRequestContext.getContextPath()}/filestores">Storage options</a></li>
                             <li><a href="${springMacroRequestContext.getContextPath()}/auth/logout">Logout</a></li>
                         </ul>
                     </li>

@@ -57,7 +57,7 @@ public class RestService {
             throw new IllegalArgumentException("REST method not implemented!");
         }
 
-        logger.debug("Calling Broker with url:" + url);
+        logger.debug("Calling Broker with url:" + url + " Method:" + method);
 
         return restTemplate.exchange(url, method, entity, clazz);
         
@@ -83,6 +83,16 @@ public class RestService {
     
     public FileStore[] getFileStoreListing() {        
         HttpEntity<?> response = get(brokerURL + "/filestores", FileStore[].class);
+        return (FileStore[])response.getBody();
+    }
+
+    public FileStore[] getFileStoresLocal() {
+        HttpEntity<?> response = get(brokerURL + "/filestores/local", FileStore[].class);
+        return (FileStore[])response.getBody();
+    }
+
+    public FileStore[] getFileStoresSFTP() {
+        HttpEntity<?> response = get(brokerURL + "/filestores/sftp", FileStore[].class);
         return (FileStore[])response.getBody();
     }
     
@@ -367,20 +377,9 @@ public class RestService {
         return (User)response.getBody();
     }
 
-    public Boolean keysExist(String userId) {
-        HttpEntity<?> response = get(brokerURL + "/users/" + userId + "/keys", Boolean.class);
-        return (Boolean)response.getBody();
-    }
-
-    public String addKeys(String userId) {
-        // Bit odd to POST a null object, but a POST seems appropriate since it is a non-idempotent, create request
-        HttpEntity<?> response = post(brokerURL + "/users/" + userId + "/keys", String.class, null);
-        return (String)response.getBody();
-    }
-
     public String addKeys() {
         // Bit odd to POST a null object, but a POST seems appropriate since it is a non-idempotent, create request
-        HttpEntity<?> response = post(brokerURL + "/filestores/keys", String.class, null);
+        HttpEntity<?> response = post(brokerURL + "/filestores/sftp", String.class, null);
         return (String)response.getBody();
     }
 
@@ -430,5 +429,9 @@ public class RestService {
     /* DELETE requests */
     public void removeGroupOwner(String groupId, String userId) {
         delete(brokerURL + "/groups/" + groupId + "/users/" + userId, String.class);
+    }
+
+    public void deleteFileStore(String fileStoreId) {
+        delete(brokerURL + "/filestores/" + fileStoreId, String.class);
     }
 }

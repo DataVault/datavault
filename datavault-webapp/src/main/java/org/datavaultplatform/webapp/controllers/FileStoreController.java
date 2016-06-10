@@ -27,50 +27,46 @@ public class FileStoreController {
         this.restService = restService;
     }
 
+    // Return the 'Storage Options' page
+    @RequestMapping(value = "/filestores", method = RequestMethod.GET)
+    public String listFilestores(ModelMap model) {
+        model.addAttribute("filestoresLocal", restService.getFileStoresLocal());
+        model.addAttribute("filestoresSFTP", restService.getFileStoresSFTP());
 
-    // Return an 'add keys' page
-    @RequestMapping(value = "/users/{userid}/keys", method = RequestMethod.GET)
-    public String addKeys(ModelMap model, @PathVariable("userid") String userID) {
-
-        model.addAttribute("keysExist", restService.keysExist(userID));
-        model.addAttribute("user", restService.getUser(userID));
-        return "users/addKeys";
-    }
-
-    // Process the completed 'add keys' page
-    @RequestMapping(value = "/users/{userid}/keys", method = RequestMethod.POST)
-    public String addKeys(@ModelAttribute User user, ModelMap model, @PathVariable("userid") String userID, @RequestParam String action) {
-        // Was the cancel button pressed?
-        if ("cancel".equals(action)) {
-            return "redirect:/";
-        }
-
-        model.addAttribute("publicKey", restService.addKeys(userID));
-        model.addAttribute("user", restService.getUser(userID));
-
-        return "users/listKeys";
+        return "filestores/index";
     }
 
 
     // Process the 'add local FileStore' Ajax request
     @RequestMapping(value = "/filestores/local", method = RequestMethod.POST)
     @ResponseBody
-    public String addLocalFilestore(@RequestParam String dirname, @RequestParam String action) {
+    public FileStore addLocalFilestore(@RequestParam String dirname) {
         HashMap<String,String> storeProperties = new HashMap<String,String>();
         storeProperties.put("rootPath", dirname);
         FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Filesystem (local)");
-        restService.addFileStore(store);
+        FileStore returnedStore = restService.addFileStore(store);
 
-        return null;
+        return returnedStore;
     }
 
     // Process the 'add keys' Ajax request
     @RequestMapping(value = "/filestores/keys", method = RequestMethod.POST)
     @ResponseBody
-    public String addKeys(@RequestParam String action) {
+    public String addKeys(ModelMap model) {
+        logger.info("About to addkeys in webapp controller");
+
         String publicKey = restService.addKeys();
 
         return publicKey;
+    }
+
+    // Process the 'delete filestore' Ajax request
+    @RequestMapping(value = "/filestores/{filestoreId}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public void deleteFileStore(ModelMap model, @PathVariable("filestoreId") String filestoreId) {
+
+        logger.info("Trying to delete filestore " + filestoreId);
+        restService.deleteFileStore(filestoreId);
     }
 
 
