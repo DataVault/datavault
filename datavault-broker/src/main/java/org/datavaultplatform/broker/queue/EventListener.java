@@ -208,28 +208,39 @@ public class EventListener implements MessageListener {
                     }
                 }
                 
-                // Send email to group owners
+                // Get related information for emails
                 Vault vault = deposit.getVault();
                 Group group = vault.getGroup();
-                
-                String subject = "Data Vault - new deposit for [" + group.getName() + "]";
+                User depositUser = usersService.getUser(completeEvent.getUserId());
                 
                 HashMap model = new HashMap();
                 model.put("group-name", group.getName());
                 model.put("deposit-note", deposit.getNote());
                 model.put("deposit-id", deposit.getID());
+                model.put("vault-name", vault.getName());
                 model.put("vault-id", vault.getID());
-                model.put("user-id", completeEvent.getUserId());
+                model.put("user-id", depositUser.getID());
+                model.put("user-firstname", depositUser.getFirstname());
+                model.put("user-lastname", depositUser.getLastname());
                 model.put("size-bytes", deposit.getArchiveSize());
                 model.put("timestamp", completeEvent.getTimestamp());
                 
+                // Send email to group owners
                 for (User groupAdmin : group.getOwners()) {
                     if (groupAdmin.getEmail() != null) {
                         emailService.sendTemplateMail(groupAdmin.getEmail(),
-                                subject,
+                                "Data Vault - new deposit for [" + group.getName() + "]",
                                 "group-admin-deposit-complete.vm",
                                 model);
                     }
+                }
+                
+                // Send email to the deposit user
+                if (depositUser.getEmail() != null) {
+                    emailService.sendTemplateMail(depositUser.getEmail(),
+                            "Data Vault - deposit complete [" + deposit.getNote() + "]",
+                            "user-deposit-complete.vm",
+                            model);
                 }
                 
             } else if (concreteEvent instanceof Error) {
@@ -263,6 +274,41 @@ public class EventListener implements MessageListener {
                         // Refresh from database and retry
                         job = jobsService.getJob(concreteEvent.getJobId());
                     }
+                }
+                
+                // Get related information for emails
+                Vault vault = deposit.getVault();
+                Group group = vault.getGroup();
+                User depositUser = usersService.getUser(errorEvent.getUserId());
+                
+                HashMap model = new HashMap();
+                model.put("group-name", group.getName());
+                model.put("deposit-note", deposit.getNote());
+                model.put("deposit-id", deposit.getID());
+                model.put("vault-name", vault.getName());
+                model.put("vault-id", vault.getID());
+                model.put("user-id", depositUser.getID());
+                model.put("user-firstname", depositUser.getFirstname());
+                model.put("user-lastname", depositUser.getLastname());
+                model.put("timestamp", errorEvent.getTimestamp());
+                model.put("error-message", errorEvent.getMessage());
+                
+                // Send email to group owners
+                for (User groupAdmin : group.getOwners()) {
+                    if (groupAdmin.getEmail() != null) {
+                        emailService.sendTemplateMail(groupAdmin.getEmail(),
+                                "Data Vault - deposit error for [" + group.getName() + "]",
+                                "group-admin-deposit-error.vm",
+                                model);
+                    }
+                }
+                
+                // Send email to the deposit user
+                if (depositUser.getEmail() != null) {
+                    emailService.sendTemplateMail(depositUser.getEmail(),
+                            "Data Vault - deposit error [" + deposit.getNote() + "]",
+                            "user-deposit-error.vm",
+                            model);
                 }
                 
             } else if (concreteEvent instanceof RetrieveStart) {

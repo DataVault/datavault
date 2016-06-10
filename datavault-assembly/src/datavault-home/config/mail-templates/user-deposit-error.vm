@@ -1,0 +1,24 @@
+<html>
+	<body>
+		<h3>Data Vault - deposit error</h3>
+		
+		<p>Hi, ${user-firstname} ${user-lastname}</p>
+		
+		<p>Unfortunately there was a problem with your deposit.</p>
+
+		<p>An administrator has been contacted to help resolve this issue.</p>
+	
+		<p>Deposit details:</p>
+		<ul>
+			<li>Deposit note: ${deposit-note}</li>
+			<li>Deposit ID: ${deposit-id}</li>
+			<li>Vault: ${vault-name}</li>
+			<li>Vault ID: ${vault-id}</li>
+			<li>Timestamp: ${timestamp}</li>
+		</ul>
+		
+		<p>Error details:</p>
+		<p>${error-message}</p>
+		
+	</body>
+</html>
