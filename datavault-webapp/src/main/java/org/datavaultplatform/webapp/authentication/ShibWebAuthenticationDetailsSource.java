@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 
 public class ShibWebAuthenticationDetailsSource extends WebAuthenticationDetailsSource {
 
-    // todo - throw an exception if these headers are not present?
     private String firstnameRequestHeader;
     private String lastnameRequestHeader;
     private String emailRequestHeader;

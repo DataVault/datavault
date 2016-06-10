@@ -41,9 +41,10 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
 
         ShibWebAuthenticationDetails swad = (ShibWebAuthenticationDetails) authentication.getDetails();
 
+        List<GrantedAuthority> grantedAuths = new ArrayList<>();
+
         if (!restService.userExists(new ValidateUser(name, password))) {
             logger.info("Creating new account for new user " + name);
-            // First time the user has logged on so create a new user account
             User user = new User();
             user.setID(name);
             user.setAdmin(false);
@@ -53,9 +54,12 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
             restService.addUser(user);
         } else {
             logger.info("Existing user " + name);
+            if (restService.isAdmin(new ValidateUser(name, null))) {
+                logger.debug("user is an admin " + name);
+                grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            }
         }
 
-        List<GrantedAuthority> grantedAuths = new ArrayList<>();
         grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
         return new PreAuthenticatedAuthenticationToken(name, password, grantedAuths);
 
