@@ -33,6 +33,7 @@
                 <p>Enter new filestore details here</p>
                 <form id="add-filestore-form">
                     <div class="form-filestore">
+                        <!--
                         <div class="form-group">
                             <label for="add-hostname">Hostname</label>
                             <input type="text" class="form-control" id="add-hostname" placeholder="Enter hostname"/>
@@ -41,6 +42,7 @@
                             <label for="add-port">Port</label>
                             <input type="text" class="form-control" id="add-port" placeholder="Enter port"/>
                         </div>
+                        -->
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-default">Submit</button>
                     </div>
@@ -103,42 +105,12 @@
 </div>
 
 <script>
-    // Bind properties to the filestore removal confirmation dialog
-    $('#confirm-removal').on('show.bs.modal', function(e) {
-        var data = $(e.relatedTarget).data();
-        $('.remove-filestore', this).text(data.filestore);
-        $('.btn-ok', this).data('filestore', data.filestore);
-    });
-
-    // Bind OK button for user removal confirmation dialog
-    $('#confirm-removal').on('click', '.btn-ok', function(e) {
-        var $modalDiv = $(e.delegateTarget);
-        var user = $(this).data('filestore');
-    
-        $.ajax({
-            url: '${springMacroRequestContext.getContextPath()}/filestores/' + filestore.??????,
-            type: 'DELETE',
-            success: function(result) {
-                $modalDiv.modal('hide');
-                location.reload(true);
-            }
-        });
-    });
-
-    // Bind properties to the add filestore dialog
-    $('#add-filestore').on('show.bs.modal', function(e) {
-        var data = $(e.relatedTarget).data();
-        $('#add-hostname').val('');
-        $('#add-port').val('');
-    });
-
-
 
     var sftpFrm = $('#add-filestore-form');
     sftpFrm.submit(function (ev) {
         $.ajax({
-            type: sftpFrm.attr('POST'),
-            url: '${springMacroRequestContext.getContextPath()}/filestores'
+            method: "POST",
+            url: '${springMacroRequestContext.getContextPath()}/filestores/keys',
             data: sftpFrm.serialize(),
             success: function (data) {
                 alert('Public key is ' + data);
