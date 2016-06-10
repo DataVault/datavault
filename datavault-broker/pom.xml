@@ -159,6 +159,12 @@
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity</artifactId>
         </dependency>
+        
+        <!-- used by velocity for HTML escaping -->
+        <dependency>
+            <groupId>oro</groupId>
+            <artifactId>oro</artifactId>
+        </dependency>
 
         <!-- Note: commons-logging is excluded and slf4j is the replacement bridge to log4j -->
         <dependency>
