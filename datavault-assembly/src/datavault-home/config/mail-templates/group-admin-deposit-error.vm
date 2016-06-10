@@ -1,6 +1,6 @@
 <html>
 	<body>
-		<h3>Data Vault - new deposit for ${group-name}</h3>
+		<h3>Data Vault - deposit error for ${group-name}</h3>
 		
 		<p>Deposit details:</p>
 		
@@ -10,10 +10,11 @@
 			<li>Vault: ${vault-name}</li>
 			<li>Vault ID: ${vault-id}</li>
 			<li>User ID: ${user-id}</li>
-			<li>Size: ${size-bytes} bytes</li>
 			<li>Timestamp: ${timestamp}</li>
-			<li>Review date: ${vault-retention-expiry}</li>
 		</ul>
+		
+		<p>Error details:</p>
+		<p>${error-message}</p>
 		
 	</body>
 </html>
