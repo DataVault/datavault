@@ -30,7 +30,7 @@ Email: info@datavaultplatform.org or contact one of the individuals listed above
 
 Installation
 ------------
-Installation information can be found in [INSTALL.md!](INSTALL.md)
+Installation information can be found in [INSTALL.md](INSTALL.md)
 
 Contribute
 ----------
