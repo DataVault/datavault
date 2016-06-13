@@ -36,7 +36,7 @@
             <label class="control-label">Relates to</label>
             <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="An external metadata record that describes this Vault. For example, a Dataset record in a CRIS system."></span></span>
             <br>
-            <select id="datasetID" name="datasetID" data-width="fit" class='dataset-select'>
+            <select id="datasetID" name="datasetID" data-width="fit" class="dataset-select selectpicker show-tick">
                 <#list datasets as dataset>
                     <option value="${dataset.getID()}">${dataset.name?html}</option>
                 </#list>
@@ -47,9 +47,9 @@
             <label class="control-label">Retention Policy</label>
             <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="The set of rules which govern how long this data should be kept. This may correspond to the requirements of a specific organisation or funder."></span></span>
             <br>
-            <select id="policyID" name="policyID" data-width="fit" class='retentionPolicy-select'>
+            <select id="policyID" name="policyID" data-width="fit" class="retentionPolicy-select selectpicker show-tick">
                 <#list policies as retentionPolicy>
-                    <option value="${retentionPolicy.getID()}">${retentionPolicy.name?html}</option>
+                    <option value="${retentionPolicy.getID()}" data-subtext="${retentionPolicy.description?html}">${retentionPolicy.name?html}</option>
                 </#list>
             </select>
         </div>
@@ -58,7 +58,7 @@
             <label class="control-label">Group</label>
             <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="The Group which is associated with this Vault. A Group is used to establish a chain of custody over data in a Vault. A Group administrator will be able to view information about a Vault."></span></span>
             <br>
-            <select id="groupID" name="groupID" data-width="fit" class='group-select'>
+            <select id="groupID" name="groupID" data-width="fit" class="group-select selectpicker show-tick">
                 <#list groups as group>
                     <#if group.enabled>
                         <option value="${group.getID()}">${group.name?html}</option>
