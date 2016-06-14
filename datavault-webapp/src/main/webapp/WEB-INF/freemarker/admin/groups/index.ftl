@@ -64,7 +64,7 @@
 
                 <thead>
                     <tr class="tr">
-                        <th></th>
+                        <th>Active</th>
                         <th>ID</th>
                         <th>Name</th>
                         <th>Vaults</th>
