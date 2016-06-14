@@ -25,6 +25,7 @@
         <p>
             <b>Owner:</b> ${vault.userID?html}<br/>
             <b>Retention Policy:</b> ${retentionPolicy.name?html}<br/>
+            <b>Dataset name:</b> ${vault.datasetName?html}<br/>
             <b>Group:</b> ${group.name?html}<br/>
             <b>Created:</b> ${vault.creationTime?datetime}<br/>
             <b>Review date:</b> ${vault.policyExpiry?datetime} (Status: ${vault.policyStatusStr?html})<br/>

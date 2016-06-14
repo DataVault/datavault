@@ -60,7 +60,7 @@ public class PureProvider implements Provider {
             conn.setRequestProperty("Authorization", basicAuth);
         }
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
         String inputLine;
        
         StringBuilder sb = new StringBuilder();

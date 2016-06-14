@@ -183,6 +183,7 @@ public class Vault {
                 id,
                 user.getID(),
                 dataset.getID(),
+                dataset.getName(),
                 creationTime,
                 name,
                 description,
