@@ -25,7 +25,7 @@ public class PureProvider implements Provider {
     @Override
     public List<Dataset> getDatasetsForUser(String userID) {
         try {
-            String response = query(endpoint);
+            String response = query(endpoint + "?rendering=xml_long&associatedPersonEmployeeIds.value=" + userID);
             return parse(response);
         } catch (Exception e) {
             e.printStackTrace();
@@ -60,7 +60,7 @@ public class PureProvider implements Provider {
             conn.setRequestProperty("Authorization", basicAuth);
         }
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
         String inputLine;
        
         StringBuilder sb = new StringBuilder();
