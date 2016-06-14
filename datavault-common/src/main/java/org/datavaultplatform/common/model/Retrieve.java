@@ -45,10 +45,13 @@ public class Retrieve {
         COMPLETE
     }
 
+    @Column(columnDefinition = "TEXT")
     private String note;
-
+    
+    @Column(columnDefinition = "TEXT")
     private Status status;
 
+    @Column(columnDefinition = "TEXT")
     String retrievePath;
     
     // Additional properties might go here - e.g. format

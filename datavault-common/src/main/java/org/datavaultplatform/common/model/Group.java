@@ -21,7 +21,7 @@ public class Group {
     private String id;
     
     // Name of the group
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, columnDefinition = "TEXT")
     private String name;
 
     // Whether the group is enabled (e.g. can be used for new vaults)

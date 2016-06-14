@@ -21,15 +21,15 @@ public class RetentionPolicy {
     private String id;
 
     // Name of the policy
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, columnDefinition = "TEXT")
     private String name;
 
     // Description of the policy
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
     // Implementation class of the policy
-    @Column(name = "engine", nullable = false)
+    @Column(name = "engine", nullable = false, columnDefinition = "TEXT")
     private String engine;
 
     // Sort order of the policy

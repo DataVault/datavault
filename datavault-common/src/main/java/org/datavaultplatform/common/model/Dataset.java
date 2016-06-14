@@ -15,7 +15,7 @@ public class Dataset {
     @Column(name = "id", unique = true)
     private String id;
     
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, columnDefinition = "TEXT")
     private String name;
     
     public Dataset() {}

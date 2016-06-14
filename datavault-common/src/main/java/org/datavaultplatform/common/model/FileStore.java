@@ -23,9 +23,11 @@ public class FileStore {
     private String id;
 
     // Class to use for access to storage
+    @Column(columnDefinition = "TEXT")
     private String storageClass;
     
     // A textual description of the storage system
+    @Column(columnDefinition = "TEXT")
     private String label;
     
     // Properties to use for this storage system

@@ -15,19 +15,19 @@ public class User {
     private String id;
 
     // First name of the user
-    @Column(name = "firstname", nullable = false)
+    @Column(name = "firstname", nullable = false, columnDefinition = "TEXT")
     private String firstname;
 
     // Last name of the user
-    @Column(name = "lastname", nullable = false)
+    @Column(name = "lastname", nullable = false, columnDefinition = "TEXT")
     private String lastname;
 
     // Password
-    @Column(name = "password")
+    @Column(name = "password", columnDefinition = "TEXT")
     private String password;
 
     // Email
-    @Column(name = "email")
+    @Column(name = "email", columnDefinition = "TEXT")
     private String email;
 
     // Is this user an administrator?

@@ -52,6 +52,7 @@ public class Job {
     @OrderBy("timestamp, sequence")
     private List<Event> events;
     
+    @Column(columnDefinition = "TEXT")
     private String taskClass;
     
     // State information will be supplied by the worker task at run time
@@ -61,10 +62,14 @@ public class Job {
     // A generic indicator of progress
     private long progress;
     private long progressMax;
+    
+    @Column(columnDefinition = "TEXT")
     private String progressMessage;
     
     // Error information
     private boolean error;
+    
+    @Column(columnDefinition = "TEXT")
     private String errorMessage;
     
     public Job() {};

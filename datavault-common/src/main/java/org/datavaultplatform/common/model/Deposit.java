@@ -79,27 +79,40 @@ public class Deposit {
     }
 
     @ApiObjectField(description = "Deposit note to briefly describe the Deposit")
+    @Column(columnDefinition = "TEXT")
     private String note;
 
     // For now, a deposit relates to a single bag.
     @ApiObjectField(description = "ID of the bag associated with this Deposit")
+    @Column(columnDefinition = "TEXT")
     private String bagId;
     
     // Archive properties (e.g. archive storage path or ID)
+    @Column(columnDefinition = "TEXT")
     private String archiveDevice;
+    
+    @Column(columnDefinition = "TEXT")
     private String archiveId;
+    
     // Size of the deposit package (in bytes)
+    @Column(columnDefinition = "TEXT")
     private long archiveSize;
+    
     // Hash of the deposit package
+    @Column(columnDefinition = "TEXT")
     private String archiveDigest;
+    @Column(columnDefinition = "TEXT")
     private String archiveDigestAlgorithm;
     
     // Record the file path that the user selected for this deposit.
     @ApiObjectField(description = "Origin of the deposited filepath")
+    @Column(columnDefinition = "TEXT")
     private String fileOrigin;
     @ApiObjectField(description = "Short version of the origin of the deposited filepath")
+    @Column(columnDefinition = "TEXT")
     private String shortFilePath;
     @ApiObjectField(description = "Filepath of the origin deposit")
+    @Column(columnDefinition = "TEXT")
     private String filePath;
     
     // Size of the deposit (in bytes)
