@@ -50,11 +50,16 @@ public class PureProvider implements Provider {
     }
     
     // Query the endpoint and retrieve the XML response
-    // TODO: Support basic auth
     private String query(String url) throws Exception {
        
         URL queryURL = new URL(url);
         URLConnection conn = queryURL.openConnection();
+
+        if (queryURL.getUserInfo() != null) {
+            String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(queryURL.getUserInfo().getBytes());
+            conn.setRequestProperty("Authorization", basicAuth);
+        }
+
         BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         String inputLine;
        
