@@ -17,7 +17,7 @@ public class Group {
     // Group Identifier (not a UUID)
     @Id
     @Pattern(regexp = "[a-zA-Z0-9-_/ ]+")
-    @Column(name = "id", unique = true)
+    @Column(name = "id", unique = true, length = 180)
     private String id;
     
     // Name of the group

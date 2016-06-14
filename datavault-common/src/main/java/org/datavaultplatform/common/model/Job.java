@@ -30,7 +30,7 @@ public class Job {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "id", unique = true)
+    @Column(name = "id", unique = true, length = 36)
     private String id;
     
     // Hibernate version

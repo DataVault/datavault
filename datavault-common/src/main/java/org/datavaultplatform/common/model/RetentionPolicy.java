@@ -17,7 +17,7 @@ import javax.persistence.Table;
 public class RetentionPolicy {
     // RetentionPolicy Identifier (not a UUID)
     @Id
-    @Column(name = "id", unique = true)
+    @Column(name = "id", unique = true, length = 180)
     private String id;
 
     // Name of the policy

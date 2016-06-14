@@ -11,7 +11,7 @@ import javax.persistence.*;
 public class User {
     // User Identifier (not a UUID)
     @Id
-    @Column(name = "id", unique = true)
+    @Column(name = "id", unique = true, length = 36)
     private String id;
 
     // First name of the user
