@@ -17,7 +17,7 @@ public class Client {
 
     // User Identifier (not a UUID)
     @Id
-    @Column(name = "id", unique = true, columnDefinition = "TEXT")
+    @Column(name = "id", unique = true)
     private String id;
 
     // Name of the client application
