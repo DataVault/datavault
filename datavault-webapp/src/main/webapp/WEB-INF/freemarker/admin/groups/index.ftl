@@ -107,7 +107,7 @@
 
     <form>
         <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/admin/groups/create">
-            <span class="glyphicon glyphicon-education" aria-hidden="true"></span> Create new Group
+            <i class="fa fa-users" aria-hidden="true"></i> Create new Group
         </a>
     </form>
 
