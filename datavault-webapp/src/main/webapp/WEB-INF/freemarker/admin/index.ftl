@@ -82,7 +82,7 @@
                     <h3 class="panel-title">Users</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/users"><span class="glyphicon glyphicon-user"></span> ${usercount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/users"><i class="fa fa-user" aria-hidden="true"></i> ${usercount}</a></h1>
                 </div>
             </div>
         </div>
