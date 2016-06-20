@@ -32,6 +32,19 @@ sudo apt-get install mysql-server
 # Set a root password when prompted by the installer.
 ```
 
+### Edit MySQL character set
+```
+# Edit the my.cnf configuration file
+sudo nano /etc/mysql/my.cnf
+
+# Under the [mysqld] section add the following lines:
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+
+# Restart MySQL
+sudo service mysql restart
+```
+
 ### Configure MySQL database
 ```
 # Start MySQL shell session
@@ -41,7 +54,7 @@ mysql -i -u root -p
 # In this example the password is 'datavault' and MySQL is running on the same machine as the broker
 CREATE USER 'datavault'@'localhost' IDENTIFIED BY 'datavault';
 GRANT ALL PRIVILEGES ON *.* TO 'datavault'@'localhost';
-CREATE DATABASE datavault;
+CREATE DATABASE datavault CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 EXIT;
 ```
 
@@ -215,4 +228,3 @@ Ensure that directories referenced in datavault.properties have been created and
 * Shibboleth authentication
 * SFTP and storage configuration
 * Customisation using spring configuration files
-
