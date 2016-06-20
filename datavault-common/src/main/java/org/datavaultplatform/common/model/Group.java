@@ -17,11 +17,11 @@ public class Group {
     // Group Identifier (not a UUID)
     @Id
     @Pattern(regexp = "[a-zA-Z0-9-_/ ]+")
-    @Column(name = "id", unique = true)
+    @Column(name = "id", unique = true, length = 180)
     private String id;
     
     // Name of the group
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, columnDefinition = "TEXT")
     private String name;
 
     // Whether the group is enabled (e.g. can be used for new vaults)
