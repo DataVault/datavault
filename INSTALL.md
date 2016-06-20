@@ -133,6 +133,12 @@ sudo chmod 755 /usr/share/tomcat7/bin/setenv.sh
 ```
 # Edit the $DATAVAULT_HOME/config/datavault.properties file
 sudo nano $DATAVAULT_HOME/config/datavault.properties
+
+# For a demonstration system you must edit at least the following four properties so that they point at valid directories:
+activeDir = /home/ubuntu
+archiveDir = /home/ubuntu/data/archive
+tempDir = /home/ubuntu/data/temp
+metaDir = /home/ubuntu/data/meta
 ```
 
 | Name | Description |
