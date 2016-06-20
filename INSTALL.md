@@ -32,6 +32,19 @@ sudo apt-get install mysql-server
 # Set a root password when prompted by the installer.
 ```
 
+### Edit MySQL character set
+```
+# Edit the my.cnf configuration file
+sudo nano /etc/mysql/my.cnf
+
+# Under the [mysqld] section add the following lines:
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+
+# Restart MySQL
+sudo service mysql restart
+```
+
 ### Configure MySQL database
 ```
 # Start MySQL shell session
@@ -41,7 +54,7 @@ mysql -i -u root -p
 # In this example the password is 'datavault' and MySQL is running on the same machine as the broker
 CREATE USER 'datavault'@'localhost' IDENTIFIED BY 'datavault';
 GRANT ALL PRIVILEGES ON *.* TO 'datavault'@'localhost';
-CREATE DATABASE datavault;
+CREATE DATABASE datavault CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 EXIT;
 ```
 
@@ -101,7 +114,7 @@ sudo chmod 777 /opt/datavault/logs
 # Set the $DATAVAULT_HOME environment variable (for the current shell user)
 nano ~/.profile
 # Add the following line to your ~/.profile
-# export DATAVAULT_HOME=/opt/datavault
+export DATAVAULT_HOME=/opt/datavault
 
 # Reload the modified .profile file and check the new environment variable
 source ~/.profile
@@ -110,7 +123,7 @@ echo $DATAVAULT_HOME
 # Set the $DATAVAULT_HOME environment variable (for tomcat)
 sudo nano /usr/share/tomcat7/bin/setenv.sh
 # Add the following line to /usr/share/tomcat7/bin/setenv.sh
-# export DATAVAULT_HOME=/opt/datavault
+export DATAVAULT_HOME=/opt/datavault
 
 # If you created /usr/share/tomcat7/bin/setenv.sh make sure tomcat has read/execute permissions on the new file
 sudo chmod 755 /usr/share/tomcat7/bin/setenv.sh
@@ -120,6 +133,13 @@ sudo chmod 755 /usr/share/tomcat7/bin/setenv.sh
 ```
 # Edit the $DATAVAULT_HOME/config/datavault.properties file
 sudo nano $DATAVAULT_HOME/config/datavault.properties
+
+# For a demonstration system you must edit at least the following four properties.
+# These must point to valid directories:
+activeDir = /home/ubuntu
+archiveDir = /home/ubuntu/data/archive
+tempDir = /home/ubuntu/data/temp
+metaDir = /home/ubuntu/data/meta
 ```
 
 | Name | Description |
@@ -215,4 +235,3 @@ Ensure that directories referenced in datavault.properties have been created and
 * Shibboleth authentication
 * SFTP and storage configuration
 * Customisation using spring configuration files
-
