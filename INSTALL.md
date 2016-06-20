@@ -114,7 +114,7 @@ sudo chmod 777 /opt/datavault/logs
 # Set the $DATAVAULT_HOME environment variable (for the current shell user)
 nano ~/.profile
 # Add the following line to your ~/.profile
-# export DATAVAULT_HOME=/opt/datavault
+export DATAVAULT_HOME=/opt/datavault
 
 # Reload the modified .profile file and check the new environment variable
 source ~/.profile
@@ -123,7 +123,7 @@ echo $DATAVAULT_HOME
 # Set the $DATAVAULT_HOME environment variable (for tomcat)
 sudo nano /usr/share/tomcat7/bin/setenv.sh
 # Add the following line to /usr/share/tomcat7/bin/setenv.sh
-# export DATAVAULT_HOME=/opt/datavault
+export DATAVAULT_HOME=/opt/datavault
 
 # If you created /usr/share/tomcat7/bin/setenv.sh make sure tomcat has read/execute permissions on the new file
 sudo chmod 755 /usr/share/tomcat7/bin/setenv.sh
