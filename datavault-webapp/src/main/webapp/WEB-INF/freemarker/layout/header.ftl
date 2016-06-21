@@ -19,7 +19,9 @@
                     <li <#if nav == "home">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/">Home <span class="sr-only">(current)</span></a></li>
                     <li <#if nav == "help">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/help/">Help</a></li>
                     <li <#if nav == "feedback">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/feedback/">Feedback</a></li>
-                    <li <#if nav == "groups">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/groups/">Groups</a></li>
+                    <#if Session.isGroupOwner="true">
+                        <li <#if nav == "groups">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/groups/">Groups</a></li>
+                    </#if>
                     <@sec.authorize url="/admin">
                     <li <#if nav == "admin">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/admin/">Administration</a></li>
                     </@sec.authorize>
