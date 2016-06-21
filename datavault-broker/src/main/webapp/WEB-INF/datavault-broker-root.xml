@@ -69,7 +69,7 @@
     </bean>
 
     <bean id="userKeyPairService" class="org.datavaultplatform.broker.services.UserKeyPairService">
-        <property name="passphrase" value="${passphrase}"/>
+        <property name="passphrase" value="${sftp.passphrase}"/>
     </bean>
 
     <bean id="jobsService" class="org.datavaultplatform.broker.services.JobsService">
@@ -77,7 +77,7 @@
     </bean>
     
     <bean id="externalMetadataService" class="org.datavaultplatform.broker.services.ExternalMetadataService">
-        <property name="metadataURL" value="${metadataURL}" />
+        <property name="metadataURL" value="${metadata.url}" />
         <property name="datasetDAO" ref="datasetDAO" />
     </bean>
 
@@ -129,12 +129,12 @@
     
     <bean id="connectionFactory"
         class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory" >
-        <constructor-arg value="${queueServer}" />
-        <property name="username" value="${queueUser}" />
-        <property name="password" value="${queuePassword}" />
+        <constructor-arg value="${queue.server}" />
+        <property name="username" value="${queue.user}" />
+        <property name="password" value="${queue.password}" />
     </bean>
     
-    <rabbit:queue id="eventQueue" name="${eventQueueName}" durable="false" />
+    <rabbit:queue id="eventQueue" name="${queue.events}" durable="false" />
     
     <rabbit:listener-container connection-factory="connectionFactory" concurrency="1" max-concurrency="1" >
         <rabbit:listener ref="listener" queues="eventQueue" />
@@ -151,10 +151,10 @@
     </bean>
 
     <bean id="sender" class="org.datavaultplatform.broker.queue.Sender">
-        <property name="queueServer" value="${queueServer}"/>
-        <property name="queueName" value="${queueName}"/>
-        <property name="queueUser" value="${queueUser}"/>
-        <property name="queuePassword" value="${queuePassword}"/>
+        <property name="queueServer" value="${queue.server}"/>
+        <property name="queueName" value="${queue.name}"/>
+        <property name="queueUser" value="${queue.user}"/>
+        <property name="queuePassword" value="${queue.password}"/>
     </bean>
     
     <!-- Hibernate -->
@@ -163,9 +163,9 @@
     
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.mysql.jdbc.Driver" />
-        <property name="url" value="jdbc:mysql://${dbURL}"/>
-        <property name="username" value="${dbUsername}" />
-        <property name="password" value="${dbPassword}"/>
+        <property name="url" value="jdbc:mysql://${db.url}"/>
+        <property name="username" value="${db.username}" />
+        <property name="password" value="${db.password}"/>
     </bean>
     
     <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" >

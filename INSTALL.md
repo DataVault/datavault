@@ -144,17 +144,18 @@ metaDir = /home/ubuntu/data/meta
 
 | Name | Description |
 | ------------- | ------------- |
-| `brokerURL`  | The URL of the broker API for use by the default web application (localhost in this simple example). |
-| `metadataURL` | The URL of the external metadata service (for example, a Pure CRIS API endpoint). Leave this blank to use a mock provider. <br> - **work in progress** |
-| `dbURL` | The location of the MySQL database (localhost in this simple example). |
-| `dbUsername` | The MySQL username - should match the created MySQL user. |
-| `dbPassword` | The MySQL password - should match the created MySQL user. |
-| `queueServer` | The location of the RabbitMQ server (localhost in this simple example). |
-| `queueName` | The name of the primary RabbitMQ queue for communication between the broker and workers. |
-| `eventQueueName` | The name of the RabbitMQ queue to use for notifying the broker of events. |
-| `queueUser` | The RabbitMQ username - should match the created RabbitMQ user. |
-| `queuePassword` | The RabbitMQ password - should match the created RabbitMQ user's password. |
-| `numberOfWorkers` | The number of concurrent workers to start. |
+| `broker.url`  | The URL of the broker API for use by the default web application (localhost in this simple example). |
+| `broker.api.key` | API key for the default web client. <br> - **you should change this value** |
+| `broker.validateclient` | Debug setting to disable API authentication. |
+| `db.url` | The location of the MySQL database (localhost in this simple example). |
+| `db.username` | The MySQL username - should match the created MySQL user. |
+| `db.password` | The MySQL password - should match the created MySQL user. |
+| `queue.server` | The location of the RabbitMQ server (localhost in this simple example). |
+| `queue.user` | The RabbitMQ username - should match the created RabbitMQ user. |
+| `queue.password` | The RabbitMQ password - should match the created RabbitMQ user's password. |
+| `queue.name` | The name of the primary RabbitMQ queue for communication between the broker and workers. |
+| `queue.events` | The name of the RabbitMQ queue to use for notifying the broker of events. |
+| `worker.number` | The number of concurrent workers to start. |
 | `activeDir` | A default directory for sample user data (if per-user storage is not configured). <br> - **for demonstration only** |
 | `archiveDir` | Directory for archive data (if using 'local storage'). |
 | `tempDir` | A temporary directory for workers to process files before storing in the archive. |
@@ -165,15 +166,18 @@ metaDir = /home/ubuntu/data/meta
 | `mail.username` | SMTP account name for sending mail. |
 | `mail.password` | SMTP password for sending mail. |
 | `webapp.welcome` | Welcome message (HTML) displayed by the (non-shibboleth) login page. |
-| `broker.api.key` | API key for the default web client. <br> - **you should change this value** |
-| `validateClient` | Debug setting to disable API authentication. |
-| `describe.system` | Name displayed in the help page for the institutional CRIS or external metadata system. |
-| `describe.link` | URL displayed in the help page for the institutional CRIS or external metadata system. |
+| `metadata.url` | The URL of the external metadata service (for example, a Pure CRIS API endpoint). Leave this blank to use a mock provider. <br> - **work in progress** |
+| `metadata.system` | Name displayed in the help page for the institutional CRIS or external metadata system. |
+| `metadata.link` | URL displayed in the help page for the institutional CRIS or external metadata system. |
 | `retentioncheck.schedule` | How frequently the retention policy check job is run (in 'cron' format). |
-| `host` | Default SFTP host. <br> - **work in progress** |
-| `port` | Default SFTP port. <br> - **work in progress** |
-| `rootPath` | Default SFTP path. <br> - **work in progress** |
-| `passphrase` | Default SFTP key passphrase. <br> - **work in progress** |
+| `sftp.host` | Default SFTP host. <br> - **work in progress** |
+| `sftp.port` | Default SFTP port. <br> - **work in progress** |
+| `sftp.rootPath` | Default SFTP path. <br> - **work in progress** |
+| `sftp.passphrase` | Default SFTP key passphrase. <br> - **work in progress** |
+| `shibboleth.principal` | Shibboleth header containing the username. |
+| `shibboleth.firstname` | Shibboleth header containing the user's first name. |
+| `shibboleth.lastname` | Shibboleth header containing the user's last name. |
+| `shibboleth.email` | Shibboleth header containing the user's email. |
 
 ### Deploy web applications
 ```
