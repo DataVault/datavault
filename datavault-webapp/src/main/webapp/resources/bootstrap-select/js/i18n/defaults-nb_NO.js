@@ -23,19 +23,19 @@
 
 (function ($) {
   $.fn.selectpicker.defaults = {
-    noneSelectedText: 'Intet valgt',
-    noneResultsText: 'Ingen resultater fundet {0}',
+    noneSelectedText: 'Ingen valgt',
+    noneResultsText: 'Søket gir ingen treff {0}',
     countSelectedText: function (numSelected, numTotal) {
-      return (numSelected == 1) ? "{0} valgt" : "{0} valgt";
+      return (numSelected == 1) ? "{0} alternativ valgt" : "{0} alternativer valgt";
     },
     maxOptionsText: function (numAll, numGroup) {
       return [
-        (numAll == 1) ? 'Begrænsning nået (max {n} valgt)' : 'Begrænsning nået (max {n} valgte)',
-        (numGroup == 1) ? 'Gruppe-begrænsning nået (max {n} valgt)' : 'Gruppe-begrænsning nået (max {n} valgte)'
+        (numAll == 1) ? 'Grense nådd (maks {n} valg)' : 'Grense nådd (maks {n} valg)',
+        (numGroup == 1) ? 'Grense for grupper nådd (maks {n} grupper)' : 'Grense for grupper nådd (maks {n} grupper)'
       ];
     },
-    selectAllText: 'Markér alle',
-    deselectAllText: 'Afmarkér alle',
+    selectAllText: 'Merk alle',
+    deselectAllText: 'Fjern alle',
     multipleSeparator: ', '
   };
 })(jQuery);

@@ -23,19 +23,19 @@
 
 (function ($) {
   $.fn.selectpicker.defaults = {
-    noneSelectedText: 'Intet valgt',
-    noneResultsText: 'Ingen resultater fundet {0}',
+    noneSelectedText: 'Odaberite stavku',
+    noneResultsText: 'Nema rezultata pretrage {0}',
     countSelectedText: function (numSelected, numTotal) {
-      return (numSelected == 1) ? "{0} valgt" : "{0} valgt";
+      return (numSelected == 1) ? "{0} stavka selektirana" : "{0} stavke selektirane";
     },
     maxOptionsText: function (numAll, numGroup) {
       return [
-        (numAll == 1) ? 'Begrænsning nået (max {n} valgt)' : 'Begrænsning nået (max {n} valgte)',
-        (numGroup == 1) ? 'Gruppe-begrænsning nået (max {n} valgt)' : 'Gruppe-begrænsning nået (max {n} valgte)'
+        (numAll == 1) ? 'Limit je postignut ({n} stvar maximalno)' : 'Limit je postignut ({n} stavke maksimalno)',
+        (numGroup == 1) ? 'Grupni limit je postignut ({n} stvar maksimalno)' : 'Grupni limit je postignut ({n} stavke maksimalno)'
       ];
     },
-    selectAllText: 'Markér alle',
-    deselectAllText: 'Afmarkér alle',
+    selectAllText: 'Selektiraj sve',
+    deselectAllText: 'Deselektiraj sve',
     multipleSeparator: ', '
   };
 })(jQuery);

@@ -23,19 +23,19 @@
 
 (function ($) {
   $.fn.selectpicker.defaults = {
-    noneSelectedText: 'Intet valgt',
-    noneResultsText: 'Ingen resultater fundet {0}',
+    noneSelectedText: 'Niekas nepasirinkta',
+    noneResultsText: 'Niekas nesutapo su {0}',
     countSelectedText: function (numSelected, numTotal) {
-      return (numSelected == 1) ? "{0} valgt" : "{0} valgt";
+      return (numSelected == 1) ? "{0} elementas pasirinktas" : "{0} elementai(-ų) pasirinkta";
     },
     maxOptionsText: function (numAll, numGroup) {
       return [
-        (numAll == 1) ? 'Begrænsning nået (max {n} valgt)' : 'Begrænsning nået (max {n} valgte)',
-        (numGroup == 1) ? 'Gruppe-begrænsning nået (max {n} valgt)' : 'Gruppe-begrænsning nået (max {n} valgte)'
+        (numAll == 1) ? 'Pasiekta riba ({n} elementas daugiausiai)' : 'Riba pasiekta ({n} elementai(-ų) daugiausiai)',
+        (numGroup == 1) ? 'Grupės riba pasiekta ({n} elementas daugiausiai)' : 'Grupės riba pasiekta ({n} elementai(-ų) daugiausiai)'
       ];
     },
-    selectAllText: 'Markér alle',
-    deselectAllText: 'Afmarkér alle',
+    selectAllText: 'Pasirinkti visus',
+    deselectAllText: 'Atmesti visus',
     multipleSeparator: ', '
   };
 })(jQuery);
