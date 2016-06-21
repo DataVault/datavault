@@ -53,7 +53,7 @@
         </li>
         <li>
             <span class="glyphicon glyphicon-save"></span> <strong>Deposit:</strong> Once you have created a vault, you can deposit data
-            into the vault.  Each time you deposit data ito the vault, you give a brief description of what is in that particular deposit.
+            into the vault.  Each time you deposit data into the vault, you give a brief description of what is in that particular deposit.
             A vault can contain more than one deposit.
         </li>
         <li>

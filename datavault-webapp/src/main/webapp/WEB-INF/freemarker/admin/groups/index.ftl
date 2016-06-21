@@ -35,7 +35,7 @@
                         <label class="control-label">User:</label>
                         <br>
                         <select id='add-group-owner-user' class='user-select' data-live-search='true'>
-                            <option selected disabled style='display: none' value=''></option>
+                            <option selected disabled data-hidden="true">Please choose a user</option>
                             <#list users as user>
                                 <option value="${user.getID()?js_string}" data-tokens="${user.getID()?js_string}">${user.firstname?html} ${user.lastname?html}</option>
                             </#list>
@@ -144,7 +144,8 @@
         var data = $(e.relatedTarget).data();
         $('.add-owner-group', this).text(data.group);
         $('#add-group-owner-form').data('group', data.group);
-        $('#add-group-owner-user').val('');
+        $('.user-select').val(-1);
+        $('.user-select').selectpicker('refresh');
     });
     $('#add-group-owner').on('shown.bs.modal', function(e) {
         $('#add-group-owner-user').focus();
