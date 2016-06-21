@@ -81,7 +81,9 @@ public class VaultsService {
             groupOwner = true;
         }
         
-        if (!userVault && !groupOwner) {
+        Boolean adminUser = user.isAdmin();
+        
+        if (!userVault && !groupOwner && !adminUser) {
             throw new Exception("Access denied");
         }
 
