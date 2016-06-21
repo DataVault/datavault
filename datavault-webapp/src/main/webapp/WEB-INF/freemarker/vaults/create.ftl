@@ -37,6 +37,7 @@
             <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="An external metadata record that describes this Vault. For example, a Dataset record in a CRIS system."></span></span>
             <br>
             <select id="datasetID" name="datasetID" data-width="fit" class="dataset-select selectpicker show-tick">
+                <option selected disabled data-hidden="true">Please choose a dataset record</option>
                 <#list datasets as dataset>
                     <option value="${dataset.getID()}">${dataset.name?html}</option>
                 </#list>
