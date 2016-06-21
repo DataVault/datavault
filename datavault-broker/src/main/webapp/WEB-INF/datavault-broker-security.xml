@@ -45,7 +45,7 @@
     <bean id="restAuthenticationProvider" class="org.datavaultplatform.broker.authentication.RestAuthenticationProvider">
         <property name="usersService" ref="usersService" />
         <property name="clientsService" ref="clientsService" />
-        <property name="validateClient" value="${validateClient}" />
+        <property name="validateClient" value="${broker.validateclient}" />
     </bean>
 
     <bean id="authenticationSuccessHandler" class="org.datavaultplatform.broker.authentication.RestAuthenticationSuccessHandler" />

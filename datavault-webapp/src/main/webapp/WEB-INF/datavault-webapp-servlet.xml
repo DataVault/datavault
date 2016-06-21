@@ -81,8 +81,8 @@
     </bean>
 
     <bean id="helpController" class="org.datavaultplatform.webapp.controllers.HelpController">
-        <property name="system" value="${describe.system}" />
-        <property name="link" value="${describe.link}" />
+        <property name="system" value="${metadata.system}" />
+        <property name="link" value="${metadata.link}" />
     </bean>
 
     <bean id="adminController" class="org.datavaultplatform.webapp.controllers.admin.AdminController">
@@ -126,7 +126,7 @@
     </bean>
 
     <bean id="restService" class="org.datavaultplatform.webapp.services.RestService">
-        <property name="brokerURL" value="${brokerURL}" />
+        <property name="brokerURL" value="${broker.url}" />
         <property name="brokerApiKey" value="${broker.api.key}" />
     </bean>
     
