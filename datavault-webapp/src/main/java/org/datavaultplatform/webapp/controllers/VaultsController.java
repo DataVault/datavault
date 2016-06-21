@@ -1,25 +1,14 @@
 package org.datavaultplatform.webapp.controllers;
 
 import org.datavaultplatform.common.model.Dataset;
-import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-/**
- * User: Tom Higgins
- * Date: 27/05/2015
- * Time: 14:44
- */
 
 @Controller
 //@RequestMapping("/vaults")
