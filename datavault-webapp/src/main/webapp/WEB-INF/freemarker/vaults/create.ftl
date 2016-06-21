@@ -94,6 +94,15 @@
                 },
                 description: {
                     required: true
+                },
+                datasetID : {
+                    required: true
+                },
+                policyID : {
+                    required: true
+                },
+                groupID : {
+                    required: true
                 }
             },
             highlight: function (element) {
