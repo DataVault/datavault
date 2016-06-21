@@ -89,7 +89,9 @@ public class DepositsService {
             groupOwner = true;
         }
         
-        if (!userVault && !groupOwner) {
+        Boolean adminUser = user.isAdmin();
+        
+        if (!userVault && !groupOwner && !adminUser) {
             throw new Exception("Access denied");
         }
 
