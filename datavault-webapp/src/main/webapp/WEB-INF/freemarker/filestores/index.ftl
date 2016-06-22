@@ -30,20 +30,20 @@
                 <h4 class="modal-title" id="addFileStoreSFTPLabel">Add filestore</h4>
             </div>
             <div class="modal-body">
-                <p>Enter new filestore details here</p>
+                <p>Overwrite the default values as appropriate</p>
                 <form id="add-filestoreSFTP-form">
                     <div class="form-filestore">
                         <div class="form-group">
                             <label for="hostname">Hostname</label>
-                            <input type="text" class="form-control" id="hostname" name="hostname" placeholder="Enter hostname"/>
+                            <input type="text" class="form-control" id="hostname" name="hostname" value="${sftpHost}"/>
                         </div>
                         <div class="form-group">
                             <label for="port">Port</label>
-                            <input type="text" class="form-control" id="port" name="port" placeholder="Enter port"/>
+                            <input type="text" class="form-control" id="port" name="port" value="${sftpPort}"/>
                         </div>
                         <div class="form-group">
                             <label for="path">Path</label>
-                            <input type="text" class="form-control" id="path" name="path" placeholder="Enter path"/>
+                            <input type="text" class="form-control" id="path" name="path" value="${sftpRootPath}"/>
                         </div>
 
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -63,7 +63,7 @@
                 <h4 class="modal-title" id="addFileStoreLocalLabel">Add filestore</h4>
             </div>
             <div class="modal-body">
-                <p>Enter new filestore details here</p>
+                <p>Currently the default values cannot be overwritten</p>
                 <form id="add-filestoreLocal-form">
                     <div class="form-filestore">
                         <div class="form-group">
@@ -90,19 +90,19 @@
 
     <h3>Local Storage</h3>
 
-    <div class="table-responsive">
+    <div class="table-responsive storage-table">
+        <#if filestoresLocal?has_content>
         <table class="table table-striped">
 
             <thead>
             <tr class="tr">
                 <th>Hostname</th>
                 <th>Path</th>
-                <th>action</th>
+                <th></th>
             </tr>
             </thead>
 
             <tbody id="fileStoresLocal">
-                <#if filestoresLocal?has_content>
                     <#list filestoresLocal as filestoreLocal>
                     <tr class="tr">
                         <td>localhost</td>
@@ -114,9 +114,12 @@
                         </td>
                     </tr>
                     </#list>
-                </#if>
             </tbody>
         </table>
+
+        <#else>
+            <h4>There are currently no Local Filestores configured</h4>
+        </#if>
 
         <form>
             <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-filestoreLocal">
@@ -129,21 +132,22 @@
 
     <h3>SFTP Storage</h3>
 
-    <div class="table-responsive">
-        <table class="table table-striped">
 
-            <thead>
-            <tr class="tr">
-                <th>Hostname</th>
-                <th>Port</th>
-                <th>Path</th>
-                <th>Public key</th>
-                <th>action</th>
-            </tr>
-            </thead>
+    <div class="table-responsive storage-table">
+        <#if filestoresSFTP?has_content>
+            <table class="table table-striped">
 
-            <tbody id="fileStoresSFTP">
-                <#if filestoresSFTP?has_content>
+                <thead>
+                <tr class="tr">
+                    <th>Hostname</th>
+                    <th>Port</th>
+                    <th>Path</th>
+                    <th>Public key</th>
+                    <th></th>
+                </tr>
+                </thead>
+
+                <tbody id="fileStoresSFTP">
                     <#list filestoresSFTP as filestoreSFTP>
                     <tr class="tr">
                         <td>${filestoreSFTP.properties['host']}</td>
@@ -157,9 +161,12 @@
                         </td>
                     </tr>
                     </#list>
-                </#if>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+
+        <#else>
+            <h4>There are currently no SFTP Filestores configured</h4>
+        </#if>
 
         <form>
             <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-filestoreSFTP">
@@ -168,7 +175,9 @@
         </form>
 
     </div>
-</div>
+
+    <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/">Continue</a>
+    </div>
 
 <script>
 

@@ -22,8 +22,10 @@ public class FileStoreController {
     private static final Logger logger = LoggerFactory.getLogger(FileStoreController.class);
 
     private RestService restService;
-
     private String activeDir;
+    private String sftpHost;
+    private String sftpPort;
+    private String sftpRootPath;
 
     public void setRestService(RestService restService) {
         this.restService = restService;
@@ -33,10 +35,25 @@ public class FileStoreController {
         this.activeDir = activeDir;
     }
 
+    public void setSftpHost(String sftpHost) {
+        this.sftpHost = sftpHost;
+    }
+
+    public void setSftpPort(String sftpPort) {
+        this.sftpPort = sftpPort;
+    }
+
+    public void setSftpRootPath(String sftpRootPath) {
+        this.sftpRootPath = sftpRootPath;
+    }
+
     // Return the 'Storage Options' page
     @RequestMapping(value = "/filestores", method = RequestMethod.GET)
     public String listFilestores(ModelMap model) {
         model.addAttribute("activeDir", activeDir);
+        model.addAttribute("sftpHost", sftpHost);
+        model.addAttribute("sftpPort", sftpPort);
+        model.addAttribute("sftpRootPath", sftpRootPath);
         model.addAttribute("filestoresLocal", restService.getFileStoresLocal());
         model.addAttribute("filestoresSFTP", restService.getFileStoresSFTP());
 

@@ -175,6 +175,10 @@ h6, .h6 {
 
 }
 
+.storage-table {
+    margin-bottom: 30px;
+}
+
 
 /* Sticky footer */
 
@@ -374,3 +378,5 @@ span.fancytree-active span.fancytree-title {
 .bs-callout-info h4 {
     color: #1b809e;
 }
+
+
