@@ -35,7 +35,7 @@
             <li class="active"><a data-toggle="tab" href="#deposit">Deposit</a></li>
             <li><a data-toggle="tab" href="#contents">Contents <span class="badge">${manifest?size}</span></a></li>
             <li><a data-toggle="tab" href="#events">Events <span class="badge">${events?size}</span></a></li>
-            <li><a data-toggle="tab" href="#retrieves">Retrieves <span class="badge">${retrieves?size}</span></a></li>
+            <li><a data-toggle="tab" href="#retrievals">Retrievals <span class="badge">${retrieves?size}</span></a></li>
         </ul>
 
         <div id="deposit-tab-content" class="tab-content">
@@ -136,14 +136,14 @@
                 </div>
             </div>
 
-            <div class="tab-pane" id="retrieves">
+            <div class="tab-pane" id="retrievals">
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
                         <tr class="tr">
-                            <th>Retrieve note</th>
+                            <th>Retrieval note</th>
                             <th>Status</th>
-                            <th>Retrieve path</th>
+                            <th>Retrieval path</th>
                             <th>Timestamp</th>
                         </tr>
                         </thead>
