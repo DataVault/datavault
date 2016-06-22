@@ -59,7 +59,7 @@
         <li>
             <i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> <strong>Retrieve:</strong> If you need to retrieve data from a vault, then you are
             able to request that a deposit is restored.  Sometimes this may take a few hours or longer, depending upon the location of the
-            data, which may have been transfered into offline storage.
+            data, which may have been transferred into offline storage.
         </li>
     </ul>
 
@@ -142,19 +142,19 @@
 
     <h4><a name="retrieve">5 - Retrieve data</a></h4>
     <p>
-        To retrieve data, first select the Vault you wish to retrieve data from, and then select the relevant Deposit.  Click on 'Retrieve deposit'.
+        To retrieve data, first select the Vault you wish to retrieve data from, and then select the relevant Deposit.  Click on 'Retrieve data'.
         If you wish to retrieve data from multiple Deposits, you will need to perform the following step for each Deposit.
     </p>
     <p>
-        First you must enter a retrieve note.  This is a brief description of why you are retrieving the data.  This is stored in an audit
+        First you must enter a retrieval note.  This is a brief description of why you are retrieving the data.  This is stored in an audit
         log, so that you can see who retrieved data, and why they retrieved it.
     </p>
     <p>
-        Second, select a directory / folder where you wish the data to be retrieved to.  You will probably want to create a new empy
+        Second, select a directory / folder where you wish the data to be retrieved to.  You will probably want to create a new empty
         directory / folder for the data.
     </p>
     <p>
-        Finally, click on the 'Restore data' button to initiate the restore.  Depending on how busy the Data Vault system is, your restore
+        Finally, click on the 'Retrieve data' button to initiate the restore.  Depending on how busy the Data Vault system is, your retrieval
         may start instantly, or it may be placed in a queue to process later.  You will be able to view the progress of the restore from the
         deposit page.
     </p>
