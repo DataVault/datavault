@@ -18,7 +18,7 @@
     </security:http>
 
     <bean id="shibFilter" class="org.datavaultplatform.webapp.authentication.ShibAuthenticationFilter">
-        <property name="principalRequestHeader" value="${principal}"/>
+        <property name="principalRequestHeader" value="${shibboleth.principal}"/>
         <property name="exceptionIfHeaderMissing" value="true"/>
         <property name="authenticationManager" ref="authenticationManager" />
         <property name="authenticationDetailsSource" ref="shibWebAuthenticationDetailsSource" />
@@ -33,9 +33,9 @@
     </bean>
 
     <bean id="shibWebAuthenticationDetailsSource" class="org.datavaultplatform.webapp.authentication.ShibWebAuthenticationDetailsSource">
-        <property name="firstnameRequestHeader" value="${firstname}"/>
-        <property name="lastnameRequestHeader" value="${lastname}"/>
-        <property name="emailRequestHeader" value="${email}"/>
+        <property name="firstnameRequestHeader" value="${shibboleth.firstname}"/>
+        <property name="lastnameRequestHeader" value="${shibboleth.lastname}"/>
+        <property name="emailRequestHeader" value="${shibboleth.email}"/>
     </bean>
 
     <bean id="http403EntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint"/>

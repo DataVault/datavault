@@ -23,7 +23,7 @@
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-warning">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Deposits / Retrieves In Progress</h3>
+                    <h3 class="panel-title">Deposits / Retrievals In Progress</h3>
                 </div>
                 <div class="panel-body">
                     <h1 class="text-center"><a href="#"><span class="glyphicon glyphicon-chevron-down"></span> ${depositsinprogress}</a> <a href="#"><span class="glyphicon glyphicon-chevron-up"></span> ${retrievesinprogress}</a></h1>
@@ -33,7 +33,7 @@
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-warning">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Deposit / Retrieve Queues</h3>
+                    <h3 class="panel-title">Deposit / Retrieval Queues</h3>
                 </div>
                 <div class="panel-body">
                     <h1 class="text-center"><a href="#"><span class="glyphicon glyphicon-arrow-down"></span> ${depositqueue}</a> <a href="#"><span class="glyphicon glyphicon-arrow-up"></span> ${retrievequeue}</a></h1>
@@ -59,7 +59,7 @@
                     <h3 class="panel-title">Deposits</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/deposits"><span class="glyphicon glyphicon-save"></span> ${depositcount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/deposits"><i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> ${depositcount}</a></h1>
                 </div>
             </div>
         </div>
@@ -69,7 +69,7 @@
                     <h3 class="panel-title">Retrieves</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/retrieves"><span class="glyphicon glyphicon-open"></span> ${retrievecount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/retrieves"><i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> ${retrievecount}</a></h1>
                 </div>
             </div>
         </div>
@@ -82,7 +82,7 @@
                     <h3 class="panel-title">Users</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/users"><span class="glyphicon glyphicon-user"></span> ${usercount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/users"><i class="fa fa-user" aria-hidden="true"></i> ${usercount}</a></h1>
                 </div>
             </div>
         </div>
@@ -92,7 +92,7 @@
                     <h3 class="panel-title">Groups</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/groups"><span class="glyphicon glyphicon-education"></span> ${groupcount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/groups"><i class="fa fa-users" aria-hidden="true"></i> ${groupcount}</a></h1>
                 </div>
             </div>
         </div>

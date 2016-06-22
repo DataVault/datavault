@@ -17,19 +17,19 @@ import javax.persistence.Table;
 public class RetentionPolicy {
     // RetentionPolicy Identifier (not a UUID)
     @Id
-    @Column(name = "id", unique = true)
+    @Column(name = "id", unique = true, length = 180)
     private String id;
 
     // Name of the policy
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, columnDefinition = "TEXT")
     private String name;
 
     // Description of the policy
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
     // Implementation class of the policy
-    @Column(name = "engine", nullable = false)
+    @Column(name = "engine", nullable = false, columnDefinition = "TEXT")
     private String engine;
 
     // Sort order of the policy

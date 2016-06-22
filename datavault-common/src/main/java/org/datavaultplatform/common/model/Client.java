@@ -17,19 +17,19 @@ public class Client {
 
     // User Identifier (not a UUID)
     @Id
-    @Column(name = "id", unique = true)
+    @Column(name = "id", unique = true, length = 180)
     private String id;
 
     // Name of the client application
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, columnDefinition = "TEXT")
     private String name;
 
     // API key
-    @Column(name = "apiKey")
+    @Column(name = "apiKey", columnDefinition = "TEXT")
     private String apiKey;
 
     // ipAddress
-    @Column(name = "ipAddress")
+    @Column(name = "ipAddress", columnDefinition = "TEXT")
     private String ipAddress;
 
 

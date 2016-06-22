@@ -19,13 +19,15 @@ public class FileStore {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "id", unique = true)
+    @Column(name = "id", unique = true, length = 36)
     private String id;
 
     // Class to use for access to storage
+    @Column(columnDefinition = "TEXT")
     private String storageClass;
     
     // A textual description of the storage system
+    @Column(columnDefinition = "TEXT")
     private String label;
     
     // Properties to use for this storage system

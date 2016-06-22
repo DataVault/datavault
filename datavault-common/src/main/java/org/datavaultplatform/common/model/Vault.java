@@ -40,7 +40,7 @@ public class Vault {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "id", unique = true)
+    @Column(name = "id", unique = true, length = 36)
     private String id;
 
     // Hibernate version
@@ -53,10 +53,11 @@ public class Vault {
     private Date creationTime;
     
     // Name of the vault
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, columnDefinition = "TEXT")
     private String name;
 
     // Description of the vault
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     // Size of the vault (in bytes)
@@ -183,6 +184,7 @@ public class Vault {
                 id,
                 user.getID(),
                 dataset.getID(),
+                dataset.getName(),
                 creationTime,
                 name,
                 description,

@@ -12,10 +12,10 @@ import javax.persistence.Table;
 public class Dataset {
     
     @Id
-    @Column(name = "id", unique = true)
+    @Column(name = "id", unique = true, length = 180)
     private String id;
     
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, columnDefinition = "TEXT")
     private String name;
     
     public Dataset() {}

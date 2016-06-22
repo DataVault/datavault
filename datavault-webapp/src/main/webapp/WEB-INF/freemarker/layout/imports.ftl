@@ -3,6 +3,7 @@
     <!-- CSS -->
     <link href="<@spring.url '/resources/bootstrap/css/bootstrap.min.css'/>" rel="stylesheet" type="text/css">
     <link href="<@spring.url '/resources/bootstrap-select/css/bootstrap-select.min.css'/>" rel="stylesheet" type="text/css">
+    <link href="<@spring.url '/resources/font-awesome/css/font-awesome.min.css'/>" rel="stylesheet" type="text/css">
     <link href="<@spring.url '/resources/fancytree/skin-lion/ui.fancytree.min.css'/>" rel="stylesheet" type="text/css">
     <link href="<@spring.url '/resources/theme/css/vault.css'/>" rel="stylesheet" type="text/css">
 

@@ -16,7 +16,7 @@ public class Retrieve {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "id", unique = true)
+    @Column(name = "id", unique = true, length = 36)
     private String id;
 
     // Serialise date in ISO 8601 format
@@ -45,10 +45,13 @@ public class Retrieve {
         COMPLETE
     }
 
+    @Column(columnDefinition = "TEXT")
     private String note;
-
+    
+    @Column(columnDefinition = "TEXT")
     private Status status;
 
+    @Column(columnDefinition = "TEXT")
     String retrievePath;
     
     // Additional properties might go here - e.g. format

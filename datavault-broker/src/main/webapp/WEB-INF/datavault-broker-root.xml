@@ -69,7 +69,7 @@
     </bean>
 
     <bean id="userKeyPairService" class="org.datavaultplatform.broker.services.UserKeyPairService">
-        <property name="passphrase" value="${passphrase}"/>
+        <property name="passphrase" value="${sftp.passphrase}"/>
     </bean>
 
     <bean id="jobsService" class="org.datavaultplatform.broker.services.JobsService">
@@ -77,12 +77,13 @@
     </bean>
     
     <bean id="externalMetadataService" class="org.datavaultplatform.broker.services.ExternalMetadataService">
-        <property name="metadataURL" value="${metadataURL}" />
+        <property name="metadataURL" value="${metadata.url}" />
         <property name="datasetDAO" ref="datasetDAO" />
     </bean>
 
     <bean id="emailService" class="org.datavaultplatform.broker.services.EmailService">
         <property name="mailSender" ref="mailSender"/>
+        <property name="velocityEngine" ref="velocityEngine"/>
         <property name="mailAdministrator" value="${mail.administrator}" />
     </bean>
 
@@ -98,6 +99,7 @@
         <property name="protocol"><value>smtp</value></property>
         <property name="username"><value>${mail.username}</value></property>
         <property name="password"><value>${mail.password}</value></property>
+        <property name="defaultEncoding" value="UTF-8"/>
         <property name="javaMailProperties">
             <props>
                 <prop key="mail.smtp.auth">true</prop>
@@ -106,17 +108,33 @@
             </props>
         </property>
     </bean>
+    
+    <bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
+        <property name="velocityProperties">
+            <props>
+                <prop key="resource.loader">file</prop>
+                <prop key="file.resource.loader.class">
+                    org.apache.velocity.runtime.resource.loader.FileResourceLoader
+                </prop>
+                <prop key="file.resource.loader.path">${DATAVAULT_HOME}/config/mail-templates</prop>
+                <prop key="file.resource.loader.cache">false</prop>
+                <prop key="eventhandler.referenceinsertion.class">
+                    org.apache.velocity.app.event.implement.EscapeHtmlReference
+                </prop>
+            </props>
+        </property>
+    </bean>
 
     <!-- RabbitMQ -->
     
     <bean id="connectionFactory"
         class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory" >
-        <constructor-arg value="${queueServer}" />
-        <property name="username" value="${queueUser}" />
-        <property name="password" value="${queuePassword}" />
+        <constructor-arg value="${queue.server}" />
+        <property name="username" value="${queue.user}" />
+        <property name="password" value="${queue.password}" />
     </bean>
     
-    <rabbit:queue id="eventQueue" name="${eventQueueName}" durable="false" />
+    <rabbit:queue id="eventQueue" name="${queue.events}" durable="false" />
     
     <rabbit:listener-container connection-factory="connectionFactory" concurrency="1" max-concurrency="1" >
         <rabbit:listener ref="listener" queues="eventQueue" />
@@ -133,10 +151,10 @@
     </bean>
 
     <bean id="sender" class="org.datavaultplatform.broker.queue.Sender">
-        <property name="queueServer" value="${queueServer}"/>
-        <property name="queueName" value="${queueName}"/>
-        <property name="queueUser" value="${queueUser}"/>
-        <property name="queuePassword" value="${queuePassword}"/>
+        <property name="queueServer" value="${queue.server}"/>
+        <property name="queueName" value="${queue.name}"/>
+        <property name="queueUser" value="${queue.user}"/>
+        <property name="queuePassword" value="${queue.password}"/>
     </bean>
     
     <!-- Hibernate -->
@@ -145,9 +163,9 @@
     
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.mysql.jdbc.Driver" />
-        <property name="url" value="jdbc:mysql://${dbURL}"/>
-        <property name="username" value="${dbUsername}" />
-        <property name="password" value="${dbPassword}"/>
+        <property name="url" value="jdbc:mysql://${db.url}"/>
+        <property name="username" value="${db.username}" />
+        <property name="password" value="${db.password}"/>
     </bean>
     
     <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" >

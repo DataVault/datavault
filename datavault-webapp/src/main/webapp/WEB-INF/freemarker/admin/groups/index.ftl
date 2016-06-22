@@ -35,7 +35,7 @@
                         <label class="control-label">User:</label>
                         <br>
                         <select id='add-group-owner-user' class='user-select' data-live-search='true'>
-                            <option selected disabled style='display: none' value=''></option>
+                            <option selected disabled data-hidden="true">Please choose a user</option>
                             <#list users as user>
                                 <option value="${user.getID()?js_string}" data-tokens="${user.getID()?js_string}">${user.firstname?html} ${user.lastname?html}</option>
                             </#list>
@@ -64,7 +64,7 @@
 
                 <thead>
                     <tr class="tr">
-                        <th></th>
+                        <th>Active</th>
                         <th>ID</th>
                         <th>Name</th>
                         <th>Vaults</th>
@@ -85,7 +85,7 @@
                             <td>
                                 <ul class="list-group">
                                     <#list group.getOwners() as user>
-                                        <li class="list-group-item"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> ${user.firstname?html} ${user.lastname?html} (${user.getID()?html})
+                                        <li class="list-group-item"><i class="fa fa-user" aria-hidden="true"></i> ${user.firstname?html} ${user.lastname?html} (${user.getID()?html})
                                             <a class="btn btn-xs btn-danger pull-right" href="#" data-user="${user.getID()}" data-group="${group.ID}" data-toggle="modal" data-target="#confirm-removal">
                                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                                             </a>
@@ -107,7 +107,7 @@
 
     <form>
         <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/admin/groups/create">
-            <span class="glyphicon glyphicon-education" aria-hidden="true"></span> Create new Group
+            <i class="fa fa-users" aria-hidden="true"></i> Create new Group
         </a>
     </form>
 
@@ -144,7 +144,8 @@
         var data = $(e.relatedTarget).data();
         $('.add-owner-group', this).text(data.group);
         $('#add-group-owner-form').data('group', data.group);
-        $('#add-group-owner-user').val('');
+        $('.user-select').val(-1);
+        $('.user-select').selectpicker('refresh');
     });
     $('#add-group-owner').on('shown.bs.modal', function(e) {
         $('#add-group-owner-user').focus();

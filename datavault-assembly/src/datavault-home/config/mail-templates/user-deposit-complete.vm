@@ -1,0 +1,22 @@
+<html>
+	<body>
+		<h3>Data Vault - deposit complete</h3>
+		
+		<p>Hi, ${user-firstname} ${user-lastname}</p>
+		
+		<p>Your deposit is now complete.</p>
+
+		<p>Deposit details:</p>
+		<ul>
+			<li>Deposit note: ${deposit-note}</li>
+			<li>Deposit ID: ${deposit-id}</li>
+			<li>Vault: ${vault-name}</li>
+			<li>Vault ID: ${vault-id}</li>
+			<li>Size: ${size-bytes} bytes</li>
+			<li>Timestamp: ${timestamp}</li>
+		</ul>
+		
+		<p>Data in this Vault will be retained until at least ${vault-retention-expiry} when a review will be carried out.</p>
+		
+	</body>
+</html>
