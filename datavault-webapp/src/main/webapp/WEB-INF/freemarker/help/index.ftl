@@ -52,12 +52,12 @@
             that you might create a new vault for each large project you undertake, so that you keep related datasets in a single vault.
         </li>
         <li>
-            <span class="glyphicon glyphicon-save"></span> <strong>Deposit:</strong> Once you have created a vault, you can deposit data
+            <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> <strong>Deposit:</strong> Once you have created a vault, you can deposit data
             into the vault.  Each time you deposit data into the vault, you give a brief description of what is in that particular deposit.
             A vault can contain more than one deposit.
         </li>
         <li>
-            <span class="glyphicon glyphicon-open"></span> <strong>Retrieve:</strong> If you need to retrieve data from a vault, then you are
+            <i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> <strong>Retrieve:</strong> If you need to retrieve data from a vault, then you are
             able to request that a deposit is restored.  Sometimes this may take a few hours or longer, depending upon the location of the
             data, which may have been transfered into offline storage.
         </li>

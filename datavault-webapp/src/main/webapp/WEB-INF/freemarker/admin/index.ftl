@@ -59,7 +59,7 @@
                     <h3 class="panel-title">Deposits</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/deposits"><span class="glyphicon glyphicon-save"></span> ${depositcount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/deposits"><i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> ${depositcount}</a></h1>
                 </div>
             </div>
         </div>
@@ -69,7 +69,7 @@
                     <h3 class="panel-title">Retrieves</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/retrieves"><span class="glyphicon glyphicon-open"></span> ${retrievecount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/retrieves"><i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> ${retrievecount}</a></h1>
                 </div>
             </div>
         </div>

@@ -164,7 +164,7 @@
 
         <#if deposit.status.name() == "COMPLETE">
             <a id="retrievebtn" class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve" disabled='disabled'>
-                <span class="glyphicon glyphicon-open" aria-hidden="true"></span> Retrieve data
+                <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Retrieve data
             </a>
         </#if>
 

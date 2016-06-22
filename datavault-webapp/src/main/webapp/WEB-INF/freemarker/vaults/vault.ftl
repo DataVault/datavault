@@ -81,7 +81,7 @@
 
         <form>
             <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create">
-                <span class="glyphicon glyphicon-save" aria-hidden="true"></span> Deposit data
+                <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit data
             </a>
         </form>
 
