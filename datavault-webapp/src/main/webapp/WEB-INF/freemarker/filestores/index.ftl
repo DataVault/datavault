@@ -15,7 +15,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger btn-ok">Remove</button>
+                <button type="button" class="btn btn-danger btn-ok" id="remove">Remove</button>
             </div>
         </div>
     </div>
@@ -33,16 +33,19 @@
                 <p>Enter new filestore details here</p>
                 <form id="add-filestore-form">
                     <div class="form-filestore">
-                        <!--
                         <div class="form-group">
-                            <label for="add-hostname">Hostname</label>
-                            <input type="text" class="form-control" id="add-hostname" placeholder="Enter hostname"/>
+                            <label for="hostname">Hostname</label>
+                            <input type="text" class="form-control" id="hostname" name="hostname" placeholder="Enter hostname"/>
                         </div>
                         <div class="form-group">
-                            <label for="add-port">Port</label>
-                            <input type="text" class="form-control" id="add-port" placeholder="Enter port"/>
+                            <label for="port">Port</label>
+                            <input type="text" class="form-control" id="port" name="port" placeholder="Enter port"/>
                         </div>
-                        -->
+                        <div class="form-group">
+                            <label for="path">Path</label>
+                            <input type="text" class="form-control" id="path" name="path" placeholder="Enter path"/>
+                        </div>
+
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-default">Submit</button>
                     </div>
@@ -60,48 +63,45 @@
 
     <h3>SFTP Storage</h3>
 
-       <div class="table-responsive">
-            <table class="table table-striped">
+    <div class="table-responsive">
+        <table class="table table-striped">
 
-                <thead>
+            <thead>
+            <tr class="tr">
+                <th>Hostname</th>
+                <th>Port</th>
+                <th>Path</th>
+                <th>Public key</th>
+                <th>action</th>
+            </tr>
+            </thead>
+
+            <tbody id="fileStoresSFTP">
+                <#if filestoresSFTP?has_content>
+                    <#list filestoresSFTP as filestoreSFTP>
                     <tr class="tr">
-                        <th>Hostname</th>
-                        <th>Port</th>
-                        <th>Path</th>
-                        <th>Public Key</th>
+                        <td>${filestoreSFTP.properties['host']}</td>
+                        <td>${filestoreSFTP.properties['port']}</td>
+                        <td>${filestoreSFTP.properties['rootPath']}</td>
+                        <td>${filestoreSFTP.properties['publicKey']}</td>
+                        <td>
+                            <a class="btn btn-xs btn-danger pull-right" href="#" data-filestore="${filestoreSFTP.ID}" data-toggle="modal" data-target="#confirm-removal">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
+                            </a>
+                        </td>
                     </tr>
-                </thead>
+                    </#list>
+                </#if>
+            </tbody>
+        </table>
 
-                <tbody>
-                    <#if filestoresSFTP?has_content>
-                        <#list filestoresSFTP as filestoreSFTP>
-                        <tr class="tr">
-                            <td>${filestoreSFTP.properties['hostname']}</td>
-                            <td>${filestoreSFTP.properties['port']}</td>
-                            <td>${filestoreSFTP.properties['rootPath']}</td>
-                            <td>${filestoreSFTP.properties['publicKey']}</td>
-                            <td>
-                               <a class="btn btn-xs btn-danger pull-right" href="#" data-filestore="${filestoreSFTP.ID}" data-toggle="modal" data-target="#confirm-removal">
-                                  <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
-                               </a>
-                            </td>
-                        </tr>
-                        </#list>
-                    </#if>
-                </tbody>
-            </table>
+        <form>
+            <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-filestore">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Filestore
+            </a>
+        </form>
 
-           <form>
-               <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-filestore">
-                   <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Filestore
-               </a>
-           </form>
-
-        </div>
-
-
-
-
+    </div>
 </div>
 
 <script>
@@ -110,11 +110,42 @@
     sftpFrm.submit(function (ev) {
         $.ajax({
             method: "POST",
-            url: '${springMacroRequestContext.getContextPath()}/filestores/keys',
+            url: '${springMacroRequestContext.getContextPath()}/filestores/sftp',
             data: sftpFrm.serialize(),
             success: function (data) {
-                alert('Public key is ' + data);
+                location.reload(true);
             }
+
+            //error: function(xhr, ajaxOptions, thrownError) {
+            //    alert('Error: unable to add new filestore');
+            //}
+        });
+
+        ev.preventDefault();
+    });
+
+
+    // Bind properties to the user removal confirmation dialog
+    $('#confirm-removal').on('show.bs.modal', function(e) {
+        var data = $(e.relatedTarget).data();
+        $('.remove-filestore', this).text(data.filestore);
+        // todo: should this be filestore id?
+        $('#remove', this).data('filestoreId', data.filestore);
+
+    });
+
+    $("button#remove").click(function(){
+        var filestoreId = $(this).data('filestoreId');
+        $.ajax({
+            method: "DELETE",
+            url: '${springMacroRequestContext.getContextPath()}/filestores/' + filestoreId,
+            success: function (data) {
+                location.reload(true);
+            }
+
+            //error: function(xhr, ajaxOptions, thrownError) {
+            //    alert('Error: unable to add new filestore');
+            //}
         });
 
         ev.preventDefault();

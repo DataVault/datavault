@@ -62,6 +62,7 @@ public class FileStoreController {
         this.passphrase = passphrase;
     }
 
+
     @RequestMapping(value = "/filestores", method = RequestMethod.GET)
     public List<FileStore> getFileStores(@RequestHeader(value = "X-UserID", required = true) String userID) {
         User user = usersService.getUser(userID);
@@ -75,6 +76,8 @@ public class FileStoreController {
         return userStores;
     }
 
+
+
     @RequestMapping(value = "/filestores", method = RequestMethod.POST)
     public FileStore addFileStore(@RequestHeader(value = "X-UserID", required = true) String userID,
                                   @RequestBody FileStore store) throws Exception {
@@ -86,7 +89,7 @@ public class FileStoreController {
     }
 
     @RequestMapping(value = "/filestores/{filestoreid}", method = RequestMethod.GET)
-    public FileStore getPublicKey(@RequestHeader(value = "X-UserID", required = true) String userID,
+    public FileStore getFileStore(@RequestHeader(value = "X-UserID", required = true) String userID,
                                @PathVariable("filestoreid") String filestoreid) {
 
         FileStore store = fileStoreService.getFileStore(filestoreid);
@@ -101,7 +104,6 @@ public class FileStoreController {
 
     }
 
-
     @RequestMapping(value = "/filestores/local", method = RequestMethod.GET)
     public List<FileStore> getFileStoresLocal(@RequestHeader(value = "X-UserID", required = true) String userID) {
         User user = usersService.getUser(userID);
@@ -112,6 +114,7 @@ public class FileStoreController {
         for (FileStore userStore : userStores) {
             if (userStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.LocalFileSystem")) {
                 localStores.add(userStore);
+                logger.info("Adding entry to list of local filestores" + userStore);
             }
         }
 
@@ -119,23 +122,24 @@ public class FileStoreController {
     }
 
 
+
     @RequestMapping(value = "/filestores/sftp", method = RequestMethod.POST)
-    public FileStore addKeyPair(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    public FileStore addFileStoreSFTP(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                      @RequestBody FileStore store) throws Exception {
+
         User user = usersService.getUser(userID);
 
         userKeyPairService.generateNewKeyPair();
 
-        HashMap<String,String> storeProperties = new HashMap<String,String>();
-        storeProperties.put("host", host);
-        storeProperties.put("port", port);
-        storeProperties.put("rootPath", rootPath);
+        HashMap<String,String> storeProperties = store.getProperties();
+
+        // Add the confidential properties.
         storeProperties.put("username", user.getID());
         storeProperties.put("password", "");
         storeProperties.put("publicKey", userKeyPairService.getPublicKey());
         storeProperties.put("privateKey", userKeyPairService.getPrivateKey());
         storeProperties.put("passphrase", passphrase);
 
-        FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.SFTPFileSystem", storeProperties, "SFTP filesystem");
         store.setUser(user);
         fileStoreService.addFileStore(store);
 
@@ -149,8 +153,24 @@ public class FileStoreController {
         return store;
     }
 
+    @RequestMapping(value = "/filestores/sftp", method = RequestMethod.GET)
+    public List<FileStore> getFileStoresSFTP(@RequestHeader(value = "X-UserID", required = true) String userID) {
+        User user = usersService.getUser(userID);
+
+        List<FileStore> userStores = user.getFileStores();
+        List<FileStore> localStores = new ArrayList<>();
+
+        for (FileStore userStore : userStores) {
+            if (userStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.SFTPFileSystem")) {
+                localStores.add(userStore);
+            }
+        }
+
+        return localStores;
+    }
+
     @RequestMapping(value = "/filestores/sftp/{filestoreid}", method = RequestMethod.GET)
-    public FileStore getSftpFilestore(@RequestHeader(value = "X-UserID", required = true) String userID,
+    public FileStore getFilestoreSFTP(@RequestHeader(value = "X-UserID", required = true) String userID,
                                    @PathVariable("filestoreid") String filestoreid) {
 
         FileStore store = fileStoreService.getFileStore(filestoreid);
@@ -165,6 +185,7 @@ public class FileStoreController {
         return store;
 
     }
+
 
 
 }

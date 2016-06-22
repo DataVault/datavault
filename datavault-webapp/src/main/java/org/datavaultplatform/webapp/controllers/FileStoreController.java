@@ -36,36 +36,37 @@ public class FileStoreController {
         return "filestores/index";
     }
 
-
     // Process the 'add local FileStore' Ajax request
     @RequestMapping(value = "/filestores/local", method = RequestMethod.POST)
     @ResponseBody
-    public FileStore addLocalFilestore(@RequestParam String dirname) {
+    public void addLocalFilestore(@RequestParam String dirname) {
         HashMap<String,String> storeProperties = new HashMap<String,String>();
         storeProperties.put("rootPath", dirname);
         FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Filesystem (local)");
-        FileStore returnedStore = restService.addFileStore(store);
-
-        return returnedStore;
+        restService.addFileStore(store);
     }
 
-    // Process the 'add keys' Ajax request
-    @RequestMapping(value = "/filestores/keys", method = RequestMethod.POST)
+    // Process the 'add SFTP FileStore' Ajax request
+    @RequestMapping(value = "/filestores/sftp", method = RequestMethod.POST)
     @ResponseBody
-    public String addKeys(ModelMap model) {
-        logger.info("About to addkeys in webapp controller");
+    public void addSFTPFilestore(@RequestParam("hostname") String hostname, @RequestParam("port") String port, @RequestParam("path") String path, ModelMap model) {
+        //todo : replace the separate parms above with one Filestore model attribute?
 
-        String publicKey = restService.addKeys();
+        // Generate a partially complete Filestore
+        HashMap<String,String> storeProperties = new HashMap<String,String>();
+        storeProperties.put("host", hostname);
+        storeProperties.put("port", port);
+        storeProperties.put("rootPath", path);
 
-        return publicKey;
+        FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.SFTPFileSystem", storeProperties, "SFTP filesystem");
+        restService.addFileStoreSFTP(store);
     }
+
 
     // Process the 'delete filestore' Ajax request
     @RequestMapping(value = "/filestores/{filestoreId}", method = RequestMethod.DELETE)
     @ResponseBody
     public void deleteFileStore(ModelMap model, @PathVariable("filestoreId") String filestoreId) {
-
-        logger.info("Trying to delete filestore " + filestoreId);
         restService.deleteFileStore(filestoreId);
     }
 

@@ -35,12 +35,12 @@ public class VaultsController {
     public String getVaultsListing(ModelMap model) {
          //Decide what page the user should see. Is it the first time they have logged on?
         FileStore[] userStores = restService.getFileStoreListing();
-        //if (userStores.length == 0) {
-        //   return "redirect:/filestores";
-        //} else {
+        if (userStores.length == 0) {
+           return "redirect:/filestores";
+        } else {
            model.addAttribute("vaults", restService.getVaultsListing());
            return "vaults/index";
-        //}
+        }
 
     }
 

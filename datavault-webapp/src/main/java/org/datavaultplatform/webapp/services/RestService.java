@@ -347,6 +347,11 @@ public class RestService {
         return (FileStore)response.getBody();
     }
 
+    public FileStore addFileStoreSFTP(FileStore fileStore) {
+        HttpEntity<?> response = post(brokerURL + "/filestores/sftp", FileStore.class, fileStore);
+        return (FileStore)response.getBody();
+    }
+
     public VaultInfo addVault(CreateVault createVault) {
         HttpEntity<?> response = post(brokerURL + "/vaults/", VaultInfo.class, createVault);
         return (VaultInfo)response.getBody();
@@ -375,12 +380,6 @@ public class RestService {
     public User editUser(User user) {
         HttpEntity<?> response = put(brokerURL + "/admin/users/", User.class, user);
         return (User)response.getBody();
-    }
-
-    public String addKeys() {
-        // Bit odd to POST a null object, but a POST seems appropriate since it is a non-idempotent, create request
-        HttpEntity<?> response = post(brokerURL + "/filestores/sftp", String.class, null);
-        return (String)response.getBody();
     }
 
     public Boolean userExists(ValidateUser validateUser) {
