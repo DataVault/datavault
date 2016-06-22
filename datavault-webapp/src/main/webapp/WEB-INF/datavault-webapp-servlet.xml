@@ -73,6 +73,7 @@
 
     <bean id="fileStoreController" class="org.datavaultplatform.webapp.controllers.FileStoreController">
         <property name="restService" ref="restService" />
+        <property name="activeDir" value="${activeDir}" />
     </bean>
 
     <bean id="feedbackController" class="org.datavaultplatform.webapp.controllers.FeedbackController">

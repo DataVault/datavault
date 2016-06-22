@@ -22,16 +22,16 @@
 </div>
 
 
-<div class="modal fade" id="add-filestore" tabindex="-1" role="dialog" aria-labelledby="addFilestoreLabel" aria-hidden="true">
+<div class="modal fade" id="add-filestoreSFTP" tabindex="-1" role="dialog" aria-labelledby="addFilestoreSFTPLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h4 class="modal-title" id="addFileStoreLabel">Add filestore</h4>
+                <h4 class="modal-title" id="addFileStoreSFTPLabel">Add filestore</h4>
             </div>
             <div class="modal-body">
                 <p>Enter new filestore details here</p>
-                <form id="add-filestore-form">
+                <form id="add-filestoreSFTP-form">
                     <div class="form-filestore">
                         <div class="form-group">
                             <label for="hostname">Hostname</label>
@@ -55,11 +55,77 @@
     </div>
 </div>
 
+<div class="modal fade" id="add-filestoreLocal" tabindex="-1" role="dialog" aria-labelledby="addFilestoreLocalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="addFileStoreLocalLabel">Add filestore</h4>
+            </div>
+            <div class="modal-body">
+                <p>Enter new filestore details here</p>
+                <form id="add-filestoreLocal-form">
+                    <div class="form-filestore">
+                        <div class="form-group">
+                            <label for="path">Path</label>
+                            <input type="text" class="form-control" id="path" name="path" value="${activeDir}" readonly />
+                        </div>
+
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-default">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 <div class="container">
 
     <ol class="breadcrumb">
         <li><a href="${springMacroRequestContext.getContextPath()}/filestores"><b>Storage Options</b></a></li>
     </ol>
+
+    <h3>Local Storage</h3>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+
+            <thead>
+            <tr class="tr">
+                <th>Hostname</th>
+                <th>Path</th>
+                <th>action</th>
+            </tr>
+            </thead>
+
+            <tbody id="fileStoresLocal">
+                <#if filestoresLocal?has_content>
+                    <#list filestoresLocal as filestoreLocal>
+                    <tr class="tr">
+                        <td>localhost</td>
+                        <td>${filestoreLocal.properties['rootPath']}</td>
+                        <td>
+                            <a class="btn btn-xs btn-danger pull-right" href="#" data-filestore="${filestoreLocal.ID}" data-toggle="modal" data-target="#confirm-removal">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
+                            </a>
+                        </td>
+                    </tr>
+                    </#list>
+                </#if>
+            </tbody>
+        </table>
+
+        <form>
+            <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-filestoreLocal">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Filestore
+            </a>
+        </form>
+
+    </div>
+
 
     <h3>SFTP Storage</h3>
 
@@ -96,7 +162,7 @@
         </table>
 
         <form>
-            <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-filestore">
+            <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-filestoreSFTP">
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Filestore
             </a>
         </form>
@@ -106,7 +172,26 @@
 
 <script>
 
-    var sftpFrm = $('#add-filestore-form');
+    var localFrm = $('#add-filestoreLocal-form');
+    localFrm.submit(function (ev) {
+        $.ajax({
+            method: "POST",
+            url: '${springMacroRequestContext.getContextPath()}/filestores/local',
+            data: localFrm.serialize(),
+            success: function (data) {
+                location.reload(true);
+            }
+
+            //error: function(xhr, ajaxOptions, thrownError) {
+            //    alert('Error: unable to add new filestore');
+            //}
+        });
+
+        ev.preventDefault();
+    });
+
+
+    var sftpFrm = $('#add-filestoreSFTP-form');
     sftpFrm.submit(function (ev) {
         $.ajax({
             method: "POST",

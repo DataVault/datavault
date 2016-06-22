@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.controllers;
 
 import org.datavaultplatform.common.model.Dataset;
+import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.request.CreateVault;

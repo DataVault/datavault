@@ -23,13 +23,20 @@ public class FileStoreController {
 
     private RestService restService;
 
+    private String activeDir;
+
     public void setRestService(RestService restService) {
         this.restService = restService;
+    }
+
+    public void setActiveDir(String activeDir) {
+        this.activeDir = activeDir;
     }
 
     // Return the 'Storage Options' page
     @RequestMapping(value = "/filestores", method = RequestMethod.GET)
     public String listFilestores(ModelMap model) {
+        model.addAttribute("activeDir", activeDir);
         model.addAttribute("filestoresLocal", restService.getFileStoresLocal());
         model.addAttribute("filestoresSFTP", restService.getFileStoresSFTP());
 
@@ -39,9 +46,12 @@ public class FileStoreController {
     // Process the 'add local FileStore' Ajax request
     @RequestMapping(value = "/filestores/local", method = RequestMethod.POST)
     @ResponseBody
-    public void addLocalFilestore(@RequestParam String dirname) {
+    public void addLocalFilestore(@RequestParam("path") String path) {
         HashMap<String,String> storeProperties = new HashMap<String,String>();
-        storeProperties.put("rootPath", dirname);
+        // In theory we could allow the user to define the path, however that would allow them access to anything that the
+        // Datavault app can read. So for now we will just use the configured default value.
+        //storeProperties.put("rootPath", path);
+        storeProperties.put("rootPath", activeDir);
         FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Filesystem (local)");
         restService.addFileStore(store);
     }
