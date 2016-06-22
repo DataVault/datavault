@@ -50,6 +50,7 @@
                 <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="The set of rules which govern how long this data should be kept. This may correspond to the requirements of a specific organisation or funder."></span></span>
                 <br>
                 <select id="policyID" name="policyID" data-width="fit" class="retentionPolicy-select selectpicker show-tick">
+                    <option selected disabled data-hidden="true">Please choose a retention policy</option>
                     <#list policies as retentionPolicy>
                         <option value="${retentionPolicy.getID()}" data-subtext="${retentionPolicy.description?html}">${retentionPolicy.name?html}</option>
                     </#list>
@@ -61,6 +62,7 @@
                 <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="The Group which is associated with this Vault. A Group is used to establish a chain of custody over data in a Vault. A Group administrator will be able to view information about a Vault."></span></span>
                 <br>
                 <select id="groupID" name="groupID" data-width="fit" class="group-select selectpicker show-tick">
+                    <option selected disabled data-hidden="true">Please choose a group owner</option>
                     <#list groups as group>
                         <#if group.enabled>
                             <option value="${group.getID()}">${group.name?html}</option>
