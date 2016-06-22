@@ -11,7 +11,7 @@
     </ol>
 
     <div class="bs-callout">
-        <h2><span class="glyphicon glyphicon-save"></span> ${deposit.note?html}</h2>
+        <h2><i class="fa fa-hdd-o" aria-hidden="true"></i> ${deposit.note?html}</h2>
 
         <ol id="progtrckr" class="progtrckr" data-progtrckr-steps="0" style="display:none;">
         </ol>
