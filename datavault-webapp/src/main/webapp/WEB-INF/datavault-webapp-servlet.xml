@@ -73,6 +73,10 @@
 
     <bean id="fileStoreController" class="org.datavaultplatform.webapp.controllers.FileStoreController">
         <property name="restService" ref="restService" />
+        <property name="activeDir" value="${activeDir}" />
+        <property name="sftpHost" value="${sftp.host}"/>
+        <property name="sftpPort" value="${sftp.port}"/>
+        <property name="sftpRootPath" value="${sftp.rootPath}"/>
     </bean>
 
     <bean id="feedbackController" class="org.datavaultplatform.webapp.controllers.FeedbackController">

@@ -12,5 +12,6 @@ public interface FileStoreDAO {
     public List<FileStore> list();
 
     public FileStore findById(String Id);
-    
+
+    public void deleteById(String Id);
 }

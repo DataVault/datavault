@@ -25,6 +25,10 @@ public class FileStoreService {
     public FileStore getFileStore(String fileStoreID) {
         return fileStoreDAO.findById(fileStoreID);
     }
+
+    public void deleteFileStore(String fileStoreID) {
+        fileStoreDAO.deleteById(fileStoreID);
+    }
     
     public void setFileStoreDAO(FileStoreDAO fileStoreDAO) {
         this.fileStoreDAO = fileStoreDAO;
