@@ -58,6 +58,9 @@
     <mvc:resources mapping="/resources/**" location="/resources/" />
 
 
+    <bean id="welcomeController" class="org.datavaultplatform.webapp.controllers.WelcomeController">
+        <property name="restService" ref="restService" />
+    </bean>
 
     <bean id="filesController" class="org.datavaultplatform.webapp.controllers.FilesController">
         <property name="restService" ref="restService" />
