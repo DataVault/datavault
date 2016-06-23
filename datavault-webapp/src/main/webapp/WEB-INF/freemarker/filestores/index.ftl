@@ -45,11 +45,12 @@
                             <label for="path">Path</label>
                             <input type="text" class="form-control" id="path" name="path" value="${sftpRootPath}"/>
                         </div>
-
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-default">Submit</button>
                     </div>
                 </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button form="add-filestoreSFTP-form" type="submit" class="btn btn-primary">Submit</button>
             </div>
         </div>
     </div>
@@ -70,11 +71,12 @@
                             <label for="path">Path</label>
                             <input type="text" class="form-control" id="path" name="path" value="${activeDir}" readonly />
                         </div>
-
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-default">Submit</button>
                     </div>
                 </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button form="add-filestoreLocal-form" type="submit" class="btn btn-primary">Submit</button>
             </div>
         </div>
     </div>
@@ -85,7 +87,7 @@
 <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/filestores"><b>Storage Options</b></a></li>
+        <li class="active"><b>Storage Options</b></li>
     </ol>
 
     <h3>Local Storage</h3>
@@ -135,7 +137,7 @@
 
     <div class="table-responsive storage-table">
         <#if filestoresSFTP?has_content>
-            <table class="table table-striped">
+            <table class="table table-striped" style="table-layout: fixed; word-wrap: break-word;">
 
                 <thead>
                 <tr class="tr">
@@ -153,7 +155,7 @@
                         <td>${filestoreSFTP.properties['host']}</td>
                         <td>${filestoreSFTP.properties['port']}</td>
                         <td>${filestoreSFTP.properties['rootPath']}</td>
-                        <td>${filestoreSFTP.properties['publicKey']}</td>
+                        <td><code>${filestoreSFTP.properties['publicKey']}</code></td>
                         <td>
                             <a class="btn btn-xs btn-danger pull-right" href="#" data-filestore="${filestoreSFTP.ID}" data-toggle="modal" data-target="#confirm-removal">
                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
