@@ -19,6 +19,7 @@ public class Packager {
     public static final String depositMetaFileName = "deposit.json";
     public static final String vaultMetaFileName = "vault.json";
     public static final String fileTypeMetaFileName = "filetype.json";
+    public static final String externalMetaFileName = "external.txt";
     
     // Create a bag from an existing directory.
     public static boolean createBag(File dir) throws Exception {
@@ -57,7 +58,8 @@ public class Packager {
     public static boolean addMetadata(File bagDir,
                                       String depositMetadata,
                                       String vaultMetadata,
-                                      String fileTypeMetadata) {
+                                      String fileTypeMetadata,
+                                      String externalMetadata) {
         
         boolean result = false;
         
@@ -77,6 +79,7 @@ public class Packager {
             addMetaFile(tagManifest, metadataDirPath, depositMetaFileName, depositMetadata, alg);
             addMetaFile(tagManifest, metadataDirPath, vaultMetaFileName, vaultMetadata, alg);
             addMetaFile(tagManifest, metadataDirPath, fileTypeMetaFileName, fileTypeMetadata, alg);
+            addMetaFile(tagManifest, metadataDirPath, externalMetaFileName, externalMetadata, alg);
             
             // Metadata files created
             result = true;

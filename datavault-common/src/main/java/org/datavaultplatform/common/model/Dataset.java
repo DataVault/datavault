@@ -1,10 +1,8 @@
 package org.datavaultplatform.common.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -17,6 +15,11 @@ public class Dataset {
     
     @Column(name = "name", nullable = false, columnDefinition = "TEXT")
     private String name;
+    
+    // The raw content from the metadata provider e.g. XML
+    @JsonIgnore
+    @Transient
+    private String content;
     
     public Dataset() {}
 
@@ -34,5 +37,13 @@ public class Dataset {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 }

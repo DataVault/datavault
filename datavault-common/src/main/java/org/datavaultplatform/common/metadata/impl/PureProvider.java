@@ -40,7 +40,9 @@ public class PureProvider implements Provider {
             String response = query(endpoint + "?uuids.uuid=" + id + "&rendering=xml_long");
             List<Dataset> datasets = parse(response);
             if (datasets.size() == 1) {
-                return datasets.get(0);
+                Dataset d = datasets.get(0);
+                d.setContent(response);
+                return d;
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -39,6 +39,14 @@ public class ExternalMetadataService {
         return dataset;
     }
     
+    public String getDatasetContent(String id) {
+        
+        // Query the metadata provider
+        Dataset dataset = metadataProvider.getDataset(id);
+
+        return dataset.getContent();
+    }
+    
     public List<Dataset> getCachedDatasets() {
         return datasetDAO.list();
     }

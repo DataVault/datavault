@@ -68,6 +68,7 @@ public class Deposit extends Task {
         // TODO: is there a better way to pass this to the worker?
         String depositMetadata = properties.get("depositMetadata");
         String vaultMetadata = properties.get("vaultMetadata");
+        String externalMetadata = properties.get("externalMetadata");
         
         ArrayList<String> states = new ArrayList<>();
         states.add("Calculating size");     // 0
@@ -149,7 +150,7 @@ public class Deposit extends Task {
                 String fileTypeMetadata = mapper.writeValueAsString(fileTypes);
                 
                 // Add vault/deposit/type metadata to the bag
-                Packager.addMetadata(bagDir, depositMetadata, vaultMetadata, fileTypeMetadata);
+                Packager.addMetadata(bagDir, depositMetadata, vaultMetadata, fileTypeMetadata, externalMetadata);
                 
                 // Tar the bag directory
                 logger.info("Creating tar file ...");

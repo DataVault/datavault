@@ -16,6 +16,7 @@ public class MockProvider implements Provider {
             Dataset d = new Dataset();
             d.setID("MOCK-DATASET-" + i);
             d.setName("Sample dataset " + i);
+            d.setContent("Mock Metadata");
             datasets.add(d);
         }
     }
