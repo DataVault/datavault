@@ -29,6 +29,7 @@ public class DepositsController {
     private DepositsService depositsService;
     private RetrievesService retrievesService;
     private MetadataService metadataService;
+    private ExternalMetadataService externalMetadataService;
     private FilesService filesService;
     private UsersService usersService;
     private ArchiveStoreService archiveStoreService;
@@ -51,6 +52,10 @@ public class DepositsController {
 
     public void setMetadataService(MetadataService metadataService) {
         this.metadataService = metadataService;
+    }
+    
+    public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
+        this.externalMetadataService = externalMetadataService;
     }
 
     public void setFilesService(FilesService filesService) {
@@ -129,6 +134,12 @@ public class DepositsController {
         if (!filesService.validPath(storagePath, userStore)) {
             throw new IllegalArgumentException("Path '" + storagePath + "' is invalid");
         }
+        
+        // Get metadata content from the external provider
+        Dataset dataset = externalMetadataService.getDataset(vault.getDataset().getID());
+        if (dataset == null) {
+            throw new Exception("Dataset metadata record '" + vault.getDataset().getID() + "' does not exist");
+        }
 
         // Add the deposit object
         depositsService.addDeposit(vault, deposit, storagePath, userStore.getLabel(), archiveStore.getID());
@@ -152,6 +163,7 @@ public class DepositsController {
             // In future we'll need a more formal schema/representation (e.g. RDF or JSON-LD).
             depositProperties.put("depositMetadata", mapper.writeValueAsString(deposit));
             depositProperties.put("vaultMetadata", mapper.writeValueAsString(vault));
+            depositProperties.put("externalMetadata", mapper.writeValueAsString(dataset.getContent()));
 
             Task depositTask = new Task(job, depositProperties, userStore, archiveStore);
             String jsonDeposit = mapper.writeValueAsString(depositTask);

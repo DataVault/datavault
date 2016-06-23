@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 
@@ -16,7 +17,8 @@ public class Dataset {
     private String name;
     
     // The raw content from the metadata provider e.g. XML
-    @Lob
+    @JsonIgnore
+    @Transient
     private String content;
     
     public Dataset() {}

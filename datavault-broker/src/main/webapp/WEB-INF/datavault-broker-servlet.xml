@@ -67,6 +67,7 @@
         <property name="depositsService" ref="depositsService" />
         <property name="retrievesService" ref="retrievesService" />
         <property name="metadataService" ref="metadataService" />
+        <property name="externalMetadataService" ref="externalMetadataService" />
         <property name="filesService" ref="filesService" />
         <property name="usersService" ref="usersService" />
         <property name="archiveStoreService" ref="archiveStoreService" />
