@@ -11,24 +11,24 @@
     <context:property-placeholder location="file:///${DATAVAULT_HOME}/config/datavault.properties"/>
 
     <bean id="workerManager" class="org.datavaultplatform.worker.WorkerManager">
-        <property name="numberOfWorkers" value="${numberOfWorkers}"/>
+        <property name="numberOfWorkers" value="${worker.number}"/>
     </bean>
 
     <bean id="receiver" class="org.datavaultplatform.worker.queue.Receiver">
-        <property name="queueServer" value="${queueServer}"/>
-        <property name="queueName" value="${queueName}"/>
-        <property name="queueUser" value="${queueUser}"/>
-        <property name="queuePassword" value="${queuePassword}"/>
+        <property name="queueServer" value="${queue.server}"/>
+        <property name="queueName" value="${queue.name}"/>
+        <property name="queueUser" value="${queue.user}"/>
+        <property name="queuePassword" value="${queue.password}"/>
         <property name="archiveDir" value="${archiveDir}"/>
         <property name="tempDir" value="${tempDir}"/>
         <property name="metaDir" value="${metaDir}"/>
     </bean>
 
     <bean id="eventSender" class="org.datavaultplatform.worker.queue.EventSender">
-        <property name="queueServer" value="${queueServer}"/>
-        <property name="eventQueueName" value="${eventQueueName}"/>
-        <property name="queueUser" value="${queueUser}"/>
-        <property name="queuePassword" value="${queuePassword}"/>
+        <property name="queueServer" value="${queue.server}"/>
+        <property name="eventQueueName" value="${queue.events}"/>
+        <property name="queueUser" value="${queue.user}"/>
+        <property name="queuePassword" value="${queue.password}"/>
     </bean>
 
 </beans>

@@ -9,8 +9,12 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 
 import org.datavaultplatform.common.model.FileStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileStoreDAOImpl implements FileStoreDAO {
+
+    private static final Logger logger = LoggerFactory.getLogger(FileStoreDAOImpl.class);
 
     private SessionFactory sessionFactory;
  
@@ -55,4 +59,20 @@ public class FileStoreDAOImpl implements FileStoreDAO {
         session.close();
         return fileStore;
     }
+
+    @Override
+    public void deleteById(String Id) {
+        logger.info("Deleting Filstore with id " + Id);
+
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(FileStore.class);
+        criteria.add(Restrictions.eq("id", Id));
+        FileStore fileStore = (FileStore) criteria.uniqueResult();
+        session.delete(fileStore);
+        session.flush();
+        session.close();
+    }
+
 }
+
+

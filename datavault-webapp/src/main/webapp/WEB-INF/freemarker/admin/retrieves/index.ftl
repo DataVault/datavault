@@ -7,7 +7,7 @@
 
     <ol class="breadcrumb">
         <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
-        <li class="active"><b>Retrieves</b></li>
+        <li class="active"><b>Retrievals</b></li>
     </ol>
 
     <#if retrieves?has_content>
@@ -15,7 +15,7 @@
             <table class="table table-striped">
                 <thead>
                 <tr class="tr">
-                    <th>Retrieve</th>
+                    <th>Retrieval</th>
                     <th>Status</th>
                     <th>Timestamp</th>
                     <th>Retrieve path</th>

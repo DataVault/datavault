@@ -111,10 +111,10 @@
         <property name="usersService" ref="usersService" />
         <property name="fileStoreService" ref="fileStoreService" />
         <property name="userKeyPairService" ref="userKeyPairService" />
-        <property name="host" value="${host}"/>
-        <property name="port" value="${port}"/>
-        <property name="rootPath" value="${rootPath}"/>
-        <property name="passphrase" value="${passphrase}"/>
+        <property name="host" value="${sftp.host}"/>
+        <property name="port" value="${sftp.port}"/>
+        <property name="rootPath" value="${sftp.rootPath}"/>
+        <property name="passphrase" value="${sftp.passphrase}"/>
     </bean>
     
     <bean id="archiveStoreController" class="org.datavaultplatform.broker.controllers.ArchiveStoreController">
@@ -139,7 +139,7 @@
 
     <bean id="documentationController" class="org.jsondoc.springmvc.controller.JSONDocController">
         <constructor-arg name="version" value="1.0" />
-        <constructor-arg name="basePath" value="${brokerURL}" />
+        <constructor-arg name="basePath" value="${broker.url}" />
         <constructor-arg name="packages">
             <list>
                 <value>org.datavaultplatform.broker.controllers</value>

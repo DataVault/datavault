@@ -11,7 +11,7 @@
     </ol>
 
     <div class="bs-callout">
-        <h2><span class="glyphicon glyphicon-save"></span> ${deposit.note?html}</h2>
+        <h2><i class="fa fa-hdd-o" aria-hidden="true"></i> ${deposit.note?html}</h2>
 
         <ol id="progtrckr" class="progtrckr" data-progtrckr-steps="0" style="display:none;">
         </ol>
@@ -35,7 +35,7 @@
             <li class="active"><a data-toggle="tab" href="#deposit">Deposit</a></li>
             <li><a data-toggle="tab" href="#contents">Contents <span class="badge">${manifest?size}</span></a></li>
             <li><a data-toggle="tab" href="#events">Events <span class="badge">${events?size}</span></a></li>
-            <li><a data-toggle="tab" href="#retrieves">Retrieves <span class="badge">${retrieves?size}</span></a></li>
+            <li><a data-toggle="tab" href="#retrievals">Retrievals <span class="badge">${retrieves?size}</span></a></li>
         </ul>
 
         <div id="deposit-tab-content" class="tab-content">
@@ -136,14 +136,14 @@
                 </div>
             </div>
 
-            <div class="tab-pane" id="retrieves">
+            <div class="tab-pane" id="retrievals">
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
                         <tr class="tr">
-                            <th>Retrieve note</th>
+                            <th>Retrieval note</th>
                             <th>Status</th>
-                            <th>Retrieve path</th>
+                            <th>Retrieval path</th>
                             <th>Timestamp</th>
                         </tr>
                         </thead>
@@ -164,7 +164,7 @@
 
         <#if deposit.status.name() == "COMPLETE">
             <a id="retrievebtn" class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve" disabled='disabled'>
-                <span class="glyphicon glyphicon-open" aria-hidden="true"></span> Retrieve data
+                <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Retrieve data
             </a>
         </#if>
 

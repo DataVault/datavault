@@ -73,6 +73,10 @@
 
     <bean id="fileStoreController" class="org.datavaultplatform.webapp.controllers.FileStoreController">
         <property name="restService" ref="restService" />
+        <property name="activeDir" value="${activeDir}" />
+        <property name="sftpHost" value="${sftp.host}"/>
+        <property name="sftpPort" value="${sftp.port}"/>
+        <property name="sftpRootPath" value="${sftp.rootPath}"/>
     </bean>
 
     <bean id="feedbackController" class="org.datavaultplatform.webapp.controllers.FeedbackController">
@@ -81,8 +85,8 @@
     </bean>
 
     <bean id="helpController" class="org.datavaultplatform.webapp.controllers.HelpController">
-        <property name="system" value="${describe.system}" />
-        <property name="link" value="${describe.link}" />
+        <property name="system" value="${metadata.system}" />
+        <property name="link" value="${metadata.link}" />
     </bean>
 
     <bean id="adminController" class="org.datavaultplatform.webapp.controllers.admin.AdminController">
@@ -126,7 +130,7 @@
     </bean>
 
     <bean id="restService" class="org.datavaultplatform.webapp.services.RestService">
-        <property name="brokerURL" value="${brokerURL}" />
+        <property name="brokerURL" value="${broker.url}" />
         <property name="brokerApiKey" value="${broker.api.key}" />
     </bean>
     
