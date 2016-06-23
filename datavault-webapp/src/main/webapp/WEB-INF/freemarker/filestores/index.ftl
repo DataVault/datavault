@@ -189,11 +189,10 @@
             data: localFrm.serialize(),
             success: function (data) {
                 location.reload(true);
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                alert('Error: unable to add new filestore');
             }
-
-            //error: function(xhr, ajaxOptions, thrownError) {
-            //    alert('Error: unable to add new filestore');
-            //}
         });
 
         ev.preventDefault();
@@ -208,11 +207,10 @@
             data: sftpFrm.serialize(),
             success: function (data) {
                 location.reload(true);
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                alert('Error: unable to add new filestore');
             }
-
-            //error: function(xhr, ajaxOptions, thrownError) {
-            //    alert('Error: unable to add new filestore');
-            //}
         });
 
         ev.preventDefault();
@@ -235,11 +233,10 @@
             url: '${springMacroRequestContext.getContextPath()}/filestores/' + filestoreId,
             success: function (data) {
                 location.reload(true);
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                alert('Error: unable to add new filestore');
             }
-
-            //error: function(xhr, ajaxOptions, thrownError) {
-            //    alert('Error: unable to add new filestore');
-            //}
         });
 
         ev.preventDefault();
