@@ -6,11 +6,11 @@
 
     <div class="jumbotron">
         <p>Welcome to the Data Vault!</p>
+        <p>Please read the help section <a href="${springMacroRequestContext.getContextPath()}/help">here</a> before continuing.</p>
     </div>
 
-    <p>Introductory blurb explaining about storage, vaults, and deposits. Please follow the instructions to get started...</p>
-
     <#if noFilestores>
+        <h4>Ready to get started?</h4>
         <p>We need to know a little about where you intend to archive data from. Please click <a href="${springMacroRequestContext.getContextPath()}/filestores">here</a> to define your storage options.</p>
     <#else>
         <p>You previously defined your storage options but if you would like to review them then click <a href="${springMacroRequestContext.getContextPath()}/filestores">here</a>.</p>
