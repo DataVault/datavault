@@ -37,6 +37,8 @@
         </div>
         
         <script>
+            var filesizeSeq = 0;
+            
             // Create the tree inside the <div id="tree"> element.
             $("#tree").fancytree({
                 source: {
@@ -55,7 +57,9 @@
                 selectMode: 1,
                 activate: function(event, data) {
                     var node = data.tree.getActiveNode();
-
+                    filesizeSeq = filesizeSeq + 1;
+                    var currentSeq = filesizeSeq;
+                    
                     if (node) {
                         $("#deposit-size").text("Deposit size: calculating ...");
                         $(".file-path").val(node.key);
@@ -65,7 +69,9 @@
                             data: {filepath: node.key},
                             dataType: 'text',
                             success: function (result) {
-                                $("#deposit-size").text("Deposit size: " + result);
+                                if (currentSeq == filesizeSeq) {
+                                    $("#deposit-size").text("Deposit size: " + result);
+                                }
                             }
                         });
                     } else {
