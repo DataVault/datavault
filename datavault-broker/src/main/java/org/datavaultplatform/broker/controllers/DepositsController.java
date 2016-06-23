@@ -135,12 +135,9 @@ public class DepositsController {
             throw new IllegalArgumentException("Path '" + storagePath + "' is invalid");
         }
         
-        // Get metadata content from the external provider
-        Dataset dataset = externalMetadataService.getDataset(vault.getDataset().getID());
-        if (dataset == null) {
-            throw new Exception("Dataset metadata record '" + vault.getDataset().getID() + "' does not exist");
-        }
-
+        // Get metadata content from the external provider (bypass database cache)
+        String externalMetadata = externalMetadataService.getDatasetContent(vault.getDataset().getID());
+        
         // Add the deposit object
         depositsService.addDeposit(vault, deposit, storagePath, userStore.getLabel(), archiveStore.getID());
 
@@ -163,8 +160,10 @@ public class DepositsController {
             // In future we'll need a more formal schema/representation (e.g. RDF or JSON-LD).
             depositProperties.put("depositMetadata", mapper.writeValueAsString(deposit));
             depositProperties.put("vaultMetadata", mapper.writeValueAsString(vault));
-            depositProperties.put("externalMetadata", mapper.writeValueAsString(dataset.getContent()));
-
+            
+            // External metadata is text from an external system - e.g. XML or JSON
+            depositProperties.put("externalMetadata", externalMetadata);
+            
             Task depositTask = new Task(job, depositProperties, userStore, archiveStore);
             String jsonDeposit = mapper.writeValueAsString(depositTask);
             sender.send(jsonDeposit);
