@@ -24,15 +24,17 @@ public class WelcomeController {
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String getVaultsListing(ModelMap model) {
 
-        if (restService.getFileStoreListing().length == 0) {
-            model.addAttribute("noFilestores", true);
-            return "welcome";
-        } else if (restService.getVaultsListing().length == 0) {
-            model.addAttribute("noFilestores", false);
-            model.addAttribute("noVaults", true);
-            return "welcome";
+        if (restService.getVaultsListing().length > 0) {
+            return "redirect:/vaults";
         }
 
-        return "redirect:/vaults";
+        if (restService.getFileStoreListing().length > 0) {
+            model.addAttribute("filestoresExist", true);
+        } else {
+            model.addAttribute("filestoresExist", false);
+        }
+
+        return "welcome";
+
     }
 }
