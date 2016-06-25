@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.controllers;
 
+import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
@@ -17,6 +18,16 @@ public class WelcomeController {
 
     private RestService restService;
 
+    private String system;
+    private String link;
+
+    public void setSystem(String system) {
+        this.system = system;
+    }
+    public void setLink(String link) {
+        this.link = link;
+    }
+
     public void setRestService(RestService restService) {
         this.restService = restService;
     }
@@ -33,6 +44,15 @@ public class WelcomeController {
         } else {
             model.addAttribute("filestoresExist", false);
         }
+
+        if (restService.getDatasets().length > 0) {
+            model.addAttribute("datasetsExist", true);
+        } else {
+            model.addAttribute("datasetsExist", false);
+        }
+
+        model.put("system", system);
+        model.put("link", link);
 
         return "welcome";
 
