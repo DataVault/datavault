@@ -28,15 +28,16 @@
         your working data store once you have finished with your existing data.  You may wish to do this for a number of reasons:
     </p>
     <ul>
-        <li>You have data the needs to be protected from accidental change or deletion</li>
+        <li>You have data that needs to be protected from accidental change or deletion</li>
         <li>Your funder requires you to keep data safe for a set time period</li>
         <li>You are not able to share your data openly, but want to keep a copy that can be requested</a>
     </ul>
     <div class="bs-callout bs-callout-danger">
         <h4>DataVault vs. Backup</h4>
         <p>
-            Please note that the DataVault is not a system for routine backups.  Your data should normally be stored in a system where
-            backups are routinely taken.  Your University centrally-provided storage includes backups.
+
+            Please note that the DataVault is not a system for routine backups. Your data should normally be stored in a service where
+            backups are routinely taken. If you require a backup service please speak to your IT Services.
         </p>
         <p>
             The DataVault is for single copies of data which need to be retained for a long period of time.
@@ -83,7 +84,7 @@
     </p>
     <p>
         Now that you have given your vault a name and a description, you need to select the dataset description that you previously entered
-        into ${system}.  By relating your data to this description in ${system}, it means that you won't need to re-enter any of the
+        into ${system} (this is done via the 'Relates to' dropdown menu).  By relating your data to this description in ${system}, it means that you won't need to re-enter any of the
         details about the data again!
     </p>
     <p>
@@ -93,8 +94,7 @@
         that will allow you to decide whether to keep the data for longer or to delete it.
     </p>
     <p>
-        Finally, select which group you belong to.  Your group's Data Manager will also be able to access your data vaults in order to
-        assist you with the management of them.
+        Finally, select which group you belong to.  Your group's Data Manager will also be able to access your data vaults in order to assist you with the management of them.
     </p>
     <div class="bs-callout bs-callout-info">
         <h4>Access to your vaults</h4>
@@ -146,8 +146,9 @@
         If you wish to retrieve data from multiple Deposits, you will need to perform the following step for each Deposit.
     </p>
     <p>
-        First you must enter a retrieval note.  This is a brief description of why you are retrieving the data.  This is stored in an audit
-        log, so that you can see who retrieved data, and why they retrieved it.
+        First you must enter a retrieval note. This is a brief description of why you are retrieving the data. A useful note should state
+        whether the data is to be re-used so as to guide future retention decisions. This is stored in an audit log, so that you can see who
+        retrieved data, and why they retrieved it.
     </p>
     <p>
         Second, select a directory / folder where you wish the data to be retrieved to.  You will probably want to create a new empty
