@@ -27,7 +27,7 @@ public class GroupDAOImpl implements GroupDAO {
         tx.commit();
         session.close();
     }
-    
+
     @Override
     public void update(Group group) {
         Session session = this.sessionFactory.openSession();
@@ -36,7 +36,16 @@ public class GroupDAOImpl implements GroupDAO {
         tx.commit();
         session.close();
     }
- 
+
+    @Override
+    public void delete(Group group) {
+        Session session = this.sessionFactory.openSession();
+        Transaction tx = session.beginTransaction();
+        session.delete(group);
+        tx.commit();
+        session.close();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public List<Group> list() {

@@ -324,6 +324,11 @@ public class RestService {
         return (Integer)response.getBody();
     }
 
+    public boolean deleteGroup(String groupID) {
+        HttpEntity<?> response = delete(brokerURL + "/groups/" + groupID, Boolean.class);
+        return (Boolean)response.getBody();
+    }
+
     public Dataset[] getDatasets() {
         HttpEntity<?> response = get(brokerURL + "/metadata/datasets", Dataset[].class);
         return (Dataset[])response.getBody();

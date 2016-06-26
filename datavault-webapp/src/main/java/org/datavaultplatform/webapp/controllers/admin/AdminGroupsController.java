@@ -62,14 +62,22 @@ public class AdminGroupsController {
         Group newGroup = restService.addGroup(group);
         return "redirect:/admin/groups/";      
     }
-    
+
+    // Delete a group
+    @RequestMapping(value = "/admin/groups/{groupid}/delete", method = RequestMethod.GET)
+    public String deleteGroup(ModelMap model,
+                              @PathVariable("groupid") String groupId) {
+        restService.deleteGroup(groupId);
+        return "redirect:/admin/groups/";
+    }
+
     // Enable a group
     @RequestMapping(value = "/admin/groups/{groupid}/enable", method = RequestMethod.PUT)
     public @ResponseBody void enableGroup(ModelMap model,
                                           @PathVariable("groupid") String groupId) {
         restService.enableGroup(groupId);
     }
-    
+
     // Disable a group
     @RequestMapping(value = "/admin/groups/{groupid}/disable", method = RequestMethod.PUT)
     public @ResponseBody void disableGroup(ModelMap model,
