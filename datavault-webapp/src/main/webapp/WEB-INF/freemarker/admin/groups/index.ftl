@@ -80,8 +80,14 @@
                                 <input type="checkbox" class="toggleGroupEnabled" data-group="${group.ID}" <#if group.getEnabled()>checked</#if>>
                             </td>
                             <td>${group.ID?html}</td>
-                            <td>${group.name?html}</td>
-                            <td><span class="badge">${vaultCounts[counter]}<#assign counter = counter + 1></span></td>
+                            <td>${group.name?html}
+                                <form>
+                                     <a class="btn btn-xs btn-danger <#if ((vaultCounts[counter] != 0) || (group.getOwners()?size != 0))> disabled</#if>" href="${springMacroRequestContext.getContextPath()}/admin/groups/${group.ID}/delete">
+                                        <i class="fa fa-trash-o" aria-hidden="true"></i> Delete Group
+                                    </a>
+                                </form>
+                            </td>
+                            <td><span class="badge">${vaultCounts[counter]}</span></td>
                             <td>
                                 <ul class="list-group">
                                     <#list group.getOwners() as user>
@@ -99,6 +105,7 @@
                                 </form>
                             </td>
                         </tr>
+                        <#assign counter = counter + 1>
                     </#list>
                 </tbody>
             </table>

@@ -215,7 +215,7 @@ public class GroupsController {
                                   @PathVariable("groupid") @ApiPathParam(name = "Group ID", description = "The Group ID to retrieve") String groupID) {
         return groupsService.getGroup(groupID).getVaults().size();
     }
-    
+
     @ApiMethod(
             path = "/groups/{groupid}/vaults",
             verb = ApiVerb.GET,
@@ -235,5 +235,28 @@ public class GroupsController {
             vaultResponses.add(vault.convertToResponse());
         }
         return vaultResponses;
+    }
+
+    @ApiMethod(
+            path = "/groups/{groupid}",
+            verb = ApiVerb.DELETE,
+            description = "Delete Group (only possible on groups not attached to any vault)",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
+    @RequestMapping(value = "/groups/{groupid}", method = RequestMethod.DELETE)
+    public boolean deleteGroup(@RequestHeader(value = "X-UserID", required = true) String userID,
+                               @PathVariable("groupid") String groupID) throws Exception {
+
+        Group group = groupsService.getGroup(groupID);
+        // Only attempt to delete if there are no associated vaults or group owners
+        if ((group.getVaults().size() == 0) && (group.getOwners().size() == 0)) {
+            groupsService.deleteGroup(group);
+            return true;
+        }
+        return false;
     }
 }
