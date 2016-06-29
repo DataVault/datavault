@@ -7,6 +7,15 @@
 sudo apt-get update
 ```
 
+### Create data directories
+```
+mkdir ~/data
+mkdir ~/data/meta
+mkdir ~/data/active
+mkdir ~/data/archive
+mkdir ~/data/temp
+```
+
 ## Prerequisites
 
 ### Java (1.7)
