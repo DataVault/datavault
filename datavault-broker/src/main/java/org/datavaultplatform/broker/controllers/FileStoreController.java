@@ -15,7 +15,9 @@ import org.jsondoc.core.annotation.ApiPathParam;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import org.datavaultplatform.broker.services.FileStoreService;
@@ -64,7 +66,7 @@ public class FileStoreController {
 
 
     @RequestMapping(value = "/filestores", method = RequestMethod.GET)
-    public List<FileStore> getFileStores(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    public ResponseEntity<List<FileStore>> getFileStores(@RequestHeader(value = "X-UserID", required = true) String userID) {
         User user = usersService.getUser(userID);
         
         List<FileStore> userStores = user.getFileStores();
@@ -73,39 +75,39 @@ public class FileStoreController {
             store.setProperties(null);
         }
         
-        return userStores;
+        return new ResponseEntity<>(userStores, HttpStatus.OK);
     }
 
 
 
     @RequestMapping(value = "/filestores", method = RequestMethod.POST)
-    public FileStore addFileStore(@RequestHeader(value = "X-UserID", required = true) String userID,
+    public ResponseEntity<FileStore> addFileStore(@RequestHeader(value = "X-UserID", required = true) String userID,
                                   @RequestBody FileStore store) throws Exception {
-        
+
         User user = usersService.getUser(userID);
         store.setUser(user);
         fileStoreService.addFileStore(store);
-        return store;
+        return new ResponseEntity<>(store, HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/filestores/{filestoreid}", method = RequestMethod.GET)
-    public FileStore getFileStore(@RequestHeader(value = "X-UserID", required = true) String userID,
+    public ResponseEntity<FileStore> getFileStore(@RequestHeader(value = "X-UserID", required = true) String userID,
                                @PathVariable("filestoreid") String filestoreid) {
 
         FileStore store = fileStoreService.getFileStore(filestoreid);
-        return store;
+        return new ResponseEntity<>(store, HttpStatus.OK);
     }
 
     @RequestMapping(value = "filestores/{filestoreid}", method = RequestMethod.DELETE)
-    public @ResponseBody void deleteFileStore(@RequestHeader(value = "X-UserID", required = true) String userID,
+    public ResponseEntity<Object>  deleteFileStore(@RequestHeader(value = "X-UserID", required = true) String userID,
                                                @PathVariable("filestoreid") String filestoreid) {
 
         fileStoreService.deleteFileStore(filestoreid);
-
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @RequestMapping(value = "/filestores/local", method = RequestMethod.GET)
-    public List<FileStore> getFileStoresLocal(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    public ResponseEntity<List<FileStore>> getFileStoresLocal(@RequestHeader(value = "X-UserID", required = true) String userID) {
         User user = usersService.getUser(userID);
 
         List<FileStore> userStores = user.getFileStores();
@@ -118,13 +120,13 @@ public class FileStoreController {
             }
         }
 
-        return localStores;
+        return new ResponseEntity<>(localStores, HttpStatus.OK);
     }
 
 
 
     @RequestMapping(value = "/filestores/sftp", method = RequestMethod.POST)
-    public FileStore addFileStoreSFTP(@RequestHeader(value = "X-UserID", required = true) String userID,
+    public ResponseEntity<FileStore> addFileStoreSFTP(@RequestHeader(value = "X-UserID", required = true) String userID,
                                       @RequestBody FileStore store) throws Exception {
 
         User user = usersService.getUser(userID);
@@ -150,11 +152,11 @@ public class FileStoreController {
         storeProperties.remove("passphrase");
         store.setProperties(storeProperties);
 
-        return store;
+        return new ResponseEntity<>(store, HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/filestores/sftp", method = RequestMethod.GET)
-    public List<FileStore> getFileStoresSFTP(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    public ResponseEntity<List<FileStore>> getFileStoresSFTP(@RequestHeader(value = "X-UserID", required = true) String userID) {
         User user = usersService.getUser(userID);
 
         List<FileStore> userStores = user.getFileStores();
@@ -166,11 +168,11 @@ public class FileStoreController {
             }
         }
 
-        return localStores;
+        return new ResponseEntity<>(localStores, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/filestores/sftp/{filestoreid}", method = RequestMethod.GET)
-    public FileStore getFilestoreSFTP(@RequestHeader(value = "X-UserID", required = true) String userID,
+    public ResponseEntity<FileStore> getFilestoreSFTP(@RequestHeader(value = "X-UserID", required = true) String userID,
                                    @PathVariable("filestoreid") String filestoreid) {
 
         FileStore store = fileStoreService.getFileStore(filestoreid);
@@ -182,7 +184,7 @@ public class FileStoreController {
         storeProperties.remove("passphrase");
         store.setProperties(storeProperties);
 
-        return store;
+        return new ResponseEntity<>(store, HttpStatus.OK);
 
     }
 
