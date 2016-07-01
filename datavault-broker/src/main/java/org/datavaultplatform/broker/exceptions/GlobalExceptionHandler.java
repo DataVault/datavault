@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * Catches any Exceptions thrown by a Controller, or anything further down the stack, allowing us to return
+ * a ResponseEntity that can be nicely formatted as Json by Jackson.
+ *
  * User: Robin Taylor
  * Date: 01/07/2016
  * Time: 09:11
