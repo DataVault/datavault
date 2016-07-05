@@ -9,15 +9,14 @@
         <p>As this may be your first time here, please read the
         <a href="${springMacroRequestContext.getContextPath()}/help">help section</a> before continuing.</p>
 
-        <div <#if filestoresExist>class="text-muted" </#if>>
+        <div <#if datasetsExist>class="text-muted" </#if>>
             <div class="bs-callout bs-callout-info">
-                <h4>1. Define your storage options</h4>
+                <h4>1. Define a dataset in ${system}</h4>
                 <div class="row">
                     <div class="col-md-10">
-                        <p><small>We need to know a little about where you intend to archive data from. Please
-                        <a href="${springMacroRequestContext.getContextPath()}/filestores">define your storage options</a>.</small></p>
+                        <p><small>You must record a dataset in <a href="${link}" target="_blank">${system}</a> to record details of your vault.</small></p>
                     </div>
-                    <#if filestoresExist>
+                    <#if datasetsExist>
                         <div class="col-md-2 text-success">
                             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>&nbsp;Complete
                         </div>
@@ -29,14 +28,15 @@
             </div>
         </div>
 
-        <div <#if datasetsExist>class="text-muted" </#if>>
+        <div <#if filestoresExist>class="text-muted" </#if>>
             <div class="bs-callout bs-callout-info">
-                <h4>2. Define a dataset in ${system}</h4>
+                <h4>2. Define your storage options</h4>
                 <div class="row">
                     <div class="col-md-10">
-                    <p><small>You must record a dataset in <a href="${link}" target="_blank">${system}</a> to record details of your vault.</small></p>
+                        <p><small>We need to know a little about where you intend to archive data from. Please
+                        <a href="${springMacroRequestContext.getContextPath()}/filestores">define your storage options</a>.</small></p>
                     </div>
-                    <#if datasetsExist>
+                    <#if filestoresExist>
                         <div class="col-md-2 text-success">
                             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>&nbsp;Complete
                         </div>
