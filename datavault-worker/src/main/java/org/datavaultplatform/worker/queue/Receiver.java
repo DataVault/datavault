@@ -24,7 +24,6 @@ public class Receiver {
     private String queueName;
     private String queueUser;
     private String queuePassword;
-    private String archiveDir;
     private String tempDir;
     private String metaDir;
 
@@ -42,10 +41,6 @@ public class Receiver {
 
     public void setQueuePassword(String queuePassword) {
         this.queuePassword = queuePassword;
-    }
-
-    public void setArchiveDir(String archiveDir) {
-        this.archiveDir = archiveDir;
     }
 
     public void setTempDir(String tempDir) {
@@ -96,15 +91,13 @@ public class Receiver {
                     concreteTask.setIsRedeliver(true);
                 }
 
-                Path archiveDirPath = Paths.get(archiveDir);
-                
                 // Set up the worker temporary directory
                 Path tempDirPath = Paths.get(tempDir, WorkerInstance.getWorkerName());
                 tempDirPath.toFile().mkdir();
                 
                 Path metaDirPath = Paths.get(metaDir);
                 
-                Context context = new Context(archiveDirPath, tempDirPath, metaDirPath, events);
+                Context context = new Context(tempDirPath, metaDirPath, events);
                 concreteTask.performAction(context);
                 
                 // Clean up the temporary directory
