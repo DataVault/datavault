@@ -180,18 +180,7 @@ public class VaultsController {
             externalMetadataService.addCachedDataset(dataset);
         }
         vault.setDataset(dataset);
-        
-        // For testing purposes add a default file store for the user if none exists.
-        // This is an action that will ideally take place at user creation instead.
-        // A template could be used to construct file paths (if configured).
-        List<FileStore> userStores = user.getFileStores();
-        if (userStores.isEmpty()) {
-            HashMap<String,String> storeProperties = new HashMap<String,String>();
-            storeProperties.put("rootPath", activeDir);
-            FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Default filesystem (local)");
-            store.setUser(user);
-            fileStoreService.addFileStore(store);
-        }
+
 
         // Also configure a default system-level archive store if none exists.
         // This would normally be part of system configuration.
