@@ -7,6 +7,15 @@
 sudo apt-get update
 ```
 
+### Create data directories
+```
+mkdir ~/data
+mkdir ~/data/meta
+mkdir ~/data/active
+mkdir ~/data/archive
+mkdir ~/data/temp
+```
+
 ## Prerequisites
 
 ### Java (1.7)
@@ -136,7 +145,7 @@ sudo nano $DATAVAULT_HOME/config/datavault.properties
 
 # For a demonstration system you must edit at least the following four properties.
 # These must point to valid directories:
-activeDir = /home/ubuntu
+activeDir = /home/ubuntu/data/active
 archiveDir = /home/ubuntu/data/archive
 tempDir = /home/ubuntu/data/temp
 metaDir = /home/ubuntu/data/meta
@@ -209,9 +218,9 @@ sudo /etc/init.d/tomcat7 restart
 # Start MySQL shell session
 mysql -i -u root -p
 
-# In this example the new API key is '123456'
+# In this example the new API key is 'datavault-webapp'
 USE datavault
-UPDATE Clients SET apiKey = '123456' WHERE id = 'datavault-webapp';
+UPDATE Clients SET apiKey = 'datavault-webapp' WHERE id = 'datavault-webapp';
 EXIT;
 ```
 

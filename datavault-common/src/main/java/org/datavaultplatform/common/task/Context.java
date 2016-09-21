@@ -7,25 +7,15 @@ import java.nio.file.Path;
 
 public class Context {
 
-    private Path archiveDir;
     private Path tempDir;
     private Path metaDir;
     private EventStream eventStream;
     
     public Context() {};
-    public Context(Path archiveDir, Path tempDir, Path metaDir, EventStream eventStream) {
-        this.archiveDir = archiveDir;
+    public Context(Path tempDir, Path metaDir, EventStream eventStream) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.eventStream = eventStream;
-    }
-
-    public Path getArchiveDir() {
-        return archiveDir;
-    }
-
-    public void setArchiveDir(Path archiveDir) {
-        this.archiveDir = archiveDir;
     }
 
     public Path getTempDir() {

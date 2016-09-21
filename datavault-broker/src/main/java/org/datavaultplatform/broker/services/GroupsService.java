@@ -25,6 +25,10 @@ public class GroupsService {
         groupDAO.update(group);
     }
 
+    public void deleteGroup(Group group) {
+        groupDAO.delete(group);
+    }
+
     public Group getGroup(String groupID) {
         return groupDAO.findById(groupID);
     }

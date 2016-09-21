@@ -19,7 +19,6 @@
         <property name="queueName" value="${queue.name}"/>
         <property name="queueUser" value="${queue.user}"/>
         <property name="queuePassword" value="${queue.password}"/>
-        <property name="archiveDir" value="${archiveDir}"/>
         <property name="tempDir" value="${tempDir}"/>
         <property name="metaDir" value="${metaDir}"/>
     </bean>
