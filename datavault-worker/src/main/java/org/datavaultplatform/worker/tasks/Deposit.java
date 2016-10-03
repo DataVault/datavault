@@ -134,6 +134,10 @@ public class Deposit extends Task {
                 logger.info("Copying target to bag directory ...");
                 copyFromUserStorage(filePath, bagPath);
                 
+                // MOCKUP
+                // Add any directly uploaded files (direct move from temp dir)
+                moveFromUserUploads(context.getTempDir(), bagPath, userID);
+                
                 // Bag the directory in-place
                 eventStream.send(new TransferComplete(jobID, depositId)
                     .withUserId(userID)
@@ -264,6 +268,19 @@ public class Deposit extends Task {
             // Stop the tracking thread
             tracker.stop();
             trackerThread.join();
+        }
+    }
+    
+    private void moveFromUserUploads(Path tempPath, Path bagPath, String userID) throws Exception {
+
+        // TODO: possible namespace clash
+        File outputFile = bagPath.resolve("uploads").toFile();
+        
+        // TODO: this is a bit of a hack to escape the per-worker temp directory
+        File uploadDir = tempPath.getParent().resolve("uploads").resolve(userID).toFile();
+        if (uploadDir.exists()) {
+            logger.info("Moving user uploads to bag directory");
+            FileUtils.moveDirectory(uploadDir, outputFile);
         }
     }
     

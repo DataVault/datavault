@@ -85,7 +85,7 @@
 <style>
     /* Uploader: Drag & Drop */
     .flow-error {display:none; font-size:14px; font-style:italic;}
-    .flow-drop {padding:15px; font-size:13px; text-align:center; color:#666; font-weight:bold;background-color:#eee; border:2px dashed #aaa; border-radius:10px; margin-top:40px; z-index:9999;}
+    .flow-drop {padding:30px; font-size:13px; text-align:center; color:#666; font-weight:bold;background-color:#eee; border:2px dashed #aaa; border-radius:10px; z-index:9999;}
     .flow-dragover {padding:30px; color:#555; background-color:#ddd; border:1px solid #999;}
 
     /* Uploader: Progress bar */
@@ -118,26 +118,29 @@
     .is-error .uploader-item-creating-thumbnail {display:none;}
 </style>
 
-      <div class="flow-error">
-        Your browser, unfortunately, is not supported by Flow.js. The library requires support for <a href="http://www.w3.org/TR/FileAPI/">the HTML5 File API</a> along with <a href="http://www.w3.org/TR/FileAPI/#normalization-of-params">file slicing</a>.
-      </div>
+        <div class="form-group">
+            <label class="control-label">File upload:</label>
+            <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Select a single file, or a directory to add to the Vault."></span></span>
 
-      <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
-        Drop files here to upload or <a class="flow-browse"><u>browse for files</u></a>
-      </div>
-      
-      <div class="flow-progress">
-        <table>
-          <tr>
-            <td width="100%"><div class="progress-container"><div class="progress-bar"></div></div></td>
-            <td class="progress-text" nowrap="nowrap"></td>
-          </tr>
-        </table>
-      </div>
-      
-      <ul class="flow-list"></ul>
+            <div class="flow-error">
+              Your browser, unfortunately, is not supported by Flow.js. The library requires support for <a href="http://www.w3.org/TR/FileAPI/">the HTML5 File API</a> along with <a href="http://www.w3.org/TR/FileAPI/#normalization-of-params">file slicing</a>.
+            </div>
 
-    <br>
+            <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
+              Drag and drop to upload files or <a class="flow-browse"><u>browse</u></a>
+            </div>
+
+            <div class="flow-progress">
+              <table>
+                <tr>
+                  <td width="100%"><div class="progress-container"><div class="progress-bar"></div></div></td>
+                  <td class="progress-text" nowrap="nowrap"></td>
+                </tr>
+              </table>
+            </div>
+
+            <ul class="flow-list"></ul>
+        </div>
 
         <div class="btn-toolbar">
             <button type="submit" value="submit" class="btn btn-primary"><i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit data</button>

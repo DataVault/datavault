@@ -157,17 +157,19 @@ public class FilesController {
         Long chunkSize = Long.parseLong(request.getParameter("chunkSize"));
         Long totalSize = Long.parseLong(request.getParameter("totalSize"));
         
+        /*
         System.out.println("Broker postFileChunk:" +
                 " chunkNumber=" + chunkNumber +
                 " totalChunks=" + totalChunks +
                 " chunkSize=" + chunkSize +
                 " totalSize=" + totalSize);
+        */
         
+        // Get the top-level upload directory
         String dirName = "uploads";
         Path uploadDirPath = Paths.get(tempDir, dirName);
         File uploadDir = uploadDirPath.toFile();
         
-        // Get the top-level upload directory
         if (!uploadDir.exists()) {
             System.out.println("Creating uploadDir: " + uploadDir.getPath());
             Boolean success = uploadDir.mkdir();
