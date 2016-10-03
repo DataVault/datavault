@@ -44,6 +44,7 @@
     <bean id="filesController" class="org.datavaultplatform.broker.controllers.FilesController">
         <property name="filesService" ref="filesService" />
         <property name="usersService" ref="usersService" />
+        <property name="tempDir" value="${tempDir}" />
     </bean>
 
     <bean id="vaultsController" class="org.datavaultplatform.broker.controllers.VaultsController">

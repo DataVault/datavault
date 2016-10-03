@@ -5,10 +5,10 @@ import org.datavaultplatform.webapp.model.FancytreeNode;
 import org.datavaultplatform.webapp.services.RestService;
 import java.util.ArrayList;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.*;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.*;
 
 @Controller
 public class FilesController {
@@ -78,5 +78,38 @@ public class FilesController {
         String filepath = request.getParameter("filepath");
         
         return restService.getFilesize(filepath);
+    }
+    
+    @RequestMapping(value = "/fileupload", method = RequestMethod.POST)
+    public void fileUpload(MultipartHttpServletRequest request, HttpServletResponse response) throws Exception {
+        
+        String flowChunkNumber = request.getParameter("flowChunkNumber");
+        String flowTotalChunks = request.getParameter("flowTotalChunks");
+        String flowChunkSize = request.getParameter("flowChunkSize");
+        String flowTotalSize = request.getParameter("flowTotalSize");
+        String flowIdentifier = request.getParameter("flowIdentifier");
+        String flowFilename = request.getParameter("flowFilename");
+        String flowRelativePath = request.getParameter("flowRelativePath");
+        
+        System.out.println("webapp fileupload:" +
+                " flowChunkNumber=" + flowChunkNumber +
+                " flowTotalChunks=" + flowTotalChunks +
+                " flowChunkSize=" + flowChunkSize +
+                " flowTotalSize=" + flowTotalSize +
+                " flowIdentifier=" + flowIdentifier +
+                " flowFilename=" + flowFilename +
+                " flowRelativePath=" + flowRelativePath);
+        
+        MultipartFile file = request.getFile("file");
+        System.out.println(file.getSize() + " bytes");
+        
+        // Send this chunk to the broker
+        restService.addFileChunk(flowFilename, flowChunkNumber, flowTotalChunks, flowChunkSize, flowTotalSize, file.getBytes());
+        
+        // Send a response to the client
+        java.io.PrintWriter wr = response.getWriter();
+        response.setStatus(HttpServletResponse.SC_OK);
+        wr.flush();
+        wr.close();
     }
 }

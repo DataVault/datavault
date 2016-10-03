@@ -345,7 +345,18 @@ public class RestService {
     }
     
     /* POST requests */
-
+    
+    public String addFileChunk(String filename, String chunkNumber, String totalChunks, String chunkSize, String totalSize, byte[] content) {
+        
+        String fileChunkURL = brokerURL + "/files/" + filename + "?" +
+                "chunkNumber=" + chunkNumber + "&" +
+                "totalChunks=" + totalChunks + "&" +
+                "chunkSize=" + chunkSize + "&" +
+                "totalSize=" + totalSize;
+        
+        HttpEntity<?> response = post(fileChunkURL, Byte[].class, content);
+        return (String)response.getBody();
+    }
 
     public FileStore addFileStore(FileStore fileStore) {
         HttpEntity<?> response = post(brokerURL + "/filestores/", FileStore.class, fileStore);
