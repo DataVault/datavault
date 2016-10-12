@@ -25,45 +25,43 @@
         
         <label class="control-label">Deposit file or directory:</label>
         <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Select a single file, or a directory to add to the Vault."></span></span>
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <@spring.bind "deposit.filePath" />
-                            <input type="text"
-                                   style="display:none;"
-                                   class="form-control file-path"
-                                   name="${spring.status.expression}"
-                                   value="${spring.status.value!""}"/>
-                            <div id="tree" class="fancytree tree-box"></div>
-                            <label id="deposit-size" class="text-muted small">No files selected</label>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <div class="flow-error">
-                              Your browser, unfortunately, is not supported by Flow.js. The library requires support for <a href="http://www.w3.org/TR/FileAPI/">the HTML5 File API</a> along with <a href="http://www.w3.org/TR/FileAPI/#normalization-of-params">file slicing</a>.
-                            </div>
+        <div class="bs-callout" style="margin-top:0px;">
+            <div class="form-group">
+                <@spring.bind "deposit.filePath" />
+                <input type="text"
+                       style="display:none;"
+                       class="form-control file-path"
+                       name="${spring.status.expression}"
+                       value="${spring.status.value!""}"/>
+                <div id="tree" class="fancytree tree-box"></div>
+                <label id="deposit-size" class="text-muted small">No files selected</label>
+            </div>
+            <div class="form-group">
+                <div class="flow-error">
+                  Your browser, unfortunately, is not supported by Flow.js. The library requires support for <a href="http://www.w3.org/TR/FileAPI/">the HTML5 File API</a> along with <a href="http://www.w3.org/TR/FileAPI/#normalization-of-params">file slicing</a>.
+                </div>
 
-                            <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
-                              Drag and drop to upload files or <a class="flow-browse"><u>browse</u></a>
-                            </div>
+                <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
+                  Drag and drop to upload files or <a class="flow-browse"><u>browse</u></a>
+                </div>
 
-                            <div id="upload-tree" class="fancytree tree-box"></div>
+                <div id="upload-tree" class="fancytree tree-box"></div>
 
-                            <div class="flow-progress">
-                              <table>
-                                <tr>
-                                  <td width="100%"><div class="progress-container"><div class="progress-bar"></div></div></td>
-                                  <td class="progress-text" nowrap="nowrap"></td>
-                                </tr>
-                              </table>
-                            </div>
-                        </div>
-                    </div>
+                <div class="flow-progress">
+                  <table>
+                    <tr>
+                      <td width="100%"><div class="progress-container"><div class="progress-bar"></div></div></td>
+                      <td class="progress-text" nowrap="nowrap"></td>
+                    </tr>
+                  </table>
                 </div>
             </div>
+            
+            <div class="btn-toolbar">
+                <button class="btn btn-default"><i class="fa fa-plus" aria-hidden="true"></i> Add from network storage</button>
+                <button class="btn btn-default"><i class="fa fa-plus" aria-hidden="true"></i> Add from Dropbox</button>
+            </div>
+
         </div>
 
         <script>
@@ -149,6 +147,10 @@
     .is-error .uploader-item:hover, .is-active.is-error .uploader-item {border-color:#900;}
     .is-error .uploader-item:hover .uploader-item-title, .is-active.is-error .uploader-item .uploader-item-title {background-color:rgba(153,0,0,0.6);}
     .is-error .uploader-item-creating-thumbnail {display:none;}
+
+    /* In progress item */
+    .progress-item {opacity:0.5;}
+
 </style>
 
         <div class="btn-toolbar">
@@ -201,7 +203,8 @@
         query:{upload_token:'my_token'},
         headers:{'${_csrf.headerName}': '${_csrf.token}'},
         chunkSize:10*1024*1024,
-        testChunks: false
+        testChunks: false,
+        maxChunkRetries:1
     });
     
     r.assignDrop($('.flow-drop')[0]);
@@ -216,9 +219,11 @@
 
       var rootNode = $("#upload-tree").fancytree("getRootNode");
       var childNode = rootNode.addChildren({
+        key: file.name,
         title: file.name,
         tooltip: "Tooltip.",
-        folder: false
+        folder: false,
+        extraClasses: 'progress-item'
       });
 
       var $self = $('.flow-file-'+file.uniqueIdentifier);
@@ -253,6 +258,8 @@
       $self.find('.flow-file-progress').text('(completed)');
       $self.find('.flow-file-pause, .flow-file-resume').remove();
       $self.find('.flow-file-download').attr('href', '/download/' + file.uniqueIdentifier).show();
+      $("#upload-tree").fancytree("getTree").getNodeByKey(file.name).extraClasses = '';
+      $("#upload-tree").fancytree("getTree").getNodeByKey(file.name).renderTitle();
     });
     r.on('fileError', function(file, message){
       // Reflect that the file upload has resulted in error
