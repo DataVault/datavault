@@ -22,20 +22,50 @@
                    name="${spring.status.expression}"
                    value="${spring.status.value!""}"/>
         </div>
-
-        <div class="form-group">
-            <label class="control-label">Deposit file or directory:</label>
-            <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Select a single file, or a directory to add to the Vault."></span></span>
-            <@spring.bind "deposit.filePath" />
-            <input type="text"
-                   style="display:none;"
-                   class="form-control file-path"
-                   name="${spring.status.expression}"
-                   value="${spring.status.value!""}"/>
-            <div id="tree" class="fancytree tree-box"></div>
-            <label id="deposit-size" class="text-muted small">No files selected</label>
-        </div>
         
+        <label class="control-label">Deposit file or directory:</label>
+        <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Select a single file, or a directory to add to the Vault."></span></span>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <@spring.bind "deposit.filePath" />
+                            <input type="text"
+                                   style="display:none;"
+                                   class="form-control file-path"
+                                   name="${spring.status.expression}"
+                                   value="${spring.status.value!""}"/>
+                            <div id="tree" class="fancytree tree-box"></div>
+                            <label id="deposit-size" class="text-muted small">No files selected</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="flow-error">
+                              Your browser, unfortunately, is not supported by Flow.js. The library requires support for <a href="http://www.w3.org/TR/FileAPI/">the HTML5 File API</a> along with <a href="http://www.w3.org/TR/FileAPI/#normalization-of-params">file slicing</a>.
+                            </div>
+
+                            <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
+                              Drag and drop to upload files or <a class="flow-browse"><u>browse</u></a>
+                            </div>
+
+                            <div id="upload-tree" class="fancytree tree-box"></div>
+
+                            <div class="flow-progress">
+                              <table>
+                                <tr>
+                                  <td width="100%"><div class="progress-container"><div class="progress-bar"></div></div></td>
+                                  <td class="progress-text" nowrap="nowrap"></td>
+                                </tr>
+                              </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <script>
             var filesizeSeq = 0;
             
@@ -80,6 +110,10 @@
                     }
                 }
             });
+
+            $("#upload-tree").fancytree({
+                source: []
+            });
         </script>
         
 <style>
@@ -89,10 +123,10 @@
     .flow-dragover {padding:30px; color:#555; background-color:#ddd; border:1px solid #999;}
 
     /* Uploader: Progress bar */
-    .flow-progress {margin:30px 0 30px 0; width:100%; display:none;}
+    .flow-progress {width:100%; display:none;}
     .progress-container {height:7px; background:#9CBD94; position:relative; }
     .progress-bar {position:absolute; top:0; left:0; bottom:0; background:#45913A; width:0;}
-    .progress-text {font-size:11px; line-height:9px; padding-left:10px;}
+    .progress-text {font-size:11px; line-height:9px;}
     .progress-pause {padding:0 0 0 7px;}
     .progress-resume-link {display:none;}
     .is-paused .progress-resume-link {display:inline;}
@@ -100,7 +134,6 @@
     .is-complete .progress-pause {display:none;}
 
     /* Uploader: List of items being uploaded */
-    .flow-list {overflow:auto; margin-right:-20px; display:none;}
     .uploader-item {width:148px; height:90px; background-color:#666; position:relative; border:2px solid black; float:left; margin:0 6px 6px 0;}
     .uploader-item-thumbnail {width:100%; height:100%; position:absolute; top:0; left:0;}
     .uploader-item img.uploader-item-thumbnail {opacity:0;}
@@ -117,30 +150,6 @@
     .is-error .uploader-item:hover .uploader-item-title, .is-active.is-error .uploader-item .uploader-item-title {background-color:rgba(153,0,0,0.6);}
     .is-error .uploader-item-creating-thumbnail {display:none;}
 </style>
-
-        <div class="form-group">
-            <label class="control-label">File upload:</label>
-            <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Select a single file, or a directory to add to the Vault."></span></span>
-
-            <div class="flow-error">
-              Your browser, unfortunately, is not supported by Flow.js. The library requires support for <a href="http://www.w3.org/TR/FileAPI/">the HTML5 File API</a> along with <a href="http://www.w3.org/TR/FileAPI/#normalization-of-params">file slicing</a>.
-            </div>
-
-            <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
-              Drag and drop to upload files or <a class="flow-browse"><u>browse</u></a>
-            </div>
-
-            <div class="flow-progress">
-              <table>
-                <tr>
-                  <td width="100%"><div class="progress-container"><div class="progress-bar"></div></div></td>
-                  <td class="progress-text" nowrap="nowrap"></td>
-                </tr>
-              </table>
-            </div>
-
-            <ul class="flow-list"></ul>
-        </div>
 
         <div class="btn-toolbar">
             <button type="submit" value="submit" class="btn btn-primary"><i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit data</button>
@@ -201,14 +210,17 @@
     // Handle file add event
     r.on('fileAdded', function(file){
       // Show progress bar
-      $('.flow-progress, .flow-list').show();
+      
+      $('.flow-progress').show();
       // Add the file to the list
-      $('.flow-list').append(
-        '<li class="flow-file flow-file-'+file.uniqueIdentifier+'">' +
-        'Uploading <span class="flow-file-name"></span> ' +
-        '<span class="flow-file-size"></span> ' +
-        '<span class="flow-file-progress"></span> '
-      );
+
+      var rootNode = $("#upload-tree").fancytree("getRootNode");
+      var childNode = rootNode.addChildren({
+        title: file.name,
+        tooltip: "Tooltip.",
+        folder: false
+      });
+
       var $self = $('.flow-file-'+file.uniqueIdentifier);
       $self.find('.flow-file-name').text(file.name);
       $self.find('.flow-file-size').text(readablizeBytes(file.size));
