@@ -3,6 +3,7 @@ package org.datavaultplatform.worker;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecuteResultHandler;
 import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ShutdownHookProcessDestroyer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -67,7 +68,9 @@ public class WorkerManager {
         DefaultExecuteResultHandler resultHandler = new DefaultExecuteResultHandler();
 
         DefaultExecutor executor = new DefaultExecutor();
-        executor.setExitValue(1);
+        
+        // If the Manager gets killed then kill the Workers.
+        executor.setProcessDestroyer(new ShutdownHookProcessDestroyer());
 
         executor.execute(cmdLine, resultHandler);
 
