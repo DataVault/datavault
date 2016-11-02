@@ -48,17 +48,10 @@
             </div>
         </div>
 
-        <#if filestoresExist && datasetsExist>
-            <div class="bs-callout bs-callout-info">
-                <h4>3. Create your first vault</h4>
-                <p><small>You are now ready to create your first vault!</small></p>
-                <form>
-                    <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/create">
-                        <span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span> Create new Vault
-                    </a>
-                </form>
-            </div>
-        </#if>
+        <div class="bs-callout bs-callout-info">
+            <h4>3. Create your first vault</h4>
+            <p><small>You have not yet defined any vaults. Please click <a href="${springMacroRequestContext.getContextPath()}/vaults/create">here</a> to create your first vault.</small></p>
+        </div>
 
     </div>
 
