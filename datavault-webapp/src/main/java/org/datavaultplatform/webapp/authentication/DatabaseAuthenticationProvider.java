@@ -42,19 +42,20 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
 
         if (!restService.isValid(new ValidateUser(name, password))) {
-            logger.debug("Invalid username or password for " + name);
+            logger.info("Invalid username or password for " + name);
             throw new BadCredentialsException("Invalid userid or password");
         }
 
-        logger.debug("Authentication success for " + name);
+        logger.info("Authentication success for " + name);
 
         List<GrantedAuthority> grantedAuths = new ArrayList<>();
 
         if (restService.isAdmin(new ValidateUser(name, null))) {
-            logger.debug("user is an admin " + name);
+            logger.info("Granting user " + name + " ROLE_ADMIN");
             grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         }
 
+        logger.info("Granting user " + name + " ROLE_USER");
         grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
         return new UsernamePasswordAuthenticationToken(name, password, grantedAuths);
 

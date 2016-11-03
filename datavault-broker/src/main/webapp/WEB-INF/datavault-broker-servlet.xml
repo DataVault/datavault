@@ -137,6 +137,11 @@
         <property name="usersService" ref="usersService" />
     </bean>
 
+    <bean id="initialiseDatabase" class="org.datavaultplatform.broker.scheduled.InitialiseDatabase">
+        <property name="archiveStoreService" ref="archiveStoreService" />
+        <property name="archiveDir" value="${archiveDir}" />
+    </bean>
+
     <!-- Documentation using jsondoc -->
 
     <bean id="documentationController" class="org.jsondoc.springmvc.controller.JSONDocController">
