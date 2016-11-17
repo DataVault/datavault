@@ -11,6 +11,7 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.CascadeType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -56,13 +57,17 @@ public class Deposit {
     @OneToMany(targetEntity=Event.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp, sequence")
     private List<Event> events;
-
+    
+    // A Deposit can have a number of deposit paths
+    @OneToMany(targetEntity=DepositPath.class, mappedBy="deposit", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<DepositPath> depositPaths;
+    
     // A Deposit can have a number of active jobs
     @JsonIgnore
     @OneToMany(targetEntity=Job.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp")
     private List<Job> jobs;
-
+    
     // A Deposit can have a number of retrieves
     @JsonIgnore
     @OneToMany(targetEntity=Retrieve.class, mappedBy="deposit", fetch=FetchType.LAZY)
@@ -232,6 +237,14 @@ public class Deposit {
     public List<Event> getEvents() {
         return events;
     }
+    
+    public List<DepositPath> getDepositPaths() {
+        return depositPaths;
+    }
+
+    public void setDepositPaths(List<DepositPath> depositPaths) {
+        this.depositPaths = depositPaths;
+    }
 
     public List<Job> getJobs() {
         return jobs;
@@ -249,7 +262,8 @@ public class Deposit {
                 shortFilePath,
                 filePath,
                 depositSize,
-                vault.getID()
+                vault.getID(),
+                depositPaths
             );
     }
 }

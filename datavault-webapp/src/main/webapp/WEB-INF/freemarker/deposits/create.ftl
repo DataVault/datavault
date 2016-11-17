@@ -27,12 +27,19 @@
         <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Select a single file, or a directory to add to the Vault."></span></span>
         <div class="bs-callout" style="margin-top:0px;">
             <div class="form-group">
-                <@spring.bind "deposit.filePath" />
+                <@spring.bind "deposit.fileUploadHandle" />
                 <input type="text"
-                       style="display:none;"
-                       class="form-control file-path"
+                   class="form-control file-upload-handle"
+                   name="${spring.status.expression}"
+                   value="${spring.status.value!""}"/>
+                <@spring.bind "deposit.depositPaths" />
+                <select
+                       multiple="true"
+                       class="file-path"
                        name="${spring.status.expression}"
-                       value="${spring.status.value!""}"/>
+                       value="${spring.status.value!""}">
+                       <option value="abc"/>
+                </select>
                 <div id="tree" class="fancytree tree-box"></div>
                 <label id="deposit-size" class="text-muted small">No files selected</label>
             </div>
@@ -43,23 +50,25 @@
 
                 <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
                   Drag and drop to upload files or <a class="flow-browse"><u>browse</u></a>
-                </div>
+                  
+                  <div id="upload-tree" class="fancytree tree-box text-left"></div>
 
-                <div id="upload-tree" class="fancytree tree-box"></div>
-
-                <div class="flow-progress">
-                  <table>
-                    <tr>
-                      <td width="100%"><div class="progress-container"><div class="progress-bar"></div></div></td>
-                      <td class="progress-text" nowrap="nowrap"></td>
-                    </tr>
-                  </table>
+                    <div class="flow-progress">
+                      <table>
+                        <tr>
+                          <td width="100%"><div class="progress-container"><div class="progress-bar"></div></div></td>
+                          <td class="progress-text" nowrap="nowrap"></td>
+                        </tr>
+                      </table>
+                    </div>
+                  
                 </div>
             </div>
             
             <div class="btn-toolbar">
-                <button class="btn btn-default"><i class="fa fa-plus" aria-hidden="true"></i> Add from network storage</button>
-                <button class="btn btn-default"><i class="fa fa-plus" aria-hidden="true"></i> Add from Dropbox</button>
+                Import from
+                <button class="btn btn-default"><i class="fa fa-hdd-o" aria-hidden="true"></i> Research Data Storage</button>
+                <button class="btn btn-default"><i class="fa fa-dropbox" aria-hidden="true"></i> Dropbox</button>
             </div>
 
         </div>
@@ -90,7 +99,11 @@
                     
                     if (node) {
                         $("#deposit-size").text("Deposit size: calculating ...");
-                        $(".file-path").val(node.key);
+                        
+                        $('.file-path')
+                          .append($('<option>', { value : node.key })
+                          .text(node.key));
+
                         $.ajax({
                             url: "${springMacroRequestContext.getContextPath()}/filesize",
                             type: "GET",
@@ -200,7 +213,7 @@
 
     var r = new Flow({
         target:'${springMacroRequestContext.getContextPath()}/fileupload',
-        query:{upload_token:'my_token'},
+        query:{fileUploadHandle:$('.file-upload-handle').val()},
         headers:{'${_csrf.headerName}': '${_csrf.token}'},
         chunkSize:10*1024*1024,
         testChunks: false,

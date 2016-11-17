@@ -143,9 +143,10 @@ public class FilesController {
         }
     }
     
-    @RequestMapping(value="/files/{filename:.+}", method = RequestMethod.POST)
+    @RequestMapping(value="/upload/{fileUploadHandle}/{filename:.+}", method = RequestMethod.POST)
     public String postFileChunk(@RequestHeader(value = "X-UserID", required = true) String userID,
                                 HttpServletRequest request,
+                                @PathVariable("fileUploadHandle") String fileUploadHandle,
                                 @PathVariable("filename") String filename) throws Exception {
         
         User user = usersService.getUser(userID);
@@ -156,6 +157,8 @@ public class FilesController {
         Long totalChunks = Long.parseLong(request.getParameter("totalChunks"));
         Long chunkSize = Long.parseLong(request.getParameter("chunkSize"));
         Long totalSize = Long.parseLong(request.getParameter("totalSize"));
+        
+        System.out.println("fileUploadHandle =" + fileUploadHandle);
         
         /*
         System.out.println("Broker postFileChunk:" +
@@ -173,24 +176,35 @@ public class FilesController {
         if (!uploadDir.exists()) {
             System.out.println("Creating uploadDir: " + uploadDir.getPath());
             Boolean success = uploadDir.mkdir();
-            if (!success) {
+            if (!success && !uploadDir.exists()) {
                 throw new Exception("Unable to create uploadDir");
             }
         }
-
-        // Create the upload directory for this file
+        
+        // Create the directory for this user
         Path userUploadDirPath = uploadDirPath.resolve(userID);
         File userUploadDir = userUploadDirPath.toFile();
         if (!userUploadDir.exists()) {
             System.out.println("Creating userUploadDir: " + userUploadDir.getPath());
             Boolean success = userUploadDir.mkdir();
-            if (!success) {
+            if (!success && !userUploadDir.exists()) {
                 throw new Exception("Unable to create userUploadDir");
             }
         }
         
+        // Create the upload directory within the user directory
+        Path handleUploadDirPath = userUploadDirPath.resolve(fileUploadHandle);
+        File handleUploadDir = handleUploadDirPath.toFile();
+        if (!handleUploadDir.exists()) {
+            System.out.println("Creating handleUploadDir: " + handleUploadDir.getPath());
+            Boolean success = handleUploadDir.mkdir();
+            if (!success && !handleUploadDir.exists()) {
+                throw new Exception("Unable to create handleUploadDir");
+            }
+        }
+        
         // Get the actual file
-        File f = userUploadDirPath.resolve(filename).toFile();
+        File f = handleUploadDirPath.resolve(filename).toFile();
         RandomAccessFile raf = new RandomAccessFile(f, "rw");
         
         //Seek through the file to the start of this chunk

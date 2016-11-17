@@ -346,9 +346,9 @@ public class RestService {
     
     /* POST requests */
     
-    public String addFileChunk(String filename, String chunkNumber, String totalChunks, String chunkSize, String totalSize, byte[] content) {
+    public String addFileChunk(String fileUploadHandle, String filename, String chunkNumber, String totalChunks, String chunkSize, String totalSize, byte[] content) {
         
-        String fileChunkURL = brokerURL + "/files/" + filename + "?" +
+        String fileChunkURL = brokerURL + "/upload/" + fileUploadHandle + "/" + filename + "?" +
                 "chunkNumber=" + chunkNumber + "&" +
                 "totalChunks=" + totalChunks + "&" +
                 "chunkSize=" + chunkSize + "&" +

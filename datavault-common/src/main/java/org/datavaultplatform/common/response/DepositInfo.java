@@ -3,8 +3,10 @@ package org.datavaultplatform.common.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Date;
+import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.model.Deposit;
+import org.datavaultplatform.common.model.DepositPath;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
@@ -43,8 +45,11 @@ public class DepositInfo {
     @ApiObjectField(description = "Size of the depoit (in bytes)")
     private long depositSize;
     
+    @ApiObjectField(description = "Deposit paths")
+    private List<DepositPath> depositPaths;
+    
     public DepositInfo() {}
-    public DepositInfo(String id, Date creationTime, Deposit.Status status, String note, String fileOrigin, String shortFilePath, String filePath, long depositSize, String vaultID) {
+    public DepositInfo(String id, Date creationTime, Deposit.Status status, String note, String fileOrigin, String shortFilePath, String filePath, long depositSize, String vaultID, List<DepositPath> depositPaths) {
         this.id = id;
         this.creationTime = creationTime;
         this.status = status;
@@ -54,6 +59,7 @@ public class DepositInfo {
         this.filePath = filePath;
         this.depositSize = depositSize;
         this.vaultID = vaultID;
+        this.depositPaths = depositPaths;
     }
 
     public String getID() {
@@ -130,5 +136,13 @@ public class DepositInfo {
     
     public String getSizeStr() {
         return FileUtils.byteCountToDisplaySize(depositSize);
+    }
+
+    public List<DepositPath> getDepositPaths() {
+        return depositPaths;
+    }
+
+    public void setDepositPaths(List<DepositPath> depositPaths) {
+        this.depositPaths = depositPaths;
     }
 }

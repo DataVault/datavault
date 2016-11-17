@@ -90,6 +90,7 @@ public class FilesController {
         String flowIdentifier = request.getParameter("flowIdentifier");
         String flowFilename = request.getParameter("flowFilename");
         String flowRelativePath = request.getParameter("flowRelativePath");
+        String fileUploadHandle = request.getParameter("fileUploadHandle");
         
         /*
         System.out.println("webapp fileupload:" +
@@ -99,13 +100,14 @@ public class FilesController {
                 " flowTotalSize=" + flowTotalSize +
                 " flowIdentifier=" + flowIdentifier +
                 " flowFilename=" + flowFilename +
-                " flowRelativePath=" + flowRelativePath);
+                " flowRelativePath=" + flowRelativePath +
+                " fileUploadHandle=" + fileUploadHandle);
         */
         
         MultipartFile file = request.getFile("file");
         
         // Send this chunk to the broker
-        restService.addFileChunk(flowFilename, flowChunkNumber, flowTotalChunks, flowChunkSize, flowTotalSize, file.getBytes());
+        restService.addFileChunk(fileUploadHandle, flowFilename, flowChunkNumber, flowTotalChunks, flowChunkSize, flowTotalSize, file.getBytes());
         
         // Send a response to the client
         java.io.PrintWriter wr = response.getWriter();
