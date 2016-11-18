@@ -2,6 +2,8 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.HashMap;
 import java.util.List;
 import javax.persistence.*;
 
@@ -33,6 +35,10 @@ public class User {
     // Is this user an administrator?
     @Column(name = "admin", nullable = false)
     private Boolean admin;
+
+    // Additional properties associated with the user
+    @Lob
+    private HashMap<String,String> properties;
 
     // A user is related to a number of vaults
     @JsonIgnore
@@ -93,6 +99,15 @@ public class User {
         this.admin = admin;
     }
 
+
+
+    public HashMap<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(HashMap<String, String> properties) {
+        this.properties = properties;
+    }
 
     public List<Vault> getVaults() {
         return vaults;

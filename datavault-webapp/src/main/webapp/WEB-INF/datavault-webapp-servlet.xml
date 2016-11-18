@@ -138,6 +138,17 @@
         <property name="brokerURL" value="${broker.url}" />
         <property name="brokerApiKey" value="${broker.api.key}" />
     </bean>
+
+    <bean id="ldapService" class="org.datavaultplatform.webapp.services.LDAPService">
+        <property name="host" value="${ldap.host}" />
+        <property name="port" value="${ldap.port}" />
+        <property name="useSsl" value="${ldap.useSsl}" />
+        <property name="dn" value="${ldap.dn}" />
+        <property name="password" value="${ldap.password}" />
+        <property name="searchContext" value="${ldap.searchContext}" />
+        <property name="searchFilter" value="${ldap.searchFilter}" />
+        <property name="attrs" value="${ldap.attrs}" />
+    </bean>
     
     <bean id="authSuccessHandler" class="org.datavaultplatform.webapp.authentication.AuthenticationSuccess">
         <property name="restService" ref="restService" />

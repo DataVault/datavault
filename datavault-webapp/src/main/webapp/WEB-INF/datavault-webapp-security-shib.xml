@@ -30,6 +30,7 @@
 
     <bean id="shibAuthenticationProvider" class="org.datavaultplatform.webapp.authentication.ShibAuthenticationProvider">
         <property name="restService" ref="restService" />
+        <property name="ldapService" ref="ldapService" />
     </bean>
 
     <bean id="shibWebAuthenticationDetailsSource" class="org.datavaultplatform.webapp.authentication.ShibWebAuthenticationDetailsSource">

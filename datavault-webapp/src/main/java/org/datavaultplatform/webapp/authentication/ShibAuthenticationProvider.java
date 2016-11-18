@@ -1,11 +1,14 @@
 package org.datavaultplatform.webapp.authentication;
 
+import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.ValidateUser;
+import org.datavaultplatform.webapp.services.LDAPService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,6 +16,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -30,8 +34,14 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
 
     private RestService restService;
 
+    private LDAPService ldapService;
+
     public void setRestService(RestService restService) {
         this.restService = restService;
+    }
+
+    public void setLdapService(LDAPService ldapService) {
+        this.ldapService = ldapService;
     }
 
     @Override
@@ -51,7 +61,29 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
             user.setFirstname(swad.getFirstname());
             user.setLastname(swad.getLastname());
             user.setEmail(swad.getEmail());
+
+            try {
+                ldapService.getConnection();
+
+                HashMap<String, String> attributes = ldapService.search(name);
+
+                logger.info("Returned attributes are " + attributes.toString());
+                user.setProperties(attributes);
+
+            }catch (Exception e) {
+                throw new AuthenticationServiceException("LDAP Exception", e);
+
+            } finally {
+                try {
+                    ldapService.closeConnection();
+                } catch (LdapException e) {
+                    throw new AuthenticationServiceException("LDAP Exception", e);
+                }
+            }
+
             restService.addUser(user);
+
+
         } else {
             logger.info("Existing user " + name);
             if (restService.isAdmin(new ValidateUser(name, null))) {
