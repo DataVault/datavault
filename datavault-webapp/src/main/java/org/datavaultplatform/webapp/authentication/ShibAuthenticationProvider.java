@@ -33,8 +33,9 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
     private static final Logger logger = LoggerFactory.getLogger(ShibAuthenticationProvider.class);
 
     private RestService restService;
-
     private LDAPService ldapService;
+    private Boolean ldapEnabled;
+
 
     public void setRestService(RestService restService) {
         this.restService = restService;
@@ -42,6 +43,10 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
 
     public void setLdapService(LDAPService ldapService) {
         this.ldapService = ldapService;
+    }
+
+    public void setLdapEnabled(Boolean ldapEnabled) {
+        this.ldapEnabled = ldapEnabled;
     }
 
     @Override
@@ -62,23 +67,8 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
             user.setLastname(swad.getLastname());
             user.setEmail(swad.getEmail());
 
-            try {
-                ldapService.getConnection();
-
-                HashMap<String, String> attributes = ldapService.search(name);
-
-                logger.info("Returned attributes are " + attributes.toString());
-                user.setProperties(attributes);
-
-            }catch (Exception e) {
-                throw new AuthenticationServiceException("LDAP Exception", e);
-
-            } finally {
-                try {
-                    ldapService.closeConnection();
-                } catch (LdapException e) {
-                    throw new AuthenticationServiceException("LDAP Exception", e);
-                }
+            if (ldapEnabled) {
+                user.setProperties(getLDAPAttributes(name));
             }
 
             restService.addUser(user);
@@ -100,5 +90,26 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
     @Override
     public boolean supports(Class<?> authentication) {
         return authentication.equals(PreAuthenticatedAuthenticationToken.class);
+    }
+
+    private HashMap<String, String> getLDAPAttributes(String name) {
+        HashMap<String, String> attributes;
+
+        try {
+            ldapService.getConnection();
+            attributes = ldapService.search(name);
+
+        }catch (Exception e) {
+            throw new AuthenticationServiceException("LDAP Exception", e);
+
+        } finally {
+            try {
+                ldapService.closeConnection();
+            } catch (LdapException e) {
+                throw new AuthenticationServiceException("LDAP Exception", e);
+            }
+        }
+
+        return attributes;
     }
 }

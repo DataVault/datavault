@@ -68,22 +68,17 @@ public class LDAPService {
     }
 
     public void getConnection() throws LdapException, CursorException {
-        logger.info("About to do the LDAP bind");
-
         connection = new LdapNetworkConnection(host, Integer.parseInt(port), Boolean.parseBoolean(useSsl));
         connection.setTimeOut(0);
         connection.bind(dn, password);
-
-        logger.info("LDAP bind successful");
     }
 
     public void closeConnection() throws LdapException {
-        // Close not required as we explicitly unbind
         connection.unBind();
     }
 
     public HashMap<String, String> search(String id) throws LdapException, CursorException, IOException {
-        logger.info("About to do search for id " + id);
+        logger.info("Search LDAP for " + id);
 
         HashMap<String, String> attributes = new HashMap<String, String>();
 
@@ -101,6 +96,7 @@ public class LDAPService {
 
         cursor.close();
 
+        logger.info("LDAP attributes are " + attributes.toString());
         return attributes;
     }
 }
