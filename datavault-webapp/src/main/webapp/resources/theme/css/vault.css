@@ -118,6 +118,12 @@ h6, .h6 {
     content: ' ';
 }
 
+/* form */
+
+form {
+    padding-bottom: 15px;
+}
+
 /*
  * Mobile view
  */
