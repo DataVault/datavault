@@ -1,6 +1,7 @@
 <#macro loginLayout>
 <#import "/spring.ftl" as spring />
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 
     <#include "imports.ftl"/>
