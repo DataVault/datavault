@@ -10,17 +10,6 @@
     .flow-drop {padding:30px; font-size:13px; text-align:center; color:#666; font-weight:bold;background-color:#eee; border:2px dashed #aaa; border-radius:10px; z-index:9999;}
     .flow-dragover {padding:30px; color:#555; background-color:#ddd; border:1px solid #999;}
 
-    /* Uploader: Progress bar */
-    .flow-progress {width:100%; display:none;}
-    .progress-container {height:7px; background:#9CBD94; position:relative; }
-    .progress-bar {position:absolute; top:0; left:0; bottom:0; background:#45913A; width:0;}
-    .progress-text {font-size:11px; line-height:9px;}
-    .progress-pause {padding:0 0 0 7px;}
-    .progress-resume-link {display:none;}
-    .is-paused .progress-resume-link {display:inline;}
-    .is-paused .progress-pause-link {display:none;}
-    .is-complete .progress-pause {display:none;}
-
     /* Uploader: List of items being uploaded */
     .uploader-item {width:148px; height:90px; background-color:#666; position:relative; border:2px solid black; float:left; margin:0 6px 6px 0;}
     .uploader-item-thumbnail {width:100%; height:100%; position:absolute; top:0; left:0;}
@@ -113,17 +102,13 @@
                 <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
                   Drag and drop to upload files or <a class="flow-browse"><u>browse</u></a>
                   
-                  <div id="upload-tree" class="fancytree tree-box text-left" style="display:none;"></div>
-
-                    <div class="flow-progress">
-                      <table>
-                        <tr>
-                          <td width="100%"><div class="progress-container"><div class="progress-bar"></div></div></td>
-                          <td class="progress-text" nowrap="nowrap"></td>
-                        </tr>
-                      </table>
+                  <div class="progress">
+                    <div id="upload-progress" class="progress-bar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                      <span id="progress-label" class="sr-only">0% Complete</span>
                     </div>
-                  
+                  </div>
+
+                  <div id="upload-tree" class="fancytree tree-box text-left" style="display:none;"></div>
                 </div>
             </div>
             
@@ -250,9 +235,6 @@
     // Handle file add event
     r.on('fileAdded', function(file){
       
-      // Show progress bar
-      $('.flow-progress').show();
-      
       // Add the file to the list
       $("#upload-tree").show();
       var rootNode = $("#upload-tree").fancytree("getRootNode");
@@ -286,16 +268,8 @@
     r.on('filesSubmitted', function(file) {
       r.upload();
     });
-    r.on('complete', function(){
-      // Hide pause/resume when the upload has completed
-      $('.flow-progress .progress-resume-link, .flow-progress .progress-pause-link').hide();
-    });
     r.on('fileSuccess', function(file,message){
-      var $self = $('.flow-file-'+file.uniqueIdentifier);
       // Reflect that the file upload has completed
-      $self.find('.flow-file-progress').text('(completed)');
-      $self.find('.flow-file-pause, .flow-file-resume').remove();
-      $self.find('.flow-file-download').attr('href', '/download/' + file.uniqueIdentifier).show();
       $("#upload-tree").fancytree("getTree").getNodeByKey(file.name).extraClasses = '';
       $("#upload-tree").fancytree("getTree").getNodeByKey(file.name).renderTitle();
     });
@@ -304,17 +278,9 @@
       $('.flow-file-'+file.uniqueIdentifier+' .flow-file-progress').html('(file could not be uploaded: '+message+')');
     });
     r.on('fileProgress', function(file){
-      // Handle progress for both the file and the overall upload
-      $('.flow-file-'+file.uniqueIdentifier+' .flow-file-progress')
-        .html(Math.floor(file.progress()*100) + '% '
-          + readablizeBytes(file.averageSpeed) + '/s '
-          + secondsToStr(file.timeRemaining()) + ' remaining') ;
-      $('.progress-bar').css({width:Math.floor(r.progress()*100) + '%'});
-    });
-    r.on('uploadStart', function(){
-      // Show pause, hide resume
-      $('.flow-progress .progress-resume-link').hide();
-      $('.flow-progress .progress-pause-link').show();
+      var percentComplete = Math.floor(r.progress()*100);
+      $('#upload-progress').css('width', percentComplete + '%').attr('aria-valuenow', percentComplete);
+      $('#progress-label').text(percentComplete + '% Complete')
     });
     r.on('catchAll', function() {
       console.log.apply(console, arguments);
@@ -322,11 +288,6 @@
     window.r = {
       pause: function () {
         r.pause();
-        // Show resume, hide pause
-        $('.flow-file-resume').show();
-        $('.flow-file-pause').hide();
-        $('.flow-progress .progress-resume-link').show();
-        $('.flow-progress .progress-pause-link').hide();
       },
       cancel: function() {
         r.cancel();
