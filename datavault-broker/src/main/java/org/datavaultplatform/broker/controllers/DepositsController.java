@@ -2,6 +2,7 @@ package org.datavaultplatform.broker.controllers;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.HashMap;
 
 import org.datavaultplatform.broker.services.*;
@@ -97,6 +98,11 @@ public class DepositsController {
         deposit.setNote(createDeposit.getNote());
         deposit.setDepositPaths(new ArrayList<DepositPath>());
         
+        List<FileStore> userStores = user.getFileStores();
+        
+        Map<String, String> userFileStoreClasses = new HashMap<>();
+        Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
+        
         // Add server-side filestore paths
         for (String path : createDeposit.getDepositPaths()) {
             
@@ -109,6 +115,35 @@ public class DepositsController {
                 // A request to archive a sub-directory
                 storageID = path.substring(0, path.indexOf("/"));
                 storagePath = path.replaceFirst(storageID + "/", "");
+            }
+            
+            if (!userFileStoreClasses.containsKey(storageID)) {
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    
+                    FileStore userStore = null;
+                    for (FileStore store : userStores) {
+                        if (store.getID().equals(storageID)) {
+                            userStore = store;
+                        }
+                    }
+                    
+                    if (userStore == null) {
+                        throw new IllegalArgumentException("Storage ID '" + storageID + "' is invalid");
+                    }
+
+                    // Check the source file path is valid
+                    if (!filesService.validPath(storagePath, userStore)) {
+                        throw new IllegalArgumentException("Path '" + storagePath + "' is invalid");
+                    }
+                    
+                    userFileStoreClasses.put(storageID, userStore.getStorageClass());
+                    userFileStoreProperties.put(storageID, userStore.getProperties());
+                    
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw(e);
+                }
             }
             
             DepositPath depositPath = new DepositPath(deposit, path, Path.PathType.FILESTORE);
@@ -175,7 +210,18 @@ public class DepositsController {
             // External metadata is text from an external system - e.g. XML or JSON
             depositProperties.put("externalMetadata", externalMetadata);
             
-            Task depositTask = new Task(job, depositProperties, archiveStore, deposit.getDepositPaths());
+            ArrayList<String> filestorePaths = new ArrayList<>();
+            ArrayList<String> userUploadPaths = new ArrayList<>();
+            
+            for (DepositPath path: deposit.getDepositPaths()) {
+                if (path.getPathType() == Path.PathType.FILESTORE) {
+                    filestorePaths.add(path.getFilePath());
+                } else if (path.getPathType() == Path.PathType.USER_UPLOAD) {
+                    userUploadPaths.add(path.getFilePath());
+                }
+            }
+            
+            Task depositTask = new Task(job, depositProperties, archiveStore, userFileStoreProperties, userFileStoreClasses, filestorePaths, userUploadPaths);
             String jsonDeposit = mapper.writeValueAsString(depositTask);
             sender.send(jsonDeposit);
 
@@ -320,7 +366,7 @@ public class DepositsController {
             retrieveProperties.put("archiveDigest", deposit.getArchiveDigest());
             retrieveProperties.put("archiveDigestAlgorithm", deposit.getArchiveDigestAlgorithm());
             
-            Task retrieveTask = new Task(job, retrieveProperties, archiveStore, null);
+            Task retrieveTask = new Task(job, retrieveProperties, archiveStore, null, null, null, null);
             ObjectMapper mapper = new ObjectMapper();
             String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
             sender.send(jsonRetrieve);

@@ -77,6 +77,9 @@ public class Retrieve extends Task {
         UserStore userStore;
         Device archiveFs;
         
+        if (1==1) { return; }
+        
+        /*
         // Connect to the user storage
         try {
             Class<?> clazz = Class.forName(userFileStore.getStorageClass());
@@ -105,6 +108,7 @@ public class Retrieve extends Task {
                 .withUserId(userID));
             return;
         }
+        */
         
         try {
             if (!userStore.exists(retrievePath) || !userStore.isDirectory(retrievePath)) {

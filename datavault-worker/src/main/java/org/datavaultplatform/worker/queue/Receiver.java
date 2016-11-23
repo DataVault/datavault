@@ -74,8 +74,8 @@ public class Receiver {
             String message = new String(delivery.getBody());
             
             // Note that the message body might contain keys/credentials
-            logger.debug("Received " + message.length() + " bytes");
-            logger.debug("Received message body '" + message + "'");
+            logger.info("Received " + message.length() + " bytes");
+            logger.info("Received message body '" + message + "'");
             
             // Decode and begin the job ...
             
