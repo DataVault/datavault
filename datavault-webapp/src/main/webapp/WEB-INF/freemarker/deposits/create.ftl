@@ -3,130 +3,7 @@
 <#global nav="home">
 <@layout.vaultLayout>
     <#import "/spring.ftl" as spring />
-<div class="container">
 
-    <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>My Vaults</b></a></li>
-        <li><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}"><b>Vault:</b> ${vault.name?html}</a></li>
-        <li class="active">Create new deposit</li>
-    </ol>
-
-    <form id="create-deposit" class="form" role="form" action="" method="post">
-
-        <div class="form-group">
-            <label class="control-label">Deposit Note:</label>
-            <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="A descriptive name for this particular Deposit to the Vault, to set it apart from other parts of the data."></span></span>
-            <@spring.bind "deposit.note" />
-            <input type="text"
-                   class="form-control"
-                   name="${spring.status.expression}"
-                   value="${spring.status.value!""}"/>
-        </div>
-        
-        <label class="control-label">Deposit file or directory:</label>
-        <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Select a single file, or a directory to add to the Vault."></span></span>
-        <div class="bs-callout" style="margin-top:0px;">
-            <div class="form-group">
-                <@spring.bind "deposit.fileUploadHandle" />
-                <input type="text"
-                   class="form-control file-upload-handle"
-                   name="${spring.status.expression}"
-                   value="${spring.status.value!""}"/>
-                <@spring.bind "deposit.depositPaths" />
-                <select
-                       multiple="true"
-                       class="file-path"
-                       name="${spring.status.expression}"
-                       value="${spring.status.value!""}">
-                       <option value="abc"/>
-                </select>
-                <div id="tree" class="fancytree tree-box"></div>
-                <label id="deposit-size" class="text-muted small">No files selected</label>
-            </div>
-            <div class="form-group">
-                <div class="flow-error">
-                  Your browser, unfortunately, is not supported by Flow.js. The library requires support for <a href="http://www.w3.org/TR/FileAPI/">the HTML5 File API</a> along with <a href="http://www.w3.org/TR/FileAPI/#normalization-of-params">file slicing</a>.
-                </div>
-
-                <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
-                  Drag and drop to upload files or <a class="flow-browse"><u>browse</u></a>
-                  
-                  <div id="upload-tree" class="fancytree tree-box text-left"></div>
-
-                    <div class="flow-progress">
-                      <table>
-                        <tr>
-                          <td width="100%"><div class="progress-container"><div class="progress-bar"></div></div></td>
-                          <td class="progress-text" nowrap="nowrap"></td>
-                        </tr>
-                      </table>
-                    </div>
-                  
-                </div>
-            </div>
-            
-            <div class="btn-toolbar">
-                Import from
-                <button class="btn btn-default"><i class="fa fa-hdd-o" aria-hidden="true"></i> Research Data Storage</button>
-                <button class="btn btn-default"><i class="fa fa-dropbox" aria-hidden="true"></i> Dropbox</button>
-            </div>
-
-        </div>
-
-        <script>
-            var filesizeSeq = 0;
-            
-            // Create the tree inside the <div id="tree"> element.
-            $("#tree").fancytree({
-                source: {
-                        url: "${springMacroRequestContext.getContextPath()}/files",
-                        cache: false
-                },
-                lazyLoad: function(event, data){
-                    var node = data.node;
-                    // Load child nodes via ajax GET /files?mode=children&parent=1234
-                    data.result = {
-                        url: "${springMacroRequestContext.getContextPath()}/files",
-                        data: {mode: "children", parent: node.key},
-                        cache: false
-                    };
-                },
-                selectMode: 1,
-                activate: function(event, data) {
-                    var node = data.tree.getActiveNode();
-                    filesizeSeq = filesizeSeq + 1;
-                    var currentSeq = filesizeSeq;
-                    
-                    if (node) {
-                        $("#deposit-size").text("Deposit size: calculating ...");
-                        
-                        $('.file-path')
-                          .append($('<option>', { value : node.key })
-                          .text(node.key));
-
-                        $.ajax({
-                            url: "${springMacroRequestContext.getContextPath()}/filesize",
-                            type: "GET",
-                            data: {filepath: node.key},
-                            dataType: 'text',
-                            success: function (result) {
-                                if (currentSeq == filesizeSeq) {
-                                    $("#deposit-size").text("Deposit size: " + result);
-                                }
-                            }
-                        });
-                    } else {
-                        $(".file-path").val("");
-                        $("#deposit-size").text("No files selected");
-                    }
-                }
-            });
-
-            $("#upload-tree").fancytree({
-                source: []
-            });
-        </script>
-        
 <style>
     /* Uploader: Drag & Drop */
     .flow-error {display:none; font-size:14px; font-style:italic;}
@@ -163,8 +40,155 @@
 
     /* In progress item */
     .progress-item {opacity:0.5;}
-
 </style>
+
+<div class="modal fade" id="add-from-storage" tabindex="-1" role="dialog" aria-labelledby="addFromStorage" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                <h4 class="modal-title" id="addFromStorage">Add files from storage</h4>
+            </div>
+            <div class="modal-body">
+                <p>I'm a friendly message which tells you what to do</p>
+                <form id="add-from-storage-form">
+                    <div class="form-group">
+                        <label class="control-label">Select file or folder:</label>
+                        <div id="tree" class="fancytree tree-box"></div>
+                        <label id="deposit-size" class="text-muted small">No files selected</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button form="add-from-storage" type="submit" class="btn btn-primary btn-ok">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+    <ol class="breadcrumb">
+        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>My Vaults</b></a></li>
+        <li><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}"><b>Vault:</b> ${vault.name?html}</a></li>
+        <li class="active">Create new deposit</li>
+    </ol>
+
+    <form id="create-deposit" class="form" role="form" action="" method="post">
+
+        <div class="form-group">
+            <label class="control-label">Deposit Note:</label>
+            <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="A descriptive name for this particular Deposit to the Vault, to set it apart from other parts of the data."></span></span>
+            <@spring.bind "deposit.note" />
+            <input type="text"
+                   class="form-control"
+                   name="${spring.status.expression}"
+                   value="${spring.status.value!""}"/>
+        </div>
+        
+        <label class="control-label">Deposit file or directory:</label>
+        <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Select a single file, or a directory to add to the Vault."></span></span>
+        <div class="bs-callout" style="margin-top:0px;">
+            <div class="form-group">
+                <@spring.bind "deposit.fileUploadHandle" />
+                <input type="hidden"
+                   class="form-control file-upload-handle"
+                   name="${spring.status.expression}"
+                   value="${spring.status.value!""}"/>
+                <@spring.bind "deposit.depositPaths" />
+                <select
+                       multiple="true"
+                       class="file-path"
+                       style="display:none;"
+                       name="${spring.status.expression}"
+                       value="${spring.status.value!""}">
+                </select>
+            </div>
+            <div class="form-group">
+                <div class="flow-error">
+                  Your browser, unfortunately, is not supported by Flow.js. The library requires support for <a href="http://www.w3.org/TR/FileAPI/">the HTML5 File API</a> along with <a href="http://www.w3.org/TR/FileAPI/#normalization-of-params">file slicing</a>.
+                </div>
+
+                <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
+                  Drag and drop to upload files or <a class="flow-browse"><u>browse</u></a>
+                  
+                  <div id="upload-tree" class="fancytree tree-box text-left" style="display:none;"></div>
+
+                    <div class="flow-progress">
+                      <table>
+                        <tr>
+                          <td width="100%"><div class="progress-container"><div class="progress-bar"></div></div></td>
+                          <td class="progress-text" nowrap="nowrap"></td>
+                        </tr>
+                      </table>
+                    </div>
+                  
+                </div>
+            </div>
+            
+            <div class="btn-toolbar">
+                Import from
+                <button class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage"><i class="fa fa-hdd-o" aria-hidden="true"></i> Research Data Storage</button>
+                <button class="btn btn-default"><i class="fa fa-dropbox" aria-hidden="true"></i> Dropbox</button>
+            </div>
+
+        </div>
+
+        <script>
+            var filesizeSeq = 0;
+            
+            // Create the tree inside the <div id="tree"> element.
+            $("#tree").fancytree({
+                source: {
+                        url: "${springMacroRequestContext.getContextPath()}/files",
+                        cache: false
+                },
+                lazyLoad: function(event, data){
+                    var node = data.node;
+                    // Load child nodes via ajax GET /files?mode=children&parent=1234
+                    data.result = {
+                        url: "${springMacroRequestContext.getContextPath()}/files",
+                        data: {mode: "children", parent: node.key},
+                        cache: false
+                    };
+                },
+                selectMode: 1,
+                activate: function(event, data) {
+                    var node = data.tree.getActiveNode();
+                    filesizeSeq = filesizeSeq + 1;
+                    var currentSeq = filesizeSeq;
+                    
+                    if (node) {
+                        $("#deposit-size").text("Deposit size: calculating ...");
+                        
+                        $('.file-path')
+                          .append($('<option>', { value : node.key })
+                          .text(node.key)
+                          .prop('selected', true));
+
+                        $.ajax({
+                            url: "${springMacroRequestContext.getContextPath()}/filesize",
+                            type: "GET",
+                            data: {filepath: node.key},
+                            dataType: 'text',
+                            success: function (result) {
+                                if (currentSeq == filesizeSeq) {
+                                    $("#deposit-size").text("Deposit size: " + result);
+                                }
+                            }
+                        });
+                    } else {
+                        $(".file-path").val("");
+                        $("#deposit-size").text("No files selected");
+                    }
+                }
+            });
+
+            $("#upload-tree").fancytree({
+                source: []
+            });
+        </script>
 
         <div class="btn-toolbar">
             <button type="submit" value="submit" class="btn btn-primary"><i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit data</button>
@@ -225,11 +249,12 @@
 
     // Handle file add event
     r.on('fileAdded', function(file){
-      // Show progress bar
       
+      // Show progress bar
       $('.flow-progress').show();
+      
       // Add the file to the list
-
+      $("#upload-tree").show();
       var rootNode = $("#upload-tree").fancytree("getRootNode");
       var childNode = rootNode.addChildren({
         key: file.name,

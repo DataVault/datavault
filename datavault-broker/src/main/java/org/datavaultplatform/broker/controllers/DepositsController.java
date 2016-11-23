@@ -103,51 +103,53 @@ public class DepositsController {
         Map<String, String> userFileStoreClasses = new HashMap<>();
         Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
         
-        // Add server-side filestore paths
-        for (String path : createDeposit.getDepositPaths()) {
-            
-            String storageID, storagePath;
-            if (!path.contains("/")) {
-                // A request to archive the whole share/device
-                storageID = path;
-                storagePath = "/";
-            } else {
-                // A request to archive a sub-directory
-                storageID = path.substring(0, path.indexOf("/"));
-                storagePath = path.replaceFirst(storageID + "/", "");
-            }
-            
-            if (!userFileStoreClasses.containsKey(storageID)) {
-                try {
-                    ObjectMapper mapper = new ObjectMapper();
-                    
-                    FileStore userStore = null;
-                    for (FileStore store : userStores) {
-                        if (store.getID().equals(storageID)) {
-                            userStore = store;
-                        }
-                    }
-                    
-                    if (userStore == null) {
-                        throw new IllegalArgumentException("Storage ID '" + storageID + "' is invalid");
-                    }
+        // Add any server-side filestore paths
+        if (createDeposit.getDepositPaths() != null) {
+            for (String path : createDeposit.getDepositPaths()) {
 
-                    // Check the source file path is valid
-                    if (!filesService.validPath(storagePath, userStore)) {
-                        throw new IllegalArgumentException("Path '" + storagePath + "' is invalid");
-                    }
-                    
-                    userFileStoreClasses.put(storageID, userStore.getStorageClass());
-                    userFileStoreProperties.put(storageID, userStore.getProperties());
-                    
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    throw(e);
+                String storageID, storagePath;
+                if (!path.contains("/")) {
+                    // A request to archive the whole share/device
+                    storageID = path;
+                    storagePath = "/";
+                } else {
+                    // A request to archive a sub-directory
+                    storageID = path.substring(0, path.indexOf("/"));
+                    storagePath = path.replaceFirst(storageID + "/", "");
                 }
+
+                if (!userFileStoreClasses.containsKey(storageID)) {
+                    try {
+                        ObjectMapper mapper = new ObjectMapper();
+
+                        FileStore userStore = null;
+                        for (FileStore store : userStores) {
+                            if (store.getID().equals(storageID)) {
+                                userStore = store;
+                            }
+                        }
+
+                        if (userStore == null) {
+                            throw new IllegalArgumentException("Storage ID '" + storageID + "' is invalid");
+                        }
+
+                        // Check the source file path is valid
+                        if (!filesService.validPath(storagePath, userStore)) {
+                            throw new IllegalArgumentException("Path '" + storagePath + "' is invalid");
+                        }
+
+                        userFileStoreClasses.put(storageID, userStore.getStorageClass());
+                        userFileStoreProperties.put(storageID, userStore.getProperties());
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw(e);
+                    }
+                }
+
+                DepositPath depositPath = new DepositPath(deposit, path, Path.PathType.FILESTORE);
+                deposit.getDepositPaths().add(depositPath);
             }
-            
-            DepositPath depositPath = new DepositPath(deposit, path, Path.PathType.FILESTORE);
-            deposit.getDepositPaths().add(depositPath);
         }
         
         // Add the file upload path
