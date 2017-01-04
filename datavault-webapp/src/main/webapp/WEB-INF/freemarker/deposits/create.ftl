@@ -76,7 +76,7 @@
                    value="${spring.status.value!""}"/>
         </div>
         
-        <label class="control-label">Deposit file or directory:</label>
+        <label class="control-label">Choose files to deposit:</label>
         <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Select a single file, or a directory to add to the Vault."></span></span>
         <div class="bs-callout" style="margin-top:0px;">
             <div class="form-group">
@@ -94,30 +94,30 @@
                        value="${spring.status.value!""}">
                 </select>
             </div>
+            
             <div class="form-group">
                 <div class="flow-error">
                   Your browser, unfortunately, is not supported by Flow.js. The library requires support for <a href="http://www.w3.org/TR/FileAPI/">the HTML5 File API</a> along with <a href="http://www.w3.org/TR/FileAPI/#normalization-of-params">file slicing</a>.
                 </div>
 
                 <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
-                  Drag and drop to upload files or <a class="flow-browse"><u>browse</u></a>
                   
-                  <div class="progress">
+                    <div class="btn-toolbar">
+                        <button class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage"><i class="fa fa-hdd-o" aria-hidden="true"></i> Research Data Storage</button>
+                        <button class="btn btn-default"><i class="fa fa-dropbox" aria-hidden="true"></i> Dropbox</button>
+                        <button class="btn btn-default flow-browse"><i class="fa fa-laptop" aria-hidden="true"></i> Browse</button>
+                    </div>
+
+                  <div class="progress" style="display:none; margin-top:15px;">
                     <div id="upload-progress" class="progress-bar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
                       <span id="progress-label" class="sr-only">0% Complete</span>
                     </div>
                   </div>
 
-                  <div id="upload-tree" class="fancytree tree-box text-left" style="display:none;"></div>
+                  <div id="upload-tree" class="fancytree tree-box text-left" style="display:none; margin-top:15px;"></div>
                 </div>
             </div>
             
-            <div class="btn-toolbar">
-                Import from
-                <button class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage"><i class="fa fa-hdd-o" aria-hidden="true"></i> Research Data Storage</button>
-                <button class="btn btn-default"><i class="fa fa-dropbox" aria-hidden="true"></i> Dropbox</button>
-            </div>
-
         </div>
 
         <script>
@@ -189,6 +189,11 @@
 <script>
     $(document).ready(function () {
 
+        var updateProgress = function(percentComplete) {
+          $('#upload-progress').css('width', percentComplete + '%').attr('aria-valuenow', percentComplete);
+          $('#progress-label').text(percentComplete + '% Complete');
+        }
+        
         $('button[type="submit"]').on("click", function() {
             $('#submitAction').val($(this).attr('value'));
         });
@@ -235,6 +240,8 @@
     // Handle file add event
     r.on('fileAdded', function(file){
       
+      $('.progress').show();
+
       // Add the file to the list
       $("#upload-tree").show();
       var rootNode = $("#upload-tree").fancytree("getRootNode");
@@ -278,9 +285,11 @@
       $('.flow-file-'+file.uniqueIdentifier+' .flow-file-progress').html('(file could not be uploaded: '+message+')');
     });
     r.on('fileProgress', function(file){
-      var percentComplete = Math.floor(r.progress()*100);
-      $('#upload-progress').css('width', percentComplete + '%').attr('aria-valuenow', percentComplete);
-      $('#progress-label').text(percentComplete + '% Complete')
+      if (r.progress() == 1.0) {
+        $('.progress').hide();
+      } else {
+        updateProgress(Math.floor(r.progress()*100));
+      }
     });
     r.on('catchAll', function() {
       console.log.apply(console, arguments);
