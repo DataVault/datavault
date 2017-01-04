@@ -50,7 +50,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button form="add-from-storage" type="submit" class="btn btn-primary btn-ok">Add</button>
+                <button type="button" id="add-from-storage-btn" form="add-from-storage" class="btn btn-primary btn-ok">Add</button>
             </div>
         </div>
     </div>
@@ -77,47 +77,44 @@
         </div>
         
         <label class="control-label">Choose files to deposit:</label>
-        <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Select a single file, or a directory to add to the Vault."></span></span>
-        <div class="bs-callout" style="margin-top:0px;">
-            <div class="form-group">
-                <@spring.bind "deposit.fileUploadHandle" />
-                <input type="hidden"
-                   class="form-control file-upload-handle"
+        <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Select files or directories to add to the Vault."></span></span>
+
+        <div class="form-group">
+
+            <@spring.bind "deposit.fileUploadHandle" />
+            <input type="hidden"
+               class="form-control file-upload-handle"
+               name="${spring.status.expression}"
+               value="${spring.status.value!""}"/>
+            <@spring.bind "deposit.depositPaths" />
+            <select
+                   multiple="true"
+                   class="file-path"
+                   style="display:none;"
                    name="${spring.status.expression}"
-                   value="${spring.status.value!""}"/>
-                <@spring.bind "deposit.depositPaths" />
-                <select
-                       multiple="true"
-                       class="file-path"
-                       style="display:none;"
-                       name="${spring.status.expression}"
-                       value="${spring.status.value!""}">
-                </select>
+                   value="${spring.status.value!""}">
+            </select>
+
+            <div class="flow-error">
+              Your browser, unfortunately, is not supported by Flow.js. The library requires support for <a href="http://www.w3.org/TR/FileAPI/">the HTML5 File API</a> along with <a href="http://www.w3.org/TR/FileAPI/#normalization-of-params">file slicing</a>.
             </div>
-            
-            <div class="form-group">
-                <div class="flow-error">
-                  Your browser, unfortunately, is not supported by Flow.js. The library requires support for <a href="http://www.w3.org/TR/FileAPI/">the HTML5 File API</a> along with <a href="http://www.w3.org/TR/FileAPI/#normalization-of-params">file slicing</a>.
+
+            <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
+
+                <div class="btn-toolbar">
+                    <button type="button" class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage"><i class="fa fa-hdd-o" aria-hidden="true"></i> Research Data Storage</button>
+                    <button type="button" class="btn btn-default" href="#" ><i class="fa fa-dropbox" aria-hidden="true"></i> Dropbox</button>
+                    <button type="button" class="btn btn-default flow-browse"><i class="fa fa-laptop" aria-hidden="true"></i> My Computer</button>
                 </div>
 
-                <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
-                  
-                    <div class="btn-toolbar">
-                        <button class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage"><i class="fa fa-hdd-o" aria-hidden="true"></i> Research Data Storage</button>
-                        <button class="btn btn-default"><i class="fa fa-dropbox" aria-hidden="true"></i> Dropbox</button>
-                        <button class="btn btn-default flow-browse"><i class="fa fa-laptop" aria-hidden="true"></i> Browse</button>
-                    </div>
-
-                  <div class="progress" style="display:none; margin-top:15px;">
-                    <div id="upload-progress" class="progress-bar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
-                      <span id="progress-label" class="sr-only">0% Complete</span>
-                    </div>
-                  </div>
-
-                  <div id="upload-tree" class="fancytree tree-box text-left" style="display:none; margin-top:15px;"></div>
+              <div class="progress" style="display:none; margin-top:15px;">
+                <div id="upload-progress" class="progress-bar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                  <span id="progress-label" class="sr-only">0% Complete</span>
                 </div>
+              </div>
+
+              <div id="upload-tree" class="fancytree tree-box text-left" style="display:none; margin-top:15px;"></div>
             </div>
-            
         </div>
 
         <script>
@@ -141,17 +138,13 @@
                 selectMode: 1,
                 activate: function(event, data) {
                     var node = data.tree.getActiveNode();
+                    
                     filesizeSeq = filesizeSeq + 1;
                     var currentSeq = filesizeSeq;
                     
                     if (node) {
                         $("#deposit-size").text("Deposit size: calculating ...");
                         
-                        $('.file-path')
-                          .append($('<option>', { value : node.key })
-                          .text(node.key)
-                          .prop('selected', true));
-
                         $.ajax({
                             url: "${springMacroRequestContext.getContextPath()}/filesize",
                             type: "GET",
@@ -164,7 +157,6 @@
                             }
                         });
                     } else {
-                        $(".file-path").val("");
                         $("#deposit-size").text("No files selected");
                     }
                 }
@@ -193,7 +185,41 @@
           $('#upload-progress').css('width', percentComplete + '%').attr('aria-valuenow', percentComplete);
           $('#progress-label').text(percentComplete + '% Complete');
         }
-        
+       
+        $('#add-from-storage-btn').on("click", function() {
+            
+            // Add the path to the hidden control
+            var node = $("#tree").fancytree("getActiveNode");
+            $('.file-path')
+              .append($('<option>', { value : node.key })
+              .text(node.key)
+              .prop('selected', true));
+            
+            // Add the file to the list
+            $("#upload-tree").show();
+            
+            var storageNode = $("#upload-tree").fancytree("getNodeByKey", "storage");
+            if (!storageNode) {
+              var rootNode = $("#upload-tree").fancytree("getRootNode");
+              storageNode = rootNode.addChildren({
+                  key: "storage",
+                  title: "Research Data Storage",
+                  tooltip: "Research Data Storage",
+                  folder: true,
+                  expanded: true
+              });
+            }
+            
+            var childNode = storageNode.addChildren({
+              key: node.key,
+              title: node.title,
+              tooltip: "Path: " + node.key,
+              folder: node.folder
+            });
+
+            $('#add-from-storage').modal('hide');
+        });
+  
         $('button[type="submit"]').on("click", function() {
             $('#submitAction').val($(this).attr('value'));
         });
@@ -202,9 +228,6 @@
             ignore: ".ignore",
             rules: {
                 note: {
-                    required: true
-                },
-                filePath: {
                     required: true
                 }
             },
@@ -244,11 +267,23 @@
 
       // Add the file to the list
       $("#upload-tree").show();
-      var rootNode = $("#upload-tree").fancytree("getRootNode");
-      var childNode = rootNode.addChildren({
+     
+      var uploadsNode = $("#upload-tree").fancytree("getNodeByKey", "uploads");
+      if (!uploadsNode) {
+        var rootNode = $("#upload-tree").fancytree("getRootNode");
+        uploadsNode = rootNode.addChildren({
+            key: "uploads",
+            title: "My Computer",
+            tooltip: "Browser uploads.",
+            folder: true,
+            expanded: true
+        });
+      }
+      
+      var childNode = uploadsNode.addChildren({
         key: file.name,
         title: file.name,
-        tooltip: "Tooltip.",
+        tooltip: file.name,
         folder: false,
         extraClasses: 'progress-item'
       });
