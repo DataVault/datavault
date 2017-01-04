@@ -168,7 +168,7 @@
         </script>
 
         <div class="btn-toolbar">
-            <button type="submit" value="submit" class="btn btn-primary"><i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit data</button>
+            <button id="deposit-submit-btn" type="submit" value="submit" class="btn btn-primary"><i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit data</button>
             <button type="submit" value="cancel" class="btn btn-danger cancel">Cancel</button>
         </div>
 
@@ -263,7 +263,11 @@
     // Handle file add event
     r.on('fileAdded', function(file){
       
+      // Show progress bar
       $('.progress').show();
+
+      // Prevent completion of deposit
+      $('#deposit-submit-btn').prop('disabled', true);
 
       // Add the file to the list
       $("#upload-tree").show();
@@ -321,7 +325,13 @@
     });
     r.on('fileProgress', function(file){
       if (r.progress() == 1.0) {
+        
+        // Hide progress bar
         $('.progress').hide();
+        
+        // Allow completion of deposit
+        $('#deposit-submit-btn').prop('disabled', false);
+
       } else {
         updateProgress(Math.floor(r.progress()*100));
       }
