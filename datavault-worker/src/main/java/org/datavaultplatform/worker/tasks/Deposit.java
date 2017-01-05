@@ -38,8 +38,6 @@ public class Deposit extends Task {
     
     EventSender eventStream;
     HashMap<String, UserStore> userStores;
-    //Device userFs;
-    //UserStore userStore;
     ArchiveStore archiveFs;
     String depositId;
     String bagID;
@@ -172,6 +170,8 @@ public class Deposit extends Task {
         File bagDir = bagPath.toFile();
         bagDir.mkdir();
         
+        Long depositIndex = 0L;
+        
         for (String filePath: fileStorePaths) {
         
             String storageID = filePath.substring(0, filePath.indexOf('/'));
@@ -183,7 +183,13 @@ public class Deposit extends Task {
             
             UserStore userStore = userStores.get(storageID);
             
-            // TODO: handle namespace problems
+            Path depositPath = bagPath;
+            // If there are multiple deposits then create a sub-directory for each one
+            if (fileStorePaths.size() > 1) {
+                depositIndex += 1;
+                depositPath = bagPath.resolve(depositIndex.toString());
+                depositPath.toFile().mkdir();
+            }
             
             try {
                 if (userStore.exists(storagePath)) {
@@ -194,7 +200,7 @@ public class Deposit extends Task {
                         .withNextState(1));
 
                     logger.info("Copying target to bag directory ...");
-                    copyFromUserStorage(userStore, storagePath, bagPath);
+                    copyFromUserStorage(userStore, storagePath, depositPath);
                     
                 } else {
                     logger.error("File does not exist.");
