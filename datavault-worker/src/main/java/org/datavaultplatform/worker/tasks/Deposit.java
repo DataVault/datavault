@@ -131,6 +131,42 @@ public class Deposit extends Task {
             return;
         }
         
+        // Calculate the total deposit size of selected files
+        long depositTotalSize = 0;
+        for (String filePath: fileStorePaths) {
+        
+            String storageID = filePath.substring(0, filePath.indexOf('/'));
+            String storagePath = filePath.substring(filePath.indexOf('/')+1);
+            
+            try {
+                UserStore userStore = userStores.get(storageID);
+                depositTotalSize += userStore.getSize(storagePath);
+            } catch (Exception e) {
+                String msg = "Deposit failed: could not access user filesystem";
+                logger.error(msg, e);
+                eventStream.send(new Error(jobID, depositId, msg)
+                    .withUserId(userID));
+                return;
+            }
+        }
+        
+        // Add size of any user uploads
+        try {
+            for (String path : fileUploadPaths) {
+                depositTotalSize += getUserUploadsSize(context.getTempDir(), userID, path);
+            }
+        } catch (Exception e) {
+            String msg = "Deposit failed: could not access user uploads";
+            logger.error(msg, e);
+            eventStream.send(new Error(jobID, depositId, msg)
+                .withUserId(userID));
+            return;
+        }
+        
+        // Store the calculated deposit size
+        eventStream.send(new ComputedSize(jobID, depositId, depositTotalSize)
+            .withUserId(userID));
+        
         // Create a new directory based on the broker-generated UUID
         Path bagPath = context.getTempDir().resolve(bagID);
         File bagDir = bagPath.toFile();
@@ -284,8 +320,6 @@ public class Deposit extends Task {
         
         // Compute bytes to copy
         long expectedBytes = userStore.getSize(filePath);
-        eventStream.send(new ComputedSize(jobID, depositId, expectedBytes)
-            .withUserId(userID));
         
         // Display progress bar
         eventStream.send(new UpdateProgress(jobID, depositId, 0, expectedBytes, "Starting transfer ...")
@@ -307,6 +341,16 @@ public class Deposit extends Task {
             tracker.stop();
             trackerThread.join();
         }
+    }
+    
+    private long getUserUploadsSize(Path tempPath, String userID, String uploadPath) throws Exception {
+        // TODO: this is a bit of a hack to escape the per-worker temp directory
+        File uploadDir = tempPath.getParent().resolve("uploads").resolve(userID).resolve(uploadPath).toFile();
+        if (uploadDir.exists()) {
+            logger.info("Calculating size of user uploads directory");
+            return FileUtils.sizeOfDirectory(uploadDir);
+        }
+        return 0;
     }
     
     private void moveFromUserUploads(Path tempPath, Path bagPath, String userID, String uploadPath) throws Exception {
