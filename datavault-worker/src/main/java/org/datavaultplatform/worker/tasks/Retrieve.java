@@ -73,26 +73,31 @@ public class Retrieve extends Task {
         logger.info("bagID: " + bagID);
         logger.info("retrievePath: " + retrievePath);
         
-        Device userFs;
-        UserStore userStore;
-        Device archiveFs;
+        Device userFs = null;
+        UserStore userStore = null;
+        Device archiveFs = null;
         
-        if (1==1) { return; }
-        
-        /*
-        // Connect to the user storage
-        try {
-            Class<?> clazz = Class.forName(userFileStore.getStorageClass());
-            Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-            Object instance = constructor.newInstance(userFileStore.getStorageClass(), userFileStore.getProperties());
-            userFs = (Device)instance;
-            userStore = (UserStore)userFs;
-        } catch (Exception e) {
-            String msg = "Retrieve failed: could not access active filesystem";
-            logger.error(msg, e);
-            eventStream.send(new Error(jobID, depositId, msg)
-                .withUserId(userID));
-            return;
+        for (String storageID : userFileStoreClasses.keySet()) {
+            
+            String storageClass = userFileStoreClasses.get(storageID);
+            Map<String, String> storageProperties = userFileStoreProperties.get(storageID);
+            
+            // Connect to the first user storage device (we only expect one for a retrieval)
+            try {
+                Class<?> clazz = Class.forName(storageClass);
+                Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
+                Object instance = constructor.newInstance(storageClass, storageProperties);                
+                userFs = (Device)instance;
+                userStore = (UserStore)userFs;
+                logger.info("Connected to user store: " + storageID + ", class: " + storageClass);
+                break;
+            } catch (Exception e) {
+                String msg = "Deposit failed: could not access user filesystem";
+                logger.error(msg, e);
+                eventStream.send(new Error(jobID, depositId, msg)
+                    .withUserId(userID));
+                return;
+            }
         }
         
         // Connect to the archive storage
@@ -108,7 +113,6 @@ public class Retrieve extends Task {
                 .withUserId(userID));
             return;
         }
-        */
         
         try {
             if (!userStore.exists(retrievePath) || !userStore.isDirectory(retrievePath)) {

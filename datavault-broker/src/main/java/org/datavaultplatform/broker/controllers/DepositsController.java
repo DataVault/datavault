@@ -368,7 +368,13 @@ public class DepositsController {
             retrieveProperties.put("archiveDigest", deposit.getArchiveDigest());
             retrieveProperties.put("archiveDigestAlgorithm", deposit.getArchiveDigestAlgorithm());
             
-            Task retrieveTask = new Task(job, retrieveProperties, archiveStore, null, null, null, null);
+            // Add a single entry for the user file storage
+            Map<String, String> userFileStoreClasses = new HashMap<>();
+            Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
+            userFileStoreClasses.put(storageID, userStore.getStorageClass());
+            userFileStoreProperties.put(storageID, userStore.getProperties());
+            
+            Task retrieveTask = new Task(job, retrieveProperties, archiveStore, userFileStoreProperties, userFileStoreClasses, null, null);
             ObjectMapper mapper = new ObjectMapper();
             String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
             sender.send(jsonRetrieve);
