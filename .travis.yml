@@ -1,8 +1,6 @@
 language: java
 sudo: true
 
-env:
-  # Give Maven 1GB of memory to work with
-  - MAVEN_OPTS=-Xmx2048M
+before_install: MAVEN_OPTS=-Xmx20484M
 
-script: mvn clean package
+install: travis_wait mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
