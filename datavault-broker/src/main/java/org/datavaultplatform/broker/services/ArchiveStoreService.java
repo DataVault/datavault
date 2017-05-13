@@ -25,6 +25,10 @@ public class ArchiveStoreService {
     public ArchiveStore getArchiveStore(String archiveStoreID) {
         return archiveStoreDAO.findById(archiveStoreID);
     }
+
+    public void deleteArchiveStore(String archiveStoreID) {
+        archiveStoreDAO.deleteById(archiveStoreID);
+    }
     
     public void setArchiveStoreDAO(ArchiveStoreDAO archiveStoreDAO) {
         this.archiveStoreDAO = archiveStoreDAO;

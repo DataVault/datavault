@@ -136,6 +136,10 @@
         <property name="usersService" ref="usersService" />
     </bean>
 
+    <bean id="adminArchiveStoreController" class="org.datavaultplatform.broker.controllers.admin.AdminArchiveStoreController">
+        <property name="archiveStoreService" ref="archiveStoreService" />
+    </bean>
+
     <bean id="initialiseDatabase" class="org.datavaultplatform.broker.scheduled.InitialiseDatabase">
         <property name="archiveStoreService" ref="archiveStoreService" />
         <property name="archiveDir" value="${archiveDir}" />

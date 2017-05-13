@@ -80,7 +80,7 @@ public class RestService {
     }
     
     /* GET requests */
-    
+
     public FileStore[] getFileStoreListing() {        
         HttpEntity<?> response = get(brokerURL + "/filestores", FileStore[].class);
         return (FileStore[])response.getBody();
@@ -95,6 +95,13 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/filestores/sftp", FileStore[].class);
         return (FileStore[])response.getBody();
     }
+
+    public ArchiveStore[] getArchiveStores() {
+        HttpEntity<?> response = get(brokerURL + "/admin/archivestores", ArchiveStore[].class);
+        return (ArchiveStore[])response.getBody();
+    }
+
+
     
     public FileInfo[] getFilesListing(String filePath) {
         
@@ -357,6 +364,11 @@ public class RestService {
         return (FileStore)response.getBody();
     }
 
+    public ArchiveStore addArchiveStore(ArchiveStore archiveStore) {
+        HttpEntity<?> response = post(brokerURL + "/admin/archivestores/", ArchiveStore.class, archiveStore);
+        return (ArchiveStore)response.getBody();
+    }
+
     public VaultInfo addVault(CreateVault createVault) {
         HttpEntity<?> response = post(brokerURL + "/vaults/", VaultInfo.class, createVault);
         return (VaultInfo)response.getBody();
@@ -437,5 +449,9 @@ public class RestService {
 
     public void deleteFileStore(String fileStoreId) {
         delete(brokerURL + "/filestores/" + fileStoreId, String.class);
+    }
+
+    public void deleteArchiveStore(String archiveStoreId) {
+        delete(brokerURL + "/admin/archivestores/" + archiveStoreId, String.class);
     }
 }

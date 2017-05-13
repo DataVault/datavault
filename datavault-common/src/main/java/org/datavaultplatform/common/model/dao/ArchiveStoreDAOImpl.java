@@ -1,7 +1,8 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
- 
+
+import org.datavaultplatform.common.model.FileStore;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -9,8 +10,12 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 
 import org.datavaultplatform.common.model.ArchiveStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ArchiveStoreDAOImpl implements ArchiveStoreDAO {
+
+    private static final Logger logger = LoggerFactory.getLogger(ArchiveStoreDAOImpl.class);
 
     private SessionFactory sessionFactory;
  
@@ -55,4 +60,18 @@ public class ArchiveStoreDAOImpl implements ArchiveStoreDAO {
         session.close();
         return archiveStore;
     }
+
+    @Override
+    public void deleteById(String Id) {
+        logger.info("Deleting Archivestore with id " + Id);
+
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(ArchiveStore.class);
+        criteria.add(Restrictions.eq("id", Id));
+        ArchiveStore archiveStore = (ArchiveStore)criteria.uniqueResult();
+        session.delete(archiveStore);
+        session.flush();
+        session.close();
+    }
+
 }
