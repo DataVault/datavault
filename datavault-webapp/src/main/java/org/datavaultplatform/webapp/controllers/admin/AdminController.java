@@ -40,6 +40,7 @@ public class AdminController {
         model.addAttribute("reviewcount", restService.getRetentionPolicyStatusCount(RetentionPolicyStatus.REVIEW));
         model.addAttribute("eventcount", restService.getEventCount());
         model.addAttribute("policycount", restService.getRetentionPolicyListing().length);
+        model.addAttribute("archivestorescount", restService.getArchiveStores().length);
 
         return "admin/index";
     }

@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 
 
+/**
+ *  By default this class is enabled in the Spring XML config, to disable it just comment it out.
+ */
 
 @Component
 public class InitialiseDatabase {

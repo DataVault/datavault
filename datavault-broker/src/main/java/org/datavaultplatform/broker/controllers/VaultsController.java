@@ -181,17 +181,6 @@ public class VaultsController {
         }
         vault.setDataset(dataset);
 
-
-        // Also configure a default system-level archive store if none exists.
-        // This would normally be part of system configuration.
-        List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
-        if (archiveStores.isEmpty()) {
-            HashMap<String,String> storeProperties = new HashMap<String,String>();
-            storeProperties.put("rootPath", archiveDir);
-            ArchiveStore store = new ArchiveStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Default archive store (local)");
-            archiveStoreService.addArchiveStore(store);
-        }
-        
         vaultsService.addVault(vault);
         
         Create vaultEvent = new Create(vault.getID());
