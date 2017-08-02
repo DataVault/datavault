@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.storage.impl;
 
+import oracle.cloudstorage.ftm.*;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
@@ -8,20 +9,9 @@ import org.datavaultplatform.common.storage.Verify;
 import java.io.File;
 import java.util.Map;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.Properties;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import oracle.cloudstorage.ftm.CloudStorageClass;
-import oracle.cloudstorage.ftm.FileTransferAuth;
-import oracle.cloudstorage.ftm.FileTransferManager;
-import oracle.cloudstorage.ftm.TransferResult;
-import oracle.cloudstorage.ftm.TransferTask;
-import oracle.cloudstorage.ftm.UploadConfig;
 import oracle.cloudstorage.ftm.exception.ClientException;
 
 public class OracleArchive extends Device implements ArchiveStore {
@@ -55,28 +45,27 @@ public class OracleArchive extends Device implements ArchiveStore {
 
     @Override
     public void retrieve(String path, File working, Progress progress) throws Exception {
-
-
-    }
-
-    @Override
-    public String store(String path, File working, Progress progress) throws Exception {
-        String objectName = null;
-
         FileTransferManager manager = null;
         try {
             manager = FileTransferManager.getDefaultFileTransferManager(auth);
 
-            UploadConfig uploadConfig = new UploadConfig();
-            uploadConfig.setOverwrite(true);
-            uploadConfig.setStorageClass(CloudStorageClass.Standard);
-            TransferTask<TransferResult> uploadTask = manager.uploadAsync(uploadConfig, containerName, null, working);
+            DownloadConfig downloadConfig = new DownloadConfig();
 
-            logger.info("Waiting for upload task to complete...");
-            TransferResult uploadResult = uploadTask.getResult();
-            logger.info("Task completed. State:" + uploadResult.getState());
-            objectName = uploadResult.getObjectName();
-            logger.info("Object name is " + objectName);
+            logger.info("Downloading file " + path + " from container " + containerName);
+            TransferResult downloadResult = manager.download(downloadConfig, containerName, path, working);
+            logger.info("Download completed. State:" + downloadResult.getState());
+
+            TransferState ts = downloadResult.getState();
+            while (ts.equals(TransferState.RestoreInProgress)) {
+                logger.info("Restore in progress. % completed: " + downloadResult.getRestoreCompletedPercentage());
+                Thread.sleep(1 * 60 * 1000); // Wait for 1 minute.
+                downloadResult = manager.download(downloadConfig, containerName, path, working);
+                ts = downloadResult.getState();
+            }
+
+            logger.info("Download Result:" + downloadResult.toString());
+            logger.info("Completed synchronous downloading of file ... ");
+
         } catch (ClientException ce) {
             System.out.println("Operation failed. " + ce.getMessage());
         } finally {
@@ -85,8 +74,36 @@ public class OracleArchive extends Device implements ArchiveStore {
             }
         }
 
-        // todo : Is this a useful thing to return??
-        return objectName;
+    }
+
+    @Override
+    public String store(String path, File working, Progress progress) throws Exception {
+        FileTransferManager manager = null;
+        try {
+            manager = FileTransferManager.getDefaultFileTransferManager(auth);
+
+            UploadConfig uploadConfig = new UploadConfig();
+            // todo  : I think a value of false prevents an object of the same name being overwritten, but this needs checked
+            uploadConfig.setOverwrite(false);
+            uploadConfig.setStorageClass(CloudStorageClass.Archive);
+
+            TransferTask<TransferResult> uploadTask = manager.uploadAsync(uploadConfig, containerName, working.getName(), working);
+
+            logger.info("Waiting for upload task to complete...");
+
+            TransferResult uploadResult = uploadTask.getResult();
+
+            logger.info("Task completed. State:" + uploadResult.getState());
+            logger.info("Object name is " + uploadResult.getObjectName());
+        } catch (ClientException ce) {
+            System.out.println("Operation failed. " + ce.getMessage());
+        } finally {
+            if (manager != null) {
+                manager.shutdown();
+            }
+        }
+
+        return working.getName();
     }
 
     @Override
