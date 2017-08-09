@@ -361,7 +361,7 @@ public class Deposit extends Task {
     
     private void moveFromUserUploads(Path tempPath, Path bagPath, String userID, String uploadPath) throws Exception {
         
-        File outputFile = bagPath.resolve("uploads").resolve(uploadPath).toFile();
+        File outputFile = bagPath.resolve("uploads").toFile();
         
         // TODO: this is a bit of a hack to escape the per-worker temp directory
         File uploadDir = tempPath.getParent().resolve("uploads").resolve(userID).resolve(uploadPath).toFile();
