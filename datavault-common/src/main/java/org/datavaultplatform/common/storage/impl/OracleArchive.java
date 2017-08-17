@@ -45,15 +45,20 @@ public class OracleArchive extends Device implements ArchiveStore {
 
     @Override
     public void retrieve(String path, File working, Progress progress) throws Exception {
+
+        // Note :- A file must typically be 'restored' before it can be 'transferred/retrieved'
+
         FileTransferManager manager = null;
         try {
+            logger.info("Downloading file " + path + " from container " + containerName);
+
             manager = FileTransferManager.getDefaultFileTransferManager(auth);
 
             DownloadConfig downloadConfig = new DownloadConfig();
 
-            logger.info("Downloading file " + path + " from container " + containerName);
+            // First 'restore' the file, assuming its not already in a restored state.
             TransferResult downloadResult = manager.download(downloadConfig, containerName, path, working);
-            logger.info("Download completed. State:" + downloadResult.getState());
+            logger.info("Restore/Download started. State:" + downloadResult.getState());
 
             TransferState ts = downloadResult.getState();
             while (ts.equals(TransferState.RestoreInProgress)) {
@@ -67,7 +72,9 @@ public class OracleArchive extends Device implements ArchiveStore {
             logger.info("Completed synchronous downloading of file ... ");
 
         } catch (ClientException ce) {
-            System.out.println("Operation failed. " + ce.getMessage());
+            logger.info("Download failed: " + ce.getMessage());
+            throw new Exception(ce);
+
         } finally {
             if (manager != null) {
                 manager.shutdown();
@@ -80,6 +87,8 @@ public class OracleArchive extends Device implements ArchiveStore {
     public String store(String path, File working, Progress progress) throws Exception {
         FileTransferManager manager = null;
         try {
+            logger.info("About to initiate upload to Cloud");
+
             manager = FileTransferManager.getDefaultFileTransferManager(auth);
 
             UploadConfig uploadConfig = new UploadConfig();
@@ -87,16 +96,15 @@ public class OracleArchive extends Device implements ArchiveStore {
             uploadConfig.setOverwrite(false);
             uploadConfig.setStorageClass(CloudStorageClass.Archive);
 
-            TransferTask<TransferResult> uploadTask = manager.uploadAsync(uploadConfig, containerName, working.getName(), working);
+            // Note :- There is an alternative async upload method, but if I can't think of anything useful to
+            // do meantime then what is the point?
+            TransferResult uploadResult = manager.upload(uploadConfig, containerName, working.getName(), working);
+            logger.info("Upload completed. Result:" + uploadResult.toString());
 
-            logger.info("Waiting for upload task to complete...");
-
-            TransferResult uploadResult = uploadTask.getResult();
-
-            logger.info("Task completed. State:" + uploadResult.getState());
-            logger.info("Object name is " + uploadResult.getObjectName());
         } catch (ClientException ce) {
-            System.out.println("Operation failed. " + ce.getMessage());
+            logger.info("Upload failed: " + ce.getMessage());
+            throw new Exception(ce);
+
         } finally {
             if (manager != null) {
                 manager.shutdown();
