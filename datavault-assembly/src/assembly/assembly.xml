@@ -13,6 +13,11 @@
             <directory>src/datavault-home</directory>
             <outputDirectory>datavault-home</outputDirectory>
         </fileSet>
+
+        <fileSet>
+            <directory>${root.basedir}/lib/ftm-sdk-2.2.5/libs</directory>
+            <outputDirectory>datavault-home/lib</outputDirectory>
+        </fileSet>
     </fileSets>
 
     <dependencySets>

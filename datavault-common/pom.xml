@@ -89,6 +89,15 @@
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-sns</artifactId>
         </dependency>
+
+        <!-- Oracle Cloud Storge -->
+        <dependency>
+            <groupId>ftm-sdk-2.2.5</groupId>
+            <artifactId>ftm-api</artifactId>
+            <version>2.2.5</version>
+            <scope>system</scope>
+            <systemPath>${root.basedir}/lib/ftm-sdk-2.2.5/libs/ftm-api-2.2.5.jar</systemPath>
+        </dependency>
         
     </dependencies>
 </project>
