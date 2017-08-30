@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
@@ -7,6 +8,7 @@ import javax.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.util.HashMap;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -19,6 +21,12 @@ public class ArchiveStore {
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Column(name = "id", unique = true, length = 36)
     private String id;
+
+    // An ArchiveStore can have many Archives
+    @JsonIgnore
+    @OneToMany(targetEntity = Archive.class, mappedBy = "archiveStore", fetch=FetchType.LAZY)
+    @OrderBy("timestamp")
+    private List<Archive> archives;
 
     // Class to use for access to storage
     @Column(columnDefinition = "TEXT")

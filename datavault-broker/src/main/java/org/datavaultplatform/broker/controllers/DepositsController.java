@@ -27,6 +27,7 @@ public class DepositsController {
 
     private VaultsService vaultsService;
     private DepositsService depositsService;
+    private ArchivesService archivesService;
     private RetrievesService retrievesService;
     private MetadataService metadataService;
     private ExternalMetadataService externalMetadataService;
@@ -44,6 +45,10 @@ public class DepositsController {
 
     public void setDepositsService(DepositsService depositsService) {
         this.depositsService = depositsService;
+    }
+
+    public void setArchivesService(ArchivesService archivesService) {
+        this.archivesService = archivesService;
     }
 
     public void setRetrievesService(RetrievesService retrievesService) {
@@ -139,7 +144,12 @@ public class DepositsController {
         String externalMetadata = externalMetadataService.getDatasetContent(vault.getDataset().getID());
         
         // Add the deposit object
-        depositsService.addDeposit(vault, deposit, storagePath, userStore.getLabel(), archiveStore.getID());
+        depositsService.addDeposit(vault, deposit, storagePath, userStore.getLabel());
+
+        // Add the archive object
+        // todo : loop round this to allow for multiple backend archive objects
+        archivesService.addArchive(new Archive(), deposit, archiveStore);
+
 
         // Create a job to track this deposit
         Job job = new Job("org.datavaultplatform.worker.tasks.Deposit");
@@ -260,11 +270,14 @@ public class DepositsController {
             retrievePath = fullPath.replaceFirst(storageID + "/", "");
         }
 
-        String archiveStoreID = deposit.getArchiveDevice();
-        ArchiveStore archiveStore = archiveStoreService.getArchiveStore(archiveStoreID);
+        // Get the appropriate archive for the deposit, and thence the ArchiveStore and ID.
+        // todo : At the moment we are assuming there is only one, change it to be the preferred one for retrieval
+        Archive archive = deposit.getArchives().get(0);
+        ArchiveStore archiveStore = archive.getArchiveStore();
+        String archiveID = archive.getArchiveId();
 
         if (archiveStore == null) {
-            throw new IllegalArgumentException("Archive store ID '" + archiveStoreID + "' is invalid");
+            throw new IllegalArgumentException("Archive store ID '" + archiveID + "' is invalid");
         }
 
         FileStore userStore = null;
@@ -303,7 +316,7 @@ public class DepositsController {
             retrieveProperties.put("retrieveId", retrieve.getID());
             retrieveProperties.put("bagId", deposit.getBagId());
             retrieveProperties.put("retrievePath", retrievePath); // No longer the absolute path
-            retrieveProperties.put("archiveId", deposit.getArchiveId());
+            retrieveProperties.put("archiveId", archiveID);
             retrieveProperties.put("archiveSize", Long.toString(deposit.getArchiveSize()));
             retrieveProperties.put("userId", user.getID());
             retrieveProperties.put("archiveDigest", deposit.getArchiveDigest());
