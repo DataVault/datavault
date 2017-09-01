@@ -65,6 +65,7 @@
     <bean id="depositsController" class="org.datavaultplatform.broker.controllers.DepositsController">
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
+        <property name="archivesService" ref="archivesService" />
         <property name="retrievesService" ref="retrievesService" />
         <property name="metadataService" ref="metadataService" />
         <property name="externalMetadataService" ref="externalMetadataService" />

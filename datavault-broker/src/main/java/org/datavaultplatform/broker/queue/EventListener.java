@@ -12,6 +12,7 @@ import org.springframework.amqp.core.MessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.HashMap;
+import java.util.List;
 
 public class EventListener implements MessageListener {
 
@@ -19,6 +20,7 @@ public class EventListener implements MessageListener {
     private EventService eventService;
     private VaultsService vaultsService;
     private DepositsService depositsService;
+    private ArchivesService archivesService;
     private RetrievesService retrievesService;
     private UsersService usersService;
     private EmailService emailService;
@@ -29,6 +31,7 @@ public class EventListener implements MessageListener {
     public void setEventService(EventService eventService) { this.eventService = eventService; }
     public void setVaultsService(VaultsService vaultsService) { this.vaultsService = vaultsService; }
     public void setDepositsService(DepositsService depositsService) { this.depositsService = depositsService; }
+    public void setArchivesService(ArchivesService archivesService) { this.archivesService = archivesService;}
     public void setRetrievesService(RetrievesService retrievesService) { this.retrievesService = retrievesService; }
     public void setUsersService(UsersService usersService) { this.usersService = usersService; }
     public void setEmailService(EmailService emailService) { this.emailService = emailService; }
@@ -50,6 +53,10 @@ public class EventListener implements MessageListener {
             // Get the related deposit
             Deposit deposit = depositsService.getDeposit(concreteEvent.getDepositId());
             concreteEvent.setDeposit(deposit);
+
+            // Get the related archive
+            // todo : allow for multiple backend archives, at the moment we will just assume there is one
+            Archive archive = archivesService.getArchives().get(0);
             
             // Get the related job
             Job job = jobsService.getJob(concreteEvent.getJobId());
@@ -198,9 +205,12 @@ public class EventListener implements MessageListener {
                 while (!success) {
                     try {
                         deposit.setStatus(Deposit.Status.COMPLETE);
-                        deposit.setArchiveId(completeEvent.getArchiveId());
                         deposit.setArchiveSize(completeEvent.getArchiveSize());
                         depositsService.updateDeposit(deposit);
+
+                        archive.setArchiveId(completeEvent.getArchiveId());
+                        archivesService.updateArchive(archive);
+
                         success = true;
                     } catch (org.hibernate.StaleObjectStateException e) {
                         // Refresh from database and retry

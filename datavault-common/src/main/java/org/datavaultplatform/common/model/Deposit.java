@@ -50,7 +50,13 @@ public class Deposit {
     
     @ManyToOne
     private Vault vault;
-    
+
+    // A Deposit can have many Archives
+    @JsonIgnore
+    @OneToMany(targetEntity = Archive.class, mappedBy = "deposit", fetch=FetchType.LAZY)
+    @OrderBy("creationTime")
+    private List<Archive> archives;
+
     // A Deposit can have a number of events
     @JsonIgnore
     @OneToMany(targetEntity=Event.class, mappedBy="deposit", fetch=FetchType.LAZY)
@@ -86,14 +92,7 @@ public class Deposit {
     @ApiObjectField(description = "ID of the bag associated with this Deposit")
     @Column(columnDefinition = "TEXT")
     private String bagId;
-    
-    // Archive properties (e.g. archive storage path or ID)
-    @Column(columnDefinition = "TEXT")
-    private String archiveDevice;
-    
-    @Column(columnDefinition = "TEXT")
-    private String archiveId;
-    
+
     // Size of the deposit package (in bytes)
     @Column(columnDefinition = "TEXT")
     private long archiveSize;
@@ -116,7 +115,7 @@ public class Deposit {
     private String filePath;
     
     // Size of the deposit (in bytes)
-    @ApiObjectField(description = "Size of the depoit (in bytes)")
+    @ApiObjectField(description = "Size of the deposit (in bytes)")
     private long depositSize;
     
     public Deposit() {}
@@ -142,7 +141,11 @@ public class Deposit {
     public void setVault(Vault vault) {
         this.vault = vault;
     }
-    
+
+    public List<Archive> getArchives() {
+        return archives;
+    }
+
     public String getNote() { return note; }
     
     public void setNote(String note) {
@@ -159,22 +162,6 @@ public class Deposit {
     
     public void setBagId(String bagId) {
         this.bagId = bagId;
-    }
-
-    public String getArchiveDevice() {
-        return archiveDevice;
-    }
-
-    public void setArchiveDevice(String archiveDevice) {
-        this.archiveDevice = archiveDevice;
-    }
-
-    public String getArchiveId() {
-        return archiveId;
-    }
-
-    public void setArchiveId(String archiveId) {
-        this.archiveId = archiveId;
     }
 
     public long getArchiveSize() {
