@@ -346,13 +346,14 @@ public class RestService {
     
     /* POST requests */
     
-    public String addFileChunk(String fileUploadHandle, String filename, String chunkNumber, String totalChunks, String chunkSize, String totalSize, byte[] content) {
+    public String addFileChunk(String fileUploadHandle, String filename, String encodedRelativePath, String chunkNumber, String totalChunks, String chunkSize, String totalSize, byte[] content) {
         
         String fileChunkURL = brokerURL + "/upload/" + fileUploadHandle + "/" + filename + "?" +
+                "relativePath=" + encodedRelativePath + "&" +
                 "chunkNumber=" + chunkNumber + "&" +
                 "totalChunks=" + totalChunks + "&" +
                 "chunkSize=" + chunkSize + "&" +
-                "totalSize=" + totalSize;
+                "totalSize=" + totalSize + "&";
         
         HttpEntity<?> response = post(fileChunkURL, Byte[].class, content);
         return (String)response.getBody();

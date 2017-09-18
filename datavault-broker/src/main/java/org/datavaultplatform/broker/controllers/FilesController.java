@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.HandlerMapping;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.User;
@@ -153,6 +154,7 @@ public class FilesController {
         
         System.out.println("Broker postFileChunk for " + user.getID() + " - " + filename);
         
+        String relativePath = new String(Base64.decodeBase64(request.getParameter("relativePath").getBytes()));
         Long chunkNumber = Long.parseLong(request.getParameter("chunkNumber"));
         Long totalChunks = Long.parseLong(request.getParameter("totalChunks"));
         Long chunkSize = Long.parseLong(request.getParameter("chunkSize"));
@@ -162,6 +164,7 @@ public class FilesController {
         
         /*
         System.out.println("Broker postFileChunk:" +
+                " relativePath=" + relativePath +
                 " chunkNumber=" + chunkNumber +
                 " totalChunks=" + totalChunks +
                 " chunkSize=" + chunkSize +
@@ -204,7 +207,18 @@ public class FilesController {
         }
         
         // Get the actual file
-        File f = handleUploadDirPath.resolve(filename).toFile();
+        File f = handleUploadDirPath.resolve(relativePath).toFile();
+        
+        // Check the path is a valid sub-path
+        Path canonicalBase = Paths.get(handleUploadDir.getCanonicalPath());
+        Path canonicalPath = Paths.get(f.getCanonicalPath());
+        if (!canonicalPath.startsWith(canonicalBase)) {
+            throw new Exception("Relative path error");
+        }
+        
+        // Create subdirectories (if needed)
+        f.getParentFile().mkdirs();
+        
         RandomAccessFile raf = new RandomAccessFile(f, "rw");
         
         //Seek through the file to the start of this chunk

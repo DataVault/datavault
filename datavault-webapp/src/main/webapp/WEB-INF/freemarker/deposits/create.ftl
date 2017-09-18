@@ -39,7 +39,6 @@
                 <h4 class="modal-title" id="addFromStorage">Add files from storage</h4>
             </div>
             <div class="modal-body">
-                <p>I'm a friendly message which tells you what to do</p>
                 <form id="add-from-storage-form">
                     <div class="form-group">
                         <label class="control-label">Select file or folder:</label>
@@ -113,7 +112,7 @@
                 </div>
               </div>
 
-              <div id="upload-tree" class="fancytree tree-box text-left" style="display:none; margin-top:15px;"></div>
+              <div id="upload-tree" class="fancytree tree-box text-left" style="display:none; margin-top:15px; max-height:25vh; overflow-y:scroll;"></div>
             </div>
         </div>
 
@@ -285,9 +284,9 @@
       }
       
       var childNode = uploadsNode.addChildren({
-        key: file.name,
-        title: file.name,
-        tooltip: file.name,
+        key: file.relativePath,
+        title: file.relativePath,
+        tooltip: file.relativePath,
         folder: false,
         extraClasses: 'progress-item'
       });
@@ -316,8 +315,8 @@
     });
     r.on('fileSuccess', function(file,message){
       // Reflect that the file upload has completed
-      $("#upload-tree").fancytree("getTree").getNodeByKey(file.name).extraClasses = '';
-      $("#upload-tree").fancytree("getTree").getNodeByKey(file.name).renderTitle();
+      $("#upload-tree").fancytree("getTree").getNodeByKey(file.relativePath).extraClasses = '';
+      $("#upload-tree").fancytree("getTree").getNodeByKey(file.relativePath).renderTitle();
     });
     r.on('fileError', function(file, message){
       // Reflect that the file upload has resulted in error

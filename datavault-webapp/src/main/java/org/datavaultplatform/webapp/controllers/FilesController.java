@@ -4,11 +4,11 @@ import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.webapp.model.FancytreeNode;
 import org.datavaultplatform.webapp.services.RestService;
 import java.util.ArrayList;
-
 import javax.servlet.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.*;
+import org.apache.commons.codec.binary.Base64;
 
 @Controller
 public class FilesController {
@@ -107,7 +107,8 @@ public class FilesController {
         MultipartFile file = request.getFile("file");
         
         // Send this chunk to the broker
-        restService.addFileChunk(fileUploadHandle, flowFilename, flowChunkNumber, flowTotalChunks, flowChunkSize, flowTotalSize, file.getBytes());
+        String encodedRelativePath = new String(Base64.encodeBase64(flowRelativePath.getBytes()));
+        restService.addFileChunk(fileUploadHandle, flowFilename, encodedRelativePath, flowChunkNumber, flowTotalChunks, flowChunkSize, flowTotalSize, file.getBytes());
         
         // Send a response to the client
         java.io.PrintWriter wr = response.getWriter();
