@@ -101,8 +101,7 @@
             <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
 
                 <div class="btn-toolbar">
-                    <button type="button" class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage"><i class="fa fa-hdd-o" aria-hidden="true"></i> Research Data Storage</button>
-                    <button type="button" class="btn btn-default" href="#" ><i class="fa fa-dropbox" aria-hidden="true"></i> Dropbox</button>
+                    <button type="button" class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage"><i class="fa fa-hdd-o" aria-hidden="true"></i> Data Storage</button>
                     <button type="button" class="btn btn-default flow-browse"><i class="fa fa-laptop" aria-hidden="true"></i> My Computer</button>
                 </div>
 
