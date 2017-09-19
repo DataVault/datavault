@@ -19,7 +19,8 @@ public class DepositsService {
     
     public void addDeposit(Vault vault,
                            Deposit deposit,
-                           String archiveDeviceID) {
+                           String shortPath,
+                           String origin) {
         
         Date d = new Date();
         deposit.setCreationTime(d);
@@ -27,11 +28,12 @@ public class DepositsService {
         deposit.setVault(vault);
         deposit.setStatus(Deposit.Status.NOT_STARTED);
         
+        // Set display values for the deposit path/origin
+        deposit.setShortFilePath(shortPath);
+        deposit.setFileOrigin(origin);
+        
         // Generate a new UUID for this Bag.
         deposit.setBagId(UUID.randomUUID().toString());
-        
-        // Link the deposit to the archive store
-        deposit.setArchiveDevice(archiveDeviceID);
         
         depositDAO.save(deposit);
     }

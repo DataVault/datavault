@@ -12,5 +12,7 @@ public interface ArchiveStoreDAO {
     public List<ArchiveStore> list();
 
     public ArchiveStore findById(String Id);
+
+    public void deleteById(String Id);
     
 }

@@ -32,6 +32,10 @@
         <property name="depositDAO" ref="depositDAO" />
     </bean>
 
+    <bean id="archivesService" class="org.datavaultplatform.broker.services.ArchivesService">
+        <property name="archiveDAO" ref="archiveDAO" />
+    </bean>
+
     <bean id="retrievesService" class="org.datavaultplatform.broker.services.RetrievesService">
         <property name="retrieveDAO" ref="retrieveDAO" />
     </bean>
@@ -144,6 +148,7 @@
         <property name="jobsService" ref="jobsService" />
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
+        <property name="archivesService" ref="archivesService" />
         <property name="retrievesService" ref="retrievesService" />
         <property name="eventService" ref="eventService" />
         <property name="usersService" ref="usersService" />
@@ -213,6 +218,10 @@
     </bean>
 
     <bean id="retrieveDAO" class="org.datavaultplatform.common.model.dao.RetrieveDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="archiveDAO" class="org.datavaultplatform.common.model.dao.ArchiveDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 

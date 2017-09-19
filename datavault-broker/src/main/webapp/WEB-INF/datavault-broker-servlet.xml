@@ -66,6 +66,7 @@
     <bean id="depositsController" class="org.datavaultplatform.broker.controllers.DepositsController">
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
+        <property name="archivesService" ref="archivesService" />
         <property name="retrievesService" ref="retrievesService" />
         <property name="metadataService" ref="metadataService" />
         <property name="externalMetadataService" ref="externalMetadataService" />
@@ -135,6 +136,10 @@
 
     <bean id="adminUsersController" class="org.datavaultplatform.broker.controllers.admin.AdminUsersController">
         <property name="usersService" ref="usersService" />
+    </bean>
+
+    <bean id="adminArchiveStoreController" class="org.datavaultplatform.broker.controllers.admin.AdminArchiveStoreController">
+        <property name="archiveStoreService" ref="archiveStoreService" />
     </bean>
 
     <bean id="initialiseDatabase" class="org.datavaultplatform.broker.scheduled.InitialiseDatabase">

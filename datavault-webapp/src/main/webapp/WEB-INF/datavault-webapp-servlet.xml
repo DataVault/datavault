@@ -130,6 +130,11 @@
         <property name="restService" ref="restService" />
     </bean>
 
+    <bean id="adminArchiveStoreController" class="org.datavaultplatform.webapp.controllers.admin.AdminArchiveStoreController">
+        <property name="restService" ref="restService" />
+        <property name="archiveDir" value="${archiveDir}" />
+    </bean>
+
     <bean id="groupVaultsController" class="org.datavaultplatform.webapp.controllers.groups.GroupVaultsController">
         <property name="restService" ref="restService" />
     </bean>
