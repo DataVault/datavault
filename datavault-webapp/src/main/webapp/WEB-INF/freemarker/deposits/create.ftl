@@ -94,15 +94,16 @@
                    value="${spring.status.value!""}">
             </select>
 
-            <div class="flow-error">
-              Your browser, unfortunately, is not supported by Flow.js. The library requires support for <a href="http://www.w3.org/TR/FileAPI/">the HTML5 File API</a> along with <a href="http://www.w3.org/TR/FileAPI/#normalization-of-params">file slicing</a>.
+            <div id="uploadMaxSizeAlert" class="alert alert-warning" role="alert" style="display:none;">
+              <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+              Files larger than 5GB cannot be uploaded directly from your computer.
             </div>
 
             <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
 
                 <div class="btn-toolbar">
                     <button type="button" class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage"><i class="fa fa-hdd-o" aria-hidden="true"></i> Data Storage</button>
-                    <button type="button" class="btn btn-default flow-browse"><i class="fa fa-laptop" aria-hidden="true"></i> My Computer</button>
+                    <button type="button" class="btn btn-default flow-browse" data-toggle="tooltip" title="Maximum file size: 5GB"><i class="fa fa-laptop" aria-hidden="true"></i> My Computer</button>
                 </div>
 
               <div class="progress" style="display:none; margin-top:15px;">
@@ -201,8 +202,8 @@
               var rootNode = $("#upload-tree").fancytree("getRootNode");
               storageNode = rootNode.addChildren({
                   key: "storage",
-                  title: "Research Data Storage",
-                  tooltip: "Research Data Storage",
+                  title: "Data Storage",
+                  tooltip: "Data Storage",
                   folder: true,
                   expanded: true
               });
@@ -264,6 +265,12 @@
     // Handle file add event
     r.on('fileAdded', function(file){
       
+      // Prevent browser upload of large files (5GB)
+      if (file.size > (5 * 1024 * 1024 * 1024)) {
+        $('#uploadMaxSizeAlert').show();
+        return false;
+      }
+
       // Show progress bar
       $('.progress').show();
 
