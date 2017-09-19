@@ -2,6 +2,7 @@ package org.datavaultplatform.broker.controllers;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.HashMap;
 
 import org.datavaultplatform.broker.services.*;
@@ -100,20 +101,66 @@ public class DepositsController {
         
         Deposit deposit = new Deposit();
         deposit.setNote(createDeposit.getNote());
-        deposit.setFilePath(createDeposit.getFilePath());
+        deposit.setDepositPaths(new ArrayList<DepositPath>());
         
-        String fullPath = deposit.getFilePath();
-        String storageID, storagePath;
-        if (!fullPath.contains("/")) {
-            // A request to archive the whole share/device
-            storageID = fullPath;
-            storagePath = "/";
-        } else {
-            // A request to archive a sub-directory
-            storageID = fullPath.substring(0, fullPath.indexOf("/"));
-            storagePath = fullPath.replaceFirst(storageID + "/", "");
-        }
+        List<FileStore> userStores = user.getFileStores();
+        
+        Map<String, String> userFileStoreClasses = new HashMap<>();
+        Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
+        
+        // Add any server-side filestore paths
+        if (createDeposit.getDepositPaths() != null) {
+            for (String path : createDeposit.getDepositPaths()) {
 
+                String storageID, storagePath;
+                if (!path.contains("/")) {
+                    // A request to archive the whole share/device
+                    storageID = path;
+                    storagePath = "/";
+                } else {
+                    // A request to archive a sub-directory
+                    storageID = path.substring(0, path.indexOf("/"));
+                    storagePath = path.replaceFirst(storageID + "/", "");
+                }
+
+                if (!userFileStoreClasses.containsKey(storageID)) {
+                    try {
+                        ObjectMapper mapper = new ObjectMapper();
+
+                        FileStore userStore = null;
+                        for (FileStore store : userStores) {
+                            if (store.getID().equals(storageID)) {
+                                userStore = store;
+                            }
+                        }
+
+                        if (userStore == null) {
+                            throw new IllegalArgumentException("Storage ID '" + storageID + "' is invalid");
+                        }
+
+                        // Check the source file path is valid
+                        if (!filesService.validPath(storagePath, userStore)) {
+                            throw new IllegalArgumentException("Path '" + storagePath + "' is invalid");
+                        }
+
+                        userFileStoreClasses.put(storageID, userStore.getStorageClass());
+                        userFileStoreProperties.put(storageID, userStore.getProperties());
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw(e);
+                    }
+                }
+
+                DepositPath depositPath = new DepositPath(deposit, path, Path.PathType.FILESTORE);
+                deposit.getDepositPaths().add(depositPath);
+            }
+        }
+        
+        // Add the file upload path
+        DepositPath fileUploadPath = new DepositPath(deposit, createDeposit.getFileUploadHandle(), Path.PathType.USER_UPLOAD);
+        deposit.getDepositPaths().add(fileUploadPath);
+        
         ArchiveStore archiveStore = null;
         List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
         if (archiveStores.size() > 0) {
@@ -123,33 +170,15 @@ public class DepositsController {
             throw new Exception("No configured archive storage");
         }
 
-        FileStore userStore = null;
-        List<FileStore> userStores = user.getFileStores();
-        for (FileStore store : userStores) {
-            if (store.getID().equals(storageID)) {
-                userStore = store;
-            }
-        }
-
-        if (userStore == null) {
-            throw new IllegalArgumentException("Storage ID '" + storageID + "' is invalid");
-        }
-
-        // Check the source file path is valid
-        if (!filesService.validPath(storagePath, userStore)) {
-            throw new IllegalArgumentException("Path '" + storagePath + "' is invalid");
-        }
-        
         // Get metadata content from the external provider (bypass database cache)
         String externalMetadata = externalMetadataService.getDatasetContent(vault.getDataset().getID());
         
         // Add the deposit object
-        depositsService.addDeposit(vault, deposit, storagePath, userStore.getLabel());
+        depositsService.addDeposit(vault, deposit, "", "");
 
         // Add the archive object
         // todo : loop round this to allow for multiple backend archive objects
         archivesService.addArchive(new Archive(), deposit, archiveStore);
-
 
         // Create a job to track this deposit
         Job job = new Job("org.datavaultplatform.worker.tasks.Deposit");
@@ -162,9 +191,8 @@ public class DepositsController {
             HashMap<String, String> depositProperties = new HashMap<>();
             depositProperties.put("depositId", deposit.getID());
             depositProperties.put("bagId", deposit.getBagId());
-            depositProperties.put("filePath", storagePath); // Path without storage ID
             depositProperties.put("userId", user.getID());
-
+            
             // Deposit and Vault metadata
             // TODO: at the moment we're just serialising the objects to JSON.
             // In future we'll need a more formal schema/representation (e.g. RDF or JSON-LD).
@@ -174,7 +202,18 @@ public class DepositsController {
             // External metadata is text from an external system - e.g. XML or JSON
             depositProperties.put("externalMetadata", externalMetadata);
             
-            Task depositTask = new Task(job, depositProperties, userStore, archiveStore);
+            ArrayList<String> filestorePaths = new ArrayList<>();
+            ArrayList<String> userUploadPaths = new ArrayList<>();
+            
+            for (DepositPath path: deposit.getDepositPaths()) {
+                if (path.getPathType() == Path.PathType.FILESTORE) {
+                    filestorePaths.add(path.getFilePath());
+                } else if (path.getPathType() == Path.PathType.USER_UPLOAD) {
+                    userUploadPaths.add(path.getFilePath());
+                }
+            }
+            
+            Task depositTask = new Task(job, depositProperties, archiveStore, userFileStoreProperties, userFileStoreClasses, filestorePaths, userUploadPaths);
             String jsonDeposit = mapper.writeValueAsString(depositTask);
             sender.send(jsonDeposit);
 
@@ -322,7 +361,13 @@ public class DepositsController {
             retrieveProperties.put("archiveDigest", deposit.getArchiveDigest());
             retrieveProperties.put("archiveDigestAlgorithm", deposit.getArchiveDigestAlgorithm());
             
-            Task retrieveTask = new Task(job, retrieveProperties, userStore, archiveStore);
+            // Add a single entry for the user file storage
+            Map<String, String> userFileStoreClasses = new HashMap<>();
+            Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
+            userFileStoreClasses.put(storageID, userStore.getStorageClass());
+            userFileStoreProperties.put(storageID, userStore.getProperties());
+            
+            Task retrieveTask = new Task(job, retrieveProperties, archiveStore, userFileStoreProperties, userFileStoreClasses, null, null);
             ObjectMapper mapper = new ObjectMapper();
             String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
             sender.send(jsonRetrieve);

@@ -9,6 +9,7 @@ import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+import java.util.UUID;
 
 /**
  * User: Robin Taylor
@@ -28,8 +29,14 @@ public class DepositsController {
     // Return an 'create new deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/create", method = RequestMethod.GET)
     public String createDeposit(ModelMap model, @PathVariable("vaultid") String vaultID) {
+        
         // pass the view an empty Deposit since the form expects it
-        model.addAttribute("deposit", new CreateDeposit());
+        CreateDeposit deposit = new CreateDeposit();
+        
+        // Maybe get this from an API call in future. For now generate a random ID.
+        deposit.setFileUploadHandle(UUID.randomUUID().toString());
+        
+        model.addAttribute("deposit", deposit);
         model.addAttribute("vault", restService.getVault(vaultID));
         return "/deposits/create";
     }

@@ -7,6 +7,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.FileUtils;
 import gov.loc.repository.bagit.*;
 import gov.loc.repository.bagit.Manifest.Algorithm;
@@ -97,7 +98,7 @@ public class Packager {
     public static boolean addMetaFile(File tagManifest, Path metadataDirPath, String metadataFileName, String metadata, Algorithm alg) throws IOException {
         
         File metadataFile = metadataDirPath.resolve(metadataFileName).toFile();
-        FileUtils.writeStringToFile(metadataFile, metadata);
+        FileUtils.writeStringToFile(metadataFile, metadata, StandardCharsets.UTF_8);
         String hash = computeFileHash(metadataFile, alg);
         FileUtils.writeStringToFile(tagManifest, hash + "  " + metadataDirName + "/" + metadataFileName + "\r\n", true);
         

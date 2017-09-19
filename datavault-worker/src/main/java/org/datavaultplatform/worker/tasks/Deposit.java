@@ -37,8 +37,7 @@ public class Deposit extends Task {
     private static final Logger logger = LoggerFactory.getLogger(Deposit.class);
     
     EventSender eventStream;
-    Device userFs;
-    UserStore userStore;
+    HashMap<String, UserStore> userStores;
     ArchiveStore archiveFs;
     String depositId;
     String bagID;
@@ -55,9 +54,7 @@ public class Deposit extends Task {
         depositId = properties.get("depositId");
         bagID = properties.get("bagId");
         userID = properties.get("userId");
-        String filePath = properties.get("filePath");
         
-
         if (this.isRedeliver()) {
             eventStream.send(new Error(jobID, depositId, "Deposit stopped: the message had been redelivered, please investigate")
                 .withUserId(userID));
@@ -85,21 +82,37 @@ public class Deposit extends Task {
             .withNextState(0));
         
         logger.info("bagID: " + bagID);
-        logger.info("filePath: " + filePath);
         
-        // Connect to the user storage
-        try {
-            Class<?> clazz = Class.forName(userFileStore.getStorageClass());
-            Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-            Object instance = constructor.newInstance(userFileStore.getStorageClass(), userFileStore.getProperties());
-            userFs = (Device)instance;
-            userStore = (UserStore)userFs;
-        } catch (Exception e) {
-            String msg = "Deposit failed: could not access user filesystem";
-            logger.error(msg, e);
-            eventStream.send(new Error(jobID, depositId, msg)
-                .withUserId(userID));
-            return;
+        userStores = new HashMap<>();
+        
+        for (String storageID : userFileStoreClasses.keySet()) {
+            
+            String storageClass = userFileStoreClasses.get(storageID);
+            Map<String, String> storageProperties = userFileStoreProperties.get(storageID);
+            
+            // Connect to the user storage devices
+            try {
+                Class<?> clazz = Class.forName(storageClass);
+                Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
+                Object instance = constructor.newInstance(storageClass, storageProperties);                
+                Device userFs = (Device)instance;
+                UserStore userStore = (UserStore)userFs;
+                userStores.put(storageID, userStore);
+                logger.info("Connected to user store: " + storageID + ", class: " + storageClass);
+            } catch (Exception e) {
+                String msg = "Deposit failed: could not access user filesystem";
+                logger.error(msg, e);
+                eventStream.send(new Error(jobID, depositId, msg)
+                    .withUserId(userID));
+                return;
+            }
+        }
+        
+        for (String path : fileStorePaths) {
+            System.out.println("fileStorePath: " + path);
+        }
+        for (String path : fileUploadPaths) {
+            System.out.println("fileUploadPath: " + path);
         }
         
         // Connect to the archive storage
@@ -116,134 +129,203 @@ public class Deposit extends Task {
             return;
         }
         
-        logger.info("Deposit file: " + filePath);
-
-        try {
-            if (userStore.exists(filePath)) {
-
-                // Create a new directory based on the broker-generated UUID
-                Path bagPath = context.getTempDir().resolve(bagID);
-                File bagDir = bagPath.toFile();
-                bagDir.mkdir();
-                
-                // Copy the target file to the bag directory
-                eventStream.send(new UpdateProgress(jobID, depositId)
-                    .withUserId(userID)
-                    .withNextState(1));
-                
-                logger.info("Copying target to bag directory ...");
-                copyFromUserStorage(filePath, bagPath);
-                
-                // Bag the directory in-place
-                eventStream.send(new TransferComplete(jobID, depositId)
-                    .withUserId(userID)
-                    .withNextState(2));
-                
-                logger.info("Creating bag ...");
-                Packager.createBag(bagDir);
-                
-                // Identify the deposit file types
-                logger.info("Identifying file types ...");
-                Path bagDataPath = bagDir.toPath().resolve("data");
-                HashMap<String, String> fileTypes = Identifier.detectDirectory(bagDataPath);
-                ObjectMapper mapper = new ObjectMapper();
-                String fileTypeMetadata = mapper.writeValueAsString(fileTypes);
-                
-                // Add vault/deposit/type metadata to the bag
-                Packager.addMetadata(bagDir, depositMetadata, vaultMetadata, fileTypeMetadata, externalMetadata);
-                
-                // Tar the bag directory
-                logger.info("Creating tar file ...");
-                String tarFileName = bagID + ".tar";
-                Path tarPath = context.getTempDir().resolve(tarFileName);
-                File tarFile = tarPath.toFile();
-                Tar.createTar(bagDir, tarFile);
-                String tarHash = Verify.getDigest(tarFile);
-                String tarHashAlgorithm = Verify.getAlgorithm();
-
-                eventStream.send(new PackageComplete(jobID, depositId)
-                    .withUserId(userID)
-                    .withNextState(3));
-                
-                long archiveSize = tarFile.length();
-                logger.info("Tar file: " + archiveSize + " bytes");
-                logger.info("Checksum algorithm: " + tarHashAlgorithm);
-                logger.info("Checksum: " + tarHash);
-                
-                eventStream.send(new ComputedDigest(jobID, depositId, tarHash, tarHashAlgorithm)
+        // Calculate the total deposit size of selected files
+        long depositTotalSize = 0;
+        for (String filePath: fileStorePaths) {
+        
+            String storageID = filePath.substring(0, filePath.indexOf('/'));
+            String storagePath = filePath.substring(filePath.indexOf('/')+1);
+            
+            try {
+                UserStore userStore = userStores.get(storageID);
+                depositTotalSize += userStore.getSize(storagePath);
+            } catch (Exception e) {
+                String msg = "Deposit failed: could not access user filesystem";
+                logger.error(msg, e);
+                eventStream.send(new Error(jobID, depositId, msg)
                     .withUserId(userID));
-                
-                // Create the meta directory for the bag information
-                Path metaPath = context.getMetaDir().resolve(bagID);
-                File metaDir = metaPath.toFile();
-                metaDir.mkdir();
-                
-                // Copy bag meta files to the meta directory
-                logger.info("Copying meta files ...");
-                Packager.extractMetadata(bagDir, metaDir);
-                
-                // Copy the resulting tar file to the archive area
-                logger.info("Copying tar file to archive ...");
-                String archiveId = copyToArchiveStorage(tarFile);
-                
-                // Cleanup
-                logger.info("Cleaning up ...");
-                FileUtils.deleteDirectory(bagDir);
-                
-                eventStream.send(new UpdateProgress(jobID, depositId)
-                    .withUserId(userID)
-                    .withNextState(4));
-                
-                logger.info("Verifying archive package ...");
-                logger.info("Verification method: " + archiveFs.getVerifyMethod());
-                
-                // Get the tar file
-                
-                if (archiveFs.getVerifyMethod() == Verify.Method.LOCAL_ONLY) {
-                    
-                    // Verify the contents of the temporary file
-                    verifyTarFile(context.getTempDir(), tarFile, null);
-                    
-                } else if (archiveFs.getVerifyMethod() == Verify.Method.COPY_BACK) {
+                return;
+            }
+        }
+        
+        // Add size of any user uploads
+        try {
+            for (String path : fileUploadPaths) {
+                depositTotalSize += getUserUploadsSize(context.getTempDir(), userID, path);
+            }
+        } catch (Exception e) {
+            String msg = "Deposit failed: could not access user uploads";
+            logger.error(msg, e);
+            eventStream.send(new Error(jobID, depositId, msg)
+                .withUserId(userID));
+            return;
+        }
+        
+        // Store the calculated deposit size
+        eventStream.send(new ComputedSize(jobID, depositId, depositTotalSize)
+            .withUserId(userID));
+        
+        // Create a new directory based on the broker-generated UUID
+        Path bagPath = context.getTempDir().resolve(bagID);
+        File bagDir = bagPath.toFile();
+        bagDir.mkdir();
+        
+        Long depositIndex = 0L;
+        
+        for (String filePath: fileStorePaths) {
+        
+            String storageID = filePath.substring(0, filePath.indexOf('/'));
+            String storagePath = filePath.substring(filePath.indexOf('/')+1);
+            
+            logger.info("Deposit file: " + filePath);
+            logger.info("Deposit storageID: " + storageID);
+            logger.info("Deposit storagePath: " + storagePath);
+            
+            UserStore userStore = userStores.get(storageID);
+            
+            Path depositPath = bagPath;
+            // If there are multiple deposits then create a sub-directory for each one
+            if (fileStorePaths.size() > 1) {
+                depositIndex += 1;
+                depositPath = bagPath.resolve(depositIndex.toString());
+                depositPath.toFile().mkdir();
+            }
+            
+            try {
+                if (userStore.exists(storagePath)) {
 
-                    // Delete the existing temporary file
-                    tarFile.delete();
+                    // Copy the target file to the bag directory
+                    eventStream.send(new UpdateProgress(jobID, depositId)
+                        .withUserId(userID)
+                        .withNextState(1));
+
+                    logger.info("Copying target to bag directory ...");
+                    copyFromUserStorage(userStore, storagePath, depositPath);
                     
-                    // Copy file back from the archive storage
-                    copyBackFromArchive(archiveId, tarFile);
-                    
-                    // Verify the contents
-                    verifyTarFile(context.getTempDir(), tarFile, tarHash);
+                } else {
+                    logger.error("File does not exist.");
+                    eventStream.send(new Error(jobID, depositId, "Deposit failed: file not found")
+                        .withUserId(userID));
                 }
-                
-                logger.info("Deposit complete: " + archiveId);
-                
-                eventStream.send(new Complete(jobID, depositId, archiveId, archiveSize)
-                    .withUserId(userID)
-                    .withNextState(5));
-                
-            } else {
-                logger.error("File does not exist.");
-                eventStream.send(new Error(jobID, depositId, "Deposit failed: file not found")
+            } catch (Exception e) {
+                String msg = "Deposit failed: " + e.getMessage();
+                logger.error(msg, e);
+                eventStream.send(new Error(jobID, depositId, msg)
                     .withUserId(userID));
             }
+        }
+        
+        try {
+
+            // Add any directly uploaded files (direct move from temp dir)            
+            for (String path : fileUploadPaths) {
+                moveFromUserUploads(context.getTempDir(), bagPath, userID, path);
+            }
+            
+            // Bag the directory in-place
+            eventStream.send(new TransferComplete(jobID, depositId)
+                .withUserId(userID)
+                .withNextState(2));
+
+            logger.info("Creating bag ...");
+            Packager.createBag(bagDir);
+
+            // Identify the deposit file types
+            logger.info("Identifying file types ...");
+            Path bagDataPath = bagDir.toPath().resolve("data");
+            HashMap<String, String> fileTypes = Identifier.detectDirectory(bagDataPath);
+            ObjectMapper mapper = new ObjectMapper();
+            String fileTypeMetadata = mapper.writeValueAsString(fileTypes);
+
+            // Add vault/deposit/type metadata to the bag
+            Packager.addMetadata(bagDir, depositMetadata, vaultMetadata, fileTypeMetadata, externalMetadata);
+
+            // Tar the bag directory
+            logger.info("Creating tar file ...");
+            String tarFileName = bagID + ".tar";
+            Path tarPath = context.getTempDir().resolve(tarFileName);
+            File tarFile = tarPath.toFile();
+            Tar.createTar(bagDir, tarFile);
+            String tarHash = Verify.getDigest(tarFile);
+            String tarHashAlgorithm = Verify.getAlgorithm();
+
+            eventStream.send(new PackageComplete(jobID, depositId)
+                .withUserId(userID)
+                .withNextState(3));
+
+            long archiveSize = tarFile.length();
+            logger.info("Tar file: " + archiveSize + " bytes");
+            logger.info("Checksum algorithm: " + tarHashAlgorithm);
+            logger.info("Checksum: " + tarHash);
+
+            eventStream.send(new ComputedDigest(jobID, depositId, tarHash, tarHashAlgorithm)
+                .withUserId(userID));
+
+            // Create the meta directory for the bag information
+            Path metaPath = context.getMetaDir().resolve(bagID);
+            File metaDir = metaPath.toFile();
+            metaDir.mkdir();
+
+            // Copy bag meta files to the meta directory
+            logger.info("Copying meta files ...");
+            Packager.extractMetadata(bagDir, metaDir);
+
+            // Copy the resulting tar file to the archive area
+            logger.info("Copying tar file to archive ...");
+            String archiveId = copyToArchiveStorage(tarFile);
+
+            // Cleanup
+            logger.info("Cleaning up ...");
+            FileUtils.deleteDirectory(bagDir);
+
+            eventStream.send(new UpdateProgress(jobID, depositId)
+                .withUserId(userID)
+                .withNextState(4));
+
+            logger.info("Verifying archive package ...");
+            logger.info("Verification method: " + archiveFs.getVerifyMethod());
+
+            // Get the tar file
+
+            if (archiveFs.getVerifyMethod() == Verify.Method.LOCAL_ONLY) {
+
+                // Verify the contents of the temporary file
+                verifyTarFile(context.getTempDir(), tarFile, null);
+
+            } else if (archiveFs.getVerifyMethod() == Verify.Method.COPY_BACK) {
+
+                // Delete the existing temporary file
+                tarFile.delete();
+
+                // Copy file back from the archive storage
+                copyBackFromArchive(archiveId, tarFile);
+
+                // Verify the contents
+                verifyTarFile(context.getTempDir(), tarFile, tarHash);
+            }
+
+            logger.info("Deposit complete: " + archiveId);
+
+            eventStream.send(new Complete(jobID, depositId, archiveId, archiveSize)
+                .withUserId(userID)
+                .withNextState(5));
         } catch (Exception e) {
             String msg = "Deposit failed: " + e.getMessage();
             logger.error(msg, e);
             eventStream.send(new Error(jobID, depositId, msg)
                 .withUserId(userID));
         }
+        
+        // TODO: Disconnect from user and archive storage system?
     }
     
-    private void copyFromUserStorage(String filePath, Path bagPath) throws Exception {
+    private void copyFromUserStorage(UserStore userStore, String filePath, Path bagPath) throws Exception {
 
         String fileName = userStore.getName(filePath);
         File outputFile = bagPath.resolve(fileName).toFile();
         
         // Compute bytes to copy
         long expectedBytes = userStore.getSize(filePath);
-        eventStream.send(new ComputedSize(jobID, depositId, expectedBytes)
-            .withUserId(userID));
         
         // Display progress bar
         eventStream.send(new UpdateProgress(jobID, depositId, 0, expectedBytes, "Starting transfer ...")
@@ -259,11 +341,33 @@ public class Deposit extends Task {
         
         try {
             // Ask the driver to copy files to our working directory
-            userFs.retrieve(filePath, outputFile, progress);
+            ((Device)userStore).retrieve(filePath, outputFile, progress);
         } finally {
             // Stop the tracking thread
             tracker.stop();
             trackerThread.join();
+        }
+    }
+    
+    private long getUserUploadsSize(Path tempPath, String userID, String uploadPath) throws Exception {
+        // TODO: this is a bit of a hack to escape the per-worker temp directory
+        File uploadDir = tempPath.getParent().resolve("uploads").resolve(userID).resolve(uploadPath).toFile();
+        if (uploadDir.exists()) {
+            logger.info("Calculating size of user uploads directory");
+            return FileUtils.sizeOfDirectory(uploadDir);
+        }
+        return 0;
+    }
+    
+    private void moveFromUserUploads(Path tempPath, Path bagPath, String userID, String uploadPath) throws Exception {
+        
+        File outputFile = bagPath.resolve("uploads").toFile();
+        
+        // TODO: this is a bit of a hack to escape the per-worker temp directory
+        File uploadDir = tempPath.getParent().resolve("uploads").resolve(userID).resolve(uploadPath).toFile();
+        if (uploadDir.exists()) {
+            logger.info("Moving user uploads to bag directory");
+            FileUtils.moveDirectory(uploadDir, outputFile);
         }
     }
     

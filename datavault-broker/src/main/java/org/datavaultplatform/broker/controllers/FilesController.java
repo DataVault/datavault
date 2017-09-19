@@ -1,8 +1,12 @@
 package org.datavaultplatform.broker.controllers;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.io.File;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.broker.services.FilesService;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,11 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.HandlerMapping;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.User;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * User: Robin Taylor
@@ -28,6 +35,7 @@ public class FilesController {
     
     private FilesService filesService;
     private UsersService usersService;
+    private String tempDir;
     
     public void setFilesService(FilesService filesService) {
         this.filesService = filesService;
@@ -35,6 +43,10 @@ public class FilesController {
     
     public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
+    }
+    
+    public void setTempDir(String tempDir) {
+        this.tempDir = tempDir;
     }
     
     @RequestMapping("/files")
@@ -130,5 +142,103 @@ public class FilesController {
         } else {
             return FileUtils.byteCountToDisplaySize(size);
         }
+    }
+    
+    @RequestMapping(value="/upload/{fileUploadHandle}/{filename:.+}", method = RequestMethod.POST)
+    public String postFileChunk(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                HttpServletRequest request,
+                                @PathVariable("fileUploadHandle") String fileUploadHandle,
+                                @PathVariable("filename") String filename) throws Exception {
+        
+        User user = usersService.getUser(userID);
+        
+        System.out.println("Broker postFileChunk for " + user.getID() + " - " + filename);
+        
+        String relativePath = new String(Base64.decodeBase64(request.getParameter("relativePath").getBytes()));
+        Long chunkNumber = Long.parseLong(request.getParameter("chunkNumber"));
+        Long totalChunks = Long.parseLong(request.getParameter("totalChunks"));
+        Long chunkSize = Long.parseLong(request.getParameter("chunkSize"));
+        Long totalSize = Long.parseLong(request.getParameter("totalSize"));
+        
+        System.out.println("fileUploadHandle =" + fileUploadHandle);
+        
+        /*
+        System.out.println("Broker postFileChunk:" +
+                " relativePath=" + relativePath +
+                " chunkNumber=" + chunkNumber +
+                " totalChunks=" + totalChunks +
+                " chunkSize=" + chunkSize +
+                " totalSize=" + totalSize);
+        */
+        
+        // Get the top-level upload directory
+        String dirName = "uploads";
+        Path uploadDirPath = Paths.get(tempDir, dirName);
+        File uploadDir = uploadDirPath.toFile();
+        
+        if (!uploadDir.exists()) {
+            System.out.println("Creating uploadDir: " + uploadDir.getPath());
+            Boolean success = uploadDir.mkdir();
+            if (!success && !uploadDir.exists()) {
+                throw new Exception("Unable to create uploadDir");
+            }
+        }
+        
+        // Create the directory for this user
+        Path userUploadDirPath = uploadDirPath.resolve(userID);
+        File userUploadDir = userUploadDirPath.toFile();
+        if (!userUploadDir.exists()) {
+            System.out.println("Creating userUploadDir: " + userUploadDir.getPath());
+            Boolean success = userUploadDir.mkdir();
+            if (!success && !userUploadDir.exists()) {
+                throw new Exception("Unable to create userUploadDir");
+            }
+        }
+        
+        // Create the upload directory within the user directory
+        Path handleUploadDirPath = userUploadDirPath.resolve(fileUploadHandle);
+        File handleUploadDir = handleUploadDirPath.toFile();
+        if (!handleUploadDir.exists()) {
+            System.out.println("Creating handleUploadDir: " + handleUploadDir.getPath());
+            Boolean success = handleUploadDir.mkdir();
+            if (!success && !handleUploadDir.exists()) {
+                throw new Exception("Unable to create handleUploadDir");
+            }
+        }
+        
+        // Get the actual file
+        File f = handleUploadDirPath.resolve(relativePath).toFile();
+        
+        // Check the path is a valid sub-path
+        Path canonicalBase = Paths.get(handleUploadDir.getCanonicalPath());
+        Path canonicalPath = Paths.get(f.getCanonicalPath());
+        if (!canonicalPath.startsWith(canonicalBase)) {
+            throw new Exception("Relative path error");
+        }
+        
+        // Create subdirectories (if needed)
+        f.getParentFile().mkdirs();
+        
+        RandomAccessFile raf = new RandomAccessFile(f, "rw");
+        
+        //Seek through the file to the start of this chunk
+        raf.seek((chunkNumber - 1) * chunkSize);
+        
+        // Write chunk bytes to file
+        InputStream is = request.getInputStream();
+        long count = 0;
+        long length = request.getContentLength();
+        byte[] buf = new byte[1024 * 1024];
+        while(count < length) {
+            int r = is.read(buf);
+            if (r < 0)  {
+                break;
+            }
+            raf.write(buf, 0, r);
+            count += r;
+        }
+        raf.close();
+        
+        return "";
     }
 }
