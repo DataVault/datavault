@@ -42,7 +42,7 @@
                 <form id="add-from-storage-form">
                     <div class="form-group">
                         <label class="control-label">Select file or folder:</label>
-                        <div id="tree" class="fancytree tree-box"></div>
+                        <div id="tree" class="fancytree tree-box" style="max-height:50vh; overflow-y:scroll;"></div>
                         <label id="deposit-size" class="text-muted small">No files selected</label>
                     </div>
                 </form>
@@ -256,6 +256,9 @@
         maxChunkRetries:1
     });
     
+    // Keep track of uploaded directory names (top level only)
+    var uploadDirs = {};
+
     r.assignDrop($('.flow-drop')[0]);
     r.assignBrowse($('.flow-browse')[0]);
 
@@ -283,13 +286,27 @@
         });
       }
       
-      var childNode = uploadsNode.addChildren({
-        key: file.relativePath,
-        title: file.relativePath,
-        tooltip: file.relativePath,
-        folder: false,
-        extraClasses: 'progress-item'
-      });
+      if (file.relativePath == file.name) {
+        var childNode = uploadsNode.addChildren({
+          key: file.name,
+          title: file.name,
+          tooltip: file.name,
+          folder: false
+        });
+      } else {
+        var dirName = file.relativePath.split('/')[0];
+        if (!(dirName in uploadDirs)) {
+          uploadDirs[dirName] = true;
+          var childNode = uploadsNode.addChildren({
+            key: dirName,
+            title: dirName,
+            tooltip: dirName,
+            folder: true
+          });
+        }
+      }
+
+      // extraClasses: 'progress-item'
 
       var $self = $('.flow-file-'+file.uniqueIdentifier);
       $self.find('.flow-file-name').text(file.name);
@@ -315,8 +332,10 @@
     });
     r.on('fileSuccess', function(file,message){
       // Reflect that the file upload has completed
+      /*
       $("#upload-tree").fancytree("getTree").getNodeByKey(file.relativePath).extraClasses = '';
       $("#upload-tree").fancytree("getTree").getNodeByKey(file.relativePath).renderTitle();
+      */
     });
     r.on('fileError', function(file, message){
       // Reflect that the file upload has resulted in error
@@ -336,7 +355,7 @@
       }
     });
     r.on('catchAll', function() {
-      console.log.apply(console, arguments);
+      // console.log.apply(console, arguments);
     });
     window.r = {
       pause: function () {
