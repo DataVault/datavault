@@ -120,10 +120,6 @@
         <property name="passphrase" value="${sftp.passphrase}"/>
     </bean>
     
-    <bean id="archiveStoreController" class="org.datavaultplatform.broker.controllers.ArchiveStoreController">
-        <property name="archiveStoreService" ref="archiveStoreService" />
-    </bean>
-    
     <bean id="metadataController" class="org.datavaultplatform.broker.controllers.MetadataController">
         <property name="externalMetadataService" ref="externalMetadataService" />
     </bean>

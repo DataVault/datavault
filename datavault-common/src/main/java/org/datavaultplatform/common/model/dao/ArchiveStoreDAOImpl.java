@@ -62,6 +62,16 @@ public class ArchiveStoreDAOImpl implements ArchiveStoreDAO {
     }
 
     @Override
+    public ArchiveStore findForRetrieval() {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(ArchiveStore.class);
+        criteria.add(Restrictions.eq("retrieve",true));
+        ArchiveStore archiveStore = (ArchiveStore)criteria.uniqueResult();
+        session.close();
+        return archiveStore;
+    }
+
+    @Override
     public void deleteById(String Id) {
         logger.info("Deleting Archivestore with id " + Id);
 
