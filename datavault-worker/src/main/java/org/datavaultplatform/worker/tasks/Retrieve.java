@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 
 import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
 import org.datavaultplatform.common.event.retrieve.RetrieveStart;
+import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.worker.queue.EventSender;
@@ -99,7 +100,10 @@ public class Retrieve extends Task {
                 return;
             }
         }
-        
+
+        // We get passed a list because it is a parameter common to deposits and retrieves, but for retrieve there should only be one.
+        ArchiveStore archiveFileStore = archiveFileStores.get(0);
+
         // Connect to the archive storage
         try {
             Class<?> clazz = Class.forName(archiveFileStore.getStorageClass());

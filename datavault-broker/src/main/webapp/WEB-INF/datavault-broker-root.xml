@@ -148,6 +148,7 @@
         <property name="jobsService" ref="jobsService" />
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
+        <property name="archiveStoreService" ref="archiveStoreService" />
         <property name="archivesService" ref="archivesService" />
         <property name="retrievesService" ref="retrievesService" />
         <property name="eventService" ref="eventService" />

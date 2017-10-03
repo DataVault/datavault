@@ -8,28 +8,32 @@ import java.util.List;
 public class ArchiveStoreService {
 
     private ArchiveStoreDAO archiveStoreDAO;
-    
+
     public List<ArchiveStore> getArchiveStores() {
         return archiveStoreDAO.list();
     }
-    
+
     public void addArchiveStore(ArchiveStore archiveStore) {
-        
+
         archiveStoreDAO.save(archiveStore);
     }
-    
+
     public void updateArchiveStore(ArchiveStore archiveStore) {
         archiveStoreDAO.update(archiveStore);
     }
-    
+
     public ArchiveStore getArchiveStore(String archiveStoreID) {
         return archiveStoreDAO.findById(archiveStoreID);
+    }
+
+    public ArchiveStore getForRetrieval() {
+        return archiveStoreDAO.findForRetrieval();
     }
 
     public void deleteArchiveStore(String archiveStoreID) {
         archiveStoreDAO.deleteById(archiveStoreID);
     }
-    
+
     public void setArchiveStoreDAO(ArchiveStoreDAO archiveStoreDAO) {
         this.archiveStoreDAO = archiveStoreDAO;
     }
