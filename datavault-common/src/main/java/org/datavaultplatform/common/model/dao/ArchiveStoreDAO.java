@@ -13,6 +13,8 @@ public interface ArchiveStoreDAO {
 
     public ArchiveStore findById(String Id);
 
+    public ArchiveStore findForRetrieval();
+
     public void deleteById(String Id);
     
 }

@@ -65,6 +65,7 @@
             <tr class="tr">
                 <th>Hostname</th>
                 <th>Path</th>
+                <th>Retrieve Enabled</t>
                 <th></th>
             </tr>
             </thead>
@@ -74,6 +75,11 @@
                     <tr class="tr">
                         <td>localhost</td>
                         <td>${archivestoreLocal.properties['rootPath']}</td>
+                        <td>
+                            <div class="checkbox">
+                                <input type="checkbox" class="toggleRetrieveEnabled" data-archivestore1="${archivestoreLocal.ID}" ${archivestoreLocal.retrieveEnabled?then("checked", "")}>
+                            </div>
+                        </td>
                         <td>
                             <a class="btn btn-xs btn-danger pull-right" href="#" data-archivestore="${archivestoreLocal.ID}" data-toggle="modal" data-target="#confirm-removal">
                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
@@ -144,6 +150,26 @@
         });
 
         ev.preventDefault();
+    });
+
+    // Handle enable/disable retrieval
+    $('.toggleRetrieveEnabled').click(function() {
+        var command;
+        var archivestore1 = $(this).data('archivestore1');
+
+        if ($(this).prop("checked")) {
+            command = 'enable';
+        } else {
+            command = 'disable';
+        }
+
+        $.ajax({
+            url: '${springMacroRequestContext.getContextPath()}/admin/archivestores/' + archivestore1 + '/' + command,
+            type: 'POST',
+            error: function(xhr, ajaxOptions, thrownError) {
+                alert('Error: unable to update archivestore');
+            }
+        });
     });
 
 

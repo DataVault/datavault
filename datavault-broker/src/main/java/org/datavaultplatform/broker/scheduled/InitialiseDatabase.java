@@ -42,7 +42,7 @@ public class InitialiseDatabase {
         if (archiveStores.isEmpty()) {
             HashMap<String,String> storeProperties = new HashMap<String,String>();
             storeProperties.put("rootPath", archiveDir);
-            ArchiveStore store = new ArchiveStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Default archive store (local)");
+            ArchiveStore store = new ArchiveStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Default archive store (local)", true);
             archiveStoreService.addArchiveStore(store);
         }
 

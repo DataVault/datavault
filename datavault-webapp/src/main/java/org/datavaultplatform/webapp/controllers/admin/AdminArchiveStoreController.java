@@ -59,7 +59,7 @@ public class AdminArchiveStoreController {
     public void addLocalArchivestore(@RequestParam("path") String path) {
         HashMap<String,String> storeProperties = new HashMap<String,String>();
         storeProperties.put("rootPath", path);
-        ArchiveStore store = new ArchiveStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Default archive store (local)");
+        ArchiveStore store = new ArchiveStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Default archive store (local)", false);
         restService.addArchiveStore(store);
     }
 
@@ -68,6 +68,24 @@ public class AdminArchiveStoreController {
     @ResponseBody
     public void deleteArchiveStore(ModelMap model, @PathVariable("archivestoreId") String archivestoreId) {
         restService.deleteArchiveStore(archivestoreId);
+    }
+
+    // Mark this archive store as being the preferred one for retrieval
+    @RequestMapping(value = "/admin/archivestores/{archivestoreId}/enable", method = RequestMethod.POST)
+    @ResponseBody
+    public void enableRetrieve(ModelMap model, @PathVariable("archivestoreId") String archivestoreId) {
+        ArchiveStore archiveStore = restService.getArchiveStore(archivestoreId);
+        archiveStore.setRetrieveEnabled(true);
+        restService.editArchiveStore(archiveStore);
+    }
+
+    // Mark this archivestore as no longer being preferred for retrieval
+    @RequestMapping(value = "/admin/archivestores/{archivestoreId}/disable", method = RequestMethod.POST)
+    @ResponseBody
+    public void disableRetrieve(ModelMap model, @PathVariable("archivestoreId") String archivestoreId) {
+        ArchiveStore archiveStore = restService.getArchiveStore(archivestoreId);
+        archiveStore.setRetrieveEnabled(false);
+        restService.editArchiveStore(archiveStore);
     }
 
 
