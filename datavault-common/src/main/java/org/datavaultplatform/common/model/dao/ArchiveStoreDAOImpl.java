@@ -65,7 +65,7 @@ public class ArchiveStoreDAOImpl implements ArchiveStoreDAO {
     public ArchiveStore findForRetrieval() {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(ArchiveStore.class);
-        criteria.add(Restrictions.eq("retrieve",true));
+        criteria.add(Restrictions.eq("retrieveEnabled",true));
         ArchiveStore archiveStore = (ArchiveStore)criteria.uniqueResult();
         session.close();
         return archiveStore;

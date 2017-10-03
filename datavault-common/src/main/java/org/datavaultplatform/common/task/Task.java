@@ -19,7 +19,7 @@ public class Task {
     Map<String, String> properties;
     protected List<String> fileStorePaths;
     protected List<String> fileUploadPaths;
-    protected ArchiveStore archiveFileStore;
+    protected List<ArchiveStore> archiveFileStores;
     protected Map<String, Map<String, String>> userFileStoreProperties;
     protected Map<String, String> userFileStoreClasses;
     
@@ -28,7 +28,7 @@ public class Task {
     public Task() {};
     public Task(Job job,
                 Map<String, String> properties,
-                ArchiveStore archiveFileStore,
+                List<ArchiveStore> archiveFileStores,
                 Map<String, Map<String, String>> userFileStoreProperties,
                 Map<String, String> userFileStoreClasses,
                 List<String> fileStorePaths,
@@ -36,7 +36,7 @@ public class Task {
         this.jobID = job.getID();
         this.taskClass = job.getTaskClass();
         this.properties = properties;
-        this.archiveFileStore = archiveFileStore;
+        this.archiveFileStores = archiveFileStores;
         this.userFileStoreProperties = userFileStoreProperties;
         this.userFileStoreClasses = userFileStoreClasses;
         this.fileStorePaths = fileStorePaths;
@@ -78,13 +78,13 @@ public class Task {
     public void setFileUploadPaths(List<String> fileUploadPaths) {
         this.fileUploadPaths = fileUploadPaths;
     }
-    
-    public ArchiveStore getArchiveFileStore() {
-        return archiveFileStore;
+
+    public List<ArchiveStore> getArchiveFileStores() {
+        return archiveFileStores;
     }
 
-    public void setArchiveFileStore(ArchiveStore archiveFileStore) {
-        this.archiveFileStore = archiveFileStore;
+    public void setArchiveFileStores(List<ArchiveStore> archiveFileStores) {
+        this.archiveFileStores = archiveFileStores;
     }
 
     public Map<String, Map<String, String>> getUserFileStoreProperties() {

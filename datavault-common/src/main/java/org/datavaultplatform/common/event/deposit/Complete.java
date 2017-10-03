@@ -7,28 +7,31 @@ import org.datavaultplatform.common.event.Event;
 
 @Entity
 public class Complete extends Event {
-    
-    public String archiveId;
+
+    // Maps the model ArchiveStore Id to the generated Archive Id
+    HashMap<String, String> archiveIds = new HashMap<>();
+
+    //public String archiveId;
     public long archiveSize;
-    
+
     Complete() {};
-    public Complete(String jobId, String depositId, String archiveId, long archiveSize) {
-        
+    public Complete(String jobId, String depositId, HashMap<String, String> archiveIds, long archiveSize) {
+
         super("Deposit completed");
-        
+
         this.eventClass = Complete.class.getCanonicalName();
-        this.archiveId = archiveId;
+        this.archiveIds = archiveIds;
         this.archiveSize = archiveSize;
         this.depositId = depositId;
         this.jobId = jobId;
     }
 
-    public String getArchiveId() {
-        return archiveId;
+    public HashMap<String, String> getArchiveIds() {
+        return archiveIds;
     }
 
-    public void setArchiveId(String archiveId) {
-        this.archiveId = archiveId;
+    public void setArchiveIds(HashMap<String, String> archiveIds) {
+        this.archiveIds = archiveIds;
     }
 
     public long getArchiveSize() {
@@ -38,4 +41,5 @@ public class Complete extends Event {
     public void setArchiveSize(long archiveSize) {
         this.archiveSize = archiveSize;
     }
+
 }

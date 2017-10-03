@@ -21,15 +21,20 @@ public class ArchivesService {
         return archiveDAO.list();
     }
 
-    public void addArchive(Archive archive,
-                           Deposit deposit,
-                           ArchiveStore archiveStore) {
+    public Archive getArchive(String archiveId) {
+        return archiveDAO.findById(archiveId);
+    }
+
+    public void addArchive(Deposit deposit, ArchiveStore archiveStore, String archiveId) {
+
+        Archive archive = new Archive();
 
         Date d = new Date();
         archive.setCreationTime(d);
 
         archive.setDeposit(deposit);
         archive.setArchiveStore(archiveStore);
+        archive.setArchiveId(archiveId);
 
         archiveDAO.save(archive);
     }
@@ -37,5 +42,4 @@ public class ArchivesService {
     public void updateArchive(Archive archive) {
         archiveDAO.update(archive);
     }
-
 }

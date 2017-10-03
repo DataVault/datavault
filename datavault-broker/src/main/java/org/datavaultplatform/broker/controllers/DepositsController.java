@@ -160,13 +160,9 @@ public class DepositsController {
         // Add the file upload path
         DepositPath fileUploadPath = new DepositPath(deposit, createDeposit.getFileUploadHandle(), Path.PathType.USER_UPLOAD);
         deposit.getDepositPaths().add(fileUploadPath);
-        
-        ArchiveStore archiveStore = null;
+
         List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
-        if (archiveStores.size() > 0) {
-            // For now, just use the first configured archive store
-            archiveStore = archiveStores.get(0);
-        } else {
+        if (archiveStores.size() == 0) {
             throw new Exception("No configured archive storage");
         }
 
@@ -175,10 +171,6 @@ public class DepositsController {
         
         // Add the deposit object
         depositsService.addDeposit(vault, deposit, "", "");
-
-        // Add the archive object
-        // todo : loop round this to allow for multiple backend archive objects
-        archivesService.addArchive(new Archive(), deposit, archiveStore);
 
         // Create a job to track this deposit
         Job job = new Job("org.datavaultplatform.worker.tasks.Deposit");
@@ -212,8 +204,8 @@ public class DepositsController {
                     userUploadPaths.add(path.getFilePath());
                 }
             }
-            
-            Task depositTask = new Task(job, depositProperties, archiveStore, userFileStoreProperties, userFileStoreClasses, filestorePaths, userUploadPaths);
+
+            Task depositTask = new Task(job, depositProperties, archiveStores, userFileStoreProperties, userFileStoreClasses, filestorePaths, userUploadPaths);
             String jsonDeposit = mapper.writeValueAsString(depositTask);
             sender.send(jsonDeposit);
 
@@ -309,14 +301,22 @@ public class DepositsController {
             retrievePath = fullPath.replaceFirst(storageID + "/", "");
         }
 
-        // Get the appropriate archive for the deposit, and thence the ArchiveStore and ID.
-        // todo : At the moment we are assuming there is only one, change it to be the preferred one for retrieval
-        Archive archive = deposit.getArchives().get(0);
-        ArchiveStore archiveStore = archive.getArchiveStore();
-        String archiveID = archive.getArchiveId();
+        // Fetch the ArchiveStore that is flagged for retrieval. We store it in a list as the Task parameters require a list.
+        ArchiveStore archiveStore = archiveStoreService.getForRetrieval();
+        List<ArchiveStore> archiveStores = new ArrayList<ArchiveStore>();
+        archiveStores.add(archiveStore);
 
-        if (archiveStore == null) {
-            throw new IllegalArgumentException("Archive store ID '" + archiveID + "' is invalid");
+        // Find the Archive that matches the ArchiveStore.
+        String archiveID = null;
+        for (Archive archive : deposit.getArchives()) {
+            if (archive.getArchiveStore().getID().equals(archiveStore.getID())) {
+                archiveID = archive.getArchiveId();
+            }
+        }
+
+        // Worth checking that we found a matching Archive for the ArchiveStore.
+        if (archiveID == null) {
+            throw new Exception("No valid archive for retrieval");
         }
 
         FileStore userStore = null;
@@ -367,7 +367,7 @@ public class DepositsController {
             userFileStoreClasses.put(storageID, userStore.getStorageClass());
             userFileStoreProperties.put(storageID, userStore.getProperties());
             
-            Task retrieveTask = new Task(job, retrieveProperties, archiveStore, userFileStoreProperties, userFileStoreClasses, null, null);
+            Task retrieveTask = new Task(job, retrieveProperties, archiveStores, userFileStoreProperties, userFileStoreClasses, null, null);
             ObjectMapper mapper = new ObjectMapper();
             String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
             sender.send(jsonRetrieve);
