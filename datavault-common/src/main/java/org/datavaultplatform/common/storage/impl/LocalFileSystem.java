@@ -20,8 +20,12 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.io.FileCopy;
 import org.datavaultplatform.common.storage.Verify;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
+
+    private static final Logger log = LoggerFactory.getLogger(LocalFileSystem.class);
 
     private String rootPath = null;
     
@@ -109,8 +113,9 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
     @Override
     public String getName(String path) {
         Path absolutePath = getAbsolutePath(path);
-        File file = absolutePath.toFile();
-        return file.getName();
+//        File file = absolutePath.toFile();
+//        return file.getName();
+        return absolutePath.getFileName().toString();
     }
     
     @Override
@@ -121,13 +126,17 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
 
     @Override
     public void retrieve(String path, File working, Progress progress) throws Exception {
-        Path absolutePath = getAbsolutePath(path);
-        File file = absolutePath.toFile();
+        log.debug("path: " + path);
+        Path absoluteFilePath = getAbsolutePath(path);
+        log.debug("absoluteFilePath: " + absoluteFilePath);
+        File file = absoluteFilePath.toFile();
         
         if (file.isFile()) {
-            FileCopy.copyFile(progress, file, working);
+            log.debug("Copy File: " + absoluteFilePath);
+            FileCopy.copyFile(progress, absoluteFilePath, working);
         } else if (file.isDirectory()) {
-            FileCopy.copyDirectory(progress, file, working);
+            log.debug("Copy Directory: " + absoluteFilePath);
+            FileCopy.copyDirectory(progress, absoluteFilePath, working);
         }
     }
 
@@ -137,9 +146,9 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
         File retrieveFile = absolutePath.resolve(working.getName()).toFile();
         
         if (working.isFile()) {
-            FileCopy.copyFile(progress, working, retrieveFile);
+            FileCopy.copyFile(progress, working.toPath(), retrieveFile);
         } else if (working.isDirectory()) {
-            FileCopy.copyDirectory(progress, working, retrieveFile);
+            FileCopy.copyDirectory(progress, working.toPath(), retrieveFile);
         }
         
         return working.getName();
@@ -166,9 +175,10 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
                 while (filePath.startsWith("/")) {
                     filePath = filePath.replaceFirst("/", "");
                 }
-
+                
+                log.debug("filePath: " + filePath);
                 absolute = base.resolve(filePath);
-                absolute = Paths.get(absolute.toFile().getCanonicalPath());
+                absolute = Paths.get(absolute.toFile().getAbsolutePath());
             }
 
             if (isValidSubPath(absolute)) {
@@ -190,8 +200,8 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
         
         try {
             Path base = Paths.get(rootPath);
-            Path canonicalBase = Paths.get(base.toFile().getCanonicalPath());
-            Path canonicalPath = Paths.get(path.toFile().getCanonicalPath());
+            Path canonicalBase = Paths.get(base.toFile().getAbsolutePath());
+            Path canonicalPath = Paths.get(path.toFile().getAbsolutePath());
             
             if (canonicalPath.startsWith(canonicalBase)) {
                 return true;

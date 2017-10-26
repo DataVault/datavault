@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import javax.crypto.Cipher;
@@ -51,13 +52,23 @@ public class Tar {
      */
     private static void addFileToTar(TarArchiveOutputStream tar, File f, String base) throws Exception {
         String entryName = base + f.getName();
-        TarArchiveEntry tarEntry = new TarArchiveEntry(f, entryName);
+        TarArchiveEntry tarEntry;
+        if (Files.isSymbolicLink(f.toPath())){
+            tarEntry= new TarArchiveEntry(entryName, TarArchiveEntry.LF_SYMLINK);
+            Path sourcePath = f.toPath();
+            Path linkTarget = Files.readSymbolicLink(sourcePath);
+            tarEntry.setLinkName(linkTarget.toString());
+        }else{
+            tarEntry= new TarArchiveEntry(f, entryName);
+        }
         tar.putArchiveEntry(tarEntry);
 
         if (f.isFile()) {
-            FileInputStream in = new FileInputStream(f);
-            IOUtils.copy(in, tar);
-            in.close();
+            if(!tarEntry.isSymbolicLink()){
+                FileInputStream in = new FileInputStream(f);
+                IOUtils.copy(in, tar);
+                in.close();
+            }
             tar.closeArchiveEntry();
         } else {
             tar.closeArchiveEntry();

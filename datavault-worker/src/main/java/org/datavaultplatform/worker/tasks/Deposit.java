@@ -99,7 +99,7 @@ public class Deposit extends Task {
         depositId = properties.get("depositId");
         bagID = properties.get("bagId");
         userID = properties.get("userId");
-        
+
         if (this.isRedeliver()) {
             eventStream.send(new Error(jobID, depositId, "Deposit stopped: the message had been redelivered, please investigate")
                 .withUserId(userID));
@@ -126,7 +126,6 @@ public class Deposit extends Task {
             .withUserId(userID)
             .withNextState(0));
         
-        logger.info("bagID: " + bagID);
 //        try {
 //        		JSONObject jsnobject = new JSONObject(vaultMetadata);
 //        		this.vaultID = jsnobject.getString("id");
@@ -136,7 +135,6 @@ public class Deposit extends Task {
 //			at the moment the vault id is only used by the S3 plugin and may be used by the TSM plugin in the future*/
 //			e1.printStackTrace();
 //		}
-        
         
         userStores = new HashMap<>();
         
@@ -229,6 +227,9 @@ public class Deposit extends Task {
         File bagDir = bagPath.toFile();
         bagDir.mkdir();
         
+                logger.debug("bagPath: "+bagPath.toString());
+                logger.debug("bagFile: "+bagDir.getPath());
+                
         Long depositIndex = 0L;
         
         for (String filePath: fileStorePaths) {
@@ -288,7 +289,7 @@ public class Deposit extends Task {
 
             logger.info("Creating bag ...");
             Packager.createBag(bagDir);
-
+            
             // Identify the deposit file types
             logger.info("Identifying file types ...");
             Path bagDataPath = bagDir.toPath().resolve("data");
@@ -308,6 +309,8 @@ public class Deposit extends Task {
             String tarHash = Verify.getDigest(tarFile);
             String tarHashAlgorithm = Verify.getAlgorithm();
 
+            logger.info("Tar created: "+tarFile);
+            
             long archiveSize = tarFile.length();
             logger.info("Tar file: " + archiveSize + " bytes");
             logger.info("Checksum algorithm: " + tarHashAlgorithm);
@@ -424,7 +427,7 @@ public class Deposit extends Task {
             // Cleanup
             // TODO: should we not do this after the verification?
             logger.info("Cleaning up ...");
-            FileUtils.deleteDirectory(bagDir);
+//            FileUtils.deleteDirectory(bagDir);
 
             eventStream.send(new UpdateProgress(jobID, depositId)
                 .withUserId(userID)
@@ -705,7 +708,7 @@ public class Deposit extends Task {
                 alreadyVerified = true;
 
                 // Delete the existing temporary file
-                tarFile.delete();
+//                tarFile.delete();
                 // Copy file back from the archive storage
                 if (((Device)archiveStore).hasMultipleCopies()) {
                     for (String loc : ((Device)archiveStore).getLocations()) {
@@ -826,9 +829,9 @@ public class Deposit extends Task {
         }
         
         // Cleanup
-        logger.info("Cleaning up ...");
-        FileUtils.deleteDirectory(bagDir);
-        tarFile.delete();
+//        logger.info("Cleaning up ...");
+//        FileUtils.deleteDirectory(bagDir);
+//        tarFile.delete();
     }
     
     /**

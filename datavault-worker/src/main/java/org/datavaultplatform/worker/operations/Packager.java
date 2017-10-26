@@ -15,7 +15,6 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.loc.repository.bagit.creator.BagCreator;
 import gov.loc.repository.bagit.domain.Bag;
 import gov.loc.repository.bagit.exceptions.CorruptChecksumException;
 import gov.loc.repository.bagit.exceptions.FileNotInPayloadDirectoryException;
@@ -51,7 +50,7 @@ public class Packager {
      * @throws Exception if anything unexpected happens
      */
     public static Bag createBag(File dir) throws Exception {        
-        return BagCreator.bagInPlace(
+        return DatavaultBagCreator.bagInPlace(
                 dir.toPath(),
                 Arrays.asList(StandardSupportedAlgorithms.MD5),  
                 true); // include hidden files

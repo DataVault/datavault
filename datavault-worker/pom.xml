@@ -26,7 +26,7 @@
         <dependency>
             <groupId>gov.loc</groupId>
             <artifactId>bagit</artifactId>
-            <version>5.0.3</version>
+            <version>5.1.1</version>
         </dependency>
 
         <dependency>
