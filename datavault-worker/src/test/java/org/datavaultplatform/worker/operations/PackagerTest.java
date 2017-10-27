@@ -18,12 +18,12 @@ import org.junit.Test;
 public class PackagerTest {
     private static String packagerResources;
     private static File testDir;
-    
+
     @BeforeClass
     public static void setUpClass() {
         String resourcesDir = System.getProperty("user.dir") + File.separator + "src" +
                 File.separator + "test" + File.separator + "resources";
-        
+
         packagerResources = resourcesDir + File.separator + "packager";
         testDir = new File(resourcesDir + File.separator + "packager-output");
     }
@@ -32,15 +32,15 @@ public class PackagerTest {
     public void setUp() {
         try{
             testDir.mkdir();
-        } 
+        }
         catch(SecurityException se) {
             fail(se.getMessage());
-        } 
-        
+        }
+
         BasicConfigurator.configure();
     }
-    
-    //@Test
+
+    @Test
     public void testCreateBag() {
         // files expected in bag
         final String TEST_FILE = "item.pdf";
@@ -51,10 +51,10 @@ public class PackagerTest {
                 "manifest-md5.txt",
                 "tagmanifest-md5.txt",
                 "bagit.txt");
-        
+
         File dir =  new File(testDir + File.separator + "createbag");
         dir.mkdir();
-       
+
         try{
             FileUtils.copyFileToDirectory(
                     new File(packagerResources + File.separator + TEST_FILE),
@@ -85,7 +85,7 @@ public class PackagerTest {
         // TODO
         System.out.println("testValidateBag");
         try{
-            Packager.createBag(new File("/mnt/dataexchange/test/bagit"));
+            //Packager.createBag(new File("/mnt/dataexchange/test/bagit"));
         }
         catch(Exception ex){
             fail(ex.getMessage());
