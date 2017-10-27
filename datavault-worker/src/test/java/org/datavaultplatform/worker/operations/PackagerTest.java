@@ -42,8 +42,9 @@ public class PackagerTest {
 
     @Test
     public void testCreateBag() {
-        // files expected in bag
         final String TEST_FILE = "item.pdf";
+        
+        // files expected in bag
         final List<String> expectFiles = Arrays.asList(
                 "bagit.txt",
                 "item.pdf",
@@ -63,6 +64,7 @@ public class PackagerTest {
         catch(IOException ex){
             fail(ex.getMessage());
         }
+        
         try {
             Packager.createBag(dir);
 
@@ -81,11 +83,24 @@ public class PackagerTest {
     }
 
     @Test
-    public void testValidateBag() {
-        // TODO
-        System.out.println("testValidateBag");
+    public void testValidateBag() { 
+        final String TEST_FILE = "item.pdf";
+        File dir =  new File(testDir + File.separator + "createbag");
+        dir.mkdir();
+    
         try{
-            //Packager.createBag(new File("/mnt/dataexchange/test/bagit"));
+            FileUtils.copyFileToDirectory(
+                    new File(packagerResources + File.separator + TEST_FILE),
+                    dir);
+        }
+        catch(IOException ex){
+            fail(ex.getMessage());
+        }
+        
+        try{
+            File bag = new File("/mnt/dataexchange/test/bagit");
+            Packager.createBag(bag);
+            assertTrue(Packager.validateBag(bag));
         }
         catch(Exception ex){
             fail(ex.getMessage());
