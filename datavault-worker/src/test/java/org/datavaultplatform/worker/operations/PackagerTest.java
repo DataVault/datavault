@@ -1,16 +1,15 @@
 package org.datavaultplatform.worker.operations;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.After;
@@ -89,22 +88,31 @@ public class PackagerTest {
     public void testValidateBag() { 
         final String TEST_FILE1 = "item.pdf";
         final String TEST_FILE2 = "banjo.jpg";
+        final String EMPTY_DIR_NAME = "emptydir";
+        final String CHILD_DIR_NAME = "childdir";
+        
         File parentDir =  new File(testDir, "validatebag");
         parentDir.mkdir();
-        File childDir =  new File(parentDir, "childdir");
+        File emptyDir =  new File(parentDir, EMPTY_DIR_NAME);
+        emptyDir.mkdir();
+        File childDir =  new File(parentDir, CHILD_DIR_NAME);
+        File test1file = null;
+        File test2file = null;
         
         try{
+            test1file = new File(packagerResources, TEST_FILE1);
             FileUtils.copyFileToDirectory(
                     new File(packagerResources, TEST_FILE1),
                     parentDir);
-            File test2file = new File(packagerResources, TEST_FILE2);
+            test2file = new File(packagerResources, TEST_FILE2);
             FileUtils.copyFileToDirectory(test2file, childDir);
             
             // create symlink in parent file to file in child
+            // TODO: currently doesn't work
             /*System.setProperty("user.dir", parentDir.getAbsolutePath());
             Files.createSymbolicLink(
                     Paths.get(TEST_FILE2),
-                    Paths.get("childdir/" + TEST_FILE2));*/
+                    Paths.get("childdir" + File.separator + TEST_FILE2));*/
         }
         catch(IOException ex){
             ex.printStackTrace();
@@ -116,22 +124,44 @@ public class PackagerTest {
             assertTrue(Packager.validateBag(parentDir));
 
             // #1 check files in manifest 
-            List<String> lines = FileUtils.readLines(new File(parentDir.getAbsolutePath() +  File.separator + "manifest-md5.txt"));
+            List<String> lines = FileUtils.readLines(
+                    new File(parentDir.getAbsolutePath() + File.separator + "manifest-md5.txt"));
             
+         
             // the order of files in manifest may change
-            String fPath1 = lines.get(0).split("  ")[1];
-            String fPath2 = lines.get(1).split("  ")[1];
-            assertTrue(fPath1.endsWith(TEST_FILE2));
-            assertTrue(fPath2.endsWith(TEST_FILE1));
+            assertTrue(lines.contains(this.getChecksum(test1file) + "  data" +
+                    File.separator + TEST_FILE1));
+            assertTrue(lines.contains(this.getChecksum(test2file) + "  data" +
+                    File.separator + CHILD_DIR_NAME + File.separator + TEST_FILE2));
            
-            // #2 check symlinks 
+            // #2 check symlinks
+            // TODO
+            
+            // #3 check empty dir exists
+            assertTrue(new File(parentDir.getAbsolutePath(), EMPTY_DIR_NAME).isDirectory());
         }
+        
         catch(Exception ex){
             ex.printStackTrace();
             fail(ex.getMessage());
         }
     }
-
+    
+    // get the mdf checksum of a file
+    private String getChecksum(File f){
+        String cksum = null;
+        try{
+            FileInputStream fis = new FileInputStream(f);
+            cksum = DigestUtils.md5Hex(fis);
+            fis.close();
+        }
+        catch(IOException ex){
+            fail(ex.getMessage());
+        }
+        
+        return cksum;
+    }
+    
     @After
     public void tearDown() {
         try{
