@@ -7,6 +7,9 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -113,10 +116,10 @@ public class PackagerTest {
             
             // create symlink in parent file to file in child
             // TODO: currently doesn't work
-            /*System.setProperty("user.dir", parentDir.getAbsolutePath());
-            Files.createSymbolicLink(
-                    Paths.get(TEST_FILE2),
-                    Paths.get("childdir" + File.separator + TEST_FILE2));*/
+            /*Path source = Paths.get(childDir.getAbsolutePath() + File.separator + TEST_FILE2);
+            Path link = Paths.get(parentDir.getAbsolutePath() + File.separator + TEST_FILE2);
+            Path relativeSrc = link.getParent().relativize(source); 
+            Files.createSymbolicLink(link, relativeSrc);*/
         }
         catch(IOException ex){
             ex.printStackTrace();
@@ -237,7 +240,6 @@ public class PackagerTest {
             File metaDir =  new File(testDir, "tmp");
             if(Packager.createBag(dir) && Packager.extractMetadata(dir, metaDir)){
                 // check metadata files are in new directory
-                assertTrue(new File(metaDir, TEST_FILE).exists()); // ? not sure about this
                 assertTrue(new File(metaDir, "tagmanifest-md5.txt").exists());
                 assertTrue(new File(metaDir, "bag-info.txt").exists());
                 assertTrue(new File(metaDir, "manifest-md5.txt").exists());
