@@ -6,12 +6,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+/**
+ * @author ?
+ *
+ */
 public class WorkerInstance {
 
+    /**
+     * @return
+     */
     public static String getWorkerName() {
         return java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
     }
     
+    /**
+     * Set up the logger for the Workers and start listening to the message queue for something to do.
+     * @param args
+     */
     public static void main(String [] args) {
         
         // Bind $DATAVAULT_HOME to a system variable for use by Log4j

@@ -15,14 +15,37 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+/**
+ * @author ?
+ * 
+ * This class handles the start up and monitoring of the required number of Worker instances.  The number of instances
+ * comes from the datavault.properties file (I think).
+ * 
+ * Each started Worker instance is killed if the Worker Manager fails.
+ * 
+ * We output a warning if an instance of a Workers fails to respond which then appears to trigger the exiting of the entire
+ * WorkerManager
+ *
+ */
 public class WorkerManager {
 
     private String numberOfWorkers;
 
+    /**
+     * Setter for numberOfWorkers member
+     * @param numberOfWorkers A string defining the number of worker instances that will be instantiated at startup
+     */
     public void setNumberOfWorkers(String numberOfWorkers) {
         this.numberOfWorkers = numberOfWorkers;
     }
 
+    /**
+     * Initialise and monitor the worker instances and set up the manager logging 
+     * if the relevant config file exists.
+     * @param args
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public static void main(String [] args) throws IOException, InterruptedException {
         
         // Bind $DATAVAULT_HOME to a system variable for use by Log4j
@@ -47,6 +70,12 @@ public class WorkerManager {
         workerManager.checkResultHandlers(resultHandlers);
     }
 
+    /**
+     * Start the required number of Worker instances
+     * @return A list of DefaultExecuteResultHandler objects (one for each instance)
+     * @throws IOException
+     * @throws InterruptedException
+     */
     private List<DefaultExecuteResultHandler> startWorkers() throws IOException, InterruptedException {
         List<DefaultExecuteResultHandler> resultHandlers = new ArrayList<>();
         int i = 0;
@@ -58,6 +87,13 @@ public class WorkerManager {
         return resultHandlers;
     }
 
+    /**
+     * Start a worker instance via the command line adding a shutdown hook so that the instance is destoryed if the 
+     * manager is killed.
+     * @return The instances DefaultExecuteResultHandler object
+     * @throws IOException
+     * @throws InterruptedException
+     */
     private DefaultExecuteResultHandler startWorker() throws IOException, InterruptedException {
         CommandLine cmdLine = new CommandLine("java");
         cmdLine.addArgument("-cp");
@@ -77,6 +113,14 @@ public class WorkerManager {
         return resultHandler;
     }
 
+    /**
+     * Iterate over each result handler and check if any have stopped.  If none have sleep then repeat.
+     * If one has stopped output a message to system out (I've just noticed this goes to system.out and not a log
+     * then exit the method.
+     * @param resultHandlers A list of DefaultExecuteResultHandler objects one for each Worker instance
+     * @throws IOException
+     * @throws InterruptedException
+     */
     private void checkResultHandlers(List<DefaultExecuteResultHandler> resultHandlers) throws IOException, InterruptedException {
         while (true) {
             for (DefaultExecuteResultHandler resultHandler : resultHandlers) {
