@@ -235,7 +235,7 @@ nohup java -cp datavault-worker-1.0-SNAPSHOT.jar:./* org.datavaultplatform.worke
 Ensure tests pass before committing code.
 ```
 cd ~/datavault/.git/hooks/
-ln ../../scripts/git/hooks/pre-commit
+ln -s ../../scripts/git/hooks/pre-commit
 ```
 
 ### Troubleshooting
