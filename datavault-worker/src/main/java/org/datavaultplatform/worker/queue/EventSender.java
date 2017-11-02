@@ -12,6 +12,10 @@ import org.datavaultplatform.worker.WorkerInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author ?
+ *
+ */
 public class EventSender implements EventStream {
 
     private static final Logger logger = LoggerFactory.getLogger(EventSender.class);
@@ -23,22 +27,37 @@ public class EventSender implements EventStream {
     
     private int sequence = 0;
 
+    /**
+     * @param queueServer
+     */
     public void setQueueServer(String queueServer) {
         this.queueServer = queueServer;
     }
 
+    /**
+     * @param eventQueueName
+     */
     public void setEventQueueName(String eventQueueName) {
         this.eventQueueName = eventQueueName;
     }
 
+    /**
+     * @param queueUser
+     */
     public void setQueueUser(String queueUser) {
         this.queueUser = queueUser;
     }
 
+    /**
+     * @param queuePassword
+     */
     public void setQueuePassword(String queuePassword) {
         this.queuePassword = queuePassword;
     }
     
+    /* (non-Javadoc)
+     * @see org.datavaultplatform.common.event.EventStream#send(org.datavaultplatform.common.event.Event)
+     */
     @Override
     public void send(Event event) {
         

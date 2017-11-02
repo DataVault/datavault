@@ -16,6 +16,10 @@ import org.datavaultplatform.worker.WorkerInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author ?
+ *
+ */
 public class Receiver {
 
     private static final Logger logger = LoggerFactory.getLogger(Receiver.class);
@@ -27,30 +31,54 @@ public class Receiver {
     private String tempDir;
     private String metaDir;
 
+    /**
+     * @param queueServer
+     */
     public void setQueueServer(String queueServer) {
         this.queueServer = queueServer;
     }
 
+    /**
+     * @param queueName
+     */
     public void setQueueName(String queueName) {
         this.queueName = queueName;
     }
 
+    /**
+     * @param queueUser
+     */
     public void setQueueUser(String queueUser) {
         this.queueUser = queueUser;
     }
 
+    /**
+     * @param queuePassword
+     */
     public void setQueuePassword(String queuePassword) {
         this.queuePassword = queuePassword;
     }
 
+    /**
+     * @param tempDir
+     */
     public void setTempDir(String tempDir) {
         this.tempDir = tempDir;
     }
     
+    /**
+     * @param metaDir
+     */
     public void setMetaDir(String metaDir) {
         this.metaDir = metaDir;
     }
 
+    /**
+     * @param events
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TimeoutException
+     */
     public void receive(EventSender events) throws IOException, InterruptedException, TimeoutException {
 
         ConnectionFactory factory = new ConnectionFactory();
