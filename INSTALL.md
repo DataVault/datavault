@@ -100,12 +100,12 @@ sudo /etc/init.d/tomcat7 start
 
 ## Data Vault
 
-### Download and build the Data Vault code
+### Download, build and test the Data Vault code
 ```
 git clone https://github.com/DataVault/datavault.git
 cd datavault
 export MAVEN_OPTS="-Xmx1024m"
-mvn package
+mvn test
 ```
 
 ### Configure the Data Vault home directory
@@ -229,6 +229,13 @@ EXIT;
 cd ~/datavault/datavault-worker/target
 pkill -f datavault-worker
 nohup java -cp datavault-worker-1.0-SNAPSHOT.jar:./* org.datavaultplatform.worker.WorkerManager > /dev/null 2>&1 &
+```
+
+### Dev setup
+Ensure tests pass before committing code.
+```
+cd ~/datavault/.git/hooks/
+ln ../../scripts/git/hooks/pre-commit
 ```
 
 ### Troubleshooting
