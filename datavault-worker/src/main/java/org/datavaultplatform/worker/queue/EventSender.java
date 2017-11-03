@@ -28,6 +28,7 @@ public class EventSender implements EventStream {
     private int sequence = 0;
 
     /**
+     * Setter for the queue server
      * @param queueServer
      */
     public void setQueueServer(String queueServer) {
@@ -35,6 +36,7 @@ public class EventSender implements EventStream {
     }
 
     /**
+     * Setter for the event queue name
      * @param eventQueueName
      */
     public void setEventQueueName(String eventQueueName) {
@@ -42,6 +44,7 @@ public class EventSender implements EventStream {
     }
 
     /**
+     * Setter for the queue user
      * @param queueUser
      */
     public void setQueueUser(String queueUser) {
@@ -49,6 +52,7 @@ public class EventSender implements EventStream {
     }
 
     /**
+     * Setter for the queuePassword
      * @param queuePassword
      */
     public void setQueuePassword(String queuePassword) {

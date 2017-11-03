@@ -116,7 +116,7 @@ public class WorkerManager {
     /**
      * Iterate over each result handler and check if any have stopped.  If none have sleep then repeat.
      * If one has stopped output a message to system out (I've just noticed this goes to system.out and not a log
-     * then exit the method.
+     * then exit the method (which in turn appears to exit the whole app).
      * @param resultHandlers A list of DefaultExecuteResultHandler objects one for each Worker instance
      * @throws IOException
      * @throws InterruptedException

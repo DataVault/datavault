@@ -32,6 +32,7 @@ public class Receiver {
     private String metaDir;
 
     /**
+     * Set the queue server
      * @param queueServer
      */
     public void setQueueServer(String queueServer) {
@@ -39,6 +40,7 @@ public class Receiver {
     }
 
     /**
+     * Set the queue name
      * @param queueName
      */
     public void setQueueName(String queueName) {
@@ -46,6 +48,7 @@ public class Receiver {
     }
 
     /**
+     * Set the queue user
      * @param queueUser
      */
     public void setQueueUser(String queueUser) {
@@ -53,6 +56,7 @@ public class Receiver {
     }
 
     /**
+     * Set the queue password
      * @param queuePassword
      */
     public void setQueuePassword(String queuePassword) {
@@ -60,6 +64,7 @@ public class Receiver {
     }
 
     /**
+     * Set the temp dir
      * @param tempDir
      */
     public void setTempDir(String tempDir) {
@@ -67,6 +72,7 @@ public class Receiver {
     }
     
     /**
+     * Set the meta dir
      * @param metaDir
      */
     public void setMetaDir(String metaDir) {
@@ -74,7 +80,8 @@ public class Receiver {
     }
 
     /**
-     * @param events
+     * 
+     * @param events an EventSender object
      * @throws IOException
      * @throws InterruptedException
      * @throws TimeoutException

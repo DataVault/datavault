@@ -13,7 +13,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class WorkerInstance {
 
     /**
-     * @return
+     * Get the workers name
+     * @return the name as a string
      */
     public static String getWorkerName() {
         return java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
