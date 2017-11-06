@@ -61,6 +61,13 @@ public class EventSender implements EventStream {
     
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.event.EventStream#send(org.datavaultplatform.common.event.Event)
+     * 
+     * Add a sequence to the event to allow ordering where the timestamp is equal, create a connection to the queue
+     * then encode the event as json, declare the queue and publish the message.
+     * 
+     * Finally close the connection.
+     * 
+     * @param event An event object
      */
     @Override
     public void send(Event event) {

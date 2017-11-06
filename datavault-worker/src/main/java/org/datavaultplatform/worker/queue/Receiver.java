@@ -80,6 +80,13 @@ public class Receiver {
     }
 
     /**
+     * Setup a connection to the queue then wait for messages to arrive.  When we recieve a message delivery
+     * work out the type of task, check if it is a redelivery then complete the task.
+     * 
+     * To complete the task we set up a tmp dir then perform the tasks action (I'm not sure this is actually 
+     * implemented atm afaics perform action is empty and insn't overridden)
+     * 
+     * Once the task is complete we clean up and acknowledge the message
      * 
      * @param events an EventSender object
      * @throws IOException
