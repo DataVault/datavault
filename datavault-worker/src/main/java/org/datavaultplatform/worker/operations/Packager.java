@@ -1,17 +1,21 @@
 package org.datavaultplatform.worker.operations;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.charset.StandardCharsets;
+
 import org.apache.commons.io.FileUtils;
-import gov.loc.repository.bagit.*;
+
+import gov.loc.repository.bagit.Bag;
+import gov.loc.repository.bagit.BagFactory;
 import gov.loc.repository.bagit.Manifest.Algorithm;
-import java.io.FileNotFoundException;
+import gov.loc.repository.bagit.PreBag;
 
 public class Packager {
 
@@ -173,5 +177,34 @@ public class Packager {
         }
         
         return result;
+    }
+    
+    /**
+     * Execute packager as a command-line process.
+     * @param args Expects a string directory argument.
+     */
+    public static void main(String[] args) {
+        int status = -1;
+        if (args.length == 1) {
+            File dir = new File(args[0]);
+            if(dir.isDirectory()) {
+                try {
+                    if(Packager.createBag(dir)){
+                        status = 0;
+                    }
+                }
+                catch(Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            else {
+                System.out.println("Packager expects a directory as an argument");
+            }
+        }
+        else {
+            System.out.println("Packager expects a single directory argument");
+        }
+        
+        System.exit(status); 
     }
 }
