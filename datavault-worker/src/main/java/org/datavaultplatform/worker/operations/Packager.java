@@ -1,5 +1,12 @@
 package org.datavaultplatform.worker.operations;
 
+import gov.loc.repository.bagit.creator.BagCreator;
+import gov.loc.repository.bagit.domain.Bag;
+import gov.loc.repository.bagit.hash.StandardSupportedAlgorithms;
+import gov.loc.repository.bagit.hash.SupportedAlgorithm;
+import gov.loc.repository.bagit.reader.BagReader;
+import gov.loc.repository.bagit.verify.BagVerifier;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,13 +16,10 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-
-import gov.loc.repository.bagit.Bag;
-import gov.loc.repository.bagit.BagFactory;
-import gov.loc.repository.bagit.Manifest.Algorithm;
-import gov.loc.repository.bagit.PreBag;
 
 public class Packager {
 
@@ -28,35 +32,76 @@ public class Packager {
     
     // Create a bag from an existing directory.
     public static boolean createBag(File dir) throws Exception {
-
-        BagFactory bagFactory = new BagFactory();
+        //boolean valid = false;
+        /*BagFactory bagFactory = new BagFactory();
         PreBag preBag = bagFactory.createPreBag(dir);
-        Bag bag = preBag.makeBagInPlace(BagFactory.LATEST, false);
+        Bag bag = preBag.makeBagInPlace(BagFactory.LATEST, false);*/
+        //Collection<String> places = Arrays.asList())("Buenos Aires", "Córdoba", "La Plata");
+        List<SupportedAlgorithm> s = Arrays.asList(StandardSupportedAlgorithms.MD5);
         
-        boolean result = false;
+        //final Collection<SupportedAlgorithm> algorithms
+        Bag bag = BagCreator.bagInPlace(
+                dir.toPath(),
+                s,//StandardSupportedAlgorithms.MD5,  
+                true); // include hidden files
+        
+        
+//        boolean result = false;
+//        try {
+//            result = bag.verifyValid().isSuccess();
+//        } finally {
+//            bag.close();
+//        }
+        /*BagVerifier bv = new BagVerifier();
         try {
-            result = bag.verifyValid().isSuccess();
-        } finally {
-            bag.close();
+            bv.isValid(bag, false);
+            valid = true;
         }
+        catch(Exception ex){
+            throw new Exception(ex);
+        }
+        finally {
+            bv.close();
+        }*/
         
-        return result;
+        // if an exception has not been throw 
+        //return valid;
+        return Packager.isValid(bag);
     }
     
     // Validate an existing bag
     public static boolean validateBag(File dir) throws Exception {
-
-        BagFactory bagFactory = new BagFactory();
-        Bag bag = bagFactory.createBag(dir);
+        //boolean valid = false;
+        //BagFactory bagFactory = new BagFactory();
+        //Bag bag = bagFactory.createBag(dir);
+        Bag bag = new BagReader().read(dir.toPath());
         
-        boolean result = false;
+        /*boolean result = false;
         try {
             result = bag.verifyValid().isSuccess();
         } finally {
             bag.close();
+        }*/
+        
+        return Packager.isValid(bag);
+    }
+    
+    private static boolean isValid(Bag bag) throws Exception {
+        boolean isValid = false;
+        
+        BagVerifier bv = new BagVerifier();
+        try {
+            bv.isValid(bag, false);
+            isValid = true;
+        }
+        catch(Exception ex){
+            throw new Exception(ex);
+        }
+        finally {
+            bv.close();
         }
         
-        return result;
+        return isValid;
     }
     
     // Add vault/deposit metadata
@@ -78,7 +123,8 @@ public class Packager {
             
             // TODO: get the manifest file and algorithm config via bagit library?
             File tagManifest = bagPath.resolve("tagmanifest-md5.txt").toFile();
-            Algorithm alg = Algorithm.MD5;
+            SupportedAlgorithm alg = StandardSupportedAlgorithms.MD5;
+            //SupportedAlgorithm
             
             // Create metadata files and compute/store hashes
             addMetaFile(tagManifest, metadataDirPath, depositMetaFileName, depositMetadata, alg);
@@ -99,7 +145,7 @@ public class Packager {
     
     // Add a metadata file to the bag metadata directory
     // Also adds tag information to the tag manifest
-    public static boolean addMetaFile(File tagManifest, Path metadataDirPath, String metadataFileName, String metadata, Algorithm alg) throws IOException {
+    public static boolean addMetaFile(File tagManifest, Path metadataDirPath, String metadataFileName, String metadata, SupportedAlgorithm alg) throws IOException {
         
         File metadataFile = metadataDirPath.resolve(metadataFileName).toFile();
         FileUtils.writeStringToFile(metadataFile, metadata, StandardCharsets.UTF_8);
@@ -110,17 +156,17 @@ public class Packager {
     }
     
     // Compute a hash value for file contents
-    public static String computeFileHash(File file, Algorithm alg) throws FileNotFoundException, IOException {
+    public static String computeFileHash(File file, SupportedAlgorithm alg) throws FileNotFoundException, IOException {
         String hash = null;
         FileInputStream fis = new FileInputStream(file);
 
-        if (alg == Algorithm.MD5) {
+        if (alg == StandardSupportedAlgorithms.MD5) {
             hash = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
-        } else if (alg == Algorithm.SHA1) {
-            hash = org.apache.commons.codec.digest.DigestUtils.sha1Hex(fis);
-        } else if (alg == Algorithm.SHA256) {
+        } else if (alg == StandardSupportedAlgorithms.SHA1) {
+            hash = org.apache.commons.codec.digest.DigestUtils.shaHex(fis);
+        } else if (alg == StandardSupportedAlgorithms.SHA256) {
             hash = org.apache.commons.codec.digest.DigestUtils.sha256Hex(fis);
-        } else if (alg == Algorithm.SHA512) {
+        } else if (alg == StandardSupportedAlgorithms.SHA512) {
             hash = org.apache.commons.codec.digest.DigestUtils.sha512Hex(fis);
         }
         
