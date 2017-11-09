@@ -1,12 +1,5 @@
 package org.datavaultplatform.worker.operations;
 
-import gov.loc.repository.bagit.creator.BagCreator;
-import gov.loc.repository.bagit.domain.Bag;
-import gov.loc.repository.bagit.hash.StandardSupportedAlgorithms;
-import gov.loc.repository.bagit.hash.SupportedAlgorithm;
-import gov.loc.repository.bagit.reader.BagReader;
-import gov.loc.repository.bagit.verify.BagVerifier;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,12 +10,30 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import gov.loc.repository.bagit.creator.BagCreator;
+import gov.loc.repository.bagit.domain.Bag;
+import gov.loc.repository.bagit.exceptions.CorruptChecksumException;
+import gov.loc.repository.bagit.exceptions.FileNotInPayloadDirectoryException;
+import gov.loc.repository.bagit.exceptions.InvalidBagitFileFormatException;
+import gov.loc.repository.bagit.exceptions.MaliciousPathException;
+import gov.loc.repository.bagit.exceptions.MissingBagitFileException;
+import gov.loc.repository.bagit.exceptions.MissingPayloadDirectoryException;
+import gov.loc.repository.bagit.exceptions.MissingPayloadManifestException;
+import gov.loc.repository.bagit.exceptions.UnsupportedAlgorithmException;
+import gov.loc.repository.bagit.exceptions.VerificationException;
+import gov.loc.repository.bagit.hash.StandardSupportedAlgorithms;
+import gov.loc.repository.bagit.hash.SupportedAlgorithm;
+import gov.loc.repository.bagit.reader.BagReader;
+import gov.loc.repository.bagit.verify.BagVerifier;
 
 public class Packager {
-
+    private static final Logger log = LoggerFactory.getLogger(Packager.class);
+    
     public static final String metadataDirName = "metadata";
     
     public static final String depositMetaFileName = "deposit.json";
@@ -31,62 +42,30 @@ public class Packager {
     public static final String externalMetaFileName = "external.txt";
     
     // Create a bag from an existing directory.
-    public static boolean createBag(File dir) throws Exception {
-        //boolean valid = false;
-        /*BagFactory bagFactory = new BagFactory();
-        PreBag preBag = bagFactory.createPreBag(dir);
-        Bag bag = preBag.makeBagInPlace(BagFactory.LATEST, false);*/
-        //Collection<String> places = Arrays.asList())("Buenos Aires", "Córdoba", "La Plata");
-        List<SupportedAlgorithm> s = Arrays.asList(StandardSupportedAlgorithms.MD5);
-        
-        //final Collection<SupportedAlgorithm> algorithms
+    public static boolean createBag(File dir) throws Exception {        
         Bag bag = BagCreator.bagInPlace(
                 dir.toPath(),
-                s,//StandardSupportedAlgorithms.MD5,  
+                Arrays.asList(StandardSupportedAlgorithms.MD5),  
                 true); // include hidden files
         
-        
-//        boolean result = false;
-//        try {
-//            result = bag.verifyValid().isSuccess();
-//        } finally {
-//            bag.close();
-//        }
-        /*BagVerifier bv = new BagVerifier();
-        try {
-            bv.isValid(bag, false);
-            valid = true;
-        }
-        catch(Exception ex){
-            throw new Exception(ex);
-        }
-        finally {
-            bv.close();
-        }*/
-        
-        // if an exception has not been throw 
-        //return valid;
         return Packager.isValid(bag);
     }
     
     // Validate an existing bag
     public static boolean validateBag(File dir) throws Exception {
-        //boolean valid = false;
-        //BagFactory bagFactory = new BagFactory();
-        //Bag bag = bagFactory.createBag(dir);
         Bag bag = new BagReader().read(dir.toPath());
-        
-        /*boolean result = false;
-        try {
-            result = bag.verifyValid().isSuccess();
-        } finally {
-            bag.close();
-        }*/
         
         return Packager.isValid(bag);
     }
     
-    private static boolean isValid(Bag bag) throws Exception {
+    /**
+     * A bag is invalid if a defined exception is thrown in the isValid method
+     * of BagVerifier.
+     * @param bag A bagit bag object.
+     * @return True if bag is valid.
+     * @throws Exception
+     */
+    private static boolean isValid(Bag bag) {
         boolean isValid = false;
         
         BagVerifier bv = new BagVerifier();
@@ -94,8 +73,12 @@ public class Packager {
             bv.isValid(bag, false);
             isValid = true;
         }
-        catch(Exception ex){
-            throw new Exception(ex);
+        catch(IOException | CorruptChecksumException | InvalidBagitFileFormatException |
+                VerificationException | InterruptedException | MaliciousPathException |
+                MissingPayloadManifestException | MissingPayloadDirectoryException |
+                FileNotInPayloadDirectoryException | MissingBagitFileException |
+                UnsupportedAlgorithmException ex){
+           log.warn("Bag " + bag.getRootDir() + " is invalid: " + ex.getMessage());
         }
         finally {
             bv.close();
@@ -124,7 +107,6 @@ public class Packager {
             // TODO: get the manifest file and algorithm config via bagit library?
             File tagManifest = bagPath.resolve("tagmanifest-md5.txt").toFile();
             SupportedAlgorithm alg = StandardSupportedAlgorithms.MD5;
-            //SupportedAlgorithm
             
             // Create metadata files and compute/store hashes
             addMetaFile(tagManifest, metadataDirPath, depositMetaFileName, depositMetadata, alg);

@@ -187,9 +187,9 @@ public class PackagerTest {
                 
                 // check contents of metadata files
                 File df = new File(dir + File.separator + Packager.metadataDirName, Packager.depositMetaFileName);
-                //assertEquals(DEPOSIT_META, FileUtils.readFileToString(df));
+                assertEquals(DEPOSIT_META, FileUtils.readFileToString(df));
                 File vf = new File(dir + File.separator + Packager.metadataDirName, Packager.vaultMetaFileName);
-                //assertEquals(VAULT_META, FileUtils.readFileToString(vf));
+                assertEquals(VAULT_META, FileUtils.readFileToString(vf));
                 File ff = new File(dir + File.separator + Packager.metadataDirName, Packager.fileTypeMetaFileName);
                 assertEquals(FT_META, FileUtils.readFileToString(ff));
                 File ef = new File(dir + File.separator + Packager.metadataDirName, Packager.externalMetaFileName);
