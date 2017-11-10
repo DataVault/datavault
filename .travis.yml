@@ -5,4 +5,4 @@ env:
   # Give Maven 1GB of memory to work with
   - MAVEN_OPTS=-Xmx2048M
 
-script: mvn clean package
+script: mvn clean test package
