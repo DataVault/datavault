@@ -462,6 +462,9 @@ public class Deposit extends Task {
     }
 
     /**
+     * Not sure what this does yet the comment below suggests it copies an archive to the tmp dir
+     * why are deposit would do this I'm not sure
+     * 
      * @param archiveStore
      * @param archiveId
      * @param tarFile
@@ -476,9 +479,14 @@ public class Deposit extends Task {
     }
     
     /**
-     * @param tempPath
-     * @param tarFile
-     * @param origTarHash
+     * Compare the SHA hash of the passed in tar file and the passed in original hash.
+     * 
+     * First compare the tar file then the bag then clean up
+     * 
+     * If the verification fails at either check throw an exception (maybe we could throw separate exceptions here)
+     * @param tempPath Path to the temp storage location
+     * @param tarFile File 
+     * @param origTarHash String representing the orig hash
      * @throws Exception
      */
     private void verifyTarFile(Path tempPath, File tarFile, String origTarHash) throws Exception {
