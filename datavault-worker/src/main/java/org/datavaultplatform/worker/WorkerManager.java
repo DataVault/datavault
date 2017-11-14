@@ -42,9 +42,9 @@ public class WorkerManager {
     /**
      * Initialise and monitor the worker instances and set up the manager logging 
      * if the relevant config file exists.
-     * @param args
-     * @throws IOException
-     * @throws InterruptedException
+     * @param args a string array of arguments to the main class, this is unused so should be null.
+     * @throws IOException if an IOException occurs
+     * @throws InterruptedException if an InterruptedException occurs to a thread
      */
     public static void main(String [] args) throws IOException, InterruptedException {
         
@@ -73,8 +73,8 @@ public class WorkerManager {
     /**
      * Start the required number of Worker instances
      * @return A list of DefaultExecuteResultHandler objects (one for each instance)
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException if an IOException occurs
+     * @throws InterruptedException if an InterruptedException occurs to a thread
      */
     private List<DefaultExecuteResultHandler> startWorkers() throws IOException, InterruptedException {
         List<DefaultExecuteResultHandler> resultHandlers = new ArrayList<>();
@@ -91,8 +91,8 @@ public class WorkerManager {
      * Start a worker instance via the command line adding a shutdown hook so that the instance is destoryed if the 
      * manager is killed.
      * @return The instances DefaultExecuteResultHandler object
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException if an IOException occurs
+     * @throws InterruptedException if an InterruptedException occurs to a thread
      */
     private DefaultExecuteResultHandler startWorker() throws IOException, InterruptedException {
         CommandLine cmdLine = new CommandLine("java");
@@ -118,8 +118,8 @@ public class WorkerManager {
      * If one has stopped output a message to system out (I've just noticed this goes to system.out and not a log
      * then exit the method (which in turn appears to exit the whole app).
      * @param resultHandlers A list of DefaultExecuteResultHandler objects one for each Worker instance
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException if an IOException occurs
+     * @throws InterruptedException if an InterruptedException occurs to a thread
      */
     private void checkResultHandlers(List<DefaultExecuteResultHandler> resultHandlers) throws IOException, InterruptedException {
         while (true) {

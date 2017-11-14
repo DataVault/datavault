@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author ?
+ * A class to review messages from the message queue then process them.
  *
  */
 public class Receiver {
@@ -33,7 +34,7 @@ public class Receiver {
 
     /**
      * Set the queue server
-     * @param queueServer
+     * @param queueServer the queueServer value
      */
     public void setQueueServer(String queueServer) {
         this.queueServer = queueServer;
@@ -41,7 +42,7 @@ public class Receiver {
 
     /**
      * Set the queue name
-     * @param queueName
+     * @param queueName the queueName value
      */
     public void setQueueName(String queueName) {
         this.queueName = queueName;
@@ -49,7 +50,7 @@ public class Receiver {
 
     /**
      * Set the queue user
-     * @param queueUser
+     * @param queueUser the queueUser value
      */
     public void setQueueUser(String queueUser) {
         this.queueUser = queueUser;
@@ -57,7 +58,7 @@ public class Receiver {
 
     /**
      * Set the queue password
-     * @param queuePassword
+     * @param queuePassword the queuePassword value
      */
     public void setQueuePassword(String queuePassword) {
         this.queuePassword = queuePassword;
@@ -65,7 +66,7 @@ public class Receiver {
 
     /**
      * Set the temp dir
-     * @param tempDir
+     * @param tempDir the tempDir value
      */
     public void setTempDir(String tempDir) {
         this.tempDir = tempDir;
@@ -73,7 +74,7 @@ public class Receiver {
     
     /**
      * Set the meta dir
-     * @param metaDir
+     * @param metaDir the metaDir value
      */
     public void setMetaDir(String metaDir) {
         this.metaDir = metaDir;
@@ -89,9 +90,9 @@ public class Receiver {
      * Once the task is complete we clean up and acknowledge the message
      * 
      * @param events an EventSender object
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TimeoutException
+     * @throws IOException if an IOException occurs
+     * @throws InterruptedException if an InterruptedException occurs to a thread
+     * @throws TimeoutException if a thread times out
      */
     public void receive(EventSender events) throws IOException, InterruptedException, TimeoutException {
 

@@ -8,7 +8,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author ?
- *
+ * A Worker class which listens to the messge queue an process messages as they arrive.
  */
 public class WorkerInstance {
 
@@ -22,7 +22,7 @@ public class WorkerInstance {
     
     /**
      * Set up the logger for the Workers and start listening to the message queue for something to do.
-     * @param args
+     * @param args a string array of arguments to the main class, this is unused so should be null.
      */
     public static void main(String [] args) {
         

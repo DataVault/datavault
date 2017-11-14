@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author ?
+ * A class to add Events to the event queue
  *
  */
 public class EventSender implements EventStream {
@@ -29,7 +30,7 @@ public class EventSender implements EventStream {
 
     /**
      * Setter for the queue server
-     * @param queueServer
+     * @param queueServer the queue server value
      */
     public void setQueueServer(String queueServer) {
         this.queueServer = queueServer;
@@ -37,7 +38,7 @@ public class EventSender implements EventStream {
 
     /**
      * Setter for the event queue name
-     * @param eventQueueName
+     * @param eventQueueName the eventQueueName value
      */
     public void setEventQueueName(String eventQueueName) {
         this.eventQueueName = eventQueueName;
@@ -45,7 +46,7 @@ public class EventSender implements EventStream {
 
     /**
      * Setter for the queue user
-     * @param queueUser
+     * @param queueUser the queueUser value
      */
     public void setQueueUser(String queueUser) {
         this.queueUser = queueUser;
@@ -53,7 +54,7 @@ public class EventSender implements EventStream {
 
     /**
      * Setter for the queuePassword
-     * @param queuePassword
+     * @param queuePassword the queuePassword value
      */
     public void setQueuePassword(String queuePassword) {
         this.queuePassword = queuePassword;

@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author ?
  *
+ * A class that extends Task which is used to handle Deposits to the vault
  */
 public class Deposit extends Task {
 

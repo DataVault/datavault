@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author ?
- *
+ * A class that extends Task which is used to handle Retrievals from the vault
  */
 public class Retrieve extends Task {
     
