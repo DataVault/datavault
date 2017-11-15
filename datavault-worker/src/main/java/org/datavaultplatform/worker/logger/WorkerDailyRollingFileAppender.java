@@ -4,8 +4,7 @@ import org.apache.log4j.DailyRollingFileAppender;
 import org.datavaultplatform.worker.WorkerInstance;
 
 /**
- * @author ?
- *
+ *Log4j Appeneder
  */
 public class WorkerDailyRollingFileAppender extends DailyRollingFileAppender {
     

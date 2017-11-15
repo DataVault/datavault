@@ -33,8 +33,6 @@ import gov.loc.repository.bagit.verify.BagVerifier;
 
 /**
  * A set of methods to package files in a Bagit erm Bag
- * 
- * @author ?
  */
 public class Packager {
     private static final Logger log = LoggerFactory.getLogger(Packager.class);

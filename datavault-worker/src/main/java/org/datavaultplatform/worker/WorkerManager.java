@@ -23,8 +23,6 @@ import org.slf4j.LoggerFactory;
  * 
  * We output a warning if an instance of a Workers fails to respond which then appears to trigger the exiting of the entire
  * WorkerManager
- *
- * @author ?
  */
 public class WorkerManager {
 

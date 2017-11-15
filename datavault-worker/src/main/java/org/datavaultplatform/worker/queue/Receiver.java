@@ -18,8 +18,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A class to review messages from the message queue then process them.
- * 
- * @author ?
  */
 public class Receiver {
 

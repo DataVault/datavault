@@ -13,8 +13,6 @@ import org.apache.tika.mime.MediaType;
 
 /**
  * A set of methods to indentify file / directory types
- * 
- * @author ?
  */
 public class Identifier {
     

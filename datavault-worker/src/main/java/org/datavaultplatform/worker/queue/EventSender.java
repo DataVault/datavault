@@ -14,8 +14,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A class to add Events to the event queue
- * 
- * @author ?
  */
 public class EventSender implements EventStream {
 

@@ -13,8 +13,6 @@ import org.apache.commons.io.IOUtils;
 
 /**
  * Set of methods to tar a dir / manipulate a tarred dir
- * 
- * @author ?
  */
 public class Tar {
     
