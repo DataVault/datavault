@@ -1,6 +1,7 @@
 package org.datavaultplatform.worker.operations;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -17,6 +18,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import gov.loc.repository.bagit.domain.Bag;
+import gov.loc.repository.bagit.domain.Manifest;
 
 public class PackagerTest {
     private static String packagerResources;
@@ -68,15 +72,25 @@ public class PackagerTest {
         }
         
         try {
-            Packager.createBag(dir);
-
+            Bag bag = Packager.createBag(dir);
+            assertNotNull(bag);
+            
             // check bag contains expected files
             for (File file : dir.listFiles()) {
                 if (file.isFile()) {
-                    System.out.println(file.getName());
                     assertTrue(expectFiles.contains(file.getName()));
                 }
             }
+            
+            File testFile =  new File(dir + File.separator + "data", TEST_FILE);
+            assertTrue(testFile.exists());
+            
+            // check test file checksum
+            FileInputStream fis = new FileInputStream(testFile);
+            String md5 = DigestUtils.md5Hex(fis);
+            fis.close();
+            Manifest manifest= bag.getPayLoadManifests().iterator().next();
+            assertEquals(md5, manifest.getFileToChecksumMap().get(testFile.toPath()));
         }
         catch(Exception ex) {
             ex.printStackTrace();
@@ -134,7 +148,6 @@ public class PackagerTest {
                     File.separator + TEST_FILE1));
             assertTrue(lines.contains(this.getChecksum(test2file) + "  data" +
                     File.separator + CHILD_DIR_NAME + File.separator + TEST_FILE2));
-            System.out.println(this.getChecksum(test3file));
             assertTrue(lines.contains(this.getChecksum(test3file) + "  data" +
                     File.separator + TEST_FILE_WITH_SPACE));
            
@@ -175,7 +188,7 @@ public class PackagerTest {
         }
         
         try {
-            if(Packager.createBag(dir)){
+            if(Packager.createBag(dir) != null){                
                 // the contents of the metadata files are of no
                 // interest for the purposes of this test
                 final String DEPOSIT_META = "jings";
@@ -235,7 +248,7 @@ public class PackagerTest {
         
         try {
             File metaDir =  new File(testDir, "tmp");
-            if(Packager.createBag(dir) && Packager.extractMetadata(dir, metaDir)){
+            if(Packager.createBag(dir) != null && Packager.extractMetadata(dir, metaDir)){
                 // check metadata files are in new directory
                 assertTrue(new File(metaDir, "tagmanifest-md5.txt").exists());
                 assertTrue(new File(metaDir, "bag-info.txt").exists());
@@ -268,7 +281,7 @@ public class PackagerTest {
         }
         
         try {
-            if(Packager.createBag(dir)){
+            if(Packager.createBag(dir) != null){
                 // TODO: this should fail
                 //fail(TEST_FILE + " is not a valid filename");
             } 
