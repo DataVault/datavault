@@ -9,8 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author ?
  * A class to track the progress of a deposit (or maybe any Task not sure)
+ * 
+ * @author ?
  */
 public class ProgressTracker implements Runnable {
     

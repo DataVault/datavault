@@ -12,9 +12,9 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 
 /**
- * @author ?
  * Set of methods to tar a dir / manipulate a tarred dir
- *
+ * 
+ * @author ?
  */
 public class Tar {
     

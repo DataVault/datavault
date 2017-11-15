@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * @author ?
- * 
  * This class handles the start up and monitoring of the required number of Worker instances.  The number of instances
  * comes from the datavault.properties file (I think).
  * 
@@ -26,6 +24,7 @@ import org.slf4j.LoggerFactory;
  * We output a warning if an instance of a Workers fails to respond which then appears to trigger the exiting of the entire
  * WorkerManager
  *
+ * @author ?
  */
 public class WorkerManager {
 

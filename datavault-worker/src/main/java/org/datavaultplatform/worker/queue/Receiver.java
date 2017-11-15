@@ -17,9 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author ?
  * A class to review messages from the message queue then process them.
- *
+ * 
+ * @author ?
  */
 public class Receiver {
 

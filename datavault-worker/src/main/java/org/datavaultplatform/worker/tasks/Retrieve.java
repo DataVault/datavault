@@ -30,8 +30,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author ?
  * A class that extends Task which is used to handle Retrievals from the vault
+ * 
+ * @author ?
  */
 public class Retrieve extends Task {
     

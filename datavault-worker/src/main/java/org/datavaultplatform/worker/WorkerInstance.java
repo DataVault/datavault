@@ -7,8 +7,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
+ * A Worker class which listens to the messge queue and process messages as they arrive.
+ * 
  * @author ?
- * A Worker class which listens to the messge queue and processes messages as they arrive.
  */
 public class WorkerInstance {
 

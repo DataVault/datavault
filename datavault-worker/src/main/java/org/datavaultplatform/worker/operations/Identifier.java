@@ -12,8 +12,9 @@ import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 
 /**
- * @author ?
  * A set of methods to indentify file / directory types
+ * 
+ * @author ?
  */
 public class Identifier {
     
