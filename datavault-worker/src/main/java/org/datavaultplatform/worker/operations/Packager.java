@@ -31,6 +31,10 @@ import gov.loc.repository.bagit.hash.SupportedAlgorithm;
 import gov.loc.repository.bagit.reader.BagReader;
 import gov.loc.repository.bagit.verify.BagVerifier;
 
+/**
+ * @author ?
+ * A set of methods to package files in a Bagit erm Bag
+ */
 public class Packager {
     private static final Logger log = LoggerFactory.getLogger(Packager.class);
     
@@ -41,7 +45,12 @@ public class Packager {
     public static final String fileTypeMetaFileName = "filetype.json";
     public static final String externalMetaFileName = "external.txt";
     
-    // Create a bag from an existing directory.
+    /**
+     * Create a bag from an existing directory then validate it.
+     * @param dir The existing directory 
+     * @return Boolean stating whether the created bag is valid
+     * @throws Exception if anything unexpected happens
+     */
     public static boolean createBag(File dir) throws Exception {        
         Bag bag = BagCreator.bagInPlace(
                 dir.toPath(),
@@ -51,7 +60,12 @@ public class Packager {
         return Packager.isValid(bag);
     }
     
-    // Validate an existing bag
+    /**
+     * Validate an existing bag
+     * @param dir The existing bag
+     * @return Boolean stating whether the bag is valid
+     * @throws Exception if anything unexpected happens
+     */
     public static boolean validateBag(File dir) throws Exception {
         Bag bag = new BagReader().read(dir.toPath());
         
@@ -63,7 +77,7 @@ public class Packager {
      * of BagVerifier.
      * @param bag A bagit bag object.
      * @return True if bag is valid.
-     * @throws Exception
+     * @throws Exception if anything unexpected happens
      */
     private static boolean isValid(Bag bag) {
         boolean isValid = false;
@@ -87,7 +101,15 @@ public class Packager {
         return isValid;
     }
     
-    // Add vault/deposit metadata
+    /**
+     * Add vault/deposit metadata
+     * @param bagDir The bag
+     * @param depositMetadata The depost metadata
+     * @param vaultMetadata The vault metadata
+     * @param fileTypeMetadata The file type metadata
+     * @param externalMetadata The external metadata
+     * @return True if the metadata is added without any exception
+     */
     public static boolean addMetadata(File bagDir,
                                       String depositMetadata,
                                       String vaultMetadata,
@@ -125,8 +147,17 @@ public class Packager {
         return result;
     }
     
-    // Add a metadata file to the bag metadata directory
-    // Also adds tag information to the tag manifest
+    /**
+     * Add a metadata file to the bag metadata directory
+     * Also adds tag information to the tag manifest
+     * @param tagManifest The tag manifest file
+     * @param metadataDirPath The path to the meta data dir
+     * @param metadataFileName The metadata file name
+     * @param metadata The meta data
+     * @param alg The algorithm applied to the bag
+     * @return True
+     * @throws IOException if an IOException has occurred
+     */
     public static boolean addMetaFile(File tagManifest, Path metadataDirPath, String metadataFileName, String metadata, SupportedAlgorithm alg) throws IOException {
         
         File metadataFile = metadataDirPath.resolve(metadataFileName).toFile();
@@ -137,7 +168,14 @@ public class Packager {
         return true;
     }
     
-    // Compute a hash value for file contents
+    /**
+     * Compute a hash value for file contents
+     * @param file The file we want to hash
+     * @param alg The algorithm we wnat to use
+     * @return The hash value as a string
+     * @throws FileNotFoundException if the file isn't found!
+     * @throws IOException if we run into any IO issues
+     */
     public static String computeFileHash(File file, SupportedAlgorithm alg) throws FileNotFoundException, IOException {
         String hash = null;
         FileInputStream fis = new FileInputStream(file);
@@ -156,7 +194,12 @@ public class Packager {
         return hash;
     }
     
-    // Extract the top-level metadata files from a bag and copy to a new directory.
+    /**
+     * Extract the top-level metadata files from a bag and copy to a new directory.
+     * @param bagDir The bad dir
+     * @param metaDir The new meta data dir
+     * @return True if all files are copied and false if not
+     */
     public static boolean extractMetadata(File bagDir, File metaDir) {
         
         // TODO: could we use the built-in "holey" bag methods instead?
