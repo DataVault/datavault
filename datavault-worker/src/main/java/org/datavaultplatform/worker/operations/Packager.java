@@ -45,30 +45,16 @@ public class Packager {
     public static final String externalMetaFileName = "external.txt";
     
     /**
-     * Create a bag from an existing directory then validate it.
+     * Create a bag from an existing directory
      * @param dir The existing directory 
      * @return Boolean stating whether the created bag is valid
      * @throws Exception if anything unexpected happens
      */
-    public static boolean createBag(File dir) throws Exception {        
-        Bag bag = BagCreator.bagInPlace(
+    public static Bag createBag(File dir) throws Exception {        
+        return BagCreator.bagInPlace(
                 dir.toPath(),
                 Arrays.asList(StandardSupportedAlgorithms.MD5),  
                 true); // include hidden files
-        
-        return Packager.isValid(bag);
-    }
-    
-    /**
-     * Validate an existing bag
-     * @param dir The existing bag
-     * @return Boolean stating whether the bag is valid
-     * @throws Exception if anything unexpected happens
-     */
-    public static boolean validateBag(File dir) throws Exception {
-        Bag bag = new BagReader().read(dir.toPath());
-        
-        return Packager.isValid(bag);
     }
     
     /**
@@ -78,8 +64,9 @@ public class Packager {
      * @return True if bag is valid.
      * @throws Exception if anything unexpected happens
      */
-    private static boolean isValid(Bag bag) {
+    public static boolean validateBag(File dir) throws Exception {
         boolean isValid = false;
+        Bag bag = new BagReader().read(dir.toPath());
         
         BagVerifier bv = new BagVerifier();
         try {
@@ -259,7 +246,7 @@ public class Packager {
             File dir = new File(args[0]);
             if(dir.isDirectory()) {
                 try {
-                    if(Packager.createBag(dir)){
+                    if(Packager.createBag(dir) != null){
                         status = 0;
                     }
                 }
