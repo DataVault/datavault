@@ -1,0 +1,265 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/rabbit
+        http://www.springframework.org/schema/rabbit/spring-rabbit-1.4.xsd">
+    
+    <!-- Note:- You need to set DATAVAULT_HOME! -->
+    <context:property-placeholder location="file:src/test/resources/config.properties"/>
+    
+    <bean id="filesService" class="org.datavaultplatform.broker.services.FilesService">
+    </bean>
+    
+    <bean id="vaultsService" class="org.datavaultplatform.broker.services.VaultsService">
+        <property name="vaultDAO" ref="vaultDAO" />
+    </bean>
+
+    <bean id="depositsService" class="org.datavaultplatform.broker.services.DepositsService">
+        <property name="depositDAO" ref="depositDAO" />
+    </bean>
+
+    <bean id="archivesService" class="org.datavaultplatform.broker.services.ArchivesService">
+        <property name="archiveDAO" ref="archiveDAO" />
+    </bean>
+
+    <bean id="retrievesService" class="org.datavaultplatform.broker.services.RetrievesService">
+        <property name="retrieveDAO" ref="retrieveDAO" />
+    </bean>
+
+    <bean id="metadataService" class="org.datavaultplatform.broker.services.MetadataService">
+        <property name="metaDir" value="${metaDir}"/>
+    </bean>
+
+    <bean id="eventService" class="org.datavaultplatform.broker.services.EventService">
+        <property name="eventDAO" ref="eventDAO" />
+    </bean>
+    
+    <bean id="retentionPoliciesService" class="org.datavaultplatform.broker.services.RetentionPoliciesService">
+        <property name="retentionPolicyDAO" ref="retentionPolicyDAO" />
+    </bean>
+
+    <bean id="usersService" class="org.datavaultplatform.broker.services.UsersService">
+        <property name="userDAO" ref="userDAO" />
+    </bean>
+
+    <bean id="groupsService" class="org.datavaultplatform.broker.services.GroupsService">
+        <property name="groupDAO" ref="groupDAO" />
+    </bean>
+
+    <bean id="clientsService" class="org.datavaultplatform.broker.services.ClientsService">
+        <property name="clientDAO" ref="clientDAO" />
+    </bean>
+
+    <bean id="fileStoreService" class="org.datavaultplatform.broker.services.FileStoreService">
+        <property name="fileStoreDAO" ref="fileStoreDAO" />
+    </bean>
+    
+    <bean id="archiveStoreService" class="org.datavaultplatform.broker.services.ArchiveStoreService">
+        <property name="archiveStoreDAO" ref="archiveStoreDAO" />
+    </bean>
+
+    <bean id="userKeyPairService" class="org.datavaultplatform.broker.services.UserKeyPairService">
+        <property name="passphrase" value="${sftp.passphrase}"/>
+    </bean>
+
+    <bean id="jobsService" class="org.datavaultplatform.broker.services.JobsService">
+        <property name="jobDAO" ref="jobDAO" />
+    </bean>
+    
+    <bean id="externalMetadataService" class="org.datavaultplatform.broker.services.ExternalMetadataService">
+        <property name="metadataURL" value="${metadata.url}" />
+        <property name="datasetDAO" ref="datasetDAO" />
+    </bean>
+
+    <bean id="emailService" class="org.datavaultplatform.broker.services.EmailService">
+        <property name="mailSender" ref="mailSender"/>
+        <property name="velocityEngine" ref="velocityEngine"/>
+        <property name="mailAdministrator" value="${mail.administrator}" />
+    </bean>
+
+    <bean id="checkRetentionPolicies" class="org.datavaultplatform.broker.scheduled.CheckRetentionPolicies">
+        <property name="vaultsService" ref="vaultsService" />
+    </bean>
+
+    <!-- Email -->
+    
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="${mail.host}"/>
+        <property name="port" value="${mail.port}"/>
+        <property name="protocol" value="smtp"/>
+        <property name="username" value="${mail.username}"/>
+        <property name="password" value="${mail.password}"/>
+        <property name="defaultEncoding" value="UTF-8"/>
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtp.auth">true</prop>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+                <prop key="mail.smtp.quitwait">false</prop>
+            </props>
+        </property>
+    </bean>
+    
+    <bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
+        <property name="velocityProperties">
+            <props>
+                <prop key="resource.loader">file</prop>
+                <prop key="file.resource.loader.class">
+                    org.apache.velocity.runtime.resource.loader.FileResourceLoader
+                </prop>
+                <prop key="file.resource.loader.path">src/test/resources/config/mail-templates</prop>
+                <prop key="file.resource.loader.cache">false</prop>
+                <prop key="eventhandler.referenceinsertion.class">
+                    org.apache.velocity.app.event.implement.EscapeHtmlReference
+                </prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- RabbitMQ -->
+    
+    <bean id="connectionFactory"
+        class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory" >
+        <constructor-arg value="${queue.server}" />
+        <property name="username" value="${queue.user}" />
+        <property name="password" value="${queue.password}" />
+    </bean>
+    
+    <rabbit:queue id="eventQueue" name="${queue.events}" durable="false" />
+    
+    <rabbit:listener-container connection-factory="connectionFactory" concurrency="1" max-concurrency="1" >
+        <rabbit:listener ref="listener" queues="eventQueue" />
+    </rabbit:listener-container>
+
+    <bean id="listener" class="org.datavaultplatform.broker.queue.EventListener" >
+        <property name="jobsService" ref="jobsService" />
+        <property name="vaultsService" ref="vaultsService" />
+        <property name="depositsService" ref="depositsService" />
+        <property name="archiveStoreService" ref="archiveStoreService" />
+        <property name="archivesService" ref="archivesService" />
+        <property name="retrievesService" ref="retrievesService" />
+        <property name="eventService" ref="eventService" />
+        <property name="usersService" ref="usersService" />
+        <property name="emailService" ref="emailService" />
+    </bean>
+
+    <bean id="sender" class="org.datavaultplatform.broker.queue.Sender">
+        <property name="queueServer" value="${queue.server}"/>
+        <property name="queueName" value="${queue.name}"/>
+        <property name="queueUser" value="${queue.user}"/>
+        <property name="queuePassword" value="${queue.password}"/>
+    </bean>
+    
+    <!-- Hibernate -->
+    
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="url" value="jdbc:mysql://${db.url}"/>
+        <property name="username" value="${db.username}" />
+        <property name="password" value="${db.password}"/>
+    </bean>
+    
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" >
+        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan">
+            <list>
+                <value>org.datavaultplatform.common.model</value>
+                <value>org.datavaultplatform.common.event</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.format_sql">false</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.enable_lazy_load_no_trans">true</prop>
+                <prop key="hibernate.hbm2ddl.import_files">/import.sql</prop>
+            </props>
+        </property>
+    </bean>
+ 
+    <bean id="transactionManager"  class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+ 
+    <bean id="persistenceExceptionTranslationPostProcessor" class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>
+
+    <!-- Retention Policy scheduler settings -->
+
+    <task:scheduler id="scheduler" pool-size="1" />
+
+    <task:scheduled-tasks scheduler="scheduler">
+        <task:scheduled ref="checkRetentionPolicies" method="checkAll" cron="${retentioncheck.schedule}" />
+    </task:scheduled-tasks>
+
+    <!-- Data Access Objects -->
+    
+    <bean id="vaultDAO" class="org.datavaultplatform.common.model.dao.VaultDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="depositDAO" class="org.datavaultplatform.common.model.dao.DepositDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="retrieveDAO" class="org.datavaultplatform.common.model.dao.RetrieveDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="archiveDAO" class="org.datavaultplatform.common.model.dao.ArchiveDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="eventDAO" class="org.datavaultplatform.common.model.dao.EventDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    
+    <bean id="retentionPolicyDAO" class="org.datavaultplatform.common.model.dao.RetentionPolicyDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="userDAO" class="org.datavaultplatform.common.model.dao.UserDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="groupDAO" class="org.datavaultplatform.common.model.dao.GroupDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="clientDAO" class="org.datavaultplatform.common.model.dao.ClientDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="fileStoreDAO" class="org.datavaultplatform.common.model.dao.FileStoreDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    
+    <bean id="archiveStoreDAO" class="org.datavaultplatform.common.model.dao.ArchiveStoreDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="jobDAO" class="org.datavaultplatform.common.model.dao.JobDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    
+    <bean id="datasetDAO" class="org.datavaultplatform.common.model.dao.DatasetDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    
+</beans>
