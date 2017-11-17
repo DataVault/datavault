@@ -12,6 +12,9 @@ import org.datavaultplatform.worker.WorkerInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A class to add Events to the event queue
+ */
 public class EventSender implements EventStream {
 
     private static final Logger logger = LoggerFactory.getLogger(EventSender.class);
@@ -23,22 +26,48 @@ public class EventSender implements EventStream {
     
     private int sequence = 0;
 
+    /**
+     * Setter for the queue server
+     * @param queueServer the queue server value
+     */
     public void setQueueServer(String queueServer) {
         this.queueServer = queueServer;
     }
 
+    /**
+     * Setter for the event queue name
+     * @param eventQueueName the eventQueueName value
+     */
     public void setEventQueueName(String eventQueueName) {
         this.eventQueueName = eventQueueName;
     }
 
+    /**
+     * Setter for the queue user
+     * @param queueUser the queueUser value
+     */
     public void setQueueUser(String queueUser) {
         this.queueUser = queueUser;
     }
 
+    /**
+     * Setter for the queuePassword
+     * @param queuePassword the queuePassword value
+     */
     public void setQueuePassword(String queuePassword) {
         this.queuePassword = queuePassword;
     }
     
+    /* (non-Javadoc)
+     * @see org.datavaultplatform.common.event.EventStream#send(org.datavaultplatform.common.event.Event)
+     * 
+     * Add a sequence to the event to allow ordering where the timestamp is equal, create a connection to the queue
+     * then encode the event as json, declare the queue and publish the message.
+     * 
+     * Finally close the connection.
+     * 
+     * @param event An event object
+     */
     @Override
     public void send(Event event) {
         

@@ -11,9 +11,18 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 
+/**
+ * Set of methods to tar a dir / manipulate a tarred dir
+ */
 public class Tar {
     
-    // Create a TAR archive of a directory.
+    /**
+     * Create a TAR archive of a directory.
+     * @param dir The dir to be tarred
+     * @param output The tarred file
+     * @return True
+     * @throws Exception if anything unexpected happens
+     */
     public static boolean createTar(File dir, File output) throws Exception {
 
         FileOutputStream fos = new FileOutputStream(output);
@@ -28,7 +37,13 @@ public class Tar {
         return true;
     }
     
-    // Recursively add a file or directory to a TAR archive.
+    /**
+     * Recursively add a file or directory to a TAR archive.
+     * @param tar The Tar stream
+     * @param f The file to be added
+     * @param base The base path
+     * @throws Exception if anything unexpected happens
+     */
     private static void addFileToTar(TarArchiveOutputStream tar, File f, String base) throws Exception {
         String entryName = base + f.getName();
         TarArchiveEntry tarEntry = new TarArchiveEntry(f, entryName);
@@ -50,7 +65,13 @@ public class Tar {
         }
     }
     
-    // Extract the contents of a TAR archive to a directory.
+    /**
+     * Extract the contents of a TAR archive to a directory.
+     * @param input The tar archive
+     * @param outputDir The extract dir
+     * @return The top dir of the extract
+     * @throws Exception if anything unexpected happens
+     */
     public static File unTar(File input, Path outputDir) throws Exception {
 
         FileInputStream fis = new FileInputStream(input);

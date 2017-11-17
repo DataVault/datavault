@@ -8,6 +8,9 @@ import org.datavaultplatform.worker.queue.EventSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A class to track the progress of a deposit (or maybe any Task not sure)
+ */
 public class ProgressTracker implements Runnable {
     
     private static final int SLEEP_INTERVAL_MS = 250;
@@ -22,6 +25,14 @@ public class ProgressTracker implements Runnable {
     
     private static final Logger logger = LoggerFactory.getLogger(ProgressTracker.class);
     
+    /**
+     * ProgressTracker constructor
+     * @param progress The progress object
+     * @param jobId Identifier for the job
+     * @param depositId Identifier for the deposit
+     * @param expectedBytes The expected size of the deposit
+     * @param eventSender The event sender
+     */
     public ProgressTracker(Progress progress, String jobId, String depositId, long expectedBytes, EventSender eventSender) {
         this.progress = progress;
         this.jobId = jobId;
@@ -30,10 +41,16 @@ public class ProgressTracker implements Runnable {
         this.eventSender = eventSender;
     }
     
+    /**
+     * Stop method for threading
+     */
     public void stop() {
         active = false;
     }
     
+    /**
+     * Update progress to the logs and broker
+     */
     void reportProgress() {
         
         long dirCount = progress.dirCount;
@@ -68,6 +85,9 @@ public class ProgressTracker implements Runnable {
         }
     }
     
+    /* (non-Javadoc)
+     * @see java.lang.Runnable#run()
+     */
     @Override
     public void run() {
         

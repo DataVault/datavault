@@ -29,10 +29,24 @@ import org.datavaultplatform.worker.operations.Packager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A class that extends Task which is used to handle Retrievals from the vault
+ */
 public class Retrieve extends Task {
     
     private static final Logger logger = LoggerFactory.getLogger(Retrieve.class);
     
+    /* (non-Javadoc)
+     * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
+     * 
+     * Connect to the user's file store, check if they have enough free space, retrieve the archive and transfer to the users file store.
+     * During the operation we untar / validate the archive before cleaning up.
+     * Events are created for each stage of the operation.
+     * 
+     * The user's file store can be a local disk, Drop box, Amazon Glacier, SFTP ...
+     *  
+     * @param context
+     */
     @Override
     public void performAction(Context context) {
         

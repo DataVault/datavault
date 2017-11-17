@@ -32,6 +32,9 @@ import org.datavaultplatform.worker.queue.EventSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A class that extends Task which is used to handle Deposits to the vault
+ */
 public class Deposit extends Task {
 
     private static final Logger logger = LoggerFactory.getLogger(Deposit.class);
@@ -51,6 +54,9 @@ public class Deposit extends Task {
     String bagID;
     String userID;
     
+    /* (non-Javadoc)
+     * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
+     */
     @Override
     public void performAction(Context context) {
         
@@ -312,6 +318,12 @@ public class Deposit extends Task {
         // TODO: Disconnect from user and archive storage system?
     }
     
+    /**
+     * @param userStore
+     * @param filePath
+     * @param bagPath
+     * @throws Exception
+     */
     private void copyFromUserStorage(UserStore userStore, String filePath, Path bagPath) throws Exception {
 
         String fileName = userStore.getName(filePath);
@@ -342,6 +354,13 @@ public class Deposit extends Task {
         }
     }
     
+    /**
+     * @param tempPath
+     * @param userID
+     * @param uploadPath
+     * @return
+     * @throws Exception
+     */
     private long getUserUploadsSize(Path tempPath, String userID, String uploadPath) throws Exception {
         // TODO: this is a bit of a hack to escape the per-worker temp directory
         File uploadDir = tempPath.getParent().resolve("uploads").resolve(userID).resolve(uploadPath).toFile();
@@ -352,6 +371,13 @@ public class Deposit extends Task {
         return 0;
     }
     
+    /**
+     * @param tempPath
+     * @param bagPath
+     * @param userID
+     * @param uploadPath
+     * @throws Exception
+     */
     private void moveFromUserUploads(Path tempPath, Path bagPath, String userID, String uploadPath) throws Exception {
         
         File outputFile = bagPath.resolve("uploads").toFile();
@@ -364,6 +390,10 @@ public class Deposit extends Task {
         }
     }
 
+    /**
+     * @param tarFile
+     * @throws Exception
+     */
     private void copyToArchiveStorage(File tarFile) throws Exception {
 
         for (String archiveStoreId : archiveStores.keySet() ) {
@@ -391,6 +421,12 @@ public class Deposit extends Task {
         }
     }
 
+    /**
+     * @param context
+     * @param tarFile
+     * @param tarHash
+     * @throws Exception
+     */
     private void verifyArchive(Context context, File tarFile, String tarHash) throws Exception {
 
         boolean alreadyVerified = false;
@@ -424,6 +460,15 @@ public class Deposit extends Task {
         }
     }
 
+    /**
+     * Not sure what this does yet the comment below suggests it copies an archive to the tmp dir
+     * why are deposit would do this I'm not sure
+     * 
+     * @param archiveStore
+     * @param archiveId
+     * @param tarFile
+     * @throws Exception
+     */
     private void copyBackFromArchive(ArchiveStore archiveStore, String archiveId, File tarFile) throws Exception {
 
         // Ask the driver to copy files to the temp directory
@@ -432,6 +477,17 @@ public class Deposit extends Task {
         logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
     }
     
+    /**
+     * Compare the SHA hash of the passed in tar file and the passed in original hash.
+     * 
+     * First compare the tar file then the bag then clean up
+     * 
+     * If the verification fails at either check throw an exception (maybe we could throw separate exceptions here)
+     * @param tempPath Path to the temp storage location
+     * @param tarFile File 
+     * @param origTarHash String representing the orig hash
+     * @throws Exception
+     */
     private void verifyTarFile(Path tempPath, File tarFile, String origTarHash) throws Exception {
 
         if (origTarHash != null) {
