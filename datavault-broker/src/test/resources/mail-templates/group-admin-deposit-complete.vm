@@ -1,0 +1,19 @@
+<html>
+	<body>
+		<h3>Data Vault - new deposit for ${group-name}</h3>
+		
+		<p>Deposit details:</p>
+		
+		<ul>
+			<li>Deposit note: ${deposit-note}</li>
+			<li>Deposit ID: ${deposit-id}</li>
+			<li>Vault: ${vault-name}</li>
+			<li>Vault ID: ${vault-id}</li>
+			<li>User ID: ${user-id}</li>
+			<li>Size: ${size-bytes} bytes</li>
+			<li>Timestamp: ${timestamp}</li>
+			<li>Review date: ${vault-retention-expiry}</li>
+		</ul>
+		
+	</body>
+</html>

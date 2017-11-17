@@ -32,7 +32,29 @@
         <root.basedir>${basedir}</root.basedir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
+    
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <build.profile.id>dev</build.profile.id>
+                <skip.integration.tests>true</skip.integration.tests>
+                <skip.unit.tests>false</skip.unit.tests>
+            </properties>
+        </profile>
+        <profile>
+            <id>integration-test</id>
+            <properties>
+                <build.profile.id>integration-test</build.profile.id>
+                <skip.integration.tests>false</skip.integration.tests>
+                <skip.unit.tests>true</skip.unit.tests>
+            </properties>
+        </profile>
+    </profiles>
+    
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -234,7 +256,6 @@
                 <artifactId>api-all</artifactId>
                 <version>1.0.0-RC2</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
