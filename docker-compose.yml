@@ -37,7 +37,7 @@ services:
       - ./docker/tmp/datavault/archive:/tmp/datavault/archive:rw
       - ./docker/tmp/datavault/temp:/tmp/datavault/temp:rw
       - ./docker/tmp/datavault/meta:/tmp/datavault/meta:rw
-      - ./datavault/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib:/docker_datavault-home/lib:rw
+      - ./datavault-worker/target/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar:/docker_datavault-home/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar:rw
       - ./docker/tmp/Users:/Users:rw
     networks:
       - dbnet
