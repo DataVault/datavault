@@ -31,20 +31,12 @@ public class VaultsServiceIT {
     @Autowired
     private VaultsService vaultsService;
     
-    @Autowired
-    private VaultDAO vaultDAO;
- 
     @Test
     public void checkVaultCount() {
         int prevVaultCount = vaultsService.count();
-//        Assert.assertThat(vaultsService.count(), is(0));
         
         Vault vault = new Vault("Vault Test");
         vaultsService.addVault(vault);
-        
-//        vaultDAO.save(vault);
-//        List<Vault> allVaults = vaultDAO.list();
-//        Assert.assertThat(allVaults.size(), is(1));
         
         int newVaultCount = prevVaultCount + 1;
         Assert.assertThat(vaultsService.count(), is(newVaultCount));
