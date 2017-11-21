@@ -17,8 +17,6 @@ services:
     image: mysql:5.7
     ports:
       - "53306:3306"
-#    volumes:
-#      - ./db_data:/var/lib/mysql:rw
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: unbr34kable
