@@ -1,0 +1,38 @@
+{
+	"taskClass": "org.datavaultplatform.worker.tasks.Deposit",
+	"jobID": "5de3ffb4-c936-4dc2-acca-13cb9a7907ad",
+	"properties": {
+		"bagId": "829c8329-f995-4fc7-9e79-f96b77359f4e",
+		"vaultMetadata": "{\"id\":\"e801f79f-5877-48f7-8361-83a7c8f90c79\",\"version\":1,\"creationTime\":\"2017-11-21T11:29:07.000Z\",\"name\":\"Vault 1\",\"description\":\"Test\",\"retentionPolicy\":{\"id\":\"UNIVERSITY\",\"name\":\"Default University Policy\",\"description\":\"Default University policy that flags vaults for review after 5 years.\",\"engine\":\"org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy\",\"sort\":1},\"retentionPolicyStatus\":1,\"retentionPolicyExpiry\":\"2022-11-21T11:29:07.000Z\",\"retentionPolicyLastChecked\":\"2017-11-21T11:29:08.000Z\",\"user\":{\"id\":\"user1\",\"firstname\":\"user 1\",\"lastname\":\"Test\",\"password\":\"password1\",\"email\":null,\"admin\":false,\"properties\":null},\"dataset\":{\"id\":\"MOCK-DATASET-1\",\"name\":\"Sample dataset 1\"},\"size\":0}",
+		"depositId": "272cb915-78fa-4f3f-9c38-e7c5aa7c8700",
+		"depositMetadata": "{\"id\":\"272cb915-78fa-4f3f-9c38-e7c5aa7c8700\",\"version\":0,\"creationTime\":\"2017-11-21T11:29:25.986Z\",\"vault\":{\"id\":\"e801f79f-5877-48f7-8361-83a7c8f90c79\",\"version\":1,\"creationTime\":\"2017-11-21T11:29:07.000Z\",\"name\":\"Vault 1\",\"description\":\"Test\",\"retentionPolicy\":{\"id\":\"UNIVERSITY\",\"name\":\"Default University Policy\",\"description\":\"Default University policy that flags vaults for review after 5 years.\",\"engine\":\"org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy\",\"sort\":1},\"retentionPolicyStatus\":1,\"retentionPolicyExpiry\":\"2022-11-21T11:29:07.000Z\",\"retentionPolicyLastChecked\":\"2017-11-21T11:29:08.000Z\",\"user\":{\"id\":\"user1\",\"firstname\":\"user 1\",\"lastname\":\"Test\",\"password\":\"password1\",\"email\":null,\"admin\":false,\"properties\":null},\"dataset\":{\"id\":\"MOCK-DATASET-1\",\"name\":\"Sample dataset 1\"},\"size\":0},\"depositPaths\":[{\"id\":\"afa27a70-fcd9-4d5f-b7ce-7e20958f83af\",\"filePath\":\"e03c5fee-db34-4a3e-9769-ccd68ff38cac/dir/\",\"pathType\":\"FILESTORE\"},{\"id\":\"0d12d55f-27c9-4e25-9dda-3123455992de\",\"filePath\":\"cbb927f5-5f8d-4cfe-bffc-e26c4cfff59f\",\"pathType\":\"USER_UPLOAD\"}],\"status\":\"NOT_STARTED\",\"note\":\"Deposit 1\",\"bagId\":\"829c8329-f995-4fc7-9e79-f96b77359f4e\",\"archiveSize\":0,\"archiveDigest\":null,\"archiveDigestAlgorithm\":null,\"fileOrigin\":\"\",\"shortFilePath\":\"\",\"filePath\":null,\"size\":0}",
+		"externalMetadata": "Mock Metadata",
+		"userId": "user1"
+	},
+	"fileStorePaths": [
+		"e03c5fee-db34-4a3e-9769-ccd68ff38cac/dir/"
+	],
+	"fileUploadPaths": [
+		"cbb927f5-5f8d-4cfe-bffc-e26c4cfff59f"
+	],
+	"archiveFileStores": [
+		{
+			"id": "0d7132d0-6219-4aab-954a-14b34ccda69f",
+			"storageClass": "org.datavaultplatform.common.storage.impl.LocalFileSystem",
+			"label": "Default archive store (local)",
+			"retrieveEnabled": true,
+			"properties": {
+				"rootPath": "/tmp/datavault/archive"
+			}
+		}
+	],
+	"userFileStoreProperties": {
+		"e03c5fee-db34-4a3e-9769-ccd68ff38cac": {
+			"rootPath": "/Users"
+		}
+	},
+	"userFileStoreClasses": {
+		"e03c5fee-db34-4a3e-9769-ccd68ff38cac": "org.datavaultplatform.common.storage.impl.LocalFileSystem"
+	},
+	"redeliver": false
+}

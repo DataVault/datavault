@@ -19,7 +19,7 @@ ADD datavault-worker/target/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-
 # Use customised properties
 ADD docker/datavault.properties /docker_datavault-home/config/datavault.properties
 
-WORKDIR /docker_datavault-home
+WORKDIR /docker_datavault-home/lib
 
 # Make port 80 available to the world outside this container
 EXPOSE 8080

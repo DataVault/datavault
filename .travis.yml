@@ -18,7 +18,7 @@ script:
   # docker needs jar file to start
   - mvn clean test package
   - docker-compose up -d
-  # - sleep 20 # wait that containers are ready
+  - sleep 20 # wait that containers are ready
   - mvn integration-test -P integration-test
   
 after_script:

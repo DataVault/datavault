@@ -35,12 +35,14 @@ services:
       - ./docker/tmp/datavault/archive:/tmp/datavault/archive:rw
       - ./docker/tmp/datavault/temp:/tmp/datavault/temp:rw
       - ./docker/tmp/datavault/meta:/tmp/datavault/meta:rw
+      - ./datavault-worker/target/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar:/docker_datavault-home/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar:rw
       - ./docker/tmp/Users:/Users:rw
     networks:
       - dbnet
       - mqnet
     depends_on:
       - rabbitmq
+      - mysql
 
 # volumes:
 #   db_data:
