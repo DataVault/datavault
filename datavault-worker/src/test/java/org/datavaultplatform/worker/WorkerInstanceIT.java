@@ -105,7 +105,14 @@ public class WorkerInstanceIT {
             int state = 0;
             boolean done =false;
             while (!done) {
-                QueueingConsumer.Delivery delivery = qConsumer.nextDelivery();
+                // Timeout after 1 minute
+                QueueingConsumer.Delivery delivery = qConsumer.nextDelivery(60000);
+                
+                // If nothing has been received after 1 minute fail
+                if(delivery == null){
+                    fail("Haven't receiving any progress from the Worker for 1 minute (state "+state+")");
+                }
+                
                 message = new String(delivery.getBody());
                 
                 System.out.println("State "+state);

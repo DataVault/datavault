@@ -20,7 +20,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@DataJpaTest
+//@DataJpaTest
 @AutoConfigureTestDatabase(replace = NONE)
 @ActiveProfiles("it")
 @ContextConfiguration(locations = {
