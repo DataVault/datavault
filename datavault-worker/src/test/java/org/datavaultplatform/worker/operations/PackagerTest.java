@@ -309,13 +309,13 @@ public class PackagerTest {
     
     @After
     public void tearDown() {
-        try{
+/*        try{
             FileUtils.deleteDirectory(testDir);
         }
         catch(IOException ex){
             fail(ex.getMessage());
         }
-
+*/
         BasicConfigurator.resetConfiguration();
     }
 }
