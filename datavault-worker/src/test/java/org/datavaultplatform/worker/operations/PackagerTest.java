@@ -8,6 +8,9 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -126,11 +129,10 @@ public class PackagerTest {
             FileUtils.copyFileToDirectory(test3file, parentDir);
             
             // create symlink in parent file to file in child
-            // TODO: currently doesn't work
-            /*Path source = Paths.get(childDir.getAbsolutePath() + File.separator + TEST_FILE2);
+            Path source = Paths.get(childDir.getAbsolutePath() + File.separator + TEST_FILE2);
             Path link = Paths.get(parentDir.getAbsolutePath() + File.separator + TEST_FILE2);
             Path relativeSrc = link.getParent().relativize(source); 
-            Files.createSymbolicLink(link, relativeSrc);*/
+            Files.createSymbolicLink(link, relativeSrc);
         }
         catch(IOException ex){
             ex.printStackTrace();
@@ -152,7 +154,8 @@ public class PackagerTest {
                     File.separator + TEST_FILE_WITH_SPACE));
            
             // #2 check symlinks
-            // TODO
+            File simLink = new File(parentDir + File.separator + "data", TEST_FILE2);
+            assertTrue(simLink.exists() && FileUtils.isSymlink(simLink));
             
             // #3 check empty dir exists
             assertTrue(new File(parentDir + File.separator + "data",
