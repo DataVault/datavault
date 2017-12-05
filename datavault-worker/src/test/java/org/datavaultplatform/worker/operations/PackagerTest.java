@@ -155,8 +155,8 @@ public class PackagerTest {
             // TODO
             
             // #3 check empty dir exists
-            // doesn't work
-            //assertTrue(new File(parentDir.getAbsolutePath(), EMPTY_DIR_NAME).isDirectory());
+            assertTrue(new File(parentDir + File.separator + "data",
+            		EMPTY_DIR_NAME).isDirectory());
             
             // # 4 check files exist
             assertTrue(new File(parentDir + File.separator + "data",
@@ -309,13 +309,13 @@ public class PackagerTest {
     
     @After
     public void tearDown() {
-        try{
+/*        try{
             FileUtils.deleteDirectory(testDir);
         }
         catch(IOException ex){
             fail(ex.getMessage());
         }
-
+*/
         BasicConfigurator.resetConfiguration();
     }
 }
