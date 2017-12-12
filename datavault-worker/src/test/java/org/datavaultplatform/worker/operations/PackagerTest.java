@@ -108,6 +108,9 @@ public class PackagerTest {
         final String TEST_FILE_WITH_SPACE = "peacock butterfly.jpeg";
         final String EMPTY_DIR_NAME = "emptydir";
         final String CHILD_DIR_NAME = "childdir";
+        final String CHILD_DIR_WITH_SPACE = "second childdir";
+        final String TEST_FILE_WITH_US = "ko_ala.jpg";
+        final String TEST_FILE_WITH_HY = "peng-uins.jpg";
         
         File parentDir =  new File(testDir, "validatebag");
         parentDir.mkdir();
@@ -117,6 +120,10 @@ public class PackagerTest {
         File test1file = null;
         File test2file = null;
         File test3file = null;
+        File secondChildDir =  new File(parentDir, CHILD_DIR_WITH_SPACE);
+        secondChildDir.mkdir();
+        File test4file = null;
+        File test5file = null;
         
         try{
             test1file = new File(packagerResources, TEST_FILE1);
@@ -127,6 +134,10 @@ public class PackagerTest {
             FileUtils.copyFileToDirectory(test2file, childDir);
             test3file = new File(packagerResources, TEST_FILE_WITH_SPACE);
             FileUtils.copyFileToDirectory(test3file, parentDir);
+            test4file = new File(packagerResources, TEST_FILE_WITH_US);
+            FileUtils.copyFileToDirectory(test4file, secondChildDir);
+            test5file = new File(packagerResources, TEST_FILE_WITH_HY);
+            FileUtils.copyFileToDirectory(test5file, secondChildDir);
             
             // create symlink in parent file to file in child
             Path source = Paths.get(childDir.getAbsolutePath() + File.separator + TEST_FILE2);
@@ -154,20 +165,22 @@ public class PackagerTest {
                     File.separator + TEST_FILE_WITH_SPACE));
            
             // #2 check symlinks
-            File simLink = new File(parentDir + File.separator + "data", TEST_FILE2);
+            File dataDir = new File(parentDir + File.separator + "data");
+            File simLink = new File(dataDir, TEST_FILE2);
             assertTrue(simLink.exists() && FileUtils.isSymlink(simLink));
             
             // #3 check empty dir exists
-            assertTrue(new File(parentDir + File.separator + "data",
-            		EMPTY_DIR_NAME).isDirectory());
+            assertTrue(new File(dataDir, EMPTY_DIR_NAME).isDirectory());
             
             // # 4 check files exist
-            assertTrue(new File(parentDir + File.separator + "data",
-                    TEST_FILE1).exists());
-            assertTrue(new File(parentDir + File.separator + "data" + File.separator + CHILD_DIR_NAME,
+            assertTrue(new File(dataDir, TEST_FILE1).exists());
+            assertTrue(new File(dataDir + File.separator + CHILD_DIR_NAME,
                     TEST_FILE2).exists());
-            assertTrue(new File(parentDir + File.separator + "data",
-                    TEST_FILE_WITH_SPACE).exists());
+            assertTrue(new File(dataDir, TEST_FILE_WITH_SPACE).exists());
+            File childDirWithSpace = new File(parentDir + File.separator +
+                    "data" + File.separator + CHILD_DIR_WITH_SPACE);
+            assertTrue(new File(childDirWithSpace, TEST_FILE_WITH_US).exists());
+            assertTrue(new File(childDirWithSpace, TEST_FILE_WITH_HY).exists());
         }        
         catch(Exception ex){
             ex.printStackTrace();
@@ -312,13 +325,13 @@ public class PackagerTest {
     
     @After
     public void tearDown() {
-/*        try{
+        try{
             FileUtils.deleteDirectory(testDir);
         }
         catch(IOException ex){
             fail(ex.getMessage());
         }
-*/
+
         BasicConfigurator.resetConfiguration();
     }
 }
