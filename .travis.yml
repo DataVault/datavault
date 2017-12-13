@@ -17,8 +17,13 @@ before_install:
 script: 
   # docker needs jar file to start
   - mvn clean test package
+  - docker-compose build
   - docker-compose up -d
-  - sleep 20 # wait that containers are ready
+  - sleep 120 # wait that containers are ready
+  - docker-compose logs workers
+  - docker-compose logs rabbitmq
+  - docker-compose ps
+  - docker-compose top
   - mvn integration-test -P integration-test
   
 after_script:
