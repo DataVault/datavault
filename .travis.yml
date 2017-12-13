@@ -1,8 +1,25 @@
 language: java
-sudo: true
+
+sudo: required
 
 env:
   # Give Maven 1GB of memory to work with
   - MAVEN_OPTS=-Xmx2048M
+  
+services:
+  - docker
+  
+before_install:
+  # - setup_docker.sh
+  - docker-compose rm -f
+  - docker-compose pull
 
-script: mvn clean test package
+script: 
+  # docker needs jar file to start
+  - mvn clean test package
+  - docker-compose up -d
+  # - sleep 20 # wait that containers are ready
+  - mvn integration-test -P integration-test
+  
+after_script:
+  - docker-compose stop -t 1
