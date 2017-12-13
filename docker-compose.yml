@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 services:
   rabbitmq:
     image: bitnami/rabbitmq:latest
@@ -12,6 +12,11 @@ services:
       RABBITMQ_PASSWORD: datavault
     networks:
       - mqnet
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   mysql:
     image: mysql:5.7
