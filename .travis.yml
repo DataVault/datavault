@@ -1,8 +1,33 @@
 language: java
-sudo: true
+
+sudo: required
 
 env:
   # Give Maven 1GB of memory to work with
   - MAVEN_OPTS=-Xmx2048M
+  
+services:
+  - docker
+  
+before_install:
+  # - setup_docker.sh
+  - docker-compose rm -f
+  - docker-compose pull
 
-script: mvn clean test package
+script: 
+  # docker needs jar file to start
+  - mvn clean test package
+  - docker-compose build
+  - docker-compose up -d rabbitmq
+  - docker-compose up -d mysql
+  - sleep 60 # wait that containers are ready
+  - docker-compose logs rabbitmq
+  - docker-compose exec rabbitmq rabbitmqctl authenticate_user datavault datavault
+  - docker-compose up -d workers
+  - sleep 60 # wait that container is ready
+  - docker-compose logs workers
+  - docker-compose ps
+  - mvn verify -P integration-test
+  
+after_script:
+  - docker-compose stop -t 1
