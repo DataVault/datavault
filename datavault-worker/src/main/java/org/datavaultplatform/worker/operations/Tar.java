@@ -6,6 +6,11 @@ import java.io.FileOutputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.nio.file.Path;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -66,6 +71,29 @@ public class Tar {
     }
     
     /**
+     * Create a TAR archive of a directory with encryption.
+     * @param dir The dir to be tarred
+     * @param output The tarred file
+     * @param cipher cryptographic operation
+     * @return True
+     * @throws Exception if anything unexpected happens
+     */
+    public static boolean createEncryptedTar(File dir, File output, Cipher cipher) throws Exception {
+
+        FileOutputStream fos = new FileOutputStream(output);
+        BufferedOutputStream bos = new BufferedOutputStream(fos);
+        CipherOutputStream cos = new CipherOutputStream(bos, cipher);
+        TarArchiveOutputStream tar = new TarArchiveOutputStream(cos);
+        tar.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
+        tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
+        addFileToTar(tar, dir, "");
+        tar.finish();
+        tar.close();
+        
+        return true;
+    }
+    
+    /**
      * Extract the contents of a TAR archive to a directory.
      * @param input The tar archive
      * @param outputDir The extract dir
@@ -77,6 +105,50 @@ public class Tar {
         FileInputStream fis = new FileInputStream(input);
         BufferedInputStream bis = new BufferedInputStream(fis);
         TarArchiveInputStream tar = new TarArchiveInputStream(bis);
+        
+        File topDir = null;
+        
+        TarArchiveEntry entry;
+        while ((entry = tar.getNextTarEntry()) != null) {
+            
+            Path path = outputDir.resolve(entry.getName());
+            File entryFile = path.toFile();
+            
+            if (entry.isDirectory()) {
+                // Create a directory
+                entryFile.mkdir();
+                
+                if (topDir == null) {
+                    topDir = entryFile;
+                }
+            } else {
+                // Extract a single file
+                FileOutputStream fos = new FileOutputStream(entryFile);
+                IOUtils.copyLarge(tar, fos, 0, entry.getSize());
+                fos.close();
+            }
+        }
+
+        tar.close();
+        bis.close();
+        fis.close();
+        
+        return topDir;
+    }
+    
+    /**
+     * Extract the contents of a encrypted TAR archive to a directory.
+     * @param input The tar archive
+     * @param outputDir The extract dir
+     * @param cipher cryptographic operation
+     * @return The top dir of the extract
+     * @throws Exception if anything unexpected happens
+     */
+    public static File unTar(File input, Path outputDir, Cipher cipher) throws Exception {
+        FileInputStream fis = new FileInputStream(input);
+        BufferedInputStream bis = new BufferedInputStream(fis);
+        CipherInputStream cis = new CipherInputStream(bis, cipher);
+        TarArchiveInputStream tar = new TarArchiveInputStream(cis);
         
         File topDir = null;
         
