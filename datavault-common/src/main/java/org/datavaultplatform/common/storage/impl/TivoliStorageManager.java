@@ -83,8 +83,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     		// in the local version of this class the FileCopy class adds info to the progess object
     		// I don't think we need to use the patch at all in this version 
 
-    		logger.info("Retrieve command is " + "dsmc", "retrieve", working.getAbsolutePath(), "-description=" + "?");
-        ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", working.getAbsolutePath(), "-description=" + "?");
+    		logger.info("Retrieve command is " + "dsmc " + " retrieve " + working.getAbsolutePath());
+        ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", working.getAbsolutePath());
 
         Process p = pb.start();
 
@@ -130,7 +130,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         // The working file appears to be bagged and tarred when we get here
 		// in the local version of this class the FileCopy class adds info to the progess object
 		// I don't think we need to use the patch at all in this version 
-        logger.info("Store command is " + "dsmc", "archive", working.getAbsolutePath(), "-description=" + randomUUIDString);
+        logger.info("Store command is " + "dsmc" + " archive " + working.getAbsolutePath() +  " -description=" + randomUUIDString);
         ProcessBuilder pb = new ProcessBuilder("dsmc", "archive", working.getAbsolutePath(), "-description=" + randomUUIDString);
 
         Process p = pb.start();
