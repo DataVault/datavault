@@ -2,6 +2,8 @@ package org.datavaultplatform.common.storage.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Map;
 import java.util.UUID;
 
@@ -25,39 +27,12 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         // Unpack the config parameters (in an implementation-specific way)
         // Actually I can't think of any parameters that we need.
     }
-
     
-//	@Override
-//	public void retrieve(String path, File working, Progress progress) throws Exception {
-//		Path absolutePath = getAbsolutePath(path);
-//		File file = absolutePath.toFile();
-//	  
-//		if (file.isFile()) {
-//			FileCopy.copyFile(progress, file, working);
-//		} else if (file.isDirectory()) {
-//			FileCopy.copyDirectory(progress, file, working);
-//		}
-//	}
-
-//	@Override
-//	public String store(String path, File working, Progress progress) throws Exception {
-//		Path absolutePath = getAbsolutePath(path);
-//		File retrieveFile = absolutePath.resolve(working.getName()).toFile();
-//	
-//		if (working.isFile()) {
-//			FileCopy.copyFile(progress, working, retrieveFile);
-//		} else if (working.isDirectory()) {
-//			FileCopy.copyDirectory(progress, working, retrieveFile);
-//		}
-//	
-//		return working.getName();
-//	}
-    
-//    @Override
-//    public long getUsableSpace() throws Exception {
-//        File file = new File(rootPath);
-//        return file.getUsableSpace();
-//    }
+//  @Override
+//  public long getUsableSpace() throws Exception {
+//      File file = new File(rootPath);
+//      return file.getUsableSpace();
+//  }
     
     @Override
     public long getUsableSpace() throws Exception {
@@ -85,13 +60,30 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         return retVal;
     }
 
+//	@Override
+//	public void retrieve(String path, File working, Progress progress) throws Exception {
+//		Path absolutePath = getAbsolutePath(path);
+//		File file = absolutePath.toFile();
+//	  
+//		if (file.isFile()) {
+//			FileCopy.copyFile(progress, file, working);
+//		} else if (file.isDirectory()) {
+//			FileCopy.copyDirectory(progress, file, working);
+//		}
+//	}
+    
     @Override
     public void retrieve(String path, File working, Progress progress) throws Exception {
     		// todo : monitor progress
     	
     		// do we need to check if the selected retrieval space has enough free space? (is the file bagged and tarred atm or is the actual space going to be different?)
     		// actually the Deposit  / Retreive worker classes check the free space it appears if we get here we don't need to check
+    	
+    		// The working file appears to be bagged and tarred when we get here
+    		// in the local version of this class the FileCopy class adds info to the progess object
+    		// I don't think we need to use the patch at all in this version 
 
+    		logger.info("Retrieve command is " + "dsmc", "retrieve", working.getAbsolutePath(), "-description=" + "?");
         ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", working.getAbsolutePath(), "-description=" + "?");
 
         Process p = pb.start();
@@ -101,12 +93,28 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 
         if (p.exitValue() != 0) {
             logger.info("Retrieval of " + working.getName() + " failed. ");
-            logger.info(p.getErrorStream().toString());
-            logger.info(p.getOutputStream().toString());
+            InputStream error = p.getErrorStream();
+            for (int i = 0; i < error.available(); i++) {
+            		logger.info("" + error.read());
+            }
             throw new Exception("Retrieval of " + working.getName() + " failed. ");
         }
     }
 
+//	@Override
+//	public String store(String path, File working, Progress progress) throws Exception {
+//		Path absolutePath = getAbsolutePath(path);
+//		File retrieveFile = absolutePath.resolve(working.getName()).toFile();
+//	
+//		if (working.isFile()) {
+//			FileCopy.copyFile(progress, working, retrieveFile);
+//		} else if (working.isDirectory()) {
+//			FileCopy.copyDirectory(progress, working, retrieveFile);
+//		}
+//	
+//		return working.getName();
+//	}
+    
     @Override
     public String store(String path, File working, Progress progress) throws Exception {
 
@@ -118,7 +126,11 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         
         // check we have enough space to store the data (is the file bagged and tarred atm or is the actual space going to be different?)
         // actually the Deposit  / Retreive worker classes check the free space it appears if we get here we don't need to check
-        		
+        
+        // The working file appears to be bagged and tarred when we get here
+		// in the local version of this class the FileCopy class adds info to the progess object
+		// I don't think we need to use the patch at all in this version 
+        logger.info("Store command is " + "dsmc", "archive", working.getAbsolutePath(), "-description=" + randomUUIDString);
         ProcessBuilder pb = new ProcessBuilder("dsmc", "archive", working.getAbsolutePath(), "-description=" + randomUUIDString);
 
         Process p = pb.start();
