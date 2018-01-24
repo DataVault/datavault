@@ -209,24 +209,24 @@ public class Retrieve extends Task {
             }
             
             // Get the payload data directory
-            // File payloadDir = bagDir.toPath().resolve("data").toFile();
-            // long payloadSize = FileUtils.sizeOfDirectory(payloadDir);
+            File payloadDir = bagDir.toPath().resolve("data").toFile();
+            long payloadSize = FileUtils.sizeOfDirectory(payloadDir);
             
             // Copy the extracted files to the target retrieve area
             logger.info("Copying to user directory ...");
-            eventStream.send(new UpdateProgress(jobID, depositId, 0, bagDirSize, "Starting transfer ...")
+            eventStream.send(new UpdateProgress(jobID, depositId, 0, payloadSize, "Starting transfer ...")
                 .withUserId(userID)
                 .withNextState(3));
             
             // Progress tracking (threaded)
             progress = new Progress();
-            tracker = new ProgressTracker(progress, jobID, depositId, bagDirSize, eventStream);
+            tracker = new ProgressTracker(progress, jobID, depositId, payloadSize, eventStream);
             trackerThread = new Thread(tracker);
             trackerThread.start();
             
             try {
                 // Ask the driver to copy files to the user directory
-                userFs.store(retrievePath, bagDir, progress);
+                userFs.store(retrievePath, payloadDir, progress);
             } finally {
                 // Stop the tracking thread
                 tracker.stop();
