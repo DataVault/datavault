@@ -1,31 +1,29 @@
 package org.datavaultplatform.worker.tasks;
 
-import java.util.Map;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import org.apache.commons.io.FileUtils;
+import java.util.Arrays;
+import java.util.Map;
 
-import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
-import org.datavaultplatform.common.event.retrieve.RetrieveStart;
-import org.datavaultplatform.common.model.ArchiveStore;
-import org.datavaultplatform.common.task.Context;
-import org.datavaultplatform.common.task.Task;
-import org.datavaultplatform.worker.queue.EventSender;
+import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.InitStates;
 import org.datavaultplatform.common.event.UpdateProgress;
-
+import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
+import org.datavaultplatform.common.event.retrieve.RetrieveStart;
 import org.datavaultplatform.common.io.Progress;
+import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
+import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.worker.operations.Packager;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 import org.datavaultplatform.worker.operations.Tar;
-import org.datavaultplatform.worker.operations.Packager;
-
+import org.datavaultplatform.worker.queue.EventSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -209,9 +207,9 @@ public class Retrieve extends Task {
             }
             
             // Get the payload data directory
-            // File payloadDir = bagDir.toPath().resolve("data").toFile();
-            // long payloadSize = FileUtils.sizeOfDirectory(payloadDir);
-            
+            File payloadDir = bagDir.toPath().resolve("data").toFile();
+            long payloadSize = FileUtils.sizeOfDirectory(payloadDir);
+
             // Copy the extracted files to the target retrieve area
             logger.info("Copying to user directory ...");
             eventStream.send(new UpdateProgress(jobID, depositId, 0, bagDirSize, "Starting transfer ...")
@@ -223,10 +221,12 @@ public class Retrieve extends Task {
             tracker = new ProgressTracker(progress, jobID, depositId, bagDirSize, eventStream);
             trackerThread = new Thread(tracker);
             trackerThread.start();
-            
+
             try {
-                // Ask the driver to copy files to the user directory
-                userFs.store(retrievePath, bagDir, progress);
+                ArrayList<File> contents = new ArrayList<File>(Arrays.asList(payloadDir.listFiles()));
+                for(File content: contents){
+                    userFs.store(retrievePath, content, progress);
+                }
             } finally {
                 // Stop the tracking thread
                 tracker.stop();
