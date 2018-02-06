@@ -326,9 +326,9 @@ public class SFTPFileSystem extends Device implements UserStore {
             }
             
             monitor = new Utility.SFTPMonitor(progress);
-            
-            Utility.sendDirectory(channelSftp, working.toPath(), monitor);
-            
+
+            Utility.send(channelSftp, working, monitor);
+
         } catch (Exception e) {
             e.printStackTrace();
             throw e;

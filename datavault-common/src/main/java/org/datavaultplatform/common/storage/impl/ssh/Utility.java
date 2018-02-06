@@ -190,7 +190,19 @@ public class Utility {
             }
         }
     }
-
+    
+    public static void send(final ChannelSftp channel,
+            final File current,
+            SFTPMonitor monitor)
+        throws IOException, SftpException {
+        if (current.isDirectory()) {
+            sendDirectory(channel, current.toPath(), monitor);
+        }
+        else{
+            sendFileToRemote(channel, current, null, monitor);
+        }
+    }
+    
     private static void sendDirectoryToRemote(final ChannelSftp channel,
                                               final Path directory,
                                               SFTPMonitor monitor)
