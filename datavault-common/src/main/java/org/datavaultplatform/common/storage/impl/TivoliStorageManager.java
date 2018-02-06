@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 public class TivoliStorageManager extends Device implements ArchiveStore {
 
     private static final Logger logger = LoggerFactory.getLogger(TivoliStorageManager.class);
-    private static final String TSM_SERVER_NODE1_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm1.opt";
-    private static final String TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
+    public static final String TSM_SERVER_NODE1_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm1.opt";
+    public static final String TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
 
     // todo : can we change this to COPY_BACK?
     public Verify.Method verificationMethod = Verify.Method.LOCAL_ONLY;
@@ -94,14 +94,22 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         // Just a thought - Does the filename contain the deposit uuid? Could we use that as the description?
         String randomUUIDString = UUID.randomUUID().toString();
         
+        this.storeInTSMNode(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT, randomUUIDString);
+        this.storeInTSMNode(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT, randomUUIDString);
+
+        return randomUUIDString;
+    }
+    
+    public String storeInTSMNode(String path, File working, Progress progress, String optFilePath, String description) throws Exception {
+		
         // check we have enough space to store the data (is the file bagged and tarred atm or is the actual space going to be different?)
         // actually the Deposit  / Retreive worker classes check the free space it appears if we get here we don't need to check
         
         // The working file appears to be bagged and tarred when we get here
 		// in the local version of this class the FileCopy class adds info to the progess object
 		// I don't think we need to use the patch at all in this version 
-        logger.info("Store command is " + "dsmc" + " archive " + working.getAbsolutePath() +  " -description=" + randomUUIDString + " -optfile=" + TivoliStorageManager.TSM_SERVER_NODE1_OPT);
-        ProcessBuilder pb = new ProcessBuilder("dsmc", "archive", working.getAbsolutePath(), "-description=" + randomUUIDString, "-optfile=" + TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+        logger.info("Store command is " + "dsmc" + " archive " + working.getAbsolutePath() +  " -description=" + description + " -optfile=" + optFilePath);
+        ProcessBuilder pb = new ProcessBuilder("dsmc", "archive", working.getAbsolutePath(), "-description=" + description, "-optfile=" + optFilePath);
 
         Process p = pb.start();
 
@@ -109,13 +117,13 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         p.waitFor();
 
         if (p.exitValue() != 0) {
-            logger.info("Deposit of " + working.getName() + " failed. ");
+            logger.info("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
             logger.info(p.getErrorStream().toString());
             logger.info(p.getOutputStream().toString());
-            throw new Exception("Deposit of " + working.getName() + " failed. ");
+            throw new Exception("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
         }
 
-        return randomUUIDString;
+        return description;
     }
     
 

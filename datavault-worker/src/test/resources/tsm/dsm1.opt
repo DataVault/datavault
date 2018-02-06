@@ -14,6 +14,5 @@
 
 * SErvername       A server name defined in the dsm.sys file
 * compressalways          yes
-nodename DLIB_SIDLAWS
 quiet
 

@@ -15,5 +15,6 @@
 * SErvername       A server name defined in the dsm.sys file
 * compressalways          yes
 virtualnodename DLIB-SIDLAWS2
+password k5jg352
 quiet
 
