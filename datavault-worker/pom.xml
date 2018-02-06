@@ -144,6 +144,8 @@
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
+                    
+                    <excludedGroups>org.datavaultplatform.SlowTest</excludedGroups>
                 </configuration>
             </plugin>
             <plugin>
