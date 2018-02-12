@@ -67,20 +67,33 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     		// in the local version of this class the FileCopy class adds info to the progess object
     		// I don't think we need to use the patch at all in this version 
 
-    		logger.info("Retrieve command is " + "dsmc " + " retrieve " + working.getAbsolutePath() + " -optfile=" + TivoliStorageManager.TSM_SERVER_NODE1_OPT);
-        ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", working.getAbsolutePath(), "-optfile=" + TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+    		try {
+    			// if this fails try to retrieve from second node, I think the only failure possible
+    			// at this stage is a missing archive, checksums are checked later in Retrieve.java
+    			this.retrieve(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+    		} catch (Exception node1) {
+    			// if this fails too just continue on to the error display
+    			this.retrieve(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT);
+    		}
+    }
+    
+    public void retrieve(String path, File working, Progress progress, String optFilePath) throws Exception {
+    	
+    		logger.info("Retrieve command is " + "dsmc " + " retrieve " + working.getAbsolutePath() + " -optfile=" + optFilePath);
+        ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", working.getAbsolutePath(), "-optfile=" + optFilePath);
         Process p = pb.start();
 
         // This class is already running in its own thread so it can happily pause until finished.
         p.waitFor();
 
         if (p.exitValue() != 0) {
-            logger.info("Retrieval of " + working.getName() + " failed. ");
+            logger.info("Retrieval of " + working.getName() + " failed using " + optFilePath + ". ");
             InputStream error = p.getErrorStream();
             for (int i = 0; i < error.available(); i++) {
             		logger.info("" + error.read());
             }
             throw new Exception("Retrieval of " + working.getName() + " failed. ");
+            
         }
     }
     
@@ -100,7 +113,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         return randomUUIDString;
     }
     
-    public String storeInTSMNode(String path, File working, Progress progress, String optFilePath, String description) throws Exception {
+    private String storeInTSMNode(String path, File working, Progress progress, String optFilePath, String description) throws Exception {
 		
         // check we have enough space to store the data (is the file bagged and tarred atm or is the actual space going to be different?)
         // actually the Deposit  / Retreive worker classes check the free space it appears if we get here we don't need to check

@@ -145,7 +145,7 @@ public class TivoliStorageManagerTest {
 //			FileUtils.moveFile(working, temp);
 //			assertFalse("The working file shouldn't exist", working.exists());
 //			
-//			// retrieve from TSM
+//			// retrieve from TSM node 1
 //			System.out.println("Retrieve the tar");
 //			//dsmc  retrieve /tmp/datavault/temp/2848@ubuntu-xenial/513c2b11-30df-4947-846b-a64309c61eb8.tar
 //			tsm.retrieve(path, working, progress);
