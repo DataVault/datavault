@@ -1,9 +1,8 @@
 package org.datavaultplatform.common.storage.impl;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 
@@ -19,12 +18,17 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     private static final Logger logger = LoggerFactory.getLogger(TivoliStorageManager.class);
     public static final String TSM_SERVER_NODE1_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm1.opt";
     public static final String TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
+    //public List<String> locations = null;
 
     // todo : can we change this to COPY_BACK?
     public Verify.Method verificationMethod = Verify.Method.LOCAL_ONLY;
 
     public TivoliStorageManager(String name, Map<String,String> config) throws Exception  {
         super(name, config);
+        locations = new ArrayList<String>();
+        locations.add(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+        locations.add(TivoliStorageManager.TSM_SERVER_NODE2_OPT);
+        super.multipleCopies = true;
 
         // Unpack the config parameters (in an implementation-specific way)
         // Actually I can't think of any parameters that we need.
@@ -67,14 +71,15 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     		// in the local version of this class the FileCopy class adds info to the progess object
     		// I don't think we need to use the patch at all in this version 
 
-    		try {
+    		//try {
     			// if this fails try to retrieve from second node, I think the only failure possible
     			// at this stage is a missing archive, checksums are checked later in Retrieve.java
-    			this.retrieve(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT);
-    		} catch (Exception node1) {
+    		//	this.retrieve(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+    		//} catch (Exception node1) {
     			// if this fails too just continue on to the error display
-    			this.retrieve(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT);
-    		}
+    		//	this.retrieve(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT);
+    		//}
+    		throw new UnsupportedOperationException();
     }
     
     public void retrieve(String path, File working, Progress progress, String optFilePath) throws Exception {
@@ -82,7 +87,6 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     		logger.info("Retrieve command is " + "dsmc " + " retrieve " + working.getAbsolutePath() + " -optfile=" + optFilePath);
         ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", working.getAbsolutePath(), "-optfile=" + optFilePath);
         Process p = pb.start();
-
         // This class is already running in its own thread so it can happily pause until finished.
         p.waitFor();
 
@@ -95,6 +99,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
             throw new Exception("Retrieval of " + working.getName() + " failed. ");
             
         }
+        // FILL IN THE REST OF PROGRESS x dirs, x files, x bytes etc.
     }
     
     @Override
