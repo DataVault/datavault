@@ -150,6 +150,9 @@ public class WorkerInstanceIT {
                             assertThat(concreteEvent, instanceOf(ComputedDigest.class));
                             state++;break;
                         case 6:
+                            assertThat(concreteEvent, instanceOf(ComputedChunks.class));
+                            state++;break;
+                        case 7:
                             if(concreteEvent instanceof UpdateProgress){
                                 break;
                             }else{

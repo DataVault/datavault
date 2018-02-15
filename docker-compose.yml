@@ -33,14 +33,16 @@ services:
 
   workers:
     build: 
-      context: .
-      dockerfile: worker.Dockerfile
+      context: ./datavault-worker
+      dockerfile: Dockerfile
     volumes:
       - ./docker/tmp/datavault/active:/tmp/datavault/active:rw
       - ./docker/tmp/datavault/archive:/tmp/datavault/archive:rw
       - ./docker/tmp/datavault/temp:/tmp/datavault/temp:rw
       - ./docker/tmp/datavault/meta:/tmp/datavault/meta:rw
       - ./docker/tmp/Users:/Users:rw
+      - ./docker/config:/docker_datavault-home/config/
+      - ./docker/scripts:/docker_datavault-home/scripts/
     networks:
       - dbnet
       - mqnet
