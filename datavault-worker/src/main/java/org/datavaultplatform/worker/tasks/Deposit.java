@@ -266,7 +266,7 @@ public class Deposit extends Task {
             Tar.createTar(bagDir, tarFile);
             String tarHash = Verify.getDigest(tarFile);
             String tarHashAlgorithm = Verify.getAlgorithm();
-
+            
             eventStream.send(new PackageComplete(jobID, depositId)
                 .withUserId(userID)
                 .withNextState(3));
