@@ -108,6 +108,10 @@ public class Deposit {
     @Column(columnDefinition = "TEXT")
     private String archiveDigestAlgorithm;
     
+    // Number of Chunks
+    @Column(columnDefinition = "INT default 0")
+    private int numOfChunks;
+    
     // Record the file path that the user selected for this deposit.
     @ApiObjectField(description = "Origin of the deposited filepath")
     @Column(columnDefinition = "TEXT")
@@ -191,6 +195,15 @@ public class Deposit {
 
     public void setArchiveDigestAlgorithm(String archiveDigestAlgorithm) {
         this.archiveDigestAlgorithm = archiveDigestAlgorithm;
+    }
+    
+
+    public int getNumOfChunks() {
+        return numOfChunks;
+    }
+
+    public void setNumOfChunks(int numOfChunks) {
+        this.numOfChunks = numOfChunks;
     }
     
     public String getFileOrigin() {

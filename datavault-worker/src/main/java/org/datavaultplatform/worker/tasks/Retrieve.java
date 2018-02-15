@@ -24,6 +24,7 @@ import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 import org.datavaultplatform.worker.operations.Tar;
+import org.datavaultplatform.worker.operations.FileSplitter;
 import org.datavaultplatform.worker.operations.Packager;
 
 import org.slf4j.Logger;
@@ -63,6 +64,8 @@ public class Retrieve extends Task {
         String userID = properties.get("userId");
         String archiveDigest = properties.get("archiveDigest");
         String archiveDigestAlgorithm = properties.get("archiveDigestAlgorithm");
+        
+        int numOfChunks = Integer.parseInt(properties.get("numOfChunks"));
         
         long archiveSize = Long.parseLong(properties.get("archiveSize"));
 
@@ -172,7 +175,26 @@ public class Retrieve extends Task {
 
             try {
                 // Ask the driver to copy files to the temp directory
-                archiveFs.retrieve(archiveId, tarFile, progress);
+                if( context.isChunkingEnabled() ) {
+                    // TODO: can bypass this if there is only one chunk.
+                    
+                    File[] chunks = new File[numOfChunks];
+                    logger.info("Retrieving " + numOfChunks + " chunk(s)");
+                    for( int chunkNum = 1; chunkNum <= numOfChunks; chunkNum++) {
+                        Path chunkPath = context.getTempDir().resolve(tarFileName+FileSplitter.CHUNK_SEPARATOR+chunkNum);
+                        File chunkFile = chunkPath.toFile();
+                        String chunkArchiveId = archiveId+FileSplitter.CHUNK_SEPARATOR+chunkNum;
+                        archiveFs.retrieve(chunkArchiveId, chunkFile, progress);
+                        chunks[chunkNum-1] = chunkFile;
+                    }
+                    
+                    // TODO: Checksum for each chunks (need to add checksum in DB first)
+                    
+                    logger.info("Recomposing tar file from chunk(s)");
+                    FileSplitter.recomposeFile(chunks, tarFile);
+                } else {
+                    archiveFs.retrieve(archiveId, tarFile, progress);
+                }
             } finally {
                 // Stop the tracking thread
                 tracker.stop();
@@ -239,6 +261,8 @@ public class Retrieve extends Task {
             logger.info("Cleaning up ...");
             FileUtils.deleteDirectory(bagDir);
             tarFile.delete();
+            
+            
             
             logger.info("Data retrieve complete: " + retrievePath);
             eventStream.send(new RetrieveComplete(jobID, depositId, retrieveId).withNextState(4)

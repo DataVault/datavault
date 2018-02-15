@@ -176,6 +176,23 @@ public class EventListener implements MessageListener {
                     }
                 }
 
+            } else if (concreteEvent instanceof ComputedChunks) {
+                
+                // Update the deposit with the computed digest
+                ComputedChunks computedChunksEvent = (ComputedChunks)concreteEvent;
+                
+                Boolean success = false;
+                while (!success) {
+                    try {
+                        deposit.setNumOfChunks(computedChunksEvent.getNumOfChunks());
+                        depositsService.updateDeposit(deposit);
+                        success = true;
+                    } catch (org.hibernate.StaleObjectStateException e) {
+                        // Refresh from database and retry
+                        deposit = depositsService.getDeposit(concreteEvent.getDepositId());
+                    }
+                }
+                
             } else if (concreteEvent instanceof ComputedDigest) {
                 
                 // Update the deposit with the computed digest

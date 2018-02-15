@@ -360,6 +360,7 @@ public class DepositsController {
             retrieveProperties.put("userId", user.getID());
             retrieveProperties.put("archiveDigest", deposit.getArchiveDigest());
             retrieveProperties.put("archiveDigestAlgorithm", deposit.getArchiveDigestAlgorithm());
+            retrieveProperties.put("numOfChunks", Integer.toString(deposit.getNumOfChunks()));
             
             // Add a single entry for the user file storage
             Map<String, String> userFileStoreClasses = new HashMap<>();

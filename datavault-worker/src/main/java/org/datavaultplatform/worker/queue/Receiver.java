@@ -29,6 +29,7 @@ public class Receiver {
     private String queuePassword;
     private String tempDir;
     private String metaDir;
+    private Boolean chunkingEnabled;
 
     /**
      * Set the queue server
@@ -76,6 +77,13 @@ public class Receiver {
      */
     public void setMetaDir(String metaDir) {
         this.metaDir = metaDir;
+    }
+    /**
+     * Define if archived tar file is chunked
+     * @param doChunking true or false
+     */
+    public void setChunkingEnabled(Boolean chunkingEnabled) {
+        this.chunkingEnabled = chunkingEnabled;
     }
 
     /**
@@ -138,7 +146,7 @@ public class Receiver {
                 
                 Path metaDirPath = Paths.get(metaDir);
                 
-                Context context = new Context(tempDirPath, metaDirPath, events);
+                Context context = new Context(tempDirPath, metaDirPath, events, chunkingEnabled);
                 concreteTask.performAction(context);
                 
                 // Clean up the temporary directory
