@@ -82,10 +82,12 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     		throw new UnsupportedOperationException();
     }
     
+    @Override
     public void retrieve(String path, File working, Progress progress, String optFilePath) throws Exception {
     	
     		logger.info("Retrieve command is " + "dsmc " + " retrieve " + working.getAbsolutePath() + " -optfile=" + optFilePath);
-        ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", working.getAbsolutePath(), "-optfile=" + optFilePath);
+    		
+        ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", working.getAbsolutePath(), "-optfile=" + optFilePath, "-replace=true");
         Process p = pb.start();
         // This class is already running in its own thread so it can happily pause until finished.
         p.waitFor();

@@ -148,7 +148,7 @@ public class TivoliStorageManagerTest {
 //			// retrieve from TSM node 1
 //			System.out.println("Retrieve the tar");
 //			//dsmc  retrieve /tmp/datavault/temp/2848@ubuntu-xenial/513c2b11-30df-4947-846b-a64309c61eb8.tar
-//			tsm.retrieve(path, working, progress);
+//			tsm.retrieve(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT);
 //			
 //			// check that the /tmp/"retval" dir now exists
 //			System.out.println("Check the retrieve archive exits");
@@ -175,7 +175,7 @@ public class TivoliStorageManagerTest {
     }
     
     @Test
-    public void testRetrieveNonExistantFile() {
+    public void testRetrieveNonExistantFileFromNodeOne() {
     		// retrieve from TSM
 //     	Progress progress = new Progress();
 //    		File working  = new File("/tmp/test.tar");
@@ -184,7 +184,25 @@ public class TivoliStorageManagerTest {
 //    		try {
 //	    		System.out.println("Retrieve the tar");
 //	    		//dsmc  retrieve /tmp/datavault/temp/2848@ubuntu-xenial/513c2b11-30df-4947-846b-a64309c61eb8.tar
-//	    		tsm.retrieve(path, working, progress);
+//	    		tsm.retrieve(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+//	    		fail("Exception should have been thrown"); 
+//    		} catch (Exception e) {
+//    			assertNotNull("Exception should not be null", e);
+//    			assertEquals("Message not as expected", "Retrieval of test.tar failed. ", e.getMessage());
+//    		}
+    }
+    
+    @Test
+    public void testRetrieveNonExistantFileFromNodeTwo() {
+    		// retrieve from TSM
+//     	Progress progress = new Progress();
+//    		File working  = new File("/tmp/test.tar");
+//    		String path = "/tmp";
+//    		
+//    		try {
+//	    		System.out.println("Retrieve the tar");
+//	    		//dsmc  retrieve /tmp/datavault/temp/2848@ubuntu-xenial/513c2b11-30df-4947-846b-a64309c61eb8.tar
+//	    		tsm.retrieve(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT);
 //	    		fail("Exception should have been thrown"); 
 //    		} catch (Exception e) {
 //    			assertNotNull("Exception should not be null", e);

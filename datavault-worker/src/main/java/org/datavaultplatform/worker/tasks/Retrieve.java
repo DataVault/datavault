@@ -5,6 +5,8 @@ import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -163,13 +165,17 @@ public class Retrieve extends Task {
                 .withNextState(1));
             
             if (archiveFs.hasMultipleCopies()) {
+            		logger.info("Device has multiple copies");
 	            	Progress progress = new Progress();
 	        		ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, archiveSize, eventStream);
 	        		Thread trackerThread = new Thread(tracker);
 	        		trackerThread.start();
 	
+	        		List<String> locations = archiveFs.getLocations();
+	        		Iterator<String> locationsIt = locations.iterator();
 	        		LOCATION:
-	        		for (String location : archiveFs.getLocations()) {
+	        		while (locationsIt.hasNext()) {
+	        			String location = locationsIt.next();
 	        			try {
 			            try {
 			                // Ask the driver to copy files to the temp directory
@@ -180,14 +186,22 @@ public class Retrieve extends Task {
 			                trackerThread.join();
 			            }
 			            
+			            logger.info("Attempting retrieve on archive from " + location);
 			            this.doRetrieve(depositId, userID, retrievePath, retrieveId, context, userFs, tarFile, eventStream, archiveDigestAlgorithm, archiveDigest, progress);
+			            logger.info("Completed retrieve on archive from " + location);
+			            break LOCATION;
 	        			} catch (Exception e) {
-	        				continue LOCATION;
+	        				//if last location has an error throw the error else go round again
+	        				//continue LOCATION;
+	        				if (!locationsIt.hasNext()) {
+	        					logger.info("All locations had problems throwing exception " + e.getMessage());
+	        					throw e;
+	        				}
 	        			}
-	        			break LOCATION;
             		}
 	            
             } else {
+            		logger.info("Single copy device");
             		// Progress tracking (threaded)
             		Progress progress = new Progress();
             		ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, archiveSize, eventStream);
@@ -233,6 +247,7 @@ public class Retrieve extends Task {
         logger.info("Checksum: " + tarHash);
         
         if (!tarHash.equals(archiveDigest)) {
+        		logger.info("Checksum failed: " + tarHash + " != " + archiveDigest);
             throw new Exception("checksum failed: " + tarHash + " != " + archiveDigest);
         }
         
