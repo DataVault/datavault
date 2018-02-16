@@ -16,8 +16,11 @@ import java.util.concurrent.TimeoutException;
 import java.util.zip.ZipEntry;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.BasicConfigurator;
 import org.datavaultplatform.common.event.*;
 import org.datavaultplatform.common.event.deposit.*;
+import org.datavaultplatform.worker.operations.FileSplitter;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -43,8 +46,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
  */
 public class WorkerInstanceIT {
     private static String workerInstanceResources;
-    private static File testDir;
-    
     private static String testQueueServer = "localhost";
     private static String testQueueUser = "datavault";
     private static String testQueuePassword = "datavault";
@@ -55,10 +56,12 @@ public class WorkerInstanceIT {
                 File.separator + "test" + File.separator + "resources";
         
         workerInstanceResources = resourcesDir + File.separator + "workerInstance";
+
+        BasicConfigurator.configure();
     }
     
     @Test
-    public void testSimpleDeposite() {        
+    public void testSimpleDeposite() {
         System.out.println("Running testSimpleDeposite()");
         
         String jsonFilePath = workerInstanceResources + File.separator + "rabbitmq_deposit_sent.json";
@@ -185,24 +188,26 @@ public class WorkerInstanceIT {
         } catch (InterruptedException ie) {
             fail("We should not have a InterruptedException: "+ie);
         }
-        
+
         // Check output        
         String archiveDir = ".." + File.separator + "docker" + File.separator + "tmp" +
                 File.separator + "datavault" + File.separator + "archive";
 
         String expectedTarFilePath = workerInstanceResources + File.separator + "829c8329-f995-4fc7-9e79-f96b77359f4e.tar";
-        String tarFilePath = archiveDir +  File.separator + "829c8329-f995-4fc7-9e79-f96b77359f4e.tar";
+        // Only work if file is smaller than chunks size
+        String tarFilePath = archiveDir +  File.separator + "829c8329-f995-4fc7-9e79-f96b77359f4e.tar"+FileSplitter.CHUNK_SEPARATOR+"1";
 
         File tarfile = new File(tarFilePath);
         File expectedTarfile = new File(expectedTarFilePath);
         
         System.out.println("Check output file: " + tarFilePath);
-        
+
         try {
             assertTrue("The tar file doesn't exist: "+tarfile.getAbsolutePath(), tarfile.exists());
             assertTrue("The expected file doesn't exist: "+expectedTarfile.getAbsolutePath(), expectedTarfile.exists());
             
             assertTarEquals(tarFilePath, expectedTarFilePath);
+            
         } catch (NoSuchAlgorithmException nsae) {
             fail("We should not have a NoSuchAlgorithmException: "+nsae);
         } catch (IOException e) {
@@ -276,6 +281,26 @@ public class WorkerInstanceIT {
                 // TODO: Add more for links, directories,etc...
             }
         }
+    }
+    
+    @After
+    public void tearDown() {
+        String archiveDir = ".." + File.separator + "docker" + File.separator + "tmp" +
+                File.separator + "datavault" + File.separator + "archive";
+        String tarFilePath = archiveDir +  File.separator + "829c8329-f995-4fc7-9e79-f96b77359f4e.tar"+
+                FileSplitter.CHUNK_SEPARATOR+"1";
+
+        File tarfile = new File(tarFilePath);
+        // delete file
+        tarfile.delete();
+        // delete meta folder
+        String metaFolderPath = ".." + File.separator + "docker" + File.separator + "tmp" +
+                File.separator + "datavault" + File.separator + "meta" +
+                File.separator + "829c8329-f995-4fc7-9e79-f96b77359f4e";
+        File metaFolder = new File(metaFolderPath);
+        metaFolder.delete();
+
+        BasicConfigurator.resetConfiguration();
     }
 
 }
