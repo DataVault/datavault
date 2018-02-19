@@ -1,6 +1,9 @@
 package org.datavaultplatform.common.storage;
 
 import org.datavaultplatform.common.io.Progress;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.io.File;
 
@@ -10,6 +13,8 @@ public abstract class Device {
     
     // Some public information about a device or storage system
     public String name;
+    public Boolean multipleCopies = false;
+    public List<String> locations = null;
     
     // Some private configuration properties
     protected Map<String,String> config;
@@ -26,7 +31,19 @@ public abstract class Device {
     // Progress information should be updated for monitoring as the copy occurs
     public abstract void retrieve(String path, File working, Progress progress) throws Exception;
     
+    // This method should be overridden by plugins that allow the retrieval of multiple copies to get a specific copy
+    public void retrieve(String path, File working, Progress progress, String location) throws Exception {
+    		throw new UnsupportedOperationException();
+    }
     // Copy an object (file/dir) from the working space
     // Progress information should be updated for monitoring as the copy occurs
     public abstract String store(String path, File working, Progress progress) throws Exception;
+    
+    public Boolean hasMultipleCopies() {
+    		return this.multipleCopies;
+    }
+    
+    public List<String> getLocations() {
+    		return this.locations;
+    }
 }
