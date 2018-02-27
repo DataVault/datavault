@@ -6,6 +6,8 @@ import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.apache.commons.io.FileUtils;
 
 import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
@@ -68,6 +70,8 @@ public class Retrieve extends Task {
         int numOfChunks = Integer.parseInt(properties.get("numOfChunks"));
         
         long archiveSize = Long.parseLong(properties.get("archiveSize"));
+        
+        Map<Integer, String> chunksDigest = getChunkFilesDigest();
 
         if (this.isRedeliver()) {
             eventStream.send(new Error(jobID, depositId, "Retrieve stopped: the message had been redelivered, please investigate")
@@ -172,11 +176,18 @@ public class Retrieve extends Task {
             ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, archiveSize, eventStream);
             Thread trackerThread = new Thread(tracker);
             trackerThread.start();
+            
 
+            // Verify integrity with deposit checksum
+            String systemAlgorithm = Verify.getAlgorithm();
+            if (!systemAlgorithm.equals(archiveDigestAlgorithm)) {
+                throw new Exception("Unsupported checksum algorithm: " + archiveDigestAlgorithm);
+            }
+            
             try {
                 // Ask the driver to copy files to the temp directory
                 if( context.isChunkingEnabled() ) {
-                    // TODO: can bypass this if there is only one chunk.
+                    // TODO can bypass this if there is only one chunk.
                     
                     File[] chunks = new File[numOfChunks];
                     logger.info("Retrieving " + numOfChunks + " chunk(s)");
@@ -186,9 +197,21 @@ public class Retrieve extends Task {
                         String chunkArchiveId = archiveId+FileSplitter.CHUNK_SEPARATOR+chunkNum;
                         archiveFs.retrieve(chunkArchiveId, chunkFile, progress);
                         chunks[chunkNum-1] = chunkFile;
+                        
+                        // Check file
+                        String archivedChunkFileHash = chunksDigest.get(chunkNum);
+                        
+                        // TODO Should we check algorithm each time or assume main tar file algorithm is the same
+                        // We might also want to move algorythm check before this loop
+                        String chunkFileHash = Verify.getDigest(chunkFile);
+                        
+                        logger.info("Chunk Checksum algorithm: " + archiveDigestAlgorithm);
+                        logger.info("Checksum: " + chunkFileHash);
+                        
+                        if (!chunkFileHash.equals(archivedChunkFileHash)) {
+                            throw new Exception("checksum failed: " + chunkFileHash + " != " + archivedChunkFileHash);
+                        }
                     }
-                    
-                    // TODO: Checksum for each chunks (need to add checksum in DB first)
                     
                     logger.info("Recomposing tar file from chunk(s)");
                     FileSplitter.recomposeFile(chunks, tarFile);
@@ -206,12 +229,6 @@ public class Retrieve extends Task {
             logger.info("Validating data ...");
             eventStream.send(new UpdateProgress(jobID, depositId).withNextState(2)
                 .withUserId(userID));
-            
-            // Verify integrity with deposit checksum
-            String systemAlgorithm = Verify.getAlgorithm();
-            if (!systemAlgorithm.equals(archiveDigestAlgorithm)) {
-                throw new Exception("Unsupported checksum algorithm: " + archiveDigestAlgorithm);
-            }
             
             String tarHash = Verify.getDigest(tarFile);
             logger.info("Checksum algorithm: " + archiveDigestAlgorithm);

@@ -56,7 +56,7 @@ public class Deposit extends Task {
     String userID;
     
     // Chunking attributes
-    File[] chunks;
+    File[] chunkFiles;
     String[] chunksHash;
     
     /* (non-Javadoc)
@@ -286,22 +286,25 @@ public class Deposit extends Task {
                 .withUserId(userID));
             
             if ( context.isChunkingEnabled() ) {
-                logger.info("Chunkink tar file ...");
-                chunks = FileSplitter.spliteFile(tarFile);
-                chunksHash = new String[chunks.length];
+                logger.info("Chunking tar file ...");
+                chunkFiles = FileSplitter.spliteFile(tarFile);
+                chunksHash = new String[chunkFiles.length];
+                HashMap<Integer, String> chunksDigest = new HashMap<Integer, String>();
 
-                logger.info(chunks.length + " Chunk file created.");
-                for (int i = 0; i < chunks.length; i++){
-                    File chunk = chunks[i];
+                logger.info(chunkFiles.length + " Chunk file created.");
+                for (int i = 0; i < chunkFiles.length; i++){
+                    File chunk = chunkFiles[i];
                     chunksHash[i] = Verify.getDigest(chunk);
                     
                     long chunkSize = chunk.length();
                     logger.info("Chunk file " + i + ": " + chunkSize + " bytes");
                     logger.info("Checksum algorithm: " + tarHashAlgorithm);
                     logger.info("Checksum: " + chunksHash[i]);
+                    
+                    chunksDigest.put(i+1, chunksHash[i]);
                 }
                 
-                eventStream.send(new ComputedChunks(jobID, depositId, chunks.length)
+                eventStream.send(new ComputedChunks(jobID, depositId, chunksDigest, tarHashAlgorithm)
                         .withUserId(userID));
             }
             
@@ -318,10 +321,10 @@ public class Deposit extends Task {
             logger.info("Copying tar file(s) to archive ...");
             
             if ( context.isChunkingEnabled() ) {
-                for (File chunk : chunks){
-                    System.out.println("Copying chunk: "+chunk.getName());
+                for (File chunk : chunkFiles){
+                    logger.debug("Copying chunk: "+chunk.getName());
                     copyToArchiveStorage(chunk, true);
-                    System.out.println("archiveIds: "+archiveIds);
+                    logger.debug("archiveIds: "+archiveIds);
                 }
             } else {
                 copyToArchiveStorage(tarFile);
@@ -337,8 +340,8 @@ public class Deposit extends Task {
 
             logger.info("Verifying archive package ...");
             if( context.isChunkingEnabled() ) {
-                for (int i = 0; i < chunks.length; i++){
-                    verifyArchive(context, chunks, chunksHash, tarFile, tarHash);
+                for (int i = 0; i < chunkFiles.length; i++){
+                    verifyArchive(context, chunkFiles, chunksHash, tarFile, tarHash);
                 }
             } else {
                 verifyArchive(context, tarFile, tarHash);
@@ -468,14 +471,12 @@ public class Deposit extends Task {
             logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
             
             if (isChunk && archiveIds.get(archiveStoreId) == null){
-                System.out.println("1. archiveId: "+archiveId);
                 String separator = FileSplitter.CHUNK_SEPARATOR;
                 int beginIndex = archiveId.lastIndexOf(separator);
                 archiveId = archiveId.substring(0, beginIndex);
-                System.out.println("2. archiveId: "+archiveId);
-                System.out.println("Add to archiveIds: key: "+archiveStoreId+" ,value:"+archiveId);
+                logger.debug("Add to archiveIds: key: "+archiveStoreId+" ,value:"+archiveId);
                 archiveIds.put(archiveStoreId, archiveId);
-                System.out.println("archiveIds: "+archiveIds);
+                logger.debug("archiveIds: "+archiveIds);
             } else if(!isChunk) {
                 archiveIds.put(archiveStoreId, archiveId);
             }
@@ -510,10 +511,10 @@ public class Deposit extends Task {
 
                 // Copy file back from the archive storage
                 String archiveChunkId = archiveId+FileSplitter.CHUNK_SEPARATOR+(i+1);
-                System.out.println("archiveChunkId: "+archiveChunkId);
+                logger.debug("archiveChunkId: "+archiveChunkId);
                 copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
                 
-                System.out.println("Verifying chunk file: "+chunkFile.getAbsolutePath());
+                logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
                 verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
             }
 
@@ -540,7 +541,7 @@ public class Deposit extends Task {
 
             logger.info("Verification method: " + archiveStore.getVerifyMethod());
             
-            System.out.println("verifyArchive - archiveId: "+archiveId);
+            logger.debug("verifyArchive - archiveId: "+archiveId);
 
             // Get the tar file
 

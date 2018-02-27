@@ -205,7 +205,7 @@ public class DepositsController {
                 }
             }
 
-            Task depositTask = new Task(job, depositProperties, archiveStores, userFileStoreProperties, userFileStoreClasses, filestorePaths, userUploadPaths);
+            Task depositTask = new Task(job, depositProperties, archiveStores, userFileStoreProperties, userFileStoreClasses, filestorePaths, userUploadPaths, null);
             String jsonDeposit = mapper.writeValueAsString(depositTask);
             sender.send(jsonDeposit);
 
@@ -347,7 +347,7 @@ public class DepositsController {
 
         // Add the retrieve object
         retrievesService.addRetrieve(retrieve, deposit, retrievePath);
-
+        
         // Ask the worker to process the data retrieve
         try {
             HashMap<String, String> retrieveProperties = new HashMap<>();
@@ -368,7 +368,14 @@ public class DepositsController {
             userFileStoreClasses.put(storageID, userStore.getStorageClass());
             userFileStoreProperties.put(storageID, userStore.getProperties());
             
-            Task retrieveTask = new Task(job, retrieveProperties, archiveStores, userFileStoreProperties, userFileStoreClasses, null, null);
+            // get chunks checksums
+            HashMap<Integer, String> chunksDigest = new HashMap<Integer, String>();
+            List<DepositChunk> depositChunks = deposit.getDepositChunks();
+            for (DepositChunk depositChunk : depositChunks) {
+                chunksDigest.put(depositChunk.getChunkNum(), depositChunk.getArchiveDigest());
+            }
+            
+            Task retrieveTask = new Task(job, retrieveProperties, archiveStores, userFileStoreProperties, userFileStoreClasses, null, null, chunksDigest);
             ObjectMapper mapper = new ObjectMapper();
             String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
             sender.send(jsonRetrieve);

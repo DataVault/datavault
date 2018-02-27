@@ -6,6 +6,8 @@ import org.datavaultplatform.common.event.Event;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
@@ -67,6 +69,10 @@ public class Deposit {
     // A Deposit can have a number of deposit paths
     @OneToMany(targetEntity=DepositPath.class, mappedBy="deposit", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
     private List<DepositPath> depositPaths;
+    
+    // A Deposit can have a number of deposit chunks
+    @OneToMany(targetEntity=DepositChunk.class, mappedBy="deposit", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<DepositChunk> depositChunks;
     
     // A Deposit can have a number of active jobs
     @JsonIgnore
@@ -242,8 +248,20 @@ public class Deposit {
         return depositPaths;
     }
 
+    public void setDepositChunk(List<DepositChunk> depositChunks) {
+        this.depositChunks = depositChunks;
+    }
+    
+    public List<DepositChunk> getDepositChunks() {
+        return depositChunks;
+    }
+
     public void setDepositPaths(List<DepositPath> depositPaths) {
         this.depositPaths = depositPaths;
+    }
+
+    public void setDepositChunks(List<DepositChunk> depositChunks) {
+        this.depositChunks = depositChunks;
     }
 
     public List<Job> getJobs() {
@@ -263,7 +281,8 @@ public class Deposit {
                 filePath,
                 depositSize,
                 vault.getID(),
-                depositPaths
+                depositPaths,
+                depositChunks
             );
     }
 }

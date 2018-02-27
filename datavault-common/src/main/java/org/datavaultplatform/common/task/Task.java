@@ -22,6 +22,7 @@ public class Task {
     protected List<ArchiveStore> archiveFileStores;
     protected Map<String, Map<String, String>> userFileStoreProperties;
     protected Map<String, String> userFileStoreClasses;
+    protected Map<Integer, String> chunkFilesDigest;
     
     private boolean isRedeliver;
 
@@ -32,7 +33,8 @@ public class Task {
                 Map<String, Map<String, String>> userFileStoreProperties,
                 Map<String, String> userFileStoreClasses,
                 List<String> fileStorePaths,
-                List<String> fileUploadPaths) {
+                List<String> fileUploadPaths,
+                Map<Integer, String> chunkFilesDigest) {
         this.jobID = job.getID();
         this.taskClass = job.getTaskClass();
         this.properties = properties;
@@ -41,6 +43,7 @@ public class Task {
         this.userFileStoreClasses = userFileStoreClasses;
         this.fileStorePaths = fileStorePaths;
         this.fileUploadPaths = fileUploadPaths;
+        this.chunkFilesDigest = chunkFilesDigest;
     }
 
     public String getJobID() { return jobID; }
@@ -111,5 +114,12 @@ public class Task {
         this.isRedeliver = isRedeliver;
     }
     
+    public Map<Integer, String> getChunkFilesDigest() {
+        return chunkFilesDigest;
+    }
+    
+    public void setChunkFilesDigest(Map<Integer, String> chunkFilesDigest) {
+        this.chunkFilesDigest = chunkFilesDigest;
+    }
     public void performAction(Context context) {}
 }
