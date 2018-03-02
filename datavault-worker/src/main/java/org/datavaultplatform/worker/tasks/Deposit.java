@@ -69,6 +69,7 @@ public class Deposit extends Task {
         
         logger.info("Deposit job - performAction()");
         logger.info("chunking: "+context.isChunkingEnabled());
+        logger.info("chunks byte size: "+context.getChunkingByteSize());
         
         Map<String, String> properties = getProperties();
         depositId = properties.get("depositId");
@@ -287,7 +288,7 @@ public class Deposit extends Task {
             
             if ( context.isChunkingEnabled() ) {
                 logger.info("Chunking tar file ...");
-                chunkFiles = FileSplitter.spliteFile(tarFile);
+                chunkFiles = FileSplitter.spliteFile(tarFile, context.getChunkingByteSize());
                 chunksHash = new String[chunkFiles.length];
                 HashMap<Integer, String> chunksDigest = new HashMap<Integer, String>();
 

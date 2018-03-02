@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 public class Receiver {
 
     private static final Logger logger = LoggerFactory.getLogger(Receiver.class);
+    private static long DEFAULT_CHUNK_SIZE = 500 * 1000 * 1000; // 500MB
+    private static boolean DEFAULT_CHUNKING_ENABLE = false;
     
     private String queueServer;
     private String queueName;
@@ -29,7 +31,8 @@ public class Receiver {
     private String queuePassword;
     private String tempDir;
     private String metaDir;
-    private Boolean chunkingEnabled;
+    private Boolean chunkingEnabled = new Boolean(DEFAULT_CHUNKING_ENABLE);
+    private Long chunkingByteSize = new Long(DEFAULT_CHUNK_SIZE);
 
     /**
      * Set the queue server
@@ -80,10 +83,18 @@ public class Receiver {
     }
     /**
      * Define if archived tar file is chunked
-     * @param doChunking true or false
+     * @param chunkingEnabled true or false
      */
     public void setChunkingEnabled(Boolean chunkingEnabled) {
         this.chunkingEnabled = chunkingEnabled;
+    }
+
+    /**
+     * Define the size of each chunks
+     * @param chunkingByteSize true or false
+     */
+    public void setChunkingByteSize(Long chunkingByteSize) {
+        this.chunkingByteSize = chunkingByteSize;
     }
 
     /**
@@ -146,7 +157,7 @@ public class Receiver {
                 
                 Path metaDirPath = Paths.get(metaDir);
                 
-                Context context = new Context(tempDirPath, metaDirPath, events, chunkingEnabled);
+                Context context = new Context(tempDirPath, metaDirPath, events, chunkingEnabled, chunkingByteSize);
                 concreteTask.performAction(context);
                 
                 // Clean up the temporary directory

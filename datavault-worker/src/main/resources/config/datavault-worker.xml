@@ -22,6 +22,7 @@
         <property name="tempDir" value="${tempDir}"/>
         <property name="metaDir" value="${metaDir}"/>
         <property name="chunkingEnabled" value="${chunking.enabled}"/>
+        <property name="chunkingByteSize" value="${chunking.size}"/>
     </bean>
 
     <bean id="eventSender" class="org.datavaultplatform.worker.queue.EventSender">
