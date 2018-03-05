@@ -88,6 +88,8 @@ public class Retrieve extends Task {
         logger.info("bagID: " + bagID);
         logger.info("retrievePath: " + retrievePath);
         
+        
+        
         Device userFs = null;
         UserStore userStore = null;
         Device archiveFs = null;
@@ -179,7 +181,7 @@ public class Retrieve extends Task {
 	        			try {
 			            try {
 			                // Ask the driver to copy files to the temp directory
-			                archiveFs.retrieve(archiveId, tarFile, progress, location);
+			                archiveFs.retrieve(archiveId, tarFile, progress, location, archiveId);
 			            } finally {
 			                // Stop the tracking thread
 			                tracker.stop();

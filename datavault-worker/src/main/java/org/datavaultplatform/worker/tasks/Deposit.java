@@ -4,7 +4,6 @@ import java.util.Map;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -25,10 +24,11 @@ import org.datavaultplatform.common.event.deposit.Complete;
 import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.*;
-import org.datavaultplatform.worker.WorkerInstance;
 import org.datavaultplatform.worker.operations.*;
 import org.datavaultplatform.worker.queue.EventSender;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +53,7 @@ public class Deposit extends Task {
     String depositId;
     String bagID;
     String userID;
+    private String vaultID;
     
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
@@ -96,6 +97,16 @@ public class Deposit extends Task {
             .withNextState(0));
         
         logger.info("bagID: " + bagID);
+        try {
+        		JSONObject jsnobject = new JSONObject(vaultMetadata);
+        		this.vaultID = jsnobject.getString("id");
+        		logger.info("vaultId: " + this.vaultID);
+		} catch (JSONException e1) {
+			/* TODO not sure what to do here.  Vault id should never be unavailable as each deposit needs to be attached to a vault
+			at the moment the vault id is only used by the S3 plugin and may be used by the TSM plugin in the future*/
+			e1.printStackTrace();
+		}
+        
         
         userStores = new HashMap<>();
         
@@ -408,7 +419,11 @@ public class Deposit extends Task {
             String archiveId;
 
             try {
-                archiveId = ((Device) archiveStore).store("/", tarFile, progress);
+	            	if (((Device)archiveStore).hasMultipleCopies()) {
+	                archiveId = ((Device) archiveStore).store("/", tarFile, progress, this.vaultID);
+	            	} else {
+	                archiveId = ((Device) archiveStore).store("/", tarFile, progress);
+	            }
             } finally {
                 // Stop the tracking thread
                 tracker.stop();
