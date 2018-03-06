@@ -197,29 +197,29 @@ public class WorkerInstanceIT {
             fail("We should not have a InterruptedException: "+ie);
         }
 
-        // Check output        
+        // UNECESSARY AS RETRIEVING DATA WILL ALREADY CHECK THAT
+        // Check output       
         String archiveDir = ".." + File.separator + "docker" + File.separator + "tmp" +
                 File.separator + "datavault" + File.separator + "archive";
 
-        String expectedTarFilePath = workerInstanceResources + File.separator + "b6fa3676-2018-4fc5-9f0e-97cfb77a250a.tar";
-        // Only work if file is smaller than chunks size
-        String tarFilePath = archiveDir +  File.separator + "b6fa3676-2018-4fc5-9f0e-97cfb77a250a.tar"+FileSplitter.CHUNK_SEPARATOR+"1";
-
-        File tarfile = new File(tarFilePath);
-        File expectedTarfile = new File(expectedTarFilePath);
+        String expectedArchiveDirPath = workerInstanceResources + File.separator + "expected-archive";
+        File expectedArchiveDir = new File(expectedArchiveDirPath);
         
-        System.out.println("Check output file: " + tarFilePath);
+        for (File expectedTarFile : expectedArchiveDir.listFiles()) {
+            System.out.println("Check output file: " + expectedTarFile.getName());
 
-        try {
+            // Only work if file is smaller than chunks size
+            String tarFilePath = archiveDir +  File.separator + expectedTarFile.getName();
+            File tarfile = new File(tarFilePath);
+            
             assertTrue("The tar file doesn't exist: "+tarfile.getAbsolutePath(), tarfile.exists());
-            assertTrue("The expected file doesn't exist: "+expectedTarfile.getAbsolutePath(), expectedTarfile.exists());
             
-            assertTarEquals(tarFilePath, expectedTarFilePath);
-            
-        } catch (NoSuchAlgorithmException nsae) {
-            fail("We should not have a NoSuchAlgorithmException: "+nsae);
-        } catch (IOException e) {
-            fail("We should not have a IOException: "+e);
+            try {
+                FileUtils.contentEquals(tarfile, expectedTarFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+                fail("We should not have a IOException: "+e);
+            }
         }
 
         // assertMatches("matches existing file", FileMatchers.anExistingFile(), file);
@@ -248,35 +248,26 @@ public class WorkerInstanceIT {
         
         File originDataDir = new File(dockerLocalStorage + File.separator + "dir");
         
-        try {
-            assertTrue("The retrieved dir doesn't exist: "+retrieveDataDir.getAbsolutePath(), retrieveDataDir.exists());
+        assertTrue("The retrieved dir doesn't exist: "+retrieveDataDir.getAbsolutePath(), retrieveDataDir.exists());
+        
+        File[] originFiles = originDataDir.listFiles();
+        for(File originFile : originFiles) {
+            File retrievedFile = new File(retrieveDataDir, originFile.getName());
             
-            File[] originFiles = originDataDir.listFiles();
-            for(File originFile : originFiles) {
-                File retrievedFile = new File(retrieveDataDir, originFile.getName());
-                
-                assertTrue("The retrieved file doesn't exist: "+retrievedFile.getAbsolutePath(), retrievedFile.exists());
-                
-                if (originFile.isFile()) {
-                    long csumOriginFile = 0;
-                    long csumRetrievedFile = 0;
-                    try {
-                        csumOriginFile = FileUtils.checksum(originFile, new CRC32()).getValue();
-                        csumRetrievedFile = FileUtils.checksum(retrievedFile, new CRC32()).getValue();
-                    } catch (IOException ioe) {
-                        fail("Unexpected Exception thrown while getting checksum of output file: " + ioe);
-                    }
-                
-                    assertEquals(csumOriginFile, csumRetrievedFile);
+            assertTrue("The retrieved file doesn't exist: "+retrievedFile.getAbsolutePath(), retrievedFile.exists());
+            
+            if (originFile.isFile()) {
+                long csumOriginFile = 0;
+                long csumRetrievedFile = 0;
+                try {
+                    csumOriginFile = FileUtils.checksum(originFile, new CRC32()).getValue();
+                    csumRetrievedFile = FileUtils.checksum(retrievedFile, new CRC32()).getValue();
+                } catch (IOException ioe) {
+                    fail("Unexpected Exception thrown while getting checksum of output file: " + ioe);
                 }
+            
+                assertEquals(csumOriginFile, csumRetrievedFile);
             }
-            
-            assertTarEquals(tarFilePath, expectedTarFilePath);
-            
-        } catch (NoSuchAlgorithmException nsae) {
-            fail("We should not have a NoSuchAlgorithmException: "+nsae);
-        } catch (IOException e) {
-            fail("We should not have a IOException: "+e);
         }
     }
     
@@ -399,70 +390,6 @@ public class WorkerInstanceIT {
             fail("Problem reading the json file: "+ioe);
         }
         return message;
-    }
-    
-    /**
-     * @param archive1
-     * @param archive2
-     * @throws IOException
-     * @throws NoSuchAlgorithmException
-     */
-    public static final void assertTarEquals(String archive1, String archive2) throws IOException, NoSuchAlgorithmException {
-        // Get Member Hash
-        HashMap<String, TarArchiveEntry> files1 = getMembers(archive1);
-        HashMap<String, TarArchiveEntry> files2 = getMembers(archive2);
-
-        // Compare Files
-        assertMembersEqual(archive1, files1, archive2, files2);
-    }
-    
-    /**
-     * @param archive
-     * @return
-     * @throws IOException
-     */
-    private static final HashMap<String,TarArchiveEntry> getMembers(String archive) throws IOException {
-        TarArchiveInputStream input = new TarArchiveInputStream(
-                new BufferedInputStream(
-                new FileInputStream(archive)));
-
-        TarArchiveEntry entry;
-        HashMap<String, TarArchiveEntry> map = new HashMap<String, TarArchiveEntry>();
-        while ((entry = input.getNextTarEntry()) != null) {
-            map.put(entry.getName(), entry);
-        }
-        input.close();
-        return map;
-    }
-    
-    /**
-     * @param tar1
-     * @param files1
-     * @param tar2
-     * @param files2
-     * @throws IOException
-     */
-    private static final void assertMembersEqual(String tar1, HashMap<String, TarArchiveEntry> files1, 
-                                                 String tar2, HashMap<String, TarArchiveEntry> files2) throws IOException {
-        if (files1.size() != files2.size()) {
-            fail("Different Sizes, expected " + Integer.toString(files1.size()) + " found " + Integer.toString(files2.size()));
-        }
-
-        for (String key : files1.keySet()) {
-            if (!files2.containsKey(key)) {
-                fail("Expected file not in target " + key);
-            }else{
-                TarArchiveEntry entry1 = files1.get(key);
-                TarArchiveEntry entry2 = files2.get(key);
-                
-                assertEquals(entry1.getSize(), entry2.getSize());
-                assertEquals(entry1.getName(), entry2.getName());
-                assertEquals(entry1.getMode(), entry2.getMode());
-                assertEquals(entry1.getMode(), entry2.getMode());
-                
-                // TODO: Add more for links, directories,etc...
-            }
-        }
     }
     
     @After

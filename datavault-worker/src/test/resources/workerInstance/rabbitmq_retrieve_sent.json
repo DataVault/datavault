@@ -7,7 +7,7 @@
         "retrieveId":"507c0d10-95d7-420f-9bc5-82978ccb544f",
         "bagId":"b6fa3676-2018-4fc5-9f0e-97cfb77a250a",
         "depositId":"423d62cd-810e-4316-8275-f5e01e6b5f69",
-        "numOfChunks":"1",
+        "numOfChunks":"6",
         "retrievePath":"/",
         "archiveSize":"20480",
         "userId":"user1",
@@ -42,7 +42,12 @@
     },
     "chunkFilesDigest":
     {
-        "1":"<enter_chunk_1_digest_here>"
+        "1":"<enter_chunk_1_digest_here>",
+        "2":"<enter_chunk_2_digest_here>",
+        "3":"<enter_chunk_3_digest_here>",
+        "4":"<enter_chunk_4_digest_here>",
+        "5":"<enter_chunk_5_digest_here>",
+        "6":"<enter_chunk_6_digest_here>"
     },
     "redeliver":false
 }
