@@ -27,8 +27,6 @@ import org.datavaultplatform.common.storage.*;
 import org.datavaultplatform.worker.operations.*;
 import org.datavaultplatform.worker.queue.EventSender;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
