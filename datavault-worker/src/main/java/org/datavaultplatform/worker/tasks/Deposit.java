@@ -53,7 +53,7 @@ public class Deposit extends Task {
     String depositId;
     String bagID;
     String userID;
-    private String vaultID;
+    //private String vaultID;
     
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
@@ -97,15 +97,15 @@ public class Deposit extends Task {
             .withNextState(0));
         
         logger.info("bagID: " + bagID);
-        try {
-        		JSONObject jsnobject = new JSONObject(vaultMetadata);
-        		this.vaultID = jsnobject.getString("id");
-        		logger.info("vaultId: " + this.vaultID);
-		} catch (JSONException e1) {
-			/* TODO not sure what to do here.  Vault id should never be unavailable as each deposit needs to be attached to a vault
-			at the moment the vault id is only used by the S3 plugin and may be used by the TSM plugin in the future*/
-			e1.printStackTrace();
-		}
+//        try {
+//        		JSONObject jsnobject = new JSONObject(vaultMetadata);
+//        		this.vaultID = jsnobject.getString("id");
+//        		logger.info("vaultId: " + this.vaultID);
+//		} catch (JSONException e1) {
+//			/* TODO not sure what to do here.  Vault id should never be unavailable as each deposit needs to be attached to a vault
+//			at the moment the vault id is only used by the S3 plugin and may be used by the TSM plugin in the future*/
+//			e1.printStackTrace();
+//		}
         
         
         userStores = new HashMap<>();
@@ -420,7 +420,7 @@ public class Deposit extends Task {
 
             try {
 	            	if (((Device)archiveStore).hasMultipleCopies()) {
-	                archiveId = ((Device) archiveStore).store("/", tarFile, progress, this.vaultID);
+	                archiveId = ((Device) archiveStore).store("/", tarFile, progress, this.depositId);
 	            	} else {
 	                archiveId = ((Device) archiveStore).store("/", tarFile, progress);
 	            }

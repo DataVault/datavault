@@ -69,11 +69,11 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     }
     
     @Override
-    public void retrieve(String path, File working, Progress progress, String optFilePath, String vaultId) throws Exception {
+    public void retrieve(String path, File working, Progress progress, String optFilePath, String depositId) throws Exception {
     	
-    		logger.info("Retrieve command is " + "dsmc " + " retrieve " + working.getAbsolutePath() + " -description=" + vaultId + " -optfile=" + optFilePath);
+    		logger.info("Retrieve command is " + "dsmc " + " retrieve " + working.getAbsolutePath() + " -description=" + depositId + " -optfile=" + optFilePath);
     		
-        ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", working.getAbsolutePath(), "-description=" + vaultId, "-optfile=" + optFilePath, "-replace=true");
+        ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", working.getAbsolutePath(), "-description=" + depositId, "-optfile=" + optFilePath, "-replace=true");
         Process p = pb.start();
         // This class is already running in its own thread so it can happily pause until finished.
         p.waitFor();
@@ -96,7 +96,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     }
     
     @Override
-    public String store(String path, File working, Progress progress, String vaultId) throws Exception {
+    public String store(String path, File working, Progress progress, String depositId) throws Exception {
     		
     		
         // todo : monitor progress
@@ -106,10 +106,10 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         //String randomUUIDString = UUID.randomUUID().toString();
         
         
-        this.storeInTSMNode(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT, vaultId);
-        this.storeInTSMNode(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT, vaultId);
+        this.storeInTSMNode(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT, depositId);
+        this.storeInTSMNode(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT, depositId);
 
-        return vaultId;
+        return depositId;
     }
     
     private String storeInTSMNode(String path, File working, Progress progress, String optFilePath, String description) throws Exception {
