@@ -36,6 +36,18 @@ public class FileSplitter {
     }
     
     /**
+     * Will chunk the input file using default output location i.e. same place as the input file.
+     * 
+     * @param input  - input File to split
+     * @return
+     * @throws Exception
+     */
+    public static File[] spliteFile(File inputFile, long bytesPerChunk) throws Exception {
+        
+        return spliteFile(inputFile, bytesPerChunk, inputFile.getParentFile());
+    }
+    
+    /**
      * 
      * @param input - input File to split
      * @param chunkSize - size of each chunks
