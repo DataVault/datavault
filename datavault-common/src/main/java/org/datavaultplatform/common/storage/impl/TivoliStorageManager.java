@@ -91,12 +91,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     }
     
     @Override
-    public String store(String path, File working, Progress progress) throws Exception {
-    		throw new UnsupportedOperationException();
-    }
-    
-    @Override
-    public String store(String path, File working, Progress progress, String depositId) throws Exception {
+    public String store(String depositId, File working, Progress progress) throws Exception {
     		
     		
         // todo : monitor progress
@@ -106,13 +101,13 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         //String randomUUIDString = UUID.randomUUID().toString();
         
         
-        this.storeInTSMNode(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT, depositId);
-        this.storeInTSMNode(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT, depositId);
+        this.storeInTSMNode(working, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT, depositId);
+        this.storeInTSMNode(working, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT, depositId);
 
         return depositId;
     }
     
-    private String storeInTSMNode(String path, File working, Progress progress, String optFilePath, String description) throws Exception {
+    private String storeInTSMNode(File working, Progress progress, String optFilePath, String description) throws Exception {
 		
         // check we have enough space to store the data (is the file bagged and tarred atm or is the actual space going to be different?)
         // actually the Deposit  / Retreive worker classes check the free space it appears if we get here we don't need to check

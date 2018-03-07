@@ -44,9 +44,9 @@ public abstract class Device {
     // Progress information should be updated for monitoring as the copy occurs
     public abstract String store(String path, File working, Progress progress) throws Exception;
     
-    public String store(String path, File working, Progress progress, String depositId) throws Exception {
-    		throw new UnsupportedOperationException();
-    }
+    //public String store(String path, File working, Progress progress, String depositId) throws Exception {
+    //		throw new UnsupportedOperationException();
+    //}
     
     public Boolean hasMultipleCopies() {
     		return this.multipleCopies;

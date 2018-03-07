@@ -417,11 +417,11 @@ public class Deposit extends Task {
             String archiveId;
 
             try {
-	            	if (((Device)archiveStore).hasMultipleCopies()) {
-	                archiveId = ((Device) archiveStore).store("/", tarFile, progress, this.depositId);
-	            	} else {
-	                archiveId = ((Device) archiveStore).store("/", tarFile, progress);
-	            }
+	            //	if (((Device)archiveStore).hasMultipleCopies()) {
+	            archiveId = ((Device) archiveStore).store(this.depositId, tarFile, progress);
+	            	//} else {
+	            //   archiveId = ((Device) archiveStore).store("/", tarFile, progress);
+	            //}
             } finally {
                 // Stop the tracking thread
                 tracker.stop();
@@ -463,7 +463,6 @@ public class Deposit extends Task {
 
                 // Delete the existing temporary file
                 tarFile.delete();
-
                 // Copy file back from the archive storage
                 copyBackFromArchive(archiveStore, archiveId, tarFile);
 
