@@ -1,34 +1,33 @@
 package org.datavaultplatform.worker.tasks;
 
-import java.util.Map;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-
-import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
-import org.datavaultplatform.common.event.retrieve.RetrieveStart;
-import org.datavaultplatform.common.model.ArchiveStore;
-import org.datavaultplatform.common.task.Context;
-import org.datavaultplatform.common.task.Task;
-import org.datavaultplatform.worker.queue.EventSender;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.InitStates;
 import org.datavaultplatform.common.event.UpdateProgress;
-
+import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
+import org.datavaultplatform.common.event.retrieve.RetrieveStart;
 import org.datavaultplatform.common.io.Progress;
+import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
+import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.worker.operations.Packager;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 import org.datavaultplatform.worker.operations.Tar;
 import org.datavaultplatform.worker.operations.FileSplitter;
-import org.datavaultplatform.worker.operations.Packager;
-
+import org.datavaultplatform.worker.queue.EventSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -171,11 +170,49 @@ public class Retrieve extends Task {
                 .withUserId(userID)
                 .withNextState(1));
             
-            // Progress tracking (threaded)
-            Progress progress = new Progress();
-            ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, archiveSize, eventStream);
-            Thread trackerThread = new Thread(tracker);
-            trackerThread.start();
+            if (archiveFs.hasMultipleCopies()) {
+            		logger.info("Device has multiple copies");
+	            	Progress progress = new Progress();
+	        		ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, archiveSize, eventStream);
+	        		Thread trackerThread = new Thread(tracker);
+	        		trackerThread.start();
+	
+	        		List<String> locations = archiveFs.getLocations();
+	        		Iterator<String> locationsIt = locations.iterator();
+	        		LOCATION:
+	        		while (locationsIt.hasNext()) {
+	        			String location = locationsIt.next();
+	        			try {
+			            try {
+			                // Ask the driver to copy files to the temp directory
+			                archiveFs.retrieve(archiveId, tarFile, progress, location);
+			            } finally {
+			                // Stop the tracking thread
+			                tracker.stop();
+			                trackerThread.join();
+			            }
+			            
+			            logger.info("Attempting retrieve on archive from " + location);
+			            this.doRetrieve(depositId, userID, retrievePath, retrieveId, context, userFs, tarFile, eventStream, archiveDigestAlgorithm, archiveDigest, progress);
+			            logger.info("Completed retrieve on archive from " + location);
+			            break LOCATION;
+	        			} catch (Exception e) {
+	        				//if last location has an error throw the error else go round again
+	        				//continue LOCATION;
+	        				if (!locationsIt.hasNext()) {
+	        					logger.info("All locations had problems throwing exception " + e.getMessage());
+	        					throw e;
+	        				}
+	        			}
+            		}
+	            
+            } else {
+            		logger.info("Single copy device");
+            		// Progress tracking (threaded)
+            		Progress progress = new Progress();
+            		ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, archiveSize, eventStream);
+            		Thread trackerThread = new Thread(tracker);
+            		trackerThread.start();
             
 
             // Verify integrity with deposit checksum
@@ -184,8 +221,8 @@ public class Retrieve extends Task {
                 throw new Exception("Unsupported checksum algorithm: " + archiveDigestAlgorithm);
             }
             
-            try {
-                // Ask the driver to copy files to the temp directory
+	            try {
+	                // Ask the driver to copy files to the temp directory
                 if( context.isChunkingEnabled() ) {
                     // TODO can bypass this if there is only one chunk.
                     
@@ -218,72 +255,14 @@ public class Retrieve extends Task {
                 } else {
                     archiveFs.retrieve(archiveId, tarFile, progress);
                 }
-            } finally {
-                // Stop the tracking thread
-                tracker.stop();
-                trackerThread.join();
+	            } finally {
+	                // Stop the tracking thread
+	                tracker.stop();
+	                trackerThread.join();
+	            }
+	            
+	            this.doRetrieve(depositId, userID, retrievePath, retrieveId, context, userFs, tarFile, eventStream, archiveDigestAlgorithm, archiveDigest, progress);
             }
-            
-            logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
-            
-            logger.info("Validating data ...");
-            eventStream.send(new UpdateProgress(jobID, depositId).withNextState(2)
-                .withUserId(userID));
-            
-            String tarHash = Verify.getDigest(tarFile);
-            logger.info("Checksum algorithm: " + archiveDigestAlgorithm);
-            logger.info("Checksum: " + tarHash);
-            
-            if (!tarHash.equals(archiveDigest)) {
-                throw new Exception("checksum failed: " + tarHash + " != " + archiveDigest);
-            }
-            
-            // Decompress to the temporary directory
-            File bagDir = Tar.unTar(tarFile, context.getTempDir());
-            long bagDirSize = FileUtils.sizeOfDirectory(bagDir);
-            
-            // Validate the bagit directory
-            if (!Packager.validateBag(bagDir)) {
-                throw new Exception("Bag is invalid");
-            }
-            
-            // Get the payload data directory
-            // File payloadDir = bagDir.toPath().resolve("data").toFile();
-            // long payloadSize = FileUtils.sizeOfDirectory(payloadDir);
-            
-            // Copy the extracted files to the target retrieve area
-            logger.info("Copying to user directory ...");
-            eventStream.send(new UpdateProgress(jobID, depositId, 0, bagDirSize, "Starting transfer ...")
-                .withUserId(userID)
-                .withNextState(3));
-            
-            // Progress tracking (threaded)
-            progress = new Progress();
-            tracker = new ProgressTracker(progress, jobID, depositId, bagDirSize, eventStream);
-            trackerThread = new Thread(tracker);
-            trackerThread.start();
-            
-            try {
-                // Ask the driver to copy files to the user directory
-                userFs.store(retrievePath, bagDir, progress);
-            } finally {
-                // Stop the tracking thread
-                tracker.stop();
-                trackerThread.join();
-            }
-            
-            logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
-            
-            // Cleanup
-            logger.info("Cleaning up ...");
-            FileUtils.deleteDirectory(bagDir);
-            tarFile.delete();
-            
-            
-            
-            logger.info("Data retrieve complete: " + retrievePath);
-            eventStream.send(new RetrieveComplete(jobID, depositId, retrieveId).withNextState(4)
-                .withUserId(userID));
             
         } catch (Exception e) {
             String msg = "Data retrieve failed: " + e.getMessage();
@@ -291,5 +270,72 @@ public class Retrieve extends Task {
             eventStream.send(new Error(jobID, depositId, msg)
                 .withUserId(userID));
         }
+    }
+    
+    private void doRetrieve(String depositId, String userID, String retrievePath, String retrieveId, Context context, Device userFs, File tarFile, EventSender eventStream, 
+    		String archiveDigestAlgorithm, String archiveDigest, Progress progress) throws Exception{
+    		logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+        
+        logger.info("Validating data ...");
+        eventStream.send(new UpdateProgress(jobID, depositId).withNextState(2)
+            .withUserId(userID));
+        
+        String tarHash = Verify.getDigest(tarFile);
+        logger.info("Checksum algorithm: " + archiveDigestAlgorithm);
+        logger.info("Checksum: " + tarHash);
+        
+        if (!tarHash.equals(archiveDigest)) {
+        		logger.info("Checksum failed: " + tarHash + " != " + archiveDigest);
+            throw new Exception("checksum failed: " + tarHash + " != " + archiveDigest);
+        }
+        
+        // Decompress to the temporary directory
+        File bagDir = Tar.unTar(tarFile, context.getTempDir());
+        long bagDirSize = FileUtils.sizeOfDirectory(bagDir);
+        
+        // Validate the bagit directory
+        if (!Packager.validateBag(bagDir)) {
+            throw new Exception("Bag is invalid");
+        }
+        
+        // Get the payload data directory
+        File payloadDir = bagDir.toPath().resolve("data").toFile();
+        long payloadSize = FileUtils.sizeOfDirectory(payloadDir);
+
+        // Copy the extracted files to the target retrieve area
+        logger.info("Copying to user directory ...");
+        eventStream.send(new UpdateProgress(jobID, depositId, 0, bagDirSize, "Starting transfer ...")
+            .withUserId(userID)
+            .withNextState(3));
+        
+        // Progress tracking (threaded)
+        progress = new Progress();
+        ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, bagDirSize, eventStream);
+        Thread trackerThread = new Thread(tracker);
+        trackerThread.start();
+
+        try {
+            ArrayList<File> contents = new ArrayList<File>(Arrays.asList(payloadDir.listFiles()));
+            for(File content: contents){
+                userFs.store(retrievePath, content, progress);
+            }
+        } finally {
+            // Stop the tracking thread
+            tracker.stop();
+            trackerThread.join();
+        }
+        
+        logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+        
+        // Cleanup
+        logger.info("Cleaning up ...");
+        FileUtils.deleteDirectory(bagDir);
+        tarFile.delete();
+            
+            
+        
+        logger.info("Data retrieve complete: " + retrievePath);
+        eventStream.send(new RetrieveComplete(jobID, depositId, retrieveId).withNextState(4)
+            .withUserId(userID));
     }
 }

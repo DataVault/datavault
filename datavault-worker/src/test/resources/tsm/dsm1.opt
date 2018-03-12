@@ -1,0 +1,18 @@
+************************************************************************
+* IBM Tivoli Storage Manager                                           *
+*                                                                      *
+* Sample Client User Options file for UNIX (dsm.opt.smp)               *
+************************************************************************
+
+*  This file contains an option you can use to specify the TSM
+*  server to contact if more than one is defined in your client
+*  system options file (dsm.sys).  Copy dsm.opt.smp to dsm.opt.
+*  If you enter a server name for the option below, remove the
+*  leading asterisk (*).
+
+************************************************************************
+
+* SErvername       A server name defined in the dsm.sys file
+* compressalways          yes
+quiet
+

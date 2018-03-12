@@ -26,7 +26,7 @@ Further Information
 -------------------
 Project website: http://datavaultplatform.org/
 
-Email: info@datavaultplatform.org or contact one of the individuals listed above 
+Email: claire.knowles@ed.ac.uk or contact one of the individuals listed above 
 
 Installation
 ------------

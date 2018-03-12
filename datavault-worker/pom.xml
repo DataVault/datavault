@@ -146,6 +146,7 @@
                     </includes>
                     
                     <excludedGroups>org.datavaultplatform.SlowTest</excludedGroups>
+		    <excludedGroups>org.datavaultplatform.test.TSMTest</excludedGroups>
                 </configuration>
             </plugin>
             <plugin>
