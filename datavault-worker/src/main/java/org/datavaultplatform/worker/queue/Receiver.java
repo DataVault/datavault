@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.concurrent.TimeoutException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FileUtils;
+import org.datavaultplatform.common.io.FileUtils;
 
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.task.Context;
@@ -93,8 +93,9 @@ public class Receiver {
      * Define the size of each chunks
      * @param chunkingByteSize true or false
      */
-    public void setChunkingByteSize(Long chunkingByteSize) {
-        this.chunkingByteSize = chunkingByteSize;
+    public void setChunkingByteSize(String chunkingByteSize) {
+        long bytes = FileUtils.parseFormattedSizeToBytes(chunkingByteSize);
+        this.chunkingByteSize = bytes;
     }
 
     /**
