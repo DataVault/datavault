@@ -181,7 +181,7 @@ public class Retrieve extends Task {
 	        			try {
 			            try {
 			                // Ask the driver to copy files to the temp directory
-			                archiveFs.retrieve(archiveId, tarFile, progress, location, archiveId);
+			                archiveFs.retrieve(archiveId, tarFile, progress, location);
 			            } finally {
 			                // Stop the tracking thread
 			                tracker.stop();

@@ -21,7 +21,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     //public List<String> locations = null;
 
     // todo : can we change this to COPY_BACK?
-    public Verify.Method verificationMethod = Verify.Method.LOCAL_ONLY;
+    public Verify.Method verificationMethod = Verify.Method.COPY_BACK;
 
     public TivoliStorageManager(String name, Map<String,String> config) throws Exception  {
         super(name, config);
@@ -69,7 +69,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     }
     
     @Override
-    public void retrieve(String path, File working, Progress progress, String optFilePath, String depositId) throws Exception {
+    public void retrieve(String depositId, File working, Progress progress, String optFilePath) throws Exception {
     	
     		logger.info("Retrieve command is " + "dsmc " + " retrieve " + working.getAbsolutePath() + " -description=" + depositId + " -optfile=" + optFilePath);
     		

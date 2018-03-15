@@ -32,12 +32,12 @@ public abstract class Device {
     public abstract void retrieve(String path, File working, Progress progress) throws Exception;
     
     // This method should be overridden by plugins that allow the retrieval of a specific copy id'd by the vaultId
-    public void retrieve(String path, File working, Progress progress, String depositId) throws Exception {
-    		throw new UnsupportedOperationException();
-    }
+    //public void retrieve(String path, File working, Progress progress, String depositId) throws Exception {
+    	//	throw new UnsupportedOperationException();
+    //}
     
     // This method should be overridden by plugins that allow the retrieval of multiple copies to get a specific copy
-    public void retrieve(String path, File working, Progress progress, String location, String depositId) throws Exception {
+    public void retrieve(String path, File working, Progress progress, String location) throws Exception {
     		throw new UnsupportedOperationException();
     }
     // Copy an object (file/dir) from the working space

@@ -464,10 +464,17 @@ public class Deposit extends Task {
                 // Delete the existing temporary file
                 tarFile.delete();
                 // Copy file back from the archive storage
-                copyBackFromArchive(archiveStore, archiveId, tarFile);
-
-                // Verify the contents
-                verifyTarFile(context.getTempDir(), tarFile, tarHash);
+                	if (((Device)archiveStore).hasMultipleCopies()) {
+                		for (String loc : ((Device)archiveStore).getLocations()) {
+                			copyBackFromArchive(archiveStore, archiveId, tarFile, loc);
+                			// Verify the contents
+                         verifyTarFile(context.getTempDir(), tarFile, tarHash);
+                		}
+                	} else {
+                		copyBackFromArchive(archiveStore, archiveId, tarFile);
+                		// Verify the contents
+                    verifyTarFile(context.getTempDir(), tarFile, tarHash);
+                	}
             }
         }
     }
@@ -483,9 +490,22 @@ public class Deposit extends Task {
      */
     private void copyBackFromArchive(ArchiveStore archiveStore, String archiveId, File tarFile) throws Exception {
 
-        // Ask the driver to copy files to the temp directory
-        Progress progress = new Progress();
-        ((Device)archiveStore).retrieve(archiveId, tarFile, progress);
+//        // Ask the driver to copy files to the temp directory
+//        Progress progress = new Progress();
+//        ((Device)archiveStore).retrieve(archiveId, tarFile, progress);
+//        logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+    		this.copyBackFromArchive(archiveStore, archiveId, tarFile, null);
+    }
+    
+    private void copyBackFromArchive(ArchiveStore archiveStore, String archiveId, File tarFile, String location) throws Exception {
+
+        	// Ask the driver to copy files to the temp directory
+        	Progress progress = new Progress();
+        	if (location == null) {
+        		((Device)archiveStore).retrieve(archiveId, tarFile, progress);
+        	} else {
+        		((Device)archiveStore).retrieve(archiveId, tarFile, progress, location);
+        	}
         logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
     }
     
