@@ -18,8 +18,10 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
             value = Long.parseLong(humanReadableSize.substring(0,identifier).trim());
             
             boolean si = true;
-            if( identifier < (humanReadableSize.length()-1) &&
-                    humanReadableSize.charAt(identifier+1) == 'i' ) {
+            if( identifier == (humanReadableSize.length()-3) &&
+                    humanReadableSize.charAt(identifier+1) == 'i' &&
+                    humanReadableSize.charAt(identifier+2) == 'B' ) {
+                // identifier followed by "iB" then use Binary size i.e. GiB, MiB, KiB ect...
                 si = false;
             }
             

@@ -10,3 +10,5 @@ echo "Clean meta files"
 rm -rf ./tmp/datavault/meta/*
 echo "Clean temp files"
 rm -rf ./tmp/datavault/temp/*
+echo "Clean retirieved data"
+rm -rf ./tmp/Users/retrieved/*

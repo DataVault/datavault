@@ -243,8 +243,7 @@ public class WorkerInstanceIT {
         listenRetrieveChannel(channel);
         
         // Compare origin files with retrieved files.
-        File retrieveDataDir = new File(dockerLocalStorage + File.separator + bagId +
-                File.separator + "data" + File.separator + "dir");
+        File retrieveDataDir = new File(dockerLocalStorage + File.separator + "retrieved" + File.separator + "dir");
         
         File originDataDir = new File(dockerLocalStorage + File.separator + "dir");
         

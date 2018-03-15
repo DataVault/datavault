@@ -97,5 +97,14 @@ public class FileUtilsTest {
         
         assertEquals(expectedValue, valueReturn);
     }
+    
+    @Test
+    public void testParseFormattedSizeToBytesWithGigaByteFullString() {
+        long expectedValue = 5000000000l;
+        
+        long valueReturn = FileUtils.parseFormattedSizeToBytes("5 Giga");
+        
+        assertEquals(expectedValue, valueReturn);
+    }
 
 }
