@@ -376,6 +376,7 @@ public class Encryption {
                         0, 
                         inputFile.length());
 
+        outputFile.createNewFile();
         Path outputPathRead = outputFile.toPath();
         FileChannel outputFileChannel = (FileChannel) Files.newByteChannel(outputPathRead, EnumSet.of(StandardOpenOption.READ, StandardOpenOption.WRITE));
         MappedByteBuffer outputMappedByteBuffer = 
@@ -423,6 +424,7 @@ public class Encryption {
 //            System.out.println("Writing: ");System.out.write(obuffer);System.out.print("\n");
 //            System.out.println("Write "+obuffer.length);
 //            fos.write(obuffer);
+            outputMappedByteBuffer.put(obuffer);
             System.out.println("hasRemaining: "+inputMappedByteBuffer.hasRemaining());
         }
         

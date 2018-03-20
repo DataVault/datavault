@@ -22,6 +22,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 public class EcryptionTest {
 
@@ -134,6 +135,7 @@ public class EcryptionTest {
     }
     
     @Test
+//    @Category(org.datavaultplatform.SlowTest.class)
     public void testBigFileGCMCripto(){
         final long startTime = System.currentTimeMillis();
         System.out.println("Start testBigFileGCMCripto...");
