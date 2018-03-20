@@ -1,10 +1,10 @@
 package org.datavaultplatform.worker.operations;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.nio.file.Path;
 
 import javax.crypto.Cipher;
@@ -84,6 +84,7 @@ public class Tar {
         BufferedOutputStream bos = new BufferedOutputStream(fos);
         CipherOutputStream cos = new CipherOutputStream(bos, cipher);
         TarArchiveOutputStream tar = new TarArchiveOutputStream(cos);
+        
         tar.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
         tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
         addFileToTar(tar, dir, "");
@@ -104,7 +105,7 @@ public class Tar {
 
         FileInputStream fis = new FileInputStream(input);
         BufferedInputStream bis = new BufferedInputStream(fis);
-        TarArchiveInputStream tar = new TarArchiveInputStream(bis);
+        TarArchiveInputStream tar = new TarArchiveInputStream(fis);
         
         File topDir = null;
         
@@ -147,7 +148,7 @@ public class Tar {
     public static File unTar(File input, Path outputDir, Cipher cipher) throws Exception {
         FileInputStream fis = new FileInputStream(input);
         BufferedInputStream bis = new BufferedInputStream(fis);
-        CipherInputStream cis = new CipherInputStream(bis, cipher);
+        CipherInputStream cis = new CipherInputStream(fis, cipher);
         TarArchiveInputStream tar = new TarArchiveInputStream(cis);
         
         File topDir = null;

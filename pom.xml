@@ -244,6 +244,18 @@
                 <version>1.0.0-RC2</version>
             </dependency>
             
+            <!-- Bouncy Castle - Encryption -->
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
+                <version>1.58</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk15on</artifactId>
+                <version>1.58</version>
+            </dependency>
+            
             <!-- Tests -->
             <dependency>
              <groupId>org.hamcrest</groupId>
