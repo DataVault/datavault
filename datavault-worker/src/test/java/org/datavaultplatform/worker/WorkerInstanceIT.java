@@ -10,14 +10,24 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
+import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.BasicConfigurator;
 import org.datavaultplatform.common.event.*;
 import org.datavaultplatform.common.event.deposit.*;
+import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
+import org.datavaultplatform.common.event.retrieve.RetrieveStart;
+import org.datavaultplatform.worker.operations.FileSplitter;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -43,11 +53,11 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
  */
 public class WorkerInstanceIT {
     private static String workerInstanceResources;
-    private static File testDir;
-    
     private static String testQueueServer = "localhost";
     private static String testQueueUser = "datavault";
     private static String testQueuePassword = "datavault";
+    private static String dockerLocalStorage;
+    private static String bagId = "b6fa3676-2018-4fc5-9f0e-97cfb77a250a";
     
     @BeforeClass
     public static void setUpClass() {
@@ -55,25 +65,24 @@ public class WorkerInstanceIT {
                 File.separator + "test" + File.separator + "resources";
         
         workerInstanceResources = resourcesDir + File.separator + "workerInstance";
+        
+        dockerLocalStorage = System.getProperty("user.dir") + File.separator + ".." +
+                File.separator + "docker" + File.separator + "tmp" + 
+                File.separator + "Users";
+
+        BasicConfigurator.configure();
     }
     
     @Test
-    public void testSimpleDeposite() {        
+    public void testSimpleDeposite() {
         System.out.println("Running testSimpleDeposite()");
         
-        String jsonFilePath = workerInstanceResources + File.separator + "rabbitmq_deposit_sent.json";
+        String tarHash = "";
+        Map<Integer, String> chunksHash = new HashMap<Integer, String>();
         
         // Read Json file with example of valid Deposit Task
-        String message = "";
-        try {
-            message = new String(
-                    Files.readAllBytes(
-                            Paths.get(jsonFilePath)
-                            )
-                    );
-        } catch (IOException ioe) {
-            fail("Problem reading the json file: "+ioe);
-        }
+        String message = getJsonMessage(
+                workerInstanceResources + File.separator + "rabbitmq_deposit_sent.json");
                 
         // Connect to rabbitmq and send message
         try{            
@@ -148,8 +157,13 @@ public class WorkerInstanceIT {
                             state++;break;
                         case 5:
                             assertThat(concreteEvent, instanceOf(ComputedDigest.class));
+                            tarHash = ((ComputedDigest)concreteEvent).getDigest();
                             state++;break;
                         case 6:
+                            assertThat(concreteEvent, instanceOf(ComputedChunks.class));
+                            chunksHash = ((ComputedChunks)concreteEvent).getChunksDigest();
+                            state++;break;
+                        case 7:
                             if(concreteEvent instanceof UpdateProgress){
                                 break;
                             }else{
@@ -182,97 +196,219 @@ public class WorkerInstanceIT {
         } catch (InterruptedException ie) {
             fail("We should not have a InterruptedException: "+ie);
         }
-        
-        // Check output        
+
+        // UNECESSARY AS RETRIEVING DATA WILL ALREADY CHECK THAT
+        // Check output       
         String archiveDir = ".." + File.separator + "docker" + File.separator + "tmp" +
                 File.separator + "datavault" + File.separator + "archive";
 
-        String expectedTarFilePath = workerInstanceResources + File.separator + "829c8329-f995-4fc7-9e79-f96b77359f4e.tar";
-        String tarFilePath = archiveDir +  File.separator + "829c8329-f995-4fc7-9e79-f96b77359f4e.tar";
+        String expectedArchiveDirPath = workerInstanceResources + File.separator + "expected-archive";
+        File expectedArchiveDir = new File(expectedArchiveDirPath);
+        
+        for (File expectedTarFile : expectedArchiveDir.listFiles()) {
+            System.out.println("Check output file: " + expectedTarFile.getName());
 
-        File tarfile = new File(tarFilePath);
-        File expectedTarfile = new File(expectedTarFilePath);
-        
-        System.out.println("Check output file: " + tarFilePath);
-        
-        try {
-            assertTrue("The tar file doesn't exist: "+tarfile.getAbsolutePath(), tarfile.exists());
-            assertTrue("The expected file doesn't exist: "+expectedTarfile.getAbsolutePath(), expectedTarfile.exists());
+            // Only work if file is smaller than chunks size
+            String tarFilePath = archiveDir +  File.separator + expectedTarFile.getName();
+            File tarfile = new File(tarFilePath);
             
-            assertTarEquals(tarFilePath, expectedTarFilePath);
-        } catch (NoSuchAlgorithmException nsae) {
-            fail("We should not have a NoSuchAlgorithmException: "+nsae);
-        } catch (IOException e) {
-            fail("We should not have a IOException: "+e);
+            assertTrue("The tar file doesn't exist: "+tarfile.getAbsolutePath(), tarfile.exists());
+            
+            try {
+                FileUtils.contentEquals(tarfile, expectedTarFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+                fail("We should not have a IOException: "+e);
+            }
         }
 
         // assertMatches("matches existing file", FileMatchers.anExistingFile(), file);
         
-        System.out.println("Done");
-    }
-    
-    /**
-     * @param archive1
-     * @param archive2
-     * @throws IOException
-     * @throws NoSuchAlgorithmException
-     */
-    public static final void assertTarEquals(String archive1, String archive2) throws IOException, NoSuchAlgorithmException {
-        // Get Member Hash
-        HashMap<String, TarArchiveEntry> files1 = getMembers(archive1);
-        HashMap<String, TarArchiveEntry> files2 = getMembers(archive2);
-
-        // Compare Files
-        assertMembersEqual(archive1, files1, archive2, files2);
-    }
-    
-    /**
-     * @param archive
-     * @return
-     * @throws IOException
-     */
-    private static final HashMap<String,TarArchiveEntry> getMembers(String archive) throws IOException {
-        TarArchiveInputStream input = new TarArchiveInputStream(
-                new BufferedInputStream(
-                new FileInputStream(archive)));
-
-        TarArchiveEntry entry;
-        HashMap<String, TarArchiveEntry> map = new HashMap<String, TarArchiveEntry>();
-        while ((entry = input.getNextTarEntry()) != null) {
-            map.put(entry.getName(), entry);
+        System.out.println("Retrieving data...");
+        
+        message = getJsonMessage(
+                workerInstanceResources + File.separator + "rabbitmq_retrieve_sent.json");
+        
+        // Fill the Json with the actual tar and chunks digest
+        System.out.println("Fill json with tarhash:"+tarHash);
+        message = message.replaceAll("<enter_archiveDigest_here>", tarHash);
+        Set<Integer> keys = chunksHash.keySet();
+        for(Integer chunkNum : keys) {
+            String chunkHash = chunksHash.get(chunkNum);
+            System.out.println("Fill json with chunk "+chunkNum+" hash:"+chunkHash);
+            message = message.replaceAll("<enter_chunk_"+chunkNum+"_digest_here>", chunkHash);
         }
-        input.close();
-        return map;
-    }
-    
-    /**
-     * @param tar1
-     * @param files1
-     * @param tar2
-     * @param files2
-     * @throws IOException
-     */
-    private static final void assertMembersEqual(String tar1, HashMap<String, TarArchiveEntry> files1, 
-                                                 String tar2, HashMap<String, TarArchiveEntry> files2) throws IOException {
-        if (files1.size() != files2.size()) {
-            fail("Different Sizes, expected " + Integer.toString(files1.size()) + " found " + Integer.toString(files2.size()));
-        }
-
-        for (String key : files1.keySet()) {
-            if (!files2.containsKey(key)) {
-                fail("Expected file not in target " + key);
-            }else{
-                TarArchiveEntry entry1 = files1.get(key);
-                TarArchiveEntry entry2 = files2.get(key);
-                
-                assertEquals(entry1.getSize(), entry2.getSize());
-                assertEquals(entry1.getName(), entry2.getName());
-                assertEquals(entry1.getMode(), entry2.getMode());
-                assertEquals(entry1.getMode(), entry2.getMode());
-                
-                // TODO: Add more for links, directories,etc...
+        
+        Channel channel = sendMessageToRabbitMQ(message);
+        listenRetrieveChannel(channel);
+        
+        // Compare origin files with retrieved files.
+        File retrieveDataDir = new File(dockerLocalStorage + File.separator + "retrieved" + File.separator + "dir");
+        
+        File originDataDir = new File(dockerLocalStorage + File.separator + "dir");
+        
+        assertTrue("The retrieved dir doesn't exist: "+retrieveDataDir.getAbsolutePath(), retrieveDataDir.exists());
+        
+        File[] originFiles = originDataDir.listFiles();
+        for(File originFile : originFiles) {
+            File retrievedFile = new File(retrieveDataDir, originFile.getName());
+            
+            assertTrue("The retrieved file doesn't exist: "+retrievedFile.getAbsolutePath(), retrievedFile.exists());
+            
+            if (originFile.isFile()) {
+                long csumOriginFile = 0;
+                long csumRetrievedFile = 0;
+                try {
+                    csumOriginFile = FileUtils.checksum(originFile, new CRC32()).getValue();
+                    csumRetrievedFile = FileUtils.checksum(retrievedFile, new CRC32()).getValue();
+                } catch (IOException ioe) {
+                    fail("Unexpected Exception thrown while getting checksum of output file: " + ioe);
+                }
+            
+                assertEquals(csumOriginFile, csumRetrievedFile);
             }
         }
+    }
+    
+    private void listenRetrieveChannel(Channel channel) {
+        try {
+            QueueingConsumer qConsumer = new QueueingConsumer(channel);
+            
+            //      channel2.basicQos(1);
+            channel.basicConsume("datavault-event", true, qConsumer);
+          
+            int state = 0;
+            boolean done =false;
+            while (!done) {
+                // Timeout after 1 minute
+                QueueingConsumer.Delivery delivery = qConsumer.nextDelivery(60000);
+              
+                // If nothing has been received after 1 minute fail
+                if(delivery == null){
+                    fail("Haven't receiving any progress from the Worker for 1 minute (state "+state+")");
+                }
+              
+                String message = new String(delivery.getBody());
+              
+                System.out.println("State "+state);
+                System.out.println("Received " + message.length() + " bytes");
+                System.out.println("Received message body '" + message + "'");
+              
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    Event commonEvent = mapper.readValue(message, Event.class);
+                  
+                    Class<?> clazz = Class.forName(commonEvent.getEventClass());
+                    Event concreteEvent = (Event)(mapper.readValue(message, clazz));
+                  
+                    switch(state){
+                        case 0:
+                            assertThat(concreteEvent, instanceOf(InitStates.class));
+                            state++;break;
+                        case 1:
+                            assertThat(concreteEvent, instanceOf(RetrieveStart.class));
+                            state++;break;
+                        case 2:
+                            if(concreteEvent instanceof UpdateProgress){
+                                break;
+                            }else{
+                                assertThat(concreteEvent, instanceOf(RetrieveComplete.class));
+                                state++;done=true;break;
+                            }
+                        default:
+                            fail("Unexpected state: "+state);
+                    }
+                } catch (Exception e) {
+                    fail("Error decoding message: "+e);
+                }
+            }
+            
+            channel.close();
+            
+        } catch(IOException ioe){
+            fail("We should not have a IOException: "+ioe);
+        } catch(TimeoutException te){
+            fail("We should not have a TimeoutException: "+te);
+        } catch (ShutdownSignalException sse) {
+            fail("We should not have a ShutdownSignalException: "+sse);
+        } catch (ConsumerCancelledException cce) {
+            fail("We should not have a ConsumerCancelledException: "+cce);
+        } catch (InterruptedException ie) {
+            fail("We should not have a InterruptedException: "+ie);
+        }
+    }
+    
+    private Channel sendMessageToRabbitMQ(String message){
+        
+        try {
+            // Connect to rabbitmq and send message          
+            ConnectionFactory factory = new ConnectionFactory();
+            factory.setHost(testQueueServer);
+            factory.setUsername(testQueueUser);
+            factory.setPassword(testQueuePassword);
+    
+            Connection connection1 = factory.newConnection();
+            Channel channel1 = connection1.createChannel();
+            
+            Connection connection2 = factory.newConnection();
+            Channel channel2 = connection2.createChannel();
+                channel1.queueDeclare("datavault", false, false, false, null);
+            channel2.queueDeclare("datavault-event", false, false, false, null);
+            
+            channel1.basicPublish("", "datavault", null, message.getBytes());
+            
+            System.out.println(" [x] Sent '" + message + "'");
+            
+            System.out.println(" [*] Waiting for messages.");
+            
+            channel1.close();
+            connection1.close();
+            
+            return channel2;
+        } catch (IOException ioe) {
+            // TODO Auto-generated catch block
+            fail("We should not have a IOException: "+ioe);
+        } catch (TimeoutException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    private String getJsonMessage(String jsonFilePath) {
+        // Read Json file with example of valid Deposit Task
+        String message = "";
+        try {
+            message = new String(
+                    Files.readAllBytes(
+                            Paths.get(jsonFilePath)
+                            )
+                    );
+        } catch (IOException ioe) {
+            fail("Problem reading the json file: "+ioe);
+        }
+        return message;
+    }
+    
+    @After
+    public void tearDown() {
+        String archiveDir = ".." + File.separator + "docker" + File.separator + "tmp" +
+                File.separator + "datavault" + File.separator + "archive";
+        String tarFilePath = archiveDir +  File.separator + "829c8329-f995-4fc7-9e79-f96b77359f4e.tar"+
+                FileSplitter.CHUNK_SEPARATOR+"1";
+
+        File tarfile = new File(tarFilePath);
+        // delete file
+        tarfile.delete();
+        // delete meta folder
+        String metaFolderPath = ".." + File.separator + "docker" + File.separator + "tmp" +
+                File.separator + "datavault" + File.separator + "meta" +
+                File.separator + "829c8329-f995-4fc7-9e79-f96b77359f4e";
+        File metaFolder = new File(metaFolderPath);
+        metaFolder.delete();
+
+        BasicConfigurator.resetConfiguration();
     }
 
 }

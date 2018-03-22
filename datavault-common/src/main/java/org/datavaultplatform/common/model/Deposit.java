@@ -6,6 +6,8 @@ import org.datavaultplatform.common.event.Event;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
@@ -68,6 +70,10 @@ public class Deposit {
     @OneToMany(targetEntity=DepositPath.class, mappedBy="deposit", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
     private List<DepositPath> depositPaths;
     
+    // A Deposit can have a number of deposit chunks
+    @OneToMany(targetEntity=DepositChunk.class, mappedBy="deposit", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<DepositChunk> depositChunks;
+    
     // A Deposit can have a number of active jobs
     @JsonIgnore
     @OneToMany(targetEntity=Job.class, mappedBy="deposit", fetch=FetchType.LAZY)
@@ -107,6 +113,10 @@ public class Deposit {
     private String archiveDigest;
     @Column(columnDefinition = "TEXT")
     private String archiveDigestAlgorithm;
+    
+    // Number of Chunks
+    @Column(columnDefinition = "INT default 0")
+    private int numOfChunks;
     
     // Record the file path that the user selected for this deposit.
     @ApiObjectField(description = "Origin of the deposited filepath")
@@ -193,6 +203,15 @@ public class Deposit {
         this.archiveDigestAlgorithm = archiveDigestAlgorithm;
     }
     
+
+    public int getNumOfChunks() {
+        return numOfChunks;
+    }
+
+    public void setNumOfChunks(int numOfChunks) {
+        this.numOfChunks = numOfChunks;
+    }
+    
     public String getFileOrigin() {
         return fileOrigin;
     }
@@ -229,6 +248,14 @@ public class Deposit {
         return depositPaths;
     }
 
+    public void setDepositChunks(List<DepositChunk> depositChunks) {
+        this.depositChunks = depositChunks;
+    }
+    
+    public List<DepositChunk> getDepositChunks() {
+        return depositChunks;
+    }
+
     public void setDepositPaths(List<DepositPath> depositPaths) {
         this.depositPaths = depositPaths;
     }
@@ -250,7 +277,8 @@ public class Deposit {
                 filePath,
                 depositSize,
                 vault.getID(),
-                depositPaths
+                depositPaths,
+                depositChunks
             );
     }
 }

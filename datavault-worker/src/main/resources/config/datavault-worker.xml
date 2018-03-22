@@ -21,6 +21,8 @@
         <property name="queuePassword" value="${queue.password}"/>
         <property name="tempDir" value="${tempDir}"/>
         <property name="metaDir" value="${metaDir}"/>
+        <property name="chunkingEnabled" value="${chunking.enabled:false}"/>
+        <property name="chunkingByteSize" value="${chunking.size:0}"/>
     </bean>
 
     <bean id="eventSender" class="org.datavaultplatform.worker.queue.EventSender">
@@ -29,5 +31,4 @@
         <property name="queueUser" value="${queue.user}"/>
         <property name="queuePassword" value="${queue.password}"/>
     </bean>
-
 </beans>

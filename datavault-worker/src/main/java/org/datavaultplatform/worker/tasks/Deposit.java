@@ -22,6 +22,7 @@ import org.datavaultplatform.common.event.deposit.ComputedSize;
 import org.datavaultplatform.common.event.deposit.TransferComplete;
 import org.datavaultplatform.common.event.deposit.PackageComplete;
 import org.datavaultplatform.common.event.deposit.Complete;
+import org.datavaultplatform.common.event.deposit.ComputedChunks;
 import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.*;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
 public class Deposit extends Task {
 
     private static final Logger logger = LoggerFactory.getLogger(Deposit.class);
-    
+
     EventSender eventStream;
     HashMap<String, UserStore> userStores;
 
@@ -54,6 +55,10 @@ public class Deposit extends Task {
     String bagID;
     String userID;
     
+    // Chunking attributes
+    File[] chunkFiles;
+    String[] chunksHash;
+    
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
      */
@@ -63,6 +68,8 @@ public class Deposit extends Task {
         eventStream = (EventSender)context.getEventStream();
         
         logger.info("Deposit job - performAction()");
+        logger.info("chunking: "+context.isChunkingEnabled());
+        logger.info("chunks byte size: "+context.getChunkingByteSize());
         
         Map<String, String> properties = getProperties();
         depositId = properties.get("depositId");
@@ -267,18 +274,41 @@ public class Deposit extends Task {
             String tarHash = Verify.getDigest(tarFile);
             String tarHashAlgorithm = Verify.getAlgorithm();
 
-            eventStream.send(new PackageComplete(jobID, depositId)
-                .withUserId(userID)
-                .withNextState(3));
-
             long archiveSize = tarFile.length();
             logger.info("Tar file: " + archiveSize + " bytes");
             logger.info("Checksum algorithm: " + tarHashAlgorithm);
             logger.info("Checksum: " + tarHash);
 
+            eventStream.send(new PackageComplete(jobID, depositId)
+                .withUserId(userID)
+                .withNextState(3));
+
             eventStream.send(new ComputedDigest(jobID, depositId, tarHash, tarHashAlgorithm)
                 .withUserId(userID));
+            
+            if ( context.isChunkingEnabled() ) {
+                logger.info("Chunking tar file ...");
+                chunkFiles = FileSplitter.spliteFile(tarFile, context.getChunkingByteSize());
+                chunksHash = new String[chunkFiles.length];
+                HashMap<Integer, String> chunksDigest = new HashMap<Integer, String>();
 
+                logger.info(chunkFiles.length + " Chunk file created.");
+                for (int i = 0; i < chunkFiles.length; i++){
+                    File chunk = chunkFiles[i];
+                    chunksHash[i] = Verify.getDigest(chunk);
+                    
+                    long chunkSize = chunk.length();
+                    logger.info("Chunk file " + i + ": " + chunkSize + " bytes");
+                    logger.info("Checksum algorithm: " + tarHashAlgorithm);
+                    logger.info("Checksum: " + chunksHash[i]);
+                    
+                    chunksDigest.put(i+1, chunksHash[i]);
+                }
+                
+                eventStream.send(new ComputedChunks(jobID, depositId, chunksDigest, tarHashAlgorithm)
+                        .withUserId(userID));
+            }
+            
             // Create the meta directory for the bag information
             Path metaPath = context.getMetaDir().resolve(bagID);
             File metaDir = metaPath.toFile();
@@ -289,8 +319,17 @@ public class Deposit extends Task {
             Packager.extractMetadata(bagDir, metaDir);
 
             // Copy the resulting tar file to the archive area
-            logger.info("Copying tar file to archive ...");
-            copyToArchiveStorage(tarFile);
+            logger.info("Copying tar file(s) to archive ...");
+            
+            if ( context.isChunkingEnabled() ) {
+                for (File chunk : chunkFiles){
+                    logger.debug("Copying chunk: "+chunk.getName());
+                    copyToArchiveStorage(chunk, true);
+                    logger.debug("archiveIds: "+archiveIds);
+                }
+            } else {
+                copyToArchiveStorage(tarFile);
+            }
 
             // Cleanup
             logger.info("Cleaning up ...");
@@ -301,7 +340,13 @@ public class Deposit extends Task {
                 .withNextState(4));
 
             logger.info("Verifying archive package ...");
-            verifyArchive(context, tarFile, tarHash);
+            if( context.isChunkingEnabled() ) {
+                for (int i = 0; i < chunkFiles.length; i++){
+                    verifyArchive(context, chunkFiles, chunksHash, tarFile, tarHash);
+                }
+            } else {
+                verifyArchive(context, tarFile, tarHash);
+            }
 
             logger.info("Deposit complete");
 
@@ -389,12 +434,21 @@ public class Deposit extends Task {
             FileUtils.moveDirectory(uploadDir, outputFile);
         }
     }
-
+    
     /**
      * @param tarFile
      * @throws Exception
      */
     private void copyToArchiveStorage(File tarFile) throws Exception {
+        copyToArchiveStorage(tarFile, false);
+    }
+    
+    /**
+     * @param tarFile
+     * @param isChunk
+     * @throws Exception
+     */
+    private void copyToArchiveStorage(File tarFile, boolean isChunk) throws Exception {
 
         for (String archiveStoreId : archiveStores.keySet() ) {
             ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
@@ -416,11 +470,62 @@ public class Deposit extends Task {
             }
 
             logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
-
-            archiveIds.put(archiveStoreId, archiveId);
+            
+            if (isChunk && archiveIds.get(archiveStoreId) == null){
+                String separator = FileSplitter.CHUNK_SEPARATOR;
+                int beginIndex = archiveId.lastIndexOf(separator);
+                archiveId = archiveId.substring(0, beginIndex);
+                logger.debug("Add to archiveIds: key: "+archiveStoreId+" ,value:"+archiveId);
+                archiveIds.put(archiveStoreId, archiveId);
+                logger.debug("archiveIds: "+archiveIds);
+            } else if(!isChunk) {
+                archiveIds.put(archiveStoreId, archiveId);
+            }
         }
     }
+    
+    /**
+     * @param context
+     * @param chunkFiles
+     * @param chunksHash
+     * @param tarFile
+     * @param tarHash
+     * @throws Exception
+     */
+    private void verifyArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash) throws Exception {
 
+        for (String archiveStoreId : archiveStores.keySet() ) {
+
+            ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
+            String archiveId = archiveIds.get(archiveStoreId);
+            
+            if (archiveStore.getVerifyMethod() != Verify.Method.COPY_BACK) {
+                throw new Exception("Wrong Verify Method: [" + archiveStore.getVerifyMethod() + "] has to be " + Verify.Method.COPY_BACK);
+            }
+            
+            for (int i = 0; i < chunkFiles.length; i++) {
+                File chunkFile = chunkFiles[i];
+                String chunkHash = chunksHash[i];
+                
+                // Delete the existing temporary file
+                chunkFile.delete();
+
+                // Copy file back from the archive storage
+                String archiveChunkId = archiveId+FileSplitter.CHUNK_SEPARATOR+(i+1);
+                logger.debug("archiveChunkId: "+archiveChunkId);
+                copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
+                
+                logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
+                verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
+            }
+
+            FileSplitter.recomposeFile(chunkFiles, tarFile);
+
+            // Verify the contents
+            verifyTarFile(context.getTempDir(), tarFile, tarHash);
+        }
+    }
+    
     /**
      * @param context
      * @param tarFile
@@ -436,6 +541,8 @@ public class Deposit extends Task {
             String archiveId = archiveIds.get(archiveStoreId);
 
             logger.info("Verification method: " + archiveStore.getVerifyMethod());
+            
+            logger.debug("verifyArchive - archiveId: "+archiveId);
 
             // Get the tar file
 
@@ -477,6 +584,19 @@ public class Deposit extends Task {
         logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
     }
     
+    private void verifyChunkFile(Path tempPath, File chunkFile, String origChunkHash) throws Exception {
+
+        if (origChunkHash != null) {
+            logger.info("Get Digest from: " + chunkFile.getAbsolutePath());
+            // Compare the SHA hash
+            String chunkHash = Verify.getDigest(chunkFile);
+            logger.info("Checksum: " + chunkHash);
+            if (!chunkHash.equals(origChunkHash)) {
+                throw new Exception("checksum failed: " + chunkHash + " != " + origChunkHash);
+            }
+        }
+    }
+    
     /**
      * Compare the SHA hash of the passed in tar file and the passed in original hash.
      * 
@@ -491,6 +611,7 @@ public class Deposit extends Task {
     private void verifyTarFile(Path tempPath, File tarFile, String origTarHash) throws Exception {
 
         if (origTarHash != null) {
+            logger.info("Get Digest from: " + tarFile.getAbsolutePath());
             // Compare the SHA hash
             String tarHash = Verify.getDigest(tarFile);
             logger.info("Checksum: " + tarHash);
