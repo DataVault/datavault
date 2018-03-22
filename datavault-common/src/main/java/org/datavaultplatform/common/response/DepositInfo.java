@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.model.Deposit;
+import org.datavaultplatform.common.model.DepositChunk;
 import org.datavaultplatform.common.model.DepositPath;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
@@ -47,9 +48,12 @@ public class DepositInfo {
     
     @ApiObjectField(description = "Deposit paths")
     private List<DepositPath> depositPaths;
+
+    @ApiObjectField(description = "Deposit chunks")
+    private List<DepositChunk> depositChunks;
     
     public DepositInfo() {}
-    public DepositInfo(String id, Date creationTime, Deposit.Status status, String note, String fileOrigin, String shortFilePath, String filePath, long depositSize, String vaultID, List<DepositPath> depositPaths) {
+    public DepositInfo(String id, Date creationTime, Deposit.Status status, String note, String fileOrigin, String shortFilePath, String filePath, long depositSize, String vaultID, List<DepositPath> depositPaths, List<DepositChunk> depositChunks) {
         this.id = id;
         this.creationTime = creationTime;
         this.status = status;
@@ -60,6 +64,7 @@ public class DepositInfo {
         this.depositSize = depositSize;
         this.vaultID = vaultID;
         this.depositPaths = depositPaths;
+        this.depositChunks = depositChunks;
     }
 
     public String getID() {
@@ -144,5 +149,13 @@ public class DepositInfo {
 
     public void setDepositPaths(List<DepositPath> depositPaths) {
         this.depositPaths = depositPaths;
+    }
+
+    public List<DepositChunk> getDepositChunks() {
+        return depositChunks;
+    }
+
+    public void setDepositChunks(List<DepositChunk> depositChunks) {
+        this.depositChunks = depositChunks;
     }
 }
