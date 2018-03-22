@@ -248,7 +248,7 @@ public class Deposit {
         return depositPaths;
     }
 
-    public void setDepositChunk(List<DepositChunk> depositChunks) {
+    public void setDepositChunks(List<DepositChunk> depositChunks) {
         this.depositChunks = depositChunks;
     }
     
@@ -258,10 +258,6 @@ public class Deposit {
 
     public void setDepositPaths(List<DepositPath> depositPaths) {
         this.depositPaths = depositPaths;
-    }
-
-    public void setDepositChunks(List<DepositChunk> depositChunks) {
-        this.depositChunks = depositChunks;
     }
 
     public List<Job> getJobs() {
