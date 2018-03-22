@@ -11,8 +11,11 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 public class EventListener implements MessageListener {
 
@@ -176,6 +179,35 @@ public class EventListener implements MessageListener {
                     }
                 }
 
+            } else if (concreteEvent instanceof ComputedChunks) {
+                
+                // Update the deposit with the computed digest
+                ComputedChunks computedChunksEvent = (ComputedChunks)concreteEvent;
+                
+                Boolean success = false;
+                while (!success) {
+                    try {
+                        HashMap<Integer, String> chunksDigest = computedChunksEvent.getChunksDigest();
+                        String algorithm = computedChunksEvent.getDigestAlgorithm();
+                        deposit.setNumOfChunks(chunksDigest.size());
+                        depositsService.updateDeposit(deposit);
+                        
+                        deposit.setDepositChunks(new ArrayList<DepositChunk>());
+                        
+                        for(Integer chunkNum : chunksDigest.keySet()) {
+                            String hash = chunksDigest.get(chunkNum);
+                            // Create new Deposit chunk
+                            DepositChunk depositChunk = new DepositChunk(deposit, chunkNum, hash, algorithm);
+                            deposit.getDepositChunks().add(depositChunk);
+                        }
+                        depositsService.updateDeposit(deposit);
+                        success = true;
+                    } catch (org.hibernate.StaleObjectStateException e) {
+                        // Refresh from database and retry
+                        deposit = depositsService.getDeposit(concreteEvent.getDepositId());
+                    }
+                }
+                
             } else if (concreteEvent instanceof ComputedDigest) {
                 
                 // Update the deposit with the computed digest
@@ -224,7 +256,7 @@ public class EventListener implements MessageListener {
                 Group group = vault.getGroup();
                 User depositUser = usersService.getUser(completeEvent.getUserId());
                 
-                HashMap model = new HashMap();
+                HashMap<String, Object> model = new HashMap<String, Object>();
                 model.put("group-name", group.getName());
                 model.put("deposit-note", deposit.getNote());
                 model.put("deposit-id", deposit.getID());
@@ -293,7 +325,7 @@ public class EventListener implements MessageListener {
                 Group group = vault.getGroup();
                 User depositUser = usersService.getUser(errorEvent.getUserId());
                 
-                HashMap model = new HashMap();
+                HashMap<String, Object> model = new HashMap<String, Object>();
                 model.put("group-name", group.getName());
                 model.put("deposit-note", deposit.getNote());
                 model.put("deposit-id", deposit.getID());
