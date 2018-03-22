@@ -13,11 +13,13 @@ public abstract class Device {
     
     // Some public information about a device or storage system
     public String name;
-    public Boolean multipleCopies = false;
-    public List<String> locations = null;
+    
     
     // Some private configuration properties
     protected Map<String,String> config;
+    protected Boolean multipleCopies = false;
+    protected List<String> locations = null;
+    protected Boolean depositIdStorageKey = false;
     
     public Device(String name, Map<String,String> config) {
         this.name = name;
@@ -50,6 +52,10 @@ public abstract class Device {
     
     public Boolean hasMultipleCopies() {
     		return this.multipleCopies;
+    }
+    
+    public Boolean hasDepositIdStorageKey() {
+		return this.depositIdStorageKey;
     }
     
     public List<String> getLocations() {

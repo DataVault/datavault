@@ -32,6 +32,7 @@ public class S3Cloud extends Device implements ArchiveStore {
 	
 	public S3Cloud(String name, Map<String, String> config) {
 		super(name, config);
+		super.depositIdStorageKey = true;
 		// the auth credentials are in ~/.aws/credentials
 		s3 = new AmazonS3Client();
 	    Region euWest1 = Region.getRegion(Regions.EU_WEST_1);

@@ -417,11 +417,11 @@ public class Deposit extends Task {
             String archiveId;
 
             try {
-	            //	if (((Device)archiveStore).hasMultipleCopies()) {
-	            archiveId = ((Device) archiveStore).store(this.depositId, tarFile, progress);
-	            	//} else {
-	            //   archiveId = ((Device) archiveStore).store("/", tarFile, progress);
-	            //}
+	            if (((Device)archiveStore).hasDepositIdStorageKey()) {
+	            		archiveId = ((Device) archiveStore).store(this.depositId, tarFile, progress);
+	            } else {
+	            		archiveId = ((Device) archiveStore).store("/", tarFile, progress);
+	            }
             } finally {
                 // Stop the tracking thread
                 tracker.stop();
