@@ -530,16 +530,24 @@ public class Deposit extends Task {
                 
                 // Delete the existing temporary file
                 chunkFile.delete();
-
-                // Copy file back from the archive storage
                 String archiveChunkId = archiveId+FileSplitter.CHUNK_SEPARATOR+(i+1);
-                logger.debug("archiveChunkId: "+archiveChunkId);
-                copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
-                
-                logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
-                verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
+                if (((Device)archiveStore).hasMultipleCopies()) {
+                		for (String loc : ((Device)archiveStore).getLocations()) {
+                			logger.debug("archiveChunkId: "+archiveChunkId);
+                			copyBackFromArchive(archiveStore, archiveChunkId, chunkFile, loc);
+                			logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
+                			verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
+                		}
+                } else {
+	                // Copy file back from the archive storage
+	                logger.debug("archiveChunkId: "+archiveChunkId);
+	                copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
+	                
+	                logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
+	                verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
+                }
             }
-
+            
             FileSplitter.recomposeFile(chunkFiles, tarFile);
 
             // Verify the contents
