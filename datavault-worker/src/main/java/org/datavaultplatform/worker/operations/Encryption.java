@@ -365,7 +365,7 @@ public class Encryption {
         fos.close();
     }
     
-    public static void doBufferedCrypto(File inputFile, File outputFile, Cipher cipher) throws Exception {
+    public static void doBufferedCrypto(File inputFile, File outputFile, Cipher cipher, boolean encrypt) throws Exception {
 //        FileInputStream fis = new FileInputStream(inputFile);
         
         Path inputPathRead = inputFile.toPath();
@@ -386,9 +386,15 @@ public class Encryption {
                         cipher.getOutputSize((int) inputFile.length()) );
         
         System.out.println("Reading file...");
-        
+
         byte[] ibuffer = new byte[BUFFER_SIZE];
         byte[] obuffer = new byte[cipher.getOutputSize(ibuffer.length)];
+
+        // If decrypting we got to do this opposite, I think...
+        if(!encrypt){
+            obuffer = new byte[BUFFER_SIZE];
+        }
+        byte[] tag = new byte[TAG_BIT_LENGTH];
 //        byte[] obuffer = new byte[BUFFER_SIZE];
         
         System.out.println("file size: "+inputFile.length());
@@ -396,37 +402,57 @@ public class Encryption {
 //        System.out.println("ibuff size: "+ibuffer.length+", obuff size: "+obuffer.length);
         
         System.out.println("Input Mapped Buffer limit: "+inputMappedByteBuffer.limit());
-        System.out.println("Input Mapped Buffer limit: "+outputMappedByteBuffer.limit());
-        
+        System.out.println("Output Mapped Buffer limit: "+outputMappedByteBuffer.limit());
+
         System.out.println("Input Mapped Buffer capacity: "+inputMappedByteBuffer.capacity());
-        System.out.println("Input Mapped Buffer capacity: "+outputMappedByteBuffer.capacity());
-        
+        System.out.println("Output Mapped Buffer capacity: "+outputMappedByteBuffer.capacity());
+
+        System.out.println("Input Buffer: "+ibuffer.length);
+        System.out.println("Output Buffer: "+obuffer.length);
+
+        int offset = 0;
+
         while (inputMappedByteBuffer.hasRemaining()) {
-            System.out.println("mappedByteBuffer position: "+inputMappedByteBuffer.position());
-            System.out.println("remaining: "+inputMappedByteBuffer.remaining());
+//            System.out.println("mappedByteBuffer position: "+inputMappedByteBuffer.position());
+//            System.out.println("remaining: "+inputMappedByteBuffer.remaining());
             if(inputMappedByteBuffer.remaining() <= BUFFER_SIZE){
 //                inputMappedByteBuffer.get(ibuffer, 0, inputMappedByteBuffer.remaining());
 //                
 ////                System.out.print("Read: ");System.out.write(ibuffer);System.out.print("\n");
                 System.out.println("Last Read");
                 inputMappedByteBuffer.get(ibuffer, 0, inputMappedByteBuffer.remaining());
-                obuffer = cipher.doFinal(ibuffer, 0, inputMappedByteBuffer.remaining());
+                obuffer = new byte[inputMappedByteBuffer.remaining()];
+                offset = cipher.update(ibuffer, 0, inputMappedByteBuffer.remaining(), obuffer, 0);
+//                obuffer = cipher.update(ibuffer, 0, inputMappedByteBuffer.remaining());
 //                cipher.doFinal(inputMappedByteBuffer, outputMappedByteBuffer);
             } else {
 //                mappedByteBuffer.get(ibuffer, 0, BUFFER_SIZE);
 //                
-////                System.out.print("Read: ");System.out.write(ibuffer);System.out.print("\n");
+//                System.out.print("Read: ");System.out.write(ibuffer);System.out.print("\n");
                 System.out.println("Read ");
                 inputMappedByteBuffer.get(ibuffer, 0, BUFFER_SIZE);
-                obuffer = cipher.update(ibuffer, 0, BUFFER_SIZE);
+
+                offset = cipher.update(ibuffer, 0, BUFFER_SIZE, obuffer, 0);
+//                obuffer = cipher.update(ibuffer, 0, BUFFER_SIZE);
 //                cipher.update(inputMappedByteBuffer, outputMappedByteBuffer);
             }
 //            System.out.println("Writing: ");System.out.write(obuffer);System.out.print("\n");
-//            System.out.println("Write "+obuffer.length);
+            System.out.println("Write "+obuffer.length);
+            System.out.println("Remaining input "+inputMappedByteBuffer.remaining());
+            System.out.println("Remaining output "+outputMappedByteBuffer.remaining());
 //            fos.write(obuffer);
             outputMappedByteBuffer.put(obuffer);
-            System.out.println("hasRemaining: "+inputMappedByteBuffer.hasRemaining());
+//            System.out.println("hasRemaining: "+inputMappedByteBuffer.hasRemaining());
         }
+
+        if(encrypt) {
+            cipher.doFinal(tag, 0);
+        }else{
+            cipher.update(tag, 0, tag.length, obuffer, offset);
+            outputMappedByteBuffer.put(obuffer);
+            cipher.doFinal(tag, offset);
+        }
+        outputMappedByteBuffer.put(obuffer);
         
         inputMappedByteBuffer.clear(); // do something with the data and clear/compact it.
         inputFileChannel.close();
@@ -453,6 +479,32 @@ public class Encryption {
 //        
 //        fis.close();
 //        fos.close();
+    }
+
+    public static void doBufferedCrypto2(File inputFile, File outputFile, Cipher cipher) throws Exception {
+        Path inputPathRead = inputFile.toPath();
+        FileChannel inputFileChannel = (FileChannel) Files.newByteChannel(inputPathRead, EnumSet.of(StandardOpenOption.READ));
+        MappedByteBuffer inputMappedByteBuffer =
+                inputFileChannel.map(
+                        FileChannel.MapMode.READ_ONLY,
+                        0,
+                        inputFile.length());
+
+        outputFile.createNewFile();
+        Path outputPathRead = outputFile.toPath();
+        FileChannel outputFileChannel = (FileChannel) Files.newByteChannel(outputPathRead, EnumSet.of(StandardOpenOption.READ, StandardOpenOption.WRITE));
+        MappedByteBuffer outputMappedByteBuffer =
+                outputFileChannel.map(
+                        FileChannel.MapMode.READ_WRITE,
+                        0,
+                        cipher.getOutputSize((int) inputFile.length()) );
+
+        cipher.doFinal(inputMappedByteBuffer, outputMappedByteBuffer);
+
+        inputMappedByteBuffer.clear(); // do something with the data and clear/compact it.
+        inputFileChannel.close();
+        outputMappedByteBuffer.clear(); // do something with the data and clear/compact it.
+        outputFileChannel.close();
     }
     
     // TODO: try to use Bouncy Castle

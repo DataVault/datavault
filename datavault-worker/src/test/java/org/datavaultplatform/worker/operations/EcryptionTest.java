@@ -153,11 +153,11 @@ public class EcryptionTest {
         // Generating IV
         byte iv[] = Encryption.generateIV();
         
-        byte[] aadData = "random".getBytes() ; // Any random data can be used as tag. Some common examples could be domain name...
+//        byte[] aadData = "random".getBytes() ; // Any random data can be used as tag. Some common examples could be domain name...
         
-        Cipher cIn = Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, aesKey, iv, aadData);
+        Cipher cIn = Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, aesKey, iv);
         
-        File inputFile = new File(bigdataResourcesDir, "big_file");
+        File inputFile = new File(bigdataResourcesDir, "big_file"); //big_file
         
         long csumInputFile = 0;
         try {
@@ -169,11 +169,11 @@ public class EcryptionTest {
         File encryptedFile = new File(testDir, "BigGCMencriptedOutputFile");
         // Create a Tar file from resource dir
         try {
-            Encryption.doBufferedCrypto(inputFile, encryptedFile, cIn);
+            Encryption.doBufferedCrypto(inputFile, encryptedFile, cIn, true);
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
-            fail("Unexpected Exception thrown while extracting files from tar: " + sw);
+            fail("Unexpected Exception thrown while encrypting file: " + sw);
         }
         
         final long midTime = System.currentTimeMillis();
@@ -183,14 +183,14 @@ public class EcryptionTest {
         
         File outputFile = new File(testDir, "big_file");
         
-        Cipher cOut = Encryption.initGCMCipher(Cipher.DECRYPT_MODE, aesKey, iv, aadData);
+        Cipher cOut = Encryption.initGCMCipher(Cipher.DECRYPT_MODE, aesKey, iv);
         
         try {
-            Encryption.doBufferedCrypto(encryptedFile, outputFile, cOut);
+            Encryption.doBufferedCrypto(encryptedFile, outputFile, cOut, false);
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
-            fail("Unexpected Exception thrown while extracting files from tar: " + sw);
+            fail("Unexpected Exception thrown while decrypting file: " + sw);
         }
         
         assertTrue(outputFile.exists());
@@ -208,10 +208,10 @@ public class EcryptionTest {
 //        FileUtils.deleteQuietly(outputFile);
 
         final long endTime = System.currentTimeMillis();
+        System.out.println("\tDecryption: " +
+                TimeUnit.MILLISECONDS.toSeconds(endTime - midTime) + "." +
+                TimeUnit.MILLISECONDS.toMillis(endTime - midTime) + " sec");
         System.out.println("End testBigFileGCMCripto");
-        System.out.println("Total execution time: " + 
-                TimeUnit.MILLISECONDS.toSeconds(endTime - startTime) + "." +
-                TimeUnit.MILLISECONDS.toMillis(endTime - startTime) + " sec");
     }
     
 //    @Test
