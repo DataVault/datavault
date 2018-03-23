@@ -331,9 +331,11 @@ public class Deposit extends Task {
             logger.info("Copying tar file(s) to archive ...");
             
             if ( context.isChunkingEnabled() ) {
+            		int chunkCount = 0;
                 for (File chunk : chunkFiles){
+                		chunkCount++;
                     logger.debug("Copying chunk: "+chunk.getName());
-                    copyToArchiveStorage(chunk, true);
+                    copyToArchiveStorage(chunk, chunkCount);
                     logger.debug("archiveIds: "+archiveIds);
                 }
             } else {
@@ -449,7 +451,7 @@ public class Deposit extends Task {
      * @throws Exception
      */
     private void copyToArchiveStorage(File tarFile) throws Exception {
-        copyToArchiveStorage(tarFile, false);
+        copyToArchiveStorage(tarFile, 0);
     }
     
     /**
@@ -457,7 +459,7 @@ public class Deposit extends Task {
      * @param isChunk
      * @throws Exception
      */
-    private void copyToArchiveStorage(File tarFile, boolean isChunk) throws Exception {
+    private void copyToArchiveStorage(File tarFile, int chunkCount) throws Exception {
 
         for (String archiveStoreId : archiveStores.keySet() ) {
             ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
@@ -467,12 +469,15 @@ public class Deposit extends Task {
             ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, tarFile.length(), eventStream);
             Thread trackerThread = new Thread(tracker);
             trackerThread.start();
-
+            String depId = this.depositId;
+            if (chunkCount > 0) {
+            		depId = depId + "." + chunkCount;
+            }
             String archiveId;
 
             try {
 	            if (((Device)archiveStore).hasDepositIdStorageKey()) {
-	            		archiveId = ((Device) archiveStore).store(this.depositId, tarFile, progress);
+	            		archiveId = ((Device) archiveStore).store(depId, tarFile, progress);
 	            } else {
 	            		archiveId = ((Device) archiveStore).store("/", tarFile, progress);
 	            }
@@ -484,14 +489,17 @@ public class Deposit extends Task {
 
             logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
             
-            if (isChunk && archiveIds.get(archiveStoreId) == null){
-                String separator = FileSplitter.CHUNK_SEPARATOR;
-                int beginIndex = archiveId.lastIndexOf(separator);
-                archiveId = archiveId.substring(0, beginIndex);
-                logger.debug("Add to archiveIds: key: "+archiveStoreId+" ,value:"+archiveId);
-                archiveIds.put(archiveStoreId, archiveId);
-                logger.debug("archiveIds: "+archiveIds);
-            } else if(!isChunk) {
+            if (chunkCount > 0 && archiveIds.get(archiveStoreId) == null) {
+            		logger.info("ArchiveId is: " + archiveId);
+            		String separator = FileSplitter.CHUNK_SEPARATOR;
+            		logger.info("Separator is: " + separator);
+            		int beginIndex = archiveId.lastIndexOf(separator);
+            		logger.info("BeginIndex is: " + beginIndex); 
+            		archiveId = archiveId.substring(0, beginIndex);
+            		logger.debug("Add to archiveIds: key: "+archiveStoreId+" ,value:"+archiveId);
+            		archiveIds.put(archiveStoreId, archiveId);
+            		logger.debug("archiveIds: "+archiveIds);
+            } else if(chunkCount == 0) {
                 archiveIds.put(archiveStoreId, archiveId);
             }
         }
