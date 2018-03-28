@@ -28,171 +28,95 @@ public class EcryptionTest {
 
     private static File bigdataResourcesDir;
     private static File testDir;
-    
+
     @BeforeClass
     public static void setUpClass() {
-        String resourcesPath = System.getProperty("user.dir") + File.separator + "src" +
-                File.separator + "test" + File.separator + "resources";
-        
+        String resourcesPath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "test"
+                + File.separator + "resources";
+
         bigdataResourcesDir = new File(resourcesPath + File.separator + "big_data");
         testDir = new File(resourcesPath + File.separator + "tmp");
+
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         
-        System.out.println( "\nSecurity-Provider:" );
-        for( Provider prov : Security.getProviders() ) {
-            System.out.println( "  " + prov + ": " + prov.getInfo() );
-        }
-        
-        
-        try {
-            System.out.println( "\nMaxAllowedKeyLength (for '" + Cipher.getInstance("AES").getProvider() + "' using current 'JCE Policy Files'):\n"
-                    + "  DES        = " + Cipher.getMaxAllowedKeyLength( "DES"        ) + "\n"
-                    + "  Triple DES = " + Cipher.getMaxAllowedKeyLength( "Triple DES" ) + "\n"
-                    + "  AES        = " + Cipher.getMaxAllowedKeyLength( "AES"        ) + "\n"
-                    + "  Blowfish   = " + Cipher.getMaxAllowedKeyLength( "Blowfish"   ) + "\n"
-                    + "  RSA        = " + Cipher.getMaxAllowedKeyLength( "RSA"        ) + "\n" );
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            fail("Unexpected Exception thrown while getting checksum of input file: " + e);
+        System.out.println("\nSecurity-Provider:");
+        for (Provider prov : Security.getProviders()) {
+            System.out.println("  " + prov + ": " + prov.getInfo());
         }
     }
 
     @Before
     public void setUp() {
-        try{
+        try {
             testDir.mkdir();
-        }
-        catch(SecurityException se) {
+        } catch (SecurityException se) {
             fail(se.getMessage());
         }
 
         BasicConfigurator.configure();
     }
-    
-    @Test
-    public void testSimpleEncryptionWithAAD(){
-        String messageToEncrypt = "This is a message to test the AES encryption." ;
-        
-        // Any random data can be used as tag. Some common examples could be domain name...
-        byte[] aadData = "random".getBytes() ; 
-
-        // Use different key+IV pair for encrypting/decrypting different parameters
-
-        // Generating Key
-        SecretKey aesKey = null;
-        try {
-            aesKey = Encryption.generateSecretKey();
-        } catch (NoSuchAlgorithmException noSuchAlgoExc) {
-            fail("Key being request is for AES algorithm, "
-                    + "but this cryptographic algorithm is not available in the environment "  + 
-                    noSuchAlgoExc);
-        }
-
-        assertNotNull(aesKey);
-        
-        // Generating IV
-        byte iv[] = Encryption.generateIV();
-        
-        assertNotNull(iv);
-        
-        byte[] encryptedText = Encryption.aesGCMEncrypt(messageToEncrypt, aesKey, iv, aadData);
-        
-        assertNotNull(encryptedText);
-        
-        assertNotEquals(messageToEncrypt, Base64.getEncoder().encodeToString(encryptedText));
-        
-        // Same key, IV and GCM Specs for decryption as used for encryption.
-        byte[] decryptedText = Encryption.aesGCMDecrypt(encryptedText, aesKey, iv, aadData);
-
-        assertEquals(messageToEncrypt, new String(decryptedText));
-    }
 
     @Test
-    public void testSimpleEncryptionWithoutAAD(){
-        String messageToEncrypt = "This is a message to test the AES encryption." ;
+    public void testBigFileGCMCriptoWithoutAAD() {
+        System.out.println("Start testBigFileGCMCriptoWithoutAAD...");
 
-        // Use different key+IV pair for encrypting/decrypting different parameters
-
-        // Generating Key
-        SecretKey aesKey = null;
-        try {
-            aesKey = Encryption.generateSecretKey();
-        } catch (NoSuchAlgorithmException noSuchAlgoExc) {
-            fail("Key being request is for AES algorithm, "
-                    + "but this cryptographic algorithm is not available in the environment "  + 
-                    noSuchAlgoExc);
-        }
-        
-        // Generating IV
-        byte iv[] = Encryption.generateIV();
-        
-        byte[] encryptedText = Encryption.aesGCMEncrypt(messageToEncrypt, aesKey, iv);
-        
-        assertNotEquals(messageToEncrypt, Base64.getEncoder().encodeToString(encryptedText));
-        
-        // Same key, IV and GCM Specs for decryption as used for encryption.
-        byte[] decryptedText = Encryption.aesGCMDecrypt(encryptedText, aesKey, iv);
-
-        assertEquals(messageToEncrypt, new String(decryptedText));
-    }
-    
-    @Test
-//    @Category(org.datavaultplatform.SlowTest.class)
-    public void testBigFileGCMCripto(){
-        final long startTime = System.currentTimeMillis();
-        System.out.println("Start testBigFileGCMCripto...");
-        
         // Generating Key
         SecretKey aesKey = null;
         try {
             aesKey = Encryption.generateSecretKey(128);
         } catch (NoSuchAlgorithmException noSuchAlgoExc) {
             fail("Key being request is for AES algorithm, "
-                    + "but this cryptographic algorithm is not available in the environment "  + 
-                    noSuchAlgoExc);
+                    + "but this cryptographic algorithm is not available in the environment " + noSuchAlgoExc);
         }
-        
+
         // Generating IV
-        byte iv[] = Encryption.generateIV();
-        
-//        byte[] aadData = "random".getBytes() ; // Any random data can be used as tag. Some common examples could be domain name...
-        
+        byte iv[] = Encryption.generateIV(Encryption.IV_SIZE);
+
         Cipher cIn = Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, aesKey, iv);
-        
-        File inputFile = new File(bigdataResourcesDir, "big_file"); //big_file
-        
+
+        File inputFile = new File(bigdataResourcesDir, "big_file");
+
+        long startTime = System.currentTimeMillis();
+
         long csumInputFile = 0;
         try {
             csumInputFile = FileUtils.checksum(inputFile, new CRC32()).getValue();
         } catch (IOException ioe) {
             fail("Unexpected Exception thrown while getting checksum of input file: " + ioe);
         }
-        
+
         File encryptedFile = new File(testDir, "BigGCMencriptedOutputFile");
         // Create a Tar file from resource dir
         try {
-            Encryption.doBufferedCrypto(inputFile, encryptedFile, cIn, true);
+            Encryption.doByteBufferFileCrypto(inputFile, encryptedFile, cIn);
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
             fail("Unexpected Exception thrown while encrypting file: " + sw);
         }
-        
-        final long midTime = System.currentTimeMillis();
-        System.out.println("\t Encryption: " + 
-                TimeUnit.MILLISECONDS.toSeconds(midTime - startTime) + "." +
-                TimeUnit.MILLISECONDS.toMillis(midTime - startTime) + " sec");
-        
+
+        long midTime = System.currentTimeMillis();
+        System.out.println("\t Encryption: " + TimeUnit.MILLISECONDS.toSeconds(midTime - startTime) + "."
+                + TimeUnit.MILLISECONDS.toMillis(midTime - startTime) + " sec");
+
         File outputFile = new File(testDir, "big_file");
-        
+
         Cipher cOut = Encryption.initGCMCipher(Cipher.DECRYPT_MODE, aesKey, iv);
-        
+
+        midTime = System.currentTimeMillis();
+
         try {
-            Encryption.doBufferedCrypto(encryptedFile, outputFile, cOut, false);
+            Encryption.doByteBufferFileCrypto(encryptedFile, outputFile, cOut);
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
             fail("Unexpected Exception thrown while decrypting file: " + sw);
         }
-        
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("\tDecryption: " + TimeUnit.MILLISECONDS.toSeconds(endTime - midTime) + "."
+                + TimeUnit.MILLISECONDS.toMillis(endTime - midTime) + " sec");
+
         assertTrue(outputFile.exists());
 
         long csumOutputFile = 0;
@@ -201,91 +125,255 @@ public class EcryptionTest {
         } catch (IOException ioe) {
             fail("Unexpected Exception thrown while getting checksum of output file: " + ioe);
         }
-        
-        assertEquals(csumInputFile, csumOutputFile);
-        
-//        FileUtils.deleteQuietly(encryptedFile);
-//        FileUtils.deleteQuietly(outputFile);
 
-        final long endTime = System.currentTimeMillis();
-        System.out.println("\tDecryption: " +
-                TimeUnit.MILLISECONDS.toSeconds(endTime - midTime) + "." +
-                TimeUnit.MILLISECONDS.toMillis(endTime - midTime) + " sec");
-        System.out.println("End testBigFileGCMCripto");
+        assertEquals(csumInputFile, csumOutputFile);
+
+        FileUtils.deleteQuietly(encryptedFile);
+        FileUtils.deleteQuietly(outputFile);
+
+        System.out.println("End testBigFileGCMCriptoWithoutAAD");
+    }
+
+    @Test
+    public void testBigFileGCMCriptoWithAAD() {
+        System.out.println("Start testBigFileGCMCriptoWithAAD...");
+
+        // Generating Key
+        SecretKey aesKey = null;
+        try {
+            aesKey = Encryption.generateSecretKey(128);
+        } catch (NoSuchAlgorithmException noSuchAlgoExc) {
+            fail("Key being request is for AES algorithm, "
+                    + "but this cryptographic algorithm is not available in the environment " + noSuchAlgoExc);
+        }
+
+        // Generating IV
+        byte iv[] = Encryption.generateIV(Encryption.IV_SIZE);
+        
+        // Any random data can be used as tag. Some common examples could be domain name
+        byte[] aadData = "bd67a172c130822d6c306e02b1d9544f".getBytes();
+
+        Cipher cIn = Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, aesKey, iv, aadData);
+
+        File inputFile = new File(bigdataResourcesDir, "big_file"); // big_file
+
+        long startTime = System.currentTimeMillis();
+
+        long csumInputFile = 0;
+        try {
+            csumInputFile = FileUtils.checksum(inputFile, new CRC32()).getValue();
+        } catch (IOException ioe) {
+            fail("Unexpected Exception thrown while getting checksum of input file: " + ioe);
+        }
+
+        File encryptedFile = new File(testDir, "BigGCMencriptedOutputFile");
+        // Create a Tar file from resource dir
+        try {
+            Encryption.doByteBufferFileCrypto(inputFile, encryptedFile, cIn);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            fail("Unexpected Exception thrown while encrypting file: " + sw);
+        }
+
+        long midTime = System.currentTimeMillis();
+        System.out.println("\t Encryption: " + TimeUnit.MILLISECONDS.toSeconds(midTime - startTime) + "."
+                + TimeUnit.MILLISECONDS.toMillis(midTime - startTime) + " sec");
+
+        File outputFile = new File(testDir, "big_file");
+
+        Cipher cOut = Encryption.initGCMCipher(Cipher.DECRYPT_MODE, aesKey, iv, aadData);
+
+        midTime = System.currentTimeMillis();
+
+        try {
+            Encryption.doByteBufferFileCrypto(encryptedFile, outputFile, cOut);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            fail("Unexpected Exception thrown while decrypting file: " + sw);
+        }
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("\tDecryption: " + TimeUnit.MILLISECONDS.toSeconds(endTime - midTime) + "."
+                + TimeUnit.MILLISECONDS.toMillis(endTime - midTime) + " sec");
+
+        assertTrue(outputFile.exists());
+
+        long csumOutputFile = 0;
+        try {
+            csumOutputFile = FileUtils.checksum(outputFile, new CRC32()).getValue();
+        } catch (IOException ioe) {
+            fail("Unexpected Exception thrown while getting checksum of output file: " + ioe);
+        }
+
+        assertEquals(csumInputFile, csumOutputFile);
+
+        FileUtils.deleteQuietly(encryptedFile);
+        FileUtils.deleteQuietly(outputFile);
+        
+        System.out.println("End testBigFileGCMCriptoWithAAD");
     }
     
-//    @Test
-//    public void testBigFileGCMEncriptionAndDecryption(){
-//        final long startTime = System.currentTimeMillis();
-//        System.out.println("Start testBigFileGCMEncriptionAndDecryption...");
-//        
-//        // Generating Key
-//        SecretKey aesKey = null;
-//        try {
-//            aesKey = Encryption.generateSecretKey(128);
-//        } catch (NoSuchAlgorithmException noSuchAlgoExc) {
-//            fail("Key being request is for AES algorithm, "
-//                    + "but this cryptographic algorithm is not available in the environment "  + 
-//                    noSuchAlgoExc);
-//        }
-//        
-//        // Generating IV
-//        byte iv[] = Encryption.generateIV();
-//        
-//        byte[] aadData = "random".getBytes() ; // Any random data can be used as tag. Some common examples could be domain name...
-//        
-//        Cipher cIn = Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, aesKey, iv, aadData);
-//        
-//        File inputFile = new File(bigdataResourcesDir, "big_file");
-//        
-//        long csumInputFile = 0;
-//        try {
-//            csumInputFile = FileUtils.checksum(inputFile, new CRC32()).getValue();
-//        } catch (IOException ioe) {
-//            fail("Unexpected Exception thrown while getting checksum of input file: " + ioe);
-//        }
-//        
-//        File encryptedFile = new File(testDir, "BigGCMencriptedOutputFile");
-//        // Create a Tar file from resource dir
-//        try {
-//            Encryption.encryptFile(inputFile, encryptedFile, cIn);
-//        } catch (Exception e) {
-//            fail("Unexpected Exception thrown while creating tar: " + e);
-//        }
-//        
-//        final long midTime = System.currentTimeMillis();
-//        System.out.println("\t Encryption: " + 
-//                TimeUnit.MILLISECONDS.toSeconds(midTime - startTime) + "." +
-//                TimeUnit.MILLISECONDS.toMillis(midTime - startTime) + " sec");
-//        
-//        File outputFile = new File(testDir, "big_file");
-//        
-//        Cipher cOut = Encryption.initGCMCipher(Cipher.DECRYPT_MODE, aesKey, iv, aadData);
-//        
-//        try {
-//            Encryption.decryptFile(encryptedFile, outputFile, cOut);
-//        } catch (Exception e) {
-//            fail("Unexpected Exception thrown while extracting files from tar: " + e);
-//        }
-//        
-//        assertTrue(outputFile.exists());
-//
-//        long csumOutputFile = 0;
-//        try {
-//            csumOutputFile = FileUtils.checksum(outputFile, new CRC32()).getValue();
-//        } catch (IOException ioe) {
-//            fail("Unexpected Exception thrown while getting checksum of output file: " + ioe);
-//        }
-//        
-//        assertEquals(csumInputFile, csumOutputFile);
-//        
-//        FileUtils.deleteQuietly(encryptedFile);
-//        FileUtils.deleteQuietly(outputFile);
-//
-//        final long endTime = System.currentTimeMillis();
-//        System.out.println("End testBigFileGCMEncriptionAndDecryption");
-//        System.out.println("Total execution time: " + 
-//                TimeUnit.MILLISECONDS.toSeconds(endTime - startTime) + "." +
-//                TimeUnit.MILLISECONDS.toMillis(endTime - startTime) + " sec");
-//    }
+    @Test
+    @Category(org.datavaultplatform.SlowTest.class)
+    public void testHugeFileGCMCriptoWithAAD() {
+        System.out.println("Start testHugeFileGCMCriptoWithAAD...");
+
+        // Generating Key
+        SecretKey aesKey = null;
+        try {
+            aesKey = Encryption.generateSecretKey(128);
+        } catch (NoSuchAlgorithmException noSuchAlgoExc) {
+            fail("Key being request is for AES algorithm, "
+                    + "but this cryptographic algorithm is not available in the environment " + noSuchAlgoExc);
+        }
+
+        // Generating IV
+        byte iv[] = Encryption.generateIV(Encryption.IV_SIZE);
+        
+        // Any random data can be used as tag. Some common examples could be domain name
+        byte[] aadData = "bd67a172c130822d6c306e02b1d9544f".getBytes();
+
+        Cipher cIn = Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, aesKey, iv, aadData);
+
+        File inputFile = new File(bigdataResourcesDir, "1GB_file");
+
+        long startTime = System.currentTimeMillis();
+
+        long csumInputFile = 0;
+        try {
+            csumInputFile = FileUtils.checksum(inputFile, new CRC32()).getValue();
+        } catch (IOException ioe) {
+            fail("Unexpected Exception thrown while getting checksum of input file: " + ioe);
+        }
+
+        File encryptedFile = new File(testDir, "BigGCMencriptedOutputFile");
+        // Create a Tar file from resource dir
+        try {
+            Encryption.doByteBufferFileCrypto(inputFile, encryptedFile, cIn);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            fail("Unexpected Exception thrown while encrypting file: " + sw);
+        }
+
+        long midTime = System.currentTimeMillis();
+        System.out.println("\t Encryption: " + TimeUnit.MILLISECONDS.toSeconds(midTime - startTime) + "."
+                + TimeUnit.MILLISECONDS.toMillis(midTime - startTime) + " sec");
+
+        File outputFile = new File(testDir, "huge_file");
+
+        Cipher cOut = Encryption.initGCMCipher(Cipher.DECRYPT_MODE, aesKey, iv, aadData);
+
+        midTime = System.currentTimeMillis();
+
+        try {
+            Encryption.doByteBufferFileCrypto(encryptedFile, outputFile, cOut);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            fail("Unexpected Exception thrown while decrypting file: " + sw);
+        }
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("\tDecryption: " + TimeUnit.MILLISECONDS.toSeconds(endTime - midTime) + "."
+                + TimeUnit.MILLISECONDS.toMillis(endTime - midTime) + " sec");
+
+        assertTrue(outputFile.exists());
+
+        long csumOutputFile = 0;
+        try {
+            csumOutputFile = FileUtils.checksum(outputFile, new CRC32()).getValue();
+        } catch (IOException ioe) {
+            fail("Unexpected Exception thrown while getting checksum of output file: " + ioe);
+        }
+
+        assertEquals(csumInputFile, csumOutputFile);
+
+        FileUtils.deleteQuietly(encryptedFile);
+        FileUtils.deleteQuietly(outputFile);
+        
+        System.out.println("End testHugeFileGCMCriptoWithAAD");
+    }
+    
+    @Test
+    @Category(org.datavaultplatform.SlowTest.class)
+    public void testHugeFileCBCCriptoWithAAD() {
+        System.out.println("Start testHugeFileCBCCriptoWithAAD...");
+
+        // Generating Key
+        SecretKey aesKey = null;
+        try {
+            aesKey = Encryption.generateSecretKey(128);
+        } catch (NoSuchAlgorithmException noSuchAlgoExc) {
+            fail("Key being request is for AES algorithm, "
+                    + "but this cryptographic algorithm is not available in the environment " + noSuchAlgoExc);
+        }
+
+        // Generating IV
+        byte iv[] = Encryption.generateIV(Encryption.IV_CBC_SIZE);
+
+        Cipher cIn = Encryption.initCBCCipher(Cipher.ENCRYPT_MODE, aesKey, iv);
+
+        File inputFile = new File(bigdataResourcesDir, "1GB_file");
+
+        long startTime = System.currentTimeMillis();
+
+        long csumInputFile = 0;
+        try {
+            csumInputFile = FileUtils.checksum(inputFile, new CRC32()).getValue();
+        } catch (IOException ioe) {
+            fail("Unexpected Exception thrown while getting checksum of input file: " + ioe);
+        }
+
+        File encryptedFile = new File(testDir, "BigGCMencriptedOutputFile");
+        // Create a Tar file from resource dir
+        try {
+            Encryption.doByteBufferFileCrypto(inputFile, encryptedFile, cIn);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            fail("Unexpected Exception thrown while encrypting file: " + sw);
+        }
+
+        long midTime = System.currentTimeMillis();
+        System.out.println("\t Encryption: " + TimeUnit.MILLISECONDS.toSeconds(midTime - startTime) + "."
+                + TimeUnit.MILLISECONDS.toMillis(midTime - startTime) + " sec");
+
+        File outputFile = new File(testDir, "huge_file");
+
+        Cipher cOut = Encryption.initCBCCipher(Cipher.DECRYPT_MODE, aesKey, iv);
+
+        midTime = System.currentTimeMillis();
+
+        try {
+            Encryption.doByteBufferFileCrypto(encryptedFile, outputFile, cOut);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            fail("Unexpected Exception thrown while decrypting file: " + sw);
+        }
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("\tDecryption: " + TimeUnit.MILLISECONDS.toSeconds(endTime - midTime) + "."
+                + TimeUnit.MILLISECONDS.toMillis(endTime - midTime) + " sec");
+
+        assertTrue(outputFile.exists());
+
+        long csumOutputFile = 0;
+        try {
+            csumOutputFile = FileUtils.checksum(outputFile, new CRC32()).getValue();
+        } catch (IOException ioe) {
+            fail("Unexpected Exception thrown while getting checksum of output file: " + ioe);
+        }
+
+        assertEquals(csumInputFile, csumOutputFile);
+
+        FileUtils.deleteQuietly(encryptedFile);
+        FileUtils.deleteQuietly(outputFile);
+        
+        System.out.println("End testHugeFileCBCCriptoWithAAD");
+    }
+
 }

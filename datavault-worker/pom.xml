@@ -88,6 +88,14 @@
             <artifactId>datavault-common</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        
+        <!-- Encryption - Bouncy Castle -->
+        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.59</version>
+        </dependency>
     
         <!-- Tests -->
         <dependency>
