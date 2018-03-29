@@ -29,7 +29,6 @@ public class Encryption {
     public static int BUFFER_SIZE = 50 * 1024; // 50KB
     public static int SMALL_BUFFER_SIZE = 1024; // 1KB
     public static int AES_BLOCK_SIZE = 16; // 16 Bytes
-
     
     public static int AES_KEY_SIZE = 256;
     public static int IV_SIZE = 96;

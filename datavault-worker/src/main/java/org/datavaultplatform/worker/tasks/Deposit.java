@@ -1,5 +1,6 @@
 package org.datavaultplatform.worker.tasks;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -32,6 +33,9 @@ import org.datavaultplatform.worker.queue.EventSender;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
 
 /**
  * A class that extends Task which is used to handle Deposits to the vault
@@ -70,6 +74,8 @@ public class Deposit extends Task {
         logger.info("Deposit job - performAction()");
         logger.info("chunking: "+context.isChunkingEnabled());
         logger.info("chunks byte size: "+context.getChunkingByteSize());
+        logger.info("encryption: "+context.isEncryptionEnabled());
+        logger.info("encryption mode: "+context.getEncryptionMode());
         
         Map<String, String> properties = getProperties();
         depositId = properties.get("depositId");
@@ -308,7 +314,48 @@ public class Deposit extends Task {
                 eventStream.send(new ComputedChunks(jobID, depositId, chunksDigest, tarHashAlgorithm)
                         .withUserId(userID));
             }
-            
+
+            // Encryption
+            if(context.isEncryptionEnabled()) {
+                // Generating Key
+                SecretKey aesKey = Encryption.generateSecretKey(128);
+
+                // TODO: Save secret key somewhere
+
+                if (context.isChunkingEnabled()) {
+                    for (File chunk : chunkFiles) {
+                        // Generating IV
+                        byte iv[] = Encryption.generateIV(Encryption.IV_SIZE);
+                        Cipher cipher = Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, aesKey, iv);
+
+                        File tempEncryptedChunk = new File(chunk.getAbsoluteFile() + ".encrypted");
+
+                        logger.debug("Encrypting chunk: " + chunk.getName());
+                        Encryption.doByteBufferFileCrypto(chunk, tempEncryptedChunk, cipher);
+                        logger.debug("archiveIds: " + archiveIds);
+
+                        FileUtils.copyFile(tempEncryptedChunk, chunk);
+                        FileUtils.deleteQuietly(tempEncryptedChunk);
+
+                        // TODO: Add IV in database
+                    }
+                } else {
+                    byte iv[] = Encryption.generateIV(Encryption.IV_SIZE);
+                    Cipher cipher = Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, aesKey, iv);
+
+                    File tempEncryptedTar = new File(tarFile.getAbsoluteFile() + ".encrypted");
+
+                    logger.debug("Encrypting chunk: " + tarFile.getName());
+                    Encryption.doByteBufferFileCrypto(tarFile, tempEncryptedTar, cipher);
+                    logger.debug("archiveIds: " + archiveIds);
+
+                    FileUtils.copyFile(tempEncryptedTar, tarFile);
+                    FileUtils.deleteQuietly(tempEncryptedTar);
+
+                    // TODO: Add IV in database
+                }
+            }
+
             // Create the meta directory for the bag information
             Path metaPath = context.getMetaDir().resolve(bagID);
             File metaDir = metaPath.toFile();
