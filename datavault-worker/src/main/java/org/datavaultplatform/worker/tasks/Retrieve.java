@@ -190,33 +190,6 @@ public class Retrieve extends Task {
 			            		//	NEED TO UPDATE THIS TO INCLUDE CHUNKING STUFF IS TURNED ON
 			            		if( context.isChunkingEnabled() ) {
 			                    // TODO can bypass this if there is only one chunk.
-			                    
-//			                    File[] chunks = new File[numOfChunks];
-//			                    logger.info("Retrieving " + numOfChunks + " chunk(s)");
-//			                    for( int chunkNum = 1; chunkNum <= numOfChunks; chunkNum++) {
-//			                        Path chunkPath = context.getTempDir().resolve(tarFileName+FileSplitter.CHUNK_SEPARATOR+chunkNum);
-//			                        File chunkFile = chunkPath.toFile();
-//			                        String chunkArchiveId = archiveId+FileSplitter.CHUNK_SEPARATOR+chunkNum;
-//			                        archiveFs.retrieve(chunkArchiveId, chunkFile, progress, location);
-//			                        chunks[chunkNum-1] = chunkFile;
-//			                        
-//			                        // Check file
-//			                        String archivedChunkFileHash = chunksDigest.get(chunkNum);
-//			                        
-//			                        // TODO Should we check algorithm each time or assume main tar file algorithm is the same
-//			                        // We might also want to move algorythm check before this loop
-//			                        String chunkFileHash = Verify.getDigest(chunkFile);
-//			                        
-//			                        logger.info("Chunk Checksum algorithm: " + archiveDigestAlgorithm);
-//			                        logger.info("Checksum: " + chunkFileHash);
-//			                        
-//			                        if (!chunkFileHash.equals(archivedChunkFileHash)) {
-//			                            throw new Exception("checksum failed: " + chunkFileHash + " != " + archivedChunkFileHash);
-//			                        }
-//			                    }
-//			                    
-//			                    logger.info("Recomposing tar file from chunk(s)");
-//			                    FileSplitter.recomposeFile(chunks, tarFile);
 			            			recomposeMulti(numOfChunks, tarFileName, context, archiveId, archiveFs, progress, archiveDigestAlgorithm, tarFile, chunksDigest, location);
 			                } else {
 			                		// Ask the driver to copy files to the temp directory
@@ -261,33 +234,6 @@ public class Retrieve extends Task {
 		                // Ask the driver to copy files to the temp directory
 	                if( context.isChunkingEnabled() ) {
 	                    // TODO can bypass this if there is only one chunk.
-	                    
-//	                    File[] chunks = new File[numOfChunks];
-//	                    logger.info("Retrieving " + numOfChunks + " chunk(s)");
-//	                    for( int chunkNum = 1; chunkNum <= numOfChunks; chunkNum++) {
-//	                        Path chunkPath = context.getTempDir().resolve(tarFileName+FileSplitter.CHUNK_SEPARATOR+chunkNum);
-//	                        File chunkFile = chunkPath.toFile();
-//	                        String chunkArchiveId = archiveId+FileSplitter.CHUNK_SEPARATOR+chunkNum;
-//	                        archiveFs.retrieve(chunkArchiveId, chunkFile, progress);
-//	                        chunks[chunkNum-1] = chunkFile;
-//	                        
-//	                        // Check file
-//	                        String archivedChunkFileHash = chunksDigest.get(chunkNum);
-//	                        
-//	                        // TODO Should we check algorithm each time or assume main tar file algorithm is the same
-//	                        // We might also want to move algorythm check before this loop
-//	                        String chunkFileHash = Verify.getDigest(chunkFile);
-//	                        
-//	                        logger.info("Chunk Checksum algorithm: " + archiveDigestAlgorithm);
-//	                        logger.info("Checksum: " + chunkFileHash);
-//	                        
-//	                        if (!chunkFileHash.equals(archivedChunkFileHash)) {
-//	                            throw new Exception("checksum failed: " + chunkFileHash + " != " + archivedChunkFileHash);
-//	                        }
-//	                    }
-//	                    
-//	                    logger.info("Recomposing tar file from chunk(s)");
-//	                    FileSplitter.recomposeFile(chunks, tarFile);
 	                		recomposeSingle(numOfChunks, tarFileName, context, archiveId, archiveFs, progress, archiveDigestAlgorithm, tarFile, chunksDigest);
 	                } else {
 	                    archiveFs.retrieve(archiveId, tarFile, progress);
@@ -327,7 +273,7 @@ public class Retrieve extends Task {
             Path chunkPath = context.getTempDir().resolve(tarFileName+FileSplitter.CHUNK_SEPARATOR+chunkNum);
             File chunkFile = chunkPath.toFile();
             String chunkArchiveId = archiveId+FileSplitter.CHUNK_SEPARATOR+chunkNum;
-            if (singleCopy) {
+            if (! singleCopy) {
             		archiveFs.retrieve(chunkArchiveId, chunkFile, progress);
             } else {
             		archiveFs.retrieve(chunkArchiveId, chunkFile, progress, location);

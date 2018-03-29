@@ -524,35 +524,80 @@ public class Deposit extends Task {
                 throw new Exception("Wrong Verify Method: [" + archiveStore.getVerifyMethod() + "] has to be " + Verify.Method.COPY_BACK);
             }
             
-            for (int i = 0; i < chunkFiles.length; i++) {
-                File chunkFile = chunkFiles[i];
-                String chunkHash = chunksHash[i];
-                
-                // Delete the existing temporary file
-                chunkFile.delete();
-                String archiveChunkId = archiveId+FileSplitter.CHUNK_SEPARATOR+(i+1);
-                if (((Device)archiveStore).hasMultipleCopies()) {
-                		for (String loc : ((Device)archiveStore).getLocations()) {
-                			logger.debug("archiveChunkId: "+archiveChunkId);
-                			copyBackFromArchive(archiveStore, archiveChunkId, chunkFile, loc);
-                			logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
-                			verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
-                		}
-                } else {
-	                // Copy file back from the archive storage
-	                logger.debug("archiveChunkId: "+archiveChunkId);
-	                copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
-	                
-	                logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
-	                verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
-                }
+            if (((Device)archiveStore).hasMultipleCopies()) {
+        			for (String loc : ((Device)archiveStore).getLocations()) {
+//        				 for (int i = 0; i < chunkFiles.length; i++) {
+//        		             File chunkFile = chunkFiles[i];
+//        		             String chunkHash = chunksHash[i];
+//        		             // Delete the existing temporary file
+//        		             chunkFile.delete();
+//        		             String archiveChunkId = archiveId+FileSplitter.CHUNK_SEPARATOR+(i+1);
+//        		             logger.debug("archiveChunkId: "+archiveChunkId);
+//        		             copyBackFromArchive(archiveStore, archiveChunkId, chunkFile, loc);
+//        		             logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
+//        		             verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
+//        		             
+//        				 }
+//        				 FileSplitter.recomposeFile(chunkFiles, tarFile);
+//        					
+//        		         // Verify the contents
+//        		         verifyTarFile(context.getTempDir(), tarFile, tarHash);
+        				this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, loc,  true);
+        			}
+            } else {   
+//	            for (int i = 0; i < chunkFiles.length; i++) {
+//	                File chunkFile = chunkFiles[i];
+//	                String chunkHash = chunksHash[i];
+//	                
+//	                // Delete the existing temporary file
+//	                chunkFile.delete();
+//	                String archiveChunkId = archiveId+FileSplitter.CHUNK_SEPARATOR+(i+1);
+//	                // Copy file back from the archive storage
+//	                logger.debug("archiveChunkId: "+archiveChunkId);
+//	                copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
+//	                
+//	                logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
+//	                verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
+//	            }
+//	            
+//	            FileSplitter.recomposeFile(chunkFiles, tarFile);
+//	
+//	            // Verify the contents
+//	            verifyTarFile(context.getTempDir(), tarFile, tarHash);
+            		this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId);
+            }
+        	}
+    }
+    private void doArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, ArchiveStore archiveStore, 
+    		String archiveId) throws Exception {
+    		this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, null,  false);
+    }
+    
+    private void doArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, ArchiveStore archiveStore, 
+    		String archiveId, String location, boolean multipleCopies) throws Exception {
+    		for (int i = 0; i < chunkFiles.length; i++) {
+            File chunkFile = chunkFiles[i];
+            String chunkHash = chunksHash[i];
+            
+            // Delete the existing temporary file
+            chunkFile.delete();
+            String archiveChunkId = archiveId+FileSplitter.CHUNK_SEPARATOR+(i+1);
+            // Copy file back from the archive storage
+            logger.debug("archiveChunkId: "+archiveChunkId);
+            if (multipleCopies && location != null) {
+            		copyBackFromArchive(archiveStore, archiveChunkId, chunkFile, location);
+            } else {
+            		copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
             }
             
-            FileSplitter.recomposeFile(chunkFiles, tarFile);
-
-            // Verify the contents
-            verifyTarFile(context.getTempDir(), tarFile, tarHash);
+            logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
+            verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
         }
+        
+        FileSplitter.recomposeFile(chunkFiles, tarFile);
+
+        // Verify the contents
+        verifyTarFile(context.getTempDir(), tarFile, tarHash);
     }
     
     /**
