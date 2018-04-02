@@ -41,6 +41,10 @@ public class DepositChunk {
     @Column(columnDefinition = "TEXT")
     private String archiveDigestAlgorithm;
     
+    // Encryption
+    @Column(columnDefinition = "BLOB")
+    private byte[] encIV;
+    
     public DepositChunk() {}
     public DepositChunk(Deposit deposit, int chunkNum, String archiveDigest, String archiveDigestAlgorithm) {
         this.deposit = deposit;
@@ -71,5 +75,13 @@ public class DepositChunk {
     
     public void setArchiveDigestAlgorithm(String archiveDigestAlgorithm) {
         this.archiveDigestAlgorithm = archiveDigestAlgorithm;
+    }
+    
+    public byte[] getEncIV() {
+        return encIV;
+    }
+    
+    public void setEncIV(byte[] encIV) {
+        this.encIV = encIV;
     }
 }

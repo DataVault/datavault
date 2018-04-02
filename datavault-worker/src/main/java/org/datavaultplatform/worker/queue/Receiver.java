@@ -113,6 +113,16 @@ public class Receiver {
      * @param encryptionMode true or false
      */
     public void setEncryptionMode(String encryptionMode) { this.encryptionMode = AESMode.valueOf(encryptionMode); }
+    
+    /**
+     * @return Encryiption mode
+     */
+    public AESMode getEncryptionMode() { return encryptionMode; }
+    
+    /**
+     * @return true if encryption is enabled, false otherwise
+     */
+    public Boolean isEncryptionEnabled() { return encryptionEnabled; }
 
     /**
      * Setup a connection to the queue then wait for messages to arrive.  When we recieve a message delivery

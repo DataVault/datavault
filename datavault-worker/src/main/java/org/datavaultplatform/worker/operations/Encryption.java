@@ -10,17 +10,13 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.util.EnumSet;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
@@ -88,7 +84,7 @@ public class Encryption {
         return iv;
     }
     
-    public static Cipher initGCMCipher(int opmode, SecretKey aesKey, byte[] iv){
+    public static Cipher initGCMCipher(int opmode, SecretKey aesKey, byte[] iv) throws Exception{
         return initGCMCipher(opmode, aesKey, iv, null);
     }
     
@@ -106,60 +102,20 @@ public class Encryption {
      * @param aadData - additional authenticated data (optional)
      * @return
      */
-    public static Cipher initGCMCipher(int opmode, SecretKey aesKey, byte[] iv, byte[] aadData) {
+    public static Cipher initGCMCipher(int opmode, SecretKey aesKey, byte[] iv, byte[] aadData) throws Exception {
         Cipher c = null;
 
         // Initialize GCM Parameters
         GCMParameterSpec gcmParamSpec = new GCMParameterSpec(TAG_BIT_LENGTH, iv);
 
-        try {
-            // Transformation specifies algortihm, mode of operation and padding
-            c = Cipher.getInstance(GCM_ALGO_TRANSFORMATION_STRING, "BC");
-        } catch (NoSuchAlgorithmException noSuchAlgoExc) {
-            System.out.println(
-                    "Exception while encrypting. Algorithm being requested is not available in this environment "
-                            + noSuchAlgoExc);
-            System.exit(1);
-        } catch (NoSuchPaddingException noSuchPaddingExc) {
-            System.out.println(
-                    "Exception while encrypting. Padding Scheme being requested is not available in this environment "
-                            + noSuchPaddingExc);
-            System.exit(1);
-        } catch (NoSuchProviderException noSuchProviderExc) {
-            System.out.println(
-                    "Exception while encrypting. Provider being requested is not available in this environment "
-                            + noSuchProviderExc);
-            System.exit(1);
-        }
-
-        try {
-            c.init(opmode, aesKey, gcmParamSpec, new SecureRandom());
-        } catch (InvalidKeyException invalidKeyExc) {
-            System.out.println(
-                    "Exception while encrypting. Key being used is not valid. It could be due to invalid encoding, wrong length or uninitialized "
-                            + invalidKeyExc);
-            System.exit(1);
-        } catch (InvalidAlgorithmParameterException invalidAlgoParamExc) {
-            System.out.println("Exception while encrypting. Algorithm parameters being specified are not valid "
-                    + invalidAlgoParamExc);
-            System.exit(1);
-        }
+        // Transformation specifies algortihm, mode of operation and padding
+        c = Cipher.getInstance(GCM_ALGO_TRANSFORMATION_STRING, "BC");
+        
+        c.init(opmode, aesKey, gcmParamSpec, new SecureRandom());
+        
 
         if (aadData != null) {
-            try {
-                c.updateAAD(aadData); // add AAD tag data before encrypting
-            } catch (IllegalArgumentException illegalArgumentExc) {
-                System.out.println("Exception thrown while encrypting. Byte array might be null " + illegalArgumentExc);
-                System.exit(1);
-            } catch (IllegalStateException illegalStateExc) {
-                System.out
-                        .println("Exception thrown while encrypting. CIpher is in an illegal state " + illegalStateExc);
-                System.exit(1);
-            } catch (UnsupportedOperationException unsupportedExc) {
-                System.out.println("Exception thrown while encrypting. Provider might not be supporting this method "
-                        + unsupportedExc);
-                System.exit(1);
-            }
+            c.updateAAD(aadData); // add AAD tag data before encrypting
         }
 
         return c;
@@ -179,40 +135,17 @@ public class Encryption {
      * @param iv
      * @return
      */
-    public static Cipher initCBCCipher(int opmode, SecretKey aesKey, byte[] iv) {
+    public static Cipher initCBCCipher(int opmode, SecretKey aesKey, byte[] iv) throws Exception {
         Cipher c = null;
 
         // Initialize Parameters
         IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
 
-        try {
-            // Transformation specifies algortihm, mode of operation and padding
-            c = Cipher.getInstance(CBC_ALGO_TRANSFORMATION_STRING);
-        } catch (NoSuchAlgorithmException noSuchAlgoExc) {
-            System.out.println(
-                    "Exception while encrypting. Algorithm being requested is not available in this environment "
-                            + noSuchAlgoExc);
-            System.exit(1);
-        } catch (NoSuchPaddingException noSuchPaddingExc) {
-            System.out.println(
-                    "Exception while encrypting. Padding Scheme being requested is not available this environment "
-                            + noSuchPaddingExc);
-            System.exit(1);
-        }
-
-        try {
-            c.init(opmode, aesKey, ivParameterSpec);
-        } catch (InvalidKeyException invalidKeyExc) {
-            System.out.println(
-                    "Exception while encrypting. Key being used is not valid. It could be due to invalid encoding, wrong length or uninitialized "
-                            + invalidKeyExc);
-            System.exit(1);
-        } catch (InvalidAlgorithmParameterException invalidAlgoParamExc) {
-            System.out.println("Exception while encrypting. Algorithm parameters being specified are not valid "
-                    + invalidAlgoParamExc);
-            System.exit(1);
-        }
-
+        // Transformation specifies algortihm, mode of operation and padding
+        c = Cipher.getInstance(CBC_ALGO_TRANSFORMATION_STRING);
+        
+        c.init(opmode, aesKey, ivParameterSpec);
+        
         return c;
     }
 

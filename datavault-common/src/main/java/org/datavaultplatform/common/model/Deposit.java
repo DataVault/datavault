@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -118,6 +119,10 @@ public class Deposit {
     @Column(columnDefinition = "INT default 0")
     private int numOfChunks;
     
+    // Encryption
+    @Column(columnDefinition = "BLOB")
+    private byte[] encIV;
+
     // Record the file path that the user selected for this deposit.
     @ApiObjectField(description = "Origin of the deposited filepath")
     @Column(columnDefinition = "TEXT")
@@ -269,6 +274,12 @@ public class Deposit {
     }
 
     public List<Retrieve> getRetrieves() { return retrieves; }
+    
+
+    
+    public byte[] getEncIV() { return encIV; }
+    
+    public void setEncIV(byte[] encIV) { this.encIV = encIV; }
     
     public DepositInfo convertToResponse() {
         return new DepositInfo(

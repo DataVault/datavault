@@ -23,6 +23,8 @@ public class Task {
     protected Map<String, Map<String, String>> userFileStoreProperties;
     protected Map<String, String> userFileStoreClasses;
     protected Map<Integer, String> chunkFilesDigest;
+    protected byte[] tarIV;
+    protected Map<Integer, byte[]> chunksIVs;
     
     private boolean isRedeliver;
 
@@ -34,7 +36,9 @@ public class Task {
                 Map<String, String> userFileStoreClasses,
                 List<String> fileStorePaths,
                 List<String> fileUploadPaths,
-                Map<Integer, String> chunkFilesDigest) {
+                Map<Integer, String> chunkFilesDigest,
+                byte[] tarIV,
+                Map<Integer, byte[]> chunksIVs) {
         this.jobID = job.getID();
         this.taskClass = job.getTaskClass();
         this.properties = properties;
@@ -44,6 +48,8 @@ public class Task {
         this.fileStorePaths = fileStorePaths;
         this.fileUploadPaths = fileUploadPaths;
         this.chunkFilesDigest = chunkFilesDigest;
+        this.tarIV = tarIV;
+        this.chunksIVs = chunksIVs;
     }
 
     public String getJobID() { return jobID; }
@@ -121,5 +127,22 @@ public class Task {
     public void setChunkFilesDigest(Map<Integer, String> chunkFilesDigest) {
         this.chunkFilesDigest = chunkFilesDigest;
     }
+    
+    public byte[] getTarIV() {
+        return tarIV;
+    }
+    
+    public void setTarIV(byte[] tarIV) {
+        this.tarIV = tarIV;
+    }
+    
+    public Map<Integer, byte[]> getChunksIVs() {
+        return chunksIVs;
+    }
+    
+    public void setChunksIVs(Map<Integer, byte[]> chunksIVs) {
+        this.chunksIVs = chunksIVs;
+    }
+    
     public void performAction(Context context) {}
 }
