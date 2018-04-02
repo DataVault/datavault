@@ -81,6 +81,7 @@ public class AmazonGlacier extends Device implements ArchiveStore {
         */
     }
     
+ // todo: this is in the Amazon Glacier plugin too move to BaseAmazonFileSystem
     private ProgressListener initProgressListener(final Progress progress, final boolean trackResponse) {
 
         ProgressListener listener = new ProgressListener() {
