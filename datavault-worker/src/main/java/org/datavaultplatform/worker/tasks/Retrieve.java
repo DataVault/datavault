@@ -206,7 +206,7 @@ public class Retrieve extends Task {
 			            		//	NEED TO UPDATE THIS TO INCLUDE CHUNKING STUFF IS TURNED ON
 			            		if( context.isChunkingEnabled() ) {
 			                    // TODO can bypass this if there is only one chunk.
-			            			recomposeMulti(numOfChunks, tarFileName, context, archiveId, archiveFs, progress, archiveDigestAlgorithm, tarFile, chunksDigest, location);
+			            			recomposeMulti(numOfChunks, tarFileName, context, archiveId, archiveFs, progress, archiveDigestAlgorithm, tarFile, chunksDigest, location, depositId);
 			                } else {
 			                		// Ask the driver to copy files to the temp directory
 			                		archiveFs.retrieve(archiveId, tarFile, progress, location);
@@ -250,7 +250,7 @@ public class Retrieve extends Task {
 		                // Ask the driver to copy files to the temp directory
 	                if( context.isChunkingEnabled() ) {
 	                    // TODO can bypass this if there is only one chunk.
-	                		recomposeSingle(numOfChunks, tarFileName, context, archiveId, archiveFs, progress, archiveDigestAlgorithm, tarFile, chunksDigest);
+	                		recomposeSingle(numOfChunks, tarFileName, context, archiveId, archiveFs, progress, archiveDigestAlgorithm, tarFile, chunksDigest, depositId);
 	                } else {
 	                    archiveFs.retrieve(archiveId, tarFile, progress);
 	                }
@@ -272,17 +272,17 @@ public class Retrieve extends Task {
     }
     
     private void recomposeSingle(int numOfChunks, String tarFileName, Context context, String archiveId, Device archiveFs, Progress progress, 
-    		String archiveDigestAlgorithm, File tarFile, Map<Integer, String> chunksDigest)  throws Exception{
-    		recompose(numOfChunks, tarFileName, context, archiveId, archiveFs, progress, archiveDigestAlgorithm, tarFile, chunksDigest, false, null);
+    		String archiveDigestAlgorithm, File tarFile, Map<Integer, String> chunksDigest, String depositId)  throws Exception{
+    		recompose(numOfChunks, tarFileName, context, archiveId, archiveFs, progress, archiveDigestAlgorithm, tarFile, chunksDigest, false, null, depositId);
     }
     
     private void recomposeMulti(int numOfChunks, String tarFileName, Context context, String archiveId, Device archiveFs, Progress progress, 
-    		String archiveDigestAlgorithm, File tarFile, Map<Integer, String> chunksDigest, String location)  throws Exception{
-    		recompose(numOfChunks, tarFileName, context, archiveId, archiveFs, progress, archiveDigestAlgorithm, tarFile, chunksDigest, true, location);
+    		String archiveDigestAlgorithm, File tarFile, Map<Integer, String> chunksDigest, String location, String depositId)  throws Exception{
+    		recompose(numOfChunks, tarFileName, context, archiveId, archiveFs, progress, archiveDigestAlgorithm, tarFile, chunksDigest, true, location, depositId);
     }
     
     private void recompose(int numOfChunks, String tarFileName, Context context, String archiveId, Device archiveFs, Progress progress, 
-    		String archiveDigestAlgorithm, File tarFile, Map<Integer, String> chunksDigest, boolean singleCopy, String location)  throws Exception{
+    		String archiveDigestAlgorithm, File tarFile, Map<Integer, String> chunksDigest, boolean singleCopy, String location, String depositId)  throws Exception{
     		File[] chunks = new File[numOfChunks];
         logger.info("Retrieving " + numOfChunks + " chunk(s)");
         for( int chunkNum = 1; chunkNum <= numOfChunks; chunkNum++) {

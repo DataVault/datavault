@@ -584,20 +584,20 @@ public class Deposit extends Task {
             
             if (((Device)archiveStore).hasMultipleCopies()) {
         			for (String loc : ((Device)archiveStore).getLocations()) {
-        				this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, loc,  true);
+        				this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, loc,  true, ivs);
         			}
             } else {   
-            		this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId);
+            		this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, ivs);
             }
         	}
     }
     private void doArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, ArchiveStore archiveStore, 
-    		String archiveId) throws Exception {
-    		this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, null,  false);
+    		String archiveId, HashMap<Integer, byte[]> ivs) throws Exception {
+    		this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, null,  false, ivs);
     }
     
     private void doArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, ArchiveStore archiveStore, 
-    		String archiveId, String location, boolean multipleCopies) throws Exception {
+    		String archiveId, String location, boolean multipleCopies, HashMap<Integer, byte[]> ivs) throws Exception {
     		for (int i = 0; i < chunkFiles.length; i++) {
             File chunkFile = chunkFiles[i];
             String chunkHash = chunksHash[i];
@@ -613,12 +613,12 @@ public class Deposit extends Task {
             		copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
             }
             
-                // Decryption
-                if(ivs != null) {
-                    SecretKey aesKey = this.getSecretKeyFromKeyStore();
-                    // TODO: get aesKey from secure place
-                    decryptFile(chunkFile, aesKey, context.getEncryptionMode(), ivs.get(i+1));
-                }
+            // Decryption
+            if(ivs != null) {
+                SecretKey aesKey = this.getSecretKeyFromKeyStore();
+                // TODO: get aesKey from secure place
+                decryptFile(chunkFile, aesKey, context.getEncryptionMode(), ivs.get(i+1));
+            }
                 
             logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
             verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);

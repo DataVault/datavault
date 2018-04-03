@@ -71,8 +71,15 @@ public class EcryptionTest {
 
         // Generating IV
         byte iv[] = Encryption.generateIV(Encryption.IV_SIZE);
-
-        Cipher cIn = Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, aesKey, iv);
+        
+        Cipher cIn = null;
+        try {
+            cIn = Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, aesKey, iv);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            fail("Unexpected Exception thrown while creating cipher: " + sw);
+        }
 
         File inputFile = new File(bigdataResourcesDir, "big_file");
 
@@ -100,8 +107,15 @@ public class EcryptionTest {
                 + TimeUnit.MILLISECONDS.toMillis(midTime - startTime) + " sec");
 
         File outputFile = new File(testDir, "big_file");
-
-        Cipher cOut = Encryption.initGCMCipher(Cipher.DECRYPT_MODE, aesKey, iv);
+        
+        Cipher cOut = null;
+        try {
+            cOut = Encryption.initGCMCipher(Cipher.DECRYPT_MODE, aesKey, iv);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            fail("Unexpected Exception thrown while creating cipher: " + sw);
+        }
 
         midTime = System.currentTimeMillis();
 
@@ -152,9 +166,16 @@ public class EcryptionTest {
         
         // Any random data can be used as tag. Some common examples could be domain name
         byte[] aadData = "bd67a172c130822d6c306e02b1d9544f".getBytes();
-
-        Cipher cIn = Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, aesKey, iv, aadData);
-
+        
+        Cipher cIn = null;
+        try {
+            cIn = Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, aesKey, iv, aadData);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            fail("Unexpected Exception thrown while creating cipher: " + sw);
+        }
+        
         File inputFile = new File(bigdataResourcesDir, "big_file"); // big_file
 
         long startTime = System.currentTimeMillis();
@@ -181,8 +202,15 @@ public class EcryptionTest {
                 + TimeUnit.MILLISECONDS.toMillis(midTime - startTime) + " sec");
 
         File outputFile = new File(testDir, "big_file");
-
-        Cipher cOut = Encryption.initGCMCipher(Cipher.DECRYPT_MODE, aesKey, iv, aadData);
+        
+        Cipher cOut = null;
+        try {
+            cOut = Encryption.initGCMCipher(Cipher.DECRYPT_MODE, aesKey, iv, aadData);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            fail("Unexpected Exception thrown while creating cipher: " + sw);
+        }
 
         midTime = System.currentTimeMillis();
 
@@ -235,7 +263,14 @@ public class EcryptionTest {
         // Any random data can be used as tag. Some common examples could be domain name
         byte[] aadData = "bd67a172c130822d6c306e02b1d9544f".getBytes();
 
-        Cipher cIn = Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, aesKey, iv, aadData);
+        Cipher cIn = null;
+        try {
+            cIn = Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, aesKey, iv, aadData);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            fail("Unexpected Exception thrown while creating cipher: " + sw);
+        }
 
         File inputFile = new File(bigdataResourcesDir, "1GB_file");
 
@@ -264,7 +299,14 @@ public class EcryptionTest {
 
         File outputFile = new File(testDir, "huge_file");
 
-        Cipher cOut = Encryption.initGCMCipher(Cipher.DECRYPT_MODE, aesKey, iv, aadData);
+        Cipher cOut = null;
+        try {
+            cOut = Encryption.initGCMCipher(Cipher.DECRYPT_MODE, aesKey, iv, aadData);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            fail("Unexpected Exception thrown while creating cipher: " + sw);
+        }
 
         midTime = System.currentTimeMillis();
 
@@ -314,7 +356,14 @@ public class EcryptionTest {
         // Generating IV
         byte iv[] = Encryption.generateIV(Encryption.IV_CBC_SIZE);
 
-        Cipher cIn = Encryption.initCBCCipher(Cipher.ENCRYPT_MODE, aesKey, iv);
+        Cipher cIn = null;
+        try {
+            cIn = Encryption.initCBCCipher(Cipher.ENCRYPT_MODE, aesKey, iv);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            fail("Unexpected Exception thrown while creating cipher: " + sw);
+        }
 
         File inputFile = new File(bigdataResourcesDir, "1GB_file");
 
@@ -343,7 +392,14 @@ public class EcryptionTest {
 
         File outputFile = new File(testDir, "huge_file");
 
-        Cipher cOut = Encryption.initCBCCipher(Cipher.DECRYPT_MODE, aesKey, iv);
+        Cipher cOut = null;
+        try {
+            cOut = Encryption.initCBCCipher(Cipher.DECRYPT_MODE, aesKey, iv);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            fail("Unexpected Exception thrown while creating cipher: " + sw);
+        }
 
         midTime = System.currentTimeMillis();
 
