@@ -96,6 +96,12 @@
             <artifactId>bcprov-jdk15on</artifactId>
             <version>1.59</version>
         </dependency>
+        
+        <!-- <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20180130</version>
+        </dependency> -->    
     
         <!-- Tests -->
         <dependency>

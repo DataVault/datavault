@@ -10,7 +10,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -65,6 +64,7 @@ public class Deposit extends Task {
     String depositId;
     String bagID;
     String userID;
+    //private String vaultID;
     
     // Chunking attributes
     File[] chunkFiles;
@@ -124,6 +124,16 @@ public class Deposit extends Task {
             .withNextState(0));
         
         logger.info("bagID: " + bagID);
+//        try {
+//        		JSONObject jsnobject = new JSONObject(vaultMetadata);
+//        		this.vaultID = jsnobject.getString("id");
+//        		logger.info("vaultId: " + this.vaultID);
+//		} catch (JSONException e1) {
+//			/* TODO not sure what to do here.  Vault id should never be unavailable as each deposit needs to be attached to a vault
+//			at the moment the vault id is only used by the S3 plugin and may be used by the TSM plugin in the future*/
+//			e1.printStackTrace();
+//		}
+        
         
         userStores = new HashMap<>();
         
@@ -378,9 +388,11 @@ public class Deposit extends Task {
             logger.info("Copying tar file(s) to archive ...");
             
             if ( context.isChunkingEnabled() ) {
+            		int chunkCount = 0;
                 for (File chunk : chunkFiles){
+                		chunkCount++;
                     logger.debug("Copying chunk: "+chunk.getName());
-                    copyToArchiveStorage(chunk, true);
+                    copyToArchiveStorage(chunk, chunkCount);
                     logger.debug("archiveIds: "+archiveIds);
                 }
             } else {
@@ -398,9 +410,9 @@ public class Deposit extends Task {
 
             logger.info("Verifying archive package ...");
             if( context.isChunkingEnabled() ) {
-                for (int i = 0; i < chunkFiles.length; i++){
+                //for (int i = 0; i < chunkFiles.length; i++){
                     verifyArchive(context, chunkFiles, chunksHash, tarFile, tarHash, chunksIVs);
-                }
+                //}
             } else {
                 verifyArchive(context, tarFile, tarHash, iv);
             }
@@ -497,7 +509,7 @@ public class Deposit extends Task {
      * @throws Exception
      */
     private void copyToArchiveStorage(File tarFile) throws Exception {
-        copyToArchiveStorage(tarFile, false);
+        copyToArchiveStorage(tarFile, 0);
     }
     
     /**
@@ -505,7 +517,7 @@ public class Deposit extends Task {
      * @param isChunk
      * @throws Exception
      */
-    private void copyToArchiveStorage(File tarFile, boolean isChunk) throws Exception {
+    private void copyToArchiveStorage(File tarFile, int chunkCount) throws Exception {
 
         for (String archiveStoreId : archiveStores.keySet() ) {
             ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
@@ -515,11 +527,18 @@ public class Deposit extends Task {
             ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, tarFile.length(), eventStream);
             Thread trackerThread = new Thread(tracker);
             trackerThread.start();
-
+            String depId = this.depositId;
+            if (chunkCount > 0) {
+            		depId = depId + "." + chunkCount;
+            }
             String archiveId;
 
             try {
-                archiveId = ((Device) archiveStore).store("/", tarFile, progress);
+	            if (((Device)archiveStore).hasDepositIdStorageKey()) {
+	            		archiveId = ((Device) archiveStore).store(depId, tarFile, progress);
+	            } else {
+	            		archiveId = ((Device) archiveStore).store("/", tarFile, progress);
+	            }
             } finally {
                 // Stop the tracking thread
                 tracker.stop();
@@ -528,14 +547,17 @@ public class Deposit extends Task {
 
             logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
             
-            if (isChunk && archiveIds.get(archiveStoreId) == null){
-                String separator = FileSplitter.CHUNK_SEPARATOR;
-                int beginIndex = archiveId.lastIndexOf(separator);
-                archiveId = archiveId.substring(0, beginIndex);
-                logger.debug("Add to archiveIds: key: "+archiveStoreId+" ,value:"+archiveId);
-                archiveIds.put(archiveStoreId, archiveId);
-                logger.debug("archiveIds: "+archiveIds);
-            } else if(!isChunk) {
+            if (chunkCount > 0 && archiveIds.get(archiveStoreId) == null) {
+            		logger.info("ArchiveId is: " + archiveId);
+            		String separator = FileSplitter.CHUNK_SEPARATOR;
+            		logger.info("Separator is: " + separator);
+            		int beginIndex = archiveId.lastIndexOf(separator);
+            		logger.info("BeginIndex is: " + beginIndex); 
+            		archiveId = archiveId.substring(0, beginIndex);
+            		logger.debug("Add to archiveIds: key: "+archiveStoreId+" ,value:"+archiveId);
+            		archiveIds.put(archiveStoreId, archiveId);
+            		logger.debug("archiveIds: "+archiveIds);
+            } else if(chunkCount == 0) {
                 archiveIds.put(archiveStoreId, archiveId);
             }
         }
@@ -560,18 +582,37 @@ public class Deposit extends Task {
                 throw new Exception("Wrong Verify Method: [" + archiveStore.getVerifyMethod() + "] has to be " + Verify.Method.COPY_BACK);
             }
             
-            for (int i = 0; i < chunkFiles.length; i++) {
-                File chunkFile = chunkFiles[i];
-                String chunkHash = chunksHash[i];
-                
-                // Delete the existing temporary file
-                chunkFile.delete();
-
-                // Copy file back from the archive storage
-                String archiveChunkId = archiveId+FileSplitter.CHUNK_SEPARATOR+(i+1);
-                logger.debug("archiveChunkId: "+archiveChunkId);
-                copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
-                
+            if (((Device)archiveStore).hasMultipleCopies()) {
+        			for (String loc : ((Device)archiveStore).getLocations()) {
+        				this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, loc,  true);
+        			}
+            } else {   
+            		this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId);
+            }
+        	}
+    }
+    private void doArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, ArchiveStore archiveStore, 
+    		String archiveId) throws Exception {
+    		this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, null,  false);
+    }
+    
+    private void doArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, ArchiveStore archiveStore, 
+    		String archiveId, String location, boolean multipleCopies) throws Exception {
+    		for (int i = 0; i < chunkFiles.length; i++) {
+            File chunkFile = chunkFiles[i];
+            String chunkHash = chunksHash[i];
+            
+            // Delete the existing temporary file
+            chunkFile.delete();
+            String archiveChunkId = archiveId+FileSplitter.CHUNK_SEPARATOR+(i+1);
+            // Copy file back from the archive storage
+            logger.debug("archiveChunkId: "+archiveChunkId);
+            if (multipleCopies && location != null) {
+            		copyBackFromArchive(archiveStore, archiveChunkId, chunkFile, location);
+            } else {
+            		copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
+            }
+            
                 // Decryption
                 if(ivs != null) {
                     SecretKey aesKey = this.getSecretKeyFromKeyStore();
@@ -579,15 +620,14 @@ public class Deposit extends Task {
                     decryptFile(chunkFile, aesKey, context.getEncryptionMode(), ivs.get(i+1));
                 }
                 
-                logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
-                verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
-            }
-
-            FileSplitter.recomposeFile(chunkFiles, tarFile);
-
-            // Verify the contents
-            verifyTarFile(context.getTempDir(), tarFile, tarHash);
+            logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
+            verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
         }
+        
+        FileSplitter.recomposeFile(chunkFiles, tarFile);
+
+        // Verify the contents
+        verifyTarFile(context.getTempDir(), tarFile, tarHash);
     }
     
     /**
@@ -627,18 +667,24 @@ public class Deposit extends Task {
 
                 // Delete the existing temporary file
                 tarFile.delete();
-
                 // Copy file back from the archive storage
-                copyBackFromArchive(archiveStore, archiveId, tarFile);
-
+                	if (((Device)archiveStore).hasMultipleCopies()) {
+                		for (String loc : ((Device)archiveStore).getLocations()) {
+                			copyBackFromArchive(archiveStore, archiveId, tarFile, loc);
+                			// Verify the contents
+                         verifyTarFile(context.getTempDir(), tarFile, tarHash);
+                		}
+                	} else {
+                		copyBackFromArchive(archiveStore, archiveId, tarFile);
                 // Decryption
                 if(iv != null) {
                     SecretKey aesKey = this.getSecretKeyFromKeyStore();
                     decryptFile(tarFile, aesKey, context.getEncryptionMode(), iv);
                 }
                 
-                // Verify the contents
-                verifyTarFile(context.getTempDir(), tarFile, tarHash);
+                		// Verify the contents
+                    verifyTarFile(context.getTempDir(), tarFile, tarHash);
+                	}
             }
         }
     }
@@ -654,9 +700,22 @@ public class Deposit extends Task {
      */
     private void copyBackFromArchive(ArchiveStore archiveStore, String archiveId, File tarFile) throws Exception {
 
-        // Ask the driver to copy files to the temp directory
-        Progress progress = new Progress();
-        ((Device)archiveStore).retrieve(archiveId, tarFile, progress);
+//        // Ask the driver to copy files to the temp directory
+//        Progress progress = new Progress();
+//        ((Device)archiveStore).retrieve(archiveId, tarFile, progress);
+//        logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+    		this.copyBackFromArchive(archiveStore, archiveId, tarFile, null);
+    }
+    
+    private void copyBackFromArchive(ArchiveStore archiveStore, String archiveId, File tarFile, String location) throws Exception {
+
+        	// Ask the driver to copy files to the temp directory
+        	Progress progress = new Progress();
+        	if (location == null) {
+        		((Device)archiveStore).retrieve(archiveId, tarFile, progress);
+        	} else {
+        		((Device)archiveStore).retrieve(archiveId, tarFile, progress, location);
+        	}
         logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
     }
     

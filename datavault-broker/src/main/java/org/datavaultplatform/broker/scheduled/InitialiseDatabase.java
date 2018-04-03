@@ -42,8 +42,12 @@ public class InitialiseDatabase {
         if (archiveStores.isEmpty()) {
             HashMap<String,String> storeProperties = new HashMap<String,String>();
             storeProperties.put("rootPath", archiveDir);
-            ArchiveStore store = new ArchiveStore("org.datavaultplatform.common.storage.impl.TivoliStorageManager", storeProperties, "Default archive store (TSM)", true);
-            archiveStoreService.addArchiveStore(store);
+            ArchiveStore tsm = new ArchiveStore("org.datavaultplatform.common.storage.impl.TivoliStorageManager", storeProperties, "Default archive store (TSM)", true);
+            ArchiveStore s3 = new ArchiveStore("org.datavaultplatform.common.storage.impl.S3Cloud", storeProperties, "Cloud archive store", false);
+            //ArchiveStore local = new ArchiveStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Default archive store (Local)", true);
+            archiveStoreService.addArchiveStore(tsm);
+            archiveStoreService.addArchiveStore(s3);
+            //archiveStoreService.addArchiveStore(local);
         }
 
     }

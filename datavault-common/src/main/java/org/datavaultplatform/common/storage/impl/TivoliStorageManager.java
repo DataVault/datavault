@@ -21,7 +21,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     //public List<String> locations = null;
 
     // todo : can we change this to COPY_BACK?
-    public Verify.Method verificationMethod = Verify.Method.LOCAL_ONLY;
+    public Verify.Method verificationMethod = Verify.Method.COPY_BACK;
 
     public TivoliStorageManager(String name, Map<String,String> config) throws Exception  {
         super(name, config);
@@ -29,6 +29,10 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         locations.add(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
         locations.add(TivoliStorageManager.TSM_SERVER_NODE2_OPT);
         super.multipleCopies = true;
+        super.depositIdStorageKey = true;
+        for (String key : config.keySet()) {
+        		logger.info("Config value for " + key + " is " + config.get(key));
+        }
 
         // Unpack the config parameters (in an implementation-specific way)
         // Actually I can't think of any parameters that we need.
@@ -62,32 +66,15 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     
     @Override
     public void retrieve(String path, File working, Progress progress) throws Exception {
-    		// todo : monitor progress
-    	
-    		// do we need to check if the selected retrieval space has enough free space? (is the file bagged and tarred atm or is the actual space going to be different?)
-    		// actually the Deposit  / Retreive worker classes check the free space it appears if we get here we don't need to check
-    	
-    		// The working file appears to be bagged and tarred when we get here
-    		// in the local version of this class the FileCopy class adds info to the progess object
-    		// I don't think we need to use the patch at all in this version 
-
-    		//try {
-    			// if this fails try to retrieve from second node, I think the only failure possible
-    			// at this stage is a missing archive, checksums are checked later in Retrieve.java
-    		//	this.retrieve(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT);
-    		//} catch (Exception node1) {
-    			// if this fails too just continue on to the error display
-    		//	this.retrieve(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT);
-    		//}
     		throw new UnsupportedOperationException();
     }
     
     @Override
-    public void retrieve(String path, File working, Progress progress, String optFilePath) throws Exception {
+    public void retrieve(String depositId, File working, Progress progress, String optFilePath) throws Exception {
     	
-    		logger.info("Retrieve command is " + "dsmc " + " retrieve " + working.getAbsolutePath() + " -optfile=" + optFilePath);
+    		logger.info("Retrieve command is " + "dsmc " + " retrieve " + working.getAbsolutePath() + " -description=" + depositId + " -optfile=" + optFilePath);
     		
-        ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", working.getAbsolutePath(), "-optfile=" + optFilePath, "-replace=true");
+        ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", working.getAbsolutePath(), "-description=" + depositId, "-optfile=" + optFilePath, "-replace=true");
         Process p = pb.start();
         // This class is already running in its own thread so it can happily pause until finished.
         p.waitFor();
@@ -105,22 +92,23 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     }
     
     @Override
-    public String store(String path, File working, Progress progress) throws Exception {
+    public String store(String depositId, File working, Progress progress) throws Exception {
     		
     		
         // todo : monitor progress
 
         // Note: generate a uuid to be passed as the description. We should probably use the deposit UUID instead (do we need a specialised archive method)?
         // Just a thought - Does the filename contain the deposit uuid? Could we use that as the description?
-        String randomUUIDString = UUID.randomUUID().toString();
+        //String randomUUIDString = UUID.randomUUID().toString();
         
-        this.storeInTSMNode(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT, randomUUIDString);
-        this.storeInTSMNode(path, working, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT, randomUUIDString);
+        
+        this.storeInTSMNode(working, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT, depositId);
+        this.storeInTSMNode(working, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT, depositId);
 
-        return randomUUIDString;
+        return depositId;
     }
     
-    private String storeInTSMNode(String path, File working, Progress progress, String optFilePath, String description) throws Exception {
+    private String storeInTSMNode(File working, Progress progress, String optFilePath, String description) throws Exception {
 		
         // check we have enough space to store the data (is the file bagged and tarred atm or is the actual space going to be different?)
         // actually the Deposit  / Retreive worker classes check the free space it appears if we get here we don't need to check
