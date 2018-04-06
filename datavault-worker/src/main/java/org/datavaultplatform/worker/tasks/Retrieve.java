@@ -192,50 +192,51 @@ public class Retrieve extends Task {
                 .withNextState(1));
             
             if (archiveFs.hasMultipleCopies()) {
-            		logger.info("Device has multiple copies");
-	            	Progress progress = new Progress();
-	        		ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, archiveSize, eventStream);
-	        		Thread trackerThread = new Thread(tracker);
-	        		trackerThread.start();
-	
-	        		List<String> locations = archiveFs.getLocations();
-	        		Iterator<String> locationsIt = locations.iterator();
-	        		LOCATION:
-	        		while (locationsIt.hasNext()) {
-	        			String location = locationsIt.next();
-	        			try {
-			            try {
-			            	
-			            		//	NEED TO UPDATE THIS TO INCLUDE CHUNKING STUFF IS TURNED ON
-			            		if( context.isChunkingEnabled() ) {
-			                    // TODO can bypass this if there is only one chunk.
-			            			recomposeMulti(numOfChunks, tarFileName, context, archiveId, archiveFs, progress, 
-			            			        archiveDigestAlgorithm, tarFile, chunksDigest, encChunksDigest, location, depositId);
-			                } else {
-			                		// Ask the driver to copy files to the temp directory
-			                		archiveFs.retrieve(archiveId, tarFile, progress, location);
-			                }
-			            } finally {
-			                // Stop the tracking thread
-			                tracker.stop();
-			                trackerThread.join();
-			            }
-			            
-			            logger.info("Attempting retrieve on archive from " + location);
-			            this.doRetrieve(depositId, userID, retrievePath, retrieveId, context, userFs, tarFile, eventStream, 
-			                    archiveDigestAlgorithm, archiveDigest, progress);
-			            logger.info("Completed retrieve on archive from " + location);
-			            break LOCATION;
-	        			} catch (Exception e) {
-	        				//if last location has an error throw the error else go round again
-	        				//continue LOCATION;
-	        				if (!locationsIt.hasNext()) {
-	        					logger.info("All locations had problems throwing exception " + e.getMessage());
-	        					throw e;
-	        				}
-	        			}
-            		}
-	            
+                logger.info("Device has multiple copies");
+                Progress progress = new Progress();
+                ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, archiveSize, eventStream);
+                Thread trackerThread = new Thread(tracker);
+                trackerThread.start();
+
+                List<String> locations = archiveFs.getLocations();
+                Iterator<String> locationsIt = locations.iterator();
+                LOCATION: while (locationsIt.hasNext()) {
+                    String location = locationsIt.next();
+                    try {
+                        try {
+
+                            // NEED TO UPDATE THIS TO INCLUDE CHUNKING STUFF IS TURNED ON
+                            if (context.isChunkingEnabled()) {
+                                // TODO can bypass this if there is only one chunk.
+                                recomposeMulti(numOfChunks, tarFileName, context, archiveId, archiveFs, progress,
+                                        archiveDigestAlgorithm, tarFile, chunksDigest, encChunksDigest, location,
+                                        depositId);
+                            } else {
+                                // Ask the driver to copy files to the temp directory
+                                archiveFs.retrieve(archiveId, tarFile, progress, location);
+                            }
+                        } finally {
+                            // Stop the tracking thread
+                            tracker.stop();
+                            trackerThread.join();
+                        }
+
+                        logger.info("Attempting retrieve on archive from " + location);
+                        this.doRetrieve(depositId, userID, retrievePath, retrieveId, context, userFs, tarFile,
+                                eventStream, archiveDigestAlgorithm, archiveDigest, progress);
+                        logger.info("Completed retrieve on archive from " + location);
+                        break LOCATION;
+                    } catch (Exception e) {
+                        // if last location has an error throw the error else go
+                        // round again
+                        // continue LOCATION;
+                        if (!locationsIt.hasNext()) {
+                            logger.info("All locations had problems throwing exception " + e.getMessage());
+                            throw e;
+                        }
+                    }
+                }
+
             } else {
                 logger.info("Single copy device");
                 // Progress tracking (threaded)
@@ -245,22 +246,22 @@ public class Retrieve extends Task {
                 trackerThread.start();
                 
 
-	            // Verify integrity with deposit checksum
-	            String systemAlgorithm = Verify.getAlgorithm();
-	            if (!systemAlgorithm.equals(archiveDigestAlgorithm)) {
-	                throw new Exception("Unsupported checksum algorithm: " + archiveDigestAlgorithm);
-	            }
-	            
-	            try {
-	                // Ask the driver to copy files to the temp directory
-	                if( context.isChunkingEnabled() ) {
-	                    // TODO can bypass this if there is only one chunk.
-	                    recomposeSingle(numOfChunks, tarFileName, context, archiveId, archiveFs, progress, 
-	                            archiveDigestAlgorithm, tarFile, chunksDigest, encChunksDigest, depositId);
-	                } else {
-	                    archiveFs.retrieve(archiveId, tarFile, progress);
-	                    
-	                    if( this.getTarIV() != null ) {            
+                // Verify integrity with deposit checksum
+                String systemAlgorithm = Verify.getAlgorithm();
+                if (!systemAlgorithm.equals(archiveDigestAlgorithm)) {
+                    throw new Exception("Unsupported checksum algorithm: " + archiveDigestAlgorithm);
+                }
+
+                try {
+                    // Ask the driver to copy files to the temp directory
+                    if (context.isChunkingEnabled()) {
+                        // TODO can bypass this if there is only one chunk.
+                        recomposeSingle(numOfChunks, tarFileName, context, archiveId, archiveFs, progress,
+                                archiveDigestAlgorithm, tarFile, chunksDigest, encChunksDigest, depositId);
+                    } else {
+                        archiveFs.retrieve(archiveId, tarFile, progress);
+
+                        if (this.getTarIV() != null) {
                             // Decrypt tar file
                             String encTarFileHash = Verify.getDigest(tarFile);
                             
@@ -273,15 +274,15 @@ public class Retrieve extends Task {
                             
                             SecretKey aesKey = this.getSecretKeyFromKeyStore(depositId);
                             this.decryptFile(tarFile, aesKey, context.getEncryptionMode(), this.getTarIV());
-	                    }
-	                }
-	            } finally {
-	                // Stop the tracking thread
-	                tracker.stop();
-	                trackerThread.join();
-	            }
-	            
-	            this.doRetrieve(depositId, userID, retrievePath, retrieveId, context, userFs, tarFile, eventStream, archiveDigestAlgorithm, archiveDigest, progress);
+                        }
+                    }
+                } finally {
+                    // Stop the tracking thread
+                    tracker.stop();
+                    trackerThread.join();
+                }
+
+                this.doRetrieve(depositId, userID, retrievePath, retrieveId, context, userFs, tarFile, eventStream, archiveDigestAlgorithm, archiveDigest, progress);
             }
             
         } catch (Exception e) {
