@@ -25,6 +25,8 @@ public class Task {
     protected Map<Integer, String> chunkFilesDigest;
     protected byte[] tarIV;
     protected Map<Integer, byte[]> chunksIVs;
+    String encTarDigest;
+    Map<Integer, String> encChunksDigest;
     
     private boolean isRedeliver;
 
@@ -38,7 +40,9 @@ public class Task {
                 List<String> fileUploadPaths,
                 Map<Integer, String> chunkFilesDigest,
                 byte[] tarIV,
-                Map<Integer, byte[]> chunksIVs) {
+                Map<Integer, byte[]> chunksIVs,
+                String encTarDigest,
+                Map<Integer, String> encChunksDigest) {
         this.jobID = job.getID();
         this.taskClass = job.getTaskClass();
         this.properties = properties;
@@ -50,6 +54,8 @@ public class Task {
         this.chunkFilesDigest = chunkFilesDigest;
         this.tarIV = tarIV;
         this.chunksIVs = chunksIVs;
+        this.encTarDigest = encTarDigest;
+        this.encChunksDigest = encChunksDigest;
     }
 
     public String getJobID() { return jobID; }
@@ -142,6 +148,22 @@ public class Task {
     
     public void setChunksIVs(Map<Integer, byte[]> chunksIVs) {
         this.chunksIVs = chunksIVs;
+    }
+    
+    public String getEncTarDigest() {
+        return encTarDigest;
+    }
+    
+    public void setEncTarDigest(String encTarDigest) {
+        this.encTarDigest = encTarDigest;
+    }
+    
+    public Map<Integer, String> getEncChunksDigest() {
+        return encChunksDigest;
+    }
+    
+    public void setEncChunksDigest(Map<Integer, String> encChunksDigest) {
+        this.encChunksDigest = encChunksDigest;
     }
     
     public void performAction(Context context) {}

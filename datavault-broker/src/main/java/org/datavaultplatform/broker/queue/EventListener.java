@@ -217,7 +217,9 @@ public class EventListener implements MessageListener {
                 while (!success) {
                     try {
                         HashMap<Integer, byte[]> chunksIVs = computedEncryptionEvent.getChunkIVs();
+                        HashMap<Integer, String> encChunksDigests = computedEncryptionEvent.getEncChunkDigests();
                         byte[] tarIV = computedEncryptionEvent.getTarIV();
+                        String encTarDigest = computedEncryptionEvent.getEncTarDigest();
                         String aesMode = computedEncryptionEvent.getAesMode();
                         
                         List<DepositChunk> chunks = deposit.getDepositChunks();
@@ -225,10 +227,12 @@ public class EventListener implements MessageListener {
                             Integer num = chunk.getChunkNum();
                             
                             chunk.setEncIV(chunksIVs.get(num));
+                            chunk.setEcnArchiveDigest(encChunksDigests.get(num));
                         }
                         
                         // TODO: we might want to only update this if it's needed
                         deposit.setEncIV(tarIV);
+                        deposit.setEncArchiveDigest(encTarDigest);
                         
                         depositsService.updateDeposit(deposit);
                         success = true;

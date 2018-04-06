@@ -209,7 +209,7 @@ public class DepositsController {
                     job, depositProperties, archiveStores, 
                     userFileStoreProperties, userFileStoreClasses, 
                     filestorePaths, userUploadPaths, 
-                    null, null, null);
+                    null, null, null, null, null);
             String jsonDeposit = mapper.writeValueAsString(depositTask);
             sender.send(jsonDeposit);
 
@@ -386,12 +386,20 @@ public class DepositsController {
                 chunksIVs.put(chunks.getChunkNum(), chunks.getEncIV());
             }
             
+            // Get encrypted digests
+            String encTarDigest = deposit.getEncArchiveDigest();
+            HashMap<Integer, String> encChunksDigests = new HashMap<Integer, String>();
+            for( DepositChunk chunks : deposit.getDepositChunks() ) {
+                encChunksDigests.put(chunks.getChunkNum(), chunks.getEcnArchiveDigest());
+            }
+            
             Task retrieveTask = new Task(
                     job, retrieveProperties, archiveStores, 
                     userFileStoreProperties, userFileStoreClasses, 
                     null, null, 
                     chunksDigest,
-                    tarIVs, chunksIVs);
+                    tarIVs, chunksIVs,
+                    encTarDigest, encChunksDigests);
             ObjectMapper mapper = new ObjectMapper();
             String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
             sender.send(jsonRetrieve);

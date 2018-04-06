@@ -69,6 +69,7 @@ public class Deposit extends Task {
     // Chunking attributes
     File[] chunkFiles;
     String[] chunksHash;
+    String[] encChunksHash;
     
     // Secret key for crypto
     // TODO: store it somewhere
@@ -344,7 +345,10 @@ public class Deposit extends Task {
             // Encryption
             HashMap<Integer, byte[]> chunksIVs = null;
             byte iv[] = null;
+            String encTarHash = null;
             if(context.isEncryptionEnabled()) {
+                logger.info("Encrypting file(s)...");
+                
                 // Generating Key
                 SecretKey aesKey = Encryption.generateSecretKey(128);
 
@@ -352,26 +356,42 @@ public class Deposit extends Task {
                 saveSecretKeyToKeyStore(aesKey);
 
                 if (context.isChunkingEnabled()) {
+                    HashMap<Integer, String> encChunksDigests = new HashMap<Integer, String>();
                     chunksIVs = new HashMap<Integer, byte[]>();
+                    encChunksHash = new String[chunkFiles.length];
                     
                     for (int i = 0; i < chunkFiles.length; i++){
                         File chunk = chunkFiles[i];
                         
                         // Generating IV
                         byte[] chunkIV = encryptFile(chunk, aesKey, context.getEncryptionMode());
+                        
+                        encChunksHash[i] = Verify.getDigest(chunk);
 
+                        logger.info("Chunk file " + i + ": " + chunk.length() + " bytes");
+                        logger.info("Encrypted chunk checksum: " + encChunksHash[i]);
+                        
+                        encChunksDigests.put(i+1, encChunksHash[i]);
                         chunksIVs.put(i+1, chunkIV);
                     }
                     
                     logger.info(chunkFiles.length + " chunk files encrypted.");
                     
-                    eventStream.send(new ComputedEncryption(jobID, depositId, chunksIVs, null, context.getEncryptionMode().toString())
-                            .withUserId(userID));
+                    eventStream.send(new ComputedEncryption(jobID, depositId, chunksIVs, null, 
+                            context.getEncryptionMode().toString(), null, encChunksDigests)
+                                .withUserId(userID));
                 } else {
                     iv = encryptFile(tarFile, aesKey, context.getEncryptionMode());
-
-                    eventStream.send(new ComputedEncryption(jobID, depositId, null, iv, context.getEncryptionMode().toString())
-                            .withUserId(userID));
+                    
+                    encTarHash = Verify.getDigest(tarFile);
+                    
+                    logger.info("Encrypted Tar file: " + tarFile.length() + " bytes");
+                    logger.info("Encrypted tar checksum: " + encTarHash);
+                    
+                    eventStream.send(new ComputedEncryption(jobID, depositId, null, 
+                            iv, context.getEncryptionMode().toString(),
+                            encTarHash, null)
+                                .withUserId(userID));
                 }
             }
 
@@ -410,11 +430,9 @@ public class Deposit extends Task {
 
             logger.info("Verifying archive package ...");
             if( context.isChunkingEnabled() ) {
-                //for (int i = 0; i < chunkFiles.length; i++){
-                    verifyArchive(context, chunkFiles, chunksHash, tarFile, tarHash, chunksIVs);
-                //}
+                verifyArchive(context, chunkFiles, chunksHash, tarFile, tarHash, chunksIVs, encChunksHash);
             } else {
-                verifyArchive(context, tarFile, tarHash, iv);
+                verifyArchive(context, tarFile, tarHash, iv, encTarHash);
             }
 
             logger.info("Deposit complete");
@@ -571,7 +589,8 @@ public class Deposit extends Task {
      * @param tarHash
      * @throws Exception
      */
-    private void verifyArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, HashMap<Integer, byte[]> ivs) throws Exception {
+    private void verifyArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, 
+            HashMap<Integer, byte[]> ivs, String[] encChunksHash) throws Exception {
 
         for (String archiveStoreId : archiveStores.keySet() ) {
 
@@ -583,22 +602,25 @@ public class Deposit extends Task {
             }
             
             if (((Device)archiveStore).hasMultipleCopies()) {
-        			for (String loc : ((Device)archiveStore).getLocations()) {
-        				this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, loc,  true, ivs);
-        			}
+                for (String loc : ((Device)archiveStore).getLocations()) {
+                    this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, loc, true, ivs, null, encChunksHash);
+                }
             } else {   
-            		this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, ivs);
+                this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, ivs, null, encChunksHash);
             }
-        	}
-    }
-    private void doArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, ArchiveStore archiveStore, 
-    		String archiveId, HashMap<Integer, byte[]> ivs) throws Exception {
-    		this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, null,  false, ivs);
+        }
     }
     
     private void doArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, ArchiveStore archiveStore, 
-    		String archiveId, String location, boolean multipleCopies, HashMap<Integer, byte[]> ivs) throws Exception {
-    		for (int i = 0; i < chunkFiles.length; i++) {
+            String archiveId, HashMap<Integer, byte[]> ivs, String encTarHash, String[] encChunksHash) throws Exception {
+        this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, null,  false, ivs, encTarHash, encChunksHash);
+    }
+    
+    private void doArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, ArchiveStore archiveStore, 
+            String archiveId, String location, boolean multipleCopies, HashMap<Integer, byte[]> ivs, 
+            String encTarHash, String[] encChunksHash) throws Exception {
+        
+        for (int i = 0; i < chunkFiles.length; i++) {
             File chunkFile = chunkFiles[i];
             String chunkHash = chunksHash[i];
             
@@ -612,9 +634,15 @@ public class Deposit extends Task {
             } else {
             		copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
             }
-            
+
             // Decryption
             if(ivs != null) {
+                String encChunkHash = encChunksHash[i];
+                
+                // Check hash of encrypted file
+                logger.debug("Verifying encrypted chunk file: "+chunkFile.getAbsolutePath());
+                verifyChunkFile(context.getTempDir(), chunkFile, encChunkHash);
+                
                 SecretKey aesKey = this.getSecretKeyFromKeyStore();
                 // TODO: get aesKey from secure place
                 decryptFile(chunkFile, aesKey, context.getEncryptionMode(), ivs.get(i+1));
@@ -636,7 +664,7 @@ public class Deposit extends Task {
      * @param tarHash
      * @throws Exception
      */
-    private void verifyArchive(Context context, File tarFile, String tarHash, byte[] iv) throws Exception {
+    private void verifyArchive(Context context, File tarFile, String tarHash, byte[] iv, String encTarHash) throws Exception {
 
         boolean alreadyVerified = false;
 
@@ -668,23 +696,41 @@ public class Deposit extends Task {
                 // Delete the existing temporary file
                 tarFile.delete();
                 // Copy file back from the archive storage
-                	if (((Device)archiveStore).hasMultipleCopies()) {
-                		for (String loc : ((Device)archiveStore).getLocations()) {
-                			copyBackFromArchive(archiveStore, archiveId, tarFile, loc);
-                			// Verify the contents
-                         verifyTarFile(context.getTempDir(), tarFile, tarHash);
-                		}
-                	} else {
-                		copyBackFromArchive(archiveStore, archiveId, tarFile);
-                // Decryption
-                if(iv != null) {
-                    SecretKey aesKey = this.getSecretKeyFromKeyStore();
-                    decryptFile(tarFile, aesKey, context.getEncryptionMode(), iv);
-                }
-                
-                		// Verify the contents
+                if (((Device)archiveStore).hasMultipleCopies()) {
+                    for (String loc : ((Device)archiveStore).getLocations()) {
+                        copyBackFromArchive(archiveStore, archiveId, tarFile, loc);
+                        
+                        // check encrypted tar
+                        verifyTarFile(context.getTempDir(), tarFile, encTarHash);
+                        
+                        // Decryption
+                        if(iv != null) {
+                            SecretKey aesKey = this.getSecretKeyFromKeyStore();
+                            decryptFile(tarFile, aesKey, context.getEncryptionMode(), iv);
+                        }
+                        
+                        // Verify the contents
+                        verifyTarFile(context.getTempDir(), tarFile, tarHash);
+                    }
+                } else {
+                    copyBackFromArchive(archiveStore, archiveId, tarFile);
+                    
+                    // check encrypted tar
+                    String encTarFileHash = Verify.getDigest(tarFile);
+                    logger.info("Checksum: " + encTarFileHash);
+                    if (!encTarFileHash.equals(encTarFileHash)) {
+                        throw new Exception("checksum failed: " + encTarFileHash + " != " + encTarFileHash);
+                    }
+                    
+                    // Decryption
+                    if(iv != null) {
+                        SecretKey aesKey = this.getSecretKeyFromKeyStore();
+                        decryptFile(tarFile, aesKey, context.getEncryptionMode(), iv);
+                    }
+                    
+                    // Verify the contents
                     verifyTarFile(context.getTempDir(), tarFile, tarHash);
-                	}
+                }
             }
         }
     }

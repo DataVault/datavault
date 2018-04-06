@@ -118,6 +118,8 @@ public class Deposit {
     // Number of Chunks
     @Column(columnDefinition = "INT default 0")
     private int numOfChunks;
+    @Column(columnDefinition = "TEXT")
+    private String encArchiveDigest;
     
     // Encryption
     @Column(columnDefinition = "BLOB")
@@ -276,6 +278,10 @@ public class Deposit {
     public byte[] getEncIV() { return encIV; }
     
     public void setEncIV(byte[] encIV) { this.encIV = encIV; }
+    
+    public String getEncArchiveDigest() { return encArchiveDigest; }
+    
+    public void setEncArchiveDigest(String encArchiveDigest) {  this.encArchiveDigest = encArchiveDigest; }
     
     public DepositInfo convertToResponse() {
         return new DepositInfo(
