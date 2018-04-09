@@ -285,7 +285,11 @@ public class WorkerInstanceIT {
             e.printStackTrace();
             fail("We should not have a JsonProcessingException: "+e);
         }
-        message = message.replaceAll("<enter_encoded_tar_digest_here>", encTarHash);
+        if (encTarHash != null ) {
+            message = message.replaceAll("<enter_encoded_tar_digest_here>", encTarHash);
+        } else {
+            message = message.replaceAll("\"<enter_tar_iv_here>\"", "");
+        }
         
         Channel channel = sendMessageToRabbitMQ(message);
         listenRetrieveChannel(channel);
