@@ -1,15 +1,15 @@
 version: '2.1'
 services:
   rabbitmq:
-    image: bitnami/rabbitmq:latest
+    image: rabbitmq:3-management-alpine
     volumes:
       - ./docker/rabbitmq_data:/bitnami
     ports:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_USERNAME: datavault
-      RABBITMQ_PASSWORD: datavault
+      RABBITMQ_DEFAULT_USER: datavault
+      RABBITMQ_DEFAULT_PASS: datavault
     networks:
       - mqnet
     healthcheck:
