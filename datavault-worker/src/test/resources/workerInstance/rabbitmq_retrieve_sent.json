@@ -49,7 +49,7 @@
         "5":"<enter_chunk_5_digest_here>",
         "6":"<enter_chunk_6_digest_here>"
     },
-    "tarIV":null,
+    "tarIV":"<enter_tar_iv_here>",
     "chunksIVs":
     {
         "1":"<enter_chunk_1_iv_here>",
@@ -59,7 +59,7 @@
         "5":"<enter_chunk_5_iv_here>",
         "6":"<enter_chunk_6_iv_here>"
     },
-    "encTarDigest":null,
+    "encTarDigest":"<enter_encoded_tar_digest_here>",
     "encChunksDigest":
     {
         "1":"<enter_encoded_chunk_1_digest_here>",
