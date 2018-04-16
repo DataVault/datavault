@@ -7,6 +7,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
@@ -31,6 +32,7 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
@@ -79,6 +81,8 @@ public class WorkerInstanceIT {
         
         String tarHash = "";
         Map<Integer, String> chunksHash = new HashMap<Integer, String>();
+        Map<Integer, String> encChunksHash = new HashMap<Integer, String>();
+        Map<Integer, byte[]> chunksIVs = new HashMap<Integer, byte[]>();
         
         // Read Json file with example of valid Deposit Task
         String message = getJsonMessage(
@@ -162,8 +166,15 @@ public class WorkerInstanceIT {
                         case 6:
                             assertThat(concreteEvent, instanceOf(ComputedChunks.class));
                             chunksHash = ((ComputedChunks)concreteEvent).getChunksDigest();
+                            // TODO check hash
                             state++;break;
                         case 7:
+                            assertThat(concreteEvent, instanceOf(ComputedEncryption.class));
+                            encChunksHash = ((ComputedEncryption)concreteEvent).getEncChunkDigests();
+                            chunksIVs = ((ComputedEncryption)concreteEvent).getChunkIVs();
+                            // TODO check hash
+                            state++;break;
+                        case 8:
                             if(concreteEvent instanceof UpdateProgress){
                                 break;
                             }else{
@@ -234,9 +245,25 @@ public class WorkerInstanceIT {
         message = message.replaceAll("<enter_archiveDigest_here>", tarHash);
         Set<Integer> keys = chunksHash.keySet();
         for(Integer chunkNum : keys) {
+            ObjectMapper mapper = new ObjectMapper();
+            
             String chunkHash = chunksHash.get(chunkNum);
+            String chunkIV = null;
+            try {
+                chunkIV = mapper.writeValueAsString(chunksIVs.get(chunkNum));
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+                fail("We should not have a JsonProcessingException: "+e);
+            }
+            String encChunkHash = encChunksHash.get(chunkNum);
+            
             System.out.println("Fill json with chunk "+chunkNum+" hash:"+chunkHash);
             message = message.replaceAll("<enter_chunk_"+chunkNum+"_digest_here>", chunkHash);
+            System.out.println("Fill json with chunk "+chunkNum+" iv:"+chunkIV);
+            // ObjectMapper already put the brackets
+            message = message.replaceAll("\"<enter_chunk_"+chunkNum+"_iv_here>\"", chunkIV);
+            System.out.println("Fill json with chunk "+chunkNum+" enc. hash:"+encChunkHash);
+            message = message.replaceAll("<enter_encoded_chunk_"+chunkNum+"_digest_here>", encChunkHash);
         }
         
         Channel channel = sendMessageToRabbitMQ(message);

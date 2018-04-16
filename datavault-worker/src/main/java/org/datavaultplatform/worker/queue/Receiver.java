@@ -12,6 +12,7 @@ import org.datavaultplatform.common.io.FileUtils;
 
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.Context.AESMode;
 import org.datavaultplatform.worker.WorkerInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,17 +23,17 @@ import org.slf4j.LoggerFactory;
 public class Receiver {
 
     private static final Logger logger = LoggerFactory.getLogger(Receiver.class);
-    private static long DEFAULT_CHUNK_SIZE = 500 * 1000 * 1000; // 500MB
-    private static boolean DEFAULT_CHUNKING_ENABLE = false;
-    
+
     private String queueServer;
     private String queueName;
     private String queueUser;
     private String queuePassword;
     private String tempDir;
     private String metaDir;
-    private Boolean chunkingEnabled = new Boolean(DEFAULT_CHUNKING_ENABLE);
-    private Long chunkingByteSize = new Long(DEFAULT_CHUNK_SIZE);
+    private Boolean chunkingEnabled;
+    private Long chunkingByteSize;
+    private Boolean encryptionEnabled;
+    AESMode encryptionMode = AESMode.GCM;
 
     /**
      * Set the queue server
@@ -81,6 +82,7 @@ public class Receiver {
     public void setMetaDir(String metaDir) {
         this.metaDir = metaDir;
     }
+
     /**
      * Define if archived tar file is chunked
      * @param chunkingEnabled true or false
@@ -97,6 +99,30 @@ public class Receiver {
         long bytes = FileUtils.parseFormattedSizeToBytes(chunkingByteSize);
         this.chunkingByteSize = bytes;
     }
+
+    /**
+     * Define if should perform encryption before archiving
+     * @param encryptionEnabled true or false
+     */
+    public void setEncryptionEnabled(Boolean encryptionEnabled) {
+        this.encryptionEnabled = encryptionEnabled;
+    }
+
+    /**
+     * Define the AES mode for the encryption
+     * @param encryptionMode true or false
+     */
+    public void setEncryptionMode(String encryptionMode) { this.encryptionMode = AESMode.valueOf(encryptionMode); }
+    
+    /**
+     * @return Encryiption mode
+     */
+    public AESMode getEncryptionMode() { return encryptionMode; }
+    
+    /**
+     * @return true if encryption is enabled, false otherwise
+     */
+    public Boolean isEncryptionEnabled() { return encryptionEnabled; }
 
     /**
      * Setup a connection to the queue then wait for messages to arrive.  When we recieve a message delivery
@@ -158,7 +184,10 @@ public class Receiver {
                 
                 Path metaDirPath = Paths.get(metaDir);
                 
-                Context context = new Context(tempDirPath, metaDirPath, events, chunkingEnabled, chunkingByteSize);
+                Context context = new Context(
+                        tempDirPath, metaDirPath, events,
+                        chunkingEnabled, chunkingByteSize,
+                        encryptionEnabled, encryptionMode);
                 concreteTask.performAction(context);
                 
                 // Clean up the temporary directory

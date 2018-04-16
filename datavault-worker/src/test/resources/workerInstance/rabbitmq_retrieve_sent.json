@@ -49,5 +49,25 @@
         "5":"<enter_chunk_5_digest_here>",
         "6":"<enter_chunk_6_digest_here>"
     },
+    "tarIV":null,
+    "chunksIVs":
+    {
+        "1":"<enter_chunk_1_iv_here>",
+        "2":"<enter_chunk_2_iv_here>",
+        "3":"<enter_chunk_3_iv_here>",
+        "4":"<enter_chunk_4_iv_here>",
+        "5":"<enter_chunk_5_iv_here>",
+        "6":"<enter_chunk_6_iv_here>"
+    },
+    "encTarDigest":null,
+    "encChunksDigest":
+    {
+        "1":"<enter_encoded_chunk_1_digest_here>",
+        "2":"<enter_encoded_chunk_2_digest_here>",
+        "3":"<enter_encoded_chunk_3_digest_here>",
+        "4":"<enter_encoded_chunk_4_digest_here>",
+        "5":"<enter_encoded_chunk_5_digest_here>",
+        "6":"<enter_encoded_chunk_6_digest_here>"
+    },
     "redeliver":false
 }

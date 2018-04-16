@@ -1,5 +1,8 @@
 package org.datavaultplatform.worker;
 
+import java.security.Security;
+
+import org.datavaultplatform.common.task.Context.AESMode;
 import org.datavaultplatform.worker.queue.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +38,11 @@ public class WorkerInstance {
         
         EventSender eventSender = context.getBean(EventSender.class);
         Receiver receiver = context.getBean(Receiver.class);
+        
+        // Add Bouncy Castle provider if needed
+        if( receiver.isEncryptionEnabled() && receiver.getEncryptionMode() == AESMode.GCM ) {
+            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        }
         
         // Listen to the message queue ...
         try {

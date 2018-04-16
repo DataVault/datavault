@@ -23,6 +23,8 @@
         <property name="metaDir" value="${metaDir}"/>
         <property name="chunkingEnabled" value="${chunking.enabled:false}"/>
         <property name="chunkingByteSize" value="${chunking.size:0}"/>
+        <property name="EncryptionEnabled" value="${encryption.enabled:false}"/>
+        <property name="EncryptionMode" value="${encryption.mode:GCM}"/>
     </bean>
 
     <bean id="eventSender" class="org.datavaultplatform.worker.queue.EventSender">
