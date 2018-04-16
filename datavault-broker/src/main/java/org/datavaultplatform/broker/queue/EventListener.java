@@ -208,6 +208,40 @@ public class EventListener implements MessageListener {
                     }
                 }
                 
+            } else if (concreteEvent instanceof ComputedEncryption) {
+                
+                // Update the deposit with the computed digest
+                ComputedEncryption computedEncryptionEvent = (ComputedEncryption)concreteEvent;
+                
+                Boolean success = false;
+                while (!success) {
+                    try {
+                        HashMap<Integer, byte[]> chunksIVs = computedEncryptionEvent.getChunkIVs();
+                        HashMap<Integer, String> encChunksDigests = computedEncryptionEvent.getEncChunkDigests();
+                        byte[] tarIV = computedEncryptionEvent.getTarIV();
+                        String encTarDigest = computedEncryptionEvent.getEncTarDigest();
+                        String aesMode = computedEncryptionEvent.getAesMode();
+                        
+                        List<DepositChunk> chunks = deposit.getDepositChunks();
+                        for(DepositChunk chunk : chunks) {
+                            Integer num = chunk.getChunkNum();
+                            
+                            chunk.setEncIV(chunksIVs.get(num));
+                            chunk.setEcnArchiveDigest(encChunksDigests.get(num));
+                        }
+                        
+                        // TODO: we might want to only update this if it's needed
+                        deposit.setEncIV(tarIV);
+                        deposit.setEncArchiveDigest(encTarDigest);
+                        
+                        depositsService.updateDeposit(deposit);
+                        success = true;
+                    } catch (org.hibernate.StaleObjectStateException e) {
+                        // Refresh from database and retry
+                        deposit = depositsService.getDeposit(concreteEvent.getDepositId());
+                    }
+                }
+                
             } else if (concreteEvent instanceof ComputedDigest) {
                 
                 // Update the deposit with the computed digest

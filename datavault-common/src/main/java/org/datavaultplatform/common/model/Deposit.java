@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -117,7 +118,13 @@ public class Deposit {
     // Number of Chunks
     @Column(columnDefinition = "INT default 0")
     private int numOfChunks;
+    @Column(columnDefinition = "TEXT")
+    private String encArchiveDigest;
     
+    // Encryption
+    @Column(columnDefinition = "BLOB")
+    private byte[] encIV;
+
     // Record the file path that the user selected for this deposit.
     @ApiObjectField(description = "Origin of the deposited filepath")
     @Column(columnDefinition = "TEXT")
@@ -265,6 +272,16 @@ public class Deposit {
     }
 
     public List<Retrieve> getRetrieves() { return retrieves; }
+    
+
+    
+    public byte[] getEncIV() { return encIV; }
+    
+    public void setEncIV(byte[] encIV) { this.encIV = encIV; }
+    
+    public String getEncArchiveDigest() { return encArchiveDigest; }
+    
+    public void setEncArchiveDigest(String encArchiveDigest) {  this.encArchiveDigest = encArchiveDigest; }
     
     public DepositInfo convertToResponse() {
         return new DepositInfo(

@@ -1,11 +1,16 @@
 package org.datavaultplatform.worker.operations;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.nio.file.Path;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -76,7 +81,7 @@ public class Tar {
 
         FileInputStream fis = new FileInputStream(input);
         BufferedInputStream bis = new BufferedInputStream(fis);
-        TarArchiveInputStream tar = new TarArchiveInputStream(bis);
+        TarArchiveInputStream tar = new TarArchiveInputStream(fis);
         
         File topDir = null;
         
@@ -107,4 +112,5 @@ public class Tar {
         
         return topDir;
     }
+    
 }

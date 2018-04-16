@@ -7,6 +7,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
@@ -31,6 +32,7 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
@@ -78,7 +80,11 @@ public class WorkerInstanceIT {
         System.out.println("Running testSimpleDeposite()");
         
         String tarHash = "";
-        Map<Integer, String> chunksHash = new HashMap<Integer, String>();
+        Map<Integer, String> chunksHash = null;
+        Map<Integer, String> encChunksHash = null;
+        Map<Integer, byte[]> chunksIVs = null;
+        byte[] encTarIV = null;
+        String encTarHash = "";
         
         // Read Json file with example of valid Deposit Task
         String message = getJsonMessage(
@@ -160,11 +166,16 @@ public class WorkerInstanceIT {
                             tarHash = ((ComputedDigest)concreteEvent).getDigest();
                             state++;break;
                         case 6:
-                            assertThat(concreteEvent, instanceOf(ComputedChunks.class));
-                            chunksHash = ((ComputedChunks)concreteEvent).getChunksDigest();
-                            state++;break;
-                        case 7:
-                            if(concreteEvent instanceof UpdateProgress){
+                            if ( concreteEvent instanceof ComputedChunks ) {
+                                chunksHash = ((ComputedChunks)concreteEvent).getChunksDigest();
+                                break;
+                            }else if ( concreteEvent instanceof ComputedEncryption ) {
+                                encChunksHash = ((ComputedEncryption)concreteEvent).getEncChunkDigests();
+                                chunksIVs = ((ComputedEncryption)concreteEvent).getChunkIVs();
+                                encTarIV = ((ComputedEncryption)concreteEvent).getTarIV();
+                                encTarHash = ((ComputedEncryption)concreteEvent).getEncTarDigest();
+                                break;
+                            }else if(concreteEvent instanceof UpdateProgress){
                                 break;
                             }else{
                                 assertThat(concreteEvent, instanceOf(Complete.class));
@@ -232,11 +243,52 @@ public class WorkerInstanceIT {
         // Fill the Json with the actual tar and chunks digest
         System.out.println("Fill json with tarhash:"+tarHash);
         message = message.replaceAll("<enter_archiveDigest_here>", tarHash);
-        Set<Integer> keys = chunksHash.keySet();
-        for(Integer chunkNum : keys) {
-            String chunkHash = chunksHash.get(chunkNum);
-            System.out.println("Fill json with chunk "+chunkNum+" hash:"+chunkHash);
+        
+        ObjectMapper mapper = new ObjectMapper();
+        int[] chunkNums = {1,2,3,4,5,6};
+        for(Integer chunkNum : chunkNums) {
+            
+            String chunkHash = "";
+            if (chunksHash != null && chunksHash.containsKey(chunkNum)) {
+                chunkHash = chunksHash.get(chunkNum);
+            }
             message = message.replaceAll("<enter_chunk_"+chunkNum+"_digest_here>", chunkHash);
+            
+            try {
+                if(chunksIVs != null && chunksIVs.containsKey(chunkNum)) {
+                    message = message.replaceAll(
+                            "\"<enter_chunk_"+chunkNum+"_iv_here>\"", 
+                            mapper.writeValueAsString( chunksIVs.get(chunkNum) ) );
+                } else {
+                    message = message.replaceAll("\"<enter_chunk_"+chunkNum+"_iv_here>\"", "null");
+                }
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+                fail("We should not have a JsonProcessingException: "+e);
+            }
+            
+            String encChunkHash = "";
+            if(encChunksHash != null && encChunksHash.containsKey(chunkNum)) {
+                encChunkHash = encChunksHash.get(chunkNum);
+            }
+            message = message.replaceAll("<enter_encoded_chunk_"+chunkNum+"_digest_here>", encChunkHash);
+        }
+        
+        try {
+            if(encTarIV != null) {
+                message = message.replaceAll(
+                        "\"<enter_tar_iv_here>\"", mapper.writeValueAsString(encTarIV));
+            } else {
+                message = message.replaceAll("\"<enter_tar_iv_here>\"", "null");
+            }
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            fail("We should not have a JsonProcessingException: "+e);
+        }
+        if (encTarHash != null ) {
+            message = message.replaceAll("<enter_encoded_tar_digest_here>", encTarHash);
+        } else {
+            message = message.replaceAll("\"<enter_tar_iv_here>\"", "");
         }
         
         Channel channel = sendMessageToRabbitMQ(message);
