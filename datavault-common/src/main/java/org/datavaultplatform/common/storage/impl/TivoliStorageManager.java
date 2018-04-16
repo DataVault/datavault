@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.UUID;
 
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.ArchiveStore;
@@ -16,8 +15,11 @@ import org.slf4j.LoggerFactory;
 public class TivoliStorageManager extends Device implements ArchiveStore {
 
     private static final Logger logger = LoggerFactory.getLogger(TivoliStorageManager.class);
-    public static final String TSM_SERVER_NODE1_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm1.opt";
-    public static final String TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
+    //public static final String TSM_SERVER_NODE1_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm1.opt";
+    //public static final String TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
+    // default locations of TSM option files
+    public static String TSM_SERVER_NODE1_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm1.opt";
+    public static String TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
     //public List<String> locations = null;
 
     // todo : can we change this to COPY_BACK?
@@ -25,6 +27,12 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 
     public TivoliStorageManager(String name, Map<String,String> config) throws Exception  {
         super(name, config);
+        // if we have non default options in datavault.properties use them
+        if (config.containsKey("optionsDir")) {
+        	String optionsDir = config.get("optionsDir");
+        	TivoliStorageManager.TSM_SERVER_NODE1_OPT = optionsDir + "/dsm1.opt";
+        	TivoliStorageManager.TSM_SERVER_NODE2_OPT = optionsDir + "/dsm2.opt";
+        }
         locations = new ArrayList<String>();
         locations.add(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
         locations.add(TivoliStorageManager.TSM_SERVER_NODE2_OPT);
@@ -33,9 +41,6 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         for (String key : config.keySet()) {
         		logger.info("Config value for " + key + " is " + config.get(key));
         }
-
-        // Unpack the config parameters (in an implementation-specific way)
-        // Actually I can't think of any parameters that we need.
     }
     
     @Override
