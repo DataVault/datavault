@@ -37,6 +37,8 @@ public class DepositsController {
     private ArchiveStoreService archiveStoreService;
     private JobsService jobsService;
     private Sender sender;
+    private String optionsDir;
+    private String bucketName;
 
     private static final Logger logger = LoggerFactory.getLogger(VaultsController.class);
     
@@ -82,6 +84,14 @@ public class DepositsController {
 
     public void setSender(Sender sender) {
         this.sender = sender;
+    }
+    
+    public void setOptionsDir(String optionsDir) {
+    	this.optionsDir = optionsDir;
+    }
+    
+    public void setBucketName(String bucketName) {
+    	this.bucketName = bucketName;
     }
 
     @RequestMapping(value = "/deposits/{depositid}", method = RequestMethod.GET)
@@ -165,7 +175,8 @@ public class DepositsController {
         if (archiveStores.size() == 0) {
             throw new Exception("No configured archive storage");
         }
-
+        
+        archiveStores = this.addArchiveSpecificOptions(archiveStores);
         // Get metadata content from the external provider (bypass database cache)
         String externalMetadata = externalMetadataService.getDatasetContent(vault.getDataset().getID());
         
@@ -305,6 +316,7 @@ public class DepositsController {
         ArchiveStore archiveStore = archiveStoreService.getForRetrieval();
         List<ArchiveStore> archiveStores = new ArrayList<ArchiveStore>();
         archiveStores.add(archiveStore);
+        archiveStores = this.addArchiveSpecificOptions(archiveStores);
 
         // Find the Archive that matches the ArchiveStore.
         String archiveID = null;
@@ -318,7 +330,7 @@ public class DepositsController {
         if (archiveID == null) {
             throw new Exception("No valid archive for retrieval");
         }
-
+        
         FileStore userStore = null;
         List<FileStore> userStores = user.getFileStores();
         for (FileStore store : userStores) {
@@ -387,5 +399,33 @@ public class DepositsController {
         vaultsService.checkRetentionPolicy(deposit.getVault().getID());
 
         return true;
+    }
+    
+    private List<ArchiveStore> addArchiveSpecificOptions(List<ArchiveStore> archiveStores) {
+    	if (archiveStores != null && ! archiveStores.isEmpty()) { 
+	    	for (ArchiveStore archiveStore : archiveStores) {
+		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.TivoliStorageManager")) {
+		        	HashMap<String, String> asProps = archiveStore.getProperties();
+		        	if (this.optionsDir != null && ! this.optionsDir.equals("")) {
+		        		asProps.put("optionsDir", this.optionsDir);
+		        	}
+		        	archiveStore.setProperties(asProps);
+		        }
+		        
+		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.S3Cloud")) {
+		        	HashMap<String, String> asProps = archiveStore.getProperties();
+		        	if (this.bucketName != null && ! this.bucketName.equals("")) {  
+		        		asProps.put("bucketName", this.bucketName);
+		        	}
+		        	
+		        	//if (this.authDir != null && ! this.authDir.equals("")) {
+		        	//	asProps.put("authDir", this.authDir);
+		        	//}
+		        	archiveStore.setProperties(asProps);
+		        }
+	        }
+    	}
+    	
+    	return archiveStores;
     }
 }
