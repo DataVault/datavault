@@ -13,6 +13,7 @@
     <div id="datavault-container">
         <div id="datavault-header">
             <#include "header.ftl"/>
+            <#include "headerextra.ftl"/>
         </div>
         <div id="datavault-body">
             <#nested/>
