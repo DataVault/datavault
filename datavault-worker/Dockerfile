@@ -14,8 +14,10 @@ RUN apt-get update && apt-get install -y procps
 RUN apt-get -y install vim
 
 # Couldn't use the whole directory as volume or datavault.properties gets overwritten
-RUN mkdir -p /docker_datavault-home/{config,lib,scripts}
+RUN mkdir -p /docker_datavault-home/lib
 ADD target/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar /docker_datavault-home/lib/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar
+ADD config /docker_datavault-home/config
+ADD scripts /docker_datavault-home/scripts
 
 WORKDIR /docker_datavault-home/lib
 
