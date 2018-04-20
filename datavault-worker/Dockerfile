@@ -13,6 +13,8 @@ RUN apt-get update && apt-get install -y procps
 # Install usefull tools
 RUN apt-get -y install vim
 
+RUN curl -sLo /usr/local/bin/ep https://github.com/kreuzwerker/envplate/releases/download/v0.0.8/ep-linux && chmod +x /usr/local/bin/ep
+
 # Couldn't use the whole directory as volume or datavault.properties gets overwritten
 RUN mkdir -p /docker_datavault-home/lib
 ADD target/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar /docker_datavault-home/lib/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar
