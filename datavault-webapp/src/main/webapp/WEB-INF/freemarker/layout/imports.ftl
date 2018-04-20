@@ -48,5 +48,7 @@
     <!-- Jackie CSS, JS and IMG -->
     <link href="<@spring.url '/resources/theme/jackie/edgel.css'/>" rel="stylesheet" type="text/css">
     <link href="<@spring.url '/resources/theme/jackie/jackie.css'/>" rel="stylesheet" type="text/css">
+    <!--
     <script src="<@spring.url '/resources/theme/jackie/edgel.js'/>"></script>
+    -->
     <link href="<@spring.url '/resources/theme/jackie/jackie-quickfix.css'/>" rel="stylesheet" type="text/css">
