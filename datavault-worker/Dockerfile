@@ -18,10 +18,12 @@ RUN mkdir -p /docker_datavault-home/lib
 ADD target/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar /docker_datavault-home/lib/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar
 ADD config /docker_datavault-home/config
 ADD scripts /docker_datavault-home/scripts
+ADD docker-entrypoint.sh /docker_datavault-home/docker-entrypoint.sh
 
 WORKDIR /docker_datavault-home/lib
 
 # Make port 80 available to the world outside this container
 EXPOSE 8080
 
-CMD /docker_datavault-home/scripts/wait-for-rabbitmq.sh;java -cp datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar:./* org.datavaultplatform.worker.WorkerInstance
+ENTRYPOINT ["/docker_datavault-home/docker-entrypoint.sh"]
+CMD ["java", "-cp", "datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar:./*", "org.datavaultplatform.worker.WorkerInstance"]
