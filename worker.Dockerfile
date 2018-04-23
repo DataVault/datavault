@@ -1,3 +1,9 @@
+FROM maven:3-jdk-8
+
+COPY . /usr/src
+WORKDIR /usr/src
+RUN mvn clean test package
+
 # Use an official java 7 as a parent image
 # FROM ubuntu:latest
 FROM java:8
@@ -16,16 +22,15 @@ RUN apt-get -y install vim
 RUN curl -sLo /usr/local/bin/ep https://github.com/kreuzwerker/envplate/releases/download/v0.0.8/ep-linux && chmod +x /usr/local/bin/ep
 
 # Couldn't use the whole directory as volume or datavault.properties gets overwritten
-RUN mkdir -p /docker_datavault-home/lib
-ADD target/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar /docker_datavault-home/lib/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar
-ADD config /docker_datavault-home/config
-ADD scripts /docker_datavault-home/scripts
-ADD docker-entrypoint.sh /docker_datavault-home/docker-entrypoint.sh
+RUN mkdir -p ${DATAVAULT_HOME}/lib
+COPY --from=0 /usr/src/datavault-worker/target/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar ${DATAVAULT_HOME}/lib/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar
+COPY docker/config ${DATAVAULT_HOME}/config
+COPY docker/scripts ${DATAVAULT_HOME}/scripts
 
-WORKDIR /docker_datavault-home/lib
+WORKDIR ${DATAVAULT_HOME}/lib
 
 # Make port 80 available to the world outside this container
 EXPOSE 8080
 
-ENTRYPOINT ["/docker_datavault-home/docker-entrypoint.sh"]
+ENTRYPOINT ["/docker_datavault-home/scripts/docker-entrypoint.sh"]
 CMD ["java", "-cp", "datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar:./*", "org.datavaultplatform.worker.WorkerInstance"]

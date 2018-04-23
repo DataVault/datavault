@@ -32,9 +32,9 @@ services:
       - dbnet
 
   workers:
-    build: 
-      context: ./datavault-worker
-      dockerfile: Dockerfile
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
     volumes:
       - ./docker/tmp/datavault/active:/tmp/datavault/active:rw
       - ./docker/tmp/datavault/archive:/tmp/datavault/archive:rw
@@ -48,10 +48,11 @@ services:
       - mqnet
     depends_on:
       - rabbitmq
-      
+
   web:
     build:
-      context: datavault-webapp
+      context: .
+      dockerfile: webapp.Dockerfile
     ports:
       - "58080:8080"
     volumes:
