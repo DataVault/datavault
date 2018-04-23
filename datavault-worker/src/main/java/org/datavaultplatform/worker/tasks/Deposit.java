@@ -6,6 +6,7 @@ import java.util.Map;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -887,6 +888,8 @@ public class Deposit extends Task {
         KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
         try (FileInputStream fis = new FileInputStream(KEYSTORE_NAME)) {
             ks.load(fis, KEYSTORE_PWD.toCharArray());
+        } catch ( FileNotFoundException fnfe ) {
+            ks.load(null, KEYSTORE_PWD.toCharArray());
         }
         KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(KEYSTORE_PWD.toCharArray());
         KeyStore.SecretKeyEntry skEntry = new KeyStore.SecretKeyEntry(secretKey);
