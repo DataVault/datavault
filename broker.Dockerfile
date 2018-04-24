@@ -32,7 +32,7 @@ COPY docker/config ${DATAVAULT_HOME}/config
 COPY docker/scripts ${DATAVAULT_HOME}/scripts
 
 # RUN sed -i 's/appBase=\"webapps\"/appBase=\"\/vagrant_datavault-home\/webapps\"/' /usr/local/tomcat/conf/server.xml
-RUN ln -s $DATAVAULT_HOME/webapps/datavault-webapp /usr/local/tomcat/webapps/datavault-webapp
+RUN ln -s $DATAVAULT_HOME/webapps/datavault-broker /usr/local/tomcat/webapps/datavault-broker
 
 WORKDIR /usr/local/tomcat
 
