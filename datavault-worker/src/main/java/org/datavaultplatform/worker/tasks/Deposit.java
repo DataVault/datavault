@@ -6,6 +6,8 @@ import java.util.Map;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -884,29 +886,24 @@ public class Deposit extends Task {
      */
     private void saveSecretKeyToKeyStore(SecretKey secretKey) throws Exception {
         KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
-        ks.load(null, KEYSTORE_PWD.toCharArray());
-        KeyGenerator keyGen = KeyGenerator.getInstance(KEY_ALGO);
-        keyGen.init(128);
+        try (FileInputStream fis = new FileInputStream(KEYSTORE_NAME)) {
+            ks.load(fis, KEYSTORE_PWD.toCharArray());
+        } catch ( FileNotFoundException fnfe ) {
+            ks.load(null, KEYSTORE_PWD.toCharArray());
+        }
         KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(KEYSTORE_PWD.toCharArray());
         KeyStore.SecretKeyEntry skEntry = new KeyStore.SecretKeyEntry(secretKey);
         ks.setEntry(this.depositId, skEntry, protParam);
-        java.io.FileOutputStream fos = null;
-        try {
-            fos = new java.io.FileOutputStream(KEYSTORE_NAME);
+        try (FileOutputStream fos = new FileOutputStream(KEYSTORE_NAME)) {
             ks.store(fos, KEYSTORE_PWD.toCharArray());
-        } catch (Exception ex) {
-            logger.error(null, ex);
-        } finally {
-            if (fos != null) {
-                fos.close();
-            }
         }
     }
     
     private SecretKey getSecretKeyFromKeyStore() throws Exception {
         KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
-        FileInputStream fis = new java.io.FileInputStream(KEYSTORE_NAME);
-        ks.load(fis,KEYSTORE_PWD.toCharArray());
+        try (FileInputStream fis = new FileInputStream(KEYSTORE_NAME)) {
+            ks.load(fis, KEYSTORE_PWD.toCharArray());
+        }
         SecretKey secretKey = (SecretKey) ks.getKey(this.depositId, KEYSTORE_PWD.toCharArray());
         
         return secretKey;
