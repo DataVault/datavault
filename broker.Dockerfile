@@ -1,5 +1,7 @@
 FROM maven:3-jdk-8
 
+ENV MAVEN_OPTS "-Xmx1024m"
+
 COPY . /usr/src
 WORKDIR /usr/src
 RUN mvn clean test package
@@ -12,14 +14,7 @@ MAINTAINER William Petit <w.petit@ed.ac.uk>
 
 ARG LOCAL_DATAVAULT_DIR="./datavault"
 
-ENV MAVEN_OPTS "-Xmx1024m"
 ENV DATAVAULT_HOME "/docker_datavault-home"
-
-# Update ubuntu
-RUN apt-get update && apt-get install -y procps
-
-# Install usefull tools
-RUN apt-get -y install vim
 
 # Install MySql client
 RUN apt-get install -y mysql-client

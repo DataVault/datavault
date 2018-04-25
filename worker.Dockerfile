@@ -1,5 +1,7 @@
 FROM maven:3-jdk-8
 
+ENV MAVEN_OPTS "-Xmx1024m"
+
 COPY . /usr/src
 WORKDIR /usr/src
 RUN mvn clean test package
@@ -10,14 +12,7 @@ FROM java:8
 
 MAINTAINER William Petit <w.petit@ed.ac.uk>
 
-ENV MAVEN_OPTS "-Xmx1024m"
 ENV DATAVAULT_HOME "/docker_datavault-home"
-
-# Update ubuntu
-RUN apt-get update && apt-get install -y procps
-
-# Install usefull tools
-RUN apt-get -y install vim
 
 RUN curl -sLo /usr/local/bin/ep https://github.com/kreuzwerker/envplate/releases/download/v0.0.8/ep-linux && chmod +x /usr/local/bin/ep
 
