@@ -15,15 +15,6 @@ ARG LOCAL_DATAVAULT_DIR="./datavault"
 ENV MAVEN_OPTS "-Xmx1024m"
 ENV DATAVAULT_HOME "/docker_datavault-home"
 
-# Update ubuntu
-RUN apt-get update && apt-get install -y procps
-
-# Install usefull tools
-RUN apt-get -y install vim
-
-# Install MySql client
-RUN apt-get install -y mysql-client
-
 RUN curl -sLo /usr/local/bin/ep https://github.com/kreuzwerker/envplate/releases/download/v0.0.8/ep-linux && chmod +x /usr/local/bin/ep
 
 COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib ${DATAVAULT_HOME}/lib
