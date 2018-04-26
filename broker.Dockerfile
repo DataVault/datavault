@@ -28,7 +28,7 @@ ARG LOCAL_DATAVAULT_DIR="./datavault"
 
 ENV DATAVAULT_HOME "/docker_datavault-home"
 
-RUN apk add --no-cache mysql curl
+RUN apk add --no-cache mysql curl su-exec
 
 COPY --from=0 /usr/local/bin/ep /usr/local/bin/ep
 COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib ${DATAVAULT_HOME}/lib
@@ -36,11 +36,13 @@ COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT
 COPY docker/config ${DATAVAULT_HOME}/config
 COPY docker/scripts ${DATAVAULT_HOME}/scripts
 
-RUN ln -s $DATAVAULT_HOME/webapps/datavault-broker /usr/local/tomcat/webapps/datavault-broker
+RUN ln -s ${DATAVAULT_HOME}/webapps/datavault-broker ${CATALINA_HOME}/webapps/datavault-broker
 
-WORKDIR /usr/local/tomcat
+RUN adduser -D datavault
+RUN chown -R datavault:datavault ${DATAVAULT_HOME}
+RUN chown -R datavault:datavault ${CATALINA_HOME}
 
-# Make port 80 available to the world outside this container
+WORKDIR ${CATALINA_HOME}
 EXPOSE 8080
 
 ENTRYPOINT ["/docker_datavault-home/scripts/docker-entrypoint.sh"]

@@ -2,7 +2,14 @@
 
 set -e
 
-${DATAVAULT_HOME}/scripts/wait-for-rabbitmq.sh
-/usr/local/bin/ep ${DATAVAULT_HOME}/config/*
+/usr/local/bin/ep ${DATAVAULT_HOME}/scripts/set-defaults.sh
+source ${DATAVAULT_HOME}/scripts/set-defaults.sh
 
-exec "$@"
+/usr/local/bin/ep ${DATAVAULT_HOME}/config/*
+/usr/local/bin/ep ${DATAVAULT_HOME}/scripts/fix-permissions.sh
+/usr/local/bin/ep ${DATAVAULT_HOME}/scripts/wait-for-rabbitmq.sh
+
+${DATAVAULT_HOME}/scripts/fix-permissions.sh
+${DATAVAULT_HOME}/scripts/wait-for-rabbitmq.sh
+
+su-exec datavault "$@"

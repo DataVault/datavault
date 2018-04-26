@@ -30,6 +30,8 @@ ARG LOCAL_DATAVAULT_DIR="./datavault"
 
 ENV DATAVAULT_HOME "/docker_datavault-home"
 
+RUN apk add --no-cache su-exec
+
 COPY --from=0 /usr/local/bin/ep /usr/local/bin/ep
 COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib ${DATAVAULT_HOME}/lib
 COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/webapps ${DATAVAULT_HOME}/webapps
@@ -38,11 +40,13 @@ COPY docker/scripts ${DATAVAULT_HOME}/scripts
 
 RUN sed -i '/wait-for-rabbitmq/d' ${DATAVAULT_HOME}/scripts/docker-entrypoint.sh
 
-RUN ln -s $DATAVAULT_HOME/webapps/datavault-webapp /usr/local/tomcat/webapps/datavault-webapp
+RUN ln -s ${DATAVAULT_HOME}/webapps/datavault-webapp ${CATALINA_HOME}/webapps/datavault-webapp
 
-WORKDIR /usr/local/tomcat
+RUN adduser -D datavault
+RUN chown -R datavault:datavault ${DATAVAULT_HOME}
+RUN chown -R datavault:datavault ${CATALINA_HOME}
 
-# Make port 8080 available to the world outside this container
+WORKDIR ${CATALINA_HOME}
 EXPOSE 8080
 
 ENTRYPOINT ["/docker_datavault-home/scripts/docker-entrypoint.sh"]
