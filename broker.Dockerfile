@@ -2,13 +2,25 @@ FROM maven:3-jdk-8
 
 ENV MAVEN_OPTS "-Xmx1024m"
 
+# Copy just the pom files to cache the dependencies
+COPY datavault-assembly/pom.xml /tmp/datavault-assembly/pom.xml
+COPY datavault-broker/pom.xml /tmp/datavault-broker/pom.xml
+COPY datavault-common/pom.xml /tmp/datavault-common/pom.xml
+COPY datavault-webapp/pom.xml /tmp/datavault-webapp/pom.xml
+COPY datavault-worker/pom.xml /tmp/datavault-worker/pom.xml
+COPY pom.xml /tmp
+WORKDIR /tmp
+RUN mvn -s /usr/share/maven/ref/settings-docker.xml dependency:go-offline --fail-never
+# The dependency:go-offline gets a lot of the dependencies, but not all. This would get more, but not sure about other implications
+#RUN mvn -s /usr/share/maven/ref/settings-docker.xml install --fail-never
+
 COPY . /usr/src
 WORKDIR /usr/src
-RUN mvn clean test package
+RUN mvn -s /usr/share/maven/ref/settings-docker.xml clean test package
 
-# Use an official java 7 as a parent image
-# FROM ubuntu:latest
-FROM tomcat:7-jre8
+RUN curl -sLo /usr/local/bin/ep https://github.com/kreuzwerker/envplate/releases/download/v0.0.8/ep-linux && chmod +x /usr/local/bin/ep
+
+FROM tomcat:7-jre8-alpine
 
 MAINTAINER William Petit <w.petit@ed.ac.uk>
 
@@ -16,17 +28,14 @@ ARG LOCAL_DATAVAULT_DIR="./datavault"
 
 ENV DATAVAULT_HOME "/docker_datavault-home"
 
-# Install MySql client
-RUN apt-get install -y mysql-client
+RUN apk add --no-cache mysql curl
 
-RUN curl -sLo /usr/local/bin/ep https://github.com/kreuzwerker/envplate/releases/download/v0.0.8/ep-linux && chmod +x /usr/local/bin/ep
-
+COPY --from=0 /usr/local/bin/ep /usr/local/bin/ep
 COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib ${DATAVAULT_HOME}/lib
 COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/webapps ${DATAVAULT_HOME}/webapps
 COPY docker/config ${DATAVAULT_HOME}/config
 COPY docker/scripts ${DATAVAULT_HOME}/scripts
 
-# RUN sed -i 's/appBase=\"webapps\"/appBase=\"\/vagrant_datavault-home\/webapps\"/' /usr/local/tomcat/conf/server.xml
 RUN ln -s $DATAVAULT_HOME/webapps/datavault-broker /usr/local/tomcat/webapps/datavault-broker
 
 WORKDIR /usr/local/tomcat
