@@ -7,9 +7,9 @@ source ${DATAVAULT_HOME}/scripts/set-defaults.sh
 
 /usr/local/bin/ep ${DATAVAULT_HOME}/config/*
 /usr/local/bin/ep ${DATAVAULT_HOME}/scripts/fix-permissions.sh
-/usr/local/bin/ep ${DATAVAULT_HOME}/scripts/wait-for-rabbitmq.sh
 
 ${DATAVAULT_HOME}/scripts/fix-permissions.sh
-${DATAVAULT_HOME}/scripts/wait-for-rabbitmq.sh
+/usr/local/bin/wait-for-it ${RABBITMQ_HOST}:15672 --timeout=90 --strict -- echo "RabbitMQ is ready"
+/usr/local/bin/wait-for-it ${MYSQL_HOST}:3306 --timeout=90 --strict -- echo "MySQL is ready"
 
 su-exec datavault "$@"

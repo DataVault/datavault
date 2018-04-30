@@ -19,9 +19,8 @@ WORKDIR /usr/src
 RUN mvn -s /usr/share/maven/ref/settings-docker.xml clean test package
 
 RUN curl -sLo /usr/local/bin/ep https://github.com/kreuzwerker/envplate/releases/download/v0.0.8/ep-linux && chmod +x /usr/local/bin/ep
+RUN curl -sLo /usr/local/bin/wait-for-it https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh && chmod +x /usr/local/bin/wait-for-it
 
-# Use an official java 7 as a parent image
-# FROM ubuntu:latest
 FROM tomcat:7-jre8-alpine
 
 MAINTAINER William Petit <w.petit@ed.ac.uk>
@@ -33,12 +32,14 @@ ENV DATAVAULT_HOME "/docker_datavault-home"
 RUN apk add --no-cache su-exec
 
 COPY --from=0 /usr/local/bin/ep /usr/local/bin/ep
+COPY --from=0 /usr/local/bin/wait-for-it /usr/local/bin/wait-for-it
 COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib ${DATAVAULT_HOME}/lib
 COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/webapps ${DATAVAULT_HOME}/webapps
 COPY docker/config ${DATAVAULT_HOME}/config
 COPY docker/scripts ${DATAVAULT_HOME}/scripts
 
-RUN sed -i '/wait-for-rabbitmq/d' ${DATAVAULT_HOME}/scripts/docker-entrypoint.sh
+RUN sed -i '/wait-for-it.*RABBITMQ/d' ${DATAVAULT_HOME}/scripts/docker-entrypoint.sh
+RUN sed -i '/wait-for-it.*MYSQL/d' ${DATAVAULT_HOME}/scripts/docker-entrypoint.sh
 
 RUN ln -s ${DATAVAULT_HOME}/webapps/datavault-webapp ${CATALINA_HOME}/webapps/datavault-webapp
 

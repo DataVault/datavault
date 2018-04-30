@@ -19,6 +19,7 @@ WORKDIR /usr/src
 RUN mvn -s /usr/share/maven/ref/settings-docker.xml clean test package
 
 RUN curl -sLo /usr/local/bin/ep https://github.com/kreuzwerker/envplate/releases/download/v0.0.8/ep-linux && chmod +x /usr/local/bin/ep
+RUN curl -sLo /usr/local/bin/wait-for-it https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh && chmod +x /usr/local/bin/wait-for-it
 
 FROM tomcat:7-jre8-alpine
 
@@ -31,6 +32,7 @@ ENV DATAVAULT_HOME "/docker_datavault-home"
 RUN apk add --no-cache mysql curl su-exec
 
 COPY --from=0 /usr/local/bin/ep /usr/local/bin/ep
+COPY --from=0 /usr/local/bin/wait-for-it /usr/local/bin/wait-for-it
 COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib ${DATAVAULT_HOME}/lib
 COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/webapps ${DATAVAULT_HOME}/webapps
 COPY docker/config ${DATAVAULT_HOME}/config

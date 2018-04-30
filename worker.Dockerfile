@@ -19,6 +19,7 @@ WORKDIR /usr/src
 RUN mvn -s /usr/share/maven/ref/settings-docker.xml clean test package
 
 RUN curl -sLo /usr/local/bin/ep https://github.com/kreuzwerker/envplate/releases/download/v0.0.8/ep-linux && chmod +x /usr/local/bin/ep
+RUN curl -sLo /usr/local/bin/wait-for-it https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh && chmod +x /usr/local/bin/wait-for-it
 
 FROM openjdk:8-jre-alpine
 
@@ -30,6 +31,7 @@ RUN apk add --no-cache bash curl su-exec
 
 RUN mkdir -p ${DATAVAULT_HOME}/lib
 COPY --from=0 /usr/local/bin/ep /usr/local/bin/ep
+COPY --from=0 /usr/local/bin/wait-for-it /usr/local/bin/wait-for-it
 COPY --from=0 /usr/src/datavault-worker/target/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar ${DATAVAULT_HOME}/lib/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar
 COPY docker/config ${DATAVAULT_HOME}/config
 COPY docker/scripts ${DATAVAULT_HOME}/scripts
