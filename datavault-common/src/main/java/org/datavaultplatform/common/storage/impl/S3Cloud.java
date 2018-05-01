@@ -26,7 +26,7 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 public class S3Cloud extends Device implements ArchiveStore {
 
 	private static final Logger logger = LoggerFactory.getLogger(S3Cloud.class);
-	public Verify.Method verificationMethod = Verify.Method.COPY_BACK;
+	public Verify.Method verificationMethod = Verify.Method.CLOUD;
 	private AmazonS3 s3;
     private static String bucketName = "datavault-test-bucket";
 	

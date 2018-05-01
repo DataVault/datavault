@@ -599,7 +599,7 @@ public class Deposit extends Task {
             ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
             String archiveId = archiveIds.get(archiveStoreId);
             
-            if (archiveStore.getVerifyMethod() != Verify.Method.COPY_BACK) {
+            if (archiveStore.getVerifyMethod() != Verify.Method.COPY_BACK && archiveStore.getVerifyMethod() != Verify.Method.CLOUD ) {
                 throw new Exception("Wrong Verify Method: [" + archiveStore.getVerifyMethod() + "] has to be " + Verify.Method.COPY_BACK);
             }
             
@@ -608,9 +608,17 @@ public class Deposit extends Task {
                     this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, loc, true, ivs, null, encChunksHash);
                 }
             } else {   
-                this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, ivs, null, encChunksHash);
+            	if (archiveStore.getVerifyMethod() != Verify.Method.CLOUD) {
+            		this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, ivs, null, encChunksHash);
+            	} else {
+            		this.doArchive();
+            	}
             }
         }
+    }
+    
+    private void doArchive() {
+    	logger.info("Skipping verification as a cloud plugin (for now)");
     }
     
     private void doArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, ArchiveStore archiveStore, 
@@ -674,13 +682,14 @@ public class Deposit extends Task {
             ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
             String archiveId = archiveIds.get(archiveStoreId);
 
-            logger.info("Verification method: " + archiveStore.getVerifyMethod());
+            Verify.Method vm = archiveStore.getVerifyMethod();
+            logger.info("Verification method: " + vm);
             
             logger.debug("verifyArchive - archiveId: "+archiveId);
 
             // Get the tar file
 
-            if ((archiveStore.getVerifyMethod() == Verify.Method.LOCAL_ONLY) && (!alreadyVerified)){
+            if ((vm == Verify.Method.LOCAL_ONLY) && (!alreadyVerified)){
                 
                 // Decryption
                 if(iv != null) {
@@ -691,7 +700,7 @@ public class Deposit extends Task {
                 // Verify the contents of the temporary file
                 verifyTarFile(context.getTempDir(), tarFile, null);
 
-            } else if (archiveStore.getVerifyMethod() == Verify.Method.COPY_BACK) {
+            } else if (vm == Verify.Method.COPY_BACK) {
 
                 alreadyVerified = true;
 
@@ -733,6 +742,9 @@ public class Deposit extends Task {
                     // Verify the contents
                     verifyTarFile(context.getTempDir(), tarFile, tarHash);
                 }
+            } else if (vm == Verify.Method.CLOUD) {
+            	// do nothing for now but we hope to extend this so that we can compare checksums supplied by the cloud api
+            	logger.info("Skipping verification as a cloud plugin (for now)");
             }
         }
     }
