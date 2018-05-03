@@ -41,6 +41,7 @@
             </activation>
             <properties>
                 <build.profile.id>dev</build.profile.id>
+                <skip.function.tests>true</skip.function.tests>
                 <skip.integration.tests>true</skip.integration.tests>
                 <skip.unit.tests>false</skip.unit.tests>
             </properties>
@@ -49,7 +50,27 @@
             <id>integration-test</id>
             <properties>
                 <build.profile.id>integration-test</build.profile.id>
+                <skip.function.tests>true</skip.function.tests>
                 <skip.integration.tests>false</skip.integration.tests>
+                <skip.unit.tests>true</skip.unit.tests>
+            </properties>
+        </profile>
+        <profile>
+            <id>functional-test</id>
+            <properties>
+                <build.profile.id>functional-test</build.profile.id>
+                <skip.function.tests>false</skip.function.tests>
+                <skip.integration.tests>true</skip.integration.tests>
+                <skip.unit.tests>true</skip.unit.tests>
+            </properties>
+        </profile>
+        <profile>
+            <id>test-server-test</id>
+            <properties>
+                <build.profile.id>test-server-test</build.profile.id>
+                <skip.testserver.tests>true</skip.testserver.tests>
+                <skip.function.tests>true</skip.function.tests>
+                <skip.integration.tests>true</skip.integration.tests>
                 <skip.unit.tests>true</skip.unit.tests>
             </properties>
         </profile>
@@ -286,6 +307,13 @@
                 <artifactId>spring-boot-starter-test</artifactId>
                 <version>1.5.8.RELEASE</version>
                 <scope>test</scope>
+            </dependency>
+            
+            <!--  Selenium -->
+            <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-java</artifactId>
+                <version>3.11.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
