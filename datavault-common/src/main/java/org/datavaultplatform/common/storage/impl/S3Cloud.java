@@ -100,6 +100,14 @@ public class S3Cloud extends Device implements ArchiveStore {
 		logger.info("Uploading " + working.getName() + " to " + this.bucketName);
 		try {
 			Upload upload = this.transferManager.upload(bucketName, depositId, working);
+			// The client calculates a checksum and the server validates it matches what was transferred
+			// If we wanted to do it ourselves, we could:
+			// InputStream input = new FileInputStream(working);
+			// ObjectMetadata metadata = new ObjectMetadata();
+			// metadata.setContentLength(working.length());
+			// String contentMd5_b64 = Md5Utils.md5AsBase64(working);
+			// metadata.setContentMD5(contentMd5_b64);
+			// Upload upload = this.transferManager.upload(bucketName, depositId, input, metadata);
 			upload.waitForCompletion();
 		} catch (AmazonServiceException ase) {
 			logger.info("Caught an AmazonServiceException, which means your request made it "
