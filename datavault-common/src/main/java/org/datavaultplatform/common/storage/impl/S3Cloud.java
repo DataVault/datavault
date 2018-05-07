@@ -14,10 +14,11 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.regions.Region;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
@@ -26,21 +27,34 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 public class S3Cloud extends Device implements ArchiveStore {
 
 	private static final Logger logger = LoggerFactory.getLogger(S3Cloud.class);
+	private static String defaultBucketName = "datavault-test-bucket";
+	private static String defaultRegionName = Regions.EU_WEST_1.toString();
 	public Verify.Method verificationMethod = Verify.Method.CLOUD;
 	private AmazonS3 s3;
-    private static String bucketName = "datavault-test-bucket";
-	
+	private String bucketName;
+
 	public S3Cloud(String name, Map<String, String> config) {
 		super(name, config);
 		super.depositIdStorageKey = true;
-		if (config.containsKey("bucketName")) {
-        	String bucketName = config.get("bucketName");
-        	S3Cloud.bucketName = bucketName;
-        }
-		// the auth credentials are in ~/.aws/credentials
-		s3 = new AmazonS3Client();
-	    Region euWest1 = Region.getRegion(Regions.EU_WEST_1);
-	    s3.setRegion(euWest1);
+		String bucketName = config.get("s3.bucketName");
+		if ( bucketName == null ) {
+			bucketName = defaultBucketName;
+		}
+		String regionName = config.get("s3.region");
+		if ( regionName == null ) {
+			regionName = defaultRegionName;
+		}
+		AmazonS3ClientBuilder builder = AmazonS3ClientBuilder
+			                        .standard()
+			                        .withRegion(regionName);
+                // Access key can be provided through properties, but if not will be picked up default location, e.g. ~/.aws/credentials
+		String accessKey = config.get("s3.awsAccessKey");
+		String secretKey = config.get("s3.awsSecretKey");
+                if (accessKey != null && secretKey != null) {
+                	builder = builder.withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)));
+                }
+		this.s3 = builder.build();
+		this.bucketName = bucketName;
 	}
 
 	@Override
@@ -91,7 +105,7 @@ public class S3Cloud extends Device implements ArchiveStore {
 	public String store(String depositId, File working, Progress progress) throws Exception {
 		
 		//ProgressListener listener = initProgressListener(progress, true);
-		logger.info("Uploading " + working.getName() + " to " + S3Cloud.bucketName);
+		logger.info("Uploading " + working.getName() + " to " + this.bucketName);
 		try {
 			s3.putObject(new PutObjectRequest(bucketName, depositId, working));
 		} catch (AmazonServiceException ase) {
