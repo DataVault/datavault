@@ -91,13 +91,16 @@ public class S3Cloud extends Device implements ArchiveStore {
             logger.info("AWS Error Code:   " + ase.getErrorCode());
             logger.info("Error Type:       " + ase.getErrorType());
             logger.info("Request ID:       " + ase.getRequestId());
+            throw ase;
 		} catch (FileNotFoundException fe) {
 			logger.info(fe.getMessage());
+                        throw fe;
 		} catch (AmazonClientException ace) {
 			logger.info("Caught an AmazonClientException, which means the client encountered "
                     + "a serious internal problem while trying to communicate with S3, "
                     + "such as not being able to access the network.");
 			logger.info("Error Message: " + ace.getMessage());
+                        throw ace;
 		}
 	}
 	
@@ -116,11 +119,13 @@ public class S3Cloud extends Device implements ArchiveStore {
             logger.info("AWS Error Code:   " + ase.getErrorCode());
             logger.info("Error Type:       " + ase.getErrorType());
             logger.info("Request ID:       " + ase.getRequestId());
+            throw ase;
 		} catch (AmazonClientException ace) {
 			logger.info("Caught an AmazonClientException, which means the client encountered "
                     + "a serious internal problem while trying to communicate with S3, "
                     + "such as not being able to access the network.");
 			logger.info("Error Message: " + ace.getMessage());
+                        throw ace;
 		}
 		return depositId;
 	}
