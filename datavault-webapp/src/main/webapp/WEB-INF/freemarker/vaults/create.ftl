@@ -5,90 +5,264 @@
     <#import "/spring.ftl" as spring />
 <div class="container">
 
+    <div class="alert alert-danger" role="alert">
     <ol class="breadcrumb">
         <li><a href="${springMacroRequestContext.getContextPath()}/"><b>My Vaults</b></a></li>
         <li class="active">Create new vault</li>
     </ol>
+    </div>
 
-    <#if datasets?has_content>
-        <form id="create-vault" class="form" role="form" action="" method="post">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+            
+                <#if datasets?has_content>
+                <form id="create-vault" class="form" role="form" action="" method="post">
+                    <div class="panel panel-uoe-low">
+                        
+                        <div class="associated-image">
+                            <figure class="uoe-panel-image uoe-panel-image"></figure>
+                        </div>
+                        
+                        <div class="panel-body">
+                            
+                            <h2>
+                                Create new vault
+                                <span class="text-muted">
+                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                    title="Multiple deposits may be made into one vault. Usually one vault will correspond to one Pure record">
+                                    </span>
+                                </span>
+                                <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" 
+                                    title="Should we not only create a Vault here? Do we really want to put it on the same page?">
+                                </span>
+                            </h2>
+                            
+                            <br/>
+                            
+                            <p class="main">
+                                You must record the details of your dataset in <a href="#">PURE</a>. 
+                                If you haven't yet created a Pure dataset record containing the 
+                                details of the data you're about to deposit in the vault, please do so. 
+                            </p>
+                            <br>
+                            <p class="main">
+                                Please select the Pure record describing the data that will be contained in this vault from the list below: 
+                            </p>
+                            
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-sm-5">
+                                        <select id="datasetID" name="datasetID" class="dataset-select selectpicker show-tick form-control form-control-lg">
+                                            <#list datasets as dataset>
+                                            <option value="${dataset.getID()}">${dataset.name?html}</option>
+                                            </#list>
+                                        </select>
+                                    </div>
+                                    <span class="text-muted">
+                                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                            title="Your Pure Dataset records should be listed here. Before you create your vault, the Pure Dataset record must be validated by Research Data Service staff.&nbsp;Please contact us if you have any questions.">
+                                        </span>
+                                    </span>
+                                </div>
+                                <div class="col-sm-3"></div>
+                                
+                                <div class="alert alert-info" role="alert">
+                                    <p>
+                                    The ‘owner’ /PI will be billed for any deposit, 
+                                    against the Grant ID they provided in relation to the vault, 
+                                    unless they have made other arrangements with Information Services Research Services. 
+                                    Rates are advertised on the Research Services charges page.
+                                    </p>
+                                    <p>
+                                    You will be aware that the data you place in the Vault belongs to the University of Edinburgh 
+                                    and you will only be able to retrieve the data as long as you are employed by the University of Edinburgh.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Vault Name</label>
+                                <span class="text-muted">
+                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                        title="Maximum 400 characters.">
+                                    </span>
+                                </span>
+                                <@spring.bind "vault.name" />
+                                <input type="text"
+                                       class="form-control"
+                                       name="${spring.status.expression}"
+                                       value="${spring.status.value!""}"
+                                       placeholder="Enter a descriptive name for the Vault e.g. the project or experiment."/>
+                            </div>
+                
+                            <div class="form-group">
+                                <label class="control-label">Description</label>
+                                <span class="text-muted">
+                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                        title="This description should contain information to assist you and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
+                                    </span>
+                                </span>
+                                <@spring.bind "vault.description" />
+                                <textarea type="text" class="form-control" name="description" rows="4" cols="60"></textarea>
+                            </div>
+                            
+                            <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" 
+                                title="Here I removed the 'Dataset is..' as I don't see why it's necessary as it's displayed above?">
+                            </span>
+                            
+                            <div class="form-group">
+                                <label for="exampleFormControlSelect1">Retention Policy</label>
+                                <span class="text-muted">
+                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                        title="This field indicates the policy with which we must comply, for the purpose of deciding the minimum amount of time for which this dataset &nbsp;must be archived. In most cases this will be the funder's policy. If there are multiple funders, it should be the one with the longest minimum among them.">
+                                    </span>
+                                </span>
+                                <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/planning-your-data/funder-requirements">
+                                    Read more about retention policies
+                                </a>
+                                
+                                <select id="policyID" name="policyID" data-width="fit" 
+                                    class="form-control">
+                                    <option selected disabled data-hidden="true">Please choose a retention policy</option>
+                                    <#list policies as retentionPolicy>
+                                    <option value="${retentionPolicy.getID()}"
+                                        data-subtext="${retentionPolicy.description?html}">${retentionPolicy.name?html}</option>
+                                    </#list>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>
+                                    <strong>Grant End Date</strong>
+                                    <span class="text-muted">
+                                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                            title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;">
+                                        </span>
+                                    </span>
+                                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" 
+                                        title="Here I've used a input box of type 'date' instead of having 3 input boxes.">
+                                    </span>
+                                </label>
+                                <input class="form-control" id="endDate" type="date"/>
+                            </div>
+                            
+                            <div class="alert alert-info" role="alert">
+                                <p>
+                                Vault will be closed so no more
+                                deposits can be added, ONE calendar
+                                year after the grant end date or one
+                                year after the first deposit,
+                                whichever is later.
+                                </p>
+                            </div>
+                            
+                            <label>Data Manager(s) UUN</label>
+                            <span class="text-muted">
+                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                    title="Each person nominated as a Data Manager on this vault will have the ability to retrieve the vault's contents, deposit more data into the vault, edit the descriptions of deposits or bring forward the review date of the vault. Giving a user Data Manager status does not give them the ability to add or remove the permissions of any other user on the vault.&nbsp;In the absence of the vault Owner, the nominated Data Manager(s) may be consulted on the management of the vault.">
+                                </span>
+                                <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" 
+                                    title="How is it going to work? what does the 'add button' does?">
+                                </span>
+                            </span>
+                            <div class="input-group">
+                                <input class="form-control" aria-label="..." type="text">
+                                <div class="input-group-btn">
+                                    <button type="button"
+                                        class="btn btn-default dropdown-toggle"
+                                        data-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false">
+                                        + Add <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right">
+                                        <li><a href="#">+ Add another</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="school">School</label>
+                                <span class="text-muted">
+                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                        title="The School to which the vault belongs. In the absence of the vault Owner, School officers may be consulted on the management of the vault.">
+                                    </span>
+                                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" 
+                                        title="Where do we get that list of school?">
+                                    </span>
+                                </span>
+                                <select class="form-control" id="school">
+                                    <option selected="selected">School Name</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                    <option>5</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="alert alert-danger" role="alert">
+                                <label>Group</label>
+                                <span class="text-muted">
+                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
+                                        title="The Group which is associated with this Vault. A Group is used to establish a chain of custody over data in a Vault. A Group administrator will be able to view information about a Vault.">
+                                    </span>
+                                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" 
+                                        title="Doesn't exist in the new UI">
+                                    </span>
+                                </span>
+                                <select id="groupID" name="groupID" data-width="fit" class="group-select selectpicker show-tick">
+                                    <option selected disabled data-hidden="true">Please choose a group owner</option>
+                                        <#list groups as group>
+                                        <#if group.enabled>
+                                        <option value="${group.getID()}">${group.name?html}</option>
+                                        </#if> 
+                                        </#list>
+                                </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>
+                                    <strong>Review Date</strong>
+                                    <span class="text-muted">
+                                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                            title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault. If on the other hand you wish the vault to be deleted, bring the review date forward so that deletion may be considered.">
+                                        </span>
+                                    </span>
+                                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" 
+                                        title="Here I've used a input box of type 'date' instead of having 3 input boxes.">
+                                    </span>
+                                </label>
+                                
+                                <input class="form-control" id="reviewDate" type="date"/>
+                            </div>
 
-            <div class="form-group">
-                <label class="control-label">Vault Name</label>
-                <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="A descriptive name for the Vault e.g. the project or experiment."></span></span>
-                <@spring.bind "vault.name" />
-                <input type="text"
-                       class="form-control"
-                       name="${spring.status.expression}"
-                       value="${spring.status.value!""}"/>
+                            <input type="hidden" id="submitAction" name="action" value="submit" /> 
+                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+
+                            <div class="btn-toolbar pull-right">
+                                <button type="submit" value="cancel" class="btn-lg btn-danger btn-link cancel">Cancel</button>
+                                <button type="submit" value="submit" class="btn-lg btn-primary">
+                                    <span class="glyphicon glyphicon-folder-close"></span>
+                                    Create new Vault
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <#else>
+                <div class="alert alert-warning" role="alert">
+                    <h4>
+                        <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+                        No datasets found
+                    </h4>
+                    Please see the help page on <a href="${springMacroRequestContext.getContextPath()}/help#describe">describing your data</a> for more information.
+                </div>
+                </#if>
             </div>
-
-            <div class="form-group">
-                <label class="control-label">Description</label>
-                <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="A detailed description of the contents or purpose of this Vault."></span></span>
-                <@spring.bind "vault.description" />
-                <textarea type="text"
-                          class="form-control"
-                          name="description"
-                          rows="4" cols="60"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label">Relates to</label>
-                <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="An external metadata record that describes this Vault. For example, a Dataset record in a CRIS system."></span></span>
-                <br>
-                <select id="datasetID" name="datasetID" data-width="fit" class="dataset-select selectpicker show-tick">
-                    <option selected disabled data-hidden="true">Please choose a dataset record</option>
-                    <#list datasets as dataset>
-                        <option value="${dataset.getID()}">${dataset.name?html}</option>
-                    </#list>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label">Retention Policy</label>
-                <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="The set of rules which govern how long this data should be kept. This may correspond to the requirements of a specific organisation or funder."></span></span>
-                <br>
-                <select id="policyID" name="policyID" data-width="fit" class="retentionPolicy-select selectpicker show-tick">
-                    <option selected disabled data-hidden="true">Please choose a retention policy</option>
-                    <#list policies as retentionPolicy>
-                        <option value="${retentionPolicy.getID()}" data-subtext="${retentionPolicy.description?html}">${retentionPolicy.name?html}</option>
-                    </#list>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label">Group</label>
-                <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="The Group which is associated with this Vault. A Group is used to establish a chain of custody over data in a Vault. A Group administrator will be able to view information about a Vault."></span></span>
-                <br>
-                <select id="groupID" name="groupID" data-width="fit" class="group-select selectpicker show-tick">
-                    <option selected disabled data-hidden="true">Please choose a group owner</option>
-                    <#list groups as group>
-                        <#if group.enabled>
-                            <option value="${group.getID()}">${group.name?html}</option>
-                        </#if>
-                    </#list>
-                </select>
-            </div>
-
-            <input type="hidden" id="submitAction" name="action" value="submit"/>
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-
-            <div class="btn-toolbar">
-                <button type="submit" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-folder-close"></span> Create new Vault</button>
-                <button type="submit" value="cancel" class="btn btn-danger cancel">Cancel</button>
-            </div>
-        </form>
-    <#else>
-        <div class="alert alert-warning" role="alert">
-            <h4>
-                <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
-                No datasets found
-            </h4>
-            Please see the help page on <a href="${springMacroRequestContext.getContextPath()}/help#describe">describing your data</a> for more information.
         </div>
-    </#if>
-
+    </div>
 </div>
 
 <#if datasets?has_content>

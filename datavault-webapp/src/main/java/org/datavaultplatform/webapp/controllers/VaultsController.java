@@ -24,6 +24,18 @@ public class VaultsController {
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
     public String getVaultsListing(ModelMap model) {
         model.addAttribute("vaults", restService.getVaultsListing());
+        
+        // pass the view an empty Vault since the form expects it
+        model.addAttribute("vault", new CreateVault());
+
+        Dataset[] datasets = restService.getDatasets();
+        model.addAttribute("datasets", datasets);
+        
+        RetentionPolicy[] policies = restService.getRetentionPolicyListing();
+        model.addAttribute("policies", policies);
+
+        Group[] groups = restService.getGroups();
+        model.addAttribute("groups", groups);
 
         return "vaults/index";
     }
