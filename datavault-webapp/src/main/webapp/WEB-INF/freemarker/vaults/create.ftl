@@ -5,12 +5,10 @@
     <#import "/spring.ftl" as spring />
 <div class="container">
 
-    <div class="alert alert-danger" role="alert">
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>My Vaults</b></a></li>
+        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Current Vaults</b></a></li>
         <li class="active">Create new vault</li>
     </ol>
-    </div>
 
     <div class="container">
         <div class="row">
