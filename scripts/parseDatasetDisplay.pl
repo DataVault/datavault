@@ -22,6 +22,6 @@ foreach my $dataset ($dom->findnodes('/result/dataSet')) {
    my $persons = $dataset->findnodes('./personAssociations/personAssociation/person/@uuid')->to_literal();
    my $ds = $dataset->findnodes('./@uuid')->to_literal();
    foreach my $person ($dataset->findnodes('./personAssociations/personAssociation/person/@uuid')){
-      print $person->to_literal() . "\t" . $ds . "\t" . $title . "\t" . $workflow . \n";
+      print $person->to_literal() . "\t" . $ds . "\t" . $title . "\t" . $workflow . "\n";
    }
 }
