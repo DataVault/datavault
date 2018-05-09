@@ -23,8 +23,8 @@
             <h4><strong>Deposit and Retrieve</strong></h4>
             <div class="row">
                 <div class="col-md-12">
-                    <a class="btn btn-link pull-right" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create">
-                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Deposit
+                    <a class="btn btn-primary pull-right" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create">
+                        <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit data
                     </a>
                 </div>
             </div>
@@ -56,28 +56,18 @@
                         <td></td>
                         <td>
                             <#if deposit.status.name() == "COMPLETE">
-                            <a id="retrievebtn" class="btn btn-default"
+                            <a id="retrievebtn" class="btn btn-default pull-right"
                                href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve">
                                 <span class="fa fa-upload fa-rotate-180" aria-hidden="true"></span> Retrieve
                             </a>
                             <#elseif deposit.status.name() == "FAILED">
-                            <button id="failedbtn" class="btn btn-danger disabled">
-                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                                Failed
-                            </button>
+                            <span class="label label-danger pull-right">Failed</span>
                             <#elseif deposit.status.name() == "NOT_STARTED">
-                            <button id="inprogressbtn" class="btn btn-info disabled">
-                                Not started
-                            </button>
+                            <span class="label label-info pull-right">Not started</span>
                             <#elseif deposit.status.name() == "IN_PROGRESS">
-                            <button id="inprogressbtn" class="btn btn-info disabled">
-                                <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
-                                In progress
-                            </button>
+                            <span class="label label-info pull-right">In progress</span>
                             <#else>
-                            <button id="inprogressbtn" class="btn btn-info disabled">
-                                ${deposit.status}
-                            </button>
+                            <span class="label label-info pull-right">${deposit.status}</span>
                             </#if>
                         </td>
                     </tr>

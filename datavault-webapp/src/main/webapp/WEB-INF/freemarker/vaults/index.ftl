@@ -255,33 +255,14 @@
                             </div>
                             
                             <div class="form-group">
-                                <label for="school">School</label>
+                                <label>School</label>
                                 <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover"
                                    data-content="The School to which the vault belongs. In the absence of the vault Owner, School officers may be consulted on the management of the vault."
                                    data-original-title="" title="">?</a>
-                                <span class="text-muted">
-                                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" 
-                                        title="Where do we get that list of school?">
-                                    </span>
                                 </span>
-                                <select class="form-control" id="school">
-                                    <option selected="selected">School Name</option>
-                                    <option>2</option>
-                                    <option>3</option>
-                                    <option>4</option>
-                                    <option>5</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <div class="alert alert-danger" role="alert">
-                                <label>Group</label>
-                                <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover"
-                                   data-content="The Group which is associated with this Vault. A Group is used to establish a chain of custody over data in a Vault. A Group administrator will be able to view information about a Vault."
-                                   data-original-title="" title="">?</a>
                                 <span class="text-muted">
                                     <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" 
-                                        title="Doesn't exist in the new UI">
+                                        title="School use to be Group, I've change the name on the interface but it will stay 'Group in the database?">
                                     </span>
                                 </span>
                                 <select id="groupID" name="groupID" data-width="fit" class="group-select selectpicker show-tick">
@@ -292,7 +273,6 @@
                                         </#if> 
                                         </#list>
                                 </select>
-                                </div>
                             </div>
                             
                             <div class="form-group">
