@@ -1,0 +1,9 @@
+export BROKER_HOST=${MYSQL_HOST:-broker}
+export MYSQL_HOST=${MYSQL_HOST:-mysql}
+export MYSQL_PASSWORD=${MYSQL_PASSWORD:-datavault}
+export RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
+export RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-datavault}
+export USER_DATA_DIR=${USER_DATA_DIR:-/Users}
+export ARCHIVE_DIR=${ARCHIVE_DIR:-/tmp/datavault/archive}
+export TEMP_DIR=${TEMP_DIR:-/tmp/datavault/temp}
+export META_DIR=${META_DIR:-/tmp/datavault/meta}

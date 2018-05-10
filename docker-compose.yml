@@ -1,15 +1,15 @@
 version: '2.1'
 services:
   rabbitmq:
-    image: bitnami/rabbitmq:latest
+    image: rabbitmq:3-management-alpine
     volumes:
       - ./docker/rabbitmq_data:/bitnami
     ports:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_USERNAME: datavault
-      RABBITMQ_PASSWORD: datavault
+      RABBITMQ_DEFAULT_USER: datavault
+      RABBITMQ_DEFAULT_PASS: datavault
     networks:
       - mqnet
     healthcheck:
@@ -32,9 +32,9 @@ services:
       - dbnet
 
   workers:
-    build: 
-      context: ./datavault-worker
-      dockerfile: Dockerfile
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
     volumes:
       - ./docker/tmp/datavault/active:/tmp/datavault/active:rw
       - ./docker/tmp/datavault/archive:/tmp/datavault/archive:rw
@@ -48,10 +48,32 @@ services:
       - mqnet
     depends_on:
       - rabbitmq
-      
+
+  broker:
+    build:
+      context: .
+      dockerfile: broker.Dockerfile
+    volumes:
+      - ./docker/tmp/datavault/active:/tmp/datavault/active:rw
+      - ./docker/tmp/datavault/archive:/tmp/datavault/archive:rw
+      - ./docker/tmp/datavault/temp:/tmp/datavault/temp:rw
+      - ./docker/tmp/datavault/meta:/tmp/datavault/meta:rw
+      - ./docker/tmp/Users:/Users:rw
+      - ./docker/config:/docker_datavault-home/config/
+      - ./docker/scripts:/docker_datavault-home/scripts/
+      - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib:/docker_datavault-home/lib
+      - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/webapps:/docker_datavault-home/webapps
+    networks:
+      - dbnet
+      - mqnet
+    depends_on:
+      - rabbitmq
+      - mysql
+
   web:
     build:
-      context: datavault-webapp
+      context: .
+      dockerfile: webapp.Dockerfile
     ports:
       - "58080:8080"
     volumes:
