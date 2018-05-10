@@ -16,7 +16,7 @@ public class ExternalMetadataService {
         this.metadataURL = metadataURL;
         
         if (metadataURL.equals("")) {
-            this.metadataProvider = new MockProvider();
+            this.metadataProvider = new TestPureProvider();
         } else {
             this.metadataProvider = new PureProvider(metadataURL);
         }
