@@ -1,1 +1,8 @@
 .git
+.dockerignore
+docker-compose.yml
+*.md
+*.Dockerfile
+datavault-*/target/
+docker/tmp
+scripts/
