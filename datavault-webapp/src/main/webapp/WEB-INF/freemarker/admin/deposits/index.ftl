@@ -37,7 +37,7 @@
                     <tr class="tr">
                         <td>${deposit.note?html}</a></td>
                         <td>${deposit.status}</td>
-                        <td>${deposit.filePath?html}</td>
+                        <td>${deposit.filePath!'missing'?html}</td>
                         <td>${deposit.getSizeStr()}</td>
                         <td>${deposit.getCreationTime()?datetime}</td>
                     </tr>

@@ -5,7 +5,7 @@
 <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Current Vaults</b></a></li>
+        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
         <li class="active"><b>Vault:</b> ${vault.name?html}</li>
     </ol>
 
@@ -35,11 +35,10 @@
                         <th>Deposited By</th>
                         <th>Date and Time</th>
                         <th>Total Size of Selected Deposits</th>
-                        <th>Are any of the intended recipients external to the University of Edinburgh?</th>
                         <th>Select Desposit(s) to be Retrieved
-                            <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover"
-                               data-content="Please make sure you have enough space for the full contents of the vault to be copied to the location you will specify (see 'Size', below)."
-                               data-original-title="" title="">?</a>
+                            <span class="glyphicon glyphicon-info-sign text-muted" aria-hidden="true" data-toggle="tooltip" 
+                                title="Please make sure you have enough space for the full contents of the vault to be copied to the location you will specify (see 'Size', below).">
+                            </span>
                         </th>
                     </tr>
                 </thead>
@@ -53,7 +52,6 @@
                         <td></td>
                         <td>${deposit.getCreationTime()?datetime}</td>
                         <td>${deposit.getSizeStr()}</td>
-                        <td></td>
                         <td>
                             <#if deposit.status.name() == "COMPLETE">
                             <a id="retrievebtn" class="btn btn-default pull-right"
@@ -74,8 +72,7 @@
                     </#list>
                 </tbody>
             </table>
-            </#if>
-
+            <#else>
             <div class="row">
                 <div class="col-md-12">
                     <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create">
@@ -83,6 +80,7 @@
                     </a>
                 </div>
             </div>
+            </#if>
 
             <div id="accordion">
                 <h4 class="accordion-toggle">
@@ -117,7 +115,7 @@
                                 <td></td>
                             </tr>
                             <tr>
-                                <th scope="col">Review Date</th>
+                                <th scope="col" class="text-muted">Review Date</th>
                                 <td>00/00/0000</td>
                                 <td>
                                     <button type="button" class="btn btn-default pull-right">
@@ -301,6 +299,10 @@ $(document).ready(function(){
       //Hide the other panels
       $(".accordion-content").not($(this).next()).slideUp('fast');
 
+    });
+    
+    $('[data-toggle="tooltip"]').tooltip({
+        'placement': 'right'
     });
 });
 </script>

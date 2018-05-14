@@ -31,30 +31,35 @@ public class WelcomeController {
     public void setRestService(RestService restService) {
         this.restService = restService;
     }
-
+    
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String getVaultsListing(ModelMap model) {
-
-        if (restService.getVaultsListing().length > 0) {
-            return "redirect:/vaults";
-        }
-
-        if (restService.getFileStoreListing().length > 0) {
-            model.addAttribute("filestoresExist", true);
-        } else {
-            model.addAttribute("filestoresExist", false);
-        }
-
-        if (restService.getDatasets().length > 0) {
-            model.addAttribute("datasetsExist", true);
-        } else {
-            model.addAttribute("datasetsExist", false);
-        }
-
-        model.put("system", system);
-        model.put("link", link);
-
-        return "welcome";
-
+        return "redirect:/vaults";
     }
+    
+//    @RequestMapping(value = "/", method = RequestMethod.GET)
+//    public String getVaultsListing(ModelMap model) {
+//
+//        if (restService.getVaultsListing().length > 0) {
+//            return "redirect:/vaults";
+//        }
+//
+//        if (restService.getFileStoreListing().length > 0) {
+//            model.addAttribute("filestoresExist", true);
+//        } else {
+//            model.addAttribute("filestoresExist", false);
+//        }
+//
+//        if (restService.getDatasets().length > 0) {
+//            model.addAttribute("datasetsExist", true);
+//        } else {
+//            model.addAttribute("datasetsExist", false);
+//        }
+//
+//        model.put("system", system);
+//        model.put("link", link);
+//
+//        return "welcome";
+//
+//    }
 }

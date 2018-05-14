@@ -3,12 +3,15 @@
       <div class="container-fluid">
         <div class="navbar-header"></div>
         <ul class="nav navbar-nav ">
-            <li><a href="${springMacroRequestContext.getContextPath()}/">DATAVAULT</a></li>
+            <li <#if nav == "home">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/">DATAVAULT</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
-            <li><a href="${springMacroRequestContext.getContextPath()}/filestores">Storage Options</a></li>
-            <li><a href="${springMacroRequestContext.getContextPath()}/feedback/">Contact</a></li>
-            <li><a href="${springMacroRequestContext.getContextPath()}/help/">More Info</a></li>
+            <@sec.authorize url="/admin">
+            <li <#if nav == "admin">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/admin/">Administration</a></li>
+            </@sec.authorize>
+            <li <#if nav == "user">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/filestores">Storage Options</a></li>
+            <li <#if nav == "feedback">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/feedback/">Contact</a></li>
+            <li <#if nav == "help">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/help/">More Info</a></li>
             <li><a href="${springMacroRequestContext.getContextPath()}/auth/logout">Logout</a></li>
         </ul>
       </div>

@@ -6,19 +6,12 @@
 
     <div class="container">
     
+        <#if vaults?has_content>
         <h3>
             Current Vaults
-            <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover"
-               data-content="Vaults of which you are either the Owner or the Nominated Data Manager. If you think a vault is missing from this list, please contact the Research Data Service"
-               data-original-title="" title="">?</a>
+            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                title="Vaults of which you are either the Owner or the Nominated Data Manager. If you think a vault is missing from this list, please contact the Research Data Service">
         </h3>
-        <div class="row">
-            <div class="col-md-12">
-                <a class="btn btn-link pull-right" href="${springMacroRequestContext.getContextPath()}/vaults/create">
-                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Create new Vault
-                </a>
-            </div>
-        </div>
         
         <div class="row">
             <div class="col-md-12">
@@ -27,40 +20,28 @@
                         <thead>
                             <tr>
                                 <th>Vault Name</th>
-                                <th>Deposit 
-                                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" 
-                                        title="What is this column?">
-                                    </span>
-                                </th>
+                                <th>Deposit</th>
                                 <th>Owner Name</th>
                                 <th>Date Created</th>
-                                <th>Review Date</th>
-                                <th>Deposit/Retrieval Completeness
-                                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" 
-                                        title="Is it the completness of the last deposit/retrieval?">
-                                    </span>
-                                </th>
+                                <th class="text-muted">Review Date</th>
                             </tr>
                         </thead>
                         <tbody>
                             <#list vaults as vault>
                             <tr>
-                                <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/">${vault.name?html}</a></td>
                                 <td>
-                                    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create"
-                                       class="btn btn-primary">Deposit</a>
+                                    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/">
+                                        ${vault.name?html}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create" class="btn btn-primary">
+                                       <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit
+                                   </a>
                                 </td>
                                 <td>${vault.getUserID()}</td>
                                 <td>${vault.getCreationTime()?datetime}</td>
-                                <td>00/00/0000</td>
-                                <td>
-                                    <div class="progress">
-                                        <div class="progress-bar" role="progressbar"
-                                            aria-valuenow="70" aria-valuemin="0"
-                                            aria-valuemax="100" style="width: 70%">
-                                        </div>
-                                    </div>
-                                </td>
+                                <td class="text-muted">00/00/0000</td>
                             </tr>
                             </#list>
                         </tbody>
@@ -70,37 +51,35 @@
         </div>
         <br/>
         <br/>
+        </#if>
+        
         <div class="row">
             <div class="col-md-12">
-                <#if datasets?has_content>
-                <form id="create-vault" class="form" role="form" action="vaults/create" method="post">
-                    <div class="panel panel-uoe-low">
+                <div class="panel panel-uoe-low">
 
-                        <div class="associated-image">
-                            <figure class="uoe-panel-image uoe-panel-image"></figure>
-                        </div>
+                    <div class="associated-image">
+                        <figure class="uoe-panel-image uoe-panel-image"></figure>
+                    </div>
+                    
+                    <div class="panel-body">
+                        <h2>
+                            Create new vault
+                            <small>
+                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                    title="Multiple deposits may be made into one vault. Usually one vault will correspond to one Pure record">
+                            </small>
+                        </h2>
                         
-                        <div class="panel-body">
-
-                            <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip"
-                                  title="Should we not only create a Vault here? Do we really want to put it on the same page?">
-                            </span>
-                            <h2>
-                                Create new vault
-
-                                <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover"
-                                   data-content="Multiple deposits may be made into one vault. Usually one vault will correspond to one Pure record"
-                                   data-original-title="" title="">?</a>
-                            </h2>
-                            
-                            <br/>
-                            
-                            <p class="main">
-                                You must record the details of your dataset in <a href="#">PURE</a>. 
-                                If you haven't yet created a Pure dataset record containing the 
-                                details of the data you're about to deposit in the vault, please do so. 
-                            </p>
-                            <br>
+                        <br/>
+                        
+                        <p class="main">
+                            You must record the details of your dataset in <a href="#">PURE</a>. 
+                            If you haven't yet created a Pure dataset record containing the 
+                            details of the data you're about to deposit in the vault, please do so. 
+                        </p>
+                        <br>
+                        
+                        <form id="create-vault" class="form" role="form" action="vaults/create" method="post">
                             <p class="main">
                                 Please select the Pure record describing the data that will be contained in this vault from the list below: 
                             </p>
@@ -114,13 +93,8 @@
                                             </#list>
                                         </select>
                                     </div>
-                                    <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover"
-                                       data-content="Your Pure Dataset records should be listed here. Before you create your vault, the Pure Dataset record must be validated by Research Data Service staff.&nbsp;Please contact us if you have any questions."
-                                       data-original-title="" title="">?</a>
-                                    <span class="text-muted">
-                                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
-                                            title="Your Pure Dataset records should be listed here. Before you create your vault, the Pure Dataset record must be validated by Research Data Service staff.&nbsp;Please contact us if you have any questions.">
-                                        </span>
+                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                        title="Your Pure Dataset records should be listed here. Before you create your vault, the Pure Dataset record must be validated by Research Data Service staff.&nbsp;Please contact us if you have any questions.">
                                     </span>
                                 </div>
                                 <div class="col-sm-3"></div>
@@ -140,13 +114,8 @@
                             </div>
                             <div class="form-group">
                                 <label class="control-label">Vault Name</label>
-                                <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover"
-                                   data-content="Maximum 400 characters."
-                                   data-original-title="" title="">?</a>
-                                <span class="text-muted">
-                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
-                                        title="Maximum 400 characters.">
-                                    </span>
+                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                    title="Maximum 400 characters.">
                                 </span>
                                 <@spring.bind "vault.name" />
                                 <input type="text"
@@ -158,38 +127,23 @@
                 
                             <div class="form-group">
                                 <label class="control-label">Description</label>
-                                <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover"
-                                   data-content="This description should contain information to assist you and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters."
-                                   data-original-title="" title="">?</a>
-                                <span class="text-muted">
-                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
-                                        title="This description should contain information to assist you and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
-                                    </span>
+                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                    title="This description should contain information to assist you and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
                                 </span>
                                 <@spring.bind "vault.description" />
                                 <textarea type="text" class="form-control" name="description" rows="4" cols="60"></textarea>
                             </div>
                             
-                            <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" 
-                                title="Here I removed the 'Dataset is..' as I don't see why it's necessary as it's displayed above?">
-                            </span>
-                            
                             <div class="form-group">
                                 <label for="policyID">Retention Policy</label>
-                                <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover"
-                                   data-content="This field indicates the policy with which we must comply, for the purpose of deciding the minimum amount of time for which this dataset &nbsp;must be archived. In most cases this will be the funder's policy. If there are multiple funders, it should be the one with the longest minimum among them."
-                                   data-original-title="" title="">?</a>
-                                <span class="text-muted">
-                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
-                                        title="This field indicates the policy with which we must comply, for the purpose of deciding the minimum amount of time for which this dataset &nbsp;must be archived. In most cases this will be the funder's policy. If there are multiple funders, it should be the one with the longest minimum among them.">
-                                    </span>
+                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                    title="This field indicates the policy with which we must comply, for the purpose of deciding the minimum amount of time for which this dataset &nbsp;must be archived. In most cases this will be the funder's policy. If there are multiple funders, it should be the one with the longest minimum among them.">
                                 </span>
                                 <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/planning-your-data/funder-requirements">
                                     Read more about retention policies
                                 </a>
                                 
-                                <select id="policyID" name="policyID" data-width="fit" 
-                                    class="form-control">
+                                <select id="policyID" name="policyID" data-width="fit" class="form-control">
                                     <option selected disabled data-hidden="true">Please choose a retention policy</option>
                                     <#list policies as retentionPolicy>
                                     <option value="${retentionPolicy.getID()}"
@@ -201,19 +155,11 @@
                             <div class="form-group">
                                 <label>
                                     <strong>Grant End Date</strong>
-                                    <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover"
-                                       data-content="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;"
-                                       data-original-title="" title="">?</a>
-                                    <span class="text-muted">
-                                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
-                                            title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;">
-                                        </span>
-                                    </span>
-                                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" 
-                                        title="Here I've used a input box of type 'date' instead of having 3 input boxes.">
+                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                        title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;">
                                     </span>
                                 </label>
-                                <input class="form-control" id="endDate" type="date"/>
+                                <input class="form-control" id="endDate" type="date" disabled/>
                             </div>
                             
                             <div class="alert alert-info" role="alert">
@@ -226,46 +172,31 @@
                                 </p>
                             </div>
                             
-                            <label>Data Manager(s) UUN</label>
-                            <span class="text-muted">
-                                <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover"
-                                   data-content="Each person nominated as a Data Manager on this vault will have the ability to retrieve the vault's contents, deposit more data into the vault, edit the descriptions of deposits or bring forward the review date of the vault. Giving a user Data Manager status does not give them the ability to add or remove the permissions of any other user on the vault.&nbsp;In the absence of the vault Owner, the nominated Data Manager(s) may be consulted on the management of the vault."
-                                   data-original-title="" title="">?</a>
+                            <div class="form-group">
+                                <label>Data Manager(s) UUN</label>
                                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                                     title="Each person nominated as a Data Manager on this vault will have the ability to retrieve the vault's contents, deposit more data into the vault, edit the descriptions of deposits or bring forward the review date of the vault. Giving a user Data Manager status does not give them the ability to add or remove the permissions of any other user on the vault.&nbsp;In the absence of the vault Owner, the nominated Data Manager(s) may be consulted on the management of the vault.">
                                 </span>
-                                <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" 
-                                    title="How is it going to work? what does the 'add button' does?">
-                                </span>
-                            </span>
-                            <div class="input-group">
-                                <input class="form-control" aria-label="..." type="text">
-                                <div class="input-group-btn">
-                                    <button type="button"
-                                        class="btn btn-default dropdown-toggle"
-                                        data-toggle="dropdown"
-                                        aria-haspopup="true"
-                                        aria-expanded="false">
-                                        + Add <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-right">
-                                        <li><a href="#">+ Add another</a></li>
-                                    </ul>
+                                <div class="input-group">
+                                    <input class="form-control" aria-label="Add" type="text"/>
+                                    <span class="input-group-btn">
+                                        <button type="button"
+                                                class="btn btn-default dropdown-toggle"
+                                                data-toggle="dropdown"
+                                                aria-haspopup="true"
+                                                aria-expanded="false" disabled>
+                                                + Add
+                                        </button>
+                                    </span>
                                 </div>
                             </div>
                             
                             <div class="form-group">
                                 <label>School</label>
-                                <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover"
-                                   data-content="The School to which the vault belongs. In the absence of the vault Owner, School officers may be consulted on the management of the vault."
-                                   data-original-title="" title="">?</a>
+                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                    title="The School to which the vault belongs. In the absence of the vault Owner, School officers may be consulted on the management of the vault.">
                                 </span>
-                                <span class="text-muted">
-                                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" 
-                                        title="School use to be Group, I've change the name on the interface but it will stay 'Group in the database?">
-                                    </span>
-                                </span>
-                                <select id="groupID" name="groupID" data-width="fit" class="group-select selectpicker show-tick">
+                                <select id="groupID" name="groupID" data-width="fit" class="form-control">
                                     <option selected disabled data-hidden="true">Please choose a group owner</option>
                                         <#list groups as group>
                                         <#if group.enabled>
@@ -278,15 +209,12 @@
                             <div class="form-group">
                                 <label>
                                     <strong>Review Date</strong>
-                                    <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover"
-                                       data-content="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault. If on the other hand you wish the vault to be deleted, bring the review date forward so that deletion may be considered."
-                                       data-original-title="" title="">?</a>
-                                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" 
-                                        title="Here I've used a input box of type 'date' instead of having 3 input boxes.">
+                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                        title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault. If on the other hand you wish the vault to be deleted, bring the review date forward so that deletion may be considered.">
                                     </span>
                                 </label>
                                 
-                                <input class="form-control" id="reviewDate" type="date"/>
+                                <input class="form-control" id="reviewDate" type="date" disabled/>
                             </div>
 
                             <input type="hidden" id="submitAction" name="action" value="submit" /> 
@@ -299,23 +227,13 @@
                                     Create new Vault
                                 </button>
                             </div>
-                        </div>
+                        </form>
                     </div>
-                </form>
-                <#else>
-                <div class="alert alert-warning" role="alert">
-                    <h4>
-                        <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
-                        No datasets found
-                    </h4>
-                    Please see the help page on <a href="${springMacroRequestContext.getContextPath()}/help#describe">describing your data</a> for more information.
                 </div>
-                </#if>
             </div>
         </div>
     </div>
     
-    <#if datasets?has_content>
     <script>
         $(document).ready(function () {
 
@@ -363,6 +281,5 @@
             });
         }); $('[data-toggle="popover"]').popover();
     </script>
-    </#if>
 
 </@layout.vaultLayout>

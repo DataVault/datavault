@@ -5,168 +5,176 @@
 <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>My Vaults</b></a></li>
+        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
         <li><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}"><b>Vault:</b> ${vault.name?html}</a></li>
         <li class="active"><b>Deposit:</b> ${deposit.note?html}</li>
     </ol>
 
-    <div class="bs-callout">
-        <h2><i class="fa fa-hdd-o" aria-hidden="true"></i> ${deposit.note?html}</h2>
-
-        <ol id="progtrckr" class="progtrckr" data-progtrckr-steps="0" style="display:none;">
-        </ol>
-
-        <div id="progress-transfer" style="display:none;">
-            <span id="progress-copied">Placeholder</span>
-            <div class="progress">
-              <div id="progress" class="progress-bar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
-                <span id="progress-label" class="sr-only">0% Complete</span>
-              </div>
-            </div>
+    <div class="panel panel-uoe-low">
+        <div class="associated-image">
+            <figure class="uoe-panel-image uoe-panel-image"></figure>
         </div>
 
-        <div id = "job-error" class="alert alert-danger" role="alert" style="display:none;">
-            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            <span class="sr-only">Error</span>
-            <span id="error-label">Error details</span>
+        <div class="panel-body">
+
+            <h2><i class="fa fa-hdd-o" aria-hidden="true"></i> ${deposit.note?html}</h2>
+            <br/>
+            
+            <ol id="progtrckr" class="progtrckr" data-progtrckr-steps="0" style="display:none;">
+            </ol>
+    
+            <div id="progress-transfer" style="display:none;">
+                <span id="progress-copied">Placeholder</span>
+                <div class="progress">
+                  <div id="progress" class="progress-bar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                    <span id="progress-label" class="sr-only">0% Complete</span>
+                  </div>
+                </div>
+            </div>
+    
+            <div id = "job-error" class="alert alert-danger" role="alert" style="display:none;">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error</span>
+                <span id="error-label">Error details</span>
+            </div>
+    
+            <ul class="nav nav-tabs">
+                <li class="active"><a data-toggle="tab" href="#deposit">Deposit</a></li>
+                <li><a data-toggle="tab" href="#contents">Contents <span class="badge">${manifest?size}</span></a></li>
+                <li><a data-toggle="tab" href="#events">Events <span class="badge">${events?size}</span></a></li>
+                <li><a data-toggle="tab" href="#retrievals">Retrievals <span class="badge">${retrieves?size}</span></a></li>
+            </ul>
+    
+            <div id="deposit-tab-content" class="tab-content">
+    
+                <div class="tab-pane active" id="deposit">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr class="tr">
+                                <th>Note</th>
+                                <th>Status</th>
+                                <th>Size</th>
+                                <th>Timestamp</th>
+                            </tr>
+                            <thead>
+                            <tbody>
+                            <tr class="tr">
+                                <td>${deposit.note?html}</td>
+                                <td>
+                                    <div id="deposit-status" class="job-status">
+                                        <#if deposit.status.name() == "COMPLETE">
+                                            <div class="text-success">
+                                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                                Complete
+                                            </div>
+    
+                                        <#elseif deposit.status.name() == "FAILED">
+                                            <div class="text-danger">
+                                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                                Failed
+                                            </div>
+    
+                                        <#elseif deposit.status.name() == "NOT_STARTED">
+                                            Not started
+    
+                                        <#elseif deposit.status.name() == "IN_PROGRESS">
+                                            <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                                            In progress
+    
+                                        <#else>
+                                            ${deposit.status}
+                                        </#if>
+                                    </div>
+                                </td>
+                                <td>${deposit.getSizeStr()}</td>
+                                <td>${deposit.creationTime?datetime}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+    
+                <div class="tab-pane" id="contents">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr class="tr">
+                                <th>File</th>
+                                <th>Type</th>
+                                <th>Checksum</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <#list manifest as filefixity>
+                                <tr class="tr">
+                                    <td>${filefixity.file?html}</td>
+                                    <td>${filefixity.fileType?html}</td>
+                                    <td style="font-family:monospace;">${filefixity.fixity}&nbsp<span class="label label-primary">${filefixity.algorithm}</span></td>
+                                </tr>
+                                </#list>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+    
+                <div class="tab-pane" id="events">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr class="tr">
+                                <th>User</th>
+                                <th>Event</th>
+                                <th>Message</th>
+                                <th>Timestamp</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <#list events as event>
+                                <tr class="tr">
+                                    <td>${event.userID?html}</td>
+                                    <td>${event.eventClass?replace('org.datavaultplatform.common.event.', '')?html}</td>
+                                    <td>${event.message?html}</td>
+                                    <td>${event.timestamp?datetime}</td>
+                                </tr>
+                                </#list>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+    
+                <div class="tab-pane" id="retrievals">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr class="tr">
+                                <th>Retrieval note</th>
+                                <th>Status</th>
+                                <th>Retrieval path</th>
+                                <th>Timestamp</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <#list retrieves as retrieve>
+                                <tr class="tr">
+                                    <td>${retrieve.note?html}</td>
+                                    <td>${retrieve.status?html}</td>
+                                    <td>${retrieve.retrievePath?html}</td>
+                                    <td>${retrieve.timestamp?datetime}</td>
+                                </tr>
+                                </#list>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <#if deposit.status.name() == "COMPLETE">
+                <a id="retrievebtn" class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve" disabled='disabled'>
+                    <i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> Retrieve data
+                </a>
+            </#if>
         </div>
-
-        <ul class="nav nav-tabs">
-            <li class="active"><a data-toggle="tab" href="#deposit">Deposit</a></li>
-            <li><a data-toggle="tab" href="#contents">Contents <span class="badge">${manifest?size}</span></a></li>
-            <li><a data-toggle="tab" href="#events">Events <span class="badge">${events?size}</span></a></li>
-            <li><a data-toggle="tab" href="#retrievals">Retrievals <span class="badge">${retrieves?size}</span></a></li>
-        </ul>
-
-        <div id="deposit-tab-content" class="tab-content">
-
-            <div class="tab-pane active" id="deposit">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                        <tr class="tr">
-                            <th>Note</th>
-                            <th>Status</th>
-                            <th>Size</th>
-                            <th>Timestamp</th>
-                        </tr>
-                        <thead>
-                        <tbody>
-                        <tr class="tr">
-                            <td>${deposit.note?html}</td>
-                            <td>
-                                <div id="deposit-status" class="job-status">
-                                    <#if deposit.status.name() == "COMPLETE">
-                                        <div class="text-success">
-                                            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                                            Complete
-                                        </div>
-
-                                    <#elseif deposit.status.name() == "FAILED">
-                                        <div class="text-danger">
-                                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                                            Failed
-                                        </div>
-
-                                    <#elseif deposit.status.name() == "NOT_STARTED">
-                                        Not started
-
-                                    <#elseif deposit.status.name() == "IN_PROGRESS">
-                                        <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
-                                        In progress
-
-                                    <#else>
-                                        ${deposit.status}
-                                    </#if>
-                                </div>
-                            </td>
-                            <td>${deposit.getSizeStr()}</td>
-                            <td>${deposit.creationTime?datetime}</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="tab-pane" id="contents">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                        <tr class="tr">
-                            <th>File</th>
-                            <th>Type</th>
-                            <th>Checksum</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            <#list manifest as filefixity>
-                            <tr class="tr">
-                                <td>${filefixity.file?html}</td>
-                                <td>${filefixity.fileType?html}</td>
-                                <td style="font-family:monospace;">${filefixity.fixity}&nbsp<span class="label label-primary">${filefixity.algorithm}</span></td>
-                            </tr>
-                            </#list>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="tab-pane" id="events">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                        <tr class="tr">
-                            <th>User</th>
-                            <th>Event</th>
-                            <th>Message</th>
-                            <th>Timestamp</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            <#list events as event>
-                            <tr class="tr">
-                                <td>${event.userID?html}</td>
-                                <td>${event.eventClass?replace('org.datavaultplatform.common.event.', '')?html}</td>
-                                <td>${event.message?html}</td>
-                                <td>${event.timestamp?datetime}</td>
-                            </tr>
-                            </#list>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="tab-pane" id="retrievals">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                        <tr class="tr">
-                            <th>Retrieval note</th>
-                            <th>Status</th>
-                            <th>Retrieval path</th>
-                            <th>Timestamp</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            <#list retrieves as retrieve>
-                            <tr class="tr">
-                                <td>${retrieve.note?html}</td>
-                                <td>${retrieve.status?html}</td>
-                                <td>${retrieve.retrievePath?html}</td>
-                                <td>${retrieve.timestamp?datetime}</td>
-                            </tr>
-                            </#list>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <#if deposit.status.name() == "COMPLETE">
-            <a id="retrievebtn" class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve" disabled='disabled'>
-                <i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> Retrieve data
-            </a>
-        </#if>
 
     </div>
 

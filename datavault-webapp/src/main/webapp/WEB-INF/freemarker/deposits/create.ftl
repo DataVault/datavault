@@ -58,7 +58,7 @@
 <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>My Vaults</b></a></li>
+        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
         <li><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}"><b>Vault:</b> ${vault.name?html}</a></li>
         <li class="active">Create new deposit</li>
     </ol>
@@ -78,23 +78,20 @@
     
                         <div class="form-group">
                             <label class="control-label">Deposit Name</label>
-                            <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover" 
-                                data-content="This description should contain information to assist the vault Owner and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters." 
-                                data-original-title="" title="">?</a>
-                            <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip"
-                                  title="This is new, deposit didn't have a name, just a note...">
+                            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                title="This description should contain information to assist the vault Owner and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
                             </span>
                             <input type="text"
                                    class="form-control"
                                    name=""
-                                   value=""/>
+                                   value="" disabled/>
                         </div>
                         
                         <div class="form-group">
                             <label class="control-label">Deposit Description</label>
-                            <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover" 
-                                data-content="The deposit name should  help reviewers understand whether this subset of the data needs to be kept longer than other parts of the vault.&nbsp;Maximum 400 characters." 
-                                data-original-title="" title="">?</a>
+                            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                title="The deposit name should  help reviewers understand whether this subset of the data needs to be kept longer than other parts of the vault.&nbsp;Maximum 400 characters.">
+                            </span>
                             <@spring.bind "deposit.note" />
                             <input type="text"
                                    class="form-control"
@@ -107,9 +104,9 @@
                 <label>
                     <strong>Select the files to include in this deposit</strong>
                 </label>
-                <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover" 
-                    data-content="If you don't see the filestore you wish to use here, please click on 'Storage options' to add it." 
-                    data-original-title="" title="">?</a>
+                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                    title="If you don't see the filestore you wish to use here, please click on 'Storage options' to add it.">
+                </span>
                 <br/><br/>
                 
                 <@spring.bind "deposit.fileUploadHandle" />
@@ -204,32 +201,35 @@
                 </div>
                 
                 <label class="checkbox-inline">
-                    <input value="" type="checkbox"/>Does this deposit contain personal data? (More about personal data [<a hfef="https://www.ed.ac.uk/records-management/data-protection/what-is-it/definitions/personal-data">https://www.ed.ac.uk/records-management/data-protection/what-is-it/definitions/personal-data</a>] )
+                    <input id="ckbox-has-personal-data" name="has-personal-data" value="" type="checkbox"/>Does this deposit contain personal data? (More about personal data [<a hfef="https://www.ed.ac.uk/records-management/data-protection/what-is-it/definitions/personal-data">https://www.ed.ac.uk/records-management/data-protection/what-is-it/definitions/personal-data</a>] )
                 </label>
                 <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" title="Not in the database!"></span>
                 
+                <div id="content-has-personal-data">
+                    <div class="alert alert-info" role="alert">
+                        <p>
+                        PERSONAL DATA STATEMENT: Please describe the nature of the personal data and what steps you have taken to ensure
+                        compliance with data protection legislation and/or what WRITTEN CONSENT you have gathered from subjects with 
+                        respect to the storage and usage of these data.
+                        Good practice means anonymising your data, if you can do so without losing its usefulness. 
+                        If on the other hand you need to retain some kind of subject identifier, the data should be pseudonymised, if it is practical. 
+                        Whereas, if you unavoidably need to keep the identifying information of your subjects, 
+                        this personal data may be deposited in the DataVault because it is encrypted. 
+                        You must be able to provide justification for retaining the personal data. 
+                        Please specify any data protection exemptions you believe apply to the data. 
+                        </p>
+                    </div>
+                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" title="Not in the database!"></span>
+                    
+                    <div class="form-group">
+                        <label for="exampleFormControlTextarea1">Personal Data Statement</label>
+                        <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover" 
+                            data-content="Maximum 6,000 characters." data-original-title="" title="">?</a>
+                        <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                    </div>
                 
-                <div class="alert alert-info" role="alert">
-                    <p>
-                    PERSONAL DATA STATEMENT: Please describe the nature of the personal data and what steps you have taken to ensure
-                    compliance with data protection legislation and/or what WRITTEN CONSENT you have gathered from subjects with 
-                    respect to the storage and usage of these data.
-                    Good practice means anonymising your data, if you can do so without losing its usefulness. 
-                    If on the other hand you need to retain some kind of subject identifier, the data should be pseudonymised, if it is practical. 
-                    Whereas, if you unavoidably need to keep the identifying information of your subjects, 
-                    this personal data may be deposited in the DataVault because it is encrypted. 
-                    You must be able to provide justification for retaining the personal data. 
-                    Please specify any data protection exemptions you believe apply to the data. 
-                    </p>
                 </div>
-                <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" title="Not in the database!"></span>
                 
-                <div class="form-group">
-                    <label for="exampleFormControlTextarea1">Personal Data Statement</label>
-                    <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover" 
-                        data-content="Maximum 6,000 characters." data-original-title="" title="">?</a>
-                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
-                </div>
                 <div class="alert alert-info" role="alert">
                     <p>Your deposit will be confirmed by email. Do not edit any files that have been included until the deposit is complete.</p>
                 </div> 
@@ -259,7 +259,15 @@
           $('#upload-progress').css('width', percentComplete + '%').attr('aria-valuenow', percentComplete);
           $('#progress-label').text(percentComplete + '% Complete');
         }
-       
+        
+        $('#ckbox-has-personal-data').on("click", function() {
+            if ($('#ckbox-has-personal-data').is(":checked")){
+                $('#content-has-personal-data').show();
+            }else{
+                $('#content-has-personal-data').hide();
+            }
+        }
+        
         $('#add-from-storage-btn').on("click", function() {
             
             // Add the path to the hidden control
