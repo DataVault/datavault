@@ -221,8 +221,7 @@
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
 
                             <div class="btn-toolbar pull-right">
-                                <button type="submit" value="cancel" class="btn btn-lg btn-link cancel">Cancel</button>
-                                <button type="submit" value="submit" class="btn btn-lg btn-primary">
+                            <button type="submit" value="submit" class="btn btn-lg btn-primary"<#if datasets?size == 0> disabled</#if>>
                                     <span class="glyphicon glyphicon-folder-close"></span>
                                     Create new Vault
                                 </button>

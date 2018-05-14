@@ -148,7 +148,7 @@
                 <script>
                     var filesizeSeq = 0;
                     
-                    // Create the tree inside the <div id="tree"> element.
+                    // Create the tree inside the "tree" element.
                     $("#tree").fancytree({
                         source: {
                                 url: "${springMacroRequestContext.getContextPath()}/files",
@@ -205,7 +205,7 @@
                 </label>
                 <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" title="Not in the database!"></span>
                 
-                <div id="content-has-personal-data">
+                <div id="content-has-personal-data" class="hidden">
                     <div class="alert alert-info" role="alert">
                         <p>
                         PERSONAL DATA STATEMENT: Please describe the nature of the personal data and what steps you have taken to ensure
@@ -262,11 +262,11 @@
         
         $('#ckbox-has-personal-data').on("click", function() {
             if ($('#ckbox-has-personal-data').is(":checked")){
-                $('#content-has-personal-data').show();
+                $('#content-has-personal-data').removeClass('hidden');;
             }else{
-                $('#content-has-personal-data').hide();
+                $('#content-has-personal-data').addClass('hidden');
             }
-        }
+        });
         
         $('#add-from-storage-btn').on("click", function() {
             
