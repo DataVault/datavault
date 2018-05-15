@@ -123,42 +123,38 @@ public class TestPureProvider implements Provider {
     	List<Dataset> retVal = new ArrayList<Dataset>();
     	System.out.println("Getting Datasets from the test pure flat file for " +userID);
     	System.out.println("Employee ID is hardcoded to 123363 for now we need to add the LDAP service to get the real employee ID");
-    	// userID is the UUN
-    	// get the employee id from LDAP service
-    	
-    	
-        Map<String, String> personHash;
-		try {
-			// key employee id - value person uuid
-			personHash = this.processPersonFlatFile();
-			 // key person uuid - dataset uuid - value list of ds uuid, title, workflow
-	        Map<String, Map<String, List<String>>> displayHash = this.processDatasetDisplayFlatFile();
-	    	
-	        //add LDAPService to get employee id for logged in user
-	    	// get the person uuid for the employee id
-	    	String personUUID = personHash.get("123363");
-	    	if (personUUID != null) {
-		    	// get the datasets for this users
-		    	Map<String, List<String>> dataSetsMap = displayHash.get(personUUID);
-		    	// foreach dataset
-		    	if (dataSetsMap != null) {
-			    	for (String dsUUID: dataSetsMap.keySet()) {
-			    	// get the full meta data to make the ds content
-			    		List<String> info = dataSetsMap.get(dsUUID);
-			    		if (info.size() == 2) {
-				    		Dataset ds = new Dataset();
-				    		ds.setID(dsUUID);
-				    		ds.setName(info.get(0) + " (" + info.get(1) + ")");
-				    		retVal.add(ds);
-			    		}
+    	// userID is the employee id
+    	if (userID != null) {
+	        Map<String, String> personHash;
+			try {
+				// key employee id - value person uuid
+				personHash = this.processPersonFlatFile();
+				 // key person uuid - dataset uuid - value list of ds uuid, title, workflow
+		        Map<String, Map<String, List<String>>> displayHash = this.processDatasetDisplayFlatFile();
+		    	// get the person uuid for the employee id
+		    	String personUUID = personHash.get(userID);
+		    	if (personUUID != null) {
+			    	// get the datasets for this users
+			    	Map<String, List<String>> dataSetsMap = displayHash.get(personUUID);
+			    	// foreach dataset
+			    	if (dataSetsMap != null) {
+				    	for (String dsUUID: dataSetsMap.keySet()) {
+				    	// get the full meta data to make the ds content
+				    		List<String> info = dataSetsMap.get(dsUUID);
+				    		if (info.size() == 2) {
+					    		Dataset ds = new Dataset();
+					    		ds.setID(dsUUID);
+					    		ds.setName(info.get(0) + " (" + info.get(1) + ")");
+					    		retVal.add(ds);
+				    		}
+				    	}
 			    	}
 		    	}
-	    	}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-       
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
         return retVal;
     }
     

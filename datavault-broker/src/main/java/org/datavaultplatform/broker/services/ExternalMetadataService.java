@@ -1,16 +1,24 @@
 package org.datavaultplatform.broker.services;
 
 import org.datavaultplatform.common.model.Dataset;
-import org.datavaultplatform.common.metadata.*;
-import org.datavaultplatform.common.metadata.impl.*;
+import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.metadata.Provider;
+import org.datavaultplatform.common.metadata.impl.PureProvider;
+import org.datavaultplatform.common.metadata.impl.TestPureProvider;
 import org.datavaultplatform.common.model.dao.DatasetDAO;
 import java.util.List;
+import java.util.Map;
 
 public class ExternalMetadataService {
 
     private String metadataURL;
     private Provider metadataProvider;
     private DatasetDAO datasetDAO;
+    private UsersService usersService;
+
+    public void setUsersService(UsersService usersService) {
+		this.usersService = usersService;
+	}
     
     public void setMetadataURL(String metadataURL) {
         this.metadataURL = metadataURL;
@@ -23,7 +31,14 @@ public class ExternalMetadataService {
     }
     
     public List<Dataset> getDatasets(String userID) {
-        return metadataProvider.getDatasetsForUser(userID);
+    	if (this.metadataProvider instanceof TestPureProvider) {
+    		User user = this.usersService.getUser(userID);
+    		Map<String, String> props = user.getProperties();
+    		String employeeId = props.get("eduniRefno");
+    		return metadataProvider.getDatasetsForUser(employeeId);
+    	} else {
+    		return metadataProvider.getDatasetsForUser(userID);
+    	}
     }
     
     public Dataset getDataset(String id) {
