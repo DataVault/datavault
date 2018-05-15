@@ -17,91 +17,108 @@ import org.datavaultplatform.common.metadata.Provider;
 public class TestPureProvider implements Provider {
 
     List<Dataset> datasets = new ArrayList<>();
+    public static final String TITLE = "title";
+    public static final String XML = "xml";
+    public static final String  DATASET_DISPLAY_FILE_PATH = "/tmp/datasetDisplay.flat";
+    public static final String  DATASET_FULL_FILE_PATH = "/tmp/datasetFull.flat";
+    public static final String  PERSON_FILE_PATH = "/tmp/person.flat";
     
     public TestPureProvider() {
     }
     
+    //update view to grey out non validated datasets
     
     private Map<String, String> processPersonFlatFile() throws IOException {
     	Map<String, String> retVal = new HashMap<String, String>();
-    	File personFile = new File("/tmp/person.flat");
-    	LineIterator personIt = null;
-		try {
-			 personIt = FileUtils.lineIterator(personFile, "UTF-8");
-			while ( personIt.hasNext()) {
-	    	    String line =  personIt.nextLine();
-	    	    // do something with line
-	    	    String[] splitLine = line.split("\t");
-	    	    if (splitLine.length == 2) {
-	    	    	retVal.put(splitLine[1], splitLine[0]);
-	    	    }
-			}
-		} catch (IOException e) {
-			throw e;
-		} finally {
-			 personIt.close();
+    	File personFile = new File(TestPureProvider.PERSON_FILE_PATH);
+    	if (personFile.exists()) {
+	    	LineIterator personIt = null;
+			try {
+				 personIt = FileUtils.lineIterator(personFile, "UTF-8");
+				while ( personIt.hasNext()) {
+		    	    String line =  personIt.nextLine();
+		    	    String[] splitLine = line.split("\t");
+		    	    if (splitLine.length == 2) {
+		    	    	retVal.put(splitLine[1], splitLine[0]);
+		    	    }
+				}
+			} catch (IOException e) {
+				throw e;
+			} finally {
+				 personIt.close();
+	    	}
     	}
-		
 		return retVal;
     }
     
     private Map<String, Map<String, List<String>>> processDatasetDisplayFlatFile() throws IOException {
     	Map<String, Map<String, List<String>>> retVal = new HashMap<String, Map<String, List<String>>>();
-    	File dsDisplayFile = new File("/tmp/datasetDisplay.flat");
-    	LineIterator displayIt = null;
-		try {
-			displayIt = FileUtils.lineIterator(dsDisplayFile, "UTF-8");
-			while (displayIt.hasNext()) {
-	    	    String line = displayIt.nextLine();
-	    	    // do something with line
-	    	    String[] splitLine = line.split("\t");
-	    	    if (splitLine.length == 4) {
-	    	    	List<String> info = new ArrayList<String>();
-	    	    	info.add(splitLine[2]);
-	    	    	info.add(splitLine[3]);
-	    	    	//see if we have seen a ds for this user already if so use that
-	    	    	Map<String, List<String>> dsMap = retVal.get(splitLine[0]);
-	    	    	if (dsMap == null) {
-	    	    		// if not make a new hash
-	    	    		dsMap = new HashMap<String, List<String>>();
-	    	    	}
-	    	    	dsMap.put(splitLine[1], info);
-	    	    	retVal.put(splitLine[0], dsMap);
-	    	    }
-			}
-		} catch (IOException e) {
-			throw e;
-		} finally {
-			displayIt.close();
+    	File dsDisplayFile = new File(TestPureProvider.DATASET_DISPLAY_FILE_PATH);
+    	if (dsDisplayFile.exists()) {
+	    	LineIterator displayIt = null;
+			try {
+				displayIt = FileUtils.lineIterator(dsDisplayFile, "UTF-8");
+				while (displayIt.hasNext()) {
+		    	    String line = displayIt.nextLine();
+		    	    String[] splitLine = line.split("\t");
+		    	    if (splitLine.length == 4) {
+		    	    	List<String> info = new ArrayList<String>();
+		    	    	info.add(splitLine[2]);
+		    	    	info.add(splitLine[3]);
+		    	    	//see if we have seen a ds for this user already if so use that
+		    	    	Map<String, List<String>> dsMap = retVal.get(splitLine[0]);
+		    	    	if (dsMap == null) {
+		    	    		// if not make a new hash
+		    	    		dsMap = new HashMap<String, List<String>>();
+		    	    	}
+		    	    	dsMap.put(splitLine[1], info);
+		    	    	retVal.put(splitLine[0], dsMap);
+		    	    }
+				}
+			} catch (IOException e) {
+				throw e;
+			} finally {
+				displayIt.close();
+	    	}
     	}
-		
 		return retVal;
     }
     
-    private Map<String, String> processDatasetFullFlatFile() throws IOException {
-    	Map<String, String> retVal = new HashMap<String, String>();
-        File dsFullFile  = new File("/tmp/datasetFull.flat");
-        LineIterator fullIt = null;
-		try {
-			fullIt = FileUtils.lineIterator(dsFullFile, "UTF-8");
-			while (fullIt.hasNext()) {
-	    	    String line = fullIt.nextLine();
-	    	    // do something with line
-	    	    String[] splitLine = line.split("\t");
-	    	    if (splitLine.length == 2) {
-	    	    	retVal.put(splitLine[0], splitLine[1]);
-	    	    }
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			fullIt.close();
-    	}
-		
+    private Map<String, Map<String, String>> processDatasetFullFlatFile() throws IOException {
+    	Map<String, Map<String, String>> retVal = new HashMap<String, Map<String,String>>();
+        File dsFullFile  = new File(TestPureProvider.DATASET_FULL_FILE_PATH);
+        if (dsFullFile.exists()) {
+	        LineIterator fullIt = null;
+			try {
+				fullIt = FileUtils.lineIterator(dsFullFile, "UTF-8");
+				while (fullIt.hasNext()) {
+		    	    String line = fullIt.nextLine();
+		    	    String[] splitLine = line.split("\t");
+		    	    if (splitLine.length == 3) {
+		    	    	Map<String, String> data = new HashMap<String, String>();
+		    	    	data.put(TestPureProvider.TITLE, splitLine[1]);
+		    	    	data.put(TestPureProvider.XML, splitLine[2]);
+		    	    	retVal.put(splitLine[0], data);
+		    	    }
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				fullIt.close();
+	    	}
+        }
 		return retVal;
     }
     
     @Override
+    /*
+     * Use the flat files generated daily from the Test Pure (and will be updated to the Real Pure) to pull out the datasets
+     * for a logged in user's UUN.  The UUN is used by the LDAP service to get the employee ID which is then mapped to person uuid from
+     * Pure then we can access the actual datasets.
+     * 
+     * The flat files are generated by a bash script in DATAVAULT_HOME/scripts/generatePureData.sh this will be run nightly to generate the flat files on 
+     * a deployed machine.  This is a workaround as we aren't allowed (atm) to query Pure via the api in real time.
+     */
     public List<Dataset> getDatasetsForUser(String userID) {
     	List<Dataset> retVal = new ArrayList<Dataset>();
     	System.out.println("Getting Datasets from the test pure flat file for " +userID);
@@ -114,28 +131,27 @@ public class TestPureProvider implements Provider {
 		try {
 			// key employee id - value person uuid
 			personHash = this.processPersonFlatFile();
-			 // key person uuid - dataset uuod - value list of ds uuid, title, workflow
+			 // key person uuid - dataset uuid - value list of ds uuid, title, workflow
 	        Map<String, Map<String, List<String>>> displayHash = this.processDatasetDisplayFlatFile();
-	        // key ds uuid - value the pure record metadata as xml 
-	        Map<String, String> fullHash = this.processDatasetFullFlatFile();
 	    	
+	        //add LDAPService to get employee id for logged in user
 	    	// get the person uuid for the employee id
 	    	String personUUID = personHash.get("123363");
 	    	if (personUUID != null) {
 		    	// get the datasets for this users
 		    	Map<String, List<String>> dataSetsMap = displayHash.get(personUUID);
 		    	// foreach dataset
-		    	for (String dsUUID: dataSetsMap.keySet()) {
-		    	// get the full meta data to make the ds content
-		    		List<String> info = dataSetsMap.get(dsUUID);
-		    		if (info.size() == 2) {
-			    		Dataset ds = new Dataset();
-			    		ds.setID(dsUUID);
-			    		ds.setName(info.get(0) + "(" + info.get(1) + ")");
-			    		String xml = fullHash.get(dsUUID);
-			    		ds.setContent(xml);
-			    		retVal.add(ds);
-		    		}
+		    	if (dataSetsMap != null) {
+			    	for (String dsUUID: dataSetsMap.keySet()) {
+			    	// get the full meta data to make the ds content
+			    		List<String> info = dataSetsMap.get(dsUUID);
+			    		if (info.size() == 2) {
+				    		Dataset ds = new Dataset();
+				    		ds.setID(dsUUID);
+				    		ds.setName(info.get(0) + " (" + info.get(1) + ")");
+				    		retVal.add(ds);
+			    		}
+			    	}
 		    	}
 	    	}
 		} catch (IOException e) {
@@ -148,11 +164,27 @@ public class TestPureProvider implements Provider {
     
     @Override
     public Dataset getDataset(String id) {
-        for (Dataset d : datasets) {
-            if (d.getID().equals(id)) {
-                return d;
-            }
-        }
-        return null;
+    	Dataset retVal = null;
+	    if (id != null) {
+	    	// key ds uuid - value the pure record metadata as xml 
+	        try {
+				Map<String, Map<String, String>> fullHash = this.processDatasetFullFlatFile();
+				Map<String, String> data = fullHash.get(id);
+				if (data != null) {
+					retVal = new Dataset();
+					retVal.setID(id);
+					//fix name I'll need to bring that back in the full flat file
+					retVal.setName(data.get(TestPureProvider.TITLE));
+					retVal.setContent(data.get(TestPureProvider.XML));
+				}
+				
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
+        return retVal;
+        
     }
 }
