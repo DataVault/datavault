@@ -99,7 +99,7 @@
                                 <th scope="col">Description</th>
                                 <td>${vault.description?html}</td>
                                 <td>
-                                    <button type="button" class="btn btn-default pull-right">
+                                    <button type="button" class="btn btn-default pull-right" disabled>
                                         Edit
                                     </button>
                                 </td>
@@ -118,7 +118,7 @@
                                 <th scope="col" class="text-muted">Review Date</th>
                                 <td>00/00/0000</td>
                                 <td>
-                                    <button type="button" class="btn btn-default pull-right">
+                                    <button type="button" class="btn btn-default pull-right" disabled>
                                         Edit review date
                                     </button>
                                 </td>
@@ -140,10 +140,11 @@
                 <div class="accordion-content">
                     <h4>
                         <strong>Owner</strong>
-                        <a class="btn btn-default pad"
-                           data-toggle="popover"
-                           data-trigger="hover"
-                           data-content="A vault may have no more than one Owner. In some cases, a vault may have no Owner.&nbsp;In this case, nominated Data Managers, School officers and/or &nbsp;administrators will manage the data on behalf of the university." data-original-title="" title="">?</a>
+                        <small>
+                            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                title="A vault may have no more than one Owner. In some cases, a vault may have no Owner.&nbsp;In this case, nominated Data Managers, School officers and/or &nbsp;administrators will manage the data on behalf of the university.">
+                            </span>
+                        </small>
                     </h4>
                     <table class="table table-bordered">
                         <thead></thead>
@@ -152,8 +153,7 @@
                                 <td>${vault.userID?html}</td>
                                 <td>UUN</td>
                                 <td>
-                                    <button type="button"
-                                            class="btn btn-default pull-right">
+                                    <button type="button" class="btn btn-default pull-right" disabled>
                                         Edit
                                     </button>
                                 </td>
@@ -175,35 +175,14 @@
                                 <td>Name</td>
                                 <td>UUN</td>
                                 <td>
-                                    <button type="button" class="btn btn-default pull-right">Delete</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Name</td>
-                                <td>UUN</td>
-                                <td>
-                                    <button type="button" class="btn btn-default pull-right">Delete</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Name</td>
-                                <td>UUN</td>
-                                <td>
-                                    <button type="button" class="btn btn-default pull-right">Delete</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Name</td>
-                                <td>UUN</td>
-                                <td>
-                                    <button type="button" class="btn btn-default pull-right">Delete</button>
+                                    <button type="button" class="btn btn-default pull-right" disabled>Delete</button>
                                 </td>
                             </tr>
                             <tr>
                                 <td></td>
                                 <td></td>
                                 <td>
-                                    <button type="button" class="btn btn-default pull-right">Add Data Manager +</button>
+                                    <button type="button" class="btn btn-default pull-right" disabled>Add Data Manager +</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -252,19 +231,8 @@
                         <tr>
                             <td>Edited By</td>
                             <td>00  00/00/0000</td>
-                            <td><button type="button" class="btn btn-default pull-right">View Edit</button></td>
+                            <td><button type="button" class="btn btn-default pull-right" disabled>View Edit</button></td>
 
-                        </tr>
-                        <tr>
-                            <td>Edited By</td>
-                            <td>00  00/00/0000</td>
-                            <td><button type="button" class="btn btn-default pull-right">View Edit</button></td>
-
-                        </tr>
-                        <tr>
-                            <td>Edited By</td>
-                            <td>00  00/00/0000</td>
-                            <td><button type="button" class="btn btn-default pull-right">View Edit</button></td>
                         </tr>
                         </tbody>
                     </table>

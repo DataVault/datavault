@@ -235,7 +235,7 @@
                 </div> 
                 
                 <div class="btn-toolbar pull-right">
-                    <button type="submit" value="cancel" class="btn btn-lg btn-link">Cancel</button>
+                    <a class="btn btn-lg btn-link" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}">Cancel</a>
                     <button type="submit" value="submit" class="btn btn-lg btn-primary">
                         <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i>
                         Deposit data
