@@ -27,7 +27,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 
-public class DepositIT {
+public class DepositFT {
     private static String screenShotFolderPath = "target/surefire-reports/errorScreenshots";
     private String host;
     private WebDriver driver;

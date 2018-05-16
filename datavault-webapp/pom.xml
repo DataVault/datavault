@@ -186,7 +186,10 @@
                         </goals>
 
                         <configuration>
-                            <skipTests>${skip.integration.tests}</skipTests>
+                            <skipTests>${skip.function.tests}</skipTests>
+                            <includes>
+                                <include>**/*FT.java</include>
+                            </includes>
                         </configuration>
                     </execution>
                 </executions>
