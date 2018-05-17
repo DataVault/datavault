@@ -115,8 +115,17 @@
                                 <td></td>
                             </tr>
                             <tr>
-                                <th scope="col" class="text-muted">Review Date</th>
-                                <td>00/00/0000</td>
+                                <th scope="col">Grant End Date</th>
+                                <td>${vault.grantEndDate?string('dd/MM/yyyy')}</td>
+                                <td>
+                                    <button type="button" class="btn btn-default pull-right" disabled>
+                                        Edit review date
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="col">Review Date</th>
+                                <td>${vault.reviewDate?string('dd/MM/yyyy')}</td>
                                 <td>
                                     <button type="button" class="btn btn-default pull-right" disabled>
                                         Edit review date
@@ -160,7 +169,7 @@
                             </tr>
                         </tbody>
                     </table>
-
+                    
                     <h4><strong>Nominated Data Managers</strong></h4>
                     <table class="table table-bordered ">
                         <thead>
@@ -179,9 +188,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td></td>
-                                <td></td>
-                                <td>
+                                <td colspan="3">
                                     <button type="button" class="btn btn-default pull-right" disabled>Add Data Manager +</button>
                                 </td>
                             </tr>
@@ -207,13 +214,6 @@
                             <td>Retrieved By</td>
                             <td>00  00/00/0000</td>
                             <td>For an external user</td>
-
-                        </tr>
-                        <tr>
-                            <td>Retrieved By</td>
-                            <td>00  00/00/0000</td>
-                            <td>For an internal user</td>
-
                         </tr>
                         </tbody>
                     </table>
@@ -232,7 +232,6 @@
                             <td>Edited By</td>
                             <td>00  00/00/0000</td>
                             <td><button type="button" class="btn btn-default pull-right" disabled>View Edit</button></td>
-
                         </tr>
                         </tbody>
                     </table>

@@ -53,33 +53,9 @@ public class VaultsController {
         return "vaults/vault";
     }
 
-    // Return an empty 'create new vault' page
-    @RequestMapping(value = "/vaults/create", method = RequestMethod.GET)
-    public String createVault(ModelMap model) {
-
-        // pass the view an empty Vault since the form expects it
-        model.addAttribute("vault", new CreateVault());
-
-        Dataset[] datasets = restService.getDatasets();
-        model.addAttribute("datasets", datasets);
-        
-        RetentionPolicy[] policies = restService.getRetentionPolicyListing();
-        model.addAttribute("policies", policies);
-
-        Group[] groups = restService.getGroups();
-        model.addAttribute("groups", groups);
-
-        return "vaults/create";
-    }
-
     // Process the completed 'create new vault' page
     @RequestMapping(value = "/vaults/create", method = RequestMethod.POST)
-    public String addVault(@ModelAttribute CreateVault vault, ModelMap model, @RequestParam String action) {
-        // Was the cancel button pressed?
-        if ("cancel".equals(action)) {
-            return "redirect:/";
-        }
-
+    public String addVault(@ModelAttribute CreateVault vault, ModelMap model) {
         VaultInfo newVault = restService.addVault(vault);
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
         return "redirect:" + vaultUrl;        

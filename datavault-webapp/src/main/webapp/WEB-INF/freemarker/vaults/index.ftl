@@ -79,7 +79,7 @@
                         </p>
                         <br>
                         
-                        <form id="create-vault" class="form" role="form" action="vaults/create" method="post">
+                        <form id="create-vault" class="form" role="form" action="vaults/create" method="post" novalidate="novalidate" _lpchecked="1">
                             <p class="main">
                                 Please select the Pure record describing the data that will be contained in this vault from the list below: 
                             </p>
@@ -159,7 +159,8 @@
                                         title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;">
                                     </span>
                                 </label>
-                                <input class="form-control" id="endDate" type="date" disabled/>
+                                <@spring.bind "vault.grantEndDate" />
+                                <input id="grantEndDate" name="grantEndDate" class="form-control" type="date"/>
                             </div>
                             
                             <div class="alert alert-info" role="alert">
@@ -170,25 +171,6 @@
                                 year after the first deposit,
                                 whichever is later.
                                 </p>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Data Manager(s) UUN</label>
-                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
-                                    title="Each person nominated as a Data Manager on this vault will have the ability to retrieve the vault's contents, deposit more data into the vault, edit the descriptions of deposits or bring forward the review date of the vault. Giving a user Data Manager status does not give them the ability to add or remove the permissions of any other user on the vault.&nbsp;In the absence of the vault Owner, the nominated Data Manager(s) may be consulted on the management of the vault.">
-                                </span>
-                                <div class="input-group">
-                                    <input class="form-control" aria-label="Add" type="text"/>
-                                    <span class="input-group-btn">
-                                        <button type="button"
-                                                class="btn btn-default dropdown-toggle"
-                                                data-toggle="dropdown"
-                                                aria-haspopup="true"
-                                                aria-expanded="false" disabled>
-                                                + Add
-                                        </button>
-                                    </span>
-                                </div>
                             </div>
                             
                             <div class="form-group">
@@ -213,15 +195,15 @@
                                         title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault. If on the other hand you wish the vault to be deleted, bring the review date forward so that deletion may be considered.">
                                     </span>
                                 </label>
-                                
-                                <input class="form-control" id="reviewDate" type="date" disabled/>
+                                <@spring.bind "vault.reviewDate" />
+                                <input class="form-control" id="reviewDate" name="reviewDate" type="date"/>
                             </div>
 
                             <input type="hidden" id="submitAction" name="action" value="submit" /> 
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
 
                             <div class="btn-toolbar pull-right">
-                            <button type="submit" value="submit" class="btn btn-lg btn-primary"<#if datasets?size == 0> disabled</#if>>
+                                <button type="submit" value="submit" class="btn btn-lg btn-primary"<#if datasets?size == 0> disabled</#if>>
                                     <span class="glyphicon glyphicon-folder-close"></span>
                                     Create new Vault
                                 </button>
@@ -241,6 +223,7 @@
             });
 
             $('#create-vault').validate({
+            	debug: true,
                 rules: {
                     name: {
                         required: true
@@ -255,6 +238,12 @@
                         required: true
                     },
                     groupID : {
+                        required: true
+                    },
+                    grantEndDate : {
+                        required: true
+                    },
+                    reviewDate : {
                         required: true
                     }
                 },

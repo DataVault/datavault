@@ -18,6 +18,8 @@ import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
@@ -51,6 +53,18 @@ public class Vault {
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
+    
+    // Serialise date in ISO 8601 format
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @Temporal(TemporalType.DATE)
+    @Column(name = "grantEndDate", nullable = false)
+    private Date grantEndDate;
+    
+    // Serialise date in ISO 8601 format
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @Temporal(TemporalType.DATE)
+    @Column(name = "reviewDate", nullable = false)
+    private Date reviewDate;
     
     // Name of the vault
     @Column(name = "name", nullable = false, columnDefinition = "TEXT")
@@ -112,6 +126,32 @@ public class Vault {
 
     public Date getCreationTime() {
         return creationTime;
+    }
+    
+    public void setGrantEndDate(Date grantEndDate) {
+        this.grantEndDate = grantEndDate;
+    }
+    
+    public void setGrantEndDate(String grantEndDate) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        this.grantEndDate = formatter.parse(grantEndDate);
+    }
+
+    public Date getGrantEndDate() {
+        return grantEndDate;
+    }
+    
+    public void setReviewDate(Date reviewDate) {
+        this.reviewDate = reviewDate;
+    }
+    
+    public void setReviewDate(String reviewDate) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        this.reviewDate = formatter.parse(reviewDate);
+    }
+
+    public Date getReviewDate() {
+        return reviewDate;
     }
     
     public void setName(String name) {
@@ -193,7 +233,9 @@ public class Vault {
                 vaultSize,
                 retentionPolicyStatus,
                 retentionPolicyExpiry,
-                retentionPolicyLastChecked);
+                retentionPolicyLastChecked,
+                grantEndDate,
+                reviewDate);
     }
     
     @Override

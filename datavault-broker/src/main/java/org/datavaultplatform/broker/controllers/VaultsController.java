@@ -180,6 +180,10 @@ public class VaultsController {
             externalMetadataService.addCachedDataset(dataset);
         }
         vault.setDataset(dataset);
+        
+        vault.setGrantEndDate(createVault.getGrantEndDate());
+        
+        vault.setReviewDate(createVault.getReviewDate());
 
         vaultsService.addVault(vault);
         
