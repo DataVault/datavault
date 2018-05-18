@@ -103,6 +103,14 @@ public class Deposit {
     @ApiObjectField(description = "Deposit description to provide more information about the Deposit")
     @Column(columnDefinition = "TEXT", length = 6000)
     private String description;
+    
+    @ApiObjectField(description = "Whether the deposit contains personal data or not")
+    @Column(nullable = false)
+    private Boolean hasPersonalData;
+    
+    @ApiObjectField(description = "Description of the nature of the personal data")
+    @Column(columnDefinition = "TEXT", length = 6000)
+    private String personalDataStatement;
 
     // For now, a deposit relates to a single bag.
     @ApiObjectField(description = "ID of the bag associated with this Deposit")
@@ -145,9 +153,10 @@ public class Deposit {
     private long depositSize;
     
     public Deposit() {}
-    public Deposit(String name, String description) {
+    public Deposit(String name, String description, Boolean hasPersonalData) {
         this.name = name;
         this.description = description;
+        this.hasPersonalData = hasPersonalData;
         this.status = Status.NOT_STARTED;
     }
     
@@ -184,7 +193,23 @@ public class Deposit {
     public void setDescription(String description) {
         this.description = description;
     }
-
+    
+    public Boolean getHasPersonalData() {
+        return hasPersonalData;
+    }
+    
+    public void setHasPersonalData(Boolean hasPersonalData) {
+        this.hasPersonalData = hasPersonalData;
+    }
+    
+    public String getPersonalDataStatement() {
+        return personalDataStatement;
+    }
+    
+    public void setPersonalDataStatement(String personalDataStatement) {
+        this.personalDataStatement = personalDataStatement;
+    }
+    
     public Status getStatus() { return status; }
 
     public void setStatus(Status status) {
@@ -301,6 +326,8 @@ public class Deposit {
                 status,
                 name,
                 description,
+                hasPersonalData,
+                personalDataStatement,
                 fileOrigin,
                 shortFilePath,
                 filePath,

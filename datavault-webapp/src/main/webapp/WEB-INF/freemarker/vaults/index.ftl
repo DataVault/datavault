@@ -41,7 +41,7 @@
                                 </td>
                                 <td>${vault.getUserID()}</td>
                                 <td>${vault.getCreationTime()?datetime}</td>
-                                <td class="text-muted">00/00/0000</td>
+                                <td class="text-muted">${vault.getReviewDate()?datetime}</td>
                             </tr>
                             </#list>
                         </tbody>

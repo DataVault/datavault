@@ -31,6 +31,12 @@ public class DepositInfo {
     
     @ApiObjectField(description = "Deposit description to provide more information about the Deposit")
     private String description;
+
+    @ApiObjectField(description = "Whether the deposit contains personal data or not")
+    private Boolean hasPersonalData;
+    
+    @ApiObjectField(description = "Description of the nature of the personal data")
+    private String personalDataStatement;
     
     // Record the file path that the user selected for this deposit.
     @ApiObjectField(description = "Origin of the deposited filepath")
@@ -56,12 +62,14 @@ public class DepositInfo {
     private List<DepositChunk> depositChunks;
     
     public DepositInfo() {}
-    public DepositInfo(String id, Date creationTime, Deposit.Status status, String name, String description, String fileOrigin, String shortFilePath, String filePath, long depositSize, String vaultID, List<DepositPath> depositPaths, List<DepositChunk> depositChunks) {
+    public DepositInfo(String id, Date creationTime, Deposit.Status status, String name, String description, boolean hasPersonalData, String personalDataStatement, String fileOrigin, String shortFilePath, String filePath, long depositSize, String vaultID, List<DepositPath> depositPaths, List<DepositChunk> depositChunks) {
         this.id = id;
         this.creationTime = creationTime;
         this.status = status;
         this.name = name;
         this.description = description;
+        this.hasPersonalData = hasPersonalData;
+        this.personalDataStatement = personalDataStatement;
         this.fileOrigin = fileOrigin;
         this.shortFilePath = shortFilePath;
         this.filePath = filePath;
@@ -110,7 +118,23 @@ public class DepositInfo {
     public void setDescription(String description) {
         this.description = description;
     }
-
+    
+    public Boolean getHasPersonalData() {
+        return hasPersonalData;
+    }
+    
+    public void setHasPersonalData(Boolean hasPersonalData) {
+        this.hasPersonalData = hasPersonalData;
+    }
+    
+    public String getPersonalDataStatement() {
+        return personalDataStatement;
+    }
+    
+    public void setPersonalDataStatement(String personalDataStatement) {
+        this.personalDataStatement = personalDataStatement;
+    }
+    
     public String getFileOrigin() {
         return fileOrigin;
     }

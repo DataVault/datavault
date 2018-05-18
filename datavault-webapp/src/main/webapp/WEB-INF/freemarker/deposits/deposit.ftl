@@ -58,11 +58,13 @@
                     </tr>
                     <tr>
                     <th scope="col">Contains Personal Data</th>
-                        <td></td>
+                        <td>
+                        <#if deposit.hasPersonalData>Yes<#else>No</#if>
+                        </td>
                     </tr>
                     <tr>
                         <th scope="col">Personal Data Statement</th>
-                        <td></td>
+                        <td>${deposit.personalDataStatement}</td>
                     </tr>
                     <tr>
                         <th scope="col">Status</th>

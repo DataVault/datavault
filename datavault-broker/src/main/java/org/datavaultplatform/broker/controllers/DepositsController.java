@@ -113,6 +113,12 @@ public class DepositsController {
         Deposit deposit = new Deposit();
         deposit.setName(createDeposit.getName());
         deposit.setDescription(createDeposit.getDescription());
+        if(createDeposit.getHasPersonalData().toLowerCase().equals("yes")) {
+            deposit.setHasPersonalData(true);
+        } else {
+            deposit.setHasPersonalData(false);
+        }
+        deposit.setPersonalDataStatement(createDeposit.getPersonalDataStatement());
         deposit.setDepositPaths(new ArrayList<DepositPath>());
         
         List<FileStore> userStores = user.getFileStores();

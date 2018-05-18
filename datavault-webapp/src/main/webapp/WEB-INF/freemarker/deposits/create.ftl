@@ -207,10 +207,12 @@
                     </small>
                     <br/>
                     <div class="radio-has-personal-data radio-inline">
-                        <input type="radio" name="has-personal-data" value="yes"> Yes
+                        <@spring.bind "deposit.hasPersonalData" />
+                        <input type="radio" name="${spring.status.expression}" value="yes"> Yes
                     </div>
                     <div class="radio-has-personal-data radio-inline">
-                        <input type="radio" name="has-personal-data" value="No"> No
+                        <@spring.bind "deposit.hasPersonalData" />
+                        <input type="radio" name="${spring.status.expression}" value="No"> No
                     </div>
                 </div>
                 
@@ -233,7 +235,8 @@
                         <label for="personal-data-statement">Personal Data Statement</label>
                         <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                             title="Maximum 6,000 characters."></span>
-                        <textarea class="form-control" id="personal-data-statement" name="personal-data-statement" rows="3"></textarea>
+                        <@spring.bind "deposit.personalDataStatement" />
+                        <textarea class="form-control" id="${spring.status.expression}" name="${spring.status.expression}" rows="3"></textarea>
                     </div>
                 
                 </div>
@@ -268,13 +271,13 @@
           $('#progress-label').text(percentComplete + '% Complete');
         }
         
-        $("input[name='has-personal-data']").change( function() {
+        $("input[name='hasPersonalData']").change( function() {
             if ($(this).val() === 'yes'){
                 $('#content-has-personal-data').removeClass('hidden');
-                $('#personal-data-statement').removeClass('ignore');
+                $('#personalDataStatement').removeClass('ignore');
             }else{
                 $('#content-has-personal-data').addClass('hidden');
-                $('#personal-data-statement').addClass('ignore');
+                $('#personalDataStatement').addClass('ignore');
             }
         });
         
@@ -322,10 +325,10 @@
                 'name': {
                     required: true
                 },
-                'has-personal-data': {
+                'hasPersonalData': {
                     required: true
                 },
-                'personal-data-statement': {
+                'personalDataStatement': {
                     required: true
                 }
             },
