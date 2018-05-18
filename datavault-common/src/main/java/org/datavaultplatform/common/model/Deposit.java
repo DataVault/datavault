@@ -96,9 +96,13 @@ public class Deposit {
         FAILED
     }
 
-    @ApiObjectField(description = "Deposit note to briefly describe the Deposit")
-    @Column(columnDefinition = "TEXT")
-    private String note;
+    @ApiObjectField(description = "Deposit name to briefly describe the Deposit")
+    @Column(columnDefinition = "TEXT", nullable = false, length = 400)
+    private String name;
+
+    @ApiObjectField(description = "Deposit description to provide more information about the Deposit")
+    @Column(columnDefinition = "TEXT", length = 6000)
+    private String description;
 
     // For now, a deposit relates to a single bag.
     @ApiObjectField(description = "ID of the bag associated with this Deposit")
@@ -141,8 +145,9 @@ public class Deposit {
     private long depositSize;
     
     public Deposit() {}
-    public Deposit(String note) {
-        this.note = note;
+    public Deposit(String name, String description) {
+        this.name = name;
+        this.description = description;
         this.status = Status.NOT_STARTED;
     }
     
@@ -168,10 +173,16 @@ public class Deposit {
         return archives;
     }
 
-    public String getNote() { return note; }
+    public String getName() { return name; }
     
-    public void setNote(String note) {
-        this.note = note;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() { return description; }
+    
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Status getStatus() { return status; }
@@ -288,7 +299,8 @@ public class Deposit {
                 id,
                 creationTime,
                 status,
-                note,
+                name,
+                description,
                 fileOrigin,
                 shortFilePath,
                 filePath,

@@ -8,7 +8,7 @@
     <ol class="breadcrumb">
         <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
         <li><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}"><b>Vault:</b> ${vault.name?html}</a></li>
-        <li><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}"><b>Deposit:</b> ${deposit.note?html}</a></li>
+        <li><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}"><b>Deposit:</b> ${deposit.name?html}</a></li>
         <li class="active">Retrieve data</li>
     </ol>
     
@@ -33,7 +33,11 @@
                 
                         <div class="form-group">
                             <label class="control-label">Retrieve Note:</label>
-                            <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Explain the reason why this Deposit is being retrieved."></span></span>
+                            <span class="text-muted">
+                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                    title="Explain the reason why this Deposit is being retrieved.">
+                                </span>
+                            </span>
                             <@spring.bind "retrieve.note" />
                             <input type="text"
                                    class="form-control"

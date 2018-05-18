@@ -99,6 +99,7 @@ public class DepositsController {
                                   @PathVariable("depositid") String depositID) throws Exception {
 
         User user = usersService.getUser(userID);
+
         return depositsService.getUserDeposit(user, depositID).convertToResponse();
     }
 
@@ -110,7 +111,8 @@ public class DepositsController {
         Vault vault = vaultsService.getUserVault(user, createDeposit.getVaultID());
         
         Deposit deposit = new Deposit();
-        deposit.setNote(createDeposit.getNote());
+        deposit.setName(createDeposit.getName());
+        deposit.setDescription(createDeposit.getDescription());
         deposit.setDepositPaths(new ArrayList<DepositPath>());
         
         List<FileStore> userStores = user.getFileStores();

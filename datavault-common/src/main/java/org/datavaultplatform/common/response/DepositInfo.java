@@ -26,8 +26,11 @@ public class DepositInfo {
     @ApiObjectField(description = "Status of the Deposit", allowedvalues={"NOT_STARTED", "IN_PROGRESS", "COMPLETE"})
     private Deposit.Status status;
 
-    @ApiObjectField(description = "Deposit note to briefly describe the Deposit")
-    private String note;
+    @ApiObjectField(description = "Deposit name to briefly describe the Deposit")
+    private String name;
+    
+    @ApiObjectField(description = "Deposit description to provide more information about the Deposit")
+    private String description;
     
     // Record the file path that the user selected for this deposit.
     @ApiObjectField(description = "Origin of the deposited filepath")
@@ -53,11 +56,12 @@ public class DepositInfo {
     private List<DepositChunk> depositChunks;
     
     public DepositInfo() {}
-    public DepositInfo(String id, Date creationTime, Deposit.Status status, String note, String fileOrigin, String shortFilePath, String filePath, long depositSize, String vaultID, List<DepositPath> depositPaths, List<DepositChunk> depositChunks) {
+    public DepositInfo(String id, Date creationTime, Deposit.Status status, String name, String description, String fileOrigin, String shortFilePath, String filePath, long depositSize, String vaultID, List<DepositPath> depositPaths, List<DepositChunk> depositChunks) {
         this.id = id;
         this.creationTime = creationTime;
         this.status = status;
-        this.note = note;
+        this.name = name;
+        this.description = description;
         this.fileOrigin = fileOrigin;
         this.shortFilePath = shortFilePath;
         this.filePath = filePath;
@@ -91,12 +95,20 @@ public class DepositInfo {
         this.status = status;
     }
 
-    public String getNote() {
-        return note;
+    public String getName() {
+        return name;
     }
 
-    public void setNote(String note) {
-        this.note = note;
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getFileOrigin() {

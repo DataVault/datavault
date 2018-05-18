@@ -52,7 +52,7 @@ public class DepositsController {
         
         // Set the Vault ID for the new deposit
         deposit.setVaultID(vaultID);
-
+        
         DepositInfo newDeposit = restService.addDeposit(deposit);
         String depositUrl = "/vaults/" + vaultID + "/deposits/" + newDeposit.getID() + "/";
         return "redirect:" + depositUrl;
@@ -66,6 +66,7 @@ public class DepositsController {
         model.addAttribute("manifest", restService.getDepositManifest(depositID));
         model.addAttribute("events", restService.getDepositEvents(depositID));
         model.addAttribute("retrieves", restService.getDepositRetrieves(depositID));
+        
         return "deposits/deposit";
     }
     

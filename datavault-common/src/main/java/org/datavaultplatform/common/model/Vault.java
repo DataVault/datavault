@@ -67,11 +67,11 @@ public class Vault {
     private Date reviewDate;
     
     // Name of the vault
-    @Column(name = "name", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "name", nullable = false, columnDefinition = "TEXT", length=400)
     private String name;
 
     // Description of the vault
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", length = 6000)
     private String description;
 
     // Size of the vault (in bytes)
@@ -132,22 +132,12 @@ public class Vault {
         this.grantEndDate = grantEndDate;
     }
     
-    public void setGrantEndDate(String grantEndDate) throws ParseException {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        this.grantEndDate = formatter.parse(grantEndDate);
-    }
-
     public Date getGrantEndDate() {
         return grantEndDate;
     }
     
     public void setReviewDate(Date reviewDate) {
         this.reviewDate = reviewDate;
-    }
-    
-    public void setReviewDate(String reviewDate) throws ParseException {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        this.reviewDate = formatter.parse(reviewDate);
     }
 
     public Date getReviewDate() {

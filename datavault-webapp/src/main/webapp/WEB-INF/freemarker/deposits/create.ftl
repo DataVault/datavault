@@ -81,10 +81,8 @@
                             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                                 title="This description should contain information to assist the vault Owner and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
                             </span>
-                            <input type="text"
-                                   class="form-control"
-                                   name=""
-                                   value="" disabled/>
+                            <@spring.bind "deposit.name" />
+                            <input type="text" class="form-control" name="${spring.status.expression}" value='${spring.status.value!""}'/>
                         </div>
                         
                         <div class="form-group">
@@ -92,11 +90,8 @@
                             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                                 title="The deposit name should  help reviewers understand whether this subset of the data needs to be kept longer than other parts of the vault.&nbsp;Maximum 400 characters.">
                             </span>
-                            <@spring.bind "deposit.note" />
-                            <input type="text"
-                                   class="form-control"
-                                   name="${spring.status.expression}"
-                                   value="${spring.status.value!""}"/>
+                            <@spring.bind "deposit.description" />
+                            <input type="text" class="form-control" name="${spring.status.expression}" value='${spring.status.value!""}'/>
                         </div>
                     </div>
                 </div>
@@ -199,11 +194,25 @@
                     <p>Your dataset ID: ${vault.datasetName?html}<br>
                     If you think this might be the wrong dataset Pure ID, please return to the first tab to select the correct one .</p>
                 </div>
-                
-                <label class="checkbox-inline">
-                    <input id="ckbox-has-personal-data" name="has-personal-data" value="" type="checkbox"/>Does this deposit contain personal data? (More about personal data [<a hfef="https://www.ed.ac.uk/records-management/data-protection/what-is-it/definitions/personal-data">https://www.ed.ac.uk/records-management/data-protection/what-is-it/definitions/personal-data</a>] )
-                </label>
-                <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" title="Not in the database!"></span>
+                    
+                <div class="form-group">
+                    <label for="has-personal-data" class="control-label">
+                        Does this deposit contain personal data?
+                    </label>
+                    <small>
+                        (More about personal data 
+                        [<a hfef="https://www.ed.ac.uk/records-management/data-protection/what-is-it/definitions/personal-data">
+                            https://www.ed.ac.uk/records-management/data-protection/what-is-it/definitions/personal-data
+                        </a>])
+                    </small>
+                    <br/>
+                    <div class="radio-has-personal-data radio-inline">
+                        <input type="radio" name="has-personal-data" value="yes"> Yes
+                    </div>
+                    <div class="radio-has-personal-data radio-inline">
+                        <input type="radio" name="has-personal-data" value="No"> No
+                    </div>
+                </div>
                 
                 <div id="content-has-personal-data" class="hidden">
                     <div class="alert alert-info" role="alert">
@@ -219,13 +228,12 @@
                         Please specify any data protection exemptions you believe apply to the data. 
                         </p>
                     </div>
-                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" title="Not in the database!"></span>
                     
                     <div class="form-group">
-                        <label for="exampleFormControlTextarea1">Personal Data Statement</label>
-                        <a class="btn btn-default pad" data-toggle="popover" data-trigger="hover" 
-                            data-content="Maximum 6,000 characters." data-original-title="" title="">?</a>
-                        <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                        <label for="personal-data-statement">Personal Data Statement</label>
+                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                            title="Maximum 6,000 characters."></span>
+                        <textarea class="form-control" id="personal-data-statement" name="personal-data-statement" rows="3"></textarea>
                     </div>
                 
                 </div>
@@ -260,11 +268,13 @@
           $('#progress-label').text(percentComplete + '% Complete');
         }
         
-        $('#ckbox-has-personal-data').on("click", function() {
-            if ($('#ckbox-has-personal-data').is(":checked")){
-                $('#content-has-personal-data').removeClass('hidden');;
+        $("input[name='has-personal-data']").change( function() {
+            if ($(this).val() === 'yes'){
+                $('#content-has-personal-data').removeClass('hidden');
+                $('#personal-data-statement').removeClass('ignore');
             }else{
                 $('#content-has-personal-data').addClass('hidden');
+                $('#personal-data-statement').addClass('ignore');
             }
         });
         
@@ -309,7 +319,13 @@
         $('#create-deposit').validate({
             ignore: ".ignore",
             rules: {
-                note: {
+                'name': {
+                    required: true
+                },
+                'has-personal-data': {
+                    required: true
+                },
+                'personal-data-statement': {
                     required: true
                 }
             },
@@ -323,6 +339,17 @@
             submitHandler: function (form) {
                 $('button[type="submit"]').prop('disabled', true);
                 form.submit();
+            },
+            errorPlacement: function(error, element) 
+            {
+                if ( element.is(":radio") ) 
+                {
+                    error.appendTo( element.parents('.form-group') );
+                }
+                else 
+                { // This is the default behavior 
+                    error.insertAfter( element );
+                }
             }
         });
 
@@ -330,168 +357,164 @@
             'placement': 'top'
         });
 
-    var r = new Flow({
-        target:'${springMacroRequestContext.getContextPath()}/fileupload',
-        query:{fileUploadHandle:$('.file-upload-handle').val()},
-        headers:{'${_csrf.headerName}': '${_csrf.token}'},
-        chunkSize:10*1024*1024,
-        testChunks: false,
-        maxChunkRetries:1
-    });
+        var r = new Flow({
+            target:'${springMacroRequestContext.getContextPath()}/fileupload',
+            query:{fileUploadHandle:$('.file-upload-handle').val()},
+            headers:{'${_csrf.headerName}': '${_csrf.token}'},
+            chunkSize:10*1024*1024,
+            testChunks: false,
+            maxChunkRetries:1
+        });
     
-    // Keep track of uploaded directory names (top level only)
-    var uploadDirs = {};
+        // Keep track of uploaded directory names (top level only)
+        var uploadDirs = {};
 
-    r.assignDrop($('.flow-drop')[0]);
-    r.assignBrowse($('.flow-browse')[0]);
+        r.assignDrop($('.flow-drop')[0]);
+        r.assignBrowse($('.flow-browse')[0]);
 
-    // Handle file add event
-    r.on('fileAdded', function(file){
-      
-      // Prevent browser upload of large files (5GB)
-      if (file.size > (5 * 1024 * 1024 * 1024)) {
-        $('#uploadMaxSizeAlert').show();
-        return false;
-      }
+        // Handle file add event
+        r.on('fileAdded', function(file){
+            // Prevent browser upload of large files (5GB)
+            if (file.size > (5 * 1024 * 1024 * 1024)) {
+                $('#uploadMaxSizeAlert').show();
+                return false;
+            }
 
-      // Show progress bar
-      $('.progress').show();
+            // Show progress bar
+            $('.progress').show();
 
-      // Prevent completion of deposit
-      $('#deposit-submit-btn').prop('disabled', true);
+            // Prevent completion of deposit
+            $('#deposit-submit-btn').prop('disabled', true);
 
-      // Add the file to the list
-      $("#upload-tree").show();
+            // Add the file to the list
+            $("#upload-tree").show();
      
-      var uploadsNode = $("#upload-tree").fancytree("getNodeByKey", "uploads");
-      if (!uploadsNode) {
-        var rootNode = $("#upload-tree").fancytree("getRootNode");
-        uploadsNode = rootNode.addChildren({
-            key: "uploads",
-            title: "My Computer",
-            tooltip: "Browser uploads.",
-            folder: true,
-            expanded: true
-        });
-      }
+            var uploadsNode = $("#upload-tree").fancytree("getNodeByKey", "uploads");
+            if (!uploadsNode) {
+                var rootNode = $("#upload-tree").fancytree("getRootNode");
+                uploadsNode = rootNode.addChildren({
+                    key: "uploads",
+                    title: "My Computer",
+                    tooltip: "Browser uploads.",
+                    folder: true,
+                    expanded: true
+                });
+            }
       
-      if (file.relativePath == file.name) {
-        var childNode = uploadsNode.addChildren({
-          key: file.name,
-          title: file.name,
-          tooltip: file.name,
-          folder: false
+            if (file.relativePath == file.name) {
+                var childNode = uploadsNode.addChildren({
+                    key: file.name,
+                    title: file.name,
+                    tooltip: file.name,
+                    folder: false
+                });
+            } else {
+                var dirName = file.relativePath.split('/')[0];
+                if (!(dirName in uploadDirs)) {
+                    uploadDirs[dirName] = true;
+                    var childNode = uploadsNode.addChildren({
+                        key: dirName,
+                        title: dirName,
+                        tooltip: dirName,
+                        folder: true
+                    });
+                }
+            }
+
+            // extraClasses: 'progress-item'
+
+            var $self = $('.flow-file-'+file.uniqueIdentifier);
+            $self.find('.flow-file-name').text(file.name);
+            $self.find('.flow-file-size').text(readablizeBytes(file.size));
+            $self.find('.flow-file-download').attr('href', '/download/' + file.uniqueIdentifier).hide();
+            $self.find('.flow-file-pause').on('click', function () {
+                file.pause();
+                $self.find('.flow-file-pause').hide();
+                $self.find('.flow-file-resume').show();
+            });
+            $self.find('.flow-file-resume').on('click', function () {
+                file.resume();
+                $self.find('.flow-file-pause').show();
+                $self.find('.flow-file-resume').hide();
+            });
+            $self.find('.flow-file-cancel').on('click', function () {
+                file.cancel();
+                $self.remove();
+            });
         });
-      } else {
-        var dirName = file.relativePath.split('/')[0];
-        if (!(dirName in uploadDirs)) {
-          uploadDirs[dirName] = true;
-          var childNode = uploadsNode.addChildren({
-            key: dirName,
-            title: dirName,
-            tooltip: dirName,
-            folder: true
-          });
+        r.on('filesSubmitted', function(file) {
+            r.upload();
+        });
+        
+        r.on('fileSuccess', function(file,message){
+            // Reflect that the file upload has completed
+            /*
+            $("#upload-tree").fancytree("getTree").getNodeByKey(file.relativePath).extraClasses = '';
+            $("#upload-tree").fancytree("getTree").getNodeByKey(file.relativePath).renderTitle();
+            */
+        });
+        r.on('fileError', function(file, message){
+            // Reflect that the file upload has resulted in error
+            $('.flow-file-'+file.uniqueIdentifier+' .flow-file-progress').html('(file could not be uploaded: '+message+')');
+        });
+        r.on('fileProgress', function(file){
+            if (r.progress() == 1.0) {
+                // Hide progress bar
+                $('.progress').hide();
+                // Allow completion of deposit
+                $('#deposit-submit-btn').prop('disabled', false);
+            } else {
+                updateProgress(Math.floor(r.progress()*100));
+            }
+        });
+        r.on('catchAll', function() {
+            // console.log.apply(console, arguments);
+        });
+        window.r = {
+            pause: function () {
+                r.pause();
+            },
+            cancel: function() {
+                r.cancel();
+                $('.flow-file').remove();
+            },
+            upload: function() {
+                $('.flow-file-pause').show();
+                $('.flow-file-resume').hide();
+                r.resume();
+            },
+            flow: r
+        };
+    });
+
+    function readablizeBytes(bytes) {
+        var s = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
+        var e = Math.floor(Math.log(bytes) / Math.log(1024));
+        return (bytes / Math.pow(1024, e)).toFixed(2) + " " + s[e];
+    }
+    function secondsToStr (temp) {
+        function numberEnding (number) {
+            return (number > 1) ? 's' : '';
         }
-      }
-
-      // extraClasses: 'progress-item'
-
-      var $self = $('.flow-file-'+file.uniqueIdentifier);
-      $self.find('.flow-file-name').text(file.name);
-      $self.find('.flow-file-size').text(readablizeBytes(file.size));
-      $self.find('.flow-file-download').attr('href', '/download/' + file.uniqueIdentifier).hide();
-      $self.find('.flow-file-pause').on('click', function () {
-        file.pause();
-        $self.find('.flow-file-pause').hide();
-        $self.find('.flow-file-resume').show();
-      });
-      $self.find('.flow-file-resume').on('click', function () {
-        file.resume();
-        $self.find('.flow-file-pause').show();
-        $self.find('.flow-file-resume').hide();
-      });
-      $self.find('.flow-file-cancel').on('click', function () {
-        file.cancel();
-        $self.remove();
-      });
-    });
-    r.on('filesSubmitted', function(file) {
-      r.upload();
-    });
-    r.on('fileSuccess', function(file,message){
-      // Reflect that the file upload has completed
-      /*
-      $("#upload-tree").fancytree("getTree").getNodeByKey(file.relativePath).extraClasses = '';
-      $("#upload-tree").fancytree("getTree").getNodeByKey(file.relativePath).renderTitle();
-      */
-    });
-    r.on('fileError', function(file, message){
-      // Reflect that the file upload has resulted in error
-      $('.flow-file-'+file.uniqueIdentifier+' .flow-file-progress').html('(file could not be uploaded: '+message+')');
-    });
-    r.on('fileProgress', function(file){
-      if (r.progress() == 1.0) {
-        
-        // Hide progress bar
-        $('.progress').hide();
-        
-        // Allow completion of deposit
-        $('#deposit-submit-btn').prop('disabled', false);
-
-      } else {
-        updateProgress(Math.floor(r.progress()*100));
-      }
-    });
-    r.on('catchAll', function() {
-      // console.log.apply(console, arguments);
-    });
-    window.r = {
-      pause: function () {
-        r.pause();
-      },
-      cancel: function() {
-        r.cancel();
-        $('.flow-file').remove();
-      },
-      upload: function() {
-        $('.flow-file-pause').show();
-        $('.flow-file-resume').hide();
-        r.resume();
-      },
-      flow: r
-    };
-
-    });
-
-  function readablizeBytes(bytes) {
-    var s = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
-    var e = Math.floor(Math.log(bytes) / Math.log(1024));
-    return (bytes / Math.pow(1024, e)).toFixed(2) + " " + s[e];
-  }
-  function secondsToStr (temp) {
-    function numberEnding (number) {
-      return (number > 1) ? 's' : '';
+        var years = Math.floor(temp / 31536000);
+        if (years) {
+            return years + ' year' + numberEnding(years);
+        }
+        var days = Math.floor((temp %= 31536000) / 86400);
+        if (days) {
+            return days + ' day' + numberEnding(days);
+        }
+        var hours = Math.floor((temp %= 86400) / 3600);
+        if (hours) {
+            return hours + ' hour' + numberEnding(hours);
+        }
+        var minutes = Math.floor((temp %= 3600) / 60);
+        if (minutes) {
+            return minutes + ' minute' + numberEnding(minutes);
+        }
+        var seconds = temp % 60;
+        return seconds + ' second' + numberEnding(seconds);
     }
-    var years = Math.floor(temp / 31536000);
-    if (years) {
-      return years + ' year' + numberEnding(years);
-    }
-    var days = Math.floor((temp %= 31536000) / 86400);
-    if (days) {
-      return days + ' day' + numberEnding(days);
-    }
-    var hours = Math.floor((temp %= 86400) / 3600);
-    if (hours) {
-      return hours + ' hour' + numberEnding(hours);
-    }
-    var minutes = Math.floor((temp %= 3600) / 60);
-    if (minutes) {
-      return minutes + ' minute' + numberEnding(minutes);
-    }
-    var seconds = temp % 60;
-    return seconds + ' second' + numberEnding(seconds);
-  }
 
 </script>
 

@@ -1,6 +1,8 @@
 package org.datavaultplatform.broker.controllers;
 
 import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -180,10 +182,10 @@ public class VaultsController {
             externalMetadataService.addCachedDataset(dataset);
         }
         vault.setDataset(dataset);
-        
-        vault.setGrantEndDate(createVault.getGrantEndDate());
-        
-        vault.setReviewDate(createVault.getReviewDate());
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        vault.setGrantEndDate(formatter.parse(createVault.getGrantEndDate()));
+        vault.setReviewDate(formatter.parse(createVault.getReviewDate()));
 
         vaultsService.addVault(vault);
         

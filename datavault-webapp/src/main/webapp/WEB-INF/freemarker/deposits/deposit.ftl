@@ -7,7 +7,7 @@
     <ol class="breadcrumb">
         <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
         <li><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}"><b>Vault:</b> ${vault.name?html}</a></li>
-        <li class="active"><b>Deposit:</b> ${deposit.note?html}</li>
+        <li class="active"><b>Deposit:</b> ${deposit.name?html}</li>
     </ol>
 
     <div class="panel panel-uoe-low">
@@ -17,7 +17,7 @@
 
         <div class="panel-body">
 
-            <h2>View the Deposit: <small>${deposit.note?html}</small></h2>
+            <h2>View the Deposit: <small>${deposit.name?html}</small></h2>
             <br/>
             
             <ol id="progtrckr" class="progtrckr" data-progtrckr-steps="0" style="display:none;">
@@ -42,7 +42,7 @@
                 <tbody>
                     <tr>
                         <th scope="col">Deposit Name</th>
-                        <td>${deposit.note?html}</td>
+                        <td>${deposit.name?html}</td>
                     </tr>
                     <tr>
                         <th scope="col">Desposit Size</th>
@@ -50,7 +50,7 @@
                     </tr>
                     <tr>
                         <th scope="col">Description</th>
-                        <td></td>
+                        <td>${deposit.getDescription()}</td>
                     </tr>
                     <tr>
                         <th scope="col">Time and Date of Deposit</th>
