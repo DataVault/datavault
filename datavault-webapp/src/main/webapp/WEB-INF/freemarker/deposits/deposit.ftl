@@ -38,11 +38,21 @@
                 <span id="error-label">Error details</span>
             </div>
             
+            <#if deposit.status.name() == "COMPLETE">
+                <a id="retrievebtn" class="btn btn-primary pull-right" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve" disabled='disabled'>
+                    <i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> Retrieve data
+                </a>
+            </#if>
+            
             <table class="table table-sm">
                 <tbody>
                     <tr>
                         <th scope="col">Deposit Name</th>
                         <td>${deposit.name?html}</td>
+                    </tr>
+                    <tr>
+                        <th scope="col">Desposited By</th>
+                        <td>${deposit.getUserID()}</td>
                     </tr>
                     <tr>
                         <th scope="col">Desposit Size</th>
@@ -93,13 +103,6 @@
                     </tr>
                 </tbody>
             </table>
-            
-    
-            <#if deposit.status.name() == "COMPLETE">
-                <a id="retrievebtn" class="btn btn-primary pull-right" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve" disabled='disabled'>
-                    <i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> Retrieve data
-                </a>
-            </#if>
             
             <ul class="nav nav-tabs">
                 <li class="active"><a data-toggle="tab" href="#contents">Contents <span class="badge">${manifest?size}</span></a></li>
@@ -167,7 +170,7 @@
                                 <thead>
                                 <tr class="tr">
                                     <th>Retrieved By</th>
-                                    <th>Retrieval note</th>
+                                    <th>For external user?</th>
                                     <th>Date and Time</th>
                                     <th>Status</th>
                                 </tr>
@@ -175,10 +178,31 @@
                                 <tbody>
                                     <#list retrieves as retrieve>
                                     <tr class="tr">
-                                        <td></td>
-                                        <td>${retrieve.note?html}</td>
+                                        <td>${retrieve.user.getID()?html}</td>
+                                        <td><#if retrieve.hasExternalRecipients>Yes<#else>No</#if></td>
                                         <td>${retrieve.timestamp?datetime}</td>
-                                        <td>${retrieve.status?html}</td>
+                                        <td>
+                                            <div class="job-status">
+                                                <#if retrieve.status.name() == "COMPLETE">
+                                                <div class="text-success">
+                                                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                                    Complete
+                                                </div>
+                                                <#elseif retrieve.status.name() == "FAILED">
+                                                <div class="text-danger">
+                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                                    Failed
+                                                </div>
+                                                <#elseif retrieve.status.name() == "NOT_STARTED">
+                                                Not started
+                                                <#elseif retrieve.status.name() == "IN_PROGRESS">
+                                                <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                                                In progress
+                                                <#else>
+                                                ${retrieve.status}
+                                                </#if>
+                                            </div>
+                                        </td>
                                     </tr>
                                     </#list>
                                 </tbody>

@@ -161,8 +161,8 @@
                         <thead></thead>
                         <tbody>
                             <tr>
+                                <td>User Name</td>
                                 <td>${vault.userID?html}</td>
-                                <td>UUN</td>
                                 <td>
                                     <button type="button" class="btn btn-default pull-right" disabled>
                                         Edit

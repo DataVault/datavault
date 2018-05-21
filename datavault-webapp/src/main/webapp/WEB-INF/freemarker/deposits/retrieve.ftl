@@ -30,8 +30,27 @@
                     <p class="help-block">Describe the reason for this retrieve request (who and why) and choose a working directory to retrieve data from the archive</p>
 
                     <form id="retrieve-deposit" class="form" role="form" action="" method="post">
-                
+                        
                         <div class="form-group">
+                            <label>Are any of the intended recipients external to the University of Edinburgh?</label>
+                            <br/>
+                            <div class="radio-inline">
+                                <label>
+                                    <@spring.bind "retrieve.hasExternalRecipients" />
+                                    <input type="radio" name="hasExternalRecipients" value="true">
+                                    Yes
+                                </label>
+                            </div>
+                            <div class="radio-inline">
+                                <label>
+                                    <@spring.bind "retrieve.hasExternalRecipients" />
+                                    <input type="radio" name="hasExternalRecipients" value="false">
+                                    No
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group hidden">
                             <label class="control-label">Retrieve Note:</label>
                             <span class="text-muted">
                                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
@@ -43,23 +62,6 @@
                                    class="form-control"
                                    name="${spring.status.expression}"
                                    value="${spring.status.value!""}"/>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Are any of the intended recipients external to the University of Edinburgh?</label>
-                            <br/>
-                            <div class="radio-inline">
-                                <label>
-                                    <input type="radio" name="optionsRadios" value="yes" disabled>
-                                    Yes
-                                </label>
-                            </div>
-                            <div class="radio-inline">
-                                <label>
-                                    <input type="radio" name="optionsRadios" value="No" disabled>
-                                    No
-                                </label>
-                            </div>
                         </div>
                 
                         <div class="form-group">
@@ -128,7 +130,7 @@
         $('#retrieve-deposit').validate({
             ignore: ".ignore",
             rules: {
-                note: {
+                hasExternalRecipients: {
                     required: true
                 },
                 retrievePath: {
@@ -145,6 +147,17 @@
             submitHandler: function (form) {
                 $('button[type="submit"]').prop('disabled', true);
                 form.submit();
+            },
+            errorPlacement: function(error, element) 
+            {
+                if ( element.is(":radio") ) 
+                {
+                    error.appendTo( element.parents('.form-group') );
+                }
+                else 
+                { // This is the default behavior 
+                    error.insertAfter( element );
+                }
             }
         });
 

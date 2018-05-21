@@ -325,6 +325,9 @@
                 'name': {
                     required: true
                 },
+                depositPaths: {
+                    required: true
+                },
                 'hasPersonalData': {
                     required: true
                 },

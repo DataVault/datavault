@@ -3,6 +3,7 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
+import org.jsondoc.core.annotation.ApiObjectField;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -54,6 +55,12 @@ public class Retrieve {
     @Column(columnDefinition = "TEXT")
     String retrievePath;
     
+    @Column(nullable = false)
+    private Boolean hasExternalRecipients;
+    
+    @ManyToOne
+    private User user;
+    
     // Additional properties might go here - e.g. format
     
     public Retrieve() {};
@@ -92,6 +99,20 @@ public class Retrieve {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public Boolean getHasExternalRecipients() {
+        return hasExternalRecipients;
+    }
+
+    public void setHasExternalRecipients(Boolean hasExternalRecipients) {
+        this.hasExternalRecipients = hasExternalRecipients;
+    }
+
+    public User getUser() { return user; }
+    
+    public void setUser(User user) {
+        this.user = user;
     }
 
 //    public List<Event> getEvents() {

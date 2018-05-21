@@ -308,7 +308,12 @@ public class DepositsController {
 
         User user = usersService.getUser(userID);
         Deposit deposit = depositsService.getUserDeposit(user, depositID);
-
+        
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+        retrieve.setUser(user);
+        
         List<Job> jobs = deposit.getJobs();
         for (Job job : jobs) {
             if (job.isError() == false && job.getState() != job.getStates().size() - 1) {
