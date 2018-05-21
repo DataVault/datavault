@@ -203,22 +203,53 @@
                 </h4>
                 <div class="accordion-content">
                     <h4><strong>Retrievals</strong></h4>
-                    <table class="table table-bordered ">
-                        <thead>
-                        <tr>
-                            <th>Retrieved By</th>
-                            <th>Date and Time</th>
-                            <th>Reason</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>Retrieved By</td>
-                            <td>00  00/00/0000</td>
-                            <td>For an external user</td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <div class="scrollable">
+                        <table class="table table-bordered ">
+                            <thead>
+                            <tr>
+                                <th>Deposit Name</th>
+                                <th>Retrieved By</th>
+                                <th>For an external user</th>
+                                <th>Date and Time</th>
+                                <th>Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <#list retrievals?keys as depositName>
+                                <#list retrievals[depositName] as retrieve>
+                                <tr>
+                                    <td>${depositName}</td>
+                                    <td>${retrieve.user.getID()?html}</td>
+                                    <td><#if retrieve.hasExternalRecipients>Yes<#else>No</#if></td>
+                                    <td>${retrieve.timestamp?datetime}</td>
+                                    <td>
+                                        <div class="job-status">
+                                            <#if retrieve.status.name() == "COMPLETE">
+                                            <div class="text-success">
+                                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                                Complete
+                                            </div>
+                                            <#elseif retrieve.status.name() == "FAILED">
+                                            <div class="text-danger">
+                                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                                Failed
+                                            </div>
+                                            <#elseif retrieve.status.name() == "NOT_STARTED">
+                                            Not started
+                                            <#elseif retrieve.status.name() == "IN_PROGRESS">
+                                            <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                                            In progress
+                                            <#else>
+                                            ${retrieve.status}
+                                            </#if>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </#list> 
+                            </#list> 
+                            </tbody>
+                        </table>
+                    </div>
 
                     <h4><strong>Edits</strong></h4>
                     <table class="table table-bordered ">

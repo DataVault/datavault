@@ -1,10 +1,15 @@
 package org.datavaultplatform.webapp.controllers;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.RetentionPolicy;
+import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.request.CreateVault;
+import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
@@ -48,8 +53,17 @@ public class VaultsController {
 
         model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
         model.addAttribute(restService.getGroup(vault.getGroupID()));
-        model.addAttribute("deposits", restService.getDepositsListing(vaultID));
-
+        
+        DepositInfo[] deposits = restService.getDepositsListing(vaultID);
+        model.addAttribute("deposits", deposits);
+        
+        Map<String, Retrieve[]> depositRetrievals = new HashMap<String, Retrieve[]>();
+        for (DepositInfo deposit : deposits) {
+            Retrieve[] retrievals = restService.getDepositRetrieves(deposit.getID());
+            depositRetrievals.put(deposit.getName(), retrievals);
+        }
+        model.addAttribute("retrievals", depositRetrievals);
+        
         return "vaults/vault";
     }
 
