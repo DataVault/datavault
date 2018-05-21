@@ -122,7 +122,7 @@ public class TestPureProvider implements Provider {
     public List<Dataset> getDatasetsForUser(String userID) {
     	List<Dataset> retVal = new ArrayList<Dataset>();
     	System.out.println("Getting Datasets from the test pure flat file for " +userID);
-    	System.out.println("Employee ID is hardcoded to 123363 for now we need to add the LDAP service to get the real employee ID");
+    	//System.out.println("Employee ID is hardcoded to 123363 for now we need to add the LDAP service to get the real employee ID");
     	// userID is the employee id
     	if (userID != null) {
 	        Map<String, String> personHash;
