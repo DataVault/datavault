@@ -51,7 +51,7 @@
                                 ${deposit.name?html}
                             </a>
                         </td>
-                        <td></td>
+                        <td>${deposit.getUserID()}</td>
                         <td>${deposit.getCreationTime()?datetime}</td>
                         <td>${deposit.getSizeStr()}</td>
                         <td>

@@ -121,6 +121,11 @@ public class DepositsController {
         deposit.setPersonalDataStatement(createDeposit.getPersonalDataStatement());
         deposit.setDepositPaths(new ArrayList<DepositPath>());
         
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+        deposit.setUser(user);
+        
         List<FileStore> userStores = user.getFileStores();
         
         Map<String, String> userFileStoreClasses = new HashMap<>();

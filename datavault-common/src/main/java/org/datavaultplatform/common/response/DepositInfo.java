@@ -60,10 +60,14 @@ public class DepositInfo {
 
     @ApiObjectField(description = "Deposit chunks")
     private List<DepositChunk> depositChunks;
+
+    @ApiObjectField(description = "The user who did this deposit")
+    private String userID;
     
     public DepositInfo() {}
-    public DepositInfo(String id, Date creationTime, Deposit.Status status, String name, String description, boolean hasPersonalData, String personalDataStatement, String fileOrigin, String shortFilePath, String filePath, long depositSize, String vaultID, List<DepositPath> depositPaths, List<DepositChunk> depositChunks) {
+    public DepositInfo(String id, String userID, Date creationTime, Deposit.Status status, String name, String description, boolean hasPersonalData, String personalDataStatement, String fileOrigin, String shortFilePath, String filePath, long depositSize, String vaultID, List<DepositPath> depositPaths, List<DepositChunk> depositChunks) {
         this.id = id;
+        this.userID = userID;
         this.creationTime = creationTime;
         this.status = status;
         this.name = name;
@@ -87,6 +91,14 @@ public class DepositInfo {
         this.id = id;
     }
 
+    public String getUserID() {
+        return userID;
+    }
+
+    public void setUserID(String userID) {
+        this.userID = userID;
+    }
+    
     public Date getCreationTime() {
         return creationTime;
     }

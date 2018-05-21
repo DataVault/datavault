@@ -152,6 +152,9 @@ public class Deposit {
     @ApiObjectField(description = "Size of the deposit (in bytes)")
     private long depositSize;
     
+    @ManyToOne
+    private User user;
+    
     public Deposit() {}
     public Deposit(String name, String description, Boolean hasPersonalData) {
         this.name = name;
@@ -319,9 +322,16 @@ public class Deposit {
     
     public void setEncArchiveDigest(String encArchiveDigest) {  this.encArchiveDigest = encArchiveDigest; }
     
+    public User getUser() { return user; }
+    
+    public void setUser(User user) {
+        this.user = user;
+    }
+    
     public DepositInfo convertToResponse() {
         return new DepositInfo(
                 id,
+                user.getID(),
                 creationTime,
                 status,
                 name,
