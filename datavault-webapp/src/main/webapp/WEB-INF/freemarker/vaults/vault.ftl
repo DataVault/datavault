@@ -173,7 +173,8 @@
                     </table>
                     
                     <h4><strong>Nominated Data Managers</strong></h4>
-                    <table class="table table-bordered ">
+                    <div class="alert alert-info">Not available</div>
+                    <table class="table table-bordered hidden">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -250,9 +251,10 @@
                             </tbody>
                         </table>
                     </div>
-
+                    
                     <h4><strong>Edits</strong></h4>
-                    <table class="table table-bordered ">
+                    <div class="alert alert-info">Not available</div>
+                    <table class="table table-bordered hidden">
                         <thead>
                         <tr>
                             <th>Edited By</th>
