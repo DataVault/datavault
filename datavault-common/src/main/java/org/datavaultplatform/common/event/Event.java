@@ -38,6 +38,7 @@ public class Event {
     private String id;
     
     // Event properties
+    @Column(name = "message", length = 4000)
     public String message;
     public String retrieveId;
     public String eventClass;

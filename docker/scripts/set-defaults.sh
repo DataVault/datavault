@@ -7,3 +7,7 @@ export USER_DATA_DIR=${USER_DATA_DIR:-/Users}
 export ARCHIVE_DIR=${ARCHIVE_DIR:-/tmp/datavault/archive}
 export TEMP_DIR=${TEMP_DIR:-/tmp/datavault/temp}
 export META_DIR=${META_DIR:-/tmp/datavault/meta}
+export AWS_S3_BUCKET=${AWS_S3_BUCKET:-datavault-archive}
+export AWS_REGION=${AWS_REGION:-eu-west-1}
+export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:--}
+export AWS_SECRET_KEY_ID=${AWS_SECRET_KEY_ID:--}
