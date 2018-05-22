@@ -25,21 +25,25 @@ Functional tests can be run against any deployed instance of the application, lo
 They require you to first deploy and configure the application.
 Note that they will make persistent changes, so if this is a problem you'll need to be prepared to delete data afterwards.
 They should be written in such a way that they can cope with differences in the existing state, e.g. a test may do different things depending on whether the user had previously set up a vault or not, but should pass regardless.
+
+Note that the functional tests may generate some false-positives, e.g. tests that fail due to timing issues, or differences in setup.
+For that reason, we don't run them as part of the CI process.
+
 To run them against localhost, run:
 
     mvn verify -P functional-test
 
+By default, the tests run against localhost:58080 (the URL specified in `docker-compose.yml`), but you can run them against a remote server with the `test.url` property, e.g.:
+
+    mvn verify -P functional-test -Dtest.url=http://webapp:8080
+
 The tests require you to have Selenium & Firefox installed locally.
 If you don't/can't have this, you can also use a remote Selenium server using the `test.selenium.driver` property.
+Note that if you're using a remote Selenium server, `localhost` would resolve to the Selenium server, so you will also need to specify a different `test.url`.
 For example, you can run a standalone Selenium server with:
 
     docker run -d -p 4444:4444 selenium/standalone-firefox
 
 Then run the tests with:
 
-    mvn verify -P functional-test -Dtest.selenium.driver.url=http://localhost:4444/wd/hub
-
-By default, the tests run against localhost:58080 (the URL specified in `docker-compose.yml`), but you can run them against a remote server with the `test.url` property, e.g.:
-
-    mvn verify -P functional-test -Dtest.url=http://dlib-dumpling.edina.ac.uk
-
+    mvn verify -P functional-test -Dtest.selenium.driver.url=http://localhost:4444/wd/hub -Dtest.url=http://webapp:8080
