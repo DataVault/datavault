@@ -1,8 +1,8 @@
 package org.datavaultplatform.common.storage.impl;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+//import java.io.FileNotFoundException;
+//import java.io.FileOutputStream;
 import java.util.Map;
 
 import org.datavaultplatform.common.io.Progress;
@@ -26,8 +26,9 @@ import com.amazonaws.services.s3.transfer.Upload;
 public class S3Cloud extends Device implements ArchiveStore {
 
 	private static final Logger logger = LoggerFactory.getLogger(S3Cloud.class);
-	private static String defaultBucketName = "datavault-test-bucket";
-	private static String defaultRegionName = Regions.EU_WEST_1.toString();
+	private static String defaultBucketName = "datavault-test-bucket-edina";
+	// Regions.EU_WEST_1 returns EU_WEST_1 even if you lower case _ is still wrong
+	private static String defaultRegionName = "eu-west-1";
 	public Verify.Method verificationMethod = Verify.Method.CLOUD;
 	private TransferManager transferManager;
 	private String bucketName;
@@ -46,16 +47,16 @@ public class S3Cloud extends Device implements ArchiveStore {
 		AmazonS3ClientBuilder builder = AmazonS3ClientBuilder
 			                        .standard()
 			                        .withRegion(regionName);
-                // Access key can be provided through properties, but if not will be picked up default location, e.g. ~/.aws/credentials
+        // Access key can be provided through properties, but if not will be picked up default location, e.g. ~/.aws/credentials
 		String accessKey = config.get("s3.awsAccessKey");
 		String secretKey = config.get("s3.awsSecretKey");
-                if (accessKey != null && secretKey != null) {
-                	builder = builder.withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)));
-                }
-                this.transferManager = TransferManagerBuilder
-                                       .standard()
-                                       .withS3Client(builder.build())
-                                       .build();
+        if (accessKey != null && secretKey != null) {
+            builder = builder.withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)));
+        }
+        this.transferManager = TransferManagerBuilder
+                               .standard()
+                               .withS3Client(builder.build())
+                               .build();
 		this.bucketName = bucketName;
 	}
 
