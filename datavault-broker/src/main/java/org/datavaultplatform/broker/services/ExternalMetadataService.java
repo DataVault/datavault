@@ -5,7 +5,7 @@ import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.metadata.Provider;
 import org.datavaultplatform.common.metadata.impl.MockProvider;
 import org.datavaultplatform.common.metadata.impl.PureProvider;
-import org.datavaultplatform.common.metadata.impl.TestPureProvider;
+import org.datavaultplatform.common.metadata.impl.PureFlatFileProvider;
 import org.datavaultplatform.common.model.dao.DatasetDAO;
 
 import java.util.ArrayList;
@@ -30,14 +30,14 @@ public class ExternalMetadataService {
         if (metadataURL.equals("")) {
             this.metadataProvider = new MockProvider();
         } else {
-        	this.metadataProvider = new TestPureProvider();
+        	this.metadataProvider = new PureFlatFileProvider();
             //this.metadataProvider = new PureProvider(metadataURL);
         }
     }
     
     public List<Dataset> getDatasets(String userID) {
     	System.out.println("Getting Datasets for UUN " + userID);
-    	if (this.metadataProvider instanceof TestPureProvider) {
+    	if (this.metadataProvider instanceof PureFlatFileProvider) {
     		User user = this.usersService.getUser(userID);
     		if (user != null) {
     			System.out.println("User surname " + user.getLastname());
