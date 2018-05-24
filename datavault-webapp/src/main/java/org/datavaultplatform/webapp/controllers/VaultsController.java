@@ -1,7 +1,6 @@
 package org.datavaultplatform.webapp.controllers;
 
 import org.datavaultplatform.common.model.Dataset;
-import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.request.CreateVault;
@@ -17,7 +16,7 @@ public class VaultsController {
 
     private RestService restService;
 
-    public void setRestService(RestService restService) {
+	public void setRestService(RestService restService) {
         this.restService = restService;
     }
 

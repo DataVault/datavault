@@ -82,14 +82,17 @@ public class LDAPService {
 
         HashMap<String, String> attributes = new HashMap<String, String>();
 
+        logger.info("Attributes to retrieve: " + attrs);
         EntryCursor cursor = connection.search(searchContext, "(" + searchFilter + "="  + id + ")", SearchScope.ONELEVEL, attrs);
-
         // We appear to loop round a set of LDAP entries, in fact we only expect to have found one match.
         while (cursor.next()) {
+        	logger.info("In cursor loop");
             Entry entry = cursor.get();
+            logger.info("The entry object as a string:" + entry.toString());
 
             // Now store all the returned attributes in a HashMap
             for (Attribute attribute : entry.getAttributes()) {
+            	logger.info("Adding attribute:" + id + " with value " +  attribute.getString());
                 attributes.put(attribute.getId(), attribute.getString());
             }
         }
