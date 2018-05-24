@@ -50,7 +50,7 @@ public class S3Cloud extends Device implements ArchiveStore {
         // Access key can be provided through properties, but if not will be picked up default location, e.g. ~/.aws/credentials
 		String accessKey = config.get("s3.awsAccessKey");
 		String secretKey = config.get("s3.awsSecretKey");
-        if (accessKey != null && secretKey != null) {
+        if (accessKey != null && ! accessKey.isEmpty() && secretKey != null && ! secretKey.isEmpty()) {
             builder = builder.withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)));
         }
         this.transferManager = TransferManagerBuilder
