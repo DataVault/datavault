@@ -27,8 +27,6 @@
                     
                     <br/>
                     
-                    <p class="help-block">Describe the reason for this retrieve request (who and why) and choose a working directory to retrieve data from the archive</p>
-
                     <form id="retrieve-deposit" class="form" role="form" action="" method="post">
                         
                         <div class="form-group">
