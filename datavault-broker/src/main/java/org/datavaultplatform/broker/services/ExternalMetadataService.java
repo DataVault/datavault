@@ -47,7 +47,7 @@ public class ExternalMetadataService {
 	    			System.out.println("No user properties setting default");
 	    			employeeId = "123363";
 	    		}
-	    		if (props != null) {
+	    		if (props != null  && props.get(ExternalMetadataService.EDUNIREFNO) != null) {
 	    			System.out.println("Getting employeeId from properties");
 		    		employeeId = props.get(ExternalMetadataService.EDUNIREFNO);
 	    		}
