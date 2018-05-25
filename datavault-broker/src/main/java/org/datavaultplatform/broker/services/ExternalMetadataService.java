@@ -42,11 +42,8 @@ public class ExternalMetadataService {
     		if (user != null) {
     			System.out.println("User surname " + user.getLastname());
 	    		Map<String, String> props = user.getProperties();
-	    		String employeeId = null;
-	    		if (props == null) {
-	    			System.out.println("No user properties setting default");
-	    			employeeId = "123363";
-	    		}
+	    		System.out.println("Setting default employee id for testing:123363");
+    			String employeeId = "123363";
 	    		if (props != null  && props.get(ExternalMetadataService.EDUNIREFNO) != null) {
 	    			System.out.println("Getting employeeId from properties");
 		    		employeeId = props.get(ExternalMetadataService.EDUNIREFNO);
