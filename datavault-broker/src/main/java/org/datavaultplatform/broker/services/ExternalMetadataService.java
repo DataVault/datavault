@@ -18,7 +18,7 @@ public class ExternalMetadataService {
     private Provider metadataProvider;
     private DatasetDAO datasetDAO;
     private UsersService usersService;
-    public static final String EDUNIREFNO = "eduniRefNo";
+    public static final String EDUNIREFNO = "edunirefno";
 
     public void setUsersService(UsersService usersService) {
 		this.usersService = usersService;
@@ -42,12 +42,16 @@ public class ExternalMetadataService {
     		if (user != null) {
     			System.out.println("User surname " + user.getLastname());
 	    		Map<String, String> props = user.getProperties();
-	    		String employeeId = null;
-	    		if (props == null) {
-	    			System.out.println("No user properties setting default");
-	    			employeeId = "123363";
-	    		}
-	    		if (props != null) {
+	    		System.out.println("Setting default employee id for testing:123363");
+    			String employeeId = "123363";
+
+    			if (props != null) {
+    				System.out.println("Props is not null");
+    				for (String key : props.keySet()) {
+    					System.out.println("key is :'" + "'" + key + " value is :'" + props.get(key) + "'");
+    				}
+    			}
+	    		if (props != null  && props.get(ExternalMetadataService.EDUNIREFNO) != null) {
 	    			System.out.println("Getting employeeId from properties");
 		    		employeeId = props.get(ExternalMetadataService.EDUNIREFNO);
 	    		}
