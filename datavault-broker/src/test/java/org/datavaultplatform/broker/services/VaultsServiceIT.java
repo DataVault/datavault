@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
 
+import java.util.Date;
 import java.util.List;
 
 import org.datavaultplatform.common.model.Vault;
@@ -36,6 +37,9 @@ public class VaultsServiceIT {
         int prevVaultCount = vaultsService.count();
         
         Vault vault = new Vault("Vault Test");
+        vault.setDescription("Vault for test");
+        vault.setGrantEndDate(new Date());
+        vault.setReviewDate(new Date());
         vaultsService.addVault(vault);
         
         int newVaultCount = prevVaultCount + 1;

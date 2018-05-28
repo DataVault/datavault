@@ -96,9 +96,21 @@ public class Deposit {
         FAILED
     }
 
-    @ApiObjectField(description = "Deposit note to briefly describe the Deposit")
-    @Column(columnDefinition = "TEXT")
-    private String note;
+    @ApiObjectField(description = "Deposit name to briefly describe the Deposit")
+    @Column(columnDefinition = "TEXT", nullable = false, length = 400)
+    private String name;
+
+    @ApiObjectField(description = "Deposit description to provide more information about the Deposit")
+    @Column(columnDefinition = "TEXT", length = 6000)
+    private String description;
+    
+    @ApiObjectField(description = "Whether the deposit contains personal data or not")
+    @Column(nullable = false)
+    private Boolean hasPersonalData;
+    
+    @ApiObjectField(description = "Description of the nature of the personal data")
+    @Column(columnDefinition = "TEXT", length = 6000)
+    private String personalDataStatement;
 
     // For now, a deposit relates to a single bag.
     @ApiObjectField(description = "ID of the bag associated with this Deposit")
@@ -140,9 +152,14 @@ public class Deposit {
     @ApiObjectField(description = "Size of the deposit (in bytes)")
     private long depositSize;
     
+    @ManyToOne
+    private User user;
+    
     public Deposit() {}
-    public Deposit(String note) {
-        this.note = note;
+    public Deposit(String name, String description, Boolean hasPersonalData) {
+        this.name = name;
+        this.description = description;
+        this.hasPersonalData = hasPersonalData;
         this.status = Status.NOT_STARTED;
     }
     
@@ -168,12 +185,34 @@ public class Deposit {
         return archives;
     }
 
-    public String getNote() { return note; }
+    public String getName() { return name; }
     
-    public void setNote(String note) {
-        this.note = note;
+    public void setName(String name) {
+        this.name = name;
     }
 
+    public String getDescription() { return description; }
+    
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    public Boolean getHasPersonalData() {
+        return hasPersonalData;
+    }
+    
+    public void setHasPersonalData(Boolean hasPersonalData) {
+        this.hasPersonalData = hasPersonalData;
+    }
+    
+    public String getPersonalDataStatement() {
+        return personalDataStatement;
+    }
+    
+    public void setPersonalDataStatement(String personalDataStatement) {
+        this.personalDataStatement = personalDataStatement;
+    }
+    
     public Status getStatus() { return status; }
 
     public void setStatus(Status status) {
@@ -283,12 +322,22 @@ public class Deposit {
     
     public void setEncArchiveDigest(String encArchiveDigest) {  this.encArchiveDigest = encArchiveDigest; }
     
+    public User getUser() { return user; }
+    
+    public void setUser(User user) {
+        this.user = user;
+    }
+    
     public DepositInfo convertToResponse() {
         return new DepositInfo(
                 id,
+                user.getID(),
                 creationTime,
                 status,
-                note,
+                name,
+                description,
+                hasPersonalData,
+                personalDataStatement,
                 fileOrigin,
                 shortFilePath,
                 filePath,

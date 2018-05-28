@@ -87,99 +87,113 @@
 <div class="container">
 
     <ol class="breadcrumb">
+        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
         <li class="active"><b>Storage Options</b></li>
     </ol>
 
-    <h3>Local Storage</h3>
+    <div class="panel panel-uoe-low">
+        <div class="associated-image">
+            <figure class="uoe-panel-image uoe-panel-image"></figure>
+        </div>
 
-    <div class="table-responsive storage-table">
-        <#if filestoresLocal?has_content>
-        <table class="table table-striped">
+        <div class="panel-body">
+            <h2>Define Your Storage Options</h2>
+            <br/>
 
-            <thead>
-            <tr class="tr">
-                <th>Hostname</th>
-                <th>Path</th>
-                <th></th>
-            </tr>
-            </thead>
+            <p>We need to know a little about where you intent to archive data from.</p>
 
-            <tbody id="fileStoresLocal">
-                    <#list filestoresLocal as filestoreLocal>
-                    <tr class="tr">
-                        <td>localhost</td>
-                        <td>${filestoreLocal.properties['rootPath']}</td>
-                        <td>
-                            <a class="btn btn-xs btn-danger pull-right" href="#" data-filestore="${filestoreLocal.ID}" data-toggle="modal" data-target="#confirm-removal">
-                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
-                            </a>
-                        </td>
-                    </tr>
-                    </#list>
-            </tbody>
-        </table>
+            <div class="hidden">
+                <h3>Define Your Storage Options</h3>
 
-        <#else>
-            <h4>There are currently no Local Filestores configured</h4>
-        </#if>
+                <div class="table-responsive storage-table">
+                    <#if filestoresLocal?has_content>
+                    <table class="table table-striped">
 
-        <form>
-            <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-filestoreLocal">
-                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Filestore
-            </a>
-        </form>
+                        <thead>
+                        <tr class="tr">
+                            <th>Hostname</th>
+                            <th>Path</th>
+                            <th></th>
+                        </tr>
+                        </thead>
 
+                        <tbody id="fileStoresLocal">
+                                <#list filestoresLocal as filestoreLocal>
+                                <tr class="tr">
+                                    <td>localhost</td>
+                                    <td>${filestoreLocal.properties['rootPath']}</td>
+                                    <td>
+                                        <a class="btn btn-xs btn-danger pull-right" href="#" data-filestore="${filestoreLocal.ID}" data-toggle="modal" data-target="#confirm-removal">
+                                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
+                                        </a>
+                                    </td>
+                                </tr>
+                                </#list>
+                        </tbody>
+                    </table>
+
+                    <#else>
+                        <h4>There are currently no Local Filestores configured</h4>
+                    </#if>
+
+                    <form>
+                        <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-filestoreLocal">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Filestore
+                        </a>
+                    </form>
+
+                </div>
+            </div>
+
+
+            <h3><strong>Data Store</strong></h3>
+
+            <div class="table-responsive storage-table">
+                <#if filestoresSFTP?has_content>
+                    <p>Your existing filestore paths</p>
+                    <table class="table table-striped" style="table-layout: fixed; word-wrap: break-word;">
+
+                        <thead>
+                        <tr class="tr">
+                            <th>Hostname</th>
+                            <th>Port</th>
+                            <th>Path</th>
+                            <th>Public key</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+
+                        <tbody id="fileStoresSFTP">
+                            <#list filestoresSFTP as filestoreSFTP>
+                            <tr class="tr">
+                                <td>${filestoreSFTP.properties['host']}</td>
+                                <td>${filestoreSFTP.properties['port']}</td>
+                                <td>${filestoreSFTP.properties['rootPath']}</td>
+                                <td><code>${filestoreSFTP.properties['publicKey']}</code></td>
+                                <td>
+                                    <a class="btn btn-xs btn-danger pull-right" href="#" data-filestore="${filestoreSFTP.ID}" data-toggle="modal" data-target="#confirm-removal">
+                                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
+                                    </a>
+                                </td>
+                            </tr>
+                            </#list>
+                        </tbody>
+                    </table>
+
+                <#else>
+                    <p>There are currently no SFTP Filestores configured</p>
+                </#if>
+
+                <form>
+                    <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-filestoreSFTP">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> File store
+                    </a>
+                </form>
+
+            </div>
+        </div>
     </div>
-
-
-    <h3>SFTP Storage</h3>
-
-
-    <div class="table-responsive storage-table">
-        <#if filestoresSFTP?has_content>
-            <table class="table table-striped" style="table-layout: fixed; word-wrap: break-word;">
-
-                <thead>
-                <tr class="tr">
-                    <th>Hostname</th>
-                    <th>Port</th>
-                    <th>Path</th>
-                    <th>Public key</th>
-                    <th></th>
-                </tr>
-                </thead>
-
-                <tbody id="fileStoresSFTP">
-                    <#list filestoresSFTP as filestoreSFTP>
-                    <tr class="tr">
-                        <td>${filestoreSFTP.properties['host']}</td>
-                        <td>${filestoreSFTP.properties['port']}</td>
-                        <td>${filestoreSFTP.properties['rootPath']}</td>
-                        <td><code>${filestoreSFTP.properties['publicKey']}</code></td>
-                        <td>
-                            <a class="btn btn-xs btn-danger pull-right" href="#" data-filestore="${filestoreSFTP.ID}" data-toggle="modal" data-target="#confirm-removal">
-                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
-                            </a>
-                        </td>
-                    </tr>
-                    </#list>
-                </tbody>
-            </table>
-
-        <#else>
-            <h4>There are currently no SFTP Filestores configured</h4>
-        </#if>
-
-        <form>
-            <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-filestoreSFTP">
-                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Filestore
-            </a>
-        </form>
-
-    </div>
-
-    <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/">Continue</a>
-    </div>
+</div>
 
 <script>
 

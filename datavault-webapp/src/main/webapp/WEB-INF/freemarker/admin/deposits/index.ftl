@@ -25,8 +25,8 @@
                 <thead>
                 <tr class="tr">
                     <th><a href="?sort=note&query=${query?url}">Deposit</a></th>
+                    <th><a href="?sort=note&query=${query?url}">Description</a></th>
                     <th><a href="?sort=status&query=${query?url}">Status</a></th>
-                    <th><a href="?sort=filePath&query=${query?url}">File Path</a></th>
                     <th><a href="?sort=depositSize&query=${query?url}">Size</a></th>
                     <th><a href="?sort=creationTime&query=${query?url}">Timestamp</a></th>
                 </tr>
@@ -35,9 +35,9 @@
                 <tbody>
                     <#list deposits as deposit>
                     <tr class="tr">
-                        <td>${deposit.note?html}</a></td>
+                        <td>${deposit.name?html}</a></td>
+                        <td>${deposit.description?html}</a></td>
                         <td>${deposit.status}</td>
-                        <td>${deposit.filePath?html}</td>
                         <td>${deposit.getSizeStr()}</td>
                         <td>${deposit.getCreationTime()?datetime}</td>
                     </tr>

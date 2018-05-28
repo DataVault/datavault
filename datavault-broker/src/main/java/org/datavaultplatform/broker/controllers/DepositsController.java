@@ -114,6 +114,7 @@ public class DepositsController {
                                   @PathVariable("depositid") String depositID) throws Exception {
 
         User user = usersService.getUser(userID);
+
         return depositsService.getUserDeposit(user, depositID).convertToResponse();
     }
 
@@ -125,8 +126,20 @@ public class DepositsController {
         Vault vault = vaultsService.getUserVault(user, createDeposit.getVaultID());
         
         Deposit deposit = new Deposit();
-        deposit.setNote(createDeposit.getNote());
+        deposit.setName(createDeposit.getName());
+        deposit.setDescription(createDeposit.getDescription());
+        if(createDeposit.getHasPersonalData().toLowerCase().equals("yes")) {
+            deposit.setHasPersonalData(true);
+        } else {
+            deposit.setHasPersonalData(false);
+        }
+        deposit.setPersonalDataStatement(createDeposit.getPersonalDataStatement());
         deposit.setDepositPaths(new ArrayList<DepositPath>());
+        
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+        deposit.setUser(user);
         
         List<FileStore> userStores = user.getFileStores();
         
@@ -310,7 +323,12 @@ public class DepositsController {
 
         User user = usersService.getUser(userID);
         Deposit deposit = depositsService.getUserDeposit(user, depositID);
-
+        
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+        retrieve.setUser(user);
+        
         List<Job> jobs = deposit.getJobs();
         for (Job job : jobs) {
             if (job.isError() == false && job.getState() != job.getStates().size() - 1) {

@@ -7,55 +7,69 @@
 <div class="container">
 
     <ol class="breadcrumb">
+        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
         <li class="active"><b>Feedback</b></li>
     </ol>
 
-    <form id="feedback" class="form-horizontal role="form" action="" method="post">
-
-        <div class="form-group">
-            <label class="col-sm-2 control-label" for="name">Name:</label>
-            <div class="col-sm-10">
-                <input type="text"
-                       class="form-control"
-                       name="name"
-                       value="${principal}"
-                       disabled />
-            </div>
+    <div class="panel panel-uoe-low">
+        <div class="associated-image">
+            <figure class="uoe-panel-image uoe-panel-image"></figure>
         </div>
 
-        <div class="form-group">
-            <label class="col-sm-2 control-label" for="email">Email:</label>
-            <div class="col-sm-10">
-                <input type="text"
-                       class="form-control"
-                       name="email"
-                       value=""/>
-           </div>
-        </div>
+        <div class="panel-body">
 
-        <div class="form-group">
-            <label class="col-sm-2 control-label" for="feedback">Feedback:</label>
-            <div class="col-sm-10">
-                <textarea type="text"
-                          class="form-control"
-                          name="feedback"
-                          rows="4" cols="60"></textarea>
-            </div>
-        </div>
+            <h2>Feedback</h2>
+            <br/>
 
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <form id="feedback" class="form-horizontal role="form" action="" method="post">
 
-        <div class="form-group">
-            <label class="col-sm-2 control-label"></label>
-            <div class="col-sm-10">
-                <div class="btn-toolbar">
-                    <button type="submit" name="action" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-bullhorn"></span> Send feedback</button>
-                    <button type="submit" name="action" value="cancel" class="btn btn-danger cancel">Cancel</button>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="name">Name:</label>
+                    <div class="col-sm-10">
+                        <input type="text"
+                               class="form-control"
+                               name="name"
+                               value="${principal}"
+                               disabled />
+                    </div>
                 </div>
-            </div>
-        </div>
 
-    </form>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="email">Email:</label>
+                    <div class="col-sm-10">
+                        <input type="text"
+                               class="form-control"
+                               name="email"
+                               value=""/>
+                   </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="feedback">Feedback:</label>
+                    <div class="col-sm-10">
+                        <textarea type="text"
+                                  class="form-control"
+                                  name="feedback"
+                                  rows="4" cols="60"></textarea>
+                    </div>
+                </div>
+
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"></label>
+                    <div class="col-sm-10">
+                        <div class="btn-toolbar">
+                            <button type="submit" name="action" value="submit" class="btn btn-primary"><span class="glyphicon glyphicon-bullhorn"></span> Send feedback</button>
+                            <button type="submit" name="action" value="cancel" class="btn btn-danger cancel">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
 
 </div>
 

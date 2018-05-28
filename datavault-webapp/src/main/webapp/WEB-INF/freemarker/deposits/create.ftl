@@ -58,133 +58,229 @@
 <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>My Vaults</b></a></li>
+        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
         <li><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}"><b>Vault:</b> ${vault.name?html}</a></li>
         <li class="active">Create new deposit</li>
     </ol>
+    
+    <div class="panel panel-uoe-low">
+        <div class="associated-image">
+            <figure class="uoe-panel-image uoe-panel-image"></figure>
+        </div>
 
-    <form id="create-deposit" class="form" role="form" action="" method="post">
+        <div class="panel-body">
 
-        <div class="form-group">
-            <label class="control-label">Deposit Note:</label>
-            <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="A descriptive name for this particular Deposit to the Vault, to set it apart from other parts of the data."></span></span>
-            <@spring.bind "deposit.note" />
-            <input type="text"
-                   class="form-control"
+            <h2>Create a new Deposit</h2>
+            <br/>
+            <form id="create-deposit" class="form" role="form" action="" method="post">
+                <div class="row">
+                    <div class="col-sm-10">
+    
+                        <div class="form-group">
+                            <label class="control-label">Deposit Name</label>
+                            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                title="This description should contain information to assist the vault Owner and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
+                            </span>
+                            <@spring.bind "deposit.name" />
+                            <input type="text" class="form-control" name="${spring.status.expression}" value='${spring.status.value!""}'/>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="control-label">Deposit Description</label>
+                            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                                title="The deposit name should  help reviewers understand whether this subset of the data needs to be kept longer than other parts of the vault.&nbsp;Maximum 400 characters.">
+                            </span>
+                            <@spring.bind "deposit.description" />
+                            <input type="text" class="form-control" name="${spring.status.expression}" value='${spring.status.value!""}'/>
+                        </div>
+                    </div>
+                </div>
+                
+                <label>
+                    <strong>Select the files to include in this deposit</strong>
+                </label>
+                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                    title="If you don't see the filestore you wish to use here, please click on 'Storage options' to add it.">
+                </span>
+                <br/><br/>
+                
+                <@spring.bind "deposit.fileUploadHandle" />
+                <input type="hidden"
+                   class="form-control file-upload-handle"
                    name="${spring.status.expression}"
                    value="${spring.status.value!""}"/>
-        </div>
+                   
+                <@spring.bind "deposit.depositPaths" />
+                <select
+                       multiple="true"
+                       class="file-path"
+                       style="display:none;"
+                       name="${spring.status.expression}"
+                       value="${spring.status.value!""}">
+                </select>
         
-        <label class="control-label">Choose files to deposit:</label>
-        <span class="text-muted"><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" title="Select files or directories to add to the Vault."></span></span>
-
-        <div class="form-group">
-
-            <@spring.bind "deposit.fileUploadHandle" />
-            <input type="hidden"
-               class="form-control file-upload-handle"
-               name="${spring.status.expression}"
-               value="${spring.status.value!""}"/>
-            <@spring.bind "deposit.depositPaths" />
-            <select
-                   multiple="true"
-                   class="file-path"
-                   style="display:none;"
-                   name="${spring.status.expression}"
-                   value="${spring.status.value!""}">
-            </select>
-
-            <div id="uploadMaxSizeAlert" class="alert alert-warning" role="alert" style="display:none;">
-              <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-              Files larger than 5GB cannot be uploaded directly from your computer.
-            </div>
-
-            <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
-
-                <div class="btn-toolbar">
-                    <button type="button" class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage"><i class="fa fa-hdd-o" aria-hidden="true"></i> Data Storage</button>
-                    <button type="button" class="btn btn-default flow-browse" data-toggle="tooltip" title="Maximum file size: 5GB"><i class="fa fa-laptop" aria-hidden="true"></i> My Computer</button>
+                <div id="uploadMaxSizeAlert" class="alert alert-warning" role="alert" style="display:none;">
+                  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                  Files larger than 5GB cannot be uploaded directly from your computer.
                 </div>
-
-              <div class="progress" style="display:none; margin-top:15px;">
-                <div id="upload-progress" class="progress-bar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
-                  <span id="progress-label" class="sr-only">0% Complete</span>
+        
+                <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
+    
+                    <div class="btn-toolbar">
+                        <button type="button" class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage"><i class="fa fa-hdd-o" aria-hidden="true"></i> Data Storage</button>
+                        <button type="button" class="btn btn-default flow-browse" data-toggle="tooltip" title="Maximum file size: 5GB"><i class="fa fa-laptop" aria-hidden="true"></i> My Computer</button>
+                    </div>
+    
+                    <div class="progress" style="display:none; margin-top:15px;">
+                        <div id="upload-progress" class="progress-bar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                            <span id="progress-label" class="sr-only">0% Complete</span>
+                        </div>
+                    </div>
+    
+                    <div id="upload-tree" class="fancytree tree-box text-left" style="display:none; margin-top:15px; max-height:25vh; overflow-y:scroll;"></div>
                 </div>
-              </div>
-
-              <div id="upload-tree" class="fancytree tree-box text-left" style="display:none; margin-top:15px; max-height:25vh; overflow-y:scroll;"></div>
-            </div>
-        </div>
-
-        <script>
-            var filesizeSeq = 0;
-            
-            // Create the tree inside the <div id="tree"> element.
-            $("#tree").fancytree({
-                source: {
-                        url: "${springMacroRequestContext.getContextPath()}/files",
-                        cache: false
-                },
-                lazyLoad: function(event, data){
-                    var node = data.node;
-                    // Load child nodes via ajax GET /files?mode=children&parent=1234
-                    data.result = {
-                        url: "${springMacroRequestContext.getContextPath()}/files",
-                        data: {mode: "children", parent: node.key},
-                        cache: false
-                    };
-                },
-                selectMode: 1,
-                activate: function(event, data) {
-                    var node = data.tree.getActiveNode();
+                
+                <script>
+                    var filesizeSeq = 0;
                     
-                    filesizeSeq = filesizeSeq + 1;
-                    var currentSeq = filesizeSeq;
-                    
-                    if (node) {
-                        $("#deposit-size").text("Deposit size: calculating ...");
-                        
-                        $.ajax({
-                            url: "${springMacroRequestContext.getContextPath()}/filesize",
-                            type: "GET",
-                            data: {filepath: node.key},
-                            dataType: 'text',
-                            success: function (result) {
-                                if (currentSeq == filesizeSeq) {
-                                    $("#deposit-size").text("Deposit size: " + result);
-                                }
+                    // Create the tree inside the "tree" element.
+                    $("#tree").fancytree({
+                        source: {
+                                url: "${springMacroRequestContext.getContextPath()}/files",
+                                cache: false
+                        },
+                        lazyLoad: function(event, data){
+                            var node = data.node;
+                            // Load child nodes via ajax GET /files?mode=children&parent=1234
+                            data.result = {
+                                url: "${springMacroRequestContext.getContextPath()}/files",
+                                data: {mode: "children", parent: node.key},
+                                cache: false
+                            };
+                        },
+                        selectMode: 1,
+                        activate: function(event, data) {
+                            var node = data.tree.getActiveNode();
+                            
+                            filesizeSeq = filesizeSeq + 1;
+                            var currentSeq = filesizeSeq;
+                            
+                            if (node) {
+                                $("#deposit-size").text("Deposit size: calculating ...");
+                                
+                                $.ajax({
+                                    url: "${springMacroRequestContext.getContextPath()}/filesize",
+                                    type: "GET",
+                                    data: {filepath: node.key},
+                                    dataType: 'text',
+                                    success: function (result) {
+                                        if (currentSeq == filesizeSeq) {
+                                            $("#deposit-size").text("Deposit size: " + result);
+                                        }
+                                    }
+                                });
+                            } else {
+                                $("#deposit-size").text("No files selected");
                             }
-                        });
-                    } else {
-                        $("#deposit-size").text("No files selected");
-                    }
-                }
-            });
-
-            $("#upload-tree").fancytree({
-                source: []
-            });
-        </script>
-
-        <div class="btn-toolbar">
-            <button id="deposit-submit-btn" type="submit" value="submit" class="btn btn-primary"><i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit data</button>
-            <button type="submit" value="cancel" class="btn btn-danger cancel">Cancel</button>
+                        }
+                    });
+        
+                    $("#upload-tree").fancytree({
+                        source: []
+                    });
+                </script>
+                
+                <div class="alert alert-info" role="alert">
+                    <p>Your dataset ID: ${vault.datasetName?html}<br>
+                    If you think this might be the wrong dataset Pure ID, please return to the first tab to select the correct one .</p>
+                </div>
+                    
+                <div class="form-group">
+                    <label for="has-personal-data" class="control-label">
+                        Does this deposit contain personal data?
+                    </label>
+                    <small>
+                        (More about personal data 
+                        [<a hfef="https://www.ed.ac.uk/records-management/data-protection/what-is-it/definitions/personal-data">
+                            https://www.ed.ac.uk/records-management/data-protection/what-is-it/definitions/personal-data
+                        </a>])
+                    </small>
+                    <br/>
+                    <div class="radio-has-personal-data radio-inline">
+                        <@spring.bind "deposit.hasPersonalData" />
+                        <input type="radio" name="${spring.status.expression}" value="yes"> Yes
+                    </div>
+                    <div class="radio-has-personal-data radio-inline">
+                        <@spring.bind "deposit.hasPersonalData" />
+                        <input type="radio" name="${spring.status.expression}" value="No"> No
+                    </div>
+                </div>
+                
+                <div id="content-has-personal-data" class="hidden">
+                    <div class="alert alert-info" role="alert">
+                        <p>
+                        PERSONAL DATA STATEMENT: Please describe the nature of the personal data and what steps you have taken to ensure
+                        compliance with data protection legislation and/or what WRITTEN CONSENT you have gathered from subjects with 
+                        respect to the storage and usage of these data.
+                        Good practice means anonymising your data, if you can do so without losing its usefulness. 
+                        If on the other hand you need to retain some kind of subject identifier, the data should be pseudonymised, if it is practical. 
+                        Whereas, if you unavoidably need to keep the identifying information of your subjects, 
+                        this personal data may be deposited in the DataVault because it is encrypted. 
+                        You must be able to provide justification for retaining the personal data. 
+                        Please specify any data protection exemptions you believe apply to the data. 
+                        </p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="personal-data-statement">Personal Data Statement</label>
+                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
+                            title="Maximum 6,000 characters."></span>
+                        <@spring.bind "deposit.personalDataStatement" />
+                        <textarea class="form-control" id="${spring.status.expression}" name="${spring.status.expression}" rows="3"></textarea>
+                    </div>
+                
+                </div>
+                
+                <div class="alert alert-info" role="alert">
+                    <p>Your deposit will be confirmed by email. Do not edit any files that have been included until the deposit is complete.</p>
+                </div> 
+                
+                <div class="btn-toolbar pull-right">
+                    <a class="btn btn-lg btn-link" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}">Cancel</a>
+                    <button type="submit" value="submit" class="btn btn-lg btn-primary">
+                        <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i>
+                        Deposit data
+                    </button>
+                </div>
+        
+                <input type="hidden" id="submitAction" name="action" value="submit"/>
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        
+            </form>
         </div>
-
-        <input type="hidden" id="submitAction" name="action" value="submit"/>
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-
-    </form>
+    </div>
 </div>
 
 <script>
     $(document).ready(function () {
-
+        
+        $('[data-toggle="popover"]').popover();
+        
         var updateProgress = function(percentComplete) {
           $('#upload-progress').css('width', percentComplete + '%').attr('aria-valuenow', percentComplete);
           $('#progress-label').text(percentComplete + '% Complete');
         }
-       
+        
+        $("input[name='hasPersonalData']").change( function() {
+            if ($(this).val() === 'yes'){
+                $('#content-has-personal-data').removeClass('hidden');
+                $('#personalDataStatement').removeClass('ignore');
+            }else{
+                $('#content-has-personal-data').addClass('hidden');
+                $('#personalDataStatement').addClass('ignore');
+            }
+        });
+        
         $('#add-from-storage-btn').on("click", function() {
             
             // Add the path to the hidden control
@@ -226,7 +322,16 @@
         $('#create-deposit').validate({
             ignore: ".ignore",
             rules: {
-                note: {
+                'name': {
+                    required: true
+                },
+                /*'depositPaths': {
+                    required: true
+                },*/
+                'hasPersonalData': {
+                    required: true
+                },
+                'personalDataStatement': {
                     required: true
                 }
             },
@@ -240,6 +345,17 @@
             submitHandler: function (form) {
                 $('button[type="submit"]').prop('disabled', true);
                 form.submit();
+            },
+            errorPlacement: function(error, element) 
+            {
+                if ( element.is(":radio") ) 
+                {
+                    error.appendTo( element.parents('.form-group') );
+                }
+                else 
+                { // This is the default behavior 
+                    error.insertAfter( element );
+                }
             }
         });
 
@@ -247,168 +363,164 @@
             'placement': 'top'
         });
 
-    var r = new Flow({
-        target:'${springMacroRequestContext.getContextPath()}/fileupload',
-        query:{fileUploadHandle:$('.file-upload-handle').val()},
-        headers:{'${_csrf.headerName}': '${_csrf.token}'},
-        chunkSize:10*1024*1024,
-        testChunks: false,
-        maxChunkRetries:1
-    });
+        var r = new Flow({
+            target:'${springMacroRequestContext.getContextPath()}/fileupload',
+            query:{fileUploadHandle:$('.file-upload-handle').val()},
+            headers:{'${_csrf.headerName}': '${_csrf.token}'},
+            chunkSize:10*1024*1024,
+            testChunks: false,
+            maxChunkRetries:1
+        });
     
-    // Keep track of uploaded directory names (top level only)
-    var uploadDirs = {};
+        // Keep track of uploaded directory names (top level only)
+        var uploadDirs = {};
 
-    r.assignDrop($('.flow-drop')[0]);
-    r.assignBrowse($('.flow-browse')[0]);
+        r.assignDrop($('.flow-drop')[0]);
+        r.assignBrowse($('.flow-browse')[0]);
 
-    // Handle file add event
-    r.on('fileAdded', function(file){
-      
-      // Prevent browser upload of large files (5GB)
-      if (file.size > (5 * 1024 * 1024 * 1024)) {
-        $('#uploadMaxSizeAlert').show();
-        return false;
-      }
+        // Handle file add event
+        r.on('fileAdded', function(file){
+            // Prevent browser upload of large files (5GB)
+            if (file.size > (5 * 1024 * 1024 * 1024)) {
+                $('#uploadMaxSizeAlert').show();
+                return false;
+            }
 
-      // Show progress bar
-      $('.progress').show();
+            // Show progress bar
+            $('.progress').show();
 
-      // Prevent completion of deposit
-      $('#deposit-submit-btn').prop('disabled', true);
+            // Prevent completion of deposit
+            $('#deposit-submit-btn').prop('disabled', true);
 
-      // Add the file to the list
-      $("#upload-tree").show();
+            // Add the file to the list
+            $("#upload-tree").show();
      
-      var uploadsNode = $("#upload-tree").fancytree("getNodeByKey", "uploads");
-      if (!uploadsNode) {
-        var rootNode = $("#upload-tree").fancytree("getRootNode");
-        uploadsNode = rootNode.addChildren({
-            key: "uploads",
-            title: "My Computer",
-            tooltip: "Browser uploads.",
-            folder: true,
-            expanded: true
-        });
-      }
+            var uploadsNode = $("#upload-tree").fancytree("getNodeByKey", "uploads");
+            if (!uploadsNode) {
+                var rootNode = $("#upload-tree").fancytree("getRootNode");
+                uploadsNode = rootNode.addChildren({
+                    key: "uploads",
+                    title: "My Computer",
+                    tooltip: "Browser uploads.",
+                    folder: true,
+                    expanded: true
+                });
+            }
       
-      if (file.relativePath == file.name) {
-        var childNode = uploadsNode.addChildren({
-          key: file.name,
-          title: file.name,
-          tooltip: file.name,
-          folder: false
+            if (file.relativePath == file.name) {
+                var childNode = uploadsNode.addChildren({
+                    key: file.name,
+                    title: file.name,
+                    tooltip: file.name,
+                    folder: false
+                });
+            } else {
+                var dirName = file.relativePath.split('/')[0];
+                if (!(dirName in uploadDirs)) {
+                    uploadDirs[dirName] = true;
+                    var childNode = uploadsNode.addChildren({
+                        key: dirName,
+                        title: dirName,
+                        tooltip: dirName,
+                        folder: true
+                    });
+                }
+            }
+
+            // extraClasses: 'progress-item'
+
+            var $self = $('.flow-file-'+file.uniqueIdentifier);
+            $self.find('.flow-file-name').text(file.name);
+            $self.find('.flow-file-size').text(readablizeBytes(file.size));
+            $self.find('.flow-file-download').attr('href', '/download/' + file.uniqueIdentifier).hide();
+            $self.find('.flow-file-pause').on('click', function () {
+                file.pause();
+                $self.find('.flow-file-pause').hide();
+                $self.find('.flow-file-resume').show();
+            });
+            $self.find('.flow-file-resume').on('click', function () {
+                file.resume();
+                $self.find('.flow-file-pause').show();
+                $self.find('.flow-file-resume').hide();
+            });
+            $self.find('.flow-file-cancel').on('click', function () {
+                file.cancel();
+                $self.remove();
+            });
         });
-      } else {
-        var dirName = file.relativePath.split('/')[0];
-        if (!(dirName in uploadDirs)) {
-          uploadDirs[dirName] = true;
-          var childNode = uploadsNode.addChildren({
-            key: dirName,
-            title: dirName,
-            tooltip: dirName,
-            folder: true
-          });
+        r.on('filesSubmitted', function(file) {
+            r.upload();
+        });
+        
+        r.on('fileSuccess', function(file,message){
+            // Reflect that the file upload has completed
+            /*
+            $("#upload-tree").fancytree("getTree").getNodeByKey(file.relativePath).extraClasses = '';
+            $("#upload-tree").fancytree("getTree").getNodeByKey(file.relativePath).renderTitle();
+            */
+        });
+        r.on('fileError', function(file, message){
+            // Reflect that the file upload has resulted in error
+            $('.flow-file-'+file.uniqueIdentifier+' .flow-file-progress').html('(file could not be uploaded: '+message+')');
+        });
+        r.on('fileProgress', function(file){
+            if (r.progress() == 1.0) {
+                // Hide progress bar
+                $('.progress').hide();
+                // Allow completion of deposit
+                $('#deposit-submit-btn').prop('disabled', false);
+            } else {
+                updateProgress(Math.floor(r.progress()*100));
+            }
+        });
+        r.on('catchAll', function() {
+            // console.log.apply(console, arguments);
+        });
+        window.r = {
+            pause: function () {
+                r.pause();
+            },
+            cancel: function() {
+                r.cancel();
+                $('.flow-file').remove();
+            },
+            upload: function() {
+                $('.flow-file-pause').show();
+                $('.flow-file-resume').hide();
+                r.resume();
+            },
+            flow: r
+        };
+    });
+
+    function readablizeBytes(bytes) {
+        var s = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
+        var e = Math.floor(Math.log(bytes) / Math.log(1024));
+        return (bytes / Math.pow(1024, e)).toFixed(2) + " " + s[e];
+    }
+    function secondsToStr (temp) {
+        function numberEnding (number) {
+            return (number > 1) ? 's' : '';
         }
-      }
-
-      // extraClasses: 'progress-item'
-
-      var $self = $('.flow-file-'+file.uniqueIdentifier);
-      $self.find('.flow-file-name').text(file.name);
-      $self.find('.flow-file-size').text(readablizeBytes(file.size));
-      $self.find('.flow-file-download').attr('href', '/download/' + file.uniqueIdentifier).hide();
-      $self.find('.flow-file-pause').on('click', function () {
-        file.pause();
-        $self.find('.flow-file-pause').hide();
-        $self.find('.flow-file-resume').show();
-      });
-      $self.find('.flow-file-resume').on('click', function () {
-        file.resume();
-        $self.find('.flow-file-pause').show();
-        $self.find('.flow-file-resume').hide();
-      });
-      $self.find('.flow-file-cancel').on('click', function () {
-        file.cancel();
-        $self.remove();
-      });
-    });
-    r.on('filesSubmitted', function(file) {
-      r.upload();
-    });
-    r.on('fileSuccess', function(file,message){
-      // Reflect that the file upload has completed
-      /*
-      $("#upload-tree").fancytree("getTree").getNodeByKey(file.relativePath).extraClasses = '';
-      $("#upload-tree").fancytree("getTree").getNodeByKey(file.relativePath).renderTitle();
-      */
-    });
-    r.on('fileError', function(file, message){
-      // Reflect that the file upload has resulted in error
-      $('.flow-file-'+file.uniqueIdentifier+' .flow-file-progress').html('(file could not be uploaded: '+message+')');
-    });
-    r.on('fileProgress', function(file){
-      if (r.progress() == 1.0) {
-        
-        // Hide progress bar
-        $('.progress').hide();
-        
-        // Allow completion of deposit
-        $('#deposit-submit-btn').prop('disabled', false);
-
-      } else {
-        updateProgress(Math.floor(r.progress()*100));
-      }
-    });
-    r.on('catchAll', function() {
-      // console.log.apply(console, arguments);
-    });
-    window.r = {
-      pause: function () {
-        r.pause();
-      },
-      cancel: function() {
-        r.cancel();
-        $('.flow-file').remove();
-      },
-      upload: function() {
-        $('.flow-file-pause').show();
-        $('.flow-file-resume').hide();
-        r.resume();
-      },
-      flow: r
-    };
-
-    });
-
-  function readablizeBytes(bytes) {
-    var s = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
-    var e = Math.floor(Math.log(bytes) / Math.log(1024));
-    return (bytes / Math.pow(1024, e)).toFixed(2) + " " + s[e];
-  }
-  function secondsToStr (temp) {
-    function numberEnding (number) {
-      return (number > 1) ? 's' : '';
+        var years = Math.floor(temp / 31536000);
+        if (years) {
+            return years + ' year' + numberEnding(years);
+        }
+        var days = Math.floor((temp %= 31536000) / 86400);
+        if (days) {
+            return days + ' day' + numberEnding(days);
+        }
+        var hours = Math.floor((temp %= 86400) / 3600);
+        if (hours) {
+            return hours + ' hour' + numberEnding(hours);
+        }
+        var minutes = Math.floor((temp %= 3600) / 60);
+        if (minutes) {
+            return minutes + ' minute' + numberEnding(minutes);
+        }
+        var seconds = temp % 60;
+        return seconds + ' second' + numberEnding(seconds);
     }
-    var years = Math.floor(temp / 31536000);
-    if (years) {
-      return years + ' year' + numberEnding(years);
-    }
-    var days = Math.floor((temp %= 31536000) / 86400);
-    if (days) {
-      return days + ' day' + numberEnding(days);
-    }
-    var hours = Math.floor((temp %= 86400) / 3600);
-    if (hours) {
-      return hours + ' hour' + numberEnding(hours);
-    }
-    var minutes = Math.floor((temp %= 3600) / 60);
-    if (minutes) {
-      return minutes + ' minute' + numberEnding(minutes);
-    }
-    var seconds = temp % 60;
-    return seconds + ' second' + numberEnding(seconds);
-  }
 
 </script>
 

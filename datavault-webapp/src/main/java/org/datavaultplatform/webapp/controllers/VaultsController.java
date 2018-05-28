@@ -1,9 +1,14 @@
 package org.datavaultplatform.webapp.controllers;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.RetentionPolicy;
+import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.request.CreateVault;
+import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
@@ -23,27 +28,7 @@ public class VaultsController {
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
     public String getVaultsListing(ModelMap model) {
         model.addAttribute("vaults", restService.getVaultsListing());
-
-        return "vaults/index";
-    }
-
-    @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
-    public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID) {
-        VaultInfo vault = restService.getVault(vaultID);
-
-        model.addAttribute("vault", vault);
-
-        model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
-        model.addAttribute(restService.getGroup(vault.getGroupID()));
-        model.addAttribute("deposits", restService.getDepositsListing(vaultID));
-
-        return "vaults/vault";
-    }
-
-    // Return an empty 'create new vault' page
-    @RequestMapping(value = "/vaults/create", method = RequestMethod.GET)
-    public String createVault(ModelMap model) {
-
+        
         // pass the view an empty Vault since the form expects it
         model.addAttribute("vault", new CreateVault());
 
@@ -56,17 +41,34 @@ public class VaultsController {
         Group[] groups = restService.getGroups();
         model.addAttribute("groups", groups);
 
-        return "vaults/create";
+        return "vaults/index";
+    }
+
+    @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
+    public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID) {
+        VaultInfo vault = restService.getVault(vaultID);
+
+        model.addAttribute("vault", vault);
+
+        model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
+        model.addAttribute(restService.getGroup(vault.getGroupID()));
+        
+        DepositInfo[] deposits = restService.getDepositsListing(vaultID);
+        model.addAttribute("deposits", deposits);
+        
+        Map<String, Retrieve[]> depositRetrievals = new HashMap<String, Retrieve[]>();
+        for (DepositInfo deposit : deposits) {
+            Retrieve[] retrievals = restService.getDepositRetrieves(deposit.getID());
+            depositRetrievals.put(deposit.getName(), retrievals);
+        }
+        model.addAttribute("retrievals", depositRetrievals);
+        
+        return "vaults/vault";
     }
 
     // Process the completed 'create new vault' page
     @RequestMapping(value = "/vaults/create", method = RequestMethod.POST)
-    public String addVault(@ModelAttribute CreateVault vault, ModelMap model, @RequestParam String action) {
-        // Was the cancel button pressed?
-        if ("cancel".equals(action)) {
-            return "redirect:/";
-        }
-
+    public String addVault(@ModelAttribute CreateVault vault, ModelMap model) {
         VaultInfo newVault = restService.addVault(vault);
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
         return "redirect:" + vaultUrl;        
