@@ -100,7 +100,10 @@
             <h2>Define Your Storage Options</h2>
             <br/>
 
-            <p>We need to know a little about where you intent to archive data from.</p>
+            <p>
+            We need to know a little about where you wish to archive data from by SFTP. N.B. 
+            if you wish to browse to your files, please use the 'My Computer' button on the 'Create a deposit' page.
+            </p>
 
             <div class="hidden">
                 <h3>Define Your Storage Options</h3>

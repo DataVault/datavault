@@ -127,8 +127,12 @@
                 <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
     
                     <div class="btn-toolbar">
-                        <button type="button" class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage"><i class="fa fa-hdd-o" aria-hidden="true"></i> Data Storage</button>
-                        <button type="button" class="btn btn-default flow-browse" data-toggle="tooltip" title="Maximum file size: 5GB"><i class="fa fa-laptop" aria-hidden="true"></i> My Computer</button>
+                        <button type="button" class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage">
+                            <i class="fa fa-hdd-o" aria-hidden="true"></i> Data Storage (SFTP)
+                        </button>
+                        <button type="button" class="btn btn-default flow-browse" data-toggle="tooltip" title="Maximum file size: 5GB">
+                            <i class="fa fa-laptop" aria-hidden="true"></i> My Computer
+                        </button>
                     </div>
     
                     <div class="progress" style="display:none; margin-top:15px;">
@@ -191,8 +195,10 @@
                 </script>
                 
                 <div class="alert alert-info" role="alert">
-                    <p>Your dataset ID: ${vault.datasetName?html}<br>
-                    If you think this might be the wrong dataset Pure ID, please return to the first tab to select the correct one .</p>
+                    <p>
+                        Your dataset ID: <strong>${vault.datasetName?html}</strong><br>
+                        If you think this might be the wrong dataset Pure ID, please return to the first tab to select the correct one .
+                    </p>
                 </div>
                     
                 <div class="form-group">
