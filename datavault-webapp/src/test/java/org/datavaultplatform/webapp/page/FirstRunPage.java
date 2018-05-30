@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 public class FirstRunPage extends Page {
@@ -15,9 +16,15 @@ public class FirstRunPage extends Page {
     }
 
     private void verifyWelcome() {
-        WebElement welcome = driver.findElement(By.cssSelector(".jumbotron p"));
-        if (! "Welcome to the Data Vault!".equals(welcome.getText())) {
-            throw new IllegalStateException("Not on first-run page. Text was: " + welcome.getText());
+        String expected =  "Welcome to the Data Vault!";
+        try {
+            WebElement welcome = driver.findElement(By.cssSelector(".jumbotron p"));
+            if (!expected.equals(welcome.getText())) {
+                throw new IllegalStateException(String.format("Not on %s: Welcome was %s, expected %s", this.getClass().getSimpleName(), welcome.getText(), expected));
+            }
+        }
+        catch(WebDriverException e) {
+            throw new IllegalStateException(String.format("Not on %s: Welcome not found", this.getClass().getSimpleName()), e);
         }
     }
 

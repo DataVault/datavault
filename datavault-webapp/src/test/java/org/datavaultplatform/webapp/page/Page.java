@@ -17,11 +17,11 @@ public abstract class Page {
         try {
             WebElement welcome = driver.findElement(By.cssSelector(".breadcrumb .active"));
             if (! expected.equals(welcome.getText())) {
-                throw new IllegalStateException(String.format("Not on %s: Breadcrumb was %s, expected %s", this.getClass(), welcome.getText(), expected));
+                throw new IllegalStateException(String.format("Not on %s: Breadcrumb was %s, expected %s", this.getClass().getSimpleName(), welcome.getText(), expected));
             }
         }
         catch(WebDriverException e) {
-            throw new IllegalStateException(String.format("Not on %s: Breadcrumb not found", this.getClass()), e);
+            throw new IllegalStateException(String.format("Not on %s: Breadcrumb not found", this.getClass().getSimpleName()), e);
         }
     }
 
