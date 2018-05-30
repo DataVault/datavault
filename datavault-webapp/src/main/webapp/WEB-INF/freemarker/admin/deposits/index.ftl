@@ -24,19 +24,23 @@
             <table class="table table-striped">
                 <thead>
                 <tr class="tr">
-                    <th><a href="?sort=note&query=${query?url}">Deposit</a></th>
+                    <th>Vault ID</th>
+                    <th>Deposit ID</th>
+                    <th><a href="?sort=note&query=${query?url}">Deposit Name</a></th>
                     <th><a href="?sort=note&query=${query?url}">Description</a></th>
                     <th><a href="?sort=status&query=${query?url}">Status</a></th>
                     <th><a href="?sort=depositSize&query=${query?url}">Size</a></th>
-                    <th><a href="?sort=creationTime&query=${query?url}">Timestamp</a></th>
+                    <th><a href="?sort=creationTime&query=${query?url}">Date deposited</a></th>
                 </tr>
                 </thead>
 
                 <tbody>
                     <#list deposits as deposit>
                     <tr class="tr">
-                        <td>${deposit.name?html}</a></td>
-                        <td>${deposit.description?html}</a></td>
+                        <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}">${deposit.vaultID?html}</a></td>
+                        <td>${deposit.getID()?html}</td>
+                        <td>${deposit.name?html}</td>
+                        <td>${deposit.description?html}</td>
                         <td>${deposit.status}</td>
                         <td>${deposit.getSizeStr()}</td>
                         <td>${deposit.getCreationTime()?datetime}</td>
