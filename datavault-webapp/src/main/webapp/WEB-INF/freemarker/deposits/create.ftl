@@ -197,7 +197,7 @@
                     
                 <div class="form-group">
                     <label for="has-personal-data" class="control-label">
-                        Does this deposit contain personal data?
+                        Does this deposit contain personally identifying information?
                     </label>
                     <small>
                         (More about personal data 
@@ -219,15 +219,13 @@
                 <div id="content-has-personal-data" class="hidden">
                     <div class="alert alert-info" role="alert">
                         <p>
-                        PERSONAL DATA STATEMENT: Please describe the nature of the personal data and what steps you have taken to ensure
-                        compliance with data protection legislation and/or what WRITTEN CONSENT you have gathered from subjects with 
-                        respect to the storage and usage of these data.
+                        PERSONAL DATA STATEMENT: Please describe the nature of the personally identifying information and 
+                        what steps you have taken to ensure compliance with data protection legislation . 
                         Good practice means anonymising your data, if you can do so without losing its usefulness. 
-                        If on the other hand you need to retain some kind of subject identifier, the data should be pseudonymised, if it is practical. 
-                        Whereas, if you unavoidably need to keep the identifying information of your subjects, 
+                        If on the other hand you need to retain some kind of subject identifier, the data should be pseudonymised, 
+                        if it is practical. Whereas, if you unavoidably need to keep the identifying information of your subjects, 
                         this personal data may be deposited in the DataVault because it is encrypted. 
-                        You must be able to provide justification for retaining the personal data. 
-                        Please specify any data protection exemptions you believe apply to the data. 
+                        You must be able to provide justification for retaining the personal data.
                         </p>
                     </div>
                     
