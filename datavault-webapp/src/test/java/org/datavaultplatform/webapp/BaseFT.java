@@ -81,6 +81,7 @@ public class BaseFT {
     @AfterMethod(dependsOnMethods={"takeScreenShotOnFailure"})
     public void logout() {
         try {
+            driver.get(host + "/datavault-webapp/");
             driver.findElement(By.partialLinkText("user")).click();
             driver.findElement(By.linkText("Logout")).click();
         } catch (Exception e) {
