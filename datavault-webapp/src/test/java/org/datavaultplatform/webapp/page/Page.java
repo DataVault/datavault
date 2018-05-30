@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.page;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -29,6 +30,14 @@ public abstract class Page {
         driver.findElement(By.partialLinkText(user)).click();
         driver.findElement(By.linkText("Logout")).click();
         return new LoginPage(driver);
+    }
+
+    public void focusAndClick(WebElement element) {
+        // Some elements (for unknown reasons) don't seem to properly be submitted when they are clicked
+        // Clicking them twice works, but can sometimes cause problems if *both* clicks register
+        // This instead gives the element focus before clicking, which also seems to fix the issue
+        ((JavascriptExecutor)driver).executeScript("var input = arguments[0]; input.focus();", element);
+        element.click();
     }
 }
 

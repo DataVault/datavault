@@ -54,4 +54,22 @@ public class DepositFT extends BaseFT {
         depositPage.waitForStatus("Complete");
         depositPage.logout("user1");
     }
+
+    @Test(dependsOnMethods={"testDepositFirstRun"}, alwaysRun=true)
+    public void testDepositUpload() throws Exception {
+        // This test currently assumes it's not the first time this user has logged in and they have created a local filestore and a vault called "My Vault"
+        // Any other circumstance, it'll fail, e.g. they've defined a vault with a different name, or added SFTP storage etc.
+        driver.get(host + "/datavault-webapp/");
+        LoginPage page = new LoginPage(driver);
+        page = page.typeUsername("user1")
+                   .typePassword("password1");
+
+        VaultsPage vaultsPage = page.submitLogin();
+        DepositPage depositPage = vaultsPage.clickVault("My Vault")
+                                            .clickDeposit()
+                                            .depositUploadedFile();
+
+        depositPage.waitForStatus("Complete");
+        depositPage.logout("user1");
+    }
 }
