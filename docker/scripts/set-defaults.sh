@@ -1,4 +1,4 @@
-export BROKER_HOST=${MYSQL_HOST:-broker}
+export BROKER_HOST=${BROKER_HOST:-broker}
 export MYSQL_HOST=${MYSQL_HOST:-mysql}
 export MYSQL_PASSWORD=${MYSQL_PASSWORD:-datavault}
 export RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
