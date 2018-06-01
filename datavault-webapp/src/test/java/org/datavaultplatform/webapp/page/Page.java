@@ -8,7 +8,6 @@ import org.openqa.selenium.WebElement;
 
 public abstract class Page {
     protected WebDriver driver;
-    private WebElement loginForm;
 
     public Page(WebDriver driver) {
         this.driver = driver;

@@ -5,7 +5,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 public class FilestoresPage extends Page {
-    private WebElement loginForm;
 
     public FilestoresPage(WebDriver driver) {
         super(driver);

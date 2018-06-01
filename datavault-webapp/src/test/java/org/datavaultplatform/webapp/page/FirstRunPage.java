@@ -8,7 +8,6 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 public class FirstRunPage extends Page {
-    private WebElement loginForm;
 
     public FirstRunPage(WebDriver driver) {
         super(driver);

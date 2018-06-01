@@ -5,7 +5,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 public class VaultsPage extends Page {
-    private WebElement loginForm;
 
     public VaultsPage(WebDriver driver) {
         super(driver);

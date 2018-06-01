@@ -5,7 +5,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 public class LoginPage extends Page {
-    private WebElement loginForm;
 
     public LoginPage(WebDriver driver) {
         super(driver);
@@ -15,7 +14,7 @@ public class LoginPage extends Page {
     private void verifyLoginForm() {
         // This should really test something simpler, e.g. heading or title, but neither of those are present
         // Check login screen is loaded
-        loginForm = driver.findElement(By.cssSelector("form.form-signin"));
+        WebElement loginForm = driver.findElement(By.cssSelector("form.form-signin"));
         if(! loginForm.isDisplayed()) {
             throw new IllegalStateException("Not on login page");
         }

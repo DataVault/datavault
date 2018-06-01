@@ -8,7 +8,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 public class AddDepositPage extends Page {
-    private WebElement loginForm;
 
     public AddDepositPage(WebDriver driver) {
         super(driver);

@@ -7,7 +7,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class AddVaultPage extends Page {
-    private WebElement loginForm;
 
     public AddVaultPage(WebDriver driver) {
         super(driver);
