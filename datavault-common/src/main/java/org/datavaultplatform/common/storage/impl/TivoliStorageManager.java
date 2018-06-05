@@ -11,18 +11,18 @@ import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.Verify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 public class TivoliStorageManager extends Device implements ArchiveStore {
 
     private static final Logger logger = LoggerFactory.getLogger(TivoliStorageManager.class);
-    //public static final String TSM_SERVER_NODE1_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm1.opt";
-    //public static final String TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
     // default locations of TSM option files
     public static String TSM_SERVER_NODE1_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm1.opt";
     public static String TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
-    //public List<String> locations = null;
 
-    // todo : can we change this to COPY_BACK?
     public Verify.Method verificationMethod = Verify.Method.COPY_BACK;
 
     public TivoliStorageManager(String name, Map<String,String> config) throws Exception  {
@@ -77,9 +77,13 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     @Override
     public void retrieve(String depositId, File working, Progress progress, String optFilePath) throws Exception {
     	
-    		logger.info("Retrieve command is " + "dsmc " + " retrieve " + working.getAbsolutePath() + " -description=" + depositId + " -optfile=" + optFilePath);
+    	String tempDirPath = "/tmp/datavault/temp/";
+    	String fileDir = tempDirPath + "/" + depositId;
+    	String filePath = fileDir + "/" + working.getName();
+    	Files.createDirectory(Paths.get(fileDir));
+    	logger.info("Retrieve command is " + "dsmc " + " retrieve " + filePath + " -description=" + depositId + " -optfile=" + optFilePath + "-replace=true");
     		
-        ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", working.getAbsolutePath(), "-description=" + depositId, "-optfile=" + optFilePath, "-replace=true");
+        ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", filePath, "-description=" + depositId, "-optfile=" + optFilePath, "-replace=true");
         Process p = pb.start();
         // This class is already running in its own thread so it can happily pause until finished.
         p.waitFor();
@@ -94,6 +98,10 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
             
         }
         // FILL IN THE REST OF PROGRESS x dirs, x files, x bytes etc.
+        if (Files.exists(Paths.get(filePath))) {
+        	Files.move(Paths.get(filePath), Paths.get(working.getAbsolutePath()), StandardCopyOption.REPLACE_EXISTING);
+        }
+        Files.delete(Paths.get(fileDir));
     }
     
     @Override
@@ -105,11 +113,25 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         // Note: generate a uuid to be passed as the description. We should probably use the deposit UUID instead (do we need a specialised archive method)?
         // Just a thought - Does the filename contain the deposit uuid? Could we use that as the description?
         //String randomUUIDString = UUID.randomUUID().toString();
+    	String pathPrefix = "/tmp/datavault/temp/";
+    	Path sourcePath = Paths.get(working.getAbsolutePath());
+    	Path destinationDir = Paths.get(pathPrefix + depositId);
+    	Path destinationFile = Paths.get(pathPrefix + depositId + "/" + working.getName());
+    	if (Files.exists(sourcePath)) {
+    		logger.info("Moving from temp to deposit id");
+    		Files.createDirectory(destinationDir);
+    		Files.move(sourcePath, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+    	}
+    	
+    	File tsmFile = new File(pathPrefix + depositId + "/" + working.getName());
+        this.storeInTSMNode(tsmFile, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT, depositId);
+        this.storeInTSMNode(tsmFile, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT, depositId);
         
-        
-        this.storeInTSMNode(working, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT, depositId);
-        this.storeInTSMNode(working, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT, depositId);
-
+        if (Files.exists(destinationFile)) {
+        	logger.info("Moving from deposit id to temp");
+        	Files.move(destinationFile, sourcePath, StandardCopyOption.REPLACE_EXISTING);
+        	Files.delete(destinationDir);
+        }
         return depositId;
     }
     
@@ -119,10 +141,12 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         // actually the Deposit  / Retreive worker classes check the free space it appears if we get here we don't need to check
         
         // The working file appears to be bagged and tarred when we get here
-		// in the local version of this class the FileCopy class adds info to the progess object
-		// I don't think we need to use the patch at all in this version 
+		// in the local version of this class the FileCopy class adds info to the progress object
+		// I don't think we need to use the patch at all in this version
+    	//File path = working.getAbsoluteFile().getParentFile();
         logger.info("Store command is " + "dsmc" + " archive " + working.getAbsolutePath() +  " -description=" + description + " -optfile=" + optFilePath);
         ProcessBuilder pb = new ProcessBuilder("dsmc", "archive", working.getAbsolutePath(), "-description=" + description, "-optfile=" + optFilePath);
+        //pb.directory(path);
 
         Process p = pb.start();
 
