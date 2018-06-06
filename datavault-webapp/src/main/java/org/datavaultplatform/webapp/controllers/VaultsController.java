@@ -20,6 +20,15 @@ import org.springframework.web.bind.annotation.*;
 public class VaultsController {
 
     private RestService restService;
+    private String system;
+    private String link;
+
+    public void setSystem(String system) {
+        this.system = system;
+    }
+    public void setLink(String link) {
+        this.link = link;
+    }
 
 	public void setRestService(RestService restService) {
         this.restService = restService;
@@ -40,6 +49,9 @@ public class VaultsController {
 
         Group[] groups = restService.getGroups();
         model.addAttribute("groups", groups);
+        
+        model.put("system", system);
+        model.put("link", link);
 
         return "vaults/index";
     }

@@ -41,7 +41,7 @@
                                 </td>
                                 <td>${vault.getUserID()}</td>
                                 <td>${vault.getCreationTime()?datetime}</td>
-                                <td class="text-muted">${vault.getReviewDate()?datetime}</td>
+                                <td class="text-muted">${vault.getReviewDate()?string('dd/MM/yyyy')}</td>
                             </tr>
                             </#list>
                         </tbody>
@@ -73,7 +73,7 @@
                         <br/>
                         
                         <p class="main">
-                            You must record the details of your dataset in <a href="#">PURE</a>. 
+                            You must record the details of your dataset in <a href="${link}" target="_blank">${system}</a>. 
                             If you haven't yet created a Pure dataset record containing the 
                             details of the data you're about to deposit in the vault, please do so. 
                         </p>
@@ -104,7 +104,8 @@
                                     The ‘owner’ /PI will be billed for any deposit, 
                                     against the Grant ID they provided in relation to the vault, 
                                     unless they have made other arrangements with Information Services Research Services. 
-                                    Rates are advertised on the Research Services charges page.
+                                    Rates are advertised on the 
+                                    <a href="http://www.ed.ac.uk/is/research-support/datavault" target="_blank">Research Services charges page</a>.
                                     </p>
                                     <p>
                                     You will be aware that the data you place in the Vault belongs to the University of Edinburgh 
@@ -179,12 +180,11 @@
                                     title="The School to which the vault belongs. In the absence of the vault Owner, School officers may be consulted on the management of the vault.">
                                 </span>
                                 <select id="groupID" name="groupID" data-width="fit" class="form-control">
-                                    <option selected disabled data-hidden="true">Please choose a group owner</option>
-                                        <#list groups as group>
-                                        <#if group.enabled>
-                                        <option value="${group.getID()}">${group.name?html}</option>
-                                        </#if> 
-                                        </#list>
+                                    <#list groups as group>
+                                    <#if group.enabled>
+                                    <option value="${group.getID()}">${group.name?html}</option>
+                                    </#if> 
+                                    </#list>
                                 </select>
                             </div>
                             

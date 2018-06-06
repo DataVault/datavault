@@ -138,7 +138,7 @@
                     </table>
                     <div class="alert alert-info" role="alert">
                         <p>
-                            All vaults are automatically closed so no more deposits can be added.
+                            All vaults are automatically closed so no more deposits can be added
                             ONE calendar year after the grant end date or one year after the first
                             deposit, whichever is later.
                         </p>
@@ -274,7 +274,7 @@
                     <h4><strong>Vault Metadata</strong></h4>
                     <h5>
                         <strong>
-                            PURE metadata - Vault description and other metadata captured from associated PURE dataset record at a time.
+                            PURE metadata - Vault description and other metadata captured from associated PURE dataset record at the time of creation of the vault.
                         </strong>
                     </h5>
 

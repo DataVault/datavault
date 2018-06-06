@@ -27,35 +27,38 @@ public class FeedbackController {
         this.templateMessage = templateMessage;
     }
 
-    @RequestMapping(value = "/feedback", method = RequestMethod.GET)
-    public String feedback(ModelMap model) {
-
-        return "feedback/index";
-    }
-
-    @RequestMapping(value = "/feedback", method = RequestMethod.POST)
-    public String sendFeedback(ModelMap model,
-                               @RequestParam String email,
-                               @RequestParam String feedback,
-                               @RequestParam String action) {
-        // Was the cancel button pressed?
-        if ("cancel".equals(action)) {
-            return "redirect:/";
-        }
-
-        // Send the feedback
-        SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
-        msg.setText("Feedback from: " + email + "\n" +
-                    "Message: " + feedback);
-        try{
-            this.mailSender.send(msg);
-        }
-        catch (MailException ex) {
-            // TODO better logging
-            System.err.println(ex.getMessage());
-        }
-
-        return "feedback/sent";
-    }
+    /*
+     * Replaced by EdWeb ‘Contact’ page
+     */
+//    @RequestMapping(value = "/feedback", method = RequestMethod.GET)
+//    public String feedback(ModelMap model) {
+//
+//        return "feedback/index";
+//    }
+//
+//    @RequestMapping(value = "/feedback", method = RequestMethod.POST)
+//    public String sendFeedback(ModelMap model,
+//                               @RequestParam String email,
+//                               @RequestParam String feedback,
+//                               @RequestParam String action) {
+//        // Was the cancel button pressed?
+//        if ("cancel".equals(action)) {
+//            return "redirect:/";
+//        }
+//
+//        // Send the feedback
+//        SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
+//        msg.setText("Feedback from: " + email + "\n" +
+//                    "Message: " + feedback);
+//        try{
+//            this.mailSender.send(msg);
+//        }
+//        catch (MailException ex) {
+//            // TODO better logging
+//            System.err.println(ex.getMessage());
+//        }
+//
+//        return "feedback/sent";
+//    }
 
 }

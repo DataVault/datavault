@@ -213,6 +213,7 @@ public class Vault {
         return new VaultInfo(
                 id,
                 user.getID(),
+                user.getFirstname()+" "+user.getLastname(),
                 dataset.getID(),
                 dataset.getName(),
                 creationTime,

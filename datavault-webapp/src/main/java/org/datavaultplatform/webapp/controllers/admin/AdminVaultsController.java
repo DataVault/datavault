@@ -29,7 +29,7 @@ public class AdminVaultsController {
         String theSort = sort;
         String theOrder = order;
         if (sort == null) theSort = "creationTime";
-        if (order == null) theOrder = "asc";
+        if (order == null) theOrder = "desc";
 
         if ((query == null) || ("".equals(query))) {
             model.addAttribute("vaults", restService.getVaultsListingAll(theSort, theOrder));
