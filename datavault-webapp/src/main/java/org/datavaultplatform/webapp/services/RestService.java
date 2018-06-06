@@ -251,6 +251,11 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits", DepositInfo[].class);
         return (DepositInfo[])response.getBody();
     }
+    
+    public DataManager[] getDataManagers(String vaultId) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/dataManagers", DataManager[].class);
+        return (DataManager[])response.getBody();
+    }
 
     public DepositInfo[] getDepositsListingAll() {
         HttpEntity<?> response = get(brokerURL + "/admin/deposits", DepositInfo[].class);
@@ -415,6 +420,16 @@ public class RestService {
     public User addUser(User user) {
         HttpEntity<?> response = post(brokerURL + "/users/", User.class, user);
         return (User)response.getBody();
+    }
+    
+    public VaultInfo addDataManager(String vaultId, String dataManagerUUN) {
+        HttpEntity<?> response = put(brokerURL + "/vaults/" + vaultId + "/addDataManager", VaultInfo.class, dataManagerUUN);
+        return (VaultInfo)response.getBody();
+    }
+    
+    public VaultInfo deleteDataManager(String vaultId, String dataManagerID) {
+        HttpEntity<?> response = delete(brokerURL + "/vaults/" + vaultId + "/deleteDataManager/" + dataManagerID, VaultInfo.class);
+        return (VaultInfo)response.getBody();
     }
 
     public User editUser(User user) {

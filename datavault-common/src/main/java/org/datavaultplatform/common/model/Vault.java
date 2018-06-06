@@ -82,6 +82,12 @@ public class Vault {
     @OneToMany(targetEntity=Deposit.class, mappedBy="vault", fetch=FetchType.EAGER)
     @OrderBy("creationTime")
     private List<Deposit> deposits;
+    
+    // A vault can have several data managers
+    @JsonIgnore
+    @OneToMany(targetEntity=DataManager.class, mappedBy="vault", fetch=FetchType.LAZY)
+    @OrderBy("uun")
+    private List<DataManager> dataManagers;
 
     @ManyToOne
     private RetentionPolicy retentionPolicy;
@@ -171,6 +177,15 @@ public class Vault {
         this.deposits.add(deposit);
     }
 
+    public List<DataManager> getDataManagers() {
+        if (dataManagers == null) return new ArrayList();
+        return dataManagers;
+    }
+    
+    public void addDataManager(DataManager dataManager) {
+        this.dataManagers.add(dataManager);
+    }
+    
     public RetentionPolicy getRetentionPolicy() { return retentionPolicy; }
 
     public void setRetentionPolicy(RetentionPolicy retentionPolicy) {

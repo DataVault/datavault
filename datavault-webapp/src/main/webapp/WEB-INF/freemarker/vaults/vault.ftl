@@ -1,9 +1,37 @@
 <#import "*/layout/defaultlayout.ftl" as layout>
 <#-- Specify which navbar element should be flagged as active -->
 <#global nav="home">
+<#import "/spring.ftl" as spring />
 <@layout.vaultLayout>
 <div class="container">
 
+    <div id="add-data-manager" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addDataManger" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form id="add-data-manager-form" class="form" role="form" action="addDataManager" method="post">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <h4 class="modal-title" id="addDataManger">Add Data Manager</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="control-label">UUN:</label>
+                            <input type="text" class="form-control" name="dataManagerUUN" value=""/>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="submitAction" name="action" value="submit"/>
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="submit" id="add-data-manager-btn" class="btn btn-primary btn-ok">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
     <ol class="breadcrumb">
         <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
         <li class="active"><b>Vault:</b> ${vault.name?html}</li>
@@ -15,7 +43,6 @@
         </div>
 
         <div class="panel-body">
-
             <h2>Summary of Vault Metadata</h2>
             <br/>
 
@@ -161,7 +188,7 @@
                         <thead></thead>
                         <tbody>
                             <tr>
-                                <td>User Name</td>
+                                <td class="text-muted">User Name</td>
                                 <td>${vault.userID?html}</td>
                                 <td>
                                     <button type="button" class="btn btn-default pull-right" disabled>
@@ -173,8 +200,8 @@
                     </table>
                     
                     <h4><strong>Nominated Data Managers</strong></h4>
-                    <div class="alert alert-info">Not available</div>
-                    <table class="table table-bordered hidden">
+                    
+                    <table class="table table-bordered">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -183,20 +210,32 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <#list dataManagers as dataManager>
                             <tr>
-                                <td>Name</td>
-                                <td>UUN</td>
+                                <td class="text-muted">User Name</td>
+                                <td>${dataManager.getUUN()}</td>
                                 <td>
-                                    <button type="button" class="btn btn-default pull-right" disabled>Delete</button>
+                                    <form id="delete-data-manager-form" role="form" action="deleteDataManager" method="post">
+                                        <input type="hidden" class="form-control" name="dataManagerID" 
+                                            value="${dataManager.getID()}"/>
+                                        <input type="hidden" id="submitAction" name="action" value="submit"/>
+                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                                        <button type="submit" id="delete-data-manager-btn" 
+                                            class="btn btn-primary btn-ok pull-right btn-sm">Delete</button>
+                                    </form>
                                 </td>
                             </tr>
+                            </#list>
                             <tr>
                                 <td colspan="3">
-                                    <button type="button" class="btn btn-default pull-right" disabled>Add Data Manager +</button>
+                                    <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#add-data-manager">
+                                        <i class="fa fa-plus" aria-hidden="true"></i> Add Data Manager
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                    
                 </div>
 
                 <h4 class="accordion-toggle">
@@ -306,6 +345,7 @@ $(document).ready(function(){
     $('[data-toggle="tooltip"]').tooltip({
         'placement': 'right'
     });
+
 });
 </script>
 
