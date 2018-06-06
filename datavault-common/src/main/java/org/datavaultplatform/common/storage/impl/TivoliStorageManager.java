@@ -22,6 +22,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     // default locations of TSM option files
     public static String TSM_SERVER_NODE1_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm1.opt";
     public static String TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
+    public static String TEMP_PATH_PREFIX = "/tmp/datavault/temp/";
 
     public Verify.Method verificationMethod = Verify.Method.COPY_BACK;
 
@@ -77,8 +78,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     @Override
     public void retrieve(String depositId, File working, Progress progress, String optFilePath) throws Exception {
     	
-    	String tempDirPath = "/tmp/datavault/temp/";
-    	String fileDir = tempDirPath + "/" + depositId;
+    	String fileDir = TivoliStorageManager.TEMP_PATH_PREFIX + "/" + depositId;
     	String filePath = fileDir + "/" + working.getName();
     	Files.createDirectory(Paths.get(fileDir));
     	logger.info("Retrieve command is " + "dsmc " + " retrieve " + filePath + " -description=" + depositId + " -optfile=" + optFilePath + "-replace=true");
@@ -113,7 +113,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         // Note: generate a uuid to be passed as the description. We should probably use the deposit UUID instead (do we need a specialised archive method)?
         // Just a thought - Does the filename contain the deposit uuid? Could we use that as the description?
         //String randomUUIDString = UUID.randomUUID().toString();
-    	String pathPrefix = "/tmp/datavault/temp/";
+    	String pathPrefix = TivoliStorageManager.TEMP_PATH_PREFIX;
     	Path sourcePath = Paths.get(working.getAbsolutePath());
     	Path destinationDir = Paths.get(pathPrefix + depositId);
     	Path destinationFile = Paths.get(pathPrefix + depositId + "/" + working.getName());
