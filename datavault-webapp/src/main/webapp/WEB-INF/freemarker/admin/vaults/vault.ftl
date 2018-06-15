@@ -52,7 +52,7 @@
                         <#list deposits as deposit>
                             <tr class="tr">
                                 <td>
-                                    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}">${deposit.note?html}</a>
+                                    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}">${deposit.name?html}</a>
                                 </td>
                                 <td>${deposit.fileOrigin?html}</td>
                                 <td>${deposit.shortFilePath?html}</td>

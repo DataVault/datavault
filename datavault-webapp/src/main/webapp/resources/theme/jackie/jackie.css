@@ -1,0 +1,172 @@
+@charset "utf-8";
+/* CSS Document */
+
+.discover-uni h3 {
+    padding: 20px 0 5px;
+    margin: 0;
+     font-family: 'Crimson Text',serif;
+    font-size: 1.5em;
+    font-weight: 400;
+    color: #777;
+    text-transform: uppercase;
+}
+.discover-uni {
+    padding: 0 0 15px;
+    margin: 0;
+    width:100%;
+    font-size: 1.2em;
+    background: #252525;
+}
+p:last-child {
+    margin-bottom: 0;
+}
+.titleblock {
+    position: relative;
+    display: table-cell;
+    height: 35px;
+    padding-top: 1.5em;
+    padding-bottom: 1.3em;
+    font-size: 1em;
+    vertical-align: middle;
+}
+.home-hero .titleblock span.site-section-subheading, .home-hero .titleblock h2 {
+    display: block;
+    font-size: 1.4em;
+    font-style: italic;
+    margin: 0 0 8px 0;
+}
+.home-hero .titleblock .h2, .home-hero .titleblock h2 {
+    display: block;
+    margin: 0 0 8px 0;
+    font-size: 1.0em;
+    font-style: italic;
+}
+.jumbotron h1, .jumbotron h2, .jumbotron h3, .jumbotron h4, .jumbotron h5, .jumbotron h6, .jumbotron .site-section-heading, .jumbotron .site-section-subheading {
+    font-family: 'Crimson Text', serif;
+}
+.jumbotron .h1, .jumbotron .h2, .jumbotron .h3, .jumbotron .h4, .jumbotron .h5, .jumbotron .h6, .jumbotron h1, .jumbotron h2, .jumbotron h3, .jumbotron h4, .jumbotron h5, .jumbotron h6 {
+    font-family: 'Crimson Text',serif;
+    font-weight: 400;
+}
+.sr-only {
+    position: absolute !important;
+}
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    border: 0;
+}
+
+.panel-body h2 {
+    font-size: 2.2em;
+    color: #0059ae !important;
+    padding-left: 10px;
+}
+
+/*
+h1 + h2, h2 + h3, h3 + h4, h4 + h5, h5 + h6 {
+    margin-top: -4px;
+}
+h1, h2, h3, h4 {
+    font-weight: 300;
+}
+h1, h2, h3, h4, h5, h6 {
+    clear: left;
+    font-family: 'Source Sans Pro',sans-serif;
+}
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+    clear: left;
+}
+.h2, h2 {
+    font-size:2.2em;
+    color:#0059ae !important;
+    padding-left:10px;
+}
+.h1, .h2, .h3, h1, h2, h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+    font-family: inherit;
+    font-weight: 300;
+    line-height: 1.1;
+    color: inherit;
+}
+*/
+
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+.home-hero .titleblock {
+    font-size: 1.5em;
+}
+.jumbotron {
+    color: inherit;
+}
+.code {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 90%;
+    color: #555;
+}
+.code {
+    font-size: 90%;
+    color: #c7254e;
+}
+.code, kbd, pre, samp {
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+}
+.code, kbd, pre, samp {
+    font-family: monospace,monospace;
+    font-size: 1em;
+}
+
+/* above edgel stuff*/
+.red {
+   background-color:#0059ae;color:#ffffff;
+}
+h3.white {
+    color:#FFF;
+    margin-bottom:20px;
+    font-size:140%;
+    text-align:center;
+}
+.whitebackground {
+    background-color:#FFF;
+}
+p.main {
+    font-size:140%;
+}
+p.grey {
+    font-size:80%;
+    color:#666;
+}
+.scrollable {
+    border:3px solid #bbb;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height:230px;
+    background-color:#FFF;
+}
+.panel-uoe-low {
+    border-color: #ddd;
+    border-top: 8px solid #0059ae;}
+.pad {
+    margin:3px;
+}
+.greyblue {background-color: #D50032;}	
+.newcolour {background-color: #041E42;}
+
+.accordion-toggle {cursor: pointer;}
+.accordion-content {display: none;}
+.accordion-content.default {display: block;}
+h4.accordion-toggle {padding:10px;background-color:#333333;color:#FFF;border-radius: 8px;}
+.accordion-toggle:hover {background-color:#d50032;}
+.bigger {font-size:120%;}
+

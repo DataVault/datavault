@@ -292,7 +292,7 @@ public class EventListener implements MessageListener {
                 
                 HashMap<String, Object> model = new HashMap<String, Object>();
                 model.put("group-name", group.getName());
-                model.put("deposit-note", deposit.getNote());
+                model.put("deposit-name", deposit.getName());
                 model.put("deposit-id", deposit.getID());
                 model.put("vault-name", vault.getName());
                 model.put("vault-id", vault.getID());
@@ -316,7 +316,7 @@ public class EventListener implements MessageListener {
                 // Send email to the deposit user
                 if (depositUser.getEmail() != null) {
                     emailService.sendTemplateMail(depositUser.getEmail(),
-                            "Data Vault - deposit complete [" + deposit.getNote() + "]",
+                            "Data Vault - deposit complete [" + deposit.getName() + "]",
                             "user-deposit-complete.vm",
                             model);
                 }
@@ -361,7 +361,7 @@ public class EventListener implements MessageListener {
                 
                 HashMap<String, Object> model = new HashMap<String, Object>();
                 model.put("group-name", group.getName());
-                model.put("deposit-note", deposit.getNote());
+                model.put("deposit-note", deposit.getName());
                 model.put("deposit-id", deposit.getID());
                 model.put("vault-name", vault.getName());
                 model.put("vault-id", vault.getID());
@@ -384,7 +384,7 @@ public class EventListener implements MessageListener {
                 // Send email to the deposit user
                 if (depositUser.getEmail() != null) {
                     emailService.sendTemplateMail(depositUser.getEmail(),
-                            "Data Vault - deposit error [" + deposit.getNote() + "]",
+                            "Data Vault - deposit error [" + deposit.getName() + "]",
                             "user-deposit-error.vm",
                             model);
                 }

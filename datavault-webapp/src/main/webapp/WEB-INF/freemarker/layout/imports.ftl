@@ -5,7 +5,9 @@
     <link href="<@spring.url '/resources/bootstrap-select/css/bootstrap-select.min.css'/>" rel="stylesheet" type="text/css">
     <link href="<@spring.url '/resources/font-awesome/css/font-awesome.min.css'/>" rel="stylesheet" type="text/css">
     <link href="<@spring.url '/resources/fancytree/skin-lion/ui.fancytree.min.css'/>" rel="stylesheet" type="text/css">
+    <!--
     <link href="<@spring.url '/resources/theme/css/vault.css'/>" rel="stylesheet" type="text/css">
+    -->
 
     <!-- jQuery js -->
     <script src="<@spring.url '/resources/jquery/js/jquery-1.11.3.min.js'/>"></script>
@@ -36,9 +38,17 @@
     <![endif]-->
 
     <!-- Spring Security CSRF (ajax) -->
-    <meta name="_csrf" content="${_csrf.token}"/>
-    <meta name="_csrf_header" content="${_csrf.headerName}"/>
+    <meta name="_csrf" content="${(_csrf.token)!""}"/>
+    <meta name="_csrf_header" content="${(_csrf.headerName)!""}"/>
 
     <!-- For IE compatibility -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Jackie CSS, JS and IMG -->
+    <link href="<@spring.url '/resources/theme/jackie/edgel.css'/>" rel="stylesheet" type="text/css">
+    <link href="<@spring.url '/resources/theme/jackie/jackie.css'/>" rel="stylesheet" type="text/css">
+    <!--
+    <script src="<@spring.url '/resources/theme/jackie/edgel.js'/>"></script>
+    -->
+    <link href="<@spring.url '/resources/theme/jackie/jackie-quickfix.css'/>" rel="stylesheet" type="text/css">

@@ -39,8 +39,11 @@ public class VaultInfo {
     @ApiObjectField(description = "The group which is related to this vault")
     private String groupID;
     
-    @ApiObjectField(description = "The user who owns this vault")
+    @ApiObjectField(description = "The user UUN who owns this vault")
     private String userID;
+    
+    @ApiObjectField(description = "The user name who owns this vault")
+    private String userName;
 
     @ApiObjectField(description = "A reference to an external metadata record that describes this vault")
     private String datasetID;
@@ -53,12 +56,21 @@ public class VaultInfo {
     
     @ApiObjectField(description = "The status of the vault policy")
     private int policyStatus;
+
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @ApiObjectField(description = "Define the minimum of time the archive will be kept")
+    private Date grantEndDate;
+
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @ApiObjectField(description = "The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage")
+    private Date reviewDate;
     
     public VaultInfo() { }
 
-    public VaultInfo(String id, String userID, String datasetID, String datasetName, Date creationTime, String name, String description, String policyID, String groupID, long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked) {
+    public VaultInfo(String id, String userID, String userName, String datasetID, String datasetName, Date creationTime, String name, String description, String policyID, String groupID, long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked, Date grantEndDate, Date reviewDate) {
         this.id = id;
         this.userID = userID;
+        this.userName = userName;
         this.datasetID = datasetID;
         this.datasetName = datasetName;
         this.creationTime = creationTime;
@@ -70,6 +82,8 @@ public class VaultInfo {
         this.policyStatus = policyStatus;
         this.policyExpiry = policyExpiry;
         this.policyLastChecked = policyLastChecked;
+        this.grantEndDate = grantEndDate;
+        this.reviewDate = reviewDate;
     }
 
     public String getID() {
@@ -86,6 +100,14 @@ public class VaultInfo {
 
     public void setUserID(String userID) {
         this.userID = userID;
+    }
+    
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getDatasetID() {
@@ -185,5 +207,21 @@ public class VaultInfo {
         else if (policyStatus == RetentionPolicyStatus.OK) return "OK";
         else if (policyStatus == RetentionPolicyStatus.REVIEW) return "Review";
         else return ("Unknown");
+    }
+    
+    public Date getGrantEndDate() {
+        return grantEndDate;
+    }
+
+    public void setGrantEndDate(Date grantEndDate) {
+        this.grantEndDate = grantEndDate;
+    }
+
+    public Date getReviewDate() {
+        return reviewDate;
+    }
+
+    public void setReviewDate(Date reviewDate) {
+        this.reviewDate = reviewDate;
     }
 }

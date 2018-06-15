@@ -1,6 +1,8 @@
 package org.datavaultplatform.broker.controllers;
 
 import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -12,7 +14,9 @@ import org.datavaultplatform.common.response.*;
 
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import org.slf4j.Logger;
@@ -34,6 +38,7 @@ public class VaultsController {
     private ArchiveStoreService archiveStoreService;
     private EventService eventService;
     private ClientsService clientsService;
+    private DataManagersService dataManagersService;
     
     private String activeDir;
     private String archiveDir;
@@ -82,6 +87,10 @@ public class VaultsController {
     
     public void setClientsService(ClientsService clientsService) {
         this.clientsService = clientsService;
+    }
+    
+    public void setDataManagersService(DataManagersService dataManagersService) {
+        this.dataManagersService = dataManagersService;
     }
 
     // NOTE: this a placeholder and will eventually be handled by per-user config
@@ -181,6 +190,10 @@ public class VaultsController {
         }
         vault.setDataset(dataset);
 
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        vault.setGrantEndDate(formatter.parse(createVault.getGrantEndDate()));
+        vault.setReviewDate(formatter.parse(createVault.getReviewDate()));
+
         vaultsService.addVault(vault);
         
         Create vaultEvent = new Create(vault.getID());
@@ -229,5 +242,44 @@ public class VaultsController {
             depositResponses.add(deposit.convertToResponse());
         }
         return depositResponses;
+    }
+    
+    @RequestMapping(value = "/vaults/{vaultid}/addDataManager", method = RequestMethod.PUT)
+    public VaultInfo addDataManager(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                   @PathVariable("vaultid") String vaultID,
+                                   @RequestBody() String unn) throws Exception {
+        User user = usersService.getUser(userID);
+        Vault vault = vaultsService.getUserVault(user, vaultID);
+        
+        DataManager dataManager = new DataManager(unn);
+        dataManager.setVault(vault);
+        dataManagersService.addDataManager(dataManager);
+        
+        return vault.convertToResponse();
+    }
+    
+    @RequestMapping(value = "/vaults/{vaultid}/dataManagers", method = RequestMethod.GET)
+    public List<DataManager> getDataManagers(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                         @PathVariable("vaultid") String vaultID) throws Exception {
+        User user = usersService.getUser(userID);
+        Vault vault = vaultsService.getUserVault(user, vaultID);
+
+        List<DataManager> dataManagersList = new ArrayList<>();
+        for (DataManager dataManager : vault.getDataManagers()) {
+            dataManagersList.add(dataManager);
+        }
+        return dataManagersList;
+    }
+    
+    @RequestMapping(value = "/vaults/{vaultid}/deleteDataManager/{dataManagerID}", method = RequestMethod.DELETE)
+    public VaultInfo deleteDataManager(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                   @PathVariable("vaultid") String vaultID,
+                                   @PathVariable("dataManagerID") String dataManagerID) throws Exception {
+        User user = usersService.getUser(userID);
+        Vault vault = vaultsService.getUserVault(user, vaultID);
+        
+        dataManagersService.deleteDataManager(dataManagerID);
+        
+        return vault.convertToResponse();
     }
 }

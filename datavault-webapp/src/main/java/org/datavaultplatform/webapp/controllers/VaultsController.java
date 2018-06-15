@@ -1,9 +1,16 @@
 package org.datavaultplatform.webapp.controllers;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.datavaultplatform.common.model.DataManager;
 import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.RetentionPolicy;
+import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.request.CreateVault;
+import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
@@ -15,6 +22,15 @@ import org.springframework.web.bind.annotation.*;
 public class VaultsController {
 
     private RestService restService;
+    private String system;
+    private String link;
+
+    public void setSystem(String system) {
+        this.system = system;
+    }
+    public void setLink(String link) {
+        this.link = link;
+    }
 
 	public void setRestService(RestService restService) {
         this.restService = restService;
@@ -23,6 +39,21 @@ public class VaultsController {
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
     public String getVaultsListing(ModelMap model) {
         model.addAttribute("vaults", restService.getVaultsListing());
+        
+        // pass the view an empty Vault since the form expects it
+        model.addAttribute("vault", new CreateVault());
+
+        Dataset[] datasets = restService.getDatasets();
+        model.addAttribute("datasets", datasets);
+        
+        RetentionPolicy[] policies = restService.getRetentionPolicyListing();
+        model.addAttribute("policies", policies);
+
+        Group[] groups = restService.getGroups();
+        model.addAttribute("groups", groups);
+        
+        model.put("system", system);
+        model.put("link", link);
 
         return "vaults/index";
     }
@@ -35,40 +66,47 @@ public class VaultsController {
 
         model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
         model.addAttribute(restService.getGroup(vault.getGroupID()));
-        model.addAttribute("deposits", restService.getDepositsListing(vaultID));
-
-        return "vaults/vault";
-    }
-
-    // Return an empty 'create new vault' page
-    @RequestMapping(value = "/vaults/create", method = RequestMethod.GET)
-    public String createVault(ModelMap model) {
-
-        // pass the view an empty Vault since the form expects it
-        model.addAttribute("vault", new CreateVault());
-
-        Dataset[] datasets = restService.getDatasets();
-        model.addAttribute("datasets", datasets);
         
-        RetentionPolicy[] policies = restService.getRetentionPolicyListing();
-        model.addAttribute("policies", policies);
-
-        Group[] groups = restService.getGroups();
-        model.addAttribute("groups", groups);
-
-        return "vaults/create";
+        DepositInfo[] deposits = restService.getDepositsListing(vaultID);
+        model.addAttribute("deposits", deposits);
+        
+        Map<String, Retrieve[]> depositRetrievals = new HashMap<String, Retrieve[]>();
+        for (DepositInfo deposit : deposits) {
+            Retrieve[] retrievals = restService.getDepositRetrieves(deposit.getID());
+            depositRetrievals.put(deposit.getName(), retrievals);
+        }
+        model.addAttribute("retrievals", depositRetrievals);
+        
+        DataManager[] dataManagers = restService.getDataManagers(vaultID);
+        model.addAttribute("dataManagers", dataManagers);
+        
+        return "vaults/vault";
     }
 
     // Process the completed 'create new vault' page
     @RequestMapping(value = "/vaults/create", method = RequestMethod.POST)
-    public String addVault(@ModelAttribute CreateVault vault, ModelMap model, @RequestParam String action) {
-        // Was the cancel button pressed?
-        if ("cancel".equals(action)) {
-            return "redirect:/";
-        }
-
+    public String addVault(@ModelAttribute CreateVault vault, ModelMap model) {
         VaultInfo newVault = restService.addVault(vault);
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
+        return "redirect:" + vaultUrl;        
+    }
+    
+    @RequestMapping(value = "/vaults/{vaultid}/addDataManager", method = RequestMethod.POST)
+    public String addDataManager(ModelMap model,
+                                @PathVariable("vaultid") String vaultID,
+                                @RequestParam("dataManagerUUN") String dataManagerUUN ) {
+        VaultInfo vault = restService.addDataManager(vaultID, dataManagerUUN);
+        String vaultUrl = "/vaults/" + vault.getID() + "/";
+        return "redirect:" + vaultUrl;        
+    }
+    
+    
+    @RequestMapping(value = "/vaults/{vaultid}/deleteDataManager", method = RequestMethod.POST)
+    public String deleteDataManager(ModelMap model,
+                                @PathVariable("vaultid") String vaultID,
+                                @RequestParam("dataManagerID") String dataManagerID ) {
+        VaultInfo vault = restService.deleteDataManager(vaultID, dataManagerID);
+        String vaultUrl = "/vaults/" + vault.getID() + "/";
         return "redirect:" + vaultUrl;        
     }
 }

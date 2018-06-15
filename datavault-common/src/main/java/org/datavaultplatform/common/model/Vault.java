@@ -18,6 +18,8 @@ import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
@@ -52,12 +54,24 @@ public class Vault {
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
     
+    // Serialise date in ISO 8601 format
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @Temporal(TemporalType.DATE)
+    @Column(name = "grantEndDate", nullable = false)
+    private Date grantEndDate;
+    
+    // Serialise date in ISO 8601 format
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @Temporal(TemporalType.DATE)
+    @Column(name = "reviewDate", nullable = false)
+    private Date reviewDate;
+    
     // Name of the vault
-    @Column(name = "name", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "name", nullable = false, columnDefinition = "TEXT", length=400)
     private String name;
 
     // Description of the vault
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", length = 6000)
     private String description;
 
     // Size of the vault (in bytes)
@@ -68,6 +82,12 @@ public class Vault {
     @OneToMany(targetEntity=Deposit.class, mappedBy="vault", fetch=FetchType.EAGER)
     @OrderBy("creationTime")
     private List<Deposit> deposits;
+    
+    // A vault can have several data managers
+    @JsonIgnore
+    @OneToMany(targetEntity=DataManager.class, mappedBy="vault", fetch=FetchType.LAZY)
+    @OrderBy("uun")
+    private List<DataManager> dataManagers;
 
     @ManyToOne
     private RetentionPolicy retentionPolicy;
@@ -114,6 +134,22 @@ public class Vault {
         return creationTime;
     }
     
+    public void setGrantEndDate(Date grantEndDate) {
+        this.grantEndDate = grantEndDate;
+    }
+    
+    public Date getGrantEndDate() {
+        return grantEndDate;
+    }
+    
+    public void setReviewDate(Date reviewDate) {
+        this.reviewDate = reviewDate;
+    }
+
+    public Date getReviewDate() {
+        return reviewDate;
+    }
+    
     public void setName(String name) {
         this.name = name;
     }
@@ -141,6 +177,15 @@ public class Vault {
         this.deposits.add(deposit);
     }
 
+    public List<DataManager> getDataManagers() {
+        if (dataManagers == null) return new ArrayList();
+        return dataManagers;
+    }
+    
+    public void addDataManager(DataManager dataManager) {
+        this.dataManagers.add(dataManager);
+    }
+    
     public RetentionPolicy getRetentionPolicy() { return retentionPolicy; }
 
     public void setRetentionPolicy(RetentionPolicy retentionPolicy) {
@@ -183,17 +228,20 @@ public class Vault {
         return new VaultInfo(
                 id,
                 user.getID(),
+                user.getFirstname()+" "+user.getLastname(),
                 dataset.getID(),
                 dataset.getName(),
                 creationTime,
                 name,
                 description,
-                retentionPolicy.getID(),
+                String.valueOf(retentionPolicy.getID()),
                 group.getID(),
                 vaultSize,
                 retentionPolicyStatus,
                 retentionPolicyExpiry,
-                retentionPolicyLastChecked);
+                retentionPolicyLastChecked,
+                grantEndDate,
+                reviewDate);
     }
     
     @Override

@@ -6,6 +6,7 @@
 <div class="container">
 
     <ol class="breadcrumb">
+        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
         <li class="active"><b>Administration</b></li>
     </ol>
 
@@ -138,9 +139,6 @@
                     <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/archivestores"><span class="glyphicon glyphicon-upload"></span> ${archivestorescount}</a></h1>
                 </div>
             </div>
-        </div>
-    </div>
-
         </div>
     </div>
 
