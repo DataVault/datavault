@@ -47,10 +47,11 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	            logger.info("Failed to read demo account properties file.");
 	            throw e;
 	    }
-		//logger.info("User name is '" + prop.getProperty("user-name") + "'");
-		//logger.info("Service name is '" + prop.getProperty("service-name") + "'");
-		//logger.info("Service url is '" + prop.getProperty("service-url") + "'");
-		//logger.info("Identity domain is '" + prop.getProperty("identity-domain") + "'");
+		logger.info("User name is '" + prop.getProperty("user-name") + "'");
+		logger.info("Service name is '" + prop.getProperty("service-name") + "'");
+		logger.info("Service url is '" + prop.getProperty("service-url") + "'");
+		logger.info("Identity domain is '" + prop.getProperty("identity-domain") + "'");
+		logger.info("Password is '" + prop.getProperty("password") + "'");
 		this.auth = new FileTransferAuth(
 				prop.getProperty("user-name"),
 				prop.getProperty("password").toCharArray(),
@@ -61,20 +62,25 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	}
 
 	@Override
-	public Method getVerifyMethod() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public Verify.Method getVerifyMethod() {
+        return this.verificationMethod;
+    }
 
 	@Override
 	public long getUsableSpace() throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void retrieve(String depositId, File working, Progress progress) throws Exception {
 		try {
+			
+			logger.info("User name is '" + this.auth.getUser() + "'");
+			logger.info("Service name is '" + this.auth.getServiceName() + "'");
+			logger.info("Service url is '" + this.auth.getServiceUrl() + "'");
+			logger.info("Identity domain is '" + this.auth.getIdentityDomain() + "'");
+			logger.info("Password is '" + this.auth.getPassword() + "'");
+			logger.info("Auth Password is '" + this.auth.getAuthPassword().toString() + "'");
 			this.manager = FileTransferManager.getDefaultFileTransferManager(this.auth);
 			DownloadConfig downloadConfig = new DownloadConfig();
             TransferResult downloadResult = manager.download(downloadConfig, OracleObjectStorageClassic.defaultContainerName, depositId, working);
@@ -105,11 +111,17 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	public String store(String depositId, File working, Progress progress) throws Exception {
 
 		try {
+			logger.info("User name is '" + this.auth.getUser() + "'");
+			logger.info("Service name is '" + this.auth.getServiceName() + "'");
+			logger.info("Service url is '" + this.auth.getServiceUrl() + "'");
+			logger.info("Identity domain is '" + this.auth.getIdentityDomain() + "'");
+			logger.info("Password is '" + this.auth.getPassword() + "'");
+			logger.info("Auth Password is '" + this.auth.getAuthPassword().toString() + "'");
 			this.manager = FileTransferManager.getDefaultFileTransferManager(this.auth);
 			UploadConfig uploadConfig = new UploadConfig();
-			uploadConfig.setOverwrite(true);
+			//uploadConfig.setOverwrite(true);
 			uploadConfig.setStorageClass(CloudStorageClass.Archive);
-			logger.info("Uploading file " + working.getName() + " to container " + OracleObjectStorageClassic.defaultContainerName);
+			logger.info("Uploading file " + working.getName() + " to container " + OracleObjectStorageClassic.defaultContainerName + " as " + depositId);
 			TransferResult uploadResult = this.manager.upload(uploadConfig, OracleObjectStorageClassic.defaultContainerName, depositId, working);
 			logger.info("Upload completed successfully.");
 			logger.info("Upload result:" + uploadResult.toString());
