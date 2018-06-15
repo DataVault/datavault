@@ -143,14 +143,17 @@
                                 <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/planning-your-data/funder-requirements">
                                     Read more about retention policies
                                 </a>
-                                
-                                <select id="policyID" name="policyID" data-width="fit" class="form-control">
-                                    <option selected disabled data-hidden="true">Please choose a retention policy</option>
-                                    <#list policies as retentionPolicy>
-                                    <option value="${retentionPolicy.getID()}"
-                                        data-subtext="${retentionPolicy.description?html}">${retentionPolicy.name?html}</option>
-                                    </#list>
-                                </select>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <select id="policyID" name="policyID" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick">
+                                            <option selected disabled data-hidden="true">Please choose a retention policy</option>
+                                            <#list policies as retentionPolicy>
+                                            <option value="${retentionPolicy.getID()}" 
+                                                data-subtext="( Minimum period: ${retentionPolicy.minDataRetentionPeriod?html} )">${retentionPolicy.name?html}</option>
+                                            </#list>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                             
                             <div class="form-group">
@@ -179,13 +182,17 @@
                                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                                     title="The School to which the vault belongs. In the absence of the vault Owner, School officers may be consulted on the management of the vault.">
                                 </span>
-                                <select id="groupID" name="groupID" data-width="fit" class="form-control">
-                                    <#list groups as group>
-                                    <#if group.enabled>
-                                    <option value="${group.getID()}">${group.name?html}</option>
-                                    </#if> 
-                                    </#list>
-                                </select>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <select id="groupID" name="groupID" data-width="auto" class="form-control group-select selectpicker show-tick">
+                                            <#list groups as group>
+                                            <#if group.enabled>
+                                            <option value="${group.getID()}">${group.name?html}</option>
+                                            </#if> 
+                                            </#list>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                             
                             <div class="form-group">
