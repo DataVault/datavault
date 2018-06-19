@@ -1,8 +1,10 @@
 package org.datavaultplatform.webapp.controllers;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.datavaultplatform.common.model.DataManager;
 import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.RetentionPolicy;
@@ -75,6 +77,9 @@ public class VaultsController {
         }
         model.addAttribute("retrievals", depositRetrievals);
         
+        DataManager[] dataManagers = restService.getDataManagers(vaultID);
+        model.addAttribute("dataManagers", dataManagers);
+        
         return "vaults/vault";
     }
 
@@ -83,6 +88,25 @@ public class VaultsController {
     public String addVault(@ModelAttribute CreateVault vault, ModelMap model) {
         VaultInfo newVault = restService.addVault(vault);
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
+        return "redirect:" + vaultUrl;        
+    }
+    
+    @RequestMapping(value = "/vaults/{vaultid}/addDataManager", method = RequestMethod.POST)
+    public String addDataManager(ModelMap model,
+                                @PathVariable("vaultid") String vaultID,
+                                @RequestParam("dataManagerUUN") String dataManagerUUN ) {
+        VaultInfo vault = restService.addDataManager(vaultID, dataManagerUUN);
+        String vaultUrl = "/vaults/" + vault.getID() + "/";
+        return "redirect:" + vaultUrl;        
+    }
+    
+    
+    @RequestMapping(value = "/vaults/{vaultid}/deleteDataManager", method = RequestMethod.POST)
+    public String deleteDataManager(ModelMap model,
+                                @PathVariable("vaultid") String vaultID,
+                                @RequestParam("dataManagerID") String dataManagerID ) {
+        VaultInfo vault = restService.deleteDataManager(vaultID, dataManagerID);
+        String vaultUrl = "/vaults/" + vault.getID() + "/";
         return "redirect:" + vaultUrl;        
     }
 }

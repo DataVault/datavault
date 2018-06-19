@@ -80,6 +80,10 @@
         <property name="jobDAO" ref="jobDAO" />
     </bean>
     
+    <bean id="dataManagersService" class="org.datavaultplatform.broker.services.DataManagersService">
+        <property name="dataManagerDAO" ref="dataManagerDAO" />
+    </bean>
+    
     <bean id="externalMetadataService" class="org.datavaultplatform.broker.services.ExternalMetadataService">
         <property name="metadataURL" value="${metadata.url}" />
         <property name="datasetDAO" ref="datasetDAO" />
@@ -260,6 +264,10 @@
     </bean>
     
     <bean id="datasetDAO" class="org.datavaultplatform.common.model.dao.DatasetDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    
+    <bean id="dataManagerDAO" class="org.datavaultplatform.common.model.dao.DataManagerDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
     
