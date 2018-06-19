@@ -51,7 +51,7 @@ public class RetentionPolicyDAOImpl implements RetentionPolicyDAO {
     public RetentionPolicy findById(String Id) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(RetentionPolicy.class);
-        criteria.add(Restrictions.eq("id",Id));
+        criteria.add(Restrictions.eq("id",Integer.parseInt(Id)));
         RetentionPolicy retentionPolicy = (RetentionPolicy)criteria.uniqueResult();
         session.close();
         return retentionPolicy;
