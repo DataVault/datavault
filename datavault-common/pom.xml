@@ -91,16 +91,22 @@
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-sns</artifactId>
         </dependency>
+        <!--  Oracle Cloud Storage Classic -->
         <dependency>
     		<groupId>oracle.cloudstorage.ftm</groupId>
     		<artifactId>ftm-api</artifactId>
     		<version>1.0</version>
-  	</dependency>    
+  		</dependency>    
         <dependency>
                 <groupId>oracle.cloudstorage.ftm</groupId>
                 <artifactId>low-level-api-core</artifactId>
                 <version>1.0</version>
         </dependency>
+        <dependency>
+    		<groupId>org.glassfish</groupId>
+    		<artifactId>javax.json</artifactId>
+    		<version>1.0.4</version>
+		</dependency>
 	<!-- Tests -->
         <dependency>
          <groupId>org.hamcrest</groupId>
