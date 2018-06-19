@@ -79,7 +79,7 @@
                         </p>
                         <br>
                         
-                        <form id="create-vault" class="form" role="form" action="vaults/create" method="post" novalidate="novalidate" _lpchecked="1">
+                        <form id="create-vault" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/vaults/create" method="post" novalidate="novalidate" _lpchecked="1">
                             <p class="main">
                                 Please select the Pure record describing the data that will be contained in this vault from the list below: 
                             </p>

@@ -33,6 +33,10 @@ public class Receiver {
     private Boolean chunkingEnabled;
     private Long chunkingByteSize;
     private Boolean encryptionEnabled;
+    private String vaultAddress;
+    private String vaultToken;
+    private String vaultKeyPath;
+    private String vaultKeyName;
     AESMode encryptionMode = AESMode.GCM;
 
     /**
@@ -123,6 +127,50 @@ public class Receiver {
      * @return true if encryption is enabled, false otherwise
      */
     public Boolean isEncryptionEnabled() { return encryptionEnabled; }
+    
+    /**
+     * @return HarshiCorp Vault server address
+     */
+    public String getVaultAddress() {
+        return vaultAddress;
+    }
+    
+    /**
+     * Define HarshiCorp Vault server address
+     */
+    public void setVaultAddress(String vaultAddress) {
+        this.vaultAddress = vaultAddress;
+    }
+    
+    /**
+     * @return HarshiCorp Vault Token ID
+     */
+    public String getVaultToken() {
+        return vaultToken;
+    }
+    
+    /**
+     * Define HarshiCorp Vault Token ID
+     */
+    public void setVaultToken(String vaultToken) {
+        this.vaultToken = vaultToken;
+    }
+    
+    public String getVaultKeyPath() {
+        return vaultKeyPath;
+    }
+
+    public void setVaultKeyPath(String vaultKeyPath) {
+        this.vaultKeyPath = vaultKeyPath;
+    }
+
+    public String getVaultKeyName() {
+        return vaultKeyName;
+    }
+
+    public void setVaultKeyName(String vaultKeyName) {
+        this.vaultKeyName = vaultKeyName;
+    }
 
     /**
      * Setup a connection to the queue then wait for messages to arrive.  When we recieve a message delivery
@@ -187,7 +235,8 @@ public class Receiver {
                 Context context = new Context(
                         tempDirPath, metaDirPath, events,
                         chunkingEnabled, chunkingByteSize,
-                        encryptionEnabled, encryptionMode);
+                        encryptionEnabled, encryptionMode, 
+                        vaultAddress, vaultToken, vaultKeyPath, vaultKeyName);
                 concreteTask.performAction(context);
                 
                 // Clean up the temporary directory

@@ -41,6 +41,7 @@ COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT
 COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/webapps ${DATAVAULT_HOME}/webapps
 COPY docker/config ${DATAVAULT_HOME}/config
 COPY docker/scripts ${DATAVAULT_HOME}/scripts
+COPY docker/pure/ /tmp/
 
 RUN ln -s ${DATAVAULT_HOME}/webapps/datavault-broker ${CATALINA_HOME}/webapps/datavault-broker
 
@@ -51,5 +52,5 @@ RUN chown -R datavault:datavault ${CATALINA_HOME}
 WORKDIR ${CATALINA_HOME}
 EXPOSE 8080
 
-ENTRYPOINT ["/docker_datavault-home/scripts/docker-entrypoint.sh"]
+ENTRYPOINT ["/docker_datavault-home/scripts/docker-entrypoint.sh", "brocker"]
 CMD ["/usr/local/tomcat/bin/catalina.sh", "run"]

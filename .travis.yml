@@ -18,8 +18,7 @@ script:
   # docker needs jar file to start
   - mvn clean test package
   - docker-compose build
-  - docker-compose up -d rabbitmq
-  - docker-compose up -d mysql
+  - docker-compose up -d rabbitmq mysql vault vault-administration
   - sleep 60 # wait that containers are ready
   - docker-compose logs rabbitmq
   - docker-compose exec rabbitmq rabbitmqctl authenticate_user datavault datavault

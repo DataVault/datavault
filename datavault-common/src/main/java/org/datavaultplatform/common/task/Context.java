@@ -16,11 +16,17 @@ public class Context {
     private Long chunkingByteSize;
     private Boolean encryptionEnabled;
     private AESMode encryptionMode;
+    private String vaultAddress;
+    private String vaultToken;
+    private String vaultKeyPath;
+    private String vaultKeyName;
     
     public Context() {};
     public Context(Path tempDir, Path metaDir, EventStream eventStream,
                    Boolean chunkingEnabled, Long chunkingByteSize,
-                   Boolean encryptionEnabled, AESMode encryptionMode) {
+                   Boolean encryptionEnabled, AESMode encryptionMode, 
+                   String vaultAddress, String vaultToken,
+                   String vaultKeyPath, String vaultKeyName) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.eventStream = eventStream;
@@ -28,6 +34,10 @@ public class Context {
         this.chunkingByteSize = chunkingByteSize;
         this.encryptionEnabled = encryptionEnabled;
         this.encryptionMode = encryptionMode;
+        this.vaultAddress = vaultAddress;
+        this.vaultToken = vaultToken;
+        this.vaultKeyPath = vaultKeyPath;
+        this.vaultKeyName = vaultKeyName;
     }
 
     public Path getTempDir() {
@@ -81,4 +91,36 @@ public class Context {
     }
 
     public AESMode getEncryptionMode() { return encryptionMode; }
+    
+    public String getVaultAddress() {
+        return vaultAddress;
+    }
+    
+    public void setVaultAddress(String vaultAddress) {
+        this.vaultAddress = vaultAddress;
+    }
+    
+    public String getVaultToken() {
+        return vaultToken;
+    }
+    
+    public void setVaultToken(String vaultToken) {
+        this.vaultToken = vaultToken;
+    }
+    
+    public String getVaultKeyPath() {
+        return vaultKeyPath;
+    }
+    
+    public void setVaultKeyPath(String vaultKeyPath) {
+        this.vaultKeyPath = vaultKeyPath;
+    }
+    
+    public String getVaultKeyName() {
+        return vaultKeyName;
+    }
+    
+    public void setVaultKeyName(String vaultKeyName) {
+        this.vaultKeyName = vaultKeyName;
+    }
 }

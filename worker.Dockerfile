@@ -45,5 +45,5 @@ RUN chown -R datavault:datavault ${DATAVAULT_HOME}
 
 WORKDIR ${DATAVAULT_HOME}/lib
 
-ENTRYPOINT ["/docker_datavault-home/scripts/docker-entrypoint.sh"]
+ENTRYPOINT ["/docker_datavault-home/scripts/docker-entrypoint.sh", "worker"]
 CMD ["java", "-cp", "datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar:./*", "org.datavaultplatform.worker.WorkerInstance"]
