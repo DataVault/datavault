@@ -15,6 +15,8 @@ before_install:
   - docker-compose pull
 
 script: 
+  - mvn install:install-file -Dfile=datavault-common/src/main/resources/ftm-api-2.4.2.jar -DgroupId=oracle.cloudstorage.ftm -DartifactId=ftm-api -Dversion=1.0 -Dpackaging=jar
+  - mvn install:install-file -Dfile=datavault-common/src/main/resources/low-level-api-core-1.14.19.jar -DartifactId=low-level-api-core -DartifactId=ftm-api -Dversion=1.0 -Dpackaging=jar
   # docker needs jar file to start
   - mvn clean test package
   - docker-compose build
