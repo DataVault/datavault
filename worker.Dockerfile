@@ -20,6 +20,8 @@ RUN mvn dependency:go-offline --fail-never
 
 COPY . /usr/src
 WORKDIR /usr/src
+RUN mvn install:install-file -Dfile=datavault-common/src/main/resources/ftm-api-2.4.2.jar -DgroupId=oracle.cloudstorage.ftm -DartifactId=ftm-api -Dversion=1.0 -Dpackaging=jar
+RUN mvn install:install-file -Dfile=datavault-common/src/main/resources/low-level-api-core-1.14.19.jar -DgroupId=oracle.cloudstorage.ftm -DartifactId=low-level-api-core -Dversion=1.0 -Dpackaging=jar:
 RUN mvn clean test package
 
 RUN curl -sLo /usr/local/bin/ep https://github.com/kreuzwerker/envplate/releases/download/v0.0.8/ep-linux && chmod +x /usr/local/bin/ep
