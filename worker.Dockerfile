@@ -1,14 +1,15 @@
 FROM maven:3-jdk-8
 
 ENV MAVEN_OPTS "-Xmx1024m"
-RUN echo "worker.dockerfile adding oracle jars"
-RUN mvn install:install-file -Dfile=datavault-common/src/main/resources/ftm-api-2.4.2.jar -DgroupId=oracle.cloudstorage.ftm -DartifactId=ftm-api -Dversion=1.0 -Dpackaging=jar
-RUN mvn install:install-file -Dfile=datavault-common/src/main/resources/low-level-api-core-1.14.19.jar -DgroupId=oracle.cloudstorage.ftm -DartifactId=low-level-api-core -Dversion=1.0 -Dpackaging=jar
-RUN echo "worker.dockerfile added oracle jars"
 
 # By default this is empty, but if you've built the package locally (without Docker) you can speed up repeated builds by copying your ~/.m2/repository into docker/m2/repository
 # Any dependencies you don't have will still be downloaded as normal
 COPY docker/m2/repository /root/.m2/repository
+
+RUN echo "worker.dockerfile adding oracle jars"
+RUN mvn install:install-file -Dfile=/usr/src/datavault-common/src/main/resources/ftm-api-2.4.2.jar -DgroupId=oracle.cloudstorage.ftm -DartifactId=ftm-api -Dversion=1.0 -Dpackaging=jar
+RUN mvn install:install-file -Dfile=/usr/scr/datavault-common/src/main/resources/low-level-api-core-1.14.19.jar -DgroupId=oracle.cloudstorage.ftm -DartifactId=low-level-api-core -Dversion=1.0 -Dpackaging=jar
+RUN echo "worker.dockerfile added oracle jars"
 
 # Copy just the pom files to cache the dependencies
 COPY datavault-assembly/pom.xml /tmp/datavault-assembly/pom.xml
