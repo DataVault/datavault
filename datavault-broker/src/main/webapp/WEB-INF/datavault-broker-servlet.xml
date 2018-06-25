@@ -76,6 +76,7 @@
         <property name="jobsService" ref="jobsService" />
         <property name="sender" ref="sender" />
         <property name="optionsDir" value="${optionsDir:#{null}}" />
+        <property name="tempDir" value="${tempDir:#{null}}" />
         <property name="bucketName" value="${s3.bucketName:#{null}}" />
         <property name="region" value="${s3.region:#{null}}" />
         <property name="awsAccessKey" value="${s3.awsAccessKey:#{null}}" />
