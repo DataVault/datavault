@@ -1,4 +1,4 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
+#import "*/layout/defaultlayout.ftl" as layout>
 <#-- Specify which navbar element should be flagged as active -->
 <#global nav="user">
 <@layout.vaultLayout>
@@ -101,8 +101,8 @@
             <br/>
 
             <p>
-            We need to know a little about where you wish to archive data from by SFTP. N.B. 
-            if you wish to browse to your files, please use the 'My Computer' button on the 'Create a deposit' page.
+            We need to know a little about where you wish to archive data from by SFTP. <br/>
+            N.B. if you wish to browse to your files, please use the 'My Computer' button on the 'Create a deposit' page.
             </p>
 
             <div class="hidden">
@@ -149,7 +149,7 @@
             </div>
 
 
-            <h3><strong>Data Store</strong></h3>
+            <h3><strong>File store locations</strong></h3>
 
             <div class="table-responsive storage-table">
                 <#if filestoresSFTP?has_content>
