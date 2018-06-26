@@ -28,11 +28,16 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 
     public TivoliStorageManager(String name, Map<String,String> config) throws Exception  {
         super(name, config);
+        String optionsKey = "optionsDir";
+    	String tempKey = "tempDir";
         // if we have non default options in datavault.properties use them
-        if (config.containsKey("optionsDir")) {
-        	String optionsDir = config.get("optionsDir");
+        if (config.containsKey(optionsKey)) {
+        	String optionsDir = config.get(optionsKey);
         	TivoliStorageManager.TSM_SERVER_NODE1_OPT = optionsDir + "/dsm1.opt";
         	TivoliStorageManager.TSM_SERVER_NODE2_OPT = optionsDir + "/dsm2.opt";
+        }
+        if (config.containsKey(tempKey)) {
+        	TivoliStorageManager.TEMP_PATH_PREFIX = config.get(tempKey);
         }
         locations = new ArrayList<String>();
         locations.add(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
@@ -115,15 +120,15 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         //String randomUUIDString = UUID.randomUUID().toString();
     	String pathPrefix = TivoliStorageManager.TEMP_PATH_PREFIX;
     	Path sourcePath = Paths.get(working.getAbsolutePath());
-    	Path destinationDir = Paths.get(pathPrefix + depositId);
-    	Path destinationFile = Paths.get(pathPrefix + depositId + "/" + working.getName());
+    	Path destinationDir = Paths.get(pathPrefix + "/" + depositId);
+    	Path destinationFile = Paths.get(pathPrefix + "/" + depositId + "/" + working.getName());
     	if (Files.exists(sourcePath)) {
     		logger.info("Moving from temp to deposit id");
     		Files.createDirectory(destinationDir);
     		Files.move(sourcePath, destinationFile, StandardCopyOption.REPLACE_EXISTING);
     	}
     	
-    	File tsmFile = new File(pathPrefix + depositId + "/" + working.getName());
+    	File tsmFile = new File(pathPrefix + "/" + depositId + "/" + working.getName());
         this.storeInTSMNode(tsmFile, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT, depositId);
         this.storeInTSMNode(tsmFile, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT, depositId);
         

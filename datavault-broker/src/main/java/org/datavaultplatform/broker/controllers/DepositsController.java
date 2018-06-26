@@ -38,6 +38,7 @@ public class DepositsController {
     private JobsService jobsService;
     private Sender sender;
     private String optionsDir;
+	private String tempDir;
     private String bucketName;
     private String region;
     private String awsAccessKey;
@@ -88,6 +89,10 @@ public class DepositsController {
     public void setSender(Sender sender) {
         this.sender = sender;
     }
+    
+    public void setTempDir(String tempDir) {
+		this.tempDir = tempDir;
+	}
     
     public void setOptionsDir(String optionsDir) {
     	this.optionsDir = optionsDir;
@@ -465,6 +470,9 @@ public class DepositsController {
 		        	HashMap<String, String> asProps = archiveStore.getProperties();
 		        	if (this.optionsDir != null && ! this.optionsDir.equals("")) {
 		        		asProps.put("optionsDir", this.optionsDir);
+		        	}
+		        	if (this.tempDir != null && ! this.tempDir.equals("")) {
+		        		asProps.put("tempDir", this.tempDir);
 		        	}
 		        	archiveStore.setProperties(asProps);
 		        }
