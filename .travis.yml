@@ -18,35 +18,27 @@ before_install:
 
 script: 
   # docker needs jar file to start
-  - echo "Got here 1"
   - mvn clean test package
-  - echo "Got here 2"
   - docker-compose build
   - docker-compose up -d rabbitmq
   - docker-compose up -d mysql
-  - echo "Got here 3"
   - sleep 60 # wait that containers are ready
   - docker-compose logs rabbitmq
   - docker-compose exec rabbitmq rabbitmqctl authenticate_user datavault datavault
   - docker-compose up -d workers
-  - echo "Got here 4"
   - sleep 60 # wait that container is ready
   - docker-compose logs workers
   - docker-compose ps
-  - echo "Got here 5"
   - mvn verify -P integration-test
   - sed -i 's/chunking\.enabled = true/chunking.enabled = false/' docker/config/datavault.properties
   - docker-compose restart workers
-  - echo "Got here 6"
   - mvn verify -P integration-test
   - sed -i 's/encryption\.enabled = true/encryption.enabled = false/' docker/config/datavault.properties
   - docker-compose restart workers
-  - echo "Got here 7"
   - mvn verify -P integration-test
   - sed -i 's/chunking\.enabled = false/chunking.enabled = true/' docker/config/datavault.properties
   - docker-compose restart workers
   - mvn verify -P integration-test
-  - echo "Got here 1"
   
 after_script:
   - docker-compose stop -t 1
