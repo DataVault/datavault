@@ -37,6 +37,7 @@ public class Receiver {
     private String vaultToken;
     private String vaultKeyPath;
     private String vaultKeyName;
+    private String vaultSslPEMPath;
     AESMode encryptionMode = AESMode.GCM;
 
     /**
@@ -172,6 +173,14 @@ public class Receiver {
         this.vaultKeyName = vaultKeyName;
     }
 
+    public String getVaultSslPEMPath() {
+        return vaultSslPEMPath;
+    }
+
+    public void setVaultSslPEMPath(String sslPEMPath) {
+        this.vaultSslPEMPath = sslPEMPath;
+    }
+
     /**
      * Setup a connection to the queue then wait for messages to arrive.  When we recieve a message delivery
      * work out the type of task, check if it is a redelivery then complete the task.
@@ -236,7 +245,8 @@ public class Receiver {
                         tempDirPath, metaDirPath, events,
                         chunkingEnabled, chunkingByteSize,
                         encryptionEnabled, encryptionMode, 
-                        vaultAddress, vaultToken, vaultKeyPath, vaultKeyName);
+                        vaultAddress, vaultToken, 
+                        vaultKeyPath, vaultKeyName, vaultSslPEMPath);
                 concreteTask.performAction(context);
                 
                 // Clean up the temporary directory

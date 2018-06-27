@@ -116,7 +116,7 @@ services:
         while ! $$(vault status &> /dev/null); do echo "Trying to connect to vault"; sleep 2; done
         sleep 40
         vault login $${VAULT_DEV_ROOT_TOKEN_ID}
-        vault secrets enable -version=1 kv
+        vault secrets enable -version=2 kv
         vault kv put kv/datavault secret-key=$$(echo -n '`cat /dev/urandom | head -n 128`' | base64)
         vault kv get kv/datavault
     environment:

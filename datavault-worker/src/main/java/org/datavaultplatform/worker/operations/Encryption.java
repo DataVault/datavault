@@ -30,9 +30,12 @@ import org.datavaultplatform.worker.tasks.Retrieve;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.bettercloud.vault.SslConfig;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
+import com.bettercloud.vault.json.Json;
+import com.bettercloud.vault.json.JsonObject;
 
 public class Encryption {
     
@@ -252,7 +255,20 @@ public class Encryption {
         
         logger.debug("get secret key: "+context.getVaultKeyPath()+" "+context.getVaultKeyName());
         
-        String encodedKey = vault.logical().read(context.getVaultKeyPath()).getData().get(context.getVaultKeyName());
+//        String encodedKey = vault.logical().read(context.getVaultKeyPath()).getData().get(context.getVaultKeyName());
+        
+        final String jsonString = new String(
+                vault.logical().read(context.getVaultKeyPath()).getRestResponse().getBody(), "UTF-8");
+
+        logger.debug("jsonString: " + jsonString);
+        
+        final JsonObject jsonObject = Json.parse(jsonString).asObject();
+
+        
+        final JsonObject jsonDataObject = jsonObject.get("data").asObject().get("data").asObject();
+        logger.debug("jsonDataObject: " + jsonDataObject.toString());
+        
+        String encodedKey = jsonDataObject.get(context.getVaultKeyName()).asString();
         
         logger.debug("encodedKey received: "+encodedKey);
         
@@ -268,9 +284,16 @@ public class Encryption {
         final VaultConfig vaultConfig = new VaultConfig()
                 .address(context.getVaultAddress())
                 .token(context.getVaultToken())
-                .build();
+        if(context.getVaultSslPEMPath() != null) {
+            vaultConfig.sslConfig(new SslConfig()
+                    .pemFile(new File(context.getVaultSslPEMPath()))
+                    .build());
+        }
+        vaultConfig.build();
+        
         logger.debug("Vault address: "+vaultConfig.getAddress());
-        logger.debug("Vault token: "+vaultConfig.getToken());
+//        logger.debug("Vault token: "+vaultConfig.getToken()); // we should not display token in logs
+        logger.debug("Vault PEM path: "+context.getVaultSslPEMPath());
         logger.debug("Vault Max Retries: "+vaultConfig.getMaxRetries());
         logger.debug("Vault Retry Interval: "+vaultConfig.getRetryIntervalMilliseconds());
         logger.debug("Vault Retry Open Timeout: "+vaultConfig.getOpenTimeout());
