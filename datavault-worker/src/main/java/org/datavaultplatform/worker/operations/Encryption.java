@@ -283,17 +283,23 @@ public class Encryption {
     private static void setVault(Context context) throws VaultException {
         final VaultConfig vaultConfig = new VaultConfig()
                 .address(context.getVaultAddress())
-                .token(context.getVaultToken())
-        if(context.getVaultSslPEMPath() != null) {
+                .token(context.getVaultToken());
+
+        System.out.println("Vault PEM path: '"+context.getVaultSslPEMPath()+"'");
+        System.out.println("context.getVaultSslPEMPath().trim().equals(\"\"): "+context.getVaultSslPEMPath().equals(""));
+        
+        if(context.getVaultSslPEMPath().trim().equals("")) {
+            logger.debug("Won't use SSL Certificate.");
+        } else {
+            logger.debug("Use PEM file: '"+context.getVaultSslPEMPath().trim()+"'");
             vaultConfig.sslConfig(new SslConfig()
-                    .pemFile(new File(context.getVaultSslPEMPath()))
-                    .build());
+                        .pemFile(new File(context.getVaultSslPEMPath().trim())
+                    ).build());
         }
         vaultConfig.build();
         
         logger.debug("Vault address: "+vaultConfig.getAddress());
 //        logger.debug("Vault token: "+vaultConfig.getToken()); // we should not display token in logs
-        logger.debug("Vault PEM path: "+context.getVaultSslPEMPath());
         logger.debug("Vault Max Retries: "+vaultConfig.getMaxRetries());
         logger.debug("Vault Retry Interval: "+vaultConfig.getRetryIntervalMilliseconds());
         logger.debug("Vault Retry Open Timeout: "+vaultConfig.getOpenTimeout());
