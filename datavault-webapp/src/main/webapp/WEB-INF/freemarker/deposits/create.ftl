@@ -79,7 +79,7 @@
                         <div class="form-group">
                             <label class="control-label">Deposit Name</label>
                             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
-                                title="This description should contain information to assist the vault Owner and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
+                                title="The deposit name should  help reviewers understand whether this subset of the data needs to be kept longer than other parts of the vault.&nbsp;Maximum 400 characters.">
                             </span>
                             <@spring.bind "deposit.name" />
                             <input type="text" class="form-control" name="${spring.status.expression}" value='${spring.status.value!""}'/>
@@ -88,7 +88,7 @@
                         <div class="form-group">
                             <label class="control-label">Deposit Description</label>
                             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
-                                title="The deposit name should  help reviewers understand whether this subset of the data needs to be kept longer than other parts of the vault.&nbsp;Maximum 400 characters.">
+                                title="This description should contain information to assist the vault Owner and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
                             </span>
                             <@spring.bind "deposit.description" />
                             <input type="text" class="form-control" name="${spring.status.expression}" value='${spring.status.value!""}'/>
@@ -121,7 +121,7 @@
         
                 <div id="uploadMaxSizeAlert" class="alert alert-warning" role="alert" style="display:none;">
                   <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                  Files larger than 5GB cannot be uploaded directly from your computer.
+                  Files larger than 20GB cannot be uploaded directly from your computer.
                 </div>
         
                 <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
@@ -130,7 +130,7 @@
                         <button type="button" class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage">
                             <i class="fa fa-hdd-o" aria-hidden="true"></i> Data Storage (SFTP)
                         </button>
-                        <button type="button" class="btn btn-default flow-browse" data-toggle="tooltip" title="Maximum file size: 5GB">
+                        <button type="button" class="btn btn-default flow-browse" data-toggle="tooltip" title="Maximum file size: 20GB">
                             <i class="fa fa-laptop" aria-hidden="true"></i> My Computer
                         </button>
                     </div>
@@ -197,7 +197,12 @@
                 <div class="alert alert-info" role="alert">
                     <p>
                         Your dataset ID: <strong>${vault.datasetName?html}</strong><br>
-                        If you think this might be the wrong dataset Pure ID, please return to the first tab to select the correct one .
+                        Before you make this deposit, please make sure the Pure record describing the Vault you have selected is appropriate.
+                        For example, if the files you are planning to upload belong to a different project or 
+                        should have a different review date from the rest of the data, 
+                        or if they do not fit the dataset description in the Pure record then they should be deposited in a new, 
+                        separate Vault with a new, separate Pure record. 
+                        You can view the Pure metadata on the Vault information page.
                     </p>
                 </div>
                     
@@ -384,8 +389,8 @@
 
         // Handle file add event
         r.on('fileAdded', function(file){
-            // Prevent browser upload of large files (5GB)
-            if (file.size > (5 * 1024 * 1024 * 1024)) {
+            // Prevent browser upload of large files (20GB)
+            if (file.size > (20 * 1024 * 1024 * 1024)) {
                 $('#uploadMaxSizeAlert').show();
                 return false;
             }
