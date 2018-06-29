@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.EnumSet;
 
 import javax.crypto.Cipher;
@@ -20,8 +21,26 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.io.FileUtils;
+import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.Context.AESMode;
+import org.datavaultplatform.worker.tasks.Retrieve;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.bettercloud.vault.SslConfig;
+import com.bettercloud.vault.Vault;
+import com.bettercloud.vault.VaultConfig;
+import com.bettercloud.vault.VaultException;
+import com.bettercloud.vault.json.Json;
+import com.bettercloud.vault.json.JsonObject;
 
 public class Encryption {
+    
+    private static final Logger logger = LoggerFactory.getLogger(Retrieve.class);
+    
     public static int BUFFER_SIZE = 50 * 1024; // 50KB
     public static int SMALL_BUFFER_SIZE = 1024; // 1KB
     public static int AES_BLOCK_SIZE = 16; // 16 Bytes
@@ -34,6 +53,8 @@ public class Encryption {
     public static String CBC_ALGO_TRANSFORMATION_STRING = "AES/CBC/PKCS5Padding";
     public static String CTR_ALGO_TRANSFORMATION_STRING = "AES/CTR/PKCS5Padding";
     public static String CCM_ALGO_TRANSFORMATION_STRING = "AES/CCM/NoPadding";
+
+    private static Vault vault = null;
     
     /**
      * Generate a secret key for AES encryption Need JCE Unlimited Strength to
@@ -84,6 +105,10 @@ public class Encryption {
         return iv;
     }
     
+    public static Cipher initGCMCipher(Context context, int opmode, byte[] iv) throws Exception{
+        return initGCMCipher(opmode, Encryption.getSecretKeyFromVault(context), iv, null);
+    }
+    
     public static Cipher initGCMCipher(int opmode, SecretKey aesKey, byte[] iv) throws Exception{
         return initGCMCipher(opmode, aesKey, iv, null);
     }
@@ -119,6 +144,10 @@ public class Encryption {
         }
 
         return c;
+    }
+    
+    public static Cipher initCBCCipher(Context context, int opmode, byte[] iv) throws Exception {
+        return initCBCCipher(opmode, Encryption.getSecretKeyFromVault(context), iv);
     }
     
     /**
@@ -217,5 +246,123 @@ public class Encryption {
         inputFileChannel.close();
         outputMappedByteBuffer.clear(); // do something with the data and clear/compact it.
         outputFileChannel.close();
+    }
+    
+    private static SecretKey getSecretKeyFromVault(Context context) throws Exception {
+        if(vault == null) {
+            setVault(context);
+        }
+        
+        logger.debug("get secret key: "+context.getVaultKeyPath()+" "+context.getVaultKeyName());
+        
+//        String encodedKey = vault.logical().read(context.getVaultKeyPath()).getData().get(context.getVaultKeyName());
+        
+        final String jsonString = new String(
+                vault.logical().read(context.getVaultKeyPath()).getRestResponse().getBody(), "UTF-8");
+
+        logger.debug("jsonString: " + jsonString);
+        
+        final JsonObject jsonObject = Json.parse(jsonString).asObject();
+
+        
+        final JsonObject jsonDataObject = jsonObject.get("data").asObject().get("data").asObject();
+        logger.debug("jsonDataObject: " + jsonDataObject.toString());
+        
+        String encodedKey = jsonDataObject.get(context.getVaultKeyName()).asString();
+        
+        logger.debug("encodedKey received: "+encodedKey);
+        
+        // decode the base64 encoded string
+        byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
+        // rebuild key using SecretKeySpec
+        SecretKey secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+        
+        return secretKey;
+    }
+    
+    private static void setVault(Context context) throws VaultException {
+        final VaultConfig vaultConfig = new VaultConfig()
+                .address(context.getVaultAddress())
+                .token(context.getVaultToken());
+
+        System.out.println("Vault PEM path: '"+context.getVaultSslPEMPath()+"'");
+        System.out.println("context.getVaultSslPEMPath().trim().equals(\"\"): "+context.getVaultSslPEMPath().equals(""));
+        
+        if(context.getVaultSslPEMPath().trim().equals("")) {
+            logger.debug("Won't use SSL Certificate.");
+        } else {
+            logger.debug("Use PEM file: '"+context.getVaultSslPEMPath().trim()+"'");
+            vaultConfig.sslConfig(new SslConfig()
+                        .pemFile(new File(context.getVaultSslPEMPath().trim())
+                    ).build());
+        }
+        vaultConfig.build();
+        
+        logger.debug("Vault address: "+vaultConfig.getAddress());
+//        logger.debug("Vault token: "+vaultConfig.getToken()); // we should not display token in logs
+        logger.debug("Vault Max Retries: "+vaultConfig.getMaxRetries());
+        logger.debug("Vault Retry Interval: "+vaultConfig.getRetryIntervalMilliseconds());
+        logger.debug("Vault Retry Open Timeout: "+vaultConfig.getOpenTimeout());
+        logger.debug("Vault Retry Read Timeout: "+vaultConfig.getReadTimeout());
+        
+        vault = new Vault(vaultConfig);
+    }
+    
+    public static Vault getVault() {
+        return vault;
+    }
+    
+    /**
+     * Perform encryption on file
+     *  
+     * @param file - file to be encrypted
+     * @param aesKey - secret key 
+     * @param aesMode - AES encryption mode
+     * @return generated IV
+     * @throws Exception
+     */
+    public static byte[] encryptFile(Context context, File file)  throws Exception {
+        return doCrypto(context, file, Cipher.ENCRYPT_MODE, null);
+    }
+    
+    /**
+     * Perform decryption on file
+     * 
+     * @param file - encrypted file
+     * @param aesKey - secret key 
+     * @param aesMode - AES encryption mode
+     * @param iv - Initialisation Vector used for the encryption
+     * @throws Exception
+     */
+    public static void decryptFile(Context context, File file, byte[] iv)  throws Exception {
+        doCrypto(context, file, Cipher.DECRYPT_MODE, iv);
+    }
+    
+    private static byte[] doCrypto(Context context, File file, int encryptMode, byte[] iv) throws Exception {
+        
+        if(encryptMode == Cipher.ENCRYPT_MODE) {
+            // Generating IV
+            iv = Encryption.generateIV(Encryption.IV_SIZE);
+        }
+        
+        Cipher cipher;
+        switch (context.getEncryptionMode()) {
+            case GCM:
+                cipher = Encryption.initGCMCipher(context, encryptMode, iv); break;
+            case CBC:
+                cipher = Encryption.initCBCCipher(context, encryptMode, iv); break;
+            default:
+                cipher = Encryption.initGCMCipher(context, encryptMode, iv); break;
+        }
+
+        File tempEncryptedFile = new File(file.getAbsoluteFile() + ".encrypted");
+
+        logger.debug("Encrypting chunk: " + file.getName());
+        Encryption.doByteBufferFileCrypto(file, tempEncryptedFile, cipher);
+
+        FileUtils.copyFile(tempEncryptedFile, file);
+        FileUtils.deleteQuietly(tempEncryptedFile);
+        
+        return iv;
     }
 }
