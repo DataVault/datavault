@@ -9,16 +9,15 @@ import java.io.StringWriter;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
-import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
 
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.BasicConfigurator;
+import org.datavaultplatform.common.crypto.Encryption;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;

@@ -107,6 +107,13 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <!--  HashiCorp Vault -->
+        <dependency>
+            <groupId>com.bettercloud</groupId>
+            <artifactId>vault-java-driver</artifactId>
+            <version>3.1.0</version>
+        </dependency>
     </dependencies>
     
     <build>

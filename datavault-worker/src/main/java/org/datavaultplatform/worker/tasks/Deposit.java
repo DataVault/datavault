@@ -11,6 +11,7 @@ import org.apache.commons.io.FileUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.event.Error;
@@ -28,13 +29,9 @@ import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.*;
 import org.datavaultplatform.worker.operations.*;
 import org.datavaultplatform.worker.queue.EventSender;
-import org.datavaultplatform.common.task.Context.AESMode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
 
 /**
  * A class that extends Task which is used to handle Deposits to the vault
