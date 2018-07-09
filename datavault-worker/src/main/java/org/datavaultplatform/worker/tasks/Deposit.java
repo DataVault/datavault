@@ -1,15 +1,7 @@
 package org.datavaultplatform.worker.tasks;
 
-import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
 import java.util.Map;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -42,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 /**
@@ -72,14 +63,6 @@ public class Deposit extends Task {
     File[] chunkFiles;
     String[] chunksHash;
     String[] encChunksHash;
-    
-    // Secret key for crypto
-    // TODO: store it somewhere
-    private final String KEYSTORE_TYPE = "JCEKS";
-    private final String KEYSTORE_NAME = "DatavaultKeyStore";
-    private final String KEY_ALGO = "AES";
-    private final String KEYSTORE_PWD ="VeryBadPasswordForTestOnly"; 
-//    private SecretKey aesKey = null;
     
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
@@ -136,7 +119,6 @@ public class Deposit extends Task {
 //			at the moment the vault id is only used by the S3 plugin and may be used by the TSM plugin in the future*/
 //			e1.printStackTrace();
 //		}
-        
         
         userStores = new HashMap<>();
         
@@ -350,12 +332,6 @@ public class Deposit extends Task {
             String encTarHash = null;
             if(context.isEncryptionEnabled()) {
                 logger.info("Encrypting file(s)...");
-                
-                // Generating Key
-                SecretKey aesKey = Encryption.generateSecretKey(128);
-
-                // TODO: Save secret key somewhere
-                saveSecretKeyToKeyStore(aesKey);
 
                 if (context.isChunkingEnabled()) {
                     HashMap<Integer, String> encChunksDigests = new HashMap<Integer, String>();
@@ -366,7 +342,7 @@ public class Deposit extends Task {
                         File chunk = chunkFiles[i];
                         
                         // Generating IV
-                        byte[] chunkIV = encryptFile(chunk, aesKey, context.getEncryptionMode());
+                        byte[] chunkIV = Encryption.encryptFile(context, chunk);
                         
                         encChunksHash[i] = Verify.getDigest(chunk);
 
@@ -383,7 +359,7 @@ public class Deposit extends Task {
                             context.getEncryptionMode().toString(), null, encChunksDigests)
                                 .withUserId(userID));
                 } else {
-                    iv = encryptFile(tarFile, aesKey, context.getEncryptionMode());
+                    iv = Encryption.encryptFile(context, tarFile);
                     
                     encTarHash = Verify.getDigest(tarFile);
                     
@@ -653,9 +629,8 @@ public class Deposit extends Task {
                 logger.debug("Verifying encrypted chunk file: "+chunkFile.getAbsolutePath());
                 verifyChunkFile(context.getTempDir(), chunkFile, encChunkHash);
                 
-                SecretKey aesKey = this.getSecretKeyFromKeyStore();
                 // TODO: get aesKey from secure place
-                decryptFile(chunkFile, aesKey, context.getEncryptionMode(), ivs.get(i+1));
+                Encryption.decryptFile(context, chunkFile, ivs.get(i+1));
             }
                 
             logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
@@ -693,8 +668,7 @@ public class Deposit extends Task {
                 
                 // Decryption
                 if(iv != null) {
-                    SecretKey aesKey = this.getSecretKeyFromKeyStore();
-                    decryptFile(tarFile, aesKey, context.getEncryptionMode(), iv);
+                    Encryption.decryptFile(context, tarFile, iv);
                 }
                 
                 // Verify the contents of the temporary file
@@ -716,8 +690,7 @@ public class Deposit extends Task {
                         
                         // Decryption
                         if(iv != null) {
-                            SecretKey aesKey = this.getSecretKeyFromKeyStore();
-                            decryptFile(tarFile, aesKey, context.getEncryptionMode(), iv);
+                            Encryption.decryptFile(context, tarFile, iv);
                         }
                         
                         // Verify the contents
@@ -735,8 +708,7 @@ public class Deposit extends Task {
                     
                     // Decryption
                     if(iv != null) {
-                        SecretKey aesKey = this.getSecretKeyFromKeyStore();
-                        decryptFile(tarFile, aesKey, context.getEncryptionMode(), iv);
+                        Encryption.decryptFile(context, tarFile, iv);
                     }
                     
                     // Verify the contents
@@ -831,93 +803,4 @@ public class Deposit extends Task {
         tarFile.delete();
     }
     
-    /**
-     * Perform encryption on file
-     *  
-     * @param file - file to be encrypted
-     * @param aesKey - secret key 
-     * @param aesMode - AES encryption mode
-     * @return generated IV
-     * @throws Exception
-     */
-    private byte[] encryptFile(File file, SecretKey aesKey, AESMode aesMode)  throws Exception {
-        return doCrypto(file, aesKey, aesMode, Cipher.ENCRYPT_MODE, null);
-    }
-    
-    /**
-     * Perform decryption on file
-     * 
-     * @param file - encrypted file
-     * @param aesKey - secret key 
-     * @param aesMode - AES encryption mode
-     * @param iv - Initialisation Vector used for the encryption
-     * @throws Exception
-     */
-    private void decryptFile(File file, SecretKey aesKey, AESMode aesMode, byte[] iv)  throws Exception {
-        doCrypto(file, aesKey, aesMode, Cipher.DECRYPT_MODE, iv);
-    }
-    
-    private byte[] doCrypto(File file, SecretKey aesKey, AESMode aesMode, int encryptMode, byte[] iv) throws Exception {
-        
-        if(encryptMode == Cipher.ENCRYPT_MODE) {
-            // Generating IV
-            iv = Encryption.generateIV(Encryption.IV_SIZE);
-        }
-        
-        Cipher cipher;
-        switch (aesMode) {
-            case GCM:
-                cipher = Encryption.initGCMCipher(encryptMode, aesKey, iv); break;
-            case CBC:
-                cipher = Encryption.initCBCCipher(encryptMode, aesKey, iv); break;
-            default:
-                cipher = Encryption.initGCMCipher(encryptMode, aesKey, iv); break;
-        }
-
-        File tempEncryptedFile = new File(file.getAbsoluteFile() + ".encrypted");
-
-        logger.debug("Encrypting chunk: " + file.getName());
-        Encryption.doByteBufferFileCrypto(file, tempEncryptedFile, cipher);
-        logger.debug("archiveIds: " + archiveIds);
-
-        FileUtils.copyFile(tempEncryptedFile, file);
-        FileUtils.deleteQuietly(tempEncryptedFile);
-        
-        return iv;
-    }
-    
-    /**
-     * Save the AES secret key somewhere
-     * 
-     * At the moment it just put it in a File which is not safe at all and should really only be use for development and test
-     * 
-     * TODO: Implement similar function to save the key somewhere safe
-     * 
-     * @param key
-     * @throws Exception 
-     */
-    private void saveSecretKeyToKeyStore(SecretKey secretKey) throws Exception {
-        KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
-        try (FileInputStream fis = new FileInputStream(KEYSTORE_NAME)) {
-            ks.load(fis, KEYSTORE_PWD.toCharArray());
-        } catch ( FileNotFoundException fnfe ) {
-            ks.load(null, KEYSTORE_PWD.toCharArray());
-        }
-        KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(KEYSTORE_PWD.toCharArray());
-        KeyStore.SecretKeyEntry skEntry = new KeyStore.SecretKeyEntry(secretKey);
-        ks.setEntry(this.depositId, skEntry, protParam);
-        try (FileOutputStream fos = new FileOutputStream(KEYSTORE_NAME)) {
-            ks.store(fos, KEYSTORE_PWD.toCharArray());
-        }
-    }
-    
-    private SecretKey getSecretKeyFromKeyStore() throws Exception {
-        KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
-        try (FileInputStream fis = new FileInputStream(KEYSTORE_NAME)) {
-            ks.load(fis, KEYSTORE_PWD.toCharArray());
-        }
-        SecretKey secretKey = (SecretKey) ks.getKey(this.depositId, KEYSTORE_PWD.toCharArray());
-        
-        return secretKey;
-    }
 }

@@ -1,19 +1,15 @@
 package org.datavaultplatform.worker.tasks;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.lang.reflect.Constructor;
 import java.nio.file.Path;
-import java.security.KeyStore;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 import org.apache.commons.io.FileUtils;
@@ -45,14 +41,6 @@ import org.slf4j.LoggerFactory;
 public class Retrieve extends Task {
     
     private static final Logger logger = LoggerFactory.getLogger(Retrieve.class);
-    
-    // Secret key for crypto
-    // TODO: store it somewhere
-    private final String KEYSTORE_TYPE = "JCEKS";
-    private final String KEYSTORE_NAME = "DatavaultKeyStore";
-    private final String KEY_ALGO = "AES";
-    private final String KEYSTORE_PWD ="VeryBadPasswordForTestOnly"; 
-//    private SecretKey aesKey = null;
     
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
@@ -112,8 +100,6 @@ public class Retrieve extends Task {
         
         logger.info("bagID: " + bagID);
         logger.info("retrievePath: " + retrievePath);
-        
-        
         
         Device userFs = null;
         UserStore userStore = null;
@@ -204,7 +190,6 @@ public class Retrieve extends Task {
                     String location = locationsIt.next();
                     try {
                         try {
-
                             // NEED TO UPDATE THIS TO INCLUDE CHUNKING STUFF IS TURNED ON
                             if (context.isChunkingEnabled()) {
                                 // TODO can bypass this if there is only one chunk.
@@ -272,8 +257,7 @@ public class Retrieve extends Task {
                                 throw new Exception("checksum failed: " + encTarFileHash + " != " + encTarDigest);
                             }
                             
-                            SecretKey aesKey = this.getSecretKeyFromKeyStore(depositId);
-                            this.decryptFile(tarFile, aesKey, context.getEncryptionMode(), this.getTarIV());
+                            Encryption.decryptFile(context, tarFile, this.getTarIV());
                         }
                     }
                 } finally {
@@ -294,14 +278,16 @@ public class Retrieve extends Task {
     }
     
     private void recomposeSingle(int numOfChunks, String tarFileName, Context context, String archiveId, Device archiveFs, Progress progress, 
-            String archiveDigestAlgorithm, File tarFile, Map<Integer, String> chunksDigest, Map<Integer, String> encChunksDigest, String depositId)  
+            String archiveDigestAlgorithm, File tarFile, Map<Integer, String> chunksDigest, Map<Integer, String> encChunksDigest, 
+            String depositId)  
                     throws Exception {
         recompose(numOfChunks, tarFileName, context, archiveId, archiveFs, progress, archiveDigestAlgorithm, 
                 tarFile, chunksDigest, encChunksDigest, false, null, depositId);
     }
     
     private void recomposeMulti(int numOfChunks, String tarFileName, Context context, String archiveId, Device archiveFs, Progress progress, 
-            String archiveDigestAlgorithm, File tarFile, Map<Integer, String> chunksDigest, Map<Integer, String> encChunksDigest, String location, String depositId)  
+            String archiveDigestAlgorithm, File tarFile, Map<Integer, String> chunksDigest, Map<Integer, String> encChunksDigest, 
+            String location, String depositId)  
                     throws Exception {
         recompose(numOfChunks, tarFileName, context, archiveId, archiveFs, progress, archiveDigestAlgorithm, 
                 tarFile, chunksDigest, encChunksDigest, true, location, depositId);
@@ -337,14 +323,13 @@ public class Retrieve extends Task {
                     throw new Exception("checksum failed: " + encChunkFileHash + " != " + archivedEncChunkFileHash);
                 }
                 
-                SecretKey aesKey = this.getSecretKeyFromKeyStore(depositId);
-                this.decryptFile(chunkFile, aesKey, context.getEncryptionMode(), this.getChunksIVs().get(chunkNum));
+                Encryption.decryptFile(context, chunkFile, this.getChunksIVs().get(chunkNum));
             }
             
             // Check file
             String archivedChunkFileHash = chunksDigest.get(chunkNum);
             
-            // TODO Should we check algorithm each time or assume main tar file algorithm is the same
+            // TODO: Should we check algorithm each time or assume main tar file algorithm is the same
             // We might also want to move algorythm check before this loop
             String chunkFileHash = Verify.getDigest(chunkFile);
             
@@ -425,65 +410,5 @@ public class Retrieve extends Task {
         logger.info("Data retrieve complete: " + retrievePath);
         eventStream.send(new RetrieveComplete(jobID, depositId, retrieveId).withNextState(4)
             .withUserId(userID));
-    }
-    
-    /**
-     * Perform decryption on file
-     * 
-     * @param file - encrypted file
-     * @param aesKey - secret key 
-     * @param aesMode - AES encryption mode
-     * @param iv - Initialisation Vector used for the encryption
-     * @throws Exception
-     */
-    private void decryptFile(File file, SecretKey aesKey, AESMode aesMode, byte[] iv)  throws Exception {
-        doCrypto(file, aesKey, aesMode, Cipher.DECRYPT_MODE, iv);
-    }
-    
-    private byte[] doCrypto(File file, SecretKey aesKey, AESMode aesMode, int encryptMode, byte[] iv) throws Exception {
-        
-        if(encryptMode == Cipher.ENCRYPT_MODE) {
-            // Generating IV
-            iv = Encryption.generateIV(Encryption.IV_SIZE);
-        }
-        
-        Cipher cipher;
-        switch (aesMode) {
-            case GCM:
-                cipher = Encryption.initGCMCipher(encryptMode, aesKey, iv); break;
-            case CBC:
-                cipher = Encryption.initCBCCipher(encryptMode, aesKey, iv); break;
-            default:
-                cipher = Encryption.initGCMCipher(encryptMode, aesKey, iv); break;
-        }
-
-        File tempEncryptedFile = new File(file.getAbsoluteFile() + ".encrypted");
-
-        logger.debug("Encrypting chunk: " + file.getName());
-        Encryption.doByteBufferFileCrypto(file, tempEncryptedFile, cipher);
-
-        FileUtils.copyFile(tempEncryptedFile, file);
-        FileUtils.deleteQuietly(tempEncryptedFile);
-        
-        return iv;
-    }
-    
-    /**
-     * Get the AES secret key from KeyStore
-     * 
-     * At the moment it just put it in the KeyStore but it should really only be use for development and test
-     * 
-     * TODO: Implement similar function to save the key somewhere safe
-     * 
-     * @param key
-     * @throws Exception 
-     */
-    private SecretKey getSecretKeyFromKeyStore(String depositId) throws Exception {
-        KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
-        FileInputStream fis = new java.io.FileInputStream(KEYSTORE_NAME);
-        ks.load(fis,KEYSTORE_PWD.toCharArray());
-        SecretKey secretKey = (SecretKey) ks.getKey(depositId, KEYSTORE_PWD.toCharArray());
-        
-        return secretKey;
     }
 }

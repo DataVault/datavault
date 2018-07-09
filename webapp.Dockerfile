@@ -54,5 +54,5 @@ RUN chown -R datavault:datavault ${CATALINA_HOME}
 WORKDIR ${CATALINA_HOME}
 EXPOSE 8080
 
-ENTRYPOINT ["/docker_datavault-home/scripts/docker-entrypoint.sh"]
+ENTRYPOINT ["/docker_datavault-home/scripts/docker-entrypoint.sh", "webapp"]
 CMD ["/usr/local/tomcat/bin/catalina.sh", "run"]

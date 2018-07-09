@@ -14,11 +14,18 @@ import javax.servlet.http.HttpSession;
 @Controller
 @RequestMapping("/auth")
 public class AuthController {
-
+    
+    private final static String DEFAULT_LOGOUT_URL = "/auth/login?logout";
+    
     private String welcome;
+    private String logoutUrl;
     
     public void setWelcome(String welcome) {
         this.welcome = welcome;
+    }
+    
+    public void setLogoutUrl(String logoutUrl) {
+        this.logoutUrl = logoutUrl;
     }
     
     @RequestMapping(value = "/login", method = RequestMethod.GET)
@@ -44,7 +51,12 @@ public class AuthController {
     public String getDeniedPage(ModelMap model, HttpSession session) {
 
         session.invalidate();
-        return "redirect:/auth/login?logout";
+        
+        if (logoutUrl == null || logoutUrl.equals("")) {
+            logoutUrl = AuthController.DEFAULT_LOGOUT_URL;
+        }
+        
+        return "redirect:"+logoutUrl;
     }
 
     @RequestMapping(value = "/denied", method = RequestMethod.GET)
