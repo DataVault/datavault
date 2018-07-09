@@ -144,6 +144,7 @@
     
     <bean id="authController" class="org.datavaultplatform.webapp.controllers.AuthController">
         <property name="welcome" value="${webapp.welcome}"/>
+        <property name="logoutUrl" value="${webapp.logout.url:}"/>
     </bean>
 
     <bean id="restService" class="org.datavaultplatform.webapp.services.RestService">
