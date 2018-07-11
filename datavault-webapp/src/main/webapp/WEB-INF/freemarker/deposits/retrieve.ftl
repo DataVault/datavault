@@ -71,6 +71,10 @@
                                    class="form-control file-path"
                                    name="${spring.status.expression}"
                                    value="${spring.status.value!""}"/>
+                            <div id="tree-error" class="alert alert-danger" style="display: none">
+                                 DataVault could not access the location you specified. Please check that you have provided the correct hostname, port number and have copied the authentication key to the location.
+                                 If you need assistance please contact the DataVault support team.
+                            </div>
                             <div id="tree" class="fancytree tree-box"></div>
                         </div>
                 
@@ -99,6 +103,15 @@
                                     } else {
                                         $(".file-path").val("");
                                     }
+                                },
+                                init: function(event, data) {
+                                  if ( data.tree.count() == 0 ) {
+                                     $("#tree-error").show();
+                                     $("#tree").hide();
+                                  } else {
+                                     $("#tree-error").hide();
+                                     $("#tree").show();
+                                  }
                                 }
                             });
                         </script>
