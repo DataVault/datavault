@@ -26,18 +26,18 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 
     public Verify.Method verificationMethod = Verify.Method.COPY_BACK;
 
-    public TivoliStorageManager(String name, Map<String,String> config) throws Exception  {
+    public TivoliStorageManager(String name, Map<String,Object> config) throws Exception  {
         super(name, config);
         String optionsKey = "optionsDir";
     	String tempKey = "tempDir";
         // if we have non default options in datavault.properties use them
         if (config.containsKey(optionsKey)) {
-        	String optionsDir = config.get(optionsKey);
+        	String optionsDir = (String)config.get(optionsKey);
         	TivoliStorageManager.TSM_SERVER_NODE1_OPT = optionsDir + "/dsm1.opt";
         	TivoliStorageManager.TSM_SERVER_NODE2_OPT = optionsDir + "/dsm2.opt";
         }
         if (config.containsKey(tempKey)) {
-        	TivoliStorageManager.TEMP_PATH_PREFIX = config.get(tempKey);
+        	TivoliStorageManager.TEMP_PATH_PREFIX = (String)config.get(tempKey);
         }
         locations = new ArrayList<String>();
         locations.add(TivoliStorageManager.TSM_SERVER_NODE1_OPT);

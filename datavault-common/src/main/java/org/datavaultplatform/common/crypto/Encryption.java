@@ -36,7 +36,7 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 
 public class Encryption {
-   
+
     private static final Logger logger = LoggerFactory.getLogger(Encryption.class);
 
     public static int BUFFER_SIZE = 50 * 1024; // 50KB
@@ -51,6 +51,13 @@ public class Encryption {
     public static String CBC_ALGO_TRANSFORMATION_STRING = "AES/CBC/PKCS5Padding";
     public static String CTR_ALGO_TRANSFORMATION_STRING = "AES/CTR/PKCS5Padding";
     public static String CCM_ALGO_TRANSFORMATION_STRING = "AES/CCM/NoPadding";
+
+    private static String vaultAddress;
+    private static String vaultToken;
+    private static String vaultKeyPath;
+    private static String vaultDataEncryptionKeyName;
+    private static String vaultPrivateKeyEncryptionKeyName;
+    private static String vaultSslPEMPath;
 
     private static Vault vault = null;
 
@@ -83,7 +90,6 @@ public class Encryption {
     /**
      * Generate a Initialisation Vector using default size (i.e. Encryption.IV_SIZE)
      *
-     * @param size in bytes for the iv
      * @return Initialisation Vector
      */
     public static byte[] generateIV(){
@@ -103,8 +109,8 @@ public class Encryption {
         return iv;
     }
 
-    public static Cipher initGCMCipher(Context context, int opmode, byte[] iv) throws Exception{
-        return initGCMCipher(opmode, Encryption.getSecretKeyFromVault(context), iv, null);
+    public static Cipher initGCMCipher(String keyName, int opmode, byte[] iv) throws Exception{
+        return initGCMCipher(opmode, Encryption.getSecretKeyFromVault(keyName), iv, null);
     }
 
     public static Cipher initGCMCipher(int opmode, SecretKey aesKey, byte[] iv) throws Exception{
@@ -144,8 +150,8 @@ public class Encryption {
         return c;
     }
 
-    public static Cipher initCBCCipher(Context context, int opmode, byte[] iv) throws Exception {
-        return initCBCCipher(opmode, Encryption.getSecretKeyFromVault(context), iv);
+    public static Cipher initCBCCipher(String keyName, int opmode, byte[] iv) throws Exception {
+        return initCBCCipher(opmode, Encryption.getSecretKeyFromVault(keyName), iv);
     }
 
     /**
@@ -246,27 +252,27 @@ public class Encryption {
         outputFileChannel.close();
     }
 
-    private static SecretKey getSecretKeyFromVault(Context context) throws Exception {
+    private static SecretKey getSecretKeyFromVault(String keyName) throws Exception {
         if(vault == null) {
-            setVault(context);
+            setVault();
         }
 
-        logger.debug("get secret key: "+context.getVaultKeyPath()+" "+context.getVaultKeyName());
+        logger.debug("get secret key: "+getVaultKeyPath()+" "+keyName);
 
 //        String encodedKey = vault.logical().read(context.getVaultKeyPath()).getData().get(context.getVaultKeyName());
 
         final String jsonString = new String(
-                vault.logical().read(context.getVaultKeyPath()).getRestResponse().getBody(), "UTF-8");
+                vault.logical().read(getVaultKeyPath()).getRestResponse().getBody(), "UTF-8");
 
-        logger.debug("jsonString: " + jsonString);
+//        logger.debug("jsonString: " + jsonString);
 
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
 
 
         final JsonObject jsonDataObject = jsonObject.get("data").asObject().get("data").asObject();
-        logger.debug("jsonDataObject: " + jsonDataObject.toString());
+//        logger.debug("jsonDataObject: " + jsonDataObject.toString());
 
-        String encodedKey = jsonDataObject.get(context.getVaultKeyName()).asString();
+        String encodedKey = jsonDataObject.get(keyName).asString();
 
         logger.debug("encodedKey received: "+encodedKey);
 
@@ -278,20 +284,20 @@ public class Encryption {
         return secretKey;
     }
 
-    private static void setVault(Context context) throws VaultException {
+    private static void setVault() throws VaultException {
         final VaultConfig vaultConfig = new VaultConfig()
-                .address(context.getVaultAddress())
-                .token(context.getVaultToken());
+                .address(getVaultAddress())
+                .token(getVaultToken());
 
-        System.out.println("Vault PEM path: '"+context.getVaultSslPEMPath()+"'");
-        System.out.println("context.getVaultSslPEMPath().trim().equals(\"\"): "+context.getVaultSslPEMPath().equals(""));
+        System.out.println("Vault PEM path: '"+getVaultSslPEMPath()+"'");
+        System.out.println("context.getVaultSslPEMPath().trim().equals(\"\"): "+getVaultSslPEMPath().equals(""));
 
-        if(context.getVaultSslPEMPath().trim().equals("")) {
+        if(getVaultSslPEMPath().trim().equals("")) {
             logger.debug("Won't use SSL Certificate.");
         } else {
-            logger.debug("Use PEM file: '"+context.getVaultSslPEMPath().trim()+"'");
+            logger.debug("Use PEM file: '"+getVaultSslPEMPath().trim()+"'");
             vaultConfig.sslConfig(new SslConfig()
-                        .pemFile(new File(context.getVaultSslPEMPath().trim())
+                        .pemFile(new File(getVaultSslPEMPath().trim())
                     ).build());
         }
         vaultConfig.build();
@@ -314,8 +320,6 @@ public class Encryption {
      * Perform encryption on file
      *
      * @param file - file to be encrypted
-     * @param aesKey - secret key
-     * @param aesMode - AES encryption mode
      * @return generated IV
      * @throws Exception
      */
@@ -327,8 +331,6 @@ public class Encryption {
      * Perform decryption on file
      *
      * @param file - encrypted file
-     * @param aesKey - secret key
-     * @param aesMode - AES encryption mode
      * @param iv - Initialisation Vector used for the encryption
      * @throws Exception
      */
@@ -346,11 +348,11 @@ public class Encryption {
         Cipher cipher;
         switch (context.getEncryptionMode()) {
             case GCM:
-                cipher = Encryption.initGCMCipher(context, encryptMode, iv); break;
+                cipher = Encryption.initGCMCipher(getVaultDataEncryptionKeyName(), encryptMode, iv); break;
             case CBC:
-                cipher = Encryption.initCBCCipher(context, encryptMode, iv); break;
+                cipher = Encryption.initCBCCipher(getVaultDataEncryptionKeyName(), encryptMode, iv); break;
             default:
-                cipher = Encryption.initGCMCipher(context, encryptMode, iv); break;
+                cipher = Encryption.initGCMCipher(getVaultDataEncryptionKeyName(), encryptMode, iv); break;
         }
 
         File tempEncryptedFile = new File(file.getAbsoluteFile() + ".encrypted");
@@ -362,5 +364,86 @@ public class Encryption {
         FileUtils.deleteQuietly(tempEncryptedFile);
 
         return iv;
+    }
+
+    public static byte[] encryptSecret(String privateKey, byte[] iv) throws Exception {
+        return encryptSecret(privateKey, null, iv);
+    }
+
+    public static byte[] encryptSecret(String secret, SecretKey secretKey, byte[] iv) throws Exception {
+        Cipher cipher;
+        if(secretKey == null) {
+            cipher = Encryption.initGCMCipher(getVaultPrivateKeyEncryptionKeyName(), Cipher.ENCRYPT_MODE, iv);
+        }
+        else {
+            cipher = Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, secretKey, iv);
+        }
+
+        return cipher.doFinal(secret.getBytes());
+    }
+
+    public static byte[] decryptSecret(byte[] privateKey, byte[] iv) throws Exception {
+        return decryptSecret(privateKey, iv, null);
+    }
+
+    public static byte[] decryptSecret(byte[] encryptedSecret, byte[] iv, SecretKey secretKey) throws Exception {
+        Cipher cipher;
+        if(secretKey == null) {
+            cipher = Encryption.initGCMCipher(getVaultPrivateKeyEncryptionKeyName(), Cipher.DECRYPT_MODE, iv);
+        }
+        else {
+            cipher = Encryption.initGCMCipher(Cipher.DECRYPT_MODE, secretKey, iv);
+        }
+
+        return cipher.doFinal(encryptedSecret);
+    }
+
+    public static String getVaultAddress() {
+        return vaultAddress;
+    }
+
+    public static void setVaultAddress(String vaultAddress) {
+        Encryption.vaultAddress = vaultAddress;
+    }
+
+    public static String getVaultToken() {
+        return vaultToken;
+    }
+
+    public static void setVaultToken(String vaultToken) {
+        Encryption.vaultToken = vaultToken;
+    }
+
+    public static String getVaultKeyPath() {
+        return vaultKeyPath;
+    }
+
+    public static void setVaultKeyPath(String vaultKeyPath) {
+        Encryption.vaultKeyPath = vaultKeyPath;
+    }
+
+    public static String getVaultSslPEMPath() {
+        return vaultSslPEMPath;
+    }
+
+    public static void setVaultSslPEMPath(String vaultSslPEMPath) {
+        Encryption.vaultSslPEMPath = vaultSslPEMPath;
+    }
+
+
+    public static String getVaultDataEncryptionKeyName() {
+        return vaultDataEncryptionKeyName;
+    }
+
+    public static void setVaultDataEncryptionKeyName(String vaultDataEncryptionKeyName) {
+        Encryption.vaultDataEncryptionKeyName = vaultDataEncryptionKeyName;
+    }
+
+    public static String getVaultPrivateKeyEncryptionKeyName() {
+        return vaultPrivateKeyEncryptionKeyName;
+    }
+
+    public static void setVaultPrivateKeyEncryptionKeyName(String vaultPrivateKeyEncryptionKeyName) {
+        Encryption.vaultPrivateKeyEncryptionKeyName = vaultPrivateKeyEncryptionKeyName;
     }
 }

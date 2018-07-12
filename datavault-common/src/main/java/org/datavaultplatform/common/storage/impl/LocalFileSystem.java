@@ -25,11 +25,11 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
 
     private String rootPath = null;
     
-    public LocalFileSystem(String name, Map<String,String> config) throws FileNotFoundException {
+    public LocalFileSystem(String name, Map<String,Object> config) throws FileNotFoundException {
         super(name, config);
         
         // Unpack the config parameters (in an implementation-specific way)
-        rootPath = config.get("rootPath");
+        rootPath = (String)config.get("rootPath");
         
         // Verify parameters are correct.
         File file = new File(rootPath);

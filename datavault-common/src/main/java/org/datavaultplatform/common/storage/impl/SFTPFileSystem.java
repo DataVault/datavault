@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.storage.impl;
 
+import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.model.FileInfo;
@@ -28,7 +29,8 @@ public class SFTPFileSystem extends Device implements UserStore {
     private String rootPath = null;
     private String username = null;
     private String password = null;
-    private String privateKey = null;
+    private byte[] encPrivateKey = null;
+    private byte[] encIV = null;
     private String passphrase = null;
     
     private Session session = null;
@@ -38,27 +40,32 @@ public class SFTPFileSystem extends Device implements UserStore {
     
     private Utility.SFTPMonitor monitor = null;
     
-    public SFTPFileSystem(String name, Map<String,String> config) throws Exception {
+    public SFTPFileSystem(String name, Map<String,Object> config) throws Exception {
         super(name, config);
         
         // Unpack the config parameters (in an implementation-specific way)
-        host = config.get("host");
-        port = Integer.parseInt(config.get("port"));
-        rootPath = config.get("rootPath");
-        username = config.get("username");
-        password = config.get("password");
-        privateKey = config.get("privateKey");
-        passphrase = config.get("passphrase");
+        host = (String)config.get("host");
+        port = Integer.parseInt((String)config.get("port"));
+        rootPath = (String)config.get("rootPath");
+        username = (String)config.get("username");
+        password = (String)config.get("password");
+        encPrivateKey = (byte[])config.get("privateKey");
+        encIV = (byte[])config.get("iv");
+        passphrase = (String)config.get("passphrase");
     }
     
     private void Connect() throws Exception {
         JSch jsch = new JSch();
         session = jsch.getSession(username, host, port);
 
+        byte[] privateKey = Encryption.decryptSecret(encPrivateKey, encIV);
+
+        logger.debug("Private Key: "+new String(privateKey));
+
         if (password != null && !password.isEmpty()) {
             session.setPassword(password);
         } else {
-            jsch.addIdentity(username, privateKey.getBytes(), null, passphrase.getBytes());
+            jsch.addIdentity(username, privateKey, null, passphrase.getBytes());
         }
 
         // todo : check its a known host??

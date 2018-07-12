@@ -149,7 +149,7 @@ public class DepositsController {
         List<FileStore> userStores = user.getFileStores();
         
         Map<String, String> userFileStoreClasses = new HashMap<>();
-        Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
+        Map<String, Map<String, Object>> userFileStoreProperties = new HashMap<>();
         
         // Add any server-side filestore paths
         if (createDeposit.getDepositPaths() != null) {
@@ -418,7 +418,7 @@ public class DepositsController {
             
             // Add a single entry for the user file storage
             Map<String, String> userFileStoreClasses = new HashMap<>();
-            Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
+            Map<String, Map<String, Object>> userFileStoreProperties = new HashMap<>();
             userFileStoreClasses.put(storageID, userStore.getStorageClass());
             userFileStoreProperties.put(storageID, userStore.getProperties());
             

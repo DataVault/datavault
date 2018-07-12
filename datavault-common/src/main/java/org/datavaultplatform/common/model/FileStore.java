@@ -33,14 +33,14 @@ public class FileStore {
     // Properties to use for this storage system
     // NOTE: this is not a secure mechanism for storing credentials!
     @Lob
-    private HashMap<String,String> properties;
+    private HashMap<String,Object> properties;
     
     @JsonIgnore
     @ManyToOne
     private User user;
     
     public FileStore() {}
-    public FileStore(String storageClass, HashMap<String,String> properties, String label) {
+    public FileStore(String storageClass, HashMap<String,Object> properties, String label) {
         this.storageClass = storageClass;
         this.properties = properties;
         this.label = label;
@@ -54,11 +54,11 @@ public class FileStore {
         this.storageClass = storageClass;
     }
 
-    public HashMap<String, String> getProperties() {
+    public HashMap<String, Object> getProperties() {
         return properties;
     }
 
-    public void setProperties(HashMap<String, String> properties) {
+    public void setProperties(HashMap<String, Object> properties) {
         this.properties = properties;
     }
 

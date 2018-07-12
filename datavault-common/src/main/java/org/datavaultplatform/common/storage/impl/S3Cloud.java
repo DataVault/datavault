@@ -33,14 +33,14 @@ public class S3Cloud extends Device implements ArchiveStore {
 	private TransferManager transferManager;
 	private String bucketName;
 
-	public S3Cloud(String name, Map<String, String> config) {
+	public S3Cloud(String name, Map<String, Object> config) {
 		super(name, config);
 		super.depositIdStorageKey = true;
-		String bucketName = config.get("s3.bucketName");
+		String bucketName = (String)config.get("s3.bucketName");
 		if ( bucketName == null ) {
 			bucketName = defaultBucketName;
 		}
-		String regionName = config.get("s3.region");
+		String regionName = (String)config.get("s3.region");
 		if ( regionName == null ) {
 			regionName = defaultRegionName;
 		}
@@ -48,8 +48,8 @@ public class S3Cloud extends Device implements ArchiveStore {
 			                        .standard()
 			                        .withRegion(regionName);
         // Access key can be provided through properties, but if not will be picked up default location, e.g. ~/.aws/credentials
-		String accessKey = config.get("s3.awsAccessKey");
-		String secretKey = config.get("s3.awsSecretKey");
+		String accessKey = (String)config.get("s3.awsAccessKey");
+		String secretKey = (String)config.get("s3.awsSecretKey");
         if (accessKey != null && ! accessKey.isEmpty() && secretKey != null && ! secretKey.isEmpty()) {
             builder = builder.withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)));
         }

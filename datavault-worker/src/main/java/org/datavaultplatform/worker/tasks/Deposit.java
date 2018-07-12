@@ -122,7 +122,7 @@ public class Deposit extends Task {
         for (String storageID : userFileStoreClasses.keySet()) {
             
             String storageClass = userFileStoreClasses.get(storageID);
-            Map<String, String> storageProperties = userFileStoreProperties.get(storageID);
+            Map<String, Object> storageProperties = userFileStoreProperties.get(storageID);
             
             // Connect to the user storage devices
             try {
@@ -507,7 +507,6 @@ public class Deposit extends Task {
     
     /**
      * @param tarFile
-     * @param isChunk
      * @throws Exception
      */
     private void copyToArchiveStorage(File tarFile, int chunkCount) throws Exception {

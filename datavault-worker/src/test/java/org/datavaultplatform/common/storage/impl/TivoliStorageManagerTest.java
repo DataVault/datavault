@@ -39,7 +39,7 @@ public class TivoliStorageManagerTest {
 	@Before
 	public void setUp() {
 		String name = "Test";
-		Map<String,String> config = new HashMap<String, String>();
+		Map<String,Object> config = new HashMap<>();
 		try {
 			tsm = new TivoliStorageManager(name, config);
 		} catch (Exception e) {

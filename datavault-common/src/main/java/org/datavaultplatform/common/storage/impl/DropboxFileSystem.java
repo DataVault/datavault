@@ -35,11 +35,11 @@ public class DropboxFileSystem extends Device implements UserStore {
     
     private String accessToken = null;
     
-    public DropboxFileSystem(String name, Map<String,String> config) throws IOException, DbxException  {
+    public DropboxFileSystem(String name, Map<String,Object> config) throws IOException, DbxException  {
         super(name, config);
         
         // Unpack the config parameters (in an implementation-specific way)
-        accessToken = config.get("accessToken");
+        accessToken = (String)config.get("accessToken");
         
         dbxConfig = new DbxRequestConfig(dbxAppName, Locale.getDefault().toString());
         dbxClient = new DbxClient(dbxConfig, accessToken);

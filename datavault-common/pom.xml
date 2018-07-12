@@ -108,6 +108,14 @@
             </exclusions>
         </dependency>
 
+        <!-- Encryption - Bouncy Castle -->
+        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.59</version>
+        </dependency>
+
         <!--  HashiCorp Vault -->
         <dependency>
             <groupId>com.bettercloud</groupId>

@@ -1,13 +1,13 @@
 package org.datavaultplatform.broker.controllers;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 import org.datavaultplatform.broker.services.UserKeyPairService;
+import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.FileStore;
 
+import org.datavaultplatform.common.task.Context;
 import org.jsondoc.core.annotation.ApiHeader;
 import org.jsondoc.core.annotation.ApiHeaders;
 import org.jsondoc.core.annotation.ApiMethod;
@@ -127,19 +127,31 @@ public class FileStoreController {
 
     @RequestMapping(value = "/filestores/sftp", method = RequestMethod.POST)
     public ResponseEntity<FileStore> addFileStoreSFTP(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                      @RequestBody FileStore store) throws Exception {
+                                      @RequestBody FileStore store) {
 
         User user = usersService.getUser(userID);
 
         userKeyPairService.generateNewKeyPair();
 
-        HashMap<String,String> storeProperties = store.getProperties();
+        byte[] encrypted = null;
+        byte[] iv = Encryption.generateIV();
+        try {
+            // We got to encrypt the private key before putting it int he database.
+            encrypted = Encryption.encryptSecret(userKeyPairService.getPrivateKey(), null, iv);
+        } catch (Exception e) {
+            logger.error("Error when encrypting private key: "+e);
+            e.printStackTrace();
+            return new ResponseEntity<>(store, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        HashMap<String, Object> storeProperties = store.getProperties();
 
         // Add the confidential properties.
         storeProperties.put("username", user.getID());
         storeProperties.put("password", "");
         storeProperties.put("publicKey", userKeyPairService.getPublicKey());
-        storeProperties.put("privateKey", userKeyPairService.getPrivateKey());
+        storeProperties.put("privateKey", encrypted);
+        storeProperties.put("iv", iv);
         storeProperties.put("passphrase", passphrase);
 
         store.setUser(user);
@@ -178,7 +190,7 @@ public class FileStoreController {
         FileStore store = fileStoreService.getFileStore(filestoreid);
 
         // Remove sensitive information that should only be held server side.
-        HashMap<String,String> storeProperties = store.getProperties();
+        HashMap<String,Object> storeProperties = store.getProperties();
         storeProperties.remove("password");
         storeProperties.remove("privateKey");
         storeProperties.remove("passphrase");

@@ -45,14 +45,14 @@ public class AmazonGlacier extends Device implements ArchiveStore {
     private final AmazonSNSClient snsClient;
     private final ArchiveTransferManager transferManager;
     
-    public AmazonGlacier(String name, Map<String,String> config) throws Exception  {
+    public AmazonGlacier(String name, Map<String,Object> config) throws Exception  {
         super(name, config);
         
         // Unpack the config parameters (in an implementation-specific way)
-        glacierVault = config.get("glacierVault"); // e.g. datavault-test
-        awsRegion = config.get("awsRegion"); // e.g. eu-west-1.amazonaws.com
-        accessKey = config.get("accessKey");
-        secretKey = config.get("secretKey");
+        glacierVault = (String)config.get("glacierVault"); // e.g. datavault-test
+        awsRegion = (String)config.get("awsRegion"); // e.g. eu-west-1.amazonaws.com
+        accessKey = (String)config.get("accessKey");
+        secretKey = (String)config.get("secretKey");
         
         // Connect
         System.out.println("Connecting to " + awsRegion);

@@ -16,12 +16,12 @@ public abstract class Device {
     
     
     // Some private configuration properties
-    protected Map<String,String> config;
+    protected Map<String,Object> config;
     protected Boolean multipleCopies = false;
     protected List<String> locations = null;
     protected Boolean depositIdStorageKey = false;
     
-    public Device(String name, Map<String,String> config) {
+    public Device(String name, Map<String,Object> config) {
         this.name = name;
         this.config = config;
     }

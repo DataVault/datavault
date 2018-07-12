@@ -104,7 +104,7 @@ public class Retrieve extends Task {
         for (String storageID : userFileStoreClasses.keySet()) {
             
             String storageClass = userFileStoreClasses.get(storageID);
-            Map<String, String> storageProperties = userFileStoreProperties.get(storageID);
+            Map<String, Object> storageProperties = userFileStoreProperties.get(storageID);
             
             // Connect to the first user storage device (we only expect one for a retrieval)
             try {

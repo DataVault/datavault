@@ -149,6 +149,9 @@
         <property name="archiveDir" value="${archiveDir}" />
     </bean>
 
+    <bean id="initialiseEncryption" class="org.datavaultplatform.broker.scheduled.InitialiseEncryption">
+    </bean>
+
     <!-- Documentation using jsondoc -->
 
     <bean id="documentationController" class="org.jsondoc.springmvc.controller.JSONDocController">
