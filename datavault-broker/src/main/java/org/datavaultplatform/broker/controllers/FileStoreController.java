@@ -1,27 +1,21 @@
 package org.datavaultplatform.broker.controllers;
 
-import java.util.*;
-
+import org.bouncycastle.util.encoders.Base64;
+import org.datavaultplatform.broker.services.FileStoreService;
 import org.datavaultplatform.broker.services.UserKeyPairService;
+import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.crypto.Encryption;
-import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.FileStore;
-
-import org.datavaultplatform.common.task.Context;
-import org.jsondoc.core.annotation.ApiHeader;
-import org.jsondoc.core.annotation.ApiHeaders;
-import org.jsondoc.core.annotation.ApiMethod;
-import org.jsondoc.core.annotation.ApiPathParam;
-import org.jsondoc.core.pojo.ApiVerb;
+import org.datavaultplatform.common.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import org.datavaultplatform.broker.services.FileStoreService;
-import org.datavaultplatform.broker.services.UsersService;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @RestController
 public class FileStoreController {
@@ -144,14 +138,14 @@ public class FileStoreController {
             return new ResponseEntity<>(store, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        HashMap<String, Object> storeProperties = store.getProperties();
+        HashMap<String, String> storeProperties = store.getProperties();
 
         // Add the confidential properties.
         storeProperties.put("username", user.getID());
         storeProperties.put("password", "");
         storeProperties.put("publicKey", userKeyPairService.getPublicKey());
-        storeProperties.put("privateKey", encrypted);
-        storeProperties.put("iv", iv);
+        storeProperties.put("privateKey", Base64.toBase64String(encrypted));
+        storeProperties.put("iv", Base64.toBase64String(iv));
         storeProperties.put("passphrase", passphrase);
 
         store.setUser(user);
@@ -190,7 +184,7 @@ public class FileStoreController {
         FileStore store = fileStoreService.getFileStore(filestoreid);
 
         // Remove sensitive information that should only be held server side.
-        HashMap<String,Object> storeProperties = store.getProperties();
+        HashMap<String,String> storeProperties = store.getProperties();
         storeProperties.remove("password");
         storeProperties.remove("privateKey");
         storeProperties.remove("passphrase");

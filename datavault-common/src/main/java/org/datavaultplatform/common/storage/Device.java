@@ -2,10 +2,9 @@ package org.datavaultplatform.common.storage;
 
 import org.datavaultplatform.common.io.Progress;
 
-import java.util.ArrayList;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.io.File;
 
 // A generic storage UserStore/system
 
@@ -16,12 +15,12 @@ public abstract class Device {
     
     
     // Some private configuration properties
-    protected Map<String,Object> config;
+    protected Map<String,String> config;
     protected Boolean multipleCopies = false;
     protected List<String> locations = null;
     protected Boolean depositIdStorageKey = false;
     
-    public Device(String name, Map<String,Object> config) {
+    public Device(String name, Map<String,String> config) {
         this.name = name;
         this.config = config;
     }

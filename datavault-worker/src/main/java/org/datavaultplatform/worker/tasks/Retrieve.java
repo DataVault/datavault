@@ -1,15 +1,7 @@
 package org.datavaultplatform.worker.tasks;
 
-import java.io.File;
-import java.lang.reflect.Constructor;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.io.FileUtils;
+import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.InitStates;
 import org.datavaultplatform.common.event.UpdateProgress;
@@ -22,14 +14,18 @@ import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.worker.operations.FileSplitter;
 import org.datavaultplatform.worker.operations.Packager;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 import org.datavaultplatform.worker.operations.Tar;
-import org.datavaultplatform.common.crypto.Encryption;
-import org.datavaultplatform.worker.operations.FileSplitter;
 import org.datavaultplatform.worker.queue.EventSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.nio.file.Path;
+import java.util.*;
 
 /**
  * A class that extends Task which is used to handle Retrievals from the vault
@@ -104,7 +100,7 @@ public class Retrieve extends Task {
         for (String storageID : userFileStoreClasses.keySet()) {
             
             String storageClass = userFileStoreClasses.get(storageID);
-            Map<String, Object> storageProperties = userFileStoreProperties.get(storageID);
+            Map<String, String> storageProperties = userFileStoreProperties.get(storageID);
             
             // Connect to the first user storage device (we only expect one for a retrieval)
             try {

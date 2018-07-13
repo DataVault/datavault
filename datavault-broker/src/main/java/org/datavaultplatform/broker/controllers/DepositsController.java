@@ -1,25 +1,23 @@
 package org.datavaultplatform.broker.controllers;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-
-import org.datavaultplatform.broker.services.*;
-import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.request.*;
-import org.datavaultplatform.common.response.*;
-import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.task.Task;
-import org.datavaultplatform.broker.queue.Sender;
-
-import org.jsondoc.core.annotation.*;
-import org.springframework.web.bind.annotation.*;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import org.datavaultplatform.broker.queue.Sender;
+import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.request.CreateDeposit;
+import org.datavaultplatform.common.response.DepositInfo;
+import org.datavaultplatform.common.response.EventInfo;
+import org.datavaultplatform.common.task.Task;
+import org.jsondoc.core.annotation.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -149,7 +147,7 @@ public class DepositsController {
         List<FileStore> userStores = user.getFileStores();
         
         Map<String, String> userFileStoreClasses = new HashMap<>();
-        Map<String, Map<String, Object>> userFileStoreProperties = new HashMap<>();
+        Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
         
         // Add any server-side filestore paths
         if (createDeposit.getDepositPaths() != null) {
@@ -418,7 +416,7 @@ public class DepositsController {
             
             // Add a single entry for the user file storage
             Map<String, String> userFileStoreClasses = new HashMap<>();
-            Map<String, Map<String, Object>> userFileStoreProperties = new HashMap<>();
+            Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
             userFileStoreClasses.put(storageID, userStore.getStorageClass());
             userFileStoreProperties.put(storageID, userStore.getProperties());
             

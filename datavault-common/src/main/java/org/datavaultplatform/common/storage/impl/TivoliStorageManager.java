@@ -1,20 +1,20 @@
 package org.datavaultplatform.common.storage.impl;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Map;
-
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.Verify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class TivoliStorageManager extends Device implements ArchiveStore {
 
@@ -26,18 +26,18 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 
     public Verify.Method verificationMethod = Verify.Method.COPY_BACK;
 
-    public TivoliStorageManager(String name, Map<String,Object> config) throws Exception  {
+    public TivoliStorageManager(String name, Map<String,String> config) throws Exception  {
         super(name, config);
         String optionsKey = "optionsDir";
     	String tempKey = "tempDir";
         // if we have non default options in datavault.properties use them
         if (config.containsKey(optionsKey)) {
-        	String optionsDir = (String)config.get(optionsKey);
+        	String optionsDir = config.get(optionsKey);
         	TivoliStorageManager.TSM_SERVER_NODE1_OPT = optionsDir + "/dsm1.opt";
         	TivoliStorageManager.TSM_SERVER_NODE2_OPT = optionsDir + "/dsm2.opt";
         }
         if (config.containsKey(tempKey)) {
-        	TivoliStorageManager.TEMP_PATH_PREFIX = (String)config.get(tempKey);
+        	TivoliStorageManager.TEMP_PATH_PREFIX = config.get(tempKey);
         }
         locations = new ArrayList<String>();
         locations.add(TivoliStorageManager.TSM_SERVER_NODE1_OPT);

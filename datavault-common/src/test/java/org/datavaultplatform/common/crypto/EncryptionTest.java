@@ -1,29 +1,28 @@
 package org.datavaultplatform.common.crypto;
 
-import static org.junit.Assert.*;
+import org.apache.commons.io.FileUtils;
+import org.bouncycastle.util.encoders.Base64;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
+import java.security.SecureRandom;
 import java.security.Security;
-import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import java.security.SecureRandom;
-import javax.crypto.spec.GCMParameterSpec;
-
-import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import static org.junit.Assert.*;
 
 public class EncryptionTest {
 
@@ -78,12 +77,14 @@ public class EncryptionTest {
             fail("Exception happened while encrypting " + e);
         }
 
-        String encryptedTxt = new String(encrypted);
+        String encryptedTxt = Base64.toBase64String(encrypted);
         System.out.println("encrypted: "+encryptedTxt);
+        String ivTxt = Base64.toBase64String(iv);
+        System.out.println("iv: "+ivTxt);
 
         byte[] result = null;
         try {
-            result = Encryption.decryptSecret(encrypted, iv, secretKey);
+            result = Encryption.decryptSecret(Base64.decode(encryptedTxt), Base64.decode(ivTxt), secretKey);
         } catch (Exception e) {
             e.printStackTrace();
             fail("Exception happened while decrypting " + e);

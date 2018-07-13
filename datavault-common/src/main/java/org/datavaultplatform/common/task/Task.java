@@ -1,13 +1,11 @@
 package org.datavaultplatform.common.task;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import java.util.Map;
-import java.util.List;
-import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.Job;
-import org.datavaultplatform.common.model.DepositPath;
+
+import java.util.List;
+import java.util.Map;
 
 // A generic task container
 
@@ -20,7 +18,7 @@ public class Task {
     protected List<String> fileStorePaths;
     protected List<String> fileUploadPaths;
     protected List<ArchiveStore> archiveFileStores;
-    protected Map<String, Map<String, Object>> userFileStoreProperties;
+    protected Map<String, Map<String, String>> userFileStoreProperties;
     protected Map<String, String> userFileStoreClasses;
     protected Map<Integer, String> chunkFilesDigest;
     protected byte[] tarIV;
@@ -34,7 +32,7 @@ public class Task {
     public Task(Job job,
                 Map<String, String> properties,
                 List<ArchiveStore> archiveFileStores,
-                Map<String, Map<String, Object>> userFileStoreProperties,
+                Map<String, Map<String, String>> userFileStoreProperties,
                 Map<String, String> userFileStoreClasses,
                 List<String> fileStorePaths,
                 List<String> fileUploadPaths,
@@ -102,11 +100,11 @@ public class Task {
         this.archiveFileStores = archiveFileStores;
     }
 
-    public Map<String, Map<String, Object>> getUserFileStoreProperties() {
+    public Map<String, Map<String, String>> getUserFileStoreProperties() {
         return userFileStoreProperties;
     }
 
-    public void setUserFileStoreProperties(Map<String, Map<String, Object>> userFileStoreProperties) {
+    public void setUserFileStoreProperties(Map<String, Map<String, String>> userFileStoreProperties) {
         this.userFileStoreProperties = userFileStoreProperties;
     }
     

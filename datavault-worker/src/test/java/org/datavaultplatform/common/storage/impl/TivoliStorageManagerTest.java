@@ -1,10 +1,12 @@
 package org.datavaultplatform.common.storage.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.apache.commons.io.FileUtils;
+import org.datavaultplatform.common.io.Progress;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,13 +15,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
-import org.datavaultplatform.common.io.Progress;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import static org.junit.Assert.*;
 
 public class TivoliStorageManagerTest {
 	
@@ -39,7 +35,7 @@ public class TivoliStorageManagerTest {
 	@Before
 	public void setUp() {
 		String name = "Test";
-		Map<String,Object> config = new HashMap<>();
+		Map<String,String> config = new HashMap<>();
 		try {
 			tsm = new TivoliStorageManager(name, config);
 		} catch (Exception e) {

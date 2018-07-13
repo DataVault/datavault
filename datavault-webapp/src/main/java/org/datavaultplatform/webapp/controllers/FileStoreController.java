@@ -1,7 +1,6 @@
 package org.datavaultplatform.webapp.controllers;
 
 import org.datavaultplatform.common.model.FileStore;
-import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +63,7 @@ public class FileStoreController {
     @RequestMapping(value = "/filestores/local", method = RequestMethod.POST)
     @ResponseBody
     public void addLocalFilestore(@RequestParam("path") String path) {
-        HashMap<String,Object> storeProperties = new HashMap<>();
+        HashMap<String,String> storeProperties = new HashMap<>();
         // In theory we could allow the user to define the path, however that would allow them access to anything that the
         // Datavault app can read. So for now we will just use the configured default value.
         //storeProperties.put("rootPath", path);
@@ -80,7 +79,7 @@ public class FileStoreController {
         //todo : replace the separate parms above with one Filestore model attribute?
 
         // Generate a partially complete Filestore
-        HashMap<String,Object> storeProperties = new HashMap<>();
+        HashMap<String,String> storeProperties = new HashMap<>();
         storeProperties.put("host", hostname);
         storeProperties.put("port", port);
         storeProperties.put("rootPath", path);

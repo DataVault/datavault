@@ -2,12 +2,9 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import javax.persistence.*;
-
 import org.hibernate.annotations.GenericGenerator;
 
-import java.sql.Blob;
+import javax.persistence.*;
 import java.util.HashMap;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -33,14 +30,14 @@ public class FileStore {
     // Properties to use for this storage system
     // NOTE: this is not a secure mechanism for storing credentials!
     @Lob
-    private HashMap<String,Object> properties;
+    private HashMap<String,String> properties;
     
     @JsonIgnore
     @ManyToOne
     private User user;
     
     public FileStore() {}
-    public FileStore(String storageClass, HashMap<String,Object> properties, String label) {
+    public FileStore(String storageClass, HashMap<String,String> properties, String label) {
         this.storageClass = storageClass;
         this.properties = properties;
         this.label = label;
@@ -54,11 +51,11 @@ public class FileStore {
         this.storageClass = storageClass;
     }
 
-    public HashMap<String, Object> getProperties() {
+    public HashMap<String, String> getProperties() {
         return properties;
     }
 
-    public void setProperties(HashMap<String, Object> properties) {
+    public void setProperties(HashMap<String, String> properties) {
         this.properties = properties;
     }
 
