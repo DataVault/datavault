@@ -5,7 +5,6 @@
 		<p>Deposit details:</p>
 		
 		<ul>
-			<li>Deposit note: ${deposit-note}</li>
 			<li>Deposit ID: ${deposit-id}</li>
 			<li>Vault: ${vault-name}</li>
 			<li>Vault ID: ${vault-id}</li>
