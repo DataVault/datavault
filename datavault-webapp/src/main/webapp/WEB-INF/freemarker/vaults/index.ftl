@@ -77,8 +77,14 @@
                             If you haven't yet created a Pure dataset record containing the 
                             details of the data you're about to deposit in the vault, please do so. 
                         </p>
-                        <br>
-                        
+                        <br/>
+
+                        <#if datasets?size == 0>
+                        <div class="alert alert-danger" role="alert">
+                            <strong>No Dataset available!</strong>
+                        </div>
+                        </#if>
+
                         <form id="create-vault" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/vaults/create" method="post" novalidate="novalidate" _lpchecked="1">
                             <p class="main">
                                 Please select the Pure record describing the data that will be contained in this vault from the list below: 
@@ -87,7 +93,8 @@
                             <div class="container">
                                 <div class="row">
                                     <div class="col-sm-5">
-                                        <select id="datasetID" name="datasetID" class="dataset-select selectpicker show-tick form-control form-control-lg">
+                                        <select id="datasetID" name="datasetID" class="dataset-select selectpicker show-tick form-control form-control-lg" <#if datasets?size == 0> disabled</#if>>
+                                            <option selected disabled data-hidden="true">Please choose a Dataset</option>
                                             <#list datasets as dataset>
                                             <option value="${dataset.getID()}">${dataset.name?html}</option>
                                             </#list>
@@ -123,7 +130,7 @@
                                        class="form-control"
                                        name="${spring.status.expression}"
                                        value="${spring.status.value!""}"
-                                       placeholder="Enter a descriptive name for the Vault e.g. the project or experiment."/>
+                                       placeholder="Enter a descriptive name for the Vault e.g. the project or experiment." <#if datasets?size == 0> disabled</#if>/>
                             </div>
                 
                             <div class="form-group">
@@ -132,7 +139,7 @@
                                     title="This description should contain information to assist you and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
                                 </span>
                                 <@spring.bind "vault.description" />
-                                <textarea type="text" class="form-control" name="description" rows="4" cols="60"></textarea>
+                                <textarea type="text" class="form-control" name="description" rows="4" cols="60" <#if datasets?size == 0> disabled</#if>></textarea>
                             </div>
                             
                             <div class="form-group">
@@ -145,7 +152,7 @@
                                 </a>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <select id="policyID" name="policyID" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick">
+                                        <select id="policyID" name="policyID" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick" <#if datasets?size == 0> disabled</#if>>
                                             <option selected disabled data-hidden="true">Please choose a retention policy</option>
                                             <#list policies as retentionPolicy>
                                             <option value="${retentionPolicy.getID()}" 
@@ -164,7 +171,7 @@
                                     </span>
                                 </label>
                                 <@spring.bind "vault.grantEndDate" />
-                                <input id="grantEndDate" name="grantEndDate" class="form-control" type="date"/>
+                                <input id="grantEndDate" name="grantEndDate" class="form-control" type="date" <#if datasets?size == 0> disabled</#if>/>
                             </div>
                             
                             <div class="alert alert-info" role="alert">
@@ -184,7 +191,7 @@
                                 </span>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <select id="groupID" name="groupID" data-width="auto" class="form-control group-select selectpicker show-tick">
+                                        <select id="groupID" name="groupID" data-width="auto" class="form-control group-select selectpicker show-tick" <#if datasets?size == 0> disabled</#if>>
                                             <#list groups as group>
                                             <#if group.enabled>
                                             <option value="${group.getID()}">${group.name?html}</option>
@@ -203,7 +210,7 @@
                                     </span>
                                 </label>
                                 <@spring.bind "vault.reviewDate" />
-                                <input class="form-control" id="reviewDate" name="reviewDate" type="date"/>
+                                <input class="form-control" id="reviewDate" name="reviewDate" type="date" <#if datasets?size == 0> disabled</#if>/>
                             </div>
 
                             <input type="hidden" id="submitAction" name="action" value="submit" /> 
