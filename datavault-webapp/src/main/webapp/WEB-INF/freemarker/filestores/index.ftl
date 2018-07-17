@@ -182,8 +182,10 @@
             <#if filestoresSFTP?has_content>
                 <div class="table-responsive storage-table">
                     <p>Your existing filestore paths</p>
+                    <p>
+                       If your filestore is on a server other than DataStore, in order to allow DataVault to authenticate (i.e. to allow DataVault to connect to the server using your identity), you will have to copy the public SSH key provided here onto your server to the appropriate place, rather than entering a username and password.
+                    </p>
                     <table class="table table-bordered">
-
                         <thead>
                         <tr class="tr">
                             <th>Hostname</th>
