@@ -170,3 +170,9 @@ h4.accordion-toggle {padding:10px;background-color:#333333;color:#FFF;border-rad
 .accordion-toggle:hover {background-color:#d50032;}
 .bigger {font-size:120%;}
 
+
+.form-group.required .control-label:after {
+   content:"*";
+   color:red;
+}
+
