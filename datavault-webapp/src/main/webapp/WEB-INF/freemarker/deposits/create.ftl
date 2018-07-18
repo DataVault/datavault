@@ -104,7 +104,7 @@
                     <strong>Select the files to include in this deposit</strong>
                 </label>
                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
-                    title="If you don't see the filestore you wish to use here, please click on 'Storage options' to add it.">
+                    title="If you don't see the filestore you wish to use here, please click on 'File Locations' to add it.">
                 </span>
                 <br/><br/>
                 

@@ -115,7 +115,7 @@
 
     <ol class="breadcrumb">
         <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
-        <li class="active"><b>Storage Options</b></li>
+        <li class="active"><b>File Locations</b></li>
     </ol>
 
     <div class="panel panel-uoe-low">
@@ -124,7 +124,7 @@
         </div>
 
         <div class="panel-body">
-            <h2>Define Your Storage Options</h2>
+            <h2>Define Your File Locations</h2>
             <br/>
 
             <p>
