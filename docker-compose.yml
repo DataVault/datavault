@@ -29,6 +29,8 @@ services:
       MYSQL_PASSWORD: datavault
     networks:
       - dbnet
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
 
   workers:
     build:
@@ -42,6 +44,7 @@ services:
       - ./docker/tmp/Users:/Users:rw
       - ./docker/config:/docker_datavault-home/config/
       - ./docker/scripts:/docker_datavault-home/scripts/
+      - ./docker/.occ:/home/datavault/.occ/
     networks:
       - mqnet
       - vault
