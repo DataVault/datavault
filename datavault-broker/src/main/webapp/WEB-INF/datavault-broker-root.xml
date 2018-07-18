@@ -67,7 +67,7 @@
     <bean id="fileStoreService" class="org.datavaultplatform.broker.services.FileStoreService">
         <property name="fileStoreDAO" ref="fileStoreDAO" />
     </bean>
-    
+
     <bean id="archiveStoreService" class="org.datavaultplatform.broker.services.ArchiveStoreService">
         <property name="archiveStoreDAO" ref="archiveStoreDAO" />
     </bean>
@@ -79,11 +79,11 @@
     <bean id="jobsService" class="org.datavaultplatform.broker.services.JobsService">
         <property name="jobDAO" ref="jobDAO" />
     </bean>
-    
+
     <bean id="dataManagersService" class="org.datavaultplatform.broker.services.DataManagersService">
         <property name="dataManagerDAO" ref="dataManagerDAO" />
     </bean>
-    
+
     <bean id="externalMetadataService" class="org.datavaultplatform.broker.services.ExternalMetadataService">
         <property name="metadataURL" value="${metadata.url}" />
         <property name="datasetDAO" ref="datasetDAO" />
@@ -101,7 +101,7 @@
     </bean>
 
     <!-- Email -->
-    
+
     <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
         <property name="host" value="${mail.host}"/>
         <property name="port" value="${mail.port}"/>
@@ -117,7 +117,7 @@
             </props>
         </property>
     </bean>
-    
+
     <bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
         <property name="velocityProperties">
             <props>
@@ -135,16 +135,16 @@
     </bean>
 
     <!-- RabbitMQ -->
-    
+
     <bean id="connectionFactory"
         class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory" >
         <constructor-arg value="${queue.server}" />
         <property name="username" value="${queue.user}" />
         <property name="password" value="${queue.password}" />
     </bean>
-    
+
     <rabbit:queue id="eventQueue" name="${queue.events}" durable="false" />
-    
+
     <rabbit:listener-container connection-factory="connectionFactory" concurrency="1" max-concurrency="1" >
         <rabbit:listener ref="listener" queues="eventQueue" />
     </rabbit:listener-container>
@@ -167,18 +167,18 @@
         <property name="queueUser" value="${queue.user}"/>
         <property name="queuePassword" value="${queue.password}"/>
     </bean>
-    
+
     <!-- Hibernate -->
-    
+
     <tx:annotation-driven transaction-manager="transactionManager"/>
-    
+
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.mysql.jdbc.Driver" />
         <property name="url" value="jdbc:mysql://${db.url}"/>
         <property name="username" value="${db.username}" />
         <property name="password" value="${db.password}"/>
     </bean>
-    
+
     <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" >
         <property name="dataSource" ref="dataSource"/>
         <property name="packagesToScan">
@@ -198,7 +198,6 @@
             </props>
         </property>
     </bean>
- 
     <bean id="transactionManager"  class="org.springframework.orm.hibernate4.HibernateTransactionManager">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
@@ -270,5 +269,16 @@
     <bean id="dataManagerDAO" class="org.datavaultplatform.common.model.dao.DataManagerDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
-    
+
+    <!-- Encryption and Harshicorp Vault -->
+
+    <bean id="encryption" class="org.datavaultplatform.common.crypto.Encryption">
+        <property name="vaultAddress" value="${vault.address}"/>
+        <property name="vaultToken" value="${vault.token}"/>
+        <property name="vaultKeyPath" value="${vault.secretPath}"/>
+        <property name="vaultDataEncryptionKeyName" value="${vault.dataEncryptionKeyName}"/>
+        <property name="vaultPrivateKeyEncryptionKeyName" value="${vault.privateKeyEncryptionKeyName}"/>
+        <property name="vaultSslPEMPath" value="${vault.sslPEMPath:}"/>
+    </bean>
+
 </beans>

@@ -1,13 +1,11 @@
 package org.datavaultplatform.common.task;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import java.util.Map;
-import java.util.List;
-import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.Job;
-import org.datavaultplatform.common.model.DepositPath;
+
+import java.util.List;
+import java.util.Map;
 
 // A generic task container
 

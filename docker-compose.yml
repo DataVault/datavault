@@ -22,6 +22,8 @@ services:
     image: mysql:5.7
     ports:
       - "53306:3306"
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: unbr34kable
       MYSQL_DATABASE: datavault
@@ -69,6 +71,7 @@ services:
       - webapp
       - dbnet
       - mqnet
+      - vault
     depends_on:
       - rabbitmq
       - mysql
@@ -120,7 +123,7 @@ services:
         sleep 40
         vault login $${VAULT_DEV_ROOT_TOKEN_ID}
         vault secrets enable -version=2 kv
-        vault kv put kv/datavault secret-key=$$(echo -n '`cat /dev/urandom | head -n 128`' | base64)
+        vault kv put kv/datavault data-encryption-key=$$(echo -n '`cat /dev/urandom | head -n 128`' | base64) ssh-encryption-key=$$(echo -n '`cat /dev/urandom | head -n 128`' | base64)
         vault kv get kv/datavault
     environment:
       VAULT_DEV_ROOT_TOKEN_ID: "datavault"
