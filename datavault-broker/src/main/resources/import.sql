@@ -102,15 +102,32 @@ insert into Users (id, firstname, lastname, password, admin) values ('user30', '
 
 insert into Users (id, firstname, lastname, password, admin) values ('admin1', 'admin user 1', 'Test', 'password1', TRUE);
 
-insert into Groups (id, name, enabled) values ('CHSS', 'Humanities and Social Science', 1);
-insert into Groups (id, name, enabled) values ('CSE', 'Science and Engineering', 1);
-insert into Groups (id, name, enabled) values ('CMVM', 'Medicine and Veterinary Medicine', 1);
+insert into Groups (id, name, enabled) values ('BS',    'Business School', 1);
+insert into Groups (id, name, enabled) values ('SD',    'School of Divinity', 1);
+insert into Groups (id, name, enabled) values ('SECO',  'School of Economics', 1);
+insert into Groups (id, name, enabled) values ('ECA',   'Edinburgh College of Art', 1);
+insert into Groups (id, name, enabled) values ('MHSE',  'The Moray House School of Education', 1);
+insert into Groups (id, name, enabled) values ('SHSS',  'School of Health in Social Science', 1);
+insert into Groups (id, name, enabled) values ('SHCA',  'School of History, Classics and Archaeology', 1);
+insert into Groups (id, name, enabled) values ('SL',    'School of Law', 1);
+insert into Groups (id, name, enabled) values ('SLLC',  'School of Literatures, Languages and Cultures', 1);
+insert into Groups (id, name, enabled) values ('SPPL',  'School of Philosophy, Psychology and Language Sciences', 1);
+insert into Groups (id, name, enabled) values ('SSPS',  'School of Social and Politial Science', 1);
+insert into Groups (id, name, enabled) values ('EMS',   'Edinburgh Medical School', 1);
+insert into Groups (id, name, enabled) values ('RDSVS', 'Royal (Dick) School of Veterinary Studies', 1);
+insert into Groups (id, name, enabled) values ('SBS',   'School of Biological Sciences', 1);
+insert into Groups (id, name, enabled) values ('SC',    'School of Chemistry', 1);
+insert into Groups (id, name, enabled) values ('SENG',  'School of Engineering', 1);
+insert into Groups (id, name, enabled) values ('SGS',   'School of GeoSciences', 1);
+insert into Groups (id, name, enabled) values ('SI',    'School of Informatics', 1);
+insert into Groups (id, name, enabled) values ('SM',    'School of Mathematics', 1);
+insert into Groups (id, name, enabled) values ('SPA',   'School of Physics and Astronomy', 1);
 
-insert into GroupOwners (group_id, user_id) values ('CHSS', 'user1');
-insert into GroupOwners (group_id, user_id) values ('CSE', 'user1');
-insert into GroupOwners (group_id, user_id) values ('CMVM', 'user1');
-insert into GroupOwners (group_id, user_id) values ('CHSS', 'user2');
-insert into GroupOwners (group_id, user_id) values ('CSE', 'user3');
-insert into GroupOwners (group_id, user_id) values ('CMVM', 'user4');
+insert into GroupOwners (group_id, user_id) values ('BS', 'user1');
+insert into GroupOwners (group_id, user_id) values ('SD', 'user1');
+insert into GroupOwners (group_id, user_id) values ('SECO', 'user1');
+insert into GroupOwners (group_id, user_id) values ('ECA', 'user2');
+insert into GroupOwners (group_id, user_id) values ('MHSE', 'user3');
+insert into GroupOwners (group_id, user_id) values ('SHSS', 'user4');
 
 insert into Clients (id, name, apiKey, ipAddress) values ('datavault-webapp', 'Datavault Webapp', 'datavault-webapp', '127.0.0.1');
