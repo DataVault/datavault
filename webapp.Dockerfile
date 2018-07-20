@@ -37,12 +37,13 @@ ARG LOCAL_DATAVAULT_DIR="./datavault"
 
 ENV DATAVAULT_HOME "/docker_datavault-home"
 
-RUN apk add --no-cache su-exec
+RUN apk add --no-cache su-exec openssh
 
 COPY --from=0 /usr/local/bin/ep /usr/local/bin/ep
 COPY --from=0 /usr/local/bin/wait-for-it /usr/local/bin/wait-for-it
 COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib ${DATAVAULT_HOME}/lib
 COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/webapps ${DATAVAULT_HOME}/webapps
+COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/bin ${DATAVAULT_HOME}/bin
 COPY docker/config ${DATAVAULT_HOME}/config
 COPY docker/scripts ${DATAVAULT_HOME}/scripts
 
