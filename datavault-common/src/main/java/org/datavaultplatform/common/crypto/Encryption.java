@@ -1,10 +1,6 @@
 package org.datavaultplatform.common.crypto;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -445,5 +441,27 @@ public class Encryption {
 
     public static void setVaultPrivateKeyEncryptionKeyName(String vaultPrivateKeyEncryptionKeyName) {
         Encryption.vaultPrivateKeyEncryptionKeyName = vaultPrivateKeyEncryptionKeyName;
+    }
+
+
+    /**
+     * Allow running encryption method outside of the app.
+     * @param args a string array of arguments to the main class, should be the name of the method.
+     * @throws IOException if an IOException occurs
+     * @throws InterruptedException if an InterruptedException occurs to a thread
+     */
+    public static void main(String [] args) {
+        String methodName = args[0];
+
+        if(methodName.equals("generateSecretKey")){
+            SecretKey key = null;
+            try {
+                key = Encryption.generateSecretKey();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+            String encodedKey = Base64.getEncoder().encodeToString(key.getEncoded());
+            System.out.println(encodedKey);
+        }
     }
 }
