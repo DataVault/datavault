@@ -2,10 +2,9 @@ package org.datavaultplatform.common.storage;
 
 import org.datavaultplatform.common.io.Progress;
 
-import java.util.ArrayList;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.io.File;
 
 // A generic storage UserStore/system
 

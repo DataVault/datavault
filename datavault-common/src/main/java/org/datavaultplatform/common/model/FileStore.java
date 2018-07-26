@@ -2,12 +2,9 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import javax.persistence.*;
-
 import org.hibernate.annotations.GenericGenerator;
 
-import java.sql.Blob;
+import javax.persistence.*;
 import java.util.HashMap;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

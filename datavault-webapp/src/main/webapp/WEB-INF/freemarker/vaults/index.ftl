@@ -77,22 +77,31 @@
                             If you haven't yet created a Pure dataset record containing the 
                             details of the data you're about to deposit in the vault, please do so. 
                         </p>
-                        <br>
-                        
+                        <br/>
+
+                        <#if datasets?size == 0>
+                        <div class="alert alert-danger" role="alert">
+                            <strong>No Dataset available!</strong>
+                        </div>
+                        </#if>
+
                         <form id="create-vault" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/vaults/create" method="post" novalidate="novalidate" _lpchecked="1">
                             <p class="main">
-                                Please select the Pure record describing the data that will be contained in this vault from the list below: 
+                                Select the Pure record describing the data that will be contained in this vault from the list below: 
                             </p>
                             
                             <div class="container">
-                                <div class="row">
+                                <div class="row form-group required">
                                     <div class="col-sm-5">
-                                        <select id="datasetID" name="datasetID" class="dataset-select selectpicker show-tick form-control form-control-lg">
+                                        <select id="datasetID" name="datasetID" class="dataset-select selectpicker show-tick form-control form-control-lg" <#if datasets?size == 0> disabled</#if>>
+                                            <option selected disabled data-hidden="true">Please choose a Dataset</option>
                                             <#list datasets as dataset>
                                             <option value="${dataset.getID()}">${dataset.name?html}</option>
                                             </#list>
                                         </select>
                                     </div>
+                                    <label class="control-label">
+                                    </label>
                                     <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                                         title="Your Pure Dataset records should be listed here. Before you create your vault, the Pure Dataset record must be validated by Research Data Service staff.&nbsp;Please contact us if you have any questions.">
                                     </span>
@@ -113,8 +122,8 @@
                                     </p>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label class="control-label">Vault Name</label>
+                            <div class="form-group required">
+                                <label for="vaultName" class="control-label">Vault Name</label>
                                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                                     title="Maximum 400 characters.">
                                 </span>
@@ -123,20 +132,21 @@
                                        class="form-control"
                                        name="${spring.status.expression}"
                                        value="${spring.status.value!""}"
-                                       placeholder="Enter a descriptive name for the Vault e.g. the project or experiment."/>
+                                       id="vaultName"
+                                       placeholder="Enter a descriptive name for the Vault e.g. the project or experiment." <#if datasets?size == 0> disabled</#if>/>
                             </div>
                 
-                            <div class="form-group">
-                                <label class="control-label">Description</label>
+                            <div class="form-group required">
+                                <label for="description" class="control-label">Description</label>
                                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                                     title="This description should contain information to assist you and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
                                 </span>
                                 <@spring.bind "vault.description" />
-                                <textarea type="text" class="form-control" name="description" rows="4" cols="60"></textarea>
+                                <textarea type="text" class="form-control" name="description" id="description" rows="4" cols="60" <#if datasets?size == 0> disabled</#if>></textarea>
                             </div>
                             
-                            <div class="form-group">
-                                <label for="policyID">Retention Policy</label>
+                            <div class="form-group required">
+                                <label for="policyID" class="control-label">Retention Policy</label>
                                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                                     title="This field indicates the policy with which we must comply, for the purpose of deciding the minimum amount of time for which this dataset &nbsp;must be archived. In most cases this will be the funder's policy. If there are multiple funders, it should be the one with the longest minimum among them.">
                                 </span>
@@ -145,7 +155,7 @@
                                 </a>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <select id="policyID" name="policyID" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick">
+                                        <select id="policyID" name="policyID" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick" <#if datasets?size == 0> disabled</#if>>
                                             <option selected disabled data-hidden="true">Please choose a retention policy</option>
                                             <#list policies as retentionPolicy>
                                             <option value="${retentionPolicy.getID()}" 
@@ -157,14 +167,14 @@
                             </div>
                             
                             <div class="form-group">
-                                <label>
+                                <label  for="grantEndDate" class="control-label">
                                     <strong>Grant End Date</strong>
                                     <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                                         title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;">
                                     </span>
                                 </label>
                                 <@spring.bind "vault.grantEndDate" />
-                                <input id="grantEndDate" name="grantEndDate" class="form-control" type="date"/>
+                                <input id="grantEndDate" name="grantEndDate" class="form-control" type="date" <#if datasets?size == 0> disabled</#if>/>
                             </div>
                             
                             <div class="alert alert-info" role="alert">
@@ -177,14 +187,14 @@
                                 </p>
                             </div>
                             
-                            <div class="form-group">
-                                <label>School</label>
+                            <div class="form-group required">
+                                <label for="groupID" class="control-label">School</label>
                                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                                     title="The School to which the vault belongs. In the absence of the vault Owner, School officers may be consulted on the management of the vault.">
                                 </span>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <select id="groupID" name="groupID" data-width="auto" class="form-control group-select selectpicker show-tick">
+                                        <select id="groupID" name="groupID" data-width="auto" class="form-control group-select selectpicker show-tick" <#if datasets?size == 0> disabled</#if>>
                                             <#list groups as group>
                                             <#if group.enabled>
                                             <option value="${group.getID()}">${group.name?html}</option>
@@ -196,14 +206,14 @@
                             </div>
                             
                             <div class="form-group">
-                                <label>
+                                <label for="reviewDate" class="control-label">
                                     <strong>Review Date</strong>
                                     <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                                         title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault. If on the other hand you wish the vault to be deleted, bring the review date forward so that deletion may be considered.">
                                     </span>
                                 </label>
                                 <@spring.bind "vault.reviewDate" />
-                                <input class="form-control" id="reviewDate" name="reviewDate" type="date"/>
+                                <input class="form-control" id="reviewDate" name="reviewDate" type="date" <#if datasets?size == 0> disabled</#if>/>
                             </div>
 
                             <input type="hidden" id="submitAction" name="action" value="submit" /> 
@@ -221,8 +231,12 @@
             </div>
         </div>
     </div>
-    
+
+    <script src="//cdn.jsdelivr.net/webshim/1.14.5/polyfiller.js"></script>
     <script>
+        webshims.setOptions('forms-ext', {types: 'date'});
+        webshims.polyfill('forms forms-ext');
+
         $(document).ready(function () {
 
             $('button[type="submit"]').on("click", function() {

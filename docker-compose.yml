@@ -31,6 +31,8 @@ services:
       MYSQL_PASSWORD: datavault
     networks:
       - dbnet
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
 
   workers:
     build:
@@ -44,6 +46,7 @@ services:
       - ./docker/tmp/Users:/Users:rw
       - ./docker/config:/docker_datavault-home/config/
       - ./docker/scripts:/docker_datavault-home/scripts/
+      - ./docker/.occ:/home/datavault/.occ/
     networks:
       - mqnet
       - vault
@@ -69,6 +72,7 @@ services:
       - webapp
       - dbnet
       - mqnet
+      - vault
     depends_on:
       - rabbitmq
       - mysql
@@ -121,7 +125,7 @@ services:
         sleep 40
         vault login $${VAULT_DEV_ROOT_TOKEN_ID}
         vault secrets enable -version=2 kv
-        vault kv put kv/datavault secret-key=$$(echo -n '`cat /dev/urandom | head -n 128`' | base64)
+        vault kv put kv/datavault data-encryption-key=$$(echo -n '`cat /dev/urandom | head -n 128`' | base64) ssh-encryption-key=$$(echo -n '`cat /dev/urandom | head -n 128`' | base64)
         vault kv get kv/datavault
     environment:
       VAULT_DEV_ROOT_TOKEN_ID: "datavault"

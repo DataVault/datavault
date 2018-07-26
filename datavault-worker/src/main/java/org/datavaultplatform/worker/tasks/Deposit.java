@@ -1,40 +1,30 @@
 package org.datavaultplatform.worker.tasks;
 
-import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FileUtils;
+import org.datavaultplatform.common.crypto.Encryption;
+import org.datavaultplatform.common.event.Error;
+import org.datavaultplatform.common.event.InitStates;
+import org.datavaultplatform.common.event.UpdateProgress;
+import org.datavaultplatform.common.event.deposit.*;
+import org.datavaultplatform.common.io.Progress;
+import org.datavaultplatform.common.storage.ArchiveStore;
+import org.datavaultplatform.common.storage.Device;
+import org.datavaultplatform.common.storage.UserStore;
+import org.datavaultplatform.common.storage.Verify;
+import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.worker.operations.*;
+import org.datavaultplatform.worker.queue.EventSender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import org.apache.commons.io.FileUtils;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.datavaultplatform.common.task.Context;
-import org.datavaultplatform.common.task.Task;
-import org.datavaultplatform.common.event.Error;
-import org.datavaultplatform.common.event.InitStates;
-import org.datavaultplatform.common.event.UpdateProgress;
-import org.datavaultplatform.common.event.deposit.Start;
-import org.datavaultplatform.common.event.deposit.ComputedSize;
-import org.datavaultplatform.common.event.deposit.TransferComplete;
-import org.datavaultplatform.common.event.deposit.PackageComplete;
-import org.datavaultplatform.common.event.deposit.Complete;
-import org.datavaultplatform.common.event.deposit.ComputedChunks;
-import org.datavaultplatform.common.event.deposit.ComputedDigest;
-import org.datavaultplatform.common.event.deposit.ComputedEncryption;
-import org.datavaultplatform.common.io.Progress;
-import org.datavaultplatform.common.storage.*;
-import org.datavaultplatform.worker.operations.*;
-import org.datavaultplatform.worker.queue.EventSender;
-import org.datavaultplatform.common.task.Context.AESMode;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
+import java.util.Map;
 
 /**
  * A class that extends Task which is used to handle Deposits to the vault
@@ -139,6 +129,7 @@ public class Deposit extends Task {
             } catch (Exception e) {
                 String msg = "Deposit failed: could not access user filesystem";
                 logger.error(msg, e);
+                e.printStackTrace();
                 eventStream.send(new Error(jobID, depositId, msg)
                     .withUserId(userID));
                 return;
@@ -510,7 +501,6 @@ public class Deposit extends Task {
     
     /**
      * @param tarFile
-     * @param isChunk
      * @throws Exception
      */
     private void copyToArchiveStorage(File tarFile, int chunkCount) throws Exception {

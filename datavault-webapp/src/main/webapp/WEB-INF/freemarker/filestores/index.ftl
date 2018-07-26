@@ -3,6 +3,17 @@
 <#global nav="user">
 <@layout.vaultLayout>
 
+<style>
+#copy-ssh-public-key .modal-body {
+    padding: 0;
+    overflow: hidden;
+    height: 600px;
+}
+.filestore-sftp-key {
+    width: 100%;
+}
+</style>
+
 <div class="modal fade" id="confirm-removal" tabindex="-1" role="dialog" aria-labelledby="confirmRemovalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -83,12 +94,28 @@
 </div>
 
 
+<div class="modal fade bs-example-modal-lg" id="copy-ssh-public-key" tabindex="-1" role="dialog" aria-labelledby="copySshPublicKey" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                <h4 class="modal-title">Key Registration Dialogue</h4>
+            </div>
+            <div class="modal-body">
+                <iframe src="https://registration.ecdf.ed.ac.uk/storage/public_keys/add" width="100%" height="100%" frameborder="0"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="container">
 
     <ol class="breadcrumb">
         <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
-        <li class="active"><b>Storage Options</b></li>
+        <li class="active"><b>File Locations</b></li>
     </ol>
 
     <div class="panel panel-uoe-low">
@@ -97,7 +124,7 @@
         </div>
 
         <div class="panel-body">
-            <h2>Define Your Storage Options</h2>
+            <h2>Define Your File Locations</h2>
             <br/>
 
             <p>
@@ -151,11 +178,14 @@
 
             <h3><strong>File store locations</strong></h3>
 
-            <div class="table-responsive storage-table">
-                <#if filestoresSFTP?has_content>
-                    <p>Your existing filestore paths</p>
-                    <table class="table table-striped" style="table-layout: fixed; word-wrap: break-word;">
 
+            <#if filestoresSFTP?has_content>
+                <div class="table-responsive storage-table">
+                    <p>Your existing filestore paths</p>
+                    <p>
+                       If your filestore is on a server other than DataStore, in order to allow DataVault to authenticate (i.e. to allow DataVault to connect to the server using your identity), you will have to copy the public SSH key provided here onto your server to the appropriate place, rather than entering a username and password.
+                    </p>
+                    <table class="table table-bordered">
                         <thead>
                         <tr class="tr">
                             <th>Hostname</th>
@@ -172,7 +202,11 @@
                                 <td>${filestoreSFTP.properties['host']}</td>
                                 <td>${filestoreSFTP.properties['port']}</td>
                                 <td>${filestoreSFTP.properties['rootPath']}</td>
-                                <td><code>${filestoreSFTP.properties['publicKey']}</code></td>
+                                <td class="col-md-5">
+                                    <small><textarea id="filestore-sftp-${filestoreSFTP?index}" class="form-control filestore-sftp-key" rows="4" readonly>${filestoreSFTP.properties['publicKey']}</textarea></small>
+                                    <br/>
+                                    <button class="btn btn-sm btn-default pull-right" onclick="copyToClipboard('#filestore-sftp-${filestoreSFTP?index}')">Copy</button>
+                                </td>
                                 <td>
                                     <a class="btn btn-xs btn-danger pull-right" href="#" data-filestore="${filestoreSFTP.ID}" data-toggle="modal" data-target="#confirm-removal">
                                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
@@ -182,18 +216,30 @@
                             </#list>
                         </tbody>
                     </table>
-
-                <#else>
-                    <p>There are currently no SFTP Filestores configured</p>
-                </#if>
-
-                <form>
                     <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-filestoreSFTP">
                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> File store
                     </a>
-                </form>
+                </div>
+            <#else>
+                <p>There are currently no SFTP Filestores configured</p>
+                <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-filestoreSFTP">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> File store
+                </a>
+            </#if>
 
-            </div>
+            <#if filestoresSFTP?has_content>
+                <p>To register your public key you need to:</p>
+                <ol>
+                    <li>Copy the public key displayed above</li>
+                    <li>Open 'Key Registration dialog' with the button below</li>
+                    <li>Paste your key into 'Public Key' text area displayed in the dialog</li>
+                    <li>Click 'Submit'</li>
+                    <li>Close the dialog</li>
+                </ol>
+                <a class="btn btn-default" href="#" data-toggle="modal" data-target="#copy-ssh-public-key">
+                    <span class="glyphicon glyphicon-modal-window" aria-hidden="true"></span> Open Key Registration Dialog
+                </a>
+            </#if>
         </div>
     </div>
 </div>
@@ -271,6 +317,13 @@
         });
     });
 
+    function copyToClipboard(element) {
+        var $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val($(element).text()).select();
+        document.execCommand("copy");
+        $temp.remove();
+    }
 
 </script>
 

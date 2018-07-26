@@ -42,6 +42,10 @@
                 <form id="add-from-storage-form">
                     <div class="form-group">
                         <label class="control-label">Select file or folder:</label>
+                        <div id="tree-error" class="alert alert-danger" style="display:none">
+                           DataVault could not access the location you specified. Please check that you have provided the correct hostname, port number and have copied the authentication key to the location.
+                           If you need assistance please contact the DataVault support team.
+                        </div>
                         <div id="tree" class="fancytree tree-box" style="max-height:50vh; overflow-y:scroll;"></div>
                         <label id="deposit-size" class="text-muted small">No files selected</label>
                     </div>
@@ -100,7 +104,7 @@
                     <strong>Select the files to include in this deposit</strong>
                 </label>
                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
-                    title="If you don't see the filestore you wish to use here, please click on 'Storage options' to add it.">
+                    title="If you don't see the filestore you wish to use here, please click on 'File Locations' to add it.">
                 </span>
                 <br/><br/>
                 
@@ -186,7 +190,17 @@
                             } else {
                                 $("#deposit-size").text("No files selected");
                             }
+                        },
+                        init: function(event, data) {
+                            if ( data.tree.count() == 0 ) {
+                               $("#tree-error").show();
+                               $("#tree").hide();
+                            } else {
+                               $("#tree-error").hide();
+                               $("#tree").show();
+                            }
                         }
+
                     });
         
                     $("#upload-tree").fancytree({

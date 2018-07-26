@@ -14,5 +14,6 @@ export AWS_SECRET_KEY_ID=${AWS_SECRET_KEY_ID:--}
 export VAULT_ADDR=${VAULT_ADDR:-http://vault:8200}
 export VAULT_TOKEN=${VAULT_TOKEN:-datavault}
 export VAULT_SECRET_PATH=${VAULT_SECRET_PATH:-kv/data/datavault}
-export VAULT_KEY_NAME=${VAULT_KEY_NAME:-secret-key}
+export VAULT_DATA_KEY_NAME=${VAULT_DATA_KEY_NAME:-data-encryption-key}
+export VAULT_SSH_KEY_NAME=${VAULT_SSH_KEY_NAME:-ssh-encryption-key}
 export VAULT_PEM_FILE=${VAULT_PEM_FILE:- }

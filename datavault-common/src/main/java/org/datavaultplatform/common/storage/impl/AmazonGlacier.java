@@ -1,12 +1,5 @@
 package org.datavaultplatform.common.storage.impl;
 
-import org.datavaultplatform.common.storage.Device;
-import org.datavaultplatform.common.storage.ArchiveStore;
-import org.datavaultplatform.common.io.Progress;
-
-import java.util.Map;
-import java.io.File;
-
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.event.ProgressEvent;
@@ -14,11 +7,15 @@ import com.amazonaws.event.ProgressEventType;
 import com.amazonaws.event.ProgressListener;
 import com.amazonaws.services.glacier.AmazonGlacierClient;
 import com.amazonaws.services.glacier.transfer.ArchiveTransferManager;
-import com.amazonaws.services.glacier.transfer.UploadResult;
-import com.amazonaws.services.glacier.model.*;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sqs.AmazonSQSClient;
+import org.datavaultplatform.common.io.Progress;
+import org.datavaultplatform.common.storage.ArchiveStore;
+import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.Verify;
+
+import java.io.File;
+import java.util.Map;
 
 // Documentation:
 // http://docs.aws.amazon.com/amazonglacier/latest/dev/using-aws-sdk-for-java.html

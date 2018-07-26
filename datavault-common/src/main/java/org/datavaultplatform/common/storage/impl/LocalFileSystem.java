@@ -1,10 +1,13 @@
 package org.datavaultplatform.common.storage.impl;
 
+import org.apache.commons.io.FileUtils;
+import org.datavaultplatform.common.io.FileCopy;
+import org.datavaultplatform.common.io.Progress;
+import org.datavaultplatform.common.model.FileInfo;
+import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
-import org.datavaultplatform.common.storage.ArchiveStore;
-import org.datavaultplatform.common.model.FileInfo;
-import org.datavaultplatform.common.io.Progress;
+import org.datavaultplatform.common.storage.Verify;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,13 +16,9 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.io.FileUtils;
-import org.datavaultplatform.common.io.FileCopy;
-import org.datavaultplatform.common.storage.Verify;
 
 public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
 

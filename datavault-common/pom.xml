@@ -30,6 +30,8 @@
         </dependencies>
     </dependencyManagement>
     
+    
+    
     <dependencies>
         <!-- Jackson JSON Processor -->
         <dependency>
@@ -89,8 +91,23 @@
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-sns</artifactId>
         </dependency>
-        
-        <!-- Tests -->
+        <!--  Oracle Cloud Storage Classic -->
+        <dependency>
+    		<groupId>oracle.cloudstorage.ftm</groupId>
+    		<artifactId>ftm-api</artifactId>
+    		<version>1.0</version>
+  		</dependency>    
+        <dependency>
+                <groupId>oracle.cloudstorage.ftm</groupId>
+                <artifactId>low-level-api-core</artifactId>
+                <version>1.0</version>
+        </dependency>
+        <dependency>
+    		<groupId>org.glassfish</groupId>
+    		<artifactId>javax.json</artifactId>
+    		<version>1.0.4</version>
+		</dependency>
+	<!-- Tests -->
         <dependency>
          <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
@@ -106,6 +123,21 @@
                     <groupId>org.hamcrest</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <!-- Encryption - Bouncy Castle -->
+        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.59</version>
+        </dependency>
+
+        <!--  HashiCorp Vault -->
+        <dependency>
+            <groupId>com.bettercloud</groupId>
+            <artifactId>vault-java-driver</artifactId>
+            <version>3.1.0</version>
         </dependency>
     </dependencies>
     

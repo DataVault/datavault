@@ -1,10 +1,14 @@
 package org.datavaultplatform.common.storage.impl;
 
-import java.io.File;
-//import java.io.FileNotFoundException;
-//import java.io.FileOutputStream;
-import java.util.Map;
-
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.transfer.Download;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
+import com.amazonaws.services.s3.transfer.Upload;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
@@ -12,16 +16,11 @@ import org.datavaultplatform.common.storage.Verify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.transfer.Download;
-import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
-import com.amazonaws.services.s3.transfer.Upload;
+import java.io.File;
+import java.util.Map;
+
+//import java.io.FileNotFoundException;
+//import java.io.FileOutputStream;
 
 public class S3Cloud extends Device implements ArchiveStore {
 

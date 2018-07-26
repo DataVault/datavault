@@ -1,24 +1,21 @@
 package org.datavaultplatform.common.storage.impl;
 
+import com.jcraft.jsch.*;
+import org.bouncycastle.util.encoders.Base64;
+import org.datavaultplatform.common.crypto.Encryption;
+import org.datavaultplatform.common.io.Progress;
+import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
-import org.datavaultplatform.common.model.FileInfo;
-import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.impl.ssh.Utility;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.OutputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedInputStream;
 import java.io.InputStream;
-import java.io.FileInputStream;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-
-import com.jcraft.jsch.*;
-import org.slf4j.*;
 
 public class SFTPFileSystem extends Device implements UserStore {
 
@@ -28,7 +25,8 @@ public class SFTPFileSystem extends Device implements UserStore {
     private String rootPath = null;
     private String username = null;
     private String password = null;
-    private String privateKey = null;
+    private byte[] encPrivateKey = null;
+    private byte[] encIV = null;
     private String passphrase = null;
     
     private Session session = null;
@@ -40,6 +38,8 @@ public class SFTPFileSystem extends Device implements UserStore {
     
     public SFTPFileSystem(String name, Map<String,String> config) throws Exception {
         super(name, config);
+
+        System.out.println("Construct SFTPFileSystem...");
         
         // Unpack the config parameters (in an implementation-specific way)
         host = config.get("host");
@@ -47,18 +47,27 @@ public class SFTPFileSystem extends Device implements UserStore {
         rootPath = config.get("rootPath");
         username = config.get("username");
         password = config.get("password");
-        privateKey = config.get("privateKey");
+        System.out.println("casting byte[]...");
+        encPrivateKey = Base64.decode(config.get("privateKey"));
+        encIV = Base64.decode(config.get("iv"));
+        System.out.println("done!");
         passphrase = config.get("passphrase");
+
+        System.out.println("SFTPFileSystem created...");
     }
     
     private void Connect() throws Exception {
         JSch jsch = new JSch();
         session = jsch.getSession(username, host, port);
 
+        byte[] privateKey = Encryption.decryptSecret(encPrivateKey, encIV);
+
+        logger.debug("Private Key: "+new String(privateKey));
+
         if (password != null && !password.isEmpty()) {
             session.setPassword(password);
         } else {
-            jsch.addIdentity(username, privateKey.getBytes(), null, passphrase.getBytes());
+            jsch.addIdentity(username, privateKey, null, passphrase.getBytes());
         }
 
         // todo : check its a known host??
