@@ -145,7 +145,7 @@
                             </tr>
                             <tr>
                                 <th scope="col">Grant End Date</th>
-                                <td>${vault.grantEndDate?string('dd/MM/yyyy')}</td>
+                                <td><#if vault.grantEndDate??>${vault.grantEndDate?string('dd/MM/yyyy')}<#else>No end date</#if></td>
                                 <td>
                                     <button type="button" class="btn btn-default pull-right" disabled>
                                         Edit review date
