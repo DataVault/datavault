@@ -191,7 +191,12 @@ public class VaultsController {
         vault.setDataset(dataset);
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        vault.setGrantEndDate(formatter.parse(createVault.getGrantEndDate()));
+	try {
+           vault.setGrantEndDate(formatter.parse(createVault.getGrantEndDate()));
+	} catch (ParseException|NullPointerException ex) {
+           vault.setGrantEndDate(null);
+	}
+
         vault.setReviewDate(formatter.parse(createVault.getReviewDate()));
 
         vaultsService.addVault(vault);

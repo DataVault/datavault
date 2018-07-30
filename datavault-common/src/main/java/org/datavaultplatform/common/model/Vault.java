@@ -54,10 +54,11 @@ public class Vault {
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
     
+    // NOTE: This field is optional. Always remember to check for null when handling it!
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
-    @Column(name = "grantEndDate", nullable = false)
+    @Column(name = "grantEndDate", nullable = true)
     private Date grantEndDate;
     
     // Serialise date in ISO 8601 format

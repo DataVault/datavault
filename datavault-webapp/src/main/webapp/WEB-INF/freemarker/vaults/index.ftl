@@ -166,7 +166,7 @@
                                 </div>
                             </div>
                             
-                            <div class="form-group required">
+                            <div class="form-group">
                                 <label  for="grantEndDate" class="control-label">
                                     <strong>Grant End Date</strong>
                                 </label>
@@ -260,9 +260,6 @@
                         required: true
                     },
                     groupID : {
-                        required: true
-                    },
-                    grantEndDate : {
                         required: true
                     },
                     reviewDate : {
