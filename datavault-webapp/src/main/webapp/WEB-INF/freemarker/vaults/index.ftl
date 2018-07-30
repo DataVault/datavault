@@ -168,13 +168,13 @@
                             
                             <div class="form-group">
                                 <label  for="grantEndDate" class="control-label">
-                                    <strong>Grant End Date [yyyy-mm-dd]</strong>
+                                    <strong>Grant End Date</strong>
                                 </label>
                                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                                      title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;">
                                 </span>
                                 <@spring.bind "vault.grantEndDate" />
-                                <input id="grantEndDate" name="grantEndDate" class="form-control" type="date" <#if datasets?size == 0> disabled</#if>/>
+                                <input id="grantEndDate" name="grantEndDate" class="form-control" type="date" placeholder="yyyy-mm-dd" <#if datasets?size == 0> disabled</#if>/>
                             </div>
                             
                             <div class="alert alert-info" role="alert">
@@ -208,13 +208,13 @@
                             
                             <div class="form-group required">
                                 <label for="reviewDate" class="control-label">
-                                    <strong>Review Date [yyyy-mm-dd]</strong>
+                                    <strong>Review Date</strong>
                                 </label>
                                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                                         title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault. If on the other hand you wish the vault to be deleted, bring the review date forward so that deletion may be considered.">
                                 </span>
                                 <@spring.bind "vault.reviewDate" />
-                                <input class="form-control" id="reviewDate" name="reviewDate" type="date" <#if datasets?size == 0> disabled</#if>/>
+                                <input class="form-control" id="reviewDate" name="reviewDate" type="date" placeholder="yyyy-mm-dd" <#if datasets?size == 0> disabled</#if>/>
                             </div>
 
                             <input type="hidden" id="submitAction" name="action" value="submit" /> 
