@@ -145,6 +145,10 @@ public class EventListener implements MessageListener {
                     }
                 }
                 
+//              // Get related information for emails
+              String type = "deposit starting";
+              this.sendEmails(deposit, concreteEvent, type, "user-deposit-start.vm", "group-admin-deposit-start.vm");
+                
             } else if (concreteEvent instanceof ComputedSize) {
                 
                 // Update the deposit with the computed size
@@ -370,7 +374,7 @@ public class EventListener implements MessageListener {
         
         // Send email to group owners
         for (User groupAdmin : group.getOwners()) {
-        	logger.info("GroupAdmin emai is " + groupAdmin.getEmail());
+        	logger.info("GroupAdmin email is " + groupAdmin.getEmail());
             if (groupAdmin.getEmail() != null) {
                 emailService.sendTemplateMail(groupAdmin.getEmail(),
                         adminTitle,
