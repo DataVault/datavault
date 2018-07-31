@@ -41,7 +41,13 @@
                 <h4 class="modal-title" id="addFileStoreSFTPLabel">Add filestore</h4>
             </div>
             <div class="modal-body">
-                <p>Overwrite the default values as appropriate</p>
+                <p>Overwrite the default values as follows:
+                   <ul>
+                      <li>Hostname: COLLEGE.datastore.ed.ac.uk where COLLEGE (either chss, cmvm, csce or sg) relates to the area you wish to connect to.</li>
+                      <li>Path: Overwrite the content of this field to add in the path to the DataStore area you wish to use. If you are unsure of the path, you should be able to view it in Windows File Explorer, or ECDF Storage Manager or by asking your local IT support.</li>
+                   </ul>
+                   Leave the port number as "22222".
+                </p>
                 <form id="add-filestoreSFTP-form">
                     <div class="form-filestore">
                         <div class="form-group">

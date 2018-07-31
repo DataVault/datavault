@@ -166,7 +166,7 @@
                                 </div>
                             </div>
                             
-                            <div class="form-group required">
+                            <div class="form-group">
                                 <label  for="grantEndDate" class="control-label">
                                     <strong>Grant End Date</strong>
                                 </label>
@@ -174,7 +174,7 @@
                                      title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;">
                                 </span>
                                 <@spring.bind "vault.grantEndDate" />
-                                <input id="grantEndDate" name="grantEndDate" class="form-control" type="date" <#if datasets?size == 0> disabled</#if>/>
+                                <input id="grantEndDate" name="grantEndDate" class="form-control" type="date" placeholder="yyyy-mm-dd" <#if datasets?size == 0> disabled</#if>/>
                             </div>
                             
                             <div class="alert alert-info" role="alert">
@@ -214,7 +214,7 @@
                                         title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault. If on the other hand you wish the vault to be deleted, bring the review date forward so that deletion may be considered.">
                                 </span>
                                 <@spring.bind "vault.reviewDate" />
-                                <input class="form-control" id="reviewDate" name="reviewDate" type="date" <#if datasets?size == 0> disabled</#if>/>
+                                <input class="form-control" id="reviewDate" name="reviewDate" type="date" placeholder="yyyy-mm-dd" <#if datasets?size == 0> disabled</#if>/>
                             </div>
 
                             <input type="hidden" id="submitAction" name="action" value="submit" /> 
@@ -233,19 +233,23 @@
         </div>
     </div>
 
-    <script src="//cdn.jsdelivr.net/webshim/1.14.5/polyfiller.js"></script>
     <script>
-        webshims.setOptions('forms-ext', {types: 'date'});
-        webshims.polyfill('forms forms-ext');
-
         $(document).ready(function () {
+            $.validator.addMethod(
+                "date",
+                function(value, element) {
+                    // put your own logic here, this is just a (crappy) example
+                    return value.match(/^\d{4}-\d{2}-\d{2}$/);
+                },
+                "Please enter the date in the format yyyy-mm-dd."
+            );
 
             $('button[type="submit"]').on("click", function() {
                 $('#submitAction').val($(this).attr('value'));
             });
 
             $('#create-vault').validate({
-            	debug: true,
+                debug: true,
                 rules: {
                     name: {
                         required: true
@@ -263,10 +267,11 @@
                         required: true
                     },
                     grantEndDate : {
-                        required: true
+                        date: true
                     },
                     reviewDate : {
-                        required: true
+                        required: true,
+                        date: true
                     }
                 },
                 highlight: function (element) {
