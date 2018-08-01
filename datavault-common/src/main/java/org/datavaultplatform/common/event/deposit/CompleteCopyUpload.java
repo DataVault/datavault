@@ -13,7 +13,7 @@ public class CompleteCopyUpload extends Event {
 	};
 
 	public CompleteCopyUpload(String jobId, String depositId, String type) {
-		super("Copy Upload started - (" + type + ")");
+		super("Copy Upload finished - (" + type + ")");
 		this.eventClass = CompleteCopyUpload.class.getCanonicalName();
 		this.depositId = depositId;
 		this.jobId = jobId;
