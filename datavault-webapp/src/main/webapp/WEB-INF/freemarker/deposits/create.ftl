@@ -192,7 +192,10 @@
                             }
                         },
                         init: function(event, data) {
-                            if ( data.tree.count() == 0 ) {
+                            // The GET request always returns the top level "SFTP filesystem" node if there's a filestore defined, even when it is bogus.
+                            // If there's no filestore defined, it returns an empty result. Therefore, if there's 1 or fewer items in the tree, we know
+                            // that there's likely some problem with the filestore.
+                            if ( data.tree.count() <= 1 ) {
                                $("#tree-error").show();
                                $("#tree").hide();
                             } else {
