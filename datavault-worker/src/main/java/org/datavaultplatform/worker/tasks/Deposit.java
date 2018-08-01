@@ -520,11 +520,13 @@ public class Deposit extends Task {
             String archiveId;
 
             try {
+            	eventStream.send(new StartCopyUpload(jobID, depositId, ((Device) archiveStore).name ).withUserId(userID));
 	            if (((Device)archiveStore).hasDepositIdStorageKey()) {
 	            		archiveId = ((Device) archiveStore).store(depId, tarFile, progress);
 	            } else {
 	            		archiveId = ((Device) archiveStore).store("/", tarFile, progress);
 	            }
+	            eventStream.send(new CompleteCopyUpload(jobID, depositId, ((Device) archiveStore).name ).withUserId(userID));
             } finally {
                 // Stop the tracking thread
                 tracker.stop();
