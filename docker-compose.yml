@@ -67,6 +67,7 @@ services:
       - ./docker/scripts:/docker_datavault-home/scripts/
       - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib:/docker_datavault-home/lib
       - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/webapps:/docker_datavault-home/webapps
+      - ./datavault-assembly/src/datavault-home/config/mail-templates:/docker_datavault-home/config/mail-templates
     networks:
       - webapp
       - dbnet
@@ -92,6 +93,7 @@ services:
       - ./docker/scripts:/docker_datavault-home/scripts/
       - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib:/docker_datavault-home/lib
       - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/webapps:/docker_datavault-home/webapps
+      - ./docker/pure:/tmp/
     networks:
       - webapp
       - selenium
