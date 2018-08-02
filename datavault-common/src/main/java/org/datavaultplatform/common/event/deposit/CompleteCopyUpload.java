@@ -6,8 +6,6 @@ import org.datavaultplatform.common.event.Event;
 @Entity
 public class CompleteCopyUpload extends Event {
 
-	//public String type;
-
 	CompleteCopyUpload() {
 		
 	};
@@ -17,14 +15,5 @@ public class CompleteCopyUpload extends Event {
 		this.eventClass = CompleteCopyUpload.class.getCanonicalName();
 		this.depositId = depositId;
 		this.jobId = jobId;
-	//	this.type = type;
 	}
-	
-//	public String getType() {
-//		return this.type;
-//	}
-//
-//	public void setType(String type) {
-//		this.type = type;
-//	}
 }
