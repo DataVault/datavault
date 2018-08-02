@@ -273,12 +273,17 @@
     <!-- Encryption and Harshicorp Vault -->
 
     <bean id="encryption" class="org.datavaultplatform.common.crypto.Encryption">
+        <property name="vaultEnable" value="${vault.enable}"/>
         <property name="vaultAddress" value="${vault.address}"/>
         <property name="vaultToken" value="${vault.token}"/>
         <property name="vaultKeyPath" value="${vault.secretPath}"/>
         <property name="vaultDataEncryptionKeyName" value="${vault.dataEncryptionKeyName}"/>
         <property name="vaultPrivateKeyEncryptionKeyName" value="${vault.privateKeyEncryptionKeyName}"/>
         <property name="vaultSslPEMPath" value="${vault.sslPEMPath:}"/>
+
+        <property name="keystoreEnable" value="${keystore.enable}"/>
+        <property name="keystorePath" value="${keystore.path}"/>
+        <property name="keystorePassword" value="${keystore.password}"/>
     </bean>
 
 </beans>
