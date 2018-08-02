@@ -177,6 +177,10 @@ public class WorkerInstanceIT {
                                 break;
                             }else if(concreteEvent instanceof UpdateProgress){
                                 break;
+                            }else if (concreteEvent instanceof StartCopyUpload) {
+                            	break;
+                            } else if (concreteEvent instanceof CompleteCopyUpload) {
+                            	break;
                             }else{
                                 assertThat(concreteEvent, instanceOf(Complete.class));
                                 state++;
