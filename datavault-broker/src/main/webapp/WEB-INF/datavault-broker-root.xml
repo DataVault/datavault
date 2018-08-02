@@ -106,13 +106,11 @@
         <property name="host" value="${mail.host}"/>
         <property name="port" value="${mail.port}"/>
         <property name="protocol" value="smtp"/>
-        <property name="username" value="${mail.username}"/>
-        <property name="password" value="${mail.password}"/>
         <property name="defaultEncoding" value="UTF-8"/>
         <property name="javaMailProperties">
             <props>
-                <prop key="mail.smtp.auth">true</prop>
-                <prop key="mail.smtp.starttls.enable">true</prop>
+                <prop key="mail.smtp.auth">false</prop>
+               	<prop key="mail.smtp.starttls.enable">true</prop>
                 <prop key="mail.smtp.quitwait">false</prop>
             </props>
         </property>
