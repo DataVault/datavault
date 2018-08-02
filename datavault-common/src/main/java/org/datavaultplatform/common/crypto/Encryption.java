@@ -254,12 +254,13 @@ public class Encryption {
     }
 
     private static SecretKey getSecretKey(String keyName) throws Exception {
-        if(Encryption.getKeystoreEnable()){
-            return Encryption.getSecretKeyFromKeyStore(keyName);
-        } else if(Encryption.getVaultEnable()){
+        if(Encryption.getVaultEnable()){
             return Encryption.getSecretKeyFromVault(keyName);
+        } else if(Encryption.getKeystoreEnable()){
+            return Encryption.getSecretKeyFromKeyStore(keyName);
+        } else {
+            throw new Exception("ERROR: Neither Hashicorp Vault or Keystore has been enabled.");
         }
-        return null;
     }
 
     private static SecretKey getSecretKeyFromVault(String keyName) throws Exception {
