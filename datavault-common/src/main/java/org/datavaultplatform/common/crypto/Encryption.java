@@ -1,15 +1,15 @@
 package org.datavaultplatform.common.crypto;
 
-import java.io.*;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.EnumSet;
+import com.bettercloud.vault.SslConfig;
+import com.bettercloud.vault.Vault;
+import com.bettercloud.vault.VaultConfig;
+import com.bettercloud.vault.VaultException;
+import com.bettercloud.vault.json.Json;
+import com.bettercloud.vault.json.JsonObject;
+import org.apache.commons.io.FileUtils;
+import org.datavaultplatform.common.task.Context;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
@@ -18,18 +18,17 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.apache.commons.io.FileUtils;
-import org.datavaultplatform.common.task.Context;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.bettercloud.vault.SslConfig;
-import com.bettercloud.vault.Vault;
-import com.bettercloud.vault.VaultConfig;
-import com.bettercloud.vault.VaultException;
-import com.bettercloud.vault.json.Json;
-import com.bettercloud.vault.json.JsonObject;
+import java.io.*;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.EnumSet;
 
 public class Encryption {
 
@@ -48,12 +47,18 @@ public class Encryption {
     public static String CTR_ALGO_TRANSFORMATION_STRING = "AES/CTR/PKCS5Padding";
     public static String CCM_ALGO_TRANSFORMATION_STRING = "AES/CCM/NoPadding";
 
+    private static boolean vaultEnable;
     private static String vaultAddress;
     private static String vaultToken;
     private static String vaultKeyPath;
     private static String vaultDataEncryptionKeyName;
     private static String vaultPrivateKeyEncryptionKeyName;
     private static String vaultSslPEMPath;
+
+    private static final String KEYSTORE_TYPE = "JCEKS";
+    private static boolean keystoreEnable;
+    private static String keystorePath;
+    private static String keystorePassword;
 
     private static Vault vault = null;
 
@@ -106,7 +111,7 @@ public class Encryption {
     }
 
     public static Cipher initGCMCipher(String keyName, int opmode, byte[] iv) throws Exception{
-        return initGCMCipher(opmode, Encryption.getSecretKeyFromVault(keyName), iv, null);
+        return initGCMCipher(opmode, Encryption.getSecretKey(keyName), iv, null);
     }
 
     public static Cipher initGCMCipher(int opmode, SecretKey aesKey, byte[] iv) throws Exception{
@@ -147,7 +152,7 @@ public class Encryption {
     }
 
     public static Cipher initCBCCipher(String keyName, int opmode, byte[] iv) throws Exception {
-        return initCBCCipher(opmode, Encryption.getSecretKeyFromVault(keyName), iv);
+        return initCBCCipher(opmode, Encryption.getSecretKey(keyName), iv);
     }
 
     /**
@@ -246,6 +251,15 @@ public class Encryption {
         inputFileChannel.close();
         outputMappedByteBuffer.clear(); // do something with the data and clear/compact it.
         outputFileChannel.close();
+    }
+
+    private static SecretKey getSecretKey(String keyName) throws Exception {
+        if(Encryption.getKeystoreEnable()){
+            return Encryption.getSecretKeyFromKeyStore(keyName);
+        } else if(Encryption.getVaultEnable()){
+            return Encryption.getSecretKeyFromVault(keyName);
+        }
+        return null;
     }
 
     private static SecretKey getSecretKeyFromVault(String keyName) throws Exception {
@@ -394,6 +408,38 @@ public class Encryption {
         return cipher.doFinal(encryptedSecret);
     }
 
+    /**
+     * Save the AES secret key in a JCEKS KeyStore
+     *
+     * @param alias - name of the key
+     * @param secretKey - the secret key value
+     * @throws Exception
+     */
+    public static void saveSecretKeyToKeyStore(String alias, SecretKey secretKey) throws Exception {
+        KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
+        try (FileInputStream fis = new FileInputStream(Encryption.getKeystorePath())) {
+            ks.load(fis, Encryption.getKeystorePassword().toCharArray());
+        } catch ( FileNotFoundException fnfe ) {
+            ks.load(null, Encryption.getKeystorePassword().toCharArray());
+        }
+        KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(Encryption.getKeystorePassword().toCharArray());
+        KeyStore.SecretKeyEntry skEntry = new KeyStore.SecretKeyEntry(secretKey);
+        ks.setEntry(alias, skEntry, protParam);
+        try (FileOutputStream fos = new FileOutputStream(Encryption.getKeystorePath())) {
+            ks.store(fos, Encryption.getKeystorePassword().toCharArray());
+        }
+    }
+
+    public static SecretKey getSecretKeyFromKeyStore(String alias) throws Exception {
+        KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
+        try (FileInputStream fis = new FileInputStream(Encryption.getKeystorePath())) {
+            ks.load(fis, Encryption.getKeystorePassword().toCharArray());
+        }
+        SecretKey secretKey = (SecretKey) ks.getKey(alias, Encryption.getKeystorePassword().toCharArray());
+
+        return secretKey;
+    }
+
     public static String getVaultAddress() {
         return vaultAddress;
     }
@@ -439,10 +485,43 @@ public class Encryption {
         return vaultPrivateKeyEncryptionKeyName;
     }
 
+
+
     public static void setVaultPrivateKeyEncryptionKeyName(String vaultPrivateKeyEncryptionKeyName) {
         Encryption.vaultPrivateKeyEncryptionKeyName = vaultPrivateKeyEncryptionKeyName;
     }
 
+    public static boolean getVaultEnable() {
+        return vaultEnable;
+    }
+
+    public static void setVaultEnable(boolean vaultEnable) {
+        Encryption.vaultEnable = vaultEnable;
+    }
+
+    public static boolean getKeystoreEnable() {
+        return keystoreEnable;
+    }
+
+    public static void setKeystoreEnable(boolean keystoreEnable) {
+        Encryption.keystoreEnable = keystoreEnable;
+    }
+
+    public static String getKeystorePath() {
+        return keystorePath;
+    }
+
+    public static void setKeystorePath(String keystorePath) {
+        Encryption.keystorePath = keystorePath;
+    }
+
+    public static String getKeystorePassword() {
+        return keystorePassword;
+    }
+
+    public static void setKeystorePassword(String keystorePassword) {
+        Encryption.keystorePassword = keystorePassword;
+    }
 
     /**
      * Allow running encryption method outside of the app.
@@ -462,6 +541,37 @@ public class Encryption {
             }
             String encodedKey = Base64.getEncoder().encodeToString(key.getEncoded());
             System.out.println(encodedKey);
+        }
+        if(methodName.equals("generateSecretKeyAndAddToJCEKS")){
+            Encryption.setKeystorePath(args[1]);
+            Encryption.setKeystorePassword(args[2]);
+            String arg2 = args[3];
+
+            String[] aliases = arg2.split(",");
+
+            try {
+                SecretKey keys[] = new SecretKey[aliases.length];
+                int i = 0;
+                for(String alias : aliases) {
+                    System.out.println("Creating " + alias +" to " + Encryption.getKeystorePath());
+                    keys[i] = Encryption.generateSecretKey();
+                    Encryption.saveSecretKeyToKeyStore(alias, keys[i]);
+                    i++;
+                }
+
+                i = 0;
+                for(String alias : aliases) {
+                    SecretKey returnKey = Encryption.getSecretKeyFromKeyStore(alias);
+                    if (!returnKey.equals(keys[i])) {
+                        System.err.println("ERROR! The " + alias + " key return by KeyStore is different!");
+                    }
+                    String encodedKey = Base64.getEncoder().encodeToString(keys[i].getEncoded());
+                    System.out.println(alias + ": " + encodedKey);
+                    i++;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }
