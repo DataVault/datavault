@@ -238,8 +238,7 @@
             $.validator.addMethod(
                 "date",
                 function(value, element) {
-                    // put your own logic here, this is just a (crappy) example
-                    return value.match(/^\d{4}-\d{2}-\d{2}$/);
+                    return this.optional(element) || value.match(/^\d{4}-\d{2}-\d{2}$/);
                 },
                 "Please enter the date in the format yyyy-mm-dd."
             );
@@ -265,9 +264,6 @@
                     },
                     groupID : {
                         required: true
-                    },
-                    grantEndDate : {
-                        date: true
                     },
                     reviewDate : {
                         required: true,
