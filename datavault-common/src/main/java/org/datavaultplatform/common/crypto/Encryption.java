@@ -5,6 +5,7 @@ import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
+import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.task.Context;
@@ -544,31 +545,36 @@ public class Encryption {
             System.out.println(encodedKey);
         }
         if(methodName.equals("generateSecretKeyAndAddToJCEKS")){
-            Encryption.setKeystorePath(args[1]);
-            Encryption.setKeystorePassword(args[2]);
-            String arg2 = args[3];
+            JsonObject jsonObject = null;
+            try {
+                FileReader jsonReader = new FileReader(args[1]);
+                jsonObject = Json.parse(jsonReader).asObject();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
 
-            String[] aliases = arg2.split(",");
+            Encryption.setKeystorePath(jsonObject.get("path").asString());
+            Encryption.setKeystorePassword(jsonObject.get("password").asString());
+
+            JsonArray aliases = jsonObject.get("key_aliases").asArray();
 
             try {
-                SecretKey keys[] = new SecretKey[aliases.length];
-                int i = 0;
-                for(String alias : aliases) {
+                SecretKey keys[] = new SecretKey[aliases.size()];
+                for(int i = 0; i < aliases.size(); i++) {
+                    String alias = aliases.get(i).toString();
                     System.out.println("Creating " + alias +" to " + Encryption.getKeystorePath());
                     keys[i] = Encryption.generateSecretKey();
                     Encryption.saveSecretKeyToKeyStore(alias, keys[i]);
-                    i++;
                 }
 
-                i = 0;
-                for(String alias : aliases) {
+                for(int i = 0; i < aliases.size(); i++) {
+                    String alias = aliases.get(i).toString();
                     SecretKey returnKey = Encryption.getSecretKeyFromKeyStore(alias);
                     if (!returnKey.equals(keys[i])) {
                         System.err.println("ERROR! The " + alias + " key return by KeyStore is different!");
                     }
                     String encodedKey = Base64.getEncoder().encodeToString(keys[i].getEncoded());
                     System.out.println(alias + ": " + encodedKey);
-                    i++;
                 }
             } catch (Exception e) {
                 e.printStackTrace();

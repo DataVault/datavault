@@ -5,11 +5,16 @@ if [ -z "$DATAVAULT_HOME" ]; then
     exit 1
 fi
 
-if [ $# != 3 ]; then
+if [ $# != 1 ]; then
     echo "Usage: "
-    echo "./generate-keystore.sh <path_to_keystore> <keystore_password>  <keyname1>,<keyname2>,..."
-    echo "Example: "
-    echo "./generate-keystore.sh /path/to/projects/datavault/docker/keystore/DatavaultKeyStore veryStrongPassword data-encryption-key,ssh-encryption-key"
+    echo "./generate-keystore.sh <path_to_json_file> <keystore_password>  <keyname1>,<keyname2>,..."
+    echo "Example of json: "
+    echo -e "{\n\
+        \"path\":\"/path/to/projects/datavault/docker/keystore/DatavaultKeyStore\",\n\
+        \"password\":\"veryStrongPassword\",\n\
+        \"key_aliases\":[\"data-encryption-key\",\"ssh-encryption-key\"]\n\
+    }"
+
     exit 1
 fi
 
