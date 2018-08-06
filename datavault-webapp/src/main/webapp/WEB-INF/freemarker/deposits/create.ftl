@@ -125,7 +125,7 @@
         
                 <div id="uploadMaxSizeAlert" class="alert alert-warning" role="alert" style="display:none;">
                   <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                  Files larger than 20GB cannot be uploaded directly from your computer.
+                  Files larger than 5GB cannot be uploaded directly from your computer.
                 </div>
         
                 <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
@@ -134,7 +134,7 @@
                         <button type="button" class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage">
                             <i class="fa fa-hdd-o" aria-hidden="true"></i> Data Storage (SFTP)
                         </button>
-                        <button type="button" class="btn btn-default flow-browse" data-toggle="tooltip" title="Maximum file size: 20GB">
+                        <button type="button" class="btn btn-default flow-browse" data-toggle="tooltip" title="Maximum file size: 5GB">
                             <i class="fa fa-laptop" aria-hidden="true"></i> My Computer
                         </button>
                     </div>
@@ -406,8 +406,8 @@
 
         // Handle file add event
         r.on('fileAdded', function(file){
-            // Prevent browser upload of large files (20GB)
-            if (file.size > (20 * 1024 * 1024 * 1024)) {
+            // Prevent browser upload of large files (5GB)
+            if (file.size > (5 * 1024 * 1024 * 1024)) {
                 $('#uploadMaxSizeAlert').show();
                 return false;
             }
