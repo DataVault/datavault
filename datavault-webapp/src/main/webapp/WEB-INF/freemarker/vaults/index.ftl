@@ -239,7 +239,12 @@
                 "date",
                 function(value, element) {
                     // put your own logic here, this is just a (crappy) example
-                    return value.match(/^\d{4}-\d{2}-\d{2}$/);
+
+                    if (value){
+                        return value.match(/^(20\d\d)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/);
+                    } else {
+                        return true;
+                    }
                 },
                 "Please enter the date in the format yyyy-mm-dd."
             );
