@@ -42,10 +42,7 @@
                 <form id="add-from-storage-form">
                     <div class="form-group">
                         <label class="control-label">Select file or folder:</label>
-                        <div id="tree-error" class="alert alert-danger" style="display:none">
-                           DataVault could not access the location you specified. Please check that you have provided the correct hostname, port number and have copied the authentication key to the location.
-                           If you need assistance please contact the DataVault support team.
-                        </div>
+                        <div id="tree-error" class="alert alert-danger" style="display:none"></div>
                         <div id="tree" class="fancytree tree-box" style="max-height:50vh; overflow-y:scroll;"></div>
                         <label id="deposit-size" class="text-muted small">No files selected</label>
                     </div>
@@ -162,9 +159,18 @@
                             // Load child nodes via ajax GET /files?mode=children&parent=1234
                             data.result = {
                                 url: "${springMacroRequestContext.getContextPath()}/files",
-                                data: {mode: "children", parent: node.key},
+                                data: {
+                                    mode: "children",
+                                    parent: node.key
+                                },
                                 cache: false
                             };
+                            window.setTimeout(function(){  // Simulate a slow Ajax request
+                                if(node.children.length == 0) {
+                                    $("#tree-error").html("DataVault could not access the location you specified. Please check that you have provided the correct hostname, port number and have copied the authentication key to the location. If you need assistance please contact the DataVault support team.");
+                                    $("#tree-error").show();
+                                }
+                            }, 5000);
                         },
                         selectMode: 1,
                         activate: function(event, data) {
@@ -195,7 +201,8 @@
                             // The GET request always returns the top level "SFTP filesystem" node if there's a filestore defined, even when it is bogus.
                             // If there's no filestore defined, it returns an empty result. Therefore, if there's 1 or fewer items in the tree, we know
                             // that there's likely some problem with the filestore.
-                            if ( data.tree.count() <= 1 ) {
+                            if ( data.tree.count() <= 0 ) {
+                               $("#tree-error").html("No File Location available, please click on 'File Locations' in the top menu to add them.");
                                $("#tree-error").show();
                                $("#tree").hide();
                             } else {
