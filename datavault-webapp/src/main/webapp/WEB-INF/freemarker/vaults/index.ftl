@@ -76,6 +76,8 @@
                             You must record the details of your dataset in <a href="${link}" target="_blank">${system}</a>. 
                             If you haven't yet created a Pure dataset record containing the 
                             details of the data you're about to deposit in the vault, please do so. 
+                            If you have any questions about this step please don’t hesitate to contact 
+                            the Research Data Service using the ‘Contact’ link at the top of this page.
                         </p>
                         <br/>
 
