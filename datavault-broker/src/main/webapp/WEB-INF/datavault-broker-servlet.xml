@@ -59,6 +59,7 @@
         <property name="archiveStoreService" ref="archiveStoreService" />
         <property name="eventService" ref="eventService" />
         <property name="clientsService" ref="clientsService" />
+        <property name="dataManagersService" ref="dataManagersService" />
         <property name="activeDir" value="${activeDir}" />
         <property name="archiveDir" value="${archiveDir}" />
     </bean>
