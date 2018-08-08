@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.storage.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
@@ -9,6 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -160,8 +163,14 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 
         if (p.exitValue() != 0) {
             logger.info("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
-            logger.info(p.getErrorStream().toString());
-            logger.info(p.getOutputStream().toString());
+            InputStream error = p.getErrorStream();
+            if (error != null) {
+            	logger.info(IOUtils.toString(error, StandardCharsets.UTF_8));
+            }
+            InputStream output = p.getInputStream();
+            if (output != null) {
+            	logger.info(IOUtils.toString(output, StandardCharsets.UTF_8));
+            }
             throw new Exception("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
         }
 
