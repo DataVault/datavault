@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -110,13 +112,15 @@ public class VaultsController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
-    public List<VaultInfo> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    public ArrayList<VaultInfo> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
 
-        List<VaultInfo> vaultResponses = new ArrayList<>();
+        ArrayList<VaultInfo> vaultResponses = new ArrayList<>();
         User user = usersService.getUser(userID);
         for (Vault vault : user.getVaults()) {
             vaultResponses.add(vault.convertToResponse());
         }
+        vaultResponses.sort(Comparator.comparing(VaultInfo::getCreationTime));
+        Collections.reverse(vaultResponses);
         return vaultResponses;
     }
 
