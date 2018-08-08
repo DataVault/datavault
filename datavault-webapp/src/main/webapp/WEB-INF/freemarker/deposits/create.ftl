@@ -134,7 +134,7 @@
                         <button type="button" class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage">
                             <i class="fa fa-hdd-o" aria-hidden="true"></i> Data Storage (SFTP)
                         </button>
-                        <button type="button" class="btn btn-default flow-browse" data-toggle="tooltip" title="Maximum file size: 5GB">
+                        <button type="button" class="btn btn-default flow-browse hidden" data-toggle="tooltip" title="Maximum file size: 5GB">
                             <i class="fa fa-laptop" aria-hidden="true"></i> My Computer
                         </button>
                     </div>
