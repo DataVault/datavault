@@ -241,12 +241,12 @@
                     // put your own logic here, this is just a (crappy) example
 
                     if (value){
-                        return value.match(/^(20\d\d)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/);
+                        return value.match(/^((19|20)\d\d)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/);
                     } else {
                         return true;
                     }
                 },
-                "Please enter the date in the format yyyy-mm-dd."
+                "Please enter a valid date in YYYY-MM-DD format."
             );
 
             $('button[type="submit"]').on("click", function() {
