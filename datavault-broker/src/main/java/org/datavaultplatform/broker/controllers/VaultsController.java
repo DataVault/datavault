@@ -1,26 +1,22 @@
 package org.datavaultplatform.broker.controllers;
 
-import java.util.List;
+import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.common.event.vault.Create;
+import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.request.CreateVault;
+import org.datavaultplatform.common.response.DepositInfo;
+import org.datavaultplatform.common.response.VaultInfo;
+import org.jsondoc.core.annotation.*;
+import org.jsondoc.core.pojo.ApiVerb;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.datavaultplatform.broker.services.*;
-import org.datavaultplatform.common.event.vault.*;
-import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.request.*;
-import org.datavaultplatform.common.response.*;
-
-import org.jsondoc.core.annotation.*;
-import org.jsondoc.core.pojo.ApiVerb;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.List;
 
 
 @RestController

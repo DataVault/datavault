@@ -181,11 +181,9 @@
                             
                             <div class="alert alert-info" role="alert">
                                 <p>
-                                Vault will be closed so no more
-                                deposits can be added, ONE calendar
-                                year after the grant end date or one
-                                year after the first deposit,
-                                whichever is later.
+                                    You will not be able to add new deposits to this Vault once it is closed.
+                                    The Vault will be closed ONE calendar year after the first deposit.
+                                    Or, if you specify a Grant End Date, ONE calendar year after the Grant End Date IF that falls later than one year after the first deposit.
                                 </p>
                             </div>
                             
@@ -243,12 +241,12 @@
                     // put your own logic here, this is just a (crappy) example
 
                     if (value){
-                        return value.match(/^(20\d\d)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/);
+                        return value.match(/^((19|20)\d\d)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/);
                     } else {
                         return true;
                     }
                 },
-                "Please enter the date in the format yyyy-mm-dd."
+                "Please enter a valid date in YYYY-MM-DD format."
             );
 
             $('button[type="submit"]').on("click", function() {
