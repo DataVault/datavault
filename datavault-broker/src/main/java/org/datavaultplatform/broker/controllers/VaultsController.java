@@ -112,9 +112,9 @@ public class VaultsController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
-    public ArrayList<VaultInfo> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    public List<VaultInfo> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
 
-        ArrayList<VaultInfo> vaultResponses = new ArrayList<>();
+        List<VaultInfo> vaultResponses = new ArrayList<>();
         User user = usersService.getUser(userID);
         for (Vault vault : user.getVaults()) {
             vaultResponses.add(vault.convertToResponse());
