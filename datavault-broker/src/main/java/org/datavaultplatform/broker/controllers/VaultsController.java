@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -117,6 +119,8 @@ public class VaultsController {
         for (Vault vault : user.getVaults()) {
             vaultResponses.add(vault.convertToResponse());
         }
+        vaultResponses.sort(Comparator.comparing(VaultInfo::getCreationTime));
+        Collections.reverse(vaultResponses);
         return vaultResponses;
     }
 
