@@ -134,8 +134,7 @@
             <br/>
 
             <p>
-            We need to know a little about where you wish to archive data from by SFTP. <br/>
-            N.B. if you wish to browse to your files, please use the 'My Computer' button on the 'Create a deposit' page.
+            We need to know a little about where you wish to archive data from by SFTP (i.e. DataStore). <br/>
             </p>
 
             <div class="hidden">
