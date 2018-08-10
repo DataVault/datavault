@@ -71,10 +71,7 @@
                                    class="form-control file-path"
                                    name="${spring.status.expression}"
                                    value="${spring.status.value!""}"/>
-                            <div id="tree-error" class="alert alert-danger" style="display: none">
-                                 DataVault could not access the location you specified. Please check that you have provided the correct hostname, port number and have copied the authentication key to the location.
-                                 If you need assistance please contact the DataVault support team.
-                            </div>
+                            <div id="tree-error" class="alert alert-danger" style="display: none"></div>
                             <div id="tree" class="fancytree tree-box"></div>
                         </div>
                 
@@ -93,6 +90,12 @@
                                         data: {mode: "children", parent: node.key},
                                         cache: false
                                     };
+                                    window.setTimeout(function(){  // Simulate a slow Ajax request
+                                        if(node.children.length == 0) {
+                                            $("#tree-error").html("DataVault could not access the location you specified. Please check that you have provided the correct hostname, port number and have copied the authentication key to the location. It can take several minutes before the connection between Datavault and the location is set, so please reload the page and try again. If the problem persists and you need assistance please contact the DataVault support team.");
+                                            $("#tree-error").show();
+                                        }
+                                    }, 3000);
                                 },
                                 selectMode: 1,
                                 activate: function(event, data) {
@@ -105,16 +108,17 @@
                                     }
                                 },
                                 init: function(event, data) {
-                                  // The GET request always returns the top level "SFTP filesystem" node if there's a filestore defined, even when it is bogus.
-                                  // If there's no filestore defined, it returns an empty result. Therefore, if there's 1 or fewer items in the tree, we know
-                                  // that there's likely some problem with the filestore.
-                                  if ( data.tree.count() <= 1 ) {
-                                     $("#tree-error").show();
-                                     $("#tree").hide();
-                                  } else {
-                                     $("#tree-error").hide();
-                                     $("#tree").show();
-                                  }
+                                    // The GET request always returns the top level "SFTP filesystem" node if there's a filestore defined, even when it is bogus.
+                                    // If there's no filestore defined, it returns an empty result. Therefore, if there's 1 or fewer items in the tree, we know
+                                    // that there's likely some problem with the filestore.
+                                    if ( data.tree.count() <= 0 ) {
+                                        $("#tree-error").html("No File Location available, please click on 'File Locations' in the top menu to add them.");
+                                        $("#tree-error").show();
+                                        $("#tree").hide();
+                                    } else {
+                                        $("#tree-error").hide();
+                                        $("#tree").show();
+                                    }
                                 }
                             });
                         </script>
