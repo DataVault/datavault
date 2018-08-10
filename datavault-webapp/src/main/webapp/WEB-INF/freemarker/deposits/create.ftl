@@ -170,7 +170,7 @@
                                     $("#tree-error").html("DataVault could not access the location you specified. Please check that you have provided the correct hostname, port number and have copied the authentication key to the location. It can take several minutes before the connection between Datavault and the location is set, so please reload the page and try again. If the problem persists and you need assistance please contact the DataVault support team.");
                                     $("#tree-error").show();
                                 }
-                            }, 5000);
+                            }, 3000);
                         },
                         selectMode: 1,
                         activate: function(event, data) {
