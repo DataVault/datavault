@@ -1,23 +1,29 @@
 <html>
 	<body>
-		<h3>Data Vault - deposit error</h3>
 		
-		<p>Hi, ${user-firstname} ${user-lastname}</p>
-		
-		<p>Unfortunately there was a problem with your deposit.</p>
-
-		<p>An administrator has been contacted to help resolve this issue.</p>
-	
-		<p>Deposit details:</p>
+		<p>Unfortunately the attempted deposit with the following details was unsuccessful:</p>
 		<ul>
+			<li>Deposit name: ${deposit-name}</li>
+			<li>Size: ${size-bytes} bytes</li>
+			<li>Date of deposit: ${timestamp}</li>
+			<li>Contains personal data: ${hasPersonalData}</li>
 			<li>Deposit ID: ${deposit-id}</li>
-			<li>Vault: ${vault-name}</li>
-			<li>Vault ID: ${vault-id}</li>
-			<li>Timestamp: ${timestamp}</li>
+			<li>Depositor name: ${user-firstname} ${user-lastname}</li>
+			<li>Depositor ID: ${user-id}</li>
 		</ul>
+		<p>The deposit was being added to the following Vault:</p>
+		<ul>
+			<li>Vault name: ${vault-name}</li>
+			<li>Vault ID: ${vault-id}</li>
+			<li>Review date: ${vault-retention-expiry}</li>
+		</ul>
+		<p>A deposit might fail because some of the files in one of the folders from which the data were being copied were moved or edited, causing the checksums to not match.</p>
 		
-		<p>Error details:</p>
-		<p>${error-message}</p>
+		<p>Please try again or contact the support team for assistance at <a href="mailto:data-support@ed.ac.uk?Subject=[DataVault deposit fail]" target="_top">data-support@ed.ac.uk</a>.</p>
 		
+		<p>Further information about the service is available at <a href="http://www.ed.ac.uk/is/research-support/datavault">http://www.ed.ac.uk/is/research-support/datavault</a>.</p>
+		
+		<p>Also please ensure these emails have a subject line that begins with '[DataVault deposit fail]' and they should be Cc'd to 
+		<a href="mailto:data-support@ed.ac.uk?Subject=[DataVault deposit fail]" target="_top">data-support@ed.ac.uk</a>.</p>
 	</body>
 </html>

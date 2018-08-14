@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class EventListener implements MessageListener {
 
@@ -27,6 +28,16 @@ public class EventListener implements MessageListener {
     private RetrievesService retrievesService;
     private UsersService usersService;
     private EmailService emailService;
+    private static final Map<String, String> EMAIL_SUBJECTS;
+    static {
+    	EMAIL_SUBJECTS = new HashMap<String, String>();
+    	EMAIL_SUBJECTS.put("user-deposit-start", "Confirmation - your new DataVault deposit is starting.");
+    	EMAIL_SUBJECTS.put("user-deposit-complete", "Confirmation - your new DataVault deposit is complete.");
+    	EMAIL_SUBJECTS.put("user-deposit-error", "DataVault ERROR - attempted deposit failed");
+    	EMAIL_SUBJECTS.put("admin-deposit-start", "Confirmation - a new DataVault deposit is starting.");
+    	EMAIL_SUBJECTS.put("admin-deposit-complete", "Confirmation - a new DataVault deposit is complete.");
+    	EMAIL_SUBJECTS.put("admin-deposit-error", "DataVault ERROR - attempted deposit failed");
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(EventListener.class);
     
@@ -146,7 +157,7 @@ public class EventListener implements MessageListener {
                 }
                 
 //              // Get related information for emails
-              String type = "deposit starting";
+              String type = "start";
               this.sendEmails(deposit, concreteEvent, type, "user-deposit-start.vm", "group-admin-deposit-start.vm");
                 
             } else if (concreteEvent instanceof ComputedSize) {
@@ -289,7 +300,7 @@ public class EventListener implements MessageListener {
                 }
                 
 //                // Get related information for emails
-                String type = "deposit complete";
+                String type = "complete";
                 this.sendEmails(deposit, completeEvent, type, "user-deposit-complete.vm", "group-admin-deposit-complete.vm");
                 
             } else if (concreteEvent instanceof Error) {
@@ -326,7 +337,7 @@ public class EventListener implements MessageListener {
                 }
                 
                 // Get related information for emails
-                String type = "deposit error";
+                String type = "error";
                 this.sendEmails(deposit, errorEvent, type, "user-deposit-error.vm", "group-admin-deposit-error.vm");
             } else if (concreteEvent instanceof RetrieveStart) {
 
@@ -347,14 +358,14 @@ public class EventListener implements MessageListener {
         }
     }
     
-    private void sendEmails(Deposit deposit, Event event, String type, String userTemplate, String adminTemplate) {
+    private void sendEmails(Deposit deposit, Event event, String type, String userTemplate, String adminTemplate) throws Exception {
     	// Get related information for emails
         Vault vault = deposit.getVault();
         Group group = vault.getGroup();
         User depositUser = usersService.getUser(event.getUserId());
         
-        String userTitle = "Data Vault - " + type + " [" + deposit.getName() + "]";
-        String adminTitle = "Data Vault - " + type + " for [" + group.getName() + "]";
+        String userTitle = EventListener.EMAIL_SUBJECTS.get("user-deposit-" + type);
+        String adminTitle = EventListener.EMAIL_SUBJECTS.get("admin-deposit-" + type);
         
         HashMap<String, Object> model = new HashMap<String, Object>();
         model.put("group-name", group.getName());
@@ -368,6 +379,7 @@ public class EventListener implements MessageListener {
         model.put("user-lastname", depositUser.getLastname());
         model.put("size-bytes", deposit.getArchiveSize());
         model.put("timestamp", event.getTimestamp());
+        model.put("hasPersonalData", deposit.getHasPersonalData());
         if (event instanceof Error) {
             model.put("error-message", event.getMessage());
         }

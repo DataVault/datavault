@@ -1,19 +1,23 @@
 <html>
 	<body>
-		<h3>Data Vault - deposit error for ${group-name}</h3>
 		
-		<p>Deposit details:</p>
-		
+		<p>Unfortunately an attempted deposit with the following details was unsuccessful:</p>
 		<ul>
+			<li>Deposit name: ${deposit-name}</li>
+			<li>Size: ${size-bytes} bytes</li>
+			<li>Date of deposit: ${timestamp}</li>
+			<li>Contains personal data: ${hasPersonalData}</li>
 			<li>Deposit ID: ${deposit-id}</li>
-			<li>Vault: ${vault-name}</li>
-			<li>Vault ID: ${vault-id}</li>
-			<li>User ID: ${user-id}</li>
-			<li>Timestamp: ${timestamp}</li>
+			<li>Depositor name: ${user-firstname} ${user-lastname}</li>
+			<li>Depositor ID: ${user-id}</li>
 		</ul>
-		
+		<p>The deposit was being added to the following Vault:</p>
+		<ul>
+			<li>Vault name: ${vault-name}</li>
+			<li>Vault ID: ${vault-id}</li>
+			<li>Review date: ${vault-retention-expiry}</li>
+		</ul>
 		<p>Error details:</p>
 		<p>${error-message}</p>
-		
 	</body>
 </html>
