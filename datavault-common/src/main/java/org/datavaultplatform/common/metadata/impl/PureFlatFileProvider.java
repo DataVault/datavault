@@ -22,6 +22,7 @@ public class PureFlatFileProvider implements Provider {
     public static final String  DATASET_DISPLAY_FILE_PATH = "/tmp/datasetDisplay.flat";
     public static final String  DATASET_FULL_FILE_PATH = "/tmp/datasetFull.flat";
     public static final String  PERSON_FILE_PATH = "/tmp/person.flat";
+    private static final String PURE_VALIDATED = "Validated";
     
     public PureFlatFileProvider() {
     }
@@ -144,7 +145,13 @@ public class PureFlatFileProvider implements Provider {
 				    		if (info.size() == 2) {
 					    		Dataset ds = new Dataset();
 					    		ds.setID(dsUUID);
-					    		ds.setName(info.get(0) + " (" + info.get(1) + ")");
+					    		String status = info.get(1);
+					    		ds.setName(info.get(0) + " (" + status + ")");
+					    		Boolean visible = true;
+					    		if (! status.equals(PureFlatFileProvider.PURE_VALIDATED)) {
+					    			visible = false;
+					    		}
+					    		ds.setVisible(visible);
 					    		retVal.add(ds);
 				    		}
 				    	}

@@ -21,6 +21,9 @@ public class Dataset {
     @Transient
     private String content;
     
+    @Transient
+    private Boolean visible;
+    
     public Dataset() {}
 
     public String getID() {
@@ -46,4 +49,12 @@ public class Dataset {
     public void setContent(String content) {
         this.content = content;
     }
+
+	public Boolean getVisible() {
+		return this.visible;
+	}
+
+	public void setVisible(Boolean visible) {
+		this.visible = visible;
+	}
 }

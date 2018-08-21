@@ -98,7 +98,11 @@
                                         <select id="datasetID" name="datasetID" class="dataset-select selectpicker show-tick form-control form-control-lg" <#if datasets?size == 0> disabled</#if>>
                                             <option selected disabled data-hidden="true">Please choose a Dataset</option>
                                             <#list datasets as dataset>
-                                            <option value="${dataset.getID()}">${dataset.name?html}</option>
+                                            <#if dataset.visible == true>
+                                           	<option value="${dataset.getID()}">${dataset.name?html}</option>
+                                           	<#else>
+                                           	<option disabled value="${dataset.getID()}">${dataset.name?html}</option>
+                                           	</#if>
                                             </#list>
                                         </select>
                                     </div>
