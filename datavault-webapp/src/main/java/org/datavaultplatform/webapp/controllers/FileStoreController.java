@@ -84,7 +84,7 @@ public class FileStoreController {
         storeProperties.put("port", port);
         storeProperties.put("rootPath", path);
 
-        FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.SFTPFileSystem", storeProperties, "SFTP filesystem");
+        FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.SFTPFileSystem", storeProperties, path);
         restService.addFileStoreSFTP(store);
     }
 
