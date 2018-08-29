@@ -14,6 +14,7 @@
 
     <!-- jQuery UI js -->
     <script src="<@spring.url '/resources/jquery-ui/jquery-ui.min.js'/>"></script>
+    <link href="<@spring.url '/resources/jquery-ui/jquery-ui.min.css'/>" rel="stylesheet" type="text/css">
 
     <!-- Bootstrap js -->
     <script src="<@spring.url '/resources/bootstrap/js/bootstrap.min.js'/>"></script>

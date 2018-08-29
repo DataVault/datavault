@@ -180,7 +180,7 @@
                                      title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;">
                                 </span>
                                 <@spring.bind "vault.grantEndDate" />
-                                <input id="grantEndDate" name="grantEndDate" class="form-control" type="date" placeholder="yyyy-mm-dd" <#if datasets?size == 0> disabled</#if>/>
+                                <input id="grantEndDate" name="grantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd" <#if datasets?size == 0> disabled</#if>/>
                             </div>
                             
                             <div class="alert alert-info" role="alert">
@@ -218,7 +218,7 @@
                                         title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault. If on the other hand you wish the vault to be deleted, bring the review date forward so that deletion may be considered.">
                                 </span>
                                 <@spring.bind "vault.reviewDate" />
-                                <input class="form-control" id="reviewDate" name="reviewDate" type="date" placeholder="yyyy-mm-dd" <#if datasets?size == 0> disabled</#if>/>
+                                <input class="form-control" id="reviewDate" name="reviewDate" placeholder="yyyy-mm-dd" <#if datasets?size == 0> disabled</#if>/>
                             </div>
 
                             <input type="hidden" id="submitAction" name="action" value="submit" /> 
@@ -239,13 +239,22 @@
 
     <script>
         $(document).ready(function () {
+            $.datepicker.setDefaults({
+                dateFormat: "yy-mm-dd"
+            });
+
+            $( "#grantEndDate" ).datepicker();
+            $( "#reviewDate" ).datepicker({
+              minDate: new Date()
+            });
+
             $.validator.addMethod(
                 "date",
                 function(value, element) {
                     // put your own logic here, this is just a (crappy) example
 
                     if (value){
-                        return value.match(/^((19|20)\d\d)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/);
+                        return value.match(/^((1|2)\d\d\d)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/);
                     } else {
                         return true;
                     }
