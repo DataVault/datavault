@@ -19,10 +19,10 @@
 
             <h2>View the Deposit: <small>${deposit.name?html}</small></h2>
             <br/>
-            
+
             <ol id="progtrckr" class="progtrckr" data-progtrckr-steps="0" style="display:none;">
             </ol>
-    
+
             <div id="progress-transfer" style="display:none;">
                 <span id="progress-copied">Placeholder</span>
                 <div class="progress">
@@ -36,6 +36,11 @@
                 <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                 <span class="sr-only">Error</span>
                 <span id="error-label">Error details</span>
+            </div>
+
+            <div id="job-info" class="alert alert-info" role="alert" style="display:none;">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <span id="job-info-msq"></span>
             </div>
             
             <#if deposit.status.name() == "COMPLETE">
@@ -300,6 +305,8 @@
                 
                 if (depositStatus == "NOT_STARTED" && depositInProgress == false) {
                     $("#deposit-status").html("<span class=\"glyphicon glyphicon-refresh glyphicon-refresh-animate\"></span>&nbspIn progress")
+                    $("#job-info-msq").html("<strong>Your deposit is in progress.</strong>  You will receive an email notification when the deposit is complete. You may close your browser, and the deposit will continue regardless.")
+                    $("#job-info").show()
                     depositInProgress = true
                 }
                 
