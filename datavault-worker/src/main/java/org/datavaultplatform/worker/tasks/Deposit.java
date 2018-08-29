@@ -615,18 +615,18 @@ public class Deposit extends Task {
 
             // Decryption
             if(ivs != null) {
-                String encChunkHash = encChunksHash[i];
+                //String encChunkHash = encChunksHash[i];
                 
                 // Check hash of encrypted file
-                logger.debug("Verifying encrypted chunk file: "+chunkFile.getAbsolutePath());
-                verifyChunkFile(context.getTempDir(), chunkFile, encChunkHash);
+                //logger.debug("Verifying encrypted chunk file: "+chunkFile.getAbsolutePath());
+                //verifyChunkFile(context.getTempDir(), chunkFile, encChunkHash);
                 
                 // TODO: get aesKey from secure place
                 Encryption.decryptFile(context, chunkFile, ivs.get(i+1));
             }
                 
-            logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
-            verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
+            //logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
+            //verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
         }
         
         FileSplitter.recomposeFile(chunkFiles, tarFile);
