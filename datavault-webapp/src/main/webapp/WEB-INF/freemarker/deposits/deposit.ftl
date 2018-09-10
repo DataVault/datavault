@@ -96,7 +96,7 @@
                                     Failed
                                 </div>
                                 <#elseif deposit.status.name() == "NOT_STARTED">
-                                Not started
+                                Queued
                                 <#elseif deposit.status.name() == "IN_PROGRESS">
                                 <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
                                 In progress
@@ -199,7 +199,7 @@
                                                     Failed
                                                 </div>
                                                 <#elseif retrieve.status.name() == "NOT_STARTED">
-                                                Not started
+                                                Queued
                                                 <#elseif retrieve.status.name() == "IN_PROGRESS">
                                                 <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
                                                 In progress

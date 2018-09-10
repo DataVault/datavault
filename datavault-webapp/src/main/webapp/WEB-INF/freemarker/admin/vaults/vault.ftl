@@ -66,7 +66,7 @@
                                             <div class="text-danger">
                                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>&nbsp;Failed
                                             </div>
-                                        <#elseif deposit.status.name() == "NOT_STARTED">&nbsp;Not started
+                                        <#elseif deposit.status.name() == "NOT_STARTED">&nbsp;Queued
                                         <#elseif deposit.status.name() == "IN_PROGRESS">
                                             <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>&nbsp;In progress
                                         <#else>
