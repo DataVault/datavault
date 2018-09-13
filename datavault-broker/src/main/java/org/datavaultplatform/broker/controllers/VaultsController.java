@@ -163,18 +163,21 @@ public class VaultsController {
         
         RetentionPolicy retentionPolicy = retentionPoliciesService.getPolicy(createVault.getPolicyID());
         if (retentionPolicy == null) {
+            logger.error("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
             throw new Exception("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
         }
         vault.setRetentionPolicy(retentionPolicy);
         
         Group group = groupsService.getGroup(createVault.getGroupID());
         if (group == null) {
+            logger.error("Group '" + createVault.getGroupID() + "' does not exist");
             throw new Exception("Group '" + createVault.getGroupID() + "' does not exist");
         }
         vault.setGroup(group);
         
         User user = usersService.getUser(userID);
         if (user == null) {
+            logger.error("User '" + userID + "' does not exist");
             throw new Exception("User '" + userID + "' does not exist");
         }
         vault.setUser(user);
@@ -183,6 +186,7 @@ public class VaultsController {
         if (dataset == null) {
             dataset = externalMetadataService.getDataset(createVault.getDatasetID());
             if (dataset == null) {
+                logger.error("Dataset metadata record '" + createVault.getDatasetID() + "' does not exist");
                 throw new Exception("Dataset metadata record '" + createVault.getDatasetID() + "' does not exist");
             }
             
@@ -191,13 +195,19 @@ public class VaultsController {
         vault.setDataset(dataset);
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-	try {
-           vault.setGrantEndDate(formatter.parse(createVault.getGrantEndDate()));
-	} catch (ParseException|NullPointerException ex) {
-           vault.setGrantEndDate(null);
-	}
+        try {
+            vault.setGrantEndDate(formatter.parse(createVault.getGrantEndDate()));
+        } catch (ParseException|NullPointerException ex) {
+            logger.error("Grant date is not in the right format: "+createVault.getGrantEndDate());
+            vault.setGrantEndDate(null);
+        }
 
-        vault.setReviewDate(formatter.parse(createVault.getReviewDate()));
+        try {
+            vault.setReviewDate(formatter.parse(createVault.getReviewDate()));
+        } catch (ParseException|NullPointerException ex) {
+            logger.error("Review date is not in the right format: "+createVault.getReviewDate());
+            vault.setGrantEndDate(null);
+        }
 
         vaultsService.addVault(vault);
         
@@ -210,8 +220,13 @@ public class VaultsController {
         eventService.addEvent(vaultEvent);
 
         // Check the retention policy of the newly created vault
-        vaultsService.checkRetentionPolicy(vault.getID());
-        
+        try {
+            vaultsService.checkRetentionPolicy(vault.getID());
+        } catch (Exception e) {
+            logger.error("Fail to check retention policy: "+e);
+            e.printStackTrace();
+            throw e;
+        }
         return vault.convertToResponse();
     }
 
