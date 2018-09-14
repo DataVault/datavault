@@ -31,6 +31,11 @@
                         
                         <div class="form-group">
                             <label>Are any of the intended recipients external to the University of Edinburgh?</label>
+                            <span class="text-muted">
+                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
+                                      title="'External' means they are neither a member of staff nor a student currently at the university. We must record this information to for compliance with funder requirements, with respect to how long a deposit is kept">
+                                </span>
+                            </span>
                             <br/>
                             <div class="radio-inline">
                                 <label>
