@@ -207,6 +207,12 @@
                                             </#list>
                                         </select>
                                     </div>
+                                    <div class="col-md-12">
+                                        <small><small>
+                                            “Edinburgh Medical School” includes Biomedical Sciences (e.g. Centre for Discovery Brain Sciences),
+                                            Clinical Sciences (e.g. MRC Centre for Inflammation Research), Molecular, Genetic and Population Health Sciences (e.g. IGMM).
+                                        </small></small>
+                                    </div>
                                 </div>
                             </div>
                             
