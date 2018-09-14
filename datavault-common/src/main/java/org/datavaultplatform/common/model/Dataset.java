@@ -22,7 +22,7 @@ public class Dataset {
     private String content;
     
     @Transient
-    private Boolean visible;
+    private Boolean visible = true;
     
     public Dataset() {}
 
