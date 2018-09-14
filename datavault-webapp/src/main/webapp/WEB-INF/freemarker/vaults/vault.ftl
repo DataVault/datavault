@@ -62,7 +62,7 @@
                         <th>Deposited By</th>
                         <th>Date and Time</th>
                         <th>Total Size of Selected Deposits</th>
-                        <th>Select Desposit(s) to be Retrieved
+                        <th>Select Deposit(s) to be Retrieved
                             <span class="glyphicon glyphicon-info-sign text-muted" aria-hidden="true" data-toggle="tooltip" 
                                 title="Please make sure you have enough space for the full contents of the vault to be copied to the location you will specify (see 'Size', below).">
                             </span>
@@ -165,9 +165,10 @@
                     </table>
                     <div class="alert alert-info" role="alert">
                         <p>
-                            All vaults are automatically closed so no more deposits can be added
-                            ONE calendar year after the grant end date or one year after the first
-                            deposit, whichever is later.
+                            You will not be able to add new deposits to this Vault once it is closed.
+                            The Vault will be closed ONE calendar year after the first deposit.
+                            Or, if you specify a Grant End Date,
+                            ONE calendar year after the Grant End Date IF that falls later than one year after the first deposit.
                         </p>
                     </div>
                 </div>

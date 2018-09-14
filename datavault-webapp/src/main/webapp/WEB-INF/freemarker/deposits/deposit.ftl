@@ -56,11 +56,11 @@
                         <td>${deposit.name?html}</td>
                     </tr>
                     <tr>
-                        <th scope="col">Desposited By</th>
+                        <th scope="col">Deposited By</th>
                         <td>${deposit.getUserID()}</td>
                     </tr>
                     <tr>
-                        <th scope="col">Desposit Size</th>
+                        <th scope="col">Deposit Size</th>
                         <td>${deposit.getSizeStr()}</td>
                     </tr>
                     <tr>
