@@ -1,12 +1,13 @@
 package org.datavaultplatform.common.response;
 
-import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
+
+import java.text.DecimalFormat;
+import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "VaultInfo")
@@ -173,9 +174,16 @@ public class VaultInfo {
     public void setVaultSize(long vaultSize) {
         this.vaultSize = vaultSize;
     }
-    
+
     public String getSizeStr() {
-        return FileUtils.byteCountToDisplaySize(vaultSize);
+        double s = vaultSize;
+        double gibibytes = s/1024/1024/1024;
+        DecimalFormat df = new DecimalFormat("#");
+        String dx = df.format(gibibytes);
+        if(dx.equals("0")){
+            return "< 1 GB";
+        }
+        return dx + " GB";
     }
 
     public int getPolicyStatus() {
