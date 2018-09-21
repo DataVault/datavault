@@ -29,6 +29,7 @@ public class Receiver {
     private String queueUser;
     private String queuePassword;
     private String tempDir;
+    private String localTempDir;
     private String metaDir;
     private Boolean chunkingEnabled;
     private Long chunkingByteSize;
@@ -78,6 +79,10 @@ public class Receiver {
      */
     public void setTempDir(String tempDir) {
         this.tempDir = tempDir;
+    }
+    
+    public void setLocalTempDir(String localTempDir) {
+        this.localTempDir = localTempDir;
     }
     
     /**
@@ -239,10 +244,18 @@ public class Receiver {
                 Path tempDirPath = Paths.get(tempDir, WorkerInstance.getWorkerName());
                 tempDirPath.toFile().mkdir();
                 
+                Path localTempDirPath = Paths.get(localTempDir, WorkerInstance.getWorkerName());
+                logger.info("About to create local temp dir");
+                if (localTempDirPath != null && ! localTempDirPath.equals(tempDirPath)) {
+                	logger.info("Creating local temp dir: " + localTempDirPath.toString());
+                	Boolean result = localTempDirPath.toFile().mkdir();
+                	logger.info("local temp dir result: " + result);
+                }
+                
                 Path metaDirPath = Paths.get(metaDir);
                 
                 Context context = new Context(
-                        tempDirPath, metaDirPath, events,
+                        tempDirPath, localTempDirPath, metaDirPath, events,
                         chunkingEnabled, chunkingByteSize,
                         encryptionEnabled, encryptionMode, 
                         vaultAddress, vaultToken, 
