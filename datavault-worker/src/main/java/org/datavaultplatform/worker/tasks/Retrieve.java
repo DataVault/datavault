@@ -24,7 +24,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 /**
@@ -292,15 +294,25 @@ public class Retrieve extends Task {
         File[] chunks = new File[numOfChunks];
         logger.info("Retrieving " + numOfChunks + " chunk(s)");
         for( int chunkNum = 1; chunkNum <= numOfChunks; chunkNum++) {
+        	// if we are using local disk temp
+        	// retrieve chunk to local disk
             Path chunkPath = context.getTempDir().resolve(tarFileName+FileSplitter.CHUNK_SEPARATOR+chunkNum);
+            Path localChunkPath = context.getLocalTempDir().resolve(tarFileName+FileSplitter.CHUNK_SEPARATOR+chunkNum);
+            // this file's path can be either tmp or localtmp
             File chunkFile = chunkPath.toFile();
+            // this file's path is always tmp
+            File tmpDirChunkFile = chunkPath.toFile();
+            if (localChunkPath != null && ! chunkPath.equals(localChunkPath)) {
+            	chunkFile = localChunkPath.toFile();
+            }
             String chunkArchiveId = archiveId+FileSplitter.CHUNK_SEPARATOR+chunkNum;
             if (! singleCopy) {
                 archiveFs.retrieve(chunkArchiveId, chunkFile, progress);
             } else {
                 archiveFs.retrieve(chunkArchiveId, chunkFile, progress, location);
             }
-            chunks[chunkNum-1] = chunkFile;
+            // add the tmp dir version of the file to the list passed to the recombine method
+            chunks[chunkNum-1] = tmpDirChunkFile;
             
             if( this.getChunksIVs().get(chunkNum) != null ) {
                 String archivedEncChunkFileHash = encChunksDigest.get(chunkNum);
@@ -330,6 +342,17 @@ public class Retrieve extends Task {
             
             if (!chunkFileHash.equals(archivedChunkFileHash)) {
                 throw new Exception("checksum failed: " + chunkFileHash + " != " + archivedChunkFileHash);
+            }
+            
+            // if everything is ok 
+            // and we are using local disk move the chunk
+            // back to temp dir
+            if (localChunkPath != null  && ! chunkPath.equals(localChunkPath)) {
+            	logger.info("Moving: " + chunkFile.toPath().toString() + " to " + chunkPath.toString());
+        		Files.move(chunkFile.toPath(), chunkPath, StandardCopyOption.REPLACE_EXISTING);
+        		logger.info("Chunk path used to be: " + chunkFile.toPath().toString());
+        		chunkFile = chunkPath.toFile();
+        		logger.info("Chunk path is now: " + chunkFile.toPath().toString());
             }
         }
         
