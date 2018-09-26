@@ -80,7 +80,10 @@
                         </td>
                         <td>${deposit.getUserID()}</td>
                         <td>${deposit.getCreationTime()?datetime}</td>
-                        <td>${deposit.getSizeStr()}</td>
+                        <td>
+                            <#if deposit.status.name() != "NOT_STARTED">
+                            ${deposit.getSizeStr()}</td>
+                            </#if>
                         <td>
                             <#if deposit.status.name() == "COMPLETE">
                             <a id="retrievebtn" class="btn btn-default pull-right"
@@ -135,7 +138,9 @@
                             </tr>
                             <tr>
                                 <th scope="col">Size</th>
-                                <td>${vault.getSizeStr()}</td>
+                                <td>
+                                    ${vault.getSizeStr()}
+                                </td>
                                 <td></td>
                             </tr>
                             <tr>

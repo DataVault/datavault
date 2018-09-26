@@ -61,7 +61,11 @@
                     </tr>
                     <tr>
                         <th scope="col">Deposit Size</th>
-                        <td>${deposit.getSizeStr()}</td>
+                        <td>
+                            <#if deposit.status.name() != "NOT_STARTED">
+                            ${deposit.getSizeStr()}
+                            </#if>
+                        </td>
                     </tr>
                     <tr>
                         <th scope="col">Description</th>
