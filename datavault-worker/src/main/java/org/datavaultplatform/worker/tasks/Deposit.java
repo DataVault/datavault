@@ -290,7 +290,9 @@ public class Deposit extends Task {
             // so we can process everything the same way
             if ( context.isChunkingEnabled() ) {
             	chunkFiles = FileSplitter.spliteFile(tarFile, context.getChunkingByteSize());
-            	this.localChunkFiles = new File[this.chunkFiles.length];
+            	if (context.getLocalTempDir() != null) {
+            		this.localChunkFiles = new File[this.chunkFiles.length];
+            	}
             } else {
             	chunkFiles = new File[1];
             	chunkFiles[0] = tarFile;
@@ -312,7 +314,12 @@ public class Deposit extends Task {
             for (int i = 0; i < chunkFiles.length; i++){
                 File chunk = chunkFiles[i];
                 // move the file from large space to smaller working space (these may be configured to be the same)
-                if (context.getLocalTempDir() != null  && ! context.getTempDir().equals(context.getLocalTempDir())) {
+                logger.info("TempDir is: " + context.getTempDir().toString());
+                if (context.getLocalTempDir() != null) {
+                	logger.info("LocalTempDir is: " + context.getLocalTempDir().toString());
+                }
+
+                if (context.getLocalTempDir() != null  && ! context.getTempDir().toString().equals(context.getLocalTempDir().toString())) {
                 	Path localChunkPath = context.getLocalTempDir().resolve(chunk.getName());
                 	logger.info("Moving: " + chunk.toPath().toString() + " to " + localChunkPath.toString());
             		Files.move(chunk.toPath(), localChunkPath, StandardCopyOption.REPLACE_EXISTING);
@@ -392,14 +399,16 @@ public class Deposit extends Task {
                 .withNextState(4));
 
             logger.info("Verifying archive package ...");
-            if (this.localChunkFiles != null) {
+            if (this.localChunkFiles != null  && this.localChunkFiles.length > 0) {
+            	logger.info("Verifying with local chunk files");
             	verifyArchive(context, localChunkFiles, chunksHash, tarFile, tarHash, chunksIVs, encChunksHash);
             } else {
+            	logger.info("Verifying with default chunk files");
             	verifyArchive(context, chunkFiles, chunksHash, tarFile, tarHash, chunksIVs, encChunksHash);
             }
 
             // delete local temp dir if we used one
-            if (context.getLocalTempDir() != null  && ! context.getTempDir().equals(context.getLocalTempDir())) {
+            if (context.getLocalTempDir() != null  && ! context.getTempDir().toString().equals(context.getLocalTempDir().toString())) {
             	File localTempDir = context.getLocalTempDir().toFile();
             	localTempDir.delete();
             }
@@ -965,13 +974,18 @@ public class Deposit extends Task {
             
             // Delete the existing temporary file
             //chunkFile.delete();
-            String archiveChunkId = archiveId+FileSplitter.CHUNK_SEPARATOR+(i+1);
+            String archiveChunkId = archiveId + FileSplitter.CHUNK_SEPARATOR + "tar";
+            if (context.isChunkingEnabled()) {
+            	archiveChunkId = archiveId+FileSplitter.CHUNK_SEPARATOR+(i+1);
+            }
             // Copy file back from the archive storage
             logger.debug("archiveChunkId: "+archiveChunkId);
             if (multipleCopies && location != null) {
-            		copyBackFromArchive(archiveStore, archiveChunkId, chunkFile, location);
+            	logger.info("Multiple copies archive retrieve");
+            	copyBackFromArchive(archiveStore, archiveChunkId, chunkFile, location);
             } else {
-            		copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
+            	logger.info("Single copy archive retrieve");
+            	copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
             }
 
             // Decryption
@@ -990,7 +1004,7 @@ public class Deposit extends Task {
             //verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
             
             // if we are using local disk move back to datastore
-            if (this.localChunkFiles != null) {
+            if (this.localChunkFiles != null && this.localChunkFiles.length > 0) {
             	Path chunkPath = context.getTempDir().resolve(chunkFile.getName());
             	logger.info("Moving: " + chunkFile.toPath().toString() + " to " + chunkPath.toString());
         		Files.move(chunkFile.toPath(), chunkPath, StandardCopyOption.REPLACE_EXISTING);
@@ -1003,7 +1017,11 @@ public class Deposit extends Task {
         
         // whether we used local space or not the global chunkfiles should be using the correct
         // path at this point
-        FileSplitter.recomposeFile(this.chunkFiles, tarFile);
+        if (context.isChunkingEnabled()) {
+        	FileSplitter.recomposeFile(this.chunkFiles, tarFile);
+        } else {
+        	tarFile = this.chunkFiles[0];
+        }
 
         // Verify the contents
         verifyTarFile(context.getTempDir(), tarFile, tarHash);
@@ -1109,6 +1127,8 @@ public class Deposit extends Task {
 
         	// Ask the driver to copy files to the temp directory
         	Progress progress = new Progress();
+        	logger.info("CopybackfromArchice file path (working): " + tarFile.toPath().toString());
+        	logger.info("CopybackfromArchice archive id (path): " + archiveId);
         	if (location == null) {
         		((Device)archiveStore).retrieve(archiveId, tarFile, progress);
         	} else {

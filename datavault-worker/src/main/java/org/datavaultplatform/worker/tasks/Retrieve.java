@@ -192,6 +192,7 @@ public class Retrieve extends Task {
                                         depositId);
                             } else {
                                 // Ask the driver to copy files to the temp directory
+                            	archiveId = archiveId + FileSplitter.CHUNK_SEPARATOR + "tar";
                                 archiveFs.retrieve(archiveId, tarFile, progress, location);
                             }
                         } finally {
@@ -238,6 +239,7 @@ public class Retrieve extends Task {
                         recomposeSingle(numOfChunks, tarFileName, context, archiveId, archiveFs, progress,
                                 archiveDigestAlgorithm, tarFile, chunksDigest, encChunksDigest, depositId);
                     } else {
+                    	archiveId = archiveId + FileSplitter.CHUNK_SEPARATOR + "tar";
                         archiveFs.retrieve(archiveId, tarFile, progress);
 
                         if (this.getTarIV() != null) {
@@ -297,7 +299,10 @@ public class Retrieve extends Task {
         	// if we are using local disk temp
         	// retrieve chunk to local disk
             Path chunkPath = context.getTempDir().resolve(tarFileName+FileSplitter.CHUNK_SEPARATOR+chunkNum);
-            Path localChunkPath = context.getLocalTempDir().resolve(tarFileName+FileSplitter.CHUNK_SEPARATOR+chunkNum);
+            Path localChunkPath = null;
+            if (context.getLocalTempDir() != null) {
+            	localChunkPath = context.getLocalTempDir().resolve(tarFileName+FileSplitter.CHUNK_SEPARATOR+chunkNum);
+            }
             // this file's path can be either tmp or localtmp
             File chunkFile = chunkPath.toFile();
             // this file's path is always tmp
@@ -369,6 +374,7 @@ public class Retrieve extends Task {
             .withUserId(userID));
         
         String tarHash = Verify.getDigest(tarFile);
+        logger.info("TarFile name: " + tarFile.getPath().toString());
         logger.info("Checksum algorithm: " + archiveDigestAlgorithm);
         logger.info("Checksum: " + tarHash);
         
