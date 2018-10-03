@@ -1,27 +1,23 @@
 package org.datavaultplatform.broker.controllers;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.commons.codec.binary.Base64;
+import org.datavaultplatform.broker.services.FilesService;
+import org.datavaultplatform.broker.services.UsersService;
+import org.datavaultplatform.common.io.FileUtils;
+import org.datavaultplatform.common.model.FileInfo;
+import org.datavaultplatform.common.model.FileStore;
+import org.datavaultplatform.common.model.User;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.HandlerMapping;
+
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.datavaultplatform.common.model.FileInfo;
-import org.datavaultplatform.broker.services.FilesService;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.HandlerMapping;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.codec.binary.Base64;
-import org.datavaultplatform.broker.services.UsersService;
-import org.datavaultplatform.common.model.FileStore;
-import org.datavaultplatform.common.model.User;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMethod;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: Robin Taylor
@@ -140,7 +136,7 @@ public class FilesController {
         if (size == null) {
             return "File information not available";
         } else {
-            return FileUtils.byteCountToDisplaySize(size);
+            return FileUtils.getGibibyteSizeStr(size);
         }
     }
     

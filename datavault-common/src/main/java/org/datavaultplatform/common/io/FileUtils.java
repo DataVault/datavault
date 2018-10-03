@@ -1,5 +1,8 @@
 package org.datavaultplatform.common.io;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+
 /**
  * This Class is an extension of {@link org.apache.commons.io.FileUtils} to add some util features required for the
  * datavault project.
@@ -44,5 +47,18 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
         }
         
         return value;
+    }
+
+    public static  String getGibibyteSizeStr(long size) {
+        double s = size;
+        double gibibytes = s/1024/1024/1024;
+        DecimalFormat df = new DecimalFormat("#.#");
+        df.setRoundingMode(RoundingMode.DOWN);
+        String dx = df.format(gibibytes);
+        if(dx.matches("0")){
+            return FileUtils.byteCountToDisplaySize(size);
+        }
+        df.setRoundingMode(RoundingMode.HALF_EVEN);
+        return df.format(gibibytes) + " GB";
     }
 }

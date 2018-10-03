@@ -2,14 +2,15 @@ package org.datavaultplatform.common.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.util.Date;
-import java.util.List;
-import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.DepositChunk;
 import org.datavaultplatform.common.model.DepositPath;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
+import org.datavaultplatform.common.io.FileUtils;
+
+import java.util.Date;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "Deposit")
@@ -186,10 +187,8 @@ public class DepositInfo {
     public void setDepositSize(long depositSize) {
         this.depositSize = depositSize;
     }
-    
-    public String getSizeStr() {
-        return FileUtils.byteCountToDisplaySize(depositSize);
-    }
+
+    public String getSizeStr() { return FileUtils.getGibibyteSizeStr(depositSize); }
 
     public List<DepositPath> getDepositPaths() {
         return depositPaths;
