@@ -221,7 +221,7 @@
                                     <strong>Review Date</strong>
                                 </label>
                                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
-                                        title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault. If on the other hand you wish the vault to be deleted, bring the review date forward so that deletion may be considered.">
+                                        title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault.">
                                 </span>
                                 <@spring.bind "vault.reviewDate" />
                                 <input class="form-control" id="reviewDate" name="reviewDate" placeholder="yyyy-mm-dd" <#if datasets?size == 0> disabled</#if>/>

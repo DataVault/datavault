@@ -22,7 +22,7 @@ public class ComputedEncryption extends Event {
     
     ComputedEncryption() {};
     public ComputedEncryption(String jobId, String depositId, HashMap<Integer, byte[]> chunkIVs, byte[] tarIV, String aesMode, String digest, HashMap<Integer, String> digests) {
-        super("Chunks ecrypted with AES/" + aesMode);
+        super("Chunks encrypted with AES/" + aesMode);
         this.eventClass = ComputedEncryption.class.getCanonicalName();
         this.chunkIVs = chunkIVs;
         this.tarIV = tarIV;
