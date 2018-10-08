@@ -251,7 +251,7 @@
 
             $( "#grantEndDate" ).datepicker();
             $( "#reviewDate" ).datepicker({
-              minDate: new Date()
+                minDate: '+1m'
             });
 
             $.validator.addMethod(
@@ -266,6 +266,25 @@
                     }
                 },
                 "Please enter a valid date in YYYY-MM-DD format."
+            );
+            $.validator.addMethod(
+                    "reviewDate",
+                    function(value, element) {
+                        // put your own logic here, this is just a (crappy) example
+
+                        if (value){
+                            var inAMonth = new Date();
+                            inAMonth.setMonth(inAMonth.getMonth() + 1);
+                            inAMonth.setHours( 0,0,0,0 );
+
+                            var selectedDate = new Date(value);
+
+                            return selectedDate >= inAMonth;
+                        } else {
+                            return true;
+                        }
+                    },
+                    "Please select a Review Date in at least a month time."
             );
 
             $('button[type="submit"]').on("click", function() {
@@ -295,7 +314,8 @@
                     },
                     reviewDate : {
                         required: true,
-                        date: true
+                        date: true,
+                        reviewDate: true
                     }
                 },
                 highlight: function (element) {
