@@ -264,7 +264,7 @@ public class VaultsController {
         return depositResponses;
     }
     
-    @RequestMapping(value = "/vaults/{vaultid}/addDataManager", method = RequestMethod.PUT)
+    @RequestMapping(value = "/vaults/{vaultid}/addDataManager", method = RequestMethod.POST)
     public VaultInfo addDataManager(@RequestHeader(value = "X-UserID", required = true) String userID,
                                    @PathVariable("vaultid") String vaultID,
                                    @RequestBody() String unn) throws Exception {
