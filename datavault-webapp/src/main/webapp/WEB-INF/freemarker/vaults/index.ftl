@@ -284,7 +284,7 @@
                             return true;
                         }
                     },
-                    "Please select a Review Date in at least a month time."
+                    "The review date must be at least one month in the future. The review date is the date at which a decision may be made about potentially deleting the data. If you believe you need the review date to be sooner, please contact the support team using the Contact button at the top of the page."
             );
 
             $('button[type="submit"]').on("click", function() {
