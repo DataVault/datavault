@@ -55,6 +55,13 @@
                 </tbody>
             </table>
         </div>
+
+        <form id="search-vaults" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/vaults/csv" method="get">
+            <div class="input-group">
+                <input type="text" class="form-control hidden" value="${query}" name="query" placeholder="Search for...">
+                <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Export to CSV</button>
+            </div>
+        </form>
     </#if>
 
 </div>

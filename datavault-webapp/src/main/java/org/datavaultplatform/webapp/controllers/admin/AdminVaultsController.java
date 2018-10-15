@@ -3,9 +3,19 @@ package org.datavaultplatform.webapp.controllers.admin;
 
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.supercsv.io.CsvBeanWriter;
+import org.supercsv.io.ICsvBeanWriter;
+import org.supercsv.prefs.CsvPreference;
+
+import java.io.IOException;
 
 /**
  * User: Stuart Lewis
@@ -14,6 +24,8 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class AdminVaultsController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminVaultsController.class);
 
     private RestService restService;
 
@@ -60,6 +72,53 @@ public class AdminVaultsController {
         }
 
         return "admin/vaults/index";
+    }
+
+    @RequestMapping(value = "/admin/vaults/csv", method = RequestMethod.GET)
+    public void exportVaults(HttpServletResponse response,
+                               @RequestParam(value = "query", required = false) String query,
+                               @RequestParam(value = "sort", required = false) String sort,
+                               @RequestParam(value = "order", required = false) String order) {
+        String theSort = sort;
+        String theOrder = order;
+        if (sort == null) theSort = "creationTime";
+        if (order == null) theOrder = "desc";
+
+        VaultInfo[] vaults = null;
+
+        if ((query == null) || ("".equals(query))) {
+            vaults = restService.getVaultsListingAll(theSort, theOrder);
+        } else {
+            vaults =  restService.searchVaults(query, theSort, theOrder);
+        }
+
+        response.setContentType("text/csv");
+
+        // creates mock data
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=\"vaults.csv\"";
+        response.setHeader(headerKey, headerValue);
+
+        String[] header = { "Vault ID", "Vault name", "Vault description", "Vault Size", "User ID", "User Name", "Policy ID", "Creation Time" };
+
+        String[] fieldMapping = { "id", "name", "description", "userID", "userName", "sizeStr", "policyID", "CreationTime" };
+
+        try {
+            // uses the Super CSV API to generate CSV data from the model data
+            ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
+
+            csvWriter.writeHeader(header);
+
+            for (VaultInfo aVault : vaults) {
+                csvWriter.write(aVault, fieldMapping);
+            }
+
+            csvWriter.close();
+
+        } catch (Exception e){
+            logger.error("IOException: "+e);
+            e.printStackTrace();
+        }
     }
 
     @RequestMapping(value = "/admin/vaults/{vaultid}", method = RequestMethod.GET)
