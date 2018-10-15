@@ -423,7 +423,7 @@ public class RestService {
     }
     
     public VaultInfo addDataManager(String vaultId, String dataManagerUUN) {
-        HttpEntity<?> response = put(brokerURL + "/vaults/" + vaultId + "/addDataManager", VaultInfo.class, dataManagerUUN);
+        HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/addDataManager", VaultInfo.class, dataManagerUUN);
         return (VaultInfo)response.getBody();
     }
     

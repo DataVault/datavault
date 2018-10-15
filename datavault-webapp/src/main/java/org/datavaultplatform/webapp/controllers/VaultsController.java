@@ -4,15 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.datavaultplatform.common.model.DataManager;
-import org.datavaultplatform.common.model.Dataset;
-import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.RetentionPolicy;
-import org.datavaultplatform.common.model.Retrieve;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
