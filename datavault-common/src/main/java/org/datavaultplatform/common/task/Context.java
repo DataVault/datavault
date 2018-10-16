@@ -10,6 +10,7 @@ public class Context {
     public enum AESMode {GCM, CBC};
 
     private Path tempDir;
+    private Path localTempDir;
     private Path metaDir;
     private EventStream eventStream;
     private Boolean chunkingEnabled;
@@ -23,13 +24,14 @@ public class Context {
     private String vaultSslPEMPath;
     
     public Context() {};
-    public Context(Path tempDir, Path metaDir, EventStream eventStream,
+    public Context(Path tempDir, Path localTempDir, Path metaDir, EventStream eventStream,
                    Boolean chunkingEnabled, Long chunkingByteSize,
                    Boolean encryptionEnabled, AESMode encryptionMode, 
                    String vaultAddress, String vaultToken,
                    String vaultKeyPath, String vaultKeyName,
                    String vaultSslPEMPath) {
         this.tempDir = tempDir;
+        this.localTempDir = localTempDir;
         this.metaDir = metaDir;
         this.eventStream = eventStream;
         this.chunkingEnabled = chunkingEnabled;
@@ -49,6 +51,14 @@ public class Context {
 
     public void setTempDir(Path tempDir) {
         this.tempDir = tempDir;
+    }
+    
+    public Path getLocalTempDir() {
+        return this.localTempDir;
+    }
+
+    public void setLocalTempDir(Path localTempDir) {
+        this.localTempDir = localTempDir;
     }
 
     public Path getMetaDir() {

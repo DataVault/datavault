@@ -37,6 +37,7 @@ public class DepositsController {
     private Sender sender;
     private String optionsDir;
 	private String tempDir;
+	private String localTempDir;
     private String bucketName;
     private String region;
     private String awsAccessKey;
@@ -90,6 +91,10 @@ public class DepositsController {
     
     public void setTempDir(String tempDir) {
 		this.tempDir = tempDir;
+	}
+    
+    public void setLocalTempDir(String localTempDir) {
+		this.localTempDir = localTempDir;
 	}
     
     public void setOptionsDir(String optionsDir) {

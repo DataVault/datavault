@@ -196,6 +196,7 @@ public class Encryption {
      */
     public static void doByteBufferFileCrypto(File inputFile, File outputFile, Cipher cipher) throws Exception {
         byte[] plainBuf = new byte[SMALL_BUFFER_SIZE];
+        logger.info("DoByteBuffereFileCrypto file path: "  + inputFile.toPath().toString());
         try (InputStream in = Files.newInputStream(inputFile.toPath());
                 OutputStream out = Files.newOutputStream(outputFile.toPath())) {
             int nread;

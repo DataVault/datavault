@@ -20,6 +20,7 @@
         <property name="queueUser" value="${queue.user}"/>
         <property name="queuePassword" value="${queue.password}"/>
         <property name="tempDir" value="${tempDir}"/>
+        <property name="localTempDir" value="${localTempDir}"/>
         <property name="metaDir" value="${metaDir}"/>
         <property name="chunkingEnabled" value="${chunking.enabled:false}"/>
         <property name="chunkingByteSize" value="${chunking.size:0}"/>
