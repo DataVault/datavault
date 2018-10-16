@@ -37,6 +37,10 @@ public class EventListener implements MessageListener {
     	EMAIL_SUBJECTS.put("admin-deposit-start", "Confirmation - a new DataVault deposit is starting.");
     	EMAIL_SUBJECTS.put("admin-deposit-complete", "Confirmation - a new DataVault deposit is complete.");
     	EMAIL_SUBJECTS.put("admin-deposit-error", "DataVault ERROR - attempted deposit failed");
+    	EMAIL_SUBJECTS.put("user-deposit-retrievestart", "Confirmation - your new DataVault retrieval is starting.");
+    	EMAIL_SUBJECTS.put("user-deposit-retrievecomplete", "Confirmation - your new DataVault retrieval is complete.");
+    	EMAIL_SUBJECTS.put("admin-deposit-retrievestart", "Confirmation - a new DataVault retrieval is starting.");
+    	EMAIL_SUBJECTS.put("admin-deposit-retrievecomplete", "Confirmation - a new DataVault retrieval is complete.");
     }
 
     private static final Logger logger = LoggerFactory.getLogger(EventListener.class);
@@ -340,17 +344,24 @@ public class EventListener implements MessageListener {
                 String type = "error";
                 this.sendEmails(deposit, errorEvent, type, "user-deposit-error.vm", "group-admin-deposit-error.vm");
             } else if (concreteEvent instanceof RetrieveStart) {
-
+            	RetrieveStart startEvent = (RetrieveStart)concreteEvent;
                 // Update the Retrieve status
                 Retrieve retrieve = retrievesService.getRetrieve(concreteEvent.getRetrieveId());
                 retrieve.setStatus(Retrieve.Status.IN_PROGRESS);
                 retrievesService.updateRetrieve(retrieve);
+                
+                String type = "retrievestart";
+                this.sendEmails(deposit, startEvent, type, "user-retrieve-start.vm", "group-admin-retrieve-start.vm");
             } else if (concreteEvent instanceof RetrieveComplete) {
 
+            	RetrieveComplete completeEvent = (RetrieveComplete)concreteEvent;
                 // Update the Retrieve status
                 Retrieve retrieve = retrievesService.getRetrieve(concreteEvent.getRetrieveId());
                 retrieve.setStatus(Retrieve.Status.COMPLETE);
                 retrievesService.updateRetrieve(retrieve);
+                
+                String type = "retrievecomplete";
+                this.sendEmails(deposit, completeEvent, type, "user-retrieve-complete.vm", "group-admin-retrieve-complete.vm");
             }
 
         } catch (Exception e) {
@@ -364,7 +375,9 @@ public class EventListener implements MessageListener {
         Group group = vault.getGroup();
         User depositUser = usersService.getUser(event.getUserId());
         
+        logger.info("User title key: " + "user-deposit-" + type);
         String userTitle = EventListener.EMAIL_SUBJECTS.get("user-deposit-" + type);
+        logger.info("Admin title key: " + "admin-deposit-" + type);
         String adminTitle = EventListener.EMAIL_SUBJECTS.get("admin-deposit-" + type);
         
         HashMap<String, Object> model = new HashMap<String, Object>();
