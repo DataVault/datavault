@@ -139,6 +139,22 @@
             <artifactId>vault-java-driver</artifactId>
             <version>3.1.0</version>
         </dependency>
+
+        <!-- Oracle Cloud Storge -->
+        <dependency>
+            <groupId>oracle.cloudstorage.ftm</groupId>
+            <artifactId>ftm-api</artifactId>
+            <version>2.4.5</version>
+            <scope>system</scope>
+            <systemPath>${root.basedir}/datavault-common/src/main/resources/ftm-api-2.4.2.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>oracle.cloudstorage.ftm</groupId>
+            <artifactId>low-level-api-core</artifactId>
+            <version>1.14.19</version>
+            <scope>system</scope>
+            <systemPath>${root.basedir}/datavault-common/src/main/resources/low-level-api-core-1.14.19.jar</systemPath>
+        </dependency>
     </dependencies>
     
     <build>
