@@ -1,0 +1,22 @@
+<html>
+	<body>
+		<p>New retrieval from the University of Edinburgh DataVault. Deposit details:</p>
+		<ul>
+			<li>Deposit name: ${deposit-name}</li>
+			<li>Size: ${size-bytes} bytes</li>
+			<li>Date of deposit: ${timestamp}</li>
+			<li>Contains personal data: ${hasPersonalData}</li>
+			<li>Deposit ID: ${deposit-id}</li>
+			<li>Depositor name: ${user-firstname} ${user-lastname}</li>
+			<li>Depositor ID: ${user-id}</li>
+		</ul>
+		
+		<p>The deposit belongs to the following Vault:</p>
+		<ul>
+			<li>Vault name: ${vault-name}</li>
+			<li>School: ${group-name}</li>
+			<li>Vault ID: ${vault-id}</li>
+			<li>Review date: ${vault-retention-expiry}</li>
+		</ul>
+	</body>
+</html>
