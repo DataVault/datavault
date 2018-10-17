@@ -13,6 +13,11 @@
             <directory>src/datavault-home</directory>
             <outputDirectory>datavault-home</outputDirectory>
         </fileSet>
+
+        <fileSet>
+            <directory>${root.basedir}/datavault-common/src/main/resources</directory>
+            <outputDirectory>datavault-home/lib</outputDirectory>
+        </fileSet>
     </fileSets>
 
     <dependencySets>
