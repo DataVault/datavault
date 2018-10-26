@@ -106,6 +106,16 @@ public class VaultsController {
         String vaultUrl = "/vaults/" + vault.getID() + "/";
         return "redirect:" + vaultUrl;        
     }
+
+
+    @RequestMapping(value = "/vaults/{vaultid}/updateVaultDescription", method = RequestMethod.POST)
+    public String updateVaultDescription(ModelMap model,
+                                 @PathVariable("vaultid") String vaultID,
+                                 @RequestParam("description") String description ) {
+        VaultInfo vault = restService.updateVaultDescription(vaultID, description);
+        String vaultUrl = "/vaults/" + vault.getID() + "/";
+        return "redirect:" + vaultUrl;
+    }
 }
 
 

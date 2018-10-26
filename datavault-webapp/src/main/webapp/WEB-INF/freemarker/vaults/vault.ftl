@@ -31,6 +31,34 @@
             </div>
         </div>
     </div>
+
+    <div id="update-vault-description" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="updateVaultDescription" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form id="update-vault-description-form" class="form" role="form" action="updateVaultDescription" method="post">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <h4 class="modal-title" id="addDataManger">Add Data Manager</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="control-label">Vault description:</label>
+                            <@spring.bind "vault.description" />
+                            <textarea type="text" class="form-control" name="description" id="description" rows="4" cols="60"></textarea>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="submitAction" name="action" value="submit"/>
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="submit" id="update-vault-description-btn" class="btn btn-primary btn-ok">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     
     <ol class="breadcrumb">
         <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
@@ -131,7 +159,7 @@
                                 <th scope="col">Description</th>
                                 <td>${vault.description?html}</td>
                                 <td>
-                                    <button type="button" class="btn btn-default pull-right" disabled>
+                                    <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#update-vault-description">
                                         Edit
                                     </button>
                                 </td>

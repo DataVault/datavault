@@ -297,9 +297,22 @@ public class VaultsController {
                                    @PathVariable("dataManagerID") String dataManagerID) throws Exception {
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
-        
+
         dataManagersService.deleteDataManager(dataManagerID);
-        
+
+        return vault.convertToResponse();
+    }
+
+    @RequestMapping(value = "/vaults/{vaultid}/updateVaultDescription", method = RequestMethod.POST)
+    public VaultInfo updateVaultDescription(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                    @PathVariable("vaultid") String vaultID,
+                                    @RequestBody() String description) throws Exception {
+        User user = usersService.getUser(userID);
+        Vault vault = vaultsService.getUserVault(user, vaultID);
+
+        vault.setDescription(description);
+        vaultsService.updateVault(vault);
+
         return vault.convertToResponse();
     }
 }

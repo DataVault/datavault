@@ -106,6 +106,8 @@
         <property name="host" value="${mail.host}"/>
         <property name="port" value="${mail.port}"/>
         <property name="protocol" value="smtp"/>
+        <!-- <property name="username" value="${mail.username}"/>
+        <property name="password" value="${mail.password}"/>-->
         <property name="defaultEncoding" value="UTF-8"/>
         <property name="javaMailProperties">
             <props>

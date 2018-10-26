@@ -492,4 +492,9 @@ public class RestService {
     public void deleteArchiveStore(String archiveStoreId) {
         delete(brokerURL + "/admin/archivestores/" + archiveStoreId, String.class);
     }
+
+    public VaultInfo updateVaultDescription(String vaultId, String vaultDescription) {
+        HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/updateVaultDescription", VaultInfo.class, vaultDescription);
+        return (VaultInfo)response.getBody();
+    }
 }

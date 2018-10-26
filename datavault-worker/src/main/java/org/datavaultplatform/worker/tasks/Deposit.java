@@ -780,18 +780,18 @@ public class Deposit extends Task {
         }
         
         // Decompress to the temporary directory
-        File bagDir = Tar.unTar(tarFile, tempPath);
+        //File bagDir = Tar.unTar(tarFile, tempPath);
         
         // Validate the bagit directory
-        if (!Packager.validateBag(bagDir)) {
-            throw new Exception("Bag is invalid");
-        } else {
-            logger.info("Bag is valid");
-        }
+        //if (!Packager.validateBag(bagDir)) {
+        //    throw new Exception("Bag is invalid");
+        //} else {
+        //    logger.info("Bag is valid");
+        //}
         
         // Cleanup
         logger.info("Cleaning up ...");
-        FileUtils.deleteDirectory(bagDir);
+        //FileUtils.deleteDirectory(bagDir);
         tarFile.delete();
     }
     
