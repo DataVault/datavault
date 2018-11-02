@@ -1,4 +1,6 @@
 language: java
+jdk:
+  - oraclejdk8
 
 sudo: required
 
@@ -19,6 +21,7 @@ before_install:
 script: 
   # docker needs jar file to start
   - mvn clean test package
+  - service docker status
   - docker-compose build
   - docker-compose up -d rabbitmq mysql vault vault-administration
   - sleep 60 # wait that containers are ready
