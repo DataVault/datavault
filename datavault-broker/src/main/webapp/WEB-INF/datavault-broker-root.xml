@@ -85,6 +85,7 @@
     </bean>
 
     <bean id="externalMetadataService" class="org.datavaultplatform.broker.services.ExternalMetadataService">
+    	<property name="flatFileLocation" value="${flatfile.location:/tmp/}" />
         <property name="metadataURL" value="${metadata.url}" />
         <property name="datasetDAO" ref="datasetDAO" />
         <property name="usersService" ref="usersService" />
