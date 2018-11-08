@@ -14,7 +14,7 @@ services:
 before_install:
   - docker-compose rm -f
 
-script: build
+script:
   # Run maven unit test
   - mvn clean test package
   # First run the maven build container (also run the unit test)
