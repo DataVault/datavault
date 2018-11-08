@@ -1,4 +1,4 @@
-version: '2.1'
+version: '3'
 services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -31,8 +31,12 @@ services:
       MYSQL_PASSWORD: datavault
     networks:
       - dbnet
-    volumes:
-      - ./docker/mysql:/var/lib/mysql
+
+  maven-build:
+    image: datavault/maven-build
+    build:
+      context: .
+      dockerfile: maven.Dockerfile
 
   workers:
     build:
@@ -53,6 +57,7 @@ services:
       - vault
     depends_on:
       - rabbitmq
+      - maven-build
 
   broker:
     build:

@@ -12,25 +12,30 @@ services:
   - docker
   
 before_install:
-  # - setup_docker.sh
-  - mvn install:install-file -Dfile=datavault-common/src/main/resources/ftm-api-2.4.2.jar -DgroupId=oracle.cloudstorage.ftm -DartifactId=ftm-api -Dversion=1.0 -Dpackaging=jar
-  - mvn install:install-file -Dfile=datavault-common/src/main/resources/low-level-api-core-1.14.19.jar -DgroupId=oracle.cloudstorage.ftm -DartifactId=low-level-api-core -Dversion=1.0 -Dpackaging=jar
   - docker-compose rm -f
-  - docker-compose pull
 
-script: 
-  # docker needs jar file to start
+script: build
+  # Run maven unit test
   - mvn clean test package
-  - service docker status
-  - docker-compose build
+  # First run the maven build container (also run the unit test)
+  - docker-compose build maven-build
+  # Start required services
   - docker-compose up -d rabbitmq mysql vault vault-administration
   - sleep 60 # wait that containers are ready
+  # Make sure rabbitmq is running properly
   - docker-compose logs rabbitmq
   - docker-compose exec rabbitmq rabbitmqctl authenticate_user datavault datavault
+  # Build the workers container and run
+  - docker-compose build workers
   - docker-compose up -d workers
+  # Delete unused containers
+  - docker-compose rm -f maven-build
+  - docker-compose rm -f vault-administration
+  # Check everything is running as expected
   - sleep 60 # wait that container is ready
   - docker-compose logs workers
   - docker-compose ps
+  # Run integration tests
   - mvn verify -P integration-test
   - sed -i 's/chunking\.enabled = true/chunking.enabled = false/' docker/config/datavault.properties
   - docker-compose restart workers

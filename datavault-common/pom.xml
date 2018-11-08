@@ -95,12 +95,16 @@
         <dependency>
     		<groupId>oracle.cloudstorage.ftm</groupId>
     		<artifactId>ftm-api</artifactId>
-    		<version>1.0</version>
-  		</dependency>    
+    		<version>2.4.2</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/ftm-api-2.4.2.jar</systemPath>
+  		</dependency>
         <dependency>
-                <groupId>oracle.cloudstorage.ftm</groupId>
-                <artifactId>low-level-api-core</artifactId>
-                <version>1.0</version>
+            <groupId>oracle.cloudstorage.ftm</groupId>
+            <artifactId>low-level-api-core</artifactId>
+            <version>1.14.19</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/low-level-api-core-1.14.19.jar</systemPath>
         </dependency>
         <dependency>
     		<groupId>org.glassfish</groupId>
