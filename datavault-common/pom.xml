@@ -97,14 +97,14 @@
             <artifactId>ftm-api</artifactId>
             <version>2.4.2</version>
             <scope>system</scope>
-            <systemPath>${root.basedir}/datavault-common/src/main/resources/ftm-api-2.4.2.jar</systemPath>
+            <systemPath>${root.basedir}/lib/ftm-api-2.4.2.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>oracle.cloudstorage.ftm</groupId>
             <artifactId>low-level-api-core</artifactId>
             <version>1.14.19</version>
             <scope>system</scope>
-            <systemPath>${root.basedir}/datavault-common/src/main/resources/low-level-api-core-1.14.19.jar</systemPath>
+            <systemPath>${root.basedir}/lib/low-level-api-core-1.14.19.jar</systemPath>
         </dependency>
 
         <dependency>
