@@ -4,7 +4,7 @@
 		<ul>
 			<li>Deposit name: ${deposit-name}</li>
 			<li>Size: ${size-bytes} bytes</li>
-			<li>Date of deposit: ${timestamp}</li>
+			<li>Date of retrieval: ${timestamp}</li>
 			<li>Contains personal data: ${hasPersonalData}</li>
 			<li>Deposit ID: ${deposit-id}</li>
 			<li>Depositor name: ${user-firstname} ${user-lastname}</li>
