@@ -13,8 +13,8 @@ COPY datavault-common/pom.xml /tmp/datavault-common/pom.xml
 COPY datavault-webapp/pom.xml /tmp/datavault-webapp/pom.xml
 COPY datavault-worker/pom.xml /tmp/datavault-worker/pom.xml
 COPY pom.xml /tmp
-COPY lib/ftm-api-2.4.2.jar /tmp/lib
-COPY lib/low-level-api-core-1.14.19.jar /tmp/lib
+COPY lib/ftm-api-2.4.2.jar /tmp/lib/ftm-api-2.4.2.jar
+COPY lib/low-level-api-core-1.14.19.jar /tmp/lib/ftm-api-2.4.2.jar
 WORKDIR /tmp
 RUN mvn dependency:go-offline --fail-never
 # The dependency:go-offline gets a lot of the dependencies, but not all. This would get more, but not sure about other implications
