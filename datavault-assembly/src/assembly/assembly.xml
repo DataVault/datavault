@@ -15,7 +15,7 @@
         </fileSet>
 
         <fileSet>
-            <directory>${root.basedir}/datavault-common/src/main/resources</directory>
+            <directory>${root.basedir}/lib</directory>
             <outputDirectory>datavault-home/lib</outputDirectory>
         </fileSet>
     </fileSets>
