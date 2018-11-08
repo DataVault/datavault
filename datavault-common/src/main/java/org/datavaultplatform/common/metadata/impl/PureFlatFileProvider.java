@@ -19,19 +19,30 @@ public class PureFlatFileProvider implements Provider {
     List<Dataset> datasets = new ArrayList<>();
     public static final String TITLE = "title";
     public static final String XML = "xml";
-    public static final String  DATASET_DISPLAY_FILE_PATH = "/tmp/datasetDisplay.flat";
-    public static final String  DATASET_FULL_FILE_PATH = "/tmp/datasetFull.flat";
-    public static final String  PERSON_FILE_PATH = "/tmp/person.flat";
+    private String flatFileDir = "/tmp/";
+    public static final String DATASET_DISPLAY_FILE_NAME = "datasetDisplay.flat";
+    public static final String DATASET_FULL_FILE_NAME = "datasetFull.flat";
+    public static final String PERSON_FILE_NAME = "person.flat";
     private static final String PURE_VALIDATED = "Validated";
     
     public PureFlatFileProvider() {
+    }
+    
+    public void setFlatFileDir(String flatFileDir) {
+    	System.out.println("Setting flat file dir to : " + flatFileDir);
+    	this.flatFileDir = flatFileDir;
+    }
+    
+    public String getFlatFileDir() {
+    	return this.flatFileDir;
     }
     
     //update view to grey out non validated datasets
     
     private Map<String, String> processPersonFlatFile() throws IOException {
     	Map<String, String> retVal = new HashMap<String, String>();
-    	File personFile = new File(PureFlatFileProvider.PERSON_FILE_PATH);
+    	System.out.println("flat file dir is : " + this.getFlatFileDir());
+    	File personFile = new File(this.getFlatFileDir() + PureFlatFileProvider.PERSON_FILE_NAME);
     	if (personFile.exists()) {
 	    	LineIterator personIt = null;
 			try {
@@ -54,7 +65,8 @@ public class PureFlatFileProvider implements Provider {
     
     private Map<String, Map<String, List<String>>> processDatasetDisplayFlatFile() throws IOException {
     	Map<String, Map<String, List<String>>> retVal = new HashMap<String, Map<String, List<String>>>();
-    	File dsDisplayFile = new File(PureFlatFileProvider.DATASET_DISPLAY_FILE_PATH);
+    	System.out.println("flat file dir is : " + this.getFlatFileDir());
+    	File dsDisplayFile = new File(this.getFlatFileDir() + PureFlatFileProvider.DATASET_DISPLAY_FILE_NAME);
     	if (dsDisplayFile.exists()) {
 	    	LineIterator displayIt = null;
 			try {
@@ -87,7 +99,8 @@ public class PureFlatFileProvider implements Provider {
     
     private Map<String, Map<String, String>> processDatasetFullFlatFile() throws IOException {
     	Map<String, Map<String, String>> retVal = new HashMap<String, Map<String,String>>();
-        File dsFullFile  = new File(PureFlatFileProvider.DATASET_FULL_FILE_PATH);
+    	System.out.println("flat file dir is : " + this.getFlatFileDir());
+        File dsFullFile  = new File(this.getFlatFileDir() + PureFlatFileProvider.DATASET_FULL_FILE_NAME);
         if (dsFullFile.exists()) {
 	        LineIterator fullIt = null;
 			try {

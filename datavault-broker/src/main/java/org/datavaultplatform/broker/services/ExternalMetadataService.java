@@ -15,6 +15,7 @@ import java.util.Map;
 public class ExternalMetadataService {
 
     private String metadataURL;
+    private String flatFileLocation;
     private Provider metadataProvider;
     private DatasetDAO datasetDAO;
     private UsersService usersService;
@@ -24,13 +25,20 @@ public class ExternalMetadataService {
 		this.usersService = usersService;
 	}
     
+    public void setFlatFileLocation(String flatFileLocation) {
+    	System.out.println("Setting flat file location to : " + flatFileLocation);
+		this.flatFileLocation = flatFileLocation;
+	}
+    
     public void setMetadataURL(String metadataURL) {
         this.metadataURL = metadataURL;
         
         if (metadataURL.equals("")) {
             this.metadataProvider = new MockProvider();
         } else {
-        	this.metadataProvider = new PureFlatFileProvider();
+        	Provider prov = new PureFlatFileProvider();
+        	((PureFlatFileProvider) prov).setFlatFileDir(this.flatFileLocation);
+        	this.metadataProvider = prov;
             //this.metadataProvider = new PureProvider(metadataURL);
         }
     }
