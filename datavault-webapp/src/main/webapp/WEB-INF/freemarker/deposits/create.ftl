@@ -151,8 +151,8 @@
                     // Create the tree inside the "tree" element.
                     $("#tree").fancytree({
                         source: {
-                                url: "${springMacroRequestContext.getContextPath()}/files",
-                                cache: false
+                            url: "${springMacroRequestContext.getContextPath()}/files",
+                            cache: false
                         },
                         lazyLoad: function(event, data){
                             var node = data.node;
@@ -165,12 +165,15 @@
                                 },
                                 cache: false
                             };
-                            window.setTimeout(function(){  // Simulate a slow Ajax request
-                                if(node.children.length == 0) {
-                                    $("#tree-error").html("DataVault could not access the location you specified. Please check that you have provided the correct hostname, port number and have copied the authentication key to the location. It can take several minutes before the connection between Datavault and the location is set, so please reload the page and try again. If the problem persists and you need assistance please contact the DataVault support team.");
-                                    $("#tree-error").show();
-                                }
-                            }, 3000);
+                        },
+                        loadChildren: function(event, data) {
+                            var node = data.node;
+                            if(node != null && !node.key.includes('/') && node.children.length == 0) {
+                                $("#tree-error").html("DataVault could not access the location you specified. Please check that you have provided the correct hostname, port number and have copied the authentication key to the location. It can take several minutes before the connection between Datavault and the location is set, so please reload the page and try again. If the problem persists and you need assistance please contact the DataVault support team.");
+                                $("#tree-error").show();
+                            }else{
+                                $("#tree-error").hide();
+                            }
                         },
                         selectMode: 1,
                         activate: function(event, data) {
