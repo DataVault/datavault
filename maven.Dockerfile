@@ -22,12 +22,6 @@ RUN curl -sLo /usr/local/bin/wait-for-it https://raw.githubusercontent.com/vishn
 # The dependency:go-offline gets a lot of the dependencies, but not all. This would get more, but not sure about other implications
 #RUN mvn -s /usr/share/maven/ref/settings-docker.xml install --fail-never
 
-#RUN mvn clean package --projects datavault-common
-#RUN mvn clean package --projects datavault-broker
-#RUN mvn clean package --projects datavault-webapp
-#RUN mvn clean package --projects datavault-worker
-#RUN mvn clean package --projects datavault-assembly
-
 WORKDIR /usr/src
 
 # By default this is empty, but if you've built the package locally (without Docker) you can speed up repeated builds by copying your ~/.m2/repository into docker/m2/repository
