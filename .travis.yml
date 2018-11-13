@@ -12,6 +12,8 @@ services:
   - docker
   
 before_install:
+  - mvn install:install-file -Dfile=lib/ftm-api-2.4.2.jar -DgroupId=oracle.cloudstorage.ftm -DartifactId=ftm-api -Dversion=1.0 -Dpackaging=jar
+  - mvn install:install-file -Dfile=lib/low-level-api-core-1.14.19.jar -DgroupId=oracle.cloudstorage.ftm -DartifactId=low-level-api-core -Dversion=1.0 -Dpackaging=jar
   - docker-compose rm -f
 
 script:
