@@ -7,8 +7,8 @@ Datavault is using Docker for several purpose:
 
 ## Development
 
-For development you can either use the main `docker-compose.yml` file which will keep everything contain and avoid mixed
-up between your local environment and the datavault environment.
+For development you can either use the main `docker-compose.yml` file which will keep everything contained 
+and avoid mixing configurations between your local environment and the datavault environment.
 
 N.B.: You'll notice that some commands require `sudo`, this is only because the `mysql` container has some file in the
 shared volume that can only be access by using `sudo`. This can normally be avoid by running the following command:
@@ -50,13 +50,11 @@ Now we can start Datavault services one by one or all together:
 ### Redeploy
 
 Once you are done developping awesome features for datavault, you don't need to restart every containers, you can just
-rebuild your project.
-
-    sudo docker-compose up -d --build maven-build
-
-and only rebuild the containers affected with the code change
+rebuild the container you need.
 
     docker-compose up -d --build web
+
+This should automatically trigger a maven build of the new code in the `maven-build` container and update the web container.
 
 ### Clean up
 
@@ -81,7 +79,7 @@ Only use this file if you know what you are doing as it hasn't been optimised.
 
 In the `.travis.yml`, we use the docker service in order to run our integration test.
 
-Integration tests require the database, rabbitMQ and Hashicorp Vault and a worker to run.
+Integration tests only require the database, rabbitMQ and Hashicorp Vault and a worker to run.
 
 At the moment the test simply send request to RabbitMQ, observe the worker and verify that the tasks have been properly
 executed. 

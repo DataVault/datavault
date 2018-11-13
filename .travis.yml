@@ -18,9 +18,7 @@ before_install:
 
 script:
   # Run maven unit test
-  - mvn clean test package
-  # First run the maven build container (also run the unit test)
-  - docker-compose up -d --build maven-build
+  - mvn clean test
   # Start required services
   - docker-compose up -d rabbitmq mysql vault vault-administration
   # Check everything is running as expected
