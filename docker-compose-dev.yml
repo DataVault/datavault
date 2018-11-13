@@ -37,6 +37,9 @@ services:
     build:
       context: .
       dockerfile: maven.Dockerfile
+    volumes:
+      - .docker/m2/repository:/root/.m2/repository
+      - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home:/usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home
 
   workers:
     build:
@@ -72,9 +75,9 @@ services:
       - ./docker/config:/docker_datavault-home/config/
       - ./docker/keystore:/docker_datavault-home/keystore/
       - ./docker/scripts:/docker_datavault-home/scripts/
-#      - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib:/docker_datavault-home/lib
-#      - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/webapps:/docker_datavault-home/webapps
-#      - ./datavault-assembly/src/datavault-home/config/mail-templates:/docker_datavault-home/config/mail-templates
+      - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib:/docker_datavault-home/lib
+      - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/webapps:/docker_datavault-home/webapps
+      - ./datavault-assembly/src/datavault-home/config/mail-templates:/docker_datavault-home/config/mail-templates
     networks:
       - webapp
       - dbnet
@@ -98,8 +101,8 @@ services:
       - ./docker/tmp/Users:/Users:rw
       - ./docker/config:/docker_datavault-home/config/
       - ./docker/scripts:/docker_datavault-home/scripts/
-#      - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib:/docker_datavault-home/lib
-#      - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/webapps:/docker_datavault-home/webapps
+      - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib:/docker_datavault-home/lib
+      - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/webapps:/docker_datavault-home/webapps
       - ./docker/pure:/tmp/
     networks:
       - webapp
