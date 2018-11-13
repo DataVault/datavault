@@ -1,3 +1,6 @@
+FROM datavault/maven-build:latest
+# will trigger the maven build
+
 FROM tomcat:7-jre8-alpine
 
 MAINTAINER William Petit <w.petit@ed.ac.uk>
@@ -8,10 +11,10 @@ ENV DATAVAULT_HOME "/docker_datavault-home"
 
 RUN apk add --no-cache mysql curl su-exec
 
-COPY --from=datavault/maven-build /usr/local/bin/ep /usr/local/bin/ep
-COPY --from=datavault/maven-build /usr/local/bin/wait-for-it /usr/local/bin/wait-for-it
-COPY --from=datavault/maven-build /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib ${DATAVAULT_HOME}/lib
-COPY --from=datavault/maven-build /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/webapps ${DATAVAULT_HOME}/webapps
+COPY --from=0 /usr/local/bin/ep /usr/local/bin/ep
+COPY --from=0 /usr/local/bin/wait-for-it /usr/local/bin/wait-for-it
+COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib ${DATAVAULT_HOME}/lib
+COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/webapps ${DATAVAULT_HOME}/webapps
 
 COPY docker/config ${DATAVAULT_HOME}/config
 COPY docker/scripts ${DATAVAULT_HOME}/scripts

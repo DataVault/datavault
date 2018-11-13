@@ -1,3 +1,6 @@
+FROM datavault/maven-build:latest
+# will trigger the maven build
+
 FROM openjdk:8-jre-alpine
 
 MAINTAINER William Petit <w.petit@ed.ac.uk>
@@ -8,9 +11,9 @@ RUN apk add --no-cache bash curl su-exec
 
 RUN mkdir -p ${DATAVAULT_HOME}/lib
 
-COPY --from=datavault/maven-build /usr/local/bin/ep /usr/local/bin/ep
-COPY --from=datavault/maven-build /usr/local/bin/wait-for-it /usr/local/bin/wait-for-it
-COPY --from=datavault/maven-build /usr/src/datavault-worker/target/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar ${DATAVAULT_HOME}/lib/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar
+COPY --from=0 /usr/local/bin/ep /usr/local/bin/ep
+COPY --from=0 /usr/local/bin/wait-for-it /usr/local/bin/wait-for-it
+COPY --from=0 /usr/src/datavault-worker/target/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar ${DATAVAULT_HOME}/lib/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar
 
 COPY docker/config ${DATAVAULT_HOME}/config
 COPY docker/scripts ${DATAVAULT_HOME}/scripts
