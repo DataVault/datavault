@@ -114,10 +114,15 @@
                             </#if>
                         <td>
                             <#if deposit.status.name() == "COMPLETE">
-                            <a id="retrievebtn" class="btn btn-default pull-right"
-                               href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve">
-                                <span class="fa fa-upload fa-rotate-180" aria-hidden="true"></span> Retrieve
-                            </a>
+                                <div class="pull-right">
+                                    <#if deposit.hasPersonalData == true>
+                                        <span class="label label-info" style="margin-right: 10px">Personal data</span>
+                                    </#if>
+                                    <a id="retrievebtn" class="btn btn-default"
+                                       href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve">
+                                        <span class="fa fa-upload fa-rotate-180" aria-hidden="true"></span> Retrieve
+                                    </a>
+                                </div>
                             <#elseif deposit.status.name() == "FAILED">
                             <span class="label label-danger pull-right">Failed</span>
                             <#elseif deposit.status.name() == "NOT_STARTED">

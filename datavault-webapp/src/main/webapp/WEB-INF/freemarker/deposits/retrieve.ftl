@@ -26,7 +26,11 @@
                     </h2>
                     
                     <br/>
-                    
+
+                    <#if deposit.hasPersonalData == true>
+                        <div class="alert alert-info" role="alert"><strong>Contains personal data!</strong><br/>Statement: ${deposit.getPersonalDataStatement()}</div>
+                    </#if>
+
                     <form id="retrieve-deposit" class="form" role="form" action="" method="post">
                         
                         <div class="form-group">
