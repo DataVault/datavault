@@ -15,7 +15,7 @@
 		<ul>
 			<li>Vault name: ${vault-name}</li>
 			<li>Vault ID: ${vault-id}</li>
-			<li>Review date: ${vault-retention-expiry}</li>
+			<li>Review date: ${vault-review-date}</li>
 		</ul>
 		<p>A deposit might fail because some of the files in one of the folders from which the data were being copied were moved or edited, causing the checksums to not match.</p>
 		

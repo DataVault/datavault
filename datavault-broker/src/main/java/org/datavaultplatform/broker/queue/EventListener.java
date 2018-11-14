@@ -386,7 +386,8 @@ public class EventListener implements MessageListener {
         model.put("deposit-id", deposit.getID());
         model.put("vault-name", vault.getName());
         model.put("vault-id", vault.getID());
-        model.put("vault-retention-expiry", vault.getRetentionPolicyExpiry());
+//        model.put("vault-retention-expiry", vault.getRetentionPolicyExpiry());
+        model.put("vault-review-date", vault.getReviewDate());
         model.put("user-id", depositUser.getID());
         model.put("user-firstname", depositUser.getFirstname());
         model.put("user-lastname", depositUser.getLastname());
