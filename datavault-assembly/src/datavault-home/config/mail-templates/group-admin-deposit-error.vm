@@ -15,7 +15,7 @@
 		<ul>
 			<li>Vault name: ${vault-name}</li>
 			<li>Vault ID: ${vault-id}</li>
-			<li>Review date: ${vault-retention-expiry}</li>
+			<li>Review date: ${vault-review-date}</li>
 		</ul>
 		<p>Error details:</p>
 		<p>${error-message}</p>

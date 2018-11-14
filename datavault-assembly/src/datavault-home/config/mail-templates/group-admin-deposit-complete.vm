@@ -16,7 +16,7 @@
 			<li>Vault name: ${vault-name}</li>
 			<li>School: ${group-name}</li>
 			<li>Vault ID: ${vault-id}</li>
-			<li>Review date: ${vault-retention-expiry}</li>
+			<li>Review date: ${vault-review-date}</li>
 		</ul>
 	</body>
 </html>
