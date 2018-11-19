@@ -33,10 +33,10 @@ public class EventListener implements MessageListener {
     	EMAIL_SUBJECTS = new HashMap<String, String>();
     	EMAIL_SUBJECTS.put("user-deposit-start", "Confirmation - your new DataVault deposit is starting.");
     	EMAIL_SUBJECTS.put("user-deposit-complete", "Confirmation - your new DataVault deposit is complete.");
-    	EMAIL_SUBJECTS.put("user-deposit-error", "DataVault ERROR - attempted deposit failed");
+    	EMAIL_SUBJECTS.put("user-deposit-error", "DataVault ERROR - attempted deposit or retrieval of a deposit failed");
     	EMAIL_SUBJECTS.put("admin-deposit-start", "Confirmation - a new DataVault deposit is starting.");
     	EMAIL_SUBJECTS.put("admin-deposit-complete", "Confirmation - a new DataVault deposit is complete.");
-    	EMAIL_SUBJECTS.put("admin-deposit-error", "DataVault ERROR - attempted deposit failed");
+    	EMAIL_SUBJECTS.put("admin-deposit-error", "DataVault ERROR - attempted deposit or retrieval of a deposit failed");
     	EMAIL_SUBJECTS.put("user-deposit-retrievestart", "Confirmation - your new DataVault retrieval is starting.");
     	EMAIL_SUBJECTS.put("user-deposit-retrievecomplete", "Confirmation - your new DataVault retrieval is complete.");
     	EMAIL_SUBJECTS.put("admin-deposit-retrievestart", "Confirmation - a new DataVault retrieval is starting.");
@@ -373,7 +373,8 @@ public class EventListener implements MessageListener {
     	// Get related information for emails
         Vault vault = deposit.getVault();
         Group group = vault.getGroup();
-        User depositUser = usersService.getUser(event.getUserId());
+        User depositUser = deposit.getUser();
+        User retrieveUser = usersService.getUser(event.getUserId());
         
         logger.info("User title key: " + "user-deposit-" + type);
         String userTitle = EventListener.EMAIL_SUBJECTS.get("user-deposit-" + type);
@@ -396,7 +397,11 @@ public class EventListener implements MessageListener {
         model.put("hasPersonalData", deposit.getHasPersonalData());
         if (event instanceof Error) {
             model.put("error-message", event.getMessage());
+            model.put("retrieve-firstname", retrieveUser.getFirstname());
+            model.put("retrieve-lastname", retrieveUser.getLastname());
+            model.put("retrieve-id", retrieveUser.getID());
         }
+        
         
         // Send email to group owners
         for (User groupAdmin : group.getOwners()) {
