@@ -11,7 +11,7 @@
 			<li>Depositor name: ${user-firstname} ${user-lastname}</li>
 			<li>Depositor ID: ${user-id}</li>
 		</ul>
-		<p>The deposit was being added to the following Vault:</p>
+		<p>The deposit was being deposited/retrieved from the following Vault:</p>
 		<ul>
 			<li>Vault name: ${vault-name}</li>
 			<li>Vault ID: ${vault-id}</li>
