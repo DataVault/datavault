@@ -64,4 +64,10 @@ public class AuthController {
 
         return "/auth/denied";
     }
+
+    @RequestMapping(value = "/confirmation", method = RequestMethod.GET)
+    public String getConfirmationPage() {
+
+        return "/auth/confirmation";
+    }
 }
