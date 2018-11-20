@@ -7,10 +7,10 @@
     <div class="row">
         <div class="col-sm-3 col-sm-offset-5 col-md-3 col-md-offset-5">
 
-            <div class="alert alert-warning" role="alert">
+            <div class="alert alert-info" role="alert">
                 <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                 <span class="sr-only">Warning:</span>
-                To logout of the DataVault you must close your browser, in order to end the browser session, so that you will be logged out of EASE.
+                <strong>To logout of the DataVault you must close your browser, in order to end the browser session, so that you will be logged out of EASE.</strong>
             </div>
 
         </div>

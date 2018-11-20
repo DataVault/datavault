@@ -9,10 +9,14 @@
             <@sec.authorize url="/admin">
             <li <#if nav == "admin">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/admin/">Administration</a></li>
             </@sec.authorize>
-            <li <#if nav == "user">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/filestores">File Locations</a></li>
+            <@sec.authorize access="isAuthenticated()">
+                <li <#if nav == "user">class="active"</#if>><a href="${springMacroRequestContext.getContextPath()}/filestores">File Locations</a></li>
+            </@sec.authorize>
             <li <#if nav == "feedback">class="active"</#if>><a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/contact" target="_blank">Contact</a></li>
             <li <#if nav == "help">class="active"</#if>><a href="http://www.ed.ac.uk/is/research-support/datavault" target="_blank">More Info</a></li>
-            <li><a href="${springMacroRequestContext.getContextPath()}/auth/logout">Logout</a></li>
+            <@sec.authorize access="isAuthenticated()">
+                <li><a href="${springMacroRequestContext.getContextPath()}/auth/logout">Logout</a></li>
+            </@sec.authorize>
         </ul>
       </div>
     </nav>
