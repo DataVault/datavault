@@ -359,12 +359,13 @@ public class Retrieve extends Task {
         long bagDirSize = FileUtils.sizeOfDirectory(bagDir);
         
         // Validate the bagit directory
-        if (!Packager.validateBag(bagDir)) {
-            throw new Exception("Bag is invalid");
-        }
-        
+        //if (!Packager.validateBag(bagDir)) {
+        //    throw new Exception("Bag is invalid");
+        //}
+
         // Get the payload data directory
-        File payloadDir = bagDir.toPath().resolve("data").toFile();
+        //File payloadDir = bagDir.toPath().resolve("data").toFile();
+        File payloadDir = bagDir;
         long payloadSize = FileUtils.sizeOfDirectory(payloadDir);
 
         // Copy the extracted files to the target retrieve area

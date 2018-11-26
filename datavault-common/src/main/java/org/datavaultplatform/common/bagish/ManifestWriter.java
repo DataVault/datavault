@@ -45,11 +45,18 @@ public class ManifestWriter extends SimpleFileVisitor<Path> {
     public FileVisitResult visitFile(Path file, BasicFileAttributes attr) throws IOException {
         String hash;
 
+        /*
+           So the following code was cribbed from the Oracle Java docs, but it didn't work as I had expected.
+           Symlinks are not being recognised as symlinks. I think I could have fixed that by passing some options
+           in the walkFileTree call, but I decided that it was useful to have them listed in the manifest file.
+           That's my excuse anyway :) .
+         */
+
         if (attr.isSymbolicLink()) {
-            logger.info("Symbolic link: " + file.toString());
+            //logger.info("Symbolic link: " + file.toString());
 
         } else if (attr.isRegularFile()) {
-            logger.info("Regular file: " + file.toString());
+            //logger.info("Regular file: " + file.toString());
 
             try {
                 hash = checkSummer.computeFileHash(file.toFile(), SupportedAlgorithm.MD5);
@@ -63,7 +70,7 @@ public class ManifestWriter extends SimpleFileVisitor<Path> {
             bw.newLine();
 
         } else {
-            logger.info("Other: " + file.toString());
+            //logger.info("Other: " + file.toString());
         }
 
         return CONTINUE;
