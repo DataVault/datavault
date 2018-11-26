@@ -370,8 +370,8 @@ public class Retrieve extends Task {
         //}
 
         // Get the payload data directory
-        //File payloadDir = bagDir.toPath().resolve("data").toFile();
-        File payloadDir = bagDir;
+        File payloadDir = bagDir.toPath().resolve("data").toFile();
+        //File payloadDir = bagDir;
         long payloadSize = FileUtils.sizeOfDirectory(payloadDir);
 
         // Copy the extracted files to the target retrieve area
