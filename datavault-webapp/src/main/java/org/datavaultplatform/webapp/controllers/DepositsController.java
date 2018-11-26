@@ -68,7 +68,6 @@ public class DepositsController {
     public String getDeposit(ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
         model.addAttribute("vault", restService.getVault(vaultID));
         model.addAttribute("deposit", restService.getDeposit(depositID));
-        model.addAttribute("manifest", restService.getDepositManifest(depositID));
         model.addAttribute("events", restService.getDepositEvents(depositID));
         model.addAttribute("retrieves", restService.getDepositRetrieves(depositID));
         

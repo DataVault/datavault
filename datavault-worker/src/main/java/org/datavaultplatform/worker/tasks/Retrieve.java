@@ -332,9 +332,15 @@ public class Retrieve extends Task {
                 throw new Exception("checksum failed: " + chunkFileHash + " != " + archivedChunkFileHash);
             }
         }
-        
+
         logger.info("Recomposing tar file from chunk(s)");
         FileSplitter.recomposeFile(chunks, tarFile);
+
+        // On the assumption that we have the tarfile now, delete the chunks
+        logger.info("Deleting the chunks now we have the recomposed tarfile");
+        for (File chunk : chunks) {
+            chunk.delete();
+        }
     }
     
     private void doRetrieve(String depositId, String userID, String retrievePath, String retrieveId, Context context, Device userFs, File tarFile, EventSender eventStream, 
@@ -397,9 +403,9 @@ public class Retrieve extends Task {
         logger.info("Cleaning up ...");
         FileUtils.deleteDirectory(bagDir);
         tarFile.delete();
-            
-            
-        
+
+
+
         logger.info("Data retrieve complete: " + retrievePath);
         eventStream.send(new RetrieveComplete(jobID, depositId, retrieveId).withNextState(4)
             .withUserId(userID));

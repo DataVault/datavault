@@ -114,38 +114,13 @@
             </table>
             
             <ul class="nav nav-tabs">
-                <li class="active"><a data-toggle="tab" href="#contents">Contents <span class="badge">${manifest?size}</span></a></li>
-                <li><a data-toggle="tab" href="#events">Events <span class="badge">${events?size}</span></a></li>
+                <li class="active"><a data-toggle="tab" href="#events">Events <span class="badge">${events?size}</span></a></li>
                 <li><a data-toggle="tab" href="#retrievals">Retrievals <span class="badge">${retrieves?size}</span></a></li>
             </ul>
             
             <div id="deposit-tab-content" class="tab-content">
-                <div class="tab-pane active" id="contents">
-                    <div class="scrollable">
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <thead>
-                                <tr class="tr">
-                                    <th>File</th>
-                                    <th>Type</th>
-                                    <th>Checksum</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                    <#list manifest as filefixity>
-                                    <tr class="tr">
-                                        <td>${filefixity.file?html}</td>
-                                        <td>${filefixity.fileType?html}</td>
-                                        <td style="font-family:monospace;">${filefixity.fixity}&nbsp<span class="label label-primary">${filefixity.algorithm}</span></td>
-                                    </tr>
-                                    </#list>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
     
-                <div class="tab-pane" id="events">
+                <div class="tab-pane active" id="events">
                     <div class="scrollable">
                         <div class="table-responsive">
                             <table class="table table-bordered">

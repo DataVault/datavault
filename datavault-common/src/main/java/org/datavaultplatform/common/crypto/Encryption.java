@@ -369,11 +369,13 @@ public class Encryption {
 
         File tempEncryptedFile = new File(file.getAbsoluteFile() + ".encrypted");
 
-        logger.debug("Encrypting chunk: " + file.getName());
+        logger.debug("Encrypting/Decrypting chunk: " + file.getName());
         Encryption.doByteBufferFileCrypto(file, tempEncryptedFile, cipher);
 
-        FileUtils.copyFile(tempEncryptedFile, file);
-        FileUtils.deleteQuietly(tempEncryptedFile);
+        // todo : move this out of here and do it for all chunks after the encryption stage in order to allow the
+        // todo : whole step to be restarted in a future ideal world.
+        FileUtils.deleteQuietly(file);
+        FileUtils.moveFile(tempEncryptedFile, file);
 
         return iv;
     }

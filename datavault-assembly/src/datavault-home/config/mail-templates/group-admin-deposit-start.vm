@@ -3,7 +3,6 @@
 		<p>New deposit into the University of Edinburgh DataVault. Deposit details:</p>
 		<ul>
 			<li>Deposit name: ${deposit-name}</li>
-			<li>Size: ${size-bytes} bytes</li>
 			<li>Date of deposit: ${timestamp}</li>
 			<li>Contains personal data: ${hasPersonalData}</li>
 			<li>Deposit ID: ${deposit-id}</li>
@@ -16,7 +15,7 @@
 			<li>Vault name: ${vault-name}</li>
 			<li>School: ${group-name}</li>
 			<li>Vault ID: ${vault-id}</li>
-			<li>Review date: ${vault-retention-expiry}</li>
+			<li>Review date: ${vault-review-date}</li>
 		</ul>
 	</body>
 </html>

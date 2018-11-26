@@ -302,7 +302,10 @@ public class Deposit extends Task {
 
             eventStream.send(new ComputedDigest(jobID, depositId, tarHash, tarHashAlgorithm)
                 .withUserId(userID));
-            
+
+            logger.info("We have successfully created the Tar, so lets delete the Bag to save space");
+            FileUtils.deleteDirectory(bagDir);
+
             if ( context.isChunkingEnabled() ) {
                 logger.info("Chunking tar file ...");
                 chunkFiles = FileSplitter.spliteFile(tarFile, context.getChunkingByteSize());
@@ -374,12 +377,13 @@ public class Deposit extends Task {
                 }
             }
 
-            // Create the meta directory for the bag information
-            Path metaPath = context.getMetaDir().resolve(bagID);
-            File metaDir = metaPath.toFile();
-            metaDir.mkdir();
-
             // The following bit of code was commented out by Robin on 22/11/18. Feel free to remove it.
+
+            // Create the meta directory for the bag information
+            //Path metaPath = context.getMetaDir().resolve(bagID);
+            //File metaDir = metaPath.toFile();
+            //metaDir.mkdir();
+
             // Copy bag meta files to the meta directory
             //logger.info("Copying meta files ...");
             //Packager.extractMetadata(bagDir, metaDir);
@@ -398,11 +402,6 @@ public class Deposit extends Task {
             } else {
                 copyToArchiveStorage(tarFile);
             }
-
-            // Cleanup
-            // TODO: should we not do this after the verification?
-            logger.info("Cleaning up ...");
-            FileUtils.deleteDirectory(bagDir);
 
             eventStream.send(new UpdateProgress(jobID, depositId)
                 .withUserId(userID)
