@@ -48,6 +48,8 @@ public class Deposit extends Task {
     String bagID;
     String userID;
     //private String vaultID;
+
+    PackagerV2 packagerV2 = new PackagerV2();
     
     // Chunking attributes
     File[] chunkFiles;
@@ -201,6 +203,11 @@ public class Deposit extends Task {
         Path bagPath = context.getTempDir().resolve(bagID);
         File bagDir = bagPath.toFile();
         bagDir.mkdir();
+
+        // Create a subdirectory 'data'
+        Path bagDataPath = bagPath.resolve("data");
+        File bagDataDir = bagDataPath.toFile();
+        bagDataDir.mkdir();
         
         Long depositIndex = 0L;
         
@@ -214,12 +221,13 @@ public class Deposit extends Task {
             logger.info("Deposit storagePath: " + storagePath);
             
             UserStore userStore = userStores.get(storageID);
-            
-            Path depositPath = bagPath;
+
+            // Retrieve the data straight into the Bag data directory.
+            Path depositPath = bagDataPath;
             // If there are multiple deposits then create a sub-directory for each one
             if (fileStorePaths.size() > 1) {
                 depositIndex += 1;
-                depositPath = bagPath.resolve(depositIndex.toString());
+                depositPath = bagDataPath.resolve(depositIndex.toString());
                 depositPath.toFile().mkdir();
             }
             
@@ -251,7 +259,9 @@ public class Deposit extends Task {
 
             // Add any directly uploaded files (direct move from temp dir)            
             for (String path : fileUploadPaths) {
-                moveFromUserUploads(context.getTempDir(), bagPath, userID, path);
+                // Retrieve the data straight into the Bag data directory.
+                Path depositPath = bagDataPath;
+                moveFromUserUploads(context.getTempDir(), depositPath, userID, path);
             }
             
             // Bag the directory in-place
@@ -260,28 +270,18 @@ public class Deposit extends Task {
                 .withNextState(2));
 
             logger.info("Creating bag ...");
-            Packager.createBag(bagDir);
+            packagerV2.createBag(bagDir);
 
             // Identify the deposit file types
             logger.info("Identifying file types ...");
-            Path bagDataPath = bagDir.toPath().resolve("data");
+            //Path bagDataPath = bagDir.toPath().resolve("data");
             HashMap<String, String> fileTypes = Identifier.detectDirectory(bagDataPath);
             ObjectMapper mapper = new ObjectMapper();
             String fileTypeMetadata = mapper.writeValueAsString(fileTypes);
 
             // Add vault/deposit/type metadata to the bag
-            Packager.addMetadata(bagDir, depositMetadata, vaultMetadata, fileTypeMetadata, externalMetadata);
+            packagerV2.addMetadata(bagDir, depositMetadata, vaultMetadata, fileTypeMetadata, externalMetadata);
 
-            // Create the meta directory for the bag information
-            Path metaPath = context.getMetaDir().resolve(bagID);
-            File metaDir = metaPath.toFile();
-            metaDir.mkdir();
-
-            // Copy bag meta files to the meta directory
-            logger.info("Copying meta files ...");
-            Packager.extractMetadata(bagDir, metaDir);
-
-            
             // Tar the bag directory
             logger.info("Creating tar file ...");
             String tarFileName = bagID + ".tar";
@@ -376,6 +376,17 @@ public class Deposit extends Task {
                                 .withUserId(userID));
                 }
             }
+
+            // The following bit of code was commented out by Robin on 22/11/18. Feel free to remove it.
+
+            // Create the meta directory for the bag information
+            //Path metaPath = context.getMetaDir().resolve(bagID);
+            //File metaDir = metaPath.toFile();
+            //metaDir.mkdir();
+
+            // Copy bag meta files to the meta directory
+            //logger.info("Copying meta files ...");
+            //Packager.extractMetadata(bagDir, metaDir);
 
             // Copy the resulting tar file to the archive area
             logger.info("Copying tar file(s) to archive ...");
