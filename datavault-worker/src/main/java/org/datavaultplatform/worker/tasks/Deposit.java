@@ -273,14 +273,13 @@ public class Deposit extends Task {
             packagerV2.createBag(bagDir);
 
             // Identify the deposit file types
-            logger.info("Identifying file types ...");
-            //Path bagDataPath = bagDir.toPath().resolve("data");
-            HashMap<String, String> fileTypes = Identifier.detectDirectory(bagDataPath);
-            ObjectMapper mapper = new ObjectMapper();
-            String fileTypeMetadata = mapper.writeValueAsString(fileTypes);
-
+            //logger.info("Identifying file types ...");
+            //HashMap<String, String> fileTypes = Identifier.detectDirectory(bagDataPath);
+            //ObjectMapper mapper = new ObjectMapper();
+            //String fileTypeMetadata = mapper.writeValueAsString(fileTypes);
+            
             // Add vault/deposit/type metadata to the bag
-            packagerV2.addMetadata(bagDir, depositMetadata, vaultMetadata, fileTypeMetadata, externalMetadata);
+            packagerV2.addMetadata(bagDir, depositMetadata, vaultMetadata, null, externalMetadata);
 
             // Tar the bag directory
             logger.info("Creating tar file ...");
