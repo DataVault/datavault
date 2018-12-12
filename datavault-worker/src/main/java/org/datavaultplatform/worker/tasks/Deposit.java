@@ -252,6 +252,7 @@ public class Deposit extends Task {
                 logger.error(msg, e);
                 eventStream.send(new Error(jobID, depositId, msg)
                     .withUserId(userID));
+                return;
             }
         }
         
