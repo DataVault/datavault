@@ -72,7 +72,12 @@
         <div class="panel-body">
 
             <h2>Create a new Deposit</h2>
-            <br/>
+            <div class="alert alert-info" role="alert">
+                <p>
+                    You must set up the folder from which you want to deposit your files (using the <a href="${springMacroRequestContext.getContextPath()}/filestores">File Locations page</a>) BEFORE you can set the deposit name and description.
+                </p>
+            </div>
+
             <form id="create-deposit" class="form" role="form" action="" method="post">
                 <div class="row">
                     <div class="col-sm-10">
@@ -103,6 +108,8 @@
                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                     title="If you don't see the filestore you wish to use here, please click on 'File Locations' to add it.">
                 </span>
+                <br/>
+                <small>Click on the button marked 'Data Storage (SFTP)' to: connect to the location(s) you specified on the File Locations page, and browse to the files you want to upload.</small>
                 <br/><br/>
                 
                 <@spring.bind "deposit.fileUploadHandle" />

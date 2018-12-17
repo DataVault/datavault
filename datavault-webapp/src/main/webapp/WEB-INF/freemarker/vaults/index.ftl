@@ -117,8 +117,7 @@
                                 <div class="alert alert-info" role="alert">
                                     <p>
                                     The ‘owner’ /PI will be billed for any deposit, 
-                                    against the Grant ID they provided in relation to the vault, 
-                                    unless they have made other arrangements with Information Services Research Services. 
+                                    against the Grant ID they provided in relation to the vault.
                                     Rates are advertised on the 
                                     <a href="http://www.ed.ac.uk/is/research-support/datavault" target="_blank">Research Services charges page</a>.
                                     </p>

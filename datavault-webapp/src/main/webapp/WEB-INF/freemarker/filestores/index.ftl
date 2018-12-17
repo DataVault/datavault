@@ -44,22 +44,23 @@
                 <p>Overwrite the default values as follows:
                    <ul>
                       <li>Hostname: COLLEGE.datastore.ed.ac.uk where COLLEGE (either chss, cmvm, csce or sg) relates to the area you wish to connect to.</li>
-                      <li>Path: Overwrite the content of this field to add in the path to the DataStore area you wish to use. If you are unsure of the path, you should be able to view it in Windows File Explorer, or ECDF Storage Manager or by asking your local IT support.</li>
+                      <li>Path: Overwrite the content of this field to add in the path to the DataStore area you wish to use (and folder / sub-directory if applicable); this might be a group shared area or your personal homespace.
+                          If you are unsure of the path, you should be able to view it in Windows File Explorer, or ECDF Storage Manager or by asking your local IT support.</li>
                    </ul>
                    Leave the port number as "22222".
                 </p>
                 <form id="add-filestoreSFTP-form">
                     <div class="form-filestore">
                         <div class="form-group">
-                            <label for="hostname">Hostname</label>
+                            <label for="hostname">Hostname<br/><small>e.g. cmvm.datastore.ed.ac.uk, chss.datastore.ed.ac.uk, csce.datastore.ed.ac.uk</small></label>
                             <input type="text" class="form-control" id="hostname" name="hostname" value="${sftpHost}"/>
                         </div>
                         <div class="form-group">
-                            <label for="port">Port</label>
+                            <label for="port">Port<br/></label>
                             <input type="text" class="form-control" id="port" name="port" value="${sftpPort}"/>
                         </div>
                         <div class="form-group">
-                            <label for="path">Path</label>
+                            <label for="path">Path<br/><small>e.g. /chss/datastore/eca/groups/one-group, /csce/datastore/ph/groups/gelato-group, /cmvm/datastore/edmed/users/person7</small></label>
                             <input type="text" class="form-control" id="path" name="path" value="${sftpRootPath}"/>
                         </div>
                     </div>
@@ -181,7 +182,7 @@
             </div>
 
 
-            <h3><strong>File store locations</strong></h3>
+            <h3><strong>Locations of the folders/directories you want to deposit from or retrieve into</strong></h3>
 
 
             <#if filestoresSFTP?has_content>
@@ -244,7 +245,10 @@
                 <a class="btn btn-default" href="#" data-toggle="modal" data-target="#copy-ssh-public-key">
                     <span class="glyphicon glyphicon-modal-window" aria-hidden="true"></span> Open Key Registration Dialog
                 </a>
+                <br/><br/>
+                <p>Go to the <a href="${springMacroRequestContext.getContextPath()}/">homepage</a> to select the vault you want to use (to make a deposit or retrieval) from the list of your current vaults.</p>
             </#if>
+
         </div>
     </div>
 </div>
