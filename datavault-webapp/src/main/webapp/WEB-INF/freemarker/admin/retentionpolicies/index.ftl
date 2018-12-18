@@ -29,7 +29,7 @@
                         <tr class="tr">
                             <td>${policy.getID()?html}</td>
                             <td>${policy.name?html}</td>
-                            <td>${policy.description?html}</td>
+                            <td>${policy.description!?html}</td>
                             <td><span class="label label-default">${policy.engine?html}</span></td>
                             <td>${policy.sort?html}</td>
                         </tr>
