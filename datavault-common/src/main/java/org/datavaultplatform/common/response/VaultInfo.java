@@ -176,6 +176,9 @@ public class VaultInfo {
     }
 
     public String getSizeStr() {
+        if ( vaultSize == 0 ){
+            return "No deposits yet";
+        }
         double s = vaultSize;
         double gibibytes = s/1024/1024/1024;
         DecimalFormat df = new DecimalFormat("#");
