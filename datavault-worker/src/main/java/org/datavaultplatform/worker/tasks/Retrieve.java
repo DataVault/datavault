@@ -116,7 +116,8 @@ public class Retrieve extends Task {
                 logger.error(msg, e);
                 eventStream.send(new Error(jobID, depositId, msg)
                     .withUserId(userID));
-                return;
+
+                System.exit(1);
             }
         }
 
@@ -134,7 +135,8 @@ public class Retrieve extends Task {
             logger.error(msg, e);
             eventStream.send(new Error(jobID, depositId, msg)
                 .withUserId(userID));
-            return;
+
+            System.exit(1);
         }
         
         try {
@@ -156,6 +158,8 @@ public class Retrieve extends Task {
                 logger.info("Unable to determine free space");
                 eventStream.send(new Error(jobID, depositId, "Unable to determine free space")
                     .withUserId(userID));
+
+                System.exit(1);
             }
 
             // Retrieve the archived data
@@ -211,6 +215,7 @@ public class Retrieve extends Task {
                             logger.info("All locations had problems throwing exception " + e.getMessage());
                             throw e;
                         }
+                        System.exit(1);
                     }
                 }
 
@@ -266,6 +271,8 @@ public class Retrieve extends Task {
             logger.error(msg, e);
             eventStream.send(new Error(jobID, depositId, msg)
                 .withUserId(userID));
+
+            System.exit(1);
         }
     }
     

@@ -134,7 +134,8 @@ public class Deposit extends Task {
                 e.printStackTrace();
                 eventStream.send(new Error(jobID, depositId, msg)
                     .withUserId(userID));
-                return;
+
+                System.exit(1);
             }
         }
         
@@ -159,7 +160,8 @@ public class Deposit extends Task {
                 logger.error(msg, e);
                 eventStream.send(new Error(jobID, depositId, msg)
                         .withUserId(userID));
-                return;
+
+                System.exit(1);
             }
         }
         
@@ -178,7 +180,8 @@ public class Deposit extends Task {
                 logger.error(msg, e);
                 eventStream.send(new Error(jobID, depositId, msg)
                     .withUserId(userID));
-                return;
+
+                System.exit(1);
             }
         }
         
@@ -252,6 +255,8 @@ public class Deposit extends Task {
                 logger.error(msg, e);
                 eventStream.send(new Error(jobID, depositId, msg)
                     .withUserId(userID));
+
+                System.exit(1);
             }
         }
         
@@ -423,6 +428,8 @@ public class Deposit extends Task {
             logger.error(msg, e);
             eventStream.send(new Error(jobID, depositId, msg)
                 .withUserId(userID));
+
+            System.exit(1);
         }
         
         // TODO: Disconnect from user and archive storage system?
