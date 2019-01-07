@@ -41,7 +41,7 @@ public class RetentionPolicyDAOImpl implements RetentionPolicyDAO {
     public List<RetentionPolicy> list() {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(RetentionPolicy.class);
-        criteria.addOrder(Order.asc("sort"));
+        criteria.addOrder(Order.asc("name"));
         List<RetentionPolicy> policies = criteria.list();
         session.close();
         return policies;

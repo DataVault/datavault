@@ -12,10 +12,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.Date;
 
 public class SFTPFileSystem extends Device implements UserStore {
 
@@ -315,7 +317,7 @@ public class SFTPFileSystem extends Device implements UserStore {
     
     @Override
     public String store(String path, File working, Progress progress) throws Exception {
-        
+
         // Strip any leading separators (we want a path relative to the current dir)
         while (path.startsWith(PATH_SEPARATOR)) {
             path = path.replaceFirst(PATH_SEPARATOR, "");
@@ -323,9 +325,17 @@ public class SFTPFileSystem extends Device implements UserStore {
         
         try {
             Connect();
-            
+
             path = channelSftp.pwd() + "/" + path;
             channelSftp.cd(path);
+
+            // Create timestamped folder to avoid overwriting files
+            String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+            String timestampDirName = "dv_" + timeStamp;
+            path = path + PATH_SEPARATOR + timestampDirName;
+
+            channelSftp.mkdir(timestampDirName);
+            channelSftp.cd(timestampDirName);
             
             if (working.isDirectory()) {
                 // Create top-level directory
