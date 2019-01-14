@@ -11,13 +11,14 @@
                 <div class="col-sm-4 col-md-4">
                     <ul>
                         <li><a href="http://www.ed.ac.uk/about/website/website-terms-conditions">Terms &amp; conditions</a></li>
-                        <li><a href="http://www.ed.ac.uk/about/website/privacy">Privacy &amp; cookies</a></li>
-                        <li><a href="http://www.ed.ac.uk/sustainability/modern-slavery-statement">Modern slavery</a></li>
+                        <li><a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/sharing-preserving-data/datavault/privacy">Privacy Notice</a></li>
+                        <li><a href="http://www.ed.ac.uk/about/website/privacy">Cookies</a></li>
                     </ul>
                 </div>
     
                 <div class="col-sm-4">
                     <ul>
+                        <li><a href="http://www.ed.ac.uk/sustainability/modern-slavery-statement">Modern slavery</a></li>
                         <li><a href="http://www.ed.ac.uk/about/website/accessibility">Website accessibility</a></li>
                         <li><a href="http://www.ed.ac.uk/about/website/freedom-information">Freedom of information publication scheme</a></li>
                     </ul>
