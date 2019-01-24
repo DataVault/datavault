@@ -46,7 +46,7 @@ public class DepositChunk {
     private byte[] encIV;
     @Column(columnDefinition = "TEXT")
     private String ecnArchiveDigest;
-    
+
     public DepositChunk() {}
     public DepositChunk(Deposit deposit, int chunkNum, String archiveDigest, String archiveDigestAlgorithm) {
         this.deposit = deposit;
@@ -54,6 +54,8 @@ public class DepositChunk {
         this.archiveDigest = archiveDigest;
         this.archiveDigestAlgorithm = archiveDigestAlgorithm;
     }
+
+    public String getID() { return id; }
     
     public int getChunkNum() {
         return chunkNum;

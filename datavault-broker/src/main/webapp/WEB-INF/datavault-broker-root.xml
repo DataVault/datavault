@@ -101,6 +101,11 @@
         <property name="vaultsService" ref="vaultsService" />
     </bean>
 
+    <bean id="checkEncryptionData" class="org.datavaultplatform.broker.scheduled.CheckEncryptionData">
+        <property name="depositsService" ref="depositsService" />
+        <property name="emailService" ref="emailService" />
+    </bean>
+
     <!-- Email -->
 
     <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
@@ -211,6 +216,10 @@
 
     <task:scheduled-tasks scheduler="scheduler">
         <task:scheduled ref="checkRetentionPolicies" method="checkAll" cron="${retentioncheck.schedule}" />
+    </task:scheduled-tasks>
+
+    <task:scheduled-tasks scheduler="scheduler">
+        <task:scheduled ref="checkEncryptionData" method="checkAll" cron="${encryptioncheck.schedule}" />
     </task:scheduled-tasks>
 
     <!-- Data Access Objects -->

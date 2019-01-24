@@ -1,15 +1,16 @@
 package org.datavaultplatform.broker.scheduled;
 
 import org.datavaultplatform.broker.services.DepositsService;
+import org.datavaultplatform.broker.services.EmailService;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.deposit.ComputedEncryption;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.DepositChunk;
+import org.datavaultplatform.common.model.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -17,9 +18,13 @@ import java.util.concurrent.TimeUnit;
 public class CheckEncryptionData {
 
     private DepositsService depositsService;
+    private EmailService emailService;
 
     public void setDepositsService(DepositsService depositsService) {
-        this.depositsService = depositsService;
+        depositsService = depositsService;
+    }
+    public void setEmailService(EmailService emailService) {
+        emailService = emailService;
     }
 
     private static final Logger log = LoggerFactory.getLogger(CheckEncryptionData.class);
@@ -54,9 +59,23 @@ public class CheckEncryptionData {
                             log.info("The encChunkDigest in the Event table is " + encChunkDigest);
 
                             // Now the risky bit, update the deposit chunk with the data from the event.
-                            chunk.setEncIV(chunkIV);
-                            chunk.setEcnArchiveDigest(encChunkDigest);
+                            // We agreed we would do this in a different script that we run manually
+                            // Instead we want to notify the team
+                            if(chunkIV != null) {
+                                log.info("Updating chunk IV with: " + chunkIV);
+                                chunk.setEncIV(chunkIV);
+                            }else{
+                                log.info("Didn't update chunk IV.");
+                            }
+                            if(chunk.getEcnArchiveDigest() == null && encChunkDigest != null) {
+                                log.info("Updating encChunkDigest with: " + encChunkDigest);
+                                chunk.setEcnArchiveDigest(encChunkDigest);
+                            }else{
+                                log.info("Didn't update encChunkDigest.");
+                            }
                             depositsService.updateDeposit(deposit);
+
+                            this.sendEmails(deposit, event, chunk.getID(), chunkIV.toString(), encChunkDigest);
 
                             // Break out of the Events loop. I hate break statements, but I don't have time to code this better.
                             break;
@@ -70,4 +89,40 @@ public class CheckEncryptionData {
         log.info("Finished check of encryption data at " + start);
         log.info("Check took " + TimeUnit.MILLISECONDS.toSeconds(end.getTime() - start.getTime()) + " seconds");
     }
+
+    private void sendEmails(Deposit deposit, Event event, String ChunkID, String chunkIV, String encChunkDigest) {
+        // Get related information for emails
+        Vault vault = deposit.getVault();
+        Group group = vault.getGroup();
+        User depositUser = deposit.getUser();
+
+        HashMap<String, Object> model = new HashMap<String, Object>();
+        model.put("group-name", group.getName());
+        model.put("deposit-name", deposit.getName());
+        model.put("deposit-id", deposit.getID());
+        model.put("vault-name", vault.getName());
+        model.put("vault-id", vault.getID());
+//        model.put("vault-retention-expiry", vault.getRetentionPolicyExpiry());
+        model.put("vault-review-date", vault.getReviewDate());
+        model.put("user-id", depositUser.getID());
+        model.put("user-firstname", depositUser.getFirstname());
+        model.put("user-lastname", depositUser.getLastname());
+        model.put("size-bytes", deposit.getArchiveSize());
+        model.put("timestamp", event.getTimestamp());
+        model.put("hasPersonalData", deposit.getHasPersonalData());
+        model.put("chunk-id", ChunkID);
+        model.put("chunk-iv", chunkIV);
+        model.put("enc-chunk-digest", encChunkDigest);
+
+        // Send email to group owners
+        for (User groupAdmin : group.getOwners()) {
+            if (groupAdmin.getEmail() != null) {
+                emailService.sendTemplateMail(groupAdmin.getEmail(),
+                        "Found missing IV in Deposit",
+                        "group-admin-missing-iv.vm",
+                        model);
+            }
+        }
+    }
+
 }
