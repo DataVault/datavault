@@ -21,10 +21,10 @@ public class CheckEncryptionData {
     private EmailService emailService;
 
     public void setDepositsService(DepositsService depositsService) {
-        depositsService = depositsService;
+        this.depositsService = depositsService;
     }
     public void setEmailService(EmailService emailService) {
-        emailService = emailService;
+        this.emailService = emailService;
     }
 
     private static final Logger log = LoggerFactory.getLogger(CheckEncryptionData.class);
@@ -35,7 +35,7 @@ public class CheckEncryptionData {
         Date start = new Date();
         log.info("Initiating check of encryption data at " + start);
 
-        for (Deposit deposit : depositsService.completed()) {
+        for (Deposit deposit : this.depositsService.completed()) {
             log.info("Checking encryption data for deposit " + deposit.getID() + " name - " + deposit.getName());
 
             // Look for any faulty chunks with no encryption data
