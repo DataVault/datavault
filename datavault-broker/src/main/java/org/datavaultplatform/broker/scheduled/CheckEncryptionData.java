@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import org.bouncycastle.util.encoders.Base64;
+
 
 public class CheckEncryptionData {
 
@@ -62,7 +64,7 @@ public class CheckEncryptionData {
                             // We agreed we would do this in a different script that we run manually
                             // Instead we want to notify the team
                             if(chunkIV != null) {
-                                log.info("Updating chunk IV with: " + chunkIV);
+                                log.info("Updating chunk IV with: " + Base64.toBase64String(chunkIV));
                                 chunk.setEncIV(chunkIV);
                             }else{
                                 log.info("Didn't update chunk IV.");
@@ -73,9 +75,10 @@ public class CheckEncryptionData {
                             }else{
                                 log.info("Didn't update encChunkDigest.");
                             }
+
                             depositsService.updateDeposit(deposit);
 
-                            this.sendEmails(deposit, event, chunk.getID(), chunkIV.toString(), encChunkDigest);
+                            this.sendEmails(deposit, event, chunk.getID(), Base64.toBase64String(chunkIV), encChunkDigest);
 
                             // Break out of the Events loop. I hate break statements, but I don't have time to code this better.
                             break;

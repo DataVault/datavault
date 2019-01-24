@@ -1,6 +1,6 @@
 <html>
 	<body>
-		<p>We found a deposit chunk which is missing a encryption IV in the database:</p>
+		<p>We found a deposit chunk which is missing a encryption Initialization Vector in the database:</p>
 		<p>Chunk details:</p>
 		<ul>
 			<li>ID: ${chunk-id}</li>
