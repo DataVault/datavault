@@ -56,6 +56,8 @@ public class DepositsService {
 
     public List<Deposit> inProgress() { return depositDAO.inProgress(); }
 
+    public List<Deposit> completed() { return depositDAO.completed(); }
+
     public List<Deposit> search(String query, String sort) { return this.depositDAO.search(query, sort); }
 
     public Long size() { return depositDAO.size(); }

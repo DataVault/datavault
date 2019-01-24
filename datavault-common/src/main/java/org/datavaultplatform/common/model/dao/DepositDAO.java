@@ -21,6 +21,8 @@ public interface DepositDAO {
 
     public List<Deposit> inProgress();
 
+    public List<Deposit> completed();
+
     public List<Deposit> search(String query, String sort);
 
     public Long size();

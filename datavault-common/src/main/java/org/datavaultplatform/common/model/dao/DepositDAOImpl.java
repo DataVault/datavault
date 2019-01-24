@@ -121,6 +121,16 @@ public class DepositDAOImpl implements DepositDAO {
     }
 
     @Override
+    public List<Deposit> completed() {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Deposit.class);
+        criteria.add(Restrictions.eq("status", Deposit.Status.COMPLETE));
+        List<Deposit> deposits = criteria.list();
+        session.close();
+        return deposits;
+    }
+
+    @Override
     public List<Deposit> search(String query, String sort) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Deposit.class);
