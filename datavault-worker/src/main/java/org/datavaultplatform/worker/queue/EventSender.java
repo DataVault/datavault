@@ -92,7 +92,7 @@ public class EventSender implements EventStream {
             ObjectMapper mapper = new ObjectMapper();
             String jsonEvent = mapper.writeValueAsString(event);
 
-            channel.queueDeclare(eventQueueName, false, false, false, null);
+            channel.queueDeclare(eventQueueName, true, false, false, null);
             channel.basicPublish("", eventQueueName, null, jsonEvent.getBytes());
             logger.debug("Sent " + jsonEvent.length() + " bytes");
             logger.debug("Sent message body '" + jsonEvent + "'");

@@ -149,7 +149,7 @@
         <property name="password" value="${queue.password}" />
     </bean>
 
-    <rabbit:queue id="eventQueue" name="${queue.events}" durable="false" />
+    <rabbit:queue id="eventQueue" name="${queue.events}" durable="true" />
 
     <rabbit:listener-container connection-factory="connectionFactory" concurrency="1" max-concurrency="1" >
         <rabbit:listener ref="listener" queues="eventQueue" />

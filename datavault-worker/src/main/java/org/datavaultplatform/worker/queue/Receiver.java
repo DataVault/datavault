@@ -205,7 +205,7 @@ public class Receiver {
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 
-        channel.queueDeclare(queueName, false, false, false, null);
+        channel.queueDeclare(queueName, true, false, false, null);
         logger.info("Waiting for messages");
         
         QueueingConsumer consumer = new QueueingConsumer(channel);

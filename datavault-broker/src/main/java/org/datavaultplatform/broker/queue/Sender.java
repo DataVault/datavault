@@ -49,7 +49,7 @@ public class Sender {
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
         
-        channel.queueDeclare(queueName, false, false, false, null);
+        channel.queueDeclare(queueName, true, false, false, null);
         channel.basicPublish("", queueName, null, message.getBytes());
         logger.info("Sent '" + message + "'");
         
