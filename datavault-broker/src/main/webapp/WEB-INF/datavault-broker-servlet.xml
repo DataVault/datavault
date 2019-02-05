@@ -145,10 +145,12 @@
         <property name="archiveStoreService" ref="archiveStoreService" />
     </bean>
 
+    <!--
     <bean id="initialiseDatabase" class="org.datavaultplatform.broker.scheduled.InitialiseDatabase">
         <property name="archiveStoreService" ref="archiveStoreService" />
         <property name="archiveDir" value="${archiveDir}" />
     </bean>
+    -->
 
     <bean id="initialiseEncryption" class="org.datavaultplatform.broker.scheduled.InitialiseEncryption">
     </bean>
