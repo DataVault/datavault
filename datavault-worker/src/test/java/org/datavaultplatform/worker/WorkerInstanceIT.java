@@ -91,7 +91,7 @@ public class WorkerInstanceIT {
                 workerInstanceResources + File.separator + "rabbitmq_deposit_sent.json");
                 
         // Connect to rabbitmq and send message
-        try{            
+        try{
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(testQueueServer);
             factory.setUsername(testQueueUser);
@@ -99,7 +99,7 @@ public class WorkerInstanceIT {
 
             Connection connection1 = factory.newConnection();
             Channel channel1 = connection1.createChannel();
-            
+
             Connection connection2 = factory.newConnection();
             Channel channel2 = connection2.createChannel();
             
@@ -201,6 +201,7 @@ public class WorkerInstanceIT {
             connection1.close();
             connection2.close();
         }catch(IOException ioe){
+            ioe.printStackTrace();
             fail("We should not have a IOException: "+ioe);
         }catch(TimeoutException te){
             fail("We should not have a TimeoutException: "+te);
