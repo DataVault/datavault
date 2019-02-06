@@ -103,8 +103,8 @@ public class WorkerInstanceIT {
             Connection connection2 = factory.newConnection();
             Channel channel2 = connection2.createChannel();
             
-            channel1.queueDeclare("datavault", false, false, false, null);
-            channel2.queueDeclare("datavault-event", false, false, false, null);
+            channel1.queueDeclare("datavault", true, false, false, null);
+            channel2.queueDeclare("datavault-event", true, false, false, null);
             
             channel1.basicPublish("", "datavault", null, message.getBytes());
 
@@ -408,8 +408,8 @@ public class WorkerInstanceIT {
             
             Connection connection2 = factory.newConnection();
             Channel channel2 = connection2.createChannel();
-                channel1.queueDeclare("datavault", false, false, false, null);
-            channel2.queueDeclare("datavault-event", false, false, false, null);
+            channel1.queueDeclare("datavault", true, false, false, null);
+            channel2.queueDeclare("datavault-event", true, false, false, null);
             
             channel1.basicPublish("", "datavault", null, message.getBytes());
             
