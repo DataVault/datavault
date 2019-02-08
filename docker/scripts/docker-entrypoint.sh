@@ -18,4 +18,6 @@ if [ $1 == "broker" ] || [ $1 == "worker" ]; then
 fi
 shift
 
+cd ${DATAVAULT_HOME}/lib
+
 su-exec datavault "$@"

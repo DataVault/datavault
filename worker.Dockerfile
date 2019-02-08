@@ -13,7 +13,8 @@ RUN mkdir -p ${DATAVAULT_HOME}/lib
 
 COPY --from=0 /usr/local/bin/ep /usr/local/bin/ep
 COPY --from=0 /usr/local/bin/wait-for-it /usr/local/bin/wait-for-it
-COPY --from=0 /usr/src/datavault-worker/target/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar ${DATAVAULT_HOME}/lib/datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar
+COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib ${DATAVAULT_HOME}/lib
+COPY --from=0 /usr/src/datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/bin ${DATAVAULT_HOME}/bin
 
 COPY docker/config ${DATAVAULT_HOME}/config
 COPY docker/scripts ${DATAVAULT_HOME}/scripts
@@ -24,4 +25,4 @@ RUN chown -R datavault:datavault ${DATAVAULT_HOME}
 WORKDIR ${DATAVAULT_HOME}/lib
 
 ENTRYPOINT ["/docker_datavault-home/scripts/docker-entrypoint.sh", "worker"]
-CMD ["java", "-cp", "datavault-worker-1.0-SNAPSHOT-jar-with-dependencies-spring.jar:./*", "org.datavaultplatform.worker.WorkerInstance"]
+CMD ["java", "-cp", "datavault-worker-1.0-SNAPSHOT-jar:./*", "org.datavaultplatform.worker.WorkerManager"]
