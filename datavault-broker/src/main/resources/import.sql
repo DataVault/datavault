@@ -71,6 +71,7 @@ INSERT INTO RetentionPolicies(name,sort,engine,minDataRetentionPeriod,inEffectDa
 INSERT INTO RetentionPolicies(name,sort,engine,minDataRetentionPeriod,inEffectDate,endDate,url,dataGuidanceReviewed) VALUES ('NHS Retention Policy',58,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy','N/A',STR_TO_DATE('03/12/2018', '%d/%m/%Y'),NULL,'https://www.hra.nhs.uk/planning-and-improving-research/policies-standards-legislation/',STR_TO_DATE('03/12/2018', '%d/%m/%Y'));
 INSERT INTO RetentionPolicies(name,description,sort,engine,minDataRetentionPeriod,inEffectDate,endDate,url,dataGuidanceReviewed) VALUES ('Edinburgh Imaging Retention Policy','Policy of UoE''s Edinburgh Imaging (part of Edinburgh Medical School)',59,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy','N/A',STR_TO_DATE('03/12/2018', '%d/%m/%Y'),NULL,'',STR_TO_DATE('03/12/2018', '%d/%m/%Y'));
 
+insert into Users (id, firstname, lastname, password, admin) values ('rtaylor3', 'Robin', 'Taylor', 'password1', TRUE);
 insert into Users (id, firstname, lastname, password, admin) values ('user1', 'user 1', 'Test', 'password1', FALSE);
 insert into Users (id, firstname, lastname, password, admin) values ('user2', 'user 2', 'Test', 'password2', FALSE);
 insert into Users (id, firstname, lastname, password, admin) values ('user3', 'user 3', 'Test', 'password3', FALSE);
