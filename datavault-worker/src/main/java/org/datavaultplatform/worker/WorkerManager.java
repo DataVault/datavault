@@ -94,7 +94,6 @@ public class WorkerManager {
     private DefaultExecuteResultHandler startWorker() throws IOException, InterruptedException {
         CommandLine cmdLine = new CommandLine("java");
         cmdLine.addArgument("-cp");
-        //cmdLine.addArgument("datavault-worker-1.0-SNAPSHOT-jar-with-dependencies.jar");
         cmdLine.addArgument("datavault-worker-1.0-SNAPSHOT-jar:./*");
         cmdLine.addArgument("org.datavaultplatform.worker.WorkerInstance");
 
