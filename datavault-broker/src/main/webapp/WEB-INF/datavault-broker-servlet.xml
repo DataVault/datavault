@@ -45,6 +45,7 @@
         <property name="filesService" ref="filesService" />
         <property name="usersService" ref="usersService" />
         <property name="tempDir" value="${tempDir}" />
+        <property name="maxDepositByteSize" value="${max.deposit.size}"/>
     </bean>
 
     <bean id="vaultsController" class="org.datavaultplatform.broker.controllers.VaultsController">

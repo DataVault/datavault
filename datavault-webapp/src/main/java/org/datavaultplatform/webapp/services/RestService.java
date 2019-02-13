@@ -129,6 +129,27 @@ public class RestService {
         return (String)response.getBody();
     }
 
+    public Boolean checkDepositSize(String[] filePaths) {
+
+        String parameters = "?";
+
+        for (int i=0; i< filePaths.length; i++){
+            String filePath = filePaths[i];
+            if (!filePath.startsWith("/")) {
+                filePath = "/" + filePath;
+            }
+            parameters += "filepath=" + filePath + "&";
+        }
+
+        System.out.println("parameters: " + parameters);
+
+        HttpEntity<?> response = get(brokerURL + "/checkdepositsize" + parameters, Boolean.class);
+
+        System.out.println("return: " + response.getBody());
+
+        return (Boolean)response.getBody();
+    }
+
     public VaultInfo[] getVaultsListing() {
         HttpEntity<?> response = get(brokerURL + "/vaults", VaultInfo[].class);
         return (VaultInfo[])response.getBody();
