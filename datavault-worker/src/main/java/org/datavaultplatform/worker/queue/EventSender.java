@@ -5,6 +5,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
 
+import com.rabbitmq.client.MessageProperties;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.EventStream;
 import org.datavaultplatform.common.model.Agent;
@@ -93,7 +94,7 @@ public class EventSender implements EventStream {
             String jsonEvent = mapper.writeValueAsString(event);
 
             channel.queueDeclare(eventQueueName, true, false, false, null);
-            channel.basicPublish("", eventQueueName, null, jsonEvent.getBytes());
+            channel.basicPublish("", eventQueueName, MessageProperties.PERSISTENT_TEXT_PLAIN, jsonEvent.getBytes());
             logger.debug("Sent " + jsonEvent.length() + " bytes");
             logger.debug("Sent message body '" + jsonEvent + "'");
 
