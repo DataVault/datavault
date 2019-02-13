@@ -15,6 +15,17 @@
         </fileSet>
     </fileSets>
 
+    <files>
+        <file>
+            <source>${root.basedir}/lib/ftm-api-2.4.2.jar</source>
+            <outputDirectory>datavault-home/lib</outputDirectory>
+        </file>
+        <file>
+            <source>${root.basedir}/lib/low-level-api-core-1.14.19.jar</source>
+            <outputDirectory>datavault-home/lib</outputDirectory>
+        </file>
+    </files>
+
     <dependencySets>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
