@@ -245,7 +245,11 @@
     <script>
         $(document).ready(function () {
             $.datepicker.setDefaults({
-                dateFormat: "yy-mm-dd"
+                dateFormat: "yy-mm-dd",
+                changeMonth: true,
+                changeYear: true,
+                showOtherMonths: true,
+                selectOtherMonths: true
             });
 
             $( "#grantEndDate" ).datepicker();
