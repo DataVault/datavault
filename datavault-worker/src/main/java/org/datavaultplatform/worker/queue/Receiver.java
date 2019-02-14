@@ -222,7 +222,7 @@ public class Receiver {
             logger.info("Received message body '" + message + "'");
             
             // Decode and begin the job ...
-            
+            Path tempDirPath = null;
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 Task commonTask = mapper.readValue(message, Task.class);
@@ -236,7 +236,7 @@ public class Receiver {
                 }
 
                 // Set up the worker temporary directory
-                Path tempDirPath = Paths.get(tempDir, WorkerInstance.getWorkerName());
+                tempDirPath = Paths.get(tempDir, WorkerInstance.getWorkerName());
                 tempDirPath.toFile().mkdir();
                 
                 Path metaDirPath = Paths.get(metaDir);
@@ -249,11 +249,11 @@ public class Receiver {
                         vaultKeyPath, vaultKeyName, vaultSslPEMPath);
                 concreteTask.performAction(context);
                 
-                // Clean up the temporary directory
-                FileUtils.deleteDirectory(tempDirPath.toFile());
-                
             } catch (Exception e) {
                 logger.error("Error decoding message", e);
+            } finally {
+            	// Clean up the temporary directory
+                FileUtils.deleteDirectory(tempDirPath.toFile());
             }
 
             channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
