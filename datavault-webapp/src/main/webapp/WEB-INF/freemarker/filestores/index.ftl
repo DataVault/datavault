@@ -247,6 +247,7 @@
                 </a>
                 <br/><br/>
                 <p>Go to the <a href="${springMacroRequestContext.getContextPath()}/">homepage</a> to select the vault you want to use (to make a deposit or retrieval) from the list of your current vaults.</p>
+                <p><b>It can take several minutes before the connection between Datavault and the location is set, so please reload the page and try again.</b></p>
             </#if>
 
         </div>
