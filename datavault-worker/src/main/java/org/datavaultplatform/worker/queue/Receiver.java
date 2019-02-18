@@ -220,6 +220,12 @@ public class Receiver {
             // Note that the message body might contain keys/credentials
             logger.info("Received " + message.length() + " bytes");
             logger.info("Received message body '" + message + "'");
+
+            if (message.compareToIgnoreCase("shutdown") == 0) {
+                channel.basicQos(0);
+                logger.info("Shutdown message received, exiting");
+                System.exit(1);
+            }
             
             // Decode and begin the job ...
             
