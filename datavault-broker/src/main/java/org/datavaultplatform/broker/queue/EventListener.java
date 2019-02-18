@@ -234,12 +234,27 @@ public class EventListener implements MessageListener {
                 Boolean success = false;
                 while (!success) {
                     try {
+                        // If went through chunking will also get the chuncking information
+                        HashMap<Integer, String> chunksDigest = computedEncryptionEvent.getChunksDigest();
+                        String algorithm = computedEncryptionEvent.getDigestAlgorithm();
+                        deposit.setNumOfChunks(chunksDigest.size());
+                        depositsService.updateDeposit(deposit);
+
+                        deposit.setDepositChunks(new ArrayList<DepositChunk>());
+
+                        for(Integer chunkNum : chunksDigest.keySet()) {
+                            String hash = chunksDigest.get(chunkNum);
+                            // Create new Deposit chunk
+                            DepositChunk depositChunk = new DepositChunk(deposit, chunkNum, hash, algorithm);
+                            deposit.getDepositChunks().add(depositChunk);
+                        }
+
                         HashMap<Integer, byte[]> chunksIVs = computedEncryptionEvent.getChunkIVs();
                         HashMap<Integer, String> encChunksDigests = computedEncryptionEvent.getEncChunkDigests();
                         byte[] tarIV = computedEncryptionEvent.getTarIV();
                         String encTarDigest = computedEncryptionEvent.getEncTarDigest();
                         String aesMode = computedEncryptionEvent.getAesMode();
-                        
+
                         List<DepositChunk> chunks = deposit.getDepositChunks();
                         for(DepositChunk chunk : chunks) {
                             Integer num = chunk.getChunkNum();

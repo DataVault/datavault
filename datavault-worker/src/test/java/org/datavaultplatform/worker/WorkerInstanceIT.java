@@ -170,6 +170,7 @@ public class WorkerInstanceIT {
                                 chunksHash = ((ComputedChunks)concreteEvent).getChunksDigest();
                                 break;
                             }else if ( concreteEvent instanceof ComputedEncryption ) {
+                                chunksHash = ((ComputedEncryption)concreteEvent).getChunksDigest();
                                 encChunksHash = ((ComputedEncryption)concreteEvent).getEncChunkDigests();
                                 chunksIVs = ((ComputedEncryption)concreteEvent).getChunkIVs();
                                 encTarIV = ((ComputedEncryption)concreteEvent).getTarIV();

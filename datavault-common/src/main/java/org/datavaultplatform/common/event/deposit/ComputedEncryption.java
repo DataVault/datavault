@@ -19,9 +19,21 @@ public class ComputedEncryption extends Event {
     public byte[] tarIV;
     private String encTarDigest;
     private String aesMode;
+    @Column(name="chunksDigest", columnDefinition="LONGBLOB")
+    public HashMap<Integer, String> chunksDigest;
+    public String digestAlgorithm;
     
     ComputedEncryption() {};
-    public ComputedEncryption(String jobId, String depositId, HashMap<Integer, byte[]> chunkIVs, byte[] tarIV, String aesMode, String digest, HashMap<Integer, String> digests) {
+    public ComputedEncryption(
+            String jobId,
+            String depositId,
+            HashMap<Integer, byte[]> chunkIVs,
+            byte[] tarIV,
+            String aesMode,
+            String digest,
+            HashMap<Integer, String> digests,
+            HashMap<Integer, String> chunksDigest,
+            String digestAlgorithm) {
         super("Chunks encrypted with AES/" + aesMode);
         this.eventClass = ComputedEncryption.class.getCanonicalName();
         this.chunkIVs = chunkIVs;
@@ -31,6 +43,8 @@ public class ComputedEncryption extends Event {
         this.encChunkDigests = digests;
         this.depositId = depositId;
         this.jobId = jobId;
+        this.chunksDigest = chunksDigest;
+        this.digestAlgorithm = digestAlgorithm;
     }
     
     public HashMap<Integer, byte[]> getChunkIVs() {
@@ -72,6 +86,20 @@ public class ComputedEncryption extends Event {
     public void setEncChunkDigests(HashMap<Integer, String> encChunkDigests) {
         this.encChunkDigests = encChunkDigests;
     }
-    
-    
+
+    public HashMap<Integer, String> getChunksDigest() {
+        return chunksDigest;
+    }
+
+    public void setChunksDigest(HashMap<Integer, String> chunksDigest) {
+        this.chunksDigest = chunksDigest;
+    }
+
+    public String getDigestAlgorithm() {
+        return digestAlgorithm;
+    }
+
+    public void setDigestAlgorithm(String digestAlgorithm) {
+        this.digestAlgorithm = digestAlgorithm;
+    }
 }

@@ -17,7 +17,11 @@ public class ComputedChunks extends Event {
     public String digestAlgorithm;
     
     ComputedChunks() {};
-    public ComputedChunks(String jobId, String depositId, HashMap<Integer, String> chunksDigest, String digestAlgorithm) {
+    public ComputedChunks(
+            String jobId,
+            String depositId,
+            HashMap<Integer, String> chunksDigest,
+            String digestAlgorithm) {
         super("Number of chunks: " + chunksDigest.size());
         this.eventClass = ComputedChunks.class.getCanonicalName();
         this.chunksDigest = chunksDigest;
