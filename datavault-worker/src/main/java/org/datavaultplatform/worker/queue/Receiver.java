@@ -223,8 +223,9 @@ public class Receiver {
 
             if (message.compareToIgnoreCase("shutdown") == 0) {
                 channel.basicQos(0);
+                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
                 logger.info("Shutdown message received, exiting");
-                System.exit(1);
+                System.exit(0);
             }
             
             // Decode and begin the job ...
