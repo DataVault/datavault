@@ -135,7 +135,8 @@ public class Deposit extends Task {
                 eventStream.send(new Error(jobID, depositId, msg)
                     .withUserId(userID));
 
-                System.exit(1);
+                //System.exit(1);
+                throw new RuntimeException(e);
             }
         }
         
@@ -161,7 +162,8 @@ public class Deposit extends Task {
                 eventStream.send(new Error(jobID, depositId, msg)
                         .withUserId(userID));
 
-                System.exit(1);
+                //System.exit(1);
+                throw new RuntimeException(e);
             }
         }
         
@@ -181,7 +183,8 @@ public class Deposit extends Task {
                 eventStream.send(new Error(jobID, depositId, msg)
                     .withUserId(userID));
 
-                System.exit(1);
+                //System.exit(1);
+                throw new RuntimeException(e);
             }
         }
         
@@ -256,7 +259,8 @@ public class Deposit extends Task {
                 eventStream.send(new Error(jobID, depositId, msg)
                     .withUserId(userID));
 
-                System.exit(1);
+                //System.exit(1);
+                throw new RuntimeException(e);
             }
         }
         
@@ -429,7 +433,8 @@ public class Deposit extends Task {
             eventStream.send(new Error(jobID, depositId, msg)
                 .withUserId(userID));
 
-            System.exit(1);
+            //System.exit(1);
+            throw new RuntimeException(e);
         }
         
         // TODO: Disconnect from user and archive storage system?
