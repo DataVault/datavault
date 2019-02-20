@@ -314,11 +314,12 @@ public class Deposit extends Task {
             logger.info("We have successfully created the Tar, so lets delete the Bag to save space");
             FileUtils.deleteDirectory(bagDir);
 
+            HashMap<Integer, String> chunksDigest = null;
             if ( context.isChunkingEnabled() ) {
                 logger.info("Chunking tar file ...");
                 chunkFiles = FileSplitter.spliteFile(tarFile, context.getChunkingByteSize());
                 chunksHash = new String[chunkFiles.length];
-                HashMap<Integer, String> chunksDigest = new HashMap<Integer, String>();
+                chunksDigest = new HashMap<Integer, String>();
 
                 for (int i = 0; i < chunkFiles.length; i++){
                     File chunk = chunkFiles[i];
@@ -333,9 +334,11 @@ public class Deposit extends Task {
                 }
                 
                 logger.info(chunkFiles.length + " chunk files created.");
-                
-                eventStream.send(new ComputedChunks(jobID, depositId, chunksDigest, tarHashAlgorithm)
-                        .withUserId(userID));
+
+                if(!context.isEncryptionEnabled()) {
+                    eventStream.send(new ComputedChunks(jobID, depositId, chunksDigest, tarHashAlgorithm)
+                            .withUserId(userID));
+                }
             }
 
             // Encryption
@@ -368,7 +371,8 @@ public class Deposit extends Task {
                     logger.info(chunkFiles.length + " chunk files encrypted.");
                     
                     eventStream.send(new ComputedEncryption(jobID, depositId, chunksIVs, null, 
-                            context.getEncryptionMode().toString(), null, encChunksDigests)
+                            context.getEncryptionMode().toString(), null, encChunksDigests,
+                            chunksDigest, tarHashAlgorithm)
                                 .withUserId(userID));
                 } else {
                     iv = Encryption.encryptFile(context, tarFile);
@@ -378,9 +382,9 @@ public class Deposit extends Task {
                     logger.info("Encrypted Tar file: " + tarFile.length() + " bytes");
                     logger.info("Encrypted tar checksum: " + encTarHash);
                     
-                    eventStream.send(new ComputedEncryption(jobID, depositId, null, 
+                    eventStream.send(new ComputedEncryption(jobID, depositId,null,
                             iv, context.getEncryptionMode().toString(),
-                            encTarHash, null)
+                            encTarHash, null, null, null)
                                 .withUserId(userID));
                 }
             }
