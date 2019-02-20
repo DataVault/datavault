@@ -6,6 +6,8 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.common.io.FileUtils;
@@ -205,7 +207,11 @@ public class Receiver {
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 
-        channel.queueDeclare(queueName, true, false, false, null);
+        // Allow for priority messages so that a shutdown message can be prioritised if required.
+        Map<String, Object> args = new HashMap<String, Object>();
+        args.put("x-max-priority", 2);
+
+        channel.queueDeclare(queueName, true, false, false, args);
         logger.info("Waiting for messages");
         
         QueueingConsumer consumer = new QueueingConsumer(channel);
@@ -220,7 +226,14 @@ public class Receiver {
             // Note that the message body might contain keys/credentials
             logger.info("Received " + message.length() + " bytes");
             logger.info("Received message body '" + message + "'");
-            
+
+            if (message.compareToIgnoreCase("shutdown") == 0) {
+                channel.basicQos(0);
+                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                logger.info("Shutdown message received, exiting");
+                System.exit(0);
+            }
+
             // Decode and begin the job ...
             Path tempDirPath = null;
             try {

@@ -4,6 +4,8 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import com.rabbitmq.client.MessageProperties;
@@ -49,8 +51,12 @@ public class Sender {
 
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
+
+        // Allow for priority messages so that a shutdown message can be prioritised if required.
+        Map<String, Object> args = new HashMap<String, Object>();
+        args.put("x-max-priority", 2);
         
-        channel.queueDeclare(queueName, true, false, false, null);
+        channel.queueDeclare(queueName, true, false, false, args);
         channel.basicPublish("", queueName, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
         logger.info("Sent '" + message + "'");
         

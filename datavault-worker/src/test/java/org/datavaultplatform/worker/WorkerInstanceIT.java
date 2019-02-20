@@ -100,10 +100,14 @@ public class WorkerInstanceIT {
             Connection connection1 = factory.newConnection();
             Channel channel1 = connection1.createChannel();
 
+            // Allow for priority messages so that a shutdown message can be prioritised if required.
+            Map<String, Object> args = new HashMap<String, Object>();
+            args.put("x-max-priority", 2);
+
             Connection connection2 = factory.newConnection();
             Channel channel2 = connection2.createChannel();
             
-            channel1.queueDeclare("datavault", true, false, false, null);
+            channel1.queueDeclare("datavault", true, false, false, args);
             channel2.queueDeclare("datavault-event", true, false, false, null);
             
             channel1.basicPublish("", "datavault", null, message.getBytes());
@@ -407,10 +411,14 @@ public class WorkerInstanceIT {
     
             Connection connection1 = factory.newConnection();
             Channel channel1 = connection1.createChannel();
+
+            // Allow for priority messages so that a shutdown message can be prioritised if required.
+            Map<String, Object> args = new HashMap<String, Object>();
+            args.put("x-max-priority", 2);
             
             Connection connection2 = factory.newConnection();
             Channel channel2 = connection2.createChannel();
-            channel1.queueDeclare("datavault", true, false, false, null);
+            channel1.queueDeclare("datavault", true, false, false, args);
             channel2.queueDeclare("datavault-event", true, false, false, null);
             
             channel1.basicPublish("", "datavault", null, message.getBytes());
