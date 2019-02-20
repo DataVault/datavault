@@ -33,6 +33,25 @@
                 <form id="add-archivestoreLocal-form">
                     <div class="form-archivestore">
                         <div class="form-group">
+                            <label for="label">Label</label>
+                            <input type="text" class="form-control" id="label" name="label"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="type">Type</label>
+                            <select class="form-control" id="type" name="type">
+                                <option value="AmazonGlacier">Amazon Glacier</option>
+                                <option value="DropboxFileSystem">Dropbox File System</option>
+                                <option value="LocalFileSystem">Local File System</option>
+                                <option value="OracleObjectStorageClassic">Oracle Object Storage Classic</option>
+                                <option value="S3Cloud">S3 Cloud</option>
+                                <option value="SFTPFileSystem">SFTP File System</option>
+                                <option value="TrivolyStorageManager">Trivoly Storage Manager</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="checkbox" id="retrieve" name="retrieve"/> Enable Retrieve
+                        </div>
+                        <div class="form-group">
                             <label for="path">Path</label>
                             <input type="text" class="form-control" id="path" name="path" value="${archiveDir}" />
                         </div>
@@ -55,33 +74,37 @@
         <li class="active"><b>Archive Storage Options</b></li>
     </ol>
 
-    <h3>Local Storage</h3>
+    <h3>Storage</h3>
 
     <div class="table-responsive storage-table">
-        <#if archivestoresLocal?has_content>
+        <#if archivestores?has_content>
         <table class="table table-striped">
 
             <thead>
             <tr class="tr">
-                <th>Hostname</th>
-                <th>Path</th>
-                <th>Retrieve Enabled</t>
+                <th>Label</th>
+                <th>Class</th>
+                <th>Properties</th>
+                <th>Retrieve Enabled</th>
                 <th></th>
             </tr>
             </thead>
 
             <tbody id="fileStoresLocal">
-                    <#list archivestoresLocal as archivestoreLocal>
+                    <#list archivestores as archivestore>
                     <tr class="tr">
-                        <td>localhost</td>
-                        <td>${archivestoreLocal.properties['rootPath']}</td>
+                        <td>${archivestore.label}</td>
+                        <td>${archivestore.storageClass}</td>
                         <td>
-                            <div class="checkbox">
-                                <input type="checkbox" class="toggleRetrieveEnabled" data-archivestore1="${archivestoreLocal.ID}" ${archivestoreLocal.retrieveEnabled?then("checked", "")}>
-                            </div>
+                            <#list archivestore.properties.keys as prop>
+                            <div>${prop}: ${archivestore.properties[prop]}</div>
+                            </#list>
                         </td>
                         <td>
-                            <a class="btn btn-xs btn-danger pull-right" href="#" data-archivestore="${archivestoreLocal.ID}" data-toggle="modal" data-target="#confirm-removal">
+                            <input type="checkbox" class="toggleRetrieveEnabled" data-archivestore1="${archivestore.ID}" ${archivestore.retrieveEnabled?then("checked", "")}>
+                        </td>
+                        <td>
+                            <a class="btn btn-xs btn-danger pull-right" href="#" data-archivestore="${archivestore.ID}" data-toggle="modal" data-target="#confirm-removal">
                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                             </a>
                         </td>
@@ -118,7 +141,7 @@
                 location.reload(true);
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                alert('Error: unable to add new archivestore');
+                alert("Error - unable to add new archivestore:\n" + thrownError);
             }
         });
 

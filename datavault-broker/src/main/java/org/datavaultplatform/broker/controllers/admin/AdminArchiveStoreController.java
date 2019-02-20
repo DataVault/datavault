@@ -39,8 +39,13 @@ public class AdminArchiveStoreController {
     @RequestMapping(value = "/admin/archivestores", method = RequestMethod.POST)
     public ResponseEntity<ArchiveStore> addArchiveStore(@RequestHeader(value = "X-UserID", required = true) String userID,
                                                         @RequestBody ArchiveStore store) throws Exception {
+        try{
+            archiveStoreService.addArchiveStore(store);
+        }catch(Exception e){
+            System.err.println("Couldn't add archive store: "+ e.getMessage());
+            return new ResponseEntity<>(store, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
-        archiveStoreService.addArchiveStore(store);
         return new ResponseEntity<>(store, HttpStatus.CREATED);
     }
 

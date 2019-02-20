@@ -40,15 +40,16 @@ public class AdminArchiveStoreController {
         model.addAttribute("archiveDir", archiveDir);
 
         ArchiveStore[] archiveStores = restService.getArchiveStores();
-        List<ArchiveStore> localStores = new ArrayList<>();
+        List<ArchiveStore> stores = new ArrayList<>();
 
         for (ArchiveStore archiveStore : archiveStores) {
-            if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.LocalFileSystem")) {
-                localStores.add(archiveStore);
-            }
+//            if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.LocalFileSystem")) {
+//                localStores.add(archiveStore);
+//            }
+            stores.add(archiveStore);
         }
 
-        model.addAttribute("archivestoresLocal", localStores);
+        model.addAttribute("archivestores", stores);
 
         return "admin/archivestores/index";
     }
@@ -56,10 +57,20 @@ public class AdminArchiveStoreController {
     // Process the 'add local ArchiveStore' Ajax request
     @RequestMapping(value = "/admin/archivestores/local", method = RequestMethod.POST)
     @ResponseBody
-    public void addLocalArchivestore(@RequestParam("path") String path) {
-        HashMap<String,String> storeProperties = new HashMap<String,String>();
+    public void addLocalArchivestore(@RequestParam("path") String path,
+                                     @RequestParam("label") String label,
+                                     @RequestParam("type") String type,
+                                     @RequestParam(value="retrieve",required=false) String retrieve) {
+        HashMap<String,String> storeProperties = new HashMap<>();
         storeProperties.put("rootPath", path);
-        ArchiveStore store = new ArchiveStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Default archive store (local)", false);
+        String storageClass = "org.datavaultplatform.common.storage.impl." + type;
+
+        boolean retrieveEnabled = false;
+        if(retrieve != null && retrieve.equals("on")){
+            retrieveEnabled = true;
+        }
+
+        ArchiveStore store = new ArchiveStore(storageClass, storeProperties, label, retrieveEnabled);
         restService.addArchiveStore(store);
     }
 

@@ -388,7 +388,9 @@ public class RestService {
     }
 
     public ArchiveStore addArchiveStore(ArchiveStore archiveStore) {
+        System.out.println("Post request to broker");
         HttpEntity<?> response = post(brokerURL + "/admin/archivestores/", ArchiveStore.class, archiveStore);
+        System.out.println("Done");
         return (ArchiveStore)response.getBody();
     }
 
