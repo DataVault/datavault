@@ -32,7 +32,8 @@ public class FilesController {
     private FilesService filesService;
     private UsersService usersService;
     private String tempDir;
-    
+    private Long maxDepositByteSize;
+
     public void setFilesService(FilesService filesService) {
         this.filesService = filesService;
     }
@@ -43,6 +44,11 @@ public class FilesController {
     
     public void setTempDir(String tempDir) {
         this.tempDir = tempDir;
+    }
+
+    public void setMaxDepositByteSize(String maxDepositByteSize) {
+        long bytes = FileUtils.parseFormattedSizeToBytes(maxDepositByteSize);
+        this.maxDepositByteSize = bytes;
     }
     
     @RequestMapping("/files")
@@ -137,6 +143,54 @@ public class FilesController {
             return "File information not available";
         } else {
             return FileUtils.getGibibyteSizeStr(size);
+        }
+    }
+
+    @RequestMapping("/checkdepositsize")
+    public Boolean checkDepositSize(@RequestHeader(value = "X-UserID", required = true) String userID,
+                              HttpServletRequest request) throws Exception {
+
+        User user = usersService.getUser(userID);
+        String[] filePaths = request.getParameterValues("filepath");
+
+        Long size = 0L;
+        for (String filePath : filePaths) {
+            System.out.println("Full filePath: " + filePath);
+            filePath = filePath.replaceFirst("/storage/", "");
+            // remove first slashes
+            filePath = filePath.replaceFirst("^\\/+", "");
+            System.out.println("Full filePath cleaned: " + filePath);
+            String storageID = filePath.substring(0,filePath.indexOf("/"));
+            System.out.println("storageID: " + storageID);
+            filePath = filePath.substring(filePath.indexOf("/"));
+            System.out.println("filePath: " + filePath);
+
+            FileStore store = null;
+            List<FileStore> userStores = user.getFileStores();
+
+            for (FileStore userStore : userStores) {
+                if (userStore.getID().equals(storageID)) {
+                    store = userStore;
+                }
+            }
+
+            if (store == null) {
+                throw new Exception("Storage device '" + storageID + "' not found!");
+            }
+
+            System.out.println("size: " + size);
+
+            Long fileSize = filesService.getFilesize(filePath, store);
+
+            size += fileSize;
+        }
+
+        System.out.println("Total size: " + size);
+
+        if (size <= this.maxDepositByteSize) {
+            return Boolean.TRUE;
+        } else {
+            return Boolean.FALSE;
         }
     }
     

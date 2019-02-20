@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.controllers;
 
+import org.datavaultplatform.common.io.FileUtils;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.webapp.model.FancytreeNode;
 import org.datavaultplatform.webapp.services.RestService;
@@ -14,9 +15,19 @@ import org.apache.commons.codec.binary.Base64;
 public class FilesController {
 
     private RestService restService;
+    private Long maxDepositByteSize;
     
     public void setRestService(RestService restService) {
         this.restService = restService;
+    }
+
+    public void setMaxDepositByteSize(String maxDepositByteSize) {
+        long bytes = FileUtils.parseFormattedSizeToBytes(maxDepositByteSize);
+        this.maxDepositByteSize = bytes;
+    }
+
+    public String getMaxDepositSizeDisplay(){
+        return FileUtils.getGibibyteSizeStr(maxDepositByteSize);
     }
 
     public ArrayList<FancytreeNode> getNodes(String parent, boolean directoryOnly) {
@@ -78,6 +89,21 @@ public class FilesController {
         String filepath = request.getParameter("filepath");
         
         return restService.getFilesize(filepath);
+    }
+
+    @RequestMapping("/checkdepositsize")
+    public @ResponseBody String checkDepositSize(HttpServletRequest request) {
+
+        String[] filePaths = request.getParameterValues("filepath[]");
+
+        for(String filePath : filePaths){
+            System.out.println("filePaths: " + filePath);
+        }
+
+        String success = restService.checkDepositSize(filePaths).toString();
+        String max = getMaxDepositSizeDisplay();
+
+        return "{ \"success\":\"" + success + "\", \"max\":\"" + max + "\"}";
     }
     
     @RequestMapping(value = "/fileupload", method = RequestMethod.POST)

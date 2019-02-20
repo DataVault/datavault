@@ -306,7 +306,9 @@
 
 <script>
     $(document).ready(function () {
-        
+
+        var total_deposit_size = 0;
+
         $('[data-toggle="popover"]').popover();
         
         var updateProgress = function(percentComplete) {
@@ -347,15 +349,45 @@
                   expanded: true
               });
             }
-            
-            var childNode = storageNode.addChildren({
-              key: node.key,
-              title: node.title,
-              tooltip: "Path: " + node.key,
-              folder: node.folder
-            });
 
-            $('#add-from-storage').modal('hide');
+            var pathNodes = storageNode.getChildren();
+            var paths = [];
+
+            var isFull = false;
+
+            if (pathNodes != null) {
+                for (var i = 0; i < pathNodes.length; i++) {
+                    var checkedNode = pathNodes[i];
+                    paths.push(checkedNode.getKeyPath().replace("/storage/", "/"));
+                }
+            }
+
+            paths.push(node.key);
+            $.ajax({
+                url: "${springMacroRequestContext.getContextPath()}/checkdepositsize",
+                type: "GET",
+                data: {filepath: paths},
+                dataType: 'json',
+                success: function (result) {
+                    if (result.success == "false") {
+                        isFull = true
+                    }
+
+                    if(!isFull) {
+                        var childNode = storageNode.addChildren({
+                            key: node.key,
+                            title: node.title,
+                            tooltip: "Path: " + node.key,
+                            folder: node.folder
+                        });
+
+                        $('#add-from-storage').modal('hide');
+                    }
+                    else{
+                        alert("A deposit is limited to " + result.max + "!")
+                    }
+                }
+            });
         });
   
         $('button[type="submit"]').on("click", function() {
