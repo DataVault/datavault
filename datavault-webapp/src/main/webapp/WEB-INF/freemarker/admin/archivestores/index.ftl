@@ -53,7 +53,7 @@
                         </div>
                         <div class="form-group">
                             <label for="path">Path</label>
-                            <input type="text" class="form-control" id="path" name="path" value="${archiveDir}" />
+                            <textarea class="form-control" id="properties" name="properties" rows="3"></textarea>
                         </div>
                     </div>
                 </form>
@@ -96,9 +96,10 @@
                         <td>${archivestore.label}</td>
                         <td>${archivestore.storageClass}</td>
                         <td>
-                            <#list archivestore.properties.keys as prop>
-                            <div>${prop}: ${archivestore.properties[prop]}</div>
-                            </#list>
+                            <textarea id="${archivestore.ID}-properties" class="form-control" id="properties" name="properties" rows="3"><#list archivestore.properties?keys as prop>${prop}=${archivestore.properties[prop]}
+                                </#list>
+                            </textarea>
+                            <a class="update-properties-btn btn btn-default btn-sm pull-right" href="#" data-archivestore="${archivestore.ID}">Update</a>
                         </td>
                         <td>
                             <input type="checkbox" class="toggleRetrieveEnabled" data-archivestore1="${archivestore.ID}" ${archivestore.retrieveEnabled?then("checked", "")}>
@@ -148,7 +149,21 @@
         ev.preventDefault();
     });
 
+    // Handle properties update
+    $('.update-properties-btn').click(function() {
+        var archivestore = $(this).data('archivestore');
 
+        var properties = $("#"+archivestore+"-properties").val();
+
+        $.ajax({
+            url: '${springMacroRequestContext.getContextPath()}/admin/archivestores/' + archivestore + '/update/properties',
+            type: 'POST',
+            data: { properties : properties },
+            error: function(xhr, ajaxOptions, thrownError) {
+                alert('Error: unable to update archivestore');
+            }
+        });
+    });
 
     // Bind properties to the user removal confirmation dialog
     $('#confirm-removal').on('show.bs.modal', function(e) {
