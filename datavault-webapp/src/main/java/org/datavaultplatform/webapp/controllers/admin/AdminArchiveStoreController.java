@@ -40,15 +40,16 @@ public class AdminArchiveStoreController {
         model.addAttribute("archiveDir", archiveDir);
 
         ArchiveStore[] archiveStores = restService.getArchiveStores();
-        List<ArchiveStore> localStores = new ArrayList<>();
+        List<ArchiveStore> stores = new ArrayList<>();
 
         for (ArchiveStore archiveStore : archiveStores) {
-            if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.LocalFileSystem")) {
-                localStores.add(archiveStore);
-            }
+//            if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.LocalFileSystem")) {
+//                localStores.add(archiveStore);
+//            }
+            stores.add(archiveStore);
         }
 
-        model.addAttribute("archivestoresLocal", localStores);
+        model.addAttribute("archivestores", stores);
 
         return "admin/archivestores/index";
     }
@@ -56,10 +57,20 @@ public class AdminArchiveStoreController {
     // Process the 'add local ArchiveStore' Ajax request
     @RequestMapping(value = "/admin/archivestores/local", method = RequestMethod.POST)
     @ResponseBody
-    public void addLocalArchivestore(@RequestParam("path") String path) {
-        HashMap<String,String> storeProperties = new HashMap<String,String>();
-        storeProperties.put("rootPath", path);
-        ArchiveStore store = new ArchiveStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Default archive store (local)", false);
+    public void addLocalArchivestore(@RequestParam(value="properties",required=false) String properties,
+                                     @RequestParam(value="label") String label,
+                                     @RequestParam(value="type") String type,
+                                     @RequestParam(value="retrieve",required=false) String retrieve) {
+        String storageClass = "org.datavaultplatform.common.storage.impl." + type;
+
+        boolean retrieveEnabled = false;
+        if(retrieve != null && retrieve.equals("on")){
+            retrieveEnabled = true;
+        }
+
+        HashMap<String,String> storeProperties = buildStoreProperties(properties);
+
+        ArchiveStore store = new ArchiveStore(storageClass, storeProperties, label, retrieveEnabled);
         restService.addArchiveStore(store);
     }
 
@@ -88,5 +99,37 @@ public class AdminArchiveStoreController {
         restService.editArchiveStore(archiveStore);
     }
 
+    // Process the 'update properties archivestore' Ajax request
+    @RequestMapping(value = "/admin/archivestores/{archivestoreId}/update/properties", method = RequestMethod.POST)
+    @ResponseBody
+    public void deleteArchiveStore(ModelMap model,
+                                   @PathVariable("archivestoreId") String archivestoreId,
+                                   @RequestParam("properties") String properties) {
+        ArchiveStore archiveStore = restService.getArchiveStore(archivestoreId);
+        HashMap<String,String> storeProperties = buildStoreProperties(properties);
+        archiveStore.setProperties(storeProperties);
+        restService.editArchiveStore(archiveStore);
+    }
 
+    private HashMap<String,String> buildStoreProperties(String properties){
+        HashMap<String,String> storeProperties = new HashMap<>();
+
+        String lines[] = properties.split("\\r?\\n");
+        int lineCount = 0;
+        for(String line : lines){
+            lineCount++;
+            if(line.contains("=")){
+                String prop[] = line.split("=");
+                if(prop.length == 2) {
+                    System.out.println(prop[0].trim()+" = "+prop[1].trim());
+                    storeProperties.put(prop[0].trim(), prop[1].trim());
+                }else{
+                    System.err.println("line #"+lineCount+" has wrong syntax: "+line);
+                }
+            }else{
+                System.err.println("line #"+lineCount+" has wrong syntax: "+line);
+            }
+        }
+        return storeProperties;
+    }
 }
