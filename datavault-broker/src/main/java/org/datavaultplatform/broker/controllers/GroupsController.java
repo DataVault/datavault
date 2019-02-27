@@ -5,7 +5,9 @@ import org.datavaultplatform.broker.services.GroupsService;
 import org.datavaultplatform.common.model.Group;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -258,5 +260,22 @@ public class GroupsController {
             return true;
         }
         return false;
+    }
+
+    @RequestMapping(value = "/groups/update", method = RequestMethod.POST)
+    public ResponseEntity<Object> updateGroup(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                          @RequestBody Group group) throws Exception {
+
+        User user = usersService.getUser(userID);
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+
+        if (!user.isAdmin()) {
+            throw new Exception("Access denied");
+        }
+
+        groupsService.updateGroup(group);
+        return new ResponseEntity<>(group, HttpStatus.OK);
     }
 }
