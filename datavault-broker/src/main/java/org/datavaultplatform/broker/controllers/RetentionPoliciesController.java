@@ -4,12 +4,11 @@ import java.util.List;
 
 import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.broker.services.RetentionPoliciesService;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.datavaultplatform.broker.services.UsersService;
+import org.datavaultplatform.common.model.User;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * User: Tom Higgins
@@ -21,9 +20,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class RetentionPoliciesController {
     
     private RetentionPoliciesService retentionPoliciesService;
+    private UsersService usersService;
     
     public void setRetentionPoliciesService(RetentionPoliciesService retentionPoliciesService) {
         this.retentionPoliciesService = retentionPoliciesService;
+    }
+    public void setUsersService(UsersService usersService) {
+        this.usersService = usersService;
     }
     
     @RequestMapping(value = "/retentionpolicies", method = RequestMethod.GET)
@@ -37,5 +40,22 @@ public class RetentionPoliciesController {
                                               @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
                                               @PathVariable("policyid") String policyID) {
         return retentionPoliciesService.getPolicy(policyID);
+    }
+
+    @RequestMapping(value = "/retentionpolicies/update", method = RequestMethod.POST)
+    public ResponseEntity<Object> updateGroup(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                              @RequestBody RetentionPolicy policy) throws Exception {
+
+        User user = usersService.getUser(userID);
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+
+        if (!user.isAdmin()) {
+            throw new Exception("Access denied");
+        }
+
+        retentionPoliciesService.updateRetentionPolicy(policy);
+        return new ResponseEntity<>(policy, HttpStatus.OK);
     }
 }

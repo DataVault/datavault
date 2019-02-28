@@ -323,6 +323,11 @@ public class RestService {
         return (RetentionPolicy)response.getBody();
     }
 
+    public RetentionPolicy updateRententionPolicy(RetentionPolicy policy) {
+        HttpEntity<?> response = post(brokerURL + "/retentionpolicies/update", RetentionPolicy.class, policy);
+        return (RetentionPolicy)response.getBody();
+    }
+
     public User getUser(String userId) {
         HttpEntity<?> response = get(brokerURL + "/users/" + userId, User.class);
         return (User)response.getBody();

@@ -96,7 +96,7 @@
                         <td>${archivestore.label}</td>
                         <td>${archivestore.storageClass}</td>
                         <td>
-                            <textarea id="${archivestore.ID}-properties" class="form-control" id="properties" name="properties" rows="3"><#list archivestore.properties?keys as prop>${prop}=${archivestore.properties[prop]}
+                            <textarea id="${archivestore.ID}-properties" class="form-control" name="${archivestore.ID}-properties" rows="3"><#list archivestore.properties?keys as prop>${prop}=${archivestore.properties[prop]}
                                 </#list>
                             </textarea>
                             <a class="update-properties-btn btn btn-default btn-sm pull-right" href="#" data-archivestore="${archivestore.ID}">Update</a>
