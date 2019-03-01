@@ -307,8 +307,6 @@
 <script>
     $(document).ready(function () {
 
-        var total_deposit_size = 0;
-
         $('[data-toggle="popover"]').popover();
         
         var updateProgress = function(percentComplete) {
@@ -327,42 +325,31 @@
         });
         
         $('#add-from-storage-btn').on("click", function() {
-            
+
             // Add the path to the hidden control
             var node = $("#tree").fancytree("getActiveNode");
             $('.file-path')
-              .append($('<option>', { value : node.key })
-              .text(node.key)
-              .prop('selected', true));
-            
-            // Add the file to the list
-            $("#upload-tree").show();
-            
+                .append($('<option>', { value : node.key })
+                    .text(node.key)
+                    .prop('selected', true));
+
             var storageNode = $("#upload-tree").fancytree("getNodeByKey", "storage");
-            if (!storageNode) {
-              var rootNode = $("#upload-tree").fancytree("getRootNode");
-              storageNode = rootNode.addChildren({
-                  key: "storage",
-                  title: "Data Storage",
-                  tooltip: "Data Storage",
-                  folder: true,
-                  expanded: true
-              });
-            }
 
-            var pathNodes = storageNode.getChildren();
             var paths = [];
+            if (storageNode) {
+                var pathNodes = storageNode.getChildren();
 
-            var isFull = false;
+                var isFull = false;
 
-            if (pathNodes != null) {
-                for (var i = 0; i < pathNodes.length; i++) {
-                    var checkedNode = pathNodes[i];
-                    paths.push(checkedNode.getKeyPath().replace("/storage/", "/"));
+                if (pathNodes != null) {
+                    for (var i = 0; i < pathNodes.length; i++) {
+                        var checkedNode = pathNodes[i];
+                        paths.push(checkedNode.getKeyPath().replace("/storage/", "/"));
+                    }
                 }
+                paths.push(node.key);
             }
 
-            paths.push(node.key);
             $.ajax({
                 url: "${springMacroRequestContext.getContextPath()}/checkdepositsize",
                 type: "GET",
@@ -374,19 +361,40 @@
                     }
 
                     if(!isFull) {
-                        var childNode = storageNode.addChildren({
+                        // Add the file to the list
+                        $("#upload-tree").show();
+
+                        if (!storageNode) {
+                            var rootNode = $("#upload-tree").fancytree("getRootNode");
+                            storageNode = rootNode.addChildren({
+                                key: "storage",
+                                title: "Data Storage",
+                                tooltip: "Data Storage",
+                                folder: true,
+                                expanded: true
+                            });
+                        }
+
+                        // Add the path to the hidden control
+                        storageNode.addChildren({
                             key: node.key,
                             title: node.title,
                             tooltip: "Path: " + node.key,
                             folder: node.folder
                         });
 
-                        $('#add-from-storage').modal('hide');
+                        alert("Files added to the deposit!")
                     }
                     else{
                         alert("A deposit is limited to " + result.max + "!")
                     }
                 }
+            })
+            .fail(function( msg ) {
+                alert("Couldn't calculate size of the deposit!\nMake sure the path to the file location is correct and try again.");
+            })
+            .done(function( msg ) {
+                $('#add-from-storage').modal('hide');
             });
         });
   
