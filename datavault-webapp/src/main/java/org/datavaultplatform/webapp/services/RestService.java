@@ -368,11 +368,6 @@ public class RestService {
         return (Boolean)response.getBody();
     }
 
-    public Group updateGroup(Group group) {
-        HttpEntity<?> response = post(brokerURL + "/groups/update", Group.class, group);
-        return (Group)response.getBody();
-    }
-
     public Dataset[] getDatasets() {
         HttpEntity<?> response = get(brokerURL + "/metadata/datasets", Dataset[].class);
         return (Dataset[])response.getBody();

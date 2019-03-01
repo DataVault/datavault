@@ -1,14 +1,11 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
-import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
 
 /**
  * User: Stuart Lewis
@@ -102,17 +99,6 @@ public class AdminGroupsController {
                                                @PathVariable("groupid") String groupId,
                                                @PathVariable("userid") String userId) {
         restService.removeGroupOwner(groupId, userId);
-    }
-
-    // Process the 'update properties archivestore' Ajax request
-    @RequestMapping(value = "/admin/groups/{groupid}/update/name", method = RequestMethod.POST)
-    @ResponseBody
-    public void updateArchiveStore(ModelMap model,
-                                   @PathVariable("groupid") String groupId,
-                                   @RequestParam("name") String name) {
-        Group group = restService.getGroup(groupId);
-        group.setName(name);
-        restService.updateGroup(group);
     }
 }
 

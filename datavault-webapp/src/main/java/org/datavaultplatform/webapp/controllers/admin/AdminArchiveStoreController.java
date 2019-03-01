@@ -102,7 +102,7 @@ public class AdminArchiveStoreController {
     // Process the 'update properties archivestore' Ajax request
     @RequestMapping(value = "/admin/archivestores/{archivestoreId}/update/properties", method = RequestMethod.POST)
     @ResponseBody
-    public void updateArchiveStore(ModelMap model,
+    public void deleteArchiveStore(ModelMap model,
                                    @PathVariable("archivestoreId") String archivestoreId,
                                    @RequestParam("properties") String properties) {
         ArchiveStore archiveStore = restService.getArchiveStore(archivestoreId);
