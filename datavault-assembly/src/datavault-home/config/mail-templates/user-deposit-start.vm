@@ -18,7 +18,7 @@
 			<li>Review date: ${vault-review-date}</li>
 		</ul>
 		
-		<p>You may view the details of your deposit or retrieve your deposit by logging in with EASE at <a href="https://datavault.ed.ac.uk/">https://datavault.ed.ac.uk/</a>. 
-		Further information about the service is available at <a href="http://www.ed.ac.uk/is/research-support/datavault">http://www.ed.ac.uk/is/research-support/datavault</a>.</p>
+		<p>You may view the details of your deposit or retrieve your deposit by logging in with EASE at <a href=${home-page}>${home-page}</a>. 
+		Further information about the service is available at <a href=${help-page}>${help-page}</a>.</p>
 	</body>
 </html>

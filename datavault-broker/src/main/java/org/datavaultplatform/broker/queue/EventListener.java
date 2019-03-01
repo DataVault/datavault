@@ -28,7 +28,11 @@ public class EventListener implements MessageListener {
     private RetrievesService retrievesService;
     private UsersService usersService;
     private EmailService emailService;
-    private static final Map<String, String> EMAIL_SUBJECTS;
+    private String homeUrl;
+	private String helpUrl;
+	private String helpMail;
+    
+	private static final Map<String, String> EMAIL_SUBJECTS;
     static {
     	EMAIL_SUBJECTS = new HashMap<String, String>();
     	EMAIL_SUBJECTS.put("user-deposit-start", "Confirmation - your new DataVault deposit is starting.");
@@ -416,7 +420,9 @@ public class EventListener implements MessageListener {
             model.put("retrieve-lastname", retrieveUser.getLastname());
             model.put("retrieve-id", retrieveUser.getID());
         }
-        
+        model.put("home-page", this.getHomeUrl());
+        model.put("help-page", this.getHelpUrl());
+        model.put("help-mail", this.getHelpMail());
         
         // Send email to group owners
         for (User groupAdmin : group.getOwners()) {
@@ -438,4 +444,24 @@ public class EventListener implements MessageListener {
                     model);
         }
     }
+    
+    public String getHomeUrl() {
+		return this.homeUrl;
+	}
+	public void setHomeUrl(String homeUrl) {
+		this.homeUrl = homeUrl;
+	}
+	public String getHelpUrl() {
+		return this.helpUrl;
+	}
+	public void setHelpUrl(String helpUrl) {
+		this.helpUrl = helpUrl;
+	}
+	
+	public String getHelpMail() {
+		return this.helpMail;
+	}
+	public void setHelpMail(String helpMail) {
+		this.helpMail = helpMail;
+	}
 }

@@ -165,6 +165,9 @@
         <property name="eventService" ref="eventService" />
         <property name="usersService" ref="usersService" />
         <property name="emailService" ref="emailService" />
+        <property name="homeUrl" value="${home.page}"/>
+        <property name="helpUrl" value="${help.page}"/>
+        <property name="helpMail" value="${help.mail}a"/>
     </bean>
 
     <bean id="sender" class="org.datavaultplatform.broker.queue.Sender">
