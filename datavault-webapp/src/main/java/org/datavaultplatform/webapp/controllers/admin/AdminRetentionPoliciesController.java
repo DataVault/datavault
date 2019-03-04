@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -26,6 +27,24 @@ public class AdminRetentionPoliciesController {
 
         return "admin/retentionpolicies/index";
     }
+
+    // Process the 'update policy name' Ajax request
+    @RequestMapping(value = "/admin/retentionpolicies/{id}/update", method = RequestMethod.POST)
+    public @ResponseBody
+    void updateRetentionPolicy(ModelMap model,
+                                      @PathVariable("id") String policyId,
+                                      @RequestParam(name = "name", required = false) String name,
+                                      @RequestParam(name = "description", required = false) String description) {
+        System.out.println("Calling updateRetentionPolicyName");
+        RetentionPolicy policy = restService.getRetentionPolicy(policyId);
+        if(name != null) {
+            System.out.println("Update Name");
+            policy.setName(name);
+        }
+        if(description != null){
+            System.out.println("Update Description");
+            policy.setDescription(description);
+        }
+        restService.updateRententionPolicy(policy);
+    }
 }
-
-

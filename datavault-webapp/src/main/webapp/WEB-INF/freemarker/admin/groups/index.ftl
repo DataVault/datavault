@@ -80,7 +80,9 @@
                                 <input type="checkbox" class="toggleGroupEnabled" data-group="${group.ID}" <#if group.getEnabled()>checked</#if>>
                             </td>
                             <td>${group.ID?html}</td>
-                            <td>${group.name?html}
+                            <td>
+                                <input id="${group.ID}-name" value="${group.name?html}"/>
+                                <a class="update-name-btn btn btn-default btn-sm" href="#" data-groupid="${group.ID}">Update</a>
                                 <form>
                                      <a class="btn btn-xs btn-danger <#if ((vaultCounts[counter] != 0) || (group.getOwners()?size != 0))> disabled</#if>" href="${springMacroRequestContext.getContextPath()}/admin/groups/${group.ID}/delete">
                                         <i class="fa fa-trash-o" aria-hidden="true"></i> Delete Group
@@ -180,6 +182,22 @@
         }
         
         e.preventDefault();
+    });
+
+    // Handle name update
+    $('.update-name-btn').click(function() {
+        var group_id = $(this).data('groupid');
+
+        var new_name = $("#"+group_id+"-name").val();
+
+        $.ajax({
+            url: '${springMacroRequestContext.getContextPath()}/admin/groups/' + group_id + '/update/name',
+            type: 'POST',
+            data: { name : new_name },
+            error: function(xhr, ajaxOptions, thrownError) {
+                alert('Error: unable to update group name');
+            }
+        });
     });
 
     // Add Spring Security CSRF header to ajax requests

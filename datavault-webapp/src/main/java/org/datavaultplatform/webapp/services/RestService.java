@@ -323,6 +323,11 @@ public class RestService {
         return (RetentionPolicy)response.getBody();
     }
 
+    public RetentionPolicy updateRententionPolicy(RetentionPolicy policy) {
+        HttpEntity<?> response = post(brokerURL + "/retentionpolicies/update", RetentionPolicy.class, policy);
+        return (RetentionPolicy)response.getBody();
+    }
+
     public User getUser(String userId) {
         HttpEntity<?> response = get(brokerURL + "/users/" + userId, User.class);
         return (User)response.getBody();
@@ -366,6 +371,11 @@ public class RestService {
     public boolean deleteGroup(String groupID) {
         HttpEntity<?> response = delete(brokerURL + "/groups/" + groupID, Boolean.class);
         return (Boolean)response.getBody();
+    }
+
+    public Group updateGroup(Group group) {
+        HttpEntity<?> response = post(brokerURL + "/groups/update", Group.class, group);
+        return (Group)response.getBody();
     }
 
     public Dataset[] getDatasets() {
