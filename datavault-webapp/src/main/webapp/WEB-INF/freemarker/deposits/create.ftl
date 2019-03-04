@@ -347,8 +347,9 @@
                         paths.push(checkedNode.getKeyPath().replace("/storage/", "/"));
                     }
                 }
-                paths.push(node.key);
             }
+
+            paths.push(node.key);
 
             $.ajax({
                 url: "${springMacroRequestContext.getContextPath()}/checkdepositsize",
@@ -382,8 +383,6 @@
                             tooltip: "Path: " + node.key,
                             folder: node.folder
                         });
-
-                        alert("Files added to the deposit!")
                     }
                     else{
                         alert("A deposit is limited to " + result.max + "!")
