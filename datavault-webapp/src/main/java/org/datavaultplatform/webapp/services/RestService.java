@@ -278,6 +278,11 @@ public class RestService {
         return (DataManager[])response.getBody();
     }
 
+    public DataManager getDataManager(String vaultId, String uun) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/dataManager/" + uun, DataManager.class);
+        return (DataManager)response.getBody();
+    }
+
     public DepositInfo[] getDepositsListingAll() {
         HttpEntity<?> response = get(brokerURL + "/admin/deposits", DepositInfo[].class);
         return (DepositInfo[])response.getBody();

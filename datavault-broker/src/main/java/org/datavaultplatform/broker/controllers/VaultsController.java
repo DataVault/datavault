@@ -266,8 +266,8 @@ public class VaultsController {
     
     @RequestMapping(value = "/vaults/{vaultid}/addDataManager", method = RequestMethod.POST)
     public VaultInfo addDataManager(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                   @PathVariable("vaultid") String vaultID,
-                                   @RequestBody() String unn) throws Exception {
+                                    @PathVariable("vaultid") String vaultID,
+                                    @RequestBody() String unn) throws Exception {
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
         
@@ -289,6 +289,16 @@ public class VaultsController {
             dataManagersList.add(dataManager);
         }
         return dataManagersList;
+    }
+
+    @RequestMapping(value = "/vaults/{vaultid}/dataManager/{uun}", method = RequestMethod.GET)
+    public DataManager getDataManager(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                            @PathVariable("vaultid") String vaultID,
+                                            @PathVariable("uun") String uun) throws Exception {
+        User user = usersService.getUser(userID);
+        Vault vault = vaultsService.getUserVault(user, vaultID);
+
+        return vault.getDataManager(uun);
     }
     
     @RequestMapping(value = "/vaults/{vaultid}/deleteDataManager/{dataManagerID}", method = RequestMethod.DELETE)

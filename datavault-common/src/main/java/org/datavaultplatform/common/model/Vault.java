@@ -182,6 +182,15 @@ public class Vault {
         if (dataManagers == null) return new ArrayList();
         return dataManagers;
     }
+
+    public DataManager getDataManager(String uun) {
+        for(DataManager dataManager : dataManagers){
+            if(dataManager.getUUN().equals(uun)){
+                return dataManager;
+            }
+        }
+        return null;
+    }
     
     public void addDataManager(DataManager dataManager) {
         this.dataManagers.add(dataManager);
