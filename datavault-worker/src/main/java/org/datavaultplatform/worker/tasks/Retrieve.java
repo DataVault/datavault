@@ -213,13 +213,15 @@ public class Retrieve extends Task {
                     } catch (Exception e) {
                         // if last location has an error throw the error else go
                         // round again
-                        // continue LOCATION;
                         if (!locationsIt.hasNext()) {
                             logger.info("All locations had problems throwing exception " + e.getMessage());
                             throw e;
+                        } else {
+                        	continue LOCATION;
                         }
                         //System.exit(1);
-                        throw new RuntimeException(e);
+                        //throw new RuntimeException(e);
+
                     }
                 }
 
