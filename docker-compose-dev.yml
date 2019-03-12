@@ -51,7 +51,7 @@ services:
       - ./docker/tmp/datavault/temp:/tmp/datavault/temp:rw
       - ./docker/tmp/datavault/meta:/tmp/datavault/meta:rw
       - ./docker/tmp/Users:/Users:rw
-      - ./docker/config:/docker_datavault-home/config/
+      - ./docker/config:/etc/datavault/
       - ./docker/keystore:/docker_datavault-home/keystore/
       - ./docker/scripts:/docker_datavault-home/scripts/
       - ./docker/.occ:/home/datavault/.occ/
@@ -72,7 +72,7 @@ services:
       - ./docker/tmp/datavault/temp:/tmp/datavault/temp:rw
       - ./docker/tmp/datavault/meta:/tmp/datavault/meta:rw
       - ./docker/tmp/Users:/Users:rw
-      - ./docker/config:/docker_datavault-home/config/
+      - ./docker/config:/etc/datavault/
       - ./docker/keystore:/docker_datavault-home/keystore/
       - ./docker/scripts:/docker_datavault-home/scripts/
       - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib:/docker_datavault-home/lib
@@ -99,7 +99,7 @@ services:
       - ./docker/tmp/datavault/temp:/tmp/datavault/temp:rw
       - ./docker/tmp/datavault/meta:/tmp/datavault/meta:rw
       - ./docker/tmp/Users:/Users:rw
-      - ./docker/config:/docker_datavault-home/config/
+      - ./docker/config:/etc/datavault/
       - ./docker/scripts:/docker_datavault-home/scripts/
       - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/lib:/docker_datavault-home/lib
       - ./datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/webapps:/docker_datavault-home/webapps
