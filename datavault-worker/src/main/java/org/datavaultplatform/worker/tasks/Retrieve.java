@@ -221,9 +221,6 @@ public class Retrieve extends Task {
                         	logger.info("Current " + location + " has a problem trying next location");
                         	continue LOCATION;
                         }
-                        //System.exit(1);
-                        //throw new RuntimeException(e);
-
                     }
                 }
 

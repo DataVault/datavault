@@ -88,7 +88,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     	
     	String fileDir = TivoliStorageManager.TEMP_PATH_PREFIX + "/" + depositId;
     	String filePath = fileDir + "/" + working.getName();
-    	if (Files.exists(Paths.get(fileDir))) {
+    	if (! Files.exists(Paths.get(fileDir))) {
     		Files.createDirectory(Paths.get(fileDir));
     	}
     	logger.info("Retrieve command is " + "dsmc " + " retrieve " + filePath + " -description=" + depositId + " -optfile=" + optFilePath + "-replace=true");
