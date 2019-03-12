@@ -6,6 +6,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
@@ -51,6 +52,7 @@ public class GroupDAOImpl implements GroupDAO {
     public List<Group> list() {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Group.class);
+        criteria.addOrder(Order.asc("name"));
         List<Group> groups = criteria.list();
         session.close();
         return groups;
