@@ -187,6 +187,7 @@ public class Retrieve extends Task {
                 Iterator<String> locationsIt = locations.iterator();
                 LOCATION: while (locationsIt.hasNext()) {
                     String location = locationsIt.next();
+                    logger.info("Current " + location);
                     try {
                         try {
                             // NEED TO UPDATE THIS TO INCLUDE CHUNKING STUFF IS TURNED ON
@@ -213,13 +214,13 @@ public class Retrieve extends Task {
                     } catch (Exception e) {
                         // if last location has an error throw the error else go
                         // round again
-                        // continue LOCATION;
                         if (!locationsIt.hasNext()) {
                             logger.info("All locations had problems throwing exception " + e.getMessage());
                             throw e;
+                        } else {
+                        	logger.info("Current " + location + " has a problem trying next location");
+                        	continue LOCATION;
                         }
-                        //System.exit(1);
-                        throw new RuntimeException(e);
                     }
                 }
 
