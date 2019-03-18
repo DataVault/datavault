@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,6 +101,11 @@ public class VaultsController {
                 u = new User();
                 u.setID(dm.getUUN());
                 u.setAdmin(false);
+
+                // Generate random password to make sure account is not easily accessible
+                String password = RandomStringUtils.randomAscii(10);
+                u.setPassword(password);
+
                 restService.addUser(u);
             }
             dataManagerUsers.add(u);
@@ -164,6 +171,11 @@ public class VaultsController {
             u.setEmail(attributes.get("mail")); attributes.remove("mail");
             u.setProperties(attributes);
             u.setAdmin(false);
+
+            // Generate random password to make sure account is not easily accessible
+            String password = RandomStringUtils.randomAscii(10);
+            u.setPassword(password);
+
             restService.addUser(u);
         } else {
             logger.info("User "+uun+" already exist!");
