@@ -25,15 +25,13 @@ script:
   - docker-compose -f docker-compose-test.yml logs rabbitmq
   - docker-compose -f docker-compose-test.yml exec rabbitmq rabbitmqctl authenticate_user datavault datavault
   # Build the workers container and run
-  - sudo docker-compose up -d --build workers web broker
+    - sudo docker-compose up -d --build workers
   # Delete unused containers
   - docker-compose -f docker-compose-test.yml rm -f maven-build
   - docker-compose -f docker-compose-test.yml rm -f vault-administration
   # Check everything is running as expected
   - sleep 60 # wait that container is ready
   - docker-compose -f docker-compose-test.yml logs workers
-  - docker-compose -f docker-compose-test.yml logs broker
-  - docker-compose -f docker-compose-test.yml logs web
   - docker-compose -f docker-compose-test.yml ps
   # Run integration tests
   - mvn verify -P integration-test
@@ -47,6 +45,9 @@ script:
   - docker-compose -f docker-compose-test.yml restart workers
   - mvn verify -P integration-test
   # Run Cypress functional test
+  - sudo docker-compose up -d --build broker web
+  - sleep 60 # wait that container is ready
+  - docker-compose -f docker-compose-test.yml logs broker web
   - sed -i 's/encryption\.enabled = false/encryption.enabled = true/' docker/config/datavault.properties
   - sudo docker-compose -f docker-compose-test.yml up e2e
 
