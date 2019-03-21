@@ -46,7 +46,7 @@ script:
   # Run Cypress functional test
   - sed -i 's/encryption\.enabled = false/encryption.enabled = true/' docker/config/datavault.properties
   - docker-compose -f docker-compose-test.yml restart workers
-  - sudo docker-compose -f docker-compose-test.yml up -d --build e2e
+  - sudo docker-compose -f docker-compose-test.yml up --build e2e
 
 after_script:
   - docker-compose stop -t 1
