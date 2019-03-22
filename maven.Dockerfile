@@ -28,4 +28,4 @@ RUN mvn dependency:go-offline --fail-never
 WORKDIR /usr/src
 
 ONBUILD COPY . /usr/src
-ONBUILD RUN mvn -Dmaven.test.skip=true  package
+ONBUILD RUN mvn -Dmaven.test.skip=true clean package

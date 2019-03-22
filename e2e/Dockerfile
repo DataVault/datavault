@@ -16,4 +16,4 @@ RUN npm ci
 RUN npx cypress verify
 
 COPY cypress cypress
-COPY cypress.json .
+COPY docker-cypress.json ./cypress.json

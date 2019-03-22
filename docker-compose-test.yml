@@ -93,6 +93,11 @@ services:
     depends_on:
       - broker
       - maven-build
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/datavault-webapp"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   vault:
     image: vault
