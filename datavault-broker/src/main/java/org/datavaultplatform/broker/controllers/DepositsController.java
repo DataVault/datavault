@@ -123,145 +123,61 @@ public class DepositsController {
 
     @RequestMapping(value = "/deposits", method = RequestMethod.POST)
     public DepositInfo addDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                  @RequestBody CreateDeposit createDeposit) throws Exception {
-
-        User user = usersService.getUser(userID);
-        Vault vault = vaultsService.getUserVault(user, createDeposit.getVaultID());
-        
+                                  @RequestBody CreateDeposit createDeposit) {
         Deposit deposit = new Deposit();
-        deposit.setName(createDeposit.getName());
-        deposit.setDescription(createDeposit.getDescription());
-        if(createDeposit.getHasPersonalData().toLowerCase().equals("yes")) {
-            deposit.setHasPersonalData(true);
-        } else {
-            deposit.setHasPersonalData(false);
-        }
-        deposit.setPersonalDataStatement(createDeposit.getPersonalDataStatement());
-        deposit.setDepositPaths(new ArrayList<DepositPath>());
-        
-        if (user == null) {
-            throw new Exception("User '" + userID + "' does not exist");
-        }
-        deposit.setUser(user);
-        
-        List<FileStore> userStores = user.getFileStores();
-        
-        Map<String, String> userFileStoreClasses = new HashMap<>();
-        Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
-        
-        // Add any server-side filestore paths
-        if (createDeposit.getDepositPaths() != null) {
-            for (String path : createDeposit.getDepositPaths()) {
-
-                String storageID, storagePath;
-                if (!path.contains("/")) {
-                    // A request to archive the whole share/device
-                    storageID = path;
-                    storagePath = "/";
-                } else {
-                    // A request to archive a sub-directory
-                    storageID = path.substring(0, path.indexOf("/"));
-                    storagePath = path.replaceFirst(storageID + "/", "");
-                }
-
-                if (!userFileStoreClasses.containsKey(storageID)) {
-                    try {
-                        ObjectMapper mapper = new ObjectMapper();
-
-                        FileStore userStore = null;
-                        for (FileStore store : userStores) {
-                            if (store.getID().equals(storageID)) {
-                                userStore = store;
-                            }
-                        }
-
-                        if (userStore == null) {
-                            throw new IllegalArgumentException("Storage ID '" + storageID + "' is invalid");
-                        }
-
-                        // Check the source file path is valid
-                        if (!filesService.validPath(storagePath, userStore)) {
-                            throw new IllegalArgumentException("Path '" + storagePath + "' is invalid");
-                        }
-
-                        userFileStoreClasses.put(storageID, userStore.getStorageClass());
-                        userFileStoreProperties.put(storageID, userStore.getProperties());
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        throw(e);
-                    }
-                }
-
-                DepositPath depositPath = new DepositPath(deposit, path, Path.PathType.FILESTORE);
-                deposit.getDepositPaths().add(depositPath);
-            }
-        }
-        
-        // Add the file upload path
-        DepositPath fileUploadPath = new DepositPath(deposit, createDeposit.getFileUploadHandle(), Path.PathType.USER_UPLOAD);
-        deposit.getDepositPaths().add(fileUploadPath);
-
-        List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
-        if (archiveStores.size() == 0) {
-            throw new Exception("No configured archive storage");
-        }
-        
-        archiveStores = this.addArchiveSpecificOptions(archiveStores);
-        // Get metadata content from the external provider (bypass database cache)
-        String externalMetadata = externalMetadataService.getDatasetContent(vault.getDataset().getID());
-        
-        // Add the deposit object
-        depositsService.addDeposit(vault, deposit, "", "");
-
-        // Create a job to track this deposit
-        Job job = new Job("org.datavaultplatform.worker.tasks.Deposit");
-        jobsService.addJob(deposit, job);
-
-        // Ask the worker to process the deposit
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            User user = usersService.getUser(userID);
+            Vault vault = vaultsService.getUserVault(user, createDeposit.getVaultID());
 
-            HashMap<String, String> depositProperties = new HashMap<>();
-            depositProperties.put("depositId", deposit.getID());
-            depositProperties.put("bagId", deposit.getBagId());
-            depositProperties.put("userId", user.getID());
-            
-            // Deposit and Vault metadata
-            // TODO: at the moment we're just serialising the objects to JSON.
-            // In future we'll need a more formal schema/representation (e.g. RDF or JSON-LD).
-            depositProperties.put("depositMetadata", mapper.writeValueAsString(deposit));
-            depositProperties.put("vaultMetadata", mapper.writeValueAsString(vault));
-            
-            // External metadata is text from an external system - e.g. XML or JSON
-            depositProperties.put("externalMetadata", externalMetadata);
-            
-            ArrayList<String> filestorePaths = new ArrayList<>();
-            ArrayList<String> userUploadPaths = new ArrayList<>();
-            
-            for (DepositPath path: deposit.getDepositPaths()) {
-                if (path.getPathType() == Path.PathType.FILESTORE) {
-                    filestorePaths.add(path.getFilePath());
-                } else if (path.getPathType() == Path.PathType.USER_UPLOAD) {
-                    userUploadPaths.add(path.getFilePath());
-                }
+            deposit.setName(createDeposit.getName());
+            deposit.setDescription(createDeposit.getDescription());
+            if (createDeposit.getHasPersonalData().toLowerCase().equals("yes")) {
+                deposit.setHasPersonalData(true);
+            } else {
+                deposit.setHasPersonalData(false);
+            }
+            deposit.setPersonalDataStatement(createDeposit.getPersonalDataStatement());
+            deposit.setDepositPaths(new ArrayList<DepositPath>());
+
+            System.out.println("Deposit File Path: ");
+            for (DepositPath dPath : deposit.getDepositPaths()){
+                System.out.println("\t- " + dPath.getFilePath());
             }
 
-            Task depositTask = new Task(
-                    job, depositProperties, archiveStores, 
-                    userFileStoreProperties, userFileStoreClasses, 
-                    filestorePaths, userUploadPaths, 
-                    null, null, null, null, null);
-            String jsonDeposit = mapper.writeValueAsString(depositTask);
-            sender.send(jsonDeposit);
+            if (user == null) {
+                throw new Exception("User '" + userID + "' does not exist");
+            }
+            deposit.setUser(user);
 
-        } catch (Exception e) {
+            // Add the file upload path
+            DepositPath fileUploadPath = new DepositPath(deposit, createDeposit.getFileUploadHandle(), Path.PathType.USER_UPLOAD);
+            deposit.getDepositPaths().add(fileUploadPath);
+
+            List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
+            if (archiveStores.size() == 0) {
+                throw new Exception("No configured archive storage");
+            }
+
+            archiveStores = this.addArchiveSpecificOptions(archiveStores);
+            // Get metadata content from the external provider (bypass database cache)
+            String externalMetadata = externalMetadataService.getDatasetContent(vault.getDataset().getID());
+
+            System.out.println("Deposit File Path: ");
+            for (DepositPath dPath : deposit.getDepositPaths()){
+                System.out.println("\t- " + dPath.getFilePath());
+            }
+
+            // Add the deposit object
+            depositsService.addDeposit(vault, deposit, "", "");
+
+            this.runDeposit(deposit, createDeposit.getDepositPaths());
+
+            // Check the retention policy of the newly created vault
+            vaultsService.checkRetentionPolicy(vault.getID());
+        }catch(Exception e){
+            System.out.println(e);
             e.printStackTrace();
         }
-
-        // Check the retention policy of the newly created vault
-        vaultsService.checkRetentionPolicy(vault.getID());
-
         return deposit.convertToResponse();
     }
     
@@ -499,5 +415,155 @@ public class DepositsController {
     	}
     	
     	return archiveStores;
+    }
+
+    @RequestMapping(value = "/deposits/{depositid}/restart", method = RequestMethod.POST)
+    public Deposit restartDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                   @PathVariable("depositid") String depositID) {
+        Deposit deposit = null;
+        try {
+            User user = usersService.getUser(userID);
+            deposit = depositsService.getUserDeposit(user, depositID);
+
+            if (user == null) {
+                throw new Exception("User '" + userID + "' does not exist");
+            } else {
+                if (!user.isAdmin()) {
+                    throw new Exception("Only an admin can restart a deposit");
+                }
+            }
+
+            if (deposit == null) {
+                throw new Exception("Deposit '" + depositID + "' does not exist");
+            }
+
+            List<FileStore> userStores = user.getFileStores();
+            System.out.println("There is " + userStores.size() + "user stores.");
+
+            ArrayList<String> paths = new ArrayList<String>();
+            for(DepositPath dPath : deposit.getDepositPaths()){
+                if(dPath.getPathType() == Path.PathType.FILESTORE) {
+                    paths.add(dPath.getFilePath());
+                }
+            }
+            System.out.println("There is " + paths.size() + " deposit path");
+
+            runDeposit(deposit, paths);
+        } catch(Exception e) {
+            System.err.println(e);
+            e.printStackTrace();
+        }
+
+        return deposit;
+    }
+
+    private Job runDeposit(Deposit deposit, List<String> paths){
+        User user = deposit.getUser();
+        List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
+        Vault vault = deposit.getVault();
+
+        String externalMetadata = externalMetadataService.getDatasetContent(vault.getDataset().getID());
+
+        List<FileStore> userStores = user.getFileStores();
+
+        Map<String, String> userFileStoreClasses = new HashMap<>();
+        Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
+
+        // Add any server-side filestore paths
+        if (paths != null) {
+            for (String path : paths) {
+
+                String storageID, storagePath;
+                if (!path.contains("/")) {
+                    // A request to archive the whole share/device
+                    storageID = path;
+                    storagePath = "/";
+                } else {
+                    // A request to archive a sub-directory
+                    storageID = path.substring(0, path.indexOf("/"));
+                    storagePath = path.replaceFirst(storageID + "/", "");
+                }
+
+                if (!userFileStoreClasses.containsKey(storageID)) {
+                    try {
+                        ObjectMapper mapper = new ObjectMapper();
+
+                        FileStore userStore = null;
+                        for (FileStore store : userStores) {
+                            if (store.getID().equals(storageID)) {
+                                userStore = store;
+                            }
+                        }
+
+                        if (userStore == null) {
+                            throw new IllegalArgumentException("Storage ID '" + storageID + "' is invalid");
+                        }
+
+                        // Check the source file path is valid
+                        if (!filesService.validPath(storagePath, userStore)) {
+                            throw new IllegalArgumentException("Path '" + storagePath + "' is invalid");
+                        }
+
+                        userFileStoreClasses.put(storageID, userStore.getStorageClass());
+                        userFileStoreProperties.put(storageID, userStore.getProperties());
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw (e);
+                    }
+                }
+
+                System.out.println("Add deposit path: " + path);
+                DepositPath depositPath = new DepositPath(deposit, path, Path.PathType.FILESTORE);
+                deposit.getDepositPaths().add(depositPath);
+            }
+        }
+
+        // Create a job to track this deposit
+        Job job = new Job("org.datavaultplatform.worker.tasks.Deposit");
+        jobsService.addJob(deposit, job);
+
+        // Ask the worker to process the deposit
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            HashMap<String, String> depositProperties = new HashMap<>();
+            depositProperties.put("depositId", deposit.getID());
+            depositProperties.put("bagId", deposit.getBagId());
+            depositProperties.put("userId", user.getID());
+
+            // Deposit and Vault metadata
+            // TODO: at the moment we're just serialising the objects to JSON.
+            // In future we'll need a more formal schema/representation (e.g. RDF or JSON-LD).
+            depositProperties.put("depositMetadata", mapper.writeValueAsString(deposit));
+            depositProperties.put("vaultMetadata", mapper.writeValueAsString(vault));
+
+            // External metadata is text from an external system - e.g. XML or JSON
+            depositProperties.put("externalMetadata", externalMetadata);
+
+            ArrayList<String> filestorePaths = new ArrayList<>();
+            ArrayList<String> userUploadPaths = new ArrayList<>();
+
+            for (DepositPath path : deposit.getDepositPaths()) {
+                if (path.getPathType() == Path.PathType.FILESTORE) {
+                    filestorePaths.add(path.getFilePath());
+                } else if (path.getPathType() == Path.PathType.USER_UPLOAD) {
+                    userUploadPaths.add(path.getFilePath());
+                }
+            }
+
+            Task depositTask = new Task(
+                    job, depositProperties, archiveStores,
+                    userFileStoreProperties, userFileStoreClasses,
+                    filestorePaths, userUploadPaths,
+                    null, null, null, null, null);
+            String jsonDeposit = mapper.writeValueAsString(depositTask);
+            sender.send(jsonDeposit);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return job;
     }
 }
