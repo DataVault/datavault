@@ -46,12 +46,12 @@
                         <td>${deposit.getSizeStr()}</td>
                         <td>${deposit.getCreationTime()?datetime}</td>
                         <td>
-                            <#--<#if deposit.status == "FAILED">-->
+                            <#if deposit.status == "FAILED">
                             <a class="restart-deposit-btn btn btn-default btn-sm"
                                href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}/deposits/${deposit.getID()?html}/restart">
                                 Restart
                             </a>
-                            <#--</#if>-->
+                            </#if>
                         </td>
                     </tr>
                     </#list>
