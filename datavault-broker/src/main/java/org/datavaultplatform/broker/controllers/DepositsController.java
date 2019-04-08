@@ -170,7 +170,7 @@ public class DepositsController {
             // Add the deposit object
             depositsService.addDeposit(vault, deposit, "", "");
 
-            this.runDeposit(deposit, createDeposit.getDepositPaths());
+            this.runDeposit(deposit, createDeposit.getDepositPaths(), null);
 
             // Check the retention policy of the newly created vault
             vaultsService.checkRetentionPolicy(vault.getID());
@@ -363,7 +363,7 @@ public class DepositsController {
                     null, null, 
                     chunksDigest,
                     tarIVs, chunksIVs,
-                    encTarDigest, encChunksDigests);
+                    encTarDigest, encChunksDigests, null);
             ObjectMapper mapper = new ObjectMapper();
             String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
             sender.send(jsonRetrieve);
@@ -448,7 +448,10 @@ public class DepositsController {
             }
             System.out.println("There is " + paths.size() + " deposit path");
 
-            runDeposit(deposit, paths);
+            // Get last Deposit Event
+            Event lastEvent = deposit.getLastNotFailedEvent();
+
+            runDeposit(deposit, paths, lastEvent);
         } catch(Exception e) {
             System.err.println(e);
             e.printStackTrace();
@@ -457,7 +460,7 @@ public class DepositsController {
         return deposit;
     }
 
-    private Job runDeposit(Deposit deposit, List<String> paths){
+    private Job runDeposit(Deposit deposit, List<String> paths, Event lastEvent){
         User user = deposit.getUser();
         List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
         Vault vault = deposit.getVault();
@@ -556,7 +559,8 @@ public class DepositsController {
                     job, depositProperties, archiveStores,
                     userFileStoreProperties, userFileStoreClasses,
                     filestorePaths, userUploadPaths,
-                    null, null, null, null, null);
+                    null, null, null, null, null,
+                    lastEvent);
             String jsonDeposit = mapper.writeValueAsString(depositTask);
             sender.send(jsonDeposit);
 

@@ -3,6 +3,7 @@ package org.datavaultplatform.common.task;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.Job;
+import org.datavaultplatform.common.event.Event;
 
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ public class Task {
     protected Map<Integer, byte[]> chunksIVs;
     String encTarDigest;
     Map<Integer, String> encChunksDigest;
+    private Event lastEvent;
     
     private boolean isRedeliver;
 
@@ -40,7 +42,8 @@ public class Task {
                 byte[] tarIV,
                 Map<Integer, byte[]> chunksIVs,
                 String encTarDigest,
-                Map<Integer, String> encChunksDigest) {
+                Map<Integer, String> encChunksDigest,
+                Event lastEvent) {
         this.jobID = job.getID();
         this.taskClass = job.getTaskClass();
         this.properties = properties;
@@ -54,6 +57,7 @@ public class Task {
         this.chunksIVs = chunksIVs;
         this.encTarDigest = encTarDigest;
         this.encChunksDigest = encChunksDigest;
+        this.lastEvent = lastEvent;
     }
 
     public String getJobID() { return jobID; }
@@ -163,6 +167,10 @@ public class Task {
     public void setEncChunksDigest(Map<Integer, String> encChunksDigest) {
         this.encChunksDigest = encChunksDigest;
     }
+
+    public Event getLastEvent() { return lastEvent; }
+
+    public void setLastEvent(Event lastEvent) { this.lastEvent = lastEvent; }
     
     public void performAction(Context context) {}
 }
