@@ -1,6 +1,5 @@
 package org.datavaultplatform.worker.tasks;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.event.Error;
@@ -91,11 +90,7 @@ public class Deposit extends Task {
 
         userStores = this.setupUserFilePlugins();
         this.setupStoragePlugins();
-        long depositTotalSize = this.calculateTotalDepositSize(context);
-        
-        // Store the calculated deposit size
-        eventStream.send(new ComputedSize(jobID, depositId, depositTotalSize)
-            .withUserId(userID));
+        this.calculateTotalDepositSize(context);
         
         // Create a new directory based on the broker-generated UUID
         Path bagPath = context.getTempDir().resolve(bagID);
@@ -105,18 +100,7 @@ public class Deposit extends Task {
         this.copySelectedUserDataToBagDir(bagDataPath);
         
         try {
-
-            // Add any directly uploaded files (direct move from temp dir)            
-            for (String path : fileUploadPaths) {
-                // Retrieve the data straight into the Bag data directory.
-                Path depositPath = bagDataPath;
-                moveFromUserUploads(context.getTempDir(), depositPath, userID, path);
-            }
-            
-            // Bag the directory in-place
-            eventStream.send(new TransferComplete(jobID, depositId)
-                .withUserId(userID)
-                .withNextState(2));
+        	this.copyAdditionalUserData(context, bagDataPath); 
 
             logger.info("Creating bag ...");
             this.createBag(bagDir, depositMetadata, vaultMetadata, externalMetadata);
@@ -145,10 +129,6 @@ public class Deposit extends Task {
             HashMap<Integer, String> chunksDigest = null;
             if ( context.isChunkingEnabled() ) {
             	chunksDigest = this.createChunks(tarFile, context, chunksDigest, tarHashAlgorithm);
-                if(!context.isEncryptionEnabled()) {
-                    eventStream.send(new ComputedChunks(jobID, depositId, chunksDigest, tarHashAlgorithm)
-                            .withUserId(userID));
-                }
             }
 
             // Encryption
@@ -157,19 +137,12 @@ public class Deposit extends Task {
             String encTarHash = null;
             if(context.isEncryptionEnabled()) {
                 logger.info("Encrypting file(s)...");
-
                 if (context.isChunkingEnabled()) {
                 	chunksIVs = this.encryptChunks(context, chunksDigest, tarHashAlgorithm);
                 } else {
-                    iv = Encryption.encryptFile(context, tarFile);
-                    encTarHash = Verify.getDigest(tarFile);
-                    logger.info("Encrypted Tar file: " + tarFile.length() + " bytes");
-                    logger.info("Encrypted tar checksum: " + encTarHash);
-                    
-                    eventStream.send(new ComputedEncryption(jobID, depositId,null,
-                            iv, context.getEncryptionMode().toString(),
-                            encTarHash, null, null, null)
-                                .withUserId(userID));
+                	EncryptionHelper helper = this.encryptFullTar(context, tarFile);
+                	iv = helper.getIv();
+                	encTarHash = helper.getEncTarHash();
                 }
             }
 
@@ -591,7 +564,7 @@ public class Deposit extends Task {
     	}
     }
     
-	private long calculateTotalDepositSize(Context context) {
+	private void calculateTotalDepositSize(Context context) {
 		// Calculate the total deposit size of selected files
 		long depositTotalSize = 0;
 		for (String filePath : fileStorePaths) {
@@ -612,7 +585,9 @@ public class Deposit extends Task {
 		}
 		
 		depositTotalSize += this.calculateUserUploads(depositTotalSize, context);
-		return depositTotalSize;
+		// Store the calculated deposit size
+        eventStream.send(new ComputedSize(jobID, depositId, depositTotalSize)
+            .withUserId(userID));
 	}
 	
 	private long calculateUserUploads(long depositSize, Context context) {
@@ -752,6 +727,11 @@ public class Deposit extends Task {
             chunksDigest.put(i+1, chunksHash[i]);
         }
         
+        if(!context.isEncryptionEnabled()) {
+            eventStream.send(new ComputedChunks(jobID, depositId, chunksDigest, tarHashAlgorithm)
+                    .withUserId(userID));
+        }
+        
         logger.info(chunkFiles.length + " chunk files created.");
         return chunksDigest;
         
@@ -803,21 +783,22 @@ public class Deposit extends Task {
 //        }
 //	}
 	
-//	private byte[] encryptFullTar(Context context, File tarFile) throws Exception {
-//		byte[] iv = Encryption.encryptFile(context, tarFile);
-//        
-//        String encTarHash = Verify.getDigest(tarFile);
-//        
-//        logger.info("Encrypted Tar file: " + tarFile.length() + " bytes");
-//        logger.info("Encrypted tar checksum: " + encTarHash);
-//        
-//        eventStream.send(new ComputedEncryption(jobID, depositId,null,
-//                iv, context.getEncryptionMode().toString(),
-//                encTarHash, null, null, null)
-//                    .withUserId(userID));	
-//        
-//        return iv;
-//	}
+	private EncryptionHelper encryptFullTar(Context context, File tarFile) throws Exception {
+		EncryptionHelper retVal = new EncryptionHelper();
+		byte[] iv = Encryption.encryptFile(context, tarFile);
+        String encTarHash = Verify.getDigest(tarFile);
+        
+        logger.info("Encrypted Tar file: " + tarFile.length() + " bytes");
+        logger.info("Encrypted tar checksum: " + encTarHash);
+        
+        eventStream.send(new ComputedEncryption(jobID, depositId,null,
+                iv, context.getEncryptionMode().toString(),
+                encTarHash, null, null, null)
+                    .withUserId(userID));	
+        retVal.setIv(iv);
+        retVal.setEncTarHash(encTarHash);
+        return retVal;
+	}
 	
 	private void uploadToStorage(Context context, File tarFile) throws Exception {
 		if ( context.isChunkingEnabled() ) {
@@ -863,5 +844,19 @@ public class Deposit extends Task {
 	      states.add("Complete");             // 5
 	      eventStream.send(new InitStates(jobID, depositId, states)
 	          .withUserId(userID));		
+	}
+	
+	private void copyAdditionalUserData(Context context, Path bagDataPath) throws Exception {
+		// Add any directly uploaded files (direct move from temp dir)            
+        for (String path : fileUploadPaths) {
+            // Retrieve the data straight into the Bag data directory.
+            Path depositPath = bagDataPath;
+            moveFromUserUploads(context.getTempDir(), depositPath, userID, path);
+        }
+        
+        // Bag the directory in-place
+        eventStream.send(new TransferComplete(jobID, depositId)
+            .withUserId(userID)
+            .withNextState(2));
 	}
 }
