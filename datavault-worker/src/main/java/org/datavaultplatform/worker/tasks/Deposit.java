@@ -88,8 +88,8 @@ public class Deposit extends Task {
         
         logger.info("bagID: " + bagID);
 
-        userStores = this.setupUserFilePlugins();
-        this.setupStoragePlugins();
+        userStores = this.setupUserFileStores();
+        this.setupArchiveFileStores();
         this.calculateTotalDepositSize(context);
         
         // Create a new directory based on the broker-generated UUID
@@ -545,7 +545,7 @@ public class Deposit extends Task {
         tarFile.delete();
     }
     
-    private void setupStoragePlugins() {
+    private void setupArchiveFileStores() {
     	// Connect to the archive storage(s). Look out! There are two classes called archiveStore.
     	for (org.datavaultplatform.common.model.ArchiveStore archiveFileStore : archiveFileStores ) {
     		try {
@@ -606,7 +606,7 @@ public class Deposit extends Task {
         return depositSize;
 	}
 	
-	private HashMap<String, UserStore> setupUserFilePlugins() {
+	private HashMap<String, UserStore> setupUserFileStores() {
 		userStores = new HashMap<String, UserStore>();
         
         for (String storageID : userFileStoreClasses.keySet()) {
