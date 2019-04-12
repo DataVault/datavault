@@ -48,7 +48,7 @@ public class FileStoreController {
 
     // Return the 'Storage Options' page
     @RequestMapping(value = "/filestores", method = RequestMethod.GET)
-    public String listFilestores(ModelMap model) {
+    public String listFilestores(ModelMap model) throws Exception {
         model.addAttribute("activeDir", activeDir);
         model.addAttribute("sftpHost", sftpHost);
         model.addAttribute("sftpPort", sftpPort);
@@ -62,7 +62,7 @@ public class FileStoreController {
     // Process the 'add local FileStore' Ajax request
     @RequestMapping(value = "/filestores/local", method = RequestMethod.POST)
     @ResponseBody
-    public void addLocalFilestore(@RequestParam("path") String path) {
+    public void addLocalFilestore(@RequestParam("path") String path) throws Exception {
         HashMap<String,String> storeProperties = new HashMap<>();
         // In theory we could allow the user to define the path, however that would allow them access to anything that the
         // Datavault app can read. So for now we will just use the configured default value.
@@ -75,7 +75,7 @@ public class FileStoreController {
     // Process the 'add SFTP FileStore' Ajax request
     @RequestMapping(value = "/filestores/sftp", method = RequestMethod.POST)
     @ResponseBody
-    public void addSFTPFilestore(@RequestParam("hostname") String hostname, @RequestParam("port") String port, @RequestParam("path") String path, ModelMap model) {
+    public void addSFTPFilestore(@RequestParam("hostname") String hostname, @RequestParam("port") String port, @RequestParam("path") String path, ModelMap model) throws Exception {
         //todo : replace the separate parms above with one Filestore model attribute?
 
         // Generate a partially complete Filestore
@@ -92,7 +92,7 @@ public class FileStoreController {
     // Process the 'delete filestore' Ajax request
     @RequestMapping(value = "/filestores/{filestoreId}", method = RequestMethod.DELETE)
     @ResponseBody
-    public void deleteFileStore(ModelMap model, @PathVariable("filestoreId") String filestoreId) {
+    public void deleteFileStore(ModelMap model, @PathVariable("filestoreId") String filestoreId) throws Exception {
         restService.deleteFileStore(filestoreId);
     }
 

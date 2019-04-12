@@ -7,9 +7,13 @@ import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.webapp.services.RestService;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.DefaultResponseErrorHandler;
+
+import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -29,7 +33,7 @@ public class DepositsController {
 
     // Return an 'create new deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/create", method = RequestMethod.GET)
-    public String createDeposit(ModelMap model, @PathVariable("vaultid") String vaultID) {
+    public String createDeposit(ModelMap model, @PathVariable("vaultid") String vaultID) throws Exception {
         
         // pass the view an empty Deposit since the form expects it
         CreateDeposit deposit = new CreateDeposit();
@@ -45,7 +49,7 @@ public class DepositsController {
     // Process the completed 'create new deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/create", method = RequestMethod.POST)
     public String addDeposit(@ModelAttribute CreateDeposit deposit, ModelMap model,
-                             @PathVariable("vaultid") String vaultID, @RequestParam String action) {
+                             @PathVariable("vaultid") String vaultID, @RequestParam String action) throws Exception {
         // Was the cancel button pressed?
         if ("cancel".equals(action)) {
             return "redirect:/vaults/" + vaultID;
@@ -66,7 +70,7 @@ public class DepositsController {
 
     // View properties of a single deposit
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}", method = RequestMethod.GET)
-    public String getDeposit(ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
+    public String getDeposit(ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) throws Exception {
         model.addAttribute("vault", restService.getVault(vaultID));
         model.addAttribute("deposit", restService.getDeposit(depositID));
         model.addAttribute("events", restService.getDepositEvents(depositID));
@@ -77,19 +81,19 @@ public class DepositsController {
     
     // View properties of a single deposit as a JSON object
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/json", method = RequestMethod.GET)
-    public @ResponseBody DepositInfo getDepositJson(@PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
+    public @ResponseBody DepositInfo getDepositJson(@PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) throws Exception {
         return restService.getDeposit(depositID);
     }
     
     // View jobs related to a single deposit as a JSON object
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/jobs", method = RequestMethod.GET)
-    public @ResponseBody Job[] getDepositJobsJson(@PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
+    public @ResponseBody Job[] getDepositJobsJson(@PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) throws Exception {
         return restService.getDepositJobs(depositID);
     }
     
     // Return a 'retrieve deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/retrieve", method = RequestMethod.GET)
-    public String retrieveDeposit(@ModelAttribute Retrieve retrieve, ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) {
+    public String retrieveDeposit(@ModelAttribute Retrieve retrieve, ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) throws Exception {
         model.addAttribute("retrieve", new Retrieve());
         model.addAttribute("vault", restService.getVault(vaultID));
         model.addAttribute("deposit", restService.getDeposit(depositID));
@@ -100,7 +104,7 @@ public class DepositsController {
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/retrieve", method = RequestMethod.POST)
     public String processRetrieve(@ModelAttribute Retrieve retrieve, ModelMap model,
                                  @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID,
-                                 @RequestParam String action) {
+                                 @RequestParam String action) throws Exception {
 
 
         // If the cancel button wasn't pressed, perform the retrieve
@@ -117,7 +121,7 @@ public class DepositsController {
     // Process the completed 'restart deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositId}/restart", method = RequestMethod.GET)
     public String restartDeposit(ModelMap model,
-                                  @PathVariable("vaultid") String vaultID, @PathVariable("depositId") String depositID) {
+                                  @PathVariable("vaultid") String vaultID, @PathVariable("depositId") String depositID) throws Exception {
 
         restService.restartDeposit(depositID);
 

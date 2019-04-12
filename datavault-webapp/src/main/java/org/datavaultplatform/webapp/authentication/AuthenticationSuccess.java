@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.authentication;
 
 import java.io.IOException;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,11 +29,23 @@ public class AuthenticationSuccess extends SavedRequestAwareAuthenticationSucces
         CreateClientEvent clientEvent = new CreateClientEvent(remoteAddress, userAgent);
         
         // Log the authentication success with the broker
-        restService.notifyLogin(clientEvent);
+        try {
+            restService.notifyLogin(clientEvent);
+        } catch(Exception e){
+            System.err.println("Error when Logging the authentication success with the broker");
+            e.printStackTrace();
+        }
         
         // Check whether the user is an owner of any groups
-        boolean groupOwner = false; 
-        for (Group group : restService.getGroups()) {
+        boolean groupOwner = false;
+        Group[] groups = new Group[0];
+        try{
+            groups = restService.getGroups();
+        }catch (Exception e){
+            System.err.println("Error when trying to get groups from broker");
+            e.printStackTrace();
+        }
+        for (Group group : groups) {
             for (User owner : group.getOwners()) {
                 if (owner.getID().equals(authentication.getName())) {
                     groupOwner = true;

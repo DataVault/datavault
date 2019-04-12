@@ -6,10 +6,8 @@ import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.*;
+import org.springframework.web.client.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
@@ -35,6 +33,9 @@ public class RestService {
     private HttpEntity<?> exchange(String url, Class clazz, HttpMethod method, Object payload) {
 
         RestTemplate restTemplate = new RestTemplate();
+
+        restTemplate.setErrorHandler(new ApiErrorHandler());
+
         HttpHeaders headers = new HttpHeaders();
 
         // If we have a logged on user then pass that information.
