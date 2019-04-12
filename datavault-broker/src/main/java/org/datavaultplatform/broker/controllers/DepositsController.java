@@ -128,8 +128,6 @@ public class DepositsController {
     public ResponseEntity<Object> addDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
                                              @RequestBody CreateDeposit createDeposit) throws Exception {
 
-        if(true) throw new Exception("Testing");
-
         Deposit deposit = new Deposit();
 
         User user = usersService.getUser(userID);
