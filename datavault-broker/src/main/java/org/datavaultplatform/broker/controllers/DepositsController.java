@@ -460,7 +460,7 @@ public class DepositsController {
         return deposit;
     }
 
-    private Job runDeposit(Deposit deposit, List<String> paths, Event lastEvent){
+    private Job runDeposit(Deposit deposit, List<String> paths, Event lastEvent) throws Exception{
         User user = deposit.getUser();
         List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
         Vault vault = deposit.getVault();
@@ -527,46 +527,41 @@ public class DepositsController {
         jobsService.addJob(deposit, job);
 
         // Ask the worker to process the deposit
-        try {
-            ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
 
-            HashMap<String, String> depositProperties = new HashMap<>();
-            depositProperties.put("depositId", deposit.getID());
-            depositProperties.put("bagId", deposit.getBagId());
-            depositProperties.put("userId", user.getID());
+        HashMap<String, String> depositProperties = new HashMap<>();
+        depositProperties.put("depositId", deposit.getID());
+        depositProperties.put("bagId", deposit.getBagId());
+        depositProperties.put("userId", user.getID());
 
-            // Deposit and Vault metadata
-            // TODO: at the moment we're just serialising the objects to JSON.
-            // In future we'll need a more formal schema/representation (e.g. RDF or JSON-LD).
-            depositProperties.put("depositMetadata", mapper.writeValueAsString(deposit));
-            depositProperties.put("vaultMetadata", mapper.writeValueAsString(vault));
+        // Deposit and Vault metadata
+        // TODO: at the moment we're just serialising the objects to JSON.
+        // In future we'll need a more formal schema/representation (e.g. RDF or JSON-LD).
+        depositProperties.put("depositMetadata", mapper.writeValueAsString(deposit));
+        depositProperties.put("vaultMetadata", mapper.writeValueAsString(vault));
 
-            // External metadata is text from an external system - e.g. XML or JSON
-            depositProperties.put("externalMetadata", externalMetadata);
+        // External metadata is text from an external system - e.g. XML or JSON
+        depositProperties.put("externalMetadata", externalMetadata);
 
-            ArrayList<String> filestorePaths = new ArrayList<>();
-            ArrayList<String> userUploadPaths = new ArrayList<>();
+        ArrayList<String> filestorePaths = new ArrayList<>();
+        ArrayList<String> userUploadPaths = new ArrayList<>();
 
-            for (DepositPath path : deposit.getDepositPaths()) {
-                if (path.getPathType() == Path.PathType.FILESTORE) {
-                    filestorePaths.add(path.getFilePath());
-                } else if (path.getPathType() == Path.PathType.USER_UPLOAD) {
-                    userUploadPaths.add(path.getFilePath());
-                }
+        for (DepositPath path : deposit.getDepositPaths()) {
+            if (path.getPathType() == Path.PathType.FILESTORE) {
+                filestorePaths.add(path.getFilePath());
+            } else if (path.getPathType() == Path.PathType.USER_UPLOAD) {
+                userUploadPaths.add(path.getFilePath());
             }
-
-            Task depositTask = new Task(
-                    job, depositProperties, archiveStores,
-                    userFileStoreProperties, userFileStoreClasses,
-                    filestorePaths, userUploadPaths,
-                    null, null, null, null, null,
-                    lastEvent);
-            String jsonDeposit = mapper.writeValueAsString(depositTask);
-            sender.send(jsonDeposit);
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+
+        Task depositTask = new Task(
+                job, depositProperties, archiveStores,
+                userFileStoreProperties, userFileStoreClasses,
+                filestorePaths, userUploadPaths,
+                null, null, null, null, null,
+                lastEvent);
+        String jsonDeposit = mapper.writeValueAsString(depositTask);
+        sender.send(jsonDeposit);
 
         return job;
     }
