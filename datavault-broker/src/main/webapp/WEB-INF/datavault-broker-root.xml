@@ -32,6 +32,9 @@
             ignore-resource-not-found="true"
             ignore-unresolvable="true"/>
 
+    <context:component-scan
+            base-package="org.datavaultplatform.broker.exceptions" />
+
     <bean id="filesService" class="org.datavaultplatform.broker.services.FilesService">
     </bean>
     

@@ -20,7 +20,7 @@ public class AdminEventsController {
     @RequestMapping(value = "/admin/events", method = RequestMethod.GET)
     public String getEventsListing(ModelMap model,
                                    @RequestParam(value = "query", required = false) String query,
-                                   @RequestParam(value = "sort", required = false) String sort) {
+                                   @RequestParam(value = "sort", required = false) String sort) throws Exception {
         
         model.addAttribute("events", restService.getEvents());
         

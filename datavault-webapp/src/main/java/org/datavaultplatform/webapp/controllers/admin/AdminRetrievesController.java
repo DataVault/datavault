@@ -21,7 +21,7 @@ public class AdminRetrievesController {
     }
 
     @RequestMapping(value = "/admin/retrieves", method = RequestMethod.GET)
-    public String getRetrievesListing(ModelMap model) {
+    public String getRetrievesListing(ModelMap model) throws Exception {
         model.addAttribute("retrieves", restService.getRetrievesListingAll());
         return "admin/retrieves/index";
     }

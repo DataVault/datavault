@@ -35,7 +35,11 @@ public class LogoutListener implements ApplicationListener<SessionDestroyedEvent
             CreateClientEvent clientEvent = new CreateClientEvent(remoteAddress, null);
             
             // Log the event with the broker
-            restService.notifyLogout(clientEvent);
+            try {
+                restService.notifyLogout(clientEvent);
+            }catch (Exception e){
+                System.err.println("Error when notifying Logout to Broker!");
+            }
         }
     }
 }

@@ -1,13 +1,10 @@
 package org.datavaultplatform.broker.exceptions;
 
-import org.springframework.core.annotation.AnnotationUtils;
+import org.datavaultplatform.common.api.ApiError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Catches any Exceptions thrown by a Controller, or anything further down the stack, allowing us to return
@@ -23,14 +20,21 @@ public class GlobalExceptionHandler {
 
     // Note - Add methods for more specific Exceptions here.
 
-    @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<String> defaultExceptionHandler(HttpServletRequest req, Exception e) throws Exception {
+    @ExceptionHandler({Exception.class})
+    public ResponseEntity<Object> defaultExceptionHandler(Exception ex) {
+        //Make sure error is printing in the broker logs
+        ex.printStackTrace();
+
         // If the exception is annotated with @ResponseStatus rethrow it and let the framework handle it.
-        if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null)
-            throw e;
+//        if (AnnotationUtils.findAnnotation(ex.getClass(), ResponseStatus.class) != null)
+//            throw ex;
 
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        String errorMessage = "The Broker threw an Error!";
 
+        System.out.println("Sending ApiError to webapp...");
+
+        ApiError apiError = new ApiError(errorMessage, ex);
+        return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

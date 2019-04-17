@@ -58,7 +58,15 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
 
         List<GrantedAuthority> grantedAuths = new ArrayList<>();
 
-        if (!restService.userExists(new ValidateUser(name, password))) {
+        boolean userExists = false;
+        try{
+            userExists = restService.userExists(new ValidateUser(name, password));
+        } catch(Exception e){
+            System.err.println("Error when trying to check if user exists with Broker!");
+            e.printStackTrace();
+        }
+
+        if (!userExists) {
             logger.info("Creating new account for new user " + name);
             User user = new User();
             user.setID(name);
@@ -71,12 +79,22 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
                 user.setProperties(getLDAPAttributes(name));
             }
 
-            restService.addUser(user);
-
-
+            try{
+                restService.addUser(user);
+            } catch(Exception e){
+                System.err.println("Error when trying to add user with Broker!");
+                e.printStackTrace();
+            }
         } else {
             logger.info("Existing user " + name);
-            if (restService.isAdmin(new ValidateUser(name, null))) {
+            boolean isAdmin = false;
+            try{
+                isAdmin = restService.isAdmin(new ValidateUser(name, null));
+            } catch(Exception e){
+                System.err.println("Error when trying to check if user is admin with Broker!");
+                e.printStackTrace();
+            }
+            if (isAdmin) {
                 logger.debug("user is an admin " + name);
                 grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
             }
