@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.controllers;
 
 
+import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.request.CreateDeposit;
@@ -106,6 +107,19 @@ public class DepositsController {
         if (!"cancel".equals(action)) {
             Boolean result = restService.retrieveDeposit(depositID, retrieve);
         }
+
+        String depositUrl = "/vaults/" + vaultID + "/deposits/" + depositID + "/";
+        return "redirect:" + depositUrl;
+    }
+
+
+
+    // Process the completed 'restart deposit' page
+    @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositId}/restart", method = RequestMethod.GET)
+    public String restartDeposit(ModelMap model,
+                                  @PathVariable("vaultid") String vaultID, @PathVariable("depositId") String depositID) {
+
+        restService.restartDeposit(depositID);
 
         String depositUrl = "/vaults/" + vaultID + "/deposits/" + depositID + "/";
         return "redirect:" + depositUrl;

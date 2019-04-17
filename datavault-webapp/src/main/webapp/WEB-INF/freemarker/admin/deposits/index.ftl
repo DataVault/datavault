@@ -31,6 +31,7 @@
                     <th><a href="?sort=status&query=${query?url}">Status</a></th>
                     <th><a href="?sort=depositSize&query=${query?url}">Size</a></th>
                     <th><a href="?sort=creationTime&query=${query?url}">Date deposited</a></th>
+                    <th><a href="?sort=creationTime&query=${query?url}">Actions</a></th>
                 </tr>
                 </thead>
 
@@ -38,12 +39,20 @@
                     <#list deposits as deposit>
                     <tr class="tr">
                         <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}">${deposit.vaultID?html}</a></td>
-                        <td>${deposit.getID()?html}</td>
+                        <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}/deposits/${deposit.getID()?html}">${deposit.getID()?html}</a></td>
                         <td>${deposit.name?html}</td>
                         <td>${deposit.description?html}</td>
                         <td>${deposit.status}</td>
                         <td>${deposit.getSizeStr()}</td>
                         <td>${deposit.getCreationTime()?datetime}</td>
+                        <td>
+                            <#if deposit.status == "FAILED">
+                            <a class="restart-deposit-btn btn btn-default btn-sm"
+                               href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}/deposits/${deposit.getID()?html}/restart">
+                                Restart
+                            </a>
+                            </#if>
+                        </td>
                     </tr>
                     </#list>
                 </tbody>

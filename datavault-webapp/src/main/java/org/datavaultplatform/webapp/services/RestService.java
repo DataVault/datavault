@@ -58,6 +58,7 @@ public class RestService {
         }
 
         logger.debug("Calling Broker with url:" + url + " Method:" + method);
+        System.out.println("Calling Broker with url:" + url + " Method:" + method);
 
         return restTemplate.exchange(url, method, entity, clazz);
         
@@ -448,6 +449,11 @@ public class RestService {
     public Boolean retrieveDeposit(String depositID, Retrieve retrieve) {
         HttpEntity<?> response = post(brokerURL + "/deposits/" + depositID + "/retrieve", Boolean.class, retrieve);
         return (Boolean)response.getBody();
+    }
+
+    public Deposit restartDeposit(String depositID) {
+        HttpEntity<?> response = post(brokerURL + "/deposits/" + depositID + "/restart", Deposit.class, null);
+        return (Deposit)response.getBody();
     }
 
     public User addUser(User user) {
