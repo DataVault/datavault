@@ -21,6 +21,7 @@ public class VaultsController {
     private RestService restService;
     private String system;
     private String link;
+    private String welcome;
 
     public void setSystem(String system) {
         this.system = system;
@@ -31,6 +32,10 @@ public class VaultsController {
 
 	public void setRestService(RestService restService) {
         this.restService = restService;
+    }
+
+    public void setWelcome(String welcome) {
+        this.welcome = welcome;
     }
 
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
@@ -51,6 +56,8 @@ public class VaultsController {
         
         model.put("system", system);
         model.put("link", link);
+
+        model.addAttribute("welcome", welcome);
 
         return "vaults/index";
     }

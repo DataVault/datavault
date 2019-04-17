@@ -77,6 +77,8 @@
         <property name="system" value="${metadata.system}" />
         <property name="link" value="${metadata.link}" />
     </bean>
+
+
     
 
     <bean id="filesController" class="org.datavaultplatform.webapp.controllers.FilesController">
@@ -92,6 +94,7 @@
         <property name="restService" ref="restService" />
         <property name="system" value="${metadata.system}" />
         <property name="link" value="${metadata.link}" />
+        <property name="welcome" value="${webapp.motd}"/>
     </bean>
 
     <bean id="fileStoreController" class="org.datavaultplatform.webapp.controllers.FileStoreController">
