@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.ArchiveStore;
@@ -22,6 +23,7 @@ import oracle.cloudstorage.ftm.TransferResult;
 import oracle.cloudstorage.ftm.TransferState;
 import oracle.cloudstorage.ftm.UploadConfig;
 import oracle.cloudstorage.ftm.exception.ClientException;
+import oracle.cloudstorage.ftm.exception.ObjectExists;
 
 public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	
@@ -38,6 +40,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	private static String SERVICE_URL = "service-url";
 	private static String IDENTITY_DOMAIN = "identity-domain";
 	private static String CONTAINER_NAME = "container-name";
+	private int retryTime = 60;
 	
 	/*
 	 * Add local jars to mvn
@@ -80,28 +83,33 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 
 	@Override
 	public void retrieve(String depositId, File working, Progress progress) throws Exception {
-		try {
-			this.manager = FileTransferManager.getDefaultFileTransferManager(this.auth);
-			DownloadConfig downloadConfig = new DownloadConfig();
-            TransferResult downloadResult = manager.download(downloadConfig, this.containerName, depositId, working);
-            logger.info("Task completed. State:" + downloadResult.toString());
-            TransferState ts = downloadResult.getState();
-            while (ts.equals(TransferState.RestoreInProgress)) {
-                    logger.info("Restore in progress. % completed: " + downloadResult.getRestoreCompletedPercentage());
-                    Thread.sleep(1 * 60 * 1000); // Wait for 1 mins.
-                    downloadResult = manager.download(downloadConfig, this.containerName, depositId, working);
-                    ts = downloadResult.getState();
-            }
-            logger.info("Download Result:" + downloadResult.toString());
-		} catch (ClientException ce) {
-			logger.error("Download failed. " + ce.getMessage());
-			throw ce;
-		} catch (Exception e) {
-			logger.error("Download failed. " + e.getMessage());
-			throw e;
-		} finally {
-			if (this.manager != null) {
-				this.manager.shutdown();
+		while (true) {
+			try {
+				this.manager = FileTransferManager.getDefaultFileTransferManager(this.auth);
+				DownloadConfig downloadConfig = new DownloadConfig();
+	            TransferResult downloadResult = manager.download(downloadConfig, this.containerName, depositId, working);
+	            logger.info("Task completed. State:" + downloadResult.toString());
+	            TransferState ts = downloadResult.getState();
+	            while (ts.equals(TransferState.RestoreInProgress)) {
+	                    logger.info("Restore in progress. % completed: " + downloadResult.getRestoreCompletedPercentage());
+	                    Thread.sleep(1 * 60 * 1000); // Wait for 1 mins.
+	                    downloadResult = manager.download(downloadConfig, this.containerName, depositId, working);
+	                    ts = downloadResult.getState();
+	            }
+	            logger.info("Download Result:" + downloadResult.toString());
+	            break;
+			} catch (ClientException ce) {
+				logger.error("Download failed. " + ce.getMessage());
+				//throw ce;
+				TimeUnit.MINUTES.sleep(this.retryTime);
+			} catch (Exception e) {
+				logger.error("Download failed. " + e.getMessage());
+				//throw e;
+				TimeUnit.MINUTES.sleep(this.retryTime);
+			} finally {
+				if (this.manager != null) {
+					this.manager.shutdown();
+				}
 			}
 		}
 		
@@ -109,25 +117,33 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 
 	@Override
 	public String store(String depositId, File working, Progress progress) throws Exception {
-
-		try {
-			this.manager = FileTransferManager.getDefaultFileTransferManager(this.auth);
-			UploadConfig uploadConfig = new UploadConfig();
-			uploadConfig.setOverwrite(false);
-			uploadConfig.setStorageClass(CloudStorageClass.Archive);
-			logger.info("Uploading file " + working.getName() + " to container " + this.containerName + " as " + depositId);
-			TransferResult uploadResult = this.manager.upload(uploadConfig, this.containerName, depositId, working);
-			logger.info("Upload completed successfully.");
-			logger.info("Upload result:" + uploadResult.toString());
-		} catch (ClientException ce) {
-			logger.error("Upload failed. " + ce.getMessage());
-			throw ce;
-		} catch (Exception e) {
-			logger.error("Upload failed. " + e.getMessage());
-			throw e;
-		} finally {
-			if (this.manager != null) {
-				this.manager.shutdown();
+		while (true) {
+			try {
+				this.manager = FileTransferManager.getDefaultFileTransferManager(this.auth);
+				UploadConfig uploadConfig = new UploadConfig();
+				uploadConfig.setOverwrite(false);
+				uploadConfig.setStorageClass(CloudStorageClass.Archive);
+				logger.info("Uploading file " + working.getName() + " to container " + this.containerName + " as " + depositId);
+				TransferResult uploadResult = this.manager.upload(uploadConfig, this.containerName, depositId, working);
+				logger.info("Upload completed successfully.");
+				logger.info("Upload result:" + uploadResult.toString());
+				break;
+			} catch (ObjectExists oe) {
+				// if the object already exists we must be attempting to restart a job
+				// so just ignore exception and carry on
+				logger.info("Uploaded previously: skipping.");
+			} catch (ClientException ce) {
+				logger.error("Upload failed. " + ce.getMessage());
+				//throw ce;
+				TimeUnit.MINUTES.sleep(this.retryTime);
+			} catch (Exception e) {
+				logger.error("Upload failed. " + e.getMessage());
+				//throw e;
+				TimeUnit.MINUTES.sleep(this.retryTime);
+			} finally {
+				if (this.manager != null) {
+					this.manager.shutdown();
+				}
 			}
 		}
 		

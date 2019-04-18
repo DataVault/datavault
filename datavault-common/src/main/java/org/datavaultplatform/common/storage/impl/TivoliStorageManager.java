@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class TivoliStorageManager extends Device implements ArchiveStore {
 
@@ -28,6 +29,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     public static String TEMP_PATH_PREFIX = "/tmp/datavault/temp/";
 
     public Verify.Method verificationMethod = Verify.Method.COPY_BACK;
+    private int retryTime = 60;
 
     public TivoliStorageManager(String name, Map<String,String> config) throws Exception  {
         super(name, config);
@@ -92,26 +94,30 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     		Files.createDirectory(Paths.get(fileDir));
     	}
     	logger.info("Retrieve command is " + "dsmc " + " retrieve " + filePath + " -description=" + depositId + " -optfile=" + optFilePath + "-replace=true");
-    		
-        ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", filePath, "-description=" + depositId, "-optfile=" + optFilePath, "-replace=true");
-        Process p = pb.start();
-        // This class is already running in its own thread so it can happily pause until finished.
-        p.waitFor();
-
-        if (p.exitValue() != 0) {
-            logger.info("Retrieval of " + working.getName() + " failed using " + optFilePath + ". ");
-            InputStream error = p.getErrorStream();
-            for (int i = 0; i < error.available(); i++) {
-            		logger.info("" + error.read());
-            }
-            throw new Exception("Retrieval of " + working.getName() + " failed. ");
-            
-        }
-        // FILL IN THE REST OF PROGRESS x dirs, x files, x bytes etc.
-        if (Files.exists(Paths.get(filePath))) {
-        	Files.move(Paths.get(filePath), Paths.get(working.getAbsolutePath()), StandardCopyOption.REPLACE_EXISTING);
-        }
-        Files.delete(Paths.get(fileDir));
+    	while (true) {
+	        ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", filePath, "-description=" + depositId, "-optfile=" + optFilePath, "-replace=true");
+	        Process p = pb.start();
+	        // This class is already running in its own thread so it can happily pause until finished.
+	        p.waitFor();
+	
+	        if (p.exitValue() != 0) {
+	            logger.info("Retrieval of " + working.getName() + " failed using " + optFilePath + ". ");
+	            InputStream error = p.getErrorStream();
+	            for (int i = 0; i < error.available(); i++) {
+	            		logger.info("" + error.read());
+	            }
+	            //throw new Exception("Retrieval of " + working.getName() + " failed. ");
+	            logger.info("Retrieval of " + working.getName() + " failed. Retrying in " + this.retryTime + " mins");
+	            TimeUnit.MINUTES.sleep(this.retryTime);
+	            
+	        }
+	        // FILL IN THE REST OF PROGRESS x dirs, x files, x bytes etc.
+	        if (Files.exists(Paths.get(filePath))) {
+	        	Files.move(Paths.get(filePath), Paths.get(working.getAbsolutePath()), StandardCopyOption.REPLACE_EXISTING);
+	        }
+	        Files.delete(Paths.get(fileDir));
+	        break;
+    	}
     }
     
     @Override
@@ -157,23 +163,27 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         logger.info("Store command is " + "dsmc" + " archive " + working.getAbsolutePath() +  " -description=" + description + " -optfile=" + optFilePath);
         ProcessBuilder pb = new ProcessBuilder("dsmc", "archive", working.getAbsolutePath(), "-description=" + description, "-optfile=" + optFilePath);
         //pb.directory(path);
-
-        Process p = pb.start();
-
-        // This class is already running in its own thread so it can happily pause until finished.
-        p.waitFor();
-
-        if (p.exitValue() != 0) {
-            logger.info("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
-            InputStream error = p.getErrorStream();
-            if (error != null) {
-            	logger.info(IOUtils.toString(error, StandardCharsets.UTF_8));
-            }
-            InputStream output = p.getInputStream();
-            if (output != null) {
-            	logger.info(IOUtils.toString(output, StandardCharsets.UTF_8));
-            }
-            throw new Exception("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
+        while (true) {
+	        Process p = pb.start();
+	
+	        // This class is already running in its own thread so it can happily pause until finished.
+	        p.waitFor();
+	
+	        if (p.exitValue() != 0) {
+	            logger.info("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
+	            InputStream error = p.getErrorStream();
+	            if (error != null) {
+	            	logger.info(IOUtils.toString(error, StandardCharsets.UTF_8));
+	            }
+	            InputStream output = p.getInputStream();
+	            if (output != null) {
+	            	logger.info(IOUtils.toString(output, StandardCharsets.UTF_8));
+	            }
+	            //throw new Exception("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
+	            logger.info("Deposit of " + working.getName() + " using " + optFilePath + " failed.  Retrying in " + this.retryTime + " mins");
+	            TimeUnit.MINUTES.sleep(this.retryTime);
+	        }
+	        break;
         }
 
         return description;
