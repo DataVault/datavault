@@ -37,7 +37,7 @@ public class AdminVaultsController {
     public String searchVaults(ModelMap model,
                                @RequestParam(value = "query", required = false) String query,
                                @RequestParam(value = "sort", required = false) String sort,
-                               @RequestParam(value = "order", required = false) String order) {
+                               @RequestParam(value = "order", required = false) String order) throws Exception {
         String theSort = sort;
         String theOrder = order;
         if (sort == null) theSort = "creationTime";
@@ -78,7 +78,7 @@ public class AdminVaultsController {
     public void exportVaults(HttpServletResponse response,
                                @RequestParam(value = "query", required = false) String query,
                                @RequestParam(value = "sort", required = false) String sort,
-                               @RequestParam(value = "order", required = false) String order) {
+                               @RequestParam(value = "order", required = false) String order) throws Exception {
         String theSort = sort;
         String theOrder = order;
         if (sort == null) theSort = "creationTime";
@@ -122,7 +122,7 @@ public class AdminVaultsController {
     }
 
     @RequestMapping(value = "/admin/vaults/{vaultid}", method = RequestMethod.GET)
-    public String showVault(ModelMap model, @PathVariable("vaultid") String vaultID) {
+    public String showVault(ModelMap model, @PathVariable("vaultid") String vaultID) throws Exception {
         VaultInfo vault = restService.getVault(vaultID);
 
         model.addAttribute("vault", vault);

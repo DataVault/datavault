@@ -26,24 +26,24 @@ public class AdminArchiveStoreController {
     private RestService restService;
     private String archiveDir;
 
-    public void setRestService(RestService restService) {
+    public void setRestService(RestService restService) throws Exception {
         this.restService = restService;
     }
 
-    public void setArchiveDir(String archiveDir) {
+    public void setArchiveDir(String archiveDir) throws Exception {
         this.archiveDir = archiveDir;
     }
 
     // Return the 'Archive Stores' page
     @RequestMapping(value = "/admin/archivestores", method = RequestMethod.GET)
-    public String listArchivestores(ModelMap model) {
+    public String listArchivestores(ModelMap model) throws Exception {
         model.addAttribute("archiveDir", archiveDir);
 
         ArchiveStore[] archiveStores = restService.getArchiveStores();
         List<ArchiveStore> stores = new ArrayList<>();
 
         for (ArchiveStore archiveStore : archiveStores) {
-//            if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.LocalFileSystem")) {
+//            if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.LocalFileSystem")) throws Exception {
 //                localStores.add(archiveStore);
 //            }
             stores.add(archiveStore);
@@ -60,7 +60,7 @@ public class AdminArchiveStoreController {
     public void addLocalArchivestore(@RequestParam(value="properties",required=false) String properties,
                                      @RequestParam(value="label") String label,
                                      @RequestParam(value="type") String type,
-                                     @RequestParam(value="retrieve",required=false) String retrieve) {
+                                     @RequestParam(value="retrieve",required=false) String retrieve) throws Exception {
         String storageClass = "org.datavaultplatform.common.storage.impl." + type;
 
         boolean retrieveEnabled = false;
@@ -77,14 +77,14 @@ public class AdminArchiveStoreController {
     // Process the 'delete archivestore' Ajax request
     @RequestMapping(value = "/admin/archivestores/{archivestoreId}", method = RequestMethod.DELETE)
     @ResponseBody
-    public void deleteArchiveStore(ModelMap model, @PathVariable("archivestoreId") String archivestoreId) {
+    public void deleteArchiveStore(ModelMap model, @PathVariable("archivestoreId") String archivestoreId) throws Exception {
         restService.deleteArchiveStore(archivestoreId);
     }
 
     // Mark this archive store as being the preferred one for retrieval
     @RequestMapping(value = "/admin/archivestores/{archivestoreId}/enable", method = RequestMethod.POST)
     @ResponseBody
-    public void enableRetrieve(ModelMap model, @PathVariable("archivestoreId") String archivestoreId) {
+    public void enableRetrieve(ModelMap model, @PathVariable("archivestoreId") String archivestoreId) throws Exception {
         ArchiveStore archiveStore = restService.getArchiveStore(archivestoreId);
         archiveStore.setRetrieveEnabled(true);
         restService.editArchiveStore(archiveStore);
@@ -93,7 +93,7 @@ public class AdminArchiveStoreController {
     // Mark this archivestore as no longer being preferred for retrieval
     @RequestMapping(value = "/admin/archivestores/{archivestoreId}/disable", method = RequestMethod.POST)
     @ResponseBody
-    public void disableRetrieve(ModelMap model, @PathVariable("archivestoreId") String archivestoreId) {
+    public void disableRetrieve(ModelMap model, @PathVariable("archivestoreId") String archivestoreId) throws Exception {
         ArchiveStore archiveStore = restService.getArchiveStore(archivestoreId);
         archiveStore.setRetrieveEnabled(false);
         restService.editArchiveStore(archiveStore);
@@ -104,7 +104,7 @@ public class AdminArchiveStoreController {
     @ResponseBody
     public void updateArchiveStore(ModelMap model,
                                    @PathVariable("archivestoreId") String archivestoreId,
-                                   @RequestParam("properties") String properties) {
+                                   @RequestParam("properties") String properties) throws Exception {
         ArchiveStore archiveStore = restService.getArchiveStore(archivestoreId);
         HashMap<String,String> storeProperties = buildStoreProperties(properties);
         archiveStore.setProperties(storeProperties);

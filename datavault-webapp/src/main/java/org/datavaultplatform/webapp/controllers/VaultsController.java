@@ -37,14 +37,14 @@ public class VaultsController {
     private String system;
     private String link;
 
-    public void setSystem(String system) {
+    public void setSystem(String system) throws Exception {
         this.system = system;
     }
-    public void setLink(String link) {
+    public void setLink(String link) throws Exception {
         this.link = link;
     }
 
-	public void setRestService(RestService restService) {
+	public void setRestService(RestService restService) throws Exception {
         this.restService = restService;
     }
 
@@ -53,7 +53,7 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
-    public String getVaultsListing(ModelMap model) {
+    public String getVaultsListing(ModelMap model) throws Exception {
         model.addAttribute("vaults", restService.getVaultsListing());
         
         // pass the view an empty Vault since the form expects it
@@ -75,7 +75,7 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
-    public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID) {
+    public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID) throws Exception {
         VaultInfo vault = restService.getVault(vaultID);
 
         model.addAttribute("vault", vault);
@@ -117,7 +117,7 @@ public class VaultsController {
 
     // Process the completed 'create new vault' page
     @RequestMapping(value = "/vaults/create", method = RequestMethod.POST)
-    public String addVault(@ModelAttribute CreateVault vault, ModelMap model) {
+    public String addVault(@ModelAttribute CreateVault vault, ModelMap model) throws Exception {
         VaultInfo newVault = restService.addVault(vault);
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
         return "redirect:" + vaultUrl;        
@@ -127,7 +127,7 @@ public class VaultsController {
     public RedirectView addDataManager(ModelMap model,
                                        @PathVariable("vaultid") String vaultID,
                                        @RequestParam("uun") String uun,
-                                       final RedirectAttributes redirectAttrs) {
+                                       final RedirectAttributes redirectAttrs) throws Exception {
         logger.debug("Adding "+uun+" as DM");
 
         String vaultUrl = "/vaults/" + vaultID + "/";
@@ -193,7 +193,7 @@ public class VaultsController {
     public RedirectView deleteDataManager(ModelMap model,
                                 @PathVariable("vaultid") String vaultID,
                                 @RequestParam("uun") String uun,
-                                final RedirectAttributes redirectAttrs) {
+                                final RedirectAttributes redirectAttrs) throws Exception {
         logger.info("Get Data Manager with id: "+uun);
         DataManager dataManager = restService.getDataManager(vaultID, uun);
 
@@ -210,7 +210,7 @@ public class VaultsController {
     @RequestMapping(value = "/vaults/{vaultid}/updateVaultDescription", method = RequestMethod.POST)
     public String updateVaultDescription(ModelMap model,
                                  @PathVariable("vaultid") String vaultID,
-                                 @RequestParam("description") String description ) {
+                                 @RequestParam("description") String description ) throws Exception {
         VaultInfo vault = restService.updateVaultDescription(vaultID, description);
         String vaultUrl = "/vaults/" + vault.getID() + "/";
         return "redirect:" + vaultUrl;

@@ -305,7 +305,7 @@
 </div>
 
 <script>
-    $(document).ready(function () {
+    $(function () {
 
         $('[data-toggle="popover"]').popover();
         
@@ -325,13 +325,7 @@
         });
         
         $('#add-from-storage-btn').on("click", function() {
-
-            // Add the path to the hidden control
             var node = $("#tree").fancytree("getActiveNode");
-            $('.file-path')
-                .append($('<option>', { value : node.key })
-                    .text(node.key)
-                    .prop('selected', true));
 
             var storageNode = $("#upload-tree").fancytree("getNodeByKey", "storage");
 
@@ -362,7 +356,13 @@
                     }
 
                     if(!isFull) {
-                        // Add the file to the list
+                        // Add the path to the hidden control
+                        $('.file-path')
+                            .append($('<option>', { value : node.key })
+                                .text(node.key)
+                                .prop('selected', true));
+
+                        //Show tree
                         $("#upload-tree").show();
 
                         if (!storageNode) {

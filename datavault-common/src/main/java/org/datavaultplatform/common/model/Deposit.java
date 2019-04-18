@@ -7,10 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -326,6 +323,25 @@ public class Deposit {
     
     public void setUser(User user) {
         this.user = user;
+    }
+
+    @JsonIgnore
+    public Event getLastEvent(){
+        Event lastEvent = events
+                .stream()
+                .max(Comparator.comparing(Event::getTimestamp))
+                .orElse(null);
+        return lastEvent;
+    }
+
+    @JsonIgnore
+    public Event getLastNotFailedEvent(){
+        Event lastEvent = events
+                .stream()
+                .filter(event-> !"org.datavaultplatform.common.event.Error".equals(event.getEventClass()))
+                .max(Comparator.comparing(Event::getTimestamp))
+                .orElse(null);
+        return lastEvent;
     }
     
     public DepositInfo convertToResponse() {

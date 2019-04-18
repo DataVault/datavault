@@ -6,10 +6,8 @@ import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.*;
+import org.springframework.web.client.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
@@ -35,6 +33,9 @@ public class RestService {
     private HttpEntity<?> exchange(String url, Class clazz, HttpMethod method, Object payload) {
 
         RestTemplate restTemplate = new RestTemplate();
+
+        restTemplate.setErrorHandler(new ApiErrorHandler());
+
         HttpHeaders headers = new HttpHeaders();
 
         // If we have a logged on user then pass that information.
@@ -58,6 +59,7 @@ public class RestService {
         }
 
         logger.debug("Calling Broker with url:" + url + " Method:" + method);
+        System.out.println("Calling Broker with url:" + url + " Method:" + method);
 
         return restTemplate.exchange(url, method, entity, clazz);
         
@@ -453,6 +455,11 @@ public class RestService {
     public Boolean retrieveDeposit(String depositID, Retrieve retrieve) {
         HttpEntity<?> response = post(brokerURL + "/deposits/" + depositID + "/retrieve", Boolean.class, retrieve);
         return (Boolean)response.getBody();
+    }
+
+    public Deposit restartDeposit(String depositID) {
+        HttpEntity<?> response = post(brokerURL + "/deposits/" + depositID + "/restart", Deposit.class, null);
+        return (Deposit)response.getBody();
     }
 
     public User addUser(User user) {

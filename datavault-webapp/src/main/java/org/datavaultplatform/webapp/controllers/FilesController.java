@@ -30,7 +30,7 @@ public class FilesController {
         return FileUtils.getGibibyteSizeStr(maxDepositByteSize);
     }
 
-    public ArrayList<FancytreeNode> getNodes(String parent, boolean directoryOnly) {
+    public ArrayList<FancytreeNode> getNodes(String parent, boolean directoryOnly) throws Exception{
 
         String filePath = "";
         
@@ -64,7 +64,7 @@ public class FilesController {
     }
     
     @RequestMapping("/files")
-    public @ResponseBody ArrayList<FancytreeNode> getFilesListing(HttpServletRequest request) {
+    public @ResponseBody ArrayList<FancytreeNode> getFilesListing(HttpServletRequest request) throws Exception{
 
         // Fancytree parameters
         String mode = request.getParameter("mode");
@@ -74,7 +74,7 @@ public class FilesController {
     }
     
     @RequestMapping("/dir")
-    public @ResponseBody ArrayList<FancytreeNode> getDirListing(HttpServletRequest request) {
+    public @ResponseBody ArrayList<FancytreeNode> getDirListing(HttpServletRequest request) throws Exception{
 
         // Fancytree parameters
         String mode = request.getParameter("mode");
@@ -84,7 +84,7 @@ public class FilesController {
     }
     
     @RequestMapping("/filesize")
-    public @ResponseBody String getFilesize(HttpServletRequest request) {
+    public @ResponseBody String getFilesize(HttpServletRequest request) throws Exception{
 
         String filepath = request.getParameter("filepath");
         
@@ -92,7 +92,7 @@ public class FilesController {
     }
 
     @RequestMapping("/checkdepositsize")
-    public @ResponseBody String checkDepositSize(HttpServletRequest request) {
+    public @ResponseBody String checkDepositSize(HttpServletRequest request) throws Exception{
 
         String[] filePaths = request.getParameterValues("filepath[]");
 

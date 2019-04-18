@@ -448,7 +448,7 @@ public class Encryption {
         return vaultAddress;
     }
 
-    public static void setVaultAddress(String vaultAddress) {
+    public void setVaultAddress(String vaultAddress) {
         Encryption.vaultAddress = vaultAddress;
     }
 
@@ -456,7 +456,7 @@ public class Encryption {
         return vaultToken;
     }
 
-    public static void setVaultToken(String vaultToken) {
+    public void setVaultToken(String vaultToken) {
         Encryption.vaultToken = vaultToken;
     }
 
@@ -464,7 +464,7 @@ public class Encryption {
         return vaultKeyPath;
     }
 
-    public static void setVaultKeyPath(String vaultKeyPath) {
+    public void setVaultKeyPath(String vaultKeyPath) {
         Encryption.vaultKeyPath = vaultKeyPath;
     }
 
@@ -472,7 +472,7 @@ public class Encryption {
         return vaultSslPEMPath;
     }
 
-    public static void setVaultSslPEMPath(String vaultSslPEMPath) {
+    public void setVaultSslPEMPath(String vaultSslPEMPath) {
         Encryption.vaultSslPEMPath = vaultSslPEMPath;
     }
 
@@ -481,7 +481,7 @@ public class Encryption {
         return vaultDataEncryptionKeyName;
     }
 
-    public static void setVaultDataEncryptionKeyName(String vaultDataEncryptionKeyName) {
+    public void setVaultDataEncryptionKeyName(String vaultDataEncryptionKeyName) {
         Encryption.vaultDataEncryptionKeyName = vaultDataEncryptionKeyName;
     }
 
@@ -491,7 +491,7 @@ public class Encryption {
 
 
 
-    public static void setVaultPrivateKeyEncryptionKeyName(String vaultPrivateKeyEncryptionKeyName) {
+    public void setVaultPrivateKeyEncryptionKeyName(String vaultPrivateKeyEncryptionKeyName) {
         Encryption.vaultPrivateKeyEncryptionKeyName = vaultPrivateKeyEncryptionKeyName;
     }
 
@@ -499,32 +499,40 @@ public class Encryption {
         return vaultEnable;
     }
 
-    public static void setVaultEnable(boolean vaultEnable) {
-        Encryption.vaultEnable = vaultEnable;
+    public void setVaultEnable(boolean isEnabled) {
+        vaultEnable = isEnabled;
     }
 
     public static boolean getKeystoreEnable() {
         return keystoreEnable;
     }
 
-    public static void setKeystoreEnable(boolean keystoreEnable) {
-        Encryption.keystoreEnable = keystoreEnable;
+    public void setKeystoreEnable(boolean isEnabled) {
+        keystoreEnable = isEnabled;
     }
 
     public static String getKeystorePath() {
         return keystorePath;
     }
 
-    public static void setKeystorePath(String keystorePath) {
-        Encryption.keystorePath = keystorePath;
+    public void setKeystorePath(String path) {
+        keystorePath = path;
+    }
+
+    public static void staticSetKeystorePath(String path) {
+        keystorePath = path;
     }
 
     public static String getKeystorePassword() {
         return keystorePassword;
     }
 
-    public static void setKeystorePassword(String keystorePassword) {
-        Encryption.keystorePassword = keystorePassword;
+    public void setKeystorePassword(String password) {
+        keystorePassword = password;
+    }
+
+    public static void staticSetKeystorePassword(String password) {
+        keystorePassword = password;
     }
 
     /**
@@ -555,8 +563,8 @@ public class Encryption {
                 e.printStackTrace();
             }
 
-            Encryption.setKeystorePath(jsonObject.get("path").asString());
-            Encryption.setKeystorePassword(jsonObject.get("password").asString());
+            Encryption.staticSetKeystorePath(jsonObject.get("path").asString());
+            Encryption.staticSetKeystorePassword(jsonObject.get("password").asString());
 
             JsonArray aliases = jsonObject.get("key_aliases").asArray();
 

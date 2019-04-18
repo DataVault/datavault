@@ -22,7 +22,7 @@ public class AdminRetentionPoliciesController {
     }
 
     @RequestMapping(value = "/admin/retentionpolicies", method = RequestMethod.GET)
-    public String getRetentionPoliciesListing(ModelMap model) {
+    public String getRetentionPoliciesListing(ModelMap model) throws Exception {
         model.addAttribute("policies", restService.getRetentionPolicyListing());
 
         return "admin/retentionpolicies/index";
@@ -34,7 +34,7 @@ public class AdminRetentionPoliciesController {
     void updateRetentionPolicy(ModelMap model,
                                       @PathVariable("id") String policyId,
                                       @RequestParam(name = "name", required = false) String name,
-                                      @RequestParam(name = "description", required = false) String description) {
+                                      @RequestParam(name = "description", required = false) String description) throws Exception {
         System.out.println("Calling updateRetentionPolicyName");
         RetentionPolicy policy = restService.getRetentionPolicy(policyId);
         if(name != null) {

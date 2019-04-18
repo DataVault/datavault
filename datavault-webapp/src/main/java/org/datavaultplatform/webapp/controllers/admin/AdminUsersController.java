@@ -23,7 +23,7 @@ public class AdminUsersController {
 
     @RequestMapping(value = "/admin/users", method = RequestMethod.GET)
     public String getUsersListing(ModelMap model,
-                                  @RequestParam(value = "query", required = false) String query) {
+                                  @RequestParam(value = "query", required = false) String query) throws Exception {
         if ((query == null) || ("".equals(query))) {
             model.addAttribute("users", restService.getUsers());
             model.addAttribute("query", "");
@@ -37,7 +37,7 @@ public class AdminUsersController {
 
     // Return an empty 'create new user' page
     @RequestMapping(value = "/admin/users/create", method = RequestMethod.GET)
-    public String createUser(ModelMap model) {
+    public String createUser(ModelMap model) throws Exception {
         // pass the view an empty User since the form expects it
         model.addAttribute("user", new User());
 
@@ -46,7 +46,7 @@ public class AdminUsersController {
 
     // Process the completed 'create new user' page
     @RequestMapping(value = "/admin/users/create", method = RequestMethod.POST)
-    public String addUser(@ModelAttribute User user, ModelMap model, @RequestParam String action) {
+    public String addUser(@ModelAttribute User user, ModelMap model, @RequestParam String action) throws Exception {
         // Was the cancel button pressed?
         if ("cancel".equals(action)) {
             return "redirect:/";
@@ -65,7 +65,7 @@ public class AdminUsersController {
 
     // Return an 'edit user' page
     @RequestMapping(value = "/admin/users/edit/{userid}", method = RequestMethod.GET)
-    public String editUser(ModelMap model, @PathVariable("userid") String userID) {
+    public String editUser(ModelMap model, @PathVariable("userid") String userID) throws Exception {
 
         model.addAttribute("user", restService.getUser(userID));
         return "admin/users/edit";
@@ -73,7 +73,7 @@ public class AdminUsersController {
 
     // Process the completed 'edit user' page
     @RequestMapping(value = "/admin/users/edit/{userid}", method = RequestMethod.POST)
-    public String editUser(@ModelAttribute User user, ModelMap model, @PathVariable("userid") String userID, @RequestParam String action) {
+    public String editUser(@ModelAttribute User user, ModelMap model, @PathVariable("userid") String userID, @RequestParam String action) throws Exception {
         // Was the cancel button pressed?
         if ("cancel".equals(action)) {
             return "redirect:/";

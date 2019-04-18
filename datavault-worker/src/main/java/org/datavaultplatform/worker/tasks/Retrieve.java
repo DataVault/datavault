@@ -15,7 +15,6 @@ import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.worker.operations.FileSplitter;
-import org.datavaultplatform.worker.operations.Packager;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 import org.datavaultplatform.worker.operations.Tar;
 import org.datavaultplatform.worker.queue.EventSender;
@@ -33,6 +32,20 @@ import java.util.*;
 public class Retrieve extends Task {
     
     private static final Logger logger = LoggerFactory.getLogger(Retrieve.class);
+    private String archiveId = null;
+    private String archiveDigestAlgorithm = null;
+    private String archiveDigest = null;
+    private String userID = null;
+    private int numOfChunks = 0;
+    private Map<Integer, String> chunksDigest = null;
+    private Map<Integer, String> encChunksDigest = null;
+    private String encTarDigest = null;
+    private String retrievePath = null;
+    private String retrieveId = null;
+    private String depositId = null;
+    private String bagID = null;
+    private long archiveSize = 0;
+    private EventSender eventStream = null;
     
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
@@ -48,226 +61,59 @@ public class Retrieve extends Task {
     @Override
     public void performAction(Context context) {
         
-        EventSender eventStream = (EventSender)context.getEventStream();
-        
+        this.eventStream = (EventSender)context.getEventStream();
         logger.info("Retrieve job - performAction()");
-        
         Map<String, String> properties = getProperties();
-        String depositId = properties.get("depositId");
-        String retrieveId = properties.get("retrieveId");
-        String bagID = properties.get("bagId");
-        String retrievePath = properties.get("retrievePath");
-        String archiveId = properties.get("archiveId");
-        String userID = properties.get("userId");
-        String archiveDigest = properties.get("archiveDigest");
-        String archiveDigestAlgorithm = properties.get("archiveDigestAlgorithm");
-        
-        
-        int numOfChunks = Integer.parseInt(properties.get("numOfChunks"));
-        
-        long archiveSize = Long.parseLong(properties.get("archiveSize"));
-        
-        Map<Integer, String> chunksDigest = getChunkFilesDigest();
-        Map<Integer, String> encChunksDigest = getEncChunksDigest();
-        String encTarDigest = getEncTarDigest();
+        this.depositId = properties.get("depositId");
+        this.retrieveId = properties.get("retrieveId");
+        this.bagID = properties.get("bagId");
+        this.retrievePath = properties.get("retrievePath");
+        this.archiveId = properties.get("archiveId");
+        this.userID = properties.get("userId");
+        this.archiveDigest = properties.get("archiveDigest");
+        this.archiveDigestAlgorithm = properties.get("archiveDigestAlgorithm");
+        this.numOfChunks = Integer.parseInt(properties.get("numOfChunks"));
+        this.archiveSize = Long.parseLong(properties.get("archiveSize"));
+        this.chunksDigest = this.getChunkFilesDigest();
+        this.encChunksDigest = this.getEncChunksDigest();
+        this.encTarDigest = this.getEncTarDigest();
 
         if (this.isRedeliver()) {
-            eventStream.send(new Error(jobID, depositId, "Retrieve stopped: the message had been redelivered, please investigate")
-                .withUserId(userID));
+            eventStream.send(new Error(this.jobID, this.depositId, "Retrieve stopped: the message had been redelivered, please investigate")
+                .withUserId(this.userID));
             return;
         }
         
-        ArrayList<String> states = new ArrayList<>();
-        states.add("Computing free space");    // 0
-        states.add("Retrieving from archive"); // 1
-        states.add("Validating data");         // 2
-        states.add("Transferring files");      // 3
-        states.add("Data retrieve complete");  // 4
-        eventStream.send(new InitStates(jobID, depositId, states)
-            .withUserId(userID));
+        this.initStates();
         
-        eventStream.send(new RetrieveStart(jobID, depositId, retrieveId)
-            .withUserId(userID)
+        eventStream.send(new RetrieveStart(this.jobID, this.depositId, this.retrieveId)
+            .withUserId(this.userID)
             .withNextState(0));
         
-        logger.info("bagID: " + bagID);
-        logger.info("retrievePath: " + retrievePath);
+        logger.info("bagID: " + this.bagID);
+        logger.info("retrievePath: " + this.retrievePath);
         
-        Device userFs = null;
-        UserStore userStore = null;
-        Device archiveFs = null;
-        
-        for (String storageID : userFileStoreClasses.keySet()) {
-            
-            String storageClass = userFileStoreClasses.get(storageID);
-            Map<String, String> storageProperties = userFileStoreProperties.get(storageID);
-            
-            // Connect to the first user storage device (we only expect one for a retrieval)
-            try {
-                Class<?> clazz = Class.forName(storageClass);
-                Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-                Object instance = constructor.newInstance(storageClass, storageProperties);                
-                userFs = (Device)instance;
-                userStore = (UserStore)userFs;
-                logger.info("Connected to user store: " + storageID + ", class: " + storageClass);
-                break;
-            } catch (Exception e) {
-                String msg = "Deposit failed: could not access user filesystem";
-                logger.error(msg, e);
-                eventStream.send(new Error(jobID, depositId, msg)
-                    .withUserId(userID));
-
-                //System.exit(1);
-                throw new RuntimeException(e);
-            }
-        }
-
-        // We get passed a list because it is a parameter common to deposits and retrieves, but for retrieve there should only be one.
-        ArchiveStore archiveFileStore = archiveFileStores.get(0);
-
-        // Connect to the archive storage
-        try {
-            Class<?> clazz = Class.forName(archiveFileStore.getStorageClass());
-            Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-            Object instance = constructor.newInstance(archiveFileStore.getStorageClass(), archiveFileStore.getProperties());
-            archiveFs = (Device)instance;
-        } catch (Exception e) {
-            String msg = "Retrieve failed: could not access archive filesystem";
-            logger.error(msg, e);
-            eventStream.send(new Error(jobID, depositId, msg)
-                .withUserId(userID));
-
-            //System.exit(1);
-            throw new RuntimeException(e);
-        }
+        Device userFs = this.setupUserFileStores();
+        Device archiveFs = this.setupArchiveFileStores();
         
         try {
-            if (!userStore.exists(retrievePath) || !userStore.isDirectory(retrievePath)) {
-                // Target path must exist and be a directory
-                logger.info("Target directory not found!");
-            }
-            
-            // Check that there's enough free space ...
-            try {
-                long freespace = userFs.getUsableSpace();
-                logger.info("Free space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
-                if (freespace < archiveSize) {
-                    eventStream.send(new Error(jobID, depositId, "Not enough free space to retrieve data!")
-                        .withUserId(userID));
-                    return;
-                }
-            } catch (Exception e) {
-                logger.info("Unable to determine free space");
-                eventStream.send(new Error(jobID, depositId, "Unable to determine free space")
-                    .withUserId(userID));
-
-                //System.exit(1);
-                throw new RuntimeException(e);
-            }
+        	this.checkUserStoreFreeSpace(userFs);
 
             // Retrieve the archived data
-            String tarFileName = bagID + ".tar";
+            String tarFileName = this.bagID + ".tar";
             
             // Copy the tar file from the archive to the temporary area
             Path tarPath = context.getTempDir().resolve(tarFileName);
             File tarFile = tarPath.toFile();
             
-            eventStream.send(new UpdateProgress(jobID, depositId, 0, archiveSize, "Starting transfer ...")
-                .withUserId(userID)
+            eventStream.send(new UpdateProgress(this.jobID, this.depositId, 0, this.archiveSize, "Starting transfer ...")
+                .withUserId(this.userID)
                 .withNextState(1));
             
             if (archiveFs.hasMultipleCopies()) {
-                logger.info("Device has multiple copies");
-                Progress progress = new Progress();
-                ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, archiveSize, eventStream);
-                Thread trackerThread = new Thread(tracker);
-                trackerThread.start();
-
-                List<String> locations = archiveFs.getLocations();
-                Iterator<String> locationsIt = locations.iterator();
-                LOCATION: while (locationsIt.hasNext()) {
-                    String location = locationsIt.next();
-                    try {
-                        try {
-                            // NEED TO UPDATE THIS TO INCLUDE CHUNKING STUFF IS TURNED ON
-                            if (context.isChunkingEnabled()) {
-                                // TODO can bypass this if there is only one chunk.
-                                recomposeMulti(numOfChunks, tarFileName, context, archiveId, archiveFs, progress,
-                                        archiveDigestAlgorithm, tarFile, chunksDigest, encChunksDigest, location,
-                                        depositId);
-                            } else {
-                                // Ask the driver to copy files to the temp directory
-                                archiveFs.retrieve(archiveId, tarFile, progress, location);
-                            }
-                        } finally {
-                            // Stop the tracking thread
-                            tracker.stop();
-                            trackerThread.join();
-                        }
-
-                        logger.info("Attempting retrieve on archive from " + location);
-                        this.doRetrieve(depositId, userID, retrievePath, retrieveId, context, userFs, tarFile,
-                                eventStream, archiveDigestAlgorithm, archiveDigest, progress);
-                        logger.info("Completed retrieve on archive from " + location);
-                        break LOCATION;
-                    } catch (Exception e) {
-                        // if last location has an error throw the error else go
-                        // round again
-                        // continue LOCATION;
-                        if (!locationsIt.hasNext()) {
-                            logger.info("All locations had problems throwing exception " + e.getMessage());
-                            throw e;
-                        }
-                        //System.exit(1);
-                        throw new RuntimeException(e);
-                    }
-                }
-
+            	this.multipleCopies(context, tarFileName, tarFile, archiveFs, userFs);
             } else {
-                logger.info("Single copy device");
-                // Progress tracking (threaded)
-                Progress progress = new Progress();
-                ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, archiveSize, eventStream);
-                Thread trackerThread = new Thread(tracker);
-                trackerThread.start();
-                
-
-                // Verify integrity with deposit checksum
-                String systemAlgorithm = Verify.getAlgorithm();
-                if (!systemAlgorithm.equals(archiveDigestAlgorithm)) {
-                    throw new Exception("Unsupported checksum algorithm: " + archiveDigestAlgorithm);
-                }
-
-                try {
-                    // Ask the driver to copy files to the temp directory
-                    if (context.isChunkingEnabled()) {
-                        // TODO can bypass this if there is only one chunk.
-                        recomposeSingle(numOfChunks, tarFileName, context, archiveId, archiveFs, progress,
-                                archiveDigestAlgorithm, tarFile, chunksDigest, encChunksDigest, depositId);
-                    } else {
-                        archiveFs.retrieve(archiveId, tarFile, progress);
-
-                        if (this.getTarIV() != null) {
-                            // Decrypt tar file
-                            String encTarFileHash = Verify.getDigest(tarFile);
-                            
-                            logger.info("Encrypted tar Checksum algorithm: " + archiveDigestAlgorithm);
-                            logger.info("Encrypted tar Checksum: " + encTarFileHash);
-                            
-                            if (!encTarFileHash.equals(encTarDigest)) {
-                                throw new Exception("checksum failed: " + encTarFileHash + " != " + encTarDigest);
-                            }
-                            
-                            Encryption.decryptFile(context, tarFile, this.getTarIV());
-                        }
-                    }
-                } finally {
-                    // Stop the tracking thread
-                    tracker.stop();
-                    trackerThread.join();
-                }
-
-                this.doRetrieve(depositId, userID, retrievePath, retrieveId, context, userFs, tarFile, eventStream, archiveDigestAlgorithm, archiveDigest, progress);
+            	this.singleCopy(context, tarFileName, tarFile, archiveFs, userFs);
             }
             
         } catch (Exception e) {
@@ -275,38 +121,27 @@ public class Retrieve extends Task {
             logger.error(msg, e);
             eventStream.send(new Error(jobID, depositId, msg)
                 .withUserId(userID));
-
-            //System.exit(1);
             throw new RuntimeException(e);
         }
     }
     
-    private void recomposeSingle(int numOfChunks, String tarFileName, Context context, String archiveId, Device archiveFs, Progress progress, 
-            String archiveDigestAlgorithm, File tarFile, Map<Integer, String> chunksDigest, Map<Integer, String> encChunksDigest, 
-            String depositId)  
-                    throws Exception {
-        recompose(numOfChunks, tarFileName, context, archiveId, archiveFs, progress, archiveDigestAlgorithm, 
-                tarFile, chunksDigest, encChunksDigest, false, null, depositId);
+    private void recomposeSingle(String tarFileName, Context context, Device archiveFs, Progress progress, File tarFile) throws Exception {
+        recompose(tarFileName, context, archiveFs, progress, tarFile, false, null);
     }
     
-    private void recomposeMulti(int numOfChunks, String tarFileName, Context context, String archiveId, Device archiveFs, Progress progress, 
-            String archiveDigestAlgorithm, File tarFile, Map<Integer, String> chunksDigest, Map<Integer, String> encChunksDigest, 
-            String location, String depositId)  
-                    throws Exception {
-        recompose(numOfChunks, tarFileName, context, archiveId, archiveFs, progress, archiveDigestAlgorithm, 
-                tarFile, chunksDigest, encChunksDigest, true, location, depositId);
+    private void recomposeMulti(String tarFileName, Context context, Device archiveFs, Progress progress, File tarFile, String location) throws Exception {
+        recompose(tarFileName, context, archiveFs, progress, tarFile, true, location);
     }
     
-    private void recompose(int numOfChunks, String tarFileName, Context context, String archiveId, Device archiveFs, Progress progress, 
-            String archiveDigestAlgorithm, File tarFile, Map<Integer, String> chunksDigest, Map<Integer, String> encChunksDigest, 
-            boolean singleCopy, String location, String depositId) throws Exception {
+    private void recompose(String tarFileName, Context context, Device archiveFs, Progress progress, 
+            File tarFile, boolean singleCopy, String location) throws Exception {
 
-        File[] chunks = new File[numOfChunks];
-        logger.info("Retrieving " + numOfChunks + " chunk(s)");
-        for( int chunkNum = 1; chunkNum <= numOfChunks; chunkNum++) {
+        File[] chunks = new File[this.numOfChunks];
+        logger.info("Retrieving " + this.numOfChunks + " chunk(s)");
+        for( int chunkNum = 1; chunkNum <= this.numOfChunks; chunkNum++) {
             Path chunkPath = context.getTempDir().resolve(tarFileName+FileSplitter.CHUNK_SEPARATOR+chunkNum);
             File chunkFile = chunkPath.toFile();
-            String chunkArchiveId = archiveId+FileSplitter.CHUNK_SEPARATOR+chunkNum;
+            String chunkArchiveId = this.archiveId+FileSplitter.CHUNK_SEPARATOR+chunkNum;
             if (! singleCopy) {
                 archiveFs.retrieve(chunkArchiveId, chunkFile, progress);
             } else {
@@ -315,12 +150,12 @@ public class Retrieve extends Task {
             chunks[chunkNum-1] = chunkFile;
             
             if( this.getChunksIVs().get(chunkNum) != null ) {
-                String archivedEncChunkFileHash = encChunksDigest.get(chunkNum);
+                String archivedEncChunkFileHash = this.encChunksDigest.get(chunkNum);
                 
                 // Check encrypted file checksum
                 String encChunkFileHash = Verify.getDigest(chunkFile);
                 
-                logger.info("Encrypted chunk Checksum algorithm: " + archiveDigestAlgorithm);
+                logger.info("Encrypted chunk Checksum algorithm: " + this.archiveDigestAlgorithm);
                 logger.info("Encrypted Checksum: " + encChunkFileHash);
                 
                 if (!encChunkFileHash.equals(archivedEncChunkFileHash)) {
@@ -331,13 +166,13 @@ public class Retrieve extends Task {
             }
             
             // Check file
-            String archivedChunkFileHash = chunksDigest.get(chunkNum);
+            String archivedChunkFileHash = this.chunksDigest.get(chunkNum);
             
             // TODO: Should we check algorithm each time or assume main tar file algorithm is the same
             // We might also want to move algorythm check before this loop
             String chunkFileHash = Verify.getDigest(chunkFile);
             
-            logger.info("Chunk Checksum algorithm: " + archiveDigestAlgorithm);
+            logger.info("Chunk Checksum algorithm: " + this.archiveDigestAlgorithm);
             logger.info("Checksum: " + chunkFileHash);
             
             if (!chunkFileHash.equals(archivedChunkFileHash)) {
@@ -355,21 +190,20 @@ public class Retrieve extends Task {
         }
     }
     
-    private void doRetrieve(String depositId, String userID, String retrievePath, String retrieveId, Context context, Device userFs, File tarFile, EventSender eventStream, 
-            String archiveDigestAlgorithm, String archiveDigest, Progress progress) throws Exception{
+    private void doRetrieve(Context context, Device userFs, File tarFile, Progress progress) throws Exception{
         logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
         
         logger.info("Validating data ...");
-        eventStream.send(new UpdateProgress(jobID, depositId).withNextState(2)
-            .withUserId(userID));
+        eventStream.send(new UpdateProgress(this.jobID, this.depositId).withNextState(2)
+            .withUserId(this.userID));
         
         String tarHash = Verify.getDigest(tarFile);
-        logger.info("Checksum algorithm: " + archiveDigestAlgorithm);
+        logger.info("Checksum algorithm: " + this.archiveDigestAlgorithm);
         logger.info("Checksum: " + tarHash);
         
-        if (!tarHash.equals(archiveDigest)) {
-        		logger.info("Checksum failed: " + tarHash + " != " + archiveDigest);
-            throw new Exception("checksum failed: " + tarHash + " != " + archiveDigest);
+        if (!tarHash.equals(this.archiveDigest)) {
+        		logger.info("Checksum failed: " + tarHash + " != " + this.archiveDigest);
+            throw new Exception("checksum failed: " + tarHash + " != " + this.archiveDigest);
         }
         
         // Decompress to the temporary directory
@@ -384,24 +218,24 @@ public class Retrieve extends Task {
         // Get the payload data directory
         File payloadDir = bagDir.toPath().resolve("data").toFile();
         //File payloadDir = bagDir;
-        long payloadSize = FileUtils.sizeOfDirectory(payloadDir);
+        //long payloadSize = FileUtils.sizeOfDirectory(payloadDir);
 
         // Copy the extracted files to the target retrieve area
         logger.info("Copying to user directory ...");
-        eventStream.send(new UpdateProgress(jobID, depositId, 0, bagDirSize, "Starting transfer ...")
-            .withUserId(userID)
+        eventStream.send(new UpdateProgress(this.jobID, this.depositId, 0, bagDirSize, "Starting transfer ...")
+            .withUserId(this.userID)
             .withNextState(3));
         
         // Progress tracking (threaded)
         progress = new Progress();
-        ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, bagDirSize, eventStream);
+        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, bagDirSize, this.eventStream);
         Thread trackerThread = new Thread(tracker);
         trackerThread.start();
 
         try {
             ArrayList<File> contents = new ArrayList<File>(Arrays.asList(payloadDir.listFiles()));
             for(File content: contents){
-                userFs.store(retrievePath, content, progress);
+                userFs.store(this.retrievePath, content, progress);
             }
         } finally {
             // Stop the tracking thread
@@ -418,8 +252,188 @@ public class Retrieve extends Task {
 
 
 
-        logger.info("Data retrieve complete: " + retrievePath);
-        eventStream.send(new RetrieveComplete(jobID, depositId, retrieveId).withNextState(4)
-            .withUserId(userID));
+        logger.info("Data retrieve complete: " + this.retrievePath);
+        eventStream.send(new RetrieveComplete(this.jobID, this.depositId, this.retrieveId).withNextState(4)
+            .withUserId(this.userID));
+    }
+    
+    private void initStates() {
+    	ArrayList<String> states = new ArrayList<>();
+        states.add("Computing free space");    // 0
+        states.add("Retrieving from archive"); // 1
+        states.add("Validating data");         // 2
+        states.add("Transferring files");      // 3
+        states.add("Data retrieve complete");  // 4
+        eventStream.send(new InitStates(this.jobID, this.depositId, states)
+            .withUserId(userID));		
+	}
+    
+    private Device setupUserFileStores() {
+        Device userFs = null;
+        
+        for (String storageID : userFileStoreClasses.keySet()) {
+            
+            String storageClass = userFileStoreClasses.get(storageID);
+            Map<String, String> storageProperties = userFileStoreProperties.get(storageID);
+            
+            // Connect to the first user storage device (we only expect one for a retrieval)
+            try {
+                Class<?> clazz = Class.forName(storageClass);
+                Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
+                Object instance = constructor.newInstance(storageClass, storageProperties);                
+                userFs = (Device)instance;
+                logger.info("Connected to user store: " + storageID + ", class: " + storageClass);
+                break;
+            } catch (Exception e) {
+                String msg = "Deposit failed: could not access user filesystem";
+                logger.error(msg, e);
+                eventStream.send(new Error(this.jobID, this.depositId, msg)
+                    .withUserId(this.userID));
+                throw new RuntimeException(e);
+            }
+        }
+        
+        return userFs;
+    }
+    
+    private Device setupArchiveFileStores() {
+    	Device archiveFs = null;
+    	// We get passed a list because it is a parameter common to deposits and retrieves, but for retrieve there should only be one.
+        ArchiveStore archiveFileStore = archiveFileStores.get(0);
+
+        // Connect to the archive storage
+        try {
+            Class<?> clazz = Class.forName(archiveFileStore.getStorageClass());
+            Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
+            Object instance = constructor.newInstance(archiveFileStore.getStorageClass(), archiveFileStore.getProperties());
+            archiveFs = (Device)instance;
+        } catch (Exception e) {
+            String msg = "Retrieve failed: could not access archive filesystem";
+            logger.error(msg, e);
+            eventStream.send(new Error(this.jobID, this.depositId, msg)
+                .withUserId(userID));
+
+            throw new RuntimeException(e);
+        }
+        
+        return archiveFs;
+    }
+    
+    private void checkUserStoreFreeSpace(Device userFs) throws Exception {
+    	UserStore userStore = ((UserStore)userFs);
+        if (!userStore.exists(retrievePath) || !userStore.isDirectory(retrievePath)) {
+            // Target path must exist and be a directory
+            logger.info("Target directory not found!");
+        }
+        
+        // Check that there's enough free space ...
+        try {
+            long freespace = userFs.getUsableSpace();
+            logger.info("Free space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
+            if (freespace < archiveSize) {
+                eventStream.send(new Error(this.jobID, this.depositId, "Not enough free space to retrieve data!")
+                    .withUserId(this.userID));
+                return;
+            }
+        } catch (Exception e) {
+            logger.info("Unable to determine free space");
+            eventStream.send(new Error(jobID, depositId, "Unable to determine free space")
+                .withUserId(this.userID));
+
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private void multipleCopies(Context context, String tarFileName, File tarFile, Device archiveFs, Device userFs) throws Exception {
+    	logger.info("Device has multiple copies");
+        Progress progress = new Progress();
+        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventStream);
+        Thread trackerThread = new Thread(tracker);
+        trackerThread.start();
+
+        List<String> locations = archiveFs.getLocations();
+        Iterator<String> locationsIt = locations.iterator();
+        LOCATION: 
+        while (locationsIt.hasNext()) {
+            String location = locationsIt.next();
+            logger.info("Current " + location);
+            try {
+                try {
+                    // NEED TO UPDATE THIS TO INCLUDE CHUNKING STUFF IS TURNED ON
+                    if (context.isChunkingEnabled()) {
+                        // TODO can bypass this if there is only one chunk.
+                        recomposeMulti(tarFileName, context, archiveFs, progress, tarFile, location);
+                    } else {
+                        // Ask the driver to copy files to the temp directory
+                        archiveFs.retrieve(this.archiveId, tarFile, progress, location);
+                    }
+                } finally {
+                    // Stop the tracking thread
+                    tracker.stop();
+                    trackerThread.join();
+                }
+
+                logger.info("Attempting retrieve on archive from " + location);
+                this.doRetrieve(context, userFs, tarFile, progress);
+                logger.info("Completed retrieve on archive from " + location);
+                break LOCATION;
+            } catch (Exception e) {
+                // if last location has an error throw the error else go
+                // round again
+                if (!locationsIt.hasNext()) {
+                    logger.info("All locations had problems throwing exception " + e.getMessage());
+                    throw e;
+                } else {
+                	logger.info("Current " + location + " has a problem trying next location");
+                	continue LOCATION;
+                }
+            }
+        }
+    }
+    
+    private void singleCopy(Context context, String tarFileName, File tarFile, Device archiveFs, Device userFs) throws Exception {
+    	logger.info("Single copy device");
+        // Progress tracking (threaded)
+        Progress progress = new Progress();
+        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventStream);
+        Thread trackerThread = new Thread(tracker);
+        trackerThread.start();
+        
+
+        // Verify integrity with deposit checksum
+        String systemAlgorithm = Verify.getAlgorithm();
+        if (!systemAlgorithm.equals(this.archiveDigestAlgorithm)) {
+            throw new Exception("Unsupported checksum algorithm: " + this.archiveDigestAlgorithm);
+        }
+
+        try {
+            // Ask the driver to copy files to the temp directory
+            if (context.isChunkingEnabled()) {
+                // TODO can bypass this if there is only one chunk.
+                recomposeSingle(tarFileName, context, archiveFs, progress, tarFile);
+            } else {
+                archiveFs.retrieve(this.archiveId, tarFile, progress);
+
+                if (this.getTarIV() != null) {
+                    // Decrypt tar file
+                    String encTarFileHash = Verify.getDigest(tarFile);
+                    
+                    logger.info("Encrypted tar Checksum algorithm: " + this.archiveDigestAlgorithm);
+                    logger.info("Encrypted tar Checksum: " + encTarFileHash);
+                    
+                    if (!encTarFileHash.equals(this.encTarDigest)) {
+                        throw new Exception("checksum failed: " + encTarFileHash + " != " + this.encTarDigest);
+                    }
+                    
+                    Encryption.decryptFile(context, tarFile, this.getTarIV());
+                }
+            }
+        } finally {
+            // Stop the tracking thread
+            tracker.stop();
+            trackerThread.join();
+        }
+
+        this.doRetrieve(context, userFs, tarFile, progress);
     }
 }
