@@ -25,7 +25,7 @@ public class AdminGroupsController {
     }
 
     @RequestMapping(value = "/admin/groups", method = RequestMethod.GET)
-    public String getGroupsListing(ModelMap model) {
+    public String getGroupsListing(ModelMap model) throws Exception {
         // Get the groups
         Group[] groups = restService.getGroups();
         model.addAttribute("groups", groups);
@@ -56,7 +56,7 @@ public class AdminGroupsController {
     
     // Process the completed 'create new group' page
     @RequestMapping(value = "/admin/groups/create", method = RequestMethod.POST)
-    public String addGroup(@ModelAttribute Group group, ModelMap model, @RequestParam String action) {
+    public String addGroup(@ModelAttribute Group group, ModelMap model, @RequestParam String action) throws Exception {
         // Was the cancel button pressed?
         if ("cancel".equals(action)) {
             return "redirect:/admin/groups/";
@@ -69,7 +69,7 @@ public class AdminGroupsController {
     // Delete a group
     @RequestMapping(value = "/admin/groups/{groupid}/delete", method = RequestMethod.GET)
     public String deleteGroup(ModelMap model,
-                              @PathVariable("groupid") String groupId) {
+                              @PathVariable("groupid") String groupId) throws Exception {
         restService.deleteGroup(groupId);
         return "redirect:/admin/groups/";
     }
@@ -77,14 +77,14 @@ public class AdminGroupsController {
     // Enable a group
     @RequestMapping(value = "/admin/groups/{groupid}/enable", method = RequestMethod.PUT)
     public @ResponseBody void enableGroup(ModelMap model,
-                                          @PathVariable("groupid") String groupId) {
+                                          @PathVariable("groupid") String groupId) throws Exception {
         restService.enableGroup(groupId);
     }
 
     // Disable a group
     @RequestMapping(value = "/admin/groups/{groupid}/disable", method = RequestMethod.PUT)
     public @ResponseBody void disableGroup(ModelMap model,
-                                           @PathVariable("groupid") String groupId) {
+                                           @PathVariable("groupid") String groupId) throws Exception {
         restService.disableGroup(groupId);
     }
     
@@ -92,7 +92,7 @@ public class AdminGroupsController {
     @RequestMapping(value = "/admin/groups/{groupid}/users/{userid}", method = RequestMethod.PUT)
     public @ResponseBody void addGroupOwner(ModelMap model,
                                             @PathVariable("groupid") String groupId,
-                                            @PathVariable("userid") String userId) {
+                                            @PathVariable("userid") String userId) throws Exception {
         restService.addGroupOwner(groupId, userId);
     }
     
@@ -100,7 +100,7 @@ public class AdminGroupsController {
     @RequestMapping(value = "/admin/groups/{groupid}/users/{userid}", method = RequestMethod.DELETE)
     public @ResponseBody void removeGroupOwner(ModelMap model,
                                                @PathVariable("groupid") String groupId,
-                                               @PathVariable("userid") String userId) {
+                                               @PathVariable("userid") String userId) throws Exception {
         restService.removeGroupOwner(groupId, userId);
     }
 
@@ -109,7 +109,7 @@ public class AdminGroupsController {
     @ResponseBody
     public void updateArchiveStore(ModelMap model,
                                    @PathVariable("groupid") String groupId,
-                                   @RequestParam("name") String name) {
+                                   @RequestParam("name") String name) throws Exception {
         Group group = restService.getGroup(groupId);
         group.setName(name);
         restService.updateGroup(group);

@@ -24,7 +24,7 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/admin", method = RequestMethod.GET)
-    public String adminIndex(ModelMap model) {
+    public String adminIndex(ModelMap model) throws Exception{
         model.addAttribute("usercount", restService.getUsersCount());
         model.addAttribute("groupcount", restService.getGroupsCount());
         model.addAttribute("vaultcount", restService.getVaultsCount());

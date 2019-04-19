@@ -24,7 +24,7 @@ public class AdminDepositsController {
     @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)
     public String getDepositsListing(ModelMap model,
                                      @RequestParam(value = "query", required = false) String query,
-                                     @RequestParam(value = "sort", required = false) String sort) {
+                                     @RequestParam(value = "sort", required = false) String sort) throws Exception {
         if ((query == null) || ("".equals(query))) {
             if ((sort == null) || ("".equals(sort))) {
                 model.addAttribute("deposits", restService.getDepositsListingAll());

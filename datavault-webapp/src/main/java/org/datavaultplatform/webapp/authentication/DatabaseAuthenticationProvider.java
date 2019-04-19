@@ -39,7 +39,15 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         String name = authentication.getName();
         String password = authentication.getCredentials().toString();
 
-        if (!restService.isValid(new ValidateUser(name, password))) {
+        boolean isUserValid = false;
+        try{
+            isUserValid = restService.isValid(new ValidateUser(name, password));
+        }catch(Exception e){
+            System.err.println("Error when trying to check if user is valid with Broker!");
+            e.printStackTrace();
+        }
+
+        if (!isUserValid) {
             logger.info("Invalid username or password for " + name);
             throw new BadCredentialsException("Invalid userid or password");
         }
@@ -48,7 +56,14 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
 
         List<GrantedAuthority> grantedAuths = new ArrayList<>();
 
-        if (restService.isAdmin(new ValidateUser(name, null))) {
+        boolean isAdmin = false;
+        try{
+            isAdmin = restService.isAdmin(new ValidateUser(name, null));
+        } catch(Exception e){
+            System.err.println("Error when trying to check if user is admin with Broker!");
+            e.printStackTrace();
+        }
+        if (isAdmin) {
             logger.info("Granting user " + name + " ROLE_ADMIN");
             grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         }

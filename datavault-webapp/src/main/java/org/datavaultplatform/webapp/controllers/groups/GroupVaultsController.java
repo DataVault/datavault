@@ -26,7 +26,7 @@ public class GroupVaultsController {
     }
 
     @RequestMapping(value = "/groups", method = RequestMethod.GET)
-    public String getGroupVaultsListing(ModelMap model) {
+    public String getGroupVaultsListing(ModelMap model) throws Exception {
         // Which groups is this user an owner of
         Group[] groups = restService.getGroups();
         ArrayList<Group> members = new ArrayList<>();

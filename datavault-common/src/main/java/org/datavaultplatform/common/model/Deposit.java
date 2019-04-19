@@ -325,20 +325,22 @@ public class Deposit {
         this.user = user;
     }
 
+    @JsonIgnore
     public Event getLastEvent(){
         Event lastEvent = events
                 .stream()
                 .max(Comparator.comparing(Event::getTimestamp))
-                .orElseThrow(NoSuchElementException::new);
+                .orElse(null);
         return lastEvent;
     }
 
+    @JsonIgnore
     public Event getLastNotFailedEvent(){
         Event lastEvent = events
                 .stream()
                 .filter(event-> !"org.datavaultplatform.common.event.Error".equals(event.getEventClass()))
                 .max(Comparator.comparing(Event::getTimestamp))
-                .orElseThrow(NoSuchElementException::new);
+                .orElse(null);
         return lastEvent;
     }
     

@@ -8,15 +8,17 @@
     <div id="add-data-manager" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addDataManger" aria-hidden="true">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
-                <form id="add-data-manager-form" class="form" role="form" action="addDataManager" method="post">
+                <form id="add-data-manager-form" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/addDataManager" method="post">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
                         <h4 class="modal-title" id="addDataManger">Add Data Manager</h4>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
-                            <label class="control-label">UUN:</label>
-                            <input type="text" class="form-control" name="dataManagerUUN" value=""/>
+                            <div class="ui-widget">
+                                <label class="control-label">UUN:</label>
+                                <input id="data-manager-uun" type="text" class="form-control" name="uun" value=""/>
+                            </div>
                         </div>
                     </div>
                     
@@ -73,6 +75,22 @@
         <div class="panel-body">
             <h2>Summary of Vault Metadata</h2>
             <br/>
+
+            <#if error?? >
+                <div class="alert alert-danger">
+                    <strong>Error!</strong> ${error}
+                </div>
+            </#if>
+            <#if warning?? >
+                <div class="alert alert-warning">
+                    <strong>Warning!</strong> ${warning}
+                </div>
+            </#if>
+            <#if success?? >
+                <div class="alert alert-success">
+                    ${success}
+                </div>
+            </#if>
 
             <#if deposits?has_content>
             <h4><strong>Deposit and Retrieve</strong></h4>
@@ -229,7 +247,7 @@
                         <thead></thead>
                         <tbody>
                             <tr>
-                                <td class="text-muted">User Name</td>
+                                <td class="text-muted">${vault.userName?html}</td>
                                 <td>${vault.userID?html}</td>
                                 <td>
                                     <button type="button" class="btn btn-default pull-right" disabled>
@@ -253,13 +271,11 @@
                         <tbody>
                             <#list dataManagers as dataManager>
                             <tr>
-                                <td class="text-muted">User Name</td>
-                                <td>${dataManager.getUUN()}</td>
+                                <td>${dataManager.firstname?html} ${dataManager.lastname?html}</td>
+                                <td>${dataManager.ID?html}</td>
                                 <td>
-                                    <form id="delete-data-manager-form" role="form" action="deleteDataManager" method="post">
-                                        <input type="hidden" class="form-control" name="dataManagerID" 
-                                            value="${dataManager.getID()}"/>
-                                        <input type="hidden" id="submitAction" name="action" value="submit"/>
+                                    <form id="delete-data-manager-form" role="form" action="${springMacroRequestContext.getContextPath()}/vaults/${vault.ID?html}/deleteDataManager" method="post">
+                                        <input type="hidden" class="form-control" name="uun" value="${dataManager.ID?html}"/>
                                         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                                         <button type="submit" id="delete-data-manager-btn" 
                                             class="btn btn-primary btn-ok pull-right btn-sm">Delete</button>
@@ -385,6 +401,29 @@ $(document).ready(function(){
     
     $('[data-toggle="tooltip"]').tooltip({
         'placement': 'right'
+    });
+
+    $( "#data-manager-uun" ).autocomplete({
+        autoFocus: true,
+        appendTo: "#add-data-manager",
+        minLength: 2,
+        source: function( request, response ) {
+            var term = request.term;
+
+            $.ajax( {
+                url: "${springMacroRequestContext.getContextPath()}/vaults/autocompleteuun/"+term,
+                type: 'GET',
+                dataType: "json",
+                success: function( data ) {
+                    response( data );
+                }
+            } );
+        },
+        select: function( event, ui ) {
+            var attributes = ui.item.value.split( " - " );
+            this.value = attributes[0];
+            return false;
+        }
     });
 
 });
