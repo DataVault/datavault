@@ -1,0 +1,182 @@
+version: '3'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    volumes:
+      - ./docker/rabbitmq_data:/bitnami
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: datavault
+      RABBITMQ_DEFAULT_PASS: datavault
+    networks:
+      - mqnet
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "53306:3306"
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: unbr34kable
+      MYSQL_DATABASE: datavault
+      MYSQL_USER: datavault
+      MYSQL_PASSWORD: datavault
+    networks:
+      - dbnet
+
+  maven-build:
+    image: datavault/maven-build
+    build:
+      context: .
+      dockerfile: maven.Dockerfile
+
+  workers:
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    volumes:
+      - ./docker/tmp/datavault/active:/tmp/datavault/active:rw
+      - ./docker/tmp/datavault/archive:/tmp/datavault/archive:rw
+      - ./docker/tmp/datavault/temp:/tmp/datavault/temp:rw
+      - ./docker/tmp/datavault/meta:/tmp/datavault/meta:rw
+      - ./docker/tmp/Users:/Users:rw
+      - ./docker/config:/docker_datavault-home/config/
+      - ./docker/keystore:/docker_datavault-home/keystore/
+      - ./docker/scripts:/docker_datavault-home/scripts/
+      - ./docker/.occ:/home/datavault/.occ/
+    networks:
+      - mqnet
+      - vault
+    depends_on:
+      - rabbitmq
+      - maven-build
+
+  broker:
+    build:
+      context: .
+      dockerfile: broker.Dockerfile
+    volumes:
+      - ./docker/config:/docker_datavault-home/config/
+      - ./docker/keystore:/docker_datavault-home/keystore/
+      - ./docker/scripts:/docker_datavault-home/scripts/
+    networks:
+      - webapp
+      - dbnet
+      - mqnet
+      - vault
+    depends_on:
+      - rabbitmq
+      - mysql
+      - maven-build
+
+  web:
+    build:
+      context: .
+      dockerfile: webapp.Dockerfile
+    ports:
+      - "58080:8080"
+    volumes:
+      - ./docker/config:/docker_datavault-home/config/
+      - ./docker/scripts:/docker_datavault-home/scripts/
+      - ./docker/pure:/tmp/
+    networks:
+      - webapp
+      - selenium
+    depends_on:
+      - broker
+      - maven-build
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/datavault-webapp"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  vault:
+    image: vault
+    command: server -dev
+    ports:
+      - "127.0.0.1:8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: datavault
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+    volumes:
+      - ./docker/vault/logs:/vault/logs:rw
+    cap_add:
+      - IPC_LOCK
+    networks:
+      - vault
+
+  vault-administration:
+    image: vault
+    command:
+      - /bin/sh
+      - -c
+      - |
+        while ! $$(vault status &> /dev/null); do echo "Trying to connect to vault"; sleep 2; done
+        sleep 40
+        vault login $${VAULT_DEV_ROOT_TOKEN_ID}
+        vault secrets enable -version=2 kv
+        vault kv put kv/datavault data-encryption-key=$$(echo -n '`cat /dev/urandom | head -n 128`' | base64) ssh-encryption-key=$$(echo -n '`cat /dev/urandom | head -n 128`' | base64)
+        vault kv get kv/datavault
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "datavault"
+      VAULT_ADDR: "http://vault:8200"
+    depends_on:
+      - vault
+    networks:
+      - vault
+
+  selenium:
+    image: selenium/standalone-firefox
+    networks:
+      - selenium
+    ports:
+      - "4444:4444"
+    depends_on:
+      - web
+
+  e2e:
+    image: cypress
+    build: ./e2e
+    container_name: cypress
+    depends_on:
+      - web
+    networks:
+      - webapp
+    ports:
+      - "58081:8080"
+    # note: inside e2e container, the network allows accessing
+    # "web" host under name "web"
+    # so "curl http://web" would return whatever the webserver
+    # in the "web" container is cooking
+    # see https://docs.docker.com/compose/networking/
+    environment:
+      - CYPRESS_baseUrl=http://web:8080/datavault-webapp
+    volumes:
+      - ./docker/cypress/screenshots:/app/cypress/screenshots:rw
+      - ./docker/cypress/videos:/app/cypress/videos:rw
+    command: npx cypress run
+
+#volumes:
+#  db_data:
+#  rabbitmq_data:
+
+networks:
+  webapp:
+    driver: bridge
+  dbnet:
+    driver: bridge
+  mqnet:
+    driver: bridge
+  selenium:
+    driver: bridge
+  vault:
+    driver: bridge
