@@ -12,7 +12,6 @@ import org.datavaultplatform.common.task.Task;
 import org.jsondoc.core.annotation.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -163,8 +162,6 @@ public class DepositsController {
         }
 
         archiveStores = this.addArchiveSpecificOptions(archiveStores);
-        // Get metadata content from the external provider (bypass database cache)
-        String externalMetadata = externalMetadataService.getDatasetContent(vault.getDataset().getID());
 
         System.out.println("Deposit File Path: ");
         for (DepositPath dPath : deposit.getDepositPaths()){
@@ -174,7 +171,7 @@ public class DepositsController {
         // Add the deposit object
         depositsService.addDeposit(vault, deposit, "", "");
 
-        this.runDeposit(deposit, createDeposit.getDepositPaths(), null);
+        this.runDeposit(archiveStores, deposit, createDeposit.getDepositPaths(), null);
 
         // Check the retention policy of the newly created vault
         vaultsService.checkRetentionPolicy(vault.getID());
@@ -450,15 +447,14 @@ public class DepositsController {
 
         // Get last Deposit Event
         Event lastEvent = deposit.getLastNotFailedEvent();
-
-        runDeposit(deposit, paths, lastEvent);
+        List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
+        runDeposit(archiveStores, deposit, paths, lastEvent);
 
         return deposit;
     }
 
-    private Job runDeposit(Deposit deposit, List<String> paths, Event lastEvent) throws Exception{
+    private Job runDeposit(List<ArchiveStore> archiveStores, Deposit deposit, List<String> paths, Event lastEvent) throws Exception{
         User user = deposit.getUser();
-        List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
         Vault vault = deposit.getVault();
 
         String externalMetadata = externalMetadataService.getDatasetContent(vault.getDataset().getID());
@@ -485,8 +481,6 @@ public class DepositsController {
 
                 if (!userFileStoreClasses.containsKey(storageID)) {
                     try {
-                        ObjectMapper mapper = new ObjectMapper();
-
                         FileStore userStore = null;
                         for (FileStore store : userStores) {
                             if (store.getID().equals(storageID)) {
