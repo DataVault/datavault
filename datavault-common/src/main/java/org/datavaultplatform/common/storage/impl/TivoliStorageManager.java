@@ -110,13 +110,14 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 	            logger.info("Retrieval of " + working.getName() + " failed. Retrying in " + this.retryTime + " mins");
 	            TimeUnit.MINUTES.sleep(this.retryTime);
 	            
+	        } else {
+		        // FILL IN THE REST OF PROGRESS x dirs, x files, x bytes etc.
+		        if (Files.exists(Paths.get(filePath))) {
+		        	Files.move(Paths.get(filePath), Paths.get(working.getAbsolutePath()), StandardCopyOption.REPLACE_EXISTING);
+		        }
+		        Files.delete(Paths.get(fileDir));
+		        break;
 	        }
-	        // FILL IN THE REST OF PROGRESS x dirs, x files, x bytes etc.
-	        if (Files.exists(Paths.get(filePath))) {
-	        	Files.move(Paths.get(filePath), Paths.get(working.getAbsolutePath()), StandardCopyOption.REPLACE_EXISTING);
-	        }
-	        Files.delete(Paths.get(fileDir));
-	        break;
     	}
     }
     
@@ -182,8 +183,9 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 	            //throw new Exception("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
 	            logger.info("Deposit of " + working.getName() + " using " + optFilePath + " failed.  Retrying in " + this.retryTime + " mins");
 	            TimeUnit.MINUTES.sleep(this.retryTime);
+	        } else {
+	        	break;
 	        }
-	        break;
         }
 
         return description;

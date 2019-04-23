@@ -132,6 +132,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 				// if the object already exists we must be attempting to restart a job
 				// so just ignore exception and carry on
 				logger.info("Uploaded previously: skipping.");
+				break;
 			} catch (ClientException ce) {
 				logger.error("Upload failed. " + ce.getMessage());
 				//throw ce;
