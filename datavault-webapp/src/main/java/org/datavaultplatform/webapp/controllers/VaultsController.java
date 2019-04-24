@@ -36,6 +36,7 @@ public class VaultsController {
     private LDAPService ldapService;
     private String system;
     private String link;
+    private String welcome;
 
     public void setSystem(String system) throws Exception {
         this.system = system;
@@ -48,6 +49,10 @@ public class VaultsController {
         this.restService = restService;
     }
 
+    public void setWelcome(String welcome) {
+        this.welcome = welcome;
+    }
+  
     public void setLDAPService(LDAPService ldapService) {
         this.ldapService = ldapService;
     }
@@ -70,6 +75,8 @@ public class VaultsController {
         
         model.put("system", system);
         model.put("link", link);
+
+        model.addAttribute("welcome", welcome);
 
         return "vaults/index";
     }
