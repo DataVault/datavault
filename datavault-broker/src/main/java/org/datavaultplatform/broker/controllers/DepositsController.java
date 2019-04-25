@@ -448,6 +448,7 @@ public class DepositsController {
         // Get last Deposit Event
         Event lastEvent = deposit.getLastNotFailedEvent();
         List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
+        archiveStores = this.addArchiveSpecificOptions(archiveStores);
         runDeposit(archiveStores, deposit, paths, lastEvent);
 
         return deposit;
