@@ -133,7 +133,9 @@
 <script>
 
     var localFrm = $('#add-archivestoreLocal-form');
-    localFrm.submit(function (ev) {
+    localFrm.on('submit', function(event) {
+        event.preventDefault();
+
         $.ajax({
             method: "POST",
             url: '${springMacroRequestContext.getContextPath()}/admin/archivestores/local',
@@ -145,8 +147,6 @@
                 alert("Error - unable to add new archivestore:\n" + thrownError);
             }
         });
-
-        ev.preventDefault();
     });
 
     // Handle properties update
@@ -174,7 +174,9 @@
 
     });
 
-    $("button#remove").click(function(){
+    $("button#remove").click(function(event){
+        event.preventDefault();
+
         var archivestoreId = $(this).data('archivestoreId');
         $.ajax({
             method: "DELETE",
@@ -186,8 +188,6 @@
                 alert('Error: unable to delete archivestore');
             }
         });
-
-        ev.preventDefault();
     });
 
     // Handle enable/disable retrieval

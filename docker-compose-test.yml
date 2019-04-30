@@ -67,6 +67,7 @@ services:
       - ./docker/config:/docker_datavault-home/config/
       - ./docker/keystore:/docker_datavault-home/keystore/
       - ./docker/scripts:/docker_datavault-home/scripts/
+      - ./docker/tmp/Users:/Users:rw
     networks:
       - webapp
       - dbnet

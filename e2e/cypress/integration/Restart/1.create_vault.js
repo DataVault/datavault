@@ -1,5 +1,3 @@
-
-
 describe('Vault page', function(){
     beforeEach(function() {
         cy.visit('/')
