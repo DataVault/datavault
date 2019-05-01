@@ -34,6 +34,7 @@ describe('Retrieve Page', function(){
         cy.get('a:contains("Deposit Test")').last().click()
 
         // Click on Retrieve button
+        cy.contains('#retrievebtn').should('be.visible')
         cy.get('#retrievebtn').click()
 
         cy.get('input[name="hasExternalRecipients"][value="false"]').click()
@@ -45,6 +46,8 @@ describe('Retrieve Page', function(){
         cy.get('.fancytree-node .fancytree-title:contains("dir")').first().click()
 
         cy.get('.btn-primary[value="submit"]').click()
+
+        // cy.get('').click()
     })
 
 })
