@@ -100,6 +100,7 @@
         <property name="depositsService" ref="depositsService" />
         <property name="retrievesService" ref="retrievesService" />
         <property name="eventService" ref="eventService" />
+        <property name="usersService" ref="usersService" />
     </bean>
 
     <bean id="retentionPoliciesController" class="org.datavaultplatform.broker.controllers.RetentionPoliciesController">

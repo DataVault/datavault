@@ -1,10 +1,9 @@
 package org.datavaultplatform.broker.controllers.admin;
 
-import org.datavaultplatform.broker.services.DepositsService;
-import org.datavaultplatform.broker.services.RetrievesService;
-import org.datavaultplatform.broker.services.VaultsService;
+import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Retrieve;
+import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.response.DepositInfo;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.datavaultplatform.broker.services.EventService;
 
 /**
  * Created by Robin Taylor on 08/03/2016.
@@ -29,6 +27,7 @@ import org.datavaultplatform.broker.services.EventService;
 public class AdminController {
 
     private VaultsService vaultsService;
+    private UsersService usersService;
     private DepositsService depositsService;
     private RetrievesService retrievesService;
     private EventService eventService;
@@ -49,13 +48,28 @@ public class AdminController {
         this.eventService = eventService;
     }
 
+    public void setUsersService(UsersService usersService) {
+        this.usersService = usersService;
+    }
+
     @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)
     public List<DepositInfo> getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
                                             @RequestParam(value = "sort", required = false) String sort) throws Exception {
 
         List<DepositInfo> depositResponses = new ArrayList<>();
         for (Deposit deposit : depositsService.getDeposits(sort)) {
-            depositResponses.add(deposit.convertToResponse());
+            DepositInfo depositInfo = deposit.convertToResponse();
+            User depositor = usersService.getUser(depositInfo.getUserID());
+            depositInfo.setUserName(depositor.getFirstname() + " " + depositor.getLastname());
+            Vault vault = vaultsService.getVault(depositInfo.getVaultID());
+            depositInfo.setVaultName(vault.getName());
+            User vaultOwner = vault.getUser();
+            depositInfo.setVaultOwnerID(vaultOwner.getID());
+            depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+            depositInfo.setDatasetID(vault.getDataset().getID());
+            depositInfo.setGroupName(vault.getGroup().getName());
+            depositInfo.setVaultReviewDate(vault.getReviewDate().toString());
+            depositResponses.add(depositInfo);
         }
         return depositResponses;
     }

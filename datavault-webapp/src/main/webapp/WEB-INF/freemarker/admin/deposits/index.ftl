@@ -24,33 +24,43 @@
             <table class="table table-striped">
                 <thead>
                 <tr class="tr">
-                    <th>Vault ID</th>
-                    <th>Deposit ID</th>
-                    <th><a href="?sort=note&query=${query?url}">Deposit Name</a></th>
-                    <th><a href="?sort=note&query=${query?url}">Description</a></th>
-                    <th><a href="?sort=status&query=${query?url}">Status</a></th>
+                    <th>Deposit Name</th>
                     <th><a href="?sort=depositSize&query=${query?url}">Size</a></th>
                     <th><a href="?sort=creationTime&query=${query?url}">Date deposited</a></th>
-                    <th><a href="?sort=creationTime&query=${query?url}">Actions</a></th>
+                    <th><a href="?sort=status&query=${query?url}">Status</a></th>
+                    <th>Depositor</th>
+                    <th>Vault Name</th>
+                    <th>Pure Record ID</th>
+                    <th>School</th>
+                    <th>Deposit ID</th>
+                    <th>Vault ID</th>
+                    <th>Vault Owner</th>
+                    <th>Vault Review Date</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
 
                 <tbody>
                     <#list deposits as deposit>
                     <tr class="tr">
-                        <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}">${deposit.vaultID?html}</a></td>
-                        <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}/deposits/${deposit.getID()?html}">${deposit.getID()?html}</a></td>
                         <td>${deposit.name?html}</td>
-                        <td>${deposit.description?html}</td>
-                        <td>${deposit.status}</td>
                         <td>${deposit.getSizeStr()}</td>
                         <td>${deposit.getCreationTime()?datetime}</td>
+                        <td>${deposit.status}</td>
+                        <td>${deposit.userName} (${deposit.userID})</td>
+                        <td>${deposit.vaultName}</td>
+                        <td>${deposit.datasetID}</td>
+                        <td>${deposit.groupName}</td>
+                        <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}/deposits/${deposit.getID()?html}">${deposit.getID()?html}</a></td>
+                        <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}">${deposit.vaultID?html}</a></td>
+                        <td>${deposit.vaultOwnerName} (${deposit.vaultOwnerID})</td>
+                        <td>${deposit.vaultReviewDate}</td>
                         <td>
                             <#if deposit.status == "FAILED">
-                            <a class="restart-deposit-btn btn btn-default btn-sm"
-                               href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}/deposits/${deposit.getID()?html}/restart">
-                                Restart
-                            </a>
+                                <a class="restart-deposit-btn btn btn-default btn-sm"
+                                   href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}/deposits/${deposit.getID()?html}/restart">
+                                    Restart
+                                </a>
                             </#if>
                         </td>
                     </tr>
