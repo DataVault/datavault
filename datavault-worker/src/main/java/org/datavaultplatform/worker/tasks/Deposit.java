@@ -97,6 +97,7 @@ public class Deposit extends Task {
         Path bagDataPath = bagPath.resolve("data");
         File bagDir = this.createDir(bagPath);
         this.createDir(bagDataPath);
+
         this.copySelectedUserDataToBagDir(bagDataPath);
         
         try {
@@ -322,12 +323,14 @@ public class Deposit extends Task {
             }
             
             if (((Device)archiveStore).hasMultipleCopies()) {
+                boolean firstArchiveStore = true;
                 for (String loc : ((Device)archiveStore).getLocations()) {
-                    this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, loc, true, ivs, null, encChunksHash);
+                    this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, loc, true, ivs, null, encChunksHash, firstArchiveStore);
+                    firstArchiveStore = false;
                 }
             } else {   
             	if (archiveStore.getVerifyMethod() != Verify.Method.CLOUD) {
-            		this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, ivs, null, encChunksHash);
+            		this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, ivs, null, encChunksHash, true);
             	} else {
             		this.doArchive();
             	}
@@ -340,13 +343,13 @@ public class Deposit extends Task {
     }
     
     private void doArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, ArchiveStore archiveStore, 
-            String archiveId, HashMap<Integer, byte[]> ivs, String encTarHash, String[] encChunksHash) throws Exception {
-        this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, null,  false, ivs, encTarHash, encChunksHash);
+            String archiveId, HashMap<Integer, byte[]> ivs, String encTarHash, String[] encChunksHash, boolean doVerification) throws Exception {
+        this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, null,  false, ivs, encTarHash, encChunksHash, doVerification);
     }
     
     private void doArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, ArchiveStore archiveStore, 
             String archiveId, String location, boolean multipleCopies, HashMap<Integer, byte[]> ivs, 
-            String encTarHash, String[] encChunksHash) throws Exception {
+            String encTarHash, String[] encChunksHash, boolean doVerification) throws Exception {
         
         for (int i = 0; i < chunkFiles.length; i++) {
             File chunkFile = chunkFiles[i];
@@ -365,24 +368,28 @@ public class Deposit extends Task {
 
             // Decryption
             if(ivs != null) {
-                //String encChunkHash = encChunksHash[i];
-                
-                // Check hash of encrypted file
-                //logger.debug("Verifying encrypted chunk file: "+chunkFile.getAbsolutePath());
-                //verifyChunkFile(context.getTempDir(), chunkFile, encChunkHash);
-                
-                // TODO: get aesKey from secure place
-                Encryption.decryptFile(context, chunkFile, ivs.get(i+1));
+
+                if(doVerification) {
+                    Encryption.decryptFile(context, chunkFile, ivs.get(i + 1));
+                } else {
+                    String encChunkHash = encChunksHash[i];
+
+                    // Check hash of encrypted file
+                    logger.debug("Verifying encrypted chunk file: "+chunkFile.getAbsolutePath());
+                    verifyChunkFile(context.getTempDir(), chunkFile, encChunkHash);
+                }
             }
                 
             //logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
             //verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
         }
-        
-        FileSplitter.recomposeFile(chunkFiles, tarFile);
 
-        // Verify the contents
-        verifyTarFile(context.getTempDir(), tarFile, tarHash);
+        if(doVerification) {
+            FileSplitter.recomposeFile(chunkFiles, tarFile);
+
+            // Verify the contents
+            verifyTarFile(context.getTempDir(), tarFile, tarHash);
+        }
     }
     
     /**
