@@ -368,14 +368,15 @@ public class Deposit extends Task {
 
             // Decryption
             if(ivs != null) {
-                String encChunkHash = encChunksHash[i];
-                
-                // Check hash of encrypted file
-                //logger.debug("Verifying encrypted chunk file: "+chunkFile.getAbsolutePath());
-                verifyChunkFile(context.getTempDir(), chunkFile, encChunkHash);
 
                 if(doVerification) {
                     Encryption.decryptFile(context, chunkFile, ivs.get(i + 1));
+                } else {
+                    String encChunkHash = encChunksHash[i];
+
+                    // Check hash of encrypted file
+                    logger.debug("Verifying encrypted chunk file: "+chunkFile.getAbsolutePath());
+                    verifyChunkFile(context.getTempDir(), chunkFile, encChunkHash);
                 }
             }
                 
