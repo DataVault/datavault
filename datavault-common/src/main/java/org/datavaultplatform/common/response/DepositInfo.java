@@ -49,8 +49,11 @@ public class DepositInfo {
     @ApiObjectField(description = "Filepath of the origin deposit")
     private String filePath;
     
-    @ApiObjectField(description = "Vault where this deposit was carried out")
+    @ApiObjectField(description = "Vault ID where this deposit was carried out")
     private String vaultID;
+
+    @ApiObjectField(description = "Vault Name where this deposit was carried out")
+    private String vaultName;
     
     // Size of the deposit (in bytes)
     @ApiObjectField(description = "Size of the depoit (in bytes)")
@@ -62,11 +65,32 @@ public class DepositInfo {
     @ApiObjectField(description = "Deposit chunks")
     private List<DepositChunk> depositChunks;
 
-    @ApiObjectField(description = "The user who did this deposit")
+    @ApiObjectField(description = "The user UUN who did this deposit")
     private String userID;
+
+    @ApiObjectField(description = "The user name who did this deposit")
+    private String userName;
+
+    @ApiObjectField(description = "The vault owner UUN")
+    private String vaultOwnerID;
+
+    @ApiObjectField(description = "The vault owner name")
+    private String vaultOwnerName;
+
+    @ApiObjectField(description = "The Vault Dataset ID i.e. Pure Record ID")
+    private String datasetID;
+
+    @ApiObjectField(description = "The Vault Group Name i.e. School")
+    private String groupName;
+
+    @ApiObjectField(description = "The Vault Group Name i.e. School")
+    private String vaultReviewDate;
     
     public DepositInfo() {}
-    public DepositInfo(String id, String userID, Date creationTime, Deposit.Status status, String name, String description, boolean hasPersonalData, String personalDataStatement, String fileOrigin, String shortFilePath, String filePath, long depositSize, String vaultID, List<DepositPath> depositPaths, List<DepositChunk> depositChunks) {
+    public DepositInfo(String id, String userID, Date creationTime, Deposit.Status status, String name,
+                       String description, boolean hasPersonalData, String personalDataStatement, String fileOrigin,
+                       String shortFilePath, String filePath, long depositSize, String vaultID,
+                       List<DepositPath> depositPaths, List<DepositChunk> depositChunks) {
         this.id = id;
         this.userID = userID;
         this.creationTime = creationTime;
@@ -204,5 +228,61 @@ public class DepositInfo {
 
     public void setDepositChunks(List<DepositChunk> depositChunks) {
         this.depositChunks = depositChunks;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getVaultName() {
+        return vaultName;
+    }
+
+    public void setVaultName(String vaultName) {
+        this.vaultName = vaultName;
+    }
+
+    public String getVaultOwnerID() {
+        return vaultOwnerID;
+    }
+
+    public void setVaultOwnerID(String vaultOwnerID) {
+        this.vaultOwnerID = vaultOwnerID;
+    }
+
+    public String getVaultOwnerName() {
+        return vaultOwnerName;
+    }
+
+    public void setVaultOwnerName(String vaultOwnerName) {
+        this.vaultOwnerName = vaultOwnerName;
+    }
+
+    public String getDatasetID() {
+        return datasetID;
+    }
+
+    public void setDatasetID(String datasetId) {
+        this.datasetID = datasetId;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    public void setVaultReviewDate(String vaultReviewDate) {
+        this.vaultReviewDate = vaultReviewDate;
+    }
+
+    public String getVaultReviewDate() {
+        return vaultReviewDate;
     }
 }
