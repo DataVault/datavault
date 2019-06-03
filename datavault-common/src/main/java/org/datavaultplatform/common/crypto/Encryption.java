@@ -39,6 +39,8 @@ public class Encryption {
     public static int SMALL_BUFFER_SIZE = 1024; // 1KB
     public static int AES_BLOCK_SIZE = 16; // 16 Bytes
 
+    private static int encBufferSize = SMALL_BUFFER_SIZE;
+
     public static int AES_KEY_SIZE = 256;
     public static int IV_SIZE = 96;
     public static int IV_CBC_SIZE = 16;
@@ -195,7 +197,7 @@ public class Encryption {
      * @throws Exception
      */
     public static void doByteBufferFileCrypto(File inputFile, File outputFile, Cipher cipher) throws Exception {
-        byte[] plainBuf = new byte[SMALL_BUFFER_SIZE];
+        byte[] plainBuf = new byte[encBufferSize];
         try (InputStream in = Files.newInputStream(inputFile.toPath());
                 OutputStream out = Files.newOutputStream(outputFile.toPath())) {
             int nread;
@@ -215,7 +217,7 @@ public class Encryption {
         FileOutputStream fos = new FileOutputStream(outputFile);
         CipherOutputStream cos = new CipherOutputStream(fos, cipher);
 
-        byte[] buffer = new byte[BUFFER_SIZE];
+        byte[] buffer = new byte[encBufferSize];
         int count;
         while ((count = fis.read(buffer)) > 0)
         {
@@ -447,6 +449,10 @@ public class Encryption {
     public static String getVaultAddress() {
         return vaultAddress;
     }
+
+    public static int getEncBufferSize() { return encBufferSize; }
+
+    public void setEncBufferSize(int encBufferSize) { Encryption.encBufferSize = encBufferSize; }
 
     public void setVaultAddress(String vaultAddress) {
         Encryption.vaultAddress = vaultAddress;

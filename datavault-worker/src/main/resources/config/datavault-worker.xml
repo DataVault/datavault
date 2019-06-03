@@ -48,6 +48,7 @@
     <!-- Encryption and Harshicorp Vault -->
 
     <bean id="encryption" class="org.datavaultplatform.common.crypto.Encryption">
+        <property name="encBufferSize" value="${encryption.bufferSizeInByte}"/>
         <property name="vaultEnable" value="${vault.enable}"/>
         <property name="vaultAddress" value="${vault.address}"/>
         <property name="vaultToken" value="${vault.token}"/>
