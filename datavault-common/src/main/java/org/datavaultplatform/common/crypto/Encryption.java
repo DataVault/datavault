@@ -452,7 +452,10 @@ public class Encryption {
 
     public static int getEncBufferSize() { return encBufferSize; }
 
-    public void setEncBufferSize(int encBufferSize) { Encryption.encBufferSize = encBufferSize; }
+    public void setEncBufferSize(String encBufferSize) {
+        int bytes = Math.toIntExact(org.datavaultplatform.common.io.FileUtils.parseFormattedSizeToBytes(encBufferSize));
+        Encryption.encBufferSize = bytes;
+    }
 
     public void setVaultAddress(String vaultAddress) {
         Encryption.vaultAddress = vaultAddress;
