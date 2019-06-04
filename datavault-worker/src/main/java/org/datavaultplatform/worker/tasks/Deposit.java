@@ -575,7 +575,6 @@ public class Deposit extends Task {
 		// Calculate the total deposit size of selected files
 		long depositTotalSize = 0;
 		for (String filePath : fileStorePaths) {
-
 			String storageID = filePath.substring(0, filePath.indexOf('/'));
 			String storagePath = filePath.substring(filePath.indexOf('/') + 1);
 
@@ -591,27 +590,32 @@ public class Deposit extends Task {
 
 		}
 		
-		depositTotalSize += this.calculateUserUploads(depositTotalSize, context);
+//		depositTotalSize += this.calculateUserUploads(depositTotalSize, context);
+
 		// Store the calculated deposit size
         eventStream.send(new ComputedSize(jobID, depositId, depositTotalSize)
             .withUserId(userID));
 	}
-	
-	private long calculateUserUploads(long depositSize, Context context) {
-		// Add size of any user uploads
-        try {
-            for (String path : fileUploadPaths) {
-                depositSize += getUserUploadsSize(context.getTempDir(), userID, path);
-            }
-        } catch (Exception e) {
-            String msg = "Deposit failed: could not access user uploads";
-            logger.error(msg, e);
-            eventStream.send(new Error(jobID, depositId, msg).withUserId(userID));
-            throw new RuntimeException(e);
-        }
-        
-        return depositSize;
-	}
+
+	// TO REMOVE
+	// wpetit: I'm commenting this out as I don't think we want to keep it.
+    // It seems to be necessary when we still had the "Browse" button on the Deposit page
+    // But we removed the button and now is cause the Deposit size to be doubled
+//	private long calculateUserUploads(long depositSize, Context context) {
+//		// Add size of any user uploads
+//        try {
+//            for (String path : fileUploadPaths) {
+//                depositSize += getUserUploadsSize(context.getTempDir(), userID, path);
+//            }
+//        } catch (Exception e) {
+//            String msg = "Deposit failed: could not access user uploads";
+//            logger.error(msg, e);
+//            eventStream.send(new Error(jobID, depositId, msg).withUserId(userID));
+//            throw new RuntimeException(e);
+//        }
+//
+//        return depositSize;
+//	}
 	
 	private HashMap<String, UserStore> setupUserFileStores() {
 		userStores = new HashMap<String, UserStore>();
