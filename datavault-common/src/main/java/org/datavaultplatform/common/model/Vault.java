@@ -1,31 +1,29 @@
 package org.datavaultplatform.common.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.FetchType;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Version;
 
-import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.hibernate.annotations.GenericGenerator;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Date;
-import javax.persistence.ManyToOne;
-import javax.persistence.OrderBy;
-import javax.persistence.Version;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * User: Tom Higgins
@@ -38,6 +36,7 @@ import javax.persistence.Version;
 @Table(name="Vaults")
 public class Vault {
 
+	private static final long ZERO = 0l;
     // Vault Identifier
     @Id
     @GeneratedValue(generator = "uuid")
@@ -170,7 +169,7 @@ public class Vault {
     public long getSize() { return vaultSize; }
     
     public List<Deposit> getDeposits() {
-        if (deposits == null) return new ArrayList();
+        if (deposits == null) return new ArrayList<Deposit>();
         return deposits;
     }
     
@@ -179,7 +178,7 @@ public class Vault {
     }
 
     public List<DataManager> getDataManagers() {
-        if (dataManagers == null) return new ArrayList();
+        if (dataManagers == null) return new ArrayList<DataManager>();
         return dataManagers;
     }
 
@@ -251,7 +250,8 @@ public class Vault {
                 retentionPolicyExpiry,
                 retentionPolicyLastChecked,
                 grantEndDate,
-                reviewDate);
+                reviewDate,
+                deposits != null? deposits.size() : ZERO);
     }
     
     @Override

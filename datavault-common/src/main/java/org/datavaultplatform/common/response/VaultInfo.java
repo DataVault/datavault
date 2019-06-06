@@ -66,9 +66,12 @@ public class VaultInfo {
     @ApiObjectField(description = "The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage")
     private Date reviewDate;
     
+    @ApiObjectField(description = "Number of Deposits in a vault")
+    private long numberOfDeposits;
+    
     public VaultInfo() { }
 
-    public VaultInfo(String id, String userID, String userName, String datasetID, String datasetName, Date creationTime, String name, String description, String policyID, String groupID, long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked, Date grantEndDate, Date reviewDate) {
+    public VaultInfo(String id, String userID, String userName, String datasetID, String datasetName, Date creationTime, String name, String description, String policyID, String groupID, long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked, Date grantEndDate, Date reviewDate, long numberOfDeposits) {
         this.id = id;
         this.userID = userID;
         this.userName = userName;
@@ -85,6 +88,7 @@ public class VaultInfo {
         this.policyLastChecked = policyLastChecked;
         this.grantEndDate = grantEndDate;
         this.reviewDate = reviewDate;
+        this.numberOfDeposits = numberOfDeposits;
     }
 
     public String getID() {
@@ -235,4 +239,12 @@ public class VaultInfo {
     public void setReviewDate(Date reviewDate) {
         this.reviewDate = reviewDate;
     }
+
+	public long getNumberOfDeposits() {
+		return numberOfDeposits;
+	}
+
+	public void setNumberOfDeposits(long numberOfDeposits) {
+		this.numberOfDeposits = numberOfDeposits;
+	}
 }
