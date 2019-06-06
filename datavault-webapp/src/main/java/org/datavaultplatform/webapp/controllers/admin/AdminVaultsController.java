@@ -32,6 +32,12 @@ public class AdminVaultsController {
     public void setRestService(RestService restService) {
         this.restService = restService;
     }
+    
+    @RequestMapping(value = "/vaults/redirect", method = RequestMethod.GET)
+    public String getVaultsCreateScreen() throws Exception {
+       
+        return "/vaults/index";
+    }
 
     @RequestMapping(value = "/admin/vaults", method = RequestMethod.GET)
     public String searchVaults(ModelMap model,
@@ -58,6 +64,7 @@ public class AdminVaultsController {
         model.addAttribute("ordername", "asc");
         model.addAttribute("orderdescription", "asc");
         model.addAttribute("orderuser", "asc");
+        model.addAttribute("numberOfDeposits", "asc");
         model.addAttribute("ordervaultsize", "asc");
         model.addAttribute("orderpolicy", "asc");
         model.addAttribute("ordercreationtime", "asc");
