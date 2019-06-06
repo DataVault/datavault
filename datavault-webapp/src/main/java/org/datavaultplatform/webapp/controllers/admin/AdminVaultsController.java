@@ -62,6 +62,8 @@ public class AdminVaultsController {
         model.addAttribute("sort", sort);
         model.addAttribute("orderid", "asc");
         model.addAttribute("ordername", "asc");
+        model.addAttribute("ordergroupID", "asc");
+        model.addAttribute("orderreviewDate", "asc");
         model.addAttribute("orderdescription", "asc");
         model.addAttribute("orderuser", "asc");
         model.addAttribute("numberOfDeposits", "asc");
@@ -71,6 +73,8 @@ public class AdminVaultsController {
         if ("asc".equals(order)) {
             if ("id".equals(sort)) model.addAttribute("orderid", "dec");
             if ("name".equals(sort)) model.addAttribute("ordername", "dec");
+            if ("groupID".equals(sort)) model.addAttribute("ordergroupID", "dec");
+            if ("reviewDate".equals(sort)) model.addAttribute("orderreviewDate", "dec");
             if ("description".equals(sort)) model.addAttribute("orderdescription", "dec");
             if ("user".equals(sort)) model.addAttribute("orderuser", "dec");
             if ("vaultSize".equals(sort)) model.addAttribute("ordervaultsize", "dec");
