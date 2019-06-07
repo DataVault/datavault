@@ -22,13 +22,14 @@
         </div>
     </form>
     
+    <div align="right">
         <form id="search-vaults" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/vaults/csv" method="get">
             <div class="input-group" align="right">
                 <input type="text" class="form-control hidden" value="${query}" name="query" placeholder="Search for...">
                 <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Download CSV File</button>
             </div>
         </form>
-
+</div>
     <#if vaults?has_content>
 
         <div class="table-responsive">
