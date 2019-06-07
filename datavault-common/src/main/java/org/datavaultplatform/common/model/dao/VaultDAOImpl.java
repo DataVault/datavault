@@ -144,9 +144,9 @@ public class VaultDAOImpl implements VaultDAO {
             }
         } else if ("vaultSize".equals(sort)) {
             if (asc) {
-                criteria.addOrder(Order.asc("description"));
+                criteria.addOrder(Order.asc("vaultSize"));
             } else {
-                criteria.addOrder(Order.desc("description"));
+                criteria.addOrder(Order.desc("vaultSize"));
             }
         } else if ("user".equals(sort)) {
             if (asc) {
@@ -159,6 +159,19 @@ public class VaultDAOImpl implements VaultDAO {
                 criteria.addOrder(Order.asc("policy"));
             } else {
                 criteria.addOrder(Order.desc("policy"));
+            }
+        } else if ("groupID".equals(sort)) {
+        	criteria.createAlias("group", "g");
+            if (asc) {
+                criteria.addOrder(Order.asc("g.id"));
+            } else {
+                criteria.addOrder(Order.desc("g.id"));
+            }
+        } else if ("reviewDate".equals(sort)) {
+            if (asc) {
+                criteria.addOrder(Order.asc("reviewDate"));
+            } else {
+                criteria.addOrder(Order.desc("reviewDate"));
             }
         } else {
             if (asc) {

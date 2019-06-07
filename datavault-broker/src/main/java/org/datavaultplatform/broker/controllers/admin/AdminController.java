@@ -98,13 +98,12 @@ public class AdminController {
     @RequestMapping(value = "/admin/vaults", method = RequestMethod.GET)
     public List<VaultInfo> getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
                                         @RequestParam(value = "sort", required = false)
-                                        @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime"}, defaultvalue = "creationTime", required = false) String sort,
+                                        @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime", "groupID", "reviewDate"}, defaultvalue = "creationTime", required = false) String sort,
                                         @RequestParam(value = "order", required = false)
                                         @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order) throws Exception {
 
         if (sort == null) sort = "";
         if (order == null) order = "asc";
-
         List<VaultInfo> vaultResponses = new ArrayList<>();
         for (Vault vault : vaultsService.getVaults(sort, order)) {
             vaultResponses.add(vault.convertToResponse());
