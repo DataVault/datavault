@@ -3,6 +3,24 @@
 <#global nav="admin">
 <@layout.vaultLayout>
 
+<div class="modal fade" id="confirm-removal" tabindex="-1" role="dialog" aria-labelledby="confirmRemovalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="confirmRemovalLabel">Confirm removal of Vault</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to remove ,Vaults should normally not be deleted, only in special circumstances.<b class="remove-archivestore"></b>?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger btn-ok" id="remove">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container">
 
     <ol class="breadcrumb">
@@ -44,7 +62,7 @@
                        <th><a href="?sort=groupID&order=${ordergroupID}&query=${query?url}">School<#if sort == "groupID"><#if ordergroupID == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                        <th><a href="?sort=reviewDate&order=${orderreviewDate}&query=${query?url}">Review Date<#if sort == "reviewDate"><#if orderreviewDate == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>                     
                         <th><a href="?sort=creationTime&order=${ordercreationtime}&query=${query?url}">Date created<#if sort == "creationTime"><#if ordercreationtime == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
-                        
+                        <th>Actions</th>
                     </tr>
                 </thead>
 
@@ -61,7 +79,11 @@
                             <td>${vault.groupID?html}</td>
                             <td>${vault.reviewDate?string('dd/MM/yyyy')}</td>
                             <td>${vault.getCreationTime()?datetime}</td>
-                            
+                            <td>
+                            <a class="btn btn-xs btn-danger pull-right" href="#"  data-toggle="modal" data-target="#confirm-removal">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
+                          </a>
+                            </td>
                         </tr>
                     </#list>
                 </tbody>
