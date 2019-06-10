@@ -160,7 +160,6 @@ public class AdminVaultsController {
     @RequestMapping(value = "/admin/vaults/{vaultId}", method = RequestMethod.DELETE)
     @ResponseBody
     public void deleteVault(ModelMap model, @PathVariable("vaultId") String vaultId) throws Exception {
-    	System.out.println("Deleting vault ID :" +vaultId);
         restService.deleteVault(vaultId);
     }
 }
