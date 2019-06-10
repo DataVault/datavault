@@ -28,7 +28,7 @@
         <li class="active"><b>Vaults</b></li>
     </ol>
     
-    <a href="${springMacroRequestContext.getContextPath()}/vaults/redirect">+Add New Vault</a><br>
+    <a href="${springMacroRequestContext.getContextPath()}/vaults">+Add New Vault</a>
     
 
     <form id="search-vaults" class="form" role="form" action="" method="get">

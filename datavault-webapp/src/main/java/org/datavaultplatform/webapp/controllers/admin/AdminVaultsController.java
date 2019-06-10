@@ -35,8 +35,9 @@ public class AdminVaultsController {
     
     @RequestMapping(value = "/vaults/redirect", method = RequestMethod.GET)
     public String getVaultsCreateScreen() throws Exception {
+    	System.out.println("Came Inside....................................................");
        
-        return "/vaults/index";
+        return "/vaults";
     }
 
     @RequestMapping(value = "/admin/vaults", method = RequestMethod.GET)
@@ -52,6 +53,8 @@ public class AdminVaultsController {
         if ((query == null) || ("".equals(query))) {
             model.addAttribute("vaults", restService.getVaultsListingAll(theSort, theOrder));
             model.addAttribute("query", "");
+           // System.out.println("vault........................................................."+restService.getVaultsListingAll(theSort, theOrder));
+
         } else {
             model.addAttribute("vaults", restService.searchVaults(query, theSort, theOrder));
             model.addAttribute("query", query);
@@ -137,10 +140,11 @@ public class AdminVaultsController {
         VaultInfo vault = restService.getVault(vaultID);
 
         model.addAttribute("vault", vault);
-
+       
         model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
         model.addAttribute(restService.getGroup(vault.getGroupID()));
         model.addAttribute("deposits", restService.getDepositsListing(vaultID));
+        
 
         return "admin/vaults/vault";
     }
