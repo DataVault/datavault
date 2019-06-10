@@ -89,5 +89,9 @@ public class VaultsService {
 
         return vault;
     }
+    
+    public void deleteVault(String vaultId) {
+        vaultDAO.deleteById(vaultId);
+    }
 }
 

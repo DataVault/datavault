@@ -11,7 +11,7 @@
                 <h4 class="modal-title" id="confirmRemovalLabel">Confirm removal of Vault</h4>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to remove ,Vaults should normally not be deleted, only in special circumstances.<b class="remove-archivestore"></b></p>
+                <p>Are you sure you want to remove ,Vaults should normally not be deleted, only in special circumstances.<b class="remove-vault"></b></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -62,7 +62,7 @@
                        <th><a href="?sort=groupID&order=${ordergroupID}&query=${query?url}">School<#if sort == "groupID"><#if ordergroupID == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                        <th><a href="?sort=reviewDate&order=${orderreviewDate}&query=${query?url}">Review Date<#if sort == "reviewDate"><#if orderreviewDate == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>                     
                         <th><a href="?sort=creationTime&order=${ordercreationtime}&query=${query?url}">Date created<#if sort == "creationTime"><#if ordercreationtime == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
-                        <th>Actions</th>
+                        <th style="display:none">Actions</th>
                     </tr>
                 </thead>
 
@@ -79,8 +79,9 @@
                             <td>${vault.groupID?html}</td>
                             <td>${vault.reviewDate?string('dd/MM/yyyy')}</td>
                             <td>${vault.getCreationTime()?datetime}</td>
-                            <td>
-                            <a class="btn btn-xs btn-danger pull-left" href="#"  data-toggle="modal" data-target="#confirm-removal">
+                            <td style="display:none">
+                            <!-- TODO : Hiding the remove button unless the functionality is clear as to what it should do - Soft/Hard delete -->
+                            <a class="btn btn-xs btn-danger pull-left" href="#" data-vault="${vault.ID}" data-toggle="modal" data-target="#confirm-removal">
                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                           </a>
                             </td>
@@ -93,4 +94,39 @@
     </#if>
 
 </div>
+<script>
+
+//Bind properties to the user removal confirmation dialog
+$('#confirm-removal').on('show.bs.modal', function(e) {
+    var data = $(e.relatedTarget).data();
+    $('.remove-vault', this).text(data.vault);
+    $('#remove', this).data('vaultId', data.vault);
+
+});
+
+$("button#remove").click(function(){
+    var vaultId = $(this).data('vaultId');
+    $.ajax({
+        url: '${springMacroRequestContext.getContextPath()}/admin/vaults/' + vaultId,
+        type: 'DELETE',
+        success: function (data) {
+        	console.log("----success---");
+            location.reload(true);
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            alert('Error: unable to delete vault');
+        }
+    });
+});
+
+//Add Spring Security CSRF header to ajax requests
+$(function () {
+    var token = $("meta[name='_csrf']").attr("content");
+    var header = $("meta[name='_csrf_header']").attr("content");
+    $(document).ajaxSend(function(e, xhr, options) {
+        xhr.setRequestHeader(header, token);
+    });
+});
+
+</script>
 </@layout.vaultLayout>

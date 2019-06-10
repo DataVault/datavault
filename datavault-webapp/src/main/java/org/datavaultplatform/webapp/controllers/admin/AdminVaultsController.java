@@ -1,21 +1,22 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletResponse;
-
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.prefs.CsvPreference;
-
-import java.io.IOException;
 
 /**
  * User: Stuart Lewis
@@ -150,6 +151,13 @@ public class AdminVaultsController {
         restService.checkVaultRetentionPolicy(vaultID);
 
         return "redirect:/admin/vaults/" + vaultID;
+    }
+    
+    @RequestMapping(value = "/admin/vaults/{vaultId}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public void deleteVault(ModelMap model, @PathVariable("vaultId") String vaultId) throws Exception {
+    	System.out.println("Deleting vault ID :" +vaultId);
+        restService.deleteVault(vaultId);
     }
 }
 

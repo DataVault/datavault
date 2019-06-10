@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -79,13 +80,13 @@ public class Vault {
     
     // A vault can contain a number of deposits
     @JsonIgnore
-    @OneToMany(targetEntity=Deposit.class, mappedBy="vault", fetch=FetchType.EAGER)
+    @OneToMany(targetEntity=Deposit.class, mappedBy="vault", fetch=FetchType.EAGER, cascade = CascadeType.ALL)
     @OrderBy("creationTime")
     private List<Deposit> deposits;
     
     // A vault can have several data managers
     @JsonIgnore
-    @OneToMany(targetEntity=DataManager.class, mappedBy="vault", fetch=FetchType.LAZY)
+    @OneToMany(targetEntity=DataManager.class, mappedBy="vault", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
     @OrderBy("uun")
     private List<DataManager> dataManagers;
 

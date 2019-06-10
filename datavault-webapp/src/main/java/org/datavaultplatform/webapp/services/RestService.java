@@ -542,4 +542,8 @@ public class RestService {
         HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/updateVaultDescription", VaultInfo.class, vaultDescription);
         return (VaultInfo)response.getBody();
     }
+    
+    public void deleteVault(String vaultId) {
+        delete(brokerURL + "/admin/vaults/" + vaultId, String.class);
+    }
 }

@@ -16,7 +16,9 @@ import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.EventInfo;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -120,5 +122,12 @@ public class AdminController {
             events.add(event.convertToResponse());
         }
         return events;
+    }
+    
+    @RequestMapping(value = "/admin/vaults/{vaultId}", method = RequestMethod.DELETE)
+    public ResponseEntity<Object>  deleteVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                                      @PathVariable("vaultId") String vaultId) {
+    	vaultsService.deleteVault(vaultId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

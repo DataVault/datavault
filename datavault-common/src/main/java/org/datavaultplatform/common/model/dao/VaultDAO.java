@@ -20,4 +20,6 @@ public interface VaultDAO {
     public int count();
 
     public int getRetentionPolicyCount(int status);
+
+	void deleteById(String id);
 }

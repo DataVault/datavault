@@ -2,17 +2,20 @@ package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
 
+import org.datavaultplatform.common.model.Vault;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.Criteria;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.Order;
-
-import org.datavaultplatform.common.model.Vault;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class VaultDAOImpl implements VaultDAO {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(VaultDAOImpl.class);
 
     private SessionFactory sessionFactory;
  
@@ -180,5 +183,17 @@ public class VaultDAOImpl implements VaultDAO {
                 criteria.addOrder(Order.desc("creationTime"));
             }
         }
+    }
+    
+    @Override
+    public void deleteById(String Id) {
+        LOGGER.info("Deleting Vault with id " + Id);
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Vault.class);
+        criteria.add(Restrictions.eq("id", Id));
+        Vault vault = (Vault)criteria.uniqueResult();
+        session.delete(vault);
+        session.flush();
+        session.close();
     }
 }
