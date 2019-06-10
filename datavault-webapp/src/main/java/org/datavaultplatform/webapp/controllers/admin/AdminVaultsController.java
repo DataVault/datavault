@@ -110,9 +110,9 @@ public class AdminVaultsController {
         String headerValue = "attachment; filename=\"vaults.csv\"";
         response.setHeader(headerKey, headerValue);
 
-        String[] header = { "Vault ID", "Vault name", "Vault description", "Vault Size", "User ID", "User Name", "Policy ID", "Creation Time" };
+        String[] header = { "Vault name", "Deposits","Vault description", "Vault Size", "User ID", "User Name", "School", "Review Date","Creation Time" };
 
-        String[] fieldMapping = { "id", "name", "description", "userID", "userName", "sizeStr", "policyID", "CreationTime" };
+        String[] fieldMapping = { "name", "NumberOfDeposits", "description", "sizeStr", "userID", "userName","groupID","reviewDate", "CreationTime" };
 
         try {
             // uses the Super CSV API to generate CSV data from the model data
