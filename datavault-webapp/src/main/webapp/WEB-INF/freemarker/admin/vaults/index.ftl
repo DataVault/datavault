@@ -51,7 +51,7 @@
     <#if vaults?has_content>
 
         <div class="table-responsive">
-            <table class="table table-striped">
+            <table id="dtBasicExample" class="table table-striped">
 
                 <thead>
                     <tr class="tr">
@@ -74,7 +74,9 @@
                             </td>
                             <td>${vault.getNumberOfDeposits()}</td>
                            <td>${vault.getSizeStr()}</td>
-                            <td>${vault.getUserName()?html} (${vault.getUserID()?html})</td>                           
+                            <td>
+                            <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/${vault.getUserID()}">${vault.getUserID()}</a>
+                            </td>                           
                             
                             <td>${vault.groupID?html}</td>
                             <td>${vault.reviewDate?string('dd/MM/yyyy')}</td>
@@ -94,7 +96,20 @@
     </#if>
 
 </div>
+
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.8/js/jquery.dataTables.min.js">
+ $(document).ready(function () {
+	 var table = $('#dtBasicExample').DataTable({	
+     "pagingType": "full_numbers",
+	 "paging": true,
+	 pageLength : 5,
+	 lengthMenu: [[5, 10, 20, -1], [5, 10, 20, 'Todos']]
+ } )
+ } );
+ </script>  
+ 
 <script>
+
 
 //Bind properties to the user removal confirmation dialog
 $('#confirm-removal').on('show.bs.modal', function(e) {

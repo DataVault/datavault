@@ -1,12 +1,19 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 
+import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.support.PagedListHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,8 +43,7 @@ public class AdminVaultsController {
     
     @RequestMapping(value = "/vaults/redirect", method = RequestMethod.GET)
     public String getVaultsCreateScreen() throws Exception {
-    	System.out.println("Came Inside....................................................");
-       
+    	
         return "/vaults";
     }
 
@@ -45,17 +51,18 @@ public class AdminVaultsController {
     public String searchVaults(ModelMap model,
                                @RequestParam(value = "query", required = false) String query,
                                @RequestParam(value = "sort", required = false) String sort,
-                               @RequestParam(value = "order", required = false) String order) throws Exception {
+                               @RequestParam(value = "order", required = false) String order,
+                               @RequestParam(required = false) Integer page) throws Exception {
         String theSort = sort;
         String theOrder = order;
         if (sort == null) theSort = "creationTime";
         if (order == null) theOrder = "desc";
+       // VaultInfo[] vaults = null;
 
         if ((query == null) || ("".equals(query))) {
             model.addAttribute("vaults", restService.getVaultsListingAll(theSort, theOrder));
             model.addAttribute("query", "");
-           // System.out.println("vault........................................................."+restService.getVaultsListingAll(theSort, theOrder));
-
+         
         } else {
             model.addAttribute("vaults", restService.searchVaults(query, theSort, theOrder));
             model.addAttribute("query", query);

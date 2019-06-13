@@ -110,9 +110,22 @@ public class VaultsController {
     )
     @ApiHeaders(headers={
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
-    })
+    })      
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
     public List<VaultInfo> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
+
+        List<VaultInfo> vaultResponses = new ArrayList<>();
+        User user = usersService.getUser(userID);
+        for (Vault vault : user.getVaults()) {
+            vaultResponses.add(vault.convertToResponse());
+        }
+        vaultResponses.sort(Comparator.comparing(VaultInfo::getCreationTime));
+        Collections.reverse(vaultResponses);
+        return vaultResponses;
+    }
+    
+    @RequestMapping(value = "/vaults/user", method = RequestMethod.GET)
+    public List<VaultInfo> getVaultsForUser(@RequestParam(value = "userID", required = true)String userID) {
 
         List<VaultInfo> vaultResponses = new ArrayList<>();
         User user = usersService.getUser(userID);
