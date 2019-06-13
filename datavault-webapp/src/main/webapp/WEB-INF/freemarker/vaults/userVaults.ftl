@@ -21,6 +21,7 @@
                             <tr>
                                 <th>Vault Name</th>                                
                                 <th>Owner Name</th>
+                                <th>Vault Size</th>
                                 <th>Date Created</th>
                                 <th class="text-muted">Review Date</th>
                             </tr>
@@ -36,6 +37,7 @@
                                
                                 </td>
                                 <td>${vault.getUserID()}</td>
+                                <td>${vault.getVaultSize()}</td>
                                 <td>${vault.getCreationTime()?datetime}</td>
                                 <td class="text-muted">${vault.getReviewDate()?string('dd/MM/yyyy')}</td>
                             </tr>
