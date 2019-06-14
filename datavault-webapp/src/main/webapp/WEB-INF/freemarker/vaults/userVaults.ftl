@@ -37,7 +37,7 @@
                                 </td>
                                
                                 </td>
-                                <td>${vault.getUserID()}</td>
+                                <td>${vault.getUserName()?html} (${vault.getUserID()?html})</td>
                                 <td></td>
                                 <td>${vault.getVaultSize()}</td>
                                 <td>${vault.getCreationTime()?datetime}</td>
