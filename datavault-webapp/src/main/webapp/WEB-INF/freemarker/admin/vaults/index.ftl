@@ -52,7 +52,6 @@
 
         <div class="table-responsive" id="vaultsTable">
             <table class="table table-striped">
-
                 <thead>
                     <tr class="tr">
                        <th><a href="?sort=name&order=${ordername}&query=${query?url}">Vault Name<#if sort == "name"><#if ordername == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
@@ -74,7 +73,9 @@
                             </td>
                             <td>${vault.getNumberOfDeposits()}</td>
                            <td>${vault.getSizeStr()}</td>
-                            <td>${vault.getUserName()?html} (${vault.getUserID()?html})</td>                           
+                            <td>
+                            <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/${vault.getUserID()}">${vault.getUserName()?html} (${vault.getUserID()?html})</a>
+                            </td>                           
                             
                             <td>${vault.groupID?html}</td>
                             <td>${vault.reviewDate?string('dd/MM/yyyy')}</td>
@@ -109,6 +110,7 @@
     </#if>
 
 </div>
+ 
 <script>
 
 $(function(){

@@ -6,8 +6,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,12 +42,15 @@ public class AdminVaultsController {
         this.restService = restService;
     }
 
+
     @RequestMapping(value = "/admin/vaults", method = RequestMethod.GET)
     public String searchVaults(ModelMap model,
                                @RequestParam(value = "query", required = false) String query,
                                @RequestParam(value = "sort", required = false) String sort,
                                @RequestParam(value = "order", required = false) String order,
                                @RequestParam(value = "pageId", required = false) String pageId) throws Exception {
+
+
         String theSort = sort;
         String theOrder = order;
         String offset = pageId;
