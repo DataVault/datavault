@@ -1,8 +1,12 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 
+import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
@@ -26,40 +30,73 @@ import org.supercsv.prefs.CsvPreference;
 @Controller
 public class AdminVaultsController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AdminVaultsController.class);
+
+	private static final Logger logger = LoggerFactory.getLogger(AdminVaultsController.class);
+	
+	private static final String _0 = "0";
+	private static final String MAX_RECORDS_PER_PAGE = "10";
 
     private RestService restService;
 
     public void setRestService(RestService restService) {
         this.restService = restService;
     }
-    
-    @RequestMapping(value = "/vaults/redirect", method = RequestMethod.GET)
-    public String getVaultsCreateScreen() throws Exception {
-    	System.out.println("Came Inside....................................................");
-       
-        return "/vaults";
-    }
 
     @RequestMapping(value = "/admin/vaults", method = RequestMethod.GET)
     public String searchVaults(ModelMap model,
                                @RequestParam(value = "query", required = false) String query,
                                @RequestParam(value = "sort", required = false) String sort,
-                               @RequestParam(value = "order", required = false) String order) throws Exception {
+                               @RequestParam(value = "order", required = false) String order,
+                               @RequestParam(value = "pageId", required = false) String pageId) throws Exception {
         String theSort = sort;
         String theOrder = order;
+        String offset = pageId;
         if (sort == null) theSort = "creationTime";
         if (order == null) theOrder = "desc";
+        if(pageId == null) offset = _0;
+        
+        //No of records to be shown per page
+        String maxResult = MAX_RECORDS_PER_PAGE;
 
+        // calculate offset which is passed to the service to fetch records from that row Id
+        int maxRecords = Integer.valueOf(maxResult).intValue();
+        if(offset != _0) {
+        	int s = Integer.valueOf(offset).intValue() * maxRecords - Integer.valueOf(maxResult).intValue();
+        	offset = String.valueOf(s);
+        } 
+        
         if ((query == null) || ("".equals(query))) {
-            model.addAttribute("vaults", restService.getVaultsListingAll(theSort, theOrder));
+        	VaultsData vaultData = restService.getVaultsListingAll(theSort, theOrder, offset, maxResult);
+        	long recordsTotal = vaultData.getRecordsTotal();
+        	int numberOfPages = (int)Math.ceil(recordsTotal/(Double.valueOf(maxResult)));
+        	List<String> pages = new ArrayList<>();
+        	int i =1;
+        	while(i <= numberOfPages) {
+        		pages.add(String.valueOf(i));
+        		i++;
+        	}
+        	model.addAttribute("pages", pages);
+			model.addAttribute("vaults", vaultData.getData());
             model.addAttribute("query", "");
-           // System.out.println("vault........................................................."+restService.getVaultsListingAll(theSort, theOrder));
-
+            model.addAttribute("recordsInfo", constructTableRecordsInfo(offset, recordsTotal, vaultData.getData().size()));
         } else {
-            model.addAttribute("vaults", restService.searchVaults(query, theSort, theOrder));
+        	VaultsData filteredVaultsData = restService.searchVaults(query, theSort, theOrder, offset, maxResult);
+            long filteredRecordsTotal = filteredVaultsData.getRecordsFiltered();
+            int numberOfPages = (int)Math.ceil(filteredRecordsTotal/(Double.valueOf(maxResult)));
+            List<String> pages = new ArrayList<>();
+        	int i =1;
+        	while(i <= numberOfPages) {
+        		pages.add(String.valueOf(i));
+        		i++;
+        	}
+        	model.addAttribute("pages", pages);
+            model.addAttribute("vaults", filteredVaultsData.getData());
             model.addAttribute("query", query);
+            model.addAttribute("recordsInfo", constructTableRecordsInfo(offset, filteredRecordsTotal, filteredVaultsData.getData().size()));
         }
+        
+        model.addAttribute("theSort", theSort);
+        model.addAttribute("theOrder", theOrder);
 
         // Pass the sort and order
         if (sort == null) sort = "";
@@ -89,6 +126,14 @@ public class AdminVaultsController {
         return "admin/vaults/index";
     }
 
+	private String constructTableRecordsInfo(String offset, long recordsTotal, int numberOfRecordsonPage) {
+		StringBuilder recordsInfo = new StringBuilder();
+		recordsInfo.append("Showing ").append(Integer.valueOf(offset).intValue() + 1)
+		.append(" - ").append(Integer.valueOf(offset).intValue()+ numberOfRecordsonPage)
+		.append(" vaults of ").append(recordsTotal);
+		return recordsInfo.toString();
+	}
+
     @RequestMapping(value = "/admin/vaults/csv", method = RequestMethod.GET)
     public void exportVaults(HttpServletResponse response,
                                @RequestParam(value = "query", required = false) String query,
@@ -99,12 +144,14 @@ public class AdminVaultsController {
         if (sort == null) theSort = "creationTime";
         if (order == null) theOrder = "desc";
 
-        VaultInfo[] vaults = null;
+        List<VaultInfo> vaults = null;
 
         if ((query == null) || ("".equals(query))) {
-            vaults = restService.getVaultsListingAll(theSort, theOrder);
+            VaultsData vaultData = restService.getVaultsListingAll(theSort, theOrder, _0, _0);
+			vaults = vaultData.getData();
         } else {
-            vaults =  restService.searchVaults(query, theSort, theOrder);
+        	VaultsData vaultData =  restService.searchVaults(query, theSort, theOrder, _0, _0);
+        	vaults = vaultData.getData();
         }
 
         response.setContentType("text/csv");

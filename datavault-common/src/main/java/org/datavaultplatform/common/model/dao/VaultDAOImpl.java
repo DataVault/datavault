@@ -68,18 +68,22 @@ public class VaultDAOImpl implements VaultDAO {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Vault> list(String sort, String order) {
+    public List<Vault> list(String sort, String order, String offset, String maxResult) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Vault.class);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
         order(sort, order, criteria);
+        if((offset != null && maxResult != null) || !maxResult.equals("0")) {
+        	criteria.setMaxResults(Integer.valueOf(maxResult));
+        	criteria.setFirstResult(Integer.valueOf(offset));
+        }
 
         List<Vault> vaults = criteria.list();
         session.close();
         return vaults;
     }
-
+    
     @Override
     public Vault findById(String Id) {
         Session session = this.sessionFactory.openSession();
@@ -90,14 +94,19 @@ public class VaultDAOImpl implements VaultDAO {
         return vault;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public List<Vault> search(String query, String sort, String order) {
+    public List<Vault> search(String query, String sort, String order, String offset, String maxResult) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Vault.class);
         criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
         order(sort, order, criteria);
+        if((offset != null && maxResult != null) || !maxResult.equals("0")) {
+        	criteria.setMaxResults(Integer.valueOf(maxResult));
+        	criteria.setFirstResult(Integer.valueOf(offset));
+        }
 
         List<Vault> vaults = criteria.list();
         session.close();
@@ -196,4 +205,30 @@ public class VaultDAOImpl implements VaultDAO {
         session.flush();
         session.close();
     }
+
+	@Override
+	public Long getTotalNumberOfVaults() {
+		Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Vault.class);
+        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+        criteria.setProjection(Projections.rowCount());
+        Long totalNoOfRows = (Long) criteria.uniqueResult();
+
+        session.close();
+        return totalNoOfRows;
+	}
+	/**
+	 * Retrieve Total NUmber of rows after applying the filter
+	 */
+	public Long getTotalNumberOfVaults(String query) {
+		Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Vault.class);
+        criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
+        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+        criteria.setProjection(Projections.rowCount());
+        Long totalNoOfRows = (Long) criteria.uniqueResult();
+
+        session.close();
+        return totalNoOfRows;
+	}
 }

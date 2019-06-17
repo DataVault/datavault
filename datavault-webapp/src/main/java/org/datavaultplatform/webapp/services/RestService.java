@@ -1,14 +1,33 @@
 package org.datavaultplatform.webapp.services;
 
+import org.datavaultplatform.common.model.ArchiveStore;
+import org.datavaultplatform.common.model.DataManager;
 import org.datavaultplatform.common.model.Dataset;
-import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.request.*;
-import org.datavaultplatform.common.response.*;
+import org.datavaultplatform.common.model.Deposit;
+import org.datavaultplatform.common.model.FileFixity;
+import org.datavaultplatform.common.model.FileInfo;
+import org.datavaultplatform.common.model.FileStore;
+import org.datavaultplatform.common.model.Group;
+import org.datavaultplatform.common.model.Job;
+import org.datavaultplatform.common.model.RetentionPolicy;
+import org.datavaultplatform.common.model.Retrieve;
+import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.request.CreateClientEvent;
+import org.datavaultplatform.common.request.CreateDeposit;
+import org.datavaultplatform.common.request.CreateVault;
+import org.datavaultplatform.common.request.ValidateUser;
+import org.datavaultplatform.common.response.DepositInfo;
+import org.datavaultplatform.common.response.EventInfo;
+import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.response.VaultsData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.*;
-import org.springframework.web.client.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * User: Robin Taylor
@@ -167,9 +186,9 @@ public class RestService {
         return (VaultInfo[])response.getBody();
     }
 
-    public VaultInfo[] getVaultsListingAll(String sort, String order) {
-        HttpEntity<?> response = get(brokerURL + "/admin/vaults?sort=" + sort + "&order=" + order, VaultInfo[].class);
-        return (VaultInfo[])response.getBody();
+    public VaultsData getVaultsListingAll(String sort, String order, String offset, String maxResult) {
+        HttpEntity<?> response = get(brokerURL + "/admin/vaults?sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
+        return (VaultsData)response.getBody();
     }
 
     public VaultInfo[] searchVaults(String query) {
@@ -177,9 +196,9 @@ public class RestService {
         return (VaultInfo[])response.getBody();
     }
 
-    public VaultInfo[] searchVaults(String query, String sort, String order) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query + "&sort=" + sort + "&order=" + order, VaultInfo[].class);
-        return (VaultInfo[])response.getBody();
+    public VaultsData searchVaults(String query, String sort, String order, String offset, String maxResult) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query + "&sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
+        return (VaultsData)response.getBody();
     }
 
     public int getVaultsCount() {
@@ -546,4 +565,5 @@ public class RestService {
     public void deleteVault(String vaultId) {
         delete(brokerURL + "/admin/vaults/" + vaultId, String.class);
     }
+
 }

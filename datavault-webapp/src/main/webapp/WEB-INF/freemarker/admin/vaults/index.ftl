@@ -50,7 +50,7 @@
 </div>
     <#if vaults?has_content>
 
-        <div class="table-responsive">
+        <div class="table-responsive" id="vaultsTable">
             <table class="table table-striped">
 
                 <thead>
@@ -90,11 +90,36 @@
                 </tbody>
             </table>
         </div>
+            
+            <div align="center">
+            	<p class="text-info">${recordsInfo}</p>
+            </div>
+            <div align="center">
+            <nav aria-label="...">
+			    <ul class="pagination pagination-lg" id="paginationButton">
+            		<#list pages as page>
+				    	<li class="page-item" id="${page}">
+				     	 <a class="page-link" href="${springMacroRequestContext.getContextPath()}/admin/vaults?sort=${theSort}&order=${theOrder}&pageId=${page}" tabindex="-1">${page}</a>
+				    	</li>
+					</#list>
+				 </ul>
+			</nav>
+        </div>
 
     </#if>
 
 </div>
 <script>
+
+$(function(){
+	$('#paginationButton li#1').addClass('active').siblings().removeClass('active');
+	$('#paginationButton a').filter(function(){
+		return this.href==location.href
+		}).parent().addClass('active').siblings().removeClass('active')
+	$('#paginationButton a').click(function(){
+		$(this).parent().addClass('active').siblings().removeClass('active')
+	})
+})
 
 //Bind properties to the user removal confirmation dialog
 $('#confirm-removal').on('show.bs.modal', function(e) {
