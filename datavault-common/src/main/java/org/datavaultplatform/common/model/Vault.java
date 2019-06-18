@@ -80,7 +80,7 @@ public class Vault {
     
     // A vault can contain a number of deposits
     @JsonIgnore
-    @OneToMany(targetEntity=Deposit.class, mappedBy="vault", fetch=FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(targetEntity=Deposit.class, mappedBy="vault", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
     @OrderBy("creationTime")
     private List<Deposit> deposits;
     
