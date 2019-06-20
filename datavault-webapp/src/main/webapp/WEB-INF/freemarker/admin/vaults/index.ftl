@@ -99,7 +99,7 @@
             <nav aria-label="...">
 			    <ul class="pagination pagination-lg" id="paginationButton">
             		<#list pages as page>
-				    	<li class="page-item" id="${page}">
+				    	<li <#if page == activePageId>class="page-item active"<#else>class="page-item"</#if> id="${page}">
 				     	 <a class="page-link" href="${springMacroRequestContext.getContextPath()}/admin/vaults?sort=${theSort}&order=${theOrder}&pageId=${page}" tabindex="-1">${page}</a>
 				    	</li>
 					</#list>
@@ -112,17 +112,6 @@
 </div>
  
 <script>
-
-$(function(){
-	$('#paginationButton li#1').addClass('active').siblings().removeClass('active');
-	$('#paginationButton a').filter(function(){
-		return this.href==location.href
-		}).parent().addClass('active').siblings().removeClass('active')
-	$('#paginationButton a').click(function(){
-		$(this).parent().addClass('active').siblings().removeClass('active')
-	})
-})
-
 //Bind properties to the user removal confirmation dialog
 $('#confirm-removal').on('show.bs.modal', function(e) {
     var data = $(e.relatedTarget).data();

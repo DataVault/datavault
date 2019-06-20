@@ -57,6 +57,7 @@ public class AdminVaultsController {
         if (sort == null) theSort = "creationTime";
         if (order == null) theOrder = "desc";
         if(pageId == null) offset = "1";
+        model.addAttribute("activePageId", offset);
 
         // calculate offset which is passed to the service to fetch records from that row Id
         int maxRecords = Integer.valueOf(MAX_RECORDS_PER_PAGE).intValue();
