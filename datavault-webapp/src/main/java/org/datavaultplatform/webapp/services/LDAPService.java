@@ -162,10 +162,7 @@ public class LDAPService {
                 "(uid="  + uid + ")" ,
                 1,
                 "uid", "cn", "email", "eduniRefNo");
-        
-        
-        System.out.println("----------------------searchRequest:------------ " + searchRequest);
-
+    
         // We don't want this to take too long as it might, default is 30s
         connection.setTimeOut(5000);
         EntryCursor cursor = new EntryCursorImpl( connection.search(searchRequest) );
