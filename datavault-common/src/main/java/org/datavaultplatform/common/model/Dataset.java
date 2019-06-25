@@ -17,8 +17,10 @@ public class Dataset {
     private String name;
     
     // The raw content from the metadata provider e.g. XML
-    @JsonIgnore
-    @Transient
+    //@JsonIgnore
+    //@Transient
+    @Lob
+
     private String content;
     
     @Transient
