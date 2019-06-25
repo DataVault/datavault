@@ -1,12 +1,12 @@
 package org.datavaultplatform.broker.services;
 
+import java.util.Date;
+import java.util.List;
+
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.dao.VaultDAO;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
-
-import java.util.Date;
-import java.util.List;
 
 public class VaultsService {
 
@@ -14,7 +14,9 @@ public class VaultsService {
 
     public List<Vault> getVaults() { return vaultDAO.list(); }
 
-    public List<Vault> getVaults(String sort, String order) { return vaultDAO.list(sort, order); }
+    public List<Vault> getVaults(String sort, String order, String offset, String maxResult) { 
+    	return vaultDAO.list(sort, order, offset, maxResult); 
+    }
 
     public void addVault(Vault vault) {
         Date d = new Date();
@@ -34,7 +36,7 @@ public class VaultsService {
         this.vaultDAO = vaultDAO;
     }
 
-    public List<Vault> search(String query, String sort, String order) { return this.vaultDAO.search(query, sort, order); }
+    public List<Vault> search(String query, String sort, String order, String offset, String maxResult) { return this.vaultDAO.search(query, sort, order, offset, maxResult); }
 
     public int count() { return vaultDAO.count(); }
 
@@ -89,5 +91,21 @@ public class VaultsService {
 
         return vault;
     }
+    
+    public void deleteVault(String vaultId) {
+        vaultDAO.deleteById(vaultId);
+    }
+	
+	public Long getTotalNumberOfVaults() {
+		return vaultDAO.getTotalNumberOfVaults();
+	}
+	/**
+	 * Total number of records after applying search filter
+	 * @param query
+	 * @return
+	 */
+	public Long getTotalNumberOfVaults(String query) {
+		return vaultDAO.getTotalNumberOfVaults(query);
+	}
 }
 

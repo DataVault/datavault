@@ -5,6 +5,7 @@ import org.datavaultplatform.common.event.vault.Create;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.response.DepositInfo;
+import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
@@ -110,9 +111,22 @@ public class VaultsController {
     )
     @ApiHeaders(headers={
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
-    })
+    })      
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
     public List<VaultInfo> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
+
+        List<VaultInfo> vaultResponses = new ArrayList<>();
+        User user = usersService.getUser(userID);
+        for (Vault vault : user.getVaults()) {
+            vaultResponses.add(vault.convertToResponse());
+        }
+        vaultResponses.sort(Comparator.comparing(VaultInfo::getCreationTime));
+        Collections.reverse(vaultResponses);
+        return vaultResponses;
+    }
+    
+    @RequestMapping(value = "/vaults/user", method = RequestMethod.GET)
+    public List<VaultInfo> getVaultsForUser(@RequestParam(value = "userID", required = true)String userID) {
 
         List<VaultInfo> vaultResponses = new ArrayList<>();
         User user = usersService.getUser(userID);
@@ -127,17 +141,27 @@ public class VaultsController {
 
 
     @RequestMapping(value = "/vaults/search", method = RequestMethod.GET)
-    public List<VaultInfo> searchAllVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
+    public VaultsData searchAllVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
                                                   @RequestParam String query,
                                                   @RequestParam(value = "sort", required = false) String sort,
                                                   @RequestParam(value = "order", required = false)
-                                                  @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order) throws Exception {
+                                                  @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order,
+                                                  @RequestParam(value = "offset", required = false)
+											      @ApiQueryParam(name = "offset", description = "Vault row id ", defaultvalue = "0", required = false) String offset,
+											      @RequestParam(value = "maxResult", required = false)
+											      @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) throws Exception {
 
         List<VaultInfo> vaultResponses = new ArrayList<>();
-        for (Vault vault : vaultsService.search(query, sort, order)) {
+        for (Vault vault : vaultsService.search(query, sort, order, offset, maxResult)) {
             vaultResponses.add(vault.convertToResponse());
         }
-        return vaultResponses;
+        Long recordsTotal = vaultsService.getTotalNumberOfVaults();
+        Long recordsFiltered = vaultsService.getTotalNumberOfVaults(query);
+        VaultsData data = new VaultsData();
+        data.setRecordsTotal(recordsTotal);
+        data.setRecordsFiltered(recordsFiltered);
+        data.setData(vaultResponses);
+        return data;
     }
 
     @RequestMapping(value = "/vaults/deposits/search", method = RequestMethod.GET)

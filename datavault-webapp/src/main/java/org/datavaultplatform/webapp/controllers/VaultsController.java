@@ -84,7 +84,7 @@ public class VaultsController {
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
     public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID) throws Exception {
         VaultInfo vault = restService.getVault(vaultID);
-
+       
         model.addAttribute("vault", vault);
 
         model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
@@ -120,6 +120,13 @@ public class VaultsController {
         model.addAttribute("dataManagers", dataManagerUsers);
         
         return "vaults/vault";
+    }
+    
+    @RequestMapping(value = "/vaults/{vaultid}/{userid}", method = RequestMethod.GET)
+    public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID,@PathVariable("userid") String userID) throws Exception {
+    	model.addAttribute("vaults", restService.getVaultsListingAll(userID));
+    	        
+        return "vaults/userVaults";
     }
 
     // Process the completed 'create new vault' page

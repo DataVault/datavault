@@ -53,3 +53,7 @@
     <script src="<@spring.url '/resources/theme/jackie/edgel.js'/>"></script>
     -->
     <link href="<@spring.url '/resources/theme/jackie/jackie-quickfix.css'/>" rel="stylesheet" type="text/css">
+    
+    <!-- Styles to be overriden -->
+    <link href="<@spring.url '/resources/theme/css/overrideStyles.css'/>" rel="stylesheet" type="text/css">
+    

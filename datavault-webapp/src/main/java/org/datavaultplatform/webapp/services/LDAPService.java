@@ -119,13 +119,12 @@ public class LDAPService {
         {
             throw new IllegalArgumentException( "The base Dn cannot be null" );
         }
-
+       
         // Create a new SearchRequest object
         SearchRequest searchRequest = createSearchRequest(
-                "(uid=*"  + term + "*)",
+                "(|(uid=*"  + term + "*)(cn=*"+ term + "*))",
                 5,
                 "uid", "cn");
-
         EntryCursor cursor = new EntryCursorImpl( connection.search(searchRequest) );
 
         List<String> entries = new ArrayList<>();
@@ -157,13 +156,13 @@ public class LDAPService {
         {
             throw new IllegalArgumentException( "The base Dn cannot be null" );
         }
-
-        // Create a new SearchRequest object
+        System.out.println("----------------------Search info for UUN:------------ " + uid);
+      
         SearchRequest searchRequest = createSearchRequest(
-                "(uid="  + uid + ")",
+                "(uid="  + uid + ")" ,
                 1,
                 "uid", "cn", "email", "eduniRefNo");
-
+    
         // We don't want this to take too long as it might, default is 30s
         connection.setTimeOut(5000);
         EntryCursor cursor = new EntryCursorImpl( connection.search(searchRequest) );
