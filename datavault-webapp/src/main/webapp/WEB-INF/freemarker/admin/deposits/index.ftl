@@ -56,7 +56,7 @@
                     <th>Vault Owner</th>
                     <th>Vault Review Date</th>
                     <th>Actions</th>
-                    <th>Remove</th>
+                    
                 </tr>
                 </thead>
 
@@ -81,13 +81,13 @@
                                    href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}/deposits/${deposit.getID()?html}/restart">
                                     Restart
                                 </a>
-                            </#if>
-                        </td>
-                         <td>
-                         <a class="btn btn-xs btn-danger pull-left" href="#" data-vault="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
+                                 <#else>
+                                  <a class="btn btn-xs btn-danger pull-left" href="#" data-vault="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                           </a>
-                           </td>
+                            </#if>
+                        </td>
+                        
                     </tr>
                     </#list>
                 </tbody>
