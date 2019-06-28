@@ -56,7 +56,7 @@
                     <th>Vault Owner</th>
                     <th>Vault Review Date</th>
                     <th>Actions</th>
-                    <th>Remove</th>
+                    
                 </tr>
                 </thead>
 
@@ -84,10 +84,13 @@
                             </#if>
                         </td>
                          <td>
-                         <a class="btn btn-xs btn-danger pull-left" href="#" data-deposit="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
+                                 <#else>
+                                 <a class="btn btn-xs btn-danger pull-left" href="#" data-deposit="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                           </a>
-                           </td>
+                            </#if>
+                        </td>
+                        
                     </tr>
                     </#list>
                 </tbody>
