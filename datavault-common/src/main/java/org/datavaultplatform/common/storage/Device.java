@@ -60,4 +60,13 @@ public abstract class Device {
     public List<String> getLocations() {
     		return this.locations;
     }
+
+	//This method should be overridden by plugins that allow delete
+	public void delete(String depositId, File working, Progress progress, String optFilePath) throws Exception {
+		throw new UnsupportedOperationException();
+	}
+	
+	public void delete(String depositId, File working, Progress progress) throws Exception {
+		throw new UnsupportedOperationException();
+	}
 }

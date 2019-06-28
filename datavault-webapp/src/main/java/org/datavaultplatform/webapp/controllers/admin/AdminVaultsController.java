@@ -208,12 +208,6 @@ public class AdminVaultsController {
 
         return "redirect:/admin/vaults/" + vaultID;
     }
-    
-    @RequestMapping(value = "/admin/vaults/{vaultId}", method = RequestMethod.DELETE)
-    @ResponseBody
-    public void deleteVault(ModelMap model, @PathVariable("vaultId") String vaultId) throws Exception {
-        restService.deleteVault(vaultId);
-    }
 }
 
 

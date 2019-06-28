@@ -43,6 +43,13 @@ public class AdminDepositsController {
 
         return "admin/deposits/index";
     }
+    
+    @RequestMapping(value = "/admin/deposits/{depositId}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public String deleteDeposit(ModelMap model, @PathVariable("depositId") String depositId) throws Exception {
+        restService.deleteDeposit(depositId);
+        return "admin/deposits/index";
+    }
 }
 
 

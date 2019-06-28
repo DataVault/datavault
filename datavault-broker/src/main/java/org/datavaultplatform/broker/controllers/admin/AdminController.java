@@ -1,15 +1,18 @@
 package org.datavaultplatform.broker.controllers.admin;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.datavaultplatform.broker.services.DepositsService;
-import org.datavaultplatform.broker.services.EventService;
-import org.datavaultplatform.broker.services.RetrievesService;
-import org.datavaultplatform.broker.services.UsersService;
-import org.datavaultplatform.broker.services.VaultsService;
+import org.datavaultplatform.broker.queue.Sender;
+import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.model.Archive;
+import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.Deposit;
+import org.datavaultplatform.common.model.DepositChunk;
+import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
@@ -17,6 +20,7 @@ import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.EventInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.common.task.Task;
 import org.jsondoc.core.annotation.Api;
 import org.jsondoc.core.annotation.ApiHeader;
 import org.jsondoc.core.annotation.ApiHeaders;
@@ -33,6 +37,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Created by Robin Taylor on 08/03/2016.
  */
@@ -47,6 +53,39 @@ public class AdminController {
     private DepositsService depositsService;
     private RetrievesService retrievesService;
     private EventService eventService;
+    private ArchiveStoreService archiveStoreService;
+    private JobsService jobsService;
+    private Sender sender;
+    private String optionsDir;
+    private String tempDir;
+    private String bucketName;
+    private String region;
+    private String awsAccessKey;
+    private String awsSecretKey;
+   
+	public void setOptionsDir(String optionsDir) {
+		this.optionsDir = optionsDir;
+	}
+
+	public void setTempDir(String tempDir) {
+		this.tempDir = tempDir;
+	}
+
+	public void setBucketName(String bucketName) {
+		this.bucketName = bucketName;
+	}
+
+	public void setRegion(String region) {
+		this.region = region;
+	}
+
+	public void setAwsAccessKey(String awsAccessKey) {
+		this.awsAccessKey = awsAccessKey;
+	}
+
+	public void setAwsSecretKey(String awsSecretKey) {
+		this.awsSecretKey = awsSecretKey;
+	}
     
     public void setDepositsService(DepositsService depositsService) {
         this.depositsService = depositsService;
@@ -67,6 +106,18 @@ public class AdminController {
     public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
     }
+    
+    public void setArchiveStoreService(ArchiveStoreService archiveStoreService) {
+        this.archiveStoreService = archiveStoreService;
+    }
+
+	public void setJobsService(JobsService jobsService) {
+		this.jobsService = jobsService;
+	}
+
+	public void setSender(Sender sender) {
+		this.sender = sender;
+	}
 
     @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)
     public List<DepositInfo> getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
@@ -141,11 +192,136 @@ public class AdminController {
         return events;
     }
     
-    @RequestMapping(value = "/admin/vaults/{vaultId}", method = RequestMethod.DELETE)
-    public ResponseEntity<Object>  deleteVault(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                                      @PathVariable("vaultId") String vaultId) {
-    	vaultsService.deleteVault(vaultId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @RequestMapping(value = "/admin/deposits/{depositID}", method = RequestMethod.DELETE)
+    public ResponseEntity<Object> deleteDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                              @PathVariable("depositID") String depositID) throws Exception {
+
+
+    	User user = usersService.getUser(userID);
+        Deposit deposit = depositsService.getUserDeposit(user, depositID);
+        
+        if (user == null) {
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+        //retrieve.setUser(user);
+        
+        List<Job> jobs = deposit.getJobs();
+        for (Job job : jobs) {
+            if (job.isError() == false && job.getState() != job.getStates().size() - 1) {
+                // There's an in-progress job for this deposit
+                throw new IllegalArgumentException("Job in-progress for this Deposit");
+            }
+        }
+       
+        List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
+        if (archiveStores.size() == 0) {
+            throw new Exception("No configured archive storage");
+        }
+        archiveStores = this.addArchiveSpecificOptions(archiveStores);
+
+        // Create a job to track this retrieve
+        Job job = new Job("org.datavaultplatform.worker.tasks.Delete");
+        jobsService.addJob(deposit, job);
+
+        // Add the retrieve object
+       // retrievesService.addRetrieve(retrieve, deposit, retrievePath);
+        
+        // Ask the worker to process the data retrieve
+        try {
+            HashMap<String, String> deleteProperties = new HashMap<>();
+            deleteProperties.put("depositId", deposit.getID());
+            deleteProperties.put("bagId", deposit.getBagId());
+            //deleteProperties.put("archives", deposit.getArchives());
+            deleteProperties.put("archiveSize", Long.toString(deposit.getArchiveSize()));
+            deleteProperties.put("userId", user.getID());
+            //deleteProperties.put("archiveDigest", deposit.getArchiveDigest());
+            //deleteProperties.put("archiveDigestAlgorithm", deposit.getArchiveDigestAlgorithm());
+            deleteProperties.put("numOfChunks", Integer.toString(deposit.getNumOfChunks()));
+            
+            for (Archive archive : deposit.getArchives()) {
+            	deleteProperties.put(archive.getArchiveStore().getID(), archive.getArchiveId());
+            }
+            
+            // Add a single entry for the user file storage
+            Map<String, String> userFileStoreClasses = new HashMap<>();
+            Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();
+            //userFileStoreClasses.put(storageID, userStore.getStorageClass());
+            //userFileStoreProperties.put(storageID, userStore.getProperties());
+            
+            // get chunks checksums
+            HashMap<Integer, String> chunksDigest = new HashMap<Integer, String>();
+            List<DepositChunk> depositChunks = deposit.getDepositChunks();
+            for (DepositChunk depositChunk : depositChunks) {
+                chunksDigest.put(depositChunk.getChunkNum(), depositChunk.getArchiveDigest());
+            }
+            
+            // Get encryption IVs
+            byte[] tarIVs = deposit.getEncIV();
+            HashMap<Integer, byte[]> chunksIVs = new HashMap<Integer, byte[]>();
+            for( DepositChunk chunks : deposit.getDepositChunks() ) {
+                chunksIVs.put(chunks.getChunkNum(), chunks.getEncIV());
+            }
+            
+            // Get encrypted digests
+            String encTarDigest = deposit.getEncArchiveDigest();
+            HashMap<Integer, String> encChunksDigests = new HashMap<Integer, String>();
+            for( DepositChunk chunks : deposit.getDepositChunks() ) {
+                encChunksDigests.put(chunks.getChunkNum(), chunks.getEcnArchiveDigest());
+            }
+            
+            Task retrieveTask = new Task(
+                    job, deleteProperties, archiveStores, 
+                    userFileStoreProperties, userFileStoreClasses, 
+                    null, null, 
+                    chunksDigest,
+                    tarIVs, chunksIVs,
+                    encTarDigest, encChunksDigests, null);
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
+            sender.send(jsonRetrieve);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+
     }
-    
+    private List<ArchiveStore> addArchiveSpecificOptions(List<ArchiveStore> archiveStores) {
+    	if (archiveStores != null && ! archiveStores.isEmpty()) { 
+	    	for (ArchiveStore archiveStore : archiveStores) {
+		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.TivoliStorageManager")) {
+		        	HashMap<String, String> asProps = archiveStore.getProperties();
+		        	if (this.optionsDir != null && ! this.optionsDir.equals("")) {
+		        		asProps.put("optionsDir", this.optionsDir);
+		        	}
+		        	if (this.tempDir != null && ! this.tempDir.equals("")) {
+		        		asProps.put("tempDir", this.tempDir);
+		        	}
+		        	archiveStore.setProperties(asProps);
+		        }
+		        
+		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.S3Cloud")) {
+		        	HashMap<String, String> asProps = archiveStore.getProperties();
+		        	if (this.bucketName != null && ! this.bucketName.equals("")) {  
+		        		asProps.put("s3.bucketName", this.bucketName);
+		        	}
+		        	if (this.region != null && ! this.region.equals("")) {  
+		        		asProps.put("s3.region", this.region);
+		        	}
+		        	if (this.awsAccessKey != null && ! this.awsAccessKey.equals("")) {  
+		        		asProps.put("s3.awsAccessKey", this.awsAccessKey);
+		        	}
+		        	if (this.awsSecretKey != null && ! this.awsSecretKey.equals("")) {  
+		        		asProps.put("s3.awsSecretKey", this.awsSecretKey);
+		        	}
+
+		        	//if (this.authDir != null && ! this.authDir.equals("")) {
+		        	//	asProps.put("authDir", this.authDir);
+		        	//}
+		        	archiveStore.setProperties(asProps);
+		        }
+	        }
+    	}
+    	
+    	return archiveStores;
+    }    
 }

@@ -84,7 +84,7 @@
                             </#if>
                         </td>
                          <td>
-                         <a class="btn btn-xs btn-danger pull-left" href="#" data-vault="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
+                         <a class="btn btn-xs btn-danger pull-left" href="#" data-deposit="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                           </a>
                            </td>
@@ -100,16 +100,15 @@
 //Bind properties to the user removal confirmation dialog
 $('#confirm-removal').on('show.bs.modal', function(e) {
     var data = $(e.relatedTarget).data();
-    $('.remove-vault', this).text(data.vault);
-    $('#remove', this).data('vaultId', data.vault);
+    $('#remove', this).data('depositId', data.deposit);
 
 });
 
 $("button#remove").click(function(){
-    var vaultId = $(this).data('vaultId');   
+    var depositId = $(this).data('depositId');   
    
     $.ajax({
-        url: 'http://www.google.com',
+    	url: '${springMacroRequestContext.getContextPath()}/admin/deposits/' + depositId,
         type: 'DELETE',
         success: function (data) {
         	console.log("----success---");
