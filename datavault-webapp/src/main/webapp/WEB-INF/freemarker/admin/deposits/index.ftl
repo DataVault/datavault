@@ -81,13 +81,10 @@
                                    href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}/deposits/${deposit.getID()?html}/restart">
                                     Restart
                                 </a>
-                            </#if>
-                        </td>
-                         <td>
-                                 <#else>
+                             <#else>
                                  <a class="btn btn-xs btn-danger pull-left" href="#" data-deposit="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
-                          </a>
+                          		</a>
                             </#if>
                         </td>
                         
