@@ -81,7 +81,7 @@
                                    href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}/deposits/${deposit.getID()?html}/restart">
                                     Restart
                                 </a>
-                             <#else>
+                             <#elseif deposit.status != "DELETED">
                                  <a class="btn btn-xs btn-danger pull-left" href="#" data-deposit="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                           		</a>
