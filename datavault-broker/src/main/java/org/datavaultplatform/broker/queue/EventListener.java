@@ -65,7 +65,6 @@ public class EventListener implements MessageListener {
     public void onMessage(Message msg) {
         
         String messageBody = new String(msg.getBody());
-        System.out.println("---------onMessage ----------");
         logger.info("Received '" + messageBody + "'");
         
         try {
@@ -75,8 +74,6 @@ public class EventListener implements MessageListener {
 
             Class<?> clazz = Class.forName(commonEvent.getEventClass());
             Event concreteEvent = (Event)(mapper.readValue(messageBody, clazz));
-            
-            System.out.println("---------concreteEvent ----------" +concreteEvent);
             
             // Get the related deposit
             Deposit deposit = depositsService.getDeposit(concreteEvent.getDepositId());

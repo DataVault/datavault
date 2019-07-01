@@ -6,7 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.datavaultplatform.broker.queue.Sender;
-import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.broker.services.ArchiveStoreService;
+import org.datavaultplatform.broker.services.DepositsService;
+import org.datavaultplatform.broker.services.EventService;
+import org.datavaultplatform.broker.services.JobsService;
+import org.datavaultplatform.broker.services.RetrievesService;
+import org.datavaultplatform.broker.services.UsersService;
+import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.Archive;
 import org.datavaultplatform.common.model.ArchiveStore;
@@ -27,6 +33,8 @@ import org.jsondoc.core.annotation.ApiHeaders;
 import org.jsondoc.core.annotation.ApiMethod;
 import org.jsondoc.core.annotation.ApiQueryParam;
 import org.jsondoc.core.pojo.ApiVerb;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +55,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @RestController
 @Api(name="Admin", description = "Administrator functions")
 public class AdminController {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(AdminController.class);
 
     private VaultsService vaultsService;
     private UsersService usersService;
@@ -196,6 +206,7 @@ public class AdminController {
     public ResponseEntity<Object> deleteDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
                                               @PathVariable("depositID") String depositID) throws Exception {
 
+    	LOGGER.info("Delete deposit with ID : {}", depositID);
 
     	User user = usersService.getUser(userID);
         Deposit deposit = depositsService.getUserDeposit(user, depositID);
@@ -203,7 +214,6 @@ public class AdminController {
         if (user == null) {
             throw new Exception("User '" + userID + "' does not exist");
         }
-        //retrieve.setUser(user);
         
         List<Job> jobs = deposit.getJobs();
         for (Job job : jobs) {
@@ -217,27 +227,21 @@ public class AdminController {
         if (archiveStores.size() == 0) {
             throw new Exception("No configured archive storage");
         }
+        LOGGER.info("Delete deposit archiveStores : {}", archiveStores);
         archiveStores = this.addArchiveSpecificOptions(archiveStores);
 
         // Create a job to track this retrieve
         Job job = new Job("org.datavaultplatform.worker.tasks.Delete");
         jobsService.addJob(deposit, job);
-
-        // Add the retrieve object
-       // retrievesService.addRetrieve(retrieve, deposit, retrievePath);
         
         // Ask the worker to process the data retrieve
         try {
             HashMap<String, String> deleteProperties = new HashMap<>();
             deleteProperties.put("depositId", deposit.getID());
             deleteProperties.put("bagId", deposit.getBagId());
-            //deleteProperties.put("archives", deposit.getArchives());
             deleteProperties.put("archiveSize", Long.toString(deposit.getArchiveSize()));
             deleteProperties.put("userId", user.getID());
-            //deleteProperties.put("archiveDigest", deposit.getArchiveDigest());
-            //deleteProperties.put("archiveDigestAlgorithm", deposit.getArchiveDigestAlgorithm());
             deleteProperties.put("numOfChunks", Integer.toString(deposit.getNumOfChunks()));
-            
             for (Archive archive : deposit.getArchives()) {
             	deleteProperties.put(archive.getArchiveStore().getID(), archive.getArchiveId());
             }
@@ -269,7 +273,7 @@ public class AdminController {
                 encChunksDigests.put(chunks.getChunkNum(), chunks.getEcnArchiveDigest());
             }
             
-            Task retrieveTask = new Task(
+            Task deleteTask = new Task(
                     job, deleteProperties, archiveStores, 
                     userFileStoreProperties, userFileStoreClasses, 
                     null, null, 
@@ -277,10 +281,10 @@ public class AdminController {
                     tarIVs, chunksIVs,
                     encTarDigest, encChunksDigests, null);
             ObjectMapper mapper = new ObjectMapper();
-            String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
-            sender.send(jsonRetrieve);
+            String jsonDelete = mapper.writeValueAsString(deleteTask);
+            sender.send(jsonDelete);
         } catch (Exception e) {
-            e.printStackTrace();
+        	LOGGER.error("Exception while deleting a deposit", e);
         }
         return new ResponseEntity<>(HttpStatus.OK);
 

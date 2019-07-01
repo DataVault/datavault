@@ -68,14 +68,11 @@ public class Delete extends Task{
         	String tarFileName = this.bagID + ".tar";
         	Path tarPath = context.getTempDir().resolve(tarFileName);
             File tarFile = tarPath.toFile();
-            
             eventStream.send(new DeleteStart(this.jobID, this.depositId).withNextState(0)
                     .withUserId(this.userID));
             
             eventStream.send(new UpdateProgress(this.jobID, this.depositId, 0, this.archiveSize, "Deposit delete started ...")
-                    .withUserId(this.userID)
-                    .withNextState(1));
-            
+                    .withUserId(this.userID));
             for (String archiveStoreId : archiveStores.keySet() ) {
                 ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
                 this.archiveId = properties.get(archiveStoreId);
@@ -88,7 +85,7 @@ public class Delete extends Task{
                 }
             }
             
-            eventStream.send(new DeleteComplete(this.jobID, this.depositId).withNextState(2)
+            eventStream.send(new DeleteComplete(this.jobID, this.depositId).withNextState(1)
                     .withUserId(this.userID));
             
         } catch (Exception e) {
