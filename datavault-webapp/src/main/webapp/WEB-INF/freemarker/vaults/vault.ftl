@@ -16,7 +16,7 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <div class="ui-widget">
-                                <label class="control-label">UUN:</label>
+                                <label class="control-label">UUN or Name:</label>
                                 <input id="data-manager-uun" type="text" class="form-control" name="uun" value=""/>
                             </div>
                         </div>

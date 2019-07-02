@@ -1,26 +1,37 @@
 package org.datavaultplatform.broker.controllers.admin;
 
-import org.datavaultplatform.broker.services.VaultsService;
-import org.datavaultplatform.broker.services.UsersService;
-import org.datavaultplatform.broker.services.DepositsService;
-import org.datavaultplatform.broker.services.RetrievesService;
-import org.datavaultplatform.broker.services.EventService;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.datavaultplatform.broker.services.DepositsService;
+import org.datavaultplatform.broker.services.EventService;
+import org.datavaultplatform.broker.services.RetrievesService;
+import org.datavaultplatform.broker.services.UsersService;
+import org.datavaultplatform.broker.services.VaultsService;
+import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.EventInfo;
-import org.jsondoc.core.annotation.*;
+import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.response.VaultsData;
+import org.jsondoc.core.annotation.Api;
+import org.jsondoc.core.annotation.ApiHeader;
+import org.jsondoc.core.annotation.ApiHeaders;
+import org.jsondoc.core.annotation.ApiMethod;
+import org.jsondoc.core.annotation.ApiQueryParam;
 import org.jsondoc.core.pojo.ApiVerb;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Created by Robin Taylor on 08/03/2016.
@@ -96,20 +107,27 @@ public class AdminController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
     @RequestMapping(value = "/admin/vaults", method = RequestMethod.GET)
-    public List<VaultInfo> getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
+    public VaultsData getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
                                         @RequestParam(value = "sort", required = false)
-                                        @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime"}, defaultvalue = "creationTime", required = false) String sort,
+                                        @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime", "groupID", "reviewDate"}, defaultvalue = "creationTime", required = false) String sort,
                                         @RequestParam(value = "order", required = false)
-                                        @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order) throws Exception {
+                                        @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order,
+                                        @RequestParam(value = "offset", required = false)
+									    @ApiQueryParam(name = "offset", description = "Vault row id ", defaultvalue = "0", required = false) String offset,
+									    @RequestParam(value = "maxResult", required = false)
+									    @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) throws Exception {
 
         if (sort == null) sort = "";
         if (order == null) order = "asc";
-
         List<VaultInfo> vaultResponses = new ArrayList<>();
-        for (Vault vault : vaultsService.getVaults(sort, order)) {
+        for (Vault vault : vaultsService.getVaults(sort, order,offset, maxResult)) {
             vaultResponses.add(vault.convertToResponse());
         }
-        return vaultResponses;
+        Long recordsTotal = vaultsService.getTotalNumberOfVaults();
+        VaultsData data = new VaultsData();
+        data.setRecordsTotal(recordsTotal);
+        data.setData(vaultResponses);
+        return data;
     }
     
     @RequestMapping(value = "/admin/events", method = RequestMethod.GET)
@@ -122,4 +140,12 @@ public class AdminController {
         }
         return events;
     }
+    
+    @RequestMapping(value = "/admin/vaults/{vaultId}", method = RequestMethod.DELETE)
+    public ResponseEntity<Object>  deleteVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                                      @PathVariable("vaultId") String vaultId) {
+    	vaultsService.deleteVault(vaultId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    
 }
