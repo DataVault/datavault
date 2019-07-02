@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
+import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -47,11 +48,13 @@ public class AdminDepositsController {
         return "admin/deposits/index";
     }
     
-    @RequestMapping(value = "/admin/deposits/{depositId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/admin/deposits/{depositID}", method = RequestMethod.DELETE)
     @ResponseBody
-    public String deleteDeposit(ModelMap model, @PathVariable("depositId") String depositId) throws Exception {
-        restService.deleteDeposit(depositId);
-        return "admin/deposits/index";
+    public String deleteDeposit(ModelMap model, @PathVariable("depositID") String depositID,
+    		@RequestParam(value = "vaultId", required = false) String vaultId) throws Exception {
+     
+    	restService.deleteDeposit(depositID);
+        return "vaults/"+vaultId+"/deposits/"+ depositID;
     }
 }
 

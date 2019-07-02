@@ -82,7 +82,7 @@
                                     Restart
                                 </a>
                              <#elseif deposit.status != "DELETED">
-                                 <a class="btn btn-xs btn-danger pull-left" href="#" data-deposit="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
+                                 <a class="btn btn-xs btn-danger pull-left" href="#" data-vault="${deposit.getVaultID()}" data-deposit="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                           		</a>
                             </#if>
@@ -101,18 +101,20 @@
 $('#confirm-removal').on('show.bs.modal', function(e) {
     var data = $(e.relatedTarget).data();
     $('#remove', this).data('depositId', data.deposit);
+    $('#remove', this).data('vaultId', data.vault);
 
 });
 
 $("button#remove").click(function(){
     var depositId = $(this).data('depositId');   
-   
+    var vaultId = $(this).data('vaultId');  
     $.ajax({
-    	url: '${springMacroRequestContext.getContextPath()}/admin/deposits/' + depositId,
+    	url: '${springMacroRequestContext.getContextPath()}/admin/deposits/' + depositId+'?vaultId='+vaultId,
         type: 'DELETE',
         success: function (data) {
         	console.log("----success---");
-            location.reload(true);
+        	window.location.href = '${springMacroRequestContext.getContextPath()}/vaults/'+vaultId+'/deposits/'+depositId;
+        	
         },
         error: function(xhr, ajaxOptions, thrownError) {
             //alert('Error: unable to delete Deposit');
