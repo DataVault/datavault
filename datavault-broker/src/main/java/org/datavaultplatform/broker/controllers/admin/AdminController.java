@@ -230,11 +230,11 @@ public class AdminController {
         LOGGER.info("Delete deposit archiveStores : {}", archiveStores);
         archiveStores = this.addArchiveSpecificOptions(archiveStores);
 
-        // Create a job to track this retrieve
+        // Create a job to track this delete
         Job job = new Job("org.datavaultplatform.worker.tasks.Delete");
         jobsService.addJob(deposit, job);
         
-        // Ask the worker to process the data retrieve
+        // Ask the worker to process the data delete
         try {
             HashMap<String, String> deleteProperties = new HashMap<>();
             deleteProperties.put("depositId", deposit.getID());
@@ -252,34 +252,14 @@ public class AdminController {
             //userFileStoreClasses.put(storageID, userStore.getStorageClass());
             //userFileStoreProperties.put(storageID, userStore.getProperties());
             
-            // get chunks checksums
-            HashMap<Integer, String> chunksDigest = new HashMap<Integer, String>();
-            List<DepositChunk> depositChunks = deposit.getDepositChunks();
-            for (DepositChunk depositChunk : depositChunks) {
-                chunksDigest.put(depositChunk.getChunkNum(), depositChunk.getArchiveDigest());
-            }
-            
-            // Get encryption IVs
-            byte[] tarIVs = deposit.getEncIV();
-            HashMap<Integer, byte[]> chunksIVs = new HashMap<Integer, byte[]>();
-            for( DepositChunk chunks : deposit.getDepositChunks() ) {
-                chunksIVs.put(chunks.getChunkNum(), chunks.getEncIV());
-            }
-            
-            // Get encrypted digests
-            String encTarDigest = deposit.getEncArchiveDigest();
-            HashMap<Integer, String> encChunksDigests = new HashMap<Integer, String>();
-            for( DepositChunk chunks : deposit.getDepositChunks() ) {
-                encChunksDigests.put(chunks.getChunkNum(), chunks.getEcnArchiveDigest());
-            }
             
             Task deleteTask = new Task(
                     job, deleteProperties, archiveStores, 
                     userFileStoreProperties, userFileStoreClasses, 
                     null, null, 
-                    chunksDigest,
-                    tarIVs, chunksIVs,
-                    encTarDigest, encChunksDigests, null);
+                    null,
+                    null, null,
+                    null, null, null);
             ObjectMapper mapper = new ObjectMapper();
             String jsonDelete = mapper.writeValueAsString(deleteTask);
             sender.send(jsonDelete);

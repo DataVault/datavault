@@ -36,7 +36,7 @@ public class Delete extends Task{
     private String bagID = null;
     private long archiveSize = 0;
     private EventSender eventStream = null;
-    // Maps the model ArchiveStore Id to the storage equivelant
+    // Maps the model ArchiveStore Id to the storage equivalent
     HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
     
     @Override

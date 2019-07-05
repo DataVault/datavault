@@ -203,8 +203,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     	String fileDir = TivoliStorageManager.TEMP_PATH_PREFIX + "/" + depositId;
     	String filePath = fileDir + "/" + working.getName();
     	while (true) {
-    		logger.info("Delete command is " + "dsmc" + " archive " + working.getAbsolutePath() +  " -description=" + depositId + " -optfile=" + optFilePath);
-	        ProcessBuilder pb = new ProcessBuilder("dsmc", "delete", "archive", filePath, "-description=" + depositId, "-optfile=" + optFilePath);
+    		logger.info("Delete command is " + "dsmc delete archive " + filePath +  " -noprompt -optfile=" + optFilePath);
+	        ProcessBuilder pb = new ProcessBuilder("dsmc", "delete", "archive", filePath, "-noprompt" , "-optfile=" + optFilePath);
 	        Process p = pb.start();
 	        p.waitFor();
 	
