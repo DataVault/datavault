@@ -197,4 +197,30 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     public Verify.Method getVerifyMethod() {
         return verificationMethod;
     }
+    
+    @Override
+    public void delete(String depositId, File working, Progress progress, String optFilePath) throws Exception {
+    	String fileDir = TivoliStorageManager.TEMP_PATH_PREFIX + "/" + depositId;
+    	String filePath = fileDir + "/" + working.getName();
+    	while (true) {
+    		logger.info("Delete command is " + "dsmc delete archive " + filePath +  " -noprompt -optfile=" + optFilePath);
+	        ProcessBuilder pb = new ProcessBuilder("dsmc", "delete", "archive", filePath, "-noprompt" , "-optfile=" + optFilePath);
+	        Process p = pb.start();
+	        p.waitFor();
+	
+	        if (p.exitValue() != 0) {
+	            logger.info("Delete of " + depositId + " failed.");
+	            InputStream error = p.getErrorStream();
+	            for (int i = 0; i < error.available(); i++) {
+	            		logger.info("" + error.read());
+	            }
+	            logger.info("Delete of " + depositId + " failed. Retrying in " + this.retryTime + " mins");
+	            TimeUnit.MINUTES.sleep(this.retryTime);
+	            
+	        } else {
+	        	logger.info("Delete of " + depositId + " is Successful.");
+		        break;
+	        }
+    	}
+    }
 }

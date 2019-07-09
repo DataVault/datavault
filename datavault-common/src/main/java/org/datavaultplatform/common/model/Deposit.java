@@ -54,13 +54,13 @@ public class Deposit {
 
     // A Deposit can have many Archives
     @JsonIgnore
-    @OneToMany(targetEntity = Archive.class, mappedBy = "deposit", fetch=FetchType.LAZY, cascade= CascadeType.ALL)
+    @OneToMany(targetEntity = Archive.class, mappedBy = "deposit", fetch=FetchType.LAZY)
     @OrderBy("creationTime")
     private List<Archive> archives;
 
     // A Deposit can have a number of events
     @JsonIgnore
-    @OneToMany(targetEntity=Event.class, mappedBy="deposit", fetch=FetchType.LAZY, cascade= CascadeType.ALL)
+    @OneToMany(targetEntity=Event.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp, sequence")
     private List<Event> events;
     
@@ -74,13 +74,13 @@ public class Deposit {
     
     // A Deposit can have a number of active jobs
     @JsonIgnore
-    @OneToMany(targetEntity=Job.class, mappedBy="deposit", fetch=FetchType.LAZY, cascade= CascadeType.ALL)
+    @OneToMany(targetEntity=Job.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp")
     private List<Job> jobs;
     
     // A Deposit can have a number of retrieves
     @JsonIgnore
-    @OneToMany(targetEntity=Retrieve.class, mappedBy="deposit", fetch=FetchType.LAZY, cascade= CascadeType.ALL)
+    @OneToMany(targetEntity=Retrieve.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp")
     private List<Retrieve> retrieves;
 
@@ -90,7 +90,9 @@ public class Deposit {
         NOT_STARTED,
         IN_PROGRESS,
         COMPLETE,
-        FAILED
+        FAILED,
+        DELETE_IN_PROGRESS,
+        DELETED
     }
 
     @ApiObjectField(description = "Deposit name to briefly describe the Deposit")

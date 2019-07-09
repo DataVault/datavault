@@ -566,8 +566,8 @@ public class RestService {
         return (VaultInfo)response.getBody();
     }
     
-    public void deleteVault(String vaultId) {
-        delete(brokerURL + "/admin/vaults/" + vaultId, String.class);
+    public void deleteDeposit(String depositId) {
+        delete(brokerURL + "/admin/deposits/" + depositId, String.class);
     }
 
 }

@@ -3,24 +3,6 @@
 <#global nav="admin">
 <@layout.vaultLayout>
 
-<div class="modal fade" id="confirm-removal" tabindex="-1" role="dialog" aria-labelledby="confirmRemovalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h4 class="modal-title" id="confirmRemovalLabel">Confirm removal of Vault</h4>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to remove ,Vaults should normally not be deleted, only in special circumstances.<b class="remove-vault"></b></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger btn-ok" id="remove">Remove</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="container">
 
     <ol class="breadcrumb">
@@ -56,6 +38,8 @@
                     <tr class="tr">
                        <th><a href="?sort=name&order=${ordername}&query=${query?url}">Vault Name<#if sort == "name"><#if ordername == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                        <th>Deposits</th>
+                       <th>Project ID</th>
+                       <th>Project Size</th>
                        <th><a href="?sort=vaultSize&order=${ordervaultsize}&query=${query?url}">Vault Size<#if sort == "vaultSize"><#if ordervaultsize == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                        <th><a href="?sort=user&order=${orderuser}&query=${query?url}">Owner(UUN)<#if sort == "user"><#if orderuser == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>                       
                        <th><a href="?sort=groupID&order=${ordergroupID}&query=${query?url}">School<#if sort == "groupID"><#if ordergroupID == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
@@ -72,6 +56,8 @@
                                 <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}">${vault.name?html}</a>
                             </td>
                             <td>${vault.getNumberOfDeposits()}</td>
+                            <td></td>
+                            <td></td>
                            <td>${vault.getSizeStr()}</td>
                             <td>
                             <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/${vault.getUserID()}">${vault.getUserName()?html} (${vault.getUserID()?html})</a>
@@ -82,9 +68,7 @@
                             <td>${vault.getCreationTime()?datetime}</td>
                             <td style="display:none">
                             <!-- TODO : Hiding the remove button unless the functionality is clear as to what it should do - Soft/Hard delete -->
-                            <a class="btn btn-xs btn-danger pull-left" href="#" data-vault="${vault.ID}" data-toggle="modal" data-target="#confirm-removal">
-                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
-                          </a>
+                           
                             </td>
                         </tr>
                     </#list>
@@ -111,38 +95,5 @@
 
 </div>
  
-<script>
-//Bind properties to the user removal confirmation dialog
-$('#confirm-removal').on('show.bs.modal', function(e) {
-    var data = $(e.relatedTarget).data();
-    $('.remove-vault', this).text(data.vault);
-    $('#remove', this).data('vaultId', data.vault);
 
-});
-
-$("button#remove").click(function(){
-    var vaultId = $(this).data('vaultId');
-    $.ajax({
-        url: '${springMacroRequestContext.getContextPath()}/admin/vaults/' + vaultId,
-        type: 'DELETE',
-        success: function (data) {
-        	console.log("----success---");
-            location.reload(true);
-        },
-        error: function(xhr, ajaxOptions, thrownError) {
-            alert('Error: unable to delete vault');
-        }
-    });
-});
-
-//Add Spring Security CSRF header to ajax requests
-$(function () {
-    var token = $("meta[name='_csrf']").attr("content");
-    var header = $("meta[name='_csrf_header']").attr("content");
-    $(document).ajaxSend(function(e, xhr, options) {
-        xhr.setRequestHeader(header, token);
-    });
-});
-
-</script>
 </@layout.vaultLayout>

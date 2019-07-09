@@ -267,7 +267,7 @@
                         // Animation complete
                         location.reload(true)
                     });
-                } else if (depositStatus != "COMPLETE" && depositStatus != "FAILED") {
+                } else if (depositStatus != "COMPLETE" && depositStatus != "FAILED" && depositStatus != "DELETED" && depositStatus != "") {
                     // Refresh the deposit
                     location.reload(true)
                 }
@@ -298,7 +298,7 @@
                         // Animation complete
                         location.reload(true)
                     });
-                } else if (depositStatus != "COMPLETE") {
+                } else if (depositStatus != "COMPLETE" && depositStatus != "DELETED") {
                     // Refresh the deposit
                     location.reload(true)
                 }

@@ -203,4 +203,10 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
             return false;
         }
     }
+    
+    @Override
+    public void delete(String path, File working, Progress progress) throws Exception {
+        Path absolutePath = getAbsolutePath(path);
+        Files.deleteIfExists(absolutePath);
+    }
 }

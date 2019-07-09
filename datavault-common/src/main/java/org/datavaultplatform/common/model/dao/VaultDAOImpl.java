@@ -193,18 +193,6 @@ public class VaultDAOImpl implements VaultDAO {
             }
         }
     }
-    
-    @Override
-    public void deleteById(String Id) {
-        LOGGER.info("Deleting Vault with id " + Id);
-        Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
-        criteria.add(Restrictions.eq("id", Id));
-        Vault vault = (Vault)criteria.uniqueResult();
-        session.delete(vault);
-        session.flush();
-        session.close();
-    }
 
 	@Override
 	public Long getTotalNumberOfVaults() {
