@@ -196,15 +196,15 @@ public class AdminController {
 				vaultResponses.add(vaultInfo);
 	        }
 	        recordsTotal = vaultsService.getTotalNumberOfVaults();
+	        Map<String, Long> projectSizeMap = constructProjectSizeMap(vaultResponses);
+	        //update project Size in the response
+	        for(VaultInfo vault: vaultResponses) {
+	        	if(vault.getProjectId() != null) {
+	        		vault.setProjectSize(projectSizeMap.get(vault.getProjectId()));
+	        	}
+	        }
         }
         //calculate and create a map of project size
-        Map<String, Long> projectSizeMap = constructProjectSizeMap(vaultResponses);
-        //update project Size in the response
-        for(VaultInfo vault: vaultResponses) {
-        	if(vault.getProjectId() != null) {
-        		vault.setProjectSize(projectSizeMap.get(vault.getProjectId()));
-        	}
-        }
         VaultsData data = new VaultsData();
         data.setRecordsTotal(recordsTotal);
         data.setData(vaultResponses);
