@@ -5,10 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.ArchiveStoreService;
 import org.datavaultplatform.broker.services.DepositsService;
 import org.datavaultplatform.broker.services.EventService;
+import org.datavaultplatform.broker.services.ExternalMetadataService;
 import org.datavaultplatform.broker.services.JobsService;
 import org.datavaultplatform.broker.services.RetrievesService;
 import org.datavaultplatform.broker.services.UsersService;
@@ -17,7 +19,6 @@ import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.Archive;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.DepositChunk;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.User;
@@ -65,6 +66,7 @@ public class AdminController {
     private EventService eventService;
     private ArchiveStoreService archiveStoreService;
     private JobsService jobsService;
+    private ExternalMetadataService externalMetadataService;
     private Sender sender;
     private String optionsDir;
     private String tempDir;
@@ -180,15 +182,52 @@ public class AdminController {
 
         if (sort == null) sort = "";
         if (order == null) order = "asc";
+        Long recordsTotal = 0L;
         List<VaultInfo> vaultResponses = new ArrayList<>();
-        for (Vault vault : vaultsService.getVaults(sort, order,offset, maxResult)) {
-            vaultResponses.add(vault.convertToResponse());
+        List<Vault> vaults = vaultsService.getVaults(sort, order,offset, maxResult);
+        if(CollectionUtils.isNotEmpty(vaults)) {
+        	Map<String, String> pureProjectIds = externalMetadataService.getPureProjectIds();
+			for (Vault vault : vaults) {
+	            VaultInfo vaultInfo = vault.convertToResponse();
+	            //set the project Id from Pure if it doesn't exists in DB
+	            if(vaultInfo.getProjectId() == null && (pureProjectIds.get(vault.getDataset().getID()) != null)) {
+	            	vaultInfo.setProjectId(pureProjectIds.get(vault.getDataset().getID()));
+	            }
+				vaultResponses.add(vaultInfo);
+	        }
+	        recordsTotal = vaultsService.getTotalNumberOfVaults();
         }
-        Long recordsTotal = vaultsService.getTotalNumberOfVaults();
+        //calculate and create a map of project size
+        Map<String, Long> projectSizeMap = constructProjectSizeMap(vaultResponses);
+        //update project Size in the response
+        for(VaultInfo vault: vaultResponses) {
+        	if(vault.getProjectId() != null) {
+        		vault.setProjectSize(projectSizeMap.get(vault.getProjectId()));
+        	}
+        }
         VaultsData data = new VaultsData();
         data.setRecordsTotal(recordsTotal);
         data.setData(vaultResponses);
         return data;
+    }
+    /**
+     * This method calculates and creates a map of projectId and project size
+     * @param vaults
+     * @return
+     */
+    private Map<String, Long> constructProjectSizeMap(List<VaultInfo> vaults) {
+    	Map<String, Long> projectSizeMap = new HashMap<>();
+    	for(VaultInfo vault: vaults) {
+    		if(vault.getProjectId() != null) {
+				if(projectSizeMap.containsKey(vault.getProjectId())) {
+	    			Long projectSize = projectSizeMap.get(vault.getProjectId());
+	    			projectSizeMap.put(vault.getProjectId(), projectSize.longValue()+ vault.getVaultSize());
+	    		} else {
+	    			projectSizeMap.put(vault.getProjectId(), vault.getVaultSize());
+	    		}
+    		}
+    	}
+    	return projectSizeMap;
     }
     
     @RequestMapping(value = "/admin/events", method = RequestMethod.GET)
@@ -307,5 +346,13 @@ public class AdminController {
     	}
     	
     	return archiveStores;
-    }    
+    }
+
+	public ExternalMetadataService getExternalMetadataService() {
+		return externalMetadataService;
+	}
+
+	public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
+		this.externalMetadataService = externalMetadataService;
+	}    
 }

@@ -116,6 +116,9 @@ public class Vault {
     @ManyToOne
     private Dataset dataset;
     
+    @Column(name = "projectId", nullable = true)
+    private String projectId;
+    
     public Vault() {}
     public Vault(String name) {
         this.name = name;
@@ -234,7 +237,13 @@ public class Vault {
         this.dataset = dataset;
     }
     
-    public VaultInfo convertToResponse() {
+    public String getProjectId() {
+		return projectId;
+	}
+	public void setProjectId(String projectId) {
+		this.projectId = projectId;
+	}
+	public VaultInfo convertToResponse() {
         return new VaultInfo(
                 id,
                 user.getID(),
@@ -252,7 +261,8 @@ public class Vault {
                 retentionPolicyLastChecked,
                 grantEndDate,
                 reviewDate,
-                deposits != null? deposits.size() : ZERO);
+                deposits != null? deposits.size() : ZERO,
+                projectId);
     }
     
     @Override

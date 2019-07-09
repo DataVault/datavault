@@ -24,6 +24,7 @@ public class PureFlatFileProvider implements Provider {
     public static final String DATASET_FULL_FILE_NAME = "datasetFull.flat";
     public static final String PERSON_FILE_NAME = "person.flat";
     private static final String PURE_VALIDATED = "Validated";
+    public static final String PURE_PROJECT_IDS_FILE_NAME = "projectId.flat";
     
     public PureFlatFileProvider() {
     }
@@ -201,6 +202,31 @@ public class PureFlatFileProvider implements Provider {
 			}
     	}
         return retVal;
-        
+    }
+    
+    @Override
+    public Map<String, String> getPureProjectIds(){
+    	Map<String, String> projectIds = new HashMap<>();
+    	System.out.println("flat file dir is : " + this.getFlatFileDir());
+        File projectIdsFullFile  = new File(this.getFlatFileDir() + PureFlatFileProvider.PURE_PROJECT_IDS_FILE_NAME);
+        if (projectIdsFullFile.exists()) {
+	        LineIterator fullIt = null;
+			try {
+				fullIt = FileUtils.lineIterator(projectIdsFullFile, "UTF-8");
+				while (fullIt.hasNext()) {
+		    	    String line = fullIt.nextLine();
+		    	    String[] splitLine = line.split("\t");
+		    	    if (splitLine.length == 2) {
+		    	    	projectIds.put(splitLine[0], splitLine[1]);
+		    	    }
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				fullIt.close();
+	    	}
+        }
+    	
+    	return projectIds;
     }
 }

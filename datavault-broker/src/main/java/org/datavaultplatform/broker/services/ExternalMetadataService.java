@@ -1,16 +1,16 @@
 package org.datavaultplatform.broker.services;
 
-import org.datavaultplatform.common.model.Dataset;
-import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.metadata.Provider;
-import org.datavaultplatform.common.metadata.impl.MockProvider;
-import org.datavaultplatform.common.metadata.impl.PureProvider;
-import org.datavaultplatform.common.metadata.impl.PureFlatFileProvider;
-import org.datavaultplatform.common.model.dao.DatasetDAO;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.datavaultplatform.common.metadata.Provider;
+import org.datavaultplatform.common.metadata.impl.MockProvider;
+import org.datavaultplatform.common.metadata.impl.PureFlatFileProvider;
+import org.datavaultplatform.common.model.Dataset;
+import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.dao.DatasetDAO;
 
 public class ExternalMetadataService {
 
@@ -83,6 +83,17 @@ public class ExternalMetadataService {
         }
         
         return dataset;
+    }
+    
+    public Map<String, String> getPureProjectIds() {
+    	Map<String, String> projectIds = new HashMap<>();
+    	if (this.metadataProvider instanceof PureFlatFileProvider) {
+    		projectIds = metadataProvider.getPureProjectIds();
+    	} else {
+    		//get from MockProvider
+    		projectIds = metadataProvider.getPureProjectIds();
+    	}
+    	return projectIds;
     }
     
     public String getDatasetContent(String id) {

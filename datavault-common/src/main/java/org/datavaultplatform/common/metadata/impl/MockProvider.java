@@ -1,7 +1,10 @@
 package org.datavaultplatform.common.metadata.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.metadata.Provider;
 
@@ -36,4 +39,14 @@ public class MockProvider implements Provider {
         }
         return null;
     }
+
+	@Override
+	public Map<String, String> getPureProjectIds() {
+		Map<String, String> projectIds = new HashMap<>();
+		for (Dataset d : datasets) {
+			String replace = d.getID().replace("MOCK-DATASET-", "MOCK-PROJECTID-");
+			projectIds.put(d.getID(), replace);
+		}
+		return projectIds;
+	}
 }
