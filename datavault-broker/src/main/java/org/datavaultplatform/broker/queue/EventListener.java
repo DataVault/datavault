@@ -388,9 +388,27 @@ public class EventListener implements MessageListener {
                 depositsService.updateDeposit(deposit);
                 
             } else if (concreteEvent instanceof DeleteComplete) {
+            	Boolean success = false;
+            	long depositSizeBeforeDelete = deposit.getSize();
             	deposit.setStatus(Deposit.Status.DELETED);
             	deposit.setSize(0);
                 depositsService.updateDeposit(deposit);
+                
+                Vault vault = deposit.getVault();
+                
+                success = false;
+                //Update the vault size after deleting the deposit
+                while (!success) {
+                    try {
+                        long vaultSize = vault.getSize();
+                        vault.setSize(vaultSize - depositSizeBeforeDelete);
+                        vaultsService.updateVault(vault);
+                        success = true;
+                    } catch (org.hibernate.StaleObjectStateException e) {
+                        // Refresh from database and retry
+                        vault = vaultsService.getVault(vault.getID());
+                    }
+                }
             }
 
         } catch (Exception e) {
