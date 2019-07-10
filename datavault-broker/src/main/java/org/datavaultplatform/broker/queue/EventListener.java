@@ -338,7 +338,10 @@ public class EventListener implements MessageListener {
                     Boolean success = false;
                     while (!success) {
                         try {
-                            deposit.setStatus(Deposit.Status.FAILED);
+                        	deposit.setStatus(Deposit.Status.FAILED);
+                        	if(deposit.getStatus() == Deposit.Status.DELETE_IN_PROGRESS) {
+                        		deposit.setStatus(Deposit.Status.DELETE_FAILED);
+                        	}
                             depositsService.updateDeposit(deposit);
                             success = true;
                         } catch (org.hibernate.StaleObjectStateException e) {
@@ -360,7 +363,7 @@ public class EventListener implements MessageListener {
                         job = jobsService.getJob(concreteEvent.getJobId());
                     }
                 }
-                
+                //TODO - send email by using correct template when deposit delete fails 
                 // Get related information for emails
                 String type = "error";
                 this.sendEmails(deposit, errorEvent, type, "user-deposit-error.vm", "group-admin-deposit-error.vm");

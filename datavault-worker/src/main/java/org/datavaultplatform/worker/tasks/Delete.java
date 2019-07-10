@@ -134,7 +134,7 @@ public class Delete extends Task{
         logger.info("deleteMultipleCopiesFromArchiveStorage for deposit : {}",this.depositId);
     	 List<String> locations = archiveFs.getLocations();
     	 for(String location : locations) {
-    		 logger.info("Delte from location : {}",location);
+    		 logger.info("Delete from location : {}",location);
     		 try {
     			 if (context.isChunkingEnabled()) {
     				 for( int chunkNum = 1; chunkNum <= this.numOfChunks; chunkNum++) {
@@ -142,11 +142,11 @@ public class Delete extends Task{
 			            File chunkFile = chunkPath.toFile();
 			            String chunkArchiveId = this.archiveId+FileSplitter.CHUNK_SEPARATOR+chunkNum;
 			            archiveFs.delete(chunkArchiveId,chunkFile, progress,location);
-			            logger.info("---------deleteMultipleCopiesFromArchiveStorage ------After Delete---- {} ",chunkArchiveId);
+			            logger.info("---------deleteMultipleCopiesFromArchiveStorage ------chunkArchiveId Deleted---- {} ",chunkArchiveId);
     				 }
     			 } else {
     				 archiveFs.delete(this.archiveId,tarFile, progress,location);
-    				 logger.info("---------deleteMultipleCopiesFromArchiveStorage ------After Delete---- {} ",this.archiveId);
+    				 logger.info("---------deleteMultipleCopiesFromArchiveStorage ------archiveId Deleted---- {} ",this.archiveId);
     			 }
     			 
     		 } finally {
@@ -172,11 +172,11 @@ public class Delete extends Task{
 			            File chunkFile = chunkPath.toFile();
 			            String chunkArchiveId = this.archiveId+FileSplitter.CHUNK_SEPARATOR+chunkNum;
 			            archiveFs.delete(chunkArchiveId,chunkFile, progress);
-			            logger.info("---------deleteFromArchiveStorage ------After Delete---- {} ",chunkArchiveId);
+			            logger.info("---------deleteFromArchiveStorage ------chunkArchiveId Deleted---- {} ",chunkArchiveId);
             		}
             	} else {
             		archiveFs.delete(this.archiveId,tarFile, progress);
-		            logger.info("---------deleteFromArchiveStorage ------After Delete---- {} ",this.archiveId);
+		            logger.info("---------deleteFromArchiveStorage ------archiveId Deleted---- {} ",this.archiveId);
             	}
             		
             } finally {
