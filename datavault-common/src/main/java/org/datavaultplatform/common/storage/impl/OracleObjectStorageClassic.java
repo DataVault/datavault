@@ -153,27 +153,17 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	
 	@Override
 	public void delete(String path, File working, Progress progress) throws Exception {
-		while (true) {
-			try {
-				this.manager = FileTransferManager.getDefaultFileTransferManager(this.auth);
-				manager.deleteObject(this.containerName, path);
-	            logger.info("Delete Successful");
-	           	            
-			} catch (ObjectNotFound  ce) {
-				logger.error("Delete failed. " + ce.getMessage());
-				TimeUnit.MINUTES.sleep(this.retryTime);
-			} catch (ClientException ce) {
-				logger.error("Delete failed. " + ce.getMessage());
-				TimeUnit.MINUTES.sleep(this.retryTime);
-			} catch (Exception e) {
-				logger.error("Delete failed. " + e.getMessage());
-				TimeUnit.MINUTES.sleep(this.retryTime);
-			} finally {
-				if (this.manager != null) {
-					this.manager.shutdown();
-				}
+		try {
+			this.manager = FileTransferManager.getDefaultFileTransferManager(this.auth);
+			manager.deleteObject(this.containerName, path);
+            logger.info("Delete Successful from Oracle Cloud Storage");
+		} catch (ObjectNotFound  ce) {
+			logger.error("Object does not exists in Oracle Cloud Storage " + ce.getMessage());
+		} finally {
+			if (this.manager != null) {
+				this.manager.shutdown();
 			}
 		}
-		
 	}
+		
 }

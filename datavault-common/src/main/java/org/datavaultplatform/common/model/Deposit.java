@@ -92,7 +92,8 @@ public class Deposit {
         COMPLETE,
         FAILED,
         DELETE_IN_PROGRESS,
-        DELETED
+        DELETED,
+        DELETE_FAILED
     }
 
     @ApiObjectField(description = "Deposit name to briefly describe the Deposit")

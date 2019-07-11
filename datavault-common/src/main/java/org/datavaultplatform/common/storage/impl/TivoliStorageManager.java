@@ -187,7 +187,6 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 	        	break;
 	        }
         }
-
         return description;
     }
     

@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.controllers;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.vault.Create;
 import org.datavaultplatform.common.model.*;
@@ -19,7 +20,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -152,16 +155,56 @@ public class VaultsController {
 											      @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) throws Exception {
 
         List<VaultInfo> vaultResponses = new ArrayList<>();
-        for (Vault vault : vaultsService.search(query, sort, order, offset, maxResult)) {
-            vaultResponses.add(vault.convertToResponse());
+        Long recordsTotal = 0L;
+        Long recordsFiltered = 0L;
+        List<Vault> vaults = vaultsService.search(query, sort, order, offset, maxResult);
+        if(CollectionUtils.isNotEmpty(vaults)) {
+        	Map<String, String> pureProjectIds = externalMetadataService.getPureProjectIds();
+			for (Vault vault : vaults) {
+	            VaultInfo vaultInfo = vault.convertToResponse();
+	            //set the project Id from Pure if it doesn't exists in DB
+	            if(vaultInfo.getProjectId() == null && (pureProjectIds.get(vault.getDataset().getID()) != null)) {
+	            	vaultInfo.setProjectId(pureProjectIds.get(vault.getDataset().getID()));
+	            }
+				vaultResponses.add(vaultInfo);
+	        }
+	        //calculate and create a map of project size
+	        Map<String, Long> projectSizeMap = constructProjectSizeMap(vaultResponses);
+	        //update project Size in the response
+	        for(VaultInfo vault: vaultResponses) {
+	        	if(vault.getProjectId() != null) {
+	        		vault.setProjectSize(projectSizeMap.get(vault.getProjectId()));
+	        	}
+	        }
+	        recordsTotal = vaultsService.getTotalNumberOfVaults();
+	        recordsFiltered = vaultsService.getTotalNumberOfVaults(query);
         }
-        Long recordsTotal = vaultsService.getTotalNumberOfVaults();
-        Long recordsFiltered = vaultsService.getTotalNumberOfVaults(query);
+        
         VaultsData data = new VaultsData();
         data.setRecordsTotal(recordsTotal);
         data.setRecordsFiltered(recordsFiltered);
         data.setData(vaultResponses);
         return data;
+    }
+    
+    /**
+     * This method calculates and creates a map of projectId and project size
+     * @param vaults
+     * @return
+     */
+    private Map<String, Long> constructProjectSizeMap(List<VaultInfo> vaults) {
+    	Map<String, Long> projectSizeMap = new HashMap<>();
+    	for(VaultInfo vault: vaults) {
+    		if(vault.getProjectId() != null) {
+				if(projectSizeMap.containsKey(vault.getProjectId())) {
+	    			Long projectSize = projectSizeMap.get(vault.getProjectId());
+	    			projectSizeMap.put(vault.getProjectId(), projectSize.longValue()+ vault.getVaultSize());
+	    		} else {
+	    			projectSizeMap.put(vault.getProjectId(), vault.getVaultSize());
+	    		}
+    		}
+    	}
+    	return projectSizeMap;
     }
 
     @RequestMapping(value = "/vaults/deposits/search", method = RequestMethod.GET)

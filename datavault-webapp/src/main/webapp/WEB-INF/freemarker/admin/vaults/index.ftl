@@ -56,8 +56,8 @@
                                 <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}">${vault.name?html}</a>
                             </td>
                             <td>${vault.getNumberOfDeposits()}</td>
-                            <td></td>
-                            <td></td>
+                            <td>${vault.getProjectId()}</td>
+                            <td>${vault.getProjectSizeStr()}</td>
                            <td>${vault.getSizeStr()}</td>
                             <td>
                             <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/${vault.getUserID()}">${vault.getUserName()?html} (${vault.getUserID()?html})</a>
