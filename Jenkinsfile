@@ -37,7 +37,7 @@ pipeline {
 
         stage('build and test datavault') {
             steps {
-                sh 'mvn clean package -U'
+                sh 'mvn --batch-mode clean package -U'
             }
         }
 
