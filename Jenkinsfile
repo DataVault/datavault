@@ -6,8 +6,6 @@ pipeline {
         }
     }
 
-    parameters {}
-
     options {
         ansiColor('xterm')
         timestamps()
