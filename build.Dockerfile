@@ -33,7 +33,7 @@ RUN apt-get update \
     && pip3 install pre-commit==$PRE_COMMIT_VERSION \
     && useradd -m -d /home/build -s /bin/bash -u 1010 build
 
-ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
+ENV JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64"
 
 USER build
 WORKDIR /home/build
