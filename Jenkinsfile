@@ -37,7 +37,7 @@ pipeline {
 
         stage('test') {
             steps {
-                sh 'mvn --batch-mode clean test -U'
+                sh 'mvn clean test -U --batch-mode'
             }
         }
 

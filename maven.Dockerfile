@@ -20,7 +20,7 @@ COPY datavault-worker/pom.xml /tmp/datavault-worker/pom.xml
 COPY pom.xml /tmp
 COPY lib /tmp/lib
 
-RUN mvn dependency:go-offline --fail-never
+RUN mvn dependency:go-offline --fail-never --batch-mode
 
 # The dependency:go-offline gets a lot of the dependencies, but not all. This would get more, but not sure about other implications
 #RUN mvn -s /usr/share/maven/ref/settings-docker.xml install --fail-never
@@ -28,4 +28,4 @@ RUN mvn dependency:go-offline --fail-never
 WORKDIR /usr/src
 
 ONBUILD COPY . /usr/src
-ONBUILD RUN mvn -Dmaven.test.skip=true clean package
+ONBUILD RUN mvn -Dmaven.test.skip=true clean package --batch-mode
