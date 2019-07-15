@@ -6,6 +6,14 @@ pipeline {
         }
     }
 
+    environment {
+        IMAGE_CREDS_JENKINS_ID = 'aks-datavault'
+        IMAGE_REGISTRY = 'datavault.azurecr.io'
+        IMAGE_REPOSITORY_WEBAPP = 'webapp'
+        IMAGE_REPOSITORY_BROKER = 'broker'
+        IMAGE_REPOSITORY_WORKER = 'worker'
+    }
+
     options {
         ansiColor('xterm')
         timestamps()
@@ -47,6 +55,36 @@ pipeline {
                 sh 'docker build -t datavault/webapp:latest -f webapp.Dockerfile .'
                 sh 'docker build -t datavault/broker:latest -f broker.Dockerfile .'
                 sh 'docker build -t datavault/worker:latest -f worker.Dockerfile .'
+            }
+        }
+
+        stage('push image') {
+            //when {
+            //    branch "master"
+            //}
+
+            steps {
+                withCredentials([usernamePassword(credentialsId: "$IMAGE_CREDS_JENKINS_ID", usernameVariable: 'IMAGE_REGISTRY_USERNAME', passwordVariable: 'IMAGE_REGISTRY_PASSWORD')]) {
+                    sh 'docker login $IMAGE_REGISTRY --username $IMAGE_REGISTRY_USERNAME --password $IMAGE_REGISTRY_PASSWORD'
+                }
+
+                script {
+                    def properties = readProperties(file: 'version.properties')
+                    version = "${properties.version}-${currentBuild.startTimeInMillis}.${currentBuild.number}"
+                    def images = [
+                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WEBAPP:$version",
+                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WEBAPP:latest",
+                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_BROKER:$version",
+                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_BROKER:latest",
+                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WORKER:$version",
+                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WORKER:latest"
+                    ]
+
+                    for (String image : images) {
+                        sh "docker tag \$IMAGE_REPOSITORY:latest $image"
+                        sh "docker push $image"
+                    }
+                }
             }
         }
     }
