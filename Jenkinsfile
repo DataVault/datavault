@@ -51,10 +51,10 @@ pipeline {
 
         stage('build images') {
             steps {
-                sh 'docker build -t datavault/maven-build:latest -f maven.Dockerfile .'
-                sh 'docker build -t datavault/webapp:latest -f webapp.Dockerfile .'
-                sh 'docker build -t datavault/broker:latest -f broker.Dockerfile .'
-                sh 'docker build -t datavault/worker:latest -f worker.Dockerfile .'
+                sh 'docker build -t maven-build:latest -f maven.Dockerfile .'
+                sh 'docker build -t $IMAGE_REPOSITORY_WEBAPP:latest -f webapp.Dockerfile .'
+                sh 'docker build -t $IMAGE_REPOSITORY_BROKER:latest -f broker.Dockerfile .'
+                sh 'docker build -t $IMAGE_REPOSITORY_WORKER:latest -f worker.Dockerfile .'
             }
         }
 
