@@ -109,7 +109,8 @@ public class VaultInfo {
     public VaultInfo(String id,String userName, Date creationTime, String name,  
     		long vaultSize, Date reviewDate,BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId) {
         this.id = id;        
-        this.userName = userName;        
+        this.userName = userName;    
+        this.creationTime = creationTime;
         this.name = name;        
         this.vaultSize = vaultSize;        
         this.reviewDate = reviewDate;

@@ -50,15 +50,16 @@ public class BillingController {
 		 */
         
         List<VaultInfo> billingResponses = new ArrayList<>();
-        List<Vault> billingDetails = vaultsService.getVaults(sort, order,offset, maxResult);
+        List<Vault> vaultDetails = vaultsService.getVaults(sort, order,offset, maxResult);
         
-        if(CollectionUtils.isNotEmpty(billingDetails)) {
+        if(CollectionUtils.isNotEmpty(vaultDetails)) {
         	Map<String, String> pureProjectIds = externalMetadataService.getPureProjectIds();
-			for (Vault billingList : billingDetails) {				
-				VaultInfo billingInfo = billingList.convertToResponseBilling();
-	            //set the project Id from Pure if it doesn't exists in DB
-	           
-				billingResponses.add(billingInfo);
+			for (Vault vaultList : vaultDetails) {				
+				VaultInfo vaultInfo = vaultList.convertToResponseBilling();
+				if(vaultInfo.getProjectId() == null && (pureProjectIds.get(vaultList.getDataset().getID()) != null)) {
+	            	vaultInfo.setProjectId(pureProjectIds.get(vaultList.getDataset().getID()));
+	            }
+				billingResponses.add(vaultInfo);
 	        }
 	        recordsTotal = vaultsService.getTotalNumberOfVaults();
 	        Map<String, Long> projectSizeMap = constructProjectSizeMap(billingResponses);

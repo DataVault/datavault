@@ -14,10 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * User: Stuart Lewis
- * Date: 27/09/2015
- */
+
 
 @Controller
 public class AdminBillingController {
