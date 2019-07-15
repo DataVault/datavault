@@ -71,18 +71,35 @@ pipeline {
                 script {
                     def properties = readProperties(file: 'version.properties')
                     version = "${properties.version}-${currentBuild.startTimeInMillis}.${currentBuild.number}"
-                    def images = [
+
+                    def webappImages = [
                             "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WEBAPP:$version",
-                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WEBAPP:latest",
-                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_BROKER:$version",
-                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_BROKER:latest",
+                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WEBAPP:latest"
+                    ]
+
+                    for (String webappImage : webappImages) {
+                        sh "docker tag \$IMAGE_REPOSITORY_WEBAPP:latest $webappImage"
+                        sh "docker push $webappImage"
+                    }
+
+                    def workerImages = [
                             "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WORKER:$version",
                             "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WORKER:latest"
                     ]
 
-                    for (String image : images) {
-                        sh "docker tag \$IMAGE_REPOSITORY:latest $image"
-                        sh "docker push $image"
+                    for (String workerImage : workerImages) {
+                        sh "docker tag \$IMAGE_REPOSITORY_WORKER:latest $workerImage"
+                        sh "docker push $workerImage"
+                    }
+
+                    def brokerImages = [
+                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_BROKER:$version",
+                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_BROKER:latest",
+                    ]
+
+                    for (String brokerImage : brokerImages) {
+                        sh "docker tag \$IMAGE_REPOSITORY_BROKER:latest $brokerImage"
+                        sh "docker push $brokerImage"
                     }
                 }
             }
