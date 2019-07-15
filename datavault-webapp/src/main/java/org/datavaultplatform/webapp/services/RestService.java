@@ -184,6 +184,10 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/vaults/user?userID=" + userID, VaultInfo[].class);
         return (VaultInfo[])response.getBody();
     }
+    public VaultsData getBillingVaultsAll(String sort, String order, String offset, String maxResult) {
+    	HttpEntity<?> response = get(brokerURL + "/admin/bill?sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
+        return (VaultsData)response.getBody();
+	}
 
     public VaultInfo[] getVaultsListingAll() {
         HttpEntity<?> response = get(brokerURL + "/admin/vaults", VaultInfo[].class);
@@ -569,5 +573,7 @@ public class RestService {
     public void deleteDeposit(String depositId) {
         delete(brokerURL + "/admin/deposits/" + depositId, String.class);
     }
+
+	
 
 }

@@ -6,6 +6,7 @@ import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
 
@@ -72,6 +73,12 @@ public class VaultInfo {
     @ApiObjectField(description = "Project Id from Pure")
     private String projectId;
     
+    @ApiObjectField(description = "Amount to be Billed")
+    private BigDecimal amountToBeBilled;
+    
+    @ApiObjectField(description = "Amount Billed")
+    private BigDecimal amountBilled;
+    
     @ApiObjectField(description = "Sum of vaults size for a projectId")
     private long projectSize;
     
@@ -98,8 +105,20 @@ public class VaultInfo {
         this.numberOfDeposits = numberOfDeposits;
         this.projectId = projectId;
     }
+    
+    public VaultInfo(String id,String userName, Date creationTime, String name,  
+    		long vaultSize, Date reviewDate,BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId) {
+        this.id = id;        
+        this.userName = userName;        
+        this.name = name;        
+        this.vaultSize = vaultSize;        
+        this.reviewDate = reviewDate;
+        this.amountToBeBilled = amountToBeBilled;
+        this.amountBilled = amountBilled;
+        this.projectId = projectId;
+    }
 
-    public String getID() {
+	public String getID() {
         return id;
     }
 
@@ -285,4 +304,21 @@ public class VaultInfo {
         }
         return dx + " GB";
     }
+
+
+	public BigDecimal getAmountToBeBilled() {
+		return amountToBeBilled;
+	}
+
+	public void setAmountToBeBilled(BigDecimal amountToBeBilled) {
+		this.amountToBeBilled = amountToBeBilled;
+	}
+
+	public BigDecimal getAmountBilled() {
+		return amountBilled;
+	}
+
+	public void setAmountBilled(BigDecimal amountBilled) {
+		this.amountBilled = amountBilled;
+	}
 }
