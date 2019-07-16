@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -e
-set -x
 
 /usr/local/bin/ep "${DATAVAULT_HOME}"/scripts/set-defaults.sh
 source "${DATAVAULT_HOME}"/scripts/set-defaults.sh
