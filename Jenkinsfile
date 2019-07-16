@@ -12,6 +12,8 @@ pipeline {
         IMAGE_REPOSITORY_WEBAPP = 'webapp'
         IMAGE_REPOSITORY_BROKER = 'broker'
         IMAGE_REPOSITORY_WORKER = 'worker'
+        DEPLOYMENT_JOB = '../datavault-infra/PR-1'
+        DEPLOYMENT_ENV = 'dev'
     }
 
     options {
@@ -58,7 +60,7 @@ pipeline {
             }
         }
 
-        stage('push image') {
+        stage('push images') {
             //when {
             //    branch "master"
             //}
@@ -102,6 +104,21 @@ pipeline {
                         sh "docker push $brokerImage"
                     }
                 }
+            }
+        }
+
+        stage('deploy images') {
+            //when {
+            //    branch "master"
+            //}
+
+            steps {
+                build job: '$DEPLOYMENT_JOB',
+                      parameters:  [
+                          [$class: 'StringParameterValue', name: 'ENVIRONMENT', value: '$DEPLOYMENT_ENV'],
+                          [$class: 'StringParameterValue', name: 'BACKEND_IMAGE_TAG', value: "${version}"]
+                      ],
+                       propagate: true
             }
         }
     }
