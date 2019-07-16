@@ -75,8 +75,8 @@ pipeline {
                     version = "${properties.version}-${currentBuild.startTimeInMillis}.${currentBuild.number}"
 
                     def webappImages = [
-                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WEBAPP:$version",
-                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WEBAPP:latest"
+                        "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WEBAPP:$version",
+                        "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WEBAPP:latest"
                     ]
 
                     for (String webappImage : webappImages) {
@@ -85,8 +85,8 @@ pipeline {
                     }
 
                     def workerImages = [
-                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WORKER:$version",
-                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WORKER:latest"
+                        "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WORKER:$version",
+                        "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_WORKER:latest"
                     ]
 
                     for (String workerImage : workerImages) {
@@ -95,8 +95,8 @@ pipeline {
                     }
 
                     def brokerImages = [
-                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_BROKER:$version",
-                            "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_BROKER:latest",
+                        "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_BROKER:$version",
+                        "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY_BROKER:latest",
                     ]
 
                     for (String brokerImage : brokerImages) {
@@ -116,7 +116,9 @@ pipeline {
                 build job: '$DEPLOYMENT_JOB',
                       parameters:  [
                           [$class: 'StringParameterValue', name: 'ENVIRONMENT', value: '$DEPLOYMENT_ENV'],
-                          [$class: 'StringParameterValue', name: 'BACKEND_IMAGE_TAG', value: "${version}"]
+                          [$class: 'StringParameterValue', name: 'WEBAPP_IMAGE_TAG', value: "${version}"],
+                          [$class: 'StringParameterValue', name: 'WORKER_IMAGE_TAG', value: "${version}"],
+                          [$class: 'StringParameterValue', name: 'BROKER_IMAGE_TAG', value: "${version}"]
                       ],
                        propagate: true
             }
