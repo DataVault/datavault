@@ -113,9 +113,9 @@ pipeline {
             //}
 
             steps {
-                build job: '$DEPLOYMENT_JOB',
+                build job: "$DEPLOYMENT_JOB",
                       parameters:  [
-                          [$class: 'StringParameterValue', name: 'ENVIRONMENT', value: '$DEPLOYMENT_ENV'],
+                          [$class: 'StringParameterValue', name: 'ENVIRONMENT', value: "$DEPLOYMENT_ENV"],
                           [$class: 'StringParameterValue', name: 'WEBAPP_IMAGE_TAG', value: "${version}"],
                           [$class: 'StringParameterValue', name: 'WORKER_IMAGE_TAG', value: "${version}"],
                           [$class: 'StringParameterValue', name: 'BROKER_IMAGE_TAG', value: "${version}"]
