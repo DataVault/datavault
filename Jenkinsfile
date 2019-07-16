@@ -12,7 +12,7 @@ pipeline {
         IMAGE_REPOSITORY_WEBAPP = 'webapp'
         IMAGE_REPOSITORY_BROKER = 'broker'
         IMAGE_REPOSITORY_WORKER = 'worker'
-        DEPLOYMENT_JOB = '../datavault-infra/PR-1'
+        DEPLOYMENT_JOB = '../datavault-infra/master'
         DEPLOYMENT_ENV = 'dev'
     }
 
@@ -61,9 +61,9 @@ pipeline {
         }
 
         stage('push images') {
-            //when {
-            //    branch "master"
-            //}
+            when {
+                branch "master"
+            }
 
             steps {
                 withCredentials([usernamePassword(credentialsId: "$IMAGE_CREDS_JENKINS_ID", usernameVariable: 'IMAGE_REGISTRY_USERNAME', passwordVariable: 'IMAGE_REGISTRY_PASSWORD')]) {
@@ -108,9 +108,9 @@ pipeline {
         }
 
         stage('deploy images') {
-            //when {
-            //    branch "master"
-            //}
+            when {
+                branch "master"
+            }
 
             steps {
                 build job: "$DEPLOYMENT_JOB",
