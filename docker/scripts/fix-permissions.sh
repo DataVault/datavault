@@ -1,3 +1,5 @@
+#!/bin/bash
+
 mkdir -p $USER_DATA_DIR
 mkdir -p $ARCHIVE_DIR
 mkdir -p $TEMP_DIR

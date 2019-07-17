@@ -24,6 +24,7 @@ datavault-webapp/src/main/webapp/WEB-INF/glassfish-web.xml
 ## Ignore all *.properties file in root folder, EXCEPT datavault.properties (the default)
 /*.properties
 !/datavault.properties
+!/version.properties
 ##Mac noise
 .DS_Store
 docker/mysql
