@@ -20,6 +20,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
+import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.hibernate.annotations.GenericGenerator;
@@ -291,6 +292,22 @@ public class Vault {
                 billinginfo != null? billinginfo.getAmountToBeBilled() : null,
                 billinginfo != null? billinginfo.getAmountBilled(): null,
         		projectId);
+    }
+	
+	public BillingInformation convertToBillingDetailsResponse() {		
+		return new BillingInformation(
+                billinginfo != null? billinginfo.getID(): null,
+                id,
+                billinginfo != null? billinginfo.getContactname() : null,
+                billinginfo != null? billinginfo.getSchool() : null,
+                billinginfo != null? billinginfo.getSubunit() : null,
+                billinginfo != null? billinginfo.getBudgetcode() : null,
+                billinginfo != null? billinginfo.getSpecialcomments() : null,
+                billinginfo != null? billinginfo.getAmountToBeBilled() : null,
+                billinginfo != null? billinginfo.getAmountBilled() : null,
+                projectId,
+                name
+            );
     }
     
     @Override

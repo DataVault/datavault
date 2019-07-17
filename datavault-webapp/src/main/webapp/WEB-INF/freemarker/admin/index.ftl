@@ -93,7 +93,7 @@
                     <h3 class="panel-title">Billing</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/bill"><i class="fa fa-users" aria-hidden="true"></i> ${groupcount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/billing"><i class="fa fa-money" aria-hidden="true"></i> </a></h1>
                 </div>
             </div>
         </div>

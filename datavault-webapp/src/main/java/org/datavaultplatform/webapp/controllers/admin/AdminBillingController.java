@@ -4,12 +4,16 @@ package org.datavaultplatform.webapp.controllers.admin;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.datavaultplatform.common.response.BillingInformation;
+import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,7 +36,7 @@ public class AdminBillingController {
     }
 
 
-    @RequestMapping(value = "/admin/bill", method = RequestMethod.GET)
+    @RequestMapping(value = "/admin/billing", method = RequestMethod.GET)
     public String billingByVaults(ModelMap model,
                                @RequestParam(value = "query", required = false) String query,
                                @RequestParam(value = "sort", required = false) String sort,
@@ -121,6 +125,20 @@ public class AdminBillingController {
 		}
 		return recordsInfo.toString();
 	}
+    
+    @RequestMapping(value = "/admin/billing/{vaultId}", method = RequestMethod.GET)
+    public String retrieveBillingInfo(ModelMap model, @PathVariable("vaultId") String vaultId) {
+    	BillingInformation billingDetails = restService.getVaultBillingInfo(vaultId);
+        model.addAttribute("billingDetails", billingDetails);
+        return "admin/billing/billingDetails";
+    }
+    
+    @RequestMapping(value = "/admin/billing/{vaultId}/updateBillingDetails", method = RequestMethod.POST)
+    public String updateBillingDetails(ModelMap model,
+            @PathVariable("vaultId") String vaultId,
+            @ModelAttribute("billingDetails") BillingInformation billingDetails ) throws Exception {
+    	return "admin/billing/billingDetails";
+    }
 
 	
 }

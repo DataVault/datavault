@@ -6,7 +6,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -21,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name="BillingInfo")
 public class BillingInfo {
 
-	private static final long ZERO = 0l;
     // Vault Identifier
     @Id
     @Column(name = "id", unique = true)
@@ -117,6 +115,22 @@ public class BillingInfo {
     public long getVersion() {
     	return version; 
     };
+    
+    public BillingInformation convertToResponse() {
+        return new BillingInformation(
+                id,
+                vault.getID(),
+                contactName,
+                school,
+                subUnit,
+                budgetCode,
+                specialComments,
+                amountToBeBilled,
+                amountBilled,
+                vault.getProjectId(),
+                vault.getName()
+            );
+    }
      
     
     @Override

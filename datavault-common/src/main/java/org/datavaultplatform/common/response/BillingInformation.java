@@ -30,7 +30,7 @@ public class BillingInformation {
     private String subUnit;
     
     @ApiObjectField(description = "To know if the user uses BudgetCode")
-    private boolean budgetCode;
+    private Boolean budgetCode;
     
     @ApiObjectField(description = "The comments entered by Admin")
     private String specialComments;
@@ -64,7 +64,10 @@ public class BillingInformation {
     
     @ApiObjectField(description = "Owner Name")
 	private String userName;
-
+    
+    public BillingInformation() {
+    	
+    }
 
 	public BillingInformation(String id, String vaultID, String contactName, String school, String subUnit, Boolean budgetCode,
 			String specialComments, BigDecimal amountToBeBilled, BigDecimal amountBilled, long vaultSize, Date reviewDate, Date creationTime, String vaultName,String projectID,String userName) {
@@ -83,6 +86,21 @@ public class BillingInformation {
         this.vaultName = vaultName;
         this.projectID= projectID;
         this.userName= userName;
+	}
+	
+	public BillingInformation(String id, String vaultID, String contactName, String school, String subUnit, Boolean budgetCode,
+			String specialComments, BigDecimal amountToBeBilled, BigDecimal amountBilled, String projectID, String vaultName) {
+    	this.id = id;        
+        this.vaultID = vaultID;    
+        this.contactName = contactName; 
+        this.school = school;        
+        this.subUnit = subUnit;        
+        this.budgetCode = budgetCode;       
+        this.specialComments = specialComments;
+        this.amountToBeBilled = amountToBeBilled;       
+        this.amountBilled = amountBilled;
+        this.projectID= projectID;
+        this.vaultName = vaultName;
 	}
 
     public String getUserName() {
@@ -141,11 +159,11 @@ public class BillingInformation {
 		this.subUnit = subUnit;
 	}
 
-	public boolean isBudgetCode() {
+	public Boolean getBudgetCode() {
 		return budgetCode;
 	}
 
-	public void setBudgetCode(boolean budgetCode) {
+	public void setBudgetCode(Boolean budgetCode) {
 		this.budgetCode = budgetCode;
 	}
 
@@ -157,11 +175,11 @@ public class BillingInformation {
 		this.specialComments = specialComments;
 	}
 
-	public BigDecimal getAmountTobeBilled() {
+	public BigDecimal getAmountToBeBilled() {
 		return amountToBeBilled;
 	}
 
-	public void setAmountobeBilled(BigDecimal amountToBeBilled) {
+	public void setAmounToBeBilled(BigDecimal amountToBeBilled) {
 		this.amountToBeBilled = amountToBeBilled;
 	}
 
@@ -172,8 +190,6 @@ public class BillingInformation {
 	public void setAmountBilled(BigDecimal amountBilled) {
 		this.amountBilled = amountBilled;
 	}
-
-	
     
     public long getVaultSize() {
 		return vaultSize;
@@ -237,4 +253,11 @@ public class BillingInformation {
         }
         return dx + " GB";
     }
+	
+	public String getBudgetCodeStr() {
+		if(budgetCode == null) {
+			return null;
+		}
+		return Boolean.TRUE.equals(budgetCode) ? "Yes" : "No";
+	}
 }

@@ -47,7 +47,7 @@
                         <th>Amount Billed</th>
                          <th><a href="?sort=user&order=${orderuser}&query=${query?url}">Owner<#if sort == "user"><#if orderuser == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>                       
                       
-                        <th>Actions</th>
+                        <th></th>
                     </tr>
                 </thead>
 
@@ -71,8 +71,7 @@
                              ${vault.getUserName()} 
                             </td>
                             <td>
-                            Edit
-                            </td>
+                             <a href="${springMacroRequestContext.getContextPath()}/admin/billing/${vault.getID()}">Billing Details</a></td>
                              
                         </tr>
                     </#list>

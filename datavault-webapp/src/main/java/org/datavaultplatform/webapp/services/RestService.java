@@ -17,6 +17,7 @@ import org.datavaultplatform.common.request.CreateClientEvent;
 import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.ValidateUser;
+import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.EventInfo;
 import org.datavaultplatform.common.response.VaultInfo;
@@ -185,8 +186,13 @@ public class RestService {
         return (VaultInfo[])response.getBody();
     }
     public VaultsData getBillingVaultsAll(String sort, String order, String offset, String maxResult) {
-    	HttpEntity<?> response = get(brokerURL + "/admin/bill?sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
+    	HttpEntity<?> response = get(brokerURL + "/admin/billing?sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
         return (VaultsData)response.getBody();
+	}
+    
+    public BillingInformation getVaultBillingInfo(String vaultId) {
+    	HttpEntity<?> response = get(brokerURL + "/admin/billing/" + vaultId , BillingInformation.class);
+        return (BillingInformation)response.getBody();
 	}
 
     public VaultInfo[] getVaultsListingAll() {
@@ -574,6 +580,5 @@ public class RestService {
         delete(brokerURL + "/admin/deposits/" + depositId, String.class);
     }
 
-	
 
 }

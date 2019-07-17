@@ -3,7 +3,6 @@ package org.datavaultplatform.common.model.dao;
 import java.util.List;
 
 import org.datavaultplatform.common.model.BillingInfo;
-
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -190,4 +189,5 @@ public class BillingDAOImpl implements BillingDAO {
         session.close();
         return totalNoOfRows;
 	}
+
 }

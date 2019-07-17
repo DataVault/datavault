@@ -23,4 +23,5 @@ public interface BillingDAO {
     public Long getTotalNumberOfVaults();
 
 	public Long getTotalNumberOfVaults(String query);
+	
 }

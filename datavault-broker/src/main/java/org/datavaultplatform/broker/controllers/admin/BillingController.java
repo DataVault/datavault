@@ -8,12 +8,16 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.datavaultplatform.broker.services.ExternalMetadataService;
 import org.datavaultplatform.broker.services.VaultsService;
+import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.response.BillingInformation;
+import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
 import org.jsondoc.core.annotation.ApiQueryParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,11 +29,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class BillingController {
 	private ExternalMetadataService externalMetadataService;
-	//private BillingService billingService;
 	private VaultsService vaultsService;
 	private static final Logger LOGGER = LoggerFactory.getLogger(BillingController.class);
 
-    @RequestMapping(value = "/admin/bill", method = RequestMethod.GET)
+    @RequestMapping(value = "/admin/billing", method = RequestMethod.GET)
     public VaultsData getBillingVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
                                         @RequestParam(value = "sort", required = false)
                                         @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "vaultSize", "user", "creationTime", "reviewDate"}, defaultvalue = "creationTime", required = false) String sort,
@@ -96,6 +99,15 @@ public class BillingController {
     	return projectSizeMap;
     }
     
+    @RequestMapping(value = "/admin/billing/{vaultId}", method = RequestMethod.GET)
+    public BillingInformation getVaultBillingInfo(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                  @PathVariable("vaultId") String vaultId) throws Exception {
+
+    	BillingInformation vaultBillingInfo = vaultsService.getVault(vaultId).convertToBillingDetailsResponse();
+
+        return vaultBillingInfo;
+    }
+    
 	public ExternalMetadataService getExternalMetadataService() {
 		return externalMetadataService;
 	}
@@ -104,17 +116,10 @@ public class BillingController {
 		this.externalMetadataService = externalMetadataService;
 	}
 
-	/*
-	 * public BillingService getBillingService() { return billingService; } public
-	 * void setBillingService(BillingService billingService) { this.billingService =
-	 * billingService; }
-	 */
 	public VaultsService getVaultsService() {
 		return vaultsService;
 	}
 	public void setVaultsService(VaultsService vaultsService) {
 		this.vaultsService = vaultsService;
-	}   
-    
-  
+	}
 }
