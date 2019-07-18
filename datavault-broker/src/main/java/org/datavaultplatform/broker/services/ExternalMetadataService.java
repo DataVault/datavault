@@ -96,6 +96,17 @@ public class ExternalMetadataService {
     	return projectIds;
     }
     
+    public String getPureProjectId(String datasetId) {
+    	String projectId = null;
+    	if (this.metadataProvider instanceof PureFlatFileProvider) {
+    		projectId = metadataProvider.getPureProjectId(datasetId);
+    	} else {
+    		//get from MockProvider
+    		projectId = metadataProvider.getPureProjectId(datasetId);
+    	}
+    	return projectId;
+    }
+    
     public String getDatasetContent(String id) {
         
         // Query the metadata provider

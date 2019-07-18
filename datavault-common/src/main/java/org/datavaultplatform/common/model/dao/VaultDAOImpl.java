@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.datavaultplatform.common.model.Vault;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -218,5 +219,11 @@ public class VaultDAOImpl implements VaultDAO {
 
         session.close();
         return totalNoOfRows;
+	}
+	
+	public List<Object[]> getAllProjectsSize() {
+		Session session = this.sessionFactory.openSession();
+		Query query = session.createQuery("select v.projectId, sum(v.vaultSize) from Vault v group by v.projectId");
+		return (List<Object[]>)query.list();
 	}
 }

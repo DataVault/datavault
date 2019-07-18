@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.datavaultplatform.common.model.Dataset;
+
+import com.amazonaws.util.CollectionUtils;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.datavaultplatform.common.metadata.Provider;
@@ -228,5 +231,17 @@ public class PureFlatFileProvider implements Provider {
         }
     	
     	return projectIds;
+    }
+    
+    @Override
+    public String getPureProjectId(String datasetId){
+    	String projectId = null;
+    	if(datasetId != null) {
+			Map<String, String> pureProjectIds = this.getPureProjectIds();
+			if(pureProjectIds != null) {
+				projectId = pureProjectIds.get(datasetId);
+			}
+    	}
+    	return projectId;
     }
 }

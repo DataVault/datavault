@@ -186,17 +186,12 @@ public class AdminController {
         List<VaultInfo> vaultResponses = new ArrayList<>();
         List<Vault> vaults = vaultsService.getVaults(sort, order,offset, maxResult);
         if(CollectionUtils.isNotEmpty(vaults)) {
-        	Map<String, String> pureProjectIds = externalMetadataService.getPureProjectIds();
 			for (Vault vault : vaults) {
-	            VaultInfo vaultInfo = vault.convertToResponse();
-	            //set the project Id from Pure if it doesn't exists in DB
-	            if(vaultInfo.getProjectId() == null && (pureProjectIds.get(vault.getDataset().getID()) != null)) {
-	            	vaultInfo.setProjectId(pureProjectIds.get(vault.getDataset().getID()));
-	            }
-				vaultResponses.add(vaultInfo);
+				vaultResponses.add(vault.convertToResponse());
 	        }
 	        recordsTotal = vaultsService.getTotalNumberOfVaults();
-	        Map<String, Long> projectSizeMap = constructProjectSizeMap(vaultResponses);
+	        //Map of project with its size
+	        Map<String, Long> projectSizeMap = vaultsService.getAllProjectsSize();
 	        //update project Size in the response
 	        for(VaultInfo vault: vaultResponses) {
 	        	if(vault.getProjectId() != null) {
@@ -204,30 +199,10 @@ public class AdminController {
 	        	}
 	        }
         }
-        //calculate and create a map of project size
         VaultsData data = new VaultsData();
         data.setRecordsTotal(recordsTotal);
         data.setData(vaultResponses);
         return data;
-    }
-    /**
-     * This method calculates and creates a map of projectId and project size
-     * @param vaults
-     * @return
-     */
-    private Map<String, Long> constructProjectSizeMap(List<VaultInfo> vaults) {
-    	Map<String, Long> projectSizeMap = new HashMap<>();
-    	for(VaultInfo vault: vaults) {
-    		if(vault.getProjectId() != null) {
-				if(projectSizeMap.containsKey(vault.getProjectId())) {
-	    			Long projectSize = projectSizeMap.get(vault.getProjectId());
-	    			projectSizeMap.put(vault.getProjectId(), projectSize.longValue()+ vault.getVaultSize());
-	    		} else {
-	    			projectSizeMap.put(vault.getProjectId(), vault.getVaultSize());
-	    		}
-    		}
-    	}
-    	return projectSizeMap;
     }
     
     @RequestMapping(value = "/admin/events", method = RequestMethod.GET)

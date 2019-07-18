@@ -56,16 +56,12 @@ public class BillingController {
         List<Vault> vaultDetails = vaultsService.getVaults(sort, order,offset, maxResult);
         
         if(CollectionUtils.isNotEmpty(vaultDetails)) {
-        	Map<String, String> pureProjectIds = externalMetadataService.getPureProjectIds();
 			for (Vault vaultList : vaultDetails) {				
-				VaultInfo vaultInfo = vaultList.convertToResponseBilling();
-				if(vaultInfo.getProjectId() == null && (pureProjectIds.get(vaultList.getDataset().getID()) != null)) {
-	            	vaultInfo.setProjectId(pureProjectIds.get(vaultList.getDataset().getID()));
-	            }
-				billingResponses.add(vaultInfo);
+				billingResponses.add(vaultList.convertToResponseBilling());
 	        }
 	        recordsTotal = vaultsService.getTotalNumberOfVaults();
-	        Map<String, Long> projectSizeMap = constructProjectSizeMap(billingResponses);
+	        //Map of project with its size
+	        Map<String, Long> projectSizeMap = vaultsService.getAllProjectsSize();
 	        //update project Size in the response
 	        for(VaultInfo vault: billingResponses) {
 	        	if(vault.getProjectId() != null) {
@@ -78,25 +74,6 @@ public class BillingController {
         data.setRecordsTotal(recordsTotal);
         data.setData(billingResponses);
         return data;
-    }
-    /**
-     * This method calculates and creates a map of projectId and project size
-     * @param vaults
-     * @return
-     */
-    private Map<String, Long> constructProjectSizeMap(List<VaultInfo> vaults) {
-    	Map<String, Long> projectSizeMap = new HashMap<>();
-    	for(VaultInfo vault: vaults) {
-    		if(vault.getProjectId() != null) {
-				if(projectSizeMap.containsKey(vault.getProjectId())) {
-	    			Long projectSize = projectSizeMap.get(vault.getProjectId());
-	    			projectSizeMap.put(vault.getProjectId(), projectSize.longValue()+ vault.getVaultSize());
-	    		} else {
-	    			projectSizeMap.put(vault.getProjectId(), vault.getVaultSize());
-	    		}
-    		}
-    	}
-    	return projectSizeMap;
     }
     
     @RequestMapping(value = "/admin/billing/{vaultId}", method = RequestMethod.GET)
