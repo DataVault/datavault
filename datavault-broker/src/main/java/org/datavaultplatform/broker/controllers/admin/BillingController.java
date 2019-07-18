@@ -1,17 +1,14 @@
 package org.datavaultplatform.broker.controllers.admin;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.datavaultplatform.broker.services.ExternalMetadataService;
 import org.datavaultplatform.broker.services.VaultsService;
-import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.response.BillingInformation;
-import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
 import org.jsondoc.core.annotation.ApiQueryParam;
@@ -72,6 +69,44 @@ public class BillingController {
         //calculate and create a map of project size
         VaultsData data = new VaultsData();
         data.setRecordsTotal(recordsTotal);
+        data.setData(billingResponses);
+        return data;
+    }
+
+    @RequestMapping(value = "/admin/billing/search", method = RequestMethod.GET)
+    public VaultsData searchAllBillingVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                                  @RequestParam String query,
+                                                  @RequestParam(value = "sort", required = false) String sort,
+                                                  @RequestParam(value = "order", required = false)
+                                                  @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order,
+                                                  @RequestParam(value = "offset", required = false)
+											      @ApiQueryParam(name = "offset", description = "Vault row id ", defaultvalue = "0", required = false) String offset,
+											      @RequestParam(value = "maxResult", required = false)
+											      @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) throws Exception {
+
+        List<VaultInfo> billingResponses = new ArrayList<>();
+        Long recordsTotal = 0L;
+        Long recordsFiltered = 0L;
+        List<Vault> vaults = vaultsService.search(query, sort, order, offset, maxResult);
+        if(CollectionUtils.isNotEmpty(vaults)) {
+			for (Vault vault : vaults) {
+	            billingResponses.add(vault.convertToResponseBilling());
+	        }
+	        //calculate and create a map of project size
+	        Map<String, Long> projectSizeMap = vaultsService.getAllProjectsSize();
+	        //update project Size in the response
+	        for(VaultInfo vault: billingResponses) {
+	        	if(vault.getProjectId() != null) {
+	        		vault.setProjectSize(projectSizeMap.get(vault.getProjectId()));
+	        	}
+	        }
+	        recordsTotal = vaultsService.getTotalNumberOfVaults();
+	        recordsFiltered = vaultsService.getTotalNumberOfVaults(query);
+        }
+        
+        VaultsData data = new VaultsData();
+        data.setRecordsTotal(recordsTotal);
+        data.setRecordsFiltered(recordsFiltered);
         data.setData(billingResponses);
         return data;
     }

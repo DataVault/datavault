@@ -4,6 +4,8 @@ package org.datavaultplatform.webapp.controllers.admin;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
@@ -17,6 +19,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.supercsv.io.CsvBeanWriter;
+import org.supercsv.io.ICsvBeanWriter;
+import org.supercsv.prefs.CsvPreference;
 
 
 
@@ -73,8 +78,8 @@ public class AdminBillingController {
             model.addAttribute("recordsInfo", constructTableRecordsInfo(offset, recordsTotal, billingData.getRecordsFiltered(),
             		billingData.getData().size(), Boolean.FALSE));
         } else {
-        	VaultsData filteredVaultsData = restService.searchVaults(query, theSort, theOrder, offset, MAX_RECORDS_PER_PAGE);
-            long filteredRecordsTotal = filteredVaultsData.getRecordsFiltered();
+        	VaultsData filteredBillingData = restService.searchVaultsForBilling(query, theSort, theOrder, offset, MAX_RECORDS_PER_PAGE);
+            long filteredRecordsTotal = filteredBillingData.getRecordsFiltered();
             int numberOfPages = (int)Math.ceil(filteredRecordsTotal/(Double.valueOf(MAX_RECORDS_PER_PAGE)));
             List<String> pages = new ArrayList<>();
         	int i =1;
@@ -83,10 +88,10 @@ public class AdminBillingController {
         		i++;
         	}
         	model.addAttribute("pages", pages);
-            model.addAttribute("vaults", filteredVaultsData.getData());
+            model.addAttribute("vaults", filteredBillingData.getData());
             model.addAttribute("query", query);
-            model.addAttribute("recordsInfo", constructTableRecordsInfo(offset, filteredVaultsData.getRecordsTotal(),
-            		filteredRecordsTotal, filteredVaultsData.getData().size(), Boolean.TRUE));
+            model.addAttribute("recordsInfo", constructTableRecordsInfo(offset, filteredBillingData.getRecordsTotal(),
+            		filteredRecordsTotal, filteredBillingData.getData().size(), Boolean.TRUE));
         }
         
         model.addAttribute("theSort", theSort);
@@ -111,6 +116,55 @@ public class AdminBillingController {
         }
 
         return "admin/billing/index";
+    }
+    
+    @RequestMapping(value = "/admin/billing/csv", method = RequestMethod.GET)
+    public void exportBillingVaults(HttpServletResponse response,
+                               @RequestParam(value = "query", required = false) String query,
+                               @RequestParam(value = "sort", required = false) String sort,
+                               @RequestParam(value = "order", required = false) String order) throws Exception {
+        String theSort = sort;
+        String theOrder = order;
+        if (sort == null) theSort = "creationTime";
+        if (order == null) theOrder = "desc";
+
+        List<VaultInfo> vaults = null;
+
+        if ((query == null) || ("".equals(query))) {
+            VaultsData vaultData = restService.getBillingVaultsAll(theSort, theOrder, _0, _0);
+			vaults = vaultData.getData();
+        } else {
+        	VaultsData vaultData =  restService.searchVaultsForBilling(query, theSort, theOrder, _0, _0);
+        	vaults = vaultData.getData();
+        }
+
+        response.setContentType("text/csv");
+
+        // creates mock data
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=\"billing.csv\"";
+        response.setHeader(headerKey, headerValue);
+
+        String[] header = { "Vault name", "Vault Size","Project ID","Project Size","Amount To Be Billed","Amount Billed", "User Name", "Review Date","Creation Time" };
+
+        String[] fieldMapping = { "name",  "sizeStr","projectID","projectSize","amountToBeBilled","amountBilled",  "userName","reviewDate", "CreationTime" };
+
+        try {
+            // uses the Super CSV API to generate CSV data from the model data
+            ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
+
+            csvWriter.writeHeader(header);
+
+            for (VaultInfo aVault : vaults) {
+                csvWriter.write(aVault, fieldMapping);
+            }
+
+            csvWriter.close();
+
+        } catch (Exception e){
+            logger.error("IOException: "+e);
+            e.printStackTrace();
+        }
     }
     
     private String constructTableRecordsInfo(String offset, long recordsTotal, long filteredRecords, int numberOfRecordsonPage, boolean isFiltered) {

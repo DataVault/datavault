@@ -209,7 +209,12 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query, VaultInfo[].class);
         return (VaultInfo[])response.getBody();
     }
-
+  
+    public VaultsData searchVaultsForBilling(String query, String sort, String order, String offset, String maxResult) {
+        HttpEntity<?> response = get(brokerURL + "/admin/billing/search?query=" + query + "&sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
+        return (VaultsData)response.getBody();
+    }
+    
     public VaultsData searchVaults(String query, String sort, String order, String offset, String maxResult) {
         HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query + "&sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
         return (VaultsData)response.getBody();
