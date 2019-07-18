@@ -6,10 +6,10 @@
 <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Billing</b></a></li>
-        <li class="active"><b>Vaults</b></li>
+        <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
+        <li class="active"><b>Billing</b></li>
     </ol>
-    
+
     
 
     <form id="search-vaults" class="form" role="form" action="" method="get">
@@ -22,10 +22,13 @@
     </form>
     
     <div align="right">
-        <form id="search-vaults" class="form" role="form" action="" method="get">
+       <form id="search-vaults" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/billing/csv" method="get">
+        
             <div class="input-group" align="right">
-                <input type="text" class="form-control hidden" value="" name="query" placeholder="Search for...">
+                <input type="text" class="form-control hidden" value="${query}" name="query" placeholder="Search for...">
                 <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Download CSV File</button>
+            <div align="right">
+           
             </div>
         </form>
 </div>
@@ -78,7 +81,20 @@
                 </tbody>
             </table>
         </div> 
-            
+      <div align="center">
+            	<p class="text-info">${recordsInfo}</p>
+            </div>
+            <div align="center">
+            <nav aria-label="...">
+			    <ul class="pagination pagination-lg" id="paginationButton">
+            		<#list pages as page>
+				    	<li <#if page == activePageId>class="page-item active"<#else>class="page-item"</#if> id="${page}">
+				     	 <a class="page-link" href="${springMacroRequestContext.getContextPath()}/admin/billing?sort=${theSort}&order=${theOrder}&pageId=${page}" tabindex="-1">${page}</a>
+				    	</li>
+					</#list>
+				 </ul>
+			</nav>
+        </div>      
             
 
  </#if> 
