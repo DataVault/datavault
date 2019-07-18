@@ -32,7 +32,7 @@
 				</tr>
 				<tr>
 					<th scope="col">Project Id</th>
-					<td><#if billingDetails.getProjectId()??>${billingDetails.projectId?html}<#else> </#if></td>
+					<td><#if billingDetails.getProjectID()??>${billingDetails.projectID?html}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Use Budget code</th>
@@ -86,7 +86,7 @@
                         </div>
                         <div class="form-group">
                             <label class="control-label">ProjectId:</label>
-                            <@spring.bind "billingDetails.projectId" />
+                            <@spring.bind "billingDetails.projectID" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
                    value="${spring.status.value!""}" id="projectId"/>
                         </div>
@@ -94,7 +94,7 @@
                             <label class="control-label">Use BudgetCode:</label>
                             <@spring.bind "billingDetails.budgetCode" />
                              <input type="checkbox" id="useBudgetCode" name="${spring.status.expression}"
-                   value="${spring.status.value!""}"/> 
+                   value="${spring.status.value!""}" <#if billingDetails.getBudgetCode()?? && billingDetails.getBudgetCode()>checked</#if> /> 
                         </div>
                         <div class="form-group">
                             <label class="control-label">Amount to be billed:</label>
@@ -112,7 +112,7 @@
                             <label class="control-label">Special arrangements comments:</label>
                             <@spring.bind "billingDetails.specialComments" />
                             <textarea type="text" class="form-control" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" id="comments" rows="4" cols="60"></textarea>
+                   value="${spring.status.value!""}" id="comments" rows="4" cols="60"><#if billingDetails.getSpecialComments()??>${billingDetails.getSpecialComments()}</#if></textarea>
                         </div>
                     </div>
 

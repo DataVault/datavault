@@ -41,9 +41,6 @@ public class BillingInformation {
     @ApiObjectField(description = "The value calculated for all deposits in the vault entered by Admin")
     private BigDecimal amountBilled;
           
-    @ApiObjectField(description = "Project Id from Pure")
-    private String projectId;
-    
     @ApiObjectField(description = "Sum of vaults size for a projectId")
     private long projectSize;
    
@@ -221,15 +218,6 @@ public class BillingInformation {
 
 	public void setVaultName(String vaultName) {
 		this.vaultName = vaultName;
-	}
-
-
-	public String getProjectId() {
-		return projectId;
-	}
-
-	public void setProjectId(String projectId) {
-		this.projectId = projectId;
 	}
 
 	public long getProjectSize() {

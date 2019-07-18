@@ -55,11 +55,11 @@ public class BillingInfo {
     private Vault vault;
     	 
    
-	public String getContactname() {
+	public String getContactName() {
 		return contactName;
 	}
-	public void setContactname(String contactname) {
-		this.contactName = contactname;
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
 	}
 	
     public String getSchool() {
@@ -68,23 +68,23 @@ public class BillingInfo {
 	public void setSchool(String school) {
 		this.school = school;
 	}
-	public String getSubunit() {
+	public String getSubUnit() {
 		return subUnit;
 	}
-	public void setSubunit(String subunit) {
-		this.subUnit = subunit;
+	public void setSubUnit(String subUnit) {
+		this.subUnit = subUnit;
 	}
-	public Boolean getBudgetcode() {
+	public Boolean getBudgetCode() {
 		return budgetCode;
 	}
-	public void setBudgetcode(Boolean budgetcode) {
-		this.budgetCode = budgetcode;
+	public void setBudgetCode(Boolean budgetCode) {
+		this.budgetCode = budgetCode;
 	}
-	public String getSpecialcomments() {
+	public String getSpecialComments() {
 		return specialComments;
 	}
-	public void setSpecialcomments(String specialcomments) {
-		this.specialComments = specialcomments;
+	public void setSpecialComments(String specialComments) {
+		this.specialComments = specialComments;
 	}
 	   
     public BigDecimal getAmountToBeBilled() {

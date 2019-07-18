@@ -1,6 +1,5 @@
 package org.datavaultplatform.common.model;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -41,7 +40,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Vault {
 
 	private static final long ZERO = 0l;
-	private static final BigDecimal ZERO_BIGDECIMAL = new BigDecimal("000.00");
     // Vault Identifier
     @Id
     @GeneratedValue(generator = "uuid")
@@ -298,11 +296,11 @@ public class Vault {
 		return new BillingInformation(
                 billinginfo != null? billinginfo.getID(): null,
                 id,
-                billinginfo != null? billinginfo.getContactname() : null,
+                billinginfo != null? billinginfo.getContactName() : null,
                 billinginfo != null? billinginfo.getSchool() : null,
-                billinginfo != null? billinginfo.getSubunit() : null,
-                billinginfo != null? billinginfo.getBudgetcode() : null,
-                billinginfo != null? billinginfo.getSpecialcomments() : null,
+                billinginfo != null? billinginfo.getSubUnit() : null,
+                billinginfo != null? billinginfo.getBudgetCode() : null,
+                billinginfo != null? billinginfo.getSpecialComments() : null,
                 billinginfo != null? billinginfo.getAmountToBeBilled() : null,
                 billinginfo != null? billinginfo.getAmountBilled() : null,
                 projectId,

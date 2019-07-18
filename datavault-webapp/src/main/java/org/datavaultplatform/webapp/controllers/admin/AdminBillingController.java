@@ -130,6 +130,7 @@ public class AdminBillingController {
     public String retrieveBillingInfo(ModelMap model, @PathVariable("vaultId") String vaultId) {
     	BillingInformation billingDetails = restService.getVaultBillingInfo(vaultId);
         model.addAttribute("billingDetails", billingDetails);
+        System.out.println("-----------Comments---------"+billingDetails.getSpecialComments());
         return "admin/billing/billingDetails";
     }
     
