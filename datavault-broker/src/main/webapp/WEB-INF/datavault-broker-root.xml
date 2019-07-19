@@ -277,6 +277,14 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
+    <bean id="roleDAO" class="org.datavaultplatform.common.model.dao.RoleDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="permissionDAO" class="org.datavaultplatform.common.model.dao.PermissionDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
     <bean id="groupDAO" class="org.datavaultplatform.common.model.dao.GroupDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
