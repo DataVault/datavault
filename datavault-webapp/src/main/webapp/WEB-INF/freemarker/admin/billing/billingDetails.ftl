@@ -9,11 +9,11 @@
 			href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
 		<li><a
 			href="${springMacroRequestContext.getContextPath()}/admin/billing"><b>Billing</b></a></li>
-		<li class="active"><b>BillingDetails:</b>${billingDetails.vaultName}</li>
+		<li class="active"><b>BillingDetails:</b>${billingDetails.vaultName?html}</li>
 	</ol>
 <div class="panel panel-uoe-low">
  <div class="panel-body">
-	<h2>Billing Details: <small>${billingDetails.getVaultName()?html}</small></h2>
+	<h2>Billing Details: <small>${billingDetails.vaultName?html}</small></h2>
 		
 		<br/>
 		<table class="table table-sm">
@@ -32,7 +32,7 @@
 				</tr>
 				<tr>
 					<th scope="col">Project Id</th>
-					<td><#if billingDetails.getProjectID()??>${billingDetails.projectID?html}<#else> </#if></td>
+					<td><#if billingDetails.getProjectId()??>${billingDetails.projectId}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Use Budget code</th>
@@ -61,7 +61,7 @@
         <div id="update-billingDetails" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="updateBillingDetails" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form id="update-billingDetails-form" class="form" role="form" action="updateBillingDetails" method="post">
+                <form id="update-billingDetails-form" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/billing/updateBillingDetails" method="post">
                     <div class="modal-header">
                         <h4 class="modal-title" id="addDataManger">Billing Details</h4>
                     </div>
@@ -86,15 +86,16 @@
                         </div>
                         <div class="form-group">
                             <label class="control-label">ProjectId:</label>
-                            <@spring.bind "billingDetails.projectID" />
+                            <@spring.bind "billingDetails.projectId" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
                    value="${spring.status.value!""}" id="projectId"/>
                         </div>
                         <div class="form-group">
                             <label class="control-label">Use BudgetCode:</label>
                             <@spring.bind "billingDetails.budgetCode" />
-                             <input type="checkbox" id="useBudgetCode" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" <#if billingDetails.getBudgetCode()?? && billingDetails.getBudgetCode()>checked</#if> /> 
+                            <input type="hidden" name="_${spring.status.expression}" value="false"/>
+                             <input type="checkbox" id="budgetCode" name="${spring.status.expression}"
+                   <#if spring.status.value?? && spring.status.value?string=="true">checked="true"</#if> /> 
                         </div>
                         <div class="form-group">
                             <label class="control-label">Amount to be billed:</label>
@@ -118,7 +119,8 @@
 
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-
+                    <input type="hidden" name="vaultID" value="${billingDetails.getVaultID()}"/>
+					<input type="hidden" name="vaultName" value="${billingDetails.getVaultName()}"/>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                         <button type="submit" id="update-billingDetails-btn" class="btn btn-primary btn-ok">Save</button>
