@@ -44,6 +44,11 @@
         <property name="metaDir" value="${metaDir}"/>
     </bean>
 
+    <bean id="permissionsService" class="org.datavaultplatform.broker.services.PermissionsService">
+        <property name="permissionDao" ref="permissionDAO" />
+        <property name="roleDao" ref="roleDAO" />
+    </bean>
+
     <bean id="eventService" class="org.datavaultplatform.broker.services.EventService">
         <property name="eventDAO" ref="eventDAO" />
     </bean>

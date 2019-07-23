@@ -87,4 +87,10 @@ public class RoleModel {
                 .map(PermissionModel::getPermission)
                 .anyMatch(p -> p.equals(permission));
     }
+
+    public int getAssignedUserCount() {
+        // TODO we need to provide the count of assigned users with the role but won't have a working impl until the
+        // stories to assign users to roles are developed
+        return 0;
+    }
 }

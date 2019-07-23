@@ -57,6 +57,10 @@ public class PermissionModel {
         this.label = label;
     }
 
+    public PermissionType getType() {
+        return type;
+    }
+
     public void setType(PermissionType type) {
         this.type = type;
     }
@@ -71,5 +75,18 @@ public class PermissionModel {
 
     public boolean isAdminPermission() {
         return type == PermissionType.ADMIN;
+    }
+
+    public boolean isAllowedForRoleType(RoleType roleType) {
+        switch (roleType) {
+            case ADMIN:
+                return true;
+            case SCHOOL:
+                return isSchoolPermission();
+            case VAULT:
+                return isVaultPermission();
+            default:
+                return false;
+        }
     }
 }

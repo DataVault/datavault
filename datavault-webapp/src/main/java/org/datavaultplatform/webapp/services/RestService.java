@@ -1,19 +1,6 @@
 package org.datavaultplatform.webapp.services;
 
-import org.datavaultplatform.common.model.ArchiveStore;
-import org.datavaultplatform.common.model.DataManager;
-import org.datavaultplatform.common.model.Dataset;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.FileFixity;
-import org.datavaultplatform.common.model.FileInfo;
-import org.datavaultplatform.common.model.FileStore;
-import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.Job;
-import org.datavaultplatform.common.model.RetentionPolicy;
-import org.datavaultplatform.common.model.Retrieve;
-import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.model.dao.BillingDAO;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateClientEvent;
 import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.request.CreateVault;
@@ -30,6 +17,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
 
 /**
  * User: Robin Taylor
@@ -51,7 +40,7 @@ public class RestService {
         this.brokerApiKey = brokerApiKey;
     }
     
-    private HttpEntity<?> exchange(String url, Class clazz, HttpMethod method, Object payload) {
+    private <T> HttpEntity<T> exchange(String url, Class<T> clazz, HttpMethod method, Object payload) {
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -86,15 +75,15 @@ public class RestService {
         
     }
     
-    public HttpEntity<?> get(String url, Class clazz) {
+    public <T> HttpEntity<T> get(String url, Class<T> clazz) {
         return exchange(url, clazz, HttpMethod.GET, null);
     }
 
-    public HttpEntity<?> put(String url, Class clazz, Object payload) {
+    public <T> HttpEntity<T> put(String url, Class<T> clazz, Object payload) {
         return exchange(url, clazz, HttpMethod.PUT, payload);
     }
     
-    public HttpEntity<?> post(String url, Class clazz, Object payload) {
+    public <T> HttpEntity<T> post(String url, Class<T> clazz, Object payload) {
         return exchange(url, clazz, HttpMethod.POST, payload);
     }
     
@@ -190,7 +179,7 @@ public class RestService {
     	HttpEntity<?> response = get(brokerURL + "/admin/billing?sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
         return (VaultsData)response.getBody();
 	}
-    
+
     public BillingInformation getVaultBillingInfo(String vaultId) {
     	HttpEntity<?> response = get(brokerURL + "/admin/billing/" + vaultId , BillingInformation.class);
         return (BillingInformation)response.getBody();
@@ -210,12 +199,12 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query, VaultInfo[].class);
         return (VaultInfo[])response.getBody();
     }
-  
+
     public VaultsData searchVaultsForBilling(String query, String sort, String order, String offset, String maxResult) {
         HttpEntity<?> response = get(brokerURL + "/admin/billing/search?query=" + query + "&sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
         return (VaultsData)response.getBody();
     }
-    
+
     public VaultsData searchVaults(String query, String sort, String order, String offset, String maxResult) {
         HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query + "&sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
         return (VaultsData)response.getBody();
@@ -585,10 +574,30 @@ public class RestService {
     public void deleteDeposit(String depositId) {
         delete(brokerURL + "/admin/deposits/" + depositId, String.class);
     }
-	
-	 public BillingInformation updateBillingInfo(String vaultId,BillingInformation billingInfo) {
-	    	HttpEntity<?> response = post(brokerURL + "/admin/billing/" + vaultId+ "/updateBilling" , BillingInformation.class,billingInfo);
-	        return (BillingInformation)response.getBody();
-		}
+
+    public BillingInformation updateBillingInfo(String vaultId,BillingInformation billingInfo) {
+        HttpEntity<?> response = post(brokerURL + "/admin/billing/" + vaultId+ "/updateBilling" , BillingInformation.class,billingInfo);
+	    return (BillingInformation)response.getBody();
+    }
+
+    public RoleModel createRole(RoleModel role) {
+        return post(brokerURL + "/permissions/role", RoleModel.class, role).getBody();
+    }
+
+    public List<PermissionModel> getSchoolPermissions() {
+        return get(brokerURL + "/permissions/school", List.class).getBody();
+    }
+
+    public List<PermissionModel> getVaultPermissions() {
+        return get(brokerURL + "/permissions/vault", List.class).getBody();
+    }
+
+    public RoleModel updateRole(RoleModel role) {
+        return put(brokerURL + "/permissions/role", RoleModel.class, role).getBody();
+    }
+
+    public void deleteRole(String roleId) {
+        delete(brokerURL + "/role/" + roleId, Void.class);
+    }
 
 }

@@ -130,6 +130,10 @@
         <property name="activeDir" value="${activeDir}" />
     </bean>
 
+    <bean id="permissionsController" class="org.datavaultplatform.broker.controllers.PermissionsController">
+        <property name="permissionsService" ref="permissionsService" />
+    </bean>
+
     <bean id="groupsController" class="org.datavaultplatform.broker.controllers.GroupsController">
         <property name="groupsService" ref="groupsService" />
         <property name="usersService" ref="usersService" />
