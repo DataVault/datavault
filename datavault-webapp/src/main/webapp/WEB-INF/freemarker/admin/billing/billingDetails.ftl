@@ -32,7 +32,7 @@
 				</tr>
 				<tr>
 					<th scope="col">Project Id</th>
-					<td><#if billingDetails.getProjectId()??>${billingDetails.projectId}<#else> </#if></td>
+					<td><#if billingDetails.getProjectId()??>${billingDetails.projectID}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Use Budget code</th>
@@ -86,7 +86,7 @@
                         </div>
                         <div class="form-group">
                             <label class="control-label">ProjectId:</label>
-                            <@spring.bind "billingDetails.projectId" />
+                            <@spring.bind "billingDetails.projectID" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
                    value="${spring.status.value!""}" id="projectId"/>
                         </div>
