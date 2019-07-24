@@ -64,11 +64,11 @@ public class PermissionsServiceTest {
         expectedException.expectMessage("Cannot create a role that already exists");
 
         RoleModel originalRole = aRole(RoleType.SCHOOL);
-        originalRole.setId("123");
-        given(mockRoleDao.find("123")).willReturn(originalRole);
+        originalRole.setId(123L);
+        given(mockRoleDao.find(123L)).willReturn(originalRole);
 
         RoleModel toCreate = aRole(RoleType.SCHOOL);
-        toCreate.setId("123");
+        toCreate.setId(123L);
 
         // When
         underTest.createRole(toCreate);
@@ -183,11 +183,11 @@ public class PermissionsServiceTest {
     public void updateRoleShouldPersistChangesToRole() {
         // Given
         RoleModel originalRole = aRole(RoleType.SCHOOL);
-        originalRole.setId("123");
-        given(mockRoleDao.find("123")).willReturn(originalRole);
+        originalRole.setId(123L);
+        given(mockRoleDao.find(123L)).willReturn(originalRole);
 
         RoleModel toUpdate = aRole(RoleType.SCHOOL);
-        toUpdate.setId("123");
+        toUpdate.setId(123L);
         toUpdate.addPermission(aPermission(Permission.SCHOOL_PERMISSION_1, PermissionModel.PermissionType.SCHOOL));
 
         // When
@@ -219,10 +219,10 @@ public class PermissionsServiceTest {
         expectedException.expect(IllegalStateException.class);
         expectedException.expectMessage("Cannot update a role that does not exist");
 
-        given(mockRoleDao.find("123")).willReturn(null);
+        given(mockRoleDao.find(123L)).willReturn(null);
 
         RoleModel toUpdate = aRole(RoleType.SCHOOL);
-        toUpdate.setId("123");
+        toUpdate.setId(123L);
         toUpdate.addPermission(aPermission(Permission.SCHOOL_PERMISSION_1, PermissionModel.PermissionType.SCHOOL));
 
         // When
@@ -239,11 +239,11 @@ public class PermissionsServiceTest {
         expectedException.expectMessage("Unable to apply permission with type VAULT to role of type SCHOOL");
 
         RoleModel originalRole = aRole(RoleType.SCHOOL);
-        originalRole.setId("123");
-        given(mockRoleDao.find("123")).willReturn(originalRole);
+        originalRole.setId(123L);
+        given(mockRoleDao.find(123L)).willReturn(originalRole);
 
         RoleModel toUpdate = aRole(RoleType.SCHOOL);
-        toUpdate.setId("123");
+        toUpdate.setId(123L);
         toUpdate.addPermission(aPermission(Permission.VAULT_PERMISSION_1, PermissionModel.PermissionType.VAULT));
 
         // When
@@ -256,14 +256,14 @@ public class PermissionsServiceTest {
     public void deleteRoleShouldRemoveTheRole() {
         // Given
         RoleModel originalRole = aRole(RoleType.SCHOOL);
-        originalRole.setId("123");
-        given(mockRoleDao.find("123")).willReturn(originalRole);
+        originalRole.setId(123L);
+        given(mockRoleDao.find(123L)).willReturn(originalRole);
 
         // When
-        underTest.deleteRole("123");
+        underTest.deleteRole(123L);
 
         // Then
-        verify(mockRoleDao).delete("123");
+        verify(mockRoleDao).delete(123L);
     }
 
     @Test
@@ -272,10 +272,10 @@ public class PermissionsServiceTest {
         expectedException.expect(IllegalStateException.class);
         expectedException.expectMessage("Cannot delete a role that does not exist");
 
-        given(mockRoleDao.find("123")).willReturn(null);
+        given(mockRoleDao.find(123L)).willReturn(null);
 
         // When
-        underTest.deleteRole("123");
+        underTest.deleteRole(123L);
 
         // Then throws IllegalStateException
     }

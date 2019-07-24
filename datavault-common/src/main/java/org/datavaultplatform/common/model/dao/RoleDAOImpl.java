@@ -31,7 +31,7 @@ public class RoleDAOImpl implements RoleDAO {
     }
 
     @Override
-    public RoleModel find(String id) {
+    public RoleModel find(Long id) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(RoleModel.class);
         criteria.add(Restrictions.eq("id", id));
@@ -69,7 +69,7 @@ public class RoleDAOImpl implements RoleDAO {
     }
 
     @Override
-    public void delete(String id) {
+    public void delete(Long id) {
         RoleModel role = find(id);
         Session session = this.sessionFactory.openSession();
         Transaction tx = session.beginTransaction();

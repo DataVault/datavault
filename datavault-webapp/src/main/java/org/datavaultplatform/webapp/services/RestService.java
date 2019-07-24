@@ -18,6 +18,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -585,19 +586,23 @@ public class RestService {
     }
 
     public List<PermissionModel> getSchoolPermissions() {
-        return get(brokerURL + "/permissions/school", List.class).getBody();
+        return Arrays.asList(get(brokerURL + "/permissions/school", PermissionModel[].class).getBody());
     }
 
     public List<PermissionModel> getVaultPermissions() {
-        return get(brokerURL + "/permissions/vault", List.class).getBody();
+        return Arrays.asList(get(brokerURL + "/permissions/vault", PermissionModel[].class).getBody());
+    }
+
+    public List<RoleModel> getEditableRoles() {
+        return Arrays.asList(get(brokerURL + "/permissions/roles", RoleModel[].class).getBody());
     }
 
     public RoleModel updateRole(RoleModel role) {
         return put(brokerURL + "/permissions/role", RoleModel.class, role).getBody();
     }
 
-    public void deleteRole(String roleId) {
-        delete(brokerURL + "/role/" + roleId, Void.class);
+    public void deleteRole(Long roleId) {
+        delete(brokerURL + "/permissions/role/" + roleId, Void.class);
     }
 
 }

@@ -12,8 +12,8 @@ import java.util.Collection;
 public class RoleModel {
 
     @Id
-    @Column(name = "id", unique = true, length = 36)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
     @Column(name = "name", nullable = false, columnDefinition = "TEXT")
     private String name;
@@ -21,6 +21,7 @@ public class RoleModel {
     @Column(name = "description", nullable = true, columnDefinition = "TEXT")
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "role_type", nullable = false, columnDefinition = "TEXT")
     private RoleType type;
 
@@ -34,11 +35,11 @@ public class RoleModel {
 
     public RoleModel() {}
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

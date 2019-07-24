@@ -51,8 +51,9 @@ public class PermissionsController {
             @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
     })
     @GetMapping("/school")
-    public List<PermissionModel> getSchoolPermissions() {
-        return permissionsService.getSchoolPermissions();
+    public PermissionModel[] getSchoolPermissions() {
+        List<PermissionModel> schoolPermissions = permissionsService.getSchoolPermissions();
+        return schoolPermissions.toArray(new PermissionModel[0]);
     }
 
     @ApiMethod(
@@ -67,8 +68,26 @@ public class PermissionsController {
             @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
     })
     @GetMapping("/vault")
-    public List<PermissionModel> getVaultPermissions() {
-        return permissionsService.getVaultPermissions();
+    public PermissionModel[] getVaultPermissions() {
+        List<PermissionModel> vaultPermissions = permissionsService.getVaultPermissions();
+        return vaultPermissions.toArray(new PermissionModel[0]);
+    }
+
+    @ApiMethod(
+            path = "/permissions/roles}",
+            verb = ApiVerb.GET,
+            description = "Gets all roles which can be edited",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
+            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
+    })
+    @GetMapping("/roles")
+    public RoleModel[] getEditableRoles() {
+        List<RoleModel> editableRoles = permissionsService.getEditableRoles();
+        return editableRoles.toArray(new RoleModel[0]);
     }
 
     @ApiMethod(
@@ -99,7 +118,7 @@ public class PermissionsController {
             @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
     })
     @DeleteMapping("/role/{roleId}")
-    public ResponseEntity deleteRole(@PathVariable("roleId") @ApiPathParam(name = "Role ID", description = "The ID of the role to delete") String roleId) {
+    public ResponseEntity deleteRole(@PathVariable("roleId") @ApiPathParam(name = "Role ID", description = "The ID of the role to delete") Long roleId) {
         permissionsService.deleteRole(roleId);
         return ResponseEntity.ok().build();
     }

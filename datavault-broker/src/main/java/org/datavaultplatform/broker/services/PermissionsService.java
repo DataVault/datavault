@@ -1,6 +1,5 @@
 package org.datavaultplatform.broker.services;
 
-import org.apache.commons.lang.StringUtils;
 import org.datavaultplatform.common.model.PermissionModel;
 import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.RoleType;
@@ -31,11 +30,11 @@ public class PermissionsService {
         }
         validateRolePermissions(role);
         roleDao.store(role);
-        return roleDao.find(role.getId());
+        return role;
     }
 
-    private boolean roleExists(String roleId) {
-        return StringUtils.isNotEmpty(roleId) && roleDao.find(roleId) != null;
+    private boolean roleExists(Long roleId) {
+        return roleId != null && roleDao.find(roleId) != null;
     }
 
     private void validateRolePermissions(RoleModel role) {
@@ -76,7 +75,7 @@ public class PermissionsService {
         return role;
     }
 
-    public void deleteRole(String roleId) {
+    public void deleteRole(Long roleId) {
         if (!roleExists(roleId)) {
             throw new IllegalStateException("Cannot delete a role that does not exist");
         }

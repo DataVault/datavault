@@ -9,7 +9,7 @@ public interface RoleDAO {
 
     void store(RoleModel role);
 
-    RoleModel find(String id);
+    RoleModel find(Long id);
 
     Collection<RoleModel> findAll();
 
@@ -17,5 +17,5 @@ public interface RoleDAO {
 
     void update(RoleModel role);
 
-    void delete(String id);
+    void delete(Long id);
 }

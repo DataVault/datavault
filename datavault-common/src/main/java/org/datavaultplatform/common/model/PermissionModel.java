@@ -2,10 +2,7 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -22,12 +19,14 @@ public class PermissionModel {
     @Column(name = "id", unique = true, length = 36)
     private String id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "permission", unique = true, nullable = false, columnDefinition = "TEXT")
     private Permission permission;
 
     @Column(name = "label", nullable = false, columnDefinition = "TEXT")
     private String label;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, columnDefinition = "TEXT")
     private PermissionType type;
 
