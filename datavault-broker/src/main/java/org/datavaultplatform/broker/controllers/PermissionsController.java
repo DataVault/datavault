@@ -30,10 +30,6 @@ public class PermissionsController {
             produces = { MediaType.APPLICATION_JSON_VALUE },
             responsestatuscode = "200 - OK"
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
-            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
-    })
     @PostMapping("/role")
     public RoleModel createRole(@RequestBody RoleModel role) {
         return permissionsService.createRole(role);
@@ -46,10 +42,6 @@ public class PermissionsController {
             produces = { MediaType.APPLICATION_JSON_VALUE },
             responsestatuscode = "200 - OK"
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
-            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
-    })
     @GetMapping("/school")
     public PermissionModel[] getSchoolPermissions() {
         List<PermissionModel> schoolPermissions = permissionsService.getSchoolPermissions();
@@ -63,10 +55,6 @@ public class PermissionsController {
             produces = { MediaType.APPLICATION_JSON_VALUE },
             responsestatuscode = "200 - OK"
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
-            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
-    })
     @GetMapping("/vault")
     public PermissionModel[] getVaultPermissions() {
         List<PermissionModel> vaultPermissions = permissionsService.getVaultPermissions();
@@ -80,10 +68,6 @@ public class PermissionsController {
             produces = { MediaType.APPLICATION_JSON_VALUE },
             responsestatuscode = "200 - OK"
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
-            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
-    })
     @GetMapping("/roles")
     public RoleModel[] getEditableRoles() {
         List<RoleModel> editableRoles = permissionsService.getEditableRoles();
@@ -98,10 +82,6 @@ public class PermissionsController {
             produces = { MediaType.APPLICATION_JSON_VALUE },
             responsestatuscode = "200 - OK"
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
-            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
-    })
     @PutMapping("/role")
     public RoleModel updateRole(@RequestBody RoleModel role) {
         return permissionsService.updateRole(role);
@@ -113,10 +93,6 @@ public class PermissionsController {
             description = "Deletes a role",
             responsestatuscode = "200 - OK"
     )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
-            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
-    })
     @DeleteMapping("/role/{roleId}")
     public ResponseEntity deleteRole(@PathVariable("roleId") @ApiPathParam(name = "Role ID", description = "The ID of the role to delete") Long roleId) {
         permissionsService.deleteRole(roleId);
