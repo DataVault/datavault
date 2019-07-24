@@ -7,6 +7,8 @@ import java.util.Collection;
 
 public interface PermissionDAO {
 
+    void synchronisePermissions();
+
     PermissionModel find(Permission permission);
 
     Collection<PermissionModel> findAll();

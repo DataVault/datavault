@@ -5,12 +5,14 @@ import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.common.model.dao.PermissionDAO;
 import org.datavaultplatform.common.model.dao.RoleDAO;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class PermissionsService {
+public class PermissionsService implements ApplicationListener<ContextRefreshedEvent> {
 
     private RoleDAO roleDao;
 
@@ -22,6 +24,11 @@ public class PermissionsService {
 
     public void setPermissionDao(PermissionDAO permissionDao) {
         this.permissionDao = permissionDao;
+    }
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        permissionDao.synchronisePermissions();
     }
 
     public RoleModel createRole(RoleModel role) {

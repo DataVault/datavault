@@ -30,6 +30,15 @@ public class PermissionModel {
     @Column(name = "type", nullable = false, columnDefinition = "TEXT")
     private PermissionType type;
 
+    public static PermissionModel createDefault(Permission permission) {
+        PermissionModel p = new PermissionModel();
+        p.setId(permission.name());
+        p.setPermission(permission);
+        p.setType(permission.getDefaultType());
+        p.setLabel(permission.getDefaultLabel());
+        return p;
+    }
+
     public PermissionModel() {}
 
     public String getId() {

@@ -133,19 +133,3 @@ insert into GroupOwners (group_id, user_id) values ('MHSE', 'user3');
 insert into GroupOwners (group_id, user_id) values ('SHSS', 'user4');
 
 insert into Clients (id, name, apiKey, ipAddress) values ('datavault-webapp', 'Datavault Webapp', 'datavault-webapp', '127.0.0.1');
-
-insert into Permissions (id, permission, label, type) values ('VAULT_PERMISSION_1', 'VAULT_PERMISSION_1', 'Vault Permission 1', 'VAULT');
-insert into Permissions (id, permission, label, type) values ('VAULT_PERMISSION_2', 'VAULT_PERMISSION_2', 'Vault Permission 2', 'VAULT');
-insert into Permissions (id, permission, label, type) values ('VAULT_PERMISSION_3', 'VAULT_PERMISSION_3', 'Vault Permission 3', 'VAULT');
-insert into Permissions (id, permission, label, type) values ('VAULT_PERMISSION_4', 'VAULT_PERMISSION_4', 'Vault Permission 4', 'VAULT');
-insert into Permissions (id, permission, label, type) values ('VAULT_PERMISSION_5', 'VAULT_PERMISSION_5', 'Vault Permission 5', 'VAULT');
-insert into Permissions (id, permission, label, type) values ('SCHOOL_PERMISSION_1', 'SCHOOL_PERMISSION_1', 'School Permission 1', 'SCHOOL');
-insert into Permissions (id, permission, label, type) values ('SCHOOL_PERMISSION_2', 'SCHOOL_PERMISSION_2', 'School Permission 2', 'SCHOOL');
-insert into Permissions (id, permission, label, type) values ('SCHOOL_PERMISSION_3', 'SCHOOL_PERMISSION_3', 'School Permission 3', 'SCHOOL');
-insert into Permissions (id, permission, label, type) values ('SCHOOL_PERMISSION_4', 'SCHOOL_PERMISSION_4', 'School Permission 4', 'SCHOOL');
-insert into Permissions (id, permission, label, type) values ('SCHOOL_PERMISSION_5', 'SCHOOL_PERMISSION_5', 'School Permission 5', 'SCHOOL');
-insert into Permissions (id, permission, label, type) values ('ADMIN_PERMISSION_1', 'ADMIN_PERMISSION_1', 'Admin Permission 1', 'ADMIN');
-insert into Permissions (id, permission, label, type) values ('ADMIN_PERMISSION_2', 'ADMIN_PERMISSION_2', 'Admin Permission 2', 'ADMIN');
-insert into Permissions (id, permission, label, type) values ('ADMIN_PERMISSION_3', 'ADMIN_PERMISSION_3', 'Admin Permission 3', 'ADMIN');
-insert into Permissions (id, permission, label, type) values ('ADMIN_PERMISSION_4', 'ADMIN_PERMISSION_4', 'Admin Permission 4', 'ADMIN');
-insert into Permissions (id, permission, label, type) values ('ADMIN_PERMISSION_5', 'ADMIN_PERMISSION_5', 'Admin Permission 5', 'ADMIN');
