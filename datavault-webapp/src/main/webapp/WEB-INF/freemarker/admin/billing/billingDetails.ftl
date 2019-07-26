@@ -20,35 +20,35 @@
 			<tbody>
 				<tr>
 					<th scope="col">Contact Name</th>
-					<td><#if billingDetails.getContactName()??>${billingDetails.contactName?html}<#else> </#if></td>
+					<td><#if billingDetails.contactName??>${billingDetails.contactName?html}<#else>_</#if></td>
 				</tr>
 				<tr>
 					<th scope="col">School/Unit</th>
-					<td><#if billingDetails.getSchool()??>${billingDetails.school?html}<#else> </#if></td>
+					<td><#if billingDetails.school??>${billingDetails.school?html}<#else>_</#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Subunit</th>
-					<td><#if billingDetails.getSubUnit()??>${billingDetails.subUnit}<#else> </#if></td>
+					<td><#if billingDetails.subUnit??>${billingDetails.subUnit}<#else>_</#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Project Id</th>
-					<td><#if billingDetails.getProjectId()??>${billingDetails.projectID}<#else> </#if></td>
+					<td><#if billingDetails.projectID??>${billingDetails.projectID}<#else>_</#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Use Budget code</th>
-					<td><#if billingDetails.getBudgetCodeStr()??>${billingDetails.getBudgetCodeStr()?html}<#else> </#if></td>
+					<td><#if billingDetails.getBudgetCodeStr()??>${billingDetails.getBudgetCodeStr()?html}<#else>_</#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Amount to be billed</th>
-					<td><#if billingDetails.getAmountToBeBilled()??>${billingDetails.getAmountToBeBilled()?html}<#else> </#if></td>
+					<td><#if billingDetails.getAmountToBeBilled()??>${billingDetails.getAmountToBeBilled()?html}<#else>_</#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Amount billed</th>
-					<td><#if billingDetails.getAmountBilled()??>${billingDetails.getAmountBilled()?html}<#else> </#if></td>
+					<td><#if billingDetails.getAmountBilled()??>${billingDetails.getAmountBilled()?html}<#else>_</#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Special arrangement comments</th>
-					<td><#if billingDetails.getSpecialComments()??>${billingDetails.getSpecialComments()?html}<#else> </#if></td>
+					<td><#if billingDetails.getSpecialComments()??>${billingDetails.getSpecialComments()?html}<#else>_</#if></td>
 				</tr>
 			</tbody>
 		</table>
