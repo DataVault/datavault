@@ -61,7 +61,7 @@
         <div id="update-billingDetails" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="updateBillingDetails" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form id="update-billingDetails-form" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/billing/updateBillingDetails" method="post">
+                <form id="update-billingDetails-form" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/billing/${billingDetails.vaultID}/updateBillingDetails" method="post">
                     <div class="modal-header">
                         <h4 class="modal-title" id="addDataManger">Billing Details</h4>
                     </div>
