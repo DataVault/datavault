@@ -16,13 +16,7 @@ import org.datavaultplatform.broker.services.RetrievesService;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.model.Archive;
-import org.datavaultplatform.common.model.ArchiveStore;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.Job;
-import org.datavaultplatform.common.model.Retrieve;
-import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.EventInfo;
 import org.datavaultplatform.common.response.VaultInfo;
@@ -47,6 +41,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Created by Robin Taylor on 08/03/2016.
@@ -240,6 +236,21 @@ public class AdminController {
         }
         return events;
     }
+
+    @RequestMapping(value = "/admin/deposits/audit", method = RequestMethod.GET)
+    public String runDepositAudit(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                HttpServletRequest request) throws Exception{
+        // Make sure it's admin or localhost
+        String remoteAdrr = request.getRemoteAddr();
+        System.out.println("remoteAdrr: "+remoteAdrr);
+
+        // Get oldest Audit
+        String query = "";
+        String sort = "";
+        List<DepositChunk> chunks = depositsService.getChunksForAudit();
+
+        return "Success";
+    }
     
     @RequestMapping(value = "/admin/deposits/{depositID}", method = RequestMethod.DELETE)
     public ResponseEntity<Object> deleteDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
@@ -354,5 +365,5 @@ public class AdminController {
 
 	public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
 		this.externalMetadataService = externalMetadataService;
-	}    
+	}
 }

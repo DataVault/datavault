@@ -1,13 +1,12 @@
 package org.datavaultplatform.broker.services;
 
-import java.util.Date;
+import java.util.*;
+
+import org.datavaultplatform.common.model.DepositChunk;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.dao.DepositDAO;
-
-import java.util.UUID;
-import java.util.List;
 
 public class DepositsService {
 
@@ -100,6 +99,52 @@ public class DepositsService {
     	Deposit deposit = depositDAO.findById(depositId);
     	deposit.setSize(0);
     	depositDAO.update(deposit);
+    }
+
+    public List<DepositChunk> getChunksForAudit(){
+        // TODO: get value from config
+        int month = 2;
+        int maxChunkAuditPerDeposit = 50;
+        int maxChunkPerAudit = 2000;
+
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MONTH, -month); // to get previous years
+        Date olderThanDate = cal.getTime();
+
+//        System.out.println("older than date: "+olderThanDate);
+
+        List<Deposit> deposits = depositDAO.getDepositsWaitingForAudit(olderThanDate);
+        List<DepositChunk> chunksToAudit = new ArrayList<DepositChunk>();
+
+        int totalCount = 0;
+        for(Deposit deposit : deposits){
+//            System.out.println("check deposit: "+deposit.getID());
+
+            List<DepositChunk> depositChunks = deposit.getDepositChunks();
+
+            int count = 0;
+            for(DepositChunk chunk : depositChunks){
+//                System.out.println("check chunk: "+chunk.getID());
+
+                Date lastAuditTime = chunk.getLastAuditTime();
+
+                if(lastAuditTime == null || lastAuditTime.before(olderThanDate)){
+//                    System.out.println("add chunk");
+                    chunksToAudit.add(chunk);
+                }
+
+                count++; totalCount++;
+                if(totalCount >= maxChunkPerAudit) {
+//                    System.out.println("maxChunkPerAudit reached");
+                    return chunksToAudit;
+                }else if(count >= maxChunkAuditPerDeposit){
+//                    System.out.println("maxChunkAuditPerDeposit reached");
+                    break; // get out of loop
+                }
+            }
+        }
+
+        return chunksToAudit;
     }
 }
 

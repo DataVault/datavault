@@ -1,16 +1,16 @@
 package org.datavaultplatform.common.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.ManyToOne;
+
+import javax.persistence.*;
+
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
+
+import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "DepositChunk")
@@ -46,6 +46,12 @@ public class DepositChunk {
     private byte[] encIV;
     @Column(columnDefinition = "TEXT")
     private String ecnArchiveDigest;
+
+    // Serialise date in ISO 8601 format
+    @ApiObjectField(description = "Date of last audit")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastAuditTime;
 
     public DepositChunk() {}
     public DepositChunk(Deposit deposit, int chunkNum, String archiveDigest, String archiveDigestAlgorithm) {
@@ -96,6 +102,13 @@ public class DepositChunk {
     public void setEcnArchiveDigest(String ecnArchiveDigest) {
         this.ecnArchiveDigest = ecnArchiveDigest;
     }
-    
+
+    public void setLastAuditTime(Date lastAuditTime) {
+        this.lastAuditTime = lastAuditTime;
+    }
+
+    public Date getLastAuditTime() {
+        return lastAuditTime;
+    }
     
 }

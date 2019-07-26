@@ -120,6 +120,11 @@
         <property name="emailService" ref="emailService" />
     </bean>
 
+    <bean id="auditDepositsChunks" class="org.datavaultplatform.broker.scheduled.AuditDepositsChunks">
+        <property name="depositsService" ref="depositsService" />
+        <property name="emailService" ref="emailService" />
+    </bean>
+
     <!-- Email -->
 
     <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
@@ -237,6 +242,10 @@
 
     <task:scheduled-tasks scheduler="scheduler">
         <task:scheduled ref="checkEncryptionData" method="checkAll" cron="${encryptioncheck.schedule}" />
+    </task:scheduled-tasks>
+
+    <task:scheduled-tasks scheduler="scheduler">
+        <task:scheduled ref="auditDepositsChunks" method="execute" cron="${auditdeposit.schedule}" />
     </task:scheduled-tasks>
 
     <!-- Data Access Objects -->

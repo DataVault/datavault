@@ -570,4 +570,8 @@ public class RestService {
         delete(brokerURL + "/admin/deposits/" + depositId, String.class);
     }
 
+    public String auditDeposits() {
+        HttpEntity<?> response =  get(brokerURL + "/admin/deposits/audit", String.class);
+        return (String)response.getBody();
+    }
 }

@@ -38,6 +38,8 @@
         </div>
     </form>
 
+    <button id="audit" class="btn btn-primary"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Run Audit</button>
+
     <#if deposits?has_content>
         <div class="table-responsive">
             <table class="table table-striped">
@@ -118,6 +120,19 @@ $("button#remove").click(function(){
         },
         error: function(xhr, ajaxOptions, thrownError) {
             //alert('Error: unable to delete Deposit');
+        }
+    });
+});
+
+$("button#audit").click(function(){
+    $.ajax({
+        url: '${springMacroRequestContext.getContextPath()}/admin/deposits/audit',
+        type: 'GET',
+        success: function (data) {
+            console.log("----success---");
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            alert('Error: unable to delete Deposit');
         }
     });
 });

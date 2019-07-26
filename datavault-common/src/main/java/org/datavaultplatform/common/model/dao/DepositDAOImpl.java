@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
+import java.util.Date;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -161,5 +162,17 @@ public class DepositDAOImpl implements DepositDAO {
     public Long size() {
         Session session = this.sessionFactory.openSession();
         return (Long)session.createCriteria(Deposit.class).setProjection(Projections.sum("depositSize")).uniqueResult();
+    }
+
+    @Override
+    public List<Deposit> getDepositsWaitingForAudit(Date olderThanDate) {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Deposit.class);
+
+        criteria.add(Restrictions.le("creationTime", olderThanDate));
+
+        List<Deposit> deposits = criteria.list();
+        session.close();
+        return deposits;
     }
 }
