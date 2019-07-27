@@ -124,6 +124,10 @@
         <property name="restService" ref="restService" />
     </bean>
 
+    <bean id="adminRolesController" class="org.datavaultplatform.webapp.controllers.admin.AdminRolesController">
+        <property name="restService" ref="restService" />
+    </bean>
+
     <bean id="adminGroupsController" class="org.datavaultplatform.webapp.controllers.admin.AdminGroupsController">
         <property name="restService" ref="restService" />
     </bean>

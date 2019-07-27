@@ -1,0 +1,143 @@
+/* Layout CSS for general layout */
+
+.container_layout
+{
+    background: white;
+}
+
+.table_layout
+{
+    max-width: 400px;
+    margin-bottom: 50px;
+}
+
+.table_layout th
+{
+    font-size: 16px;
+    font-weight: normal;
+}
+
+.table_layout td
+{
+    font-size: 16px;
+    font-weight: normal;
+}
+
+.table_layout td {
+
+    border: none;
+    height: 40px;
+    vert-align: middle;
+}
+
+.table_layout th {
+
+    border-bottom: solid black 1px;
+    padding-bottom: 5px;
+
+}
+
+
+.table_layout__title {
+    width: 200px;
+
+}
+
+.table_layout__count {
+    width: 75px;
+}
+
+.table_layout__actions {
+    width: 100px;
+}
+
+.table_layout_icon {
+    margin-right: 3px;
+}
+
+.layout_misc__add_new {
+    margin: 40px 0px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.layout_roles_title {
+    color: black;
+    font-size: 36px;
+    opacity: 1;
+    font-weight: 500;
+}
+
+
+.modal_layout_roles {
+    width: 865px;
+    min-height: 500px;
+    background: white;
+    overflow:auto;
+}
+
+
+.modal_layout_roles__inputs {
+    width: 250px !important;
+    background: white;
+    margin-left: 10px;
+}
+
+.modal_layout_roles_modal-footer {
+    border: none;
+    padding-top: 0px;
+    padding-top: 0px;
+}
+
+.modal_layout_roles_modal-header {
+    border: none;
+    padding-top: 0px;
+    padding-top: 0px;
+}
+
+
+.modal_layout_roles_modal-body {
+    padding-top: 0px;
+    padding-top: 0px;
+}
+
+.modal_layout_roles__inputs__textarea {
+    width: 300px !important;
+    height: 100px !important;
+    background: white;
+}
+.modal_layout_roles__labels {
+    min-width: 80px;
+    background: white;
+    align-text: top;
+    vertical-align:top;
+    font-weight: normal;
+}
+
+.modal_layout_roles__permissions {
+    margin-top: 20px;
+    font-size: 16px;
+    padding: 5px;
+}
+
+.modal_layout_roles_modal-header-close {
+    color: black;
+    margin-top: 10px;
+    opacity: 1;
+}
+
+.model_layout_permission_label {
+    padding: 3px;
+    margin-left: 4px;
+    font-size: 18px;
+}
+
+
+.modal_layout_action_btn {
+    padding: 2px;
+    margin: 0px;
+}
+
+.layout_select_target {
+    min-height: 250px;
+}

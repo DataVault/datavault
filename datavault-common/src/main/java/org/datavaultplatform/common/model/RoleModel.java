@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import javax.persistence.*;
 import java.util.Collection;
 
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="Roles")
