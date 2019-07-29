@@ -15,6 +15,8 @@ public interface BillingDAO {
     public List<BillingInfo> list(String sort, String order, String offset, String maxResult);
 
     public BillingInfo findById(String Id);
+    
+    public void saveOrUpdateVault(BillingInfo billing);
 
     public List<BillingInfo> search(String query, String sort, String order, String offset, String maxResult);
 
