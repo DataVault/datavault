@@ -101,10 +101,10 @@
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-success">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Review</h3>
+                    <h3 class="panel-title">Roles</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="#"><span class="glyphicon glyphicon-list-alt"></span> ${reviewcount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/roles"><i class="fa fa-cog"></i> ${rolecount}</a></h1>
                 </div>
             </div>
         </div>
