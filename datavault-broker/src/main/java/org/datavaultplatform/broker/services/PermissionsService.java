@@ -67,6 +67,10 @@ public class PermissionsService implements ApplicationListener<ContextRefreshedE
         return permissionDao.findAll().stream().filter(filter).collect(Collectors.toList());
     }
 
+    public RoleModel getRole(long id) {
+        return roleDao.find(id);
+    }
+
     public List<RoleModel> getEditableRoles() {
         return roleDao.findAll().stream()
                 .filter(role -> role.getType().isCustomCreatable())

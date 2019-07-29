@@ -32,7 +32,7 @@ public class PermissionModel {
 
     public static PermissionModel createDefault(Permission permission) {
         PermissionModel p = new PermissionModel();
-        p.setId(permission.name());
+        p.setId(permission.getId());
         p.setPermission(permission);
         p.setType(permission.getDefaultType());
         p.setLabel(permission.getDefaultLabel());

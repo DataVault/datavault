@@ -23,7 +23,7 @@ public class PermissionsController {
     }
 
     @ApiMethod(
-            path = "/permissions/role}",
+            path = "/permissions/role",
             verb = ApiVerb.POST,
             description = "Create a new DataVault Role",
             consumes = { MediaType.APPLICATION_JSON_VALUE },
@@ -36,7 +36,7 @@ public class PermissionsController {
     }
 
     @ApiMethod(
-            path = "/permissions/school}",
+            path = "/permissions/school",
             verb = ApiVerb.GET,
             description = "Gets all school permissions",
             produces = { MediaType.APPLICATION_JSON_VALUE },
@@ -49,7 +49,7 @@ public class PermissionsController {
     }
 
     @ApiMethod(
-            path = "/permissions/school}",
+            path = "/permissions/school",
             verb = ApiVerb.GET,
             description = "Gets all school permissions",
             produces = { MediaType.APPLICATION_JSON_VALUE },
@@ -62,7 +62,19 @@ public class PermissionsController {
     }
 
     @ApiMethod(
-            path = "/permissions/roles}",
+            path = "/permissions/role/{roleId}",
+            verb = ApiVerb.GET,
+            description = "Gets all roles which can be edited",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @GetMapping("/role/{roleId}")
+    public RoleModel getRole(@PathVariable("roleId") @ApiPathParam(name = "Role ID", description = "The ID of the role to get") Long id) {
+        return permissionsService.getRole(id);
+    }
+
+    @ApiMethod(
+            path = "/permissions/roles",
             verb = ApiVerb.GET,
             description = "Gets all roles which can be edited",
             produces = { MediaType.APPLICATION_JSON_VALUE },
@@ -75,7 +87,7 @@ public class PermissionsController {
     }
 
     @ApiMethod(
-            path = "/role}",
+            path = "/permissions/role",
             verb = ApiVerb.PUT,
             description = "Updates a role",
             consumes = { MediaType.APPLICATION_JSON_VALUE },
@@ -88,7 +100,7 @@ public class PermissionsController {
     }
 
     @ApiMethod(
-            path = "/role/{roleId}}",
+            path = "/permissions/role/{roleId}",
             verb = ApiVerb.DELETE,
             description = "Deletes a role",
             responsestatuscode = "200 - OK"

@@ -20,6 +20,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * User: Robin Taylor
@@ -591,6 +592,10 @@ public class RestService {
 
     public List<PermissionModel> getVaultPermissions() {
         return Arrays.asList(get(brokerURL + "/permissions/vault", PermissionModel[].class).getBody());
+    }
+
+    public Optional<RoleModel> getRole(long id) {
+        return Optional.ofNullable(get(brokerURL + "/permissions/role/" + id, RoleModel.class).getBody());
     }
 
     public List<RoleModel> getEditableRoles() {

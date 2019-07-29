@@ -1,307 +1,198 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
+import org.apache.commons.lang.StringUtils;
 import org.datavaultplatform.common.model.PermissionModel;
 import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.RoleType;
+import org.datavaultplatform.webapp.exception.EntityNotFoundException;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.datavaultplatform.webapp.model.RoleViewModel;
+import org.testng.collections.Sets;
 
 import java.util.*;
-//import java.util.stream.Collectors;
-
+import java.util.stream.Collectors;
 
 @Controller
 public class AdminRolesController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminRolesController.class);
+
     private RestService restService;
 
     public void setRestService(RestService restService) {
         this.restService = restService;
     }
 
-    private void setCommonModel(ModelMap model) {
+    @GetMapping("/admin/roles")
+    public ModelAndView getRolesListing() {
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("admin/roles/index");
+        mav.addObject("roles", restService.getEditableRoles());
+        return mav;
+    }
 
+    @PostMapping("/admin/roles/save")
+    public String save(@RequestParam(value = "id") long id,
+                       @RequestParam(value = "name") String name,
+                       @RequestParam(value = "type") String type,
+                       @RequestParam(value = "description", required = false) String description,
+                       @RequestParam(value = "permissions", required = false) String[] permissions,
+                       RedirectAttributes redirectAttributes) {
 
-        List<RoleModel> roles = restService.getEditableRoles();
+        Optional<RoleModel> stored = restService.getRole(id);
+        if (!stored.isPresent()) {
+            logger.debug("No existing role was found with ID={} - preparing to store new role.", id);
+            createNewRole(name, type, description, permissions, redirectAttributes);
 
-        if (roles.isEmpty()) {
-            logger.info("getRolesListing: roles has no items in rest fetch");
+        } else {
+            logger.debug("Existing role found with ID={} - preparing to persist update.", id);
+            updateRole(id, name, type, description, permissions, redirectAttributes);
         }
-
-        model.addAttribute("roles", roles);
-
-
-        if (!model.containsAttribute("errormessage")) {
-            model.addAttribute("errormessage", "");
-        }
-
-
+        return "redirect:/admin/roles";
     }
 
+    private void createNewRole(String name,
+                               String type,
+                               String description,
+                               String[] permissions,
+                               RedirectAttributes redirectAttributes) {
 
-    @RequestMapping(value = "/admin/roles", method = RequestMethod.GET)
-    public String getRolesListing(ModelMap model) {
+        List<PermissionModel> selectedPermissions = getSelectedPermissions(type, permissions);
 
-        try {
-                setCommonModel(model);
+        if (StringUtils.isEmpty(name)) {
+            logger.debug("Could not create role - no name provided");
+            redirectAttributes.addFlashAttribute("errormessage", "Roles must have a name.");
 
-        } catch (Exception e) {
+        } else if (StringUtils.isEmpty(description)) {
+            logger.debug("Could not create role - no description provided");
+            redirectAttributes.addFlashAttribute("errormessage", "Roles must have a description.");
 
-            logger.error("Exception in getRolesListing ", e);
-            model.addAttribute("errormessage", "<strong>Error loading roles:</strong>" + e.getMessage());
+        } else if (selectedPermissions.size() < 1) {
+            logger.debug("Could not create role - no permissions selected");
+            redirectAttributes.addFlashAttribute("errormessage", "Roles must have at least one permission.");
 
-        } finally {
-            return "admin/roles/index";
-        }
-    }
+        } else {
+            RoleModel role = new RoleModel();
+            role.setPermissions(selectedPermissions);
+            role.setName(name);
+            role.setDescription(description);
+            role.setType(RoleType.valueOf(type));
 
-    @RequestMapping(value = "/admin/roles/create", method = RequestMethod.POST)
-    public String addRole(@ModelAttribute RoleModel role, ModelMap model, @RequestParam String action) throws Exception {
-
-        setCommonModel(model);
-        return "admin/roles/index";
-    }
-
-    private RoleModel getRoleById(long roleid) {
-
-        Optional<RoleModel> optional = restService.getEditableRoles().stream().filter(x -> x.getId().equals(roleid)).findFirst();
-        RoleModel role = optional.isPresent() ? optional.get() : null;
-
-        return role;
-
-    }
-
-
-    @RequestMapping(value = "/admin/roles/save", method = RequestMethod.POST)
-    @ResponseBody
-    public void save(@RequestParam(value="id") int id,
-                     @RequestParam(value="name") String name,
-                     @RequestParam(value="type") String type,
-                     @RequestParam(value="description",required=false) String description,
-                     @RequestParam(value="permissions[]", required=false) String[] permissions) throws Exception {
-
-        try {
-
-            for (String p: permissions ) {
-                    logger.info("permission " + p);
-            }
-
-            logger.info("saving now: " + id + "name " + name);
-
-            switch (id) {
-                case 0:
-                    //create new;
-                    createNewRole(name, type, description, permissions);
-                    break;
-
-                default:
-                    saveRole(id, name, type, description, permissions);
-                    break;
-            }
-
-        } catch(Exception e) {
-            logger.error("Error Saving Role ", e);
-            throw e;
+            logger.info("Attempting to create new role with name {}", name);
+            restService.createRole(role);
         }
     }
 
-    private void saveRole(int id, String name, String type, String description, String[] permissions) throws Exception
-    {
-        RoleModel role = getRoleById(id);
-
-        if (role == null || role.getId() == 0)  {
-            logger.error("saveRole: Role can not be found on edit");
-            throw new Exception("Roles can not be found on edit action ");
+    private List<PermissionModel> getSelectedPermissions(String type, String[] permIds) {
+        if (permIds == null) {
+            return new ArrayList<>();
         }
-
-        List<PermissionModel> pms = getSelectedPermissions(type, permissions);
-
-        role.setPermissions(pms);
-        role.setName(name);
-        role.setDescription(description);
-        role.setType(RoleType.valueOf(type));
-
-        restService.updateRole(role);
-
-    }
-
-
-    private void createNewRole(String name, String type, String description, String[] permissions)
-    {
-
-        RoleModel role = new RoleModel();
-
-        List<PermissionModel> pms = getSelectedPermissions(type, permissions);
-
-        role.setPermissions(pms);
-        role.setName(name);
-        role.setDescription(description);
-        role.setType(RoleType.valueOf(type));
-
-        restService.createRole(role);
-
-    }
-
-    private List<PermissionModel> getSelectedPermissions(String type, String[] permIds )
-    {
-        List<PermissionModel> pms = getPermissionsByType(type);
-
-        ArrayList<PermissionModel> result = new ArrayList<>();
-
-        if (pms == null) return
-                new ArrayList<>();
-
-        for (String id : permIds)
-        {
-            Optional<PermissionModel> optional = pms.stream().filter(x -> x.getId().equals(id)).findFirst();
-            PermissionModel perm = optional.isPresent() ? optional.get() : null;
-
-            if (perm != null)
-                result.add(perm);
-
-        }
-          return result;
+        Set<String> permissionIds = Sets.newHashSet(Arrays.asList(permIds));
+        return getPermissionsByType(type).stream()
+                .filter(permission -> permissionIds.contains(permission.getId()))
+                .collect(Collectors.toList());
     }
 
     private List<PermissionModel> getPermissionsByType(String type) {
-
-        List<PermissionModel> model;
-
-        switch (type.toUpperCase()) {
+        switch (type) {
             case "VAULT":
-                model = restService.getVaultPermissions();
-                break;
+                return restService.getVaultPermissions();
             case "SCHOOL":
-                model = restService.getSchoolPermissions();
-                break;
+                return restService.getSchoolPermissions();
             default:
-                model = null;
-
+                return new ArrayList<>();
         }
-
-        return model;
     }
 
+    private void updateRole(long id,
+                            String name,
+                            String type,
+                            String description,
+                            String[] permissions,
+                            RedirectAttributes redirectAttributes) {
 
+        RoleModel role = restService.getRole(id)
+                .orElseThrow(() -> new EntityNotFoundException(RoleModel.class, String.valueOf(id)));
 
-    @RequestMapping(value = "/admin/roles/delete/{id}", method = {RequestMethod.GET, RequestMethod.POST})
-    public String deleteRole(ModelMap model, @PathVariable("id") long roleid, RedirectAttributes redirectAttributes) throws Exception {
+        List<PermissionModel> selectedPermissions = getSelectedPermissions(type, permissions);
 
-        try {
+        if (StringUtils.isEmpty(name)) {
+            logger.debug("Could not update role - no name provided");
+            redirectAttributes.addFlashAttribute("errormessage", "Roles must have a name.");
 
-            logger.info("Role has been requested to be deleted id:" + roleid);
+        } else if (StringUtils.isEmpty(description)) {
+            logger.debug("Could not update role - no description provided");
+            redirectAttributes.addFlashAttribute("errormessage", "Roles must have a description.");
 
-            RoleModel role = getRoleById(roleid);
+        } else if (selectedPermissions.size() < 1) {
+            logger.debug("Could not update role - no permissions selected");
+            redirectAttributes.addFlashAttribute("errormessage", "Roles must have at least one permission.");
 
-            if (role == null) {
-                model.addAttribute("errormessage", "Roles does not exist Role Id:" + roleid);
-                 setCommonModel(model);
-                 return "/admin/roles/index";
+        } else {
+            role.setPermissions(selectedPermissions);
+            role.setName(name);
+            role.setDescription(description);
+            role.setType(RoleType.valueOf(type));
 
-            } else {
-
-                if (role.getAssignedUserCount() > 0) {
-                    model.addAttribute("errormessage", "Can't delete a role that has users");
-                    setCommonModel(model);
-                    return "/admin/roles/index";
-                } else {
-                    //attempt to delete role
-                    restService.deleteRole(roleid);
-                }
-            }
-
-
-        } catch (Exception e) {
-            String msg = "Error trying to delete  role " + roleid + " Error " + e.getMessage();
-            logger.error(msg, e);
-
-            model.addAttribute("errormessage", msg);
-
-            setCommonModel(model);
-            return "/admin/roles/index";
-
+            logger.info("Attempting to update role with ID={}", id);
+            restService.updateRole(role);
         }
-            return "redirect:/admin/roles/";
     }
 
+    @PostMapping("/admin/roles/delete")
+    public String deleteRole(@RequestParam("id") long roleId, RedirectAttributes redirectAttributes) {
 
+        logger.debug("Preparing to delete role with ID={}", roleId);
+        Optional<RoleModel> role = restService.getRole(roleId);
+        if (!role.isPresent()) {
+            logger.error("Could not delete role with ID={} - no such role found", roleId);
+            redirectAttributes.addFlashAttribute("errormessage", "Role does not exist Role Id: " + roleId);
 
-    // This will add all roles which are not selected to the role.permissions for FE display.
-    private void populatePermissions(RoleViewModel roleVm) {
+        } else if (role.get().getAssignedUserCount() > 0) {
+            logger.debug("Could not delete role with ID={} - users are still assigned to the role", roleId);
+            redirectAttributes.addFlashAttribute("errormessage", "Can't delete a role that has users");
 
-        List<PermissionModel> pms;
-
-        RoleModel role = roleVm.getRole();
-
-        switch (role.getType()) {
-            case VAULT:
-                pms = restService.getVaultPermissions();
-                break;
-
-            case SCHOOL:
-                pms = restService.getSchoolPermissions();
-                break;
-            default:
-                return;
+        } else {
+            logger.info("Attempting to delete role with ID={}", roleId);
+            restService.deleteRole(roleId);
         }
 
-        //add
-        pms.forEach(p -> {
-            if (!role.getPermissions().stream().anyMatch(x -> x.getId().equals(p.getId()))) {
-                roleVm.addPermission(p);
-            }
-        });
-
-
+        return "redirect:/admin/roles";
     }
 
+    @GetMapping(value = "/admin/roles/{id}", produces = "application/json")
+    public ResponseEntity<RoleViewModel> getRole(@PathVariable("id") long roleId) {
 
-    @RequestMapping(value = "/admin/roles/{id}", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<RoleViewModel> getRole(@PathVariable("id") long roleid) throws Exception {
-
-        RoleModel role = getRoleById(roleid);
-
-
-
-        if (role == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        Optional<RoleModel> role = restService.getRole(roleId);
+        if (!role.isPresent()) {
+            logger.error("Could not find role with ID={}", roleId);
+            throw new EntityNotFoundException(RoleModel.class, String.valueOf(roleId));
         }
 
-        RoleViewModel roleVm =  new RoleViewModel();
-        roleVm.setRole(role);
+        List<PermissionModel> allPermissions = getPermissionsByType(role.get().getType().name());
+        List<PermissionModel> unsetPermissions = allPermissions.stream()
+                .filter(p -> !role.get().hasPermission(p.getPermission()))
+                .collect(Collectors.toList());
 
-        populatePermissions(roleVm);
-
-        return ResponseEntity.ok(roleVm);
+        return ResponseEntity.ok(new RoleViewModel(role.get(), unsetPermissions));
     }
 
-    @RequestMapping(value="/admin/roles/getvaultpermissions", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<List<PermissionModel>> getPermissionsVault() throws Exception
-    {
+    @GetMapping(value = "/admin/roles/getvaultpermissions", produces = "application/json")
+    public ResponseEntity<List<PermissionModel>> getAllVaultPermissions() {
         List<PermissionModel> permissions = restService.getVaultPermissions();
-
         return ResponseEntity.ok(permissions);
     }
 
-    @RequestMapping(value="/admin/roles/getschoolpermissions", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<List<PermissionModel>> getPermissionsSchool() throws Exception
-    {
+    @GetMapping(value = "/admin/roles/getschoolpermissions", produces = "application/json")
+    public ResponseEntity<List<PermissionModel>> getAllSchoolPermissions() {
         List<PermissionModel> permissions = restService.getSchoolPermissions();
-
         return ResponseEntity.ok(permissions);
     }
-
-
-
 }

@@ -31,7 +31,7 @@ public class PermissionDAOImpl implements PermissionDAO {
 
         // First, remove any permissions that are not found in the Permission enum...
         String commaSeparatedPermissionIds = Arrays.stream(Permission.values())
-                .map(Permission::name)
+                .map(Permission::getId)
                 .collect(Collectors.joining(","));
         String deleteUnknownPermissionsSql = "DELETE FROM Permissions WHERE NOT FIND_IN_SET(id, '"
                 + commaSeparatedPermissionIds
@@ -40,7 +40,10 @@ public class PermissionDAOImpl implements PermissionDAO {
 
         // ...then store default entries for anything found in the enum but not the database
         Criteria permissionEnumEntries = session.createCriteria(PermissionModel.class);
-        permissionEnumEntries.add(Restrictions.in("permission", Permission.values()));
+        Set<String> permissionIds = Arrays.stream(Permission.values())
+                .map(Permission::getId)
+                .collect(Collectors.toSet());
+        permissionEnumEntries.add(Restrictions.in("id", permissionIds));
         Set<Permission> persistedPermissions = ((List<PermissionModel>) permissionEnumEntries.list()).stream()
                 .map(PermissionModel::getPermission)
                 .collect(Collectors.toSet());
