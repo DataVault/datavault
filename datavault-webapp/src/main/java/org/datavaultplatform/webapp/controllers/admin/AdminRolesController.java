@@ -34,6 +34,7 @@ public class AdminRolesController {
     public ModelAndView getRolesListing() {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("admin/roles/index");
+        mav.addObject("readOnlyRoles", restService.getViewableRoles());
         mav.addObject("roles", restService.getEditableRoles());
         return mav;
     }

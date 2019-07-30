@@ -35,6 +35,20 @@
                     </tr>
                 </thead>
                 <tbody>
+                <#list readOnlyRoles as role>
+                    <tr class="tr">
+                        <td>${role.getName()}</td>
+                        <td>${role.getAssignedUserCount()}</td>
+                        <td title="The ${role.name} role cannot be edited or removed.">
+                            <a href="#" class="btn btn-link modal_layout_action_btn" disabled="disabled" role="button">
+                                <i class="fa fa-pencil" style="font-size:24px;color white;padding:2px;border:solid 1px black;"></i> </span>
+                            </a>
+                            <a href="#" class="btn btn-link modal_layout_action_btn" disabled="disabled" role="button">
+                                <i class="fa fa-trash-o" style="font-size:24px;color:red;background:MistyRose;border:1px solid black;padding:2px"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </#list>
                 <#list roles as role>
                     <tr class="tr">
                         <td>${role.getName()}</td>
@@ -110,24 +124,26 @@
         <div id="delete-dialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="delete-title" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form class="form form-horizontal" role="form" action="${springMacroRequestContext.getContextPath()}/admin/roles/delete" method="post">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                                <span class="glyphicon glyphicon-remove-circle  modal_layout_roles_modal-header-close"></span>
-                            </button>
-                            <h3 class="modal-title" id="delete-title">Delete Role</h3>
-                        </div>
-                        <div class="modal-body">
-                            <label>Are you sure you want to delete role <span id="delete-role-name"></span>?</label>
-                        </div>
-                        <input type="hidden" id="delete-role-id" name="id"/>
-                        <input type="hidden" id="submitAction" name="action" value="submit"/>
-                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                        <div class="modal_layout_roles_modal-footer">
-                            <button type="button" class="btn btn-basic" data-dismiss="modal"><span class="glyphicon glyphicon-remove-circle"></span> Close</button>
-                            <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
-                        </div>
-                    </form>
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            <span class="glyphicon glyphicon-remove-circle  modal_layout_roles_modal-header-close"></span>
+                        </button>
+                        <h3 class="modal-title" id="delete-title">Delete Role</h3>
+                    </div>
+                    <div class="modal-body modal_layout_roles_modal-body">
+                        <form class="form form-horizontal" role="form" action="${springMacroRequestContext.getContextPath()}/admin/roles/delete" method="post">
+                            <div class="modal-body">
+                                <label>Are you sure you want to delete role <span id="delete-role-name"></span>?</label>
+                            </div>
+                            <input type="hidden" id="delete-role-id" name="id"/>
+                            <input type="hidden" id="submitAction" name="action" value="submit"/>
+                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                            <div class="modal_layout_roles_modal-footer">
+                                <button type="button" class="btn btn-basic" data-dismiss="modal"><span class="glyphicon glyphicon-remove-circle"></span> Close</button>
+                                <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
