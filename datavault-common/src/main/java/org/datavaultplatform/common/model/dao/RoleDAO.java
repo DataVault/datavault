@@ -7,9 +7,15 @@ import java.util.Collection;
 
 public interface RoleDAO {
 
+    void storeSpecialRoles();
+
     void store(RoleModel role);
 
     RoleModel find(Long id);
+
+    RoleModel getIsAdmin();
+
+    RoleModel getDataOwner();
 
     Collection<RoleModel> findAll();
 

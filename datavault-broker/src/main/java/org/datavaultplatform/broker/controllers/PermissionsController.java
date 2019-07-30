@@ -87,6 +87,19 @@ public class PermissionsController {
     }
 
     @ApiMethod(
+            path = "/permissions/roles/readOnly",
+            verb = ApiVerb.GET,
+            description = "Gets all roles which can be viewed but not edited",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @GetMapping("/roles/readOnly")
+    public RoleModel[] getViewableRoles() {
+        List<RoleModel> viewableRoles = permissionsService.getViewableRoles();
+        return viewableRoles.toArray(new RoleModel[0]);
+    }
+
+    @ApiMethod(
             path = "/permissions/role",
             verb = ApiVerb.PUT,
             description = "Updates a role",

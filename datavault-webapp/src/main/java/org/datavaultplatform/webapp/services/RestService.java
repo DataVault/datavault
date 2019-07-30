@@ -602,6 +602,10 @@ public class RestService {
         return Arrays.asList(get(brokerURL + "/permissions/roles", RoleModel[].class).getBody());
     }
 
+    public List<RoleModel> getViewableRoles() {
+        return Arrays.asList(get(brokerURL + "/permissions/roles/readOnly", RoleModel[].class).getBody());
+    }
+
     public RoleModel updateRole(RoleModel role) {
         return put(brokerURL + "/permissions/role", RoleModel.class, role).getBody();
     }

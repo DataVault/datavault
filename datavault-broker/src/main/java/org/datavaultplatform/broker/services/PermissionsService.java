@@ -8,6 +8,7 @@ import org.datavaultplatform.common.model.dao.RoleDAO;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ public class PermissionsService implements ApplicationListener<ContextRefreshedE
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         permissionDao.synchronisePermissions();
+        roleDao.storeSpecialRoles();
     }
 
     public RoleModel createRole(RoleModel role) {
@@ -75,6 +77,10 @@ public class PermissionsService implements ApplicationListener<ContextRefreshedE
         return roleDao.findAll().stream()
                 .filter(role -> role.getType().isCustomCreatable())
                 .collect(Collectors.toList());
+    }
+
+    public List<RoleModel> getViewableRoles() {
+        return Collections.singletonList(roleDao.getDataOwner());
     }
 
     public RoleModel updateRole(RoleModel role) {
