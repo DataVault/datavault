@@ -4,6 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.datavaultplatform.common.model.PermissionModel;
 import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.RoleType;
+import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
@@ -71,6 +72,10 @@ public class AdminRolesController {
             logger.debug("Could not create role - no name provided");
             redirectAttributes.addFlashAttribute("errormessage", "Roles must have a name.");
 
+        } else if (RoleUtils.isReservedRoleName(name)) {
+            logger.debug("Could not create role - reserved name");
+            redirectAttributes.addFlashAttribute("errormessage", "Cannot create role with reserved name " + name);
+
         } else if (StringUtils.isEmpty(description)) {
             logger.debug("Could not create role - no description provided");
             redirectAttributes.addFlashAttribute("errormessage", "Roles must have a description.");
@@ -124,9 +129,17 @@ public class AdminRolesController {
 
         List<PermissionModel> selectedPermissions = getSelectedPermissions(type, permissions);
 
-        if (StringUtils.isEmpty(name)) {
+        if (!role.getType().isCustomCreatable()) {
+            logger.debug("Could not update role - non-editable role type");
+            redirectAttributes.addFlashAttribute("errormessage", "Cannot update non-editable roles.");
+
+        } else if (StringUtils.isEmpty(name)) {
             logger.debug("Could not update role - no name provided");
             redirectAttributes.addFlashAttribute("errormessage", "Roles must have a name.");
+
+        } else if (RoleUtils.isReservedRoleName(name)) {
+            logger.debug("Could not create role - reserved name");
+            redirectAttributes.addFlashAttribute("errormessage", "Cannot update role to have reserved name " + name);
 
         } else if (StringUtils.isEmpty(description)) {
             logger.debug("Could not update role - no description provided");

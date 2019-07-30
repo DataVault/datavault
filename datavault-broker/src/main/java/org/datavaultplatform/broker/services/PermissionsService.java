@@ -5,6 +5,7 @@ import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.common.model.dao.PermissionDAO;
 import org.datavaultplatform.common.model.dao.RoleDAO;
+import org.datavaultplatform.common.util.RoleUtils;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
@@ -36,6 +37,9 @@ public class PermissionsService implements ApplicationListener<ContextRefreshedE
     public RoleModel createRole(RoleModel role) {
         if (roleExists(role.getId())) {
             throw new IllegalStateException("Cannot create a role that already exists");
+        }
+        if (RoleUtils.isReservedRoleName(role.getName())) {
+            throw new IllegalStateException("Cannot create a role with reserved role name: " + role.getName());
         }
         validateRolePermissions(role);
         roleDao.store(role);

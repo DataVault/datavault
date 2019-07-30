@@ -5,24 +5,19 @@ import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
 import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.RoleType;
+import org.datavaultplatform.common.util.RoleUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class RoleDAOImpl implements RoleDAO {
-
-    private static final String IS_ADMIN_ROLE_NAME = "IS Admin";
-    private static final String IS_ADMIN_ROLE_DESCRIPTION = "An admin of the whole system, with full permissions over the system.";
-    private static final String DATA_OWNER_ROLE_NAME = "Data Owner";
-    private static final String DATA_OWNER_ROLE_DESCRIPTION = "An admin of a specific vault, with full permissions over that vault.";
 
     private SessionFactory sessionFactory;
 
@@ -49,7 +44,7 @@ public class RoleDAOImpl implements RoleDAO {
         List<PermissionModel> allPermissions = allPermissionsCriteria.list();
 
         Criteria isAdminCriteria = session.createCriteria(RoleModel.class);
-        isAdminCriteria.add(Restrictions.eq("name", IS_ADMIN_ROLE_NAME));
+        isAdminCriteria.add(Restrictions.eq("name", RoleUtils.IS_ADMIN_ROLE_NAME));
         RoleModel storedIsAdmin = (RoleModel) isAdminCriteria.uniqueResult();
         if (storedIsAdmin != null) {
             Set<Permission> storedIsAdminPerms = storedIsAdmin.getPermissions().stream()
@@ -63,8 +58,8 @@ public class RoleDAOImpl implements RoleDAO {
         } else {
             RoleModel isAdmin = new RoleModel();
             isAdmin.setType(RoleType.ADMIN);
-            isAdmin.setName(IS_ADMIN_ROLE_NAME);
-            isAdmin.setDescription(IS_ADMIN_ROLE_DESCRIPTION);
+            isAdmin.setName(RoleUtils.IS_ADMIN_ROLE_NAME);
+            isAdmin.setDescription(RoleUtils.IS_ADMIN_ROLE_DESCRIPTION);
             isAdmin.setPermissions(allPermissions);
             session.persist(isAdmin);
         }
@@ -76,7 +71,7 @@ public class RoleDAOImpl implements RoleDAO {
         List<PermissionModel> vaultPermissions = vaultPermissionsCriteria.list();
 
         Criteria dataOwnerCriteria = session.createCriteria(RoleModel.class);
-        dataOwnerCriteria.add(Restrictions.eq("name", DATA_OWNER_ROLE_NAME));
+        dataOwnerCriteria.add(Restrictions.eq("name", RoleUtils.DATA_OWNER_ROLE_NAME));
         RoleModel storedDataOwner = (RoleModel) dataOwnerCriteria.uniqueResult();
         if (storedDataOwner != null) {
             Set<Permission> storedDataOwnerPermissions = storedDataOwner.getPermissions().stream()
@@ -92,8 +87,8 @@ public class RoleDAOImpl implements RoleDAO {
         } else {
             RoleModel dataOwner = new RoleModel();
             dataOwner.setType(RoleType.ADMIN);
-            dataOwner.setName(DATA_OWNER_ROLE_NAME);
-            dataOwner.setDescription(DATA_OWNER_ROLE_DESCRIPTION);
+            dataOwner.setName(RoleUtils.DATA_OWNER_ROLE_NAME);
+            dataOwner.setDescription(RoleUtils.DATA_OWNER_ROLE_DESCRIPTION);
             dataOwner.setPermissions(vaultPermissions);
             session.persist(dataOwner);
         }
@@ -122,7 +117,7 @@ public class RoleDAOImpl implements RoleDAO {
     public RoleModel getIsAdmin() {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(RoleModel.class);
-        criteria.add(Restrictions.eq("name", IS_ADMIN_ROLE_NAME));
+        criteria.add(Restrictions.eq("name", RoleUtils.IS_ADMIN_ROLE_NAME));
         RoleModel role = (RoleModel) criteria.uniqueResult();
         session.close();
         return role;
@@ -132,7 +127,7 @@ public class RoleDAOImpl implements RoleDAO {
     public RoleModel getDataOwner() {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(RoleModel.class);
-        criteria.add(Restrictions.eq("name", DATA_OWNER_ROLE_NAME));
+        criteria.add(Restrictions.eq("name", RoleUtils.DATA_OWNER_ROLE_NAME));
         RoleModel role = (RoleModel) criteria.uniqueResult();
         session.close();
         return role;
