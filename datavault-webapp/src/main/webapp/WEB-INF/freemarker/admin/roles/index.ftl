@@ -19,12 +19,6 @@
             <a id="addNewRoleBtn" href="#">+Add New Role</a>
         </div>
 
-        <#if errormessage?has_content>
-            <div class="alert alert-danger">
-                ${errormessage}
-            </div>
-        </#if>
-
         <#if roles?has_content>
             <table class="table_layout">
                 <thead>
@@ -79,10 +73,8 @@
                         <h3 id="modal_title" class="layout_roles_title">Add new role</h3>
                     </div>
                     <div class="modal-body modal_layout_roles_modal-body">
-                        <div id="modalMsg" class="alert  alert-danger" role="alert">
-                            all OK
-                        </div>
                         <form id="create-role" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/roles/save" method="post">
+                            <div id="create-error" class="alert alert-danger hidden"></div>
                             <div class="row">
                                 <div class="col-xs-6">
                                     <input type="hidden" name="id" id="edit_roleid">
@@ -131,7 +123,8 @@
                         <h3 class="modal-title" id="delete-title">Delete Role</h3>
                     </div>
                     <div class="modal-body modal_layout_roles_modal-body">
-                        <form class="form form-horizontal" role="form" action="${springMacroRequestContext.getContextPath()}/admin/roles/delete" method="post">
+                        <form id="delete-form" class="form form-horizontal" role="form" action="${springMacroRequestContext.getContextPath()}/admin/roles/delete" method="post">
+                            <div id="delete-error" class="alert alert-danger hidden"></div>
                             <div class="modal-body">
                                 <label>Are you sure you want to delete role <span id="delete-role-name"></span>?</label>
                             </div>
@@ -165,6 +158,39 @@
            var roleName = $(this).data('role-name');
            $('#delete-role-id').val(roleId);
            $('#delete-role-name').text(roleName);
+           $('#delete-error').addClass('hidden').text('');
+        });
+
+        $('#create-role').submit(function(event) {
+            event.preventDefault();
+            var formData = $(this).serialize();
+            $.ajax({
+                method: 'POST',
+                url: '${springMacroRequestContext.getContextPath()}/admin/roles/save',
+                data: formData,
+                success: function() {
+                    window.location.href = '${springMacroRequestContext.getContextPath()}/admin/roles';
+                },
+                error: function(xhr) {
+                    $('#create-error').removeClass('hidden').text(xhr.responseText);
+                }
+            });
+        });
+
+        $('#delete-form').submit(function(event) {
+            event.preventDefault();
+            var formData = $(this).serialize();
+            $.ajax({
+                method: 'POST',
+                url: '${springMacroRequestContext.getContextPath()}/admin/roles/delete',
+                data: formData,
+                success: function() {
+                    window.location.href = '${springMacroRequestContext.getContextPath()}/admin/roles';
+                },
+                error: function(xhr) {
+                    $('#delete-error').removeClass('hidden').text(xhr.responseText);
+                }
+            });
         });
 
         function getPermissions() {
@@ -174,11 +200,9 @@
                 url: '${springMacroRequestContext.getContextPath()}/admin/roles/getvaultpermissions',
                 success: function (data) {
                     vaultPermissions = data;
-
                 },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    $("#modalMsg").show();
-                    $("#modalMsg").html("<strong>Error Fetching School Permissions: </strong> " + thrownError);
+                error: function (xhr) {
+                    $('#create-error').removeClass('hidden').text(xhr.responseText);
                 }
             });
 
@@ -187,18 +211,15 @@
                 url: '${springMacroRequestContext.getContextPath()}/admin/roles/getschoolpermissions',
                 success: function (data) {
                     schoolPermissions = data;
-
                 },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    $("#modalMsg").show();
-                    $("#modalMsg").html("<strong>Error Fetching School Permissions: </strong> " + thrownError);
+                error: function (xhr) {
+                    $('#create-error').removeClass('hidden').text(xhr.responseText);
                 }
             });
         }
 
         function EditByRoleId(roleid) {
 
-            $("#modalMsg").hide();
             getPermissions();
 
             $.ajax({
@@ -206,8 +227,7 @@
                 url: '${springMacroRequestContext.getContextPath()}/admin/roles/' + roleid,
                 success: function (data) {
 
-                    $("model_msg").innerText = "";
-
+                    $('#create-error').addClass('hidden').text('');
                     $("#modalnewedit").modal("show");
 
                     $("#edit_roleid").val(data.role.id);
@@ -233,43 +253,9 @@
                     });
 
                 },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    $("#modalMsg").show();
-                    $("#modalMsg").html("<strong>Error Fetching Role: </strong> " + thrownError);
+                error: function (xhr) {
+                    $('#create-error').removeClass('hidden').text(xhr.responseText);
                 }
-            });
-        }
-
-        $("#modalSave").click(function () {
-            $("#modalMsg").hide();
-
-            if (!$("#edit_name").val()) {
-                $("#modalMsg").show();
-                $("#modalMsg").html("Need role name to save");
-                return;
-            }
-
-            if ($("[name='permisionmodel']").filter(':checked').length == 0) {
-                $("#modalMsg").show();
-                $("#modalMsg").html("Need at least One permission selected");
-                return;
-            }
-
-            saveform();
-        });
-
-        function saveform() {
-            var formdata = {
-                id: $("#edit_roleid").val(),
-                name: $("#edit_name").val(),
-                description: $("#edit_description").val(),
-                type: $("#edit_type").val(),
-                permissions: []
-
-            };
-
-            $("[name='permisionmodel']").filter(':checked').each(function (i) {
-                formdata.permissions.push(this.id);
             });
         }
 
@@ -302,7 +288,7 @@
 
             $("#modal_title").html("Add new role");
 
-            $("#modalMsg").hide();
+            $('#create-error').addClass('hidden').text('');
             getPermissions();
 
             $("#modalnewedit").modal("show");
@@ -312,7 +298,7 @@
             $("#edit_description").val("");
 
             var type = "VAULT";
-            $("#edit_type").val = type;
+            $("#edit_type").val(type);
             changePermissions(type);
 
         });

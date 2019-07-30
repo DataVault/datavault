@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.datavaultplatform.webapp.model.RoleViewModel;
 import org.testng.collections.Sets;
 
@@ -41,59 +40,55 @@ public class AdminRolesController {
     }
 
     @PostMapping("/admin/roles/save")
-    public String save(@RequestParam(value = "id") long id,
+    public ResponseEntity save(@RequestParam(value = "id") long id,
                        @RequestParam(value = "name") String name,
                        @RequestParam(value = "type") String type,
                        @RequestParam(value = "description", required = false) String description,
-                       @RequestParam(value = "permissions", required = false) String[] permissions,
-                       RedirectAttributes redirectAttributes) {
+                       @RequestParam(value = "permissions", required = false) String[] permissions) {
 
         Optional<RoleModel> stored = restService.getRole(id);
         if (!stored.isPresent()) {
             logger.debug("No existing role was found with ID={} - preparing to store new role.", id);
-            createNewRole(name, type, description, permissions, redirectAttributes);
-
-        } else {
-            logger.debug("Existing role found with ID={} - preparing to persist update.", id);
-            updateRole(id, name, type, description, permissions, redirectAttributes);
+            return createNewRole(name, type, description, permissions);
         }
-        return "redirect:/admin/roles";
+
+        logger.debug("Existing role found with ID={} - preparing to persist update.", id);
+        return updateRole(id, name, type, description, permissions);
     }
 
-    private void createNewRole(String name,
+    private ResponseEntity createNewRole(String name,
                                String type,
                                String description,
-                               String[] permissions,
-                               RedirectAttributes redirectAttributes) {
+                               String[] permissions) {
 
         List<PermissionModel> selectedPermissions = getSelectedPermissions(type, permissions);
 
         if (StringUtils.isEmpty(name)) {
             logger.debug("Could not create role - no name provided");
-            redirectAttributes.addFlashAttribute("errormessage", "Roles must have a name.");
+            return validationFailed("Roles must have a name.");
 
         } else if (RoleUtils.isReservedRoleName(name)) {
             logger.debug("Could not create role - reserved name");
-            redirectAttributes.addFlashAttribute("errormessage", "Cannot create role with reserved name " + name);
+            return validationFailed("Cannot create role with reserved name " + name);
 
         } else if (StringUtils.isEmpty(description)) {
             logger.debug("Could not create role - no description provided");
-            redirectAttributes.addFlashAttribute("errormessage", "Roles must have a description.");
+            return validationFailed("Roles must have a description.");
 
         } else if (selectedPermissions.size() < 1) {
             logger.debug("Could not create role - no permissions selected");
-            redirectAttributes.addFlashAttribute("errormessage", "Roles must have at least one permission.");
-
-        } else {
-            RoleModel role = new RoleModel();
-            role.setPermissions(selectedPermissions);
-            role.setName(name);
-            role.setDescription(description);
-            role.setType(RoleType.valueOf(type));
-
-            logger.info("Attempting to create new role with name {}", name);
-            restService.createRole(role);
+            return validationFailed("Roles must have at least one permission.");
         }
+
+        RoleModel role = new RoleModel();
+        role.setPermissions(selectedPermissions);
+        role.setName(name);
+        role.setDescription(description);
+        role.setType(RoleType.valueOf(type));
+
+        logger.info("Attempting to create new role with name {}", name);
+        restService.createRole(role);
+        return ResponseEntity.ok().build();
     }
 
     private List<PermissionModel> getSelectedPermissions(String type, String[] permIds) {
@@ -117,12 +112,15 @@ public class AdminRolesController {
         }
     }
 
-    private void updateRole(long id,
+    private ResponseEntity validationFailed(String message) {
+        return ResponseEntity.status(422).body(message);
+    }
+
+    private ResponseEntity updateRole(long id,
                             String name,
                             String type,
                             String description,
-                            String[] permissions,
-                            RedirectAttributes redirectAttributes) {
+                            String[] permissions) {
 
         RoleModel role = restService.getRole(id)
                 .orElseThrow(() -> new EntityNotFoundException(RoleModel.class, String.valueOf(id)));
@@ -131,54 +129,52 @@ public class AdminRolesController {
 
         if (!role.getType().isCustomCreatable()) {
             logger.debug("Could not update role - non-editable role type");
-            redirectAttributes.addFlashAttribute("errormessage", "Cannot update non-editable roles.");
+            return validationFailed("Cannot update non-editable roles.");
 
         } else if (StringUtils.isEmpty(name)) {
             logger.debug("Could not update role - no name provided");
-            redirectAttributes.addFlashAttribute("errormessage", "Roles must have a name.");
+            return validationFailed("Roles must have a name.");
 
         } else if (RoleUtils.isReservedRoleName(name)) {
             logger.debug("Could not create role - reserved name");
-            redirectAttributes.addFlashAttribute("errormessage", "Cannot update role to have reserved name " + name);
+            return validationFailed("Cannot update role to have reserved name " + name);
 
         } else if (StringUtils.isEmpty(description)) {
             logger.debug("Could not update role - no description provided");
-            redirectAttributes.addFlashAttribute("errormessage", "Roles must have a description.");
+            return validationFailed("Roles must have a description.");
 
         } else if (selectedPermissions.size() < 1) {
             logger.debug("Could not update role - no permissions selected");
-            redirectAttributes.addFlashAttribute("errormessage", "Roles must have at least one permission.");
-
-        } else {
-            role.setPermissions(selectedPermissions);
-            role.setName(name);
-            role.setDescription(description);
-            role.setType(RoleType.valueOf(type));
-
-            logger.info("Attempting to update role with ID={}", id);
-            restService.updateRole(role);
+            return validationFailed("Roles must have at least one permission.");
         }
+
+        role.setPermissions(selectedPermissions);
+        role.setName(name);
+        role.setDescription(description);
+        role.setType(RoleType.valueOf(type));
+
+        logger.info("Attempting to update role with ID={}", id);
+        restService.updateRole(role);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/admin/roles/delete")
-    public String deleteRole(@RequestParam("id") long roleId, RedirectAttributes redirectAttributes) {
+    public ResponseEntity deleteRole(@RequestParam("id") long roleId) {
 
         logger.debug("Preparing to delete role with ID={}", roleId);
         Optional<RoleModel> role = restService.getRole(roleId);
         if (!role.isPresent()) {
             logger.error("Could not delete role with ID={} - no such role found", roleId);
-            redirectAttributes.addFlashAttribute("errormessage", "Role does not exist Role Id: " + roleId);
+            return validationFailed("Role does not exist Role Id: " + roleId);
 
         } else if (role.get().getAssignedUserCount() > 0) {
             logger.debug("Could not delete role with ID={} - users are still assigned to the role", roleId);
-            redirectAttributes.addFlashAttribute("errormessage", "Can't delete a role that has users");
-
-        } else {
-            logger.info("Attempting to delete role with ID={}", roleId);
-            restService.deleteRole(roleId);
+            return validationFailed("Can't delete a role that has users");
         }
 
-        return "redirect:/admin/roles";
+        logger.info("Attempting to delete role with ID={}", roleId);
+        restService.deleteRole(roleId);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = "/admin/roles/{id}", produces = "application/json")
