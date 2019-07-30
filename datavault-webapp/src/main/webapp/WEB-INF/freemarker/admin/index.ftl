@@ -104,7 +104,13 @@
                     <h3 class="panel-title">Roles</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/roles"><i class="fa fa-cog"></i> ${rolecount}</a></h1>
+                    <h1 class="text-center">
+                        <a href="${springMacroRequestContext.getContextPath()}/admin/roles">
+                            <!-- TODO this hack should be changed to show fa-user-cog once font-awesome has been upgrade to version 5 -->
+                            <i style="mask: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center; width: 1em; height: 1em; display: inline-block; background-color: rgb(52, 109, 191);"></i>
+                            <span style="vertical-align: top;">${rolecount}</span>
+                        </a>
+                    </h1>
                 </div>
             </div>
         </div>
