@@ -33,11 +33,11 @@
                     <tr class="tr">
                         <td>${role.getName()}</td>
                         <td>${role.getAssignedUserCount()}</td>
-                        <td title="The ${role.name} role cannot be edited or removed.">
-                            <a href="#" class="btn btn-link modal_layout_action_btn" disabled="disabled" role="button">
+                        <td>
+                            <a href="#" class="btn btn-link modal_layout_action_btn" disabled="disabled" role="button" title="The ${role.name} role cannot be edited.">
                                 <i class="fa fa-pencil" style="font-size:24px;color white;padding:2px;border:solid 1px black;"></i> </span>
                             </a>
-                            <a href="#" class="btn btn-link modal_layout_action_btn" disabled="disabled" role="button">
+                            <a href="#" class="btn btn-link modal_layout_action_btn" disabled="disabled" role="button" title="The ${role.name} role cannot be removed.">
                                 <i class="fa fa-trash-o" style="font-size:24px;color:red;background:MistyRose;border:1px solid black;padding:2px"></i>
                             </a>
                         </td>
@@ -48,10 +48,10 @@
                         <td>${role.getName()}</td>
                         <td>${role.getAssignedUserCount()}</td>
                         <td>
-                            <a href="#" class="btn btn-link editRoleButton modal_layout_action_btn" role="button" value="${role.getId()}">
+                            <a href="#" class="btn btn-link editRoleButton modal_layout_action_btn" role="button" value="${role.getId()}" title="Edit the ${role.name} role.">
                                 <i class="fa fa-pencil" style="font-size:24px;color white;padding:2px;border:solid 1px black;"></i> </span>
                             </a>
-                            <a href="#" class="btn btn-link modal_layout_action_btn" data-toggle="modal" data-target="#delete-dialog" data-role-id="${role.id}" data-role-name="${role.name}" role="button">
+                            <a href="#" class="btn btn-link modal_layout_action_btn" data-toggle="modal" data-target="#delete-dialog" data-role-id="${role.id}" data-role-name="${role.name}" role="button" title="Remove the ${role.name} role.">
                                 <i class="fa fa-trash-o" style="font-size:24px;color:red;background:MistyRose;border:1px solid black;padding:2px"></i>
                             </a>
                         </td>
@@ -104,8 +104,10 @@
                             <input type="hidden" id="submitAction" name="action" value="submit"/>
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                             <div class="modal_layout_roles_modal-footer">
-                                <button type="button" class="btn btn-basic" data-dismiss="modal"><span class="glyphicon glyphicon-remove-circle"></span> Close</button>
-                                <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-basic" data-dismiss="modal"><span class="glyphicon glyphicon-remove-circle"></span> Close</button>
+                                    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -132,8 +134,10 @@
                             <input type="hidden" id="submitAction" name="action" value="submit"/>
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                             <div class="modal_layout_roles_modal-footer">
-                                <button type="button" class="btn btn-basic" data-dismiss="modal"><span class="glyphicon glyphicon-remove-circle"></span> Close</button>
-                                <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-basic" data-dismiss="modal"><i class="fa fa-times"></i> No</button>
+                                    <button type="submit" class="btn btn-primary"><i class="fa fa-check"></i> Yes</button>
+                                </div>
                             </div>
                         </form>
                     </div>

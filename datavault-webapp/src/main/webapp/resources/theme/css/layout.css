@@ -138,6 +138,10 @@
     margin: 0px;
 }
 
+.modal_layout_action_btn.btn[disabled] {
+    pointer-events: auto;
+}
+
 .layout_select_target {
     min-height: 250px;
 }
