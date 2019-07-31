@@ -19,49 +19,45 @@
             <a id="addNewRoleBtn" href="#">+Add New Role</a>
         </div>
 
-        <#if roles?has_content>
-            <table class="table_layout">
-                <thead>
-                    <tr class="tr">
-                        <th class="table_layout__title">Role</th>
-                        <th class="table_layout__count"> No. of Users</th>
-                        <th class="table_layout__actions">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <#list readOnlyRoles as role>
-                    <tr class="tr">
-                        <td>${role.getName()}</td>
-                        <td>${role.getAssignedUserCount()}</td>
-                        <td>
-                            <a href="#" class="btn btn-link modal_layout_action_btn" disabled="disabled" role="button" title="The ${role.name} role cannot be edited.">
-                                <i class="fa fa-pencil" style="font-size:24px;color white;padding:2px;border:solid 1px black;"></i> </span>
-                            </a>
-                            <a href="#" class="btn btn-link modal_layout_action_btn" disabled="disabled" role="button" title="The ${role.name} role cannot be removed.">
-                                <i class="fa fa-trash-o" style="font-size:24px;color:red;background:MistyRose;border:1px solid black;padding:2px"></i>
-                            </a>
-                        </td>
-                    </tr>
-                </#list>
-                <#list roles as role>
-                    <tr class="tr">
-                        <td>${role.getName()}</td>
-                        <td>${role.getAssignedUserCount()}</td>
-                        <td>
-                            <a href="#" class="btn btn-link editRoleButton modal_layout_action_btn" role="button" value="${role.getId()}" title="Edit the ${role.name} role.">
-                                <i class="fa fa-pencil" style="font-size:24px;color white;padding:2px;border:solid 1px black;"></i> </span>
-                            </a>
-                            <a href="#" class="btn btn-link modal_layout_action_btn" data-toggle="modal" data-target="#delete-dialog" data-role-id="${role.id}" data-role-name="${role.name}" role="button" title="Remove the ${role.name} role.">
-                                <i class="fa fa-trash-o" style="font-size:24px;color:red;background:MistyRose;border:1px solid black;padding:2px"></i>
-                            </a>
-                        </td>
-                    </tr>
-                </#list>
-                </tbody>
-            </table>
-        <#else>
-            <h2>There are no roles</h2>
-        </#if>
+        <table class="table_layout">
+            <thead>
+                <tr class="tr">
+                    <th class="table_layout__title">Role</th>
+                    <th class="table_layout__count"> No. of Users</th>
+                    <th class="table_layout__actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            <#list readOnlyRoles as role>
+                <tr class="tr">
+                    <td>${role.getName()}</td>
+                    <td>${role.getAssignedUserCount()}</td>
+                    <td>
+                        <a href="#" class="btn btn-link modal_layout_action_btn" disabled="disabled" role="button" title="The ${role.name} role cannot be edited.">
+                            <i class="fa fa-pencil" style="font-size:24px;color white;padding:2px;border:solid 1px black;"></i> </span>
+                        </a>
+                        <a href="#" class="btn btn-link modal_layout_action_btn" disabled="disabled" role="button" title="The ${role.name} role cannot be removed.">
+                            <i class="fa fa-trash-o" style="font-size:24px;color:red;background:MistyRose;border:1px solid black;padding:2px"></i>
+                        </a>
+                    </td>
+                </tr>
+            </#list>
+            <#list roles as role>
+                <tr class="tr">
+                    <td>${role.getName()}</td>
+                    <td>${role.getAssignedUserCount()}</td>
+                    <td>
+                        <a href="#" class="btn btn-link editRoleButton modal_layout_action_btn" role="button" value="${role.getId()}" title="Edit the ${role.name} role.">
+                            <i class="fa fa-pencil" style="font-size:24px;color white;padding:2px;border:solid 1px black;"></i> </span>
+                        </a>
+                        <a href="#" class="btn btn-link modal_layout_action_btn" data-toggle="modal" data-target="#delete-dialog" data-role-id="${role.id}" data-role-name="${role.name}" role="button" title="Remove the ${role.name} role.">
+                            <i class="fa fa-trash-o" style="font-size:24px;color:red;background:MistyRose;border:1px solid black;padding:2px"></i>
+                        </a>
+                    </td>
+                </tr>
+            </#list>
+            </tbody>
+        </table>
 
         <div id="modalnewedit" class="modal model-lg fade " role="dialog">
             <div class="modal-dialog  modal_layout_roles">
