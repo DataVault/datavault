@@ -87,3 +87,35 @@ executed.
 ## Run Datavault on Amazon ECS
 
 TO BE COMPLETED
+
+## Setup SFTP container
+
+We have a container to simulate the SFTP connection to Datastore, at the moment it only work with `user1`.
+
+You can check the logs with the the following command
+```bash
+docker-compose logs -f sftp
+```
+
+In order to use it you'll need to create a new SFTP Location for `user1` with the following details:
+
+| Hostname | Port | Path    |
+|----------|------|---------|
+| sftp     | 22   | /upload |
+
+Then you'll have to copy the public key into `docker/config/.ssh/authorized_keys` as root (the file needs to be own by user 1001)
+
+```bash
+sudo echo %KEY >> docker/config/.ssh/authorized_keys
+```
+
+Once done, you should be able to create a new deposit from the file location created.
+
+In case of issue:
+* Make sure the `docker/.ssh` folder is own by 1001 and is only readable
+
+```bash
+sudo chown -R 1001:1001 docker/config/.ssh
+sudo chmod -R 700 docker/config/.ssh
+sudo chmod 600 docker/config/.ssh/authorized_keys
+```
