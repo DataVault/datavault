@@ -111,6 +111,10 @@
         <property name="mailAdministrator" value="${mail.administrator}" />
     </bean>
 
+    <bean id="auditsService" class="org.datavaultplatform.broker.services.AuditsService">
+        <property name="auditDAO" ref="auditDAO" />
+    </bean>
+
     <bean id="checkRetentionPolicies" class="org.datavaultplatform.broker.scheduled.CheckRetentionPolicies">
         <property name="vaultsService" ref="vaultsService" />
     </bean>
@@ -123,6 +127,16 @@
     <bean id="auditDepositsChunks" class="org.datavaultplatform.broker.scheduled.AuditDepositsChunks">
         <property name="depositsService" ref="depositsService" />
         <property name="emailService" ref="emailService" />
+        <property name="archiveStoreService" ref="archiveStoreService" />
+        <property name="jobsService" ref="jobsService" />
+        <property name="auditsService" ref="auditsService" />
+        <property name="sender" ref="sender" />
+        <property name="optionsDir" value="${optionsDir:#{null}}" />
+        <property name="tempDir" value="${tempDir:#{null}}" />
+        <property name="bucketName" value="${s3.bucketName:#{null}}" />
+        <property name="region" value="${s3.region:#{null}}" />
+        <property name="awsAccessKey" value="${s3.awsAccessKey:#{null}}" />
+        <property name="awsSecretKey" value="${s3.awsSecretKey:#{null}}" />
     </bean>
 
     <!-- Email -->
@@ -220,7 +234,7 @@
                 <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
                 <prop key="hibernate.show_sql">false</prop>
                 <prop key="hibernate.format_sql">false</prop>
-                <prop key="hibernate.hbm2ddl.auto">validate</prop>
+                <prop key="hibernate.hbm2ddl.auto">create-drop</prop>
                 <prop key="hibernate.enable_lazy_load_no_trans">true</prop>
                 <prop key="hibernate.hbm2ddl.import_files">/import.sql</prop>
             </props>
@@ -303,6 +317,10 @@
     </bean>
     
     <bean id="dataManagerDAO" class="org.datavaultplatform.common.model.dao.DataManagerDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="auditDAO" class="org.datavaultplatform.common.model.dao.AuditDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 

@@ -110,5 +110,8 @@ public class DepositChunk {
     public Date getLastAuditTime() {
         return lastAuditTime;
     }
-    
+
+    public Deposit getDeposit() {
+        return deposit;
+    }
 }
