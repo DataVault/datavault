@@ -86,14 +86,15 @@ public class ExternalMetadataService {
     }
     
     public Map<String, String> getPureProjectIds() {
-    	Map<String, String> projectIds = new HashMap<>();
-    	if (this.metadataProvider instanceof PureFlatFileProvider) {
-    		projectIds = metadataProvider.getPureProjectIds();
-    	} else {
-    		//get from MockProvider
-    		projectIds = metadataProvider.getPureProjectIds();
-    	}
+    	Map<String, String> projectIds = metadataProvider.getPureProjectIds();
+    
     	return projectIds;
+    }
+    
+    public String getPureProjectId(String datasetId) {
+    	String projectId = metadataProvider.getPureProjectId(datasetId);
+    	
+    	return projectId;
     }
     
     public String getDatasetContent(String id) {

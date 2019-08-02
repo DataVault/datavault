@@ -13,6 +13,7 @@ import org.datavaultplatform.common.metadata.Provider;
 public class MockProvider implements Provider {
 
     List<Dataset> datasets = new ArrayList<>();
+    Map<String, String> projectIds = new HashMap<>();
     
     public MockProvider() {
         for (int i = 1; i < 6; i++) {
@@ -22,6 +23,7 @@ public class MockProvider implements Provider {
             d.setContent("Mock Metadata");
             d.setVisible(true);
             datasets.add(d);
+            projectIds.put(d.getID(), "MOCK-PROJECTID-" + i);
         }
     }
     
@@ -42,11 +44,11 @@ public class MockProvider implements Provider {
 
 	@Override
 	public Map<String, String> getPureProjectIds() {
-		Map<String, String> projectIds = new HashMap<>();
-		for (Dataset d : datasets) {
-			String replace = d.getID().replace("MOCK-DATASET-", "MOCK-PROJECTID-");
-			projectIds.put(d.getID(), replace);
-		}
 		return projectIds;
+	}
+
+	@Override
+	public String getPureProjectId(String datasetId) {
+		return projectIds.get(datasetId);
 	}
 }

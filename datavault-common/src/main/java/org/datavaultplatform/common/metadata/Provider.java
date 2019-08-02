@@ -14,4 +14,5 @@ public interface Provider {
     public List<Dataset> getDatasetsForUser(String userID);
     public Dataset getDataset(String id);
 	public Map<String, String> getPureProjectIds();
+	public String getPureProjectId(String datasetId);
 }

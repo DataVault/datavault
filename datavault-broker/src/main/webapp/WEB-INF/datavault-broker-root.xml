@@ -119,7 +119,7 @@
         <property name="depositsService" ref="depositsService" />
         <property name="emailService" ref="emailService" />
     </bean>
-
+    
     <!-- Email -->
 
     <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
@@ -294,6 +294,10 @@
     </bean>
     
     <bean id="dataManagerDAO" class="org.datavaultplatform.common.model.dao.DataManagerDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    
+    <bean id="billingDAO" class="org.datavaultplatform.common.model.dao.BillingDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 

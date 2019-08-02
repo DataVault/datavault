@@ -25,4 +25,6 @@ public interface VaultDAO {
 	public Long getTotalNumberOfVaults();
 
 	public Long getTotalNumberOfVaults(String query);
+	
+	public List<Object[]> getAllProjectsSize();
 }
