@@ -92,7 +92,7 @@
 
     <bean id="vaultsController" class="org.datavaultplatform.webapp.controllers.VaultsController">
         <property name="restService" ref="restService" />
-        <property name="LDAPService" ref="ldapService" />
+        <property name="userLookupService" ref="userLookupService" />
         <property name="system" value="${metadata.system}" />
         <property name="link" value="${metadata.link}" />
         <property name="welcome" value="${webapp.motd}"/>
@@ -128,8 +128,9 @@
         <property name="restService" ref="restService" />
     </bean>
 
-    <bean id="adminGroupsController" class="org.datavaultplatform.webapp.controllers.admin.AdminGroupsController">
+    <bean id="adminSchoolsController" class="org.datavaultplatform.webapp.controllers.admin.AdminSchoolsController">
         <property name="restService" ref="restService" />
+        <property name="userLookupService" ref="userLookupService" />
     </bean>
 
     <bean id="adminBillingController" class="org.datavaultplatform.webapp.controllers.admin.AdminBillingController">
@@ -184,7 +185,12 @@
         <property name="searchFilter" value="${ldap.searchFilter}" />
         <property name="attrs" value="${ldap.attrs}" />
     </bean>
-    
+
+    <bean id="userLookupService" class="org.datavaultplatform.webapp.services.UserLookupService">
+        <property name="restService" ref="restService" />
+        <property name="ldapService" ref="ldapService" />
+    </bean>
+
     <bean id="authSuccessHandler" class="org.datavaultplatform.webapp.authentication.AuthenticationSuccess">
         <property name="restService" ref="restService" />
     </bean>

@@ -146,7 +146,7 @@ public class RoleDAOImpl implements RoleDAO {
     public Collection<RoleModel> findAll(RoleType roleType) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(RoleModel.class);
-        criteria.add(Restrictions.eq("role_type", roleType.name()));
+        criteria.add(Restrictions.eq("type", roleType));
         List<RoleModel> roles = criteria.list();
         session.close();
         return roles;

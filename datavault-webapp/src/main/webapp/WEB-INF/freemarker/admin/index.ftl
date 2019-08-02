@@ -77,7 +77,7 @@
     </div>
 
     <div class="row">
-        
+
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-success">
                 <div class="panel-heading">
@@ -91,10 +91,10 @@
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-success">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Groups</h3>
+                    <h3 class="panel-title">Schools</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/groups"><i class="fa fa-user" aria-hidden="true"></i> ${groupcount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/schools"><i class="fa fa-users" aria-hidden="true"></i> ${groupcount}</a></h1>
                 </div>
             </div>
         </div>
