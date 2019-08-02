@@ -34,7 +34,7 @@
                     <td>${role.getAssignedUserCount()}</td>
                     <td>
                         <a href="#" class="btn btn-link modal_layout_action_btn" disabled="disabled" role="button" title="The ${role.name} role cannot be edited.">
-                            <i class="fa fa-pencil" style="font-size:24px;color white;padding:2px;border:solid 1px black;"></i> </span>
+                            <i class="fa fa-pencil" style="font-size:24px;color white;padding:2px;border:solid 1px black;"></i>
                         </a>
                         <a href="#" class="btn btn-link modal_layout_action_btn" disabled="disabled" role="button" title="The ${role.name} role cannot be removed.">
                             <i class="fa fa-trash-o" style="font-size:24px;color:red;background:MistyRose;border:1px solid black;padding:2px"></i>
@@ -48,7 +48,7 @@
                     <td>${role.getAssignedUserCount()}</td>
                     <td>
                         <a href="#" class="btn btn-link editRoleButton modal_layout_action_btn" role="button" value="${role.getId()}" title="Edit the ${role.name} role.">
-                            <i class="fa fa-pencil" style="font-size:24px;color white;padding:2px;border:solid 1px black;"></i> </span>
+                            <i class="fa fa-pencil" style="font-size:24px;color white;padding:2px;border:solid 1px black;"></i>
                         </a>
                         <a href="#" class="btn btn-link modal_layout_action_btn" data-toggle="modal" data-target="#delete-dialog" data-role-id="${role.id}" data-role-name="${role.name}" role="button" title="Remove the ${role.name} role.">
                             <i class="fa fa-trash-o" style="font-size:24px;color:red;background:MistyRose;border:1px solid black;padding:2px"></i>
@@ -87,23 +87,21 @@
                                     </div>
                                 </div>
                                 <div class="col-xs-6 form-group form-inline">
-                                    <label class="modal_layout_roles__labels" for="edit_description">Description</label>
+                                    <label class="modal_layout_roles__labels modal_layout_roles__textarea_label" for="edit_description">Description</label>
                                     <textarea class="form-control modal_layout_roles__inputs__textarea" name="description" id="edit_description"></textarea>
                                 </div>
                             </div>
                             <div class="row modal_layout_roles__permissions">
-                                <p>Permissions</p>
-                                <div class="layout_select_target" id="drp-vault">
+                                <label class="modal_layout_roles__permissions_label">Permissions</label>
+                                <div id="drp-vault">
                                     <div id="edit_vaultpermissions"> </div>
                                 </div>
                             </div>
                             <input type="hidden" id="submitAction" name="action" value="submit"/>
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                             <div class="modal_layout_roles_modal-footer">
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-basic" data-dismiss="modal"><span class="glyphicon glyphicon-remove-circle"></span> Close</button>
-                                    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
-                                </div>
+                                <button type="button" class="btn btn-basic" data-dismiss="modal"><span class="glyphicon glyphicon-remove-circle"></span> Cancel</button>
+                                <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
                             </div>
                         </form>
                     </div>
@@ -112,28 +110,27 @@
         </div>
 
         <div id="delete-dialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="delete-title" aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal_layout_roles">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    <div class="modal-header modal_layout_roles_modal-header">
+                        <button type="button" class="close  modal_layout_roles_modal-header-close" data-dismiss="modal">
                             <span class="glyphicon glyphicon-remove-circle  modal_layout_roles_modal-header-close"></span>
                         </button>
-                        <h3 class="modal-title" id="delete-title">Delete Role</h3>
+                        <h3 id="modal_title" class="layout_roles_title">Delete role</h3>
                     </div>
                     <div class="modal-body modal_layout_roles_modal-body">
                         <form id="delete-form" class="form form-horizontal" role="form" action="${springMacroRequestContext.getContextPath()}/admin/roles/delete" method="post">
                             <div id="delete-error" class="alert alert-danger hidden"></div>
                             <div class="modal-body">
-                                <label>Are you sure you want to delete role <span id="delete-role-name"></span>?</label>
+                                <p>Do you want to delete <label id="delete-role-name"></label> as a role in the system?</p>
+                                <p>Note: You will not be able to delete a role before reassigning all its users to another existing role.</p>
                             </div>
                             <input type="hidden" id="delete-role-id" name="id"/>
                             <input type="hidden" id="submitAction" name="action" value="submit"/>
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                             <div class="modal_layout_roles_modal-footer">
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-basic" data-dismiss="modal"><i class="fa fa-times"></i> No</button>
-                                    <button type="submit" class="btn btn-primary"><i class="fa fa-check"></i> Yes</button>
-                                </div>
+                                <button type="button" class="btn btn-basic" data-dismiss="modal"><span class="glyphicon glyphicon-remove-circle"></span> Cancel</button>
+                                <button type="submit" class="btn btn-primary"><i class="fa fa-trash"></i> Delete</button>
                             </div>
                         </form>
                     </div>

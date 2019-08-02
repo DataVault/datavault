@@ -3,6 +3,29 @@
 <#global nav="admin">
 <@layout.vaultLayout>
 
+<style>
+    .roles-icon {
+        -webkit-mask: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center;
+        mask: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center;
+        width: 1em;
+        height: 1em;
+        display: inline-block;
+        background-color: rgb(52, 109, 191);
+    }
+    .roles-label {
+        vertical-align: top;
+    }
+    .roles-link:hover {
+        text-decoration: none;
+    }
+    .roles-link:hover .roles-icon {
+        background-color: rgb(36, 75, 131);
+    }
+    .roles-link:hover .roles-label {
+        text-decoration: underline;
+    }
+</style>
+
 <div class="container">
 
     <ol class="breadcrumb">
@@ -105,10 +128,10 @@
                 </div>
                 <div class="panel-body">
                     <h1 class="text-center">
-                        <a href="${springMacroRequestContext.getContextPath()}/admin/roles">
+                        <a href="${springMacroRequestContext.getContextPath()}/admin/roles" class="roles-link">
                             <!-- TODO this hack should be changed to show fa-user-cog once font-awesome has been upgrade to version 5 -->
-                            <i style="mask: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center; width: 1em; height: 1em; display: inline-block; background-color: rgb(52, 109, 191);"></i>
-                            <span style="vertical-align: top;">${rolecount}</span>
+                            <i class="roles-icon"></i>
+                            <span class="roles-label">${rolecount}</span>
                         </a>
                     </h1>
                 </div>
