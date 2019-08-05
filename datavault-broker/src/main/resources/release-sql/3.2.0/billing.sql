@@ -1,5 +1,5 @@
 CREATE TABLE BillingInfo (
-    id varchar(255) NOT NULL,
+    id varchar(36) NOT NULL,
     amountBilled decimal(15,2) DEFAULT '0.00',
     amountToBeBilled decimal(15,2) DEFAULT '0.00',
     budgetCode bit(1) DEFAULT NULL,
@@ -10,4 +10,5 @@ CREATE TABLE BillingInfo (
     vaultID varchar(36) DEFAULT NULL,
     PRIMARY KEY (id),
     KEY FK_eb8b8ksy2fq52e8lxsr3gdku6 (vaultID),
-    CONSTRAINT FK_eb8b8ksy2fq52e8lxsr3gdku6 FOREIGN KEY (vaultID) REFERENCES Vaults (id))
+    CONSTRAINT FK_eb8b8ksy2fq52e8lxsr3gdku6 FOREIGN KEY (vaultID) REFERENCES Vaults (id)
+    ) ENGINE=InnoDB
