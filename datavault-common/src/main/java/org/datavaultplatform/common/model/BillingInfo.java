@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
@@ -11,6 +12,7 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import org.datavaultplatform.common.response.BillingInformation;
+import org.hibernate.annotations.GenericGenerator;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -20,9 +22,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name="BillingInfo")
 public class BillingInfo {
 
-    // Vault Identifier
     @Id
-    @Column(name = "id", unique = true)
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Column(name = "id", unique = true, length = 36)
     private String id;
     
     // Hibernate version
