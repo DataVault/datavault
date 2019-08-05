@@ -54,7 +54,7 @@ public class BillingInfo {
     private String school;
 	
 	@OneToOne
-	@JoinColumn(name="vaultID")
+	@JoinColumn(name="vaultID", nullable = false)
     private Vault vault;
     	 
    
