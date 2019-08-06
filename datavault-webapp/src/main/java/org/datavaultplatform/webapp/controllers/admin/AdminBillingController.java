@@ -104,6 +104,7 @@ public class AdminBillingController {
         model.addAttribute("ordername", "asc");       
         model.addAttribute("orderuser", "asc");       
         model.addAttribute("ordervaultsize", "asc");
+        model.addAttribute("orderProjectId", "asc");
         model.addAttribute("ordercreationtime", "asc");
         model.addAttribute("orderreviewDate", "asc");
         if ("asc".equals(order)) {
@@ -111,7 +112,8 @@ public class AdminBillingController {
             if ("name".equals(sort)) model.addAttribute("ordername", "dec");            
             if ("reviewDate".equals(sort)) model.addAttribute("orderreviewDate", "dec");            
             if ("user".equals(sort)) model.addAttribute("orderuser", "dec");
-            if ("vaultSize".equals(sort)) model.addAttribute("ordervaultsize", "dec");           
+            if ("vaultSize".equals(sort)) model.addAttribute("ordervaultsize", "dec");    
+            if ("projectId".equals(sort)) model.addAttribute("orderProjectId", "dec");  
             if ("creationTime".equals(sort)) model.addAttribute("ordercreationtime", "dec");
         }
 
@@ -145,9 +147,9 @@ public class AdminBillingController {
         String headerValue = "attachment; filename=\"billing.csv\"";
         response.setHeader(headerKey, headerValue);
 
-        String[] header = { "Vault name", "Vault Size","Project ID","Project Size","Amount To Be Billed","Amount Billed", "User Name", "Review Date","Creation Time" };
+        String[] header = { "Vault name", "Vault Size","Project Id","Project Size","Amount To Be Billed","Amount Billed", "User Name", "Review Date","Creation Time" };
 
-        String[] fieldMapping = { "name",  "sizeStr","projectID","projectSize","amountToBeBilled","amountBilled",  "userName","reviewDate", "CreationTime" };
+        String[] fieldMapping = { "name",  "sizeStr","projectId","projectSize","amountToBeBilled","amountBilled",  "userName","reviewDate", "CreationTime" };
 
         try {
             // uses the Super CSV API to generate CSV data from the model data
@@ -183,15 +185,16 @@ public class AdminBillingController {
     @RequestMapping(value = "/admin/billing/{vaultId}", method = RequestMethod.GET)
     public String retrieveBillingInfo(ModelMap model, @PathVariable("vaultId") String vaultId) {
     	BillingInformation billingDetails = restService.getVaultBillingInfo(vaultId);
-        model.addAttribute("billingDetails", billingDetails);
-        System.out.println("-----------Comments---------"+billingDetails.getSpecialComments());
+        model.addAttribute("billingDetails", billingDetails);       
         return "admin/billing/billingDetails";
     }
-    
-    @RequestMapping(value = "/admin/billing/{vaultId}/updateBillingDetails", method = RequestMethod.POST)
-    public String updateBillingDetails(ModelMap model,
-            @PathVariable("vaultId") String vaultId,
-            @ModelAttribute("billingDetails") BillingInformation billingDetails ) throws Exception {
+   
+    @RequestMapping(value = "/admin/billing/updateBillingDetails", method = RequestMethod.POST)
+    public String updateBillingDetails(ModelMap model,           
+            @ModelAttribute("billingDetails") BillingInformation billingDetails         
+            ) throws Exception {
+    	 System.out.println("-----------getBudgetCode---------"+billingDetails.getBudgetCode());
+    	restService.updateBillingInfo(billingDetails.getVaultID(),billingDetails);
     	return "admin/billing/billingDetails";
     }
 

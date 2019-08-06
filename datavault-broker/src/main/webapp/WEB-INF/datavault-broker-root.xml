@@ -41,6 +41,10 @@
     <bean id="vaultsService" class="org.datavaultplatform.broker.services.VaultsService">
         <property name="vaultDAO" ref="vaultDAO" />
     </bean>
+    
+    <bean id="billingService" class="org.datavaultplatform.broker.services.BillingService">
+        <property name="billingDAO" ref="billingDAO" />
+    </bean>
 
     <bean id="depositsService" class="org.datavaultplatform.broker.services.DepositsService">
         <property name="depositDAO" ref="depositDAO" />
@@ -244,6 +248,10 @@
     <bean id="vaultDAO" class="org.datavaultplatform.common.model.dao.VaultDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
+    
+    <bean id="billingDAO" class="org.datavaultplatform.common.model.dao.BillingDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
 
     <bean id="depositDAO" class="org.datavaultplatform.common.model.dao.DepositDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
@@ -297,9 +305,7 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
     
-    <bean id="billingDAO" class="org.datavaultplatform.common.model.dao.BillingDAOImpl">
-        <property name="sessionFactory" ref="sessionFactory" />
-    </bean>
+   
 
     <!-- Encryption and Harshicorp Vault -->
 

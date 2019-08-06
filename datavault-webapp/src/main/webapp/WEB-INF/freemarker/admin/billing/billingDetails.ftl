@@ -20,35 +20,35 @@
 			<tbody>
 				<tr>
 					<th scope="col">Contact Name</th>
-					<td><#if billingDetails.contactName??>${billingDetails.contactName?html}<#else>_</#if></td>
+					<td><#if billingDetails.getContactName()??>${billingDetails.contactName?html}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">School/Unit</th>
-					<td><#if billingDetails.school??>${billingDetails.school?html}<#else>_</#if></td>
+					<td><#if billingDetails.getSchool()??>${billingDetails.school?html}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Subunit</th>
-					<td><#if billingDetails.subUnit??>${billingDetails.subUnit}<#else>_</#if></td>
+					<td><#if billingDetails.getSubUnit()??>${billingDetails.subUnit}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Project Id</th>
-					<td><#if billingDetails.projectID??>${billingDetails.projectID}<#else>_</#if></td>
+					<td><#if billingDetails.getProjectId()??>${billingDetails.projectId}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Use Budget code</th>
-					<td><#if billingDetails.getBudgetCodeStr()??>${billingDetails.getBudgetCodeStr()?html}<#else>_</#if></td>
+					<td><#if billingDetails.getBudgetCodeStr()??>${billingDetails.getBudgetCodeStr()?html}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Amount to be billed</th>
-					<td><#if billingDetails.getAmountToBeBilled()??>${billingDetails.getAmountToBeBilled()?html}<#else>_</#if></td>
+					<td><#if billingDetails.getAmountToBeBilled()??>${billingDetails.getAmountToBeBilled()?html}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Amount billed</th>
-					<td><#if billingDetails.getAmountBilled()??>${billingDetails.getAmountBilled()?html}<#else>_</#if></td>
+					<td><#if billingDetails.getAmountBilled()??>${billingDetails.getAmountBilled()?html}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Special arrangement comments</th>
-					<td><#if billingDetails.getSpecialComments()??>${billingDetails.getSpecialComments()?html}<#else>_</#if></td>
+					<td><#if billingDetails.getSpecialComments()??>${billingDetails.getSpecialComments()?html}<#else> </#if></td>
 				</tr>
 			</tbody>
 		</table>
@@ -61,7 +61,7 @@
         <div id="update-billingDetails" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="updateBillingDetails" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form id="update-billingDetails-form" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/billing/${billingDetails.vaultID}/updateBillingDetails" method="post">
+                <form id="update-billingDetails-form" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/billing/updateBillingDetails" method="post">
                     <div class="modal-header">
                         <h4 class="modal-title" id="addDataManger">Billing Details</h4>
                     </div>
@@ -86,7 +86,7 @@
                         </div>
                         <div class="form-group">
                             <label class="control-label">ProjectId:</label>
-                            <@spring.bind "billingDetails.projectID" />
+                            <@spring.bind "billingDetails.projectId" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
                    value="${spring.status.value!""}" id="projectId"/>
                         </div>

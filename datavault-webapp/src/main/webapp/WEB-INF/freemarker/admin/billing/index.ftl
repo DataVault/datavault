@@ -39,8 +39,9 @@
                 <thead>
                     <tr class="tr">
                        <th><a href="?sort=name&order=${ordername}&query=${query?url}">Vault Name<#if sort == "name"><#if ordername == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
+                       <th><a href="?sort=projectId&order=${orderProjectId}&query=${query?url}">Project Id<#if sort == "projectId"><#if ordername == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                       
-                       <th>Project ID</th>
+                       
                        <th>Project Size</th>
                        <th><a href="?sort=vaultSize&order=${ordervaultsize}&query=${query?url}">Vault Size<#if sort == "vaultSize"><#if ordervaultsize == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                        

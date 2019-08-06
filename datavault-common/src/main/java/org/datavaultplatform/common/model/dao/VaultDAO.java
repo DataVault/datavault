@@ -9,6 +9,8 @@ public interface VaultDAO {
     public void save(Vault vault);
     
     public void update(Vault vault);
+    
+    public void saveOrUpdateVault(Vault vault);
 
     public List<Vault> list();
 
