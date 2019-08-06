@@ -22,9 +22,9 @@ public interface VaultDAO {
 
     public int getRetentionPolicyCount(int status);
 
-	void deleteById(String id);
-
 	public Long getTotalNumberOfVaults();
 
 	public Long getTotalNumberOfVaults(String query);
+	
+	public List<Object[]> getAllProjectsSize();
 }

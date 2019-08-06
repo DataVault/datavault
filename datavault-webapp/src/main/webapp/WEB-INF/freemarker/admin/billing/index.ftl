@@ -7,15 +7,14 @@
 
     <ol class="breadcrumb">
         <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
-        <li class="active"><b>Vaults</b></li>
+        <li class="active"><b>Billing</b></li>
     </ol>
-    
-    <a href="${springMacroRequestContext.getContextPath()}/vaults">+Add New Vault</a>
+
     
 
     <form id="search-vaults" class="form" role="form" action="" method="get">
         <div class="input-group">
-            <input type="text" class="form-control" value="${query}" name="query" placeholder="Search for...">
+            <input type="text" class="form-control" value="" name="query" placeholder="Search for...">
             <div class="input-group-btn">
                 <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
             </div>
@@ -23,29 +22,35 @@
     </form>
     
     <div align="right">
-        <form id="search-vaults" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/vaults/csv" method="get">
+       <form id="search-vaults" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/billing/csv" method="get">
+        
             <div class="input-group" align="right">
                 <input type="text" class="form-control hidden" value="${query}" name="query" placeholder="Search for...">
                 <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Download CSV File</button>
+            <div align="right">
+           
             </div>
         </form>
 </div>
-    <#if vaults?has_content>
+ <#if vaults?has_content> 
 
         <div class="table-responsive" id="vaultsTable">
             <table class="table table-striped">
                 <thead>
                     <tr class="tr">
                        <th><a href="?sort=name&order=${ordername}&query=${query?url}">Vault Name<#if sort == "name"><#if ordername == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
-                       <th>Deposits</th>
+                      
                        <th>Project ID</th>
                        <th>Project Size</th>
                        <th><a href="?sort=vaultSize&order=${ordervaultsize}&query=${query?url}">Vault Size<#if sort == "vaultSize"><#if ordervaultsize == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
-                       <th><a href="?sort=user&order=${orderuser}&query=${query?url}">Owner(UUN)<#if sort == "user"><#if orderuser == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>                       
-                       <th><a href="?sort=groupID&order=${ordergroupID}&query=${query?url}">School<#if sort == "groupID"><#if ordergroupID == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
+                       
                        <th><a href="?sort=reviewDate&order=${orderreviewDate}&query=${query?url}">Review Date<#if sort == "reviewDate"><#if orderreviewDate == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>                     
                         <th><a href="?sort=creationTime&order=${ordercreationtime}&query=${query?url}">Date created<#if sort == "creationTime"><#if ordercreationtime == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
-                        <th style="display:none">Actions</th>
+                        <th>Amount to be Billed</th>
+                        <th>Amount Billed</th>
+                         <th><a href="?sort=user&order=${orderuser}&query=${query?url}">Owner<#if sort == "user"><#if orderuser == "dec"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>                       
+                      
+                        <th></th>
                     </tr>
                 </thead>
 
@@ -55,28 +60,28 @@
                             <td>
                                 <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}">${vault.name?html}</a>
                             </td>
-                            <td>${vault.getNumberOfDeposits()}</td>
                             <td> <#if vault.getProjectId()??>${vault.getProjectId()}<#else> </#if></td>
+                            
                             <td>${vault.getProjectSizeStr()}</td>
                            <td>${vault.getSizeStr()}</td>
-                            <td>
-                            <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/${vault.getUserID()}">${vault.getUserName()?html} (${vault.getUserID()?html})</a>
-                            </td>                           
                             
-                            <td>${vault.groupID?html}</td>
                             <td>${vault.reviewDate?string('dd/MM/yyyy')}</td>
                             <td>${vault.getCreationTime()?datetime}</td>
-                            <td style="display:none">
-                            <!-- TODO : Hiding the remove button unless the functionality is clear as to what it should do - Soft/Hard delete -->
+                            <td> <#if vault.getAmountToBeBilled()??>${vault.getAmountToBeBilled()}<#else> </#if></td>
+                            <td> <#if vault.getAmountBilled()??>${vault.getAmountBilled()}<#else> </#if></td>
                            
+                             <td>
+                             ${vault.getUserName()} 
                             </td>
+                            <td>
+                             <a href="${springMacroRequestContext.getContextPath()}/admin/billing/${vault.getID()}">Billing Details</a></td>
+                             
                         </tr>
                     </#list>
                 </tbody>
             </table>
-        </div>
-            
-            <div align="center">
+        </div> 
+      <div align="center">
             	<p class="text-info">${recordsInfo}</p>
             </div>
             <div align="center">
@@ -84,14 +89,15 @@
 			    <ul class="pagination pagination-lg" id="paginationButton">
             		<#list pages as page>
 				    	<li <#if page == activePageId>class="page-item active"<#else>class="page-item"</#if> id="${page}">
-				     	 <a class="page-link" href="${springMacroRequestContext.getContextPath()}/admin/vaults?sort=${theSort}&order=${theOrder}&pageId=${page}" tabindex="-1">${page}</a>
+				     	 <a class="page-link" href="${springMacroRequestContext.getContextPath()}/admin/billing?sort=${theSort}&order=${theOrder}&pageId=${page}" tabindex="-1">${page}</a>
 				    	</li>
 					</#list>
 				 </ul>
 			</nav>
-        </div>
+        </div>      
+            
 
-    </#if>
+ </#if> 
 
 </div>
  

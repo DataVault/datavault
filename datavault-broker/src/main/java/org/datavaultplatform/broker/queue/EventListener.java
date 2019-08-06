@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.*;
 import org.datavaultplatform.common.event.Error;
+import org.datavaultplatform.common.event.delete.DeleteComplete;
+import org.datavaultplatform.common.event.delete.DeleteStart;
 import org.datavaultplatform.common.event.deposit.*;
 import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.model.*;
@@ -336,7 +338,10 @@ public class EventListener implements MessageListener {
                     Boolean success = false;
                     while (!success) {
                         try {
-                            deposit.setStatus(Deposit.Status.FAILED);
+                        	deposit.setStatus(Deposit.Status.FAILED);
+                        	if(deposit.getStatus() == Deposit.Status.DELETE_IN_PROGRESS) {
+                        		deposit.setStatus(Deposit.Status.DELETE_FAILED);
+                        	}
                             depositsService.updateDeposit(deposit);
                             success = true;
                         } catch (org.hibernate.StaleObjectStateException e) {
@@ -358,7 +363,7 @@ public class EventListener implements MessageListener {
                         job = jobsService.getJob(concreteEvent.getJobId());
                     }
                 }
-                
+                //TODO - send email by using correct template when deposit delete fails 
                 // Get related information for emails
                 String type = "error";
                 this.sendEmails(deposit, errorEvent, type, "user-deposit-error.vm", "group-admin-deposit-error.vm");
@@ -381,6 +386,32 @@ public class EventListener implements MessageListener {
                 
                 String type = "retrievecomplete";
                 this.sendEmails(deposit, completeEvent, type, "user-retrieve-complete.vm", "group-admin-retrieve-complete.vm");
+            } else if (concreteEvent instanceof DeleteStart) {
+            	deposit.setStatus(Deposit.Status.DELETE_IN_PROGRESS);
+                depositsService.updateDeposit(deposit);
+                
+            } else if (concreteEvent instanceof DeleteComplete) {
+            	Boolean success = false;
+            	long depositSizeBeforeDelete = deposit.getSize();
+            	deposit.setStatus(Deposit.Status.DELETED);
+            	deposit.setSize(0);
+                depositsService.updateDeposit(deposit);
+                
+                Vault vault = deposit.getVault();
+                
+                success = false;
+                //Update the vault size after deleting the deposit
+                while (!success) {
+                    try {
+                        long vaultSize = vault.getSize();
+                        vault.setSize(vaultSize - depositSizeBeforeDelete);
+                        vaultsService.updateVault(vault);
+                        success = true;
+                    } catch (org.hibernate.StaleObjectStateException e) {
+                        // Refresh from database and retry
+                        vault = vaultsService.getVault(vault.getID());
+                    }
+                }
             }
 
         } catch (Exception e) {

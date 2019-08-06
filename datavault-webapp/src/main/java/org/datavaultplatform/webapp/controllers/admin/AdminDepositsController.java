@@ -1,11 +1,15 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
-import org.datavaultplatform.common.model.Retrieve;
+import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * User: Stuart Lewis
@@ -42,6 +46,15 @@ public class AdminDepositsController {
         }
 
         return "admin/deposits/index";
+    }
+    
+    @RequestMapping(value = "/admin/deposits/{depositID}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public String deleteDeposit(ModelMap model, @PathVariable("depositID") String depositID,
+    		@RequestParam(value = "vaultId", required = false) String vaultId) throws Exception {
+     
+    	restService.deleteDeposit(depositID);
+        return "vaults/"+vaultId+"/deposits/"+ depositID;
     }
 }
 

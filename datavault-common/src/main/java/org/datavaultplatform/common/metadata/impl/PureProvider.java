@@ -139,4 +139,16 @@ public class PureProvider implements Provider {
         
         return datasets;
     }
+
+	@Override
+	public Map<String, String> getPureProjectIds() {
+		// TODO - Need to check with David Speed if this has to be implemented
+		return null;
+	}
+
+	@Override
+	public String getPureProjectId(String datasetId) {
+		// TODO Need to check with David Speed if this has to be implemented
+		return null;
+	}
 }

@@ -95,5 +95,11 @@ public class DepositsService {
 
         return deposit;
     }
+    
+    public void deleteDeposit(String depositId) {
+    	Deposit deposit = depositDAO.findById(depositId);
+    	deposit.setSize(0);
+    	depositDAO.update(deposit);
+    }
 }
 

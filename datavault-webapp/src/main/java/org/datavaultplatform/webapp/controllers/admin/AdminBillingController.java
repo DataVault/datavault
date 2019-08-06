@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.webapp.services.RestService;
@@ -13,25 +14,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.prefs.CsvPreference;
 
-/**
- * User: Stuart Lewis
- * Date: 27/09/2015
- */
+
 
 @Controller
-public class AdminVaultsController {
+public class AdminBillingController {
 
 
-	private static final Logger logger = LoggerFactory.getLogger(AdminVaultsController.class);
+	private static final Logger logger = LoggerFactory.getLogger(AdminBillingController.class);
 	
 	private static final String _0 = "0";
 	private static final String MAX_RECORDS_PER_PAGE = "10";
@@ -43,8 +41,8 @@ public class AdminVaultsController {
     }
 
 
-    @RequestMapping(value = "/admin/vaults", method = RequestMethod.GET)
-    public String searchVaults(ModelMap model,
+    @RequestMapping(value = "/admin/billing", method = RequestMethod.GET)
+    public String billingByVaults(ModelMap model,
                                @RequestParam(value = "query", required = false) String query,
                                @RequestParam(value = "sort", required = false) String sort,
                                @RequestParam(value = "order", required = false) String order,
@@ -64,8 +62,9 @@ public class AdminVaultsController {
         offset = String.valueOf(Integer.valueOf(offset).intValue() * maxRecords - maxRecords);
         
         if ((query == null) || ("".equals(query))) {
-        	VaultsData vaultData = restService.getVaultsListingAll(theSort, theOrder, offset, MAX_RECORDS_PER_PAGE);
-        	long recordsTotal = vaultData.getRecordsTotal();
+        	VaultsData billingData = restService.getBillingVaultsAll(theSort, theOrder, offset, MAX_RECORDS_PER_PAGE);
+        	//restService.getVaultsListingAll(theSort, theOrder, offset, MAX_RECORDS_PER_PAGE);
+        	long recordsTotal = billingData.getRecordsTotal();
         	int numberOfPages = (int)Math.ceil(recordsTotal/(Double.valueOf(MAX_RECORDS_PER_PAGE)));
         	List<String> pages = new ArrayList<>();
         	int i =1;
@@ -74,13 +73,13 @@ public class AdminVaultsController {
         		i++;
         	}
         	model.addAttribute("pages", pages);
-			model.addAttribute("vaults", vaultData.getData());
+			model.addAttribute("vaults", billingData.getData());
             model.addAttribute("query", "");
-            model.addAttribute("recordsInfo", constructTableRecordsInfo(offset, recordsTotal, vaultData.getRecordsFiltered(),
-            		vaultData.getData().size(), Boolean.FALSE));
+            model.addAttribute("recordsInfo", constructTableRecordsInfo(offset, recordsTotal, billingData.getRecordsFiltered(),
+            		billingData.getData().size(), Boolean.FALSE));
         } else {
-        	VaultsData filteredVaultsData = restService.searchVaults(query, theSort, theOrder, offset, MAX_RECORDS_PER_PAGE);
-            long filteredRecordsTotal = filteredVaultsData.getRecordsFiltered();
+        	VaultsData filteredBillingData = restService.searchVaultsForBilling(query, theSort, theOrder, offset, MAX_RECORDS_PER_PAGE);
+            long filteredRecordsTotal = filteredBillingData.getRecordsFiltered();
             int numberOfPages = (int)Math.ceil(filteredRecordsTotal/(Double.valueOf(MAX_RECORDS_PER_PAGE)));
             List<String> pages = new ArrayList<>();
         	int i =1;
@@ -89,10 +88,10 @@ public class AdminVaultsController {
         		i++;
         	}
         	model.addAttribute("pages", pages);
-            model.addAttribute("vaults", filteredVaultsData.getData());
+            model.addAttribute("vaults", filteredBillingData.getData());
             model.addAttribute("query", query);
-            model.addAttribute("recordsInfo", constructTableRecordsInfo(offset, filteredVaultsData.getRecordsTotal(),
-            		filteredRecordsTotal, filteredVaultsData.getData().size(), Boolean.TRUE));
+            model.addAttribute("recordsInfo", constructTableRecordsInfo(offset, filteredBillingData.getRecordsTotal(),
+            		filteredRecordsTotal, filteredBillingData.getData().size(), Boolean.TRUE));
         }
         
         model.addAttribute("theSort", theSort);
@@ -102,45 +101,25 @@ public class AdminVaultsController {
         if (sort == null) sort = "";
         model.addAttribute("sort", sort);
         model.addAttribute("orderid", "asc");
-        model.addAttribute("ordername", "asc");
-        model.addAttribute("ordergroupID", "asc");
-        model.addAttribute("orderreviewDate", "asc");
-        model.addAttribute("orderdescription", "asc");
-        model.addAttribute("orderuser", "asc");
-        model.addAttribute("numberOfDeposits", "asc");
+        model.addAttribute("ordername", "asc");       
+        model.addAttribute("orderuser", "asc");       
         model.addAttribute("ordervaultsize", "asc");
-        model.addAttribute("orderpolicy", "asc");
         model.addAttribute("ordercreationtime", "asc");
+        model.addAttribute("orderreviewDate", "asc");
         if ("asc".equals(order)) {
             if ("id".equals(sort)) model.addAttribute("orderid", "dec");
-            if ("name".equals(sort)) model.addAttribute("ordername", "dec");
-            if ("groupID".equals(sort)) model.addAttribute("ordergroupID", "dec");
-            if ("reviewDate".equals(sort)) model.addAttribute("orderreviewDate", "dec");
-            if ("description".equals(sort)) model.addAttribute("orderdescription", "dec");
+            if ("name".equals(sort)) model.addAttribute("ordername", "dec");            
+            if ("reviewDate".equals(sort)) model.addAttribute("orderreviewDate", "dec");            
             if ("user".equals(sort)) model.addAttribute("orderuser", "dec");
-            if ("vaultSize".equals(sort)) model.addAttribute("ordervaultsize", "dec");
-            if ("policy".equals(sort)) model.addAttribute("orderpolicy", "dec");
+            if ("vaultSize".equals(sort)) model.addAttribute("ordervaultsize", "dec");           
             if ("creationTime".equals(sort)) model.addAttribute("ordercreationtime", "dec");
         }
 
-        return "admin/vaults/index";
+        return "admin/billing/index";
     }
-
-	private String constructTableRecordsInfo(String offset, long recordsTotal, long filteredRecords, int numberOfRecordsonPage, boolean isFiltered) {
-		StringBuilder recordsInfo = new StringBuilder();
-		recordsInfo.append("Showing ").append(Integer.valueOf(offset).intValue() + 1)
-		.append(" - ").append(Integer.valueOf(offset).intValue()+  numberOfRecordsonPage);
-		if(isFiltered) {
-			recordsInfo.append(" vaults of ").append(filteredRecords)
-			.append(" (").append("filtered from ").append(recordsTotal).append(" total vaults)");
-		} else {
-			recordsInfo.append(" vaults of ").append(recordsTotal);
-		}
-		return recordsInfo.toString();
-	}
-
-    @RequestMapping(value = "/admin/vaults/csv", method = RequestMethod.GET)
-    public void exportVaults(HttpServletResponse response,
+    
+    @RequestMapping(value = "/admin/billing/csv", method = RequestMethod.GET)
+    public void exportBillingVaults(HttpServletResponse response,
                                @RequestParam(value = "query", required = false) String query,
                                @RequestParam(value = "sort", required = false) String sort,
                                @RequestParam(value = "order", required = false) String order) throws Exception {
@@ -152,10 +131,10 @@ public class AdminVaultsController {
         List<VaultInfo> vaults = null;
 
         if ((query == null) || ("".equals(query))) {
-            VaultsData vaultData = restService.getVaultsListingAll(theSort, theOrder, _0, _0);
+            VaultsData vaultData = restService.getBillingVaultsAll(theSort, theOrder, _0, _0);
 			vaults = vaultData.getData();
         } else {
-        	VaultsData vaultData =  restService.searchVaults(query, theSort, theOrder, _0, _0);
+        	VaultsData vaultData =  restService.searchVaultsForBilling(query, theSort, theOrder, _0, _0);
         	vaults = vaultData.getData();
         }
 
@@ -163,12 +142,12 @@ public class AdminVaultsController {
 
         // creates mock data
         String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=\"vaults.csv\"";
+        String headerValue = "attachment; filename=\"billing.csv\"";
         response.setHeader(headerKey, headerValue);
 
-        String[] header = { "Vault name", "Deposits","Vault description", "Vault Size", "User ID", "User Name", "School", "Review Date","Creation Time" };
+        String[] header = { "Vault name", "Vault Size","Project ID","Project Size","Amount To Be Billed","Amount Billed", "User Name", "Review Date","Creation Time" };
 
-        String[] fieldMapping = { "name", "NumberOfDeposits", "description", "sizeStr", "userID", "userName","groupID","reviewDate", "CreationTime" };
+        String[] fieldMapping = { "name",  "sizeStr","projectID","projectSize","amountToBeBilled","amountBilled",  "userName","reviewDate", "CreationTime" };
 
         try {
             // uses the Super CSV API to generate CSV data from the model data
@@ -187,27 +166,36 @@ public class AdminVaultsController {
             e.printStackTrace();
         }
     }
-
-    @RequestMapping(value = "/admin/vaults/{vaultid}", method = RequestMethod.GET)
-    public String showVault(ModelMap model, @PathVariable("vaultid") String vaultID) throws Exception {
-        VaultInfo vault = restService.getVault(vaultID);
-
-        model.addAttribute("vault", vault);
-       
-        model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
-        model.addAttribute(restService.getGroup(vault.getGroupID()));
-        model.addAttribute("deposits", restService.getDepositsListing(vaultID));
-        
-
-        return "admin/vaults/vault";
+    
+    private String constructTableRecordsInfo(String offset, long recordsTotal, long filteredRecords, int numberOfRecordsonPage, boolean isFiltered) {
+		StringBuilder recordsInfo = new StringBuilder();
+		recordsInfo.append("Showing ").append(Integer.valueOf(offset).intValue() + 1)
+		.append(" - ").append(Integer.valueOf(offset).intValue()+  numberOfRecordsonPage);
+		if(isFiltered) {
+			recordsInfo.append(" vaults of ").append(filteredRecords)
+			.append(" (").append("filtered from ").append(recordsTotal).append(" total vaults)");
+		} else {
+			recordsInfo.append(" vaults of ").append(recordsTotal);
+		}
+		return recordsInfo.toString();
+	}
+    
+    @RequestMapping(value = "/admin/billing/{vaultId}", method = RequestMethod.GET)
+    public String retrieveBillingInfo(ModelMap model, @PathVariable("vaultId") String vaultId) {
+    	BillingInformation billingDetails = restService.getVaultBillingInfo(vaultId);
+        model.addAttribute("billingDetails", billingDetails);
+        System.out.println("-----------Comments---------"+billingDetails.getSpecialComments());
+        return "admin/billing/billingDetails";
+    }
+    
+    @RequestMapping(value = "/admin/billing/{vaultId}/updateBillingDetails", method = RequestMethod.POST)
+    public String updateBillingDetails(ModelMap model,
+            @PathVariable("vaultId") String vaultId,
+            @ModelAttribute("billingDetails") BillingInformation billingDetails ) throws Exception {
+    	return "admin/billing/billingDetails";
     }
 
-    @RequestMapping(value = "/admin/vaults/{vaultid}/checkretentionpolicy", method = RequestMethod.POST)
-    public String checkPolicy(ModelMap model, @PathVariable("vaultid") String vaultID) throws Exception {
-        restService.checkVaultRetentionPolicy(vaultID);
-
-        return "redirect:/admin/vaults/" + vaultID;
-    }
+	
 }
 
 

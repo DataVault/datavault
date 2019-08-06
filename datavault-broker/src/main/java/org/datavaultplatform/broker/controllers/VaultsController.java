@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.controllers;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.vault.Create;
 import org.datavaultplatform.common.model.*;
@@ -19,7 +20,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -152,17 +155,33 @@ public class VaultsController {
 											      @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) throws Exception {
 
         List<VaultInfo> vaultResponses = new ArrayList<>();
-        for (Vault vault : vaultsService.search(query, sort, order, offset, maxResult)) {
-            vaultResponses.add(vault.convertToResponse());
+        Long recordsTotal = 0L;
+        Long recordsFiltered = 0L;
+        List<Vault> vaults = vaultsService.search(query, sort, order, offset, maxResult);
+        if(CollectionUtils.isNotEmpty(vaults)) {
+			for (Vault vault : vaults) {
+				vaultResponses.add(vault.convertToResponse());
+	        }
+	        //Map of project with its size
+	        Map<String, Long> projectSizeMap = vaultsService.getAllProjectsSize();
+	        //update project Size in the response
+	        for(VaultInfo vault: vaultResponses) {
+	        	if(vault.getProjectId() != null) {
+	        		vault.setProjectSize(projectSizeMap.get(vault.getProjectId()));
+	        	}
+	        }
+	        recordsTotal = vaultsService.getTotalNumberOfVaults();
+	        recordsFiltered = vaultsService.getTotalNumberOfVaults(query);
         }
-        Long recordsTotal = vaultsService.getTotalNumberOfVaults();
-        Long recordsFiltered = vaultsService.getTotalNumberOfVaults(query);
+        
         VaultsData data = new VaultsData();
         data.setRecordsTotal(recordsTotal);
         data.setRecordsFiltered(recordsFiltered);
         data.setData(vaultResponses);
         return data;
     }
+    
+    
 
     @RequestMapping(value = "/vaults/deposits/search", method = RequestMethod.GET)
     public List<DepositInfo> searchAllDeposits(@RequestHeader(value = "X-UserID", required = true) String userID,
@@ -217,6 +236,8 @@ public class VaultsController {
             externalMetadataService.addCachedDataset(dataset);
         }
         vault.setDataset(dataset);
+        
+        vault.setProjectId(externalMetadataService.getPureProjectId(dataset.getID()));
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         try {

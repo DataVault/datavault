@@ -11,7 +11,6 @@ import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.Verify;
-import org.datavaultplatform.common.storage.Verify.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +23,7 @@ import oracle.cloudstorage.ftm.TransferState;
 import oracle.cloudstorage.ftm.UploadConfig;
 import oracle.cloudstorage.ftm.exception.ClientException;
 import oracle.cloudstorage.ftm.exception.ObjectExists;
+import oracle.cloudstorage.ftm.exception.ObjectNotFound;
 
 public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	
@@ -150,4 +150,20 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		
 		return depositId;
 	}
+	
+	@Override
+	public void delete(String path, File working, Progress progress) throws Exception {
+		try {
+			this.manager = FileTransferManager.getDefaultFileTransferManager(this.auth);
+			manager.deleteObject(this.containerName, path);
+            logger.info("Delete Successful from Oracle Cloud Storage");
+		} catch (ObjectNotFound  ce) {
+			logger.error("Object does not exists in Oracle Cloud Storage " + ce.getMessage());
+		} finally {
+			if (this.manager != null) {
+				this.manager.shutdown();
+			}
+		}
+	}
+		
 }

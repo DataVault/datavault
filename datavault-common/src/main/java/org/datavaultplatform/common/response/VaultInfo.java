@@ -6,6 +6,7 @@ import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
 
@@ -69,9 +70,22 @@ public class VaultInfo {
     @ApiObjectField(description = "Number of Deposits in a vault")
     private long numberOfDeposits;
     
+    @ApiObjectField(description = "Project Id from Pure")
+    private String projectId;
+    
+    @ApiObjectField(description = "Amount to be Billed")
+    private BigDecimal amountToBeBilled;
+    
+    @ApiObjectField(description = "Amount Billed")
+    private BigDecimal amountBilled;
+    
+    @ApiObjectField(description = "Sum of vaults size for a projectId")
+    private long projectSize;
+    
     public VaultInfo() { }
 
-    public VaultInfo(String id, String userID, String userName, String datasetID, String datasetName, Date creationTime, String name, String description, String policyID, String groupID, long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked, Date grantEndDate, Date reviewDate, long numberOfDeposits) {
+    public VaultInfo(String id, String userID, String userName, String datasetID, String datasetName, Date creationTime, String name, String description, String policyID, 
+    		String groupID, long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked, Date grantEndDate, Date reviewDate, long numberOfDeposits, String projectId) {
         this.id = id;
         this.userID = userID;
         this.userName = userName;
@@ -89,9 +103,23 @@ public class VaultInfo {
         this.grantEndDate = grantEndDate;
         this.reviewDate = reviewDate;
         this.numberOfDeposits = numberOfDeposits;
+        this.projectId = projectId;
+    }
+    
+    public VaultInfo(String id,String userName, Date creationTime, String name,  
+    		long vaultSize, Date reviewDate,BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId) {
+        this.id = id;        
+        this.userName = userName;    
+        this.creationTime = creationTime;
+        this.name = name;        
+        this.vaultSize = vaultSize;        
+        this.reviewDate = reviewDate;
+        this.amountToBeBilled = amountToBeBilled;
+        this.amountBilled = amountBilled;
+        this.projectId = projectId;
     }
 
-    public String getID() {
+	public String getID() {
         return id;
     }
 
@@ -246,5 +274,52 @@ public class VaultInfo {
 
 	public void setNumberOfDeposits(long numberOfDeposits) {
 		this.numberOfDeposits = numberOfDeposits;
+	}
+
+	public String getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(String projectId) {
+		this.projectId = projectId;
+	}
+
+	public long getProjectSize() {
+		return projectSize;
+	}
+
+	public void setProjectSize(long projectSize) {
+		this.projectSize = projectSize;
+	}
+	
+	public String getProjectSizeStr() {
+        if ( projectSize == 0 ){
+            return "0";
+        }
+        double s = projectSize;
+        double gibibytes = s/1024/1024/1024;
+        DecimalFormat df = new DecimalFormat("#");
+        String dx = df.format(gibibytes);
+        if(dx.equals("0")){
+            return "< 1 GB";
+        }
+        return dx + " GB";
+    }
+
+
+	public BigDecimal getAmountToBeBilled() {
+		return amountToBeBilled;
+	}
+
+	public void setAmountToBeBilled(BigDecimal amountToBeBilled) {
+		this.amountToBeBilled = amountToBeBilled;
+	}
+
+	public BigDecimal getAmountBilled() {
+		return amountBilled;
+	}
+
+	public void setAmountBilled(BigDecimal amountBilled) {
+		this.amountBilled = amountBilled;
 	}
 }
