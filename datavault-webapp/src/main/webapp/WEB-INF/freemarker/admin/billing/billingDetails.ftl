@@ -98,15 +98,15 @@
                    <#if spring.status.value?? && spring.status.value?string=="true">checked="true"</#if> /> 
                         </div>
                         <div class="form-group">
-                            <label class="control-label">Amount to be billed:</label>
+                            <label class="control-label">Amount to be billed:(Allowed values [numbers and .])</label>
                             <@spring.bind "billingDetails.amountToBeBilled" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" id="amountToBeBilled"/>
+                   value="${spring.status.value!""}" id="amountToBeBilled" pattern="[0-9]+(\.[0-9][0-9]?)?"/>
                         </div>
                         <div class="form-group">
-                            <label class="control-label">Amount billed:</label>
+                            <label class="control-label">Amount billed:(Allowed values [numbers and .])</label>
                             <@spring.bind "billingDetails.amountBilled" />
-                            <input type="text" class="form-control" name="${spring.status.expression}"
+                            <input type="text" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?)?" name="${spring.status.expression}"
                    value="${spring.status.value!""}" id="amountBilled"/>
                         </div>
                         <div class="form-group">

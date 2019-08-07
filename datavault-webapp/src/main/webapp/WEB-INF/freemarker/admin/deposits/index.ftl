@@ -76,15 +76,17 @@
                         <td>${deposit.vaultOwnerName} (${deposit.vaultOwnerID})</td>
                         <td>${deposit.vaultReviewDate}</td>
                         <td>
+                            <#if deposit.status != "DELETED">
+                                 <a class="btn btn-xs btn-danger pull-left" href="#" data-vault="${deposit.getVaultID()}" data-deposit="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
+                          		</a>
+                            </#if>
                             <#if deposit.status == "FAILED">
                                 <a class="restart-deposit-btn btn btn-default btn-sm"
                                    href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}/deposits/${deposit.getID()?html}/restart">
                                     Restart
                                 </a>
-                             <#elseif deposit.status != "DELETED">
-                                 <a class="btn btn-xs btn-danger pull-left" href="#" data-vault="${deposit.getVaultID()}" data-deposit="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
-                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
-                          		</a>
+                             
                             </#if>
                         </td>
                         
