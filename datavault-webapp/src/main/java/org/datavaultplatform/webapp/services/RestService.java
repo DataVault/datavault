@@ -638,7 +638,7 @@ public class RestService {
         return Arrays.asList(get(brokerURL + "/permissions/roleAssignments/user/" + userId, RoleAssignment[].class).getBody());
     }
 
-    public List<RoleAssignment> getRoleAssignmentsForRole(Long roleId) {
+    public List<RoleAssignment> getRoleAssignmentsForRole(long roleId) {
         return Arrays.asList(get(brokerURL + "/permissions/roleAssignments/role/" + roleId, RoleAssignment[].class).getBody());
     }
 

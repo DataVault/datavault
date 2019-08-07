@@ -15,7 +15,7 @@
             </div>
         </div>
 
-            <#if isISAdmin>
+            <#if isSuperAdmin>
                 <div class="row">
                     <div class="col-sm-4">
                         <a class="layout_misc__subpage_link"
