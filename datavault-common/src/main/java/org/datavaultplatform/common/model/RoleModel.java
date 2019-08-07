@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.Objects;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -94,5 +95,18 @@ public class RoleModel {
         // TODO we need to provide the count of assigned users with the role but won't have a working impl until the
         // stories to assign users to roles are developed
         return 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RoleModel roleModel = (RoleModel) o;
+        return Objects.equals(id, roleModel.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

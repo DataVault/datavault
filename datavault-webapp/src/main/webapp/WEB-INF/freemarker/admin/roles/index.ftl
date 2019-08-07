@@ -15,6 +15,16 @@
             </div>
         </div>
 
+            <#if isISAdmin>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <a class="layout_misc__subpage_link"
+                           href="${springMacroRequestContext.getContextPath()}/admin/roles/isadmin">Manage IS Admin
+                            role</a>
+                    </div>
+                </div>
+            </#if>
+
         <div class="layout_misc__add_new">
             <a id="addNewRoleBtn" href="#">+Add New Role</a>
         </div>

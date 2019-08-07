@@ -18,7 +18,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.client.RestTemplate;
 
-import javax.management.relation.Role;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -637,6 +636,10 @@ public class RestService {
 
     public List<RoleAssignment> getRoleAssignmentsForUser(String userId) {
         return Arrays.asList(get(brokerURL + "/permissions/roleAssignments/user/" + userId, RoleAssignment[].class).getBody());
+    }
+
+    public List<RoleAssignment> getRoleAssignmentsForRole(Long roleId) {
+        return Arrays.asList(get(brokerURL + "/permissions/roleAssignments/role/" + roleId, RoleAssignment[].class).getBody());
     }
 
     public RoleModel updateRole(RoleModel role) {

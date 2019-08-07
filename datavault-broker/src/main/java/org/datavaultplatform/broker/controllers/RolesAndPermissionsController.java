@@ -4,7 +4,9 @@ import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.common.model.PermissionModel;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleModel;
-import org.jsondoc.core.annotation.*;
+import org.jsondoc.core.annotation.Api;
+import org.jsondoc.core.annotation.ApiMethod;
+import org.jsondoc.core.annotation.ApiPathParam;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -204,6 +206,20 @@ public class RolesAndPermissionsController {
             @ApiPathParam(name = "User ID", description = "The ID of the user to get role assignments for") @PathVariable("userId") String userId) {
         List<RoleAssignment> schoolRoleAssignments = rolesAndPermissionsService.getRoleAssignmentsForUser(userId);
         return schoolRoleAssignments.toArray(new RoleAssignment[0]);
+    }
+
+    @ApiMethod(
+            path = "/permissions/roleAssignments/role/{roleId}",
+            verb = ApiVerb.GET,
+            description = "Gets all role assignments for a given role",
+            produces = {MediaType.APPLICATION_JSON_VALUE},
+            responsestatuscode = "200 - OK"
+    )
+    @GetMapping("/roleAssignments/role/{roleId}")
+    public RoleAssignment[] getRoleAssignmentsForRole(
+            @ApiPathParam(name = "Role ID", description = "The ID of the role to get role assignments for") @PathVariable("roleId") Long roleId) {
+        List<RoleAssignment> roleAssignments = rolesAndPermissionsService.getRoleAssignmentsForRole(roleId);
+        return roleAssignments.toArray(new RoleAssignment[0]);
     }
 
     @ApiMethod(

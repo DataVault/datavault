@@ -1,9 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.RoleAssignment;
-import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -104,6 +101,15 @@ public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
         List<RoleAssignment> schoolAssignments = findBy(session, "user", user);
         session.close();
         return schoolAssignments;
+    }
+
+    @Override
+    public List<RoleAssignment> findByRoleId(Long roleId) {
+        Session session = sessionFactory.openSession();
+        RoleModel role = findObjectById(session, RoleModel.class, "id", roleId);
+        List<RoleAssignment> assignments = findBy(session, "role", role);
+        session.close();
+        return assignments;
     }
 
     @Override

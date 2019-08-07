@@ -1,21 +1,26 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
+import com.google.common.collect.MoreCollectors;
 import org.apache.commons.lang.StringUtils;
-import org.datavaultplatform.common.model.PermissionModel;
-import org.datavaultplatform.common.model.RoleModel;
-import org.datavaultplatform.common.model.RoleType;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
+import org.datavaultplatform.webapp.model.RoleViewModel;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-import org.datavaultplatform.webapp.model.RoleViewModel;
 import org.testng.collections.Sets;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,11 +36,28 @@ public class AdminRolesController {
     }
 
     @GetMapping("/admin/roles")
-    public ModelAndView getRolesListing() {
+    public ModelAndView getRolesListing(Principal principal) {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("admin/roles/index");
         mav.addObject("readOnlyRoles", restService.getViewableRoles());
         mav.addObject("roles", restService.getEditableRoles());
+        mav.addObject("isISAdmin", isIsAdmin(principal));
+        return mav;
+    }
+
+    @GetMapping("/admin/roles/isadmin")
+    public ModelAndView getIsAdminUsers(Principal principal) {
+
+        RoleModel role = restService.getIsAdmin();
+        List<User> isAdminUsers = restService.getRoleAssignmentsForRole(role.getId())
+                .stream()
+                .map(roleAssignment -> roleAssignment.getUser())
+                .collect(Collectors.toList());
+
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("admin/roles/isadmin/index");
+        mav.addObject("users", isAdminUsers);
+        mav.addObject("role", role);
         return mav;
     }
 
@@ -177,6 +199,68 @@ public class AdminRolesController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/admin/roles/op")
+    public ResponseEntity addIsAdmin(Principal principal, @RequestParam("op-id") String userId) {
+
+        logger.debug("Preparing to add user ID={} to IS ADMIN role", userId);
+        RoleModel role = restService.getIsAdmin();
+        User user = restService.getUser(userId);
+
+        Optional<RoleAssignment> roleAssignment = restService.
+                getRoleAssignmentsForUser(userId)
+                .stream()
+                .filter(ra -> ra.getRole().equals(role))
+                .collect(MoreCollectors.toOptional());
+
+        if (roleAssignment.isPresent()) {
+            logger.warn("Cannot add the user ID={} to IS Admin Role ID={} because he already does have it.", userId, role.getId());
+            return validationFailed("Can't add the user to this role, because he already is in it.");
+        }
+
+        logger.info("Attempting to add user ID={} to IS Admin role with ID={}", userId, role.getId());
+
+        RoleAssignment newRoleAssignment = new RoleAssignment();
+        newRoleAssignment.setRole(role);
+        newRoleAssignment.setUser(user);
+        restService.createRoleAssignment(newRoleAssignment);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/admin/roles/deop")
+    public ResponseEntity deleteIsAdmin(Principal principal, HttpServletRequest request, @RequestParam("deop-id") String userId) throws ServletException {
+
+        logger.debug("Preparing to remove user ID={} from IS ADMIN role", userId);
+        RoleModel role = restService.getIsAdmin();
+
+        if (restService.getRoleAssignmentsForRole(role.getId()).size() <= 1) {
+            logger.info("Rejected a request to remove the user ID={} from IS Admin role ID={} because there must be at least one IS Admin", userId, role.getId());
+            return validationFailed("Cannot remove the last IS Admin.");
+        }
+
+        Optional<RoleAssignment> roleAssignment = restService.
+                getRoleAssignmentsForUser(userId)
+                .stream()
+                .filter(ra -> ra.getRole().equals(role))
+                .collect(MoreCollectors.toOptional());
+
+        if (!roleAssignment.isPresent()) {
+            logger.warn("Cannot remove the user ID={} from IS Admin Role ID={} because he doesn't have it.", userId, role.getId());
+            return validationFailed("Can't remove the user from this role, because he already is not in it.");
+        }
+
+        logger.info("Attempting to remove user ID={} from IS Admin role with ID={}", userId, role.getId());
+        restService.deleteRoleAssignment(roleAssignment.get().getId());
+
+        if (principal.getName().equals(userId)) {
+            // Must logout IS Admin, if he just deopped himself
+            request.logout();
+            // He will be redirected to login by the JS when we return OK.
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping(value = "/admin/roles/{id}", produces = "application/json")
     public ResponseEntity<RoleViewModel> getRole(@PathVariable("id") long roleId) {
 
@@ -204,5 +288,20 @@ public class AdminRolesController {
     public ResponseEntity<List<PermissionModel>> getAllSchoolPermissions() {
         List<PermissionModel> permissions = restService.getSchoolPermissions();
         return ResponseEntity.ok(permissions);
+    }
+
+    private boolean isIsAdmin(Principal principal) {
+        if (principal == null) return false;
+
+        // TODO: just pull from principal, when it starts having roles. For now: ask broker by name
+        // isAdminRole /should/ never be null.
+        RoleModel isAdminRole = restService.getIsAdmin();
+
+        // Principal.getName() should give ID of the user, according to the existing code
+        return restService
+                .getRoleAssignmentsForUser(principal.getName())
+                .stream()
+                .anyMatch(roleAssignment -> isAdminRole.equals(roleAssignment.getRole()));
+
     }
 }

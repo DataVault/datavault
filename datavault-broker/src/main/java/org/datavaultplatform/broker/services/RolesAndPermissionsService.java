@@ -148,6 +148,10 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         return roleAssignmentDao.findByUserId(userId);
     }
 
+    public List<RoleAssignment> getRoleAssignmentsForRole(Long roleId) {
+        return roleAssignmentDao.findByRoleId(roleId);
+    }
+
     public RoleModel updateRole(RoleModel role) {
         if (!roleExists(role.getId())) {
             throw new IllegalStateException("Cannot update a role that does not exist");

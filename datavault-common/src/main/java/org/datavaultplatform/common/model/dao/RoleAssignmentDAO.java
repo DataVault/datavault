@@ -20,6 +20,8 @@ public interface RoleAssignmentDAO {
 
     List<RoleAssignment> findByUserId(String userId);
 
+    List<RoleAssignment> findByRoleId(Long roleId);
+
     void update(RoleAssignment roleAssignment);
 
     void delete(Long id);

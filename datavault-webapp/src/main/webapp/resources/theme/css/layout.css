@@ -61,6 +61,12 @@
     font-weight: bold;
 }
 
+.layout_misc__subpage_link {
+    margin: 40px 0;
+    font-size: 16px;
+    font-weight: bold;
+}
+
 .layout_roles_title {
     color: black;
     font-size: 36px;
