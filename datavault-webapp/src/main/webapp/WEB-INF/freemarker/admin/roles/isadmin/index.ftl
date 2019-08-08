@@ -4,6 +4,12 @@
 <@layout.vaultLayout>
     <#import "/spring.ftl" as spring />
 
+    <ol class="breadcrumb">
+        <li><a href="${springMacroRequestContext.getContextPath()}/admin"><b>Administration</b></a></li>
+        <li><a href="${springMacroRequestContext.getContextPath()}/admin/roles"><b>Roles</b></a></li>
+        <li class="active"><b>IS Admin Management</b></li>
+    </ol>
+
     <div class="container container_layout">
     <div>
         <div class="row">
@@ -12,13 +18,6 @@
             </div>
             <div class="col-sm-8">
                 <!-- todo buttons (or not?) -->
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-sm-4">
-                <a class="layout_misc__subpage_link" href="${springMacroRequestContext.getContextPath()}/admin/roles">Back
-                    to role management</a>
             </div>
         </div>
 
@@ -73,21 +72,12 @@
                         <div class="modal-body">
                             <div id="create-error" class="alert alert-danger hidden" role="alert"></div>
                             <div class="form-group ui-widget">
-                                <label for="user-name" class="control-label col-sm-2">Name:</label>
+                                <label for="op-user-id" class="control-label col-sm-2">UUN or Name:</label>
                                 <div class="col-sm-10">
-                                    <input id="user-name" type="text" class="form-control" name="user" value=""/>
+                                    <input id="add-superadmin-uun" type="text" class="form-control" name="op-id" value=""/>
                                 </div>
                             </div>
                         </div>
-                        <#-- When Autocomplete comes around, hide this and set value from autocomplete events -->
-                        <div class="form-group ui-widget">
-                            <label for="op-user-id" class="control-label col-sm-2">For testing (will be hidden
-                                later):</label>
-                            <div class="col-sm-10">
-                                <input type="text" id="op-user-id" class="form-control" name="op-id" value=""/>
-                            </div>
-                        </div>
-                        <#-- --- -->
                         <input type="hidden" id="submitAction" name="action" value="submit"/>
                         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                         <div class="modal-footer">
@@ -182,7 +172,7 @@
         });
 
 
-        $("#user-name").autocomplete({
+        $("#add-superadmin-uun").autocomplete({
             autoFocus: true,
             appendTo: "#add-new-dialog",
             minLength: 2,
@@ -200,10 +190,6 @@
             select: function (event, ui) {
                 var attributes = ui.item.value.split(" - ");
                 this.value = attributes[0];
-                console.log("Autocomplete selected:");
-                console.log(event);
-                console.log(ui);
-                console.warn("When this actually works, then set the user id hidden field by selection data");
                 return false;
             }
         });

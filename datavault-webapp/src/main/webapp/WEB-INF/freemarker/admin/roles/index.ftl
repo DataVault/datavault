@@ -4,6 +4,11 @@
 <@layout.vaultLayout>
 <#import "/spring.ftl" as spring />
 
+    <ol class="breadcrumb">
+        <li><a href="${springMacroRequestContext.getContextPath()}/admin"><b>Administration</b></a></li>
+        <li class="active"><b>Roles</b></li>
+    </ol>
+
     <div class="container container_layout">
         <div>
             <div class="row">
@@ -14,16 +19,6 @@
                 <!-- todo buttons -->
             </div>
         </div>
-
-            <#if isSuperAdmin>
-                <div class="row">
-                    <div class="col-sm-4">
-                        <a class="layout_misc__subpage_link"
-                           href="${springMacroRequestContext.getContextPath()}/admin/roles/isadmin">Manage IS Admin
-                            role</a>
-                    </div>
-                </div>
-            </#if>
 
         <div class="layout_misc__add_new">
             <a id="addNewRoleBtn" href="#">+Add New Role</a>
@@ -38,6 +33,17 @@
                 </tr>
             </thead>
             <tbody>
+            <#if isSuperAdmin>
+                <tr class="tr">
+                    <td>${superAdminRole.getName()}</td>
+                    <td>${superAdminRole.getAssignedUserCount()}</td>
+                    <td>
+                        <a class="btn btn-link" href="${springMacroRequestContext.getContextPath()}/admin/roles/isadmin" title="Edit the ${superAdminRole.name} role.">
+                            <i class="fa fa-users" style="font-size:24px;color white;padding:2px;border:solid 1px black;"></i>
+                        </a>
+                    </td>
+                </tr>
+            </#if>
             <#list readOnlyRoles as role>
                 <tr class="tr">
                     <td>${role.getName()}</td>

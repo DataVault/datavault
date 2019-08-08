@@ -10,8 +10,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class UserLookupService {
 
@@ -35,6 +37,14 @@ public class UserLookupService {
             result = ldapService.autocompleteUID(term);
         } catch (LdapException | CursorException | IOException ex) {
             ex.printStackTrace();
+            // A fallback to known users in the Database in case LDAP is not available:
+            return Arrays.stream(restService.getUsers())
+                    .map(user -> String.format("%s - %s %s",
+                        user.getID(),
+                        user.getFirstname().replace(" - ", " – "),
+                        user.getLastname().replace(" - ", " – ")
+                    )
+            ).collect(Collectors.toList());
         }
         return result;
     }

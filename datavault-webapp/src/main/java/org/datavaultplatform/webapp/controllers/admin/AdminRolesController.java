@@ -42,6 +42,7 @@ public class AdminRolesController {
         mav.addObject("readOnlyRoles", restService.getViewableRoles());
         mav.addObject("roles", restService.getEditableRoles());
         mav.addObject("isSuperAdmin", isSuperAdmin(principal));
+        mav.addObject("superAdminRole", restService.getIsAdmin());
 
         return mav;
     }
