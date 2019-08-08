@@ -70,25 +70,25 @@
                             <label class="control-label">Contact Name:</label>
                             <@spring.bind "billingDetails.contactName" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" id="contactName"/>
+                   value="${spring.status.value!""}" id="contactName" maxlength="400"/>
                         </div>
                         <div class="form-group">
                             <label class="control-label">School/Unit:</label>
                             <@spring.bind "billingDetails.school" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" id="school"/>
+                   value="${spring.status.value!""}" id="school" maxlength="400"/>
                         </div>
                         <div class="form-group">
                             <label class="control-label">Subunit:</label>
                             <@spring.bind "billingDetails.subUnit" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" id="subunit"/>
+                   value="${spring.status.value!""}" id="subunit" maxlength="400" />
                         </div>
                         <div class="form-group">
                             <label class="control-label">ProjectId:</label>
                             <@spring.bind "billingDetails.projectId" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" id="projectId"/>
+                   value="${spring.status.value!""}" id="projectId" maxlength="400"/>
                         </div>
                         <div class="form-group">
                             <label class="control-label">Use BudgetCode:</label>
@@ -101,19 +101,19 @@
                             <label class="control-label">Amount to be billed:(Allowed values [numbers and .])</label>
                             <@spring.bind "billingDetails.amountToBeBilled" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" id="amountToBeBilled" pattern="[0-9]+(\.[0-9][0-9]?)?"/>
+                   value="${spring.status.value!""}" id="amountToBeBilled" maxlength="400" pattern="[0-9]+(\.[0-9][0-9]?)?"/>
                         </div>
                         <div class="form-group">
                             <label class="control-label">Amount billed:(Allowed values [numbers and .])</label>
                             <@spring.bind "billingDetails.amountBilled" />
                             <input type="text" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?)?" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" id="amountBilled"/>
+                   value="${spring.status.value!""}" maxlength="400" id="amountBilled"/>
                         </div>
                         <div class="form-group">
                             <label class="control-label">Special arrangements comments:</label>
                             <@spring.bind "billingDetails.specialComments" />
                             <textarea type="text" class="form-control" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" id="comments" rows="4" cols="60"><#if billingDetails.getSpecialComments()??>${billingDetails.getSpecialComments()}</#if></textarea>
+                   value="${spring.status.value!""}" id="comments" rows="4" cols="60" maxlength="400" ><#if billingDetails.getSpecialComments()??>${billingDetails.getSpecialComments()}</#if></textarea>
                         </div>
                     </div>
 
