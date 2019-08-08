@@ -375,7 +375,7 @@ public class DepositsController {
     }
     
     private List<ArchiveStore> addArchiveSpecificOptions(List<ArchiveStore> archiveStores) {
-    	if (archiveStores != null && ! archiveStores.isEmpty()) { 
+    	if (archiveStores != null && ! archiveStores.isEmpty()) {
 	    	for (ArchiveStore archiveStore : archiveStores) {
 		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.TivoliStorageManager")) {
 		        	HashMap<String, String> asProps = archiveStore.getProperties();
@@ -387,19 +387,19 @@ public class DepositsController {
 		        	}
 		        	archiveStore.setProperties(asProps);
 		        }
-		        
+
 		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.S3Cloud")) {
 		        	HashMap<String, String> asProps = archiveStore.getProperties();
-		        	if (this.bucketName != null && ! this.bucketName.equals("")) {  
+		        	if (this.bucketName != null && ! this.bucketName.equals("")) {
 		        		asProps.put("s3.bucketName", this.bucketName);
 		        	}
-		        	if (this.region != null && ! this.region.equals("")) {  
+		        	if (this.region != null && ! this.region.equals("")) {
 		        		asProps.put("s3.region", this.region);
 		        	}
-		        	if (this.awsAccessKey != null && ! this.awsAccessKey.equals("")) {  
+		        	if (this.awsAccessKey != null && ! this.awsAccessKey.equals("")) {
 		        		asProps.put("s3.awsAccessKey", this.awsAccessKey);
 		        	}
-		        	if (this.awsSecretKey != null && ! this.awsSecretKey.equals("")) {  
+		        	if (this.awsSecretKey != null && ! this.awsSecretKey.equals("")) {
 		        		asProps.put("s3.awsSecretKey", this.awsSecretKey);
 		        	}
 
@@ -410,7 +410,7 @@ public class DepositsController {
 		        }
 	        }
     	}
-    	
+
     	return archiveStores;
     }
 

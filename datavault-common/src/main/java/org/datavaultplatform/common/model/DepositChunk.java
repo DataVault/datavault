@@ -47,12 +47,6 @@ public class DepositChunk {
     @Column(columnDefinition = "TEXT")
     private String ecnArchiveDigest;
 
-    // Serialise date in ISO 8601 format
-    @ApiObjectField(description = "Date of last audit")
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastAuditTime;
-
     public DepositChunk() {}
     public DepositChunk(Deposit deposit, int chunkNum, String archiveDigest, String archiveDigestAlgorithm) {
         this.deposit = deposit;
@@ -101,14 +95,6 @@ public class DepositChunk {
     
     public void setEcnArchiveDigest(String ecnArchiveDigest) {
         this.ecnArchiveDigest = ecnArchiveDigest;
-    }
-
-    public void setLastAuditTime(Date lastAuditTime) {
-        this.lastAuditTime = lastAuditTime;
-    }
-
-    public Date getLastAuditTime() {
-        return lastAuditTime;
     }
 
     public Deposit getDeposit() {

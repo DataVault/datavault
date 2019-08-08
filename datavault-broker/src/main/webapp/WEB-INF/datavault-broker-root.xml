@@ -44,6 +44,15 @@
 
     <bean id="depositsService" class="org.datavaultplatform.broker.services.DepositsService">
         <property name="depositDAO" ref="depositDAO" />
+        <property name="depositChunkDAO" ref="depositChunkDAO" />
+        <property name="auditChunkStatusDAO" ref="auditChunkStatusDAO" />
+        <property name="auditPeriodMinutes" value="${audit.period.minutes:0}"/>
+        <property name="auditPeriodHours" value="${audit.period.hours:0}"/>
+        <property name="auditPeriodDays" value="${audit.period.days:0}"/>
+        <property name="auditPeriodMonths" value="${audit.period.months:0}"/>
+        <property name="auditPeriodYears" value="${audit.period.years:2}"/>
+        <property name="auditMaxChunksPerDeposits" value="${audit.maxChunksPerDeposits:50}"/>
+        <property name="auditMaxTotalChunks" value="${audit.maxTotalChunks:2000}"/>
     </bean>
 
     <bean id="archivesService" class="org.datavaultplatform.broker.services.ArchivesService">
@@ -113,6 +122,7 @@
 
     <bean id="auditsService" class="org.datavaultplatform.broker.services.AuditsService">
         <property name="auditDAO" ref="auditDAO" />
+        <property name="auditChunkStatusDAO" ref="auditChunkStatusDAO" />
     </bean>
 
     <bean id="checkRetentionPolicies" class="org.datavaultplatform.broker.scheduled.CheckRetentionPolicies">
@@ -198,9 +208,11 @@
         <property name="eventService" ref="eventService" />
         <property name="usersService" ref="usersService" />
         <property name="emailService" ref="emailService" />
+        <property name="auditsService" ref="auditsService" />
         <property name="homeUrl" value="${home.page}"/>
         <property name="helpUrl" value="${help.page}"/>
-        <property name="helpMail" value="${help.mail}a"/>
+        <property name="helpMail" value="${help.mail}"/>
+        <property name="auditAdminEmail" value="${audit.adminEmail}"/>
     </bean>
 
     <bean id="sender" class="org.datavaultplatform.broker.queue.Sender">
@@ -272,6 +284,14 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
+    <bean id="depositChunkDAO" class="org.datavaultplatform.common.model.dao.DepositChunkDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="auditChunkStatusDAO" class="org.datavaultplatform.common.model.dao.AuditChunkStatusDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
     <bean id="retrieveDAO" class="org.datavaultplatform.common.model.dao.RetrieveDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
@@ -321,6 +341,10 @@
     </bean>
 
     <bean id="auditDAO" class="org.datavaultplatform.common.model.dao.AuditDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="DepositChunkDAO" class="org.datavaultplatform.common.model.dao.DepositChunkDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 

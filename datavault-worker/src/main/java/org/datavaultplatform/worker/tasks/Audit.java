@@ -3,12 +3,11 @@ package org.datavaultplatform.worker.tasks;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.InitStates;
-import org.datavaultplatform.common.event.audit.AuditStart;
+import org.datavaultplatform.common.event.UpdateProgress;
+import org.datavaultplatform.common.event.audit.*;
 import org.datavaultplatform.common.model.ArchiveStore;
-import org.datavaultplatform.common.model.DepositChunk;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.Verify;
-import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.worker.operations.FileSplitter;
@@ -45,7 +44,7 @@ public class Audit extends Task {
      */
     @Override
     public void performAction(Context context) {
-        
+
         this.eventStream = (EventSender)context.getEventStream();
         logger.info("Retrieve job - performAction()");
         Map<String, String> properties = getProperties();
@@ -58,19 +57,20 @@ public class Audit extends Task {
         this.archiveIds = this.getArchiveIds();
 
         if (this.isRedeliver()) {
-            eventStream.send(new Error(this.jobID, this.auditId, "Audit stopped: the message had been redelivered, please investigate")
-                .withUserId(this.userID));
+            eventStream.send(new Error(this.jobID, this.auditId,
+                    "Audit stopped: the message had been redelivered, please investigate",
+                    Error.Type.AUDIT));
             return;
         }
         
         this.initStates();
-        
+
+        System.out.println("Audit id: "+this.auditId);
         eventStream.send(new AuditStart(this.jobID, this.auditId)
-            .withUserId(this.userID)
             .withNextState(0));
 
         Device archiveFs = this.setupArchiveFileStores();
-        
+
         try {
             if (archiveFs.hasMultipleCopies()) {
                 this.multipleCopies(context, archiveFs);
@@ -115,15 +115,24 @@ public class Audit extends Task {
     }
 
     private void doAudit(Context context, Device archiveFs, boolean singleCopy, String location) throws Exception {
+        eventStream.send(new UpdateProgress(this.jobID, null, 0,
+                this.depositChunkToAudit.size(), "Starting auditing ...")
+                .withUserId(this.userID));
 
         logger.info("Retrieving " + depositChunkToAudit.size() + " chunk(s)");
+
         for(int i = 0; i < depositChunkToAudit.size(); i++) {
+            String chunkId = depositChunkToAudit.get(i).get("id");
             String tarFileName = depositChunkToAudit.get(i).get("bagId") + ".tar";
             int chunkNum = Integer.valueOf(depositChunkToAudit.get(i).get("chunkNum"));
 
             Path chunkPath = context.getTempDir().resolve(tarFileName + FileSplitter.CHUNK_SEPARATOR + chunkNum);
             File chunkFile = chunkPath.toFile();
             String chunkArchiveId = this.archiveIds[i]+FileSplitter.CHUNK_SEPARATOR+chunkNum;
+
+            System.out.println("Sending ChunkAuditStarted event...");
+            eventStream.send(new ChunkAuditStarted(this.jobID, this.auditId, chunkId, chunkArchiveId, location));
+
             if (singleCopy) {
                 System.out.println("Retrieving singleCopy: "+chunkFile.getAbsolutePath());
                 archiveFs.retrieve(chunkArchiveId, chunkFile, null);
@@ -131,6 +140,9 @@ public class Audit extends Task {
                 System.out.println("Retrieving: "+chunkFile.getAbsolutePath());
                 archiveFs.retrieve(chunkArchiveId, chunkFile, null, location);
             }
+
+            eventStream.send(new UpdateProgress(this.jobID, null, i, depositChunkToAudit.size(),
+                    i + " chunk(s) retrieved out of " + depositChunkToAudit.size() + "..."));
 
             if( this.getChunksIVs().get(i) != null ) {
                 String archivedEncChunkFileHash = this.encChunksDigest.get(i);
@@ -141,7 +153,11 @@ public class Audit extends Task {
                 logger.info("Encrypted Checksum: " + encChunkFileHash);
 
                 if (!encChunkFileHash.equals(archivedEncChunkFileHash)) {
-                    throw new Exception("checksum failed: " + encChunkFileHash + " != " + archivedEncChunkFileHash);
+
+                    eventStream.send(new AuditError(this.jobID, this.auditId, chunkId, chunkArchiveId, location,
+                            "Encrypted checksum failed: " + encChunkFileHash + " != " + archivedEncChunkFileHash));
+
+//                    throw new Exception("checksum failed: " + encChunkFileHash + " != " + archivedEncChunkFileHash);
                 }
 
                 Encryption.decryptFile(context, chunkFile, this.getChunksIVs().get(i));
@@ -157,22 +173,25 @@ public class Audit extends Task {
             logger.info("Checksum: " + chunkFileHash);
 
             if (!chunkFileHash.equals(archivedChunkFileHash)) {
-                throw new Exception("checksum failed: " + chunkFileHash + " != " + archivedChunkFileHash);
+                eventStream.send(new AuditError(this.jobID, this.auditId, chunkId, chunkArchiveId, location,
+                        "Decrypted checksum failed: " + chunkFileHash + " != " + archivedChunkFileHash));
+
+//                throw new Exception("checksum failed: " + chunkFileHash + " != " + archivedChunkFileHash);
             }
+
+            eventStream.send(new ChunkAuditComplete(this.jobID, this.auditId, chunkId, chunkArchiveId, location));
 
             chunkFile.delete();
         }
+
+        eventStream.send(new AuditComplete(this.jobID, this.auditId).withNextState(2));
     }
 
     private void initStates() {
     	ArrayList<String> states = new ArrayList<>();
-        states.add("Computing free space");    // 0
-        states.add("Retrieving from archive"); // 1
-        states.add("Validating data");         // 2
-        states.add("Transferring files");      // 3
-        states.add("Data retrieve complete");  // 4
-        eventStream.send(new InitStates(this.jobID, this.auditId, states)
-            .withUserId(userID));		
+        states.add("Audit Data");    // 0
+        states.add("Data Audit complete");  // 1
+        eventStream.send(new InitStates(this.jobID, this.auditId, states));
 	}
     
     private Device setupArchiveFileStores() {
@@ -192,8 +211,7 @@ public class Audit extends Task {
         } catch (Exception e) {
             String msg = "Retrieve failed: could not access archive filesystem";
             logger.error(msg, e);
-            eventStream.send(new Error(this.jobID, this.auditId, msg)
-                .withUserId(userID));
+            eventStream.send(new Error(this.jobID, this.auditId, msg, Error.Type.AUDIT));
 
             throw new RuntimeException(e);
         }

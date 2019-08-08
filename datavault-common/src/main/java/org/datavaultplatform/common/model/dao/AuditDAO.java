@@ -14,10 +14,4 @@ public interface AuditDAO {
     Audit findById(String Id);
 
     int count();
-
-    int inProgressCount();
-
-    List<Audit> inProgress();
-
-    int queueCount();
 }

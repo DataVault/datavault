@@ -29,7 +29,7 @@ public class Audit {
     private List<DepositChunk> chunks;
 
     public enum Status {
-        NOT_STARTED,
+        FAILED,
         IN_PROGRESS,
         COMPLETE
     }

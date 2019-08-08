@@ -8,8 +8,8 @@ import javax.persistence.Entity;
 public class AuditStart extends Event {
 
     AuditStart() {};
-    public AuditStart(String jobId, String audiId) {
-        super(jobId, null, audiId, "Audit started");
+    public AuditStart(String jobId, String auditId) {
+        super(jobId, auditId, null,null, null, "Audit started");
         this.eventClass = AuditStart.class.getCanonicalName();
     }
 }

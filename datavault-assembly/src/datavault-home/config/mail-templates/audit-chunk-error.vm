@@ -1,0 +1,13 @@
+<html>
+	<body>
+		
+		<p>The attempted audit of the following chunk failed:</p>
+		<ul>
+			<li>Audit ID: ${audit-id}</li>
+			<li>Date of failed operation: ${timestamp}</li>
+			<li>Chunk ID: ${chunk-id}</li>
+			<li>Archive ID: ${archive-id}</li>
+			<li>location: ${location}</li>
+		</ul>
+	</body>
+</html>

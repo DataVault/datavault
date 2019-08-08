@@ -93,6 +93,31 @@ public class Event {
     
     @Enumerated(EnumType.STRING)
     private Agent.AgentType agentType;
+
+    // For Audit
+
+    // Related audit
+    @JsonIgnore
+    @ManyToOne
+    private Audit audit;
+    @Transient
+    public String auditId;
+
+    // Related archive
+    @JsonIgnore
+    @ManyToOne
+    private Archive archive;
+    @Transient
+    public String archiveId;
+
+    private String location;
+
+    // Related deposit chunk
+    @JsonIgnore
+    @ManyToOne
+    private DepositChunk chunk;
+    @Transient
+    public String chunkId;
     
     public Event() {};
     public Event(String message) {
@@ -101,12 +126,25 @@ public class Event {
         this.timestamp = new Date();
         this.sequence = 0;
     }
-    
+
     public Event(String jobId, String depositId, String retrieveId, String message) {
         this.eventClass = Event.class.getCanonicalName();
         this.jobId = jobId;
         this.depositId = depositId;
         this.retrieveId = retrieveId;
+        this.auditId = null;
+        this.message = message;
+        this.timestamp = new Date();
+        this.sequence = 0;
+    }
+    
+    public Event(String jobId, String auditId, String chunkId, String archiveId, String location, String message) {
+        this.eventClass = Event.class.getCanonicalName();
+        this.jobId = jobId;
+        this.auditId = auditId;
+        this.chunkId = chunkId;
+        this.archiveId = archiveId;
+        this.location = location;
         this.message = message;
         this.timestamp = new Date();
         this.sequence = 0;
@@ -281,4 +319,20 @@ public class Event {
                 remoteAddress,
                 userAgent);
     }
+
+    public String getAuditId() { return auditId; }
+
+    public void setAuditId(String auditId) { this.auditId = auditId; }
+
+    public String getChunkId() { return chunkId; }
+
+    public void setChunkId(String chunkId) { this.chunkId = chunkId; }
+
+    public String getArchiveId() { return archiveId; }
+
+    public void setArchiveId(String archiveId) { this.archiveId = archiveId; }
+
+    public String getLocation() { return location; }
+
+    public void setLocation(String location) { this.location = location; }
 }

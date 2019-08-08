@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.*;
 import org.datavaultplatform.common.event.Error;
+import org.datavaultplatform.common.event.audit.*;
 import org.datavaultplatform.common.event.delete.DeleteComplete;
 import org.datavaultplatform.common.event.delete.DeleteStart;
 import org.datavaultplatform.common.event.deposit.*;
@@ -14,10 +15,7 @@ import org.springframework.amqp.core.MessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EventListener implements MessageListener {
 
@@ -30,9 +28,11 @@ public class EventListener implements MessageListener {
     private RetrievesService retrievesService;
     private UsersService usersService;
     private EmailService emailService;
+    private AuditsService auditsService;
     private String homeUrl;
 	private String helpUrl;
 	private String helpMail;
+    private String auditAdminEmail;
     
 	private static final Map<String, String> EMAIL_SUBJECTS;
     static {
@@ -47,10 +47,11 @@ public class EventListener implements MessageListener {
     	EMAIL_SUBJECTS.put("user-deposit-retrievecomplete", "Confirmation - your new DataVault retrieval is complete.");
     	EMAIL_SUBJECTS.put("admin-deposit-retrievestart", "Confirmation - a new DataVault retrieval is starting.");
     	EMAIL_SUBJECTS.put("admin-deposit-retrievecomplete", "Confirmation - a new DataVault retrieval is complete.");
+        EMAIL_SUBJECTS.put("audit-chunk-error", "DataVault ERROR - Chunk failed checksum during audit.");
     }
 
     private static final Logger logger = LoggerFactory.getLogger(EventListener.class);
-    
+
     public void setJobsService(JobsService jobsService) { this.jobsService = jobsService; }
     public void setEventService(EventService eventService) { this.eventService = eventService; }
     public void setVaultsService(VaultsService vaultsService) { this.vaultsService = vaultsService; }
@@ -60,6 +61,8 @@ public class EventListener implements MessageListener {
     public void setRetrievesService(RetrievesService retrievesService) { this.retrievesService = retrievesService; }
     public void setUsersService(UsersService usersService) { this.usersService = usersService; }
     public void setEmailService(EmailService emailService) { this.emailService = emailService; }
+    public void setAuditsService(AuditsService auditsService) { this.auditsService = auditsService; }
+    public void setAuditAdminEmail(String auditAdminEmail) { this.auditAdminEmail = auditAdminEmail; }
 
     @Override
     public void onMessage(Message msg) {
@@ -334,7 +337,7 @@ public class EventListener implements MessageListener {
                 
                 Error errorEvent = (Error)concreteEvent;
                 
-                if (deposit.getStatus() != Deposit.Status.COMPLETE) {
+                if (deposit != null && deposit.getStatus() != Deposit.Status.COMPLETE) {
                     Boolean success = false;
                     while (!success) {
                         try {
@@ -363,10 +366,17 @@ public class EventListener implements MessageListener {
                         job = jobsService.getJob(concreteEvent.getJobId());
                     }
                 }
-                //TODO - send email by using correct template when deposit delete fails 
-                // Get related information for emails
-                String type = "error";
-                this.sendEmails(deposit, errorEvent, type, "user-deposit-error.vm", "group-admin-deposit-error.vm");
+
+                if(deposit != null){
+                    //TODO - send email by using correct template when deposit delete fails
+                    // Get related information for emails
+                    String type = "error";
+                    this.sendEmails(deposit, errorEvent, type, "user-deposit-error.vm", "group-admin-deposit-error.vm");
+                }
+                else if(errorEvent.getAuditId() != null) {
+                    // TODO: what to do with audit eror
+                }
+
             } else if (concreteEvent instanceof RetrieveStart) {
             	RetrieveStart startEvent = (RetrieveStart)concreteEvent;
                 // Update the Retrieve status
@@ -412,6 +422,77 @@ public class EventListener implements MessageListener {
                         vault = vaultsService.getVault(vault.getID());
                     }
                 }
+            } else if (concreteEvent instanceof AuditStart) {
+                // Update the Audit
+                System.out.println("AuditId: "+concreteEvent.getAuditId());
+                Audit audit = auditsService.getAudit(concreteEvent.getAuditId());
+                audit.setStatus(Audit.Status.IN_PROGRESS);
+                auditsService.updateAudit(audit);
+            } else if (concreteEvent instanceof ChunkAuditStarted) {
+                // Update the Audit status
+                System.out.println("AuditId: "+concreteEvent.getAuditId());
+                Audit audit = auditsService.getAudit(concreteEvent.getAuditId());
+                System.out.println("Chunk Id: "+ concreteEvent.getChunkId());
+                DepositChunk chunk = depositsService.getDepositChunkById(concreteEvent.getChunkId());
+                String archiveId = concreteEvent.getArchiveId();
+                String location = concreteEvent.getLocation();
+
+                auditsService.addAuditStatus(audit, chunk, archiveId, location);
+            } else if (concreteEvent instanceof ChunkAuditComplete) {
+                System.out.println("AuditId: "+concreteEvent.getAuditId());
+                Audit audit = auditsService.getAudit(concreteEvent.getAuditId());
+                System.out.println("Chunk Id: "+ concreteEvent.getChunkId());
+                DepositChunk chunk = depositsService.getDepositChunkById(concreteEvent.getChunkId());
+                String archiveId = concreteEvent.getArchiveId();
+                String location = concreteEvent.getLocation();
+                System.out.println("archiveId: "+ archiveId);
+                System.out.println("location: "+ location);
+
+                List<AuditChunkStatus> auditChunkStatus =
+                        auditsService.getRunningAuditChunkStatus(audit, chunk, archiveId, location);
+
+                if(auditChunkStatus.size() != 1){
+                    // TODO: Make sure it never happen
+                    System.err.println("Unexpected number of running audit chunk: "+auditChunkStatus.size());
+                }
+                AuditChunkStatus auditInfo = auditChunkStatus.get(0);
+                auditInfo.setCompleteTime(new Date());
+                auditInfo.complete();
+                auditsService.updateAuditChunkStatus(auditInfo);
+            } else if (concreteEvent instanceof AuditComplete) {
+                // Update the Audit status
+                System.out.println("AuditId: "+concreteEvent.getAuditId());
+                Audit audit = auditsService.getAudit(concreteEvent.getAuditId());
+                audit.setStatus(Audit.Status.COMPLETE);
+                auditsService.updateAudit(audit);
+            }
+            else if (concreteEvent instanceof AuditError) {
+                System.out.println("AuditId: "+concreteEvent.getAuditId());
+                Audit audit = auditsService.getAudit(concreteEvent.getAuditId());
+                System.out.println("Chunk Id: "+concreteEvent.getChunkId());
+                DepositChunk chunk = depositsService.getDepositChunkById(concreteEvent.getChunkId());
+                String archiveId = concreteEvent.getArchiveId();
+                String location = concreteEvent.getLocation();
+                System.out.println("archive Id: "+archiveId);
+                System.out.println("location: "+location);
+
+                List<AuditChunkStatus> auditChunkStatus =
+                        auditsService.getRunningAuditChunkStatus(audit, chunk, archiveId, location);
+
+                if(auditChunkStatus.size() != 1){
+                    // TODO: Make sure it never happen
+                    System.err.println("Unexpected number of running audit chunk: "+auditChunkStatus.size());
+                }
+
+                AuditChunkStatus auditInfo = auditChunkStatus.get(0);
+                auditInfo.setCompleteTime(new Date());
+                auditInfo.failed(concreteEvent.getMessage());
+                auditsService.updateAuditChunkStatus(auditInfo);
+
+                // At the moment just email
+                sendAuditEmails(concreteEvent, "error", "audit-error.vm");
+
+                // TODO: try to fix chunk
             }
 
         } catch (Exception e) {
@@ -474,6 +555,25 @@ public class EventListener implements MessageListener {
                     userTemplate,
                     model);
         }
+    }
+
+    private void sendAuditEmails(Event event, String type, String template) throws Exception {
+
+        AuditError auditErrorEven = (AuditError) event;
+
+        logger.info("title key: " + "audit-chunk-" + type);
+        String title = EventListener.EMAIL_SUBJECTS.get("audit-chunk-" + type);
+
+        HashMap<String, Object> model = new HashMap<String, Object>();
+        model.put("audit-id", auditErrorEven.getAuditId());
+        model.put("chunk-id", auditErrorEven.getChunkId());
+        model.put("archive-id", auditErrorEven.getArchiveId());
+        model.put("location", auditErrorEven.getLocation());
+        model.put("timestamp", event.getTimestamp());
+
+        String email = auditAdminEmail; // TODO: Who do we email
+
+        emailService.sendTemplateMail(email, title, template, model);
     }
     
     public String getHomeUrl() {

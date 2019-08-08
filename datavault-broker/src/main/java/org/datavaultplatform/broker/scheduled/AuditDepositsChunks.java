@@ -65,7 +65,7 @@ public class AuditDepositsChunks {
         // TODO: Make sure this is not a Deposit that is still running
         List<DepositChunk> chunks = depositsService.getChunksForAudit();
 
-        System.out.println("auditing "+chunks.size()+"chunks");
+        System.out.println("auditing "+chunks.size()+" chunks");
 
         // Fetch the ArchiveStore that is flagged for retrieval. We store it in a list as the Task parameters require a list.
         ArchiveStore archiveStore = archiveStoreService.getForRetrieval();
@@ -97,8 +97,9 @@ public class AuditDepositsChunks {
 
             // Get encryption IVs
             HashMap<Integer, byte[]> chunksIVs = new HashMap<Integer, byte[]>();
-            for( DepositChunk chunk : chunks ) {
-                chunksIVs.put(chunk.getChunkNum(), chunk.getEncIV());
+            for (int i = 0; i < chunks.size(); i++) {
+                DepositChunk chunk = chunks.get(i);
+                chunksIVs.put(i, chunk.getEncIV());
             }
 
             // Get encrypted digests
@@ -121,6 +122,7 @@ public class AuditDepositsChunks {
             for(int i=0; i< chunks.size(); i++){
                 DepositChunk chunk = chunks.get(i);
                 HashMap<String, String> info = new HashMap<String, String>();
+                info.put("id", chunk.getID());
                 info.put("bagId", chunk.getDeposit().getBagId());
                 info.put("chunkNum", String.valueOf(chunk.getChunkNum()));
                 chunksInfo.add(info);

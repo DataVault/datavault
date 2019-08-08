@@ -64,33 +64,4 @@ public class AuditDAOImpl implements AuditDAO {
         Session session = this.sessionFactory.openSession();
         return (int) (long) (Long) session.createCriteria(Audit.class).setProjection(Projections.rowCount()).uniqueResult();
     }
-
-    @Override
-    public int queueCount() {
-        Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Audit.class);
-        criteria.add(Restrictions.eq("status", Audit.Status.NOT_STARTED));
-        criteria.setProjection(Projections.rowCount());
-        return (int)(long)(Long)criteria.uniqueResult();
-    }
-
-    @Override
-    public int inProgressCount() {
-        Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Audit.class);
-        criteria.add(Restrictions.and(Restrictions.ne("status", Audit.Status.NOT_STARTED), Restrictions.ne("status", Audit.Status.COMPLETE)));
-        criteria.setProjection(Projections.rowCount());
-        return (int)(long)(Long)criteria.uniqueResult();
-    }
-
-    @Override
-    public List<Audit> inProgress() {
-        Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Audit.class);
-        criteria.add(Restrictions.and(Restrictions.ne("status", Audit.Status.NOT_STARTED), Restrictions.ne("status", Audit.Status.COMPLETE)));
-        criteria.addOrder(Order.asc("timestamp"));
-        List<Audit> Audits = criteria.list();
-        session.close();
-        return Audits;
-    }
 }
