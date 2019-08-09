@@ -14,7 +14,7 @@
 
 /usr/bin/curl "https://$1.pure.ed.ac.uk/ws/api/$2/projects?apiKey=$3&fields=project&size=30000" > $4/pureProjects.xml
 /usr/bin/curl "https://$1.pure.ed.ac.uk/ws/api/$2/datasets?apiKey=$3&fields=dataSets,relatedProjects.relatedProjects&size=30000" > $4/pureDatasetProjects.xml
-/usr/bin/perl $HOME/datavault-home/bin/parseDatasetProjects.pl -projectFile $4/pureProjects.xml -datasetFile $4/pureDatasetProjects.xml > $4/datasetProjects.flat
+/usr/bin/perl $HOME/datavault-home/bin/parseDatasetProjects.pl -projectFile $4/pureProjects.xml -datasetFile $4/pureDatasetProjects.xml > $4/projectId.flat
 /bin/rm $4/pureDatasetProjects.xml
 /bin/rm $4/pureProjects.xml
 
