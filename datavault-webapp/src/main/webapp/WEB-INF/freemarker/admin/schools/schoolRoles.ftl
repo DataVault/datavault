@@ -28,6 +28,8 @@
         }
         .role-definitions .role-definition-title {
             margin-top: 0;
+            font-weight: 500;
+            color: #000;
         }
         .role-definitions .definition {
             margin: 0.5em 0;
@@ -35,6 +37,22 @@
         .btn-delete {
             color: #b94a48;
             background-color: #f2dede;
+        }
+        .btn-cancel {
+            background-color: #ededed;
+        }
+        .modal-title {
+            font-weight: 500;
+            color: #000;
+        }
+        .control-label {
+            font-weight: 400;
+        }
+        .modal-dialog .btn > .fa {
+            padding: 0 2px;
+        }
+        #role-update-user-name {
+            padding: 7px 0 0 27px;
         }
     </style>
 
@@ -44,20 +62,21 @@
                 <form id="create-form" class="form form-horizontal" role="form" action="${springMacroRequestContext.getContextPath()}/admin/schools/${school.getID()}/user" method="post">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
-                        <h4 class="modal-title" id="add-new-user-title">Add new user</h4>
+                        <h4 class="modal-title" id="add-new-user-title">Add New User</h4>
                     </div>
                     <div class="modal-body">
                         <div id="create-error" class="alert alert-danger hidden" role="alert"></div>
                         <div class="form-group ui-widget">
-                            <label for="new-user-name" class="control-label col-sm-2">Name:</label>
+                            <label for="new-user-name" class="control-label col-sm-2">Name</label>
                             <div class="col-sm-10">
                                 <input id="new-user-name" type="text" class="form-control" name="user" value=""/>
                             </div>
                         </div>
                         <div class="form-group ui-widget">
-                            <label for="new-user-role" class="control-label col-sm-2">Role:</label>
+                            <label for="new-user-role" class="control-label col-sm-2">Role</label>
                             <div class="col-sm-10">
                                 <select id="new-user-role" name="role" class="form-control">
+                                    <option value="">Please select</option>
                                     <#list roles as role><option value="${role.id}">${role.name}</option></#list>
                                 </select>
                             </div>
@@ -66,8 +85,8 @@
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary btn-ok">Add</button>
+                        <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-ok"><i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
                     </div>
                 </form>
             </div>
@@ -80,18 +99,16 @@
                 <form id="update-form" class="form form-horizontal" role="form" action="${springMacroRequestContext.getContextPath()}/admin/schools/${school.getID()}/user/update" method="post">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
-                        <h4 class="modal-title" id="update-existing-title">Update user</h4>
+                        <h4 class="modal-title" id="update-existing-title">Edit User's Role</h4>
                     </div>
                     <div class="modal-body">
                         <div id="update-error" class="alert alert-danger hidden" role="alert"></div>
                         <div class="form-group ui-widget">
-                            <label for="role-update-user-name" class="control-label col-sm-2">Name:</label>
-                            <div class="col-sm-10">
-                                <input id="role-update-user-name" type="text" class="form-control" disabled="disabled"/>
-                            </div>
+                            <label for="role-update-user-name" class="control-label col-sm-2">Name</label>
+                            <label id="role-update-user-name"></label>
                         </div>
                         <div class="form-group ui-widget">
-                            <label for="update-user-role" class="control-label col-sm-2">Role:</label>
+                            <label for="update-user-role" class="control-label col-sm-2">Role</label>
                             <div class="col-sm-10">
                                 <select id="update-user-role" name="role" class="form-control">
                                     <#list roles as role><option value="${role.id}">${role.name}</option></#list>
@@ -103,8 +120,8 @@
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary btn-ok">Add</button>
+                        <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i>Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-ok"><i class="fa fa-floppy-o" aria-hidden="true"></i>Save</button>
                     </div>
                 </form>
             </div>
@@ -117,18 +134,18 @@
                 <form id="delete-form" class="form form-horizontal" role="form" action="${springMacroRequestContext.getContextPath()}/admin/schools/${school.getID()}/user/delete" method="post">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
-                        <h4 class="modal-title" id="delete-title">Remove user</h4>
+                        <h4 class="modal-title" id="delete-title">Delete User</h4>
                     </div>
                     <div id="delete-error" class="alert alert-danger hidden" role="alert"></div>
                     <div class="modal-body">
-                        <label>Are you sure you want to remove the role assignment for user <span id="delete-role-user-name"></span>?</label>
+                        <span>Do you want to delete <span id="delete-role-user-name"></span> from this school?</span>
                     </div>
                     <input type="hidden" id="delete-role-assignment-id" name="assignment"/>
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
-                        <button type="submit" class="btn btn-primary btn-ok">Yes</button>
+                        <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i>Cancel</button>
+                        <button type="submit" class="btn btn-danger btn-delete"><i class="fa fa-trash" aria-hidden="true"></i>Delete</button>
                     </div>
                 </form>
             </div>
@@ -215,12 +232,14 @@
 
         $('[data-target="#add-new-dialog"]').click(function() {
             $('#create-error').addClass('hidden').text('');
+            $('#new-user-name').val('');
+            $('#new-user-role').val('');
         });
         $('[data-target="#update-existing-dialog"]').click(function() {
             var assignmentId = $(this).data('assignment-id');
             var userName = $(this).data('user-name');
             $('#role-update-assignment-id').val(assignmentId);
-            $('#role-update-user-name').val(userName);
+            $('#role-update-user-name').text(userName);
             $('#update-error').addClass('hidden').text('');
         });
         $('[data-target="#delete-dialog"]').click(function() {
