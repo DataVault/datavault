@@ -112,9 +112,11 @@ public class RoleDAOImpl implements RoleDAO {
     }
 
     private void populateAssignedUserCount(Session session, RoleModel role) {
-        Criteria assignedUserCountCriteria = session.createCriteria(RoleAssignment.class);
-        assignedUserCountCriteria.add(Restrictions.eq("role", role));
-        role.setAssignedUserCount(assignedUserCountCriteria.list().size());
+        if (role != null) {
+            Criteria assignedUserCountCriteria = session.createCriteria(RoleAssignment.class);
+            assignedUserCountCriteria.add(Restrictions.eq("role", role));
+            role.setAssignedUserCount(assignedUserCountCriteria.list().size());
+        }
     }
 
     @Override
