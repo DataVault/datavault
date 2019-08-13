@@ -46,7 +46,11 @@ public class AdminController {
     }
 
     private int getManagableRolesCount() {
-        return restService.getViewableRoles().size() + restService.getEditableRoles().size();
+        // Total number of roles =
+        //        1 (for the IS Admin)
+        //      + number of read-only roles
+        //      + number of editable roles
+        return 1 + restService.getViewableRoles().size() + restService.getEditableRoles().size();
     }
 }
 

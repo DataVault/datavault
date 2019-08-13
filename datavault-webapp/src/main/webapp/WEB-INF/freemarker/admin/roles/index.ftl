@@ -4,157 +4,189 @@
 <@layout.vaultLayout>
 <#import "/spring.ftl" as spring />
 
-    <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/admin"><b>Administration</b></a></li>
-        <li class="active"><b>Roles</b></li>
-    </ol>
+    <style>
+        #add-new {
+            margin: 2em 0;
+        }
+        #role-assignments {
+            padding: 0 2em 0 0;
+        }
+        #isadmin-button {
+            float: left;
+            margin-left: 2px;
+        }
+        .action-column {
+            width: 100px;
+            text-align: center;
+        }
+        .btn-delete {
+            color: #b94a48;
+            background-color: #f2dede;
+        }
+        .modal-title {
+            font-weight: 500;
+            color: #000;
+        }
+        .modal-dialog textarea {
+            max-width: 265px;
+        }
+        .modal-dialog select.form-control {
+            width: 193px;
+        }
+        .modal-dialog .control-label {
+            margin-top: 7px;
+            font-weight: 400;
+        }
+        #permissions {
+            margin-top: 20px;
+        }
+    </style>
 
-    <div class="container container_layout">
-        <div>
-            <div class="row">
-                <div class="col-sm-4">
-                    <h1 class="layout_roles_title">Users & Roles</h1>
-                </div>
-            <div class="col-sm-8">
-                <!-- todo buttons -->
+    <div id="modalnewedit" class="modal fade " role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="create-role" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/roles/save" method="post">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <h4 id="modal_title" class="modal-title">Add new role</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div id="create-error" class="alert alert-danger hidden"></div>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <input type="hidden" name="id" id="edit_roleid">
+                                <div class="form-group form-inline row">
+                                    <label class="control-label col-xs-3" for="edit_name">Name</label>
+                                    <input class="form-control col-xs-9" type="text" name="name" id="edit_name">
+                                </div>
+                                <div class="form-group form-inline row">
+                                    <label class="control-label col-xs-3" for="edit_type">Type</label>
+                                    <select class="form-control col-xs-9" name="type" id="edit_type">
+                                        <option data-target="#drp-vault" value="VAULT">Vault role</option>
+                                        <option data-target="#drp-school" value="SCHOOL">School role</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-xs-6 form-group form-inline">
+                                <label class="control-label col-xs-3" for="edit_description">Description</label>
+                                <textarea class="form-control col-xs-9" name="description" id="edit_description"></textarea>
+                            </div>
+                        </div>
+                        <div class="row col-xs-12" id="permissions">
+                            <label>Permissions</label>
+                            <div id="drp-vault">
+                                <div id="edit_vaultpermissions"> </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="submitAction" name="action" value="submit"/>
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-basic" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
+                        <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+                    </div>
+
+                </form>
             </div>
         </div>
+    </div>
 
-        <div class="layout_misc__add_new">
+    <div id="delete-dialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="delete-title" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="delete-form" class="form form-horizontal" role="form" action="${springMacroRequestContext.getContextPath()}/admin/roles/delete" method="post">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <h4 id="modal_title" class="modal-title">Delete role</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div id="delete-error" class="alert alert-danger hidden"></div>
+                        <div class="modal-body">
+                            <p>Do you want to delete <label id="delete-role-name"></label> as a role in the system?</p>
+                            <p>Note: You will not be able to delete a role before reassigning all its users to another existing role.</p>
+                        </div>
+                    </div>
+                    <input type="hidden" id="delete-role-id" name="id"/>
+                    <input type="hidden" id="submitAction" name="action" value="submit"/>
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-basic" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="fa fa-trash"></i> Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <ol class="breadcrumb">
+            <li><a href="${springMacroRequestContext.getContextPath()}/admin"><b>Administration</b></a></li>
+            <li class="active"><b>Roles</b></li>
+        </ol>
+
+        <h1>Users & Roles</h1>
+
+        <div id="add-new">
             <a id="addNewRoleBtn" href="#">+Add New Role</a>
         </div>
 
-        <table class="table_layout">
-            <thead>
-                <tr class="tr">
-                    <th class="table_layout__title">Role</th>
-                    <th class="table_layout__count"> No. of Users</th>
-                    <th class="table_layout__actions">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            <#if isSuperAdmin>
-                <tr class="tr">
-                    <td>${superAdminRole.getName()}</td>
-                    <td>${superAdminRole.getAssignedUserCount()}</td>
-                    <td>
-                        <a class="btn btn-link" href="${springMacroRequestContext.getContextPath()}/admin/roles/isadmin" title="Edit the ${superAdminRole.name} role.">
-                            <i class="fa fa-users" style="font-size:24px;color white;padding:2px;border:solid 1px black;"></i>
-                        </a>
-                    </td>
-                </tr>
-            </#if>
-            <#list readOnlyRoles as role>
-                <tr class="tr">
-                    <td>${role.getName()}</td>
-                    <td>${role.getAssignedUserCount()}</td>
-                    <td>
-                        <a href="#" class="btn btn-link modal_layout_action_btn" disabled="disabled" role="button" title="The ${role.name} role cannot be edited.">
-                            <i class="fa fa-pencil" style="font-size:24px;color white;padding:2px;border:solid 1px black;"></i>
-                        </a>
-                        <a href="#" class="btn btn-link modal_layout_action_btn" disabled="disabled" role="button" title="The ${role.name} role cannot be removed.">
-                            <i class="fa fa-trash-o" style="font-size:24px;color:red;background:MistyRose;border:1px solid black;padding:2px"></i>
-                        </a>
-                    </td>
-                </tr>
-            </#list>
-            <#list roles as role>
-                <tr class="tr">
-                    <td>${role.getName()}</td>
-                    <td>${role.getAssignedUserCount()}</td>
-                    <td>
-                        <a href="#" class="btn btn-link editRoleButton modal_layout_action_btn" role="button" value="${role.getId()}" title="Edit the ${role.name} role.">
-                            <i class="fa fa-pencil" style="font-size:24px;color white;padding:2px;border:solid 1px black;"></i>
-                        </a>
-                        <a href="#" class="btn btn-link modal_layout_action_btn" data-toggle="modal" data-target="#delete-dialog" data-role-id="${role.id}" data-role-name="${role.name}" role="button" title="Remove the ${role.name} role.">
-                            <i class="fa fa-trash-o" style="font-size:24px;color:red;background:MistyRose;border:1px solid black;padding:2px"></i>
-                        </a>
-                    </td>
-                </tr>
-            </#list>
-            </tbody>
-        </table>
-
-        <div id="modalnewedit" class="modal model-lg fade " role="dialog">
-            <div class="modal-dialog  modal_layout_roles">
-                <div class="modal-content ">
-                    <div class="modal-header modal_layout_roles_modal-header">
-                        <button type="button" class="close  modal_layout_roles_modal-header-close" data-dismiss="modal">
-                            <span class="glyphicon glyphicon-remove-circle  modal_layout_roles_modal-header-close"></span>
-                        </button>
-                        <h3 id="modal_title" class="layout_roles_title">Add new role</h3>
-                    </div>
-                    <div class="modal-body modal_layout_roles_modal-body">
-                        <form id="create-role" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/roles/save" method="post">
-                            <div id="create-error" class="alert alert-danger hidden"></div>
-                            <div class="row">
-                                <div class="col-xs-6">
-                                    <input type="hidden" name="id" id="edit_roleid">
-                                    <div class="form-group form-inline">
-                                        <label class="modal_layout_roles__labels" for="edit_name">Name</label>
-                                        <input class="modal_layout_roles__inputs form-control" type="text" name="name" id="edit_name">
-                                    </div>
-                                    <div class="form-group form-inline">
-                                        <label class="modal_layout_roles__labels" for="edit_type">Type</label>
-                                        <select class="layout_select_source form-control modal_layout_roles__inputs" placeholder="please select" name="type" id="edit_type">
-                                            <option data-target="#drp-vault" value="VAULT">Vault role</option>
-                                            <option data-target="#drp-school" value="SCHOOL">School role</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-xs-6 form-group form-inline">
-                                    <label class="modal_layout_roles__labels modal_layout_roles__textarea_label" for="edit_description">Description</label>
-                                    <textarea class="form-control modal_layout_roles__inputs__textarea" name="description" id="edit_description"></textarea>
-                                </div>
-                            </div>
-                            <div class="row modal_layout_roles__permissions">
-                                <label class="modal_layout_roles__permissions_label">Permissions</label>
-                                <div id="drp-vault">
-                                    <div id="edit_vaultpermissions"> </div>
-                                </div>
-                            </div>
-                            <input type="hidden" id="submitAction" name="action" value="submit"/>
-                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                            <div class="modal_layout_roles_modal-footer">
-                                <button type="button" class="btn btn-basic" data-dismiss="modal"><span class="glyphicon glyphicon-remove-circle"></span> Cancel</button>
-                                <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+        <div id="role-assignments" class="col-md-6">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Role</th>
+                            <th>No. of Users</th>
+                            <th class="action-column">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <#if isSuperAdmin>
+                            <tr>
+                                <td>${superAdminRole.getName()}</td>
+                                <td>${superAdminRole.getAssignedUserCount()}</td>
+                                <td class="action-column">
+                                    <a id="isadmin-button" class="btn btn-default" href="${springMacroRequestContext.getContextPath()}/admin/roles/isadmin" title="Edit the ${superAdminRole.name} role.">
+                                        <i class="fa fa-users"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </#if>
+                        <#list readOnlyRoles as role>
+                            <tr>
+                                <td>${role.getName()}</td>
+                                <td>${role.getAssignedUserCount()}</td>
+                                <td class="action-column">
+                                    <a href="#" class="btn btn-default" disabled="disabled" role="button" title="The ${role.name} role cannot be edited.">
+                                        <i class="fa fa-pencil"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-default btn-delete" disabled="disabled" role="button" title="The ${role.name} role cannot be removed.">
+                                        <i class="fa fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </#list>
+                        <#list roles as role>
+                            <tr>
+                                <td>${role.getName()}</td>
+                                <td>${role.getAssignedUserCount()}</td>
+                                <td class="action-column">
+                                    <a href="#" class="btn btn-default editRoleButton" role="button" value="${role.getId()}" title="Edit the ${role.name} role.">
+                                        <i class="fa fa-pencil"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog" data-role-id="${role.id}" data-role-name="${role.name}" role="button" title="Remove the ${role.name} role.">
+                                        <i class="fa fa-trash-o"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </#list>
+                    </tbody>
+                </table>
             </div>
         </div>
-
-        <div id="delete-dialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="delete-title" aria-hidden="true">
-            <div class="modal-dialog modal_layout_roles">
-                <div class="modal-content">
-                    <div class="modal-header modal_layout_roles_modal-header">
-                        <button type="button" class="close  modal_layout_roles_modal-header-close" data-dismiss="modal">
-                            <span class="glyphicon glyphicon-remove-circle  modal_layout_roles_modal-header-close"></span>
-                        </button>
-                        <h3 id="modal_title" class="layout_roles_title">Delete role</h3>
-                    </div>
-                    <div class="modal-body modal_layout_roles_modal-body">
-                        <form id="delete-form" class="form form-horizontal" role="form" action="${springMacroRequestContext.getContextPath()}/admin/roles/delete" method="post">
-                            <div id="delete-error" class="alert alert-danger hidden"></div>
-                            <div class="modal-body">
-                                <p>Do you want to delete <label id="delete-role-name"></label> as a role in the system?</p>
-                                <p>Note: You will not be able to delete a role before reassigning all its users to another existing role.</p>
-                            </div>
-                            <input type="hidden" id="delete-role-id" name="id"/>
-                            <input type="hidden" id="submitAction" name="action" value="submit"/>
-                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                            <div class="modal_layout_roles_modal-footer">
-                                <button type="button" class="btn btn-basic" data-dismiss="modal"><span class="glyphicon glyphicon-remove-circle"></span> Cancel</button>
-                                <button type="submit" class="btn btn-primary"><i class="fa fa-trash"></i> Delete</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
+
     <script>
 
         var vaultPermissions = {};

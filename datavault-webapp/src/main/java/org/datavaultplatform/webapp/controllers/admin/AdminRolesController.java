@@ -197,7 +197,7 @@ public class AdminRolesController {
 
         } else if (role.get().getAssignedUserCount() > 0) {
             logger.debug("Could not delete role with ID={} - users are still assigned to the role", roleId);
-            return validationFailed("Can't delete a role that has users");
+            return validationFailed("A role that has users cannot be deleted.");
         }
 
         logger.info("Attempting to delete role with ID={}", roleId);
@@ -217,7 +217,7 @@ public class AdminRolesController {
                 .stream()
                 .anyMatch(ra -> ra.getRole().equals(superAdminRole))) {
             logger.warn("Cannot add the user ID={} to IS Admin Role ID={} because he already does have it.", userId, superAdminRole.getId());
-            return validationFailed("Can't add the user to this role, because he already is in it.");
+            return validationFailed(user.getFirstname() + " " + user.getLastname() + " is already an IS Admin.");
         }
 
         logger.info("Attempting to add user ID={} to IS Admin role with ID={}", userId, superAdminRole.getId());
@@ -249,7 +249,7 @@ public class AdminRolesController {
 
         if (!roleAssignment.isPresent()) {
             logger.warn("Cannot remove the user ID={} from IS Admin Role ID={} because he doesn't have it.", userId, superAdminRole.getId());
-            return validationFailed("Can't remove the user from this role, because he already is not in it.");
+            return validationFailed("User is not an IS Admin.");
         }
 
         logger.info("Attempting to remove user ID={} from IS Admin role with ID={}", userId, superAdminRole.getId());
