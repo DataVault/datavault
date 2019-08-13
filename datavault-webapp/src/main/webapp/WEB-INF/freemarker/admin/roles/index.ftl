@@ -23,6 +23,9 @@
             color: #b94a48;
             background-color: #f2dede;
         }
+        .btn-cancel {
+            background-color: #ededed;
+        }
         .modal-title {
             font-weight: 500;
             color: #000;
@@ -82,7 +85,7 @@
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-basic" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
+                        <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
                         <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
                     </div>
 
@@ -110,8 +113,8 @@
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-basic" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
-                        <button type="submit" class="btn btn-primary"><i class="fa fa-trash"></i> Delete</button>
+                        <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
+                        <button type="submit" class="btn btn-danger btn-delete"><i class="fa fa-trash"></i> Delete</button>
                     </div>
                 </form>
             </div>

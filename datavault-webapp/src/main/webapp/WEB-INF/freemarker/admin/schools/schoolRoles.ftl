@@ -138,7 +138,7 @@
                     </div>
                     <div id="delete-error" class="alert alert-danger hidden" role="alert"></div>
                     <div class="modal-body">
-                        <span>Do you want to delete <span id="delete-role-user-name"></span> from this school?</span>
+                        <span>Are you sure you want to remove the role assignment for user <label id="delete-role-user-name"></label>?</span>
                     </div>
                     <input type="hidden" id="delete-role-assignment-id" name="assignment"/>
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
