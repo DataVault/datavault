@@ -35,6 +35,8 @@ public class RoleModel {
     )
     private Collection<PermissionModel> permissions;
 
+    private int assignedUserCount;
+
     public RoleModel() {}
 
     public Long getId() {
@@ -91,16 +93,22 @@ public class RoleModel {
                 .anyMatch(p -> p.equals(permission));
     }
 
+    public void setAssignedUserCount(int assignedUserCount) {
+        this.assignedUserCount = assignedUserCount;
+    }
+
     public int getAssignedUserCount() {
-        // TODO we need to provide the count of assigned users with the role but won't have a working impl until the
-        // stories to assign users to roles are developed
-        return 0;
+        return assignedUserCount;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         RoleModel roleModel = (RoleModel) o;
         return Objects.equals(id, roleModel.id);
     }

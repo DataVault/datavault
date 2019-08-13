@@ -170,6 +170,10 @@ public class AdminRolesController {
         } else if (selectedPermissions.size() < 1) {
             logger.debug("Could not update role - no permissions selected");
             return validationFailed("Roles must have at least one permission.");
+
+        } else if (!role.getType().name().equals(type) && role.getAssignedUserCount() > 0) {
+            logger.debug("Could not update role - attempted to change role type while users are still applied.");
+            return validationFailed("Cannot change role type with users assigned to the role.");
         }
 
         role.setPermissions(selectedPermissions);
