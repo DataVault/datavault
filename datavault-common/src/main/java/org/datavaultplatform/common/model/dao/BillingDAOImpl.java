@@ -177,6 +177,12 @@ public class BillingDAOImpl implements BillingDAO {
             } else {
                 criteria.addOrder(Order.desc("reviewDate"));
             }
+        } else if ("projectId".equals(sort)) {
+            if (asc) {
+                criteria.addOrder(Order.asc("projectId"));
+            } else {
+                criteria.addOrder(Order.desc("projectId"));
+            }
         } else {
             if (asc) {
                 criteria.addOrder(Order.asc("creationTime"));

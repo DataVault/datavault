@@ -57,7 +57,7 @@ public class BillingInformation {
 	private String vaultName;
 
     @ApiObjectField(description = "Project ID")
-	private String projectID;
+	private String projectId;
     
     @ApiObjectField(description = "Owner Name")
 	private String userName;
@@ -67,7 +67,7 @@ public class BillingInformation {
     }
 
 	public BillingInformation(String id, String vaultID, String contactName, String school, String subUnit, Boolean budgetCode,
-			String specialComments, BigDecimal amountToBeBilled, BigDecimal amountBilled, long vaultSize, Date reviewDate, Date creationTime, String vaultName,String projectID,String userName) {
+			String specialComments, BigDecimal amountToBeBilled, BigDecimal amountBilled, long vaultSize, Date reviewDate, Date creationTime, String vaultName,String projectId,String userName) {
     	this.id = id;        
         this.vaultID = vaultID;    
         this.contactName = contactName; 
@@ -81,12 +81,12 @@ public class BillingInformation {
         this.reviewDate = reviewDate;       
         this.creationTime = creationTime;
         this.vaultName = vaultName;
-        this.projectID= projectID;
+        this.projectId= projectId;
         this.userName= userName;
 	}
 	
 	public BillingInformation(String id, String vaultID, String contactName, String school, String subUnit, Boolean budgetCode,
-			String specialComments, BigDecimal amountToBeBilled, BigDecimal amountBilled, String projectID, String vaultName) {
+			String specialComments, BigDecimal amountToBeBilled, BigDecimal amountBilled, String projectId, String vaultName) {
     	this.id = id;        
         this.vaultID = vaultID;    
         this.contactName = contactName; 
@@ -96,7 +96,7 @@ public class BillingInformation {
         this.specialComments = specialComments;
         this.amountToBeBilled = amountToBeBilled;       
         this.amountBilled = amountBilled;
-        this.projectID= projectID;
+        this.projectId= projectId;
         this.vaultName = vaultName;
 	}
 
@@ -108,12 +108,12 @@ public class BillingInformation {
 		this.userName = userName;
 	}
 	
-	public String getProjectID() {
-		return projectID;
+	public String getProjectId() {
+		return projectId;
 	}
 
-	public void setProjectID(String projectID) {
-		this.projectID = projectID;
+	public void setProjectId(String projectId) {
+		this.projectId = projectId;
 	}
 
 	public String getId() {
@@ -176,7 +176,7 @@ public class BillingInformation {
 		return amountToBeBilled;
 	}
 
-	public void setAmounToBeBilled(BigDecimal amountToBeBilled) {
+	public void setAmountToBeBilled(BigDecimal amountToBeBilled) {
 		this.amountToBeBilled = amountToBeBilled;
 	}
 

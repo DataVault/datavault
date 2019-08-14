@@ -20,35 +20,35 @@
 			<tbody>
 				<tr>
 					<th scope="col">Contact Name</th>
-					<td><#if billingDetails.contactName??>${billingDetails.contactName?html}<#else>_</#if></td>
+					<td><#if billingDetails.getContactName()??>${billingDetails.contactName?html}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">School/Unit</th>
-					<td><#if billingDetails.school??>${billingDetails.school?html}<#else>_</#if></td>
+					<td><#if billingDetails.getSchool()??>${billingDetails.school?html}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Subunit</th>
-					<td><#if billingDetails.subUnit??>${billingDetails.subUnit}<#else>_</#if></td>
+					<td><#if billingDetails.getSubUnit()??>${billingDetails.subUnit}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Project Id</th>
-					<td><#if billingDetails.projectID??>${billingDetails.projectID}<#else>_</#if></td>
+					<td><#if billingDetails.getProjectId()??>${billingDetails.projectId}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Use Budget code</th>
-					<td><#if billingDetails.getBudgetCodeStr()??>${billingDetails.getBudgetCodeStr()?html}<#else>_</#if></td>
+					<td><#if billingDetails.getBudgetCodeStr()??>${billingDetails.getBudgetCodeStr()?html}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Amount to be billed</th>
-					<td><#if billingDetails.getAmountToBeBilled()??>${billingDetails.getAmountToBeBilled()?html}<#else>_</#if></td>
+					<td><#if billingDetails.getAmountToBeBilled()??>${billingDetails.getAmountToBeBilled()?html}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Amount billed</th>
-					<td><#if billingDetails.getAmountBilled()??>${billingDetails.getAmountBilled()?html}<#else>_</#if></td>
+					<td><#if billingDetails.getAmountBilled()??>${billingDetails.getAmountBilled()?html}<#else> </#if></td>
 				</tr>
 				<tr>
 					<th scope="col">Special arrangement comments</th>
-					<td><#if billingDetails.getSpecialComments()??>${billingDetails.getSpecialComments()?html}<#else>_</#if></td>
+					<td><#if billingDetails.getSpecialComments()??>${billingDetails.getSpecialComments()?html}<#else> </#if></td>
 				</tr>
 			</tbody>
 		</table>
@@ -61,7 +61,7 @@
         <div id="update-billingDetails" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="updateBillingDetails" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form id="update-billingDetails-form" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/billing/${billingDetails.vaultID}/updateBillingDetails" method="post">
+                <form id="update-billingDetails-form" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/billing/updateBillingDetails" method="post">
                     <div class="modal-header">
                         <h4 class="modal-title" id="addDataManger">Billing Details</h4>
                     </div>
@@ -70,25 +70,25 @@
                             <label class="control-label">Contact Name:</label>
                             <@spring.bind "billingDetails.contactName" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" id="contactName"/>
+                   value="${spring.status.value!""}" id="contactName" maxlength="400"/>
                         </div>
                         <div class="form-group">
                             <label class="control-label">School/Unit:</label>
                             <@spring.bind "billingDetails.school" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" id="school"/>
+                   value="${spring.status.value!""}" id="school" maxlength="400"/>
                         </div>
                         <div class="form-group">
                             <label class="control-label">Subunit:</label>
                             <@spring.bind "billingDetails.subUnit" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" id="subunit"/>
+                   value="${spring.status.value!""}" id="subunit" maxlength="400" />
                         </div>
                         <div class="form-group">
                             <label class="control-label">ProjectId:</label>
-                            <@spring.bind "billingDetails.projectID" />
+                            <@spring.bind "billingDetails.projectId" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" id="projectId"/>
+                   value="${spring.status.value!""}" id="projectId" maxlength="400"/>
                         </div>
                         <div class="form-group">
                             <label class="control-label">Use BudgetCode:</label>
@@ -98,22 +98,22 @@
                    <#if spring.status.value?? && spring.status.value?string=="true">checked="true"</#if> /> 
                         </div>
                         <div class="form-group">
-                            <label class="control-label">Amount to be billed:</label>
+                            <label class="control-label">Amount to be billed:(Allowed values [numbers and .])</label>
                             <@spring.bind "billingDetails.amountToBeBilled" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" id="amountToBeBilled"/>
+                   value="${spring.status.value!""}" id="amountToBeBilled" maxlength="400" pattern="[0-9]+(\.[0-9][0-9]?)?"/>
                         </div>
                         <div class="form-group">
-                            <label class="control-label">Amount billed:</label>
+                            <label class="control-label">Amount billed:(Allowed values [numbers and .])</label>
                             <@spring.bind "billingDetails.amountBilled" />
-                            <input type="text" class="form-control" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" id="amountBilled"/>
+                            <input type="text" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?)?" name="${spring.status.expression}"
+                   value="${spring.status.value!""}" maxlength="400" id="amountBilled"/>
                         </div>
                         <div class="form-group">
                             <label class="control-label">Special arrangements comments:</label>
                             <@spring.bind "billingDetails.specialComments" />
                             <textarea type="text" class="form-control" name="${spring.status.expression}"
-                   value="${spring.status.value!""}" id="comments" rows="4" cols="60"><#if billingDetails.getSpecialComments()??>${billingDetails.getSpecialComments()}</#if></textarea>
+                   value="${spring.status.value!""}" id="comments" rows="4" cols="60" maxlength="400" ><#if billingDetails.getSpecialComments()??>${billingDetails.getSpecialComments()}</#if></textarea>
                         </div>
                     </div>
 

@@ -30,6 +30,10 @@ public class VaultsService {
         vaultDAO.update(vault);
     }
     
+    public void saveOrUpdateVault(Vault vault) {
+        vaultDAO.saveOrUpdateVault(vault);
+    }
+    
     public Vault getVault(String vaultID) {
         return vaultDAO.findById(vaultID);
     }
