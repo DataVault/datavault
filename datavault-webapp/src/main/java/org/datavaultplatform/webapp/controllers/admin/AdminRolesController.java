@@ -220,8 +220,9 @@ public class AdminRolesController {
         if (user == null) {
             logger.debug("Could not assign user to IS Admin role - user not found");
             return validationFailed("Could not find user with ID=" + userId);
+        }
 
-        } else if (restService.
+        if (restService.
                 getRoleAssignmentsForUser(userId)
                 .stream()
                 .anyMatch(ra -> ra.getRole().equals(superAdminRole))) {
