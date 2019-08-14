@@ -236,6 +236,7 @@ public class VaultsController {
             externalMetadataService.addCachedDataset(dataset);
         }
         vault.setDataset(dataset);
+        vault.setSnapshot(dataset.getContent());
         
         vault.setProjectId(externalMetadataService.getPureProjectId(dataset.getID()));
 

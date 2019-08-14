@@ -1,13 +1,11 @@
 -- add new column
 -- nullable for now (as the existing data needs fixed first)
 
-ALTER TABLE Datasets
-ADD Content longtext;
+ALTER TABLE Vaults ADD snapshot longtext;
 
 -- fix existing entries
-update Datasets set content = '<dataset>Missing due to bug placeholder so not null</dataset>';
+update Vaults set snapshot = '<dataset>Missing due to bug placeholder so not null</dataset>';
 
 
 -- add non nullable constraint to new column
-ALTER TABLE Datasets
-CHANGE Contents Contents longtext NOT NULL;
+ALTER TABLE Vaults CHANGE snapshot snapshot longtext NOT NULL;
