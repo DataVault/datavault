@@ -209,14 +209,23 @@ public class AdminRolesController {
     public ResponseEntity addSuperAdmin(@RequestParam("op-id") String userId) {
 
         logger.debug("Preparing to add user ID={} to IS ADMIN role", userId);
+        if (StringUtils.isEmpty(userId)) {
+            logger.debug("Could not assign user to IS Admin role - no user ID provided");
+            return validationFailed("Please choose a user.");
+        }
+
         RoleModel superAdminRole = restService.getIsAdmin();
         User user = restService.getUser(userId);
 
-        if (restService.
+        if (user == null) {
+            logger.debug("Could not assign user to IS Admin role - user not found");
+            return validationFailed("Could not find user with ID=" + userId);
+
+        } else if (restService.
                 getRoleAssignmentsForUser(userId)
                 .stream()
                 .anyMatch(ra -> ra.getRole().equals(superAdminRole))) {
-            logger.warn("Cannot add the user ID={} to IS Admin Role ID={} because he already does have it.", userId, superAdminRole.getId());
+            logger.warn("Cannot add the user ID={} to IS Admin Role ID={} because they already have it.", userId, superAdminRole.getId());
             return validationFailed(user.getFirstname() + " " + user.getLastname() + " is already an IS Admin.");
         }
 
@@ -248,7 +257,7 @@ public class AdminRolesController {
                 .collect(MoreCollectors.toOptional());
 
         if (!roleAssignment.isPresent()) {
-            logger.warn("Cannot remove the user ID={} from IS Admin Role ID={} because he doesn't have it.", userId, superAdminRole.getId());
+            logger.warn("Cannot remove the user ID={} from IS Admin Role ID={} because they don't have it.", userId, superAdminRole.getId());
             return validationFailed("User is not an IS Admin.");
         }
 
@@ -256,9 +265,9 @@ public class AdminRolesController {
         restService.deleteRoleAssignment(roleAssignment.get().getId());
 
         if (principal.getName().equals(userId)) {
-            // Must logout IS Admin, if he just deopped himself
+            // Must logout IS Admin if they just deopped themselves
             request.logout();
-            // He will be redirected to login by the JS when we return OK.
+            // They will be redirected to login by the JS when we return OK.
         }
 
         return ResponseEntity.ok().build();
