@@ -29,10 +29,16 @@ public class PermissionDAOImpl implements PermissionDAO {
         Session session = this.sessionFactory.openSession();
         Transaction tx = session.beginTransaction();
 
-        // First, remove any permissions that are not found in the Permission enum...
+        // First, remove any permissions that are no longer found in the Permission enum from all roles...
         String commaSeparatedPermissionIds = Arrays.stream(Permission.values())
                 .map(Permission::getId)
                 .collect(Collectors.joining(","));
+        String deleteUnknownRolePermissionsSql = "DELETE FROM Role_permissions WHERE NOT FIND_IN_SET(permission_id, '"
+                + commaSeparatedPermissionIds
+                + "');";
+        session.createSQLQuery(deleteUnknownRolePermissionsSql).executeUpdate();
+
+        // ...then remove those permissions themselves...
         String deleteUnknownPermissionsSql = "DELETE FROM Permissions WHERE NOT FIND_IN_SET(id, '"
                 + commaSeparatedPermissionIds
                 + "');";
