@@ -192,7 +192,7 @@
                                 <td>${assignment.user.firstname} ${assignment.user.lastname}</td>
                                 <td class="role-column">${assignment.role.name}</td>
                                 <td class="action-column">
-                                    <a href="#" class="btn btn-default" data-toggle="modal" data-target="#update-existing-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.user.firstname} ${assignment.user.lastname}" title="Edit role assignment for user ${assignment.user.firstname} ${assignment.user.lastname}."><i class="fa fa-pencil"></i></a>
+                                    <a href="#" class="btn btn-default" data-toggle="modal" data-target="#update-existing-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.user.firstname} ${assignment.user.lastname}" data-user-role="${assignment.role.id}" title="Edit role assignment for user ${assignment.user.firstname} ${assignment.user.lastname}."><i class="fa fa-pencil"></i></a>
                                     <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.user.firstname} ${assignment.user.lastname}" title="Remove role assignment for user ${assignment.user.firstname} ${assignment.user.lastname}."><i class="fa fa-trash"></i></a>
                                 </td>
                             </tr>
@@ -238,7 +238,9 @@
         $('[data-target="#update-existing-dialog"]').click(function() {
             var assignmentId = $(this).data('assignment-id');
             var userName = $(this).data('user-name');
+            var role = $(this).data('user-role');
             $('#role-update-assignment-id').val(assignmentId);
+            $('#update-user-role').val(role);
             $('#role-update-user-name').text(userName);
             $('#update-error').addClass('hidden').text('');
         });
