@@ -212,14 +212,6 @@ public class AdminSchoolsController {
             return Optional.of(userLookupService.ensureUserExists(userId));
         } catch (InvalidUunException e) {
             logger.error(e.getMessage(), e);
-            // TODO this is probably the wrong thing to do here in an environment with access to the UoE LDAP server
-            //  but without this fallback it would be impossible to build the roles & permissions framework in an
-            //  environment without LDAP access. Additionally, this method wraps the returned user in an Optional solely
-            //  to validate that the user exists in the DB - this is unnecessary with LDAP access as the lookup service
-            //  persists any LDAP users that aren't yet present in the DB. In the event that someone tries to assign a
-            //  role to a user who doesn't exist in LDAP an InvalidUunException will be thrown so the calling code
-            //  should be refactored to add the user feedback on the exception rather than when this Optional
-            //  is not present.
             return Optional.ofNullable(restService.getUser(userId));
         }
     }
