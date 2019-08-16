@@ -11,7 +11,7 @@
 
     <security:http entry-point-ref="http403EntryPoint">
         <security:intercept-url pattern="/auth/login" access="hasRole('N/A_FOR_SHIB')" />
-        <security:intercept-url pattern="/admin/" access="hasRole('ROLE_ADMIN')" />
+        <security:intercept-url pattern="/admin" access="hasRole('ROLE_ADMIN')" />
         <security:intercept-url pattern="/admin/archivestores/**" access="hasRole('ROLE_ADMIN_ARCHIVESTORES')" />
         <security:intercept-url pattern="/admin/billing/**" access="hasRole('ROLE_ADMIN_BILLING')" />
         <security:intercept-url pattern="/admin/deposits/**" access="hasRole('ROLE_ADMIN_DEPOSITS')" />
