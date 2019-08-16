@@ -152,6 +152,12 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         return roleAssignmentDao.findByRoleId(roleId);
     }
 
+    public boolean hasAdminDashboardPermissions(String userId) {
+        return roleAssignmentDao.findByUserId(userId).stream()
+                .flatMap(roleAssignment -> roleAssignment.getRole().getPermissions().stream())
+                .anyMatch(permissionModel -> permissionModel.getPermission().isDashboardPermission());
+    }
+
     public RoleModel updateRole(RoleModel role) {
         if (!roleExists(role.getId())) {
             throw new IllegalStateException("Cannot update a role that does not exist");

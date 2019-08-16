@@ -1,11 +1,6 @@
 package org.datavaultplatform.broker.controllers;
 
-import java.util.HashMap;
-import java.util.List;
-
-import org.datavaultplatform.broker.services.FileStoreService;
-import org.datavaultplatform.broker.services.UserKeyPairService;
-import org.datavaultplatform.common.model.FileStore;
+import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.request.ValidateUser;
@@ -17,23 +12,17 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Api(name="Users", description = "Interact with DataVault Users")
 public class UsersController {
+
+    private RolesAndPermissionsService rolesAndPermissionsService;
     
     private UsersService usersService;
-    private FileStoreService fileStoreService;
-    private UserKeyPairService userKeyPairService;
-    private String activeDir;
+
+    public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
+        this.rolesAndPermissionsService = rolesAndPermissionsService;
+    }
 
     public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
-    }
-    public void setFileStoreService(FileStoreService fileStoreService) {
-        this.fileStoreService = fileStoreService;
-    }
-    public void setUserKeyPairService(UserKeyPairService userKeyPairService) {
-        this.userKeyPairService = userKeyPairService;
-    }
-    public void setActiveDir(String activeDir) {
-        this. activeDir = activeDir;
     }
 
     @ApiMethod(
@@ -48,7 +37,7 @@ public class UsersController {
             @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
     })
     @RequestMapping(value = "/users", method = RequestMethod.POST)
-    public User addUser(@RequestBody User user) throws Exception {
+    public User addUser(@RequestBody User user) {
         usersService.addUser(user);
         return user;
     }
@@ -70,22 +59,17 @@ public class UsersController {
     }
 
     @RequestMapping(value = "/auth/users/exists", method = RequestMethod.POST)
-    public Boolean exists(@RequestBody ValidateUser validateUser) throws Exception {
-        if (usersService.getUser(validateUser.getUserid()) == null) {
-            return false;
-        } else {
-            return true;
-        }
+    public Boolean exists(@RequestBody ValidateUser validateUser) {
+        return usersService.getUser(validateUser.getUserid()) != null;
     }
 
     @RequestMapping(value = "/auth/users/isvalid", method = RequestMethod.POST)
-    public Boolean validateUser(@RequestBody ValidateUser validateUser) throws Exception {
+    public Boolean validateUser(@RequestBody ValidateUser validateUser) {
         return usersService.validateUser(validateUser.getUserid(), validateUser.getPassword());
     }
 
     @RequestMapping(value = "/auth/users/isadmin", method = RequestMethod.POST)
-    public Boolean isAdmin(@RequestBody ValidateUser validateUser) throws Exception {
-        User user = usersService.getUser(validateUser.getUserid());
-        return user.isAdmin();
+    public Boolean isAdmin(@RequestBody ValidateUser validateUser) {
+        return rolesAndPermissionsService.hasAdminDashboardPermissions(validateUser.getUserid());
     }
 }

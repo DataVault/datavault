@@ -125,9 +125,7 @@
 
     <bean id="usersController" class="org.datavaultplatform.broker.controllers.UsersController">
         <property name="usersService" ref="usersService" />
-        <property name="fileStoreService" ref="fileStoreService" />
-        <property name="userKeyPairService" ref="userKeyPairService" />
-        <property name="activeDir" value="${activeDir}" />
+        <property name="rolesAndPermissionsService" ref="rolesAndPermissionsService" />
     </bean>
 
     <bean id="rolesAndPermissionsController" class="org.datavaultplatform.broker.controllers.RolesAndPermissionsController">
