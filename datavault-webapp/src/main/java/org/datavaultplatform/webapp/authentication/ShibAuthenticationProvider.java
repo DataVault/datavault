@@ -3,7 +3,9 @@ package org.datavaultplatform.webapp.authentication;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.ValidateUser;
+import org.datavaultplatform.webapp.model.AdminDashboardPermissionsModel;
 import org.datavaultplatform.webapp.services.LDAPService;
+import org.datavaultplatform.webapp.services.PermissionsService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +17,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
+import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * In truth this class does not do any true authentication as the user was pre-authenticated by Shib, it just
@@ -34,8 +39,8 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
 
     private RestService restService;
     private LDAPService ldapService;
+    private PermissionsService permissionsService;
     private Boolean ldapEnabled;
-
 
     public void setRestService(RestService restService) {
         this.restService = restService;
@@ -43,6 +48,10 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
 
     public void setLdapService(LDAPService ldapService) {
         this.ldapService = ldapService;
+    }
+
+    public void setPermissionsService(PermissionsService permissionsService) {
+        this.permissionsService = permissionsService;
     }
 
     public void setLdapEnabled(Boolean ldapEnabled) {
@@ -97,12 +106,21 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
             if (isAdmin) {
                 logger.debug("user is an admin " + name);
                 grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                grantedAuths.addAll(getAdminAuthorities(authentication));
             }
         }
 
         grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
         return new PreAuthenticatedAuthenticationToken(name, password, grantedAuths);
 
+    }
+
+    private Collection<GrantedAuthority> getAdminAuthorities(Principal principal) {
+        AdminDashboardPermissionsModel adminPermissions = permissionsService.getDashboardPermissions(principal);
+        return adminPermissions.getUnscopedPermissions().stream()
+                .filter(p -> p.getPermission().getRoleName() != null)
+                .map(p -> new SimpleGrantedAuthority(p.getPermission().getRoleName()))
+                .collect(Collectors.toSet());
     }
 
     @Override

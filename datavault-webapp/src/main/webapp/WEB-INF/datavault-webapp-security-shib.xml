@@ -11,7 +11,16 @@
 
     <security:http entry-point-ref="http403EntryPoint">
         <security:intercept-url pattern="/auth/login" access="hasRole('N/A_FOR_SHIB')" />
-        <security:intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')" />
+        <security:intercept-url pattern="/admin/" access="hasRole('ROLE_ADMIN')" />
+        <security:intercept-url pattern="/admin/archivestores/**" access="hasRole('ROLE_ADMIN_ARCHIVESTORES')" />
+        <security:intercept-url pattern="/admin/billing/**" access="hasRole('ROLE_ADMIN_BILLING')" />
+        <security:intercept-url pattern="/admin/deposits/**" access="hasRole('ROLE_ADMIN_DEPOSITS')" />
+        <security:intercept-url pattern="/admin/events/**" access="hasRole('ROLE_ADMIN_EVENTS')" />
+        <security:intercept-url pattern="/admin/retentionpolicies/**" access="hasRole('ROLE_ADMIN_RETENTIONPOLICIES')" />
+        <security:intercept-url pattern="/admin/retrieves/**" access="hasRole('ROLE_ADMIN_RETRIEVES')" />
+        <security:intercept-url pattern="/admin/roles/**" access="hasRole('ROLE_ADMIN_ROLES')" />
+        <security:intercept-url pattern="/admin/schools/**" access="hasRole('ROLE_ADMIN_SCHOOLS')" />
+        <security:intercept-url pattern="/admin/vaults/**" access="hasRole('ROLE_ADMIN_VAULTS')" />
         <security:intercept-url pattern="/**" access="hasRole('ROLE_USER')" />
 
         <security:custom-filter position="PRE_AUTH_FILTER" ref="shibFilter" />
@@ -31,6 +40,7 @@
     <bean id="shibAuthenticationProvider" class="org.datavaultplatform.webapp.authentication.ShibAuthenticationProvider">
         <property name="restService" ref="restService" />
         <property name="ldapService" ref="ldapService" />
+        <property name="permissionsService" ref="permissionsService" />
         <property name="ldapEnabled" value="${ldap.enabled}" />
     </bean>
 

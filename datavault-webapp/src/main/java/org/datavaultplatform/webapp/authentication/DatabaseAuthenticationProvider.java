@@ -1,6 +1,8 @@
 package org.datavaultplatform.webapp.authentication;
 
 import org.datavaultplatform.common.request.ValidateUser;
+import org.datavaultplatform.webapp.model.AdminDashboardPermissionsModel;
+import org.datavaultplatform.webapp.services.PermissionsService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +15,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * User: Robin Taylor
@@ -29,8 +34,14 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
 
     private RestService restService;
 
+    private PermissionsService permissionsService;
+
 	public void setRestService(RestService restService) {
         this.restService = restService;
+    }
+
+    public void setPermissionsService(PermissionsService permissionsService) {
+        this.permissionsService = permissionsService;
     }
 
     @Override
@@ -66,12 +77,21 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         if (isAdmin) {
             logger.info("Granting user " + name + " ROLE_ADMIN");
             grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            grantedAuths.addAll(getAdminAuthorities(authentication));
         }
 
         logger.info("Granting user " + name + " ROLE_USER");
         grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
         return new UsernamePasswordAuthenticationToken(name, password, grantedAuths);
 
+    }
+
+    private Collection<GrantedAuthority> getAdminAuthorities(Principal principal) {
+        AdminDashboardPermissionsModel adminPermissions = permissionsService.getDashboardPermissions(principal);
+        return adminPermissions.getUnscopedPermissions().stream()
+                .filter(p -> p.getPermission().getRoleName() != null)
+                .map(p -> new SimpleGrantedAuthority(p.getPermission().getRoleName()))
+                .collect(Collectors.toSet());
     }
 
     @Override

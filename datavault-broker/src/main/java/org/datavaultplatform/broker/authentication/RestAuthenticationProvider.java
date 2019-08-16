@@ -1,8 +1,10 @@
 package org.datavaultplatform.broker.authentication;
 
 import org.datavaultplatform.broker.services.ClientsService;
+import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.model.Client;
+import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +34,10 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
     private UsersService usersService;
     private ClientsService clientsService;
+    private RolesAndPermissionsService rolesAndPermissionsService;
 
     // This is a crappy means of allowing someone to turn off the client validation. Must be a better way of doing this.
     private boolean validateClient;
-
 
     public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
@@ -47,6 +49,10 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
     public void setValidateClient(boolean validateClient) {
         this.validateClient = validateClient;
+    }
+
+    public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
+        this.rolesAndPermissionsService = rolesAndPermissionsService;
     }
 
     @Override
@@ -73,6 +79,13 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
                 logger.debug(user.getID() + " is an ordinary user");
                 grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
             }
+
+            checkPermissions(name, Permission.CAN_MANAGE_ARCHIVE_STORES, grantedAuths);
+            checkPermissions(name, Permission.CAN_MANAGE_DEPOSITS, grantedAuths);
+            checkPermissions(name, Permission.CAN_VIEW_RETRIEVES, grantedAuths);
+            checkPermissions(name, Permission.CAN_MANAGE_VAULTS, grantedAuths);
+            checkPermissions(name, Permission.CAN_VIEW_EVENTS, grantedAuths);
+            checkPermissions(name, Permission.CAN_MANAGE_BILLING_DETAILS, grantedAuths);
         }
 
         RestWebAuthenticationDetails rwad = (RestWebAuthenticationDetails) authentication.getDetails();
@@ -100,6 +113,12 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
         return new PreAuthenticatedAuthenticationToken(name, password, grantedAuths);
 
+    }
+
+    private void checkPermissions(String userId, Permission permission, List<GrantedAuthority> grantedAuths) {
+        if (rolesAndPermissionsService.hasPermission(userId, permission)) {
+            grantedAuths.add(new SimpleGrantedAuthority(permission.getRoleName()));
+        }
     }
 
     @Override
