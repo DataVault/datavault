@@ -28,10 +28,6 @@ public class AdminController {
     @RequestMapping(value = "/admin", method = RequestMethod.GET)
     public String adminIndex(ModelMap modelMap, Principal principal) {
         AdminDashboardPermissionsModel permissionsModel = permissionsService.getDashboardPermissions(principal);
-        if (!permissionsModel.canSeeAdminDashboard()) {
-            // TODO maybe throw 403 here instead...
-            return "redirect:/";
-        }
 
         if (permissionsModel.hasPermission(Permission.CAN_VIEW_VAULTS_SIZE)) {
             modelMap.addAttribute("canViewVaultsSize", true);
