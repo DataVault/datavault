@@ -120,7 +120,6 @@ public class AdminDashboardPermissionsModel {
 
     public boolean isGlobalScoped(Permission permission) {
         Set<String> scope = getScope(permission);
-        // TODO maybe also check that there's only one entry...
         return scope.contains(GLOBAL_SCOPE_IDENTIFIER);
     }
 }
