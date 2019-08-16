@@ -118,6 +118,7 @@
 
     <bean id="adminController" class="org.datavaultplatform.webapp.controllers.admin.AdminController">
         <property name="restService" ref="restService" />
+        <property name="permissionsService" ref="permissionsService" />
     </bean>
 
     <bean id="adminUsersController" class="org.datavaultplatform.webapp.controllers.admin.AdminUsersController">
@@ -173,6 +174,10 @@
     <bean id="restService" class="org.datavaultplatform.webapp.services.RestService">
         <property name="brokerURL" value="${broker.url}" />
         <property name="brokerApiKey" value="${broker.api.key}" />
+    </bean>
+
+    <bean id="permissionsService" class="org.datavaultplatform.webapp.services.PermissionsService">
+        <property name="restService" ref="restService" />
     </bean>
 
     <bean id="ldapService" class="org.datavaultplatform.webapp.services.LDAPService">

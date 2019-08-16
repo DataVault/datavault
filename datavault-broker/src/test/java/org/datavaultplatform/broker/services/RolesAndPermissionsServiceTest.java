@@ -87,7 +87,7 @@ public class RolesAndPermissionsServiceTest {
         expectedException.expectMessage("Unable to apply permission with type SCHOOL to role of type VAULT");
 
         RoleModel toCreate = aRole(RoleType.VAULT);
-        toCreate.addPermission(aPermission(Permission.SCHOOL_PERMISSION_1, PermissionModel.PermissionType.SCHOOL));
+        toCreate.addPermission(aPermission(Permission.CAN_MANAGE_SCHOOL_USERS, PermissionModel.PermissionType.SCHOOL));
 
         // When
         underTest.createRole(toCreate);
@@ -216,9 +216,9 @@ public class RolesAndPermissionsServiceTest {
     @Test
     public void getSchoolPermissionsShouldReturnAllPermissionsApplicableToSchoolRoles() {
         // Given
-        PermissionModel school1 = aPermission(Permission.SCHOOL_PERMISSION_1, PermissionModel.PermissionType.SCHOOL);
-        PermissionModel school2 = aPermission(Permission.SCHOOL_PERMISSION_2, PermissionModel.PermissionType.SCHOOL);
-        PermissionModel school3 = aPermission(Permission.SCHOOL_PERMISSION_3, PermissionModel.PermissionType.SCHOOL);
+        PermissionModel school1 = aPermission(Permission.CAN_VIEW_VAULTS_SIZE, PermissionModel.PermissionType.SCHOOL);
+        PermissionModel school2 = aPermission(Permission.CAN_VIEW_IN_PROGRESS_DEPOSITS, PermissionModel.PermissionType.SCHOOL);
+        PermissionModel school3 = aPermission(Permission.CAN_VIEW_DEPOSIT_QUEUE, PermissionModel.PermissionType.SCHOOL);
 
         List<PermissionModel> allPermissions = Arrays.asList(
                 school1,
@@ -227,9 +227,9 @@ public class RolesAndPermissionsServiceTest {
                 aPermission(Permission.VAULT_PERMISSION_1, PermissionModel.PermissionType.VAULT),
                 aPermission(Permission.VAULT_PERMISSION_2, PermissionModel.PermissionType.VAULT),
                 aPermission(Permission.VAULT_PERMISSION_3, PermissionModel.PermissionType.VAULT),
-                aPermission(Permission.ADMIN_PERMISSION_1, PermissionModel.PermissionType.ADMIN),
-                aPermission(Permission.ADMIN_PERMISSION_2, PermissionModel.PermissionType.ADMIN),
-                aPermission(Permission.ADMIN_PERMISSION_3, PermissionModel.PermissionType.ADMIN));
+                aPermission(Permission.CAN_MANAGE_ROLES, PermissionModel.PermissionType.ADMIN),
+                aPermission(Permission.CAN_MANAGE_BILLING_DETAILS, PermissionModel.PermissionType.ADMIN),
+                aPermission(Permission.CAN_VIEW_EVENTS, PermissionModel.PermissionType.ADMIN));
 
         given(mockPermissionDao.findAll()).willReturn(allPermissions);
 
@@ -249,15 +249,15 @@ public class RolesAndPermissionsServiceTest {
         PermissionModel vault3 = aPermission(Permission.VAULT_PERMISSION_1, PermissionModel.PermissionType.VAULT);
 
         List<PermissionModel> allPermissions = Arrays.asList(
-                aPermission(Permission.SCHOOL_PERMISSION_1, PermissionModel.PermissionType.SCHOOL),
-                aPermission(Permission.SCHOOL_PERMISSION_2, PermissionModel.PermissionType.SCHOOL),
-                aPermission(Permission.SCHOOL_PERMISSION_3, PermissionModel.PermissionType.SCHOOL),
+                aPermission(Permission.CAN_VIEW_VAULTS_SIZE, PermissionModel.PermissionType.SCHOOL),
+                aPermission(Permission.CAN_VIEW_IN_PROGRESS_DEPOSITS, PermissionModel.PermissionType.SCHOOL),
+                aPermission(Permission.CAN_VIEW_DEPOSIT_QUEUE, PermissionModel.PermissionType.SCHOOL),
                 vault1,
                 vault2,
                 vault3,
-                aPermission(Permission.ADMIN_PERMISSION_1, PermissionModel.PermissionType.ADMIN),
-                aPermission(Permission.ADMIN_PERMISSION_2, PermissionModel.PermissionType.ADMIN),
-                aPermission(Permission.ADMIN_PERMISSION_3, PermissionModel.PermissionType.ADMIN));
+                aPermission(Permission.CAN_MANAGE_BILLING_DETAILS, PermissionModel.PermissionType.ADMIN),
+                aPermission(Permission.CAN_MANAGE_ROLES, PermissionModel.PermissionType.ADMIN),
+                aPermission(Permission.CAN_MANAGE_RETENTION_POLICIES, PermissionModel.PermissionType.ADMIN));
 
         given(mockPermissionDao.findAll()).willReturn(allPermissions);
 
@@ -295,7 +295,7 @@ public class RolesAndPermissionsServiceTest {
 
         RoleModel toUpdate = aRole(RoleType.SCHOOL);
         toUpdate.setId(123L);
-        toUpdate.addPermission(aPermission(Permission.SCHOOL_PERMISSION_1, PermissionModel.PermissionType.SCHOOL));
+        toUpdate.addPermission(aPermission(Permission.CAN_MANAGE_SCHOOL_USERS, PermissionModel.PermissionType.SCHOOL));
 
         // When
         underTest.updateRole(toUpdate);
@@ -312,7 +312,7 @@ public class RolesAndPermissionsServiceTest {
 
         RoleModel toUpdate = aRole(RoleType.SCHOOL);
         toUpdate.setId(null);
-        toUpdate.addPermission(aPermission(Permission.SCHOOL_PERMISSION_1, PermissionModel.PermissionType.SCHOOL));
+        toUpdate.addPermission(aPermission(Permission.CAN_MANAGE_SCHOOL_USERS, PermissionModel.PermissionType.SCHOOL));
 
         // When
         underTest.updateRole(toUpdate);
@@ -330,7 +330,7 @@ public class RolesAndPermissionsServiceTest {
 
         RoleModel toUpdate = aRole(RoleType.SCHOOL);
         toUpdate.setId(123L);
-        toUpdate.addPermission(aPermission(Permission.SCHOOL_PERMISSION_1, PermissionModel.PermissionType.SCHOOL));
+        toUpdate.addPermission(aPermission(Permission.CAN_MANAGE_SCHOOL_USERS, PermissionModel.PermissionType.SCHOOL));
 
         // When
         underTest.updateRole(toUpdate);

@@ -33,7 +33,7 @@
         <li class="active"><b>Administration</b></li>
     </ol>
 
-    <div class="row">
+    <#if canViewVaultsSize??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-warning">
                 <div class="panel-heading">
@@ -44,6 +44,8 @@
                 </div>
             </div>
         </div>
+    </#if>
+    <#if canViewInProgress??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-warning">
                 <div class="panel-heading">
@@ -54,6 +56,8 @@
                 </div>
             </div>
         </div>
+    </#if>
+    <#if canViewQueues??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-warning">
                 <div class="panel-heading">
@@ -64,9 +68,8 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="row">
+    </#if>
+    <#if canManageVaults??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-info">
                 <div class="panel-heading">
@@ -77,6 +80,8 @@
                 </div>
             </div>
         </div>
+    </#if>
+    <#if canManageDeposits??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-info">
                 <div class="panel-heading">
@@ -87,6 +92,8 @@
                 </div>
             </div>
         </div>
+    </#if>
+    <#if canViewRetrieves??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-info">
                 <div class="panel-heading">
@@ -97,10 +104,8 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="row">
-
+    </#if>
+    <#if canManageBillingDetails??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-success">
                 <div class="panel-heading">
@@ -111,6 +116,8 @@
                 </div>
             </div>
         </div>
+    </#if>
+    <#if canManageSchoolUsers??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-success">
                 <div class="panel-heading">
@@ -121,6 +128,8 @@
                 </div>
             </div>
         </div>
+    </#if>
+    <#if canManageRoles??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-success">
                 <div class="panel-heading">
@@ -137,9 +146,8 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="row">
+    </#if>
+    <#if canViewEvents??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -150,6 +158,8 @@
                 </div>
             </div>
         </div>
+    </#if>
+    <#if canManageRetentionPolicies??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -160,6 +170,8 @@
                 </div>
             </div>
         </div>
+    </#if>
+    <#if canManageArchiveStores??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -170,7 +182,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </#if>
 
 </div>
 </@layout.vaultLayout>
