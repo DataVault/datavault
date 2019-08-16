@@ -4,6 +4,9 @@
 <@layout.vaultLayout>
 
 <style>
+    .panel {
+        height: 200px;
+    }
     .roles-icon {
         -webkit-mask: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center;
         mask: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center;
