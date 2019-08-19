@@ -10,11 +10,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.PermissionEvaluator;
-import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,12 +24,9 @@ public class AdminRoleAssignmentController {
 
     private final RestService rest;
 
-    private final PermissionEvaluator permissionEvaluator;
-
     @Autowired
-    public AdminRoleAssignmentController(RestService rest, PermissionEvaluator permissionEvaluator) {
+    public AdminRoleAssignmentController(RestService rest) {
         this.rest = rest;
-        this.permissionEvaluator = permissionEvaluator;
     }
 
     @PostMapping("/security/roles/{roleType}/{target}/user/update")
@@ -46,7 +40,12 @@ public class AdminRoleAssignmentController {
         RoleAssignment roleAssignment = rest.getRoleAssignment(assignmentId)
                 .orElseThrow(() -> new EntityNotFoundException(RoleAssignment.class, String.valueOf(assignmentId)));
 
-        Object target;
+        User user = rest.getUser(assignmentRequest.user);
+        RoleModel role = rest.getRole(assignmentRequest.role).orElseThrow
+                (()  -> new EntityNotFoundException(RoleModel.class, String.valueOf(assignmentRequest.role)));
+
+        roleAssignment.setUser(user);
+        roleAssignment.setRole(role);
 
         return ResponseEntity.ok().build();
     }

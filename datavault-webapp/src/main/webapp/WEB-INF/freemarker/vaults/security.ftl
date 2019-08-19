@@ -100,7 +100,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form id="update-form" class="form form-horizontal" role="form"
-                  action="<@spring.url relativeUrl="/security/roles/${vault.ID}/user/update" />"
+                  action="<@spring.url relativeUrl="/security/roles/vault/${vault.ID}/user/update" />"
                   method="post">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
@@ -143,7 +143,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form id="delete-form" class="form form-horizontal" role="form"
-                  action="<@spring.url "/security/roles/${vault.ID}/user/delete" />"
+                  action="<@spring.url "/security/roles/vault/${vault.ID}/user/delete" />"
                   method="post">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i

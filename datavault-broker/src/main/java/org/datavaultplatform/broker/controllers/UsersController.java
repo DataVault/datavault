@@ -70,6 +70,7 @@ public class UsersController {
 
     @RequestMapping(value = "/auth/users/isadmin", method = RequestMethod.POST)
     public Boolean isAdmin(@RequestBody ValidateUser validateUser) {
-        return rolesAndPermissionsService.hasAdminDashboardPermissions(validateUser.getUserid());
+        User user = usersService.getUser(validateUser.getUserid());
+        return user.isAdmin() || rolesAndPermissionsService.hasAdminDashboardPermissions(validateUser.getUserid());
     }
 }
