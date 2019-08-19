@@ -277,6 +277,11 @@ public class RestService {
         return (Retrieve[])response.getBody();
     }
 
+    public Vault getActualVault(String id) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + id + "/actual", Vault.class);
+        return (Vault)response.getBody();
+    }
+
     public VaultInfo getVault(String id) {        
         HttpEntity<?> response = get(brokerURL + "/vaults/" + id, VaultInfo.class);
         return (VaultInfo)response.getBody();

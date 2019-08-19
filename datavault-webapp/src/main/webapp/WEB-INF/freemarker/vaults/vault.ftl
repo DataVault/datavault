@@ -234,66 +234,11 @@
                 <h4 class="accordion-toggle">
                     ‹› &nbsp;Data Managers
                 </h4>
+
                 <div class="accordion-content">
-                    <h4>
-                        <strong>Owner</strong>
-                        <small>
-                            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
-                                title="A vault may have no more than one Owner. In some cases, a vault may have no Owner.&nbsp;In this case, nominated Data Managers, School officers and/or &nbsp;administrators will manage the data on behalf of the university.">
-                            </span>
-                        </small>
-                    </h4>
-                    <table class="table table-bordered">
-                        <thead></thead>
-                        <tbody>
-                            <tr>
-                                <td class="text-muted">${vault.userName?html}</td>
-                                <td>${vault.userID?html}</td>
-                                <td>
-                                    <button type="button" class="btn btn-default pull-right" disabled>
-                                        Edit
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    <h4><strong>Nominated Data Managers</strong></h4>
-                    
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>UUN</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <#list dataManagers as dataManager>
-                            <tr>
-                                <td>${dataManager.firstname?html} ${dataManager.lastname?html}</td>
-                                <td>${dataManager.ID?html}</td>
-                                <td>
-                                    <form id="delete-data-manager-form" role="form" action="${springMacroRequestContext.getContextPath()}/vaults/${vault.ID?html}/deleteDataManager" method="post">
-                                        <input type="hidden" class="form-control" name="uun" value="${dataManager.ID?html}"/>
-                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                                        <button type="submit" id="delete-data-manager-btn" 
-                                            class="btn btn-primary btn-ok pull-right btn-sm">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            </#list>
-                            <tr>
-                                <td colspan="3">
-                                    <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#add-data-manager">
-                                        <i class="fa fa-plus" aria-hidden="true"></i> Add Data Manager
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
+                    <#include "security.ftl" />
                 </div>
+
 
                 <h4 class="accordion-toggle">
                     ‹› &nbsp;Vault History

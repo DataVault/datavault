@@ -1,6 +1,8 @@
 package org.datavaultplatform.webapp.authentication;
 
+import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.request.ValidateUser;
+import org.datavaultplatform.webapp.security.ScopedGrantedAuthority;
 import org.datavaultplatform.webapp.model.AdminDashboardPermissionsModel;
 import org.datavaultplatform.webapp.services.PermissionsService;
 import org.datavaultplatform.webapp.services.RestService;
@@ -66,6 +68,13 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         logger.info("Authentication success for " + name);
 
         List<GrantedAuthority> grantedAuths = new ArrayList<>();
+        List<RoleAssignment> roleAssignments = restService.getRoleAssignmentsForUser(name);
+
+        for (RoleAssignment assignment : roleAssignments) {
+            if (assignment.getVault() != null || assignment.getSchool() != null) {
+                grantedAuths.add(new ScopedGrantedAuthority(assignment));
+            }
+        }
 
         boolean isAdmin = false;
         try{

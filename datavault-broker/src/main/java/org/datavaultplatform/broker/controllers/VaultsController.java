@@ -295,6 +295,13 @@ public class VaultsController {
         return vaultsService.checkRetentionPolicy(vaultID);
     }
 
+    @RequestMapping(value = "/vaults/{vaultid}/actual", method = RequestMethod.GET)
+    public Vault getActualVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                           @PathVariable("vaultid") String vaultID) throws Exception {
+
+        return vaultsService.getVault(vaultID);
+    }
+
     @RequestMapping(value = "/vaults/{vaultid}/deposits", method = RequestMethod.GET)
     public List<DepositInfo> getDeposits(@RequestHeader(value = "X-UserID", required = true) String userID,
                                          @PathVariable("vaultid") String vaultID) throws Exception {

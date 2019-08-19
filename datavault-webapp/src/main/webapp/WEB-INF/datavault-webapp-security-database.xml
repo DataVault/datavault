@@ -10,7 +10,6 @@
     <security:http pattern="/resources/**" security="none"/>
 
 	<security:http>
-
         <security:intercept-url pattern="/auth/**" access="permitAll" />
         <security:intercept-url pattern="/admin" access="hasRole('ROLE_ADMIN')" />
         <security:intercept-url pattern="/admin/archivestores/**" access="hasRole('ROLE_ADMIN_ARCHIVESTORES')" />
@@ -38,7 +37,6 @@
                 logout-success-url="/auth/login?logout"/>
 
 	</security:http>
-	
     <security:authentication-manager>
         <security:authentication-provider ref="databaseAuthenticationProvider"/>
 	</security:authentication-manager>

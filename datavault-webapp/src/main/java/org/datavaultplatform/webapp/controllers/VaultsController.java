@@ -81,9 +81,11 @@ public class VaultsController {
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
     public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID) throws Exception {
         VaultInfo vault = restService.getVault(vaultID);
-       
-        model.addAttribute("vault", vault);
 
+        List<RoleAssignment> roleAssignmentsForVault = restService.getRoleAssignmentsForVault(vaultID);
+        model.addAttribute("vault", vault);
+        model.addAttribute("roles", restService.getVaultRoles());
+        model.addAttribute("roleAssignments", roleAssignmentsForVault);
         model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
         model.addAttribute(restService.getGroup(vault.getGroupID()));
         
