@@ -81,7 +81,8 @@ public class AdminRoleAssignmentController {
 
         RoleAssignment assignment = new RoleAssignment();
 
-        switch (RoleType.valueOf(type.toUpperCase())) {
+        RoleType roleType = RoleType.valueOf(type.toUpperCase());
+        switch (roleType) {
             case SCHOOL:
                 assignment.setSchool(rest.getGroup(targetId));
                 break;
@@ -99,6 +100,8 @@ public class AdminRoleAssignmentController {
 
         RoleModel role = rest.getRole(roleId)
                 .orElseThrow(() -> new EntityNotFoundException(RoleModel.class, String.valueOf(roleId)));
+
+        // @TODO - Check if RoleModel.roleType matches roleType if really necessary.
 
         assignment.setUser(user);
         assignment.setRole(role);
