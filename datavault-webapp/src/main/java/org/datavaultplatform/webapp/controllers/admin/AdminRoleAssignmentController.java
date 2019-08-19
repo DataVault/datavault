@@ -1,0 +1,134 @@
+package org.datavaultplatform.webapp.controllers.admin;
+
+import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.RoleModel;
+import org.datavaultplatform.common.model.RoleType;
+import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.webapp.exception.EntityNotFoundException;
+import org.datavaultplatform.webapp.services.RestService;
+import org.hibernate.validator.constraints.NotEmpty;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.access.method.P;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
+@Controller
+public class AdminRoleAssignmentController {
+
+    private final RestService rest;
+
+    private final PermissionEvaluator permissionEvaluator;
+
+    @Autowired
+    public AdminRoleAssignmentController(RestService rest, PermissionEvaluator permissionEvaluator) {
+        this.rest = rest;
+        this.permissionEvaluator = permissionEvaluator;
+    }
+
+    @PostMapping("/security/roles/{roleType}/{target}/user/update")
+    @PreAuthorize("hasPermission(#targetId, #type, 'MANAGE_ROLES')")
+    public ResponseEntity updateRoleAssignment(
+            @PathVariable("roleType") String type,
+            @PathVariable("target") String targetId,
+            @Valid @NotNull @RequestParam("assignment") Long assignmentId,
+            @Valid RoleAssignmentRequest assignmentRequest) {
+
+        RoleAssignment roleAssignment = rest.getRoleAssignment(assignmentId)
+                .orElseThrow(() -> new EntityNotFoundException(RoleAssignment.class, String.valueOf(assignmentId)));
+
+        Object target;
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/security/roles/{roleType}/{target}/user/delete")
+    @PreAuthorize("hasPermission(#targetId, #type, 'MANAGE_ROLES')")
+    public ResponseEntity removeRoleAssignment(@PathVariable("roleType") String type,
+                                               @PathVariable("target") String targetId,
+                                               @RequestParam("assignment") long assignmentId) {
+
+        RoleAssignment assignment = rest.getRoleAssignment(assignmentId)
+                .orElseThrow(() -> new EntityNotFoundException(RoleAssignment.class, String.valueOf(assignmentId)));
+
+        RoleModel role = assignment.getRole();
+
+        if (role.getAssignedUserCount() > 0) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body("This role has users currently assigned");
+        }
+
+        rest.deleteRoleAssignment(assignment.getId());
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasPermission(#targetId, #type, 'MANAGE_ROLES')")
+    @PostMapping("/security/roles/{roleType}/{target}/user")
+    public ResponseEntity createRoleAssignment(
+            @PathVariable("roleType") String type,
+            @PathVariable("target") String targetId,
+            @RequestParam("role") long roleId,
+            @RequestParam("user") String userId) {
+
+        RoleAssignment assignment = new RoleAssignment();
+
+        switch (RoleType.valueOf(type.toUpperCase())) {
+            case SCHOOL:
+                assignment.setSchool(rest.getGroup(targetId));
+                break;
+            case VAULT:
+                assignment.setVault(rest.getActualVault(targetId));
+                break;
+            default:
+                return ResponseEntity.notFound().build();
+        }
+
+        User user = rest.getUser(userId);
+        if (user == null) {
+            throw new EntityNotFoundException(User.class, userId);
+        }
+
+        RoleModel role = rest.getRole(roleId)
+                .orElseThrow(() -> new EntityNotFoundException(RoleModel.class, String.valueOf(roleId)));
+
+        assignment.setUser(user);
+        assignment.setRole(role);
+
+        return ResponseEntity.ok(rest.createRoleAssignment(assignment));
+    }
+
+    public static class RoleAssignmentRequest {
+        @NotNull
+        Long role;
+
+        @NotNull
+        @NotEmpty
+        String user;
+
+        public Long getRole() {
+            return role;
+        }
+
+        public void setRole(Long role) {
+            this.role = role;
+        }
+
+        public String getUser() {
+            return user;
+        }
+
+        public void setUser(String user) {
+            this.user = user;
+        }
+    }
+}

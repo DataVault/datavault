@@ -3,7 +3,7 @@ package org.datavaultplatform.common.model;
 public enum Permission {
 
     // Vault permissions
-    VAULT_PERMISSION_1("VAULT_PERMISSION_1", PermissionModel.PermissionType.VAULT, "Vault Permission 1", null, false),
+    MANAGE_ROLES("VAULT_PERMISSION_1", PermissionModel.PermissionType.VAULT, "Manage roles", null, false),
     VAULT_PERMISSION_2("VAULT_PERMISSION_2", PermissionModel.PermissionType.VAULT, "Vault Permission 2", null, false),
     VAULT_PERMISSION_3("VAULT_PERMISSION_3", PermissionModel.PermissionType.VAULT, "Vault Permission 3", null, false),
     VAULT_PERMISSION_4("VAULT_PERMISSION_4", PermissionModel.PermissionType.VAULT, "Vault Permission 4", null, false),

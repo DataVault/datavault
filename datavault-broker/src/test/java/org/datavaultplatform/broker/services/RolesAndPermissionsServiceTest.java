@@ -52,7 +52,7 @@ public class RolesAndPermissionsServiceTest {
     public void createRoleShouldStoreANewRole() {
         // Given
         RoleModel toCreate = aRole(RoleType.VAULT);
-        toCreate.addPermission(aPermission(Permission.VAULT_PERMISSION_1, PermissionModel.PermissionType.VAULT));
+        toCreate.addPermission(aPermission(Permission.MANAGE_ROLES, PermissionModel.PermissionType.VAULT));
 
         // When
         underTest.createRole(toCreate);
@@ -102,7 +102,7 @@ public class RolesAndPermissionsServiceTest {
         expectedException.expectMessage("Unable to apply permission with type VAULT to role of type SCHOOL");
 
         RoleModel toCreate = aRole(RoleType.SCHOOL);
-        toCreate.addPermission(aPermission(Permission.VAULT_PERMISSION_1, PermissionModel.PermissionType.VAULT));
+        toCreate.addPermission(aPermission(Permission.MANAGE_ROLES, PermissionModel.PermissionType.VAULT));
 
         // When
         underTest.createRole(toCreate);
@@ -224,7 +224,7 @@ public class RolesAndPermissionsServiceTest {
                 school1,
                 school2,
                 school3,
-                aPermission(Permission.VAULT_PERMISSION_1, PermissionModel.PermissionType.VAULT),
+                aPermission(Permission.MANAGE_ROLES, PermissionModel.PermissionType.VAULT),
                 aPermission(Permission.VAULT_PERMISSION_2, PermissionModel.PermissionType.VAULT),
                 aPermission(Permission.VAULT_PERMISSION_3, PermissionModel.PermissionType.VAULT),
                 aPermission(Permission.CAN_MANAGE_ROLES, PermissionModel.PermissionType.ADMIN),
@@ -244,9 +244,9 @@ public class RolesAndPermissionsServiceTest {
     @Test
     public void getVaultPermissionsShouldReturnAllPermissionsApplicableToVaultRoles() {
         // Given
-        PermissionModel vault1 = aPermission(Permission.VAULT_PERMISSION_1, PermissionModel.PermissionType.VAULT);
-        PermissionModel vault2 = aPermission(Permission.VAULT_PERMISSION_1, PermissionModel.PermissionType.VAULT);
-        PermissionModel vault3 = aPermission(Permission.VAULT_PERMISSION_1, PermissionModel.PermissionType.VAULT);
+        PermissionModel vault1 = aPermission(Permission.MANAGE_ROLES, PermissionModel.PermissionType.VAULT);
+        PermissionModel vault2 = aPermission(Permission.MANAGE_ROLES, PermissionModel.PermissionType.VAULT);
+        PermissionModel vault3 = aPermission(Permission.MANAGE_ROLES, PermissionModel.PermissionType.VAULT);
 
         List<PermissionModel> allPermissions = Arrays.asList(
                 aPermission(Permission.CAN_VIEW_VAULTS_SIZE, PermissionModel.PermissionType.SCHOOL),
@@ -351,7 +351,7 @@ public class RolesAndPermissionsServiceTest {
 
         RoleModel toUpdate = aRole(RoleType.SCHOOL);
         toUpdate.setId(123L);
-        toUpdate.addPermission(aPermission(Permission.VAULT_PERMISSION_1, PermissionModel.PermissionType.VAULT));
+        toUpdate.addPermission(aPermission(Permission.MANAGE_ROLES, PermissionModel.PermissionType.VAULT));
 
         // When
         underTest.updateRole(toUpdate);
