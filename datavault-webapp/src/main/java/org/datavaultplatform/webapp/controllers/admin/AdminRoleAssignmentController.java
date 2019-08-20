@@ -94,7 +94,7 @@ public class AdminRoleAssignmentController {
                 assignment.setSchool(rest.getGroup(targetId));
                 break;
             case VAULT:
-                assignment.setVault(rest.getActualVault(targetId));
+                assignment.setVault(rest.getVaultRecord(targetId));
                 break;
             default:
                 return ResponseEntity.notFound().build();

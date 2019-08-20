@@ -277,8 +277,8 @@ public class RestService {
         return (Retrieve[])response.getBody();
     }
 
-    public Vault getActualVault(String id) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/" + id + "/actual", Vault.class);
+    public Vault getVaultRecord(String id) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + id + "/record", Vault.class);
         return (Vault)response.getBody();
     }
 

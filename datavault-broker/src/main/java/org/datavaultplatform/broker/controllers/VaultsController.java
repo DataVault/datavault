@@ -295,8 +295,8 @@ public class VaultsController {
         return vaultsService.checkRetentionPolicy(vaultID);
     }
 
-    @RequestMapping(value = "/vaults/{vaultid}/actual", method = RequestMethod.GET)
-    public Vault getActualVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @RequestMapping(value = "/vaults/{vaultid}/record", method = RequestMethod.GET)
+    public Vault getVaultRecord(@RequestHeader(value = "X-UserID", required = true) String userID,
                                            @PathVariable("vaultid") String vaultID) throws Exception {
 
         return vaultsService.getVault(vaultID);
