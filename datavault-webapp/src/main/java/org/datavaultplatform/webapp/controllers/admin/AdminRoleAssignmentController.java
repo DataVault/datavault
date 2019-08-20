@@ -47,6 +47,8 @@ public class AdminRoleAssignmentController {
         roleAssignment.setUser(user);
         roleAssignment.setRole(role);
 
+        rest.updateRoleAssignment(roleAssignment);
+
         return ResponseEntity.ok().build();
     }
 
