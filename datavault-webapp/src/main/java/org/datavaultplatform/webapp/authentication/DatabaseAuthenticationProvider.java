@@ -79,14 +79,19 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         boolean isAdmin = false;
         try{
             isAdmin = restService.isAdmin(new ValidateUser(name, null));
+            if (isAdmin) {
+                grantedAuths.add(new SimpleGrantedAuthority("ROLE_IS_ADMIN"));
+            }
         } catch(Exception e){
             System.err.println("Error when trying to check if user is admin with Broker!");
             e.printStackTrace();
         }
-        if (isAdmin) {
+
+        Collection<GrantedAuthority> adminAuthorities = getAdminAuthorities(authentication);
+        if (!adminAuthorities.isEmpty()) {
             logger.info("Granting user " + name + " ROLE_ADMIN");
             grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-            grantedAuths.addAll(getAdminAuthorities(authentication));
+            grantedAuths.addAll(adminAuthorities);
         }
 
         logger.info("Granting user " + name + " ROLE_USER");

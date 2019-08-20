@@ -97,4 +97,14 @@ public class RoleAssignment {
     public int hashCode() {
         return Objects.hash(id, role, user, school, vault);
     }
+
+    public String getTargetId() {
+        if (school != null) {
+            return school.getID();
+        } else if (vault != null) {
+            return vault.getID();
+        } else {
+            throw new IllegalStateException("Target ID requested global role assignment");
+        }
+    }
 }

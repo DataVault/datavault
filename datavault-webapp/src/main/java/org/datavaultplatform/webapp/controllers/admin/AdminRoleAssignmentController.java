@@ -47,6 +47,10 @@ public class AdminRoleAssignmentController {
         }
 
         User user = rest.getUser(assignmentRequest.user);
+        if (user == null) {
+            throw new EntityNotFoundException(User.class, assignmentRequest.user);
+        }
+
         RoleModel role = rest.getRole(assignmentRequest.role).orElseThrow
                 (()  -> new EntityNotFoundException(RoleModel.class, String.valueOf(assignmentRequest.role)));
 
