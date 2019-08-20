@@ -1,4 +1,4 @@
-package org.datavaultplatform.webapp.controllers.admin;
+package org.datavaultplatform.webapp.controllers;
 
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleModel;
@@ -20,12 +20,12 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @Controller
-public class AdminRoleAssignmentController {
+public class RoleAssignmentController {
 
     private final RestService rest;
 
     @Autowired
-    public AdminRoleAssignmentController(RestService rest) {
+    public RoleAssignmentController(RestService rest) {
         this.rest = rest;
     }
 
