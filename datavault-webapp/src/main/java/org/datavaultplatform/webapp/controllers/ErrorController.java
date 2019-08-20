@@ -30,6 +30,10 @@ class ErrorController {
 
         logger.error("An error occurred: {}", exceptionMessage, throwable);
 
+        if (statusCode == 403) {
+            return "auth/denied";
+        }
+
         String requestUri = (String) request.getAttribute("javax.servlet.error.request_uri");
         if (requestUri == null) {
             requestUri = "Unknown";
