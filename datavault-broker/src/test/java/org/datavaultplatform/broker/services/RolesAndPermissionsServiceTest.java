@@ -225,8 +225,6 @@ public class RolesAndPermissionsServiceTest {
                 school2,
                 school3,
                 aPermission(Permission.MANAGE_ROLES, PermissionModel.PermissionType.VAULT),
-                aPermission(Permission.VAULT_PERMISSION_2, PermissionModel.PermissionType.VAULT),
-                aPermission(Permission.VAULT_PERMISSION_3, PermissionModel.PermissionType.VAULT),
                 aPermission(Permission.CAN_MANAGE_ROLES, PermissionModel.PermissionType.ADMIN),
                 aPermission(Permission.CAN_MANAGE_BILLING_DETAILS, PermissionModel.PermissionType.ADMIN),
                 aPermission(Permission.CAN_VIEW_EVENTS, PermissionModel.PermissionType.ADMIN));

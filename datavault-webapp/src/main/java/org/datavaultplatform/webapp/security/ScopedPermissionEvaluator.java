@@ -13,7 +13,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.TreeMap;
 
 /**
  * A permission expression evaluator that is able to check existence of {@link Vault} and {@link Group} permissions
