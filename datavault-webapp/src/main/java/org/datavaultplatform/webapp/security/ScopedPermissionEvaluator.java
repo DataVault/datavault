@@ -67,6 +67,8 @@ public class ScopedPermissionEvaluator implements PermissionEvaluator {
             }
         } else if (permissionId instanceof Permission) {
             permission = (Permission) permissionId;
+        } else {
+            throw new IllegalArgumentException("Expected java.lang.String or Permission value, found: " + permissionId);
         }
 
         Multimap<ScopedPermissionKey, Permission> permissions = ScopedPermissionMapBuilder.createPermissionMap(auth);
