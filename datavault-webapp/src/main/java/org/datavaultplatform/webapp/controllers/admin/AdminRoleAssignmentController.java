@@ -1,9 +1,12 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
+import oracle.cloudstorage.api.http.Status;
+import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
 import org.datavaultplatform.webapp.services.RestService;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -40,6 +43,12 @@ public class AdminRoleAssignmentController {
         RoleAssignment roleAssignment = rest.getRoleAssignment(assignmentId)
                 .orElseThrow(() -> new EntityNotFoundException(RoleAssignment.class, String.valueOf(assignmentId)));
 
+        String existingTargetId = roleAssignment.getTargetId();
+
+        if (!existingTargetId.equals(targetId)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         User user = rest.getUser(assignmentRequest.user);
         RoleModel role = rest.getRole(assignmentRequest.role).orElseThrow
                 (()  -> new EntityNotFoundException(RoleModel.class, String.valueOf(assignmentRequest.role)));
@@ -61,11 +70,10 @@ public class AdminRoleAssignmentController {
         RoleAssignment assignment = rest.getRoleAssignment(assignmentId)
                 .orElseThrow(() -> new EntityNotFoundException(RoleAssignment.class, String.valueOf(assignmentId)));
 
-        RoleModel role = assignment.getRole();
+        String existingTargetId = assignment.getTargetId();
 
-        if (role.getAssignedUserCount() > 0) {
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
-                    .body("This role has users currently assigned");
+        if (!existingTargetId.equals(targetId)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         rest.deleteRoleAssignment(assignment.getId());
