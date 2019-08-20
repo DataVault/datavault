@@ -1,12 +1,9 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
-import oracle.cloudstorage.api.http.Status;
-import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
 import org.datavaultplatform.webapp.services.RestService;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -110,8 +107,6 @@ public class AdminRoleAssignmentController {
 
         RoleModel role = rest.getRole(roleId)
                 .orElseThrow(() -> new EntityNotFoundException(RoleModel.class, String.valueOf(roleId)));
-
-        // @TODO - Check if RoleModel.roleType matches roleType if really necessary.
 
         assignment.setUser(user);
         assignment.setRole(role);
