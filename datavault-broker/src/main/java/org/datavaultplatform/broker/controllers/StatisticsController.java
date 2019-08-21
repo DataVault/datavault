@@ -78,13 +78,13 @@ public class StatisticsController {
     @RequestMapping(value = "/statistics/retrievecount", method = RequestMethod.GET)
     public int getRetrievesCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return retrievesService.count();
+        return retrievesService.count(userID);
     }
 
     @RequestMapping(value = "/statistics/retrieveinprogresscount", method = RequestMethod.GET)
     public int getRetrievesInProgressCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return retrievesService.inProgressCount();
+        return retrievesService.inProgressCount(userID);
     }
 
     @RequestMapping(value = "/vaults/depositqueuecount", method = RequestMethod.GET)
@@ -102,7 +102,7 @@ public class StatisticsController {
     @RequestMapping(value = "/vaults/retrievequeuecount", method = RequestMethod.GET)
     public int getRetrievesQueuedCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return retrievesService.queueCount();
+        return retrievesService.queueCount(userID);
     }
 
     @RequestMapping(value = "/vaults/retrieveinprogress", method = RequestMethod.GET)

@@ -14,11 +14,11 @@ public interface RetrieveDAO {
 
     public Retrieve findById(String Id);
 
-    public int count();
+    public int count(String userId);
 
-    public int inProgressCount();
+    public int inProgressCount(String userId);
 
     public List<Retrieve> inProgress();
 
-    public int queueCount();
+    public int queueCount(String userId);
 }

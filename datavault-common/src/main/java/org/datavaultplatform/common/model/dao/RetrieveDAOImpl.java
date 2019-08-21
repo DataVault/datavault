@@ -1,6 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.Retrieve;
+import org.datavaultplatform.common.model.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -10,6 +10,8 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class RetrieveDAOImpl implements RetrieveDAO {
 
@@ -60,24 +62,24 @@ public class RetrieveDAOImpl implements RetrieveDAO {
     }
 
     @Override
-    public int count() {
+    public int count(String userId) {
         Session session = this.sessionFactory.openSession();
-        return (int) (long) (Long) session.createCriteria(Retrieve.class).setProjection(Projections.rowCount()).uniqueResult();
+        return (int) (long) (Long) retrieveCriteriaForUser(userId, session).setProjection(Projections.rowCount()).uniqueResult();
     }
 
     @Override
-    public int queueCount() {
+    public int queueCount(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Retrieve.class);
+        Criteria criteria = retrieveCriteriaForUser(userId, session);
         criteria.add(Restrictions.eq("status", Retrieve.Status.NOT_STARTED));
         criteria.setProjection(Projections.rowCount());
         return (int)(long)(Long)criteria.uniqueResult();
     }
 
     @Override
-    public int inProgressCount() {
+    public int inProgressCount(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Retrieve.class);
+        Criteria criteria = retrieveCriteriaForUser(userId, session);
         criteria.add(Restrictions.and(Restrictions.ne("status", Retrieve.Status.NOT_STARTED), Restrictions.ne("status", Retrieve.Status.COMPLETE)));
         criteria.setProjection(Projections.rowCount());
         return (int)(long)(Long)criteria.uniqueResult();
@@ -92,5 +94,33 @@ public class RetrieveDAOImpl implements RetrieveDAO {
         List<Retrieve> retrieves = criteria.list();
         session.close();
         return retrieves;
+    }
+
+    private Criteria retrieveCriteriaForUser(String userId, Session session) {
+        Criteria roleAssignmentsCriteria = session.createCriteria(RoleAssignment.class, "roleAssignment");
+        roleAssignmentsCriteria.createAlias("roleAssignment.user", "user");
+        roleAssignmentsCriteria.createAlias("roleAssignment.role", "role");
+        roleAssignmentsCriteria.createAlias("role.permissions", "permissions");
+        roleAssignmentsCriteria.add(Restrictions.eq("user.id", userId));
+        roleAssignmentsCriteria.add(Restrictions.eq("permissions.id", Permission.CAN_VIEW_VAULTS_SIZE.getId()));
+        roleAssignmentsCriteria.add(Restrictions.or(
+                Restrictions.isNotNull("roleAssignment.school"),
+                Restrictions.eq("role.type", RoleType.ADMIN)));
+        List<RoleAssignment> roleAssignments = roleAssignmentsCriteria.list();
+        Set<String> schoolIds = roleAssignments.stream()
+                .map(roleAssignment -> roleAssignment.getSchool() == null ? "*" : roleAssignment.getSchool().getID())
+                .collect(Collectors.toSet());
+
+        Criteria retrieveCriteria = session.createCriteria(Retrieve.class, "retrieve");
+        if (!schoolIds.contains("*")) {
+            retrieveCriteria.createAlias("retrieve.deposit", "deposit");
+            retrieveCriteria.createAlias("deposit.vault", "vault");
+            retrieveCriteria.createAlias("vault.group", "group");
+            Set<String> permittedSchoolIds = schoolIds.stream()
+                    .filter(schoolId -> !"*".equals(schoolId))
+                    .collect(Collectors.toSet());
+            retrieveCriteria.add(Restrictions.in("group.id", permittedSchoolIds));
+        }
+        return retrieveCriteria;
     }
 }
