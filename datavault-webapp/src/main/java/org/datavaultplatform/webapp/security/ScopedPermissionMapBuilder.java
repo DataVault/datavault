@@ -22,24 +22,10 @@ public class ScopedPermissionMapBuilder {
                 continue;
             }
 
-            RoleAssignment assignment = ((ScopedGrantedAuthority) authority).getRoleAssignment();
-            Vault vault = assignment.getVault();
-            Group group = assignment.getSchool();
+            ScopedGrantedAuthority scopedAuthority = (ScopedGrantedAuthority) authority;
+            ScopedPermissionKey key = new ScopedPermissionKey(scopedAuthority.getId(), scopedAuthority.getType());
 
-            final ScopedPermissionKey key;
-            if (vault != null) {
-                key = new ScopedPermissionKey(vault.getID(), Vault.class);
-            } else if (group != null) {
-                key = new ScopedPermissionKey(group.getID(), Group.class);
-            } else {
-                continue;
-            }
-
-            assignment.getRole().getPermissions()
-                    .stream()
-                    .map(PermissionModel::getPermission)
-                    .forEach(permission -> permissionMap.put(key, permission));
-
+            permissionMap.putAll(key, scopedAuthority.getPermissions());
         }
 
         return permissionMap;

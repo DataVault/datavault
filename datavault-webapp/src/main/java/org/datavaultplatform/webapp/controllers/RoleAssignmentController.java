@@ -118,6 +118,7 @@ public class RoleAssignmentController {
         return ResponseEntity.ok(rest.createRoleAssignment(assignment));
     }
 
+
     public static class RoleAssignmentRequest {
         @NotNull
         Long role;
