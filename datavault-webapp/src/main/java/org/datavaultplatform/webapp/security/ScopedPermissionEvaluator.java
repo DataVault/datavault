@@ -52,7 +52,7 @@ public class ScopedPermissionEvaluator implements PermissionEvaluator {
         }
 
         Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
-        if (authorities.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+        if (authorities.contains(new SimpleGrantedAuthority("ROLE_IS_ADMIN"))) {
             return true;
         }
 
