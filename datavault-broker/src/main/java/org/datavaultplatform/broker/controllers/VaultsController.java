@@ -5,6 +5,7 @@ import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.vault.Create;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
+import org.datavaultplatform.common.request.TransferVault;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.common.response.VaultInfo;
@@ -13,6 +14,7 @@ import org.jsondoc.core.pojo.ApiVerb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
@@ -41,12 +43,16 @@ public class VaultsController {
     private EventService eventService;
     private ClientsService clientsService;
     private DataManagersService dataManagersService;
-    
+    private RolesAndPermissionsService permissionsService;
     private String activeDir;
     private String archiveDir;
 
     private static final Logger logger = LoggerFactory.getLogger(VaultsController.class);
-    
+
+    public void setPermissionsService(RolesAndPermissionsService permissionsService) {
+        this.permissionsService = permissionsService;
+    }
+
     public void setVaultsService(VaultsService vaultsService) {
         this.vaultsService = vaultsService;
     }
@@ -142,6 +148,37 @@ public class VaultsController {
     }
 
 
+    @RequestMapping(value = "/vaults/{vaultId}/transfer", method = RequestMethod.POST)
+    public ResponseEntity transferVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                        @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
+                                        @PathVariable("vaultId") String vaultId,
+                                        @RequestBody TransferVault transfer) {
+
+        User newOwner = usersService.getUser(transfer.getUserId());
+
+        if (newOwner == null) {
+            throw new IllegalStateException("Can't orphan a vault currently");
+        }
+
+        Vault vault = vaultsService.getVault(vaultId);
+        User currentOwner = vault.getUser();
+
+        vault.setUser(newOwner);
+        vaultsService.saveOrUpdateVault(vault);
+
+        Long roleId = transfer.getRoleId();
+        if (transfer.isChangingRoles()) {
+            RoleModel role = permissionsService.getRole(roleId);
+            RoleAssignment assignment = new RoleAssignment();
+            assignment.setRole(role);
+            assignment.setUser(currentOwner);
+            assignment.setVault(vault);
+
+            permissionsService.createRoleAssignment(assignment);
+        }
+
+        return ResponseEntity.ok().build();
+    }
 
     @RequestMapping(value = "/vaults/search", method = RequestMethod.GET)
     public VaultsData searchAllVaults(@RequestHeader(value = "X-UserID", required = true) String userID,

@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalLong;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.datavaultplatform.common.request.TransferVault;
+import org.datavaultplatform.webapp.exception.EntityNotFoundException;
 import org.datavaultplatform.webapp.exception.InvalidUunException;
 import org.datavaultplatform.webapp.services.UserLookupService;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,11 +21,18 @@ import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+
+import javax.validation.Valid;
+import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.NotNull;
 
 @Controller
 //@RequestMapping("/vaults")
@@ -53,6 +64,22 @@ public class VaultsController {
     public void setUserLookupService(UserLookupService userLookupService) {
         this.userLookupService = userLookupService;
     }
+
+    @PostMapping(value = "/vaults/{vaultid}/data-owner/update")
+    public ResponseEntity transferOwnership(
+            @PathVariable("vaultid") String vaultId,
+            @Valid VaultTransferRequest request) {
+
+        TransferVault transfer = new TransferVault();
+        transfer.setUserId(request.user);
+        transfer.setRoleId(request.role);
+        transfer.setChangingRoles(request.confirmed);
+
+        restService.transferVault(vaultId, transfer);
+
+        return ResponseEntity.ok().build();
+    }
+
 
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
     public String getVaultsListing(ModelMap model) throws Exception {
@@ -204,6 +231,39 @@ public class VaultsController {
         List<String> result = userLookupService.getSuggestedUuns(term);
         Gson gson = new Gson();
         return gson.toJson(result);
+    }
+
+    private static class VaultTransferRequest {
+        private Long role;
+        private String user;
+        private boolean confirmed;
+
+        public void setConfirmed(boolean confirmed) {
+            this.confirmed = confirmed;
+        }
+
+        public void setRole(Long role) {
+            this.role = role;
+        }
+
+        public void setUser(String user) {
+            this.user = user;
+        }
+
+        @NotNull
+        public Long getRole() {
+            return role;
+        }
+
+        @NotNull
+        @NotEmpty
+        public String getUser() {
+            return user;
+        }
+
+        public boolean isConfirmed() {
+            return confirmed;
+        }
     }
 }
 

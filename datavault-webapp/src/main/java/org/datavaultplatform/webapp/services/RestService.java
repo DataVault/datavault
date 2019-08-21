@@ -4,6 +4,7 @@ import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateClientEvent;
 import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.request.CreateVault;
+import org.datavaultplatform.common.request.TransferVault;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.DepositInfo;
@@ -475,6 +476,10 @@ public class RestService {
     public VaultInfo addVault(CreateVault createVault) {
         HttpEntity<?> response = post(brokerURL + "/vaults/", VaultInfo.class, createVault);
         return (VaultInfo)response.getBody();
+    }
+
+    public void transferVault(String vaultId, TransferVault transfer) {
+        post(brokerURL + "/vaults/" + vaultId + "/transfer", VaultInfo.class, transfer);
     }
 
     public DepositInfo addDeposit(CreateDeposit createDeposit) {

@@ -49,6 +49,7 @@
     </bean>
 
     <bean id="vaultsController" class="org.datavaultplatform.broker.controllers.VaultsController">
+        <property name="permissionsService" ref="rolesAndPermissionsService" />
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
         <property name="retrievesService" ref="retrievesService" />
