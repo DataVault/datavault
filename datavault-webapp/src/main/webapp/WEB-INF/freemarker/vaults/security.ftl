@@ -57,7 +57,7 @@
 
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="create-form" class="form form-horizontal" role="form"
+            <form id="transfer-form" class="form form-horizontal" role="form"
                   action="<@spring.url relativeUrl="/vaults/${vault.ID}/data-owner/update" />"
                   method="post">
                 <div class="modal-header">
@@ -332,6 +332,7 @@
         '#create-form',
         '#update-form',
         '#delete-form',
+        '#transfer-form',
     ];
 
     for (var formSelector of forms) {
