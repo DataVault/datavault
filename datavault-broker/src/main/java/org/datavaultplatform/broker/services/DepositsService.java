@@ -77,22 +77,6 @@ public class DepositsService {
             throw new Exception("Vault does not exist");
         }
         
-        Boolean userVault = false;
-        if (vault.getUser().equals(user)) {
-            userVault = true;
-        }
-        
-        Boolean groupOwner = false;
-        if (vault.getGroup().getOwners().contains(user)) {
-            groupOwner = true;
-        }
-        
-        Boolean adminUser = user.isAdmin();
-        
-        if (!userVault && !groupOwner && !adminUser) {
-            throw new Exception("Access denied");
-        }
-
         return deposit;
     }
     

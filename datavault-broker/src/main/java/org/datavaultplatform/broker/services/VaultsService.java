@@ -72,27 +72,10 @@ public class VaultsService {
     
     // Get the specified Vault object and validate it against the current User
     public Vault getUserVault(User user, String vaultID) throws Exception {
-
         Vault vault = getVault(vaultID);
 
         if (vault == null) {
             throw new Exception("Vault '" + vaultID + "' does not exist");
-        }
-
-        Boolean userVault = false;
-        if (vault.getUser().equals(user)) {
-            userVault = true;
-        }
-        
-        Boolean groupOwner = false;
-        if (vault.getGroup().getOwners().contains(user)) {
-            groupOwner = true;
-        }
-        
-        Boolean adminUser = user.isAdmin();
-        
-        if (!userVault && !groupOwner && !adminUser) {
-            throw new Exception("Access denied");
         }
 
         return vault;
