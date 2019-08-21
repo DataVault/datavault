@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
@@ -98,6 +99,7 @@ public class RoleAssignment {
         return Objects.hash(id, role, user, school, vault);
     }
 
+    @JsonIgnore
     public String getTargetId() {
         if (school != null) {
             return school.getID();
