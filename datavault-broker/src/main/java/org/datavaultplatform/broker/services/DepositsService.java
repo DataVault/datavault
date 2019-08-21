@@ -48,11 +48,11 @@ public class DepositsService {
     
     public void setDepositDAO(DepositDAO depositDAO) { this.depositDAO = depositDAO; }
 
-    public int count() { return depositDAO.count(); }
+    public int count(String userId) { return depositDAO.count(userId); }
 
-    public int queueCount() { return depositDAO.queueCount(); }
+    public int queueCount(String userId) { return depositDAO.queueCount(userId); }
 
-    public int inProgressCount() { return depositDAO.inProgressCount(); }
+    public int inProgressCount(String userId) { return depositDAO.inProgressCount(userId); }
 
     public List<Deposit> inProgress() { return depositDAO.inProgress(); }
 
@@ -60,7 +60,7 @@ public class DepositsService {
 
     public List<Deposit> search(String query, String sort) { return this.depositDAO.search(query, sort); }
 
-    public Long size() { return depositDAO.size(); }
+    public Long size(String userId) { return depositDAO.size(userId); }
     
     // Get the specified Deposit object and validate it against the current User and Vault
     public Deposit getUserDeposit(User user, String depositID) throws Exception {

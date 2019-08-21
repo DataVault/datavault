@@ -13,11 +13,11 @@ public interface DepositDAO {
 
     public Deposit findById(String Id);
 
-    public int count();
+    public int count(String userId);
 
-    public int queueCount();
+    public int queueCount(String userId);
 
-    public int inProgressCount();
+    public int inProgressCount(String userId);
 
     public List<Deposit> inProgress();
 
@@ -25,5 +25,5 @@ public interface DepositDAO {
 
     public List<Deposit> search(String query, String sort);
 
-    public Long size();
+    public Long size(String userId);
 }

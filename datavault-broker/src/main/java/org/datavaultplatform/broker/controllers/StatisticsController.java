@@ -60,19 +60,19 @@ public class StatisticsController {
     @RequestMapping(value = "/statistics/size", method = RequestMethod.GET)
     public Long getVaultsSize(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return depositsService.size();
+        return depositsService.size(userID);
     }
 
     @RequestMapping(value = "/statistics/depositcount", method = RequestMethod.GET)
     public int getDepositsCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return depositsService.count();
+        return depositsService.count(userID);
     }
 
     @RequestMapping(value = "/statistics/depositinprogresscount", method = RequestMethod.GET)
     public int getDepositsInProgressCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return depositsService.inProgressCount();
+        return depositsService.inProgressCount(userID);
     }
 
     @RequestMapping(value = "/statistics/retrievecount", method = RequestMethod.GET)
@@ -90,7 +90,7 @@ public class StatisticsController {
     @RequestMapping(value = "/vaults/depositqueuecount", method = RequestMethod.GET)
     public int getDepositsQueueCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return depositsService.queueCount();
+        return depositsService.queueCount(userID);
     }
 
     @RequestMapping(value = "/vaults/depositinprogress", method = RequestMethod.GET)

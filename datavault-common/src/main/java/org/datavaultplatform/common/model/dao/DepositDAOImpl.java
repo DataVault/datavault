@@ -1,7 +1,12 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.datavaultplatform.common.model.Permission;
+import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.RoleType;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -87,24 +92,24 @@ public class DepositDAOImpl implements DepositDAO {
     }
 
     @Override
-    public int count() {
+    public int count(String userId) {
         Session session = this.sessionFactory.openSession();
-        return (int)(long)(Long)session.createCriteria(Deposit.class).setProjection(Projections.rowCount()).uniqueResult();
+        return (int)(long)(Long)depositCriteriaForUser(userId, session).setProjection(Projections.rowCount()).uniqueResult();
     }
 
     @Override
-    public int queueCount() {
+    public int queueCount(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Deposit.class);
+        Criteria criteria = depositCriteriaForUser(userId, session);
         criteria.add(Restrictions.eq("status", Deposit.Status.NOT_STARTED));
         criteria.setProjection(Projections.rowCount());
         return (int)(long)(Long)criteria.uniqueResult();
     }
 
     @Override
-    public int inProgressCount() {
+    public int inProgressCount(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Deposit.class);
+        Criteria criteria = depositCriteriaForUser(userId, session);
         criteria.add(Restrictions.and(Restrictions.ne("status", Deposit.Status.NOT_STARTED), Restrictions.ne("status", Deposit.Status.COMPLETE)));
         criteria.setProjection(Projections.rowCount());
         return (int)(long)(Long)criteria.uniqueResult();
@@ -158,8 +163,36 @@ public class DepositDAOImpl implements DepositDAO {
     }
 
     @Override
-    public Long size() {
+    public Long size(String userId) {
         Session session = this.sessionFactory.openSession();
-        return (Long)session.createCriteria(Deposit.class).setProjection(Projections.sum("depositSize")).uniqueResult();
+        Criteria depositCriteria = depositCriteriaForUser(userId, session);
+        return (Long) depositCriteria.setProjection(Projections.sum("depositSize")).uniqueResult();
+    }
+
+    private Criteria depositCriteriaForUser(String userId, Session session) {
+        Criteria roleAssignmentsCriteria = session.createCriteria(RoleAssignment.class, "roleAssignment");
+        roleAssignmentsCriteria.createAlias("roleAssignment.user", "user");
+        roleAssignmentsCriteria.createAlias("roleAssignment.role", "role");
+        roleAssignmentsCriteria.createAlias("role.permissions", "permissions");
+        roleAssignmentsCriteria.add(Restrictions.eq("user.id", userId));
+        roleAssignmentsCriteria.add(Restrictions.eq("permissions.id", Permission.CAN_VIEW_VAULTS_SIZE.getId()));
+        roleAssignmentsCriteria.add(Restrictions.or(
+                Restrictions.isNotNull("roleAssignment.school"),
+                Restrictions.eq("role.type", RoleType.ADMIN)));
+        List<RoleAssignment> roleAssignments = roleAssignmentsCriteria.list();
+        Set<String> schoolIds = roleAssignments.stream()
+                .map(roleAssignment -> roleAssignment.getSchool() == null ? "*" : roleAssignment.getSchool().getID())
+                .collect(Collectors.toSet());
+
+        Criteria depositCriteria = session.createCriteria(Deposit.class, "deposit");
+        if (!schoolIds.contains("*")) {
+            depositCriteria.createAlias("deposit.vault", "vault");
+            depositCriteria.createAlias("vault.group", "group");
+            Set<String> permittedSchoolIds = schoolIds.stream()
+                    .filter(schoolId -> !"*".equals(schoolId))
+                    .collect(Collectors.toSet());
+            depositCriteria.add(Restrictions.in("group.id", permittedSchoolIds));
+        }
+        return depositCriteria;
     }
 }
