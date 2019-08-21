@@ -16,5 +16,5 @@ public interface GroupDAO {
 
     public Group findById(String Id);
 
-    public int count();
+    public int count(String userId);
 }

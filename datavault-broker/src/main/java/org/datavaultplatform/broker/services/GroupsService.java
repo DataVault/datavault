@@ -37,6 +37,6 @@ public class GroupsService {
         this.groupDAO = groupDAO;
     }
 
-    public int count() { return groupDAO.count(); }
+    public int count(String userId) { return groupDAO.count(userId); }
 }
 

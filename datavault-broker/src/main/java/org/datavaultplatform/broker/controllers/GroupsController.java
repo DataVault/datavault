@@ -183,7 +183,7 @@ public class GroupsController {
     })
     @RequestMapping(value = "/groups/count", method = RequestMethod.GET)
     public int getGroupsCount(@RequestHeader(value = "X-UserID", required = true) String userID) {
-        return groupsService.count();
+        return groupsService.count(userID);
     }
 
     @ApiMethod(

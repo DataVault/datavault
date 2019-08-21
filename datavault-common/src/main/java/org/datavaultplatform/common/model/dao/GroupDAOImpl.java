@@ -1,7 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -11,6 +10,8 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GroupDAOImpl implements GroupDAO {
 
@@ -69,8 +70,33 @@ public class GroupDAOImpl implements GroupDAO {
     }
 
     @Override
-    public int count() {
+    public int count(String userId) {
         Session session = this.sessionFactory.openSession();
-        return (int)(long)(Long)session.createCriteria(Group.class).setProjection(Projections.rowCount()).uniqueResult();
+        return (int)(long)(Long)groupCriteriaForUser(userId, session).setProjection(Projections.rowCount()).uniqueResult();
+    }
+
+    private Criteria groupCriteriaForUser(String userId, Session session) {
+        Criteria roleAssignmentsCriteria = session.createCriteria(RoleAssignment.class, "roleAssignment");
+        roleAssignmentsCriteria.createAlias("roleAssignment.user", "user");
+        roleAssignmentsCriteria.createAlias("roleAssignment.role", "role");
+        roleAssignmentsCriteria.createAlias("role.permissions", "permissions");
+        roleAssignmentsCriteria.add(Restrictions.eq("user.id", userId));
+        roleAssignmentsCriteria.add(Restrictions.eq("permissions.id", Permission.CAN_VIEW_VAULTS_SIZE.getId()));
+        roleAssignmentsCriteria.add(Restrictions.or(
+                Restrictions.isNotNull("roleAssignment.school"),
+                Restrictions.eq("role.type", RoleType.ADMIN)));
+        List<RoleAssignment> roleAssignments = roleAssignmentsCriteria.list();
+        Set<String> groupIds = roleAssignments.stream()
+                .map(roleAssignment -> roleAssignment.getSchool() == null ? "*" : roleAssignment.getSchool().getID())
+                .collect(Collectors.toSet());
+
+        Criteria retrieveCriteria = session.createCriteria(Group.class, "group");
+        if (!groupIds.contains("*")) {
+            Set<String> permittedSchoolIds = groupIds.stream()
+                    .filter(schoolId -> !"*".equals(schoolId))
+                    .collect(Collectors.toSet());
+            retrieveCriteria.add(Restrictions.in("group.id", permittedSchoolIds));
+        }
+        return retrieveCriteria;
     }
 }
