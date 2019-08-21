@@ -11,8 +11,8 @@ public class RetrievesService {
 
     private RetrieveDAO retrieveDAO;
     
-    public List<Retrieve> getRetrieves() {
-        return retrieveDAO.list();
+    public List<Retrieve> getRetrieves(String userId) {
+        return retrieveDAO.list(userId);
     }
     
     public void addRetrieve(Retrieve retrieve, Deposit deposit, String retrievePath) {

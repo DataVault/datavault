@@ -10,7 +10,7 @@ public interface RetrieveDAO {
     
     public void update(Retrieve retrieve);
     
-    public List<Retrieve> list();
+    public List<Retrieve> list(String userId);
 
     public Retrieve findById(String Id);
 

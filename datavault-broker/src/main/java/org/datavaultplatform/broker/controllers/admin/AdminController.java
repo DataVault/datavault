@@ -156,7 +156,7 @@ public class AdminController {
     @RequestMapping(value = "/admin/retrieves", method = RequestMethod.GET)
     public List<Retrieve> getRetrievesAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return retrievesService.getRetrieves();
+        return retrievesService.getRetrieves(userID);
     }
 
     @ApiMethod(

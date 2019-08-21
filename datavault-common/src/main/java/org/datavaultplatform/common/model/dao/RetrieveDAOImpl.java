@@ -41,9 +41,9 @@ public class RetrieveDAOImpl implements RetrieveDAO {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Retrieve> list() {
+    public List<Retrieve> list(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Retrieve.class);
+        Criteria criteria = retrieveCriteriaForUser(userId, session);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         criteria.addOrder(Order.asc("timestamp"));
         List<Retrieve> retrieves = criteria.list();
