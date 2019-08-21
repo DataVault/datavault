@@ -226,7 +226,7 @@ public class VaultsController {
                                            @RequestParam(value = "sort", required = false) String sort) throws Exception {
 
         List<DepositInfo> depositResponses = new ArrayList<>();
-        for (Deposit deposit : depositsService.search(query, sort)) {
+        for (Deposit deposit : depositsService.search(query, sort, userID)) {
             depositResponses.add(deposit.convertToResponse());
         }
         return depositResponses;

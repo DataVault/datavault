@@ -136,7 +136,7 @@ public class AdminController {
                                             @RequestParam(value = "sort", required = false) String sort) throws Exception {
 
         List<DepositInfo> depositResponses = new ArrayList<>();
-        for (Deposit deposit : depositsService.getDeposits(sort)) {
+        for (Deposit deposit : depositsService.getDeposits(sort, userID)) {
             DepositInfo depositInfo = deposit.convertToResponse();
             User depositor = usersService.getUser(depositInfo.getUserID());
             depositInfo.setUserName(depositor.getFirstname() + " " + depositor.getLastname());

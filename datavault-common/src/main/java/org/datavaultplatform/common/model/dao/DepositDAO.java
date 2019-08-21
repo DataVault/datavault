@@ -9,7 +9,7 @@ public interface DepositDAO {
     
     public void update(Deposit deposit);
     
-    public List<Deposit> list(String sort);
+    public List<Deposit> list(String sort, String userId);
 
     public Deposit findById(String Id);
 
@@ -23,7 +23,7 @@ public interface DepositDAO {
 
     public List<Deposit> completed();
 
-    public List<Deposit> search(String query, String sort);
+    public List<Deposit> search(String query, String sort, String userId);
 
     public Long size(String userId);
 }

@@ -13,8 +13,8 @@ public class DepositsService {
 
     private DepositDAO depositDAO;
     
-    public List<Deposit> getDeposits(String sort) {
-        return depositDAO.list(sort);
+    public List<Deposit> getDeposits(String sort, String userId) {
+        return depositDAO.list(sort, userId);
     }
     
     public void addDeposit(Vault vault,
@@ -58,7 +58,7 @@ public class DepositsService {
 
     public List<Deposit> completed() { return depositDAO.completed(); }
 
-    public List<Deposit> search(String query, String sort) { return this.depositDAO.search(query, sort); }
+    public List<Deposit> search(String query, String sort, String userId) { return this.depositDAO.search(query, sort, userId); }
 
     public Long size(String userId) { return depositDAO.size(userId); }
     

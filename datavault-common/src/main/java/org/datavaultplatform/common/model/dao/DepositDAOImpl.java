@@ -58,9 +58,9 @@ public class DepositDAOImpl implements DepositDAO {
  
     @SuppressWarnings("unchecked")
     @Override
-    public List<Deposit> list(String sort) {
+    public List<Deposit> list(String sort, String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Deposit.class);
+        Criteria criteria = depositCriteriaForUser(userId, session);
         // See if there is a valid sort option
         if ("id".equals(sort)) {
             criteria.addOrder(Order.asc("id"));
@@ -136,9 +136,9 @@ public class DepositDAOImpl implements DepositDAO {
     }
 
     @Override
-    public List<Deposit> search(String query, String sort) {
+    public List<Deposit> search(String query, String sort, String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Deposit.class);
+        Criteria criteria = depositCriteriaForUser(userId, session);
         criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("note", "%" + query + "%"), Restrictions.ilike("filePath", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
