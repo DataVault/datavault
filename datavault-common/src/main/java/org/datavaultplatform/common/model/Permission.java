@@ -6,9 +6,9 @@ public enum Permission {
     MANAGE_ROLES("MANAGE_ROLES", PermissionModel.PermissionType.VAULT, "Manage roles", null, false),
 
     // School permissions
-    CAN_VIEW_VAULTS_SIZE("CAN_VIEW_VAULTS_SIZE", PermissionModel.PermissionType.SCHOOL, "View school vaults size", null, true),
-    CAN_VIEW_IN_PROGRESS_DEPOSITS("CAN_VIEW_IN_PROGRESS_DEPOSITS", PermissionModel.PermissionType.SCHOOL, "View school deposits/retrieves in progress", null, true),
-    CAN_VIEW_DEPOSIT_QUEUE("CAN_VIEW_DEPOSIT_QUEUE", PermissionModel.PermissionType.SCHOOL, "View school deposit/retrieval queues", null, true),
+    CAN_VIEW_VAULTS_SIZE("CAN_VIEW_VAULTS_SIZE", PermissionModel.PermissionType.SCHOOL, "View school vaults size", "ROLE_ADMIN", true),
+    CAN_VIEW_IN_PROGRESS_DEPOSITS("CAN_VIEW_IN_PROGRESS_DEPOSITS", PermissionModel.PermissionType.SCHOOL, "View school deposits/retrieves in progress", "ROLE_ADMIN", true),
+    CAN_VIEW_DEPOSIT_QUEUE("CAN_VIEW_DEPOSIT_QUEUE", PermissionModel.PermissionType.SCHOOL, "View school deposit/retrieval queues", "ROLE_ADMIN", true),
     CAN_MANAGE_VAULTS("CAN_MANAGE_VAULTS", PermissionModel.PermissionType.SCHOOL, "Manage school vaults", "ROLE_ADMIN_VAULTS", true),
     CAN_MANAGE_DEPOSITS("CAN_MANAGE_DEPOSITS", PermissionModel.PermissionType.SCHOOL, "Manage school vault deposits", "ROLE_ADMIN_DEPOSITS", true),
     CAN_VIEW_RETRIEVES("CAN_VIEW_RETRIEVES", PermissionModel.PermissionType.SCHOOL, "View school retrieves", "ROLE_ADMIN_RETRIEVES", true),
