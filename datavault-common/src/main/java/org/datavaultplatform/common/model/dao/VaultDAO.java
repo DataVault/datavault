@@ -20,7 +20,7 @@ public interface VaultDAO {
 
     public List<Vault> search(String query, String sort, String order, String offset, String maxResult);
 
-    public int count();
+    public int count(String userId);
 
     public int getRetentionPolicyCount(int status);
 

@@ -34,7 +34,7 @@ public class VaultsServiceIT {
     
     @Test
     public void checkVaultCount() {
-        int prevVaultCount = vaultsService.count();
+        int prevVaultCount = vaultsService.count("admin1");
         
         Vault vault = new Vault("Vault Test");
         vault.setDescription("Vault for test");
@@ -43,6 +43,6 @@ public class VaultsServiceIT {
         vaultsService.addVault(vault);
         
         int newVaultCount = prevVaultCount + 1;
-        Assert.assertThat(vaultsService.count(), is(newVaultCount));
+        Assert.assertThat(vaultsService.count("admin1"), is(newVaultCount));
     }
 }

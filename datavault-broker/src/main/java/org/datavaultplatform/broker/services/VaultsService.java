@@ -44,7 +44,7 @@ public class VaultsService {
 
     public List<Vault> search(String query, String sort, String order, String offset, String maxResult) { return this.vaultDAO.search(query, sort, order, offset, maxResult); }
 
-    public int count() { return vaultDAO.count(); }
+    public int count(String userId) { return vaultDAO.count(userId); }
 
     public int getRetentionPolicyCount(int status) { return vaultDAO.getRetentionPolicyCount(status); }
 

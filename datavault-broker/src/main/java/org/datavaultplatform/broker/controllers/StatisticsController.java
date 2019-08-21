@@ -54,7 +54,7 @@ public class StatisticsController {
     @RequestMapping(value = "/statistics/count", method = RequestMethod.GET)
     public int getVaultsCount(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
-        return vaultsService.count();
+        return vaultsService.count(userID);
     }
 
     @RequestMapping(value = "/statistics/size", method = RequestMethod.GET)

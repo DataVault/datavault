@@ -1,8 +1,10 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.*;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -139,9 +141,9 @@ public class VaultDAOImpl implements VaultDAO {
     }
 
     @Override
-    public int count() {
+    public int count(String userId) {
         Session session = this.sessionFactory.openSession();
-        return (int)(long)(Long)session.createCriteria(Vault.class).setProjection(Projections.rowCount()).uniqueResult();
+        return (int)(long)(Long)vaultCriteriaForUser(userId, session).setProjection(Projections.rowCount()).uniqueResult();
     }
 
     @Override
@@ -256,4 +258,30 @@ public class VaultDAOImpl implements VaultDAO {
 		Query query = session.createQuery("select v.projectId, sum(v.vaultSize) from Vault v group by v.projectId");
 		return (List<Object[]>)query.list();
 	}
+
+    private Criteria vaultCriteriaForUser(String userId, Session session) {
+        Criteria roleAssignmentsCriteria = session.createCriteria(RoleAssignment.class, "roleAssignment");
+        roleAssignmentsCriteria.createAlias("roleAssignment.user", "user");
+        roleAssignmentsCriteria.createAlias("roleAssignment.role", "role");
+        roleAssignmentsCriteria.createAlias("role.permissions", "permissions");
+        roleAssignmentsCriteria.add(Restrictions.eq("user.id", userId));
+        roleAssignmentsCriteria.add(Restrictions.eq("permissions.id", Permission.CAN_VIEW_VAULTS_SIZE.getId()));
+        roleAssignmentsCriteria.add(Restrictions.or(
+                Restrictions.isNotNull("roleAssignment.school"),
+                Restrictions.eq("role.type", RoleType.ADMIN)));
+        List<RoleAssignment> roleAssignments = roleAssignmentsCriteria.list();
+        Set<String> schoolIds = roleAssignments.stream()
+                .map(roleAssignment -> roleAssignment.getSchool() == null ? "*" : roleAssignment.getSchool().getID())
+                .collect(Collectors.toSet());
+
+        Criteria vaultCriteria = session.createCriteria(Vault.class, "vault");
+        if (!schoolIds.contains("*")) {
+            vaultCriteria.createAlias("vault.group", "group");
+            Set<String> permittedSchoolIds = schoolIds.stream()
+                    .filter(schoolId -> !"*".equals(schoolId))
+                    .collect(Collectors.toSet());
+            vaultCriteria.add(Restrictions.in("group.id", permittedSchoolIds));
+        }
+        return vaultCriteria;
+    }
 }
