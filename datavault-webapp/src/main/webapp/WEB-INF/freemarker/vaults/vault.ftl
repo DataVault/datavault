@@ -232,7 +232,7 @@
                 </div>
 
                 <h4 class="accordion-toggle">
-                    ‹› &nbsp;Data Managers
+                    ‹› &nbsp;Vault Roles
                 </h4>
 
                 <div class="accordion-content">

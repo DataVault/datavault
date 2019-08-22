@@ -4,6 +4,7 @@ import com.google.common.collect.Multimap;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.PermissionEvaluator;
@@ -37,6 +38,11 @@ import java.util.Collection;
 public class ScopedPermissionEvaluator implements PermissionEvaluator {
 
     private static final Logger logger = LoggerFactory.getLogger(ScopedPermissionEvaluator.class);
+    private final RestService rest;
+
+    public ScopedPermissionEvaluator(RestService rest) {
+        this.rest = rest;
+    }
 
     /**
      * Real implementation for actual checking of permissions on an authentication.
@@ -80,6 +86,14 @@ public class ScopedPermissionEvaluator implements PermissionEvaluator {
         final ScopedPermissionKey key;
 
         if (targetDomainObject instanceof Vault) {
+            Vault vault = (Vault) targetDomainObject;
+
+            // TODO: Stop gap, need to imply permissions for data owners either via Vaults.user, or a RoleAssignment
+            // relation.
+            if (auth.getName().equals(vault.getUser().getID())) {
+                return true;
+            }
+
             key = new ScopedPermissionKey(((Vault) targetDomainObject).getID(), Vault.class);
         } else if (targetDomainObject instanceof Group) {
             key = new ScopedPermissionKey(((Group) targetDomainObject).getID(), Group.class);
@@ -92,17 +106,15 @@ public class ScopedPermissionEvaluator implements PermissionEvaluator {
 
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
-        final ScopedPermissionKey key;
+        final String id = targetId.toString();
 
         if (VAULT_TYPE_SHORT.equalsIgnoreCase(targetType) || VAULT_TYPE.equalsIgnoreCase(targetType)) {
-            key = new ScopedPermissionKey(targetId, Vault.class);
+            return hasPermission(authentication, rest.getVaultRecord(id), permission);
         } else if (GROUP_TYPE_SHORT.equalsIgnoreCase(targetType) || GROUP_TYPE.equalsIgnoreCase(targetType)) {
-            key = new ScopedPermissionKey(targetId, Group.class);
+            return hasPermission(authentication, rest.getGroup(id), permission);
         } else {
             return false;
         }
-
-        return hasPermission(authentication, key, permission);
     }
 
     private static final String VAULT_TYPE_SHORT = Vault.class.getSimpleName();

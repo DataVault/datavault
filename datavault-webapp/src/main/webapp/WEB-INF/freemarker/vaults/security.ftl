@@ -68,13 +68,13 @@
                 <div class="modal-body">
                     <div id="create-error" class="alert alert-danger hidden" role="alert"></div>
                     <div class="col-sm-10 form-group ui-widget">
-                        <label for="new-user-name" class="control-label">New owner:</label>
+                        <label for="new-user-name" class="control-label">New Data Owner:</label>
                         <div >
                             <input id="new-user-name" type="text" class="form-control" name="user" value=""/>
                         </div>
                     </div>
                     <div class="col-sm-10 form-group ui-widget">
-                        <label for="new-user-role" class="control-label">Role:</label>
+                        <label for="new-user-role" class="control-label">Vault role to assign to previous Data Owner:</label>
                         <div>
                             <select id="new-user-role" name="role" class="form-control">
                                 <#list roles as role>
@@ -84,7 +84,7 @@
                         </div>
                     </div>
                     <div class="form-group ui-widget col-sm-10">
-                        <label for="confirm-checkbox" class="control-label">Don't assign self new role?</label>
+                        <label for="confirm-checkbox" class="control-label">Don't assign previous owner a new role?</label>
                         <div class="checkbox">
                             <input class="form-check-input" id="confirm-checkbox" type="checkbox" name="confirmed" />
                         </div>
@@ -94,7 +94,7 @@
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary btn-ok">Add</button>
+                    <button type="submit" class="btn btn-primary btn-ok">Save</button>
                 </div>
             </form>
         </div>
@@ -138,7 +138,7 @@
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary btn-ok">Add</button>
+                    <button type="submit" class="btn btn-primary btn-ok">Save</button>
                 </div>
             </form>
         </div>
@@ -156,7 +156,7 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
                                 class="fa fa-times" aria-hidden="true"></i></button>
-                    <h4 class="modal-title" id="update-existing-title">Update user</h4>
+                    <h4 class="modal-title" id="update-existing-title">Edit user's role</h4>
                 </div>
                 <div class="modal-body">
                     <div id="update-error" class="alert alert-danger hidden" role="alert"></div>
@@ -182,7 +182,7 @@
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary btn-ok">Add</button>
+                    <button type="submit" class="btn btn-primary btn-ok">Save</button>
                 </div>
             </form>
         </div>
@@ -194,25 +194,24 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form id="delete-form" class="form form-horizontal" role="form"
-                  action="<@spring.url "/security/roles/vault/${vault.ID}/user/delete" />"
+                  action="<@spring.url relativeUrl="/security/roles/vault/${vault.ID}/user/delete" />"
                   method="post">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
                                 class="fa fa-times" aria-hidden="true"></i></button>
-                    <h4 class="modal-title" id="delete-title">Remove user</h4>
+                    <h4 class="modal-title" id="delete-title">Delete user</h4>
                 </div>
                 <div id="delete-error" class="alert alert-danger hidden" role="alert"></div>
                 <div class="modal-body">
-                    <label>Are you sure you want to remove the role assignment for user <span
-                                id="delete-role-user-name"></span>?</label>
+                    <label>Do you want to delete <span id="delete-role-user-name"></span> from this vault?</label>
                 </div>
                 <input type="hidden" id="delete-role-assignment-id" name="assignment"/>
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
-                    <button type="submit" class="btn btn-primary btn-ok">Yes</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-ok">Delete</button>
                 </div>
             </form>
         </div>
@@ -254,7 +253,7 @@
                        data-target="#orphan-dialog"
                        data-user-name="${vault.userName}"
                        title="Transfer ownership of this vault."><i
-                                class="fa fa-pencil"></i></a>
+                                class="fa fa-users"></i></a>
                 </td>
             </tr>
             <#list roleAssignments as assignment>
