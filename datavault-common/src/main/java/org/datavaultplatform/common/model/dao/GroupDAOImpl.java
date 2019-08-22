@@ -72,16 +72,16 @@ public class GroupDAOImpl implements GroupDAO {
     @Override
     public int count(String userId) {
         Session session = this.sessionFactory.openSession();
-        return (int)(long)(Long)groupCriteriaForUser(userId, session).setProjection(Projections.rowCount()).uniqueResult();
+        return (int)(long)(Long)groupCriteriaForUser(userId, session, Permission.CAN_MANAGE_SCHOOL_USERS).setProjection(Projections.rowCount()).uniqueResult();
     }
 
-    private Criteria groupCriteriaForUser(String userId, Session session) {
+    private Criteria groupCriteriaForUser(String userId, Session session, Permission permission) {
         Criteria roleAssignmentsCriteria = session.createCriteria(RoleAssignment.class, "roleAssignment");
         roleAssignmentsCriteria.createAlias("roleAssignment.user", "user");
         roleAssignmentsCriteria.createAlias("roleAssignment.role", "role");
         roleAssignmentsCriteria.createAlias("role.permissions", "permissions");
         roleAssignmentsCriteria.add(Restrictions.eq("user.id", userId));
-        roleAssignmentsCriteria.add(Restrictions.eq("permissions.id", Permission.CAN_VIEW_VAULTS_SIZE.getId()));
+        roleAssignmentsCriteria.add(Restrictions.eq("permissions.id", permission.getId()));
         roleAssignmentsCriteria.add(Restrictions.or(
                 Restrictions.isNotNull("roleAssignment.school"),
                 Restrictions.eq("role.type", RoleType.ADMIN)));

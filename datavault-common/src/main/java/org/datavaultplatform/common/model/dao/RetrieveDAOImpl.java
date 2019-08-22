@@ -43,7 +43,7 @@ public class RetrieveDAOImpl implements RetrieveDAO {
     @Override
     public List<Retrieve> list(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = retrieveCriteriaForUser(userId, session);
+        Criteria criteria = retrieveCriteriaForUser(userId, session, Permission.CAN_VIEW_RETRIEVES);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         criteria.addOrder(Order.asc("timestamp"));
         List<Retrieve> retrieves = criteria.list();
@@ -64,13 +64,13 @@ public class RetrieveDAOImpl implements RetrieveDAO {
     @Override
     public int count(String userId) {
         Session session = this.sessionFactory.openSession();
-        return (int) (long) (Long) retrieveCriteriaForUser(userId, session).setProjection(Projections.rowCount()).uniqueResult();
+        return (int) (long) (Long) retrieveCriteriaForUser(userId, session, Permission.CAN_VIEW_RETRIEVES).setProjection(Projections.rowCount()).uniqueResult();
     }
 
     @Override
     public int queueCount(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = retrieveCriteriaForUser(userId, session);
+        Criteria criteria = retrieveCriteriaForUser(userId, session, Permission.CAN_VIEW_DEPOSIT_QUEUE);
         criteria.add(Restrictions.eq("status", Retrieve.Status.NOT_STARTED));
         criteria.setProjection(Projections.rowCount());
         return (int)(long)(Long)criteria.uniqueResult();
@@ -79,7 +79,7 @@ public class RetrieveDAOImpl implements RetrieveDAO {
     @Override
     public int inProgressCount(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = retrieveCriteriaForUser(userId, session);
+        Criteria criteria = retrieveCriteriaForUser(userId, session, Permission.CAN_VIEW_IN_PROGRESS_DEPOSITS);
         criteria.add(Restrictions.and(Restrictions.ne("status", Retrieve.Status.NOT_STARTED), Restrictions.ne("status", Retrieve.Status.COMPLETE)));
         criteria.setProjection(Projections.rowCount());
         return (int)(long)(Long)criteria.uniqueResult();
@@ -96,13 +96,13 @@ public class RetrieveDAOImpl implements RetrieveDAO {
         return retrieves;
     }
 
-    private Criteria retrieveCriteriaForUser(String userId, Session session) {
+    private Criteria retrieveCriteriaForUser(String userId, Session session, Permission permission) {
         Criteria roleAssignmentsCriteria = session.createCriteria(RoleAssignment.class, "roleAssignment");
         roleAssignmentsCriteria.createAlias("roleAssignment.user", "user");
         roleAssignmentsCriteria.createAlias("roleAssignment.role", "role");
         roleAssignmentsCriteria.createAlias("role.permissions", "permissions");
         roleAssignmentsCriteria.add(Restrictions.eq("user.id", userId));
-        roleAssignmentsCriteria.add(Restrictions.eq("permissions.id", Permission.CAN_VIEW_VAULTS_SIZE.getId()));
+        roleAssignmentsCriteria.add(Restrictions.eq("permissions.id", permission.getId()));
         roleAssignmentsCriteria.add(Restrictions.or(
                 Restrictions.isNotNull("roleAssignment.school"),
                 Restrictions.eq("role.type", RoleType.ADMIN)));

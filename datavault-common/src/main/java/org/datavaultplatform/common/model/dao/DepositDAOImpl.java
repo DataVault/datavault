@@ -60,7 +60,7 @@ public class DepositDAOImpl implements DepositDAO {
     @Override
     public List<Deposit> list(String sort, String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = depositCriteriaForUser(userId, session);
+        Criteria criteria = depositCriteriaForUser(userId, session, Permission.CAN_MANAGE_DEPOSITS);
         // See if there is a valid sort option
         if ("id".equals(sort)) {
             criteria.addOrder(Order.asc("id"));
@@ -94,13 +94,13 @@ public class DepositDAOImpl implements DepositDAO {
     @Override
     public int count(String userId) {
         Session session = this.sessionFactory.openSession();
-        return (int)(long)(Long)depositCriteriaForUser(userId, session).setProjection(Projections.rowCount()).uniqueResult();
+        return (int)(long)(Long)depositCriteriaForUser(userId, session, Permission.CAN_MANAGE_DEPOSITS).setProjection(Projections.rowCount()).uniqueResult();
     }
 
     @Override
     public int queueCount(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = depositCriteriaForUser(userId, session);
+        Criteria criteria = depositCriteriaForUser(userId, session, Permission.CAN_VIEW_DEPOSIT_QUEUE);
         criteria.add(Restrictions.eq("status", Deposit.Status.NOT_STARTED));
         criteria.setProjection(Projections.rowCount());
         return (int)(long)(Long)criteria.uniqueResult();
@@ -109,7 +109,7 @@ public class DepositDAOImpl implements DepositDAO {
     @Override
     public int inProgressCount(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = depositCriteriaForUser(userId, session);
+        Criteria criteria = depositCriteriaForUser(userId, session, Permission.CAN_VIEW_IN_PROGRESS_DEPOSITS);
         criteria.add(Restrictions.and(Restrictions.ne("status", Deposit.Status.NOT_STARTED), Restrictions.ne("status", Deposit.Status.COMPLETE)));
         criteria.setProjection(Projections.rowCount());
         return (int)(long)(Long)criteria.uniqueResult();
@@ -138,7 +138,7 @@ public class DepositDAOImpl implements DepositDAO {
     @Override
     public List<Deposit> search(String query, String sort, String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = depositCriteriaForUser(userId, session);
+        Criteria criteria = depositCriteriaForUser(userId, session, Permission.CAN_MANAGE_DEPOSITS);
         criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("note", "%" + query + "%"), Restrictions.ilike("filePath", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
@@ -165,17 +165,17 @@ public class DepositDAOImpl implements DepositDAO {
     @Override
     public Long size(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria depositCriteria = depositCriteriaForUser(userId, session);
+        Criteria depositCriteria = depositCriteriaForUser(userId, session, Permission.CAN_VIEW_VAULTS_SIZE);
         return (Long) depositCriteria.setProjection(Projections.sum("depositSize")).uniqueResult();
     }
 
-    private Criteria depositCriteriaForUser(String userId, Session session) {
+    private Criteria depositCriteriaForUser(String userId, Session session, Permission permission) {
         Criteria roleAssignmentsCriteria = session.createCriteria(RoleAssignment.class, "roleAssignment");
         roleAssignmentsCriteria.createAlias("roleAssignment.user", "user");
         roleAssignmentsCriteria.createAlias("roleAssignment.role", "role");
         roleAssignmentsCriteria.createAlias("role.permissions", "permissions");
         roleAssignmentsCriteria.add(Restrictions.eq("user.id", userId));
-        roleAssignmentsCriteria.add(Restrictions.eq("permissions.id", Permission.CAN_VIEW_VAULTS_SIZE.getId()));
+        roleAssignmentsCriteria.add(Restrictions.eq("permissions.id", permission.getId()));
         roleAssignmentsCriteria.add(Restrictions.or(
                 Restrictions.isNotNull("roleAssignment.school"),
                 Restrictions.eq("role.type", RoleType.ADMIN)));

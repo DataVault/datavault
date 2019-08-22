@@ -143,7 +143,7 @@ public class VaultDAOImpl implements VaultDAO {
     @Override
     public int count(String userId) {
         Session session = this.sessionFactory.openSession();
-        return (int)(long)(Long)vaultCriteriaForUser(userId, session).setProjection(Projections.rowCount()).uniqueResult();
+        return (int)(long)(Long)vaultCriteriaForUser(userId, session, Permission.CAN_MANAGE_VAULTS).setProjection(Projections.rowCount()).uniqueResult();
     }
 
     @Override
@@ -259,13 +259,13 @@ public class VaultDAOImpl implements VaultDAO {
 		return (List<Object[]>)query.list();
 	}
 
-    private Criteria vaultCriteriaForUser(String userId, Session session) {
+    private Criteria vaultCriteriaForUser(String userId, Session session, Permission permission) {
         Criteria roleAssignmentsCriteria = session.createCriteria(RoleAssignment.class, "roleAssignment");
         roleAssignmentsCriteria.createAlias("roleAssignment.user", "user");
         roleAssignmentsCriteria.createAlias("roleAssignment.role", "role");
         roleAssignmentsCriteria.createAlias("role.permissions", "permissions");
         roleAssignmentsCriteria.add(Restrictions.eq("user.id", userId));
-        roleAssignmentsCriteria.add(Restrictions.eq("permissions.id", Permission.CAN_VIEW_VAULTS_SIZE.getId()));
+        roleAssignmentsCriteria.add(Restrictions.eq("permissions.id", permission.getId()));
         roleAssignmentsCriteria.add(Restrictions.or(
                 Restrictions.isNotNull("roleAssignment.school"),
                 Restrictions.eq("role.type", RoleType.ADMIN)));
