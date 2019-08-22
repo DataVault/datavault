@@ -100,7 +100,7 @@ public class DepositDAOImpl implements DepositDAO {
     @Override
     public int queueCount(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = depositCriteriaForUser(userId, session, Permission.CAN_VIEW_DEPOSIT_QUEUE);
+        Criteria criteria = depositCriteriaForUser(userId, session, Permission.CAN_VIEW_QUEUES);
         criteria.add(Restrictions.eq("status", Deposit.Status.NOT_STARTED));
         criteria.setProjection(Projections.rowCount());
         return (int)(long)(Long)criteria.uniqueResult();
@@ -109,7 +109,7 @@ public class DepositDAOImpl implements DepositDAO {
     @Override
     public int inProgressCount(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = depositCriteriaForUser(userId, session, Permission.CAN_VIEW_IN_PROGRESS_DEPOSITS);
+        Criteria criteria = depositCriteriaForUser(userId, session, Permission.CAN_VIEW_IN_PROGRESS);
         criteria.add(Restrictions.and(Restrictions.ne("status", Deposit.Status.NOT_STARTED), Restrictions.ne("status", Deposit.Status.COMPLETE)));
         criteria.setProjection(Projections.rowCount());
         return (int)(long)(Long)criteria.uniqueResult();

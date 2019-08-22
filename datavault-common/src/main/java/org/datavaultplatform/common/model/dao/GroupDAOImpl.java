@@ -62,7 +62,7 @@ public class GroupDAOImpl implements GroupDAO {
     @Override
     public List<Group> list(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = groupCriteriaForUser(userId, session, Permission.CAN_MANAGE_SCHOOL_USERS);
+        Criteria criteria = groupCriteriaForUser(userId, session, Permission.CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS);
         criteria.addOrder(Order.asc("name"));
         List<Group> groups = criteria.list();
         session.close();
@@ -82,7 +82,7 @@ public class GroupDAOImpl implements GroupDAO {
     @Override
     public int count(String userId) {
         Session session = this.sessionFactory.openSession();
-        return (int)(long)(Long)groupCriteriaForUser(userId, session, Permission.CAN_MANAGE_SCHOOL_USERS).setProjection(Projections.rowCount()).uniqueResult();
+        return (int)(long)(Long)groupCriteriaForUser(userId, session, Permission.CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS).setProjection(Projections.rowCount()).uniqueResult();
     }
 
     private Criteria groupCriteriaForUser(String userId, Session session, Permission permission) {

@@ -33,12 +33,12 @@ public class AdminController {
             modelMap.addAttribute("canViewVaultsSize", true);
             modelMap.addAttribute("vaultsize", getVaultSize());
         }
-        if (permissionsModel.hasPermission(Permission.CAN_VIEW_IN_PROGRESS_DEPOSITS)) {
+        if (permissionsModel.hasPermission(Permission.CAN_VIEW_IN_PROGRESS)) {
             modelMap.addAttribute("canViewInProgress", true);
             modelMap.addAttribute("depositsinprogress", restService.getDepositsInProgressCount());
             modelMap.addAttribute("retrievesinprogress", restService.getRetrievesInProgressCount());
         }
-        if (permissionsModel.hasPermission(Permission.CAN_VIEW_DEPOSIT_QUEUE)) {
+        if (permissionsModel.hasPermission(Permission.CAN_VIEW_QUEUES)) {
             modelMap.addAttribute("canViewQueues", true);
             modelMap.addAttribute("depositqueue", restService.getDepositsQueue());
             modelMap.addAttribute("retrievequeue", restService.getRetrievesQueue());
@@ -58,7 +58,7 @@ public class AdminController {
         if (permissionsModel.hasPermission(Permission.CAN_MANAGE_BILLING_DETAILS)) {
             modelMap.addAttribute("canManageBillingDetails", true);
         }
-        if (permissionsModel.hasPermission(Permission.CAN_MANAGE_SCHOOL_USERS)) {
+        if (permissionsModel.hasPermission(Permission.CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS)) {
             modelMap.addAttribute("canManageSchoolUsers", true);
             modelMap.addAttribute("groupcount", restService.getGroupsCount());
         }

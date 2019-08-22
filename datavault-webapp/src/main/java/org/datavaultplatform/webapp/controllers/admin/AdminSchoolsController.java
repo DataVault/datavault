@@ -53,7 +53,7 @@ public class AdminSchoolsController {
         return mav;
     }
 
-    @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_USERS')")
+    @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS')")
     @GetMapping("/admin/schools/{school}")
     public ModelAndView getSchoolRoleAssignmentsPage(@PathVariable("school") String schoolId) {
 
@@ -72,7 +72,7 @@ public class AdminSchoolsController {
         return mav;
     }
 
-    @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_USERS')")
+    @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS')")
     @PostMapping("/admin/schools/{school}/user")
     public ResponseEntity addNewRoleAssignment(@PathVariable("school") String schoolId,
                                                @RequestParam("user") String userId,
@@ -140,7 +140,7 @@ public class AdminSchoolsController {
         return ResponseEntity.status(422).body(message);
     }
 
-    @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_USERS')")
+    @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS')")
     @PostMapping("/admin/schools/{school}/user/update")
     public ResponseEntity updateExistingRoleAssignment(@PathVariable("school") String schoolId,
                                                @RequestParam("assignment") Long assignmentId,
@@ -184,7 +184,7 @@ public class AdminSchoolsController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_USERS')")
+    @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS')")
     @PostMapping("/admin/schools/{school}/user/delete")
     public ResponseEntity deleteRoleAssignment(@PathVariable("school") String schoolId,
                                        @RequestParam("assignment") Long assignmentId) {

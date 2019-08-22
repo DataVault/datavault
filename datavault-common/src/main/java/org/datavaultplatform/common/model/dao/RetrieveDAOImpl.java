@@ -70,7 +70,7 @@ public class RetrieveDAOImpl implements RetrieveDAO {
     @Override
     public int queueCount(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = retrieveCriteriaForUser(userId, session, Permission.CAN_VIEW_DEPOSIT_QUEUE);
+        Criteria criteria = retrieveCriteriaForUser(userId, session, Permission.CAN_VIEW_QUEUES);
         criteria.add(Restrictions.eq("status", Retrieve.Status.NOT_STARTED));
         criteria.setProjection(Projections.rowCount());
         return (int)(long)(Long)criteria.uniqueResult();
@@ -79,7 +79,7 @@ public class RetrieveDAOImpl implements RetrieveDAO {
     @Override
     public int inProgressCount(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = retrieveCriteriaForUser(userId, session, Permission.CAN_VIEW_IN_PROGRESS_DEPOSITS);
+        Criteria criteria = retrieveCriteriaForUser(userId, session, Permission.CAN_VIEW_IN_PROGRESS);
         criteria.add(Restrictions.and(Restrictions.ne("status", Retrieve.Status.NOT_STARTED), Restrictions.ne("status", Retrieve.Status.COMPLETE)));
         criteria.setProjection(Projections.rowCount());
         return (int)(long)(Long)criteria.uniqueResult();

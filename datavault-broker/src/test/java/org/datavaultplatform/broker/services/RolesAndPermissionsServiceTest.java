@@ -87,7 +87,7 @@ public class RolesAndPermissionsServiceTest {
         expectedException.expectMessage("Unable to apply permission with type SCHOOL to role of type VAULT");
 
         RoleModel toCreate = aRole(RoleType.VAULT);
-        toCreate.addPermission(aPermission(Permission.CAN_MANAGE_SCHOOL_USERS, PermissionModel.PermissionType.SCHOOL));
+        toCreate.addPermission(aPermission(Permission.CAN_VIEW_RETRIEVES, PermissionModel.PermissionType.SCHOOL));
 
         // When
         underTest.createRole(toCreate);
@@ -217,8 +217,8 @@ public class RolesAndPermissionsServiceTest {
     public void getSchoolPermissionsShouldReturnAllPermissionsApplicableToSchoolRoles() {
         // Given
         PermissionModel school1 = aPermission(Permission.CAN_VIEW_VAULTS_SIZE, PermissionModel.PermissionType.SCHOOL);
-        PermissionModel school2 = aPermission(Permission.CAN_VIEW_IN_PROGRESS_DEPOSITS, PermissionModel.PermissionType.SCHOOL);
-        PermissionModel school3 = aPermission(Permission.CAN_VIEW_DEPOSIT_QUEUE, PermissionModel.PermissionType.SCHOOL);
+        PermissionModel school2 = aPermission(Permission.CAN_VIEW_IN_PROGRESS, PermissionModel.PermissionType.SCHOOL);
+        PermissionModel school3 = aPermission(Permission.CAN_VIEW_QUEUES, PermissionModel.PermissionType.SCHOOL);
 
         List<PermissionModel> allPermissions = Arrays.asList(
                 school1,
@@ -248,8 +248,8 @@ public class RolesAndPermissionsServiceTest {
 
         List<PermissionModel> allPermissions = Arrays.asList(
                 aPermission(Permission.CAN_VIEW_VAULTS_SIZE, PermissionModel.PermissionType.SCHOOL),
-                aPermission(Permission.CAN_VIEW_IN_PROGRESS_DEPOSITS, PermissionModel.PermissionType.SCHOOL),
-                aPermission(Permission.CAN_VIEW_DEPOSIT_QUEUE, PermissionModel.PermissionType.SCHOOL),
+                aPermission(Permission.CAN_VIEW_IN_PROGRESS, PermissionModel.PermissionType.SCHOOL),
+                aPermission(Permission.CAN_VIEW_QUEUES, PermissionModel.PermissionType.SCHOOL),
                 vault1,
                 vault2,
                 vault3,
@@ -293,7 +293,7 @@ public class RolesAndPermissionsServiceTest {
 
         RoleModel toUpdate = aRole(RoleType.SCHOOL);
         toUpdate.setId(123L);
-        toUpdate.addPermission(aPermission(Permission.CAN_MANAGE_SCHOOL_USERS, PermissionModel.PermissionType.SCHOOL));
+        toUpdate.addPermission(aPermission(Permission.CAN_VIEW_RETRIEVES, PermissionModel.PermissionType.SCHOOL));
 
         // When
         underTest.updateRole(toUpdate);
@@ -310,7 +310,7 @@ public class RolesAndPermissionsServiceTest {
 
         RoleModel toUpdate = aRole(RoleType.SCHOOL);
         toUpdate.setId(null);
-        toUpdate.addPermission(aPermission(Permission.CAN_MANAGE_SCHOOL_USERS, PermissionModel.PermissionType.SCHOOL));
+        toUpdate.addPermission(aPermission(Permission.CAN_VIEW_RETRIEVES, PermissionModel.PermissionType.SCHOOL));
 
         // When
         underTest.updateRole(toUpdate);
@@ -328,7 +328,7 @@ public class RolesAndPermissionsServiceTest {
 
         RoleModel toUpdate = aRole(RoleType.SCHOOL);
         toUpdate.setId(123L);
-        toUpdate.addPermission(aPermission(Permission.CAN_MANAGE_SCHOOL_USERS, PermissionModel.PermissionType.SCHOOL));
+        toUpdate.addPermission(aPermission(Permission.CAN_VIEW_RETRIEVES, PermissionModel.PermissionType.SCHOOL));
 
         // When
         underTest.updateRole(toUpdate);
