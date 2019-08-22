@@ -45,6 +45,21 @@
         color: #b94a48;
         background-color: #f2dede;
     }
+
+    .form-confirm {
+        display: flex;
+        margin-left: 0px !important;
+    }
+
+    .form-label {
+        float: left;
+    }
+
+    .form-input {
+        float: left;
+        min-width: 70%;
+    }
+
 </style>
 
 <#import "/spring.ftl" as spring />
@@ -67,15 +82,15 @@
                 </div>
                 <div class="modal-body">
                     <div id="create-error" class="alert alert-danger hidden" role="alert"></div>
-                    <div class="col-sm-10 form-group ui-widget">
-                        <label for="new-user-name" class="control-label">New Data Owner:</label>
-                        <div >
+                    <div class="col-sm-10 form-group ui-widget control-form--checkbox">
+                        <label for="new-user-name" class="control-label form-label">New Data Owner:</label>
+                        <div class="form-input" >
                             <input id="new-user-name" type="text" class="form-control" name="user" value=""/>
                         </div>
                     </div>
                     <div class="col-sm-10 form-group ui-widget">
-                        <label for="new-user-role" class="control-label">Vault role to assign to previous Data Owner:</label>
-                        <div>
+                        <label for="new-user-role" class="control-label form-label">Vault role to assign to previous Data Owner:</label>
+                        <div class="form-input">
                             <select id="new-user-role" name="role" class="form-control">
                                 <#list roles as role>
                                     <option value="${role.id}">${role.name}</option>
@@ -83,11 +98,11 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group ui-widget col-sm-10">
-                        <label for="confirm-checkbox" class="control-label">Don't assign previous owner a new role?</label>
+                    <div class="form-group ui-widget col-sm-10 form-confirm">
                         <div class="checkbox">
                             <input class="form-check-input" id="confirm-checkbox" type="checkbox" name="confirmed" />
                         </div>
+                        <label for="confirm-checkbox" class="control-label">Don't assign self new role?</label>
                     </div>
                 </div>
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
