@@ -3,12 +3,14 @@ package org.datavaultplatform.webapp.controllers.admin;
 import org.apache.commons.lang.StringUtils;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
+import org.datavaultplatform.webapp.exception.ForbiddenException;
 import org.datavaultplatform.webapp.exception.InvalidUunException;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -35,12 +37,23 @@ public class AdminSchoolsController {
 
     @GetMapping("/admin/schools")
     public ModelAndView getSchoolsListingPage() {
+        Group[] manageableSchools = restService.getGroupsByScopedPermissions();
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("admin/schools/index");
-        mav.addObject("schools", restService.getGroups());
+        switch (manageableSchools.length) {
+            case 0:
+                throw new ForbiddenException();
+            case 1:
+                mav.setViewName("redirect:/admin/schools/" + manageableSchools[0].getID());
+                break;
+            default:
+                mav.setViewName("admin/schools/index");
+                mav.addObject("schools", restService.getGroupsByScopedPermissions());
+                break;
+        }
         return mav;
     }
 
+    @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_USERS')")
     @GetMapping("/admin/schools/{school}")
     public ModelAndView getSchoolRoleAssignmentsPage(@PathVariable("school") String schoolId) {
 
@@ -59,6 +72,7 @@ public class AdminSchoolsController {
         return mav;
     }
 
+    @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_USERS')")
     @PostMapping("/admin/schools/{school}/user")
     public ResponseEntity addNewRoleAssignment(@PathVariable("school") String schoolId,
                                                @RequestParam("user") String userId,
@@ -126,6 +140,7 @@ public class AdminSchoolsController {
         return ResponseEntity.status(422).body(message);
     }
 
+    @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_USERS')")
     @PostMapping("/admin/schools/{school}/user/update")
     public ResponseEntity updateExistingRoleAssignment(@PathVariable("school") String schoolId,
                                                @RequestParam("assignment") Long assignmentId,
@@ -169,6 +184,7 @@ public class AdminSchoolsController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_USERS')")
     @PostMapping("/admin/schools/{school}/user/delete")
     public ResponseEntity deleteRoleAssignment(@PathVariable("school") String schoolId,
                                        @RequestParam("assignment") Long assignmentId) {

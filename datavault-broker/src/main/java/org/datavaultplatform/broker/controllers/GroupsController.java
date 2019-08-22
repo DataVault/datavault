@@ -45,6 +45,21 @@ public class GroupsController {
     public List<Group> getGroups(@RequestHeader(value = "X-UserID", required = true) String userID) {
         return groupsService.getGroups();
     }
+
+    @ApiMethod(
+            path = "/groups/byScopedPermissions",
+            verb = ApiVerb.GET,
+            description = "Gets a list of all Groups",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
+    @RequestMapping(value = "/groups/byScopedPermissions", method = RequestMethod.GET)
+    public List<Group> getGroupsByScopedPermissions(@RequestHeader(value = "X-UserID", required = true) String userId) {
+        return groupsService.getGroups(userId);
+    }
     
     @ApiHeaders(headers={
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),

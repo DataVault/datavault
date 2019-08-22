@@ -401,6 +401,11 @@ public class RestService {
         return (Group[])response.getBody();
     }
 
+    public Group[] getGroupsByScopedPermissions() {
+        HttpEntity<?> response = get(brokerURL + "/groups/byScopedPermissions", Group[].class);
+        return (Group[])response.getBody();
+    }
+
     public int getGroupsCount() {
         HttpEntity<?> response = get(brokerURL + "/groups/count", Integer.class);
         return (Integer)response.getBody();

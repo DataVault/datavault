@@ -13,6 +13,10 @@ public class GroupsService {
         return groupDAO.list();
     }
 
+    public List<Group> getGroups(String userId) {
+        return groupDAO.list(userId);
+    }
+
     public void addGroup(Group group) {
         
         // Default required "enabled" property

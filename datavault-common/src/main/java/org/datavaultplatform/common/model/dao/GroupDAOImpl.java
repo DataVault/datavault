@@ -60,6 +60,16 @@ public class GroupDAOImpl implements GroupDAO {
     }
 
     @Override
+    public List<Group> list(String userId) {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = groupCriteriaForUser(userId, session, Permission.CAN_MANAGE_SCHOOL_USERS);
+        criteria.addOrder(Order.asc("name"));
+        List<Group> groups = criteria.list();
+        session.close();
+        return groups;
+    }
+
+    @Override
     public Group findById(String Id) {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(Group.class);
