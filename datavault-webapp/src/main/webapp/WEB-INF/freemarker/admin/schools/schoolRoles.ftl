@@ -56,6 +56,8 @@
         }
     </style>
 
+    <#if canManageSchoolRoleAssignments>
+
     <div id="add-new-dialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="add-new-user-title" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -152,6 +154,8 @@
         </div>
     </div>
 
+    </#if>
+
     <div class="container">
 
         <ol class="breadcrumb">
@@ -183,7 +187,9 @@
                                     </#list>
                                 </div>
                             </th>
-                            <th class="action-column">Actions</th>
+                            <#if canManageSchoolRoleAssignments>
+                                <th class="action-column">Actions</th>
+                            </#if>
                         </tr>
                     </thead>
                     <tbody>
@@ -191,10 +197,12 @@
                             <tr>
                                 <td>${assignment.user.firstname} ${assignment.user.lastname}</td>
                                 <td class="role-column">${assignment.role.name}</td>
-                                <td class="action-column">
-                                    <a href="#" class="btn btn-default" data-toggle="modal" data-target="#update-existing-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.user.firstname} ${assignment.user.lastname}" data-user-role="${assignment.role.id}" title="Edit role assignment for user ${assignment.user.firstname} ${assignment.user.lastname}."><i class="fa fa-pencil"></i></a>
-                                    <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.user.firstname} ${assignment.user.lastname}" title="Remove role assignment for user ${assignment.user.firstname} ${assignment.user.lastname}."><i class="fa fa-trash"></i></a>
-                                </td>
+                                <#if canManageSchoolRoleAssignments>
+                                    <td class="action-column">
+                                        <a href="#" class="btn btn-default" data-toggle="modal" data-target="#update-existing-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.user.firstname} ${assignment.user.lastname}" data-user-role="${assignment.role.id}" title="Edit role assignment for user ${assignment.user.firstname} ${assignment.user.lastname}."><i class="fa fa-pencil"></i></a>
+                                        <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.user.firstname} ${assignment.user.lastname}" title="Remove role assignment for user ${assignment.user.firstname} ${assignment.user.lastname}."><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </#if>
                             </tr>
                         </#list>
                     </tbody>
@@ -229,6 +237,8 @@
                 $(this).toggle(allValues.length === 0 || allValues.includes($(this).find('.role-column').text()));
             });
         });
+
+        <#if canManageSchoolRoleAssignments>
 
         $('[data-target="#add-new-dialog"]').click(function() {
             $('#create-error').addClass('hidden').text('');
@@ -336,6 +346,8 @@
                 return false;
             }
         });
+
+        </#if>
     </script>
 
 </@layout.vaultLayout>

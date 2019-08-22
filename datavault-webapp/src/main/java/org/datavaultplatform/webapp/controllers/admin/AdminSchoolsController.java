@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,7 +56,7 @@ public class AdminSchoolsController {
 
     @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS')")
     @GetMapping("/admin/schools/{school}")
-    public ModelAndView getSchoolRoleAssignmentsPage(@PathVariable("school") String schoolId) {
+    public ModelAndView getSchoolRoleAssignmentsPage(@PathVariable("school") String schoolId, Principal principal) {
 
         Optional<Group> school = getGroup(schoolId);
         if (!school.isPresent()) {
@@ -64,11 +65,16 @@ public class AdminSchoolsController {
             throw new EntityNotFoundException(Group.class, schoolId);
         }
 
+        boolean canManageSchoolRoleAssignments = restService.getRoleAssignmentsForUser(principal.getName()).stream()
+                .flatMap(roleAssignment -> roleAssignment.getRole().getPermissions().stream())
+                .anyMatch(p -> p.getPermission() == Permission.CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS);
+
         ModelAndView mav = new ModelAndView();
         mav.setViewName("admin/schools/schoolRoles");
         mav.addObject("school", school.get());
         mav.addObject("roles", getRoles());
         mav.addObject("roleAssignments", getRoleAssignments(school.get()));
+        mav.addObject("canManageSchoolRoleAssignments", canManageSchoolRoleAssignments);
         return mav;
     }
 
