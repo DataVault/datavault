@@ -46,19 +46,31 @@
         background-color: #f2dede;
     }
 
+    .form-group {
+        display: block;
+        text-align: left;
+    }
+
     .form-confirm {
         display: flex;
         margin-left: 0px !important;
+        padding-left: 10px;
     }
 
     .form-label {
-        float: left;
+        display: block;
+        text-align: left !important;
     }
 
     .form-input {
-        float: left;
         min-width: 70%;
+        text-align: left !important;
     }
+
+    .checkbox {
+        margin-left: 10px !important;
+    }
+
 
 </style>
 
@@ -82,12 +94,16 @@
                 </div>
                 <div class="modal-body">
                     <div id="create-error" class="alert alert-danger hidden" role="alert"></div>
-                    <div class="col-sm-10 form-group ui-widget control-form--checkbox">
+
+
+                    <div class="col-sm-10 form-group ui-widget">
                         <label for="new-user-name" class="control-label form-label">New Data Owner:</label>
                         <div class="form-input" >
                             <input id="new-user-name" type="text" class="form-control" name="user" value=""/>
                         </div>
                     </div>
+
+
                     <div class="col-sm-10 form-group ui-widget">
                         <label for="new-user-role" class="control-label form-label">Vault role to assign to previous Data Owner:</label>
                         <div class="form-input">
@@ -98,6 +114,7 @@
                             </select>
                         </div>
                     </div>
+
                     <div class="form-group ui-widget col-sm-10 form-confirm">
                         <div class="checkbox">
                             <input class="form-check-input" id="confirm-checkbox" type="checkbox" name="confirmed" />
