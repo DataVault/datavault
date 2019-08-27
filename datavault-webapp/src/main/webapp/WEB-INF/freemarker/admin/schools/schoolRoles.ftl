@@ -167,7 +167,9 @@
         <h1 id="role-assignments-title">${school.name}</h1>
 
         <div id="add-new">
+            <#if canManageSchoolRoleAssignments>
             <a href="#" data-toggle="modal" data-target="#add-new-dialog">+ Add new user to school</a>
+            </#if>
         </div>
 
         <div class="col-md-8" id="role-assignments">
