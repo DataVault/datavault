@@ -1,25 +1,22 @@
 package org.datavaultplatform.webapp.controllers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.datavaultplatform.webapp.exception.InvalidUunException;
+import org.datavaultplatform.webapp.services.UserLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
-import org.apache.directory.api.ldap.model.cursor.CursorException;
-import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.VaultInfo;
-import org.datavaultplatform.webapp.services.LDAPService;
 import org.datavaultplatform.webapp.services.RestService;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +30,7 @@ public class VaultsController {
     private static final Logger logger = LoggerFactory.getLogger(VaultsController.class);
 
     private RestService restService;
-    private LDAPService ldapService;
+    private UserLookupService userLookupService;
     private String system;
     private String link;
     private String welcome;
@@ -52,9 +49,9 @@ public class VaultsController {
     public void setWelcome(String welcome) {
         this.welcome = welcome;
     }
-  
-    public void setLDAPService(LDAPService ldapService) {
-        this.ldapService = ldapService;
+
+    public void setUserLookupService(UserLookupService userLookupService) {
+        this.userLookupService = userLookupService;
     }
 
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
@@ -157,42 +154,11 @@ public class VaultsController {
             }
         }
 
-        User u = restService.getUser(uun);
-        if( u == null ) {
-            // Validate UUN
-            HashMap<String, String> attributes;
-            try {
-                attributes = ldapService.getLdapUserInfo(uun);
-            } catch (LdapException | CursorException | IOException e) {
-                e.printStackTrace();
-                redirectAttrs.addFlashAttribute("error",
-                        "<i>'"+uun+"'</i> doesnt seem to be a valid UUN!");
-                return new RedirectView(vaultUrl, true);
-            }
-            if(attributes.size() < 1){
-                redirectAttrs.addFlashAttribute("error",
-                        "<i>'"+uun+"'</i> doesnt seem to be a valid UUN!");
-                return new RedirectView(vaultUrl, true);
-            }
-
-            String[] names = attributes.get("cn").split(" "); attributes.remove("cn");
-
-            logger.info("Adding user " + uun + " - " + names[0] + " " + names[1]);
-            u = new User();
-            u.setFirstname(names[0]);
-            u.setLastname(names[1]);
-            u.setID(attributes.get("uid")); attributes.remove("uid");
-            u.setEmail(attributes.get("mail")); attributes.remove("mail");
-            u.setProperties(attributes);
-            u.setAdmin(false);
-
-            // Generate random password to make sure account is not easily accessible
-            String password = RandomStringUtils.randomAscii(10);
-            u.setPassword(password);
-
-            restService.addUser(u);
-        } else {
-            logger.info("User "+uun+" already exist!");
+        try {
+            userLookupService.ensureUserExists(uun);
+        } catch (InvalidUunException e) {
+            redirectAttrs.addFlashAttribute("error", "<i>'" + uun + "'</i> doesnt seem to be a valid UUN!");
+            return new RedirectView(vaultUrl, true);
         }
 
         restService.addDataManager(vaultID, uun);
@@ -233,15 +199,9 @@ public class VaultsController {
     @RequestMapping(value = "/vaults/autocompleteuun/{term}", method = RequestMethod.GET)
     @ResponseBody
     public String autocompleteUUN(@PathVariable("term") String term) {
-        List<String> result = new ArrayList<>();
-        try {
-            result = ldapService.autocompleteUID(term);
-        }catch(LdapException | CursorException | IOException ex) {
-            ex.printStackTrace();
-        }
+        List<String> result = userLookupService.getSuggestedUuns(term);
         Gson gson = new Gson();
-        String jsonArray = gson.toJson(result);
-        return jsonArray;
+        return gson.toJson(result);
     }
 }
 

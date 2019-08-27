@@ -1,5 +1,7 @@
 package org.datavaultplatform.webapp.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,12 +19,16 @@ import java.text.MessageFormat;
 @Controller
 class ErrorController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ErrorController.class);
+
     @RequestMapping("error")
     public String customError(HttpServletRequest request, HttpServletResponse response, Model model) {
         // Retrieve some useful information from the request
         Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
         Throwable throwable = (Throwable) request.getAttribute("javax.servlet.error.exception");
         String exceptionMessage = getExceptionMessage(throwable, statusCode, response);
+
+        logger.error("An error occurred: {}", exceptionMessage, throwable);
 
         String requestUri = (String) request.getAttribute("javax.servlet.error.request_uri");
         if (requestUri == null) {
