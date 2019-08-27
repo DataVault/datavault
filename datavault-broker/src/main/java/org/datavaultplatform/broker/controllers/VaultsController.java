@@ -194,7 +194,7 @@ public class VaultsController {
         List<VaultInfo> vaultResponses = new ArrayList<>();
         Long recordsTotal = 0L;
         Long recordsFiltered = 0L;
-        List<Vault> vaults = vaultsService.search(query, sort, order, offset, maxResult);
+        List<Vault> vaults = vaultsService.search(userID, query, sort, order, offset, maxResult);
         if(CollectionUtils.isNotEmpty(vaults)) {
 			for (Vault vault : vaults) {
 				vaultResponses.add(vault.convertToResponse());
@@ -207,7 +207,7 @@ public class VaultsController {
 	        		vault.setProjectSize(projectSizeMap.get(vault.getProjectId()));
 	        	}
 	        }
-	        recordsTotal = vaultsService.getTotalNumberOfVaults();
+	        recordsTotal = vaultsService.getTotalNumberOfVaults(userID);
 	        recordsFiltered = vaultsService.getTotalNumberOfVaults(query);
         }
         

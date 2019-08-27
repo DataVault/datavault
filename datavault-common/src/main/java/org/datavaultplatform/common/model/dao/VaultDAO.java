@@ -14,19 +14,19 @@ public interface VaultDAO {
 
     public List<Vault> list();
 
-    public List<Vault> list(String sort, String order, String offset, String maxResult);
+    public List<Vault> list(String userId, String sort, String order, String offset, String maxResult);
 
     public Vault findById(String Id);
 
-    public List<Vault> search(String query, String sort, String order, String offset, String maxResult);
+    public List<Vault> search(String userId, String query, String sort, String order, String offset, String maxResult);
 
     public int count(String userId);
 
     public int getRetentionPolicyCount(int status);
 
-	public Long getTotalNumberOfVaults();
+	public Long getTotalNumberOfVaults(String userId);
 
-	public Long getTotalNumberOfVaults(String query);
+	public Long getTotalNumberOfVaults(String userId, String query);
 	
 	public List<Object[]> getAllProjectsSize();
 }

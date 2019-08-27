@@ -16,8 +16,8 @@ public class VaultsService {
 
     public List<Vault> getVaults() { return vaultDAO.list(); }
 
-    public List<Vault> getVaults(String sort, String order, String offset, String maxResult) { 
-    	return vaultDAO.list(sort, order, offset, maxResult); 
+    public List<Vault> getVaults(String userId, String sort, String order, String offset, String maxResult) {
+    	return vaultDAO.list(userId, sort, order, offset, maxResult);
     }
 
     public void addVault(Vault vault) {
@@ -42,7 +42,9 @@ public class VaultsService {
         this.vaultDAO = vaultDAO;
     }
 
-    public List<Vault> search(String query, String sort, String order, String offset, String maxResult) { return this.vaultDAO.search(query, sort, order, offset, maxResult); }
+    public List<Vault> search(String userId, String query, String sort, String order, String offset, String maxResult) {
+        return this.vaultDAO.search(userId, query, sort, order, offset, maxResult);
+    }
 
     public int count(String userId) { return vaultDAO.count(userId); }
 
@@ -81,16 +83,17 @@ public class VaultsService {
         return vault;
     }
  	
-	public Long getTotalNumberOfVaults() {
-		return vaultDAO.getTotalNumberOfVaults();
+	public Long getTotalNumberOfVaults(String userId) {
+		return vaultDAO.getTotalNumberOfVaults(userId);
 	}
+
 	/**
 	 * Total number of records after applying search filter
 	 * @param query
 	 * @return
 	 */
-	public Long getTotalNumberOfVaults(String query) {
-		return vaultDAO.getTotalNumberOfVaults(query);
+	public Long getTotalNumberOfVaults(String userId, String query) {
+		return vaultDAO.getTotalNumberOfVaults(userId, query);
 	}
 	
 	public Map<String, Long> getAllProjectsSize() {

@@ -95,9 +95,9 @@ public class VaultDAOImpl implements VaultDAO {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Vault> list(String sort, String order, String offset, String maxResult) {
+    public List<Vault> list(String userId, String sort, String order, String offset, String maxResult) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
+        Criteria criteria = vaultCriteriaForUser(userId, session, Permission.CAN_MANAGE_VAULTS);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
         order(sort, order, criteria);
@@ -123,9 +123,9 @@ public class VaultDAOImpl implements VaultDAO {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Vault> search(String query, String sort, String order, String offset, String maxResult) {
+    public List<Vault> search(String userId, String query, String sort, String order, String offset, String maxResult) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
+        Criteria criteria = vaultCriteriaForUser(userId, session, Permission.CAN_MANAGE_VAULTS);
         criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
@@ -228,9 +228,9 @@ public class VaultDAOImpl implements VaultDAO {
     }
 
 	@Override
-	public Long getTotalNumberOfVaults() {
+	public Long getTotalNumberOfVaults(String userId) {
 		Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
+        Criteria criteria = vaultCriteriaForUser(userId, session, Permission.CAN_MANAGE_VAULTS);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         criteria.setProjection(Projections.rowCount());
         Long totalNoOfRows = (Long) criteria.uniqueResult();
@@ -238,12 +238,14 @@ public class VaultDAOImpl implements VaultDAO {
         session.close();
         return totalNoOfRows;
 	}
+
 	/**
 	 * Retrieve Total NUmber of rows after applying the filter
 	 */
-	public Long getTotalNumberOfVaults(String query) {
+	@Override
+	public Long getTotalNumberOfVaults(String userId, String query) {
 		Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
+        Criteria criteria = vaultCriteriaForUser(userId, session, Permission.CAN_MANAGE_VAULTS);
         criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         criteria.setProjection(Projections.rowCount());
@@ -252,7 +254,8 @@ public class VaultDAOImpl implements VaultDAO {
         session.close();
         return totalNoOfRows;
 	}
-	
+
+	@Override
 	public List<Object[]> getAllProjectsSize() {
 		Session session = this.sessionFactory.openSession();
 		Query query = session.createQuery("select v.projectId, sum(v.vaultSize) from Vault v group by v.projectId");
