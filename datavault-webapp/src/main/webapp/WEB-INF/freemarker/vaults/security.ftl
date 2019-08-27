@@ -158,7 +158,8 @@
                     <div class="form-group ui-widget">
                         <label for="new-user-role" class="control-label col-sm-2">Role:</label>
                         <div class="col-sm-10">
-                            <select id="new-user-role" name="role" class="form-control">
+                            <select id="new-user-role" name="role" class="form-control" >
+                                <option hidden value="" selected disabled>Please select</option>
                                 <#list roles as role>
                                     <option value="${role.id}">${role.name}</option>
                                 </#list>
