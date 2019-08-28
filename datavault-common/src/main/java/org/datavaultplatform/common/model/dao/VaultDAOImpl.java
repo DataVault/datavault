@@ -1,6 +1,8 @@
 package org.datavaultplatform.common.model.dao;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -97,7 +99,11 @@ public class VaultDAOImpl implements VaultDAO {
     @Override
     public List<Vault> list(String userId, String sort, String order, String offset, String maxResult) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = vaultCriteriaForUser(userId, session, Permission.CAN_MANAGE_VAULTS);
+        Optional<Criteria> criteriaOptional = vaultCriteriaForUser(userId, session, Permission.CAN_MANAGE_VAULTS);
+        if (criteriaOptional.isPresent()) {
+            return new ArrayList<>();
+        }
+        Criteria criteria = criteriaOptional.get();
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
         order(sort, order, criteria);
@@ -125,7 +131,11 @@ public class VaultDAOImpl implements VaultDAO {
     @Override
     public List<Vault> search(String userId, String query, String sort, String order, String offset, String maxResult) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = vaultCriteriaForUser(userId, session, Permission.CAN_MANAGE_VAULTS);
+        Optional<Criteria> criteriaOptional = vaultCriteriaForUser(userId, session, Permission.CAN_MANAGE_VAULTS);
+        if (!criteriaOptional.isPresent()) {
+            return new ArrayList<>();
+        }
+        Criteria criteria = criteriaOptional.get();
         criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
@@ -143,7 +153,8 @@ public class VaultDAOImpl implements VaultDAO {
     @Override
     public int count(String userId) {
         Session session = this.sessionFactory.openSession();
-        return (int)(long)(Long)vaultCriteriaForUser(userId, session, Permission.CAN_MANAGE_VAULTS).setProjection(Projections.rowCount()).uniqueResult();
+        Optional<Criteria> criteria = vaultCriteriaForUser(userId, session, Permission.CAN_MANAGE_VAULTS);
+        return criteria.map(value -> (int) (long) (Long) value.setProjection(Projections.rowCount()).uniqueResult()).orElse(0);
     }
 
     @Override
@@ -230,13 +241,16 @@ public class VaultDAOImpl implements VaultDAO {
 	@Override
 	public Long getTotalNumberOfVaults(String userId) {
 		Session session = this.sessionFactory.openSession();
-        Criteria criteria = vaultCriteriaForUser(userId, session, Permission.CAN_MANAGE_VAULTS);
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        criteria.setProjection(Projections.rowCount());
-        Long totalNoOfRows = (Long) criteria.uniqueResult();
+        Long totalNumberOfVaults = 0L;
+		Optional<Criteria> criteria = vaultCriteriaForUser(userId, session, Permission.CAN_MANAGE_VAULTS);
+        if (criteria.isPresent()) {
+            criteria.get().setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+            criteria.get().setProjection(Projections.rowCount());
+            totalNumberOfVaults = (Long) criteria.get().uniqueResult();
+        }
 
         session.close();
-        return totalNoOfRows;
+        return totalNumberOfVaults;
 	}
 
 	/**
@@ -245,14 +259,17 @@ public class VaultDAOImpl implements VaultDAO {
 	@Override
 	public Long getTotalNumberOfVaults(String userId, String query) {
 		Session session = this.sessionFactory.openSession();
-        Criteria criteria = vaultCriteriaForUser(userId, session, Permission.CAN_MANAGE_VAULTS);
-        criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        criteria.setProjection(Projections.rowCount());
-        Long totalNoOfRows = (Long) criteria.uniqueResult();
+        Long totalNumberOfVaults = 0L;
+		Optional<Criteria> criteria = vaultCriteriaForUser(userId, session, Permission.CAN_MANAGE_VAULTS);
+        if (criteria.isPresent()) {
+            criteria.get().add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
+            criteria.get().setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+            criteria.get().setProjection(Projections.rowCount());
+            totalNumberOfVaults = (Long) criteria.get().uniqueResult();
+        }
 
         session.close();
-        return totalNoOfRows;
+        return totalNumberOfVaults;
 	}
 
 	@Override
@@ -262,7 +279,7 @@ public class VaultDAOImpl implements VaultDAO {
 		return (List<Object[]>)query.list();
 	}
 
-    private Criteria vaultCriteriaForUser(String userId, Session session, Permission permission) {
+    private Optional<Criteria> vaultCriteriaForUser(String userId, Session session, Permission permission) {
         Criteria roleAssignmentsCriteria = session.createCriteria(RoleAssignment.class, "roleAssignment");
         roleAssignmentsCriteria.createAlias("roleAssignment.user", "user");
         roleAssignmentsCriteria.createAlias("roleAssignment.role", "role");
@@ -277,6 +294,10 @@ public class VaultDAOImpl implements VaultDAO {
                 .map(roleAssignment -> roleAssignment.getSchool() == null ? "*" : roleAssignment.getSchool().getID())
                 .collect(Collectors.toSet());
 
+        if (schoolIds.isEmpty()) {
+            return Optional.empty();
+        }
+
         Criteria vaultCriteria = session.createCriteria(Vault.class, "vault");
         if (!schoolIds.contains("*")) {
             vaultCriteria.createAlias("vault.group", "group");
@@ -285,6 +306,6 @@ public class VaultDAOImpl implements VaultDAO {
                     .collect(Collectors.toSet());
             vaultCriteria.add(Restrictions.in("group.id", permittedSchoolIds));
         }
-        return vaultCriteria;
+        return Optional.of(vaultCriteria);
     }
 }

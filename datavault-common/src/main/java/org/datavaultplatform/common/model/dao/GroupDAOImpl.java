@@ -9,7 +9,9 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -62,9 +64,11 @@ public class GroupDAOImpl implements GroupDAO {
     @Override
     public List<Group> list(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = groupCriteriaForUser(userId, session, Permission.CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS);
-        criteria.addOrder(Order.asc("name"));
-        List<Group> groups = criteria.list();
+        List<Group> groups = new ArrayList<>();
+        Optional<Criteria> criteria = groupCriteriaForUser(userId, session, Permission.CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS);
+        if (criteria.isPresent()) {
+            groups = criteria.get().addOrder(Order.asc("name")).list();
+        }
         session.close();
         return groups;
     }
@@ -82,10 +86,11 @@ public class GroupDAOImpl implements GroupDAO {
     @Override
     public int count(String userId) {
         Session session = this.sessionFactory.openSession();
-        return (int)(long)(Long)groupCriteriaForUser(userId, session, Permission.CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS).setProjection(Projections.rowCount()).uniqueResult();
+        Optional<Criteria> criteria = groupCriteriaForUser(userId, session, Permission.CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS);
+        return criteria.map(value -> (int) (long) (Long) value.setProjection(Projections.rowCount()).uniqueResult()).orElse(0);
     }
 
-    private Criteria groupCriteriaForUser(String userId, Session session, Permission permission) {
+    private Optional<Criteria> groupCriteriaForUser(String userId, Session session, Permission permission) {
         Criteria roleAssignmentsCriteria = session.createCriteria(RoleAssignment.class, "roleAssignment");
         roleAssignmentsCriteria.createAlias("roleAssignment.user", "user");
         roleAssignmentsCriteria.createAlias("roleAssignment.role", "role");
@@ -100,6 +105,10 @@ public class GroupDAOImpl implements GroupDAO {
                 .map(roleAssignment -> roleAssignment.getSchool() == null ? "*" : roleAssignment.getSchool().getID())
                 .collect(Collectors.toSet());
 
+        if (groupIds.isEmpty()) {
+            return Optional.empty();
+        }
+
         Criteria retrieveCriteria = session.createCriteria(Group.class, "group");
         if (!groupIds.contains("*")) {
             Set<String> permittedSchoolIds = groupIds.stream()
@@ -107,6 +116,6 @@ public class GroupDAOImpl implements GroupDAO {
                     .collect(Collectors.toSet());
             retrieveCriteria.add(Restrictions.in("group.id", permittedSchoolIds));
         }
-        return retrieveCriteria;
+        return Optional.of(retrieveCriteria);
     }
 }
