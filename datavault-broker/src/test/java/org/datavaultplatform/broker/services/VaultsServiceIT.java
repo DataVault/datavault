@@ -1,6 +1,8 @@
 package org.datavaultplatform.broker.services;
 
 import static org.hamcrest.Matchers.is;
+
+import org.datavaultplatform.common.model.RoleAssignment;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,14 +11,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
 
 import java.util.Date;
-import java.util.List;
 
 import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.model.dao.VaultDAO;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-//import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 
@@ -31,9 +29,20 @@ import org.springframework.test.context.transaction.TransactionConfiguration;
 public class VaultsServiceIT {
     @Autowired
     private VaultsService vaultsService;
-    
+
+    @Autowired
+    private RolesAndPermissionsService rolesAndPermissionsService;
+
+    @Autowired
+    private UsersService usersService;
+
     @Test
     public void checkVaultCount() {
+        RoleAssignment isAdminRoleAssignment = new RoleAssignment();
+        isAdminRoleAssignment.setRole(rolesAndPermissionsService.getIsAdmin());
+        isAdminRoleAssignment.setUser(usersService.getUser("admin1"));
+        rolesAndPermissionsService.createRoleAssignment(isAdminRoleAssignment);
+
         int prevVaultCount = vaultsService.count("admin1");
         
         Vault vault = new Vault("Vault Test");
