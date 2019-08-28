@@ -19,7 +19,7 @@
 		<table class="table table-sm">
 			<tbody>
 				<tr>
-					<th scope="col">Contact Name</th>
+					<th scope="col">Authoriser</th>
 					<td><#if billingDetails.getContactName()??>${billingDetails.contactName?html}<#else> </#if></td>
 				</tr>
 				<tr>
@@ -67,7 +67,7 @@
                     </div>
                     <div class="modal-body">
                     	<div class="form-group">
-                            <label class="control-label">Contact Name:</label>
+                            <label class="control-label">Authoriser:</label>
                             <@spring.bind "billingDetails.contactName" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
                    value="${spring.status.value!""}" id="contactName" maxlength="400"/>
@@ -98,13 +98,13 @@
                    <#if spring.status.value?? && spring.status.value?string=="true">checked="true"</#if> /> 
                         </div>
                         <div class="form-group">
-                            <label class="control-label">Amount to be billed:(Allowed values [numbers and .])</label>
+                            <label class="control-label">Amount to be billed:(Please enter the amount in pounds (and pence  if applicable) without any symbols, do not use commas)</label>
                             <@spring.bind "billingDetails.amountToBeBilled" />
                             <input type="text" class="form-control" name="${spring.status.expression}"
                    value="${spring.status.value!""}" id="amountToBeBilled" maxlength="400" pattern="[0-9]+(\.[0-9][0-9]?)?"/>
                         </div>
                         <div class="form-group">
-                            <label class="control-label">Amount billed:(Allowed values [numbers and .])</label>
+                            <label class="control-label">Amount billed:(Please enter the amount in pounds (and pence  if applicable) without any symbols, do not use commas)</label>
                             <@spring.bind "billingDetails.amountBilled" />
                             <input type="text" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?)?" name="${spring.status.expression}"
                    value="${spring.status.value!""}" maxlength="400" id="amountBilled"/>
