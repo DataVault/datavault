@@ -90,7 +90,7 @@ public class ScopedPermissionEvaluator implements PermissionEvaluator {
 
             // TODO: Stop gap, need to imply permissions for data owners either via Vaults.user, or a RoleAssignment
             // relation.
-            if (auth.getName().equals(vault.getUser().getID())) {
+            if (vault.getUser() != null && auth.getName().equals(vault.getUser().getID())) {
                 return true;
             }
 

@@ -93,21 +93,24 @@
                     <h4 class="modal-title" id="orphan-user-title">Transfer Ownership</h4>
                 </div>
                 <div class="modal-body">
-                    <div id="create-error" class="alert alert-danger hidden" role="alert"></div>
+                    <div class="alert alert-danger hidden error" role="alert"></div>
 
 
-                    <div class="col-sm-10 form-group ui-widget">
-                        <label for="new-user-name" class="control-label form-label">New Data Owner:</label>
-                        <div class="form-input" >
-                            <input id="new-user-name" type="text" class="form-control" name="user" value=""/>
+                    <div id="transfer-inputs">
+
+                        <div class="col-sm-10 form-group ui-widget">
+                            <label for="new-user-name" class="control-label form-label">New Data Owner</label>
+                            <div class="form-input">
+                                <input id="new-user-name" type="text" class="form-control" name="user" value=""/>
+                            </div>
                         </div>
                     </div>
 
-
                     <div class="col-sm-10 form-group ui-widget">
-                        <label for="new-user-role" class="control-label form-label">Vault role to assign to previous Data Owner:</label>
+                        <label for="transfer-role" class="control-label form-label">Vault role to assign to previous
+                            Data Owner</label>
                         <div class="form-input">
-                            <select id="new-user-role" name="role" class="form-control">
+                            <select id="transfer-role" name="role" class="form-control">
                                 <#list roles as role>
                                     <option value="${role.id}">${role.name}</option>
                                 </#list>
@@ -115,13 +118,35 @@
                         </div>
                     </div>
 
-                    <div class="form-group ui-widget col-sm-10 form-confirm">
-                        <div class="checkbox">
-                            <input class="form-check-input" id="confirm-checkbox" type="checkbox" name="confirmed" />
+                    <#assign securityExpr = "hasPermission('${vault.ID}', 'vault', 'MANAGE_ROLES')">
+                    <@sec.authorize access=securityExpr>
+                        <div class="form-group ui-widget col-sm-10 form-confirm">
+                            <div class="checkbox">
+                                <input class="form-check-input" id="confirm-checkbox" type="checkbox"
+                                       name="assigningRole" checked="checked"/>
+                            </div>
+                            <label for="confirm-checkbox" class="control-label">Assign role to previous data
+                                owner?</label>
                         </div>
-                        <label for="confirm-checkbox" class="control-label">Don't assign self new role?</label>
+                    </@sec.authorize>
+
+                    <@sec.authorize access="hasRole('ROLE_IS_ADMIN')">
+                        <div class="form-group ui-widget col-sm-10 form-confirm">
+                            <div class="checkbox">
+                                <input class="form-check-input" id="orphan-checkbox" type="checkbox" name="orphaning"/>
+                            </div>
+                            <label for="orphan-checkbox" class="control-label">Temporarily orphan this vault?</label>
+                        </div>
+                    </@sec.authorize>
+
+                    <div class="col-sm-10 form-group ui-widget control-form--checkbox">
+                        <label for="transfer-reason" class="control-label form-label">Transfer reason</label>
+                        <div class="form-input">
+                            <textarea class="form-control" id="transfer-reason" name="reason"></textarea>
+                        </div>
                     </div>
                 </div>
+
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <div class="modal-footer">
@@ -148,7 +173,7 @@
                     <h4 class="modal-title" id="add-new-user-title">Add new user</h4>
                 </div>
                 <div class="modal-body">
-                    <div id="create-error" class="alert alert-danger hidden" role="alert"></div>
+                    <div class="alert alert-danger error hidden" role="alert"></div>
                     <div class="form-group ui-widget">
                         <label for="new-user-name" class="control-label col-sm-2">Name:</label>
                         <div class="col-sm-10">
@@ -192,7 +217,7 @@
                     <h4 class="modal-title" id="update-existing-title">Edit user's role</h4>
                 </div>
                 <div class="modal-body">
-                    <div id="update-error" class="alert alert-danger hidden" role="alert"></div>
+                    <div class="alert alert-danger error hidden" role="alert"></div>
                     <div class="form-group ui-widget">
                         <label for="role-update-user-name" class="control-label col-sm-2">Name:</label>
                         <div class="col-sm-10">
@@ -234,7 +259,7 @@
                                 class="fa fa-times" aria-hidden="true"></i></button>
                     <h4 class="modal-title" id="delete-title">Delete user</h4>
                 </div>
-                <div id="delete-error" class="alert alert-danger hidden" role="alert"></div>
+                <div class="alert alert-danger hidden error" role="alert"></div>
                 <div class="modal-body">
                     <label>Do you want to delete <span id="delete-role-user-name"></span> from this vault?</label>
                 </div>
@@ -278,17 +303,20 @@
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>${vault.userName}</td>
-                <td class="role-column">Data Owner</td>
-                <td class="action-column">
-                    <a href="#" class="btn btn-default" data-toggle="modal"
-                       data-target="#orphan-dialog"
-                       data-user-name="${vault.userName}"
-                       title="Transfer ownership of this vault."><i
-                                class="fa fa-users"></i></a>
-                </td>
-            </tr>
+            <#if vault.userName?has_content>
+                <tr>
+                    <td>${vault.userName}</td>
+                    <td class="role-column">Data Owner</td>
+                    <td class="action-column">
+                        <a href="#" class="btn btn-default" data-toggle="modal"
+                           data-target="#orphan-dialog"
+                           data-user-name="${vault.userName}"
+                           title="Transfer ownership of this vault."><i
+                                    class="fa fa-users"></i></a>
+                    </td>
+                </tr>
+            </#if>
+
             <#list roleAssignments as assignment>
                 <tr>
                     <td>${assignment.user.firstname} ${assignment.user.lastname}</td>
@@ -382,14 +410,23 @@
                     window.location.href = redirectUri;
                 },
                 error: function (xhr) {
-                    var error = form.children('.error').removeClass('hidden');
+                    var error = form.find('.error').removeClass('hidden');
                     var text = xhr.status === 422 ? xhr.responseText : 'An error occurred. Please contact your system administrator.';
 
-                    error.text(text);
+                    error.html(text.replace("\n", "<br/>"));
                 }
             });
         });
     }
+
+    $(document).ready(function () {
+        var transferInputs = $('#transfer-inputs input');
+
+        $('#orphan-checkbox').on('change', function (e) {
+            var on = $(this).prop('checked');
+            transferInputs.prop('disabled', on);
+        });
+    });
 
     $("#new-user-name").autocomplete({
         autoFocus: true,

@@ -36,6 +36,7 @@
         <security:logout
                 logout-url="/auth/logout"
                 logout-success-url="/auth/login?logout"/>
+        <security:expression-handler ref="webSecurityExpressionHandler"/>
 
         <security:session-management>
             <security:concurrency-control session-registry-alias="sessionRegistry" expired-url="/auth/login?security" />

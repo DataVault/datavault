@@ -25,6 +25,11 @@ public class VaultsService {
         vault.setCreationTime(d);
         vaultDAO.save(vault);
     }
+
+    public void orphanVault(Vault vault) {
+        vault.setUser(null);
+        vaultDAO.update(vault);
+    }
     
     public void updateVault(Vault vault) {
         vaultDAO.update(vault);
@@ -106,5 +111,10 @@ public class VaultsService {
 		}
 		return projectSizeMap;
 	}
+
+    public void transferVault(Vault vault, User newOwner, String reason) {
+        vault.setUser(newOwner);
+        vaultDAO.update(vault);
+    }
 }
 

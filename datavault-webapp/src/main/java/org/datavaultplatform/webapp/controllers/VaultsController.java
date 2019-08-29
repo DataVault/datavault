@@ -1,38 +1,56 @@
 package org.datavaultplatform.webapp.controllers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.OptionalLong;
-
+import com.google.common.base.Strings;
+import com.google.gson.Gson;
 import org.apache.commons.lang.RandomStringUtils;
+import org.datavaultplatform.common.model.DataManager;
+import org.datavaultplatform.common.model.Dataset;
+import org.datavaultplatform.common.model.Group;
+import org.datavaultplatform.common.model.RetentionPolicy;
+import org.datavaultplatform.common.model.Retrieve;
+import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.TransferVault;
-import org.datavaultplatform.webapp.exception.EntityNotFoundException;
+import org.datavaultplatform.common.response.DepositInfo;
+import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.exception.InvalidUunException;
+import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
-import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.request.CreateVault;
-import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.VaultInfo;
-import org.datavaultplatform.webapp.services.RestService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
+import javax.validation.Validator;
 import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 //@RequestMapping("/vaults")
@@ -70,10 +88,29 @@ public class VaultsController {
             @PathVariable("vaultid") String vaultId,
             @Valid VaultTransferRequest request) {
 
+        if (!request.isOrphaning()) {
+            User newOwner = restService.getUser(request.user);
+            if (newOwner == null) {
+                return ResponseEntity.status(422).body("No such user)");
+            }
+
+            boolean hasVaultRole = restService.getRoleAssignmentsForUser(request.user)
+                    .stream()
+                    .anyMatch(role -> {
+                        Vault vault = role.getVault();
+                        return vault != null && vault.getID().equals(vaultId);
+                    });
+
+            if (hasVaultRole) {
+                return ResponseEntity.status(422).body("User already has a role in this vault");
+            }
+        }
+
         TransferVault transfer = new TransferVault();
         transfer.setUserId(request.user);
         transfer.setRoleId(request.role);
-        transfer.setChangingRoles(request.confirmed);
+        transfer.setChangingRoles(request.assigningRole);
+        transfer.setOrphaning(request.orphaning);
 
         restService.transferVault(vaultId, transfer);
 
@@ -236,10 +273,20 @@ public class VaultsController {
     private static class VaultTransferRequest {
         private Long role;
         private String user;
-        private boolean confirmed;
+        private boolean assigningRole;
+        private boolean orphaning;
+        private String reason;
 
-        public void setConfirmed(boolean confirmed) {
-            this.confirmed = confirmed;
+        public void setOrphaning(boolean orphaning) {
+            this.orphaning = orphaning;
+        }
+
+        public boolean isOrphaning() {
+            return orphaning;
+        }
+
+        public void setAssigningRole(boolean assigningRole) {
+            this.assigningRole = assigningRole;
         }
 
         public void setRole(Long role) {
@@ -250,19 +297,35 @@ public class VaultsController {
             this.user = user;
         }
 
-        @NotNull
         public Long getRole() {
             return role;
         }
 
-        @NotNull
-        @NotEmpty
         public String getUser() {
             return user;
         }
 
-        public boolean isConfirmed() {
-            return confirmed;
+        @NotEmpty(message = "Must provide a transfer reason.")
+        public String getReason() {
+            return reason;
+        }
+
+        public void setReason(String reason) {
+            this.reason = reason;
+        }
+
+        public boolean isAssigningRole() {
+            return assigningRole;
+        }
+
+        @AssertTrue(message = "Must select a user.")
+        public boolean isUserSelectionValid() {
+            return !orphaning && !Strings.isNullOrEmpty(user);
+        }
+
+        @AssertTrue(message = "Must select a role when assigning a new role.")
+        public boolean isRoleSelectionValid() {
+            return !assigningRole || role != null;
         }
     }
 }

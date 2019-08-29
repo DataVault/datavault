@@ -154,20 +154,18 @@ public class VaultsController {
                                         @PathVariable("vaultId") String vaultId,
                                         @RequestBody TransferVault transfer) {
 
-        User newOwner = usersService.getUser(transfer.getUserId());
-
-        if (newOwner == null) {
-            throw new IllegalStateException("Can't orphan a vault currently");
-        }
-
         Vault vault = vaultsService.getVault(vaultId);
         User currentOwner = vault.getUser();
 
-        vault.setUser(newOwner);
-        vaultsService.saveOrUpdateVault(vault);
+        if (transfer.isOrphaning()) {
+            vaultsService.orphanVault(vault);
+        } else {
+            vaultsService.transferVault(vault, usersService.getUser(transfer.getUserId()), transfer.getReason());
+        }
 
-        Long roleId = transfer.getRoleId();
         if (transfer.isChangingRoles()) {
+            long roleId = transfer.getRoleId();
+
             RoleModel role = permissionsService.getRole(roleId);
             RoleAssignment assignment = new RoleAssignment();
             assignment.setRole(role);

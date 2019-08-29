@@ -14,10 +14,16 @@
         http://www.springframework.org/schema/security/spring-security.xsd">
 
     <security:global-method-security pre-post-annotations="enabled" secured-annotations="enabled">
-        <security:expression-handler ref="securityExpressionHandler"/>
+        <security:expression-handler ref="methodSecurityExpressionHandler"/>
     </security:global-method-security>
 
-    <bean id="securityExpressionHandler" class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler">
+    <bean id="methodSecurityExpressionHandler" primary="true"
+          class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler">
+        <property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </bean>
+
+    <bean id="webSecurityExpressionHandler" primary="true"
+          class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler">
         <property name="permissionEvaluator" ref="permissionEvaluator"/>
     </bean>
 

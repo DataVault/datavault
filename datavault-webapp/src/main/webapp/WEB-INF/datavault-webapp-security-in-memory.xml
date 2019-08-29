@@ -10,6 +10,7 @@
     <security:http pattern="/resources/**" security="none"/>
 
 	<security:http>
+        <security:expression-handler ref="webSecurityExpressionHandler"/>
 
         <security:intercept-url pattern="/auth/**" access="permitAll" />
         <security:intercept-url pattern="/**" access="hasRole('ROLE_USER')" />
