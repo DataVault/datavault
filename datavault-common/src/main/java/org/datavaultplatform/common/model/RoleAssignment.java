@@ -11,7 +11,8 @@ import java.util.Objects;
 @Table(
         name="Role_assignments",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = { "role_id", "user_id", "school_id", "vault_id" })
+                @UniqueConstraint(columnNames = { "role_id", "user_id", "school_id" }),
+                @UniqueConstraint(columnNames = { "role_id", "user_id", "vault_id" })
         }
 )
 public class RoleAssignment {
