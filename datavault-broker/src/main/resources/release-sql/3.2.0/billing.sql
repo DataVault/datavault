@@ -12,3 +12,5 @@ CREATE TABLE BillingInfo (
     KEY FK_eb8b8ksy2fq52e8lxsr3gdku6 (vaultID),
     CONSTRAINT FK_eb8b8ksy2fq52e8lxsr3gdku6 FOREIGN KEY (vaultID) REFERENCES Vaults (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
+ALTER TABLE Vaults ADD COLUMN projectId varchar(180);
