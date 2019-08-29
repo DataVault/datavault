@@ -137,11 +137,13 @@
 
     <bean id="adminRolesController" class="org.datavaultplatform.webapp.controllers.admin.AdminRolesController">
         <property name="restService" ref="restService" />
+        <property name="forceLogoutService" ref="forceLogoutService" />
     </bean>
 
     <bean id="adminSchoolsController" class="org.datavaultplatform.webapp.controllers.admin.AdminSchoolsController">
         <property name="restService" ref="restService" />
         <property name="userLookupService" ref="userLookupService" />
+        <property name="forceLogoutService" ref="forceLogoutService" />
     </bean>
 
     <bean id="adminBillingController" class="org.datavaultplatform.webapp.controllers.admin.AdminBillingController">
@@ -204,6 +206,11 @@
     <bean id="userLookupService" class="org.datavaultplatform.webapp.services.UserLookupService">
         <property name="restService" ref="restService" />
         <property name="ldapService" ref="ldapService" />
+    </bean>
+
+    <bean id="forceLogoutService" class="org.datavaultplatform.webapp.services.ForceLogoutService">
+        <property name="restService" ref="restService" />
+        <property name="sessionRegistry" ref="sessionRegistry" />
     </bean>
 
     <bean id="authSuccessHandler" class="org.datavaultplatform.webapp.authentication.AuthenticationSuccess">

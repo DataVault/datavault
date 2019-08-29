@@ -2,9 +2,11 @@ package org.datavaultplatform.webapp.controllers.admin;
 
 import org.apache.commons.lang.StringUtils;
 import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
 import org.datavaultplatform.webapp.exception.ForbiddenException;
 import org.datavaultplatform.webapp.exception.InvalidUunException;
+import org.datavaultplatform.webapp.services.ForceLogoutService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
 import org.slf4j.Logger;
@@ -28,12 +30,18 @@ public class AdminSchoolsController {
 
     private UserLookupService userLookupService;
 
+    private ForceLogoutService forceLogoutService;
+
     public void setRestService(RestService restService) {
         this.restService = restService;
     }
 
     public void setUserLookupService(UserLookupService userLookupService) {
         this.userLookupService = userLookupService;
+    }
+
+    public void setForceLogoutService(ForceLogoutService forceLogoutService) {
+        this.forceLogoutService = forceLogoutService;
     }
 
     @GetMapping("/admin/schools")
@@ -251,11 +259,17 @@ public class AdminSchoolsController {
     }
 
     private void updateRoleAssignment(RoleAssignment originalRoleAssignment, RoleModel newRole) {
+        boolean hasReducedPermissions = RoleUtils.hasReducedPermissions(
+                originalRoleAssignment.getRole().getPermissions(), newRole.getPermissions());
         originalRoleAssignment.setRole(newRole);
         restService.updateRoleAssignment(originalRoleAssignment);
+        if (hasReducedPermissions) {
+            forceLogoutService.logoutUser(originalRoleAssignment.getUser().getID());
+        }
     }
 
     private void deleteRoleAssignment(RoleAssignment toDelete) {
         restService.deleteRoleAssignment(toDelete.getId());
+        forceLogoutService.logoutUser(toDelete.getUser().getID());
     }
 }
