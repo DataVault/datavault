@@ -6,6 +6,7 @@ import org.datavaultplatform.common.event.vault.Create;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.response.DepositInfo;
+import org.datavaultplatform.common.response.DepositsData;
 import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.jsondoc.core.annotation.*;
@@ -194,6 +195,33 @@ public class VaultsController {
         }
         return depositResponses;
     }
+    
+    @RequestMapping(value = "/vaults/deposits/data/search", method = RequestMethod.GET)
+    public DepositsData searchAllDeposits(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                                  @RequestParam String query
+                                                                                                    ) throws Exception {
+
+        List<DepositInfo> depositResponses = new ArrayList<>();
+       
+        List<Deposit> deposits = depositsService.search(query, null);
+        if(CollectionUtils.isNotEmpty(deposits)) {
+			for (Deposit deposit : deposits) {
+				depositResponses.add(deposit.convertToResponse());
+	        }
+	       
+	        
+	       // recordsTotal = depositsService.getTotalNumber;
+	       // recordsFiltered = depositsService.getTotalNumberOfVaults(query);
+        }
+        
+        DepositsData data = new DepositsData();
+       // data.setRecordsTotal(recordsTotal);
+       // data.setRecordsFiltered(recordsFiltered);
+        data.setData(depositResponses);
+        return data;
+    } 
+    
+    
 
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)
     public VaultInfo addVault(@RequestHeader(value = "X-UserID", required = true) String userID,

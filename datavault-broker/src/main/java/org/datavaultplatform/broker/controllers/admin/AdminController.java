@@ -24,6 +24,7 @@ import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.response.DepositInfo;
+import org.datavaultplatform.common.response.DepositsData;
 import org.datavaultplatform.common.response.EventInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
@@ -152,6 +153,51 @@ public class AdminController {
         }
         return depositResponses;
     }
+    
+    @ApiMethod(
+            path = "/admin/deposits/data",
+            verb = ApiVerb.GET,
+            description = "Gets a list of all Vaults",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
+    @RequestMapping(value = "/admin/deposits/data", method = RequestMethod.GET)
+    public DepositsData getDepositsAllData(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                        @RequestParam(value = "sort", required = false)
+                                        @ApiQueryParam(name = "sort", description = "Vault sort field") String sort
+                                        ) throws Exception {
+
+        if (sort == null) sort = "";        
+        Long recordsTotal = 0L;
+        List<DepositInfo> depositResponses = new ArrayList<>();
+        List<Deposit> deposits = depositsService.getDeposits(sort);
+        if(CollectionUtils.isNotEmpty(deposits)) {
+			for (Deposit deposit : deposits) {
+				DepositInfo depositInfo = deposit.convertToResponse();
+				User depositor = usersService.getUser(depositInfo.getUserID());
+	            depositInfo.setUserName(depositor.getFirstname() + " " + depositor.getLastname());
+	            Vault vault = vaultsService.getVault(depositInfo.getVaultID());
+	            depositInfo.setVaultName(vault.getName());
+	            User vaultOwner = vault.getUser();
+	            depositInfo.setVaultOwnerID(vaultOwner.getID());
+	            depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+	            depositInfo.setDatasetID(vault.getDataset().getID());
+	            depositInfo.setGroupName(vault.getGroup().getName());
+	            depositInfo.setVaultReviewDate(vault.getReviewDate().toString());
+	            depositResponses.add(depositInfo);
+	        }
+	     
+        }   
+        DepositsData data = new DepositsData();
+        data.setRecordsTotal(recordsTotal);
+        data.setData(depositResponses);
+        return data;
+    }
+    
+  
 
     @RequestMapping(value = "/admin/retrieves", method = RequestMethod.GET)
     public List<Retrieve> getRetrievesAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {

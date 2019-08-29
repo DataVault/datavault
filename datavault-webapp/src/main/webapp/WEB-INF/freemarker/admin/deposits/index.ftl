@@ -37,6 +37,15 @@
             </div>
         </div>
     </form>
+    
+    <div align="right">
+        <form id="search-vaults" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/deposits/csv" method="get">
+            <div class="input-group" align="right">
+                <input type="text" class="form-control hidden" value="${query}" name="query" placeholder="Search for...">
+                <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Download CSV File</button>
+            </div>
+        </form>
+</div>
 
     <#if deposits?has_content>
         <div class="table-responsive">
@@ -80,6 +89,7 @@
                                  <a class="btn btn-xs btn-danger pull-left" href="#" data-vault="${deposit.getVaultID()}" data-deposit="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                           		</a>
+                          		<br>
                             </#if>
                             <#if deposit.status == "FAILED">
                                 <a class="restart-deposit-btn btn btn-default btn-sm"
