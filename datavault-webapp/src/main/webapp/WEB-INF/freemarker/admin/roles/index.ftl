@@ -233,7 +233,6 @@
                 url: '${springMacroRequestContext.getContextPath()}/admin/roles/delete',
                 data: formData,
                 success: function() {
-                    console.log('success');
                     window.location.href = '${springMacroRequestContext.getContextPath()}/admin/roles';
                 },
                 error: function(xhr) {
