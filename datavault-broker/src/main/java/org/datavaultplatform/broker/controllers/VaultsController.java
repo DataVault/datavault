@@ -9,6 +9,7 @@ import org.datavaultplatform.common.request.TransferVault;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.util.RoleUtils;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -124,12 +126,11 @@ public class VaultsController {
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
     public List<VaultInfo> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
 
-        List<VaultInfo> vaultResponses = new ArrayList<>();
-        User user = usersService.getUser(userID);
-        for (Vault vault : user.getVaults()) {
-            vaultResponses.add(vault.convertToResponse());
-        }
-        vaultResponses.sort(Comparator.comparing(VaultInfo::getCreationTime));
+        List<VaultInfo> vaultResponses = permissionsService.getRoleAssignmentsForUser(userID).stream()
+                .filter(roleAssignment -> RoleType.VAULT == roleAssignment.getRole().getType() || RoleUtils.isDataOwner(roleAssignment))
+                .map(roleAssignment -> roleAssignment.getVault().convertToResponse())
+                .sorted(Comparator.comparing(VaultInfo::getCreationTime))
+                .collect(Collectors.toList());
         Collections.reverse(vaultResponses);
         return vaultResponses;
     }
