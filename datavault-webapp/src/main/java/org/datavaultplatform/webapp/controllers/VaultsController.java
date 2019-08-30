@@ -320,7 +320,7 @@ public class VaultsController {
 
         @AssertTrue(message = "Must select a user.")
         public boolean isUserSelectionValid() {
-            return !orphaning && !Strings.isNullOrEmpty(user);
+            return orphaning || !Strings.isNullOrEmpty(user);
         }
 
         @AssertTrue(message = "Must select a role when assigning a new role.")
