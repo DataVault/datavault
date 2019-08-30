@@ -1,7 +1,9 @@
 package org.datavaultplatform.broker.services;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
@@ -26,6 +28,10 @@ public class VaultsService {
     
     public void updateVault(Vault vault) {
         vaultDAO.update(vault);
+    }
+    
+    public void saveOrUpdateVault(Vault vault) {
+        vaultDAO.saveOrUpdateVault(vault);
     }
     
     public Vault getVault(String vaultID) {
@@ -102,6 +108,17 @@ public class VaultsService {
 	 */
 	public Long getTotalNumberOfVaults(String query) {
 		return vaultDAO.getTotalNumberOfVaults(query);
+	}
+	
+	public Map<String, Long> getAllProjectsSize() {
+		Map<String, Long> projectSizeMap = new HashMap<>();
+		List<Object[]> allProjectsSize = vaultDAO.getAllProjectsSize();
+		if(allProjectsSize != null) {
+			for(Object[] projectsizeArray :allProjectsSize) {
+				projectSizeMap.put((String)projectsizeArray[0], (Long)projectsizeArray[1]);
+			}
+		}
+		return projectSizeMap;
 	}
 }
 

@@ -37,6 +37,7 @@ public class SFTPFileSystem extends Device implements UserStore {
     private final String PATH_SEPARATOR = "/";
     
     private Utility.SFTPMonitor monitor = null;
+    private final int RETRIES = 25;
     
     public SFTPFileSystem(String name, Map<String,String> config) throws Exception {
         super(name, config);
@@ -54,7 +55,6 @@ public class SFTPFileSystem extends Device implements UserStore {
         encIV = Base64.decode(config.get("iv"));
         System.out.println("done!");
         passphrase = config.get("passphrase");
-
         System.out.println("SFTPFileSystem created...");
     }
     
@@ -78,7 +78,18 @@ public class SFTPFileSystem extends Device implements UserStore {
         java.util.Properties properties = new java.util.Properties();
         properties.put("StrictHostKeyChecking", "no");
         session.setConfig(properties);
-        session.connect();
+        for (int i = 0; i < RETRIES; i++) {
+            try {
+               logger.info("Sftp connection attempt " + i);
+               session.connect();
+               break;
+            } catch(JSchException ex) {
+               if (i == RETRIES - 1) {
+                   throw ex;
+               }
+               continue;
+            }
+        }
         
         // Start a channel for SFTP
         Channel channel = session.openChannel("sftp");

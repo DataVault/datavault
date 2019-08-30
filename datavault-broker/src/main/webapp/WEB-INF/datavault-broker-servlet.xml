@@ -112,7 +112,12 @@
         <property name="awsAccessKey" value="${s3.awsAccessKey:#{null}}" />
         <property name="awsSecretKey" value="${s3.awsSecretKey:#{null}}" />
     </bean>
-
+    <bean id="billingController" class="org.datavaultplatform.broker.controllers.admin.BillingController">
+    <property name="vaultsService" ref="vaultsService" />
+    <property name="billingService" ref="billingService" />
+    <property name="externalMetadataService" ref="externalMetadataService" />
+    </bean>
+ 
     <bean id="retentionPoliciesController" class="org.datavaultplatform.broker.controllers.RetentionPoliciesController">
         <property name="usersService" ref="usersService" />
         <property name="retentionPoliciesService" ref="retentionPoliciesService" />

@@ -2,9 +2,8 @@ package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
 
-import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.BillingInfo;
 import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -14,9 +13,9 @@ import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VaultDAOImpl implements VaultDAO {
+public class BillingDAOImpl implements BillingDAO {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(VaultDAOImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BillingDAOImpl.class);
 
     private SessionFactory sessionFactory;
  
@@ -25,22 +24,22 @@ public class VaultDAOImpl implements VaultDAO {
     }
      
     @Override
-    public void save(Vault vault) {
+    public void save(BillingInfo billing) {
         Session session = this.sessionFactory.openSession();
         Transaction tx = session.beginTransaction();
-        session.persist(vault);
+        session.persist(billing);
         tx.commit();
         session.close();
     }
  
     @Override
-    public void update(Vault vault) {        
+    public void update(BillingInfo billing) {        
         Session session = null;
         Transaction tx = null;
         try {
             session = this.sessionFactory.openSession();
             tx = session.beginTransaction();
-            session.update(vault);
+            session.update(billing);
             tx.commit();
         } catch (RuntimeException e) {
             if (tx != null) {
@@ -56,13 +55,13 @@ public class VaultDAOImpl implements VaultDAO {
     }
     
     @Override
-    public void saveOrUpdateVault(Vault vault) {        
+    public void saveOrUpdateVault(BillingInfo billing) {        
         Session session = null;
         Transaction tx = null;
         try {
             session = this.sessionFactory.openSession();
             tx = session.beginTransaction();
-            session.saveOrUpdate(vault);
+            session.saveOrUpdate(billing);
             tx.commit();
         } catch (RuntimeException e) {
             if (tx != null) {
@@ -76,26 +75,24 @@ public class VaultDAOImpl implements VaultDAO {
             }
         }
     }
-    
-    
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Vault> list() {
+    public List<BillingInfo> list() {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
+        Criteria criteria = session.createCriteria(BillingInfo.class);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         criteria.addOrder(Order.asc("creationTime"));
-        List<Vault> vaults = criteria.list();
+        List<BillingInfo> vaults = criteria.list();
         session.close();
         return vaults;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Vault> list(String sort, String order, String offset, String maxResult) {
+    public List<BillingInfo> list(String sort, String order, String offset, String maxResult) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
+        Criteria criteria = session.createCriteria(BillingInfo.class);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
         order(sort, order, criteria);
@@ -104,26 +101,26 @@ public class VaultDAOImpl implements VaultDAO {
         	criteria.setFirstResult(Integer.valueOf(offset));
         }
 
-        List<Vault> vaults = criteria.list();
+        List<BillingInfo> vaults = criteria.list();
         session.close();
         return vaults;
     }
     
     @Override
-    public Vault findById(String Id) {
+    public BillingInfo findById(String Id) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
+        Criteria criteria = session.createCriteria(BillingInfo.class);
         criteria.add(Restrictions.eq("id", Id));
-        Vault vault = (Vault)criteria.uniqueResult();
+        BillingInfo vault = (BillingInfo)criteria.uniqueResult();
         session.close();
         return vault;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Vault> search(String query, String sort, String order, String offset, String maxResult) {
+    public List<BillingInfo> search(String query, String sort, String order, String offset, String maxResult) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
+        Criteria criteria = session.createCriteria(BillingInfo.class);
         criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
@@ -133,7 +130,7 @@ public class VaultDAOImpl implements VaultDAO {
         	criteria.setFirstResult(Integer.valueOf(offset));
         }
 
-        List<Vault> vaults = criteria.list();
+        List<BillingInfo> vaults = criteria.list();
         session.close();
         return vaults;
     }
@@ -141,17 +138,10 @@ public class VaultDAOImpl implements VaultDAO {
     @Override
     public int count() {
         Session session = this.sessionFactory.openSession();
-        return (int)(long)(Long)session.createCriteria(Vault.class).setProjection(Projections.rowCount()).uniqueResult();
+        return (int)(long)(Long)session.createCriteria(BillingInfo.class).setProjection(Projections.rowCount()).uniqueResult();
     }
 
-    @Override
-    public int getRetentionPolicyCount(int status) {
-        Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
-        criteria.add(Restrictions.eq("retentionPolicyStatus", status));
-        criteria.setProjection(Projections.rowCount());
-        return (int)(long)(Long)criteria.uniqueResult();
-    }
+    
 
     private void order(String sort, String order, Criteria criteria) {
         // Default to ascending order
@@ -173,37 +163,14 @@ public class VaultDAOImpl implements VaultDAO {
             } else {
                 criteria.addOrder(Order.desc("name"));
             }
-        } else if ("description".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("description"));
-            } else {
-                criteria.addOrder(Order.desc("description"));
-            }
-        } else if ("vaultSize".equals(sort)) {
+        }
+        else if ("vaultSize".equals(sort)) {
             if (asc) {
                 criteria.addOrder(Order.asc("vaultSize"));
             } else {
                 criteria.addOrder(Order.desc("vaultSize"));
             }
-        } else if ("user".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("description"));
-            } else {
-                criteria.addOrder(Order.desc("description"));
-            }
-        } else if ("policy".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("policy"));
-            } else {
-                criteria.addOrder(Order.desc("policy"));
-            }
-        } else if ("groupID".equals(sort)) {
-        	criteria.createAlias("group", "g");
-            if (asc) {
-                criteria.addOrder(Order.asc("g.id"));
-            } else {
-                criteria.addOrder(Order.desc("g.id"));
-            }
+        
         } else if ("reviewDate".equals(sort)) {
             if (asc) {
                 criteria.addOrder(Order.asc("reviewDate"));
@@ -221,14 +188,14 @@ public class VaultDAOImpl implements VaultDAO {
                 criteria.addOrder(Order.asc("creationTime"));
             } else {
                 criteria.addOrder(Order.desc("creationTime"));
-            }
+            }}
         }
-    }
+
 
 	@Override
 	public Long getTotalNumberOfVaults() {
 		Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
+        Criteria criteria = session.createCriteria(BillingInfo.class);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         criteria.setProjection(Projections.rowCount());
         Long totalNoOfRows = (Long) criteria.uniqueResult();
@@ -241,7 +208,7 @@ public class VaultDAOImpl implements VaultDAO {
 	 */
 	public Long getTotalNumberOfVaults(String query) {
 		Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
+        Criteria criteria = session.createCriteria(BillingInfo.class);
         criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         criteria.setProjection(Projections.rowCount());
@@ -250,10 +217,5 @@ public class VaultDAOImpl implements VaultDAO {
         session.close();
         return totalNoOfRows;
 	}
-	
-	public List<Object[]> getAllProjectsSize() {
-		Session session = this.sessionFactory.openSession();
-		Query query = session.createQuery("select v.projectId, sum(v.vaultSize) from Vault v group by v.projectId");
-		return (List<Object[]>)query.list();
-	}
+
 }

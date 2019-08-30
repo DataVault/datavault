@@ -12,12 +12,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
+import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.hibernate.annotations.GenericGenerator;
@@ -84,7 +86,11 @@ public class Vault {
     @OrderBy("creationTime")
     private List<Deposit> deposits;
     
-    // A vault can have several data managers
+    @JsonIgnore
+    @OneToOne(targetEntity=BillingInfo.class, mappedBy="vault", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
+    private BillingInfo billinginfo;
+  
+	// A vault can have several data managers
     @JsonIgnore
     @OneToMany(targetEntity=DataManager.class, mappedBy="vault", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
     @OrderBy("uun")
@@ -176,7 +182,7 @@ public class Vault {
         if (deposits == null) return new ArrayList<Deposit>();
         return deposits;
     }
-    
+
     public void addDeposit(Deposit deposit) {
         this.deposits.add(deposit);
     }
@@ -243,6 +249,15 @@ public class Vault {
 	public void setProjectId(String projectId) {
 		this.projectId = projectId;
 	}
+  
+    public BillingInfo getBillinginfo() {
+    	
+		return billinginfo;
+		
+	}
+	public void setBillinginfo(BillingInfo billinginfo) {
+		this.billinginfo = billinginfo;
+	}
 	public VaultInfo convertToResponse() {
         return new VaultInfo(
                 id,
@@ -263,6 +278,34 @@ public class Vault {
                 reviewDate,
                 deposits != null? deposits.size() : ZERO,
                 projectId);
+    }
+	public VaultInfo convertToResponseBilling() {		
+        return new VaultInfo(
+                id,
+                user.getFirstname()+" "+user.getLastname(),                
+                creationTime,
+                name,               
+                vaultSize,               
+                reviewDate,              
+                billinginfo != null? billinginfo.getAmountToBeBilled() : null,
+                billinginfo != null? billinginfo.getAmountBilled(): null,
+        		projectId);
+    }
+	
+	public BillingInformation convertToBillingDetailsResponse() {		
+		return new BillingInformation(
+                billinginfo != null? billinginfo.getID(): null,
+                id,
+                billinginfo != null? billinginfo.getContactName() : null,
+                billinginfo != null? billinginfo.getSchool() : null,
+                billinginfo != null? billinginfo.getSubUnit() : null,
+                billinginfo != null? billinginfo.getBudgetCode() : null,
+                billinginfo != null? billinginfo.getSpecialComments() : null,
+                billinginfo != null? billinginfo.getAmountToBeBilled() : null,
+                billinginfo != null? billinginfo.getAmountBilled() : null,
+                projectId,
+                name
+            );
     }
     
     @Override

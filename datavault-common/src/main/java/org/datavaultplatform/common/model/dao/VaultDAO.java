@@ -9,6 +9,8 @@ public interface VaultDAO {
     public void save(Vault vault);
     
     public void update(Vault vault);
+    
+    public void saveOrUpdateVault(Vault vault);
 
     public List<Vault> list();
 
@@ -25,4 +27,6 @@ public interface VaultDAO {
 	public Long getTotalNumberOfVaults();
 
 	public Long getTotalNumberOfVaults(String query);
+	
+	public List<Object[]> getAllProjectsSize();
 }
