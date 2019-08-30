@@ -38,6 +38,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         permissionDao.synchronisePermissions();
         roleDao.storeSpecialRoles();
+        roleAssignmentDao.synchroniseDataOwners();
     }
 
     public RoleModel createRole(RoleModel role) {
@@ -109,6 +110,10 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
 
     public RoleModel getIsAdmin() {
         return roleDao.getIsAdmin();
+    }
+
+    public RoleModel getDataOwner() {
+        return roleDao.getDataOwner();
     }
 
     public List<RoleModel> getEditableRoles() {

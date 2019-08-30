@@ -40,6 +40,7 @@
     
     <bean id="vaultsService" class="org.datavaultplatform.broker.services.VaultsService">
         <property name="vaultDAO" ref="vaultDAO" />
+        <property name="rolesAndPermissionsService" ref="rolesAndPermissionsService" />
     </bean>
     
     <bean id="billingService" class="org.datavaultplatform.broker.services.BillingService">

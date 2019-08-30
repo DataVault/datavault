@@ -290,6 +290,12 @@ public class VaultsController {
         }
 
         vaultsService.addVault(vault);
+
+        RoleAssignment dataOwnerRoleAssignment = new RoleAssignment();
+        dataOwnerRoleAssignment.setUser(vault.getUser());
+        dataOwnerRoleAssignment.setVault(vault);
+        dataOwnerRoleAssignment.setRole(permissionsService.getDataOwner());
+        permissionsService.createRoleAssignment(dataOwnerRoleAssignment);
         
         Create vaultEvent = new Create(vault.getID());
         vaultEvent.setVault(vault);

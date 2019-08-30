@@ -303,14 +303,14 @@
             </tr>
             </thead>
             <tbody>
-            <#if vault.userName?has_content>
+            <#if dataOwner??>
                 <tr>
-                    <td>${vault.userName}</td>
-                    <td class="role-column">Data Owner</td>
+                    <td>${dataOwner.user.firstname} ${dataOwner.user.lastname}</td>
+                    <td class="role-column">${dataOwner.role.name}</td>
                     <td class="action-column">
                         <a href="#" class="btn btn-default" data-toggle="modal"
                            data-target="#orphan-dialog"
-                           data-user-name="${vault.userName}"
+                           data-user-name="${dataOwner.user.firstname} ${dataOwner.user.lastname}"
                            title="Transfer ownership of this vault."><i
                                     class="fa fa-users"></i></a>
                     </td>

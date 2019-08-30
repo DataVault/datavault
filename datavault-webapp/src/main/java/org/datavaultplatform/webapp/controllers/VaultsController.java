@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.controllers;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.MoreCollectors;
 import com.google.gson.Gson;
 import org.apache.commons.lang.RandomStringUtils;
 import org.datavaultplatform.common.model.DataManager;
@@ -15,6 +16,7 @@ import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.TransferVault;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.exception.InvalidUunException;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
@@ -45,11 +47,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validator;
 import javax.validation.constraints.AssertTrue;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -147,9 +145,17 @@ public class VaultsController {
         VaultInfo vault = restService.getVault(vaultID);
 
         List<RoleAssignment> roleAssignmentsForVault = restService.getRoleAssignmentsForVault(vaultID);
+        List<RoleAssignment> vaultUsers = roleAssignmentsForVault.stream()
+                .filter(roleAssignment -> !RoleUtils.isDataOwner(roleAssignment))
+                .collect(Collectors.toList());
+        roleAssignmentsForVault.stream()
+                .filter(RoleUtils::isDataOwner)
+                .findFirst()
+                .ifPresent(roleAssignment -> model.addAttribute("dataOwner", roleAssignment));
+
         model.addAttribute("vault", vault);
         model.addAttribute("roles", restService.getVaultRoles());
-        model.addAttribute("roleAssignments", roleAssignmentsForVault);
+        model.addAttribute("roleAssignments", vaultUsers);
         model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
         model.addAttribute(restService.getGroup(vault.getGroupID()));
         

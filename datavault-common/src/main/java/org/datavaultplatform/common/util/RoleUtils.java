@@ -2,6 +2,7 @@ package org.datavaultplatform.common.util;
 
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
+import org.datavaultplatform.common.model.RoleAssignment;
 
 import java.util.Collection;
 import java.util.Set;
@@ -18,6 +19,10 @@ public class RoleUtils {
 
     public static boolean isReservedRoleName(String roleName) {
         return IS_ADMIN_ROLE_NAME.equalsIgnoreCase(roleName) || DATA_OWNER_ROLE_NAME.equalsIgnoreCase(roleName);
+    }
+
+    public static boolean isDataOwner(RoleAssignment roleAssignment) {
+        return DATA_OWNER_ROLE_NAME.equals(roleAssignment.getRole().getName());
     }
 
     public static boolean hasReducedPermissions(Collection<PermissionModel> originalPermissions,

@@ -1,6 +1,7 @@
 package org.datavaultplatform.common.model.dao;
 
 import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.util.RoleUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -8,6 +9,7 @@ import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
 
 import java.util.List;
+import java.util.Optional;
 
 public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
 
@@ -18,6 +20,55 @@ public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
 
     public void setSessionFactory(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
+    }
+
+    @Override
+    public void synchroniseDataOwners() {
+        Session session = null;
+        try {
+            session = sessionFactory.openSession();
+            Transaction transaction = session.beginTransaction();
+
+            Criteria dataOwnerRoleCriteria = session.createCriteria(RoleModel.class);
+            dataOwnerRoleCriteria.add(Restrictions.eq("name", RoleUtils.DATA_OWNER_ROLE_NAME));
+            RoleModel dataOwnerRole = (RoleModel) dataOwnerRoleCriteria.uniqueResult();
+
+            Criteria vaultsCriteria = session.createCriteria(Vault.class);
+            List<Vault> allVaults = vaultsCriteria.list();
+
+            Criteria existingDataOwnerCriteria = session.createCriteria(RoleAssignment.class, "roleAssignment");
+            existingDataOwnerCriteria.add(Restrictions.eq("role", dataOwnerRole));
+            List<RoleAssignment> existingDataOwners = existingDataOwnerCriteria.list();
+
+            for (Vault vault : allVaults) {
+                Optional<RoleAssignment> vaultOwner = existingDataOwners.stream()
+                        .filter(roleAssignment -> vault.equals(roleAssignment.getVault()))
+                        .findFirst();
+
+                if (vaultOwner.isPresent() && !vaultOwner.get().getUser().equals(vault.getUser())) {
+                    // The Vaults idea of its owner doesn't match the RoleAssignments idea of the owner
+                    // => Update the Vault to match the RoleAssignment
+                    vault.setUser(vaultOwner.get().getUser());
+                    session.update(vault);
+
+                } else if (!vaultOwner.isPresent() && vault.getUser() != null) {
+                    // The vault is not orphaned but there is no RoleAssignment for the vault owner
+                    // => Create new RoleAssignment
+                    RoleAssignment dataOwner = new RoleAssignment();
+                    dataOwner.setUser(vault.getUser());
+                    dataOwner.setVault(vault);
+                    dataOwner.setRole(dataOwnerRole);
+                    session.save(dataOwner);
+                }
+            }
+
+            transaction.commit();
+
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
     }
 
     @Override

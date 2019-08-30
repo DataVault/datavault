@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface RoleAssignmentDAO {
 
+    void synchroniseDataOwners();
+
     boolean roleAssignmentExists(RoleAssignment roleAssignment);
 
     void store(RoleAssignment roleAssignment);
