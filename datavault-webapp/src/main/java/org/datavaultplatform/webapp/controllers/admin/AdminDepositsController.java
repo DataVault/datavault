@@ -51,11 +51,7 @@ public class AdminDepositsController {
             }
             model.addAttribute("query", "");
         } else {
-            if ((sort == null) || ("".equals(sort))) {
-                model.addAttribute("deposits", restService.searchDeposits(query));
-            } else {
-                model.addAttribute("deposits", restService.searchDeposits(query, sort));
-            }
+            model.addAttribute("deposits", restService.searchDeposits(query, sort));           
             model.addAttribute("query", query);
         }
 
@@ -79,14 +75,9 @@ public class AdminDepositsController {
             }
            
         } else {
-            if ((sort == null) || ("".equals(sort))) {
-            	DepositsData depositData = restService.searchDepositsData(query);
-            	deposits = depositData.getData();
-            } else {
-            	DepositsData depositData =restService.searchDepositsData(query, sort);
-            	deposits = depositData.getData();
-            }
-           
+       
+            DepositsData depositData =restService.searchDepositsData(query, sort);
+        	deposits = depositData.getData();
         }
 
         

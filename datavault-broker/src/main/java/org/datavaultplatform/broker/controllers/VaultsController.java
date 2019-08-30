@@ -191,27 +191,50 @@ public class VaultsController {
 
         List<DepositInfo> depositResponses = new ArrayList<>();
         for (Deposit deposit : depositsService.search(query, sort)) {
-            depositResponses.add(deposit.convertToResponse());
+            deposit.convertToResponse();
+            DepositInfo depositInfo = deposit.convertToResponse();
+            User depositor = usersService.getUser(depositInfo.getUserID());
+            depositInfo.setUserName(depositor.getFirstname() + " " + depositor.getLastname());
+            Vault vault = vaultsService.getVault(depositInfo.getVaultID());
+            depositInfo.setVaultName(vault.getName());
+            User vaultOwner = vault.getUser();
+            depositInfo.setVaultOwnerID(vaultOwner.getID());
+            depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+            depositInfo.setDatasetID(vault.getDataset().getID());
+            depositInfo.setGroupName(vault.getGroup().getName());
+            depositInfo.setVaultReviewDate(vault.getReviewDate().toString());
+            depositResponses.add(depositInfo);
         }
         return depositResponses;
     }
     
+        
     @RequestMapping(value = "/vaults/deposits/data/search", method = RequestMethod.GET)
-    public DepositsData searchAllDeposits(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                                  @RequestParam String query
-                                                                                                    ) throws Exception {
+    public DepositsData searchAllDepositsData(@RequestHeader(value = "X-UserID", required = true) String userID,
+    		@RequestParam("query") String query,
+    		 @RequestParam(value = "sort", required = false) String sort) throws Exception {
+                                                  
 
         List<DepositInfo> depositResponses = new ArrayList<>();
        
-        List<Deposit> deposits = depositsService.search(query, null);
+        List<Deposit> deposits = depositsService.search(query, sort);
         if(CollectionUtils.isNotEmpty(deposits)) {
 			for (Deposit deposit : deposits) {
-				depositResponses.add(deposit.convertToResponse());
+				  DepositInfo depositInfo = deposit.convertToResponse();
+					User depositor = usersService.getUser(depositInfo.getUserID());
+				    depositInfo.setUserName(depositor.getFirstname() + " " + depositor.getLastname());
+				    Vault vault = vaultsService.getVault(depositInfo.getVaultID());
+				    depositInfo.setVaultName(vault.getName());
+				    User vaultOwner = vault.getUser();
+				    depositInfo.setVaultOwnerID(vaultOwner.getID());
+				    depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+				    depositInfo.setDatasetID(vault.getDataset().getID());
+				    depositInfo.setGroupName(vault.getGroup().getName());
+				    depositInfo.setVaultReviewDate(vault.getReviewDate().toString());
+				    depositResponses.add(depositInfo); 
+				
 	        }
-	       
-	        
-	       // recordsTotal = depositsService.getTotalNumber;
-	       // recordsFiltered = depositsService.getTotalNumberOfVaults(query);
+	      
         }
         
         DepositsData data = new DepositsData();
@@ -219,9 +242,10 @@ public class VaultsController {
        // data.setRecordsFiltered(recordsFiltered);
         data.setData(depositResponses);
         return data;
+
     } 
     
-    
+  
 
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)
     public VaultInfo addVault(@RequestHeader(value = "X-UserID", required = true) String userID,

@@ -251,8 +251,8 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/statistics/depositinprogress", Deposit[].class);
         return (Deposit[])response.getBody();
     }
-    public DepositInfo[] searchDeposits(String query) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/deposits/search?query=" + query, DepositInfo[].class);
+    public DepositInfo[] searchDepositsQuery(String query) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/deposits/search/Query?query=" + query, DepositInfo[].class);
         return (DepositInfo[])response.getBody();
     }
     public DepositsData searchDepositsData(String query) {

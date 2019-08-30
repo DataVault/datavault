@@ -122,6 +122,8 @@ public class DepositsController {
 
         return depositsService.getUserDeposit(user, depositID).convertToResponse();
     }
+    
+    
 
     @RequestMapping(value = "/deposits", method = RequestMethod.POST)
     public ResponseEntity<Object> addDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,

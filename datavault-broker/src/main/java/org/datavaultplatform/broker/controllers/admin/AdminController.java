@@ -188,7 +188,7 @@ public class AdminController {
 	            depositInfo.setGroupName(vault.getGroup().getName());
 	            depositInfo.setVaultReviewDate(vault.getReviewDate().toString());
 	            depositResponses.add(depositInfo);
-	        }
+			}
 	     
         }   
         DepositsData data = new DepositsData();
@@ -197,7 +197,7 @@ public class AdminController {
         return data;
     }
     
-  
+    
 
     @RequestMapping(value = "/admin/retrieves", method = RequestMethod.GET)
     public List<Retrieve> getRetrievesAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
