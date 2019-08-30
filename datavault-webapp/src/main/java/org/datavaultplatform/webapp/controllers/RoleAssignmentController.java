@@ -30,7 +30,7 @@ public class RoleAssignmentController {
     }
 
     @PostMapping("/security/roles/{roleType}/{target}/user/update")
-    @PreAuthorize("hasPermission(#targetId, #type, 'MANAGE_ROLES')")
+    @PreAuthorize("hasPermission(#targetId, #type, 'ASSIGN_VAULT_ROLES')")
     public ResponseEntity updateRoleAssignment(
             @PathVariable("roleType") String type,
             @PathVariable("target") String targetId,
@@ -63,7 +63,7 @@ public class RoleAssignmentController {
     }
 
     @PostMapping("/security/roles/{roleType}/{target}/user/delete")
-    @PreAuthorize("hasPermission(#targetId, #type, 'MANAGE_ROLES')")
+    @PreAuthorize("hasPermission(#targetId, #type, 'ASSIGN_VAULT_ROLES')")
     public ResponseEntity removeRoleAssignment(@PathVariable("roleType") String type,
                                                @PathVariable("target") String targetId,
                                                @RequestParam("assignment") long assignmentId) {
@@ -82,7 +82,7 @@ public class RoleAssignmentController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("hasPermission(#targetId, #type, 'MANAGE_ROLES')")
+    @PreAuthorize("hasPermission(#targetId, #type, 'ASSIGN_VAULT_ROLES')")
     @PostMapping("/security/roles/{roleType}/{target}/user")
     public ResponseEntity createRoleAssignment(
             @PathVariable("roleType") String type,

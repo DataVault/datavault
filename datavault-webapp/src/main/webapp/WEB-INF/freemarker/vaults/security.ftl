@@ -118,7 +118,7 @@
                         </div>
                     </div>
 
-                    <#assign securityExpr = "hasPermission('${vault.ID}', 'vault', 'MANAGE_ROLES')">
+                    <#assign securityExpr = "hasPermission('${vault.ID}', 'vault', 'ASSIGN_VAULT_ROLES')">
                     <@sec.authorize access=securityExpr>
                         <div class="form-group ui-widget col-sm-10 form-confirm">
                             <div class="checkbox">
