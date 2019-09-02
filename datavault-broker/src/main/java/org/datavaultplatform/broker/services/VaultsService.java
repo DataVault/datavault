@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.dao.VaultDAO;
@@ -123,11 +124,16 @@ public class VaultsService {
         vault.setUser(newOwner);
         vaultDAO.update(vault);
 
+        RoleModel dataOwnerRole = rolesAndPermissionsService.getDataOwner();
+        rolesAndPermissionsService.getRoleAssignmentsForRole(dataOwnerRole.getId()).stream()
+                .filter(roleAssignment -> vault.equals(roleAssignment.getVault()))
+                .findFirst()
+                .ifPresent(roleAssignment -> rolesAndPermissionsService.deleteRoleAssignment(roleAssignment.getId()));
+
         RoleAssignment newDataOwnerAssignment = new RoleAssignment();
         newDataOwnerAssignment.setUser(newOwner);
         newDataOwnerAssignment.setVault(vault);
-        newDataOwnerAssignment.setRole(rolesAndPermissionsService.getDataOwner());
+        newDataOwnerAssignment.setRole(dataOwnerRole);
         rolesAndPermissionsService.createRoleAssignment(newDataOwnerAssignment);
     }
 }
-
