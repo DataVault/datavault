@@ -8,6 +8,7 @@ public enum Permission {
     VIEW_VAULT_ROLES("VIEW_VAULT_ROLES", PermissionModel.PermissionType.VAULT, "View vault roles", null, false),
     ASSIGN_VAULT_ROLES("ASSIGN_VAULT_ROLES", PermissionModel.PermissionType.VAULT, "Assign vault roles", null, false),
     VIEW_VAULT_HISTORY("VIEW_VAULT_HISTORY", PermissionModel.PermissionType.VAULT, "View vault history", null, false),
+    CAN_TRANSFER_VAULT_OWNERSHIP("CAN_TRANSFER_VAULT_OWNERSHIP", PermissionModel.PermissionType.VAULT, "Transfer vault ownership", null, false),
 
     // School permissions
     CAN_VIEW_VAULTS_SIZE("CAN_VIEW_VAULTS_SIZE", PermissionModel.PermissionType.SCHOOL, "View school vaults size", "ROLE_ADMIN", true),

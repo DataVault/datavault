@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -81,6 +82,7 @@ public class VaultsController {
         this.userLookupService = userLookupService;
     }
 
+    @PreAuthorize("hasPermission(#vaultId, 'Vault', 'CAN_TRANSFER_VAULT_OWNERSHIP')")
     @PostMapping(value = "/vaults/{vaultid}/data-owner/update")
     public ResponseEntity transferOwnership(
             @PathVariable("vaultid") String vaultId,

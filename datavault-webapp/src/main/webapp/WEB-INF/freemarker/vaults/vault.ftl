@@ -2,6 +2,7 @@
 <#-- Specify which navbar element should be flagged as active -->
 <#global nav="home">
 <#import "/spring.ftl" as spring />
+<#assign sec=JspTaglibs["http://www.springframework.org/security/tags"] />
 <@layout.vaultLayout>
 <div class="container">
 
@@ -93,6 +94,8 @@
             </#if>
 
             <#if deposits?has_content>
+            <#assign viewDepositsSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES')">
+            <@sec.authorize access=viewDepositsSecurityExpression>
             <h4><strong>Deposit and Retrieve</strong></h4>
             <div class="row">
                 <div class="col-md-12">
@@ -157,6 +160,7 @@
                     </#list>
                 </tbody>
             </table>
+            </@sec.authorize>
             <#else>
             <div class="row">
                 <div class="col-md-12">
@@ -168,6 +172,8 @@
             </#if>
 
             <div id="accordion">
+                <#assign viewMetadataSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_METADATA')">
+                <@sec.authorize access=viewMetadataSecurityExpression>
                 <h4 class="accordion-toggle">
                     ‹› &nbsp;Summary of Full Vault Metadata
                 </h4>
@@ -230,7 +236,10 @@
                         </p>
                     </div>
                 </div>
+                </@sec.authorize>
 
+                <#assign viewVaultRolesSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_ROLES')">
+                <@sec.authorize access=viewVaultRolesSecurityExpression>
                 <h4 class="accordion-toggle">
                     ‹› &nbsp;Vault Roles
                 </h4>
@@ -238,8 +247,11 @@
                 <div class="accordion-content">
                     <#include "security.ftl" />
                 </div>
+                </@sec.authorize>
 
 
+                <#assign viewHistorySecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_HISTORY')">
+                <@sec.authorize access=viewHistorySecurityExpression>
                 <h4 class="accordion-toggle">
                     ‹› &nbsp;Vault History
                 </h4>
@@ -325,6 +337,7 @@
                         </textarea>
                     </div>
                 </div>
+                </@sec.authorize>
             </div>
         </div>
     </div>
