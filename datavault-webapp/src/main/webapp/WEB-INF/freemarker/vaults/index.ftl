@@ -2,6 +2,7 @@
 <#-- Specify which navbar element should be flagged as active -->
 <#global nav="home">
 <#import "/spring.ftl" as spring />
+<#assign sec=JspTaglibs["http://www.springframework.org/security/tags"] />
 <@layout.vaultLayout>
 
     <div class="container">
@@ -35,9 +36,12 @@
                                     </a>
                                 </td>
                                 <td>
+                                    <#assign viewDepositsSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'MANAGE_SCHOOL_VAULT_DEPOSITS')">
+                                    <@sec.authorize access=viewDepositsSecurityExpression>
                                     <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create" class="btn btn-primary">
                                        <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit
-                                   </a>
+                                    </a>
+                                    </@sec.authorize>
                                 </td>
                                 <td>${vault.getUserID()}</td>
                                 <td>${vault.getCreationTime()?datetime}</td>

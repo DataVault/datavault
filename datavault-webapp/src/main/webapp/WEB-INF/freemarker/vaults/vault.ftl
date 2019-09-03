@@ -93,6 +93,8 @@
                 </div>
             </#if>
 
+        <#assign viewDepositsSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'MANAGE_SCHOOL_VAULT_DEPOSITS')">
+        <@sec.authorize access=viewDepositsSecurityExpression>
             <#if deposits?has_content>
             <h4><strong>Deposit and Retrieve</strong></h4>
             <div class="row">
@@ -102,8 +104,6 @@
                     </a>
                 </div>
             </div>
-            <#assign viewDepositsSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'MANAGE_SCHOOL_VAULT_DEPOSITS')">
-            <@sec.authorize access=viewDepositsSecurityExpression>
             <table class="table table-bordered">
                 <thead>
                     <tr class="tr">
@@ -160,7 +160,6 @@
                     </#list>
                 </tbody>
             </table>
-            </@sec.authorize>
             <#else>
             <div class="row">
                 <div class="col-md-12">
@@ -170,6 +169,7 @@
                 </div>
             </div>
             </#if>
+        </@sec.authorize>
 
             <div id="accordion">
                 <#assign viewMetadataSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_METADATA') or hasPermission('${vault.groupID}', 'GROUP', 'VIEW_SCHOOL_VAULT_METADATA')">
