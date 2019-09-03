@@ -78,8 +78,8 @@
 
 <#import "/spring.ftl" as spring />
 <#assign sec=JspTaglibs["http://www.springframework.org/security/tags"] />
-<#assign assignVaultRolesSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'ASSIGN_VAULT_ROLES') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_MANAGE_VAULTS')">
-<#assign transferOwnershipSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'CAN_TRANSFER_VAULT_OWNERSHIP') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_MANAGE_VAULTS')">
+<#assign assignVaultRolesSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'ASSIGN_VAULT_ROLES') or hasPermission('${vault.groupID}', 'GROUP', 'ASSIGN_SCHOOL_VAULT_ROLES')">
+<#assign transferOwnershipSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'CAN_TRANSFER_VAULT_OWNERSHIP') or hasPermission('${vault.groupID}', 'GROUP', 'TRANSFER_SCHOOL_VAULT_OWNERSHIP')">
 <#assign showActionsColumnSecurityExpression = assignVaultRolesSecurityExpression + " or " + transferOwnershipSecurityExpression />
 
 <@sec.authorize access=transferOwnershipSecurityExpression>

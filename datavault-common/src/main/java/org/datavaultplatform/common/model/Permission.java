@@ -19,6 +19,12 @@ public enum Permission {
     CAN_VIEW_RETRIEVES("CAN_VIEW_RETRIEVES", PermissionModel.PermissionType.SCHOOL, "View school retrieves", "ROLE_ADMIN_RETRIEVES", true),
     CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS("CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS", PermissionModel.PermissionType.SCHOOL, "View school role assignments", "ROLE_ADMIN_SCHOOLS", true),
     CAN_ORPHAN_SCHOOL_VAULTS("CAN_ORPHAN_SCHOOL_VAULTS", PermissionModel.PermissionType.SCHOOL, "Orphan school vaults", null, false),
+    MANAGE_SCHOOL_VAULT_DEPOSITS("MANAGE_SCHOOL_VAULT_DEPOSITS", PermissionModel.PermissionType.SCHOOL, "Manage school vault deposits and retrieves", null, false),
+    VIEW_SCHOOL_VAULT_METADATA("VIEW_SCHOOL_VAULT_METADATA", PermissionModel.PermissionType.SCHOOL, "View school vault metadata", null, false),
+    VIEW_SCHOOL_VAULT_ROLES("VIEW_SCHOOL_VAULT_ROLES", PermissionModel.PermissionType.SCHOOL, "View school vault roles", null, false),
+    ASSIGN_SCHOOL_VAULT_ROLES("ASSIGN_SCHOOL_VAULT_ROLES", PermissionModel.PermissionType.SCHOOL, "Assign school vault roles", null, false),
+    VIEW_SCHOOL_VAULT_HISTORY("VIEW_SCHOOL_VAULT_HISTORY", PermissionModel.PermissionType.SCHOOL, "View school vault history", null, false),
+    TRANSFER_SCHOOL_VAULT_OWNERSHIP("TRANSFER_SCHOOL_VAULT_OWNERSHIP", PermissionModel.PermissionType.SCHOOL, "Transfer school vault ownership", null, false),
 
     // Admin permissions
     CAN_MANAGE_BILLING_DETAILS("CAN_MANAGE_BILLING_DETAILS", PermissionModel.PermissionType.ADMIN, "Manage billing details", "ROLE_ADMIN_BILLING", true),

@@ -77,7 +77,7 @@ public class VaultsController {
         this.userLookupService = userLookupService;
     }
 
-    @PreAuthorize("hasPermission(#vaultId, 'VAULT', 'CAN_TRANSFER_VAULT_OWNERSHIP') or hasPermission(#vaultId, 'GROUP_VAULT', 'CAN_MANAGE_VAULTS')")
+    @PreAuthorize("hasPermission(#vaultId, 'VAULT', 'CAN_TRANSFER_VAULT_OWNERSHIP') or hasPermission(#vaultId, 'GROUP_VAULT', 'TRANSFER_SCHOOL_VAULT_OWNERSHIP')")
     @PostMapping(value = "/vaults/{vaultid}/data-owner/update")
     public ResponseEntity transferOwnership(
             @PathVariable("vaultid") String vaultId,
