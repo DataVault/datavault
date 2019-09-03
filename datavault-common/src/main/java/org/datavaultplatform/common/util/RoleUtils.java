@@ -25,6 +25,23 @@ public class RoleUtils {
         return DATA_OWNER_ROLE_NAME.equals(roleAssignment.getRole().getName());
     }
 
+    public static boolean isISAdmin(RoleAssignment roleAssignment) {
+        return IS_ADMIN_ROLE_NAME.equals(roleAssignment.getRole().getName());
+    }
+
+    public static boolean isRoleInVault(RoleAssignment roleAssignment, String vaultId) {
+        return roleAssignment.getVault() != null && roleAssignment.getVault().getID().equals(vaultId);
+    }
+
+    public static boolean isRoleInSchool(RoleAssignment roleAssignment, String schoolId) {
+        return roleAssignment.getSchool() != null && roleAssignment.getSchool().getID().equals(schoolId);
+    }
+
+    public static boolean hasPermission(RoleAssignment roleAssignment, Permission permission) {
+        return roleAssignment.getRole().getPermissions().stream()
+                .anyMatch(permissionModel -> permission == permissionModel.getPermission());
+    }
+
     public static boolean hasReducedPermissions(Collection<PermissionModel> originalPermissions,
                                                 Collection<PermissionModel> newPermissions) {
         Set<Permission> original = originalPermissions.stream()

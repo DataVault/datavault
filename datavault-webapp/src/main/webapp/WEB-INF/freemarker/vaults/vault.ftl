@@ -102,7 +102,7 @@
                     </a>
                 </div>
             </div>
-            <#assign viewDepositsSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES')">
+            <#assign viewDepositsSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_MANAGE_VAULTS')">
             <@sec.authorize access=viewDepositsSecurityExpression>
             <table class="table table-bordered">
                 <thead>
@@ -172,7 +172,7 @@
             </#if>
 
             <div id="accordion">
-                <#assign viewMetadataSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_METADATA')">
+                <#assign viewMetadataSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_METADATA') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_MANAGE_VAULTS')">
                 <@sec.authorize access=viewMetadataSecurityExpression>
                 <h4 class="accordion-toggle">
                     ‹› &nbsp;Summary of Full Vault Metadata
@@ -238,7 +238,7 @@
                 </div>
                 </@sec.authorize>
 
-                <#assign viewVaultRolesSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_ROLES')">
+                <#assign viewVaultRolesSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_ROLES') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_MANAGE_VAULTS')">
                 <@sec.authorize access=viewVaultRolesSecurityExpression>
                 <h4 class="accordion-toggle">
                     ‹› &nbsp;Vault Roles
@@ -250,7 +250,7 @@
                 </@sec.authorize>
 
 
-                <#assign viewHistorySecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_HISTORY')">
+                <#assign viewHistorySecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_HISTORY') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_MANAGE_VAULTS')">
                 <@sec.authorize access=viewHistorySecurityExpression>
                 <h4 class="accordion-toggle">
                     ‹› &nbsp;Vault History

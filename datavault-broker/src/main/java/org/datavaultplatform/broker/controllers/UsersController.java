@@ -4,6 +4,7 @@ import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.request.ValidateUser;
+import org.datavaultplatform.common.util.RoleUtils;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.http.MediaType;
@@ -70,7 +71,7 @@ public class UsersController {
 
     @RequestMapping(value = "/auth/users/isadmin", method = RequestMethod.POST)
     public Boolean isAdmin(@RequestBody ValidateUser validateUser) {
-        User user = usersService.getUser(validateUser.getUserid());
-        return user.isAdmin();
+        return rolesAndPermissionsService.getRoleAssignmentsForUser(validateUser.getUserid()).stream()
+                .anyMatch(RoleUtils::isISAdmin);
     }
 }

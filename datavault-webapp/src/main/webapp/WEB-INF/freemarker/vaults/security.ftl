@@ -78,8 +78,9 @@
 
 <#import "/spring.ftl" as spring />
 <#assign sec=JspTaglibs["http://www.springframework.org/security/tags"] />
-<#assign assignVaultRolesSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'ASSIGN_VAULT_ROLES')">
-<#assign transferOwnershipSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'CAN_TRANSFER_VAULT_OWNERSHIP')">
+<#assign assignVaultRolesSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'ASSIGN_VAULT_ROLES') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_MANAGE_VAULTS')">
+<#assign transferOwnershipSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'CAN_TRANSFER_VAULT_OWNERSHIP') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_MANAGE_VAULTS')">
+<#assign showActionsColumnSecurityExpression = assignVaultRolesSecurityExpression + " or " + transferOwnershipSecurityExpression />
 
 <@sec.authorize access=transferOwnershipSecurityExpression>
 <div id="orphan-dialog" class="modal fade" tabindex="-1" role="dialog"
@@ -110,6 +111,7 @@
                         </div>
                     </div>
 
+                    <@sec.authorize access=assignVaultRolesSecurityExpression>
                     <div class="col-sm-10 form-group ui-widget">
                         <label for="transfer-role" class="control-label form-label">Vault role to assign to previous
                             Data Owner</label>
@@ -122,18 +124,17 @@
                         </div>
                     </div>
 
-                    <@sec.authorize access=assignVaultRolesSecurityExpression>
-                        <div class="form-group ui-widget col-sm-10 form-confirm">
-                            <div class="checkbox">
-                                <input class="form-check-input" id="confirm-checkbox" type="checkbox"
-                                       name="assigningRole" checked="checked"/>
-                            </div>
-                            <label for="confirm-checkbox" class="control-label">Assign role to previous data
-                                owner?</label>
+                    <div class="form-group ui-widget col-sm-10 form-confirm">
+                        <div class="checkbox">
+                            <input class="form-check-input" id="confirm-checkbox" type="checkbox"
+                                   name="assigningRole" checked="checked"/>
                         </div>
+                        <label for="confirm-checkbox" class="control-label">Assign role to previous data
+                            owner?</label>
+                    </div>
                     </@sec.authorize>
 
-                    <@sec.authorize access="hasRole('ROLE_IS_ADMIN')">
+                    <@sec.authorize access="hasRole('ROLE_IS_ADMIN') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_ORPHAN_SCHOOL_VAULTS')">
                         <div class="form-group ui-widget col-sm-10 form-confirm">
                             <div class="checkbox">
                                 <input class="form-check-input" id="orphan-checkbox" type="checkbox" name="orphaning"/>
@@ -305,7 +306,7 @@
                         </#list>
                     </div>
                 </th>
-                <@sec.authorize access=assignVaultRolesSecurityExpression>
+                <@sec.authorize access=showActionsColumnSecurityExpression>
                 <th class="action-column">Actions</th>
                 </@sec.authorize>
             </tr>
@@ -315,7 +316,7 @@
                 <tr>
                     <td>${dataOwner.user.firstname} ${dataOwner.user.lastname}</td>
                     <td class="role-column">${dataOwner.role.name}</td>
-                    <@sec.authorize access=assignVaultRolesSecurityExpression>
+                    <@sec.authorize access=showActionsColumnSecurityExpression>
                     <td class="action-column">
                         <@sec.authorize access=transferOwnershipSecurityExpression>
                         <a href="#" class="btn btn-default" data-toggle="modal"
@@ -333,8 +334,9 @@
                 <tr>
                     <td>${assignment.user.firstname} ${assignment.user.lastname}</td>
                     <td class="role-column">${assignment.role.name}</td>
-                    <@sec.authorize access=assignVaultRolesSecurityExpression>
+                    <@sec.authorize access=showActionsColumnSecurityExpression>
                     <td class="action-column">
+                        <@sec.authorize access=assignVaultRolesSecurityExpression>
                         <a href="#" class="btn btn-default" data-toggle="modal"
                            data-target="#update-existing-dialog" data-assignment-id="${assignment.id}"
                            data-user-name="${assignment.user.firstname} ${assignment.user.lastname}"
@@ -345,6 +347,7 @@
                            data-user-name="${assignment.user.firstname} ${assignment.user.lastname}"
                            title="Remove role assignment for user ${assignment.user.firstname} ${assignment.user.lastname}."><i
                                     class="fa fa-trash"></i></a>
+                        </@sec.authorize>
                     </td>
                     </@sec.authorize>
                 </tr>
@@ -401,13 +404,18 @@
         $('#delete-role-user-name').text(userName);
         $('#delete-error').addClass('hidden').text('');
     });
+    </@sec.authorize>
 
     var redirectUri = '<@spring.url "/vaults/${vault.ID}"/>';
     var forms = [
+        <@sec.authorize access=assignVaultRolesSecurityExpression>
         '#create-form',
         '#update-form',
         '#delete-form',
+        </@sec.authorize>
+        <@sec.authorize access=transferOwnershipSecurityExpression>
         '#transfer-form',
+        </@sec.authorize>
     ];
 
     for (var formSelector of forms) {
@@ -433,7 +441,6 @@
             });
         });
     }
-    </@sec.authorize>
 
     $(document).ready(function () {
         var transferInputs = $('#transfer-inputs input');

@@ -4,19 +4,13 @@ import com.google.common.base.Strings;
 import com.google.common.collect.MoreCollectors;
 import com.google.gson.Gson;
 import org.apache.commons.lang.RandomStringUtils;
-import org.datavaultplatform.common.model.DataManager;
-import org.datavaultplatform.common.model.Dataset;
-import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.RetentionPolicy;
-import org.datavaultplatform.common.model.Retrieve;
-import org.datavaultplatform.common.model.RoleAssignment;
-import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.TransferVault;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.util.RoleUtils;
+import org.datavaultplatform.webapp.exception.ForbiddenException;
 import org.datavaultplatform.webapp.exception.InvalidUunException;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
@@ -48,6 +42,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validator;
 import javax.validation.constraints.AssertTrue;
+import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -82,7 +77,7 @@ public class VaultsController {
         this.userLookupService = userLookupService;
     }
 
-    @PreAuthorize("hasPermission(#vaultId, 'Vault', 'CAN_TRANSFER_VAULT_OWNERSHIP')")
+    @PreAuthorize("hasPermission(#vaultId, 'VAULT', 'CAN_TRANSFER_VAULT_OWNERSHIP') or hasPermission(#vaultId, 'GROUP_VAULT', 'CAN_MANAGE_VAULTS')")
     @PostMapping(value = "/vaults/{vaultid}/data-owner/update")
     public ResponseEntity transferOwnership(
             @PathVariable("vaultid") String vaultId,
@@ -143,8 +138,12 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
-    public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID) throws Exception {
+    public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID, Principal principal) throws Exception {
         VaultInfo vault = restService.getVault(vaultID);
+
+        if (!canAccessVault(vault, principal)) {
+            throw new ForbiddenException();
+        }
 
         List<RoleAssignment> roleAssignmentsForVault = restService.getRoleAssignmentsForVault(vaultID);
         List<RoleAssignment> vaultUsers = roleAssignmentsForVault.stream()
@@ -191,6 +190,14 @@ public class VaultsController {
         model.addAttribute("dataManagers", dataManagerUsers);
         
         return "vaults/vault";
+    }
+
+    private boolean canAccessVault(VaultInfo vault, Principal principal) {
+        List<RoleAssignment> roleAssignmentsForUser = restService.getRoleAssignmentsForUser(principal.getName());
+        return roleAssignmentsForUser.stream().anyMatch(roleAssignment ->
+                RoleUtils.isISAdmin(roleAssignment)
+                        || RoleUtils.isRoleInVault(roleAssignment, vault.getID())
+                        || (RoleUtils.isRoleInSchool(roleAssignment, vault.getGroupID()) && RoleUtils.hasPermission(roleAssignment, Permission.CAN_MANAGE_VAULTS)));
     }
     
     @RequestMapping(value = "/vaults/{vaultid}/{userid}", method = RequestMethod.GET)

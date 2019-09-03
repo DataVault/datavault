@@ -4,6 +4,7 @@ import com.google.common.collect.Multimap;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,7 +109,10 @@ public class ScopedPermissionEvaluator implements PermissionEvaluator {
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
         final String id = targetId.toString();
 
-        if (VAULT_TYPE_SHORT.equalsIgnoreCase(targetType) || VAULT_TYPE.equalsIgnoreCase(targetType)) {
+        if (GROUP_VAULT.equalsIgnoreCase(targetType)) {
+            VaultInfo vaultInfo = rest.getVault(id);
+            return hasPermission(authentication, rest.getGroup(vaultInfo.getGroupID()), permission);
+        } else if (VAULT_TYPE_SHORT.equalsIgnoreCase(targetType) || VAULT_TYPE.equalsIgnoreCase(targetType)) {
             return hasPermission(authentication, rest.getVaultRecord(id), permission);
         } else if (GROUP_TYPE_SHORT.equalsIgnoreCase(targetType) || GROUP_TYPE.equalsIgnoreCase(targetType)) {
             return hasPermission(authentication, rest.getGroup(id), permission);
@@ -122,4 +126,6 @@ public class ScopedPermissionEvaluator implements PermissionEvaluator {
 
     private static final String GROUP_TYPE_SHORT = Group.class.getSimpleName();
     private static final String GROUP_TYPE = Group.class.getName();
+
+    private static final String GROUP_VAULT = "GROUP_VAULT";
 }
