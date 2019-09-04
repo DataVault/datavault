@@ -106,7 +106,8 @@ public class VaultsController {
                 throw new EntityNotFoundException(Vault.class, vaultId);
             }
 
-            if (vault.getUserID().equals(request.user)) {
+            String userId = vault.getUserID();
+            if (userId != null && userId.equals(request.user)) {
                 return ResponseEntity.status(422).body("Cannot transfer ownership to the current owner");
             }
         }
