@@ -11,6 +11,7 @@ import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.exception.ForbiddenException;
+import org.datavaultplatform.webapp.exception.EntityNotFoundException;
 import org.datavaultplatform.webapp.exception.InvalidUunException;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
@@ -98,6 +99,15 @@ public class VaultsController {
 
             if (hasVaultRole) {
                 return ResponseEntity.status(422).body("User already has a role in this vault");
+            }
+
+            VaultInfo vault = restService.getVault(vaultId);
+            if (vault == null) {
+                throw new EntityNotFoundException(Vault.class, vaultId);
+            }
+
+            if (vault.getUserID().equals(request.user)) {
+                return ResponseEntity.status(422).body("Cannot transfer ownership to the current owner");
             }
         }
 
@@ -199,7 +209,7 @@ public class VaultsController {
                         || RoleUtils.isRoleInVault(roleAssignment, vault.getID())
                         || (RoleUtils.isRoleInSchool(roleAssignment, vault.getGroupID()) && RoleUtils.hasPermission(roleAssignment, Permission.CAN_MANAGE_VAULTS)));
     }
-    
+
     @RequestMapping(value = "/vaults/{vaultid}/{userid}", method = RequestMethod.GET)
     public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID,@PathVariable("userid") String userID) throws Exception {
     	model.addAttribute("vaults", restService.getVaultsListingAll(userID));
