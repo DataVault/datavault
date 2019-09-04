@@ -37,6 +37,12 @@ public class VaultsService {
     public void orphanVault(Vault vault) {
         vault.setUser(null);
         vaultDAO.update(vault);
+
+        RoleModel dataOwnerRole = rolesAndPermissionsService.getDataOwner();
+        rolesAndPermissionsService.getRoleAssignmentsForRole(dataOwnerRole.getId()).stream()
+                .filter(roleAssignment -> vault.equals(roleAssignment.getVault()))
+                .findFirst()
+                .ifPresent(roleAssignment -> rolesAndPermissionsService.deleteRoleAssignment(roleAssignment.getId()));
     }
     
     public void updateVault(Vault vault) {
