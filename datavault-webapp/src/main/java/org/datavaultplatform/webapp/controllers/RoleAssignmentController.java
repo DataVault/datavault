@@ -4,6 +4,7 @@ import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
 import org.datavaultplatform.webapp.services.RestService;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -46,17 +47,10 @@ public class RoleAssignmentController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        User user = rest.getUser(assignmentRequest.user);
-        if (user == null) {
-            throw new EntityNotFoundException(User.class, assignmentRequest.user);
-        }
-
         RoleModel role = rest.getRole(assignmentRequest.role).orElseThrow
                 (()  -> new EntityNotFoundException(RoleModel.class, String.valueOf(assignmentRequest.role)));
 
-        roleAssignment.setUser(user);
         roleAssignment.setRole(role);
-
         rest.updateRoleAssignment(roleAssignment);
 
         return ResponseEntity.ok().build();
@@ -91,6 +85,10 @@ public class RoleAssignmentController {
             @RequestParam("user") String userId) {
 
         RoleAssignment assignment = new RoleAssignment();
+        User user = rest.getUser(userId);
+        if (user == null) {
+            return ResponseEntity.status(422).body("No such user");
+        }
 
         RoleType roleType = RoleType.valueOf(type.toUpperCase());
         switch (roleType) {
@@ -98,16 +96,23 @@ public class RoleAssignmentController {
                 assignment.setSchool(rest.getGroup(targetId));
                 break;
             case VAULT:
+                boolean hasVaultRole = rest.getRoleAssignmentsForUser(userId)
+                        .stream()
+                        .anyMatch(role -> {
+                            Vault vault = role.getVault();
+                            return vault != null && vault.getID().equals(targetId);
+                        });
+
+                if (hasVaultRole) {
+                    return ResponseEntity.status(422).body("User already has a role in this vault");
+                }
+
                 assignment.setVault(rest.getVaultRecord(targetId));
                 break;
             default:
                 return ResponseEntity.notFound().build();
         }
 
-        User user = rest.getUser(userId);
-        if (user == null) {
-            throw new EntityNotFoundException(User.class, userId);
-        }
 
         RoleModel role = rest.getRole(roleId)
                 .orElseThrow(() -> new EntityNotFoundException(RoleModel.class, String.valueOf(roleId)));
