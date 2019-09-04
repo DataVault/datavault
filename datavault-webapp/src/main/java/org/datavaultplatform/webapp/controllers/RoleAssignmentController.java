@@ -6,6 +6,7 @@ import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
+import org.datavaultplatform.webapp.services.ForceLogoutService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +26,12 @@ public class RoleAssignmentController {
 
     private final RestService rest;
 
+    private final ForceLogoutService forceLogoutService;
+
     @Autowired
-    public RoleAssignmentController(RestService rest) {
+    public RoleAssignmentController(RestService rest, ForceLogoutService forceLogoutService) {
         this.rest = rest;
+        this.forceLogoutService = forceLogoutService;
     }
 
     @PostMapping("/security/roles/{roleType}/{target}/user/update")
@@ -53,6 +57,8 @@ public class RoleAssignmentController {
         roleAssignment.setRole(role);
         rest.updateRoleAssignment(roleAssignment);
 
+        forceLogoutService.logoutUser(roleAssignment.getUser().getID());
+
         return ResponseEntity.ok().build();
     }
 
@@ -72,6 +78,8 @@ public class RoleAssignmentController {
         }
 
         rest.deleteRoleAssignment(assignment.getId());
+
+        forceLogoutService.logoutUser(assignment.getUser().getID());
 
         return ResponseEntity.ok().build();
     }
@@ -120,6 +128,8 @@ public class RoleAssignmentController {
         assignment.setUser(user);
         assignment.setRole(role);
         rest.createRoleAssignment(assignment);
+
+        forceLogoutService.logoutUser(userId);
 
         return ResponseEntity.ok().build();
     }

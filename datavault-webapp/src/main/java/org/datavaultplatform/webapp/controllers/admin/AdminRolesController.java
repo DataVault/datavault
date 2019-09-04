@@ -248,6 +248,8 @@ public class AdminRolesController {
         newRoleAssignment.setUser(user);
         restService.createRoleAssignment(newRoleAssignment);
 
+        forceLogoutService.logoutUser(userId);
+
         return ResponseEntity.ok().build();
     }
 

@@ -252,6 +252,7 @@ public class AdminSchoolsController {
 
     private void createNewRoleAssignment(RoleAssignment toCreate) {
         restService.createRoleAssignment(toCreate);
+        forceLogoutService.logoutUser(toCreate.getUser().getID());
     }
 
     private Optional<RoleAssignment> getRoleAssignment(long assignmentId) {
