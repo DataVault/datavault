@@ -43,7 +43,7 @@
                                     </a>
                                     </@sec.authorize>
                                 </td>
-                                <td>${vault.getUserID()}</td>
+                                <td><#if vault.getUserID()??>${vault.getUserID()}</#if></td>
                                 <td>${vault.getCreationTime()?datetime}</td>
                                 <td class="text-muted">${vault.getReviewDate()?string('dd/MM/yyyy')}</td>
                             </tr>
