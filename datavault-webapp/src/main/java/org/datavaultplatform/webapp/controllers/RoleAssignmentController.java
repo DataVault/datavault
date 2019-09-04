@@ -36,7 +36,7 @@ public class RoleAssignmentController {
             @PathVariable("roleType") String type,
             @PathVariable("target") String targetId,
             @Valid @NotNull @RequestParam("assignment") Long assignmentId,
-            @Valid RoleAssignmentRequest assignmentRequest) {
+            @Valid @NotNull(message = "Must select a role") @RequestParam("role") Long roleId) {
 
         RoleAssignment roleAssignment = rest.getRoleAssignment(assignmentId)
                 .orElseThrow(() -> new EntityNotFoundException(RoleAssignment.class, String.valueOf(assignmentId)));
@@ -47,8 +47,8 @@ public class RoleAssignmentController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        RoleModel role = rest.getRole(assignmentRequest.role).orElseThrow
-                (()  -> new EntityNotFoundException(RoleModel.class, String.valueOf(assignmentRequest.role)));
+        RoleModel role = rest.getRole(roleId).orElseThrow
+                (()  -> new EntityNotFoundException(RoleModel.class, String.valueOf(roleId)));
 
         roleAssignment.setRole(role);
         rest.updateRoleAssignment(roleAssignment);
