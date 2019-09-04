@@ -38,7 +38,6 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         permissionDao.synchronisePermissions();
         roleDao.storeSpecialRoles();
-        roleAssignmentDao.synchroniseDataOwners();
     }
 
     public RoleModel createRole(RoleModel role) {
