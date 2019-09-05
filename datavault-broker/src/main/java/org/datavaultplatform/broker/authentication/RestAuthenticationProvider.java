@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.authentication;
 
+import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.ClientsService;
 import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.broker.services.UsersService;
@@ -17,7 +18,6 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * In truth this class does not do any true authentication as it is assumed the user was authenticated by the client
@@ -35,6 +35,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
     private UsersService usersService;
     private ClientsService clientsService;
     private RolesAndPermissionsService rolesAndPermissionsService;
+    private AdminService adminService;
 
     // This is a crappy means of allowing someone to turn off the client validation. Must be a better way of doing this.
     private boolean validateClient;
@@ -55,6 +56,10 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         this.rolesAndPermissionsService = rolesAndPermissionsService;
     }
 
+    public void setAdminService(AdminService adminService) {
+        this.adminService = adminService;
+    }
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         List<GrantedAuthority> grantedAuths = new ArrayList<>();
@@ -72,7 +77,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
             }
 
             // If we got here then we found a matching User record.
-            if (user.isAdmin()) {
+            if (adminService.isAdminUser(user)) {
                 logger.debug(user.getID() + " is an admin user");
                 grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
             } else {

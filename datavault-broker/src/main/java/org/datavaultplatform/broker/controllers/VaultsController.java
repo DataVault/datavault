@@ -7,8 +7,8 @@ import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.TransferVault;
 import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
@@ -20,12 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -35,13 +30,10 @@ public class VaultsController {
 
     private VaultsService vaultsService;
     private DepositsService depositsService;
-    private RetrievesService retrievesService;
     private ExternalMetadataService externalMetadataService;
     private RetentionPoliciesService retentionPoliciesService;
     private GroupsService groupsService;
     private UsersService usersService;
-    private FileStoreService fileStoreService;
-    private ArchiveStoreService archiveStoreService;
     private EventService eventService;
     private ClientsService clientsService;
     private DataManagersService dataManagersService;
@@ -63,10 +55,6 @@ public class VaultsController {
         this.depositsService = depositsService;
     }
 
-    public void setRetrievesService(RetrievesService retrievesService) {
-        this.retrievesService = retrievesService;
-    }
-    
     public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
         this.externalMetadataService = externalMetadataService;
     }
@@ -77,14 +65,6 @@ public class VaultsController {
     
     public void setGroupsService(GroupsService groupsService) {
         this.groupsService = groupsService;
-    }
-
-    public void setFileStoreService(FileStoreService fileStoreService) {
-        this.fileStoreService = fileStoreService;
-    }
-
-    public void setArchiveStoreService(ArchiveStoreService archiveStoreService) {
-        this.archiveStoreService = archiveStoreService;
     }
 
     public void setUsersService(UsersService usersService) {
@@ -188,7 +168,7 @@ public class VaultsController {
                                                   @RequestParam(value = "offset", required = false)
 											      @ApiQueryParam(name = "offset", description = "Vault row id ", defaultvalue = "0", required = false) String offset,
 											      @RequestParam(value = "maxResult", required = false)
-											      @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) throws Exception {
+                                          @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) {
 
         List<VaultInfo> vaultResponses = new ArrayList<>();
         Long recordsTotal = 0L;
@@ -221,8 +201,8 @@ public class VaultsController {
 
     @RequestMapping(value = "/vaults/deposits/search", method = RequestMethod.GET)
     public List<DepositInfo> searchAllDeposits(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                           @RequestParam("query") String query,
-                                           @RequestParam(value = "sort", required = false) String sort) throws Exception {
+                                               @RequestParam("query") String query,
+                                               @RequestParam(value = "sort", required = false) String sort) {
 
         List<DepositInfo> depositResponses = new ArrayList<>();
         for (Deposit deposit : depositsService.search(query, sort, userID)) {
@@ -339,7 +319,7 @@ public class VaultsController {
 
     @RequestMapping(value = "/vaults/{vaultid}/record", method = RequestMethod.GET)
     public Vault getVaultRecord(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                           @PathVariable("vaultid") String vaultID) throws Exception {
+                                @PathVariable("vaultid") String vaultID) {
 
         return vaultsService.getVault(vaultID);
     }
@@ -378,10 +358,7 @@ public class VaultsController {
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
 
-        List<DataManager> dataManagersList = new ArrayList<>();
-        for (DataManager dataManager : vault.getDataManagers()) {
-            dataManagersList.add(dataManager);
-        }
+        List<DataManager> dataManagersList = new ArrayList<>(vault.getDataManagers());
         return dataManagersList;
     }
 

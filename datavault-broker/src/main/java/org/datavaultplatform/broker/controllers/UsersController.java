@@ -1,10 +1,9 @@
 package org.datavaultplatform.broker.controllers;
 
-import org.datavaultplatform.broker.services.RolesAndPermissionsService;
-import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.UsersService;
+import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.ValidateUser;
-import org.datavaultplatform.common.util.RoleUtils;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.springframework.http.MediaType;
@@ -14,12 +13,12 @@ import org.springframework.web.bind.annotation.*;
 @Api(name="Users", description = "Interact with DataVault Users")
 public class UsersController {
 
-    private RolesAndPermissionsService rolesAndPermissionsService;
+    private AdminService adminService;
     
     private UsersService usersService;
 
-    public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
-        this.rolesAndPermissionsService = rolesAndPermissionsService;
+    public void setAdminService(AdminService adminService) {
+        this.adminService = adminService;
     }
 
     public void setUsersService(UsersService usersService) {
@@ -71,7 +70,6 @@ public class UsersController {
 
     @RequestMapping(value = "/auth/users/isadmin", method = RequestMethod.POST)
     public Boolean isAdmin(@RequestBody ValidateUser validateUser) {
-        return rolesAndPermissionsService.getRoleAssignmentsForUser(validateUser.getUserid()).stream()
-                .anyMatch(RoleUtils::isISAdmin);
+        return adminService.isAdminUser(validateUser.getUserid());
     }
 }

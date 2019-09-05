@@ -1,12 +1,8 @@
 package org.datavaultplatform.webapp.authentication;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
-import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.PermissionModel;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.webapp.model.AdminDashboardPermissionsModel;
 import org.datavaultplatform.webapp.security.ScopedGrantedAuthority;
@@ -85,7 +81,6 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
             logger.info("Creating new account for new user " + name);
             User user = new User();
             user.setID(name);
-            user.setAdmin(false);
             user.setFirstname(swad.getFirstname());
             user.setLastname(swad.getLastname());
             user.setEmail(swad.getEmail());
@@ -107,7 +102,7 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
             grantedAuths.addAll(scopedAuthorities);
 
             logger.info("Existing user " + name);
-            boolean isAdmin = false;
+            boolean isAdmin;
             try{
                 isAdmin = restService.isAdmin(new ValidateUser(name, null));
                 if (isAdmin) {

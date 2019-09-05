@@ -2,18 +2,12 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
-       xmlns:tx="http://www.springframework.org/schema/tx"
-       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc.xsd
-        http://www.springframework.org/schema/tx
-        http://www.springframework.org/schema/tx/spring-tx.xsd
-        http://www.springframework.org/schema/rabbit
-        http://www.springframework.org/schema/rabbit/spring-rabbit-1.4.xsd">
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
     <context:component-scan base-package="org.datavaultplatform.broker.controllers"/>
 
@@ -52,13 +46,10 @@
         <property name="permissionsService" ref="rolesAndPermissionsService" />
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
-        <property name="retrievesService" ref="retrievesService" />
         <property name="externalMetadataService" ref="externalMetadataService" />
         <property name="retentionPoliciesService" ref="retentionPoliciesService" />
         <property name="groupsService" ref="groupsService" />
         <property name="usersService" ref="usersService" />
-        <property name="fileStoreService" ref="fileStoreService" />
-        <property name="archiveStoreService" ref="archiveStoreService" />
         <property name="eventService" ref="eventService" />
         <property name="clientsService" ref="clientsService" />
         <property name="dataManagersService" ref="dataManagersService" />
@@ -69,7 +60,6 @@
     <bean id="depositsController" class="org.datavaultplatform.broker.controllers.DepositsController">
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
-        <property name="archivesService" ref="archivesService" />
         <property name="retrievesService" ref="retrievesService" />
         <property name="metadataService" ref="metadataService" />
         <property name="externalMetadataService" ref="externalMetadataService" />
@@ -77,6 +67,7 @@
         <property name="usersService" ref="usersService" />
         <property name="archiveStoreService" ref="archiveStoreService" />
         <property name="jobsService" ref="jobsService" />
+        <property name="adminService" ref="adminService"/>
         <property name="sender" ref="sender" />
         <property name="optionsDir" value="${optionsDir:#{null}}" />
         <property name="tempDir" value="${tempDir:#{null}}" />
@@ -90,9 +81,6 @@
         <property name="vaultsService" ref="vaultsService" />
         <property name="depositsService" ref="depositsService" />
         <property name="retrievesService" ref="retrievesService" />
-        <property name="retentionPoliciesService" ref="retentionPoliciesService" />
-        <property name="groupsService" ref="groupsService" />
-        <property name="usersService" ref="usersService" />
         <property name="eventService" ref="eventService" />
     </bean>
 
@@ -120,13 +108,13 @@
     </bean>
  
     <bean id="retentionPoliciesController" class="org.datavaultplatform.broker.controllers.RetentionPoliciesController">
-        <property name="usersService" ref="usersService" />
         <property name="retentionPoliciesService" ref="retentionPoliciesService" />
+        <property name="adminService" ref="adminService"/>
     </bean>
 
     <bean id="usersController" class="org.datavaultplatform.broker.controllers.UsersController">
         <property name="usersService" ref="usersService" />
-        <property name="rolesAndPermissionsService" ref="rolesAndPermissionsService" />
+        <property name="adminService" ref="adminService"/>
     </bean>
 
     <bean id="rolesAndPermissionsController" class="org.datavaultplatform.broker.controllers.RolesAndPermissionsController">
@@ -136,6 +124,7 @@
     <bean id="groupsController" class="org.datavaultplatform.broker.controllers.GroupsController">
         <property name="groupsService" ref="groupsService" />
         <property name="usersService" ref="usersService" />
+        <property name="adminService" ref="adminService"/>
     </bean>
 
     <bean id="fileStoreController" class="org.datavaultplatform.broker.controllers.FileStoreController">

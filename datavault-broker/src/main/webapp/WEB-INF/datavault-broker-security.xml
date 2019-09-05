@@ -52,6 +52,7 @@
         <property name="usersService" ref="usersService" />
         <property name="clientsService" ref="clientsService" />
         <property name="rolesAndPermissionsService" ref="rolesAndPermissionsService" />
+        <property name="adminService" ref="adminService"/>
         <property name="validateClient" value="${broker.validateclient}" />
     </bean>
 

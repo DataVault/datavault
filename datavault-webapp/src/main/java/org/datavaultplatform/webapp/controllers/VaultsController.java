@@ -1,7 +1,6 @@
 package org.datavaultplatform.webapp.controllers;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.MoreCollectors;
 import com.google.gson.Gson;
 import org.apache.commons.lang.RandomStringUtils;
 import org.datavaultplatform.common.model.*;
@@ -10,41 +9,29 @@ import org.datavaultplatform.common.request.TransferVault;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.util.RoleUtils;
-import org.datavaultplatform.webapp.exception.ForbiddenException;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
+import org.datavaultplatform.webapp.exception.ForbiddenException;
 import org.datavaultplatform.webapp.exception.InvalidUunException;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
-import javax.validation.Validator;
 import javax.validation.constraints.AssertTrue;
 import java.security.Principal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -59,14 +46,15 @@ public class VaultsController {
     private String link;
     private String welcome;
 
-    public void setSystem(String system) throws Exception {
+    public void setSystem(String system) {
         this.system = system;
     }
-    public void setLink(String link) throws Exception {
+
+    public void setLink(String link) {
         this.link = link;
     }
 
-	public void setRestService(RestService restService) throws Exception {
+    public void setRestService(RestService restService) {
         this.restService = restService;
     }
 
@@ -122,7 +110,7 @@ public class VaultsController {
 
 
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
-    public String getVaultsListing(ModelMap model) throws Exception {
+    public String getVaultsListing(ModelMap model) {
         model.addAttribute("vaults", restService.getVaultsListing());
         
         // pass the view an empty Vault since the form expects it
@@ -146,7 +134,7 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
-    public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID, Principal principal) throws Exception {
+    public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID, Principal principal) {
         VaultInfo vault = restService.getVault(vaultID);
 
         if (!canAccessVault(vault, principal)) {
@@ -170,8 +158,8 @@ public class VaultsController {
         
         DepositInfo[] deposits = restService.getDepositsListing(vaultID);
         model.addAttribute("deposits", deposits);
-        
-        Map<String, Retrieve[]> depositRetrievals = new HashMap<String, Retrieve[]>();
+
+        Map<String, Retrieve[]> depositRetrievals = new HashMap<>();
         for (DepositInfo deposit : deposits) {
             Retrieve[] retrievals = restService.getDepositRetrieves(deposit.getID());
             depositRetrievals.put(deposit.getName(), retrievals);
@@ -185,7 +173,6 @@ public class VaultsController {
             if(u == null) {
                 u = new User();
                 u.setID(dm.getUUN());
-                u.setAdmin(false);
 
                 // Generate random password to make sure account is not easily accessible
                 String password = RandomStringUtils.randomAscii(10);
@@ -209,7 +196,7 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults/{vaultid}/{userid}", method = RequestMethod.GET)
-    public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID,@PathVariable("userid") String userID) throws Exception {
+    public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("userid") String userID) {
     	model.addAttribute("vaults", restService.getVaultsListingAll(userID));
     	        
         return "vaults/userVaults";
@@ -217,7 +204,7 @@ public class VaultsController {
 
     // Process the completed 'create new vault' page
     @RequestMapping(value = "/vaults/create", method = RequestMethod.POST)
-    public String addVault(@ModelAttribute CreateVault vault, ModelMap model) throws Exception {
+    public String addVault(@ModelAttribute CreateVault vault, ModelMap model) {
         VaultInfo newVault = restService.addVault(vault);
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
         return "redirect:" + vaultUrl;        
@@ -227,7 +214,7 @@ public class VaultsController {
     public RedirectView addDataManager(ModelMap model,
                                        @PathVariable("vaultid") String vaultID,
                                        @RequestParam("uun") String uun,
-                                       final RedirectAttributes redirectAttrs) throws Exception {
+                                       final RedirectAttributes redirectAttrs) {
         logger.debug("Adding "+uun+" as DM");
 
         String vaultUrl = "/vaults/" + vaultID + "/";
@@ -260,9 +247,9 @@ public class VaultsController {
     
     @RequestMapping(value = "/vaults/{vaultid}/deleteDataManager", method = RequestMethod.POST)
     public RedirectView deleteDataManager(ModelMap model,
-                                @PathVariable("vaultid") String vaultID,
-                                @RequestParam("uun") String uun,
-                                final RedirectAttributes redirectAttrs) throws Exception {
+                                          @PathVariable("vaultid") String vaultID,
+                                          @RequestParam("uun") String uun,
+                                          final RedirectAttributes redirectAttrs) {
         logger.info("Get Data Manager with id: "+uun);
         DataManager dataManager = restService.getDataManager(vaultID, uun);
 
@@ -278,8 +265,8 @@ public class VaultsController {
 
     @RequestMapping(value = "/vaults/{vaultid}/updateVaultDescription", method = RequestMethod.POST)
     public String updateVaultDescription(ModelMap model,
-                                 @PathVariable("vaultid") String vaultID,
-                                 @RequestParam("description") String description ) throws Exception {
+                                         @PathVariable("vaultid") String vaultID,
+                                         @RequestParam("description") String description) {
         VaultInfo vault = restService.updateVaultDescription(vaultID, description);
         String vaultUrl = "/vaults/" + vault.getID() + "/";
         return "redirect:" + vaultUrl;

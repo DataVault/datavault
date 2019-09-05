@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +31,7 @@ public class UserLookupService {
     }
 
     public List<String> getSuggestedUuns(String term) {
-        List<String> result = new ArrayList<>();
+        List<String> result;
         try {
             result = ldapService.autocompleteUID(term);
         } catch (LdapException | CursorException | IOException ex) {
@@ -72,7 +71,6 @@ public class UserLookupService {
             newUser.setID(attributes.get("uid")); attributes.remove("uid");
             newUser.setEmail(attributes.get("mail")); attributes.remove("mail");
             newUser.setProperties(attributes);
-            newUser.setAdmin(false);
 
             // Generate random password to make sure account is not easily accessible
             String password = RandomStringUtils.randomAscii(10);
