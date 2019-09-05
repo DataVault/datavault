@@ -25,9 +25,8 @@ public class RoleAssignment {
     @JoinColumn(name = "role_id", nullable = false)
     private RoleModel role;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private String userId;
 
     @ManyToOne
     @JoinColumn(name = "school_id")
@@ -55,12 +54,12 @@ public class RoleAssignment {
         return role;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public User getUser() {
-        return user;
+    public String getUserId() {
+        return userId;
     }
 
     public void setSchool(Group school) {
@@ -90,14 +89,14 @@ public class RoleAssignment {
         RoleAssignment that = (RoleAssignment) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(role, that.role) &&
-                Objects.equals(user, that.user) &&
+                Objects.equals(userId, that.userId) &&
                 Objects.equals(school, that.school) &&
                 Objects.equals(vault, that.vault);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, role, user, school, vault);
+        return Objects.hash(id, role, userId, school, vault);
     }
 
     @JsonIgnore

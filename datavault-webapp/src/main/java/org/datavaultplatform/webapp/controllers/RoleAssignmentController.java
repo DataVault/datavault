@@ -57,7 +57,7 @@ public class RoleAssignmentController {
         roleAssignment.setRole(role);
         rest.updateRoleAssignment(roleAssignment);
 
-        forceLogoutService.logoutUser(roleAssignment.getUser().getID());
+        forceLogoutService.logoutUser(roleAssignment.getUserId());
 
         return ResponseEntity.ok().build();
     }
@@ -79,7 +79,7 @@ public class RoleAssignmentController {
 
         rest.deleteRoleAssignment(assignment.getId());
 
-        forceLogoutService.logoutUser(assignment.getUser().getID());
+        forceLogoutService.logoutUser(assignment.getUserId());
 
         return ResponseEntity.ok().build();
     }
@@ -125,7 +125,7 @@ public class RoleAssignmentController {
         RoleModel role = rest.getRole(roleId)
                 .orElseThrow(() -> new EntityNotFoundException(RoleModel.class, String.valueOf(roleId)));
 
-        assignment.setUser(user);
+        assignment.setUserId(userId);
         assignment.setRole(role);
         rest.createRoleAssignment(assignment);
 

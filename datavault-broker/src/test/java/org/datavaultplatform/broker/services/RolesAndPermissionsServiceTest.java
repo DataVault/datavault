@@ -113,7 +113,7 @@ public class RolesAndPermissionsServiceTest {
     @Test
     public void createRoleAssignmentShouldStoreANewSchoolRoleAssignment() {
         // Given
-        RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.SCHOOL), new User());
+        RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.SCHOOL));
         toCreate.setSchool(new Group());
         given(mockRoleAssignmentDao.roleAssignmentExists(toCreate)).willReturn(false);
 
@@ -127,7 +127,7 @@ public class RolesAndPermissionsServiceTest {
     @Test
     public void createRoleAssignmentShouldStoreANewVaultRoleAssignment() {
         // Given
-        RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.VAULT), new User());
+        RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.VAULT));
         toCreate.setVault(new Vault());
         given(mockRoleAssignmentDao.roleAssignmentExists(toCreate)).willReturn(false);
 
@@ -144,7 +144,8 @@ public class RolesAndPermissionsServiceTest {
         expectedException.expect(IllegalStateException.class);
         expectedException.expectMessage("Cannot create role assignment without user");
 
-        RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.SCHOOL), null);
+        RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.SCHOOL));
+        toCreate.setUserId(null);
         toCreate.setSchool(new Group());
 
         // When
@@ -159,7 +160,7 @@ public class RolesAndPermissionsServiceTest {
         expectedException.expect(IllegalStateException.class);
         expectedException.expectMessage("Cannot create role assignment without role");
 
-        RoleAssignment toCreate = aRoleAssignment(null, new User());
+        RoleAssignment toCreate = aRoleAssignment(null);
 
         // When
         underTest.createRoleAssignment(toCreate);
@@ -173,7 +174,7 @@ public class RolesAndPermissionsServiceTest {
         expectedException.expect(IllegalStateException.class);
         expectedException.expectMessage("Cannot create school role assignment without a school");
 
-        RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.SCHOOL), new User());
+        RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.SCHOOL));
         toCreate.setSchool(null);
 
         // When
@@ -188,7 +189,7 @@ public class RolesAndPermissionsServiceTest {
         expectedException.expect(IllegalStateException.class);
         expectedException.expectMessage("Cannot create vault role assignment without a vault");
 
-        RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.VAULT), new User());
+        RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.VAULT));
         toCreate.setVault(null);
 
         // When
@@ -203,7 +204,7 @@ public class RolesAndPermissionsServiceTest {
         expectedException.expect(IllegalStateException.class);
         expectedException.expectMessage("Role assignment already exists");
 
-        RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.SCHOOL), new User());
+        RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.SCHOOL));
         toCreate.setSchool(new Group());
         given(mockRoleAssignmentDao.roleAssignmentExists(toCreate)).willReturn(true);
 
@@ -361,11 +362,10 @@ public class RolesAndPermissionsServiceTest {
     public void updateRoleAssignmentShouldPersistAnUpdate() {
         // Given
         Group school = new Group();
-        User user = new User();
 
         RoleModel originalRole = aRole(RoleType.SCHOOL);
         originalRole.setName("Role 1");
-        RoleAssignment original = aRoleAssignment(originalRole, user);
+        RoleAssignment original = aRoleAssignment(originalRole);
         original.setSchool(school);
         original.setId(1L);
 
@@ -373,7 +373,7 @@ public class RolesAndPermissionsServiceTest {
 
         RoleModel newRole = aRole(RoleType.SCHOOL);
         newRole.setName("Role 2");
-        RoleAssignment updatedRoleAssignment = aRoleAssignment(newRole, user);
+        RoleAssignment updatedRoleAssignment = aRoleAssignment(newRole);
         updatedRoleAssignment.setSchool(school);
         updatedRoleAssignment.setId(1L);
 
@@ -392,7 +392,7 @@ public class RolesAndPermissionsServiceTest {
 
         given(mockRoleAssignmentDao.find(1L)).willReturn(null);
 
-        RoleAssignment updatedRoleAssignment = aRoleAssignment(aRole(RoleType.SCHOOL), new User());
+        RoleAssignment updatedRoleAssignment = aRoleAssignment(aRole(RoleType.SCHOOL));
         updatedRoleAssignment.setSchool(new Group());
         updatedRoleAssignment.setId(1L);
 
@@ -405,7 +405,7 @@ public class RolesAndPermissionsServiceTest {
     @Test
     public void updateRoleAssignmentShouldNotPersistAnyUpdatesWhenNothingHasChanged() {
         // Given
-        RoleAssignment roleAssignment = aRoleAssignment(aRole(RoleType.SCHOOL), new User());
+        RoleAssignment roleAssignment = aRoleAssignment(aRole(RoleType.SCHOOL));
         roleAssignment.setSchool(new Group());
         roleAssignment.setId(1L);
 
@@ -424,12 +424,13 @@ public class RolesAndPermissionsServiceTest {
         expectedException.expect(IllegalStateException.class);
         expectedException.expectMessage("Cannot create role assignment without user");
 
-        RoleAssignment original = aRoleAssignment(aRole(RoleType.SCHOOL), new User());
+        RoleAssignment original = aRoleAssignment(aRole(RoleType.SCHOOL));
         original.setSchool(new Group());
         original.setId(1L);
         given(mockRoleAssignmentDao.find(1L)).willReturn(original);
 
-        RoleAssignment update = aRoleAssignment(null, null);
+        RoleAssignment update = aRoleAssignment(null);
+        update.setUserId(null);
         update.setId(1L);
 
         // When
@@ -469,7 +470,7 @@ public class RolesAndPermissionsServiceTest {
     @Test
     public void deleteRoleAssignmentShouldRemoveTheRoleAssignment() {
         // Given
-        RoleAssignment original = aRoleAssignment(aRole(RoleType.ADMIN), new User());
+        RoleAssignment original = aRoleAssignment(aRole(RoleType.ADMIN));
         original.setId(1L);
 
         given(mockRoleAssignmentDao.find(1L)).willReturn(original);
@@ -512,10 +513,10 @@ public class RolesAndPermissionsServiceTest {
         return p;
     }
 
-    private RoleAssignment aRoleAssignment(RoleModel role, User user) {
+    private RoleAssignment aRoleAssignment(RoleModel role) {
         RoleAssignment roleAssignment = new RoleAssignment();
         roleAssignment.setRole(role);
-        roleAssignment.setUser(user);
+        roleAssignment.setUserId("user1");
         return roleAssignment;
     }
 

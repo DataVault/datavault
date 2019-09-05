@@ -170,7 +170,7 @@ public class VaultsController {
             RoleModel role = permissionsService.getRole(roleId);
             RoleAssignment assignment = new RoleAssignment();
             assignment.setRole(role);
-            assignment.setUser(currentOwner);
+            assignment.setUserId(currentOwner.getID());
             assignment.setVault(vault);
 
             permissionsService.createRoleAssignment(assignment);
@@ -293,7 +293,7 @@ public class VaultsController {
         vaultsService.addVault(vault);
 
         RoleAssignment dataOwnerRoleAssignment = new RoleAssignment();
-        dataOwnerRoleAssignment.setUser(vault.getUser());
+        dataOwnerRoleAssignment.setUserId(userID);
         dataOwnerRoleAssignment.setVault(vault);
         dataOwnerRoleAssignment.setRole(permissionsService.getDataOwner());
         permissionsService.createRoleAssignment(dataOwnerRoleAssignment);

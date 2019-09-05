@@ -33,7 +33,7 @@ public class ForceLogoutService {
     public void logoutRole(long roleId) {
         logger.warn("Forcing a logout for all users assigned to role {}", roleId);
         Set<String> userIds = restService.getRoleAssignmentsForRole(roleId).stream()
-                .map(roleAssignment -> roleAssignment.getUser().getID())
+                .map(roleAssignment -> roleAssignment.getUserId())
                 .collect(Collectors.toSet());
         logoutUsers(userIds);
     }

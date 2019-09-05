@@ -19,10 +19,9 @@ public class DaoUtils {
 
     public static Set<String> getPermittedSchoolIds(Session session, String userId, Permission permission) {
         Criteria roleAssignmentsCriteria = session.createCriteria(RoleAssignment.class, "roleAssignment");
-        roleAssignmentsCriteria.createAlias("roleAssignment.user", "user");
         roleAssignmentsCriteria.createAlias("roleAssignment.role", "role");
         roleAssignmentsCriteria.createAlias("role.permissions", "permissions");
-        roleAssignmentsCriteria.add(Restrictions.eq("user.id", userId));
+        roleAssignmentsCriteria.add(Restrictions.eq("roleAssignment.userId", userId));
         roleAssignmentsCriteria.add(Restrictions.eq("permissions.id", permission.getId()));
         roleAssignmentsCriteria.add(Restrictions.or(
                 Restrictions.isNotNull("roleAssignment.school"),

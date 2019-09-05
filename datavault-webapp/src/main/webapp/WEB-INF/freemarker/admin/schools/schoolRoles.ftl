@@ -197,12 +197,12 @@
                     <tbody>
                         <#list roleAssignments as assignment>
                             <tr>
-                                <td>${assignment.user.firstname} ${assignment.user.lastname}</td>
+                                <td>${assignment.userId}</td>
                                 <td class="role-column">${assignment.role.name}</td>
                                 <#if canManageSchoolRoleAssignments>
                                     <td class="action-column">
-                                        <a href="#" class="btn btn-default" data-toggle="modal" data-target="#update-existing-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.user.firstname} ${assignment.user.lastname}" data-user-role="${assignment.role.id}" title="Edit role assignment for user ${assignment.user.firstname} ${assignment.user.lastname}."><i class="fa fa-pencil"></i></a>
-                                        <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.user.firstname} ${assignment.user.lastname}" title="Remove role assignment for user ${assignment.user.firstname} ${assignment.user.lastname}."><i class="fa fa-trash"></i></a>
+                                        <a href="#" class="btn btn-default" data-toggle="modal" data-target="#update-existing-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.userId}" data-user-role="${assignment.role.id}" title="Edit role assignment for user ${assignment.userId}."><i class="fa fa-pencil"></i></a>
+                                        <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.userId}" title="Remove role assignment for user ${assignment.userId}."><i class="fa fa-trash"></i></a>
                                     </td>
                                 </#if>
                             </tr>

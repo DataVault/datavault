@@ -33,14 +33,11 @@ public class VaultsServiceIT {
     @Autowired
     private RolesAndPermissionsService rolesAndPermissionsService;
 
-    @Autowired
-    private UsersService usersService;
-
     @Test
     public void checkVaultCount() {
         RoleAssignment isAdminRoleAssignment = new RoleAssignment();
         isAdminRoleAssignment.setRole(rolesAndPermissionsService.getIsAdmin());
-        isAdminRoleAssignment.setUser(usersService.getUser("admin1"));
+        isAdminRoleAssignment.setUserId("admin1");
         rolesAndPermissionsService.createRoleAssignment(isAdminRoleAssignment);
 
         int prevVaultCount = vaultsService.count("admin1");

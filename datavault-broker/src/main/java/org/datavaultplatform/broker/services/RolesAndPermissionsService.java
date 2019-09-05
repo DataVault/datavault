@@ -74,7 +74,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
     }
 
     private void validateRoleAssignment(RoleAssignment roleAssignment) {
-        if (roleAssignment.getUser() == null) {
+        if (roleAssignment.getUserId() == null) {
             throw new IllegalStateException("Cannot create role assignment without user");
         }
         if (roleAssignment.getRole() == null) {

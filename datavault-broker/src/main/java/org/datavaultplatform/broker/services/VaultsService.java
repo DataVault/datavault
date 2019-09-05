@@ -137,7 +137,7 @@ public class VaultsService {
                 .ifPresent(roleAssignment -> rolesAndPermissionsService.deleteRoleAssignment(roleAssignment.getId()));
 
         RoleAssignment newDataOwnerAssignment = new RoleAssignment();
-        newDataOwnerAssignment.setUser(newOwner);
+        newDataOwnerAssignment.setUserId(newOwner.getID());
         newDataOwnerAssignment.setVault(vault);
         newDataOwnerAssignment.setRole(dataOwnerRole);
         rolesAndPermissionsService.createRoleAssignment(newDataOwnerAssignment);

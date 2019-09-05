@@ -60,7 +60,7 @@ public class AdminRolesController {
         RoleModel superAdminRole = restService.getIsAdmin();
         List<User> superAdminUsers = restService.getRoleAssignmentsForRole(superAdminRole.getId())
                 .stream()
-                .map(RoleAssignment::getUser)
+                .map(roleAssignment -> restService.getUser(roleAssignment.getUserId()))
                 .collect(Collectors.toList());
 
         ModelAndView mav = new ModelAndView();
@@ -245,7 +245,7 @@ public class AdminRolesController {
 
         RoleAssignment newRoleAssignment = new RoleAssignment();
         newRoleAssignment.setRole(superAdminRole);
-        newRoleAssignment.setUser(user);
+        newRoleAssignment.setUserId(userId);
         restService.createRoleAssignment(newRoleAssignment);
 
         forceLogoutService.logoutUser(userId);
