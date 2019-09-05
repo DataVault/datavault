@@ -106,16 +106,13 @@ public class RoleAssignmentController {
             case VAULT:
                 boolean hasVaultRole = rest.getRoleAssignmentsForUser(userId)
                         .stream()
-                        .anyMatch(role -> {
-                            Vault vault = role.getVault();
-                            return vault != null && vault.getID().equals(targetId);
-                        });
+                        .anyMatch(role -> role.getVaultId() != null && role.getVaultId().equals(targetId));
 
                 if (hasVaultRole) {
                     return ResponseEntity.status(422).body("User already has a role in this vault");
                 }
 
-                assignment.setVault(rest.getVaultRecord(targetId));
+                assignment.setVaultId(targetId);
                 break;
             default:
                 return ResponseEntity.notFound().build();

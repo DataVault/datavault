@@ -31,9 +31,8 @@ public class RoleAssignment {
     @Column(name = "school_id")
     private String schoolId;
 
-    @ManyToOne
-    @JoinColumn(name = "vault_id")
-    private Vault vault;
+    @Column(name = "vault_id")
+    private String vaultId;
 
     public RoleAssignment() {}
 
@@ -69,12 +68,12 @@ public class RoleAssignment {
         return schoolId;
     }
 
-    public void setVault(Vault vault) {
-        this.vault = vault;
+    public void setVaultId(String vaultId) {
+        this.vaultId = vaultId;
     }
 
-    public Vault getVault() {
-        return vault;
+    public String getVaultId() {
+        return vaultId;
     }
 
     @Override
@@ -90,20 +89,20 @@ public class RoleAssignment {
                 Objects.equals(role, that.role) &&
                 Objects.equals(userId, that.userId) &&
                 Objects.equals(schoolId, that.schoolId) &&
-                Objects.equals(vault, that.vault);
+                Objects.equals(vaultId, that.vaultId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, role, userId, schoolId, vault);
+        return Objects.hash(id, role, userId, schoolId, vaultId);
     }
 
     @JsonIgnore
     public String getTargetId() {
         if (schoolId != null) {
             return schoolId;
-        } else if (vault != null) {
-            return vault.getID();
+        } else if (vaultId != null) {
+            return vaultId;
         } else {
             throw new IllegalStateException("Target ID requested global role assignment");
         }

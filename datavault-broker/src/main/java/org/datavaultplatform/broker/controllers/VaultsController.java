@@ -128,7 +128,7 @@ public class VaultsController {
 
         List<VaultInfo> vaultResponses = permissionsService.getRoleAssignmentsForUser(userID).stream()
                 .filter(roleAssignment -> RoleType.VAULT == roleAssignment.getRole().getType() || RoleUtils.isDataOwner(roleAssignment))
-                .map(roleAssignment -> roleAssignment.getVault().convertToResponse())
+                .map(roleAssignment -> vaultsService.getVault(roleAssignment.getVaultId()).convertToResponse())
                 .sorted(Comparator.comparing(VaultInfo::getCreationTime))
                 .collect(Collectors.toList());
         Collections.reverse(vaultResponses);
@@ -171,7 +171,7 @@ public class VaultsController {
             RoleAssignment assignment = new RoleAssignment();
             assignment.setRole(role);
             assignment.setUserId(currentOwner.getID());
-            assignment.setVault(vault);
+            assignment.setVaultId(vaultId);
 
             permissionsService.createRoleAssignment(assignment);
         }
@@ -294,7 +294,7 @@ public class VaultsController {
 
         RoleAssignment dataOwnerRoleAssignment = new RoleAssignment();
         dataOwnerRoleAssignment.setUserId(userID);
-        dataOwnerRoleAssignment.setVault(vault);
+        dataOwnerRoleAssignment.setVaultId(vault.getID());
         dataOwnerRoleAssignment.setRole(permissionsService.getDataOwner());
         permissionsService.createRoleAssignment(dataOwnerRoleAssignment);
         

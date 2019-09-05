@@ -128,7 +128,7 @@ public class RolesAndPermissionsServiceTest {
     public void createRoleAssignmentShouldStoreANewVaultRoleAssignment() {
         // Given
         RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.VAULT));
-        toCreate.setVault(new Vault());
+        toCreate.setVaultId("vault1");
         given(mockRoleAssignmentDao.roleAssignmentExists(toCreate)).willReturn(false);
 
         // When
@@ -190,7 +190,7 @@ public class RolesAndPermissionsServiceTest {
         expectedException.expectMessage("Cannot create vault role assignment without a vault");
 
         RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.VAULT));
-        toCreate.setVault(null);
+        toCreate.setVaultId(null);
 
         // When
         underTest.createRoleAssignment(toCreate);

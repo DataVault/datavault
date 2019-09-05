@@ -84,13 +84,13 @@ public class AdminDashboardPermissionsModel {
         addScopedPermission(permissionModel, schoolId, PermissionModel.PermissionType.SCHOOL);
     }
 
-    public void addScopedPermission(PermissionModel permissionModel, Vault vault) {
-        if (vault == null) {
+    public void addVaultScopedPermission(PermissionModel permissionModel, String vaultId) {
+        if (vaultId == null) {
             logger.error("Attempted to scope permission with ID={} to vault, but no vault was provided",
                     permissionModel.getId());
             throw new IllegalArgumentException("Cannot scope permission to vault - no vault provided");
         }
-        addScopedPermission(permissionModel, vault.getID(), PermissionModel.PermissionType.VAULT);
+        addScopedPermission(permissionModel, vaultId, PermissionModel.PermissionType.VAULT);
     }
 
     private void addScopedPermission(PermissionModel permissionModel,

@@ -40,7 +40,7 @@ public class VaultsService {
 
         RoleModel dataOwnerRole = rolesAndPermissionsService.getDataOwner();
         rolesAndPermissionsService.getRoleAssignmentsForRole(dataOwnerRole.getId()).stream()
-                .filter(roleAssignment -> vault.equals(roleAssignment.getVault()))
+                .filter(roleAssignment -> vault.getID().equals(roleAssignment.getVaultId()))
                 .findFirst()
                 .ifPresent(roleAssignment -> rolesAndPermissionsService.deleteRoleAssignment(roleAssignment.getId()));
     }
@@ -132,13 +132,13 @@ public class VaultsService {
 
         RoleModel dataOwnerRole = rolesAndPermissionsService.getDataOwner();
         rolesAndPermissionsService.getRoleAssignmentsForRole(dataOwnerRole.getId()).stream()
-                .filter(roleAssignment -> vault.equals(roleAssignment.getVault()))
+                .filter(roleAssignment -> vault.getID().equals(roleAssignment.getVaultId()))
                 .findFirst()
                 .ifPresent(roleAssignment -> rolesAndPermissionsService.deleteRoleAssignment(roleAssignment.getId()));
 
         RoleAssignment newDataOwnerAssignment = new RoleAssignment();
         newDataOwnerAssignment.setUserId(newOwner.getID());
-        newDataOwnerAssignment.setVault(vault);
+        newDataOwnerAssignment.setVaultId(vault.getID());
         newDataOwnerAssignment.setRole(dataOwnerRole);
         rolesAndPermissionsService.createRoleAssignment(newDataOwnerAssignment);
     }

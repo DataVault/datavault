@@ -92,10 +92,7 @@ public class VaultsController {
 
             boolean hasVaultRole = restService.getRoleAssignmentsForUser(request.user)
                     .stream()
-                    .anyMatch(role -> {
-                        Vault vault = role.getVault();
-                        return vault != null && vault.getID().equals(vaultId);
-                    });
+                    .anyMatch(role -> role.getVaultId() != null && role.getVaultId().equals(vaultId));
 
             if (hasVaultRole) {
                 return ResponseEntity.status(422).body("User already has a role in this vault");

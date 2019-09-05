@@ -30,7 +30,7 @@ public class RoleUtils {
     }
 
     public static boolean isRoleInVault(RoleAssignment roleAssignment, String vaultId) {
-        return roleAssignment.getVault() != null && roleAssignment.getVault().getID().equals(vaultId);
+        return roleAssignment.getVaultId() != null && roleAssignment.getVaultId().equals(vaultId);
     }
 
     public static boolean isRoleInSchool(RoleAssignment roleAssignment, String schoolId) {
