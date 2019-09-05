@@ -29,8 +29,8 @@ public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
             Criteria criteria = session.createCriteria(RoleAssignment.class);
             criteria.add(Restrictions.eq("role", roleAssignment.getRole()));
             criteria.add(Restrictions.eq("userId", roleAssignment.getUserId()));
-            if (roleAssignment.getSchool() != null) {
-                criteria.add(Restrictions.eq("school", roleAssignment.getSchool()));
+            if (roleAssignment.getSchoolId() != null) {
+                criteria.add(Restrictions.eq("schoolId", roleAssignment.getSchoolId()));
             }
             if (roleAssignment.getVault() != null) {
                 criteria.add(Restrictions.eq("vault", roleAssignment.getVault()));
@@ -93,8 +93,7 @@ public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
         try {
             session = sessionFactory.openSession();
 
-            Group school = findObjectById(session, Group.class, "id", schoolId);
-            List<RoleAssignment> schoolAssignments = findBy(session, "school", school);
+            List<RoleAssignment> schoolAssignments = findBy(session, "schoolId", schoolId);
             return schoolAssignments;
         } finally {
             if (session != null) session.close();

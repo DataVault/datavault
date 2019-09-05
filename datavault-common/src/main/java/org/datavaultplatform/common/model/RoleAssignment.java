@@ -28,9 +28,8 @@ public class RoleAssignment {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
-    @ManyToOne
-    @JoinColumn(name = "school_id")
-    private Group school;
+    @Column(name = "school_id")
+    private String schoolId;
 
     @ManyToOne
     @JoinColumn(name = "vault_id")
@@ -62,12 +61,12 @@ public class RoleAssignment {
         return userId;
     }
 
-    public void setSchool(Group school) {
-        this.school = school;
+    public void setSchoolId(String schoolId) {
+        this.schoolId = schoolId;
     }
 
-    public Group getSchool() {
-        return school;
+    public String getSchoolId() {
+        return schoolId;
     }
 
     public void setVault(Vault vault) {
@@ -90,19 +89,19 @@ public class RoleAssignment {
         return Objects.equals(id, that.id) &&
                 Objects.equals(role, that.role) &&
                 Objects.equals(userId, that.userId) &&
-                Objects.equals(school, that.school) &&
+                Objects.equals(schoolId, that.schoolId) &&
                 Objects.equals(vault, that.vault);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, role, userId, school, vault);
+        return Objects.hash(id, role, userId, schoolId, vault);
     }
 
     @JsonIgnore
     public String getTargetId() {
-        if (school != null) {
-            return school.getID();
+        if (schoolId != null) {
+            return schoolId;
         } else if (vault != null) {
             return vault.getID();
         } else {

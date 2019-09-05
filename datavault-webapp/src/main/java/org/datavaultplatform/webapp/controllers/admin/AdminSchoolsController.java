@@ -126,7 +126,7 @@ public class AdminSchoolsController {
         }
 
         List<RoleAssignment> userRoleAssignments = restService.getRoleAssignmentsForUser(userId);
-        if (userRoleAssignments.stream().anyMatch(r -> r.getSchool() != null && r.getSchool().getID().equals(schoolId))) {
+        if (userRoleAssignments.stream().anyMatch(r -> r.getSchoolId() != null && r.getSchoolId().equals(schoolId))) {
             logger.debug("Attempted to add a new school role assignment for user {} and school {} when one already exists",
                     userId,
                     schoolId);
@@ -144,7 +144,7 @@ public class AdminSchoolsController {
         RoleAssignment newRoleAssignment = new RoleAssignment();
         newRoleAssignment.setRole(role.get());
         newRoleAssignment.setUserId(userId);
-        newRoleAssignment.setSchool(school.get());
+        newRoleAssignment.setSchoolId(schoolId);
         createNewRoleAssignment(newRoleAssignment);
 
         return ResponseEntity.ok().build();
@@ -213,8 +213,8 @@ public class AdminSchoolsController {
             logger.error("Attempted to delete a school role assignment {} but no such role assignment was found", assignmentId);
             throw new EntityNotFoundException(RoleAssignment.class, String.valueOf(assignmentId));
 
-        } else if (userRoleAssignment.get().getSchool() == null
-                || !userRoleAssignment.get().getSchool().getID().equals(schoolId)) {
+        } else if (userRoleAssignment.get().getSchoolId() == null
+                || !userRoleAssignment.get().getSchoolId().equals(schoolId)) {
             logger.debug("Attempted to delete role assignment that was not assigned to school {}.", schoolId);
             return validationFailed("Role assignment belongs to a different school");
         }

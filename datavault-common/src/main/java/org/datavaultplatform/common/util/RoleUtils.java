@@ -34,7 +34,7 @@ public class RoleUtils {
     }
 
     public static boolean isRoleInSchool(RoleAssignment roleAssignment, String schoolId) {
-        return roleAssignment.getSchool() != null && roleAssignment.getSchool().getID().equals(schoolId);
+        return roleAssignment.getSchoolId() != null && roleAssignment.getSchoolId().equals(schoolId);
     }
 
     public static boolean hasPermission(RoleAssignment roleAssignment, Permission permission) {

@@ -101,7 +101,7 @@ public class RoleAssignmentController {
         RoleType roleType = RoleType.valueOf(type.toUpperCase());
         switch (roleType) {
             case SCHOOL:
-                assignment.setSchool(rest.getGroup(targetId));
+                assignment.setSchoolId(targetId);
                 break;
             case VAULT:
                 boolean hasVaultRole = rest.getRoleAssignmentsForUser(userId)

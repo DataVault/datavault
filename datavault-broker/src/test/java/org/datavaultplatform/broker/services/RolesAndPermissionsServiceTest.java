@@ -114,7 +114,7 @@ public class RolesAndPermissionsServiceTest {
     public void createRoleAssignmentShouldStoreANewSchoolRoleAssignment() {
         // Given
         RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.SCHOOL));
-        toCreate.setSchool(new Group());
+        toCreate.setSchoolId("school1");
         given(mockRoleAssignmentDao.roleAssignmentExists(toCreate)).willReturn(false);
 
         // When
@@ -146,7 +146,7 @@ public class RolesAndPermissionsServiceTest {
 
         RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.SCHOOL));
         toCreate.setUserId(null);
-        toCreate.setSchool(new Group());
+        toCreate.setSchoolId("school1");
 
         // When
         underTest.createRoleAssignment(toCreate);
@@ -175,7 +175,7 @@ public class RolesAndPermissionsServiceTest {
         expectedException.expectMessage("Cannot create school role assignment without a school");
 
         RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.SCHOOL));
-        toCreate.setSchool(null);
+        toCreate.setSchoolId(null);
 
         // When
         underTest.createRoleAssignment(toCreate);
@@ -205,7 +205,7 @@ public class RolesAndPermissionsServiceTest {
         expectedException.expectMessage("Role assignment already exists");
 
         RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.SCHOOL));
-        toCreate.setSchool(new Group());
+        toCreate.setSchoolId("school1");
         given(mockRoleAssignmentDao.roleAssignmentExists(toCreate)).willReturn(true);
 
         // When
@@ -362,11 +362,12 @@ public class RolesAndPermissionsServiceTest {
     public void updateRoleAssignmentShouldPersistAnUpdate() {
         // Given
         Group school = new Group();
+        String schoolId = "school1";
 
         RoleModel originalRole = aRole(RoleType.SCHOOL);
         originalRole.setName("Role 1");
         RoleAssignment original = aRoleAssignment(originalRole);
-        original.setSchool(school);
+        original.setSchoolId(schoolId);
         original.setId(1L);
 
         given(mockRoleAssignmentDao.find(1L)).willReturn(original);
@@ -374,7 +375,7 @@ public class RolesAndPermissionsServiceTest {
         RoleModel newRole = aRole(RoleType.SCHOOL);
         newRole.setName("Role 2");
         RoleAssignment updatedRoleAssignment = aRoleAssignment(newRole);
-        updatedRoleAssignment.setSchool(school);
+        updatedRoleAssignment.setSchoolId(schoolId);
         updatedRoleAssignment.setId(1L);
 
         // When
@@ -393,7 +394,7 @@ public class RolesAndPermissionsServiceTest {
         given(mockRoleAssignmentDao.find(1L)).willReturn(null);
 
         RoleAssignment updatedRoleAssignment = aRoleAssignment(aRole(RoleType.SCHOOL));
-        updatedRoleAssignment.setSchool(new Group());
+        updatedRoleAssignment.setSchoolId("school1");
         updatedRoleAssignment.setId(1L);
 
         // When
@@ -406,7 +407,7 @@ public class RolesAndPermissionsServiceTest {
     public void updateRoleAssignmentShouldNotPersistAnyUpdatesWhenNothingHasChanged() {
         // Given
         RoleAssignment roleAssignment = aRoleAssignment(aRole(RoleType.SCHOOL));
-        roleAssignment.setSchool(new Group());
+        roleAssignment.setSchoolId("school1");
         roleAssignment.setId(1L);
 
         given(mockRoleAssignmentDao.find(1L)).willReturn(roleAssignment);
@@ -425,7 +426,7 @@ public class RolesAndPermissionsServiceTest {
         expectedException.expectMessage("Cannot create role assignment without user");
 
         RoleAssignment original = aRoleAssignment(aRole(RoleType.SCHOOL));
-        original.setSchool(new Group());
+        original.setSchoolId("school1");
         original.setId(1L);
         given(mockRoleAssignmentDao.find(1L)).willReturn(original);
 

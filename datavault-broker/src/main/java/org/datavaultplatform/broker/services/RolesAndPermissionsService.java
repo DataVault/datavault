@@ -80,7 +80,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         if (roleAssignment.getRole() == null) {
             throw new IllegalStateException("Cannot create role assignment without role");
         }
-        if (RoleType.SCHOOL == roleAssignment.getRole().getType() && roleAssignment.getSchool() == null) {
+        if (RoleType.SCHOOL == roleAssignment.getRole().getType() && roleAssignment.getSchoolId() == null) {
             throw new IllegalStateException("Cannot create school role assignment without a school");
         }
         if (RoleType.VAULT == roleAssignment.getRole().getType() && roleAssignment.getVault() == null) {

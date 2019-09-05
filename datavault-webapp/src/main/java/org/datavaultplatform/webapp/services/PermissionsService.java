@@ -32,7 +32,7 @@ public class PermissionsService {
                 if (isGlobalPermission(roleAssignment, permission)) {
                     permissionsModel.addGlobalPermission(permission);
                 } else if (PermissionModel.PermissionType.SCHOOL == permission.getType()) {
-                    permissionsModel.addScopedPermission(permission, roleAssignment.getSchool());
+                    permissionsModel.addSchoolScopedPermission(permission, roleAssignment.getSchoolId());
                 } else if (PermissionModel.PermissionType.VAULT == permission.getType()) {
                     permissionsModel.addScopedPermission(permission, roleAssignment.getVault());
                 }
@@ -52,7 +52,7 @@ public class PermissionsService {
         boolean isSchoolPermissionOnGlobalAdminRole =
                 PermissionModel.PermissionType.SCHOOL == dashboardPermission.getType()
                         && RoleType.ADMIN == roleAssignment.getRole().getType()
-                        && roleAssignment.getSchool() == null;
+                        && roleAssignment.getSchoolId() == null;
         boolean isVaultPermissionOnGlobalAdminRole =
                 PermissionModel.PermissionType.VAULT == dashboardPermission.getType()
                         && RoleType.ADMIN == roleAssignment.getRole().getType()
