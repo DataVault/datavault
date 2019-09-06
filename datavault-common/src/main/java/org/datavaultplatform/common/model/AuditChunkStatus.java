@@ -3,6 +3,7 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.datavaultplatform.common.response.AuditChunkStatusInfo;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -149,6 +150,18 @@ public class AuditChunkStatus {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public AuditChunkStatusInfo convertToResponse() {
+        return new AuditChunkStatusInfo(
+                id,
+                timestamp,
+                completeTime,
+                status,
+                depositChunk,
+                depositChunk.getDeposit(),
+                archiveId
+        );
     }
 
 }

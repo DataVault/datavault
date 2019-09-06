@@ -145,11 +145,11 @@ services:
   sftp:
     image: atmoz/sftp
     volumes:
-      - ./docker/tmp/datavault/filestore:/home/user1/upload
-      - ./docker/config/.ssh:/home/user1/.ssh:ro
+      - ./docker/tmp/datavault/filestore:/home/admin1/upload
+      - ./docker/config/.ssh:/home/admin1/.ssh:ro
     ports:
       - "2222:22"
-    command: user1::1001
+    command: admin1::1001
     networks:
       - sftp
 

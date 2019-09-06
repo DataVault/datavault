@@ -118,6 +118,12 @@ public class DepositsService {
         int maxChunkAuditPerDeposit = getAuditMaxChunksPerDeposits();
         int maxChunkPerAudit = getAuditMaxTotalChunks();
 
+        System.out.println("MINUTE: "+getAuditPeriodMinutes());
+        System.out.println("HOUR: "+getAuditPeriodHours());
+        System.out.println("DAY_OF_YEAR: "+getAuditPeriodDays());
+        System.out.println("MONTH: "+getAuditPeriodMonths());
+        System.out.println("YEAR: "+getAuditPeriodYears());
+
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.MINUTE, -getAuditPeriodMinutes()); // to get previous days
         cal.add(Calendar.HOUR, -getAuditPeriodHours()); // to get previous days
@@ -139,22 +145,29 @@ public class DepositsService {
 
             int count = 0;
             for(DepositChunk chunk : depositChunks){
-                System.out.println("check chunk: "+chunk.getID());
-
-                AuditChunkStatus auditChunkInfo = auditChunkStatusDAO.getLastChunkAuditTime(chunk);
-
-                if(auditChunkInfo == null || auditChunkInfo.getTimestamp().before(olderThanDate)){
-                    System.out.println("add chunk");
-                    chunksToAudit.add(chunk);
-                    count++; totalCount++;
-                }
-
                 if(totalCount >= maxChunkPerAudit) {
                     System.out.println("maxChunkPerAudit reached");
                     return chunksToAudit;
                 }else if(count >= maxChunkAuditPerDeposit){
                     System.out.println("maxChunkAuditPerDeposit reached");
                     break; // get out of loop
+                }
+
+                System.out.println("check chunk: "+chunk.getID());
+
+                AuditChunkStatus lastAuditChunkInfo = auditChunkStatusDAO.getLastChunkAuditTime(chunk);
+
+                if(lastAuditChunkInfo != null){
+                    System.out.println("last audit chunk: "+lastAuditChunkInfo.getTimestamp());
+                }else{
+                    System.out.println("No previous audit");
+                }
+                if(lastAuditChunkInfo == null || lastAuditChunkInfo.getTimestamp().before(olderThanDate)){
+                    System.out.println("add chunk");
+                    chunksToAudit.add(chunk);
+                    count++; totalCount++;
+                }else{
+                    System.out.println("too recent audit");
                 }
             }
         }

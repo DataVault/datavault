@@ -67,85 +67,89 @@ public class AuditDepositsChunks {
 
         System.out.println("auditing "+chunks.size()+" chunks");
 
-        // Fetch the ArchiveStore that is flagged for retrieval. We store it in a list as the Task parameters require a list.
-        ArchiveStore archiveStore = archiveStoreService.getForRetrieval();
-        List<ArchiveStore> archiveStores = new ArrayList<ArchiveStore>();
-        archiveStores.add(archiveStore);
-        archiveStores = this.addArchiveSpecificOptions(archiveStores);
+        if(chunks.size() > 0) {
+            // Fetch the ArchiveStore that is flagged for retrieval. We store it in a list as the Task parameters require a list.
+            ArchiveStore archiveStore = archiveStoreService.getForRetrieval();
+            List<ArchiveStore> archiveStores = new ArrayList<ArchiveStore>();
+            archiveStores.add(archiveStore);
+            archiveStores = this.addArchiveSpecificOptions(archiveStores);
 
 
-        // Create a job to track this retrieve
-        Job job = new Job("org.datavaultplatform.worker.tasks.Audit");
-        jobsService.addJob(null, job);
+            // Create a job to track this retrieve
+            Job job = new Job("org.datavaultplatform.worker.tasks.Audit");
+            jobsService.addJob(null, job);
 
-        // Add the Audit object
-        Audit audit = new Audit();
-        auditsService.addAudit(audit, chunks);
+            // Add the Audit object
+            Audit audit = new Audit();
+            auditsService.addAudit(audit, chunks);
 
-        // Ask the worker to process the data auditing
-        try {
-            HashMap<String, String> auditProperties = new HashMap<>();
-            auditProperties.put("auditId", audit.getID());
-            auditProperties.put("numOfChunks", Integer.toString(chunks.size()));
+            // Ask the worker to process the data auditing
+            try {
+                HashMap<String, String> auditProperties = new HashMap<>();
+                auditProperties.put("auditId", audit.getID());
+                auditProperties.put("numOfChunks", Integer.toString(chunks.size()));
 
-            // get chunks checksums
-            HashMap<Integer, String> chunksDigest = new HashMap<Integer, String>();
-            for (int i = 0; i < chunks.size(); i++) {
-                DepositChunk chunk = chunks.get(i);
-                chunksDigest.put(i, chunk.getArchiveDigest());
-            }
+                // get chunks checksums
+                HashMap<Integer, String> chunksDigest = new HashMap<Integer, String>();
+                for (int i = 0; i < chunks.size(); i++) {
+                    DepositChunk chunk = chunks.get(i);
+                    chunksDigest.put(i, chunk.getArchiveDigest());
+                }
 
-            // Get encryption IVs
-            HashMap<Integer, byte[]> chunksIVs = new HashMap<Integer, byte[]>();
-            for (int i = 0; i < chunks.size(); i++) {
-                DepositChunk chunk = chunks.get(i);
-                chunksIVs.put(i, chunk.getEncIV());
-            }
+                // Get encryption IVs
+                HashMap<Integer, byte[]> chunksIVs = new HashMap<Integer, byte[]>();
+                for (int i = 0; i < chunks.size(); i++) {
+                    DepositChunk chunk = chunks.get(i);
+                    chunksIVs.put(i, chunk.getEncIV());
+                }
 
-            // Get encrypted digests
-            HashMap<Integer, String> encChunksDigests = new HashMap<Integer, String>();
-            for (int i = 0; i < chunks.size(); i++) {
-                DepositChunk chunk = chunks.get(i);
-                encChunksDigests.put(i, chunk.getEcnArchiveDigest());
-            }
+                // Get encrypted digests
+                HashMap<Integer, String> encChunksDigests = new HashMap<Integer, String>();
+                for (int i = 0; i < chunks.size(); i++) {
+                    DepositChunk chunk = chunks.get(i);
+                    encChunksDigests.put(i, chunk.getEcnArchiveDigest());
+                }
 
-            Task auditTask = new Task(
-                    job, auditProperties, archiveStores,
-                    null, null,
-                    null, null,
-                    chunksDigest,
-                    null, chunksIVs,
-                    null, encChunksDigests, null);
+                Task auditTask = new Task(
+                        job, auditProperties, archiveStores,
+                        null, null,
+                        null, null,
+                        chunksDigest,
+                        null, chunksIVs,
+                        null, encChunksDigests, null);
 
-            List<HashMap<String, String>> chunksInfo = new ArrayList<HashMap<String, String>>();
-            String[] archiveIds = new String[chunks.size()];
-            for(int i=0; i< chunks.size(); i++){
-                DepositChunk chunk = chunks.get(i);
-                HashMap<String, String> info = new HashMap<String, String>();
-                info.put("id", chunk.getID());
-                info.put("bagId", chunk.getDeposit().getBagId());
-                info.put("chunkNum", String.valueOf(chunk.getChunkNum()));
-                chunksInfo.add(info);
+                List<HashMap<String, String>> chunksInfo = new ArrayList<HashMap<String, String>>();
+                String[] archiveIds = new String[chunks.size()];
+                for (int i = 0; i < chunks.size(); i++) {
+                    DepositChunk chunk = chunks.get(i);
+                    HashMap<String, String> info = new HashMap<String, String>();
+                    info.put("id", chunk.getID());
+                    info.put("bagId", chunk.getDeposit().getBagId());
+                    info.put("chunkNum", String.valueOf(chunk.getChunkNum()));
+                    chunksInfo.add(info);
 
-                // Find the Archive that matches the ArchiveStore.
-                for (Archive archive : chunk.getDeposit().getArchives()) {
-                    if (archive.getArchiveStore().getID().equals(archiveStore.getID())) {
-                        archiveIds[i] = archive.getArchiveId();
+                    // Find the Archive that matches the ArchiveStore.
+                    for (Archive archive : chunk.getDeposit().getArchives()) {
+                        if (archive.getArchiveStore().getID().equals(archiveStore.getID())) {
+                            archiveIds[i] = archive.getArchiveId();
+                        }
                     }
                 }
+
+                auditTask.setChunksToAudit(chunksInfo);
+                auditTask.setArchiveIds(archiveIds);
+
+                ObjectMapper mapper = new ObjectMapper();
+                String jsonAudit = mapper.writeValueAsString(auditTask);
+                sender.send(jsonAudit);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
-            auditTask.setChunksToAudit(chunksInfo);
-            auditTask.setArchiveIds(archiveIds);
-
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonAudit = mapper.writeValueAsString(auditTask);
-            sender.send(jsonAudit);
-        } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Audit Job Started...");
+        } else {
+            System.out.println("No chunk to audit...");
         }
-
-        System.out.println("Audit Job Started...");
     }
 
     private List<ArchiveStore> addArchiveSpecificOptions(List<ArchiveStore> archiveStores) {

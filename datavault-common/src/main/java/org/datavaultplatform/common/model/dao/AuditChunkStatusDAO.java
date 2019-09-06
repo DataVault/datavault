@@ -16,7 +16,7 @@ public interface AuditChunkStatusDAO {
 
     AuditChunkStatus findById(String Id);
 
-    List<AuditChunkStatus> findByAudit(String auditId);
+    List<AuditChunkStatus> findByAudit(Audit audit);
 
     List<AuditChunkStatus> findByDepositChunk(String depositChunkId);
 

@@ -63,8 +63,8 @@ public class AuditChunkStatusDAOImpl implements AuditChunkStatusDAO {
     }
 
     @Override
-    public List<AuditChunkStatus> findByAudit(String auditId){
-        return findBy("audit_id", auditId);
+    public List<AuditChunkStatus> findByAudit(Audit audit){
+        return findBy("audit", audit);
     }
 
     @Override
@@ -101,7 +101,6 @@ public class AuditChunkStatusDAOImpl implements AuditChunkStatusDAO {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(AuditChunkStatus.class);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        criteria.addOrder(Order.asc("timestamp"));
         criteria.add(Restrictions.eq("depositChunk", chunk));
         criteria.addOrder(Order.desc("timestamp"));
 

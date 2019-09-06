@@ -2,6 +2,7 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.datavaultplatform.common.response.AuditInfo;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -70,6 +71,14 @@ public class Audit {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public AuditInfo convertToResponse() {
+        return new AuditInfo(
+            id,
+            timestamp,
+            status
+        );
     }
 
 }

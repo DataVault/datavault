@@ -18,6 +18,14 @@ public class AuditsService {
     public List<Audit> getAudits() {
         return auditDAO.list();
     }
+
+    public List<AuditChunkStatus> getAllAuditChunkStatus() {
+        return auditChunkStatusDAO.list();
+    }
+
+    public List<AuditChunkStatus> getAuditChunkStatus(Audit audit) {
+        return auditChunkStatusDAO.findByAudit(audit);
+    }
     
     public void addAudit(Audit audit, List<DepositChunk> chunks) {
         
