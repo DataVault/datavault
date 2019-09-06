@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
+import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.RoleAssignment;
 
 import java.util.List;
@@ -21,6 +22,8 @@ public interface RoleAssignmentDAO {
     List<RoleAssignment> findByUserId(String userId);
 
     List<RoleAssignment> findByRoleId(Long roleId);
+
+    boolean hasPermission(String userId, Permission permission);
 
     void update(RoleAssignment roleAssignment);
 

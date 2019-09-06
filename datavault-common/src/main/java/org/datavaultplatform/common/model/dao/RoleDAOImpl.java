@@ -167,6 +167,22 @@ public class RoleDAOImpl implements RoleDAO {
     }
 
     @Override
+    public List<RoleModel> findAllEditableRoles() {
+        Session session = sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(RoleModel.class);
+        criteria.add(Restrictions.or(
+                Restrictions.eq("type", RoleType.SCHOOL),
+                Restrictions.eq("type", RoleType.VAULT)
+        ));
+        List<RoleModel> roles = criteria.list();
+        for (RoleModel role : roles) {
+            populateAssignedUserCount(session, role);
+        }
+        session.close();
+        return roles;
+    }
+
+    @Override
     public void update(RoleModel role) {
         Session session = this.sessionFactory.openSession();
         Transaction tx = session.beginTransaction();

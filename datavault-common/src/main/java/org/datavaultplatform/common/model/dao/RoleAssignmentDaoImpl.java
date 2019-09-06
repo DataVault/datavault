@@ -157,6 +157,25 @@ public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
     }
 
     @Override
+    public boolean hasPermission(String userId, Permission permission) {
+        Session session = null;
+        try {
+            session = sessionFactory.openSession();
+            Criteria criteria = session.createCriteria(RoleAssignment.class, "assignment");
+            criteria.createAlias("assignment.role", "role");
+            criteria.createAlias("role.permissions", "permission");
+            criteria.add(Restrictions.eq("assignment.userId", userId));
+            criteria.add(Restrictions.eq("permission.id", permission.getId()));
+            return criteria.list().size() > 0;
+
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+
+    @Override
     public void update(RoleAssignment roleAssignment) {
         Session session = null;
         try {
