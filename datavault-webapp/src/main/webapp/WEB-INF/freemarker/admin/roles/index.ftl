@@ -297,7 +297,7 @@
 
                     $("#edit_vaultpermissions").empty();
                     permissions.forEach(function(p) {
-                        setPermissionsHtml(p, data.role.permissions.includes(p), "edit_vaultpermissions")
+                        setPermissionsHtml(p, data.role.permissions.indexOf(p) >= 0, "edit_vaultpermissions")
                     });
 
                 },

@@ -236,7 +236,7 @@
                 allValues.push($(this).val());
             });
             $('#role-assignments table tbody tr').filter(function() {
-                $(this).toggle(allValues.length === 0 || allValues.includes($(this).find('.role-column').text()));
+                $(this).toggle(allValues.length === 0 || allValues.indexOf($(this).find('.role-column').text()) >= 0);
             });
         });
 
