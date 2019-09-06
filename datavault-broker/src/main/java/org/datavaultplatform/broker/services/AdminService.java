@@ -1,7 +1,6 @@
 package org.datavaultplatform.broker.services;
 
 import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.util.RoleUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +37,7 @@ public class AdminService {
     }
 
     public boolean isAdminUser(String userID) {
-        return rolesAndPermissionsService
-                .getRoleAssignmentsForUser(userID)
-                .stream()
-                .anyMatch(RoleUtils::isISAdmin);
+        return rolesAndPermissionsService.isAdminUser(userID);
     }
 
 }

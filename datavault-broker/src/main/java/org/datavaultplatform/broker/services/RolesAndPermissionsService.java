@@ -163,6 +163,10 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         return roleAssignmentDao.hasPermission(userId, permission);
     }
 
+    public boolean isAdminUser(String userId) {
+        return roleAssignmentDao.isAdminUser(userId);
+    }
+
     public RoleModel updateRole(RoleModel role) {
         if (!roleExists(role.getId())) {
             throw new IllegalStateException("Cannot update a role that does not exist");

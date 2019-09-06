@@ -28,6 +28,8 @@ public interface RoleAssignmentDAO {
 
     boolean hasPermission(String userId, Permission permission);
 
+    boolean isAdminUser(String userId);
+
     void update(RoleAssignment roleAssignment);
 
     void delete(Long id);
