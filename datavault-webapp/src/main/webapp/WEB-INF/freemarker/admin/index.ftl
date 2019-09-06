@@ -8,21 +8,16 @@
         height: 200px;
     }
     .roles-icon {
-        -webkit-mask: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center;
-        mask: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center;
+        background: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center;
         width: 1em;
         height: 1em;
         display: inline-block;
-        background-color: rgb(52, 109, 191);
     }
     .roles-label {
         vertical-align: top;
     }
     .roles-link:hover {
         text-decoration: none;
-    }
-    .roles-link:hover .roles-icon {
-        background-color: rgb(36, 75, 131);
     }
     .roles-link:hover .roles-label {
         text-decoration: underline;
