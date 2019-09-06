@@ -124,12 +124,12 @@
                                         <a href="#" class="btn btn-default btn-delete" data-toggle="modal"
                                            data-target="#delete-dialog" data-role-name="${role.name}" data-user-id="${user.getID()}"
                                            data-user-name="${user.getFirstname()} ${user.getLastname()}" role="button"
-                                           title="Remove user ${user.getFirstname()} ${user.getLastname()} from the ${role.name} role.">
+                                           title="Delete role for ${user.getFirstname()} ${user.getLastname()}.">
                                             <i class="fa fa-trash"></i>
                                         </a>
                                     <#else>
                                         <a href="#" class="btn btn-default btn-delete" disabled="disabled" role="button"
-                                           title="This user is the last IS Admin and cannot be removed.">
+                                           title="This user is the last ${role.name} and cannot be removed.">
                                             <i class="fa fa-trash"></i>
                                         </a>
                                     </#if>

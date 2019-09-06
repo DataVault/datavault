@@ -341,13 +341,11 @@
                            data-target="#update-existing-dialog" data-assignment-id="${assignment.id}"
                            data-user-name="${assignment.userId}"
                            data-user-role="${assignment.role.id}"
-                           title="Edit role assignment for user ${assignment.userId}."><i
-                                    class="fa fa-pencil"></i></a>
+                           title="Edit role for ${assignment.userId}."><i class="fa fa-pencil"></i></a>
                         <a href="#" class="btn btn-default btn-delete" data-toggle="modal"
                            data-target="#delete-dialog" data-assignment-id="${assignment.id}"
                            data-user-name="${assignment.userId}"
-                           title="Remove role assignment for user ${assignment.userId}."><i
-                                    class="fa fa-trash"></i></a>
+                           title="Delete role for ${assignment.userId}."><i class="fa fa-trash"></i></a>
                         </@sec.authorize>
                     </td>
                     </@sec.authorize>

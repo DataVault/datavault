@@ -150,7 +150,7 @@
                                 <td>${superAdminRole.getName()}</td>
                                 <td>${superAdminRole.getAssignedUserCount()}</td>
                                 <td class="action-column">
-                                    <a id="isadmin-button" class="btn btn-default" href="${springMacroRequestContext.getContextPath()}/admin/roles/isadmin" title="Edit the ${superAdminRole.name} role.">
+                                    <a id="isadmin-button" class="btn btn-default" href="${springMacroRequestContext.getContextPath()}/admin/roles/isadmin" title="Manage ${superAdminRole.name} users.">
                                         <i class="fa fa-users"></i>
                                     </a>
                                 </td>
@@ -161,10 +161,10 @@
                                 <td>${role.getName()}</td>
                                 <td>${role.getAssignedUserCount()}</td>
                                 <td class="action-column">
-                                    <a href="#" class="btn btn-default" disabled="disabled" role="button" title="The ${role.name} role cannot be edited.">
+                                    <a href="#" class="btn btn-default" disabled="disabled" role="button" title="Cannot edit the ${role.name} role.">
                                         <i class="fa fa-pencil"></i>
                                     </a>
-                                    <a href="#" class="btn btn-default btn-delete" disabled="disabled" role="button" title="The ${role.name} role cannot be removed.">
+                                    <a href="#" class="btn btn-default btn-delete" disabled="disabled" role="button" title="Cannot delete the ${role.name} role.">
                                         <i class="fa fa-trash"></i>
                                     </a>
                                 </td>
@@ -178,7 +178,7 @@
                                     <a href="#" class="btn btn-default editRoleButton" role="button" value="${role.getId()}" title="Edit the ${role.name} role.">
                                         <i class="fa fa-pencil"></i>
                                     </a>
-                                    <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog" data-role-id="${role.id}" data-role-name="${role.name}" role="button" title="Remove the ${role.name} role.">
+                                    <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog" data-role-id="${role.id}" data-role-name="${role.name}" role="button" title="Delete the ${role.name} role.">
                                         <i class="fa fa-trash-o"></i>
                                     </a>
                                 </td>
