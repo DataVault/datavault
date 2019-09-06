@@ -10,7 +10,9 @@ import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -145,6 +147,16 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
 
     public List<RoleAssignment> getRoleAssignmentsForRole(Long roleId) {
         return roleAssignmentDao.findByRoleId(roleId);
+    }
+
+    public boolean hasAdminDashboardPermissions(String userId) {
+        return roleAssignmentDao.findByUserId(userId).stream()
+                .flatMap(roleAssignment -> roleAssignment.getRole().getPermissions().stream())
+                .anyMatch(permissionModel -> permissionModel.getPermission().isDashboardPermission());
+    }
+
+    public Set<Permission> getUserPermissions(String userId) {
+        return roleAssignmentDao.findUserPermissions(userId);
     }
 
     public boolean hasPermission(String userId, Permission permission) {

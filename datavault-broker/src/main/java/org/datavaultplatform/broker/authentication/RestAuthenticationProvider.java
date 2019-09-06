@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * In truth this class does not do any true authentication as it is assumed the user was authenticated by the client
@@ -85,12 +86,14 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
                 grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
             }
 
-            checkPermissions(name, Permission.CAN_MANAGE_ARCHIVE_STORES, grantedAuths);
-            checkPermissions(name, Permission.CAN_MANAGE_DEPOSITS, grantedAuths);
-            checkPermissions(name, Permission.CAN_VIEW_RETRIEVES, grantedAuths);
-            checkPermissions(name, Permission.CAN_MANAGE_VAULTS, grantedAuths);
-            checkPermissions(name, Permission.CAN_VIEW_EVENTS, grantedAuths);
-            checkPermissions(name, Permission.CAN_MANAGE_BILLING_DETAILS, grantedAuths);
+            Set<Permission> userPermissions = rolesAndPermissionsService.getUserPermissions(user.getID());
+
+            checkPermissions(Permission.CAN_MANAGE_ARCHIVE_STORES, grantedAuths, userPermissions);
+            checkPermissions(Permission.CAN_MANAGE_DEPOSITS, grantedAuths, userPermissions);
+            checkPermissions(Permission.CAN_VIEW_RETRIEVES, grantedAuths, userPermissions);
+            checkPermissions(Permission.CAN_MANAGE_VAULTS, grantedAuths, userPermissions);
+            checkPermissions(Permission.CAN_VIEW_EVENTS, grantedAuths, userPermissions);
+            checkPermissions(Permission.CAN_MANAGE_BILLING_DETAILS, grantedAuths, userPermissions);
         }
 
         RestWebAuthenticationDetails rwad = (RestWebAuthenticationDetails) authentication.getDetails();
@@ -120,8 +123,8 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
     }
 
-    private void checkPermissions(String userId, Permission permission, List<GrantedAuthority> grantedAuths) {
-        if (rolesAndPermissionsService.hasPermission(userId, permission)) {
+    private void checkPermissions(Permission permission, List<GrantedAuthority> grantedAuths, Set<Permission> permissions) {
+        if (permissions.contains(permission)) {
             grantedAuths.add(new SimpleGrantedAuthority(permission.getRoleName()));
         }
     }

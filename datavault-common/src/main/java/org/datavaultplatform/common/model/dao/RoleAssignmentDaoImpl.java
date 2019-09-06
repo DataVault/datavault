@@ -2,12 +2,16 @@ package org.datavaultplatform.common.model.dao;
 
 import org.datavaultplatform.common.model.*;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
 
 import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
 
@@ -70,6 +74,27 @@ public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
             if (session != null) session.close();
         }
 
+    }
+
+    @Override
+    public Set<Permission> findUserPermissions(String userId) {
+        Session session = null;
+
+        try {
+            session = sessionFactory.openSession();
+            Query query = session.createQuery("SELECT DISTINCT role.permissions \n" +
+                    "FROM org.datavaultplatform.common.model.RoleAssignment ra\n" +
+                    "INNER JOIN ra.role as role\n" +
+                    "WHERE ra.userId = :userId");
+            query.setParameter("userId", userId);
+
+            return ((List<PermissionModel>) query.list())
+                    .stream()
+                    .map(PermissionModel::getPermission)
+                    .collect(Collectors.toSet());
+        } finally {
+            if (session != null) session.close();
+        }
     }
 
     @Override
