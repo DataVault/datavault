@@ -419,7 +419,8 @@
         </@sec.authorize>
     ];
 
-    for (var formSelector of forms) {
+    for (var formIndex in forms) {
+        var formSelector = forms[formIndex];
         $(formSelector).submit(function (event) {
             event.preventDefault();
             var form = $(this);
