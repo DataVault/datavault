@@ -31,7 +31,7 @@
             color: #000;
         }
         .modal-dialog textarea {
-            max-width: 265px;
+            max-width: 75%;
         }
         .modal-dialog select.form-control {
             width: 193px;
@@ -40,8 +40,21 @@
             margin-top: 7px;
             font-weight: 400;
         }
+        #modalnewedit .col-xs-9 {
+            width: 75%;
+        }
+        #modalnewedit .row {
+            margin-right: 0;
+            padding-right: 0;
+        }
         #permissions {
             margin-top: 20px;
+        }
+        #permissions .permission {
+            padding-left: 0;
+        }
+        #permissions .permission-label {
+            padding-left: 10px;
         }
     </style>
 
@@ -70,9 +83,11 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-xs-6 form-group form-inline">
-                                <label class="control-label col-xs-3" for="edit_description">Description</label>
-                                <textarea class="form-control col-xs-9" name="description" id="edit_description"></textarea>
+                            <div class="col-xs-6">
+                                <div class="form-group form-inline row">
+                                    <label class="control-label col-xs-3" for="edit_description">Description</label>
+                                    <textarea class="form-control col-xs-9" name="description" id="edit_description"></textarea>
+                                </div>
                             </div>
                         </div>
                         <div class="row col-xs-12" id="permissions">
@@ -312,17 +327,19 @@
             outdiv.classList.add("col-xs-6");
             outdiv.classList.add("form-group");
             outdiv.classList.add("form-inline");
+            outdiv.classList.add("permission");
             var indiv = document.createElement("div");
             indiv.classList.add("checkbox");
             var label = document.createElement("label");
             label.innerText = " " + permission.label;
-            label.classList.add("model_layout_permission_label");
+            label.classList.add("permission-label");
             label.setAttribute("for", permission.id);
             var input = document.createElement("input");
             input.setAttribute("name", "permissions");
             input.setAttribute("type", "checkbox");
             input.setAttribute("id", permission.id);
             input.setAttribute("value", permission.id);
+            input.classList.add("permission-checkbox");
             input.checked = checked;
 
             indiv.appendChild(input);
