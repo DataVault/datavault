@@ -13,6 +13,16 @@
         height: 1em;
         display: inline-block;
     }
+    @supports (-webkit-mask: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center) {
+        .roles-icon {
+            -webkit-mask: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center;
+            mask: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center;
+            background: rgb(52, 109, 191);
+        }
+        .roles-link:hover .roles-icon {
+            background-color: rgb(36, 75, 131);
+        }
+    }
     .roles-label {
         vertical-align: top;
     }
