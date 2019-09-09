@@ -454,12 +454,12 @@
 
     $("#new-user-name").autocomplete({
         autoFocus: true,
-        appendTo: "#add-new-dialog",
+        appendTo: "#orphan-dialog",
         minLength: 2,
         source: function (request, response) {
             var term = request.term;
             $.ajax({
-                url: '<@spring.url "/admin/vaults/autocompleteuun/"/>' + term,
+                url: '<@spring.url "/vaults/autocompleteuun/"/>' + term,
                 type: 'GET',
                 dataType: "json",
                 success: function (data) {
