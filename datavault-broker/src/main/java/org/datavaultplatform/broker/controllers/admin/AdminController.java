@@ -143,8 +143,10 @@ public class AdminController {
             Vault vault = vaultsService.getVault(depositInfo.getVaultID());
             depositInfo.setVaultName(vault.getName());
             User vaultOwner = vault.getUser();
-            depositInfo.setVaultOwnerID(vaultOwner.getID());
-            depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+            if (vaultOwner != null) {
+                depositInfo.setVaultOwnerID(vaultOwner.getID());
+                depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+            }
             depositInfo.setDatasetID(vault.getDataset().getID());
             depositInfo.setGroupName(vault.getGroup().getName());
             depositInfo.setVaultReviewDate(vault.getReviewDate().toString());
