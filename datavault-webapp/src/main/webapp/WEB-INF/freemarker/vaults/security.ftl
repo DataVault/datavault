@@ -73,6 +73,18 @@
         margin-left: 10px !important;
     }
 
+    .modal-title {
+        font-weight: 500;
+        color: #000;
+    }
+
+    .control-label {
+        font-weight: 400;
+    }
+
+    #role-update-user-name {
+        padding: 7px 0 0 27px;
+    }
 
 </style>
 
@@ -104,9 +116,9 @@
                     <div id="transfer-inputs">
 
                         <div class="col-sm-10 form-group ui-widget">
-                            <label for="new-user-name" class="control-label form-label">New Data Owner</label>
+                            <label for="new-owner-name" class="control-label form-label">New Data Owner</label>
                             <div class="form-input">
-                                <input id="new-user-name" type="text" class="form-control" name="user" value=""/>
+                                <input id="new-owner-name" type="text" class="form-control" name="user" value=""/>
                             </div>
                         </div>
                     </div>
@@ -155,7 +167,7 @@
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
-                    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+                    <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
                 </div>
             </form>
         </div>
@@ -176,7 +188,7 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
                                 class="fa fa-times" aria-hidden="true"></i></button>
-                    <h4 class="modal-title" id="add-new-user-title">Add new user</h4>
+                    <h4 class="modal-title" id="add-new-user-title">Add New User</h4>
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-danger error hidden" role="alert"></div>
@@ -202,7 +214,7 @@
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
-                    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+                    <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
                 </div>
             </form>
         </div>
@@ -220,16 +232,13 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
                                 class="fa fa-times" aria-hidden="true"></i></button>
-                    <h4 class="modal-title" id="update-existing-title">Edit user's role</h4>
+                    <h4 class="modal-title" id="update-existing-title">Edit User's Role</h4>
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-danger error hidden" role="alert"></div>
                     <div class="form-group ui-widget">
                         <label for="role-update-user-name" class="control-label col-sm-2">Name:</label>
-                        <div class="col-sm-10">
-                            <input id="role-update-user-name" type="text" class="form-control"
-                                   disabled="disabled"/>
-                        </div>
+                        <label id="role-update-user-name"></label>
                     </div>
                     <div class="form-group ui-widget">
                         <label for="update-user-role" class="control-label col-sm-2">Role:</label>
@@ -246,7 +255,7 @@
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
-                    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+                    <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
                 </div>
             </form>
         </div>
@@ -263,11 +272,11 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
                                 class="fa fa-times" aria-hidden="true"></i></button>
-                    <h4 class="modal-title" id="delete-title">Delete user</h4>
+                    <h4 class="modal-title" id="delete-title">Delete User</h4>
                 </div>
                 <div class="alert alert-danger hidden error" role="alert"></div>
                 <div class="modal-body">
-                    <label>Do you want to delete <span id="delete-role-user-name"></span> from this vault?</label>
+                    <p>Do you want to delete <label id="delete-role-user-name"></label> from this vault?</p>
                 </div>
                 <input type="hidden" id="delete-role-assignment-id" name="assignment"/>
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
@@ -384,10 +393,12 @@
     });
     $('[data-target="#add-new-dialog"]').click(function () {
         $('#add-new-dialog form').trigger('reset');
+        $('#add-new-dialog .error').addClass('hidden').text('');
     });
 
     $('[data-target="#orphan-dialog"]').click(function () {
         $('#orphan-dialog form').trigger('reset');
+        $('#orphan-dialog .error').addClass('hidden').text('');
     });
 
     $('[data-target="#update-existing-dialog"]').click(function () {
@@ -398,7 +409,7 @@
         var role = $(this).data('user-role');
         $('#role-update-assignment-id').val(assignmentId);
         $('#update-user-role').val(role);
-        $('#role-update-user-name').val(userName);
+        $('#role-update-user-name').text(userName);
         $('#update-error').addClass('hidden').text('');
     });
 
@@ -454,9 +465,31 @@
         });
     });
 
-    $("#new-user-name").autocomplete({
+    $("#new-owner-name").autocomplete({
         autoFocus: true,
         appendTo: "#orphan-dialog",
+        minLength: 2,
+        source: function (request, response) {
+            var term = request.term;
+            $.ajax({
+                url: '<@spring.url "/vaults/autocompleteuun/"/>' + term,
+                type: 'GET',
+                dataType: "json",
+                success: function (data) {
+                    response(data);
+                }
+            });
+        },
+        select: function (event, ui) {
+            var attributes = ui.item.value.split(" - ");
+            this.value = attributes[0];
+            return false;
+        }
+    });
+
+    $("#new-user-name").autocomplete({
+        autoFocus: true,
+        appendTo: "#add-new-dialog",
         minLength: 2,
         source: function (request, response) {
             var term = request.term;

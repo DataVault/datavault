@@ -74,21 +74,18 @@
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
                                     class="fa fa-times" aria-hidden="true"></i></button>
-                        <h4 class="modal-title" id="add-new-user-title">Remove User From IS Admin Role</h4>
+                        <h4 class="modal-title" id="add-new-user-title">Delete User From IS Admin Role</h4>
                     </div>
                     <div class="modal-body">
                         <div id="delete-error" class="alert alert-danger hidden"></div>
-                        <div class="modal-body">
-                            <p>Do you want to remove <label id="delete-user-name"></label> from the <label
-                                        id="delete-role-name"></label> role?</p>
-                        </div>
+                        <p>Do you want to delete <label id="delete-user-name"></label> from the <label id="delete-role-name"></label> role?</p>
                     </div>
                     <input type="hidden" id="delete-isadmin-user-id" name="deop-id"/>
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
-                        <button type="submit" class="btn btn-danger btn-delete"><i class="fa fa-trash"></i> Remove</button>
+                        <button type="submit" class="btn btn-danger btn-delete"><i class="fa fa-trash"></i> Delete</button>
                     </div>
 
                 </form>
