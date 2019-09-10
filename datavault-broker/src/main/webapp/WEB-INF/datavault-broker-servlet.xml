@@ -114,6 +114,7 @@
     </bean>
     <bean id="billingController" class="org.datavaultplatform.broker.controllers.admin.BillingController">
     <property name="vaultsService" ref="vaultsService" />
+    <property name="billingService" ref="billingService" />
     <property name="externalMetadataService" ref="externalMetadataService" />
     </bean>
  

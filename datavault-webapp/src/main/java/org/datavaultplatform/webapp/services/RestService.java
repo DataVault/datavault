@@ -13,6 +13,7 @@ import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.dao.BillingDAO;
 import org.datavaultplatform.common.request.CreateClientEvent;
 import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.request.CreateVault;
@@ -584,6 +585,10 @@ public class RestService {
     public void deleteDeposit(String depositId) {
         delete(brokerURL + "/admin/deposits/" + depositId, String.class);
     }
-
+	
+	 public BillingInformation updateBillingInfo(String vaultId,BillingInformation billingInfo) {
+	    	HttpEntity<?> response = post(brokerURL + "/admin/billing/" + vaultId+ "/updateBilling" , BillingInformation.class,billingInfo);
+	        return (BillingInformation)response.getBody();
+		}
 
 }
