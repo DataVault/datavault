@@ -107,6 +107,7 @@
     </bean>
 
     <bean id="vaultsController" class="org.datavaultplatform.webapp.controllers.VaultsController">
+        <property name="forceLogoutService" ref="forceLogoutService" />
         <property name="restService" ref="restService" />
         <property name="userLookupService" ref="userLookupService" />
         <property name="system" value="${metadata.system}" />

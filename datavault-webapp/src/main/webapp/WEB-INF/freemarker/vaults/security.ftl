@@ -323,7 +323,7 @@
                            data-target="#orphan-dialog"
                            data-user-name="${dataOwner.userId}"
                            title="Transfer ownership of this vault."><i
-                                    class="fa fa-users"></i></a>
+                                    class="glyphicon glyphicon-transfer"></i></a>
                         </@sec.authorize>
                     </td>
                     </@sec.authorize>
@@ -382,13 +382,17 @@
             $(this).toggle(allValues.length === 0 || allValues.indexOf($(this).find('.role-column').text()) >= 0);
         });
     });
-
-    <@sec.authorize access=assignVaultRolesSecurityExpression>
     $('[data-target="#add-new-dialog"]').click(function () {
-        $('#create-error').addClass('hidden').text('');
+        $('#add-new-dialog form').trigger('reset');
+    });
+
+    $('[data-target="#orphan-dialog"]').click(function () {
+        $('#orphan-dialog form').trigger('reset');
     });
 
     $('[data-target="#update-existing-dialog"]').click(function () {
+        $('#update-existing-dialog form').trigger('reset');
+
         var assignmentId = $(this).data('assignment-id');
         var userName = $(this).data('user-name');
         var role = $(this).data('user-role');
@@ -399,24 +403,20 @@
     });
 
     $('[data-target="#delete-dialog"]').click(function () {
+        $('#delete-dialog form').trigger('reset');
         var assignmentId = $(this).data('assignment-id');
         var userName = $(this).data('user-name');
         $('#delete-role-assignment-id').val(assignmentId);
         $('#delete-role-user-name').text(userName);
         $('#delete-error').addClass('hidden').text('');
     });
-    </@sec.authorize>
 
     var redirectUri = '<@spring.url "/vaults/${vault.ID}"/>';
     var forms = [
-        <@sec.authorize access=assignVaultRolesSecurityExpression>
         '#create-form',
         '#update-form',
         '#delete-form',
-        </@sec.authorize>
-        <@sec.authorize access=transferOwnershipSecurityExpression>
         '#transfer-form',
-        </@sec.authorize>
     ];
 
     for (var formIndex in forms) {
@@ -426,6 +426,7 @@
             var form = $(this);
             var formData = form.serialize();
             var url = form.attr('action');
+            form.find('.error').addClass('hidden');
 
             $.ajax({
                 method: 'POST',

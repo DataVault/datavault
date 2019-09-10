@@ -23,6 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Controller
@@ -92,6 +93,13 @@ public class AdminRolesController {
                                          String description,
                                          String[] permissions) {
 
+        List<RoleModel> roles = restService.getEditableRoles();
+
+        if (roles.stream().anyMatch(role -> name.equalsIgnoreCase(role.getName()))) {
+            logger.debug("Cannot create a role with the same name as an existing role");
+            return validationFailed("A role already exists with this name");
+        }
+
         List<PermissionModel> selectedPermissions = getSelectedPermissions(type, permissions);
 
         if (StringUtils.isEmpty(name)) {
@@ -157,6 +165,15 @@ public class AdminRolesController {
                 .orElseThrow(() -> new EntityNotFoundException(RoleModel.class, String.valueOf(id)));
 
         List<PermissionModel> selectedPermissions = getSelectedPermissions(type, permissions);
+        List<RoleModel> roles = restService.getEditableRoles();
+
+        Predicate<RoleModel> rolePredicate = otherRole -> name.equalsIgnoreCase(otherRole.getName())
+                && otherRole.getId() != id;
+
+        if (roles.stream().anyMatch(rolePredicate)) {
+            logger.debug("Cannot create a role with the same name as an existing role");
+            return validationFailed("A role already exists with this name");
+        }
 
         if (!role.getType().isCustomCreatable()) {
             logger.debug("Could not update role - non-editable role type");

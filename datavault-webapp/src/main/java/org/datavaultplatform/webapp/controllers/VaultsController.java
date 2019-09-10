@@ -12,6 +12,7 @@ import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
 import org.datavaultplatform.webapp.exception.ForbiddenException;
 import org.datavaultplatform.webapp.exception.InvalidUunException;
+import org.datavaultplatform.webapp.services.ForceLogoutService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -42,9 +43,14 @@ public class VaultsController {
 
     private RestService restService;
     private UserLookupService userLookupService;
+    private ForceLogoutService logoutService;
     private String system;
     private String link;
     private String welcome;
+
+    public void setForceLogoutService(ForceLogoutService service) {
+        this.logoutService = service;
+    }
 
     public void setSystem(String system) {
         this.system = system;
@@ -72,10 +78,17 @@ public class VaultsController {
             @PathVariable("vaultid") String vaultId,
             @Valid VaultTransferRequest request) {
 
+        VaultInfo vault = restService.getVault(vaultId);
+        if (vault == null) {
+            throw new EntityNotFoundException(Vault.class, vaultId);
+        }
+
+        String vaultOwner = vault.getUserID();
+
         if (!request.isOrphaning()) {
             User newOwner = restService.getUser(request.user);
             if (newOwner == null) {
-                return ResponseEntity.status(422).body("No such user)");
+                return ResponseEntity.status(422).body("Could not find user with ID=" + request.user);
             }
 
             boolean hasVaultRole = restService.getRoleAssignmentsForUser(request.user)
@@ -86,15 +99,12 @@ public class VaultsController {
                 return ResponseEntity.status(422).body("User already has a role in this vault");
             }
 
-            VaultInfo vault = restService.getVault(vaultId);
-            if (vault == null) {
-                throw new EntityNotFoundException(Vault.class, vaultId);
-            }
-
             String userId = vault.getUserID();
             if (userId != null && userId.equals(request.user)) {
                 return ResponseEntity.status(422).body("Cannot transfer ownership to the current owner");
             }
+
+            logoutService.logoutUser(newOwner.getID());
         }
 
         TransferVault transfer = new TransferVault();
@@ -104,6 +114,14 @@ public class VaultsController {
         transfer.setOrphaning(request.orphaning);
 
         restService.transferVault(vaultId, transfer);
+
+        if (vaultOwner != null) {
+            logoutService.logoutUser(vaultOwner);
+        }
+
+        if (request.assigningRole) {
+            logoutService.logoutUser(request.user);
+        }
 
         return ResponseEntity.ok().build();
     }
@@ -315,7 +333,7 @@ public class VaultsController {
             return user;
         }
 
-        @NotEmpty(message = "Must provide a transfer reason.")
+        @NotEmpty(message = "Please specify a transfer reason")
         public String getReason() {
             return reason;
         }
@@ -328,12 +346,12 @@ public class VaultsController {
             return assigningRole;
         }
 
-        @AssertTrue(message = "Must select a user.")
+        @AssertTrue(message = "Please specify a user")
         public boolean isUserSelectionValid() {
             return orphaning || !Strings.isNullOrEmpty(user);
         }
 
-        @AssertTrue(message = "Must select a role when assigning a new role.")
+        @AssertTrue(message = "Please specify a role")
         public boolean isRoleSelectionValid() {
             return !assigningRole || role != null;
         }

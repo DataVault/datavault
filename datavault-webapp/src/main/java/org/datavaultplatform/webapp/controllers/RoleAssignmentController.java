@@ -40,7 +40,7 @@ public class RoleAssignmentController {
             @PathVariable("roleType") String type,
             @PathVariable("target") String targetId,
             @Valid @NotNull @RequestParam("assignment") Long assignmentId,
-            @Valid @NotNull(message = "Must select a role") @RequestParam("role") Long roleId) {
+            @Valid @NotNull(message = "Please specify a role") @RequestParam("role") Long roleId) {
 
         RoleAssignment roleAssignment = rest.getRoleAssignment(assignmentId)
                 .orElseThrow(() -> new EntityNotFoundException(RoleAssignment.class, String.valueOf(assignmentId)));
@@ -89,13 +89,12 @@ public class RoleAssignmentController {
     public ResponseEntity createRoleAssignment(
             @PathVariable("roleType") String type,
             @PathVariable("target") String targetId,
-            @RequestParam("role") long roleId,
-            @RequestParam("user") String userId) {
+            @Valid  RoleAssignmentRequest request) {
 
         RoleAssignment assignment = new RoleAssignment();
-        User user = rest.getUser(userId);
+        User user = rest.getUser(request.user);
         if (user == null) {
-            return ResponseEntity.status(422).body("No such user");
+            return ResponseEntity.status(422).body("Could not find user with ID=" + request.user);
         }
 
         RoleType roleType = RoleType.valueOf(type.toUpperCase());
@@ -104,7 +103,7 @@ public class RoleAssignmentController {
                 assignment.setSchoolId(targetId);
                 break;
             case VAULT:
-                boolean hasVaultRole = rest.getRoleAssignmentsForUser(userId)
+                boolean hasVaultRole = rest.getRoleAssignmentsForUser(request.user)
                         .stream()
                         .anyMatch(role -> role.getVaultId() != null && role.getVaultId().equals(targetId));
 
@@ -119,25 +118,25 @@ public class RoleAssignmentController {
         }
 
 
-        RoleModel role = rest.getRole(roleId)
-                .orElseThrow(() -> new EntityNotFoundException(RoleModel.class, String.valueOf(roleId)));
+        RoleModel role = rest.getRole(request.role)
+                .orElseThrow(() -> new EntityNotFoundException(RoleModel.class, String.valueOf(request.role)));
 
-        assignment.setUserId(userId);
+        assignment.setUserId(request.user);
         assignment.setRole(role);
         rest.createRoleAssignment(assignment);
 
-        forceLogoutService.logoutUser(userId);
+        forceLogoutService.logoutUser(request.user);
 
         return ResponseEntity.ok().build();
     }
 
 
     public static class RoleAssignmentRequest {
-        @NotNull
+        @NotNull(message = "Please specify a role")
         Long role;
 
         @NotNull
-        @NotEmpty
+        @NotEmpty(message = "Please specify a user")
         String user;
 
         public Long getRole() {
