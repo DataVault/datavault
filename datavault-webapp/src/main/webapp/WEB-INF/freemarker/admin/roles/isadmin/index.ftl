@@ -157,11 +157,14 @@
                 method: 'POST',
                 url: '${springMacroRequestContext.getContextPath()}/admin/roles/deop',
                 data: formData,
-                success: function () {
+                success: function (data) {
+                    if (ErrorHandler.isForceLogoutResponse(data)) {
+                        return ErrorHandler.handleForceLogoutResponse();
+                    }
                     window.location.href = '${springMacroRequestContext.getContextPath()}/admin/roles/isadmin';
                 },
                 error: function (xhr) {
-                    $('#delete-error').removeClass('hidden').text(xhr.responseText);
+                    ErrorHandler.handleAjaxError('#delete-error', xhr);
                 }
             });
         });
@@ -178,15 +181,17 @@
                 method: 'POST',
                 url: '${springMacroRequestContext.getContextPath()}/admin/roles/op/',
                 data: formData,
-                success: function () {
+                success: function (data) {
+                    if (ErrorHandler.isForceLogoutResponse(data)) {
+                        return ErrorHandler.handleForceLogoutResponse();
+                    }
                     window.location.href = '${springMacroRequestContext.getContextPath()}/admin/roles/isadmin';
                 },
                 error: function (xhr) {
-                    var $error = $('#create-error').removeClass('hidden').text(xhr.responseText);
+                    ErrorHandler.handleAjaxError('#create-error', xhr);
                 }
             });
         });
-
 
         $("#add-superadmin-uun").autocomplete({
             autoFocus: true,
@@ -200,6 +205,9 @@
                     dataType: "json",
                     success: function (data) {
                         response(data);
+                    },
+                    error: function(xhr) {
+                        ErrorHandler.handleAjaxError('#create-error', xhr);
                     }
                 });
             },

@@ -231,11 +231,14 @@
                 method: 'POST',
                 url: '${springMacroRequestContext.getContextPath()}/admin/roles/save',
                 data: formData,
-                success: function() {
+                success: function(data) {
+                    if (ErrorHandler.isForceLogoutResponse(data)) {
+                        return ErrorHandler.handleForceLogoutResponse();
+                    }
                     window.location.href = '${springMacroRequestContext.getContextPath()}/admin/roles';
                 },
                 error: function(xhr) {
-                    $('#create-error').removeClass('hidden').text(xhr.responseText);
+                    ErrorHandler.handleAjaxError('#create-error', xhr);
                 }
             });
         });
@@ -247,11 +250,14 @@
                 method: 'POST',
                 url: '${springMacroRequestContext.getContextPath()}/admin/roles/delete',
                 data: formData,
-                success: function() {
+                success: function(data) {
+                    if (ErrorHandler.isForceLogoutResponse(data)) {
+                        return ErrorHandler.handleForceLogoutResponse();
+                    }
                     window.location.href = '${springMacroRequestContext.getContextPath()}/admin/roles';
                 },
                 error: function(xhr) {
-                    $('#delete-error').removeClass('hidden').text(xhr.responseText);
+                    ErrorHandler.handleAjaxError('#delete-error', xhr);
                 }
             });
         });
@@ -262,10 +268,13 @@
                 method: "GET",
                 url: '${springMacroRequestContext.getContextPath()}/admin/roles/getvaultpermissions',
                 success: function (data) {
+                    if (ErrorHandler.isForceLogoutResponse(data)) {
+                        return ErrorHandler.handleForceLogoutResponse();
+                    }
                     vaultPermissions = data;
                 },
                 error: function (xhr) {
-                    $('#create-error').removeClass('hidden').text(xhr.responseText);
+                    ErrorHandler.handleAjaxError('#create-error', xhr);
                 }
             });
 
@@ -273,10 +282,13 @@
                 method: "GET",
                 url: '${springMacroRequestContext.getContextPath()}/admin/roles/getschoolpermissions',
                 success: function (data) {
+                    if (ErrorHandler.isForceLogoutResponse(data)) {
+                        return ErrorHandler.handleForceLogoutResponse();
+                    }
                     schoolPermissions = data;
                 },
                 error: function (xhr) {
-                    $('#create-error').removeClass('hidden').text(xhr.responseText);
+                    ErrorHandler.handleAjaxError('#create-error', xhr);
                 }
             });
         }
@@ -289,6 +301,10 @@
                 method: "GET",
                 url: '${springMacroRequestContext.getContextPath()}/admin/roles/' + roleid,
                 success: function (data) {
+
+                    if (ErrorHandler.isForceLogoutResponse(data)) {
+                        return ErrorHandler.handleForceLogoutResponse();
+                    }
 
                     $('#create-error').addClass('hidden').text('');
                     $("#modalnewedit").modal("show");
@@ -317,7 +333,7 @@
 
                 },
                 error: function (xhr) {
-                    $('#create-error').removeClass('hidden').text(xhr.responseText);
+                    ErrorHandler.handleAjaxError('#create-error', xhr);
                 }
             });
         }

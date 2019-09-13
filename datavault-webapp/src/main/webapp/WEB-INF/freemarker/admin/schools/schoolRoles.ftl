@@ -271,16 +271,14 @@
                 method: 'POST',
                 url: '${springMacroRequestContext.getContextPath()}/admin/schools/${school.getID()}/user',
                 data: formData,
-                success: function() {
+                success: function(data) {
+                    if (ErrorHandler.isForceLogoutResponse(data)) {
+                        return ErrorHandler.handleForceLogoutResponse();
+                    }
                     window.location.href = '${springMacroRequestContext.getContextPath()}/admin/schools/${school.getID()}';
                 },
                 error: function(xhr) {
-                    var $error = $('#create-error').removeClass('hidden');
-                    if (xhr.status === 422) {
-                        $error.text(xhr.responseText);
-                    } else {
-                        $error.text('An error occurred. Please contact your system administrator.');
-                    }
+                    ErrorHandler.handleAjaxError('#create-error', xhr);
                 }
             });
         });
@@ -292,16 +290,14 @@
                 method: 'POST',
                 url: '${springMacroRequestContext.getContextPath()}/admin/schools/${school.getID()}/user/update',
                 data: formData,
-                success: function() {
+                success: function(data) {
+                    if (ErrorHandler.isForceLogoutResponse(data)) {
+                        return ErrorHandler.handleForceLogoutResponse();
+                    }
                     window.location.href = '${springMacroRequestContext.getContextPath()}/admin/schools/${school.getID()}';
                 },
                 error: function(xhr) {
-                    var $error = $('#update-error').removeClass('hidden');
-                    if (xhr.status === 422) {
-                        $error.text(xhr.responseText);
-                    } else {
-                        $error.text('An error occurred. Please contact your system administrator.');
-                    }
+                    ErrorHandler.handleAjaxError('#update-error', xhr);
                 }
             });
         });
@@ -313,16 +309,14 @@
                 method: 'POST',
                 url: '${springMacroRequestContext.getContextPath()}/admin/schools/${school.getID()}/user/delete',
                 data: formData,
-                success: function() {
+                success: function(data) {
+                    if (ErrorHandler.isForceLogoutResponse(data)) {
+                        return ErrorHandler.handleForceLogoutResponse();
+                    }
                     window.location.href = '${springMacroRequestContext.getContextPath()}/admin/schools/${school.getID()}';
                 },
                 error: function(xhr) {
-                    var $error = $('#delete-error').removeClass('hidden');
-                    if (xhr.status === 422) {
-                        $error.text(xhr.responseText);
-                    } else {
-                        $error.text('An error occurred. Please contact your system administrator.');
-                    }
+                    ErrorHandler.handleAjaxError('#delete-error', xhr);
                 }
             });
         });
@@ -339,6 +333,9 @@
                     dataType: "json",
                     success: function( data ) {
                         response( data );
+                    },
+                    error: function(xhr) {
+                        ErrorHandler.handleAjaxError('#create-error', xhr);
                     }
                 });
             },
