@@ -29,21 +29,6 @@ public class AdminUsersController {
     }
 
     @ApiMethod(
-            path = "/admin/users",
-            verb = ApiVerb.GET,
-            description = "Gets a list of all Users",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
-    })
-    @RequestMapping(value = "/admin/users", method = RequestMethod.GET)
-    public List<User> getUsers(@RequestHeader(value = "X-UserID", required = true) String userID) {
-        return usersService.getUsers();
-    }
-
-    @ApiMethod(
             path = "/admin/users/search",
             verb = ApiVerb.GET,
             description = "Search Users",

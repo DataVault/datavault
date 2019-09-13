@@ -364,7 +364,7 @@ public class RestService {
     }
 
     public User[] getUsers() {
-        HttpEntity<?> response = get(brokerURL + "/admin/users", User[].class);
+        HttpEntity<?> response = get(brokerURL + "/users", User[].class);
         return (User[])response.getBody();
     }
 
