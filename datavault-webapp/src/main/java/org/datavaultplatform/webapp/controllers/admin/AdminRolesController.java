@@ -239,7 +239,7 @@ public class AdminRolesController {
         logger.debug("Preparing to add user ID={} to IS ADMIN role", userId);
         if (StringUtils.isEmpty(userId)) {
             logger.debug("Could not assign user to IS Admin role - no user ID provided");
-            return validationFailed("Please choose a user.");
+            return validationFailed("Please specify a user.");
         }
 
         RoleModel superAdminRole = restService.getIsAdmin();
