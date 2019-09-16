@@ -192,13 +192,13 @@
                 <div class="modal-body">
                     <div id="add-new-dialog-error" class="alert alert-danger error hidden" role="alert"></div>
                     <div class="form-group ui-widget">
-                        <label for="new-user-name" class="control-label col-sm-2">Name:</label>
+                        <label for="new-user-name" class="control-label col-sm-2">Name</label>
                         <div class="col-sm-10">
                             <input id="new-user-name" type="text" class="form-control" name="user" value=""/>
                         </div>
                     </div>
                     <div class="form-group ui-widget">
-                        <label for="new-user-role" class="control-label col-sm-2">Role:</label>
+                        <label for="new-user-role" class="control-label col-sm-2">Role</label>
                         <div class="col-sm-10">
                             <select id="new-user-role" name="role" class="form-control" >
                                 <option hidden value="" selected disabled>Please select</option>
@@ -236,11 +236,11 @@
                 <div class="modal-body">
                     <div id="update-existing-dialog-error" class="alert alert-danger error hidden" role="alert"></div>
                     <div class="form-group ui-widget">
-                        <label for="role-update-user-name" class="control-label col-sm-2">Name:</label>
+                        <label for="role-update-user-name" class="control-label col-sm-2">Name</label>
                         <label id="role-update-user-name"></label>
                     </div>
                     <div class="form-group ui-widget">
-                        <label for="update-user-role" class="control-label col-sm-2">Role:</label>
+                        <label for="update-user-role" class="control-label col-sm-2">Role</label>
                         <div class="col-sm-10">
                             <select id="update-user-role" name="role" class="form-control">
                                 <#list roles as role>
