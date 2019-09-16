@@ -14,7 +14,7 @@ const ErrorHandler = {
     },
     handleAjaxError: function(errorSelector, xhr) {
         if (xhr.status === 422) {
-            $(errorSelector).removeClass('hidden').text(xhr.responseText);
+            $(errorSelector).removeClass('hidden').html(xhr.responseText.replace("\n", "<br/>"));
         } else {
             document.open();
             document.write(xhr.responseText);

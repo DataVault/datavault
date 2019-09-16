@@ -431,7 +431,6 @@
 
     for (var formIndex in forms) {
         var formSelector = forms[formIndex];
-        const errorSelector = formSelector + '-error';
         $(formSelector).submit(function (event) {
             event.preventDefault();
             var form = $(this);
@@ -450,7 +449,7 @@
                     window.location.href = redirectUri;
                 },
                 error: function (xhr) {
-                    ErrorHandler.handleAjaxError(errorSelector, xhr);
+                    ErrorHandler.handleAjaxError('#' + form.find('.error').attr('id'), xhr);
                 }
             });
         });
