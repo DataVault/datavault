@@ -486,11 +486,12 @@ public class EventListener implements MessageListener {
 
                 AuditChunkStatus auditInfo = auditChunkStatus.get(0);
                 auditInfo.setCompleteTime(new Date());
+                System.out.println("Error message: "+concreteEvent.getMessage());
                 auditInfo.failed(concreteEvent.getMessage());
                 auditsService.updateAuditChunkStatus(auditInfo);
 
                 // At the moment just email
-                sendAuditEmails(concreteEvent, "error", "audit-error.vm");
+                sendAuditEmails(concreteEvent, "error", "audit-chunk-error.vm");
 
                 // TODO: try to fix chunk
             }

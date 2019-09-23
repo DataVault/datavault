@@ -160,7 +160,8 @@ public class AuditChunkStatus {
                 status,
                 depositChunk,
                 depositChunk.getDeposit(),
-                archiveId
+                archiveId,
+                note
         );
     }
 

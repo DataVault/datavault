@@ -37,9 +37,12 @@ public class AuditChunkStatusInfo {
     @ApiObjectField(description = "The archive ID")
     private String archiveId;
 
+    @ApiObjectField(description = "The error note if any")
+    private String note;
+
     public AuditChunkStatusInfo() {}
     public AuditChunkStatusInfo(String id, Date creationTime, Date completedTime, AuditChunkStatus.Status status, DepositChunk depositChunk, Deposit deposit,
-                                String archiveId){
+                                String archiveId, String note){
         this.setId(id);
         this.setCreationTime(creationTime);
         this.setCompletedTime(completedTime);
@@ -47,6 +50,7 @@ public class AuditChunkStatusInfo {
         this.setDepositChunk(depositChunk);
         this.setDeposit(deposit);
         this.setArchiveId(archiveId);
+        this.setNote(note);
     }
 
     public String getID() {
@@ -103,5 +107,13 @@ public class AuditChunkStatusInfo {
 
     public void setCompletedTime(Date completedTime) {
         this.completedTime = completedTime;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 }

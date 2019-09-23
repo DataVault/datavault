@@ -80,8 +80,7 @@ public class Audit extends Task {
         } catch (Exception e) {
             String msg = "Data retrieve failed: " + e.getMessage();
             logger.error(msg, e);
-            eventStream.send(new Error(jobID, auditId, msg)
-                .withUserId(userID));
+            eventStream.send(new Error(jobID, auditId, msg));
             throw new RuntimeException(e);
         }
     }
@@ -114,12 +113,12 @@ public class Audit extends Task {
         }
     }
 
-    private void doAudit(Context context, Device archiveFs, boolean singleCopy, String location) throws Exception {
+    private void doAudit(Context context, Device archiveFs, boolean singleCopy, String location) {
         eventStream.send(new UpdateProgress(this.jobID, null, 0,
                 this.depositChunkToAudit.size(), "Starting auditing ...")
                 .withUserId(this.userID));
 
-        logger.info("Retrieving " + depositChunkToAudit.size() + " chunk(s)");
+        logger.info("Retrieving " + depositChunkToAudit.size() + " chunk(s) for audit.");
 
         for(int i = 0; i < depositChunkToAudit.size(); i++) {
             String chunkId = depositChunkToAudit.get(i).get("id");
@@ -133,53 +132,59 @@ public class Audit extends Task {
             System.out.println("Sending ChunkAuditStarted event...");
             eventStream.send(new ChunkAuditStarted(this.jobID, this.auditId, chunkId, chunkArchiveId, location));
 
-            if (singleCopy) {
-                System.out.println("Retrieving singleCopy: "+chunkFile.getAbsolutePath());
-                archiveFs.retrieve(chunkArchiveId, chunkFile, null);
-            } else {
-                System.out.println("Retrieving: "+chunkFile.getAbsolutePath());
-                archiveFs.retrieve(chunkArchiveId, chunkFile, null, location);
-            }
-
-            eventStream.send(new UpdateProgress(this.jobID, null, i, depositChunkToAudit.size(),
-                    i + " chunk(s) retrieved out of " + depositChunkToAudit.size() + "..."));
-
-            if( this.getChunksIVs().get(i) != null ) {
-                String archivedEncChunkFileHash = this.encChunksDigest.get(i);
-
-                // Check encrypted file checksum
-                String encChunkFileHash = Verify.getDigest(chunkFile);
-
-                logger.info("Encrypted Checksum: " + encChunkFileHash);
-
-                if (!encChunkFileHash.equals(archivedEncChunkFileHash)) {
-
-                    eventStream.send(new AuditError(this.jobID, this.auditId, chunkId, chunkArchiveId, location,
-                            "Encrypted checksum failed: " + encChunkFileHash + " != " + archivedEncChunkFileHash));
-
-//                    throw new Exception("checksum failed: " + encChunkFileHash + " != " + archivedEncChunkFileHash);
+            try {
+                if (singleCopy) {
+                    System.out.println("Retrieving singleCopy: " + chunkFile.getAbsolutePath());
+                    archiveFs.retrieve(chunkArchiveId, chunkFile, null);
+                } else {
+                    System.out.println("Retrieving: " + chunkFile.getAbsolutePath());
+                    archiveFs.retrieve(chunkArchiveId, chunkFile, null, location);
                 }
 
-                Encryption.decryptFile(context, chunkFile, this.getChunksIVs().get(i));
-            }
+                eventStream.send(new UpdateProgress(this.jobID, null, i, depositChunkToAudit.size(),
+                        i + " chunk(s) retrieved out of " + depositChunkToAudit.size() + "..."));
 
-            // Check file
-            String archivedChunkFileHash = this.chunksDigest.get(i);
+                if (this.getChunksIVs().get(i) != null) {
+                    String archivedEncChunkFileHash = this.encChunksDigest.get(i);
 
-            // TODO: Should we check algorithm each time or assume main tar file algorithm is the same
-            // We might also want to move algorythm check before this loop
-            String chunkFileHash = Verify.getDigest(chunkFile);
+                    // Check encrypted file checksum
+                    String encChunkFileHash = Verify.getDigest(chunkFile);
 
-            logger.info("Checksum: " + chunkFileHash);
+                    logger.info("Encrypted Checksum: " + encChunkFileHash);
 
-            if (!chunkFileHash.equals(archivedChunkFileHash)) {
+                    if (!encChunkFileHash.equals(archivedEncChunkFileHash)) {
+
+                        eventStream.send(new AuditError(this.jobID, this.auditId, chunkId, chunkArchiveId, location,
+                                "Encrypted checksum failed: " + encChunkFileHash + " != " + archivedEncChunkFileHash));
+                        break;
+                        //                    throw new Exception("checksum failed: " + encChunkFileHash + " != " + archivedEncChunkFileHash);
+                    }
+
+                    Encryption.decryptFile(context, chunkFile, this.getChunksIVs().get(i));
+                }
+
+                // Check file
+                String archivedChunkFileHash = this.chunksDigest.get(i);
+
+                // TODO: Should we check algorithm each time or assume main tar file algorithm is the same
+                // We might also want to move algorythm check before this loop
+                String chunkFileHash = Verify.getDigest(chunkFile);
+
+                logger.info("Checksum: " + chunkFileHash);
+
+                if (!chunkFileHash.equals(archivedChunkFileHash)) {
+                    eventStream.send(new AuditError(this.jobID, this.auditId, chunkId, chunkArchiveId, location,
+                            "Decrypted checksum failed: " + chunkFileHash + " != " + archivedChunkFileHash));
+                    break;
+                    //                throw new Exception("checksum failed: " + chunkFileHash + " != " + archivedChunkFileHash);
+                }
+
+                eventStream.send(new ChunkAuditComplete(this.jobID, this.auditId, chunkId, chunkArchiveId, location));
+
+            } catch (Exception e){
                 eventStream.send(new AuditError(this.jobID, this.auditId, chunkId, chunkArchiveId, location,
-                        "Decrypted checksum failed: " + chunkFileHash + " != " + archivedChunkFileHash));
-
-//                throw new Exception("checksum failed: " + chunkFileHash + " != " + archivedChunkFileHash);
+                        "Audit of chunk failed with Exception: " + e));
             }
-
-            eventStream.send(new ChunkAuditComplete(this.jobID, this.auditId, chunkId, chunkArchiveId, location));
 
             chunkFile.delete();
         }

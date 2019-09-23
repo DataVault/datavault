@@ -65,9 +65,9 @@
                                         <thead>
                                         <tr class="tr">
                                             <th>Chunk ID</th>
-                                            <th>Date Started</th>
-                                            <th>Date Completed</th>
+                                            <th>Date</th>
                                             <th>Status</th>
+                                            <th>Message</th>
                                             <th>Deposit</th>
                                             <th>ArchiveId</th>
                                         </tr>
@@ -83,17 +83,20 @@
                                             </td>
                                             <td>
                                             <#if chunk.creationTime??>
-                                                ${chunk.creationTime?datetime}
+                                                ${chunk.creationTime?datetime} -
                                             </#if>
-                                            </td>
-                                            <td>
                                             <#if chunk.completedTime??>
-                                                ${chunk.completedTime?datetime}
+                                                <br/>${chunk.completedTime?datetime}
                                             </#if>
                                             </td>
                                             <td>
                                             <#if chunk.status??>
                                                 ${chunk.status}
+                                            </#if>
+                                            </td>
+                                            <td>
+                                            <#if chunk.getNote()??>
+                                                ${chunk.getNote()?html}
                                             </#if>
                                             </td>
                                             <td>

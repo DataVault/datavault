@@ -69,6 +69,7 @@
                                     <th>Last Audit Start</th>
                                     <th>Last Audit End</th>
                                     <th>Last Audit Status</th>
+                                    <th>Last Audit Message</th>
                                 </tr>
                                 </thead>
 
@@ -101,8 +102,13 @@
                                                 ${chunkInfo["last_audit_chunk"].getStatus()?html}
                                             </#if>
                                             </td>
+                                            <td>
+                                            <#if chunkInfo["last_audit_chunk"].getNote()??>
+                                                ${chunkInfo["last_audit_chunk"].getNote()?html}
+                                            </#if>
+                                            </td>
                                         <#else>
-                                            <td>-</td><td>-</td><td>-</td>
+                                            <td>-</td><td>-</td><td>-</td><td>-</td>
                                         </#if>
                                     </tr>
                                     </#list>

@@ -2,6 +2,9 @@ package org.datavaultplatform.common.event.audit;
 
 import org.datavaultplatform.common.event.Event;
 
+import javax.persistence.Entity;
+
+@Entity
 public class AuditError extends Event {
 
     AuditError(){}
