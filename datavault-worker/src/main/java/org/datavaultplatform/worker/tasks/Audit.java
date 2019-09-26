@@ -156,8 +156,7 @@ public class Audit extends Task {
 
                         eventStream.send(new AuditError(this.jobID, this.auditId, chunkId, chunkArchiveId, location,
                                 "Encrypted checksum failed: " + encChunkFileHash + " != " + archivedEncChunkFileHash));
-                        break;
-                        //                    throw new Exception("checksum failed: " + encChunkFileHash + " != " + archivedEncChunkFileHash);
+                        continue;
                     }
 
                     Encryption.decryptFile(context, chunkFile, this.getChunksIVs().get(i));
@@ -175,7 +174,6 @@ public class Audit extends Task {
                 if (!chunkFileHash.equals(archivedChunkFileHash)) {
                     eventStream.send(new AuditError(this.jobID, this.auditId, chunkId, chunkArchiveId, location,
                             "Decrypted checksum failed: " + chunkFileHash + " != " + archivedChunkFileHash));
-                    break;
                     //                throw new Exception("checksum failed: " + chunkFileHash + " != " + archivedChunkFileHash);
                 }
 
@@ -184,6 +182,7 @@ public class Audit extends Task {
             } catch (Exception e){
                 eventStream.send(new AuditError(this.jobID, this.auditId, chunkId, chunkArchiveId, location,
                         "Audit of chunk failed with Exception: " + e));
+                continue;
             }
 
             chunkFile.delete();

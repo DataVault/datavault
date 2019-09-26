@@ -37,6 +37,23 @@
         </div>
 
         <#if deposits?has_content>
+
+        <form action="" method="get" class="form-inline">
+            <div class="form-group">
+                Sort by:
+                <label class="checkbox-inline">
+                    <input class="form-check-input" type="radio" name="sort" id="date" value="date" <#if sort == "date">checked</#if>> Date
+                </label>
+                <label class="checkbox-inline">
+                    <input class="form-check-input" type="radio" name="sort" id="chunkStatus" value="chunkStatus" <#if sort == "chunkStatus">checked</#if>> Chunk Status
+                </label>
+                <label class="checkbox-inline">
+                    <input class="form-check-input" type="radio" name="sort" id="chunkNum" value="chunkNum" <#if sort == "chunkNum">checked</#if>> Chunk Number
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+
         <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
             <#list deposits as deposit>
             <div class="panel panel-default">
@@ -120,6 +137,8 @@
             </div>
             </#list>
         </div>
+        <#else>
+            No Data Available
         </#if>
     </div>
     <script>

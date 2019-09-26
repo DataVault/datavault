@@ -32,13 +32,14 @@ public class AuditChunkStatus {
     @Temporal(TemporalType.TIMESTAMP)
     private Date completeTime;
 
-    @OneToMany(targetEntity = DepositChunk.class, mappedBy = "deposit", fetch=FetchType.LAZY)
-    private List<DepositChunk> chunks;
+//    @OneToMany(targetEntity = DepositChunk.class, mappedBy = "deposit", fetch=FetchType.LAZY)
+//    private List<DepositChunk> chunks;
 
     public enum Status {
         QUEUING,
         IN_PROGRESS,
         COMPLETE,
+        FIXED,
         ERROR
     }
 
@@ -76,11 +77,11 @@ public class AuditChunkStatus {
         return timestamp;
     }
 
-    public List<DepositChunk> getDepositChunks() { return chunks; }
-
-    public void setDepositChunks(List<DepositChunk> chunks) {
-        this.chunks = chunks;
-    }
+//    public List<DepositChunk> getDepositChunks() { return chunks; }
+//
+//    public void setDepositChunks(List<DepositChunk> chunks) {
+//        this.chunks = chunks;
+//    }
 
     public String getNote() { return note; }
 
@@ -164,5 +165,4 @@ public class AuditChunkStatus {
                 note
         );
     }
-
 }

@@ -209,17 +209,14 @@ public class AdminController {
 
     @RequestMapping(value = "/admin/audits", method = RequestMethod.GET)
     public List<AuditInfo> getAuditsAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
-        System.out.println("Start getAuditsAll...");
 	    List<AuditInfo> audits = new ArrayList<>();
 
 	    for (Audit audit : auditsService.getAudits()){
-	        System.out.println("Audit: "+audit.getID());
             AuditInfo auditInfo = audit.convertToResponse();
 
             List<AuditChunkStatus> auditChunks = auditsService.getAuditChunkStatus(audit);
             ArrayList<AuditChunkStatusInfo> auditChunksInfo = new ArrayList<AuditChunkStatusInfo>();
             for (AuditChunkStatus auditChunk : auditChunks){
-                System.out.println("AuditChunkStatus: "+auditChunk.getID());
                 auditChunksInfo.add(auditChunk.convertToResponse());
             }
             auditInfo.setAuditChunks(auditChunksInfo);

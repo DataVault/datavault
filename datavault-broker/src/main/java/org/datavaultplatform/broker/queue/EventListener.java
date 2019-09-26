@@ -424,29 +424,22 @@ public class EventListener implements MessageListener {
                 }
             } else if (concreteEvent instanceof AuditStart) {
                 // Update the Audit
-                System.out.println("AuditId: "+concreteEvent.getAuditId());
                 Audit audit = auditsService.getAudit(concreteEvent.getAuditId());
                 audit.setStatus(Audit.Status.IN_PROGRESS);
                 auditsService.updateAudit(audit);
             } else if (concreteEvent instanceof ChunkAuditStarted) {
                 // Update the Audit status
-                System.out.println("AuditId: "+concreteEvent.getAuditId());
                 Audit audit = auditsService.getAudit(concreteEvent.getAuditId());
-                System.out.println("Chunk Id: "+ concreteEvent.getChunkId());
                 DepositChunk chunk = depositsService.getDepositChunkById(concreteEvent.getChunkId());
                 String archiveId = concreteEvent.getArchiveId();
                 String location = concreteEvent.getLocation();
 
                 auditsService.addAuditStatus(audit, chunk, archiveId, location);
             } else if (concreteEvent instanceof ChunkAuditComplete) {
-                System.out.println("AuditId: "+concreteEvent.getAuditId());
                 Audit audit = auditsService.getAudit(concreteEvent.getAuditId());
-                System.out.println("Chunk Id: "+ concreteEvent.getChunkId());
                 DepositChunk chunk = depositsService.getDepositChunkById(concreteEvent.getChunkId());
                 String archiveId = concreteEvent.getArchiveId();
                 String location = concreteEvent.getLocation();
-                System.out.println("archiveId: "+ archiveId);
-                System.out.println("location: "+ location);
 
                 List<AuditChunkStatus> auditChunkStatus =
                         auditsService.getRunningAuditChunkStatus(audit, chunk, archiveId, location);
@@ -461,20 +454,26 @@ public class EventListener implements MessageListener {
                 auditsService.updateAuditChunkStatus(auditInfo);
             } else if (concreteEvent instanceof AuditComplete) {
                 // Update the Audit status
-                System.out.println("AuditId: "+concreteEvent.getAuditId());
                 Audit audit = auditsService.getAudit(concreteEvent.getAuditId());
-                audit.setStatus(Audit.Status.COMPLETE);
+
+                // If one chunk audit failed set status as failed
+                List<AuditChunkStatus> auditChunkStatus =
+                        auditsService.getAuditChunkStatusFromAudit(audit);
+                Optional<AuditChunkStatus> result = auditChunkStatus.stream().filter(c -> c.getStatus().equals(AuditChunkStatus.Status.ERROR)).findAny();
+
+                if(result.isPresent()){
+                    audit.setStatus(Audit.Status.FAILED);
+                }
+                else {
+                    audit.setStatus(Audit.Status.COMPLETE);
+                }
                 auditsService.updateAudit(audit);
             }
             else if (concreteEvent instanceof AuditError) {
-                System.out.println("AuditId: "+concreteEvent.getAuditId());
                 Audit audit = auditsService.getAudit(concreteEvent.getAuditId());
-                System.out.println("Chunk Id: "+concreteEvent.getChunkId());
                 DepositChunk chunk = depositsService.getDepositChunkById(concreteEvent.getChunkId());
                 String archiveId = concreteEvent.getArchiveId();
                 String location = concreteEvent.getLocation();
-                System.out.println("archive Id: "+archiveId);
-                System.out.println("location: "+location);
 
                 List<AuditChunkStatus> auditChunkStatus =
                         auditsService.getRunningAuditChunkStatus(audit, chunk, archiveId, location);
@@ -486,11 +485,11 @@ public class EventListener implements MessageListener {
 
                 AuditChunkStatus auditInfo = auditChunkStatus.get(0);
                 auditInfo.setCompleteTime(new Date());
-                System.out.println("Error message: "+concreteEvent.getMessage());
                 auditInfo.failed(concreteEvent.getMessage());
                 auditsService.updateAuditChunkStatus(auditInfo);
 
                 // At the moment just email
+                logger.info("Sending Error email to Admin");
                 sendAuditEmails(concreteEvent, "error", "audit-chunk-error.vm");
 
                 // TODO: try to fix chunk
@@ -574,6 +573,7 @@ public class EventListener implements MessageListener {
 
         String email = auditAdminEmail; // TODO: Who do we email
 
+        logger.info("Audit admin email is " + auditAdminEmail);
         emailService.sendTemplateMail(email, title, template, model);
     }
     

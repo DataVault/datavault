@@ -82,6 +82,14 @@ public class AuditsService {
         return chunkStatusList;
     }
 
+    public List<AuditChunkStatus> getAuditChunkStatusFromAudit(Audit audit){
+        HashMap<String, Object> properties = new HashMap<String, Object>();
+        properties.put("audit", audit);
+        List<AuditChunkStatus> chunkStatusList = this.auditChunkStatusDAO.findBy(properties);
+
+        return chunkStatusList;
+    }
+
     public void updateAuditChunkStatus(AuditChunkStatus auditChunkStatus) {
         auditChunkStatusDAO.update(auditChunkStatus);
     }

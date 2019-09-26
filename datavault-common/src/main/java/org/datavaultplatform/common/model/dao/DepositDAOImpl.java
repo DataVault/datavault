@@ -170,6 +170,9 @@ public class DepositDAOImpl implements DepositDAO {
         Criteria criteria = session.createCriteria(Deposit.class);
 
         criteria.add(Restrictions.le("creationTime", olderThanDate));
+        criteria.add(Restrictions.le("status", Deposit.Status.COMPLETE));
+
+        criteria.addOrder(Order.asc("creationTime"));
 
         List<Deposit> deposits = criteria.list();
         session.close();

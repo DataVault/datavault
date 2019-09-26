@@ -2,6 +2,7 @@ package org.datavaultplatform.common.model.dao;
 
 import org.datavaultplatform.common.model.Audit;
 import org.datavaultplatform.common.model.AuditChunkStatus;
+import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.DepositChunk;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -65,6 +66,11 @@ public class AuditChunkStatusDAOImpl implements AuditChunkStatusDAO {
     @Override
     public List<AuditChunkStatus> findByAudit(Audit audit){
         return findBy("audit", audit);
+    }
+
+    @Override
+    public List<AuditChunkStatus> findByDeposit(Deposit deposit){
+        return findBy("depositChunk_deposit", deposit);
     }
 
     @Override

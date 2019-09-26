@@ -39,6 +39,7 @@
                         <th>Audit ID</th>
                         <th>Date Started</th>
                         <th>Status</th>
+                        <th>Size</th>
                     </tr>
                     </thead>
 
@@ -56,10 +57,11 @@
                             </td>
                             <td>${audit.getCreationTime()?datetime}</td>
                             <td>${audit.getStatus()}</td>
+                            <td>${audit.auditChunks?size}</td>
                         </tr>
                         <#if audit.auditChunks?has_content>
                         <tr>
-                            <td colspan="3">
+                            <td colspan="4">
                                 <div class="collapse table-responsive" id="collapse${audit.getId()?html}">
                                     <table class="table">
                                         <thead>
@@ -122,6 +124,8 @@
                 </table>
             </div>
         </div>
+    <#else>
+        <div class="row">No Data Available</div>
     </#if>
     <script>
         $("button#audit").click(function(){

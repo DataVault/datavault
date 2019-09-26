@@ -76,15 +76,23 @@ public class AdminDepositsController {
     }
 
     @RequestMapping(value = "/admin/depositsAudits", method = RequestMethod.GET)
-    public String getDepositsAuditsListing(ModelMap model) throws Exception {
+    public String getDepositsAuditsListing(ModelMap model,
+                                           @RequestParam(value = "sort", required = false) String sort)
+            throws Exception {
         AuditInfo[] audits = restService.getAuditsListingAll();
 
         List<Map<String,Object>> deposits = new ArrayList<>();
+
+        if (sort == null) {
+            sort = "date";
+        }
+        model.addAttribute("sort", sort);
 
         for(AuditInfo audit : audits){
 //            System.out.println("Deposit Map size: "+deposits.size());
 //            System.out.println("Audit: "+audit.getId());
             List<AuditChunkStatusInfo> auditChunks = audit.getAuditChunks();
+
             for(AuditChunkStatusInfo auditChunk : auditChunks){
 //                System.out.println("Audit Chunk: "+auditChunk.getID());
                 Deposit deposit = auditChunk.getDeposit();
@@ -106,6 +114,13 @@ public class AdminDepositsController {
                         chunkInfo.put("deposit_chunk", depositChunk);
                         chunkInfoList.add(chunkInfo);
                     }
+
+                    if(sort.equals("chunkNum")){
+                        chunkInfoList.sort(Comparator.comparing(m ->
+                                        ((DepositChunk)m.get("deposit_chunk")).getChunkNum(),
+                                Comparator.nullsLast(Comparator.naturalOrder())));
+                    }
+
                     mapDeposit.put("chunks_info", chunkInfoList);
                     deposits.add(mapDeposit);
                 }
@@ -119,9 +134,19 @@ public class AdminDepositsController {
 //                    System.err.println("add last_audit_chunk: "+auditChunk.getID());
                     Map<String, Object> chunkInfo = result.get();
                     chunkInfo.put("last_audit_chunk", auditChunk);
+
                 }else{
                     System.err.println("Chunk missing from deposit");
                 }
+            }
+        }
+
+        if(sort.equals("chunkStatus")){
+            for(Map<String,Object> deposit : deposits){
+                List<Map<String, Object>> chunkInfoList = (List<Map<String, Object>>)deposit.get("chunks_info");
+                chunkInfoList.sort(Comparator.comparing(m ->
+                        ((AuditChunkStatusInfo)m.get("last_audit_chunk")).getStatus(),
+                        Comparator.nullsLast(Comparator.naturalOrder())));
             }
         }
 
