@@ -4,6 +4,7 @@ import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateClientEvent;
 import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.request.CreateVault;
+import org.datavaultplatform.common.request.TransferVault;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.DepositInfo;
@@ -187,11 +188,6 @@ public class RestService {
         return (BillingInformation)response.getBody();
 	}
 
-    public VaultInfo[] getVaultsListingAll() {
-        HttpEntity<?> response = get(brokerURL + "/admin/vaults", VaultInfo[].class);
-        return (VaultInfo[])response.getBody();
-    }
-
     public VaultsData getVaultsListingAll(String sort, String order, String offset, String maxResult) {
         HttpEntity<?> response = get(brokerURL + "/admin/vaults?sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
         return (VaultsData)response.getBody();
@@ -277,6 +273,11 @@ public class RestService {
         return (Retrieve[])response.getBody();
     }
 
+    public Vault getVaultRecord(String id) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + id + "/record", Vault.class);
+        return (Vault)response.getBody();
+    }
+
     public VaultInfo getVault(String id) {        
         HttpEntity<?> response = get(brokerURL + "/vaults/" + id, VaultInfo.class);
         return (VaultInfo)response.getBody();
@@ -285,14 +286,6 @@ public class RestService {
     public Vault checkVaultRetentionPolicy(String vaultId) {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/checkretentionpolicy", Vault.class);
         return (Vault)response.getBody();
-    }
-
-    public int checkAllVaultRetentionPolicies() {
-        VaultInfo[] vaults = getVaultsListingAll();
-        for (VaultInfo vault : vaults) {
-            get(brokerURL + "/vaults/" + vault.getID() + "/checkretentionpolicy", Vault.class);
-        }
-        return vaults.length;
     }
 
     public int getRetentionPolicyStatusCount(int status) {
@@ -371,7 +364,7 @@ public class RestService {
     }
 
     public User[] getUsers() {
-        HttpEntity<?> response = get(brokerURL + "/admin/users", User[].class);
+        HttpEntity<?> response = get(brokerURL + "/users", User[].class);
         return (User[])response.getBody();
     }
 
@@ -392,6 +385,11 @@ public class RestService {
 
     public Group[] getGroups() {
         HttpEntity<?> response = get(brokerURL + "/groups", Group[].class);
+        return (Group[])response.getBody();
+    }
+
+    public Group[] getGroupsByScopedPermissions() {
+        HttpEntity<?> response = get(brokerURL + "/groups/byScopedPermissions", Group[].class);
         return (Group[])response.getBody();
     }
 
@@ -470,6 +468,10 @@ public class RestService {
     public VaultInfo addVault(CreateVault createVault) {
         HttpEntity<?> response = post(brokerURL + "/vaults/", VaultInfo.class, createVault);
         return (VaultInfo)response.getBody();
+    }
+
+    public void transferVault(String vaultId, TransferVault transfer) {
+        post(brokerURL + "/vaults/" + vaultId + "/transfer", VaultInfo.class, transfer);
     }
 
     public DepositInfo addDeposit(CreateDeposit createDeposit) {

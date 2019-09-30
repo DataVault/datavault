@@ -56,3 +56,9 @@
     
     <!-- Styles to be overriden -->
     <link href="<@spring.url '/resources/theme/css/overrideStyles.css'/>" rel="stylesheet" type="text/css">
+
+    <!-- Error Handler JS -->
+    <script src="<@spring.url '/resources/theme/js/ErrorHandler.js'/>"></script>
+    <script>
+        ErrorHandler.initialiseSpringContextPath('${springMacroRequestContext.getContextPath()}');
+    </script>

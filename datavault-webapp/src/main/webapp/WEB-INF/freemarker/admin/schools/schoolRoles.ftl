@@ -56,6 +56,8 @@
         }
     </style>
 
+    <#if canManageSchoolRoleAssignments>
+
     <div id="add-new-dialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="add-new-user-title" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -138,7 +140,7 @@
                     </div>
                     <div id="delete-error" class="alert alert-danger hidden" role="alert"></div>
                     <div class="modal-body">
-                        <span>Are you sure you want to remove the role assignment for user <label id="delete-role-user-name"></label>?</span>
+                        <span>Do you want to delete <label id="delete-role-user-name"></label> from this school?</span>
                     </div>
                     <input type="hidden" id="delete-role-assignment-id" name="assignment"/>
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
@@ -152,6 +154,8 @@
         </div>
     </div>
 
+    </#if>
+
     <div class="container">
 
         <ol class="breadcrumb">
@@ -163,7 +167,9 @@
         <h1 id="role-assignments-title">${school.name}</h1>
 
         <div id="add-new">
+            <#if canManageSchoolRoleAssignments>
             <a href="#" data-toggle="modal" data-target="#add-new-dialog">+ Add new user to school</a>
+            </#if>
         </div>
 
         <div class="col-md-8" id="role-assignments">
@@ -183,18 +189,22 @@
                                     </#list>
                                 </div>
                             </th>
-                            <th class="action-column">Actions</th>
+                            <#if canManageSchoolRoleAssignments>
+                                <th class="action-column">Actions</th>
+                            </#if>
                         </tr>
                     </thead>
                     <tbody>
                         <#list roleAssignments as assignment>
                             <tr>
-                                <td>${assignment.user.firstname} ${assignment.user.lastname}</td>
+                                <td>${assignment.userId}</td>
                                 <td class="role-column">${assignment.role.name}</td>
-                                <td class="action-column">
-                                    <a href="#" class="btn btn-default" data-toggle="modal" data-target="#update-existing-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.user.firstname} ${assignment.user.lastname}" data-user-role="${assignment.role.id}" title="Edit role assignment for user ${assignment.user.firstname} ${assignment.user.lastname}."><i class="fa fa-pencil"></i></a>
-                                    <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.user.firstname} ${assignment.user.lastname}" title="Remove role assignment for user ${assignment.user.firstname} ${assignment.user.lastname}."><i class="fa fa-trash"></i></a>
-                                </td>
+                                <#if canManageSchoolRoleAssignments>
+                                    <td class="action-column">
+                                        <a href="#" class="btn btn-default" data-toggle="modal" data-target="#update-existing-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.userId}" data-user-role="${assignment.role.id}" title="Edit role for ${assignment.userId}."><i class="fa fa-pencil"></i></a>
+                                        <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.userId}" title="Delete role for ${assignment.userId}."><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </#if>
                             </tr>
                         </#list>
                     </tbody>
@@ -226,9 +236,11 @@
                 allValues.push($(this).val());
             });
             $('#role-assignments table tbody tr').filter(function() {
-                $(this).toggle(allValues.length === 0 || allValues.includes($(this).find('.role-column').text()));
+                $(this).toggle(allValues.length === 0 || allValues.indexOf($(this).find('.role-column').text()) >= 0);
             });
         });
+
+        <#if canManageSchoolRoleAssignments>
 
         $('[data-target="#add-new-dialog"]').click(function() {
             $('#create-error').addClass('hidden').text('');
@@ -259,16 +271,14 @@
                 method: 'POST',
                 url: '${springMacroRequestContext.getContextPath()}/admin/schools/${school.getID()}/user',
                 data: formData,
-                success: function() {
+                success: function(data) {
+                    if (ErrorHandler.isForceLogoutResponse(data)) {
+                        return ErrorHandler.handleForceLogoutResponse();
+                    }
                     window.location.href = '${springMacroRequestContext.getContextPath()}/admin/schools/${school.getID()}';
                 },
                 error: function(xhr) {
-                    var $error = $('#create-error').removeClass('hidden');
-                    if (xhr.status === 422) {
-                        $error.text(xhr.responseText);
-                    } else {
-                        $error.text('An error occurred. Please contact your system administrator.');
-                    }
+                    ErrorHandler.handleAjaxError('#create-error', xhr);
                 }
             });
         });
@@ -280,16 +290,14 @@
                 method: 'POST',
                 url: '${springMacroRequestContext.getContextPath()}/admin/schools/${school.getID()}/user/update',
                 data: formData,
-                success: function() {
+                success: function(data) {
+                    if (ErrorHandler.isForceLogoutResponse(data)) {
+                        return ErrorHandler.handleForceLogoutResponse();
+                    }
                     window.location.href = '${springMacroRequestContext.getContextPath()}/admin/schools/${school.getID()}';
                 },
                 error: function(xhr) {
-                    var $error = $('#update-error').removeClass('hidden');
-                    if (xhr.status === 422) {
-                        $error.text(xhr.responseText);
-                    } else {
-                        $error.text('An error occurred. Please contact your system administrator.');
-                    }
+                    ErrorHandler.handleAjaxError('#update-error', xhr);
                 }
             });
         });
@@ -301,16 +309,14 @@
                 method: 'POST',
                 url: '${springMacroRequestContext.getContextPath()}/admin/schools/${school.getID()}/user/delete',
                 data: formData,
-                success: function() {
+                success: function(data) {
+                    if (ErrorHandler.isForceLogoutResponse(data)) {
+                        return ErrorHandler.handleForceLogoutResponse();
+                    }
                     window.location.href = '${springMacroRequestContext.getContextPath()}/admin/schools/${school.getID()}';
                 },
                 error: function(xhr) {
-                    var $error = $('#delete-error').removeClass('hidden');
-                    if (xhr.status === 422) {
-                        $error.text(xhr.responseText);
-                    } else {
-                        $error.text('An error occurred. Please contact your system administrator.');
-                    }
+                    ErrorHandler.handleAjaxError('#delete-error', xhr);
                 }
             });
         });
@@ -327,6 +333,9 @@
                     dataType: "json",
                     success: function( data ) {
                         response( data );
+                    },
+                    error: function(xhr) {
+                        ErrorHandler.handleAjaxError('#create-error', xhr);
                     }
                 });
             },
@@ -336,6 +345,8 @@
                 return false;
             }
         });
+
+        </#if>
     </script>
 
 </@layout.vaultLayout>

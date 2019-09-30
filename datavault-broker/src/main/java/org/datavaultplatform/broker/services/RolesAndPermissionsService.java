@@ -1,9 +1,6 @@
 package org.datavaultplatform.broker.services;
 
-import org.datavaultplatform.common.model.PermissionModel;
-import org.datavaultplatform.common.model.RoleAssignment;
-import org.datavaultplatform.common.model.RoleModel;
-import org.datavaultplatform.common.model.RoleType;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.PermissionDAO;
 import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
 import org.datavaultplatform.common.model.dao.RoleDAO;
@@ -13,7 +10,9 @@ import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -77,16 +76,16 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
     }
 
     private void validateRoleAssignment(RoleAssignment roleAssignment) {
-        if (roleAssignment.getUser() == null) {
+        if (roleAssignment.getUserId() == null) {
             throw new IllegalStateException("Cannot create role assignment without user");
         }
         if (roleAssignment.getRole() == null) {
             throw new IllegalStateException("Cannot create role assignment without role");
         }
-        if (RoleType.SCHOOL == roleAssignment.getRole().getType() && roleAssignment.getSchool() == null) {
+        if (RoleType.SCHOOL == roleAssignment.getRole().getType() && roleAssignment.getSchoolId() == null) {
             throw new IllegalStateException("Cannot create school role assignment without a school");
         }
-        if (RoleType.VAULT == roleAssignment.getRole().getType() && roleAssignment.getVault() == null) {
+        if (RoleType.VAULT == roleAssignment.getRole().getType() && roleAssignment.getVaultId() == null) {
             throw new IllegalStateException("Cannot create vault role assignment without a vault");
         }
         if (roleAssignmentDao.roleAssignmentExists(roleAssignment)) {
@@ -95,15 +94,11 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
     }
 
     public List<PermissionModel> getSchoolPermissions() {
-        return getFilteredPermissions(PermissionModel::isSchoolPermission);
+        return permissionDao.findByType(PermissionModel.PermissionType.SCHOOL);
     }
 
     public List<PermissionModel> getVaultPermissions() {
-        return getFilteredPermissions(PermissionModel::isVaultPermission);
-    }
-
-    private List<PermissionModel> getFilteredPermissions(Predicate<PermissionModel> filter) {
-        return permissionDao.findAll().stream().filter(filter).collect(Collectors.toList());
+        return permissionDao.findByType(PermissionModel.PermissionType.VAULT);
     }
 
     public RoleModel getRole(long id) {
@@ -114,10 +109,12 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         return roleDao.getIsAdmin();
     }
 
+    public RoleModel getDataOwner() {
+        return roleDao.getDataOwner();
+    }
+
     public List<RoleModel> getEditableRoles() {
-        return roleDao.findAll().stream()
-                .filter(role -> role.getType().isCustomCreatable())
-                .collect(Collectors.toList());
+        return roleDao.findAllEditableRoles();
     }
 
     public List<RoleModel> getViewableRoles() {
@@ -150,6 +147,24 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
 
     public List<RoleAssignment> getRoleAssignmentsForRole(Long roleId) {
         return roleAssignmentDao.findByRoleId(roleId);
+    }
+
+    public boolean hasAdminDashboardPermissions(String userId) {
+        return roleAssignmentDao.findByUserId(userId).stream()
+                .flatMap(roleAssignment -> roleAssignment.getRole().getPermissions().stream())
+                .anyMatch(permissionModel -> permissionModel.getPermission().isDashboardPermission());
+    }
+
+    public Set<Permission> getUserPermissions(String userId) {
+        return roleAssignmentDao.findUserPermissions(userId);
+    }
+
+    public boolean hasPermission(String userId, Permission permission) {
+        return roleAssignmentDao.hasPermission(userId, permission);
+    }
+
+    public boolean isAdminUser(String userId) {
+        return roleAssignmentDao.isAdminUser(userId);
     }
 
     public RoleModel updateRole(RoleModel role) {

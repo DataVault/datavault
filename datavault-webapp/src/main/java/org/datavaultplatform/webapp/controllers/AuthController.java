@@ -1,14 +1,11 @@
 package org.datavaultplatform.webapp.controllers;
 
-import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 @Controller
@@ -30,7 +27,9 @@ public class AuthController {
     
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String getLoginPage(@RequestParam(value="error", required=false) boolean error,
-                               @RequestParam(value="logout", required=false) String logout, ModelMap model) {
+                               @RequestParam(value="logout", required=false) String logout,
+                               @RequestParam(value="security", required=false) String security,
+                               ModelMap model) {
 
         model.put("success", "");
         model.put("error", "");
@@ -39,9 +38,13 @@ public class AuthController {
         if (logout != null) {
             // Logout
             model.put("success", "You are now logged out");
-        }if (error == true) {
+        }
+        if (error) {
             // Login failed
             model.put("error", "Invalid username or password!");
+        } else if (security != null) {
+            // Permissions changed
+            model.put("error", "You have been logged out for security reasons. Please log back in to continue");
         }
         
         return "/auth/login";

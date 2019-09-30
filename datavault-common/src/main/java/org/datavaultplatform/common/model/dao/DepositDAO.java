@@ -9,21 +9,21 @@ public interface DepositDAO {
     
     public void update(Deposit deposit);
     
-    public List<Deposit> list(String sort);
+    public List<Deposit> list(String sort, String userId);
 
     public Deposit findById(String Id);
 
-    public int count();
+    public int count(String userId);
 
-    public int queueCount();
+    public int queueCount(String userId);
 
-    public int inProgressCount();
+    public int inProgressCount(String userId);
 
     public List<Deposit> inProgress();
 
     public List<Deposit> completed();
 
-    public List<Deposit> search(String query, String sort);
+    public List<Deposit> search(String query, String sort, String userId);
 
-    public Long size();
+    public Long size(String userId);
 }

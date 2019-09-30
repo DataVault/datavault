@@ -49,13 +49,13 @@ public class BillingController {
         Long recordsTotal = 0L;
 		        
         List<VaultInfo> billingResponses = new ArrayList<>();
-        List<Vault> vaultDetails = vaultsService.getVaults(sort, order,offset, maxResult);
+        List<Vault> vaultDetails = vaultsService.getVaults(userID, sort, order,offset, maxResult);
         
         if(CollectionUtils.isNotEmpty(vaultDetails)) {
 			for (Vault vaultList : vaultDetails) {				
 				billingResponses.add(vaultList.convertToResponseBilling());
 	        }
-	        recordsTotal = vaultsService.getTotalNumberOfVaults();
+	        recordsTotal = vaultsService.getTotalNumberOfVaults(userID);
 	        //Map of project with its size
 	        Map<String, Long> projectSizeMap = vaultsService.getAllProjectsSize();
 	        //update project Size in the response
@@ -86,7 +86,7 @@ public class BillingController {
         List<VaultInfo> billingResponses = new ArrayList<>();
         Long recordsTotal = 0L;
         Long recordsFiltered = 0L;
-        List<Vault> vaults = vaultsService.search(query, sort, order, offset, maxResult);
+        List<Vault> vaults = vaultsService.search(userID, query, sort, order, offset, maxResult);
         if(CollectionUtils.isNotEmpty(vaults)) {
 			for (Vault vault : vaults) {
 	            billingResponses.add(vault.convertToResponseBilling());
@@ -99,7 +99,7 @@ public class BillingController {
 	        		vault.setProjectSize(projectSizeMap.get(vault.getProjectId()));
 	        	}
 	        }
-	        recordsTotal = vaultsService.getTotalNumberOfVaults();
+	        recordsTotal = vaultsService.getTotalNumberOfVaults(userID);
 	        recordsFiltered = vaultsService.getTotalNumberOfVaults(query);
         }
         

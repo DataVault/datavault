@@ -72,7 +72,7 @@
                             <td> <#if vault.getAmountBilled()??>${vault.getAmountBilled()}<#else> </#if></td>
                            
                              <td>
-                             ${vault.getUserName()} 
+                                 <#if vault.getUserName()??>${vault.getUserName()}</#if>
                             </td>
                             <td>
                              <a href="${springMacroRequestContext.getContextPath()}/admin/billing/${vault.getID()}">Billing Details</a></td>

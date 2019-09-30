@@ -28,7 +28,6 @@ public class DepositsController {
 
     private VaultsService vaultsService;
     private DepositsService depositsService;
-    private ArchivesService archivesService;
     private RetrievesService retrievesService;
     private MetadataService metadataService;
     private ExternalMetadataService externalMetadataService;
@@ -36,6 +35,7 @@ public class DepositsController {
     private UsersService usersService;
     private ArchiveStoreService archiveStoreService;
     private JobsService jobsService;
+    private AdminService adminService;
     private Sender sender;
     private String optionsDir;
 	private String tempDir;
@@ -52,10 +52,6 @@ public class DepositsController {
 
     public void setDepositsService(DepositsService depositsService) {
         this.depositsService = depositsService;
-    }
-
-    public void setArchivesService(ArchivesService archivesService) {
-        this.archivesService = archivesService;
     }
 
     public void setRetrievesService(RetrievesService retrievesService) {
@@ -84,6 +80,10 @@ public class DepositsController {
 
     public void setJobsService(JobsService jobsService) {
         this.jobsService = jobsService;
+    }
+
+    public void setAdminService(AdminService adminService) {
+        this.adminService = adminService;
     }
 
     public void setSender(Sender sender) {
@@ -140,7 +140,7 @@ public class DepositsController {
             deposit.setHasPersonalData(false);
         }
         deposit.setPersonalDataStatement(createDeposit.getPersonalDataStatement());
-        deposit.setDepositPaths(new ArrayList<DepositPath>());
+        deposit.setDepositPaths(new ArrayList<>());
 
         System.out.println("Deposit File Path: ");
         for (DepositPath dPath : deposit.getDepositPaths()){
@@ -218,8 +218,7 @@ public class DepositsController {
         User user = usersService.getUser(userID);
         Deposit deposit = depositsService.getUserDeposit(user, depositID);
 
-        List<Retrieve> retrieves = deposit.getRetrieves();
-        return retrieves;
+        return deposit.getRetrieves();
     }
 
     @RequestMapping(value = "/deposits/{depositid}/jobs", method = RequestMethod.GET)
@@ -229,8 +228,7 @@ public class DepositsController {
         User user = usersService.getUser(userID);
         Deposit deposit = depositsService.getUserDeposit(user, depositID);
 
-        List<Job> jobs = deposit.getJobs();
-        return jobs;
+        return deposit.getJobs();
     }
 
     @RequestMapping(value = "/deposits/{depositid}/retrieve", method = RequestMethod.POST)
@@ -247,7 +245,7 @@ public class DepositsController {
         
         List<Job> jobs = deposit.getJobs();
         for (Job job : jobs) {
-            if (job.isError() == false && job.getState() != job.getStates().size() - 1) {
+            if (!job.isError() && job.getState() != job.getStates().size() - 1) {
                 // There's an in-progress job for this deposit
                 throw new IllegalArgumentException("Job in-progress for this Deposit");
             }
@@ -267,7 +265,7 @@ public class DepositsController {
 
         // Fetch the ArchiveStore that is flagged for retrieval. We store it in a list as the Task parameters require a list.
         ArchiveStore archiveStore = archiveStoreService.getForRetrieval();
-        List<ArchiveStore> archiveStores = new ArrayList<ArchiveStore>();
+        List<ArchiveStore> archiveStores = new ArrayList<>();
         archiveStores.add(archiveStore);
         archiveStores = this.addArchiveSpecificOptions(archiveStores);
 
@@ -294,11 +292,6 @@ public class DepositsController {
 
         if (userStore == null) {
             throw new IllegalArgumentException("Storage ID '" + storageID + "' is invalid");
-        }
-
-        // Validate the path
-        if (retrievePath == null) {
-            throw new IllegalArgumentException("Path was null");
         }
 
         // Check the source file path is valid
@@ -334,7 +327,7 @@ public class DepositsController {
             userFileStoreProperties.put(storageID, userStore.getProperties());
             
             // get chunks checksums
-            HashMap<Integer, String> chunksDigest = new HashMap<Integer, String>();
+            HashMap<Integer, String> chunksDigest = new HashMap<>();
             List<DepositChunk> depositChunks = deposit.getDepositChunks();
             for (DepositChunk depositChunk : depositChunks) {
                 chunksDigest.put(depositChunk.getChunkNum(), depositChunk.getArchiveDigest());
@@ -342,14 +335,14 @@ public class DepositsController {
             
             // Get encryption IVs
             byte[] tarIVs = deposit.getEncIV();
-            HashMap<Integer, byte[]> chunksIVs = new HashMap<Integer, byte[]>();
+            HashMap<Integer, byte[]> chunksIVs = new HashMap<>();
             for( DepositChunk chunks : deposit.getDepositChunks() ) {
                 chunksIVs.put(chunks.getChunkNum(), chunks.getEncIV());
             }
             
             // Get encrypted digests
             String encTarDigest = deposit.getEncArchiveDigest();
-            HashMap<Integer, String> encChunksDigests = new HashMap<Integer, String>();
+            HashMap<Integer, String> encChunksDigests = new HashMap<>();
             for( DepositChunk chunks : deposit.getDepositChunks() ) {
                 encChunksDigests.put(chunks.getChunkNum(), chunks.getEcnArchiveDigest());
             }
@@ -417,18 +410,10 @@ public class DepositsController {
     @RequestMapping(value = "/deposits/{depositid}/restart", method = RequestMethod.POST)
     public Deposit restartDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
                                    @PathVariable("depositid") String depositID) throws Exception{
-        Deposit deposit;
 
-        User user = usersService.getUser(userID);
-        deposit = depositsService.getUserDeposit(user, depositID);
+        User user = adminService.ensureAdminUser(userID);
+        Deposit deposit = depositsService.getUserDeposit(user, depositID);
 
-        if (user == null) {
-            throw new Exception("User '" + userID + "' does not exist");
-        } else {
-            if (!user.isAdmin()) {
-                throw new Exception("Only an admin can restart a deposit");
-            }
-        }
 
         if (deposit == null) {
             throw new Exception("Deposit '" + depositID + "' does not exist");
@@ -437,7 +422,7 @@ public class DepositsController {
         List<FileStore> userStores = user.getFileStores();
         System.out.println("There is " + userStores.size() + "user stores.");
 
-        ArrayList<String> paths = new ArrayList<String>();
+        ArrayList<String> paths = new ArrayList<>();
         for(DepositPath dPath : deposit.getDepositPaths()){
             if(dPath.getPathType() == Path.PathType.FILESTORE) {
                 paths.add(dPath.getFilePath());

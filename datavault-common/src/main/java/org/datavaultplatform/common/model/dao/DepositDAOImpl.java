@@ -1,7 +1,10 @@
 package org.datavaultplatform.common.model.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.datavaultplatform.common.model.Permission;
+import org.datavaultplatform.common.util.DaoUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -53,9 +56,13 @@ public class DepositDAOImpl implements DepositDAO {
  
     @SuppressWarnings("unchecked")
     @Override
-    public List<Deposit> list(String sort) {
+    public List<Deposit> list(String sort, String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Deposit.class);
+        SchoolPermissionCriteriaBuilder criteriaBuilder = createDepositCriteriaBuilder(userId, session, Permission.CAN_MANAGE_DEPOSITS);
+        if (criteriaBuilder.hasNoAccess()) {
+            return new ArrayList<>();
+        }
+        Criteria criteria = criteriaBuilder.build();
         // See if there is a valid sort option
         if ("id".equals(sort)) {
             criteria.addOrder(Order.asc("id"));
@@ -87,27 +94,40 @@ public class DepositDAOImpl implements DepositDAO {
     }
 
     @Override
-    public int count() {
+    public int count(String userId) {
         Session session = this.sessionFactory.openSession();
-        return (int)(long)(Long)session.createCriteria(Deposit.class).setProjection(Projections.rowCount()).uniqueResult();
+        SchoolPermissionCriteriaBuilder criteriaBuilder = createDepositCriteriaBuilder(userId, session, Permission.CAN_MANAGE_DEPOSITS);
+        if (criteriaBuilder.hasNoAccess()) {
+            return 0;
+        }
+        Criteria criteria = criteriaBuilder.build();
+        return (int) (long) (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
     }
 
     @Override
-    public int queueCount() {
+    public int queueCount(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Deposit.class);
+        SchoolPermissionCriteriaBuilder criteriaBuilder = createDepositCriteriaBuilder(userId, session, Permission.CAN_VIEW_QUEUES);
+        if (criteriaBuilder.hasNoAccess()) {
+            return 0;
+        }
+        Criteria criteria = criteriaBuilder.build();
         criteria.add(Restrictions.eq("status", Deposit.Status.NOT_STARTED));
         criteria.setProjection(Projections.rowCount());
-        return (int)(long)(Long)criteria.uniqueResult();
+        return (int) (long) (Long) criteria.uniqueResult();
     }
 
     @Override
-    public int inProgressCount() {
+    public int inProgressCount(String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Deposit.class);
+        SchoolPermissionCriteriaBuilder criteriaBuilder = createDepositCriteriaBuilder(userId, session, Permission.CAN_VIEW_IN_PROGRESS);
+        if (criteriaBuilder.hasNoAccess()) {
+            return 0;
+        }
+        Criteria criteria = criteriaBuilder.build();
         criteria.add(Restrictions.and(Restrictions.ne("status", Deposit.Status.NOT_STARTED), Restrictions.ne("status", Deposit.Status.COMPLETE)));
         criteria.setProjection(Projections.rowCount());
-        return (int)(long)(Long)criteria.uniqueResult();
+        return (int) (long) (Long) criteria.uniqueResult();
     }
 
     @Override
@@ -131,9 +151,13 @@ public class DepositDAOImpl implements DepositDAO {
     }
 
     @Override
-    public List<Deposit> search(String query, String sort) {
+    public List<Deposit> search(String query, String sort, String userId) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Deposit.class);
+        SchoolPermissionCriteriaBuilder criteriaBuilder = createDepositCriteriaBuilder(userId, session, Permission.CAN_MANAGE_DEPOSITS);
+        if (criteriaBuilder.hasNoAccess()) {
+            return new ArrayList<>();
+        }
+        Criteria criteria = criteriaBuilder.build();
         criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("note", "%" + query + "%"), Restrictions.ilike("filePath", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
@@ -158,8 +182,24 @@ public class DepositDAOImpl implements DepositDAO {
     }
 
     @Override
-    public Long size() {
+    public Long size(String userId) {
         Session session = this.sessionFactory.openSession();
-        return (Long)session.createCriteria(Deposit.class).setProjection(Projections.sum("depositSize")).uniqueResult();
+        SchoolPermissionCriteriaBuilder criteriaBuilder = createDepositCriteriaBuilder(userId, session, Permission.CAN_VIEW_VAULTS_SIZE);
+        if (criteriaBuilder.hasNoAccess()) {
+            return 0L;
+        }
+        Criteria criteria = criteriaBuilder.build();
+        return (Long) criteria.setProjection(Projections.sum("depositSize")).uniqueResult();
+    }
+
+    private SchoolPermissionCriteriaBuilder createDepositCriteriaBuilder(String userId, Session session, Permission permission) {
+        return new SchoolPermissionCriteriaBuilder()
+                .setCriteriaType(Deposit.class)
+                .setCriteriaName("deposit")
+                .setSession(session)
+                .setTypeToSchoolAliasGenerator(criteria ->
+                        criteria.createAlias("deposit.vault", "vault")
+                                .createAlias("vault.group", "group"))
+                .setSchoolIds(DaoUtils.getPermittedSchoolIds(session, userId, permission));
     }
 }

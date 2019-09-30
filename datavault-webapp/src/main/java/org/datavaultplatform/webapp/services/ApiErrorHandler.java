@@ -1,6 +1,9 @@
 package org.datavaultplatform.webapp.services;
 
 import org.datavaultplatform.common.api.ApiError;
+import org.datavaultplatform.webapp.exception.ForbiddenException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.*;
@@ -12,9 +15,16 @@ import java.rmi.ServerException;
 
 public class ApiErrorHandler extends DefaultResponseErrorHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(ApiErrorHandler.class);
+
     @Override
     public void handleError(ClientHttpResponse response) throws IOException {
         HttpStatus statusCode = response.getStatusCode();
+
+        if (statusCode == HttpStatus.FORBIDDEN) {
+            logger.error("Attempted to call the broker but received a 403 - Forbidden");
+            throw new ForbiddenException();
+        }
 
         if(statusCode == HttpStatus.INTERNAL_SERVER_ERROR){
 
