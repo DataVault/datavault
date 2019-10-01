@@ -56,4 +56,3 @@
     
     <!-- Styles to be overriden -->
     <link href="<@spring.url '/resources/theme/css/overrideStyles.css'/>" rel="stylesheet" type="text/css">
-    

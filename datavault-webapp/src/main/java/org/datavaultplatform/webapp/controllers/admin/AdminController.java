@@ -37,12 +37,20 @@ public class AdminController {
         model.addAttribute("retrievesinprogress", restService.getRetrievesInProgressCount());
         model.addAttribute("depositqueue", restService.getDepositsQueue());
         model.addAttribute("retrievequeue", restService.getRetrievesQueue());
-        model.addAttribute("reviewcount", restService.getRetentionPolicyStatusCount(RetentionPolicyStatus.REVIEW));
+        model.addAttribute("rolecount", getManagableRolesCount());
         model.addAttribute("eventcount", restService.getEventCount());
         model.addAttribute("policycount", restService.getRetentionPolicyListing().length);
         model.addAttribute("archivestorescount", restService.getArchiveStores().length);
 
         return "admin/index";
+    }
+
+    private int getManagableRolesCount() {
+        // Total number of roles =
+        //        1 (for the IS Admin)
+        //      + number of read-only roles
+        //      + number of editable roles
+        return 1 + restService.getViewableRoles().size() + restService.getEditableRoles().size();
     }
 }
 

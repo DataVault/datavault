@@ -3,6 +3,29 @@
 <#global nav="admin">
 <@layout.vaultLayout>
 
+<style>
+    .roles-icon {
+        -webkit-mask: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center;
+        mask: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center;
+        width: 1em;
+        height: 1em;
+        display: inline-block;
+        background-color: rgb(52, 109, 191);
+    }
+    .roles-label {
+        vertical-align: top;
+    }
+    .roles-link:hover {
+        text-decoration: none;
+    }
+    .roles-link:hover .roles-icon {
+        background-color: rgb(36, 75, 131);
+    }
+    .roles-link:hover .roles-label {
+        text-decoration: underline;
+    }
+</style>
+
 <div class="container">
 
     <ol class="breadcrumb">
@@ -77,7 +100,7 @@
     </div>
 
     <div class="row">
-        
+
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-success">
                 <div class="panel-heading">
@@ -91,20 +114,26 @@
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-success">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Groups</h3>
+                    <h3 class="panel-title">Schools</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/groups"><i class="fa fa-user" aria-hidden="true"></i> ${groupcount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/schools"><i class="fa fa-users" aria-hidden="true"></i> ${groupcount}</a></h1>
                 </div>
             </div>
         </div>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-success">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Review</h3>
+                    <h3 class="panel-title">Roles</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="#"><span class="glyphicon glyphicon-list-alt"></span> ${reviewcount}</a></h1>
+                    <h1 class="text-center">
+                        <a href="${springMacroRequestContext.getContextPath()}/admin/roles" class="roles-link">
+                            <!-- TODO this hack should be changed to show fa-user-cog once font-awesome has been upgrade to version 5 -->
+                            <i class="roles-icon"></i>
+                            <span class="roles-label">${rolecount}</span>
+                        </a>
+                    </h1>
                 </div>
             </div>
         </div>
