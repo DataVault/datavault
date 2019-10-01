@@ -72,7 +72,7 @@ public class RoleModel {
     }
 
     public Collection<PermissionModel> getPermissions() {
-        return Sets.newHashSet(permissions);
+        return permissions;
     }
 
     public void setPermissions(Collection<PermissionModel> permissions) {

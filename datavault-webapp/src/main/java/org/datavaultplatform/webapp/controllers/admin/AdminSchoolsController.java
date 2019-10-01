@@ -2,17 +2,22 @@ package org.datavaultplatform.webapp.controllers.admin;
 
 import org.apache.commons.lang.StringUtils;
 import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
+import org.datavaultplatform.webapp.exception.ForbiddenException;
 import org.datavaultplatform.webapp.exception.InvalidUunException;
+import org.datavaultplatform.webapp.services.ForceLogoutService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +30,8 @@ public class AdminSchoolsController {
 
     private UserLookupService userLookupService;
 
+    private ForceLogoutService forceLogoutService;
+
     public void setRestService(RestService restService) {
         this.restService = restService;
     }
@@ -33,16 +40,31 @@ public class AdminSchoolsController {
         this.userLookupService = userLookupService;
     }
 
+    public void setForceLogoutService(ForceLogoutService forceLogoutService) {
+        this.forceLogoutService = forceLogoutService;
+    }
+
     @GetMapping("/admin/schools")
     public ModelAndView getSchoolsListingPage() {
+        Group[] manageableSchools = restService.getGroupsByScopedPermissions();
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("admin/schools/index");
-        mav.addObject("schools", restService.getGroups());
+        switch (manageableSchools.length) {
+            case 0:
+                throw new ForbiddenException();
+            case 1:
+                mav.setViewName("redirect:/admin/schools/" + manageableSchools[0].getID());
+                break;
+            default:
+                mav.setViewName("admin/schools/index");
+                mav.addObject("schools", restService.getGroupsByScopedPermissions());
+                break;
+        }
         return mav;
     }
 
+    @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS')")
     @GetMapping("/admin/schools/{school}")
-    public ModelAndView getSchoolRoleAssignmentsPage(@PathVariable("school") String schoolId) {
+    public ModelAndView getSchoolRoleAssignmentsPage(@PathVariable("school") String schoolId, Principal principal) {
 
         Optional<Group> school = getGroup(schoolId);
         if (!school.isPresent()) {
@@ -51,14 +73,20 @@ public class AdminSchoolsController {
             throw new EntityNotFoundException(Group.class, schoolId);
         }
 
+        boolean canManageSchoolRoleAssignments = restService.getRoleAssignmentsForUser(principal.getName()).stream()
+                .flatMap(roleAssignment -> roleAssignment.getRole().getPermissions().stream())
+                .anyMatch(p -> p.getPermission() == Permission.CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS);
+
         ModelAndView mav = new ModelAndView();
         mav.setViewName("admin/schools/schoolRoles");
         mav.addObject("school", school.get());
         mav.addObject("roles", getRoles());
         mav.addObject("roleAssignments", getRoleAssignments(school.get()));
+        mav.addObject("canManageSchoolRoleAssignments", canManageSchoolRoleAssignments);
         return mav;
     }
 
+    @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS')")
     @PostMapping("/admin/schools/{school}/user")
     public ResponseEntity addNewRoleAssignment(@PathVariable("school") String schoolId,
                                                @RequestParam("user") String userId,
@@ -98,7 +126,7 @@ public class AdminSchoolsController {
         }
 
         List<RoleAssignment> userRoleAssignments = restService.getRoleAssignmentsForUser(userId);
-        if (userRoleAssignments.stream().anyMatch(r -> r.getSchool() != null && r.getSchool().getID().equals(schoolId))) {
+        if (userRoleAssignments.stream().anyMatch(r -> r.getSchoolId() != null && r.getSchoolId().equals(schoolId))) {
             logger.debug("Attempted to add a new school role assignment for user {} and school {} when one already exists",
                     userId,
                     schoolId);
@@ -115,8 +143,8 @@ public class AdminSchoolsController {
                 roleId);
         RoleAssignment newRoleAssignment = new RoleAssignment();
         newRoleAssignment.setRole(role.get());
-        newRoleAssignment.setUser(user.get());
-        newRoleAssignment.setSchool(school.get());
+        newRoleAssignment.setUserId(userId);
+        newRoleAssignment.setSchoolId(schoolId);
         createNewRoleAssignment(newRoleAssignment);
 
         return ResponseEntity.ok().build();
@@ -126,6 +154,7 @@ public class AdminSchoolsController {
         return ResponseEntity.status(422).body(message);
     }
 
+    @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS')")
     @PostMapping("/admin/schools/{school}/user/update")
     public ResponseEntity updateExistingRoleAssignment(@PathVariable("school") String schoolId,
                                                @RequestParam("assignment") Long assignmentId,
@@ -169,6 +198,7 @@ public class AdminSchoolsController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS')")
     @PostMapping("/admin/schools/{school}/user/delete")
     public ResponseEntity deleteRoleAssignment(@PathVariable("school") String schoolId,
                                        @RequestParam("assignment") Long assignmentId) {
@@ -183,8 +213,8 @@ public class AdminSchoolsController {
             logger.error("Attempted to delete a school role assignment {} but no such role assignment was found", assignmentId);
             throw new EntityNotFoundException(RoleAssignment.class, String.valueOf(assignmentId));
 
-        } else if (userRoleAssignment.get().getSchool() == null
-                || !userRoleAssignment.get().getSchool().getID().equals(schoolId)) {
+        } else if (userRoleAssignment.get().getSchoolId() == null
+                || !userRoleAssignment.get().getSchoolId().equals(schoolId)) {
             logger.debug("Attempted to delete role assignment that was not assigned to school {}.", schoolId);
             return validationFailed("Role assignment belongs to a different school");
         }
@@ -222,6 +252,7 @@ public class AdminSchoolsController {
 
     private void createNewRoleAssignment(RoleAssignment toCreate) {
         restService.createRoleAssignment(toCreate);
+        forceLogoutService.logoutUser(toCreate.getUserId());
     }
 
     private Optional<RoleAssignment> getRoleAssignment(long assignmentId) {
@@ -231,9 +262,11 @@ public class AdminSchoolsController {
     private void updateRoleAssignment(RoleAssignment originalRoleAssignment, RoleModel newRole) {
         originalRoleAssignment.setRole(newRole);
         restService.updateRoleAssignment(originalRoleAssignment);
+        forceLogoutService.logoutUser(originalRoleAssignment.getUserId());
     }
 
     private void deleteRoleAssignment(RoleAssignment toDelete) {
         restService.deleteRoleAssignment(toDelete.getId());
+        forceLogoutService.logoutUser(toDelete.getUserId());
     }
 }

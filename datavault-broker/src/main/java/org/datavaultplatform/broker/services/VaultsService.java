@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.dao.VaultDAO;
@@ -14,16 +16,33 @@ public class VaultsService {
 
     private VaultDAO vaultDAO;
 
+    private RolesAndPermissionsService rolesAndPermissionsService;
+
+    public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
+        this.rolesAndPermissionsService = rolesAndPermissionsService;
+    }
+
     public List<Vault> getVaults() { return vaultDAO.list(); }
 
-    public List<Vault> getVaults(String sort, String order, String offset, String maxResult) { 
-    	return vaultDAO.list(sort, order, offset, maxResult); 
+    public List<Vault> getVaults(String userId, String sort, String order, String offset, String maxResult) {
+    	return vaultDAO.list(userId, sort, order, offset, maxResult);
     }
 
     public void addVault(Vault vault) {
         Date d = new Date();
         vault.setCreationTime(d);
         vaultDAO.save(vault);
+    }
+
+    public void orphanVault(Vault vault) {
+        vault.setUser(null);
+        vaultDAO.update(vault);
+
+        RoleModel dataOwnerRole = rolesAndPermissionsService.getDataOwner();
+        rolesAndPermissionsService.getRoleAssignmentsForRole(dataOwnerRole.getId()).stream()
+                .filter(roleAssignment -> vault.getID().equals(roleAssignment.getVaultId()))
+                .findFirst()
+                .ifPresent(roleAssignment -> rolesAndPermissionsService.deleteRoleAssignment(roleAssignment.getId()));
     }
     
     public void updateVault(Vault vault) {
@@ -42,9 +61,11 @@ public class VaultsService {
         this.vaultDAO = vaultDAO;
     }
 
-    public List<Vault> search(String query, String sort, String order, String offset, String maxResult) { return this.vaultDAO.search(query, sort, order, offset, maxResult); }
+    public List<Vault> search(String userId, String query, String sort, String order, String offset, String maxResult) {
+        return this.vaultDAO.search(userId, query, sort, order, offset, maxResult);
+    }
 
-    public int count() { return vaultDAO.count(); }
+    public int count(String userId) { return vaultDAO.count(userId); }
 
     public int getRetentionPolicyCount(int status) { return vaultDAO.getRetentionPolicyCount(status); }
 
@@ -72,42 +93,26 @@ public class VaultsService {
     
     // Get the specified Vault object and validate it against the current User
     public Vault getUserVault(User user, String vaultID) throws Exception {
-
         Vault vault = getVault(vaultID);
 
         if (vault == null) {
             throw new Exception("Vault '" + vaultID + "' does not exist");
         }
 
-        Boolean userVault = false;
-        if (vault.getUser().equals(user)) {
-            userVault = true;
-        }
-        
-        Boolean groupOwner = false;
-        if (vault.getGroup().getOwners().contains(user)) {
-            groupOwner = true;
-        }
-        
-        Boolean adminUser = user.isAdmin();
-        
-        if (!userVault && !groupOwner && !adminUser) {
-            throw new Exception("Access denied");
-        }
-
         return vault;
     }
  	
-	public Long getTotalNumberOfVaults() {
-		return vaultDAO.getTotalNumberOfVaults();
+	public Long getTotalNumberOfVaults(String userId) {
+		return vaultDAO.getTotalNumberOfVaults(userId);
 	}
+
 	/**
 	 * Total number of records after applying search filter
 	 * @param query
 	 * @return
 	 */
-	public Long getTotalNumberOfVaults(String query) {
-		return vaultDAO.getTotalNumberOfVaults(query);
+	public Long getTotalNumberOfVaults(String userId, String query) {
+		return vaultDAO.getTotalNumberOfVaults(userId, query);
 	}
 	
 	public Map<String, Long> getAllProjectsSize() {
@@ -120,5 +125,21 @@ public class VaultsService {
 		}
 		return projectSizeMap;
 	}
-}
 
+    public void transferVault(Vault vault, User newOwner, String reason) {
+        vault.setUser(newOwner);
+        vaultDAO.update(vault);
+
+        RoleModel dataOwnerRole = rolesAndPermissionsService.getDataOwner();
+        rolesAndPermissionsService.getRoleAssignmentsForRole(dataOwnerRole.getId()).stream()
+                .filter(roleAssignment -> vault.getID().equals(roleAssignment.getVaultId()))
+                .findFirst()
+                .ifPresent(roleAssignment -> rolesAndPermissionsService.deleteRoleAssignment(roleAssignment.getId()));
+
+        RoleAssignment newDataOwnerAssignment = new RoleAssignment();
+        newDataOwnerAssignment.setUserId(newOwner.getID());
+        newDataOwnerAssignment.setVaultId(vault.getID());
+        newDataOwnerAssignment.setRole(dataOwnerRole);
+        rolesAndPermissionsService.createRoleAssignment(newDataOwnerAssignment);
+    }
+}

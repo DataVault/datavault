@@ -81,4 +81,14 @@ public class PermissionDAOImpl implements PermissionDAO {
         session.close();
         return permissions;
     }
+
+    @Override
+    public List<PermissionModel> findByType(PermissionModel.PermissionType type) {
+        Session session = sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(PermissionModel.class);
+        criteria.add(Restrictions.eq("type", type));
+        List<PermissionModel> permissions = criteria.list();
+        session.close();
+        return permissions;
+    }
 }

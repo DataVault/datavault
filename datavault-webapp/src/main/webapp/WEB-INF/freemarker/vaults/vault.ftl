@@ -2,6 +2,7 @@
 <#-- Specify which navbar element should be flagged as active -->
 <#global nav="home">
 <#import "/spring.ftl" as spring />
+<#assign sec=JspTaglibs["http://www.springframework.org/security/tags"] />
 <@layout.vaultLayout>
 <div class="container">
 
@@ -54,8 +55,8 @@
                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <button type="submit" id="update-vault-description-btn" class="btn btn-primary btn-ok">Save</button>
+                        <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
+                        <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
                     </div>
                 </form>
             </div>
@@ -92,6 +93,8 @@
                 </div>
             </#if>
 
+        <#assign viewDepositsSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'MANAGE_SCHOOL_VAULT_DEPOSITS')">
+        <@sec.authorize access=viewDepositsSecurityExpression>
             <#if deposits?has_content>
             <h4><strong>Deposit and Retrieve</strong></h4>
             <div class="row">
@@ -166,8 +169,11 @@
                 </div>
             </div>
             </#if>
+        </@sec.authorize>
 
             <div id="accordion">
+                <#assign viewMetadataSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_METADATA') or hasPermission('${vault.groupID}', 'GROUP', 'VIEW_SCHOOL_VAULT_METADATA')">
+                <@sec.authorize access=viewMetadataSecurityExpression>
                 <h4 class="accordion-toggle">
                     ‹› &nbsp;Summary of Full Vault Metadata
                 </h4>
@@ -230,71 +236,22 @@
                         </p>
                     </div>
                 </div>
+                </@sec.authorize>
 
+                <#assign viewVaultRolesSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_ROLES') or hasPermission('${vault.groupID}', 'GROUP', 'VIEW_SCHOOL_VAULT_ROLES')">
+                <@sec.authorize access=viewVaultRolesSecurityExpression>
                 <h4 class="accordion-toggle">
-                    ‹› &nbsp;Data Managers
+                    ‹› &nbsp;Vault Roles
                 </h4>
-                <div class="accordion-content">
-                    <h4>
-                        <strong>Owner</strong>
-                        <small>
-                            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
-                                title="A vault may have no more than one Owner. In some cases, a vault may have no Owner.&nbsp;In this case, nominated Data Managers, School officers and/or &nbsp;administrators will manage the data on behalf of the university.">
-                            </span>
-                        </small>
-                    </h4>
-                    <table class="table table-bordered">
-                        <thead></thead>
-                        <tbody>
-                            <tr>
-                                <td class="text-muted">${vault.userName?html}</td>
-                                <td>${vault.userID?html}</td>
-                                <td>
-                                    <button type="button" class="btn btn-default pull-right" disabled>
-                                        Edit
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    <h4><strong>Nominated Data Managers</strong></h4>
-                    
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>UUN</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <#list dataManagers as dataManager>
-                            <tr>
-                                <td>${dataManager.firstname?html} ${dataManager.lastname?html}</td>
-                                <td>${dataManager.ID?html}</td>
-                                <td>
-                                    <form id="delete-data-manager-form" role="form" action="${springMacroRequestContext.getContextPath()}/vaults/${vault.ID?html}/deleteDataManager" method="post">
-                                        <input type="hidden" class="form-control" name="uun" value="${dataManager.ID?html}"/>
-                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                                        <button type="submit" id="delete-data-manager-btn" 
-                                            class="btn btn-primary btn-ok pull-right btn-sm">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            </#list>
-                            <tr>
-                                <td colspan="3">
-                                    <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#add-data-manager">
-                                        <i class="fa fa-plus" aria-hidden="true"></i> Add Data Manager
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                </div>
 
+                <div class="accordion-content">
+                    <#include "security.ftl" />
+                </div>
+                </@sec.authorize>
+
+
+                <#assign viewHistorySecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_HISTORY') or hasPermission('${vault.groupID}', 'GROUP', 'VIEW_SCHOOL_VAULT_HISTORY')">
+                <@sec.authorize access=viewHistorySecurityExpression>
                 <h4 class="accordion-toggle">
                     ‹› &nbsp;Vault History
                 </h4>
@@ -380,6 +337,7 @@
                         </textarea>
                     </div>
                 </div>
+                </@sec.authorize>
             </div>
         </div>
     </div>

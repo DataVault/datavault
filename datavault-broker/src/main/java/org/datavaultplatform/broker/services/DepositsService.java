@@ -26,8 +26,8 @@ public class DepositsService {
     private DepositChunkDAO depositChunkDAO;
     private AuditChunkStatusDAO auditChunkStatusDAO;
     
-    public List<Deposit> getDeposits(String sort) {
-        return depositDAO.list(sort);
+    public List<Deposit> getDeposits(String sort, String userId) {
+        return depositDAO.list(sort, userId);
     }
     
     public void addDeposit(Vault vault,
@@ -63,19 +63,19 @@ public class DepositsService {
     public void setDepositChunkDAO(DepositChunkDAO depositChunkDAO) { this.depositChunkDAO = depositChunkDAO; }
     public void setAuditChunkStatusDAO(AuditChunkStatusDAO auditChunkStatusDAO) { this.auditChunkStatusDAO = auditChunkStatusDAO; }
 
-    public int count() { return depositDAO.count(); }
+    public int count(String userId) { return depositDAO.count(userId); }
 
-    public int queueCount() { return depositDAO.queueCount(); }
+    public int queueCount(String userId) { return depositDAO.queueCount(userId); }
 
-    public int inProgressCount() { return depositDAO.inProgressCount(); }
+    public int inProgressCount(String userId) { return depositDAO.inProgressCount(userId); }
 
     public List<Deposit> inProgress() { return depositDAO.inProgress(); }
 
     public List<Deposit> completed() { return depositDAO.completed(); }
 
-    public List<Deposit> search(String query, String sort) { return this.depositDAO.search(query, sort); }
+    public List<Deposit> search(String query, String sort, String userId) { return this.depositDAO.search(query, sort, userId); }
 
-    public Long size() { return depositDAO.size(); }
+    public Long size(String userId) { return depositDAO.size(userId); }
     
     // Get the specified Deposit object and validate it against the current User and Vault
     public Deposit getUserDeposit(User user, String depositID) throws Exception {
@@ -92,22 +92,6 @@ public class DepositsService {
             throw new Exception("Vault does not exist");
         }
         
-        Boolean userVault = false;
-        if (vault.getUser().equals(user)) {
-            userVault = true;
-        }
-        
-        Boolean groupOwner = false;
-        if (vault.getGroup().getOwners().contains(user)) {
-            groupOwner = true;
-        }
-        
-        Boolean adminUser = user.isAdmin();
-        
-        if (!userVault && !groupOwner && !adminUser) {
-            throw new Exception("Access denied");
-        }
-
         return deposit;
     }
     

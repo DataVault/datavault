@@ -74,21 +74,18 @@
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
                                     class="fa fa-times" aria-hidden="true"></i></button>
-                        <h4 class="modal-title" id="add-new-user-title">Remove User From IS Admin Role</h4>
+                        <h4 class="modal-title" id="add-new-user-title">Delete User From IS Admin Role</h4>
                     </div>
                     <div class="modal-body">
                         <div id="delete-error" class="alert alert-danger hidden"></div>
-                        <div class="modal-body">
-                            <p>Do you want to remove <label id="delete-user-name"></label> from the <label
-                                        id="delete-role-name"></label> role?</p>
-                        </div>
+                        <p>Do you want to delete <label id="delete-user-name"></label> from the <label id="delete-role-name"></label> role?</p>
                     </div>
                     <input type="hidden" id="delete-isadmin-user-id" name="deop-id"/>
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
-                        <button type="submit" class="btn btn-danger btn-delete"><i class="fa fa-trash"></i> Remove</button>
+                        <button type="submit" class="btn btn-danger btn-delete"><i class="fa fa-trash"></i> Delete</button>
                     </div>
 
                 </form>
@@ -124,12 +121,12 @@
                                         <a href="#" class="btn btn-default btn-delete" data-toggle="modal"
                                            data-target="#delete-dialog" data-role-name="${role.name}" data-user-id="${user.getID()}"
                                            data-user-name="${user.getFirstname()} ${user.getLastname()}" role="button"
-                                           title="Remove user ${user.getFirstname()} ${user.getLastname()} from the ${role.name} role.">
+                                           title="Delete role for ${user.getFirstname()} ${user.getLastname()}.">
                                             <i class="fa fa-trash"></i>
                                         </a>
                                     <#else>
                                         <a href="#" class="btn btn-default btn-delete" disabled="disabled" role="button"
-                                           title="This user is the last IS Admin and cannot be removed.">
+                                           title="This user is the last ${role.name} and cannot be removed.">
                                             <i class="fa fa-trash"></i>
                                         </a>
                                     </#if>
@@ -160,11 +157,14 @@
                 method: 'POST',
                 url: '${springMacroRequestContext.getContextPath()}/admin/roles/deop',
                 data: formData,
-                success: function () {
+                success: function (data) {
+                    if (ErrorHandler.isForceLogoutResponse(data)) {
+                        return ErrorHandler.handleForceLogoutResponse();
+                    }
                     window.location.href = '${springMacroRequestContext.getContextPath()}/admin/roles/isadmin';
                 },
                 error: function (xhr) {
-                    $('#delete-error').removeClass('hidden').text(xhr.responseText);
+                    ErrorHandler.handleAjaxError('#delete-error', xhr);
                 }
             });
         });
@@ -181,15 +181,17 @@
                 method: 'POST',
                 url: '${springMacroRequestContext.getContextPath()}/admin/roles/op/',
                 data: formData,
-                success: function () {
+                success: function (data) {
+                    if (ErrorHandler.isForceLogoutResponse(data)) {
+                        return ErrorHandler.handleForceLogoutResponse();
+                    }
                     window.location.href = '${springMacroRequestContext.getContextPath()}/admin/roles/isadmin';
                 },
                 error: function (xhr) {
-                    var $error = $('#create-error').removeClass('hidden').text(xhr.responseText);
+                    ErrorHandler.handleAjaxError('#create-error', xhr);
                 }
             });
         });
-
 
         $("#add-superadmin-uun").autocomplete({
             autoFocus: true,
@@ -203,6 +205,9 @@
                     dataType: "json",
                     success: function (data) {
                         response(data);
+                    },
+                    error: function(xhr) {
+                        ErrorHandler.handleAjaxError('#create-error', xhr);
                     }
                 });
             },

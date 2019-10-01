@@ -3,9 +3,9 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import javax.persistence.*;
 import java.util.HashMap;
 import java.util.List;
-import javax.persistence.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -31,10 +31,6 @@ public class User {
     // Email
     @Column(name = "email", columnDefinition = "TEXT")
     private String email;
-
-    // Is this user an administrator?
-    @Column(name = "admin", nullable = false)
-    private Boolean admin;
 
     // Additional properties associated with the user
     @Lob
@@ -91,16 +87,6 @@ public class User {
         this.email = email;
     }
 
-    public Boolean isAdmin() {
-        return admin;
-    }
-
-    public void setAdmin(Boolean admin) {
-        this.admin = admin;
-    }
-
-
-
     public HashMap<String, String> getProperties() {
         return properties;
     }
@@ -127,12 +113,8 @@ public class User {
         }
         
         final User user = (User)other;
-        
-        if (!user.getID().equals(getID())) {
-            return false;
-        }
-        
-        return true;
+
+        return user.getID().equals(getID());
     }
     
     @Override

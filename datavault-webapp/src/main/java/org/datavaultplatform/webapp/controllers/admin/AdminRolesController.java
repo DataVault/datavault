@@ -6,6 +6,7 @@ import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
 import org.datavaultplatform.webapp.model.RoleViewModel;
+import org.datavaultplatform.webapp.services.ForceLogoutService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Controller
@@ -31,8 +33,14 @@ public class AdminRolesController {
 
     private RestService restService;
 
+    private ForceLogoutService forceLogoutService;
+
     public void setRestService(RestService restService) {
         this.restService = restService;
+    }
+
+    public void setForceLogoutService(ForceLogoutService forceLogoutService) {
+        this.forceLogoutService = forceLogoutService;
     }
 
     @GetMapping("/admin/roles")
@@ -53,7 +61,7 @@ public class AdminRolesController {
         RoleModel superAdminRole = restService.getIsAdmin();
         List<User> superAdminUsers = restService.getRoleAssignmentsForRole(superAdminRole.getId())
                 .stream()
-                .map(RoleAssignment::getUser)
+                .map(roleAssignment -> restService.getUser(roleAssignment.getUserId()))
                 .collect(Collectors.toList());
 
         ModelAndView mav = new ModelAndView();
@@ -84,6 +92,13 @@ public class AdminRolesController {
                                          String type,
                                          String description,
                                          String[] permissions) {
+
+        List<RoleModel> roles = restService.getEditableRoles();
+
+        if (roles.stream().anyMatch(role -> name.equalsIgnoreCase(role.getName()))) {
+            logger.debug("Cannot create a role with the same name as an existing role");
+            return validationFailed("A role already exists with this name");
+        }
 
         List<PermissionModel> selectedPermissions = getSelectedPermissions(type, permissions);
 
@@ -150,6 +165,15 @@ public class AdminRolesController {
                 .orElseThrow(() -> new EntityNotFoundException(RoleModel.class, String.valueOf(id)));
 
         List<PermissionModel> selectedPermissions = getSelectedPermissions(type, permissions);
+        List<RoleModel> roles = restService.getEditableRoles();
+
+        Predicate<RoleModel> rolePredicate = otherRole -> name.equalsIgnoreCase(otherRole.getName())
+                && otherRole.getId() != id;
+
+        if (roles.stream().anyMatch(rolePredicate)) {
+            logger.debug("Cannot create a role with the same name as an existing role");
+            return validationFailed("A role already exists with this name");
+        }
 
         if (!role.getType().isCustomCreatable()) {
             logger.debug("Could not update role - non-editable role type");
@@ -176,6 +200,7 @@ public class AdminRolesController {
             return validationFailed("Cannot change role type with users assigned to the role.");
         }
 
+        boolean hasReducedPermissions = RoleUtils.hasReducedPermissions(role.getPermissions(), selectedPermissions);
         role.setPermissions(selectedPermissions);
         role.setName(name);
         role.setDescription(description);
@@ -183,6 +208,9 @@ public class AdminRolesController {
 
         logger.info("Attempting to update role with ID={}", id);
         restService.updateRole(role);
+        if (hasReducedPermissions) {
+            forceLogoutService.logoutRole(role.getId());
+        }
         return ResponseEntity.ok().build();
     }
 
@@ -211,7 +239,7 @@ public class AdminRolesController {
         logger.debug("Preparing to add user ID={} to IS ADMIN role", userId);
         if (StringUtils.isEmpty(userId)) {
             logger.debug("Could not assign user to IS Admin role - no user ID provided");
-            return validationFailed("Please choose a user.");
+            return validationFailed("Please specify a user.");
         }
 
         RoleModel superAdminRole = restService.getIsAdmin();
@@ -234,8 +262,10 @@ public class AdminRolesController {
 
         RoleAssignment newRoleAssignment = new RoleAssignment();
         newRoleAssignment.setRole(superAdminRole);
-        newRoleAssignment.setUser(user);
+        newRoleAssignment.setUserId(userId);
         restService.createRoleAssignment(newRoleAssignment);
+
+        forceLogoutService.logoutUser(userId);
 
         return ResponseEntity.ok().build();
     }
@@ -265,11 +295,7 @@ public class AdminRolesController {
         logger.info("Attempting to remove user ID={} from IS Admin role with ID={}", userId, superAdminRole.getId());
         restService.deleteRoleAssignment(roleAssignment.get().getId());
 
-        if (principal.getName().equals(userId)) {
-            // Must logout IS Admin if they just deopped themselves
-            request.logout();
-            // They will be redirected to login by the JS when we return OK.
-        }
+        forceLogoutService.logoutUser(userId);
 
         return ResponseEntity.ok().build();
     }

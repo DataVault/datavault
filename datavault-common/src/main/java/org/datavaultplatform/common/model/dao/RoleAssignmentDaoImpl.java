@@ -1,13 +1,18 @@
 package org.datavaultplatform.common.model.dao;
 
 import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.util.RoleUtils;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
 
 import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
 
@@ -28,12 +33,12 @@ public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
 
             Criteria criteria = session.createCriteria(RoleAssignment.class);
             criteria.add(Restrictions.eq("role", roleAssignment.getRole()));
-            criteria.add(Restrictions.eq("user", roleAssignment.getUser()));
-            if (roleAssignment.getSchool() != null) {
-                criteria.add(Restrictions.eq("school", roleAssignment.getSchool()));
+            criteria.add(Restrictions.eq("userId", roleAssignment.getUserId()));
+            if (roleAssignment.getSchoolId() != null) {
+                criteria.add(Restrictions.eq("schoolId", roleAssignment.getSchoolId()));
             }
-            if (roleAssignment.getVault() != null) {
-                criteria.add(Restrictions.eq("vault", roleAssignment.getVault()));
+            if (roleAssignment.getVaultId() != null) {
+                criteria.add(Restrictions.eq("vaultId", roleAssignment.getVaultId()));
             }
             return criteria.uniqueResult() != null;
         } finally {
@@ -73,6 +78,27 @@ public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
     }
 
     @Override
+    public Set<Permission> findUserPermissions(String userId) {
+        Session session = null;
+
+        try {
+            session = sessionFactory.openSession();
+            Query query = session.createQuery("SELECT DISTINCT role.permissions \n" +
+                    "FROM org.datavaultplatform.common.model.RoleAssignment ra\n" +
+                    "INNER JOIN ra.role as role\n" +
+                    "WHERE ra.userId = :userId");
+            query.setParameter("userId", userId);
+
+            return ((List<PermissionModel>) query.list())
+                    .stream()
+                    .map(PermissionModel::getPermission)
+                    .collect(Collectors.toSet());
+        } finally {
+            if (session != null) session.close();
+        }
+    }
+
+    @Override
     public List<RoleAssignment> findAll() {
         Session session = null;
         try {
@@ -93,8 +119,7 @@ public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
         try {
             session = sessionFactory.openSession();
 
-            Group school = findObjectById(session, Group.class, "id", schoolId);
-            List<RoleAssignment> schoolAssignments = findBy(session, "school", school);
+            List<RoleAssignment> schoolAssignments = findBy(session, "schoolId", schoolId);
             return schoolAssignments;
         } finally {
             if (session != null) session.close();
@@ -120,9 +145,8 @@ public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
         try {
             session = sessionFactory.openSession();
 
-            Vault vault = findObjectById(session, Vault.class, "id", vaultId);
-            List<RoleAssignment> schoolAssignments = findBy(session, "vault", vault);
-            return schoolAssignments;
+            List<RoleAssignment> vaultAssignments = findBy(session, "vaultId", vaultId);
+            return vaultAssignments;
         } finally {
             if (session != null) session.close();
         }
@@ -135,8 +159,7 @@ public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
         try {
             session = sessionFactory.openSession();
 
-            User user = findObjectById(session, User.class, "id", userId);
-            List<RoleAssignment> schoolAssignments = findBy(session, "user", user);
+            List<RoleAssignment> schoolAssignments = findBy(session, "userId", userId);
             return schoolAssignments;
         } finally {
             if (session != null) session.close();
@@ -157,6 +180,43 @@ public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
             if (session != null) session.close();
         }
 
+    }
+
+    @Override
+    public boolean hasPermission(String userId, Permission permission) {
+        Session session = null;
+        try {
+            session = sessionFactory.openSession();
+            Criteria criteria = session.createCriteria(RoleAssignment.class, "assignment");
+            criteria.createAlias("assignment.role", "role");
+            criteria.createAlias("role.permissions", "permission");
+            criteria.add(Restrictions.eq("assignment.userId", userId));
+            criteria.add(Restrictions.eq("permission.id", permission.getId()));
+            return criteria.list().size() > 0;
+
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+
+    @Override
+    public boolean isAdminUser(String userId) {
+        Session session = null;
+        try {
+            session = sessionFactory.openSession();
+            Criteria criteria = session.createCriteria(RoleAssignment.class, "assignment");
+            criteria.createAlias("assignment.role", "role");
+            criteria.add(Restrictions.eq("assignment.userId", userId));
+            criteria.add(Restrictions.eq("role.name", RoleUtils.IS_ADMIN_ROLE_NAME));
+            return criteria.list().size() > 0;
+
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
     }
 
     @Override
