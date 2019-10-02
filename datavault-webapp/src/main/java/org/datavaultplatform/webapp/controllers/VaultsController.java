@@ -19,6 +19,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -167,9 +168,38 @@ public class VaultsController {
                 .filter(RoleUtils::isDataOwner)
                 .findFirst()
                 .ifPresent(roleAssignment -> model.addAttribute("dataOwner", roleAssignment));
+        //get users highest vault role status
+        List<RoleAssignment> roleAssignmentsForUser = restService.getRoleAssignmentsForUser(principal.getName());
+
+        logger.info("About to output user roles");
+
+        // find out the highest status vault role the user has for this vault
+        // lower is highest!
+        String highestStatus = null;
+        for (RoleAssignment ra : roleAssignmentsForUser) {
+            RoleModel rm = ra.getRole();
+            if (rm.getType().equals(RoleType.VAULT)) {
+                String roleStatus = rm.getStatus();
+                logger.info("Role name " + rm.getName() + "Role status " + roleStatus);
+                if (highestStatus == null) {
+                    highestStatus = roleStatus;
+                } else if (Integer.parseInt(highestStatus) > Integer.parseInt(roleStatus)) {
+                    highestStatus = roleStatus;
+                }
+            }
+        }
+
+        // iterate over the roles and remove any with a higher or equal status
+        List<RoleModel> validRoles = new ArrayList<>();
+        logger.info("Highest status is '" + highestStatus + "'");
+        for (RoleModel role : restService.getVaultRoles()) {
+            if (highestStatus != null && Integer.parseInt(highestStatus) < Integer.parseInt(role.getStatus())) {
+                validRoles.add(role);
+            }
+        }
 
         model.addAttribute("vault", vault);
-        model.addAttribute("roles", restService.getVaultRoles());
+        model.addAttribute("roles", validRoles);
         model.addAttribute("roleAssignments", vaultUsers);
         model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
         model.addAttribute(restService.getGroup(vault.getGroupID()));
