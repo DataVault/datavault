@@ -176,6 +176,7 @@ public class VaultsController {
         // find out the highest status vault role the user has for this vault
         // lower is highest!
         String highestStatus = null;
+        boolean admin = false;
         for (RoleAssignment ra : roleAssignmentsForUser) {
             RoleModel rm = ra.getRole();
             if (rm.getType().equals(RoleType.VAULT)) {
@@ -187,13 +188,16 @@ public class VaultsController {
                     highestStatus = roleStatus;
                 }
             }
+            if (rm.getType().equals(RoleType.ADMIN)) {
+                admin = true;
+            }
         }
 
         // iterate over the roles and remove any with a higher or equal status
         List<RoleModel> validRoles = new ArrayList<>();
         logger.info("Highest status is '" + highestStatus + "'");
         for (RoleModel role : restService.getVaultRoles()) {
-            if (highestStatus != null && Integer.parseInt(highestStatus) < Integer.parseInt(role.getStatus())) {
+            if (admin || (highestStatus != null && Integer.parseInt(highestStatus) < Integer.parseInt(role.getStatus()))) {
                 validRoles.add(role);
             }
         }

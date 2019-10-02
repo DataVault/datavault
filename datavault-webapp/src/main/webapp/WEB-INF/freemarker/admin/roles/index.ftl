@@ -386,7 +386,7 @@
             $("#edit_roleid").val(0);
             $("#edit_name").val("");
             $("#edit_description").val("");
-            $("#edit_status").val(null);
+            $("#edit_status").val("");
 
             var type = "VAULT";
             $("#edit_type").val(type);
