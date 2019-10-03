@@ -6,11 +6,7 @@ import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.TransferVault;
 import org.datavaultplatform.common.request.ValidateUser;
-import org.datavaultplatform.common.response.BillingInformation;
-import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.EventInfo;
-import org.datavaultplatform.common.response.VaultInfo;
-import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.common.response.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -660,4 +656,13 @@ public class RestService {
         delete(brokerURL + "/permissions/roleAssignment/" + roleAssignmentId, Void.class);
     }
 
+    public String auditDeposits() {
+        HttpEntity<?> response =  get(brokerURL + "/admin/deposits/audit", String.class);
+        return (String)response.getBody();
+    }
+
+    public AuditInfo[] getAuditsListingAll() {
+        HttpEntity<?> response = get(brokerURL + "/admin/audits", AuditInfo[].class);
+        return (AuditInfo[])response.getBody();
+    }
 }

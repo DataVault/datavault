@@ -7,26 +7,10 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.datavaultplatform.broker.queue.Sender;
-import org.datavaultplatform.broker.services.ArchiveStoreService;
-import org.datavaultplatform.broker.services.DepositsService;
-import org.datavaultplatform.broker.services.EventService;
-import org.datavaultplatform.broker.services.ExternalMetadataService;
-import org.datavaultplatform.broker.services.JobsService;
-import org.datavaultplatform.broker.services.RetrievesService;
-import org.datavaultplatform.broker.services.UsersService;
-import org.datavaultplatform.broker.services.VaultsService;
+import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.model.Archive;
-import org.datavaultplatform.common.model.ArchiveStore;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.Job;
-import org.datavaultplatform.common.model.Retrieve;
-import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.EventInfo;
-import org.datavaultplatform.common.response.VaultInfo;
-import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.task.Task;
 import org.jsondoc.core.annotation.Api;
 import org.jsondoc.core.annotation.ApiHeader;
@@ -48,6 +32,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * Created by Robin Taylor on 08/03/2016.
  */
@@ -67,6 +53,7 @@ public class AdminController {
     private ArchiveStoreService archiveStoreService;
     private JobsService jobsService;
     private ExternalMetadataService externalMetadataService;
+    private AuditsService auditsService;
     private Sender sender;
     private String optionsDir;
     private String tempDir;
@@ -117,6 +104,10 @@ public class AdminController {
 
     public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
+    }
+
+    public void setAuditsService(AuditsService auditsService) {
+        this.auditsService = auditsService;
     }
     
     public void setArchiveStoreService(ArchiveStoreService archiveStoreService) {
@@ -217,6 +208,41 @@ public class AdminController {
         }
         return events;
     }
+
+    @RequestMapping(value = "/admin/audits", method = RequestMethod.GET)
+    public List<AuditInfo> getAuditsAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+	    List<AuditInfo> audits = new ArrayList<>();
+
+	    for (Audit audit : auditsService.getAudits()){
+            AuditInfo auditInfo = audit.convertToResponse();
+
+            List<AuditChunkStatus> auditChunks = auditsService.getAuditChunkStatus(audit);
+            ArrayList<AuditChunkStatusInfo> auditChunksInfo = new ArrayList<AuditChunkStatusInfo>();
+            for (AuditChunkStatus auditChunk : auditChunks){
+                auditChunksInfo.add(auditChunk.convertToResponse());
+            }
+            auditInfo.setAuditChunks(auditChunksInfo);
+
+            audits.add(auditInfo);
+        }
+
+	    return audits;
+    }
+
+    @RequestMapping(value = "/admin/deposits/audit", method = RequestMethod.GET)
+    public String runDepositAudit(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                HttpServletRequest request) throws Exception{
+        // Make sure it's admin or localhost
+        String remoteAdrr = request.getRemoteAddr();
+        System.out.println("remoteAdrr: "+remoteAdrr);
+
+        // Get oldest Audit
+        String query = "";
+        String sort = "";
+        List<DepositChunk> chunks = depositsService.getChunksForAudit();
+
+        return "Success";
+    }
     
     @RequestMapping(value = "/admin/deposits/{depositID}", method = RequestMethod.DELETE)
     public ResponseEntity<Object> deleteDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
@@ -286,7 +312,7 @@ public class AdminController {
 
     }
     private List<ArchiveStore> addArchiveSpecificOptions(List<ArchiveStore> archiveStores) {
-    	if (archiveStores != null && ! archiveStores.isEmpty()) { 
+    	if (archiveStores != null && ! archiveStores.isEmpty()) {
 	    	for (ArchiveStore archiveStore : archiveStores) {
 		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.TivoliStorageManager")) {
 		        	HashMap<String, String> asProps = archiveStore.getProperties();
@@ -298,19 +324,19 @@ public class AdminController {
 		        	}
 		        	archiveStore.setProperties(asProps);
 		        }
-		        
+
 		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.S3Cloud")) {
 		        	HashMap<String, String> asProps = archiveStore.getProperties();
-		        	if (this.bucketName != null && ! this.bucketName.equals("")) {  
+		        	if (this.bucketName != null && ! this.bucketName.equals("")) {
 		        		asProps.put("s3.bucketName", this.bucketName);
 		        	}
-		        	if (this.region != null && ! this.region.equals("")) {  
+		        	if (this.region != null && ! this.region.equals("")) {
 		        		asProps.put("s3.region", this.region);
 		        	}
-		        	if (this.awsAccessKey != null && ! this.awsAccessKey.equals("")) {  
+		        	if (this.awsAccessKey != null && ! this.awsAccessKey.equals("")) {
 		        		asProps.put("s3.awsAccessKey", this.awsAccessKey);
 		        	}
-		        	if (this.awsSecretKey != null && ! this.awsSecretKey.equals("")) {  
+		        	if (this.awsSecretKey != null && ! this.awsSecretKey.equals("")) {
 		        		asProps.put("s3.awsSecretKey", this.awsSecretKey);
 		        	}
 
@@ -321,7 +347,7 @@ public class AdminController {
 		        }
 	        }
     	}
-    	
+
     	return archiveStores;
     }
 
@@ -331,5 +357,5 @@ public class AdminController {
 
 	public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
 		this.externalMetadataService = externalMetadataService;
-	}    
+	}
 }

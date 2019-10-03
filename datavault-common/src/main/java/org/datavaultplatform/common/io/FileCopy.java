@@ -229,8 +229,10 @@ public class FileCopy {
                 count = size - pos > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : size - pos;
                 long copied = output.transferFrom(input, pos, count);
                 pos += copied;
-                progress.byteCount += copied;
-                progress.timestamp = System.currentTimeMillis();
+                if(progress != null) {
+                    progress.byteCount += copied;
+                    progress.timestamp = System.currentTimeMillis();
+                }
             }
         } finally {
             IOUtils.closeQuietly(output);
@@ -246,8 +248,10 @@ public class FileCopy {
         if (preserveFileDate) {
             destFile.setLastModified(srcFile.lastModified());
         }
-        
-        progress.fileCount += 1;
+
+        if(progress != null) {
+            progress.fileCount += 1;
+        }
     }
 
     //-----------------------------------------------------------------------

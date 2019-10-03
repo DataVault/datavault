@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +54,7 @@ public class DepositDAOImpl implements DepositDAO {
             }
         }
     }
- 
+
     @SuppressWarnings("unchecked")
     @Override
     public List<Deposit> list(String sort, String userId) {
@@ -201,5 +202,20 @@ public class DepositDAOImpl implements DepositDAO {
                         criteria.createAlias("deposit.vault", "vault")
                                 .createAlias("vault.group", "group"))
                 .setSchoolIds(DaoUtils.getPermittedSchoolIds(session, userId, permission));
+    }
+
+    @Override
+    public List<Deposit> getDepositsWaitingForAudit(Date olderThanDate) {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Deposit.class);
+
+        criteria.add(Restrictions.le("creationTime", olderThanDate));
+        criteria.add(Restrictions.le("status", Deposit.Status.COMPLETE));
+
+        criteria.addOrder(Order.asc("creationTime"));
+
+        List<Deposit> deposits = criteria.list();
+        session.close();
+        return deposits;
     }
 }
