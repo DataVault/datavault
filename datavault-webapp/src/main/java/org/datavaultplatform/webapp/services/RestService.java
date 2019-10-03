@@ -1,22 +1,10 @@
 package org.datavaultplatform.webapp.services;
 
-import org.datavaultplatform.common.model.ArchiveStore;
-import org.datavaultplatform.common.model.DataManager;
-import org.datavaultplatform.common.model.Dataset;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.FileFixity;
-import org.datavaultplatform.common.model.FileInfo;
-import org.datavaultplatform.common.model.FileStore;
-import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.Job;
-import org.datavaultplatform.common.model.RetentionPolicy;
-import org.datavaultplatform.common.model.Retrieve;
-import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.model.dao.BillingDAO;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateClientEvent;
 import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.request.CreateVault;
+import org.datavaultplatform.common.request.TransferVault;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.DepositInfo;
@@ -30,6 +18,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * User: Robin Taylor
@@ -51,7 +43,7 @@ public class RestService {
         this.brokerApiKey = brokerApiKey;
     }
     
-    private HttpEntity<?> exchange(String url, Class clazz, HttpMethod method, Object payload) {
+    private <T> HttpEntity<T> exchange(String url, Class<T> clazz, HttpMethod method, Object payload) {
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -86,15 +78,15 @@ public class RestService {
         
     }
     
-    public HttpEntity<?> get(String url, Class clazz) {
+    public <T> HttpEntity<T> get(String url, Class<T> clazz) {
         return exchange(url, clazz, HttpMethod.GET, null);
     }
 
-    public HttpEntity<?> put(String url, Class clazz, Object payload) {
+    public <T> HttpEntity<T> put(String url, Class<T> clazz, Object payload) {
         return exchange(url, clazz, HttpMethod.PUT, payload);
     }
     
-    public HttpEntity<?> post(String url, Class clazz, Object payload) {
+    public <T> HttpEntity<T> post(String url, Class<T> clazz, Object payload) {
         return exchange(url, clazz, HttpMethod.POST, payload);
     }
     
@@ -190,16 +182,11 @@ public class RestService {
     	HttpEntity<?> response = get(brokerURL + "/admin/billing?sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
         return (VaultsData)response.getBody();
 	}
-    
+
     public BillingInformation getVaultBillingInfo(String vaultId) {
     	HttpEntity<?> response = get(brokerURL + "/admin/billing/" + vaultId , BillingInformation.class);
         return (BillingInformation)response.getBody();
 	}
-
-    public VaultInfo[] getVaultsListingAll() {
-        HttpEntity<?> response = get(brokerURL + "/admin/vaults", VaultInfo[].class);
-        return (VaultInfo[])response.getBody();
-    }
 
     public VaultsData getVaultsListingAll(String sort, String order, String offset, String maxResult) {
         HttpEntity<?> response = get(brokerURL + "/admin/vaults?sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
@@ -210,12 +197,12 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query, VaultInfo[].class);
         return (VaultInfo[])response.getBody();
     }
-  
+
     public VaultsData searchVaultsForBilling(String query, String sort, String order, String offset, String maxResult) {
         HttpEntity<?> response = get(brokerURL + "/admin/billing/search?query=" + query + "&sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
         return (VaultsData)response.getBody();
     }
-    
+
     public VaultsData searchVaults(String query, String sort, String order, String offset, String maxResult) {
         HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query + "&sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
         return (VaultsData)response.getBody();
@@ -286,6 +273,11 @@ public class RestService {
         return (Retrieve[])response.getBody();
     }
 
+    public Vault getVaultRecord(String id) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + id + "/record", Vault.class);
+        return (Vault)response.getBody();
+    }
+
     public VaultInfo getVault(String id) {        
         HttpEntity<?> response = get(brokerURL + "/vaults/" + id, VaultInfo.class);
         return (VaultInfo)response.getBody();
@@ -294,14 +286,6 @@ public class RestService {
     public Vault checkVaultRetentionPolicy(String vaultId) {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/checkretentionpolicy", Vault.class);
         return (Vault)response.getBody();
-    }
-
-    public int checkAllVaultRetentionPolicies() {
-        VaultInfo[] vaults = getVaultsListingAll();
-        for (VaultInfo vault : vaults) {
-            get(brokerURL + "/vaults/" + vault.getID() + "/checkretentionpolicy", Vault.class);
-        }
-        return vaults.length;
     }
 
     public int getRetentionPolicyStatusCount(int status) {
@@ -380,7 +364,7 @@ public class RestService {
     }
 
     public User[] getUsers() {
-        HttpEntity<?> response = get(brokerURL + "/admin/users", User[].class);
+        HttpEntity<?> response = get(brokerURL + "/users", User[].class);
         return (User[])response.getBody();
     }
 
@@ -401,6 +385,11 @@ public class RestService {
 
     public Group[] getGroups() {
         HttpEntity<?> response = get(brokerURL + "/groups", Group[].class);
+        return (Group[])response.getBody();
+    }
+
+    public Group[] getGroupsByScopedPermissions() {
+        HttpEntity<?> response = get(brokerURL + "/groups/byScopedPermissions", Group[].class);
         return (Group[])response.getBody();
     }
 
@@ -479,6 +468,10 @@ public class RestService {
     public VaultInfo addVault(CreateVault createVault) {
         HttpEntity<?> response = post(brokerURL + "/vaults/", VaultInfo.class, createVault);
         return (VaultInfo)response.getBody();
+    }
+
+    public void transferVault(String vaultId, TransferVault transfer) {
+        post(brokerURL + "/vaults/" + vaultId + "/transfer", VaultInfo.class, transfer);
     }
 
     public DepositInfo addDeposit(CreateDeposit createDeposit) {
@@ -585,10 +578,86 @@ public class RestService {
     public void deleteDeposit(String depositId) {
         delete(brokerURL + "/admin/deposits/" + depositId, String.class);
     }
-	
-	 public BillingInformation updateBillingInfo(String vaultId,BillingInformation billingInfo) {
-	    	HttpEntity<?> response = post(brokerURL + "/admin/billing/" + vaultId+ "/updateBilling" , BillingInformation.class,billingInfo);
-	        return (BillingInformation)response.getBody();
-		}
+
+    public BillingInformation updateBillingInfo(String vaultId,BillingInformation billingInfo) {
+        HttpEntity<?> response = post(brokerURL + "/admin/billing/" + vaultId+ "/updateBilling" , BillingInformation.class,billingInfo);
+	    return (BillingInformation)response.getBody();
+    }
+
+    public RoleModel createRole(RoleModel role) {
+        return post(brokerURL + "/permissions/role", RoleModel.class, role).getBody();
+    }
+
+    public RoleAssignment createRoleAssignment(RoleAssignment roleAssignment) {
+        return post(brokerURL + "/permissions/roleAssignment", RoleAssignment.class, roleAssignment).getBody();
+    }
+
+    public List<PermissionModel> getSchoolPermissions() {
+        return Arrays.asList(get(brokerURL + "/permissions/school", PermissionModel[].class).getBody());
+    }
+
+    public List<PermissionModel> getVaultPermissions() {
+        return Arrays.asList(get(brokerURL + "/permissions/vault", PermissionModel[].class).getBody());
+    }
+
+    public Optional<RoleModel> getRole(long id) {
+        return Optional.ofNullable(get(brokerURL + "/permissions/role/" + id, RoleModel.class).getBody());
+    }
+
+    public RoleModel getIsAdmin() {
+        return get(brokerURL + "/permissions/role/isAdmin", RoleModel.class).getBody();
+    }
+
+    public List<RoleModel> getEditableRoles() {
+        return Arrays.asList(get(brokerURL + "/permissions/roles", RoleModel[].class).getBody());
+    }
+
+    public List<RoleModel> getViewableRoles() {
+        return Arrays.asList(get(brokerURL + "/permissions/roles/readOnly", RoleModel[].class).getBody());
+    }
+
+    public List<RoleModel> getSchoolRoles() {
+        return Arrays.asList(get(brokerURL + "/permissions/roles/school", RoleModel[].class).getBody());
+    }
+
+    public List<RoleModel> getVaultRoles() {
+        return Arrays.asList(get(brokerURL + "/permissions/roles/vault", RoleModel[].class).getBody());
+    }
+
+    public Optional<RoleAssignment> getRoleAssignment(Long id) {
+        return Optional.ofNullable(get(brokerURL + "/permissions/roleAssignment/" + id, RoleAssignment.class).getBody());
+    }
+
+    public List<RoleAssignment> getRoleAssignmentsForSchool(String schoolId) {
+        return Arrays.asList(get(brokerURL + "/permissions/roleAssignments/school/" + schoolId, RoleAssignment[].class).getBody());
+    }
+
+    public List<RoleAssignment> getRoleAssignmentsForVault(String vaultId) {
+        return Arrays.asList(get(brokerURL + "/permissions/roleAssignments/vault/" + vaultId, RoleAssignment[].class).getBody());
+    }
+
+    public List<RoleAssignment> getRoleAssignmentsForUser(String userId) {
+        return Arrays.asList(get(brokerURL + "/permissions/roleAssignments/user/" + userId, RoleAssignment[].class).getBody());
+    }
+
+    public List<RoleAssignment> getRoleAssignmentsForRole(long roleId) {
+        return Arrays.asList(get(brokerURL + "/permissions/roleAssignments/role/" + roleId, RoleAssignment[].class).getBody());
+    }
+
+    public RoleModel updateRole(RoleModel role) {
+        return put(brokerURL + "/permissions/role", RoleModel.class, role).getBody();
+    }
+
+    public RoleAssignment updateRoleAssignment(RoleAssignment roleAssignment) {
+        return put(brokerURL + "/permissions/roleAssignment", RoleAssignment.class, roleAssignment).getBody();
+    }
+
+    public void deleteRole(Long roleId) {
+        delete(brokerURL + "/permissions/role/" + roleId, Void.class);
+    }
+
+    public void deleteRoleAssignment(Long roleAssignmentId) {
+        delete(brokerURL + "/permissions/roleAssignment/" + roleAssignmentId, Void.class);
+    }
 
 }

@@ -276,8 +276,8 @@ public class Vault {
 	public VaultInfo convertToResponse() {
         return new VaultInfo(
                 id,
-                user.getID(),
-                user.getFirstname()+" "+user.getLastname(),
+                user == null ? null : user.getID(),
+                user == null ? null : (user.getFirstname()+" "+user.getLastname()),
                 dataset.getID(),
                 dataset.getName(),
                 creationTime,
@@ -297,7 +297,7 @@ public class Vault {
 	public VaultInfo convertToResponseBilling() {		
         return new VaultInfo(
                 id,
-                user.getFirstname()+" "+user.getLastname(),                
+                user == null ? null : (user.getFirstname()+" "+user.getLastname()),
                 creationTime,
                 name,               
                 vaultSize,               

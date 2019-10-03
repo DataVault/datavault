@@ -1,8 +1,10 @@
 package org.datavaultplatform.common.model.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.util.DaoUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -93,9 +95,13 @@ public class VaultDAOImpl implements VaultDAO {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Vault> list(String sort, String order, String offset, String maxResult) {
+    public List<Vault> list(String userId, String sort, String order, String offset, String maxResult) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
+        SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
+        if (criteriaBuilder.hasNoAccess()) {
+            return new ArrayList<>();
+        }
+        Criteria criteria = criteriaBuilder.build();
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
         order(sort, order, criteria);
@@ -121,9 +127,13 @@ public class VaultDAOImpl implements VaultDAO {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Vault> search(String query, String sort, String order, String offset, String maxResult) {
+    public List<Vault> search(String userId, String query, String sort, String order, String offset, String maxResult) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
+        SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
+        if (criteriaBuilder.hasNoAccess()) {
+            return new ArrayList<>();
+        }
+        Criteria criteria = criteriaBuilder.build();
         criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
@@ -139,9 +149,14 @@ public class VaultDAOImpl implements VaultDAO {
     }
 
     @Override
-    public int count() {
+    public int count(String userId) {
         Session session = this.sessionFactory.openSession();
-        return (int)(long)(Long)session.createCriteria(Vault.class).setProjection(Projections.rowCount()).uniqueResult();
+        SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
+        if (criteriaBuilder.hasNoAccess()) {
+            return 0;
+        }
+        Criteria criteria = criteriaBuilder.build();
+        return (int) (long) (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
     }
 
     @Override
@@ -226,34 +241,52 @@ public class VaultDAOImpl implements VaultDAO {
     }
 
 	@Override
-	public Long getTotalNumberOfVaults() {
+	public Long getTotalNumberOfVaults(String userId) {
 		Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
+        SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
+        if (criteriaBuilder.hasNoAccess()) {
+            return 0L;
+        }
+        Criteria criteria = criteriaBuilder.build();
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         criteria.setProjection(Projections.rowCount());
-        Long totalNoOfRows = (Long) criteria.uniqueResult();
-
+        Long totalNumberOfVaults = (Long) criteria.uniqueResult();
         session.close();
-        return totalNoOfRows;
+        return totalNumberOfVaults;
 	}
+
 	/**
 	 * Retrieve Total NUmber of rows after applying the filter
 	 */
-	public Long getTotalNumberOfVaults(String query) {
+	@Override
+	public Long getTotalNumberOfVaults(String userId, String query) {
 		Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
+        SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
+        if (criteriaBuilder.hasNoAccess()) {
+            return 0L;
+        }
+        Criteria criteria = criteriaBuilder.build();
         criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         criteria.setProjection(Projections.rowCount());
-        Long totalNoOfRows = (Long) criteria.uniqueResult();
-
+        Long totalNumberOfVaults = (Long) criteria.uniqueResult();
         session.close();
-        return totalNoOfRows;
+        return totalNumberOfVaults;
 	}
-	
+
+	@Override
 	public List<Object[]> getAllProjectsSize() {
 		Session session = this.sessionFactory.openSession();
 		Query query = session.createQuery("select v.projectId, sum(v.vaultSize) from Vault v group by v.projectId");
 		return (List<Object[]>)query.list();
 	}
+
+    private SchoolPermissionCriteriaBuilder createVaultCriteriaBuilder(String userId, Session session, Permission permission) {
+	    return new SchoolPermissionCriteriaBuilder()
+                .setCriteriaType(Vault.class)
+                .setCriteriaName("vault")
+                .setSession(session)
+                .setTypeToSchoolAliasGenerator(criteria -> criteria.createAlias("vault.group", "group"))
+                .setSchoolIds(DaoUtils.getPermittedSchoolIds(session, userId, permission));
+    }
 }

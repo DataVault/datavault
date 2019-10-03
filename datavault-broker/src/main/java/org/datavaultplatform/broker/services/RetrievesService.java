@@ -11,8 +11,8 @@ public class RetrievesService {
 
     private RetrieveDAO retrieveDAO;
     
-    public List<Retrieve> getRetrieves() {
-        return retrieveDAO.list();
+    public List<Retrieve> getRetrieves(String userId) {
+        return retrieveDAO.list(userId);
     }
     
     public void addRetrieve(Retrieve retrieve, Deposit deposit, String retrievePath) {
@@ -40,11 +40,11 @@ public class RetrievesService {
         this.retrieveDAO = retrieveDAO;
     }
 
-    public int count() { return retrieveDAO.count(); }
+    public int count(String userId) { return retrieveDAO.count(userId); }
 
-    public int queueCount() { return retrieveDAO.queueCount(); }
+    public int queueCount(String userId) { return retrieveDAO.queueCount(userId); }
 
-    public int inProgressCount() { return retrieveDAO.inProgressCount(); }
+    public int inProgressCount(String userId) { return retrieveDAO.inProgressCount(userId); }
 
     public List<Retrieve>inProgress() { return retrieveDAO.inProgress(); }
 }
