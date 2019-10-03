@@ -1,15 +1,22 @@
 package org.datavaultplatform.webapp.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.MessageFormat;
+import java.util.stream.Collectors;
 
 /**
  * Created by stuartlewis on 02/10/15.
@@ -17,12 +24,20 @@ import java.text.MessageFormat;
 @Controller
 class ErrorController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ErrorController.class);
+
     @RequestMapping("error")
     public String customError(HttpServletRequest request, HttpServletResponse response, Model model) {
         // Retrieve some useful information from the request
         Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
         Throwable throwable = (Throwable) request.getAttribute("javax.servlet.error.exception");
         String exceptionMessage = getExceptionMessage(throwable, statusCode, response);
+
+        logger.error("An error occurred: {}", exceptionMessage, throwable);
+
+        if (statusCode == 403) {
+            return "auth/denied";
+        }
 
         String requestUri = (String) request.getAttribute("javax.servlet.error.request_uri");
         if (requestUri == null) {

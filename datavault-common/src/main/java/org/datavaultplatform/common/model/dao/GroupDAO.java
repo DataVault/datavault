@@ -14,7 +14,9 @@ public interface GroupDAO {
 
     public List<Group> list();
 
+    public List<Group> list(String userId);
+
     public Group findById(String Id);
 
-    public int count();
+    public int count(String userId);
 }

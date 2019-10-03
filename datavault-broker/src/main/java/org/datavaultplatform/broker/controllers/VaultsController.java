@@ -5,25 +5,24 @@ import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.vault.Create;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
+import org.datavaultplatform.common.request.TransferVault;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.DepositsData;
 import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.util.RoleUtils;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -32,22 +31,23 @@ public class VaultsController {
 
     private VaultsService vaultsService;
     private DepositsService depositsService;
-    private RetrievesService retrievesService;
     private ExternalMetadataService externalMetadataService;
     private RetentionPoliciesService retentionPoliciesService;
     private GroupsService groupsService;
     private UsersService usersService;
-    private FileStoreService fileStoreService;
-    private ArchiveStoreService archiveStoreService;
     private EventService eventService;
     private ClientsService clientsService;
     private DataManagersService dataManagersService;
-    
+    private RolesAndPermissionsService permissionsService;
     private String activeDir;
     private String archiveDir;
 
     private static final Logger logger = LoggerFactory.getLogger(VaultsController.class);
-    
+
+    public void setPermissionsService(RolesAndPermissionsService permissionsService) {
+        this.permissionsService = permissionsService;
+    }
+
     public void setVaultsService(VaultsService vaultsService) {
         this.vaultsService = vaultsService;
     }
@@ -56,10 +56,6 @@ public class VaultsController {
         this.depositsService = depositsService;
     }
 
-    public void setRetrievesService(RetrievesService retrievesService) {
-        this.retrievesService = retrievesService;
-    }
-    
     public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
         this.externalMetadataService = externalMetadataService;
     }
@@ -70,14 +66,6 @@ public class VaultsController {
     
     public void setGroupsService(GroupsService groupsService) {
         this.groupsService = groupsService;
-    }
-
-    public void setFileStoreService(FileStoreService fileStoreService) {
-        this.fileStoreService = fileStoreService;
-    }
-
-    public void setArchiveStoreService(ArchiveStoreService archiveStoreService) {
-        this.archiveStoreService = archiveStoreService;
     }
 
     public void setUsersService(UsersService usersService) {
@@ -119,12 +107,11 @@ public class VaultsController {
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
     public List<VaultInfo> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
 
-        List<VaultInfo> vaultResponses = new ArrayList<>();
-        User user = usersService.getUser(userID);
-        for (Vault vault : user.getVaults()) {
-            vaultResponses.add(vault.convertToResponse());
-        }
-        vaultResponses.sort(Comparator.comparing(VaultInfo::getCreationTime));
+        List<VaultInfo> vaultResponses = permissionsService.getRoleAssignmentsForUser(userID).stream()
+                .filter(roleAssignment -> RoleType.VAULT == roleAssignment.getRole().getType() || RoleUtils.isDataOwner(roleAssignment))
+                .map(roleAssignment -> vaultsService.getVault(roleAssignment.getVaultId()).convertToResponse())
+                .sorted(Comparator.comparing(VaultInfo::getCreationTime))
+                .collect(Collectors.toList());
         Collections.reverse(vaultResponses);
         return vaultResponses;
     }
@@ -143,6 +130,35 @@ public class VaultsController {
     }
 
 
+    @RequestMapping(value = "/vaults/{vaultId}/transfer", method = RequestMethod.POST)
+    public ResponseEntity transferVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                        @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
+                                        @PathVariable("vaultId") String vaultId,
+                                        @RequestBody TransferVault transfer) {
+
+        Vault vault = vaultsService.getVault(vaultId);
+        User currentOwner = vault.getUser();
+
+        if (transfer.isOrphaning()) {
+            vaultsService.orphanVault(vault);
+        } else {
+            vaultsService.transferVault(vault, usersService.getUser(transfer.getUserId()), transfer.getReason());
+        }
+
+        if (transfer.isChangingRoles()) {
+            long roleId = transfer.getRoleId();
+
+            RoleModel role = permissionsService.getRole(roleId);
+            RoleAssignment assignment = new RoleAssignment();
+            assignment.setRole(role);
+            assignment.setUserId(currentOwner.getID());
+            assignment.setVaultId(vaultId);
+
+            permissionsService.createRoleAssignment(assignment);
+        }
+
+        return ResponseEntity.ok().build();
+    }
 
     @RequestMapping(value = "/vaults/search", method = RequestMethod.GET)
     public VaultsData searchAllVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
@@ -153,12 +169,12 @@ public class VaultsController {
                                                   @RequestParam(value = "offset", required = false)
 											      @ApiQueryParam(name = "offset", description = "Vault row id ", defaultvalue = "0", required = false) String offset,
 											      @RequestParam(value = "maxResult", required = false)
-											      @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) throws Exception {
+                                          @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) {
 
         List<VaultInfo> vaultResponses = new ArrayList<>();
         Long recordsTotal = 0L;
         Long recordsFiltered = 0L;
-        List<Vault> vaults = vaultsService.search(query, sort, order, offset, maxResult);
+        List<Vault> vaults = vaultsService.search(userID, query, sort, order, offset, maxResult);
         if(CollectionUtils.isNotEmpty(vaults)) {
 			for (Vault vault : vaults) {
 				vaultResponses.add(vault.convertToResponse());
@@ -171,7 +187,7 @@ public class VaultsController {
 	        		vault.setProjectSize(projectSizeMap.get(vault.getProjectId()));
 	        	}
 	        }
-	        recordsTotal = vaultsService.getTotalNumberOfVaults();
+	        recordsTotal = vaultsService.getTotalNumberOfVaults(userID);
 	        recordsFiltered = vaultsService.getTotalNumberOfVaults(query);
         }
         
@@ -186,12 +202,12 @@ public class VaultsController {
 
     @RequestMapping(value = "/vaults/deposits/search", method = RequestMethod.GET)
     public List<DepositInfo> searchAllDeposits(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                           @RequestParam("query") String query,
-                                           @RequestParam(value = "sort", required = false) String sort) throws Exception {
+                                               @RequestParam("query") String query,
+                                               @RequestParam(value = "sort", required = false) String sort) {
 
         List<DepositInfo> depositResponses = new ArrayList<>();
-        for (Deposit deposit : depositsService.search(query, sort)) {
-            deposit.convertToResponse();
+        for (Deposit deposit : depositsService.search(query, sort, userID)) {
+            //deposit.convertToResponse();
             DepositInfo depositInfo = deposit.convertToResponse();
             User depositor = usersService.getUser(depositInfo.getUserID());
             depositInfo.setUserName(depositor.getFirstname() + " " + depositor.getLastname());
@@ -204,6 +220,8 @@ public class VaultsController {
             depositInfo.setGroupName(vault.getGroup().getName());
             depositInfo.setVaultReviewDate(vault.getReviewDate().toString());
             depositResponses.add(depositInfo);
+        //for (Deposit deposit : depositsService.search(query, sort, userID)) {
+        //    depositResponses.add(deposit.convertToResponse());
         }
         return depositResponses;
     }
@@ -217,7 +235,7 @@ public class VaultsController {
 
         List<DepositInfo> depositResponses = new ArrayList<>();
        
-        List<Deposit> deposits = depositsService.search(query, sort);
+        List<Deposit> deposits = depositsService.search(query, sort, userID);
         if(CollectionUtils.isNotEmpty(deposits)) {
 			for (Deposit deposit : deposits) {
 				  DepositInfo depositInfo = deposit.convertToResponse();
@@ -307,6 +325,12 @@ public class VaultsController {
         }
 
         vaultsService.addVault(vault);
+
+        RoleAssignment dataOwnerRoleAssignment = new RoleAssignment();
+        dataOwnerRoleAssignment.setUserId(userID);
+        dataOwnerRoleAssignment.setVaultId(vault.getID());
+        dataOwnerRoleAssignment.setRole(permissionsService.getDataOwner());
+        permissionsService.createRoleAssignment(dataOwnerRoleAssignment);
         
         Create vaultEvent = new Create(vault.getID());
         vaultEvent.setVault(vault);
@@ -347,6 +371,13 @@ public class VaultsController {
         return vaultsService.checkRetentionPolicy(vaultID);
     }
 
+    @RequestMapping(value = "/vaults/{vaultid}/record", method = RequestMethod.GET)
+    public Vault getVaultRecord(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                @PathVariable("vaultid") String vaultID) {
+
+        return vaultsService.getVault(vaultID);
+    }
+
     @RequestMapping(value = "/vaults/{vaultid}/deposits", method = RequestMethod.GET)
     public List<DepositInfo> getDeposits(@RequestHeader(value = "X-UserID", required = true) String userID,
                                          @PathVariable("vaultid") String vaultID) throws Exception {
@@ -381,10 +412,7 @@ public class VaultsController {
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
 
-        List<DataManager> dataManagersList = new ArrayList<>();
-        for (DataManager dataManager : vault.getDataManagers()) {
-            dataManagersList.add(dataManager);
-        }
+        List<DataManager> dataManagersList = new ArrayList<>(vault.getDataManagers());
         return dataManagersList;
     }
 

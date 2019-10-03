@@ -10,6 +10,7 @@
     <security:http pattern="/resources/**" security="none"/>
 
 	<security:http>
+        <security:expression-handler ref="webSecurityExpressionHandler"/>
 
         <security:intercept-url pattern="/auth/**" access="permitAll" />
         <security:intercept-url pattern="/**" access="hasRole('ROLE_USER')" />
@@ -26,6 +27,10 @@
         <security:logout
                 logout-url="/auth/logout"
                 logout-success-url="/auth/login?logout"/>
+
+        <security:session-management>
+            <security:concurrency-control session-registry-alias="sessionRegistry" expired-url="/auth/login?security" />
+        </security:session-management>
 
 	</security:http>
 	

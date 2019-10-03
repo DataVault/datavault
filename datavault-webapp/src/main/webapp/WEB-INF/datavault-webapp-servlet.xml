@@ -3,13 +3,29 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:security = "http://www.springframework.org/schema/security"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/security
+        http://www.springframework.org/schema/security/spring-security.xsd">
 
+    <security:global-method-security pre-post-annotations="enabled" secured-annotations="enabled">
+        <security:expression-handler ref="methodSecurityExpressionHandler"/>
+    </security:global-method-security>
+
+    <bean id="methodSecurityExpressionHandler" primary="true"
+          class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler">
+        <property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </bean>
+
+    <bean id="webSecurityExpressionHandler" primary="true"
+          class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler">
+        <property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </bean>
 
     <context:component-scan base-package="org.datavaultplatform.webapp.controllers"/>
 
@@ -91,8 +107,9 @@
     </bean>
 
     <bean id="vaultsController" class="org.datavaultplatform.webapp.controllers.VaultsController">
+        <property name="forceLogoutService" ref="forceLogoutService" />
         <property name="restService" ref="restService" />
-        <property name="LDAPService" ref="ldapService" />
+        <property name="userLookupService" ref="userLookupService" />
         <property name="system" value="${metadata.system}" />
         <property name="link" value="${metadata.link}" />
         <property name="welcome" value="${webapp.motd}"/>
@@ -118,14 +135,22 @@
 
     <bean id="adminController" class="org.datavaultplatform.webapp.controllers.admin.AdminController">
         <property name="restService" ref="restService" />
+        <property name="permissionsService" ref="permissionsService" />
     </bean>
 
     <bean id="adminUsersController" class="org.datavaultplatform.webapp.controllers.admin.AdminUsersController">
         <property name="restService" ref="restService" />
     </bean>
 
-    <bean id="adminGroupsController" class="org.datavaultplatform.webapp.controllers.admin.AdminGroupsController">
+    <bean id="adminRolesController" class="org.datavaultplatform.webapp.controllers.admin.AdminRolesController">
         <property name="restService" ref="restService" />
+        <property name="forceLogoutService" ref="forceLogoutService" />
+    </bean>
+
+    <bean id="adminSchoolsController" class="org.datavaultplatform.webapp.controllers.admin.AdminSchoolsController">
+        <property name="restService" ref="restService" />
+        <property name="userLookupService" ref="userLookupService" />
+        <property name="forceLogoutService" ref="forceLogoutService" />
     </bean>
 
     <bean id="adminBillingController" class="org.datavaultplatform.webapp.controllers.admin.AdminBillingController">
@@ -170,6 +195,10 @@
         <property name="brokerApiKey" value="${broker.api.key}" />
     </bean>
 
+    <bean id="permissionsService" class="org.datavaultplatform.webapp.services.PermissionsService">
+        <property name="restService" ref="restService" />
+    </bean>
+
     <bean id="ldapService" class="org.datavaultplatform.webapp.services.LDAPService">
         <property name="host" value="${ldap.host}" />
         <property name="port" value="${ldap.port}" />
@@ -180,7 +209,17 @@
         <property name="searchFilter" value="${ldap.searchFilter}" />
         <property name="attrs" value="${ldap.attrs}" />
     </bean>
-    
+
+    <bean id="userLookupService" class="org.datavaultplatform.webapp.services.UserLookupService">
+        <property name="restService" ref="restService" />
+        <property name="ldapService" ref="ldapService" />
+    </bean>
+
+    <bean id="forceLogoutService" class="org.datavaultplatform.webapp.services.ForceLogoutService">
+        <property name="restService" ref="restService" />
+        <property name="sessionRegistry" ref="sessionRegistry" />
+    </bean>
+
     <bean id="authSuccessHandler" class="org.datavaultplatform.webapp.authentication.AuthenticationSuccess">
         <property name="restService" ref="restService" />
     </bean>
@@ -210,6 +249,9 @@
         <property name="to" value="${mail.administrator}"/>
         <property name="from" value="feedback@datavaultplatform.org"/>
         <property name="subject" value="DataVault feedback"/>
+    </bean>
+
+    <bean id="permissionEvaluator" class="org.datavaultplatform.webapp.security.ScopedPermissionEvaluator">
     </bean>
 
 </beans>

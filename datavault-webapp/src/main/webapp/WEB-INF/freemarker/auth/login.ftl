@@ -14,24 +14,24 @@
             <div class="col-sm-4 col-sm-offset-4 col-md-4 col-md-offset-4">
                 <form class="form-signin" action="${springMacroRequestContext.getContextPath()}/auth/security_check" method="post">
                     <#if welcome?has_content>
-                        <div class="alert alert-info" role="alert">
-                            <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                        <div class="alert alert-info clearfix" role="alert">
+                            <span class="glyphicon glyphicon-info-sign col-md-1" aria-hidden="true"></span>
                             <span class="sr-only">Success:</span>
-                        ${welcome}
+                            <span class="col-md-11">${welcome}</span>
                         </div>
                     </#if>
                     <#if success?has_content>
-                        <div class="alert alert-success" role="alert">
-                            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                        <div class="alert alert-success clearfix" role="alert">
+                            <span class="glyphicon glyphicon-ok col-md-1" aria-hidden="true"></span>
                             <span class="sr-only">Success:</span>
-                        ${success}
+                            <span class="col-md-11">${success}</span>
                         </div>
                     </#if>
                     <#if error?has_content>
-                        <div class="alert alert-danger" role="alert">
-                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <div class="alert alert-danger clearfix" role="alert">
+                            <span class="glyphicon glyphicon-exclamation-sign col-md-1" aria-hidden="true"></span>
                             <span class="sr-only">Error:</span>
-                        ${error}
+                            <span class="col-md-11">${error}</span>
                         </div>
                     </#if>
                     <div class="form-group">

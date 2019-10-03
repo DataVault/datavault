@@ -1,7 +1,6 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:tx="http://www.springframework.org/schema/tx"
        xmlns:task="http://www.springframework.org/schema/task"
        xmlns:rabbit="http://www.springframework.org/schema/rabbit"
@@ -9,8 +8,8 @@
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd
-        http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+
+
         http://www.springframework.org/schema/task
         http://www.springframework.org/schema/task/spring-task.xsd
         http://www.springframework.org/schema/tx
@@ -26,6 +25,7 @@
     
     <bean id="vaultsService" class="org.datavaultplatform.broker.services.VaultsService">
         <property name="vaultDAO" ref="vaultDAO" />
+        <property name="rolesAndPermissionsService" ref="permissionsService" />
     </bean>
 
     <bean id="depositsService" class="org.datavaultplatform.broker.services.DepositsService">
@@ -42,6 +42,12 @@
 
     <bean id="metadataService" class="org.datavaultplatform.broker.services.MetadataService">
         <property name="metaDir" value="${metaDir}"/>
+    </bean>
+
+    <bean id="permissionsService" class="org.datavaultplatform.broker.services.RolesAndPermissionsService">
+        <property name="permissionDao" ref="permissionDAO" />
+        <property name="roleDao" ref="roleDAO" />
+        <property name="roleAssignmentDao" ref="roleAssignmentDAO" />
     </bean>
 
     <bean id="eventService" class="org.datavaultplatform.broker.services.EventService">
@@ -89,6 +95,11 @@
         <property name="mailSender" ref="mailSender"/>
         <property name="velocityEngine" ref="velocityEngine"/>
         <property name="mailAdministrator" value="${mail.administrator}" />
+    </bean>
+
+    <bean id="adminService" class="org.datavaultplatform.broker.services.AdminService">
+        <property name="rolesAndPermissionsService" ref="permissionsService"/>
+        <property name="usersService" ref="usersService"/>
     </bean>
 
     <bean id="checkRetentionPolicies" class="org.datavaultplatform.broker.scheduled.CheckRetentionPolicies">
@@ -235,6 +246,18 @@
     </bean>
 
     <bean id="userDAO" class="org.datavaultplatform.common.model.dao.UserDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="roleDAO" class="org.datavaultplatform.common.model.dao.RoleDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="roleAssignmentDAO" class="org.datavaultplatform.common.model.dao.RoleAssignmentDaoImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="permissionDAO" class="org.datavaultplatform.common.model.dao.PermissionDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 

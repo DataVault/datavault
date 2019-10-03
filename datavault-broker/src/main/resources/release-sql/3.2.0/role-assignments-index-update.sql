@@ -1,0 +1,11 @@
+ALTER TABLE Role_assignments DROP CONSTRAINT `FK_2j93l0yx740l9r9hjeinwia1f`;
+ALTER TABLE Role_assignments DROP CONSTRAINT `FK_by9fc9iswmf9l5q7c243gdprl`;
+ALTER TABLE Role_assignments DROP CONSTRAINT `FK_mtrvvfub5q70r6jkcw5gggg0k`;
+ALTER TABLE Role_assignments DROP CONSTRAINT `FK_spyctngrr3ou9iyr5ld3h28fs`;
+ALTER TABLE Role_assignments DROP INDEX `UK_inpjm7k16ph1lrue5o38yiact`;
+ALTER TABLE Role_assignments ADD CONSTRAINT `FK_2j93l0yx740l9r9hjeinwia1f` FOREIGN KEY (`user_id`) REFERENCES `Users` (`id`);
+ALTER TABLE Role_assignments ADD CONSTRAINT `FK_by9fc9iswmf9l5q7c243gdprl` FOREIGN KEY (`vault_id`) REFERENCES `Vaults` (`id`);
+ALTER TABLE Role_assignments ADD CONSTRAINT `FK_mtrvvfub5q70r6jkcw5gggg0k` FOREIGN KEY (`school_id`) REFERENCES `Groups` (`id`);
+ALTER TABLE Role_assignments ADD CONSTRAINT `FK_spyctngrr3ou9iyr5ld3h28fs` FOREIGN KEY (`role_id`) REFERENCES `Roles` (`id`);
+ALTER TABLE Role_assignments ADD UNIQUE KEY `UK_kqx1luv7kal490959aop4pj75` (`role_id`,`user_id`,`school_id`);
+ALTER TABLE Role_assignments ADD UNIQUE KEY `UK_myhycfy43e3socqtp24jx1x71` (`role_id`,`user_id`,`vault_id`);

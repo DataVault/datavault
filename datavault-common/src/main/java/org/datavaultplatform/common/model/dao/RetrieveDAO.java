@@ -10,15 +10,15 @@ public interface RetrieveDAO {
     
     public void update(Retrieve retrieve);
     
-    public List<Retrieve> list();
+    public List<Retrieve> list(String userId);
 
     public Retrieve findById(String Id);
 
-    public int count();
+    public int count(String userId);
 
-    public int inProgressCount();
+    public int inProgressCount(String userId);
 
     public List<Retrieve> inProgress();
 
-    public int queueCount();
+    public int queueCount(String userId);
 }

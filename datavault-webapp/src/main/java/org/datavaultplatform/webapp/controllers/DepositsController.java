@@ -8,6 +8,7 @@ import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +34,7 @@ public class DepositsController {
 
     // Return an 'create new deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/create", method = RequestMethod.GET)
+    @PreAuthorize("hasPermission(#vaultID, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultID, 'GROUP_VAULT', 'MANAGE_SCHOOL_VAULT_DEPOSITS')")
     public String createDeposit(ModelMap model, @PathVariable("vaultid") String vaultID) throws Exception {
         
         // pass the view an empty Deposit since the form expects it
@@ -48,6 +50,7 @@ public class DepositsController {
 
     // Process the completed 'create new deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/create", method = RequestMethod.POST)
+    @PreAuthorize("hasPermission(#vaultID, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultID, 'GROUP_VAULT', 'MANAGE_SCHOOL_VAULT_DEPOSITS')")
     public String addDeposit(@ModelAttribute CreateDeposit deposit, ModelMap model,
                              @PathVariable("vaultid") String vaultID, @RequestParam String action) throws Exception {
         // Was the cancel button pressed?

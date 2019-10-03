@@ -60,8 +60,10 @@
                             <td>${vault.getProjectSizeStr()}</td>
                            <td>${vault.getSizeStr()}</td>
                             <td>
-                            <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/${vault.getUserID()}">${vault.getUserName()?html} (${vault.getUserID()?html})</a>
-                            </td>                           
+                                <#if vault.getUserID()??>
+                                <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/${vault.getUserID()}">${vault.getUserName()?html} (${vault.getUserID()?html})</a>
+                                </#if>
+                            </td>
                             
                             <td>${vault.groupID?html}</td>
                             <td>${vault.reviewDate?string('dd/MM/yyyy')}</td>

@@ -28,3 +28,5 @@ datavault-webapp/src/main/webapp/WEB-INF/glassfish-web.xml
 .DS_Store
 docker/mysql
 docker/config/mail-templates
+
+!.idea/

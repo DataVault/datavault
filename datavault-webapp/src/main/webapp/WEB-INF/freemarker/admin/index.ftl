@@ -3,6 +3,37 @@
 <#global nav="admin">
 <@layout.vaultLayout>
 
+<style>
+    .panel {
+        height: 200px;
+    }
+    .roles-icon {
+        background: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center;
+        width: 1em;
+        height: 1em;
+        display: inline-block;
+    }
+    @supports (-webkit-mask: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center) {
+        .roles-icon {
+            -webkit-mask: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center;
+            mask: url('${springMacroRequestContext.getContextPath()}/resources/theme/images/user-cog-solid.svg') no-repeat center;
+            background: rgb(52, 109, 191);
+        }
+        .roles-link:hover .roles-icon {
+            background-color: rgb(36, 75, 131);
+        }
+    }
+    .roles-label {
+        vertical-align: top;
+    }
+    .roles-link:hover {
+        text-decoration: none;
+    }
+    .roles-link:hover .roles-label {
+        text-decoration: underline;
+    }
+</style>
+
 <div class="container">
 
     <ol class="breadcrumb">
@@ -10,7 +41,7 @@
         <li class="active"><b>Administration</b></li>
     </ol>
 
-    <div class="row">
+    <#if canViewVaultsSize??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-warning">
                 <div class="panel-heading">
@@ -21,6 +52,8 @@
                 </div>
             </div>
         </div>
+    </#if>
+    <#if canViewInProgress??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-warning">
                 <div class="panel-heading">
@@ -31,6 +64,8 @@
                 </div>
             </div>
         </div>
+    </#if>
+    <#if canViewQueues??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-warning">
                 <div class="panel-heading">
@@ -41,9 +76,8 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="row">
+    </#if>
+    <#if canManageVaults??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-info">
                 <div class="panel-heading">
@@ -54,6 +88,8 @@
                 </div>
             </div>
         </div>
+    </#if>
+    <#if canManageDeposits??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-info">
                 <div class="panel-heading">
@@ -64,6 +100,8 @@
                 </div>
             </div>
         </div>
+    </#if>
+    <#if canViewRetrieves??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-info">
                 <div class="panel-heading">
@@ -74,10 +112,8 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="row">
-        
+    </#if>
+    <#if canManageBillingDetails??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-success">
                 <div class="panel-heading">
@@ -88,29 +124,38 @@
                 </div>
             </div>
         </div>
+    </#if>
+    <#if canManageSchoolUsers??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-success">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Groups</h3>
+                    <h3 class="panel-title">Schools</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/groups"><i class="fa fa-user" aria-hidden="true"></i> ${groupcount}</a></h1>
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/schools"><i class="fa fa-users" aria-hidden="true"></i> ${groupcount}</a></h1>
                 </div>
             </div>
         </div>
+    </#if>
+    <#if canManageRoles??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-success">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Review</h3>
+                    <h3 class="panel-title">Roles</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a href="#"><span class="glyphicon glyphicon-list-alt"></span> ${reviewcount}</a></h1>
+                    <h1 class="text-center">
+                        <a href="${springMacroRequestContext.getContextPath()}/admin/roles" class="roles-link">
+                            <!-- TODO this hack should be changed to show fa-user-cog once font-awesome has been upgrade to version 5 -->
+                            <i class="roles-icon"></i>
+                            <span class="roles-label">${rolecount}</span>
+                        </a>
+                    </h1>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="row">
+    </#if>
+    <#if canViewEvents??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -121,6 +166,8 @@
                 </div>
             </div>
         </div>
+    </#if>
+    <#if canManageRetentionPolicies??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -131,6 +178,8 @@
                 </div>
             </div>
         </div>
+    </#if>
+    <#if canManageArchiveStores??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -141,7 +190,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </#if>
 
 </div>
 </@layout.vaultLayout>

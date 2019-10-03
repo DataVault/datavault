@@ -1,8 +1,11 @@
 package org.datavaultplatform.broker.authentication;
 
+import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.ClientsService;
+import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.model.Client;
+import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +18,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 
 /**
  * In truth this class does not do any true authentication as it is assumed the user was authenticated by the client
@@ -32,10 +35,11 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
     private UsersService usersService;
     private ClientsService clientsService;
+    private RolesAndPermissionsService rolesAndPermissionsService;
+    private AdminService adminService;
 
     // This is a crappy means of allowing someone to turn off the client validation. Must be a better way of doing this.
     private boolean validateClient;
-
 
     public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
@@ -47,6 +51,14 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
     public void setValidateClient(boolean validateClient) {
         this.validateClient = validateClient;
+    }
+
+    public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
+        this.rolesAndPermissionsService = rolesAndPermissionsService;
+    }
+
+    public void setAdminService(AdminService adminService) {
+        this.adminService = adminService;
     }
 
     @Override
@@ -66,13 +78,22 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
             }
 
             // If we got here then we found a matching User record.
-            if (user.isAdmin()) {
+            if (adminService.isAdminUser(user)) {
                 logger.debug(user.getID() + " is an admin user");
                 grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
             } else {
                 logger.debug(user.getID() + " is an ordinary user");
                 grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
             }
+
+            Set<Permission> userPermissions = rolesAndPermissionsService.getUserPermissions(user.getID());
+
+            checkPermissions(Permission.CAN_MANAGE_ARCHIVE_STORES, grantedAuths, userPermissions);
+            checkPermissions(Permission.CAN_MANAGE_DEPOSITS, grantedAuths, userPermissions);
+            checkPermissions(Permission.CAN_VIEW_RETRIEVES, grantedAuths, userPermissions);
+            checkPermissions(Permission.CAN_MANAGE_VAULTS, grantedAuths, userPermissions);
+            checkPermissions(Permission.CAN_VIEW_EVENTS, grantedAuths, userPermissions);
+            checkPermissions(Permission.CAN_MANAGE_BILLING_DETAILS, grantedAuths, userPermissions);
         }
 
         RestWebAuthenticationDetails rwad = (RestWebAuthenticationDetails) authentication.getDetails();
@@ -100,6 +121,12 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
         return new PreAuthenticatedAuthenticationToken(name, password, grantedAuths);
 
+    }
+
+    private void checkPermissions(Permission permission, List<GrantedAuthority> grantedAuths, Set<Permission> permissions) {
+        if (permissions.contains(permission)) {
+            grantedAuths.add(new SimpleGrantedAuthority(permission.getRoleName()));
+        }
     }
 
     @Override
