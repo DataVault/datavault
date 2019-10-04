@@ -11,3 +11,5 @@ LEFT OUTER JOIN Roles r
 WHERE
     u.admin = 1
 and ra.id IS NULL;
+
+ALTER TABLE Users ALTER admin SET DEFAULT 0;

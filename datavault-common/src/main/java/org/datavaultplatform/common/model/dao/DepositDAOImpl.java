@@ -159,18 +159,20 @@ public class DepositDAOImpl implements DepositDAO {
             return new ArrayList<>();
         }
         Criteria criteria = criteriaBuilder.build();
-        criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("filePath", "%" + query + "%")));
+        criteria.add(Restrictions.or(
+                Restrictions.ilike("id", "%" + query + "%"),
+                Restrictions.ilike("name", "%" + query + "%"),
+                Restrictions.ilike("filePath", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
         // See if there is a valid sort option
 
-        if ("id".equals(sort)) { criteria.addOrder(Order.asc("id")); } else if
-            //("note".equals(sort)) { criteria.addOrder(Order.asc("note")); } else if
-        ("status".equals(sort)) { criteria.addOrder(Order.asc("status")); } else if
-            // ("filePath".equals(sort)) { criteria.addOrder(Order.asc("filePath")); } else
-        ("depositSize".equals(sort)) {
-            criteria.addOrder(Order.asc("depositSize")); } else {
-            criteria.addOrder(Order.asc("creationTime")); }
+        if ("id".equals(sort)) { criteria.addOrder(Order.asc("id")); }
+        else if ("name".equals(sort)) { criteria.addOrder(Order.asc("name")); }
+        else if ("status".equals(sort)) { criteria.addOrder(Order.asc("status")); }
+        else if ("filePath".equals(sort)) { criteria.addOrder(Order.asc("filePath")); }
+        else if ("depositSize".equals(sort)) { criteria.addOrder(Order.asc("depositSize")); }
+        else { criteria.addOrder(Order.asc("creationTime")); }
 
         List<Deposit> deposits = criteria.list();
         session.close();
