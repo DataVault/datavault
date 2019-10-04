@@ -46,7 +46,6 @@
                 </div>
             </form>
         </div>
-
         <#if deposits?has_content>
             <div class="table-responsive">
                 <table class="table table-striped">
@@ -142,9 +141,6 @@
                 xhr.setRequestHeader(header, token);
             });
         });
-
-
-
-
+				
     </script>
 </@layout.vaultLayout>

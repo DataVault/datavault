@@ -1,17 +1,30 @@
 package org.datavaultplatform.broker.services;
 
-import java.util.Date;
-import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.model.dao.DepositDAO;
+import java.util.*;
 
-import java.util.UUID;
-import java.util.List;
+import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
+import org.datavaultplatform.common.model.dao.AuditChunkStatusDAOImpl;
+import org.datavaultplatform.common.model.dao.DepositChunkDAO;
+import org.datavaultplatform.common.model.dao.DepositDAO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DepositsService {
 
+    private static final Logger logger = LoggerFactory.getLogger(DepositsService.class);
+
+    private int auditPeriodMinutes = 0;
+    private int auditPeriodHours = 0;
+    private int auditPeriodDays = 0;
+    private int auditPeriodMonths = 0;
+    private int auditPeriodYears = 2;
+    private int auditMaxChunksPerDeposits = 50;
+    private int auditMaxTotalChunks = 2000;
+
     private DepositDAO depositDAO;
+    private DepositChunkDAO depositChunkDAO;
+    private AuditChunkStatusDAO auditChunkStatusDAO;
     
     public List<Deposit> getDeposits(String sort, String userId) {
         return depositDAO.list(sort, userId);
@@ -47,6 +60,8 @@ public class DepositsService {
     }
     
     public void setDepositDAO(DepositDAO depositDAO) { this.depositDAO = depositDAO; }
+    public void setDepositChunkDAO(DepositChunkDAO depositChunkDAO) { this.depositChunkDAO = depositChunkDAO; }
+    public void setAuditChunkStatusDAO(AuditChunkStatusDAO auditChunkStatusDAO) { this.auditChunkStatusDAO = auditChunkStatusDAO; }
 
     public int count(String userId) { return depositDAO.count(userId); }
 
@@ -84,6 +99,149 @@ public class DepositsService {
     	Deposit deposit = depositDAO.findById(depositId);
     	deposit.setSize(0);
     	depositDAO.update(deposit);
+    }
+
+    public List<DepositChunk> getChunksForAudit(){
+        // TODO: get value from config
+        int maxChunkAuditPerDeposit = getAuditMaxChunksPerDeposits();
+        int maxChunkPerAudit = getAuditMaxTotalChunks();
+
+        logger.debug("MINUTE: "+getAuditPeriodMinutes());
+        logger.debug("HOUR: "+getAuditPeriodHours());
+        logger.debug("DAY_OF_YEAR: "+getAuditPeriodDays());
+        logger.debug("MONTH: "+getAuditPeriodMonths());
+        logger.debug("YEAR: "+getAuditPeriodYears());
+
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MINUTE, -getAuditPeriodMinutes()); // to get previous days
+        cal.add(Calendar.HOUR, -getAuditPeriodHours()); // to get previous days
+        cal.add(Calendar.DAY_OF_YEAR, -getAuditPeriodDays()); // to get previous days
+        cal.add(Calendar.MONTH, -getAuditPeriodMonths()); // to get previous month
+        cal.add(Calendar.YEAR, -getAuditPeriodYears()); // to get previous years
+        Date olderThanDate = cal.getTime();
+
+        logger.debug("older than date: "+olderThanDate);
+
+        List<Deposit> deposits = depositDAO.getDepositsWaitingForAudit(olderThanDate);
+        List<DepositChunk> chunksToAudit = new ArrayList<DepositChunk>();
+
+        int totalCount = 0;
+        for(Deposit deposit : deposits){
+            logger.debug("check deposit: "+deposit.getID());
+
+            List<DepositChunk> depositChunks = deposit.getDepositChunks();
+
+            logger.debug("Number of chunks in deposit: " + depositChunks.size());
+
+            Collections.sort(depositChunks, new Comparator<DepositChunk>(){
+                public int compare(DepositChunk c1, DepositChunk c2) {
+                    if(auditChunkStatusDAO.getLastChunkAuditTime(c1) == null){
+                        return -1;
+                    }else if(auditChunkStatusDAO.getLastChunkAuditTime(c2) == null){
+                        return 1;
+                    }else{
+                        return auditChunkStatusDAO.getLastChunkAuditTime(c1).getTimestamp().compareTo(
+                                auditChunkStatusDAO.getLastChunkAuditTime(c2).getTimestamp());
+                    }
+                }
+            });
+
+            int count = 0;
+            for(DepositChunk chunk : depositChunks){
+                if(totalCount >= maxChunkPerAudit) {
+                    logger.debug("maxChunkPerAudit reached");
+                    return chunksToAudit;
+                }else if(count >= maxChunkAuditPerDeposit){
+                    logger.debug("maxChunkAuditPerDeposit reached");
+                    break; // get out of loop
+                }
+
+                logger.debug("check chunk: "+chunk.getID());
+
+                AuditChunkStatus lastAuditChunkInfo = auditChunkStatusDAO.getLastChunkAuditTime(chunk);
+
+                if(lastAuditChunkInfo == null){
+                    logger.debug("add chunk, No previous audit.");
+                    chunksToAudit.add(chunk);
+                }else if( lastAuditChunkInfo.getTimestamp().before(olderThanDate) && (
+                                lastAuditChunkInfo.getStatus().equals(AuditChunkStatus.Status.COMPLETE) ||
+                                        lastAuditChunkInfo.getStatus().equals(AuditChunkStatus.Status.FIXED) ) ){
+                    logger.debug("add chunk, last audit: "+lastAuditChunkInfo.getTimestamp());
+                    chunksToAudit.add(chunk);
+                    count++; totalCount++;
+                }else{
+                    logger.debug("too recent audit");
+                }
+            }
+
+
+        }
+
+        return chunksToAudit;
+    }
+
+    public int getAuditPeriodMinutes() {
+        return auditPeriodMinutes;
+    }
+
+    public void setAuditPeriodMinutes(int auditPeriodMinutes) {
+        this.auditPeriodMinutes = auditPeriodMinutes;
+    }
+
+    public int getAuditPeriodHours() {
+        return auditPeriodHours;
+    }
+
+    public void setAuditPeriodHours(int auditPeriodHours) {
+        this.auditPeriodHours = auditPeriodHours;
+    }
+
+    public int getAuditPeriodDays() {
+        return auditPeriodDays;
+    }
+
+    public void setAuditPeriodDays(int auditPeriodDays) {
+        this.auditPeriodDays = auditPeriodDays;
+    }
+
+    public int getAuditPeriodMonths() {
+        return auditPeriodMonths;
+    }
+
+    public void setAuditPeriodMonths(int auditPeriodMonths) {
+        this.auditPeriodMonths = auditPeriodMonths;
+    }
+
+    public int getAuditPeriodYears() {
+        return auditPeriodYears;
+    }
+
+    public void setAuditPeriodYears(int auditPeriodYears) {
+        this.auditPeriodYears = auditPeriodYears;
+    }
+
+    public int getAuditMaxChunksPerDeposits() {
+        return auditMaxChunksPerDeposits;
+    }
+
+    public void setAuditMaxChunksPerDeposits(int auditMaxChunksPerDeposits) {
+        this.auditMaxChunksPerDeposits = auditMaxChunksPerDeposits;
+    }
+
+    public int getAuditMaxTotalChunks() {
+        return auditMaxTotalChunks;
+    }
+
+    public void setAuditMaxTotalChunks(int auditMaxTotalChunks) {
+        this.auditMaxTotalChunks = auditMaxTotalChunks;
+    }
+
+    public DepositChunk getDepositChunkById(String id){
+        return depositChunkDAO.findById(id);
+    }
+
+    public void updateDepositChunk(DepositChunk chunk) {
+        depositChunkDAO.update(chunk);
     }
 }
 

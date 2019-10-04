@@ -48,6 +48,15 @@
 
     <bean id="depositsService" class="org.datavaultplatform.broker.services.DepositsService">
         <property name="depositDAO" ref="depositDAO" />
+        <property name="depositChunkDAO" ref="depositChunkDAO" />
+        <property name="auditChunkStatusDAO" ref="auditChunkStatusDAO" />
+        <property name="auditPeriodMinutes" value="${audit.period.minutes:0}"/>
+        <property name="auditPeriodHours" value="${audit.period.hours:0}"/>
+        <property name="auditPeriodDays" value="${audit.period.days:0}"/>
+        <property name="auditPeriodMonths" value="${audit.period.months:0}"/>
+        <property name="auditPeriodYears" value="${audit.period.years:2}"/>
+        <property name="auditMaxChunksPerDeposits" value="${audit.maxChunksPerDeposits:50}"/>
+        <property name="auditMaxTotalChunks" value="${audit.maxTotalChunks:2000}"/>
     </bean>
 
     <bean id="archivesService" class="org.datavaultplatform.broker.services.ArchivesService">
@@ -126,6 +135,11 @@
         <property name="mailAdministrator" value="${mail.administrator}" />
     </bean>
 
+    <bean id="auditsService" class="org.datavaultplatform.broker.services.AuditsService">
+        <property name="auditDAO" ref="auditDAO" />
+        <property name="auditChunkStatusDAO" ref="auditChunkStatusDAO" />
+    </bean>
+
     <bean id="checkRetentionPolicies" class="org.datavaultplatform.broker.scheduled.CheckRetentionPolicies">
         <property name="vaultsService" ref="vaultsService" />
     </bean>
@@ -135,6 +149,21 @@
         <property name="emailService" ref="emailService" />
     </bean>
     
+    <bean id="auditDepositsChunks" class="org.datavaultplatform.broker.scheduled.AuditDepositsChunks">
+        <property name="depositsService" ref="depositsService" />
+        <property name="emailService" ref="emailService" />
+        <property name="archiveStoreService" ref="archiveStoreService" />
+        <property name="jobsService" ref="jobsService" />
+        <property name="auditsService" ref="auditsService" />
+        <property name="sender" ref="sender" />
+        <property name="optionsDir" value="${optionsDir:#{null}}" />
+        <property name="tempDir" value="${tempDir:#{null}}" />
+        <property name="bucketName" value="${s3.bucketName:#{null}}" />
+        <property name="region" value="${s3.region:#{null}}" />
+        <property name="awsAccessKey" value="${s3.awsAccessKey:#{null}}" />
+        <property name="awsSecretKey" value="${s3.awsSecretKey:#{null}}" />
+    </bean>
+
     <!-- Email -->
 
     <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
@@ -194,9 +223,11 @@
         <property name="eventService" ref="eventService" />
         <property name="usersService" ref="usersService" />
         <property name="emailService" ref="emailService" />
+        <property name="auditsService" ref="auditsService" />
         <property name="homeUrl" value="${home.page}"/>
         <property name="helpUrl" value="${help.page}"/>
-        <property name="helpMail" value="${help.mail}a"/>
+        <property name="helpMail" value="${help.mail}"/>
+        <property name="auditAdminEmail" value="${audit.adminEmail}"/>
     </bean>
 
     <bean id="sender" class="org.datavaultplatform.broker.queue.Sender">
@@ -254,6 +285,10 @@
         <task:scheduled ref="checkEncryptionData" method="checkAll" cron="${encryptioncheck.schedule}" />
     </task:scheduled-tasks>
 
+    <task:scheduled-tasks scheduler="scheduler">
+        <task:scheduled ref="auditDepositsChunks" method="execute" cron="${auditdeposit.schedule}" />
+    </task:scheduled-tasks>
+
     <!-- Data Access Objects -->
     
     <bean id="vaultDAO" class="org.datavaultplatform.common.model.dao.VaultDAOImpl">
@@ -265,6 +300,14 @@
     </bean>
 
     <bean id="depositDAO" class="org.datavaultplatform.common.model.dao.DepositDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="depositChunkDAO" class="org.datavaultplatform.common.model.dao.DepositChunkDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="auditChunkStatusDAO" class="org.datavaultplatform.common.model.dao.AuditChunkStatusDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
@@ -325,6 +368,14 @@
     </bean>
     
     <bean id="dataManagerDAO" class="org.datavaultplatform.common.model.dao.DataManagerDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="auditDAO" class="org.datavaultplatform.common.model.dao.AuditDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="DepositChunkDAO" class="org.datavaultplatform.common.model.dao.DepositChunkDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
     

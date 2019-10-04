@@ -2,6 +2,7 @@ package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
 import org.datavaultplatform.common.model.Deposit;
+import java.util.Date;
 
 public interface DepositDAO {
 
@@ -24,6 +25,8 @@ public interface DepositDAO {
     public List<Deposit> completed();
 
     public List<Deposit> search(String query, String sort, String userId);
+
+    public List<Deposit> getDepositsWaitingForAudit(Date olderThanDate);
 
     public Long size(String userId);
 }
