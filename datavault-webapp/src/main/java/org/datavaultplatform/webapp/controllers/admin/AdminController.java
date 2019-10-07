@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
+import org.datavaultplatform.common.io.FileUtils;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.webapp.model.AdminDashboardPermissionsModel;
 import org.datavaultplatform.webapp.services.PermissionsService;
@@ -31,7 +32,7 @@ public class AdminController {
 
         if (permissionsModel.hasPermission(Permission.CAN_VIEW_VAULTS_SIZE)) {
             modelMap.addAttribute("canViewVaultsSize", true);
-            modelMap.addAttribute("vaultsize", getVaultSize());
+            modelMap.addAttribute("vaultsize", FileUtils.getGibibyteSizeStr(getVaultSize()));
         }
         if (permissionsModel.hasPermission(Permission.CAN_VIEW_IN_PROGRESS)) {
             modelMap.addAttribute("canViewInProgress", true);

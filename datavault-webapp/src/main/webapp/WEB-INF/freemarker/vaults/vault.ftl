@@ -304,7 +304,7 @@
                             </tbody>
                         </table>
                     </div>
-                    
+                    <#comment>
                     <h4><strong>Edits</strong></h4>
                     <div class="alert alert-info">Not available</div>
                     <table class="table table-bordered hidden">
@@ -336,6 +336,7 @@
                             Not editable as could be lengthy
                         </textarea>
                     </div>
+                    </#comment>
                 </div>
                 </@sec.authorize>
             </div>
