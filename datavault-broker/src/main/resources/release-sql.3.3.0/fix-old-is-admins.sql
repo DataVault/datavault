@@ -1,0 +1,1 @@
+ALTER TABLE Users ALTER admin SET DEFAULT 0;
