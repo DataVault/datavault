@@ -5,7 +5,7 @@ CREATE TABLE `Audits` (
   `timestamp` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+ 
 ALTER TABLE Events
 ADD COLUMN audit_id varchar(36);
 ALTER TABLE Events
