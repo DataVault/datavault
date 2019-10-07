@@ -4,7 +4,7 @@ CREATE TABLE `Audits` (
   `status` text,
   `timestamp` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE Events
 ADD COLUMN audit_id varchar(36);
@@ -39,5 +39,5 @@ CREATE TABLE `AuditChunkStatus` (
   KEY `fk_auditedChunks_depositChunk_id` (`depositChunk_id`),
   CONSTRAINT `fk_auditedChunks_audit_id` FOREIGN KEY (`audit_id`) REFERENCES `Audits` (`id`),
   CONSTRAINT `fk_auditedChunks_depositChunk_id` FOREIGN KEY (`depositChunk_id`) REFERENCES `DepositChunks` (`id`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
