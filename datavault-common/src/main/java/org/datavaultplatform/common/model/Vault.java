@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -17,6 +18,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.datavaultplatform.common.response.BillingInformation;
@@ -124,6 +126,11 @@ public class Vault {
     
     @Column(name = "projectId", nullable = true)
     private String projectId;
+    
+ // The raw content from the metadata provider e.g. XML
+    @Lob
+    @Column(name = "snapshot", nullable = false)
+    private String snapshot;
     
     public Vault() {}
     public Vault(String name) {
@@ -248,6 +255,14 @@ public class Vault {
 	}
 	public void setProjectId(String projectId) {
 		this.projectId = projectId;
+	}
+	
+	public String getSnapshot() {
+		return this.snapshot;
+	}
+	
+	public void setSnapshot(String snapshot) {
+		this.snapshot = snapshot;
 	}
   
     public BillingInfo getBillinginfo() {

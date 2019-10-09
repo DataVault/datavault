@@ -294,19 +294,20 @@ public class VaultsController {
             throw new Exception("User '" + userID + "' does not exist");
         }
         vault.setUser(user);
+        String datasetId = createVault.getDatasetID();
+        Dataset dataset = externalMetadataService.getCachedDataset(datasetId);
 
-        Dataset dataset = externalMetadataService.getCachedDataset(createVault.getDatasetID());
         if (dataset == null) {
-            dataset = externalMetadataService.getDataset(createVault.getDatasetID());
+            dataset = externalMetadataService.getDataset(datasetId);
             if (dataset == null) {
-                logger.error("Dataset metadata record '" + createVault.getDatasetID() + "' does not exist");
-                throw new Exception("Dataset metadata record '" + createVault.getDatasetID() + "' does not exist");
+                logger.error("Dataset metadata record '" + datasetId + "' does not exist");
+                throw new Exception("Dataset metadata record '" + datasetId + "' does not exist");
             }
 
             externalMetadataService.addCachedDataset(dataset);
         }
         vault.setDataset(dataset);
-
+        vault.setSnapshot(externalMetadataService.getDatasetContent(datasetId));
         vault.setProjectId(externalMetadataService.getPureProjectId(dataset.getID()));
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
