@@ -6,11 +6,7 @@ import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.TransferVault;
 import org.datavaultplatform.common.request.ValidateUser;
-import org.datavaultplatform.common.response.BillingInformation;
-import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.EventInfo;
-import org.datavaultplatform.common.response.VaultInfo;
-import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.common.response.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -34,7 +30,7 @@ public class RestService {
 
     private String brokerURL;
     private String brokerApiKey;
-    
+
     public void setBrokerURL(String brokerURL) {
         this.brokerURL = brokerURL;
     }
@@ -42,7 +38,7 @@ public class RestService {
     public void setBrokerApiKey(String brokerApiKey) {
         this.brokerApiKey = brokerApiKey;
     }
-    
+
     private <T> HttpEntity<T> exchange(String url, Class<T> clazz, HttpMethod method, Object payload) {
 
         RestTemplate restTemplate = new RestTemplate();
@@ -75,9 +71,9 @@ public class RestService {
         System.out.println("Calling Broker with url:" + url + " Method:" + method);
 
         return restTemplate.exchange(url, method, entity, clazz);
-        
+
     }
-    
+
     public <T> HttpEntity<T> get(String url, Class<T> clazz) {
         return exchange(url, clazz, HttpMethod.GET, null);
     }
@@ -85,18 +81,18 @@ public class RestService {
     public <T> HttpEntity<T> put(String url, Class<T> clazz, Object payload) {
         return exchange(url, clazz, HttpMethod.PUT, payload);
     }
-    
+
     public <T> HttpEntity<T> post(String url, Class<T> clazz, Object payload) {
         return exchange(url, clazz, HttpMethod.POST, payload);
     }
-    
+
     public HttpEntity<?> delete(String url, Class clazz) {
         return exchange(url, clazz, HttpMethod.DELETE, null);
     }
-    
+
     /* GET requests */
 
-    public FileStore[] getFileStoreListing() {        
+    public FileStore[] getFileStoreListing() {
         HttpEntity<?> response = get(brokerURL + "/filestores", FileStore[].class);
         return (FileStore[])response.getBody();
     }
@@ -125,21 +121,21 @@ public class RestService {
 
 
     public FileInfo[] getFilesListing(String filePath) {
-        
+
         if (!filePath.startsWith("/")) {
             filePath = "/" + filePath;
         }
-        
+
         HttpEntity<?> response = get(brokerURL + "/files" + filePath, FileInfo[].class);
         return (FileInfo[])response.getBody();
     }
-    
+
     public String getFilesize(String filePath) {
-        
+
         if (!filePath.startsWith("/")) {
             filePath = "/" + filePath;
         }
-        
+
         HttpEntity<?> response = get(brokerURL + "/filesize" + filePath, String.class);
         return (String)response.getBody();
     }
@@ -179,14 +175,14 @@ public class RestService {
         return (VaultInfo[])response.getBody();
     }
     public VaultsData getBillingVaultsAll(String sort, String order, String offset, String maxResult) {
-    	HttpEntity<?> response = get(brokerURL + "/admin/billing?sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
+        HttpEntity<?> response = get(brokerURL + "/admin/billing?sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
         return (VaultsData)response.getBody();
-	}
+    }
 
     public BillingInformation getVaultBillingInfo(String vaultId) {
-    	HttpEntity<?> response = get(brokerURL + "/admin/billing/" + vaultId , BillingInformation.class);
+        HttpEntity<?> response = get(brokerURL + "/admin/billing/" + vaultId , BillingInformation.class);
         return (BillingInformation)response.getBody();
-	}
+    }
 
     public VaultsData getVaultsListingAll(String sort, String order, String offset, String maxResult) {
         HttpEntity<?> response = get(brokerURL + "/admin/vaults?sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
@@ -237,15 +233,22 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/statistics/depositinprogress", Deposit[].class);
         return (Deposit[])response.getBody();
     }
-
-    public DepositInfo[] searchDeposits(String query) {
-        HttpEntity<?> response = get(brokerURL + "/vaults/deposits/search?query=" + query, DepositInfo[].class);
+    public DepositInfo[] searchDepositsQuery(String query) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/deposits/search/Query?query=" + query, DepositInfo[].class);
         return (DepositInfo[])response.getBody();
+    }
+    public DepositsData searchDepositsData(String query) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/deposits/data/search?query=" + query, DepositsData.class);
+        return (DepositsData)response.getBody();
     }
 
     public DepositInfo[] searchDeposits(String query, String sort) {
         HttpEntity<?> response = get(brokerURL + "/vaults/deposits/search?query=" + query + "&sort=" + sort, DepositInfo[].class);
         return (DepositInfo[])response.getBody();
+    }
+    public DepositsData searchDepositsData(String query, String sort) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/deposits/data/search?query=" + query + "&sort=" + sort, DepositsData.class);
+        return (DepositsData)response.getBody();
     }
 
     public int getRetrievesCount() {
@@ -278,7 +281,7 @@ public class RestService {
         return (Vault)response.getBody();
     }
 
-    public VaultInfo getVault(String id) {        
+    public VaultInfo getVault(String id) {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + id, VaultInfo.class);
         return (VaultInfo)response.getBody();
     }
@@ -297,7 +300,8 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/deposits", DepositInfo[].class);
         return (DepositInfo[])response.getBody();
     }
-    
+
+
     public DataManager[] getDataManagers(String vaultId) {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/dataManagers", DataManager[].class);
         return (DataManager[])response.getBody();
@@ -308,26 +312,42 @@ public class RestService {
         return (DataManager)response.getBody();
     }
 
+    public DepositsData getDepositsListingAllData() {
+        HttpEntity<?> response = get(brokerURL + "/admin/deposits/data", DepositsData.class);
+        return (DepositsData)response.getBody();
+    }
+
     public DepositInfo[] getDepositsListingAll() {
         HttpEntity<?> response = get(brokerURL + "/admin/deposits", DepositInfo[].class);
         return (DepositInfo[])response.getBody();
     }
+
+    public VaultsData getDepositsListingAll(String sort, String order, String offset, String maxResult) {
+        HttpEntity<?> response = get(brokerURL + "/admin/vaults?sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
+        return (VaultsData)response.getBody();
+    }
+
 
     public DepositInfo[] getDepositsListingAll(String sort) {
         HttpEntity<?> response = get(brokerURL + "/admin/deposits?sort=" + sort, DepositInfo[].class);
         return (DepositInfo[])response.getBody();
     }
 
+    public DepositsData getDepositsListingAllData(String sort) {
+        HttpEntity<?> response = get(brokerURL + "/admin/deposits/data?sort=" + sort, DepositsData.class);
+        return (DepositsData)response.getBody();
+    }
+
     public DepositInfo getDeposit(String depositID) {
         HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID, DepositInfo.class);
         return (DepositInfo)response.getBody();
     }
-    
+
     public FileFixity[] getDepositManifest(String depositID) {
         HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID + "/manifest", FileFixity[].class);
         return (FileFixity[])response.getBody();
     }
-    
+
     public EventInfo[] getDepositEvents(String depositID) {
         HttpEntity<?> response = get(brokerURL + "/deposits/" + depositID + "/events", EventInfo[].class);
         return (EventInfo[])response.getBody();
@@ -417,28 +437,28 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/metadata/datasets", Dataset[].class);
         return (Dataset[])response.getBody();
     }
-    
+
     public EventInfo[] getEvents() {
         HttpEntity<?> response = get(brokerURL + "/admin/events?sort=timestamp", EventInfo[].class);
         return (EventInfo[])response.getBody();
     }
-    
+
     public int getEventCount() {
         HttpEntity<?> response = get(brokerURL + "/statistics/eventcount", Integer.class);
         return (Integer)response.getBody();
     }
-    
+
     /* POST requests */
-    
+
     public String addFileChunk(String fileUploadHandle, String filename, String encodedRelativePath, String chunkNumber, String totalChunks, String chunkSize, String totalSize, byte[] content) {
-        
+
         String fileChunkURL = brokerURL + "/upload/" + fileUploadHandle + "/" + filename + "?" +
                 "relativePath=" + encodedRelativePath + "&" +
                 "chunkNumber=" + chunkNumber + "&" +
                 "totalChunks=" + totalChunks + "&" +
                 "chunkSize=" + chunkSize + "&" +
                 "totalSize=" + totalSize + "&";
-        
+
         HttpEntity<?> response = post(fileChunkURL, Byte[].class, content);
         return (String)response.getBody();
     }
@@ -478,12 +498,12 @@ public class RestService {
         HttpEntity<?> response = post(brokerURL + "/deposits", DepositInfo.class, createDeposit);
         return (DepositInfo)response.getBody();
     }
-    
+
     public Group addGroup(Group group) {
         HttpEntity<?> response = post(brokerURL + "/groups/", Group.class, group);
         return (Group)response.getBody();
     }
-    
+
     public Boolean retrieveDeposit(String depositID, Retrieve retrieve) {
         HttpEntity<?> response = post(brokerURL + "/deposits/" + depositID + "/retrieve", Boolean.class, retrieve);
         return (Boolean)response.getBody();
@@ -498,12 +518,12 @@ public class RestService {
         HttpEntity<?> response = post(brokerURL + "/users/", User.class, user);
         return (User)response.getBody();
     }
-    
+
     public VaultInfo addDataManager(String vaultId, String dataManagerUUN) {
         HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/addDataManager", VaultInfo.class, dataManagerUUN);
         return (VaultInfo)response.getBody();
     }
-    
+
     public VaultInfo deleteDataManager(String vaultId, String dataManagerID) {
         HttpEntity<?> response = delete(brokerURL + "/vaults/" + vaultId + "/deleteDataManager/" + dataManagerID, VaultInfo.class);
         return (VaultInfo)response.getBody();
@@ -531,32 +551,32 @@ public class RestService {
         HttpEntity<?> response = post(brokerURL + "/auth/users/isadmin", Boolean.class, validateUser);
         return (Boolean)response.getBody();
     }
-    
+
     public String notifyLogin(CreateClientEvent clientEvent) {
         HttpEntity<?> response = put(brokerURL + "/notify/login", String.class, clientEvent);
         return (String)response.getBody();
     }
-    
+
     public String notifyLogout(CreateClientEvent clientEvent) {
         HttpEntity<?> response = put(brokerURL + "/notify/logout", String.class, clientEvent);
         return (String)response.getBody();
     }
-    
+
     public String enableGroup(String groupId) {
         HttpEntity<?> response = put(brokerURL + "/groups/" + groupId + "/enable", String.class, null);
         return (String)response.getBody();
     }
-    
+
     public String disableGroup(String groupId) {
         HttpEntity<?> response = put(brokerURL + "/groups/" + groupId + "/disable", String.class, null);
         return (String)response.getBody();
     }
-    
+
     public String addGroupOwner(String groupId, String userId) {
         HttpEntity<?> response = put(brokerURL + "/groups/" + groupId + "/users/" + userId, String.class, null);
         return (String)response.getBody();
     }
-    
+
     /* DELETE requests */
     public void removeGroupOwner(String groupId, String userId) {
         delete(brokerURL + "/groups/" + groupId + "/users/" + userId, String.class);
@@ -574,14 +594,14 @@ public class RestService {
         HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/updateVaultDescription", VaultInfo.class, vaultDescription);
         return (VaultInfo)response.getBody();
     }
-    
+
     public void deleteDeposit(String depositId) {
         delete(brokerURL + "/admin/deposits/" + depositId, String.class);
     }
 
     public BillingInformation updateBillingInfo(String vaultId,BillingInformation billingInfo) {
         HttpEntity<?> response = post(brokerURL + "/admin/billing/" + vaultId+ "/updateBilling" , BillingInformation.class,billingInfo);
-	    return (BillingInformation)response.getBody();
+        return (BillingInformation)response.getBody();
     }
 
     public RoleModel createRole(RoleModel role) {
@@ -660,4 +680,13 @@ public class RestService {
         delete(brokerURL + "/permissions/roleAssignment/" + roleAssignmentId, Void.class);
     }
 
+    public String auditDeposits() {
+        HttpEntity<?> response =  get(brokerURL + "/admin/deposits/audit", String.class);
+        return (String)response.getBody();
+    }
+
+    public AuditInfo[] getAuditsListingAll() {
+        HttpEntity<?> response = get(brokerURL + "/admin/audits", AuditInfo[].class);
+        return (AuditInfo[])response.getBody();
+    }
 }

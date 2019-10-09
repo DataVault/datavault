@@ -55,6 +55,7 @@ services:
     networks:
       - mqnet
       - vault
+      - sftp
     depends_on:
       - rabbitmq
       - maven-build
@@ -63,6 +64,8 @@ services:
     build:
       context: .
       dockerfile: broker.Dockerfile
+    ports:
+      - "48080:8080"
     volumes:
       - ./docker/config:/docker_datavault-home/config/
       - ./docker/keystore:/docker_datavault-home/keystore/
@@ -72,6 +75,7 @@ services:
       - dbnet
       - mqnet
       - vault
+      - sftp
     depends_on:
       - rabbitmq
       - mysql
@@ -138,6 +142,17 @@ services:
     depends_on:
       - web
 
+  sftp:
+    image: atmoz/sftp
+    volumes:
+      - ./docker/tmp/datavault/filestore:/home/admin1/upload
+      - ./docker/config/.ssh:/home/admin1/.ssh:ro
+    ports:
+      - "2222:22"
+    command: admin1::1001
+    networks:
+      - sftp
+
 #volumes:
 #  db_data:
 #  rabbitmq_data:
@@ -152,4 +167,6 @@ networks:
   selenium:
     driver: bridge
   vault:
+    driver: bridge
+  sftp:
     driver: bridge

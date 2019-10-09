@@ -92,6 +92,7 @@
         <property name="usersService" ref="usersService" />
         <property name="archiveStoreService" ref="archiveStoreService" />
         <property name="jobsService" ref="jobsService" />
+        <property name="auditsService" ref="auditsService" />
         <property name="externalMetadataService" ref="externalMetadataService" />
         <property name="sender" ref="sender" />
         <property name="optionsDir" value="${optionsDir:#{null}}" />
