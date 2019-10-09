@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,11 +19,11 @@ import org.datavaultplatform.common.model.Deposit;
 public class DepositDAOImpl implements DepositDAO {
 
     private SessionFactory sessionFactory;
- 
+
     public void setSessionFactory(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-     
+
     @Override
     public void save(Deposit deposit) {
         Session session = this.sessionFactory.openSession();
@@ -31,7 +32,7 @@ public class DepositDAOImpl implements DepositDAO {
         tx.commit();
         session.close();
     }
-    
+
     @Override
     public void update(Deposit deposit) {
         Session session = null;
@@ -53,7 +54,7 @@ public class DepositDAOImpl implements DepositDAO {
             }
         }
     }
- 
+
     @SuppressWarnings("unchecked")
     @Override
     public List<Deposit> list(String sort, String userId) {
@@ -82,7 +83,7 @@ public class DepositDAOImpl implements DepositDAO {
         session.close();
         return deposits;
     }
-    
+
     @Override
     public Deposit findById(String Id) {
         Session session = this.sessionFactory.openSession();
@@ -158,23 +159,20 @@ public class DepositDAOImpl implements DepositDAO {
             return new ArrayList<>();
         }
         Criteria criteria = criteriaBuilder.build();
-        criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("note", "%" + query + "%"), Restrictions.ilike("filePath", "%" + query + "%")));
+        criteria.add(Restrictions.or(
+                Restrictions.ilike("id", "%" + query + "%"),
+                Restrictions.ilike("name", "%" + query + "%"),
+                Restrictions.ilike("filePath", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
         // See if there is a valid sort option
-        if ("id".equals(sort)) {
-            criteria.addOrder(Order.asc("id"));
-        } else if ("note".equals(sort)) {
-            criteria.addOrder(Order.asc("note"));
-        } else if ("status".equals(sort)) {
-            criteria.addOrder(Order.asc("status"));
-        } else if ("filePath".equals(sort)) {
-            criteria.addOrder(Order.asc("filePath"));
-        } else if ("depositSize".equals(sort)) {
-            criteria.addOrder(Order.asc("depositSize"));
-        } else {
-            criteria.addOrder(Order.asc("creationTime"));
-        }
+
+        if ("id".equals(sort)) { criteria.addOrder(Order.asc("id")); }
+        else if ("name".equals(sort)) { criteria.addOrder(Order.asc("name")); }
+        else if ("status".equals(sort)) { criteria.addOrder(Order.asc("status")); }
+        else if ("filePath".equals(sort)) { criteria.addOrder(Order.asc("filePath")); }
+        else if ("depositSize".equals(sort)) { criteria.addOrder(Order.asc("depositSize")); }
+        else { criteria.addOrder(Order.asc("creationTime")); }
 
         List<Deposit> deposits = criteria.list();
         session.close();
@@ -201,5 +199,20 @@ public class DepositDAOImpl implements DepositDAO {
                         criteria.createAlias("deposit.vault", "vault")
                                 .createAlias("vault.group", "group"))
                 .setSchoolIds(DaoUtils.getPermittedSchoolIds(session, userId, permission));
+    }
+
+    @Override
+    public List<Deposit> getDepositsWaitingForAudit(Date olderThanDate) {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Deposit.class);
+
+        criteria.add(Restrictions.le("creationTime", olderThanDate));
+        criteria.add(Restrictions.le("status", Deposit.Status.COMPLETE));
+
+        criteria.addOrder(Order.asc("creationTime"));
+
+        List<Deposit> deposits = criteria.list();
+        session.close();
+        return deposits;
     }
 }

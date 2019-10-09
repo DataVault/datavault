@@ -2,9 +2,12 @@ package org.datavaultplatform.common.task;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.datavaultplatform.common.model.ArchiveStore;
+import org.datavaultplatform.common.model.DepositChunk;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.event.Event;
 
+import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +30,11 @@ public class Task {
     String encTarDigest;
     Map<Integer, String> encChunksDigest;
     private Event lastEvent;
-    
+
+    // For Audit
+    private List<HashMap<String, String>> chunksToAudit;
+    String[] archiveIds;
+
     private boolean isRedeliver;
 
     public Task() {};
@@ -173,4 +180,20 @@ public class Task {
     public void setLastEvent(Event lastEvent) { this.lastEvent = lastEvent; }
     
     public void performAction(Context context) {}
+
+    public List<HashMap<String, String>> getChunksToAudit() {
+        return chunksToAudit;
+    }
+
+    public void setChunksToAudit(List<HashMap<String, String>> chunksToAudit) {
+        this.chunksToAudit = chunksToAudit;
+    }
+
+    public String[] getArchiveIds() {
+        return this.archiveIds;
+    }
+
+    public void setArchiveIds(String[] archiveIds) {
+        this.archiveIds = archiveIds;
+    }
 }

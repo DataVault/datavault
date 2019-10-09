@@ -99,7 +99,7 @@
                         </div>
                         <div class="form-group">
                             <label class="control-label">Amount to be billed:(Please enter the amount in pounds (and pence  if applicable) without any symbols, do not use commas)</label>
-                            <@spring.bind "billingDetails.amountToBeBilled" />
+                            <@spring.bind "billingDetails.amountToBeBilled" />:
                             <input type="text" class="form-control" name="${spring.status.expression}"
                    value="${spring.status.value!""}" id="amountToBeBilled" maxlength="400" pattern="[0-9]+(\.[0-9][0-9]?)?"/>
                         </div>
