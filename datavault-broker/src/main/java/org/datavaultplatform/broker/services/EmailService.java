@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.services;
 
+import org.datavaultplatform.common.model.User;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -8,16 +9,23 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.apache.velocity.app.VelocityEngine;
 import javax.mail.internet.MimeMessage;
+import java.io.IOException;
 import java.util.HashMap;
 
 public class EmailService {
-    
+
+    private UsersService usersService;
+
     private JavaMailSender mailSender;
     private VelocityEngine velocityEngine;
     private String mailAdministrator;
     
     private final String encoding = "UTF-8";
-    
+
+    public UsersService getUsersService() { return usersService; }
+
+    public void setUsersService(UsersService usersService) { this.usersService = usersService; }
+
     public void setMailSender(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
@@ -45,7 +53,23 @@ public class EmailService {
             System.err.println(ex.getMessage());
         }
     }
-    
+
+    public void sendTemplateMailToUser(String userID, final String subject, final String template, final HashMap model) {
+        User user = usersService.getUser(userID);
+        sendTemplateMailToUser(user, subject, template, model);
+    }
+
+    public void sendTemplateMailToUser(User user, final String subject, final String template, final HashMap model) {
+        if (user.getEmail() != null) {
+            sendTemplateMail(user.getEmail(),
+                    subject,
+                    template,
+                    model);
+        } else {
+            // TODO: email admin "User missing email"
+        }
+    }
+
     // Send an HTML email based on a Velocity template using data from the provided model
     public void sendTemplateMail(final String to, final String subject, final String template, final HashMap model) {
 

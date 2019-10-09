@@ -1,9 +1,10 @@
 package org.datavaultplatform.broker.controllers;
 
-import org.datavaultplatform.broker.services.RolesAndPermissionsService;
-import org.datavaultplatform.common.model.PermissionModel;
-import org.datavaultplatform.common.model.RoleAssignment;
-import org.datavaultplatform.common.model.RoleModel;
+import org.datavaultplatform.broker.queue.EventListener;
+import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.common.event.Error;
+import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.model.*;
 import org.jsondoc.core.annotation.Api;
 import org.jsondoc.core.annotation.ApiMethod;
 import org.jsondoc.core.annotation.ApiPathParam;
@@ -12,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -19,7 +21,17 @@ import java.util.List;
 @Api(name="Permissions", description = "Interact with DataVault Roles and Permissions")
 public class RolesAndPermissionsController {
 
+    private EmailService emailService;
+    private VaultsService vaultsService;
+    private GroupsService groupsService;
+
     private RolesAndPermissionsService rolesAndPermissionsService;
+
+    public void setEmailService(EmailService emailService) { this.emailService = emailService; }
+
+    public void setVaultsService(VaultsService vaultsService) { this.vaultsService = vaultsService; }
+
+    public void setGroupsService(GroupsService groupsService) { this.groupsService = groupsService; }
 
     public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
         this.rolesAndPermissionsService = rolesAndPermissionsService;
@@ -47,7 +59,9 @@ public class RolesAndPermissionsController {
             responsestatuscode = "200 - OK"
     )
     @PostMapping("/roleAssignment")
-    public RoleAssignment createRoleAssignment(@RequestBody RoleAssignment roleAssignment) {
+    public RoleAssignment createRoleAssignment(@RequestBody RoleAssignment roleAssignment) throws Exception {
+        sendEmails("new-role-assignment", roleAssignment);
+
         return rolesAndPermissionsService.createRoleAssignment(roleAssignment);
     }
 
@@ -244,7 +258,9 @@ public class RolesAndPermissionsController {
             responsestatuscode = "200 - OK"
     )
     @PutMapping("/roleAssignment")
-    public RoleAssignment updateRoleAssignment(@RequestBody RoleAssignment roleAssignment) {
+    public RoleAssignment updateRoleAssignment(@RequestBody RoleAssignment roleAssignment) throws Exception {
+        sendEmails("update-role-assignment", roleAssignment);
+
         return rolesAndPermissionsService.updateRoleAssignment(roleAssignment);
     }
 
@@ -273,5 +289,23 @@ public class RolesAndPermissionsController {
             @PathVariable("roleAssignmentId") @ApiPathParam(name = "Role ID", description = "The ID of the role assignment to delete") Long roleAssignmentId) {
         rolesAndPermissionsService.deleteRoleAssignment(roleAssignmentId);
         return ResponseEntity.ok().build();
+    }
+
+    private void sendEmails(String template, RoleAssignment roleAssignment) throws Exception {
+
+        HashMap<String, Object> model = new HashMap<String, Object>();
+        model.put("role", roleAssignment.getRole().getName());
+        if(roleAssignment.getVaultId() != null) {
+            model.put("vault", vaultsService.getVault(roleAssignment.getVaultId()).getName());
+        }
+        if(roleAssignment.getSchoolId() != null) {
+            model.put("school", groupsService.getGroup(roleAssignment.getSchoolId()).getName());
+        }
+
+        // Send email to the deposit user
+        emailService.sendTemplateMailToUser(roleAssignment.getUserId(),
+                "Datavault - Role Assignment",
+                template,
+                model);
     }
 }
