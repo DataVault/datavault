@@ -46,6 +46,7 @@ public class VaultsServiceIT {
         vault.setDescription("Vault for test");
         vault.setGrantEndDate(new Date());
         vault.setReviewDate(new Date());
+        vault.setSnapshot("This is a dummy snapshot");
         vaultsService.addVault(vault);
         
         int newVaultCount = prevVaultCount + 1;
