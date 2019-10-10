@@ -6,8 +6,10 @@ import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
+import org.datavaultplatform.webapp.exception.InvalidUunException;
 import org.datavaultplatform.webapp.services.ForceLogoutService;
 import org.datavaultplatform.webapp.services.RestService;
+import org.datavaultplatform.webapp.services.UserLookupService;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -28,10 +32,13 @@ public class RoleAssignmentController {
 
     private final ForceLogoutService forceLogoutService;
 
+    private UserLookupService userLookupService;
+
     @Autowired
-    public RoleAssignmentController(RestService rest, ForceLogoutService forceLogoutService) {
+    public RoleAssignmentController(RestService rest, ForceLogoutService forceLogoutService, UserLookupService userLookupService) {
         this.rest = rest;
         this.forceLogoutService = forceLogoutService;
+        this.userLookupService = userLookupService;
     }
 
     @PostMapping("/security/roles/{roleType}/{target}/user/update")
@@ -94,7 +101,11 @@ public class RoleAssignmentController {
         RoleAssignment assignment = new RoleAssignment();
         User user = rest.getUser(request.user);
         if (user == null) {
-            return ResponseEntity.status(422).body("Could not find user with ID=" + request.user);
+            try {
+                userLookupService.ensureUserExists(request.user);
+            } catch (InvalidUunException e) {
+                return ResponseEntity.status(422).body("Could not find user with UUN: " + request.user);
+            }
         }
 
         RoleType roleType = RoleType.valueOf(type.toUpperCase());
@@ -116,7 +127,6 @@ public class RoleAssignmentController {
             default:
                 return ResponseEntity.notFound().build();
         }
-
 
         RoleModel role = rest.getRole(request.role)
                 .orElseThrow(() -> new EntityNotFoundException(RoleModel.class, String.valueOf(request.role)));

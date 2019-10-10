@@ -1,0 +1,13 @@
+<html>
+	<body>
+		
+		<p>Your Role on the following target as been updated:</p>
+		<ul>
+			<li>Previous Role: ${role}</li>
+			<li>New Role: ${role}</li>
+			<li>Target: ${target}</li>
+			<li>Vault: ${vault}</li>
+			<li>School: ${school}</li>
+		</ul>
+	</body>
+</html>

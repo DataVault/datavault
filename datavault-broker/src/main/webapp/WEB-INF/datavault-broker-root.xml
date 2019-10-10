@@ -131,6 +131,7 @@
 
     <bean id="emailService" class="org.datavaultplatform.broker.services.EmailService">
         <property name="mailSender" ref="mailSender"/>
+        <property name="usersService" ref="usersService" />
         <property name="velocityEngine" ref="velocityEngine"/>
         <property name="mailAdministrator" value="${mail.administrator}" />
     </bean>
