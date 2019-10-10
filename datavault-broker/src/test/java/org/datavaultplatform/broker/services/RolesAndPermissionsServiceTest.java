@@ -502,6 +502,7 @@ public class RolesAndPermissionsServiceTest {
         role.setName("Test Role");
         role.setDescription("Dummy role for testing");
         role.setType(roleType);
+        role.setStatus("1");
         role.setPermissions(new HashSet<>());
         return role;
     }

@@ -19,6 +19,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -168,8 +169,12 @@ public class VaultsController {
                 .findFirst()
                 .ifPresent(roleAssignment -> model.addAttribute("dataOwner", roleAssignment));
 
+        List<RoleAssignment> roleAssignmentsForUser = restService.getRoleAssignmentsForUser(principal.getName());
+        List<RoleModel> roles = restService.getVaultRoles();
+        List<RoleModel> validRoles = RoleUtils.getAssignableRoles(roleAssignmentsForUser, roles);
+
         model.addAttribute("vault", vault);
-        model.addAttribute("roles", restService.getVaultRoles());
+        model.addAttribute("roles", validRoles);
         model.addAttribute("roleAssignments", vaultUsers);
         model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
         model.addAttribute(restService.getGroup(vault.getGroupID()));

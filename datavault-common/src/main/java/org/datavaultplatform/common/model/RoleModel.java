@@ -27,6 +27,10 @@ public class RoleModel {
     @Column(name = "role_type", nullable = false, columnDefinition = "TEXT")
     private RoleType type;
 
+    @Column(name = "role_status", nullable = false, columnDefinition = "TEXT")
+    private String status;
+
+
     @ManyToMany
     @JoinTable(
             name = "Role_permissions",
@@ -72,7 +76,7 @@ public class RoleModel {
     }
 
     public Collection<PermissionModel> getPermissions() {
-        return permissions;
+        return Sets.newHashSet(permissions);
     }
 
     public void setPermissions(Collection<PermissionModel> permissions) {
@@ -116,5 +120,13 @@ public class RoleModel {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public String getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

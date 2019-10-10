@@ -2,7 +2,7 @@
 <#-- Specify which navbar element should be flagged as active -->
 <#global nav="admin">
 <@layout.vaultLayout>
-<#import "/spring.ftl" as spring />
+    <#import "/spring.ftl" as spring />
 
     <style>
         #add-new {
@@ -82,6 +82,10 @@
                                         <option data-target="#drp-school" value="SCHOOL">School role</option>
                                     </select>
                                 </div>
+                                <div class="form-group form-inline row">
+                                    <label class="control-label col-xs-3" for="edit_status">Status</label>
+                                    <input class="form-control col-xs-9" name="status" id="edit_status">
+                                </div>
                             </div>
                             <div class="col-xs-6">
                                 <div class="form-group form-inline row">
@@ -153,52 +157,56 @@
             <div class="table-responsive">
                 <table class="table table-striped">
                     <thead>
-                        <tr>
-                            <th>Role</th>
-                            <th>No. of Users</th>
-                            <th class="action-column">Actions</th>
-                        </tr>
+                    <tr>
+                        <th>Role</th>
+                        <th>No. of Users</th>
+                        <th>Status</th>
+                        <th class="action-column">Actions</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        <#if isSuperAdmin>
-                            <tr>
-                                <td>${superAdminRole.getName()}</td>
-                                <td>${superAdminRole.getAssignedUserCount()}</td>
-                                <td class="action-column">
-                                    <a id="isadmin-button" class="btn btn-default" href="${springMacroRequestContext.getContextPath()}/admin/roles/isadmin" title="Manage ${superAdminRole.name} users.">
-                                        <i class="fa fa-users"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        </#if>
-                        <#list readOnlyRoles as role>
-                            <tr>
-                                <td>${role.getName()}</td>
-                                <td>${role.getAssignedUserCount()}</td>
-                                <td class="action-column">
-                                    <a href="#" class="btn btn-default" disabled="disabled" role="button" title="Cannot edit the ${role.name} role.">
-                                        <i class="fa fa-pencil"></i>
-                                    </a>
-                                    <a href="#" class="btn btn-default btn-delete" disabled="disabled" role="button" title="Cannot delete the ${role.name} role.">
-                                        <i class="fa fa-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        </#list>
-                        <#list roles as role>
-                            <tr>
-                                <td>${role.getName()}</td>
-                                <td>${role.getAssignedUserCount()}</td>
-                                <td class="action-column">
-                                    <a href="#" class="btn btn-default editRoleButton" role="button" value="${role.getId()}" title="Edit the ${role.name} role.">
-                                        <i class="fa fa-pencil"></i>
-                                    </a>
-                                    <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog" data-role-id="${role.id}" data-role-name="${role.name}" role="button" title="Delete the ${role.name} role.">
-                                        <i class="fa fa-trash-o"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        </#list>
+                    <#if isSuperAdmin>
+                        <tr>
+                            <td>${superAdminRole.getName()}</td>
+                            <td>${superAdminRole.getAssignedUserCount()}</td>
+                            <td>${superAdminRole.getStatus()}</td>
+                            <td class="action-column">
+                                <a id="isadmin-button" class="btn btn-default" href="${springMacroRequestContext.getContextPath()}/admin/roles/isadmin" title="Manage ${superAdminRole.name} users.">
+                                    <i class="fa fa-users"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </#if>
+                    <#list readOnlyRoles as role>
+                        <tr>
+                            <td>${role.getName()}</td>
+                            <td>${role.getAssignedUserCount()}</td>
+                            <td>${role.getStatus()}</td>
+                            <td class="action-column">
+                                <a href="#" class="btn btn-default" disabled="disabled" role="button" title="Cannot edit the ${role.name} role.">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                <a href="#" class="btn btn-default btn-delete" disabled="disabled" role="button" title="Cannot delete the ${role.name} role.">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </#list>
+                    <#list roles as role>
+                        <tr>
+                            <td>${role.getName()}</td>
+                            <td>${role.getAssignedUserCount()}</td>
+                            <td>${role.getStatus()}</td>
+                            <td class="action-column">
+                                <a href="#" class="btn btn-default editRoleButton" role="button" value="${role.getId()}" title="Edit the ${role.name} role.">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog" data-role-id="${role.id}" data-role-name="${role.name}" role="button" title="Delete the ${role.name} role.">
+                                    <i class="fa fa-trash-o"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </#list>
                     </tbody>
                 </table>
             </div>
@@ -217,11 +225,11 @@
         });
 
         $('[data-target="#delete-dialog"]').click(function() {
-           var roleId = $(this).data('role-id');
-           var roleName = $(this).data('role-name');
-           $('#delete-role-id').val(roleId);
-           $('#delete-role-name').text(roleName);
-           $('#delete-error').addClass('hidden').text('');
+            var roleId = $(this).data('role-id');
+            var roleName = $(this).data('role-name');
+            $('#delete-role-id').val(roleId);
+            $('#delete-role-name').text(roleName);
+            $('#delete-error').addClass('hidden').text('');
         });
 
         $('#create-role').submit(function(event) {
@@ -312,6 +320,7 @@
                     $("#edit_roleid").val(data.role.id);
                     $("#edit_name").val(data.role.name);
                     $("#edit_description").val(data.role.description);
+                    $("#edit_status").val(data.role.status);
                     $("#edit_type").val(data.role.type);
 
                     var permissions = data.role.permissions;
@@ -377,6 +386,7 @@
             $("#edit_roleid").val(0);
             $("#edit_name").val("");
             $("#edit_description").val("");
+            $("#edit_status").val("");
 
             var type = "VAULT";
             $("#edit_type").val(type);
