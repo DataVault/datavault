@@ -83,6 +83,9 @@ public class DepositInfo {
     @ApiObjectField(description = "The Vault Group Name i.e. School")
     private String groupName;
 
+    @ApiObjectField(description = "The Vault Group ID i.e. School ID")
+    private String groupID;
+
     @ApiObjectField(description = "The Vault Group Name i.e. School")
     private String vaultReviewDate;
     
@@ -276,6 +279,14 @@ public class DepositInfo {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
+    }
+
+    public String getGroupID() {
+        return this.groupID;
+    }
+
+    public void setGroupID(String groupID) {
+        this.groupID = groupID;
     }
 
     public void setVaultReviewDate(String vaultReviewDate) {
