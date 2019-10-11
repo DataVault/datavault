@@ -48,7 +48,7 @@
                           If you are unsure of the path, you should be able to view it in
                           <a href="https://registration.ecdf.ed.ac.uk/storage/" target="_blank">ECDF Storage Manager</a>
                           or ask your local or School IT support or see our
-                          <a href=" https://www.edweb.ed.ac.uk/information-services/research-support/research-data-service/sharing-preserving-data/datavault/how-to-deposit-datavault/file-locations" target="_blank">
+                          <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/after/datavault/how-to-deposit-datavault/file-locations" target="_blank">
                               advice on File Locations
                           </a>
                           for further help and examples.
