@@ -40,7 +40,8 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	private static String SERVICE_URL = "service-url";
 	private static String IDENTITY_DOMAIN = "identity-domain";
 	private static String CONTAINER_NAME = "container-name";
-	private int retryTime = 60;
+	private int defaultRetryTime = 60;
+	private int retryTime = this.defaultRetryTime;
 	
 	/*
 	 * Add local jars to mvn
@@ -53,6 +54,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	public OracleObjectStorageClassic(String name, Map<String, String> config) throws Exception {
 		super(name, config);
 		super.depositIdStorageKey = true;
+		String retryKey = "occRetryTime";
 		Properties prop = new Properties();
 		try (InputStream is = new FileInputStream(OracleObjectStorageClassic.PROPERTIES_FILE_PATH)) {
             prop.load(is);
@@ -69,6 +71,13 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		);
 		String contName = prop.getProperty(OracleObjectStorageClassic.CONTAINER_NAME);
 		this.containerName = contName != null ? contName : OracleObjectStorageClassic.DEFAULT_CONTAINER_NAME;
+		if (config.containsKey(retryKey)){
+			try {
+				retryTime = Integer.parseInt(config.get(retryKey));
+			} catch (NumberFormatException nfe) {
+				retryTime = this.defaultRetryTime;
+			}
+		}
 	}
 
 	@Override
@@ -134,11 +143,11 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 				logger.info("Uploaded previously: skipping.");
 				break;
 			} catch (ClientException ce) {
-				logger.error("Upload failed. " + ce.getMessage());
+				logger.error("Upload failed. " + "Retrying in " + this.retryTime + " mins " + ce.getMessage());
 				//throw ce;
 				TimeUnit.MINUTES.sleep(this.retryTime);
 			} catch (Exception e) {
-				logger.error("Upload failed. " + e.getMessage());
+				logger.error("Upload failed. " + "Retrying in " + this.retryTime + " mins " + e.getMessage());
 				//throw e;
 				TimeUnit.MINUTES.sleep(this.retryTime);
 			} finally {

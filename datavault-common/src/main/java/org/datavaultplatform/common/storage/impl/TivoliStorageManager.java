@@ -29,12 +29,14 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     public static String TEMP_PATH_PREFIX = "/tmp/datavault/temp/";
 
     public Verify.Method verificationMethod = Verify.Method.COPY_BACK;
-    private int retryTime = 60;
+    private int defaultRetryTime = 60;
+    private int retryTime = this.defaultRetryTime;
 
     public TivoliStorageManager(String name, Map<String,String> config) throws Exception  {
         super(name, config);
         String optionsKey = "optionsDir";
     	String tempKey = "tempDir";
+    	String retryKey = "tsmRetryTime";
         // if we have non default options in datavault.properties use them
         if (config.containsKey(optionsKey)) {
         	String optionsDir = config.get(optionsKey);
@@ -44,6 +46,13 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         if (config.containsKey(tempKey)) {
         	TivoliStorageManager.TEMP_PATH_PREFIX = config.get(tempKey);
         }
+        if (config.containsKey(retryKey)){
+        	try {
+				retryTime = Integer.parseInt(config.get(retryKey));
+			} catch (NumberFormatException nfe) {
+        		retryTime = this.defaultRetryTime;
+			}
+		}
         locations = new ArrayList<String>();
         locations.add(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
         locations.add(TivoliStorageManager.TSM_SERVER_NODE2_OPT);

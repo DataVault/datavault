@@ -43,6 +43,8 @@ public class DepositsController {
     private String region;
     private String awsAccessKey;
     private String awsSecretKey;
+    private String tsmRetryTime;
+    private String occRetryTime;
 
     private static final Logger logger = LoggerFactory.getLogger(DepositsController.class);
     
@@ -112,6 +114,14 @@ public class DepositsController {
 
     public void setAwsSecretKey(String awsSecretKey) {
     	this.awsSecretKey = awsSecretKey;
+    }
+
+    public void setTsmRetryTime(String tsmRetryTime) {
+        this.tsmRetryTime = tsmRetryTime;
+    }
+
+    public void setOccRetryTime(String occRetryTime) {
+        this.occRetryTime = occRetryTime;
     }
 
     @RequestMapping(value = "/deposits/{depositid}", method = RequestMethod.GET)
@@ -378,8 +388,19 @@ public class DepositsController {
 		        	if (this.tempDir != null && ! this.tempDir.equals("")) {
 		        		asProps.put("tempDir", this.tempDir);
 		        	}
+		        	if (this.tsmRetryTime != null && ! this.tsmRetryTime.equals("")) {
+		        	    asProps.put("tsmRetryTime", this.tsmRetryTime);
+                    }
 		        	archiveStore.setProperties(asProps);
 		        }
+
+		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.OracleObjectStorageClassic")) {
+                    HashMap<String, String> asProps = archiveStore.getProperties();
+                    if (this.occRetryTime != null && ! this.occRetryTime.equals("")) {
+                        asProps.put("occRetryTime", this.tsmRetryTime);
+                    }
+                    archiveStore.setProperties(asProps);
+                }
 
 		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.S3Cloud")) {
 		        	HashMap<String, String> asProps = archiveStore.getProperties();
