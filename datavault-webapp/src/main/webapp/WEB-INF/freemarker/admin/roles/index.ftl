@@ -83,7 +83,7 @@
                                     </select>
                                 </div>
                                 <div class="form-group form-inline row">
-                                    <label class="control-label col-xs-3" for="edit_status">Status</label>
+                                    <label class="control-label col-xs-3" for="edit_status">Level</label>
                                     <input class="form-control col-xs-9" name="status" id="edit_status">
                                 </div>
                             </div>
@@ -160,7 +160,7 @@
                     <tr>
                         <th>Role</th>
                         <th>No. of Users</th>
-                        <th>Status</th>
+                        <th>Level</th>
                         <th class="action-column">Actions</th>
                     </tr>
                     </thead>
