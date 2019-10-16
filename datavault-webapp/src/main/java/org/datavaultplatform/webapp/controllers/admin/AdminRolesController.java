@@ -120,18 +120,18 @@ public class AdminRolesController {
             logger.debug("Could not create role - no permissions selected");
             return validationFailed("Roles must have at least one permission.");
         } else if (RoleType.valueOf(type).equals(RoleType.VAULT) && StringUtils.isEmpty(status)) {
-            logger.debug("Could not create vault role - no status.");
-            return validationFailed("Vaut roles must have a level.");
+            logger.debug("Could not create vault role - no level.");
+            return validationFailed("Vault roles must have a level.");
         } else if (! StringUtils.isEmpty(status)) {
             try {
                 int statusAsInt = Integer.parseInt(status);
                 if (statusAsInt < 0) {
-                    logger.debug("Could not create role - negative status.");
-                    return validationFailed("Roles must have a positive status.");
+                    logger.debug("Could not create role - negative level.");
+                    return validationFailed("Roles must have a positive level.");
                 }
             } catch (NumberFormatException nfe) {
-                logger.debug("Could not create role - invalid status.");
-                return validationFailed("Roles must have a valid status.");
+                logger.debug("Could not create role - invalid level.");
+                return validationFailed("Roles must have a valid level.");
             }
 
         }
