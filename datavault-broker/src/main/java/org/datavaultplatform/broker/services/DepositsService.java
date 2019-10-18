@@ -112,6 +112,9 @@ public class DepositsService {
         logger.debug("MONTH: "+getAuditPeriodMonths());
         logger.debug("YEAR: "+getAuditPeriodYears());
 
+        logger.debug("Max per Deposit: "+maxChunkAuditPerDeposit);
+        logger.debug("Total Max: "+maxChunkPerAudit);
+
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.MINUTE, -getAuditPeriodMinutes()); // to get previous days
         cal.add(Calendar.HOUR, -getAuditPeriodHours()); // to get previous days
@@ -127,6 +130,7 @@ public class DepositsService {
 
         int totalCount = 0;
         for(Deposit deposit : deposits){
+            logger.debug("Total Count: "+totalCount);
             logger.debug("check deposit: "+deposit.getID());
 
             List<DepositChunk> depositChunks = deposit.getDepositChunks();
@@ -148,6 +152,7 @@ public class DepositsService {
 
             int count = 0;
             for(DepositChunk chunk : depositChunks){
+                logger.debug("Chunk in deposit count: "+count);
                 if(totalCount >= maxChunkPerAudit) {
                     logger.debug("maxChunkPerAudit reached");
                     return chunksToAudit;
@@ -163,6 +168,7 @@ public class DepositsService {
                 if(lastAuditChunkInfo == null){
                     logger.debug("add chunk, No previous audit.");
                     chunksToAudit.add(chunk);
+                    count++; totalCount++;
                 }else if( lastAuditChunkInfo.getTimestamp().before(olderThanDate) && (
                                 lastAuditChunkInfo.getStatus().equals(AuditChunkStatus.Status.COMPLETE) ||
                                         lastAuditChunkInfo.getStatus().equals(AuditChunkStatus.Status.FIXED) ) ){

@@ -42,6 +42,7 @@
                                 <option value="AmazonGlacier">Amazon Glacier</option>
                                 <option value="DropboxFileSystem">Dropbox File System</option>
                                 <option value="LocalFileSystem">Local File System</option>
+                                <option value="MultiLocalFileSystem">Multi Local File System</option>
                                 <option value="OracleObjectStorageClassic">Oracle Object Storage Classic</option>
                                 <option value="S3Cloud">S3 Cloud</option>
                                 <option value="SFTPFileSystem">SFTP File System</option>

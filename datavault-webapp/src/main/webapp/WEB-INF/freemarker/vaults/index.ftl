@@ -12,6 +12,7 @@
             Current Vaults
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                 title="Vaults of which you are either the Owner or the Nominated Data Manager. If you think a vault is missing from this list, please contact the Research Data Service">
+            </span>
         </h3>
         
         <div class="row">
@@ -71,6 +72,7 @@
                             <small>
                                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                                     title="Multiple deposits may be made into one vault. Usually one vault will correspond to one Pure record">
+                                </span>
                             </small>
                         </h2>
                         

@@ -57,7 +57,6 @@ public class AuditDepositsChunks {
 
     public void setSender(Sender sender) { this.sender = sender; }
 
-    @Scheduled(cron = "${cron.expression}")
     public void execute() throws Exception {
         Date now = new Date();
         System.out.println("Start Audit Job "+now.toString());
