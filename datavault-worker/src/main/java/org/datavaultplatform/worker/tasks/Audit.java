@@ -72,6 +72,10 @@ public class Audit extends Task {
         Device archiveFs = this.setupArchiveFileStores();
 
         try {
+            eventStream.send(new UpdateProgress(this.jobID, null, 0,
+                    this.depositChunkToAudit.size(), "Starting auditing ...")
+                    .withUserId(this.userID));
+
             if (archiveFs.hasMultipleCopies()) {
                 this.multipleCopies(context, archiveFs);
             } else {
@@ -90,7 +94,7 @@ public class Audit extends Task {
 
         List<String> locations = archiveFs.getLocations();
         Iterator<String> locationsIt = locations.iterator();
-        LOCATION:
+
         while (locationsIt.hasNext()) {
             String location = locationsIt.next();
             logger.info("Current " + location);
@@ -98,26 +102,13 @@ public class Audit extends Task {
                 logger.info("Attempting audit on archive from " + location);
                 this.doAudit(context, archiveFs, false, location);
                 logger.info("Completed audit on archive from " + location);
-                break LOCATION;
             } catch (Exception e) {
-                // if last location has an error throw the error else go
-                // round again
-                if (!locationsIt.hasNext()) {
-                    logger.info("All locations had problems throwing exception " + e.getMessage());
-                    throw e;
-                } else {
-                    logger.info("Current " + location + " has a problem trying next location");
-                    continue LOCATION;
-                }
+                logger.info("Current " + location + " has a problem trying next location");
             }
         }
     }
 
     private void doAudit(Context context, Device archiveFs, boolean singleCopy, String location) {
-        eventStream.send(new UpdateProgress(this.jobID, null, 0,
-                this.depositChunkToAudit.size(), "Starting auditing ...")
-                .withUserId(this.userID));
-
         logger.info("Retrieving " + depositChunkToAudit.size() + " chunk(s) for audit.");
 
         for(int i = 0; i < depositChunkToAudit.size(); i++) {
