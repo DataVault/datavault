@@ -4,9 +4,7 @@
 		<p>You have been assigned a new Role:</p>
 		<ul>
 			<li>Role: ${role}</li>
-			<li>Target: ${target}</li>
 			<li>Vault: ${vault}</li>
-			<li>School: ${school}</li>
 		</ul>
 	</body>
 </html>

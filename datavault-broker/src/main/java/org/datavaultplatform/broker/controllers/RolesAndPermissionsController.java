@@ -60,7 +60,7 @@ public class RolesAndPermissionsController {
     )
     @PostMapping("/roleAssignment")
     public RoleAssignment createRoleAssignment(@RequestBody RoleAssignment roleAssignment) throws Exception {
-        sendEmails("new-role-assignment", roleAssignment);
+        sendEmails("new-role-assignment.vm", roleAssignment);
 
         return rolesAndPermissionsService.createRoleAssignment(roleAssignment);
     }
@@ -259,7 +259,7 @@ public class RolesAndPermissionsController {
     )
     @PutMapping("/roleAssignment")
     public RoleAssignment updateRoleAssignment(@RequestBody RoleAssignment roleAssignment) throws Exception {
-        sendEmails("update-role-assignment", roleAssignment);
+        sendEmails("update-role-assignment.vm", roleAssignment);
 
         return rolesAndPermissionsService.updateRoleAssignment(roleAssignment);
     }
