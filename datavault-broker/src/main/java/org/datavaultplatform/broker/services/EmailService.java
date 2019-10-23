@@ -67,6 +67,7 @@ public class EmailService {
                     model);
         } else {
             // TODO: email admin "User missing email"
+            System.out.println("Email missing for " + user.getID() + ".  Can't send role assignment email");
         }
     }
 
