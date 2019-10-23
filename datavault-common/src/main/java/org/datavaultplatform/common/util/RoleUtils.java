@@ -72,6 +72,9 @@ public class RoleUtils {
             if (rm.getType().equals(RoleType.ADMIN)) {
                 admin = true;
             }
+            if (rm.getType().equals(RoleType.SCHOOL)) {
+                admin = true;
+            }
         }
 
         // iterate over the roles and remove any with a higher or equal status
