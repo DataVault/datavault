@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,13 +29,16 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 
     public Verify.Method verificationMethod = Verify.Method.COPY_BACK;
     private static int defaultRetryTime = 30;
+	private static int defaultMaxRetries = 48; // 24 hours if retry time is 30 minutes
     private static int retryTime = TivoliStorageManager.defaultRetryTime;
+    private static int maxRetries = TivoliStorageManager.defaultMaxRetries;
 
     public TivoliStorageManager(String name, Map<String,String> config) throws Exception  {
         super(name, config);
         String optionsKey = "optionsDir";
     	String tempKey = "tempDir";
     	String retryKey = "tsmRetryTime";
+    	String maxKey = "tsmMaxRetries";
         // if we have non default options in datavault.properties use them
         if (config.containsKey(optionsKey)) {
         	String optionsDir = config.get(optionsKey);
@@ -48,9 +50,16 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         }
         if (config.containsKey(retryKey)){
         	try {
-				retryTime = Integer.parseInt(config.get(retryKey));
+				TivoliStorageManager.retryTime = Integer.parseInt(config.get(retryKey));
 			} catch (NumberFormatException nfe) {
-        		retryTime = TivoliStorageManager.defaultRetryTime;
+				TivoliStorageManager.retryTime = TivoliStorageManager.defaultRetryTime;
+			}
+		}
+        if (config.containsKey(maxKey)) {
+			try {
+				TivoliStorageManager.maxRetries = Integer.parseInt(config.get(maxKey));
+			} catch (NumberFormatException nfe) {
+				TivoliStorageManager.maxRetries = TivoliStorageManager.defaultMaxRetries;
 			}
 		}
         locations = new ArrayList<String>();
@@ -103,7 +112,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     		Files.createDirectory(Paths.get(fileDir));
     	}
     	logger.info("Retrieve command is " + "dsmc " + " retrieve " + filePath + " -description=" + depositId + " -optfile=" + optFilePath + "-replace=true");
-    	while (true) {
+    	for (int r = 0; r < TivoliStorageManager.maxRetries; r++) {
 	        ProcessBuilder pb = new ProcessBuilder("dsmc", "retrieve", filePath, "-description=" + depositId, "-optfile=" + optFilePath, "-replace=true");
 	        Process p = pb.start();
 	        // This class is already running in its own thread so it can happily pause until finished.
@@ -115,7 +124,9 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 	            for (int i = 0; i < error.available(); i++) {
 	            		logger.info("" + error.read());
 	            }
-	            //throw new Exception("Retrieval of " + working.getName() + " failed. ");
+	            if (r == (TivoliStorageManager.maxRetries - 1)) {
+					throw new Exception("Retrieval of " + working.getName() + " failed. ");
+				}
 	            logger.info("Retrieval of " + working.getName() + " failed. Retrying in " + TivoliStorageManager.retryTime + " mins");
 	            TimeUnit.MINUTES.sleep(TivoliStorageManager.retryTime);
 	            
@@ -173,7 +184,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         logger.info("Store command is " + "dsmc" + " archive " + working.getAbsolutePath() +  " -description=" + description + " -optfile=" + optFilePath);
         ProcessBuilder pb = new ProcessBuilder("dsmc", "archive", working.getAbsolutePath(), "-description=" + description, "-optfile=" + optFilePath);
         //pb.directory(path);
-        while (true) {
+		for (int r = 0; r < TivoliStorageManager.maxRetries; r++) {
 	        Process p = pb.start();
 	
 	        // This class is already running in its own thread so it can happily pause until finished.
@@ -189,7 +200,9 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 	            if (output != null) {
 	            	logger.info(IOUtils.toString(output, StandardCharsets.UTF_8));
 	            }
-	            //throw new Exception("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
+	            if (r == (TivoliStorageManager.maxRetries -1)) {
+					throw new Exception("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
+				}
 	            logger.info("Deposit of " + working.getName() + " using " + optFilePath + " failed.  Retrying in " + TivoliStorageManager.retryTime + " mins");
 	            TimeUnit.MINUTES.sleep(TivoliStorageManager.retryTime);
 	        } else {
