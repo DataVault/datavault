@@ -40,8 +40,8 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	private static String SERVICE_URL = "service-url";
 	private static String IDENTITY_DOMAIN = "identity-domain";
 	private static String CONTAINER_NAME = "container-name";
-	private int defaultRetryTime = 60;
-	private int retryTime = this.defaultRetryTime;
+	private static int defaultRetryTime = 30;
+	private static int retryTime = OracleObjectStorageClassic.defaultRetryTime;
 	
 	/*
 	 * Add local jars to mvn
@@ -73,9 +73,9 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		this.containerName = contName != null ? contName : OracleObjectStorageClassic.DEFAULT_CONTAINER_NAME;
 		if (config.containsKey(retryKey)){
 			try {
-				retryTime = Integer.parseInt(config.get(retryKey));
+				OracleObjectStorageClassic.retryTime = Integer.parseInt(config.get(retryKey));
 			} catch (NumberFormatException nfe) {
-				retryTime = this.defaultRetryTime;
+				retryTime = OracleObjectStorageClassic.defaultRetryTime;
 			}
 		}
 	}
@@ -110,11 +110,11 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 			} catch (ClientException ce) {
 				logger.error("Download failed. " + ce.getMessage());
 				//throw ce;
-				TimeUnit.MINUTES.sleep(this.retryTime);
+				TimeUnit.MINUTES.sleep(OracleObjectStorageClassic.retryTime);
 			} catch (Exception e) {
 				logger.error("Download failed. " + e.getMessage());
 				//throw e;
-				TimeUnit.MINUTES.sleep(this.retryTime);
+				TimeUnit.MINUTES.sleep(OracleObjectStorageClassic.retryTime);
 			} finally {
 				if (this.manager != null) {
 					this.manager.shutdown();
@@ -143,13 +143,13 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 				logger.info("Uploaded previously: skipping.");
 				break;
 			} catch (ClientException ce) {
-				logger.error("Upload failed. " + "Retrying in " + this.retryTime + " mins " + ce.getMessage());
+				logger.error("Upload failed. " + "Retrying in " + OracleObjectStorageClassic.retryTime + " mins " + ce.getMessage());
 				//throw ce;
-				TimeUnit.MINUTES.sleep(this.retryTime);
+				TimeUnit.MINUTES.sleep(OracleObjectStorageClassic.retryTime);
 			} catch (Exception e) {
-				logger.error("Upload failed. " + "Retrying in " + this.retryTime + " mins " + e.getMessage());
+				logger.error("Upload failed. " + "Retrying in " + OracleObjectStorageClassic.retryTime + " mins " + e.getMessage());
 				//throw e;
-				TimeUnit.MINUTES.sleep(this.retryTime);
+				TimeUnit.MINUTES.sleep(OracleObjectStorageClassic.retryTime);
 			} finally {
 				if (this.manager != null) {
 					this.manager.shutdown();

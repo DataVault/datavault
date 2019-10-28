@@ -29,8 +29,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     public static String TEMP_PATH_PREFIX = "/tmp/datavault/temp/";
 
     public Verify.Method verificationMethod = Verify.Method.COPY_BACK;
-    private int defaultRetryTime = 60;
-    private int retryTime = this.defaultRetryTime;
+    private static int defaultRetryTime = 30;
+    private static int retryTime = TivoliStorageManager.defaultRetryTime;
 
     public TivoliStorageManager(String name, Map<String,String> config) throws Exception  {
         super(name, config);
@@ -50,7 +50,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         	try {
 				retryTime = Integer.parseInt(config.get(retryKey));
 			} catch (NumberFormatException nfe) {
-        		retryTime = this.defaultRetryTime;
+        		retryTime = TivoliStorageManager.defaultRetryTime;
 			}
 		}
         locations = new ArrayList<String>();
@@ -116,8 +116,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 	            		logger.info("" + error.read());
 	            }
 	            //throw new Exception("Retrieval of " + working.getName() + " failed. ");
-	            logger.info("Retrieval of " + working.getName() + " failed. Retrying in " + this.retryTime + " mins");
-	            TimeUnit.MINUTES.sleep(this.retryTime);
+	            logger.info("Retrieval of " + working.getName() + " failed. Retrying in " + TivoliStorageManager.retryTime + " mins");
+	            TimeUnit.MINUTES.sleep(TivoliStorageManager.retryTime);
 	            
 	        } else {
 		        // FILL IN THE REST OF PROGRESS x dirs, x files, x bytes etc.
@@ -190,8 +190,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 	            	logger.info(IOUtils.toString(output, StandardCharsets.UTF_8));
 	            }
 	            //throw new Exception("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
-	            logger.info("Deposit of " + working.getName() + " using " + optFilePath + " failed.  Retrying in " + this.retryTime + " mins");
-	            TimeUnit.MINUTES.sleep(this.retryTime);
+	            logger.info("Deposit of " + working.getName() + " using " + optFilePath + " failed.  Retrying in " + TivoliStorageManager.retryTime + " mins");
+	            TimeUnit.MINUTES.sleep(TivoliStorageManager.retryTime);
 	        } else {
 	        	break;
 	        }

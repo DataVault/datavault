@@ -397,7 +397,7 @@ public class DepositsController {
 		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.OracleObjectStorageClassic")) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
                     if (this.occRetryTime != null && ! this.occRetryTime.equals("")) {
-                        asProps.put("occRetryTime", this.tsmRetryTime);
+                        asProps.put("occRetryTime", this.occRetryTime);
                     }
                     archiveStore.setProperties(asProps);
                 }
