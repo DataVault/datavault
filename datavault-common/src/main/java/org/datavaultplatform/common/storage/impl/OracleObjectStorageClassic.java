@@ -41,7 +41,9 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	private static String IDENTITY_DOMAIN = "identity-domain";
 	private static String CONTAINER_NAME = "container-name";
 	private static int defaultRetryTime = 30;
+	private static int defaultMaxRetries = 48; // 24 hours if retry time is 30 minutes
 	private static int retryTime = OracleObjectStorageClassic.defaultRetryTime;
+	private static int maxRetries = OracleObjectStorageClassic.defaultMaxRetries;
 	
 	/*
 	 * Add local jars to mvn
@@ -55,6 +57,8 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		super(name, config);
 		super.depositIdStorageKey = true;
 		String retryKey = "occRetryTime";
+		String maxKey = "occMaxRetries";
+
 		Properties prop = new Properties();
 		try (InputStream is = new FileInputStream(OracleObjectStorageClassic.PROPERTIES_FILE_PATH)) {
             prop.load(is);
@@ -75,7 +79,14 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 			try {
 				OracleObjectStorageClassic.retryTime = Integer.parseInt(config.get(retryKey));
 			} catch (NumberFormatException nfe) {
-				retryTime = OracleObjectStorageClassic.defaultRetryTime;
+				OracleObjectStorageClassic.retryTime = OracleObjectStorageClassic.defaultRetryTime;
+			}
+		}
+		if (config.containsKey(maxKey)){
+			try {
+				OracleObjectStorageClassic.maxRetries = Integer.parseInt(config.get(maxKey));
+			} catch (NumberFormatException nfe) {
+				OracleObjectStorageClassic.maxRetries = OracleObjectStorageClassic.defaultMaxRetries;
 			}
 		}
 	}
@@ -92,7 +103,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 
 	@Override
 	public void retrieve(String depositId, File working, Progress progress) throws Exception {
-		while (true) {
+		for (int r = 0; r < OracleObjectStorageClassic.maxRetries; r++) {
 			try {
 				this.manager = FileTransferManager.getDefaultFileTransferManager(this.auth);
 				DownloadConfig downloadConfig = new DownloadConfig();
@@ -109,11 +120,15 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	            break;
 			} catch (ClientException ce) {
 				logger.error("Download failed. " + ce.getMessage());
-				//throw ce;
+				if (r == (OracleObjectStorageClassic.maxRetries -1)) {
+					throw ce;
+				}
 				TimeUnit.MINUTES.sleep(OracleObjectStorageClassic.retryTime);
 			} catch (Exception e) {
 				logger.error("Download failed. " + e.getMessage());
-				//throw e;
+				if (r == (OracleObjectStorageClassic.maxRetries -1)) {
+					throw e;
+				}
 				TimeUnit.MINUTES.sleep(OracleObjectStorageClassic.retryTime);
 			} finally {
 				if (this.manager != null) {
@@ -126,7 +141,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 
 	@Override
 	public String store(String depositId, File working, Progress progress) throws Exception {
-		while (true) {
+		for (int r = 0; r < OracleObjectStorageClassic.maxRetries; r++) {
 			try {
 				this.manager = FileTransferManager.getDefaultFileTransferManager(this.auth);
 				UploadConfig uploadConfig = new UploadConfig();
@@ -144,11 +159,15 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 				break;
 			} catch (ClientException ce) {
 				logger.error("Upload failed. " + "Retrying in " + OracleObjectStorageClassic.retryTime + " mins " + ce.getMessage());
-				//throw ce;
+				if (r == (OracleObjectStorageClassic.maxRetries -1)) {
+					throw ce;
+				}
 				TimeUnit.MINUTES.sleep(OracleObjectStorageClassic.retryTime);
 			} catch (Exception e) {
 				logger.error("Upload failed. " + "Retrying in " + OracleObjectStorageClassic.retryTime + " mins " + e.getMessage());
-				//throw e;
+				if (r == (OracleObjectStorageClassic.maxRetries -1)) {
+					throw e;
+				}
 				TimeUnit.MINUTES.sleep(OracleObjectStorageClassic.retryTime);
 			} finally {
 				if (this.manager != null) {

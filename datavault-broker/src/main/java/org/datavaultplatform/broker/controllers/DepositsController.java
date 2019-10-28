@@ -45,6 +45,8 @@ public class DepositsController {
     private String awsSecretKey;
     private String tsmRetryTime;
     private String occRetryTime;
+    private String tsmMaxRetries;
+    private String occMaxRetries;
 
     private static final Logger logger = LoggerFactory.getLogger(DepositsController.class);
     
@@ -122,6 +124,14 @@ public class DepositsController {
 
     public void setOccRetryTime(String occRetryTime) {
         this.occRetryTime = occRetryTime;
+    }
+
+    public void setTsmMaxRetries(String tsmMaxRetries) {
+        this.tsmMaxRetries = tsmMaxRetries;
+    }
+
+    public void setOccMaxRetries(String occMaxRetries) {
+        this.occMaxRetries = occMaxRetries;
     }
 
     @RequestMapping(value = "/deposits/{depositid}", method = RequestMethod.GET)
@@ -391,6 +401,9 @@ public class DepositsController {
 		        	if (this.tsmRetryTime != null && ! this.tsmRetryTime.equals("")) {
 		        	    asProps.put("tsmRetryTime", this.tsmRetryTime);
                     }
+                    if (this.tsmMaxRetries != null && ! this.tsmMaxRetries.equals("")) {
+                        asProps.put("tsmMaxRetries", this.tsmMaxRetries);
+                    }
 		        	archiveStore.setProperties(asProps);
 		        }
 
@@ -398,6 +411,9 @@ public class DepositsController {
                     HashMap<String, String> asProps = archiveStore.getProperties();
                     if (this.occRetryTime != null && ! this.occRetryTime.equals("")) {
                         asProps.put("occRetryTime", this.occRetryTime);
+                    }
+                    if (this.occMaxRetries != null && ! this.occMaxRetries.equals("")) {
+                        asProps.put("occMaxRetries", this.occMaxRetries);
                     }
                     archiveStore.setProperties(asProps);
                 }
