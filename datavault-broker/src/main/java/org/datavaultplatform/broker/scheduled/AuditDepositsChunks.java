@@ -24,6 +24,10 @@ public class AuditDepositsChunks {
     private String region;
     private String awsAccessKey;
     private String awsSecretKey;
+    private String tsmRetryTime;
+    private String occRetryTime;
+    private String tsmMaxRetries;
+    private String occMaxRetries;
 
     public void setDepositsService(DepositsService depositsService) {
         this.depositsService = depositsService;
@@ -54,7 +58,16 @@ public class AuditDepositsChunks {
     public void setAwsSecretKey(String awsSecretKey) {
         this.awsSecretKey = awsSecretKey;
     }
-
+    public void setTsmRetryTime(String tsmRetryTime) {
+        this.tsmRetryTime = tsmRetryTime;
+    }
+    public void setOccRetryTime(String occRetryTime) {
+        this.occRetryTime = occRetryTime;
+    }
+    public void setTsmMaxRetries(String tsmMaxRetries) { this.tsmMaxRetries = tsmMaxRetries; }
+    public void setOccMaxRetries(String occMaxRetries) {
+        this.occMaxRetries = occMaxRetries;
+    }
     public void setSender(Sender sender) { this.sender = sender; }
 
     public void execute() throws Exception {
@@ -161,6 +174,23 @@ public class AuditDepositsChunks {
                     }
                     if (this.tempDir != null && ! this.tempDir.equals("")) {
                         asProps.put("tempDir", this.tempDir);
+                    }
+                    if (this.tsmRetryTime != null && ! this.tsmRetryTime.equals("")) {
+                        asProps.put("tsmRetryTime", this.tsmRetryTime);
+                    }
+                    if (this.tsmMaxRetries != null && ! this.tsmMaxRetries.equals("")) {
+                        asProps.put("tsmMaxRetries", this.tsmMaxRetries);
+                    }
+                    archiveStore.setProperties(asProps);
+                }
+
+                if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.OracleObjectStorageClassic")) {
+                    HashMap<String, String> asProps = archiveStore.getProperties();
+                    if (this.occRetryTime != null && ! this.occRetryTime.equals("")) {
+                        asProps.put("occRetryTime", this.occRetryTime);
+                    }
+                    if (this.occMaxRetries != null && ! this.occMaxRetries.equals("")) {
+                        asProps.put("occMaxRetries", this.occMaxRetries);
                     }
                     archiveStore.setProperties(asProps);
                 }
