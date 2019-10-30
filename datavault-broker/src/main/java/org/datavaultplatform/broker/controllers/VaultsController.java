@@ -218,6 +218,7 @@ public class VaultsController {
             depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
             depositInfo.setDatasetID(vault.getDataset().getID());
             depositInfo.setGroupName(vault.getGroup().getName());
+            depositInfo.setGroupID(vault.getGroup().getID());
             depositInfo.setVaultReviewDate(vault.getReviewDate().toString());
             depositResponses.add(depositInfo);
             //for (Deposit deposit : depositsService.search(query, sort, userID)) {
@@ -248,6 +249,7 @@ public class VaultsController {
                 depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
                 depositInfo.setDatasetID(vault.getDataset().getID());
                 depositInfo.setGroupName(vault.getGroup().getName());
+                depositInfo.setGroupID(vault.getGroup().getID());
                 depositInfo.setVaultReviewDate(vault.getReviewDate().toString());
                 depositResponses.add(depositInfo);
 
