@@ -24,6 +24,9 @@ public class RolesAndPermissionsController {
     private EmailService emailService;
     private VaultsService vaultsService;
     private GroupsService groupsService;
+    private UsersService usersService;
+    private String homePage;
+    private String helpPage;
 
     private RolesAndPermissionsService rolesAndPermissionsService;
 
@@ -33,8 +36,18 @@ public class RolesAndPermissionsController {
 
     public void setGroupsService(GroupsService groupsService) { this.groupsService = groupsService; }
 
+    public void setUsersService(UsersService usersService) { this.usersService = usersService; }
+
     public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
         this.rolesAndPermissionsService = rolesAndPermissionsService;
+    }
+
+    public void setHomePage(String homePage) {
+        this.homePage = homePage;
+    }
+
+    public void setHelpPage(String helpPage) {
+        this.helpPage = helpPage;
     }
 
     @ApiMethod(
@@ -59,8 +72,9 @@ public class RolesAndPermissionsController {
             responsestatuscode = "200 - OK"
     )
     @PostMapping("/roleAssignment")
-    public RoleAssignment createRoleAssignment(@RequestBody RoleAssignment roleAssignment) throws Exception {
-        sendEmails("new-role-assignment.vm", roleAssignment);
+    public RoleAssignment createRoleAssignment(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                               @RequestBody RoleAssignment roleAssignment) throws Exception {
+        sendEmails("new-role-assignment.vm", roleAssignment, userID);
 
         return rolesAndPermissionsService.createRoleAssignment(roleAssignment);
     }
@@ -258,8 +272,9 @@ public class RolesAndPermissionsController {
             responsestatuscode = "200 - OK"
     )
     @PutMapping("/roleAssignment")
-    public RoleAssignment updateRoleAssignment(@RequestBody RoleAssignment roleAssignment) throws Exception {
-        sendEmails("update-role-assignment.vm", roleAssignment);
+    public RoleAssignment updateRoleAssignment(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                               @RequestBody RoleAssignment roleAssignment) throws Exception {
+        sendEmails("update-role-assignment.vm", roleAssignment, userID);
 
         return rolesAndPermissionsService.updateRoleAssignment(roleAssignment);
     }
@@ -291,15 +306,24 @@ public class RolesAndPermissionsController {
         return ResponseEntity.ok().build();
     }
 
-    private void sendEmails(String template, RoleAssignment roleAssignment) throws Exception {
+    private void sendEmails(String template, RoleAssignment roleAssignment, String userId) throws Exception {
 
         HashMap<String, Object> model = new HashMap<String, Object>();
         model.put("role", roleAssignment.getRole().getName());
+        model.put("homepage", this.homePage);
+        model.put("helppage", this.helpPage);
+        User assignee = this.usersService.getUser(userId);
+        model.put("assignee", assignee.getFirstname() + " " + assignee.getLastname());
         if(roleAssignment.getVaultId() != null) {
-            model.put("vault", vaultsService.getVault(roleAssignment.getVaultId()).getName());
+            Vault vault = vaultsService.getVault(roleAssignment.getVaultId());
+            model.put("vault", vault.getName());
+            User vaultOwner = vault.getUser();
+            model.put("owner", vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+            model.put("target", "vault");
         }
         if(roleAssignment.getSchoolId() != null) {
             model.put("school", groupsService.getGroup(roleAssignment.getSchoolId()).getName());
+            model.put("target", "school");
         }
 
         // Send email to the deposit user
