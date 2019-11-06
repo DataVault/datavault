@@ -1,10 +1,10 @@
 package org.datavaultplatform.common.util;
 
-import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.PermissionModel;
-import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,5 +51,36 @@ public class RoleUtils {
                 .map(PermissionModel::getPermission)
                 .collect(Collectors.toSet());
         return !updated.containsAll(original);
+    }
+
+    public static List<RoleModel> getAssignableRoles(List<RoleAssignment> roleAssignmentsForUser, List<RoleModel> vaultRoles) {
+        //get users highest vault role status
+        // find out the highest status vault role the user has for this vault
+        // lower is highest!
+        String highestStatus = null;
+        boolean admin = false;
+        for (RoleAssignment ra : roleAssignmentsForUser) {
+            RoleModel rm = ra.getRole();
+            if (rm.getType().equals(RoleType.VAULT)) {
+                String roleStatus = rm.getStatus();
+                if (highestStatus == null) {
+                    highestStatus = roleStatus;
+                } else if (Integer.parseInt(highestStatus) > Integer.parseInt(roleStatus)) {
+                    highestStatus = roleStatus;
+                }
+            }
+            if (rm.getType().equals(RoleType.ADMIN)) {
+                admin = true;
+            }
+        }
+
+        // iterate over the roles and remove any with a higher or equal status
+        List<RoleModel> validRoles = new ArrayList<>();
+        for (RoleModel role : vaultRoles) {
+            if (admin || (highestStatus != null && Integer.parseInt(highestStatus) < Integer.parseInt(role.getStatus()))) {
+                validRoles.add(role);
+            }
+        }
+        return validRoles;
     }
 }

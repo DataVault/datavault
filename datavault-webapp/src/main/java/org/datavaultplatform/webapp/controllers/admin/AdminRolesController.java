@@ -75,23 +75,25 @@ public class AdminRolesController {
     public ResponseEntity save(@RequestParam(value = "id") long id,
                                @RequestParam(value = "name") String name,
                                @RequestParam(value = "type") String type,
+                               @RequestParam(value = "status") String status,
                                @RequestParam(value = "description", required = false) String description,
                                @RequestParam(value = "permissions", required = false) String[] permissions) {
 
         Optional<RoleModel> stored = restService.getRole(id);
         if (!stored.isPresent()) {
             logger.debug("No existing role was found with ID={} - preparing to store new role.", id);
-            return createNewRole(name, type, description, permissions);
+            return createNewRole(name, type, description, permissions, status);
         }
 
         logger.debug("Existing role found with ID={} - preparing to persist update.", id);
-        return updateRole(id, name, type, description, permissions);
+        return updateRole(id, name, type, description, permissions, status);
     }
 
     private ResponseEntity createNewRole(String name,
                                          String type,
                                          String description,
-                                         String[] permissions) {
+                                         String[] permissions,
+                                         String status ) {
 
         List<RoleModel> roles = restService.getEditableRoles();
 
@@ -117,6 +119,21 @@ public class AdminRolesController {
         } else if (selectedPermissions.size() < 1) {
             logger.debug("Could not create role - no permissions selected");
             return validationFailed("Roles must have at least one permission.");
+        } else if (RoleType.valueOf(type).equals(RoleType.VAULT) && StringUtils.isEmpty(status)) {
+            logger.debug("Could not create vault role - no level.");
+            return validationFailed("Vault roles must have a level.");
+        } else if (! StringUtils.isEmpty(status)) {
+            try {
+                int statusAsInt = Integer.parseInt(status);
+                if (statusAsInt < 0) {
+                    logger.debug("Could not create role - negative level.");
+                    return validationFailed("Roles must have a positive level.");
+                }
+            } catch (NumberFormatException nfe) {
+                logger.debug("Could not create role - invalid level.");
+                return validationFailed("Roles must have a valid level.");
+            }
+
         }
 
         RoleModel role = new RoleModel();
@@ -124,6 +141,7 @@ public class AdminRolesController {
         role.setName(name);
         role.setDescription(description);
         role.setType(RoleType.valueOf(type));
+        role.setStatus(status);
 
         logger.info("Attempting to create new role with name {}", name);
         restService.createRole(role);
@@ -159,7 +177,8 @@ public class AdminRolesController {
                                       String name,
                                       String type,
                                       String description,
-                                      String[] permissions) {
+                                      String[] permissions,
+                                      String status) {
 
         RoleModel role = restService.getRole(id)
                 .orElseThrow(() -> new EntityNotFoundException(RoleModel.class, String.valueOf(id)));
@@ -198,6 +217,21 @@ public class AdminRolesController {
         } else if (!role.getType().name().equals(type) && role.getAssignedUserCount() > 0) {
             logger.debug("Could not update role - attempted to change role type while users are still applied.");
             return validationFailed("Cannot change role type with users assigned to the role.");
+        } else if (RoleType.valueOf(type).equals(RoleType.VAULT) && StringUtils.isEmpty(status)) {
+            logger.debug("Could not create vault role - no status.");
+            return validationFailed("Vault roles must have a status.");
+        } else if (! StringUtils.isEmpty(status)) {
+            try {
+                int statusAsInt = Integer.parseInt(status);
+                if (statusAsInt < 0) {
+                    logger.debug("Could not create role - negative status.");
+                    return validationFailed("Roles must have a positive status.");
+                }
+            } catch (NumberFormatException nfe) {
+                logger.debug("Could not create role - invalid status.");
+                return validationFailed("Roles must have a valid status.");
+            }
+
         }
 
         boolean hasReducedPermissions = RoleUtils.hasReducedPermissions(role.getPermissions(), selectedPermissions);
@@ -205,6 +239,7 @@ public class AdminRolesController {
         role.setName(name);
         role.setDescription(description);
         role.setType(RoleType.valueOf(type));
+        role.setStatus(status);
 
         logger.info("Attempting to update role with ID={}", id);
         restService.updateRole(role);

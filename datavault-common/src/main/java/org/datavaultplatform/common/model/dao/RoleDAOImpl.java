@@ -57,6 +57,7 @@ public class RoleDAOImpl implements RoleDAO {
             isAdmin.setType(RoleType.ADMIN);
             isAdmin.setName(RoleUtils.IS_ADMIN_ROLE_NAME);
             isAdmin.setDescription(RoleUtils.IS_ADMIN_ROLE_DESCRIPTION);
+            isAdmin.setStatus("0");
             isAdmin.setPermissions(allPermissions);
             session.persist(isAdmin);
         }
@@ -87,6 +88,7 @@ public class RoleDAOImpl implements RoleDAO {
             dataOwner.setName(RoleUtils.DATA_OWNER_ROLE_NAME);
             dataOwner.setDescription(RoleUtils.DATA_OWNER_ROLE_DESCRIPTION);
             dataOwner.setPermissions(vaultPermissions);
+            dataOwner.setStatus("1");
             session.persist(dataOwner);
         }
     }

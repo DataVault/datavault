@@ -190,9 +190,12 @@
                                 <th scope="col">Description</th>
                                 <td>${vault.description?html}</td>
                                 <td>
+                                    <#assign editVaultSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_METADATA') or hasPermission('${vault.getGroupID()}', 'GROUP', 'EDIT_SCHOOL_VAULT_METADATA')">
+                                    <@sec.authorize access=editVaultSecurityExpression>
                                     <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#update-vault-description">
                                         Edit
                                     </button>
+                                    </@sec.authorize>
                                 </td>
                             </tr>
                             <tr>

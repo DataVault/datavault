@@ -1,7 +1,7 @@
-ALTER TABLE Role_assignments DROP CONSTRAINT `FK_2j93l0yx740l9r9hjeinwia1f`;
-ALTER TABLE Role_assignments DROP CONSTRAINT `FK_by9fc9iswmf9l5q7c243gdprl`;
-ALTER TABLE Role_assignments DROP CONSTRAINT `FK_mtrvvfub5q70r6jkcw5gggg0k`;
-ALTER TABLE Role_assignments DROP CONSTRAINT `FK_spyctngrr3ou9iyr5ld3h28fs`;
+ALTER TABLE Role_assignments DROP FOREIGN KEY `FK_2j93l0yx740l9r9hjeinwia1f`;
+ALTER TABLE Role_assignments DROP FOREIGN KEY `FK_by9fc9iswmf9l5q7c243gdprl`;
+ALTER TABLE Role_assignments DROP FOREIGN KEY `FK_mtrvvfub5q70r6jkcw5gggg0k`;
+ALTER TABLE Role_assignments DROP FOREIGN KEY `FK_spyctngrr3ou9iyr5ld3h28fs`;
 ALTER TABLE Role_assignments DROP INDEX `UK_inpjm7k16ph1lrue5o38yiact`;
 ALTER TABLE Role_assignments ADD CONSTRAINT `FK_2j93l0yx740l9r9hjeinwia1f` FOREIGN KEY (`user_id`) REFERENCES `Users` (`id`);
 ALTER TABLE Role_assignments ADD CONSTRAINT `FK_by9fc9iswmf9l5q7c243gdprl` FOREIGN KEY (`vault_id`) REFERENCES `Vaults` (`id`);

@@ -1,6 +1,7 @@
 <#import "*/layout/defaultlayout.ftl" as layout>
 <#-- Specify which navbar element should be flagged as active -->
 <#global nav="admin">
+<#assign sec=JspTaglibs["http://www.springframework.org/security/tags"] />
 <@layout.vaultLayout>
 
     <div class="modal fade" id="confirm-removal" tabindex="-1" role="dialog" aria-labelledby="confirmRemovalLabel" aria-hidden="true">
@@ -84,12 +85,15 @@
                             <td><#if deposit.vaultOwnerID??>${deposit.vaultOwnerName} (${deposit.vaultOwnerID})</#if></td>
                             <td>${deposit.vaultReviewDate}</td>
                             <td>
+                                <#assign removeDepositSecurityExpression = "hasPermission('${deposit.getGroupID()}', 'GROUP', 'DELETE_SCHOOL_VAULT_DEPOSITS')">
+                                <@sec.authorize access=removeDepositSecurityExpression>
                                 <#if deposit.status != "DELETED">
                                     <a class="btn btn-xs btn-danger pull-left" href="#" data-vault="${deposit.getVaultID()}" data-deposit="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
                                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                                     </a>
                                     <br>
                                 </#if>
+                                </@sec.authorize>
                                 <#if deposit.status == "FAILED">
                                     <a class="restart-deposit-btn btn btn-default btn-sm"
                                        href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}/deposits/${deposit.getID()?html}/restart">
@@ -98,6 +102,7 @@
 
                                 </#if>
                             </td>
+
 
                         </tr>
                     </#list>

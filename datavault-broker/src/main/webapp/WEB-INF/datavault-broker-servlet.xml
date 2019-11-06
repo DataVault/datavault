@@ -70,6 +70,8 @@
         <property name="adminService" ref="adminService"/>
         <property name="sender" ref="sender" />
         <property name="optionsDir" value="${optionsDir:#{null}}" />
+        <property name="tsmRetryTime" value="${tsmRetryTime:#{null}}" />
+        <property name="occRetryTime" value="${occRetryTime:#{null}}" />
         <property name="tempDir" value="${tempDir:#{null}}" />
         <property name="bucketName" value="${s3.bucketName:#{null}}" />
         <property name="region" value="${s3.region:#{null}}" />
@@ -120,6 +122,9 @@
 
     <bean id="rolesAndPermissionsController" class="org.datavaultplatform.broker.controllers.RolesAndPermissionsController">
         <property name="rolesAndPermissionsService" ref="rolesAndPermissionsService" />
+        <property name="emailService" ref="emailService" />
+        <property name="vaultsService" ref="vaultsService" />
+        <property name="groupsService" ref="groupsService" />
     </bean>
 
     <bean id="groupsController" class="org.datavaultplatform.broker.controllers.GroupsController">
