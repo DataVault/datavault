@@ -3,6 +3,7 @@ package org.datavaultplatform.common.model.dao;
 import java.util.List;
 
 import org.datavaultplatform.common.model.RetentionPolicy;
+import org.datavaultplatform.common.model.RoleModel;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -55,5 +56,15 @@ public class RetentionPolicyDAOImpl implements RetentionPolicyDAO {
         RetentionPolicy retentionPolicy = (RetentionPolicy)criteria.uniqueResult();
         session.close();
         return retentionPolicy;
+    }
+
+    @Override
+    public void delete(String id) {
+        RetentionPolicy policy = findById(id);
+        Session session = this.sessionFactory.openSession();
+        Transaction tx = session.beginTransaction();
+        session.delete(policy);
+        tx.commit();
+        session.close();
     }
 }

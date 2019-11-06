@@ -1,11 +1,14 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
-import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.RetentionPolicy;
+import org.datavaultplatform.common.request.CreateRetentionPolicy;
+import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.webapp.services.RestService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 /**
  * User: Stuart Lewis
@@ -25,7 +28,26 @@ public class AdminRetentionPoliciesController {
     public String getRetentionPoliciesListing(ModelMap model) throws Exception {
         model.addAttribute("policies", restService.getRetentionPolicyListing());
 
+        // pass the view an empty Retention Policy since the form expects it
+        model.addAttribute("retentionPolicy", new CreateRetentionPolicy());
+
         return "admin/retentionpolicies/index";
+    }
+
+    @RequestMapping(value = "/admin/retentionpolicies/create", method = RequestMethod.POST)
+    public RedirectView addRetentionPoliciesListing(@ModelAttribute CreateRetentionPolicy createRetentionPolicy, ModelMap model) throws Exception {
+        String defaultEngine = "org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy";
+
+        restService.addRetentionPolicy(createRetentionPolicy);
+
+        return new RedirectView("/admin/retentionpolicies", true);
+    }
+    @RequestMapping(value = "/admin/retentionpolicies/delete/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity deleteRetentionPoliciesListing(ModelMap model, @PathVariable("id") String policyId) throws Exception {
+
+        restService.deleteRetentionPolicy(policyId);
+
+        return ResponseEntity.ok().build();
     }
 
     // Process the 'update policy name' Ajax request
