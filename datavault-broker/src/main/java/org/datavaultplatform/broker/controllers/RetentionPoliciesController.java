@@ -4,10 +4,12 @@ import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.RetentionPoliciesService;
 import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -44,12 +46,63 @@ public class RetentionPoliciesController {
     }
 
     @RequestMapping(value = "/retentionpolicies/update", method = RequestMethod.POST)
-    public ResponseEntity<Object> updateGroup(@RequestHeader(value = "X-UserID", required = true) String userID,
+    public ResponseEntity<Object> updateRetentionPolicy(@RequestHeader(value = "X-UserID", required = true) String userID,
                                               @RequestBody RetentionPolicy policy) throws Exception {
 
         User user = adminService.ensureAdminUser(userID);
 
         retentionPoliciesService.updateRetentionPolicy(policy);
+        return new ResponseEntity<>(policy, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/retentionpolicies/delete/{id}", method = RequestMethod.DELETE)
+    public void deleteRetentionPolicy(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                                        @PathVariable("id") String policyID) throws Exception {
+
+        User user = adminService.ensureAdminUser(userID);
+
+        retentionPoliciesService.delete(policyID);
+    }
+
+    @RequestMapping(value = "/retentionpolicies/add", method = RequestMethod.PUT)
+    public ResponseEntity<Object> createRetentionPolicy(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                              @RequestBody CreateRetentionPolicy createPolicy) throws Exception {
+
+        User user = adminService.ensureAdminUser(userID);
+
+        RetentionPolicy policy = new RetentionPolicy();
+
+        if(createPolicy.getName() == null || createPolicy.getName().isEmpty()) throw new Exception("RetentionPolicy name missing.");
+        policy.setName(createPolicy.getName());
+
+        if(createPolicy.getDescription() != null) {
+            policy.setDescription(createPolicy.getDescription());
+        }
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        if(createPolicy.getDateGuidanceReviewed() != null && !createPolicy.getDateGuidanceReviewed().isEmpty()) {
+            policy.setDataGuidanceReviewed(formatter.parse(createPolicy.getDateGuidanceReviewed()));
+        }
+        if(createPolicy.getEndDate() != null && !createPolicy.getEndDate().isEmpty()) {
+            policy.setEndDate(formatter.parse(createPolicy.getEndDate()));
+        }
+        if(createPolicy.getInEffectDate() != null && !createPolicy.getInEffectDate().isEmpty()) {
+            policy.setInEffectDate(formatter.parse(createPolicy.getInEffectDate()));
+        }
+
+        if(createPolicy.getUrl() != null && !createPolicy.getUrl().isEmpty()) {
+            policy.setUrl(createPolicy.getUrl());
+        }
+
+        if(createPolicy.getSort() == null || createPolicy.getSort().isEmpty()) throw new Exception("RetentionPolicy sort missing.");
+        policy.setSort(Integer.parseInt(createPolicy.getSort()));
+
+        if(createPolicy.getEngine() == null || createPolicy.getEngine().isEmpty()) throw new Exception("RetentionPolicy engine missing.");
+        policy.setEngine(createPolicy.getEngine());
+
+
+        retentionPoliciesService.addRetentionPolicy(policy);
+
         return new ResponseEntity<>(policy, HttpStatus.OK);
     }
 }
