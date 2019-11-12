@@ -16,7 +16,7 @@ import org.datavaultplatform.common.storage.UserStore;
 public class FilesService {
 
     private UserStore userStore;
-    private final long TIMEOUT_SECONDS = 20;
+    private final long TIMEOUT_SECONDS = 40;
     
     private boolean connect(FileStore fileStore) {
         try {
