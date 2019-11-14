@@ -22,6 +22,7 @@ public class PureFlatFileProvider implements Provider {
     List<Dataset> datasets = new ArrayList<>();
     public static final String TITLE = "title";
     public static final String XML = "xml";
+	public static final String CRISID = "crisid";
     private String flatFileDir = "/tmp/";
     public static final String DATASET_DISPLAY_FILE_NAME = "datasetDisplay.flat";
     public static final String DATASET_FULL_FILE_NAME = "datasetFull.flat";
@@ -112,10 +113,11 @@ public class PureFlatFileProvider implements Provider {
 				while (fullIt.hasNext()) {
 		    	    String line = fullIt.nextLine();
 		    	    String[] splitLine = line.split("\t");
-		    	    if (splitLine.length == 3) {
+		    	    if (splitLine.length == 4) {
 		    	    	Map<String, String> data = new HashMap<String, String>();
 		    	    	data.put(PureFlatFileProvider.TITLE, splitLine[1]);
 		    	    	data.put(PureFlatFileProvider.XML, splitLine[2]);
+						data.put(PureFlatFileProvider.CRISID, splitLine[3]);
 		    	    	retVal.put(splitLine[0], data);
 		    	    }
 				}
@@ -196,6 +198,7 @@ public class PureFlatFileProvider implements Provider {
 					//fix name I'll need to bring that back in the full flat file
 					retVal.setName(data.get(PureFlatFileProvider.TITLE));
 					retVal.setContent(data.get(PureFlatFileProvider.XML));
+					retVal.setCrisId(data.get(PureFlatFileProvider.CRISID));
 				}
 				
 				

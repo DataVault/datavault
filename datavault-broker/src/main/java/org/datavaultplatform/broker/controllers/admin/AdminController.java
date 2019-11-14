@@ -144,6 +144,7 @@ public class AdminController {
             depositInfo.setGroupName(vault.getGroup().getName());
             depositInfo.setGroupID(vault.getGroup().getID());
             depositInfo.setVaultReviewDate(vault.getReviewDate().toString());
+            depositInfo.setCrisID(vault.getDataset().getCrisId());
             depositResponses.add(depositInfo);
         }
         return depositResponses;

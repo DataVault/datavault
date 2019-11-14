@@ -78,7 +78,7 @@
                             <td>${deposit.status}</td>
                             <td><#if deposit.getUserName()??>${deposit.getUserName()}<#else> </#if> (${deposit.userID})</td>
                             <td><#if deposit.getVaultName()??>${deposit.getVaultName()}<#else> </#if></td>
-                            <td><#if deposit.getDatasetID()??>${deposit.getDatasetID()}<#else> </#if> </td>
+                            <td><#if deposit.getCrisID()??>${deposit.getCrisID()}<#else> </#if> </td>
                             <td>${deposit.groupName}</td>
                             <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}/deposits/${deposit.getID()?html}">${deposit.getID()?html}</a></td>
                             <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}">${deposit.vaultID?html}</a></td>
