@@ -52,4 +52,4 @@ update Datasets set crisId = '21502727' where id = 'fd297498-7d0d-4d57-9040-769a
 
 
 -- add non nullable constraint to new column
-ALTER TABLE Datasets CHANGE cridId crisId text NOT NULL;
+ALTER TABLE Datasets CHANGE crisId crisId text NOT NULL;
