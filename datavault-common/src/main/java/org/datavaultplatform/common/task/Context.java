@@ -21,6 +21,7 @@ public class Context {
     private String vaultKeyPath;
     private String vaultKeyName;
     private String vaultSslPEMPath;
+    private Boolean multipleValidationEnabled;
     
     public Context() {};
     public Context(Path tempDir, Path metaDir, EventStream eventStream,
@@ -28,7 +29,7 @@ public class Context {
                    Boolean encryptionEnabled, AESMode encryptionMode, 
                    String vaultAddress, String vaultToken,
                    String vaultKeyPath, String vaultKeyName,
-                   String vaultSslPEMPath) {
+                   String vaultSslPEMPath, Boolean multipleValidationEnabled) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.eventStream = eventStream;
@@ -41,6 +42,7 @@ public class Context {
         this.vaultKeyPath = vaultKeyPath;
         this.vaultKeyName = vaultKeyName;
         this.vaultSslPEMPath = vaultSslPEMPath;
+        this.multipleValidationEnabled = multipleValidationEnabled;
     }
 
     public Path getTempDir() {
@@ -133,5 +135,13 @@ public class Context {
     
     public void setVaultSslPEMPath(String sslPEMPath) {
         this.vaultSslPEMPath = sslPEMPath;
+    }
+
+    public Boolean isMultipleValidationEnabled() {
+        return multipleValidationEnabled;
+    }
+
+    public void setMultipleValidationEnabled(Boolean multipleValidationEnabled) {
+        this.multipleValidationEnabled = multipleValidationEnabled;
     }
 }

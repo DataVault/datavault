@@ -325,7 +325,9 @@ public class Deposit extends Task {
             if (((Device)archiveStore).hasMultipleCopies()) {
                 boolean firstArchiveStore = true;
                 for (String loc : ((Device)archiveStore).getLocations()) {
-                    this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, loc, true, ivs, null, encChunksHash, firstArchiveStore);
+                    if (firstArchiveStore || context.isMultipleValidationEnabled() == true) {
+                        this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, loc, true, ivs, null, encChunksHash, firstArchiveStore);
+                    }
                     firstArchiveStore = false;
                 }
             } else {   
@@ -843,6 +845,7 @@ public class Deposit extends Task {
         logger.info("chunks byte size: "+context.getChunkingByteSize());
         logger.info("encryption: "+context.isEncryptionEnabled());
         logger.info("encryption mode: "+context.getEncryptionMode());
+        logger.info("validate multiple: " + context.isMultipleValidationEnabled());
 	}
 	
 	private void initStates() {
