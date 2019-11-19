@@ -63,8 +63,4 @@
         <property name="keystorePassword" value="${keystore.password}"/>
     </bean>
 
-   <!--><bean id="deposit" class="org.datavaultplatform.worker.tasks.Deposit">
-        <property name="validateMultiple" value="${validate.multiple:true}"/>
-    </bean>-->
-
 </beans>
