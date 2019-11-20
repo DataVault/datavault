@@ -340,6 +340,29 @@
                         </textarea>
                     </div>
                     </#comment>
+                    <h4><strong>Events</strong></h4>
+                    <div class="scrollable">
+                        <table class="table table-bordered ">
+                            <thead>
+                            <tr>
+                                <th>User</th>
+<#--                                <th>Event</th>-->
+                                <th>Message</th>
+                                <th>Timestamp</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <#list roleEvents as event>
+                                <tr>
+                                    <td>${event.userID?html}</td>
+<#--                                    <td>${event.eventClass?replace('org.datavaultplatform.common.event.', '')?html}</td>-->
+                                    <td>${event.message?html}</td>
+                                    <td>${event.timestamp?datetime}</td>
+                                </tr>
+                            </#list>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 </@sec.authorize>
             </div>

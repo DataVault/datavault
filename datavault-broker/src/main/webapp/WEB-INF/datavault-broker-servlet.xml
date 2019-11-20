@@ -124,6 +124,8 @@
 
     <bean id="rolesAndPermissionsController" class="org.datavaultplatform.broker.controllers.RolesAndPermissionsController">
         <property name="rolesAndPermissionsService" ref="rolesAndPermissionsService" />
+        <property name="eventService" ref="eventService" />
+        <property name="clientsService" ref="clientsService" />
         <property name="emailService" ref="emailService" />
         <property name="vaultsService" ref="vaultsService" />
         <property name="groupsService" ref="groupsService" />

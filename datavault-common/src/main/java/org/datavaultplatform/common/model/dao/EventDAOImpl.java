@@ -1,7 +1,8 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
- 
+
+import org.datavaultplatform.common.model.Vault;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -65,6 +66,17 @@ public class EventDAOImpl implements EventDAO {
         Event event = (Event)criteria.uniqueResult();
         session.close();
         return event;
+    }
+
+    @Override
+    public List<Event> findVaultEvents(Vault vault) {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(Event.class);
+        criteria.add(Restrictions.eq("vault",vault));
+        criteria.addOrder(Order.asc("timestamp"));
+        List<Event> events = criteria.list();
+        session.close();
+        return events;
     }
     
     @Override

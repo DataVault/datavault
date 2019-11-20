@@ -156,6 +156,12 @@
             <artifactId>vault-java-driver</artifactId>
             <version>3.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>16.0.3</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
     
     <build>

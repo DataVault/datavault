@@ -3,10 +3,16 @@ package org.datavaultplatform.webapp.controllers;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import org.apache.commons.lang.RandomStringUtils;
+import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
+import org.datavaultplatform.common.event.roles.DeleteRoleAssignment;
+import org.datavaultplatform.common.event.roles.OrphanVault;
+import org.datavaultplatform.common.event.roles.TransferVaultOwnership;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.TransferVault;
 import org.datavaultplatform.common.response.DepositInfo;
+import org.datavaultplatform.common.response.EventInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
@@ -30,6 +36,8 @@ import org.springframework.web.servlet.view.RedirectView;
 import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
 import java.security.Principal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -206,7 +214,10 @@ public class VaultsController {
             dataManagerUsers.add(u);
         }
         model.addAttribute("dataManagers", dataManagerUsers);
-        
+
+        EventInfo[] roleEvents = restService.getVaultsRoleEvents(vaultID);
+        model.addAttribute("roleEvents", roleEvents);
+
         return "vaults/vault";
     }
 
