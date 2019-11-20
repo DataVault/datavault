@@ -80,6 +80,9 @@ public class DepositInfo {
     @ApiObjectField(description = "The Vault Dataset ID i.e. Pure Record ID")
     private String datasetID;
 
+    @ApiObjectField(description = "The Vault Dataset ID i.e. Pure Record ID (alternative)")
+    private String crisID;
+
     @ApiObjectField(description = "The Vault Group Name i.e. School")
     private String groupName;
 
@@ -271,6 +274,14 @@ public class DepositInfo {
 
     public void setDatasetID(String datasetId) {
         this.datasetID = datasetId;
+    }
+
+    public String getCrisID() {
+        return this.crisID;
+    }
+
+    public void setCrisID(String crisId) {
+        this.crisID = crisId;
     }
 
     public String getGroupName() {

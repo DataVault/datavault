@@ -41,6 +41,7 @@ public class Receiver {
     private String vaultKeyName;
     private String vaultSslPEMPath;
     AESMode encryptionMode = AESMode.GCM;
+    private Boolean multipleValidationEnabled;
 
     /**
      * Set the queue server
@@ -183,6 +184,14 @@ public class Receiver {
         this.vaultSslPEMPath = sslPEMPath;
     }
 
+    public Boolean isMultipleValidationEnabled() {
+        return this.multipleValidationEnabled;
+    }
+
+    public void setMultipleValidationEnabled(Boolean multipleValidationEnabled) {
+        this.multipleValidationEnabled = multipleValidationEnabled;
+    }
+
     /**
      * Setup a connection to the queue then wait for messages to arrive.  When we recieve a message delivery
      * work out the type of task, check if it is a redelivery then complete the task.
@@ -259,7 +268,7 @@ public class Receiver {
                         chunkingEnabled, chunkingByteSize,
                         encryptionEnabled, encryptionMode, 
                         vaultAddress, vaultToken, 
-                        vaultKeyPath, vaultKeyName, vaultSslPEMPath);
+                        vaultKeyPath, vaultKeyName, vaultSslPEMPath, this.multipleValidationEnabled);
                 concreteTask.performAction(context);
                 
             } catch (Exception e) {

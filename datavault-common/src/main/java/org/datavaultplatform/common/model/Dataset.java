@@ -25,6 +25,9 @@ public class Dataset {
     
     @Transient
     private Boolean visible = true;
+
+    @Column(name = "crisId", nullable = false, columnDefinition = "TEXT")
+    private String crisId;
     
     public Dataset() {}
 
@@ -59,4 +62,12 @@ public class Dataset {
 	public void setVisible(Boolean visible) {
 		this.visible = visible;
 	}
+
+    public String getCrisId() {
+        return this.crisId;
+    }
+
+    public void setCrisId(String crisId) {
+        this.crisId = crisId;
+    }
 }

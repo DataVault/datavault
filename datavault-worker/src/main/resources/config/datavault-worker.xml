@@ -36,6 +36,7 @@
         <property name="chunkingByteSize" value="${chunking.size:0}"/>
         <property name="EncryptionEnabled" value="${encryption.enabled:false}"/>
         <property name="EncryptionMode" value="${encryption.mode:GCM}"/>
+        <property name="multipleValidationEnabled" value="${validate.multiple.enabled:true}"/>
     </bean>
 
     <bean id="eventSender" class="org.datavaultplatform.worker.queue.EventSender">

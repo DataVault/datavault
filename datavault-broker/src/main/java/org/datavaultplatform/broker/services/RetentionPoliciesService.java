@@ -28,5 +28,9 @@ public class RetentionPoliciesService {
     public void setRetentionPolicyDAO(RetentionPolicyDAO retentionPolicyDAO) {
         this.retentionPolicyDAO = retentionPolicyDAO;
     }
+
+    public void delete(String policyID) {
+        retentionPolicyDAO.delete(policyID);
+    }
 }
 

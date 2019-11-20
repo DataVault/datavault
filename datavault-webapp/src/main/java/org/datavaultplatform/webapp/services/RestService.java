@@ -2,11 +2,7 @@ package org.datavaultplatform.webapp.services;
 
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.request.CreateClientEvent;
-import org.datavaultplatform.common.request.CreateDeposit;
-import org.datavaultplatform.common.request.CreateVault;
-import org.datavaultplatform.common.request.TransferVault;
-import org.datavaultplatform.common.request.ValidateUser;
+import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -694,5 +690,14 @@ public class RestService {
     public EventInfo[] getVaultsRoleEvents(String vaultId) {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/roleEvents", EventInfo[].class);
         return (EventInfo[])response.getBody();
+    }
+
+    public RetentionPolicy addRetentionPolicy(CreateRetentionPolicy createRetentionPolicy) {
+        HttpEntity<?> response = put(brokerURL + "/retentionpolicies/add", RetentionPolicy.class, createRetentionPolicy);
+        return (RetentionPolicy)response.getBody();
+    }
+
+    public void deleteRetentionPolicy(String policyId) {
+        HttpEntity<?> response = delete(brokerURL + "/retentionpolicies/delete/" + policyId, Void.class);
     }
 }

@@ -12,4 +12,6 @@ public interface RetentionPolicyDAO {
     public List<RetentionPolicy> list();
 
     public RetentionPolicy findById(String Id);
+
+    public void delete(String id);
 }
