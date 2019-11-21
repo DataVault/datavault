@@ -115,7 +115,7 @@ insert into Groups (id, name, enabled) values ('SHCA',  'School of History, Clas
 insert into Groups (id, name, enabled) values ('SL',    'School of Law', 1);
 insert into Groups (id, name, enabled) values ('SLLC',  'School of Literatures, Languages and Cultures', 1);
 insert into Groups (id, name, enabled) values ('SPPL',  'School of Philosophy, Psychology and Language Sciences', 1);
-insert into Groups (id, name, enabled) values ('SSPS',  'School of Social and Politial Science', 1);
+insert into Groups (id, name, enabled) values ('SSPS',  'School of Social and Political Science', 1);
 insert into Groups (id, name, enabled) values ('EMS',   'Edinburgh Medical School', 1);
 insert into Groups (id, name, enabled) values ('RDSVS', 'Royal (Dick) School of Veterinary Studies', 1);
 insert into Groups (id, name, enabled) values ('SBS',   'School of Biological Sciences', 1);
