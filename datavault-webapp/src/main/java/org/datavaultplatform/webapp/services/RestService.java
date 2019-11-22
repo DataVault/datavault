@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.services;
 
+import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
@@ -684,6 +685,11 @@ public class RestService {
     public AuditInfo[] getAuditsListingAll() {
         HttpEntity<?> response = get(brokerURL + "/admin/audits", AuditInfo[].class);
         return (AuditInfo[])response.getBody();
+    }
+
+    public EventInfo[] getVaultsRoleEvents(String vaultId) {
+        HttpEntity<?> response = get(brokerURL + "/vaults/" + vaultId + "/roleEvents", EventInfo[].class);
+        return (EventInfo[])response.getBody();
     }
 
     public RetentionPolicy addRetentionPolicy(CreateRetentionPolicy createRetentionPolicy) {

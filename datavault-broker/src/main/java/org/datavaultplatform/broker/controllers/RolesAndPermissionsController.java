@@ -1,9 +1,9 @@
 package org.datavaultplatform.broker.controllers;
 
-import org.datavaultplatform.broker.queue.EventListener;
 import org.datavaultplatform.broker.services.*;
-import org.datavaultplatform.common.event.Error;
-import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
+import org.datavaultplatform.common.event.roles.DeleteRoleAssignment;
+import org.datavaultplatform.common.event.roles.UpdateRoleAssignment;
 import org.datavaultplatform.common.model.*;
 import org.jsondoc.core.annotation.Api;
 import org.jsondoc.core.annotation.ApiMethod;
@@ -21,6 +21,7 @@ import java.util.List;
 @Api(name="Permissions", description = "Interact with DataVault Roles and Permissions")
 public class RolesAndPermissionsController {
 
+    private EventService eventService;
     private EmailService emailService;
     private VaultsService vaultsService;
     private GroupsService groupsService;
@@ -29,6 +30,11 @@ public class RolesAndPermissionsController {
     private String helpPage;
 
     private RolesAndPermissionsService rolesAndPermissionsService;
+    private ClientsService clientsService;
+
+    public void setClientsService(ClientsService clientsService) { this.clientsService = clientsService; }
+
+    public void setEventService(EventService eventService) { this.eventService = eventService; }
 
     public void setEmailService(EmailService emailService) { this.emailService = emailService; }
 
@@ -73,10 +79,28 @@ public class RolesAndPermissionsController {
     )
     @PostMapping("/roleAssignment")
     public RoleAssignment createRoleAssignment(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                               @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
                                                @RequestBody RoleAssignment roleAssignment) throws Exception {
         sendEmails("new-role-assignment.vm", roleAssignment, userID);
 
-        return rolesAndPermissionsService.createRoleAssignment(roleAssignment);
+        RoleAssignment assignment = rolesAndPermissionsService.createRoleAssignment(roleAssignment);
+
+        CreateRoleAssignment roleAssignmentEvent = new CreateRoleAssignment(roleAssignment, userID);
+        RoleType type = roleAssignment.getRole().getType();
+        if (type == RoleType.VAULT){
+            roleAssignmentEvent.setVault(vaultsService.getVault(roleAssignment.getVaultId()));
+        } else if (type == RoleType.SCHOOL) {
+            roleAssignmentEvent.setSchool(groupsService.getGroup(roleAssignment.getSchoolId()));
+        }
+        roleAssignmentEvent.setUser(usersService.getUser(userID));
+        roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
+        roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+        roleAssignmentEvent.setAssignee(usersService.getUser(roleAssignment.getUserId()));
+        roleAssignmentEvent.setRole(roleAssignment.getRole());;
+
+        eventService.addEvent(roleAssignmentEvent);
+
+        return assignment;
     }
 
     @ApiMethod(
@@ -273,10 +297,29 @@ public class RolesAndPermissionsController {
     )
     @PutMapping("/roleAssignment")
     public RoleAssignment updateRoleAssignment(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                               @RequestBody RoleAssignment roleAssignment) throws Exception {
+                                               @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
+                                                     @RequestBody RoleAssignment roleAssignment) throws Exception {
         sendEmails("update-role-assignment.vm", roleAssignment, userID);
 
-        return rolesAndPermissionsService.updateRoleAssignment(roleAssignment);
+        UpdateRoleAssignment roleAssignmentEvent = new UpdateRoleAssignment(roleAssignment, userID);
+
+        RoleType type = roleAssignment.getRole().getType();
+        if (type == RoleType.VAULT){
+            roleAssignmentEvent.setVault(vaultsService.getVault(roleAssignment.getVaultId()));
+        } else if (type == RoleType.SCHOOL) {
+            roleAssignmentEvent.setSchool(groupsService.getGroup(roleAssignment.getSchoolId()));
+        }
+        roleAssignmentEvent.setUser(usersService.getUser(userID));
+        roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
+        roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+        roleAssignmentEvent.setAssignee(usersService.getUser(roleAssignment.getUserId()));
+        roleAssignmentEvent.setRole(roleAssignment.getRole());;
+
+        eventService.addEvent(roleAssignmentEvent);
+
+        RoleAssignment assignment = rolesAndPermissionsService.updateRoleAssignment(roleAssignment);
+
+        return assignment;
     }
 
     @ApiMethod(
@@ -301,7 +344,31 @@ public class RolesAndPermissionsController {
     )
     @DeleteMapping("/roleAssignment/{roleAssignmentId}")
     public ResponseEntity deleteRoleAssignment(
-            @PathVariable("roleAssignmentId") @ApiPathParam(name = "Role ID", description = "The ID of the role assignment to delete") Long roleAssignmentId) {
+            @RequestHeader(value = "X-UserID", required = true) String userID,
+            @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
+            @PathVariable("roleAssignmentId") @ApiPathParam(name = "Role ID", description = "The ID of the role assignment to delete") Long roleAssignmentId)
+            throws Exception {
+
+        RoleAssignment assignment = rolesAndPermissionsService.getRoleAssignment(roleAssignmentId);
+
+        sendEmails("delete-role-assignment.vm", assignment, userID);
+
+        DeleteRoleAssignment roleAssignmentEvent = new DeleteRoleAssignment(assignment, userID);
+
+        RoleType type = assignment.getRole().getType();
+        if (type == RoleType.VAULT){
+            roleAssignmentEvent.setVault(vaultsService.getVault(assignment.getVaultId()));
+        } else if (type == RoleType.SCHOOL) {
+            roleAssignmentEvent.setSchool(groupsService.getGroup(assignment.getSchoolId()));
+        }
+        roleAssignmentEvent.setUser(usersService.getUser(userID));
+        roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
+        roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+        roleAssignmentEvent.setAssignee(usersService.getUser(assignment.getUserId()));
+        roleAssignmentEvent.setRole(assignment.getRole());;
+
+        eventService.addEvent(roleAssignmentEvent);
+
         rolesAndPermissionsService.deleteRoleAssignment(roleAssignmentId);
         return ResponseEntity.ok().build();
     }

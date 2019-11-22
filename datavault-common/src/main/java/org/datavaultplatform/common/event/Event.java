@@ -118,6 +118,27 @@ public class Event {
     private DepositChunk chunk;
     @Transient
     public String chunkId;
+
+    // Related Role assignee
+    @JsonIgnore
+    @ManyToOne
+    private User assignee;
+    @Transient
+    public String assigneeId;
+
+    // Related Role school target
+    @JsonIgnore
+    @ManyToOne
+    private Group school;
+    @Transient
+    public String schoolId;
+
+    // Related Role target
+    @JsonIgnore
+    @ManyToOne
+    private RoleModel role;
+    @Transient
+    public String roleId;
     
     public Event() {};
     public Event(String message) {
@@ -335,4 +356,52 @@ public class Event {
     public String getLocation() { return location; }
 
     public void setLocation(String location) { this.location = location; }
+
+    public String getAssigneeId() {
+        return assigneeId;
+    }
+
+    public void setAssigneeId(String assigneeId) {
+        this.assigneeId = assigneeId;
+    }
+
+    public String getSchoolId() {
+        return schoolId;
+    }
+
+    public void setSchoolId(String schoolId) {
+        this.schoolId = schoolId;
+    }
+
+    public String getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(String roleId) {
+        this.roleId = roleId;
+    }
+
+    public User getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(User assignee) {
+        this.assignee = assignee;
+    }
+
+    public Group getSchool() {
+        return school;
+    }
+
+    public void setSchool(Group school) {
+        this.school = school;
+    }
+
+    public RoleModel getRole() {
+        return role;
+    }
+
+    public void setRole(RoleModel role) {
+        this.role = role;
+    }
 }

@@ -1,6 +1,7 @@
 package org.datavaultplatform.broker.services;
 
 import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.dao.EventDAO;
 
 import java.util.List;
@@ -30,5 +31,9 @@ public class EventService {
     }
     
     public int count() { return eventDAO.count(); }
+
+    public List<Event> findVaultEvents(Vault vault) {
+        return eventDAO.findVaultEvents(vault);
+    }
 }
 

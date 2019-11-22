@@ -2,14 +2,15 @@ package org.datavaultplatform.broker.controllers;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
+import org.datavaultplatform.common.event.roles.OrphanVault;
+import org.datavaultplatform.common.event.roles.TransferVaultOwnership;
 import org.datavaultplatform.common.event.vault.Create;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.TransferVault;
-import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.DepositsData;
-import org.datavaultplatform.common.response.VaultsData;
-import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.response.*;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 @Api(name="Vaults", description = "Interact with DataVault Vaults")
 public class VaultsController {
 
+    private EmailService emailService;
     private VaultsService vaultsService;
     private DepositsService depositsService;
     private ExternalMetadataService externalMetadataService;
@@ -42,11 +44,23 @@ public class VaultsController {
     private String activeDir;
     private String archiveDir;
 
+    private String homePage;
+    private String helpPage;
+
+    public void setHomePage(String homePage) {
+        this.homePage = homePage;
+    }
+    public void setHelpPage(String helpPage) {
+        this.helpPage = helpPage;
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(VaultsController.class);
 
     public void setPermissionsService(RolesAndPermissionsService permissionsService) {
         this.permissionsService = permissionsService;
     }
+
+    public void setEmailService(EmailService emailService) { this.emailService = emailService; }
 
     public void setVaultsService(VaultsService vaultsService) {
         this.vaultsService = vaultsService;
@@ -134,15 +148,35 @@ public class VaultsController {
     public ResponseEntity transferVault(@RequestHeader(value = "X-UserID", required = true) String userID,
                                         @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
                                         @PathVariable("vaultId") String vaultId,
-                                        @RequestBody TransferVault transfer) {
+                                        @RequestBody TransferVault transfer) throws Exception {
 
         Vault vault = vaultsService.getVault(vaultId);
         User currentOwner = vault.getUser();
 
+
         if (transfer.isOrphaning()) {
             vaultsService.orphanVault(vault);
+
+            OrphanVault orphanVaultEvent = new OrphanVault(vault, userID);
+            orphanVaultEvent.setVault(vault);
+            orphanVaultEvent.setUser(usersService.getUser(userID));
+            orphanVaultEvent.setAgentType(Agent.AgentType.BROKER);
+            orphanVaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+
+            eventService.addEvent(orphanVaultEvent);
         } else {
             vaultsService.transferVault(vault, usersService.getUser(transfer.getUserId()), transfer.getReason());
+
+            sendEmails("transfer-vault-ownership.vm", vault, userID, transfer.getUserId());
+
+            TransferVaultOwnership transferEvent = new TransferVaultOwnership(transfer, vault, userID);
+            transferEvent.setVault(vault);
+            transferEvent.setUser(usersService.getUser(userID));
+            transferEvent.setAgentType(Agent.AgentType.BROKER);
+            transferEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+            transferEvent.setAssignee(usersService.getUser(transfer.getUserId()));
+
+            eventService.addEvent(transferEvent);
         }
 
         if (transfer.isChangingRoles()) {
@@ -155,8 +189,19 @@ public class VaultsController {
             assignment.setVaultId(vaultId);
 
             permissionsService.createRoleAssignment(assignment);
-        }
 
+            sendEmails("transfer-vault-ownership.vm", vault, userID, transfer.getUserId());
+
+            CreateRoleAssignment roleAssignmentEvent = new CreateRoleAssignment(assignment, userID);
+            roleAssignmentEvent.setVault(vaultsService.getVault(assignment.getVaultId()));
+            roleAssignmentEvent.setUser(usersService.getUser(userID));
+            roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
+            roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+            roleAssignmentEvent.setAssignee(usersService.getUser(assignment.getUserId()));
+            roleAssignmentEvent.setRole(assignment.getRole());;
+
+            eventService.addEvent(roleAssignmentEvent);
+        }
         return ResponseEntity.ok().build();
     }
 
@@ -395,6 +440,21 @@ public class VaultsController {
         return depositResponses;
     }
 
+    @RequestMapping(value = "/vaults/{vaultid}/roleEvents", method = RequestMethod.GET)
+    public List<EventInfo> getRoleEvents(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                         @PathVariable("vaultid") String vaultID) throws Exception {
+
+        User user = usersService.getUser(userID);
+        Vault vault = vaultsService.getUserVault(user, vaultID);
+
+        List<EventInfo> events = new ArrayList<>();
+        for (Event event : eventService.findVaultEvents(vault)) {
+            events.add(event.convertToResponse());
+        }
+
+        return events;
+    }
+
     @RequestMapping(value = "/vaults/{vaultid}/addDataManager", method = RequestMethod.POST)
     public VaultInfo addDataManager(@RequestHeader(value = "X-UserID", required = true) String userID,
                                     @PathVariable("vaultid") String vaultID,
@@ -452,5 +512,29 @@ public class VaultsController {
         vaultsService.updateVault(vault);
 
         return vault.convertToResponse();
+    }
+
+    private void sendEmails(String template, Vault vault, String userId, String newOwnerId) throws Exception {
+
+        HashMap<String, Object> model = new HashMap<String, Object>();
+        model.put("homepage", this.homePage);
+        model.put("helppage", this.helpPage);
+        User assignee = this.usersService.getUser(userId);
+        model.put("assignee", assignee.getFirstname() + " " + assignee.getLastname());
+        model.put("vault", vault.getName());
+        User vaultOwner = vault.getUser();
+        model.put("previousowner", vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+        User newOwner = this.usersService.getUser(newOwnerId);
+        if(newOwner != null) {
+            model.put("newowner", newOwner.getFirstname() + " " + newOwner.getLastname());
+        }else{
+            model.put("newowner", "n/a");
+        }
+
+        // Send email to the deposit user
+        emailService.sendTemplateMailToUser(newOwner.getEmail(),
+                "Datavault - Role Assignment",
+                template,
+                model);
     }
 }

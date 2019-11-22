@@ -1,6 +1,8 @@
 package org.datavaultplatform.broker.services;
 
+import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.Vault;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
