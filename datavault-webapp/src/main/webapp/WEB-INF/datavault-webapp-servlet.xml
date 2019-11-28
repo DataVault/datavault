@@ -99,7 +99,6 @@
 
     <bean id="filesController" class="org.datavaultplatform.webapp.controllers.FilesController">
         <property name="restService" ref="restService" />
-        <property name="maxDepositByteSize" value="${max.deposit.size}"/>
     </bean>
 
     <bean id="depositsController" class="org.datavaultplatform.webapp.controllers.DepositsController">

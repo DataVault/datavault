@@ -38,8 +38,10 @@
     <bean id="filesController" class="org.datavaultplatform.broker.controllers.FilesController">
         <property name="filesService" ref="filesService" />
         <property name="usersService" ref="usersService" />
+        <property name="adminService" ref="adminService" />
         <property name="tempDir" value="${tempDir}" />
         <property name="maxDepositByteSize" value="${max.deposit.size}"/>
+        <property name="maxAdminDepositByteSize" value="${max.admin.deposit.size}"/>
     </bean>
 
     <bean id="vaultsController" class="org.datavaultplatform.broker.controllers.VaultsController">
