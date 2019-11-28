@@ -137,7 +137,7 @@ public class RestService {
         return (String)response.getBody();
     }
 
-    public Boolean checkDepositSize(String[] filePaths) {
+    public DepositSize checkDepositSize(String[] filePaths) {
 
         String parameters = "?";
 
@@ -151,11 +151,11 @@ public class RestService {
 
         System.out.println("parameters: " + parameters);
 
-        HttpEntity<?> response = get(brokerURL + "/checkdepositsize" + parameters, Boolean.class);
+        HttpEntity<?> response = get(brokerURL + "/checkdepositsize" + parameters, DepositSize.class);
 
         System.out.println("return: " + response.getBody());
 
-        return (Boolean)response.getBody();
+        return (DepositSize) response.getBody();
     }
 
     public VaultInfo[] getVaultsListing() {

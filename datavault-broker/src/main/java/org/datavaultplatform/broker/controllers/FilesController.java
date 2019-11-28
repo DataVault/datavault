@@ -1,12 +1,16 @@
 package org.datavaultplatform.broker.controllers;
 
 import org.apache.commons.codec.binary.Base64;
+import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.FilesService;
+import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.io.FileUtils;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
+import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.response.DepositSize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -31,17 +35,21 @@ public class FilesController {
     
     private FilesService filesService;
     private UsersService usersService;
+    private AdminService adminService;
     private String tempDir;
     private Long maxDepositByteSize;
+    private Long maxAdminDepositByteSize;
 
     public void setFilesService(FilesService filesService) {
         this.filesService = filesService;
     }
     
-    public void setUsersService(UsersService usersService) {
-        this.usersService = usersService;
+    public void setUsersService(UsersService usersService) { this.usersService = usersService; }
+
+    public void setAdminService(AdminService adminService) {
+        this.adminService = adminService;
     }
-    
+
     public void setTempDir(String tempDir) {
         this.tempDir = tempDir;
     }
@@ -49,6 +57,11 @@ public class FilesController {
     public void setMaxDepositByteSize(String maxDepositByteSize) {
         long bytes = FileUtils.parseFormattedSizeToBytes(maxDepositByteSize);
         this.maxDepositByteSize = bytes;
+    }
+
+    public void setMaxAdminDepositByteSize(String maxAdminDepositByteSize) {
+        long bytes = FileUtils.parseFormattedSizeToBytes(maxAdminDepositByteSize);
+        this.maxAdminDepositByteSize = bytes;
     }
     
     @RequestMapping("/files")
@@ -147,7 +160,7 @@ public class FilesController {
     }
 
     @RequestMapping("/checkdepositsize")
-    public Boolean checkDepositSize(@RequestHeader(value = "X-UserID", required = true) String userID,
+    public DepositSize checkDepositSize(@RequestHeader(value = "X-UserID", required = true) String userID,
                               HttpServletRequest request) throws Exception {
 
         User user = usersService.getUser(userID);
@@ -186,12 +199,17 @@ public class FilesController {
         }
 
         System.out.println("Total size: " + size);
+        Long max = (this.adminService.isAdminUser(user)) ? this.maxAdminDepositByteSize : this.maxDepositByteSize;
+        DepositSize retVal = new DepositSize();
+        retVal.setMax(max);
 
-        if (size <= this.maxDepositByteSize) {
-            return Boolean.TRUE;
+        System.out.println("Max (broker) is:" + max);
+        if (size <= max) {
+            retVal.setResult(Boolean.TRUE);
         } else {
-            return Boolean.FALSE;
+            retVal.setResult(Boolean.FALSE);
         }
+        return retVal;
     }
     
     @RequestMapping(value="/upload/{fileUploadHandle}/{filename:.+}", method = RequestMethod.POST)

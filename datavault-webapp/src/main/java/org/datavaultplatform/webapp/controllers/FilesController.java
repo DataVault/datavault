@@ -2,6 +2,7 @@ package org.datavaultplatform.webapp.controllers;
 
 import org.datavaultplatform.common.io.FileUtils;
 import org.datavaultplatform.common.model.FileInfo;
+import org.datavaultplatform.common.response.DepositSize;
 import org.datavaultplatform.webapp.model.FancytreeNode;
 import org.datavaultplatform.webapp.services.RestService;
 import java.util.ArrayList;
@@ -15,19 +16,9 @@ import org.apache.commons.codec.binary.Base64;
 public class FilesController {
 
     private RestService restService;
-    private Long maxDepositByteSize;
     
     public void setRestService(RestService restService) {
         this.restService = restService;
-    }
-
-    public void setMaxDepositByteSize(String maxDepositByteSize) {
-        long bytes = FileUtils.parseFormattedSizeToBytes(maxDepositByteSize);
-        this.maxDepositByteSize = bytes;
-    }
-
-    public String getMaxDepositSizeDisplay(){
-        return FileUtils.getGibibyteSizeStr(maxDepositByteSize);
     }
 
     public ArrayList<FancytreeNode> getNodes(String parent, boolean directoryOnly) throws Exception{
@@ -100,9 +91,10 @@ public class FilesController {
             System.out.println("filePaths: " + filePath);
         }
 
-        String success = restService.checkDepositSize(filePaths).toString();
-        String max = getMaxDepositSizeDisplay();
-
+        DepositSize result = restService.checkDepositSize(filePaths);
+        Boolean success = result.getResult();
+        String max = FileUtils.getGibibyteSizeStr(result.getMax());
+        System.out.println("Max deposit (web): " + max);
         return "{ \"success\":\"" + success + "\", \"max\":\"" + max + "\"}";
     }
     
