@@ -15,12 +15,13 @@ my $filename = $opt->{xmlFile};
 
 my $dom = XML::LibXML->load_xml(location => $filename);
 
-foreach my $person ($dom->findnodes('/result/person')) {
+foreach my $person ($dom->findnodes('/result/items/person')) {
     my $idType = '';
     foreach my $id ($person->findnodes('./ids/id')) {
-	my $type = $id->findnodes('./@type');	
+        my $type = $id->findnodes('./type/term/text');
         if ($type eq 'Employee ID') {
-    	   print $person->findnodes('./@uuid')->to_literal() . "\t" . $id->to_literal() . "\n";
+           my $employeeId = $id->findnodes('./value');
+           print $person->findnodes('./@uuid')->to_literal() . "\t" . $employeeId . "\n";
         }
     }
 }

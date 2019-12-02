@@ -15,7 +15,7 @@ my $filename = $opt->{xmlFile};
 
 my $dom = XML::LibXML->load_xml(location => $filename);
 
-foreach my $dataset ($dom->findnodes('/result/dataSet')) {
+foreach my $dataset ($dom->findnodes('/result/items/dataSet')) {
    my $ds = $dataset->findnodes('./@uuid')->to_literal();
    my $crisID = $dataset->findnodes('./@pureId')->to_literal();
    my $title = $dataset->findnodes('./title')->to_literal();
