@@ -19,13 +19,13 @@ my $datasetDom = XML::LibXML->load_xml(location => $datasetFilename);
 
 my %projectHash;
 
-foreach my $project ($projectDom->findnodes('/result/project')) {
+foreach my $project ($projectDom->findnodes('/result/items/project')) {
    my $uuid = $project->findnodes('./@uuid')->to_literal();
    my $pureid = $project->findnodes('./@pureId')->to_literal();
    $projectHash{$uuid} = $pureid;
 }
 
-foreach my $project ($datasetDom->findnodes('/result/dataSet')) {
+foreach my $project ($datasetDom->findnodes('/result/items/dataSet')) {
    my $datasetUuid = $project->findnodes('./@uuid')->to_literal();
    my @projectUuid = $project->findnodes('./relatedProjects/relatedProjects/@uuid');
    my $firstUuid = "";
