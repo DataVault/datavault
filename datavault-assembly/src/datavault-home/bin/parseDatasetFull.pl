@@ -19,5 +19,6 @@ foreach my $dataset ($dom->findnodes('/result/items/dataSet')) {
    my $ds = $dataset->findnodes('./@uuid')->to_literal();
    my $crisID = $dataset->findnodes('./@pureId')->to_literal();
    my $title = $dataset->findnodes('./title')->to_literal();
+   $dataset =~ s/\n//g;
    print $ds . "\t" . $title . "\t" . $dataset . "\t" . $crisID . "\n";
 }
