@@ -57,6 +57,8 @@
         <property name="dataManagersService" ref="dataManagersService" />
         <property name="activeDir" value="${activeDir}" />
         <property name="archiveDir" value="${archiveDir}" />
+        <property name="emailService" ref="emailService" />
+
     </bean>
     
     <bean id="depositsController" class="org.datavaultplatform.broker.controllers.DepositsController">

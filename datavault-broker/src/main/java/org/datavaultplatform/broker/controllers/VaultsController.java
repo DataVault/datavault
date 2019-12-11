@@ -516,6 +516,7 @@ public class VaultsController {
 
     private void sendEmails(String template, Vault vault, String userId, String newOwnerId) throws Exception {
 
+        //sendEmails("transfer-vault-ownership.vm", vault, userID, transfer.getUserId());
         HashMap<String, Object> model = new HashMap<String, Object>();
         model.put("homepage", this.homePage);
         model.put("helppage", this.helpPage);
@@ -527,14 +528,13 @@ public class VaultsController {
         User newOwner = this.usersService.getUser(newOwnerId);
         if(newOwner != null) {
             model.put("newowner", newOwner.getFirstname() + " " + newOwner.getLastname());
+            // Send email to the deposit user
+            emailService.sendTemplateMailToUser(newOwner,
+                    "Datavault - Role Assignment",
+                    template,
+                    model);
         }else{
             model.put("newowner", "n/a");
         }
-
-        // Send email to the deposit user
-        emailService.sendTemplateMailToUser(newOwner.getEmail(),
-                "Datavault - Role Assignment",
-                template,
-                model);
     }
 }
