@@ -47,8 +47,8 @@ jobs:
     #    "PUBLIC_KEY,
     #    "HOST",
     #    "USER"
-      ]
-    }
+    #  ]
+    #}
     #- name: Copy to Web
     #  run: |
     #    ssh user@host datavault-home datavault-home-Test
