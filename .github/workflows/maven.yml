@@ -30,15 +30,14 @@ jobs:
    #       "HOST",
    #       "USER"
    #   ]
-   # }
-      - name: Copy deployment dir to Web VM
-        uses: garygrossgarten/github-action-scp@release
-        with:
-          local: datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home
-          remote: /home/lacdv/actionTest
-          host: ${{ secrets.DEMO_WEB_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.DEMO_WEB }}
+    - name: Copy deployment dir to Web VM
+      uses: garygrossgarten/github-action-scp@release
+      with:
+        local: datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home
+        remote: /home/lacdv/actionTest
+        host: ${{ secrets.DEMO_WEB_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        password: ${{ secrets.DEMO_WEB }}
 
     #action "Copy to Web" {
     #  uses = maddox/actions/ssh@master
