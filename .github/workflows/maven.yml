@@ -1,0 +1,64 @@
+name: Java CI
+
+on: 
+  push:
+    branches: 
+      - action-test
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1  
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Maven
+      run:
+        mvn clean package
+
+   #-name: Archive Web
+   #   uses: maddox/actions/ssh@master
+   #   with:
+   #     args: "mv datavault-home actionTest/archive/datavault-home-Test"
+   #     secrets: [
+   #       "PRIVATE_KEY",
+   #       "PUBLIC_KEY",
+   #       "HOST",
+   #       "USER"
+   #   ]
+    - name: Copy deployment dir to Web VM
+      uses: garygrossgarten/github-action-scp@release
+      with:
+        local: datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home
+        remote: /home/lacdv/actionTest
+        host: ${{ secrets.DEMO_WEB_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        password: ${{ secrets.DEMO_WEB }}
+
+    #action "Copy to Web" {
+    #  uses = maddox/actions/ssh@master
+    #  args = "mv /home/lacdv/datavault-home /home/lacdv/actionTest/archive/datavault-home-Test"
+    #  secrets = [
+    #    "PRIVATE_KEY",
+    #    "PUBLIC_KEY,
+    #    "HOST",
+    #    "USER"
+    #  ]
+    #}
+    #- name: Copy to Web
+    #  run: |
+    #    ssh user@host datavault-home datavault-home-Test
+    #    scp -r datavault-home user@host:actionTest/.
+    #- name: Copy to worker 1
+    #  run:
+    #    scp x to y
+    #- name: Copy to worker 2
+    #  run:
+    #    scp x to y
+    #-name: Copy to worker 3
+    #  run:
+    #    scp x to y
