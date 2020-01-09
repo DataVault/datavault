@@ -33,6 +33,7 @@ public class EventListener implements MessageListener {
 	private String helpUrl;
 	private String helpMail;
     private String auditAdminEmail;
+    private Deposit.Status preDeletionStatus;
     
 	private static final Map<String, String> EMAIL_SUBJECTS;
     static {
@@ -190,7 +191,7 @@ public class EventListener implements MessageListener {
                     }
                 }
 
-                // Add to the cumulative vault size
+                /*// Add to the cumulative vault size
                 Vault vault = deposit.getVault();
                 
                 success = false;
@@ -204,7 +205,7 @@ public class EventListener implements MessageListener {
                         // Refresh from database and retry
                         vault = vaultsService.getVault(vault.getID());
                     }
-                }
+                }*/
 
             } else if (concreteEvent instanceof ComputedChunks) {
                 
@@ -320,6 +321,21 @@ public class EventListener implements MessageListener {
                             archivesService.addArchive(deposit, archiveStore, completeEvent.getArchiveIds().get(archiveStoreId));
                         }
 
+                        // Add to the cumulative vault size
+                        Vault vault = deposit.getVault();
+
+                        success = false;
+                        while (!success) {
+                            try {
+                                long vaultSize = vault.getSize();
+                                vault.setSize(vaultSize + deposit.getSize());
+                                vaultsService.updateVault(vault);
+                                success = true;
+                            } catch (org.hibernate.StaleObjectStateException e) {
+                                // Refresh from database and retry
+                                vault = vaultsService.getVault(vault.getID());
+                            }
+                        }
                         success = true;
                     } catch (org.hibernate.StaleObjectStateException e) {
                         // Refresh from database and retry
@@ -397,6 +413,8 @@ public class EventListener implements MessageListener {
                 String type = "retrievecomplete";
                 this.sendEmails(deposit, completeEvent, type, "user-retrieve-complete.vm", "group-admin-retrieve-complete.vm");
             } else if (concreteEvent instanceof DeleteStart) {
+                preDeletionStatus = deposit.getStatus();
+                logger.info("Pre Deletion Status:" + preDeletionStatus);
             	deposit.setStatus(Deposit.Status.DELETE_IN_PROGRESS);
                 depositsService.updateDeposit(deposit);
                 
@@ -406,20 +424,23 @@ public class EventListener implements MessageListener {
             	deposit.setStatus(Deposit.Status.DELETED);
             	deposit.setSize(0);
                 depositsService.updateDeposit(deposit);
-                
-                Vault vault = deposit.getVault();
-                
-                success = false;
-                //Update the vault size after deleting the deposit
-                while (!success) {
-                    try {
-                        long vaultSize = vault.getSize();
-                        vault.setSize(vaultSize - depositSizeBeforeDelete);
-                        vaultsService.updateVault(vault);
-                        success = true;
-                    } catch (org.hibernate.StaleObjectStateException e) {
-                        // Refresh from database and retry
-                        vault = vaultsService.getVault(vault.getID());
+
+                // if this wasn't an Error deposit remove from the vault size
+                if (preDeletionStatus != Deposit.Status.FAILED) {
+                    Vault vault = deposit.getVault();
+
+                    success = false;
+                    //Update the vault size after deleting the deposit
+                    while (!success) {
+                        try {
+                            long vaultSize = vault.getSize();
+                            vault.setSize(vaultSize - depositSizeBeforeDelete);
+                            vaultsService.updateVault(vault);
+                            success = true;
+                        } catch (org.hibernate.StaleObjectStateException e) {
+                            // Refresh from database and retry
+                            vault = vaultsService.getVault(vault.getID());
+                        }
                     }
                 }
             } else if (concreteEvent instanceof AuditStart) {
