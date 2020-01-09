@@ -33,6 +33,7 @@ public class EventListener implements MessageListener {
 	private String helpUrl;
 	private String helpMail;
     private String auditAdminEmail;
+    private Deposit.Status preDeletionStatus;
     
 	private static final Map<String, String> EMAIL_SUBJECTS;
     static {
@@ -412,19 +413,20 @@ public class EventListener implements MessageListener {
                 String type = "retrievecomplete";
                 this.sendEmails(deposit, completeEvent, type, "user-retrieve-complete.vm", "group-admin-retrieve-complete.vm");
             } else if (concreteEvent instanceof DeleteStart) {
+                preDeletionStatus = deposit.getStatus();
+                logger.info("Pre Deletion Status:" + preDeletionStatus);
             	deposit.setStatus(Deposit.Status.DELETE_IN_PROGRESS);
                 depositsService.updateDeposit(deposit);
                 
             } else if (concreteEvent instanceof DeleteComplete) {
             	Boolean success = false;
             	long depositSizeBeforeDelete = deposit.getSize();
-            	Deposit.Status originalStatus = deposit.getStatus();
             	deposit.setStatus(Deposit.Status.DELETED);
             	deposit.setSize(0);
                 depositsService.updateDeposit(deposit);
 
                 // if this wasn't an Error deposit remove from the vault size
-                if (originalStatus != Deposit.Status.FAILED) {
+                if (preDeletionStatus != Deposit.Status.FAILED) {
                     Vault vault = deposit.getVault();
 
                     success = false;
