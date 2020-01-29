@@ -20,5 +20,6 @@ foreach my $dataset ($dom->findnodes('/result/items/dataSet')) {
    my $crisID = $dataset->findnodes('./@pureId')->to_literal();
    my $title = $dataset->findnodes('./title')->to_literal();
    $dataset =~ s/\n//g;
+   $dataset =~ s/\t//g;
    print $ds . "\t" . $title . "\t" . $dataset . "\t" . $crisID . "\n";
 }
