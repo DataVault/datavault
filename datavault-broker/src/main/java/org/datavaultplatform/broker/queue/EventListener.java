@@ -38,14 +38,14 @@ public class EventListener implements MessageListener {
 	private static final Map<String, String> EMAIL_SUBJECTS;
     static {
     	EMAIL_SUBJECTS = new HashMap<String, String>();
-    	EMAIL_SUBJECTS.put("user-deposit-start", "Confirmation - your new DataVault deposit is starting.");
-    	EMAIL_SUBJECTS.put("user-deposit-complete", "Confirmation - your new DataVault deposit is complete.");
+    	EMAIL_SUBJECTS.put("user-deposit-start", "Confirmation - a new DataVault deposit is starting.");
+    	EMAIL_SUBJECTS.put("user-deposit-complete", "Confirmation - a new DataVault deposit is complete.");
     	EMAIL_SUBJECTS.put("user-deposit-error", "DataVault ERROR - attempted deposit or retrieval of a deposit failed");
     	EMAIL_SUBJECTS.put("admin-deposit-start", "Confirmation - a new DataVault deposit is starting.");
     	EMAIL_SUBJECTS.put("admin-deposit-complete", "Confirmation - a new DataVault deposit is complete.");
     	EMAIL_SUBJECTS.put("admin-deposit-error", "DataVault ERROR - attempted deposit or retrieval of a deposit failed");
-    	EMAIL_SUBJECTS.put("user-deposit-retrievestart", "Confirmation - your new DataVault retrieval is starting.");
-    	EMAIL_SUBJECTS.put("user-deposit-retrievecomplete", "Confirmation - your new DataVault retrieval is complete.");
+    	EMAIL_SUBJECTS.put("user-deposit-retrievestart", "Confirmation - a new DataVault retrieval is starting.");
+    	EMAIL_SUBJECTS.put("user-deposit-retrievecomplete", "Confirmation - a new DataVault retrieval is complete.");
     	EMAIL_SUBJECTS.put("admin-deposit-retrievestart", "Confirmation - a new DataVault retrieval is starting.");
     	EMAIL_SUBJECTS.put("admin-deposit-retrievecomplete", "Confirmation - a new DataVault retrieval is complete.");
         EMAIL_SUBJECTS.put("audit-chunk-error", "DataVault ERROR - Chunk failed checksum during audit.");
@@ -549,9 +549,11 @@ public class EventListener implements MessageListener {
         model.put("hasPersonalData", deposit.getHasPersonalData());
         if (event instanceof Error) {
             model.put("error-message", event.getMessage());
-            model.put("retrieve-firstname", retrieveUser.getFirstname());
-            model.put("retrieve-lastname", retrieveUser.getLastname());
-            model.put("retrieve-id", retrieveUser.getID());
+        }
+        if (event instanceof Error || event instanceof RetrieveStart || event instanceof RetrieveComplete) {
+            model.put("retriever-firstname", retrieveUser.getFirstname());
+            model.put("retriever-lastname", retrieveUser.getLastname());
+            model.put("retriever-id", retrieveUser.getID());
         }
         model.put("home-page", this.getHomeUrl());
         model.put("help-page", this.getHelpUrl());
