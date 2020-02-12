@@ -24,4 +24,4 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         push-branch: 'builds'
         commit-message: 'CI builds from commit {{ github.ref }}'
-        files: /home/runner/work/datavault/datavault/datavault-common/target/datavault-common-1.0-SNAPSHOT.jar /home/runner/work/datavault/datavault/datavault-worker/target/datavault-worker-1.0-SNAPSHOT.jar /home/runner/work/datavault/datavault/datavault-webapp/target/datavault-webapp.war /home/runner/work/datavault/datavault/datavault-broker/target/datavault-broker.war
+        files: /github/workspace/datavault-common/target/datavault-common-1.0-SNAPSHOT.jar /github/workspace/datavault-worker/target/datavault-worker-1.0-SNAPSHOT.jar /github/workspace/datavault-webapp/target/datavault-webapp.war /github/workspace/datavault-broker/target/datavault-broker.war
