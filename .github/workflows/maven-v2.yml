@@ -1,0 +1,27 @@
+name: Java CI
+
+on:
+  push:
+    branches: 
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Maven
+      run: mvn clean package
+    - name: Commit to builds branch
+      uses: github-actions-x/commit@v2.3
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        push-branch: 'builds'
+        commit-message: 'CI builds from commit {{ github.ref }}'
+        files: /home/runner/work/datavault/datavault/datavault-common/target/datavault-common-1.0-SNAPSHOT.jar /home/runner/work/datavault/datavault/datavault-worker/target/datavault-worker-1.0-SNAPSHOT.jar /home/runner/work/datavault/datavault/datavault-webapp/target/datavault-webapp.war /home/runner/work/datavault/datavault/datavault-broker/target/datavault-broker.war
