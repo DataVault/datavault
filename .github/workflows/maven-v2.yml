@@ -18,10 +18,13 @@ jobs:
         java-version: 1.8
     - name: Build with Maven
       run: mvn clean package
-    - name: Commit to builds branch
-      uses: github-actions-x/commit@v2.3
+    - name: Commit to builds repo
+      uses: seanmiddleditch/gha-publish-to-git@master
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        push-branch: 'builds'
-        commit-message: 'CI builds from commit {{ github.ref }}'
-        files: /github/workspace/datavault-common/target/datavault-common-1.0-SNAPSHOT.jar /github/workspace/datavault-worker/target/datavault-worker-1.0-SNAPSHOT.jar /github/workspace/datavault-webapp/target/datavault-webapp.war /github/workspace/datavault-broker/target/datavault-broker.war
+        repository: mbennett-uoe/datavault-builds
+        branch: master
+        github_token: '${{ secrets.GITHUB_TOKEN  }}'
+        github_pat: '${{ secrets.GH_PAT }}'
+        source_folder: datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/
+        commit_message: 'Automatic DataVault CI build from commit ${{ GITHUB_SHA }}'
+      if: success() && github.event == 'push'
