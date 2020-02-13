@@ -26,5 +26,5 @@ jobs:
         github_token: '${{ secrets.GITHUB_TOKEN  }}'
         github_pat: '${{ secrets.GH_PAT }}'
         source_folder: datavault-assembly/target/datavault-assembly-1.0-SNAPSHOT-assembly/datavault-home/
-        commit_message: 'Automatic DataVault CI build from commit ${{ GITHUB_SHA }}'
+        commit_message: 'Automatic DataVault CI build from commit ${{ github.sha }}'
       if: success() && github.event == 'push'
