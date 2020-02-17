@@ -44,7 +44,7 @@ public class ApiErrorHandler extends DefaultResponseErrorHandler {
         super.handleError(response);
     }
 
-    private Charset getCharset(ClientHttpResponse response) {
+    protected Charset getCharset(ClientHttpResponse response) {
         HttpHeaders headers = response.getHeaders();
         MediaType contentType = headers.getContentType();
         return contentType != null ? contentType.getCharset() : null;
