@@ -7,8 +7,8 @@
 			<li>Date of failed operation: ${timestamp}</li>
 			<li>Contains personal data: ${hasPersonalData}</li>
 			<li>Deposit ID: ${deposit-id}</li>
-			<li>Name of user who attempted the failed operation: ${retrieve-firstname} ${retrieve-lastname}</li>
-			<li>ID of the user who attempted the failed operation: ${retrieve-id}</li>
+			<li>Name of user who attempted the failed operation: ${retriever-firstname} ${retriever-lastname}</li>
+			<li>ID of the user who attempted the failed operation: ${retriever-id}</li>
 			<li>Name of the user who originally deposited the deposit::${user-firstname} ${user-lastname}</li>
 			<li>ID of the user who originally deposited the deposit: ${user-id}</li>
 		</ul>
