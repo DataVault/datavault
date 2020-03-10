@@ -162,11 +162,6 @@ public class DepositsController {
         deposit.setPersonalDataStatement(createDeposit.getPersonalDataStatement());
         deposit.setDepositPaths(new ArrayList<>());
 
-        System.out.println("Deposit File Path: ");
-        for (DepositPath dPath : deposit.getDepositPaths()){
-            System.out.println("\t- " + dPath.getFilePath());
-        }
-
         if (user == null) {
             throw new Exception("User '" + userID + "' does not exist");
         }
@@ -466,7 +461,9 @@ public class DepositsController {
             }
         }
         System.out.println("There is " + paths.size() + " deposit path");
-
+        if (paths.isEmpty()) {
+            throw new Exception("There are no file paths for restarted deposit - Exiting");
+        }
         // Get last Deposit Event
         Event lastEvent = deposit.getLastNotFailedEvent();
         List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
@@ -529,9 +526,16 @@ public class DepositsController {
                     }
                 }
 
-                System.out.println("Add deposit path: " + path);
-                DepositPath depositPath = new DepositPath(deposit, path, Path.PathType.FILESTORE);
-                deposit.getDepositPaths().add(depositPath);
+                if (lastEvent == null) {
+                    System.out.println("Add deposit path: " + path);
+                    DepositPath depositPath = new DepositPath(deposit, path, Path.PathType.FILESTORE);
+                    deposit.getDepositPaths().add(depositPath);
+                    logger.debug("Prior to creating the jobs we have the following depositPaths:");
+                    for (DepositPath dp : deposit.getDepositPaths()) {
+                        logger.debug(dp.getFilePath());
+                    }
+                    depositsService.updateDeposit(deposit);
+                }
             }
         }
 
@@ -546,6 +550,13 @@ public class DepositsController {
         depositProperties.put("depositId", deposit.getID());
         depositProperties.put("bagId", deposit.getBagId());
         depositProperties.put("userId", user.getID());
+        if (deposit.getNumOfChunks() != 0) {
+            logger.debug("Restart num of chunks: " + Integer.toString(deposit.getNumOfChunks()));
+            depositProperties.put("numOfChunks", Integer.toString(deposit.getNumOfChunks()));
+        }
+        if (deposit.getArchiveDigest() != null) {
+            depositProperties.put("archiveDigest", deposit.getArchiveDigest());
+        }
 
         // Deposit and Vault metadata
         // TODO: at the moment we're just serialising the objects to JSON.
@@ -561,9 +572,32 @@ public class DepositsController {
 
         for (DepositPath path : deposit.getDepositPaths()) {
             if (path.getPathType() == Path.PathType.FILESTORE) {
+                logger.debug("Adding Filestore path " + path.getFilePath());
                 filestorePaths.add(path.getFilePath());
             } else if (path.getPathType() == Path.PathType.USER_UPLOAD) {
+                logger.debug("Adding User upload path " + path.getFilePath());
                 userUploadPaths.add(path.getFilePath());
+            }
+        }
+
+        // extra info from previous attempt for restart
+        // get chunks checksums
+        // Get encryption IVs
+        byte[] tarIVs = (deposit.getEncIV() != null) ? deposit.getEncIV(): null;
+        String encTarDigest = (deposit.getEncArchiveDigest() != null) ? deposit.getEncArchiveDigest() : null;
+        HashMap<Integer, String> chunksDigest = null;
+        HashMap<Integer, byte[]> chunksIVs = null;
+        HashMap<Integer, String> encChunksDigests = null;
+        if (deposit.getDepositChunks() != null) {
+            chunksDigest = new HashMap<>();
+            chunksIVs = new HashMap<>();
+            encChunksDigests = new HashMap<>();
+            List<DepositChunk> depositChunks = deposit.getDepositChunks();
+            for (DepositChunk depositChunk : depositChunks) {
+                int num = depositChunk.getChunkNum();
+                chunksDigest.put(num, depositChunk.getArchiveDigest());
+                chunksIVs.put(num, depositChunk.getEncIV());
+                encChunksDigests.put(num, depositChunk.getEcnArchiveDigest());
             }
         }
 
@@ -571,7 +605,7 @@ public class DepositsController {
                 job, depositProperties, archiveStores,
                 userFileStoreProperties, userFileStoreClasses,
                 filestorePaths, userUploadPaths,
-                null, null, null, null, null,
+                chunksDigest, tarIVs, chunksIVs, encTarDigest, encChunksDigests,
                 lastEvent);
         String jsonDeposit = mapper.writeValueAsString(depositTask);
         sender.send(jsonDeposit);

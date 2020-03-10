@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.io.FileUtils;
 
 import org.datavaultplatform.common.task.Task;
@@ -258,7 +259,15 @@ public class Receiver {
                 }
 
                 // Set up the worker temporary directory
-                tempDirPath = Paths.get(tempDir, WorkerInstance.getWorkerName());
+                Event lastEvent = concreteTask.getLastEvent();
+                if (lastEvent != null) {
+                    logger.debug("Restart using old temp dir");
+                    tempDirPath = Paths.get(tempDir,  lastEvent.getAgent());
+                } else {
+                    logger.debug("Normal using default temp dir");
+                    tempDirPath = Paths.get(tempDir, WorkerInstance.getWorkerName());
+                }
+                logger.debug("The temp dir:" + tempDirPath.toString());
                 tempDirPath.toFile().mkdir();
                 
                 Path metaDirPath = Paths.get(metaDir);
@@ -270,19 +279,14 @@ public class Receiver {
                         vaultAddress, vaultToken, 
                         vaultKeyPath, vaultKeyName, vaultSslPEMPath, this.multipleValidationEnabled);
                 concreteTask.performAction(context);
-                
+
+                // Clean up the temporary directory (if success if failure we need it for retries)
+                FileUtils.deleteDirectory(tempDirPath.toFile());
             } catch (Exception e) {
                 logger.error("Error decoding message", e);
-            } finally {
-            	// Clean up the temporary directory
-                FileUtils.deleteDirectory(tempDirPath.toFile());
             }
 
             channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
         }
-        
-        // Unreachable - the receiver never terminates
-        // channel.close();
-        // connection.close();
     }
 }
