@@ -212,9 +212,9 @@ public class Deposit extends Task {
             }
             // Copy the resulting tar file to the archive area
             logger.info("Copying tar file(s) to archive ...");
-            if (lastEventClass == null) {
-                throw new Exception("Failed after chunking / encryption");
-            }
+            //if (lastEventClass == null) {
+            //    throw new Exception("Failed after chunking / encryption");
+            //}
             this.uploadToStorage(context, tarFile);
 
             logger.info("Verifying archive package ...");
@@ -344,13 +344,13 @@ public class Deposit extends Task {
             String archiveId;
 
             try {
-            	eventStream.send(new StartCopyUpload(jobID, depositId, ((Device) archiveStore).name ).withUserId(userID));
+            	eventStream.send(new StartCopyUpload(jobID, depositId, ((Device) archiveStore).name, chunkCount ).withUserId(userID));
 	            if (((Device)archiveStore).hasDepositIdStorageKey()) {
 	            		archiveId = ((Device) archiveStore).store(depId, tarFile, progress);
 	            } else {
 	            		archiveId = ((Device) archiveStore).store("/", tarFile, progress);
 	            }
-	            eventStream.send(new CompleteCopyUpload(jobID, depositId, ((Device) archiveStore).name ).withUserId(userID));
+	            eventStream.send(new CompleteCopyUpload(jobID, depositId, ((Device) archiveStore).name, chunkCount ).withUserId(userID));
             } finally {
                 // Stop the tracking thread
                 tracker.stop();
@@ -427,6 +427,7 @@ public class Deposit extends Task {
             String encTarHash, String[] encChunksHash, boolean doVerification) throws Exception {
         logger.debug("In doArchive");
         for (int i = 0; i < chunkFiles.length; i++) {
+
             File chunkFile = chunkFiles[i];
             logger.debug("Validating chunk file: " + chunkFile.getAbsolutePath());
             //String chunkHash = chunksHash[i];
@@ -455,7 +456,10 @@ public class Deposit extends Task {
 
                     // Check hash of encrypted file
                     logger.debug("Verifying encrypted chunk file: "+chunkFile.getAbsolutePath());
+                    eventStream.send(new StartChunkValidation(jobID, depositId, ((Device) archiveStore).name, i + 1 ).withUserId(userID));
                     verifyChunkFile(context.getTempDir(), chunkFile, encChunkHash);
+                    eventStream.send(new CompleteChunkValidation(jobID, depositId, ((Device) archiveStore).name, i + 1 ).withUserId(userID));
+
                 }
             } else {
                 logger.debug("No IVs supplied.");
@@ -469,7 +473,9 @@ public class Deposit extends Task {
             FileSplitter.recomposeFile(chunkFiles, tarFile);
 
             // Verify the contents
+            eventStream.send(new StartTarValidation(jobID, depositId).withUserId(userID));
             verifyTarFile(context.getTempDir(), tarFile, tarHash);
+            eventStream.send(new CompleteTarValidation(jobID, depositId).withUserId(userID));
         }
     }
     
@@ -907,7 +913,7 @@ public class Deposit extends Task {
 		} else {
 			copyToArchiveStorage(tarFile);
 		}
-
+        eventStream.send(new UploadComplete(jobID, depositId).withUserId(userID));
 		eventStream.send(new UpdateProgress(jobID, depositId)
         .withUserId(userID)
         .withNextState(4));
@@ -919,6 +925,8 @@ public class Deposit extends Task {
         } else {
             verifyArchive(context, tarFile, tarHash, iv, encTarHash);
         }
+        eventStream.send(new ValidationComplete(jobID, depositId).withUserId(userID));
+
 	}
 	
 	private void InitialLogging(Context context) {
