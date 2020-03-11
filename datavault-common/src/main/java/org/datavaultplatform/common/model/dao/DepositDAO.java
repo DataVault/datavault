@@ -10,11 +10,11 @@ public interface DepositDAO {
     
     public void update(Deposit deposit);
     
-    public List<Deposit> list(String sort, String userId);
+    public List<Deposit> list(String query, String userId, String sort, String order, int offset, int maxResult);
 
     public Deposit findById(String Id);
 
-    public int count(String userId);
+    public int count(String userId, String query);
 
     public int queueCount(String userId);
 

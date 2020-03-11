@@ -319,11 +319,15 @@ public class RestService {
         return (DepositInfo[])response.getBody();
     }
 
-    public VaultsData getDepositsListingAll(String sort, String order, String offset, String maxResult) {
-        HttpEntity<?> response = get(brokerURL + "/admin/vaults?sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
-        return (VaultsData)response.getBody();
+    public DepositInfo[] getDepositsListingAll(String query, String sort, String order, int offset, int maxResult) {
+        HttpEntity<?> response = get(brokerURL + "/admin/deposits?query=" + query + "&sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, DepositInfo[].class);
+        return (DepositInfo[])response.getBody();
     }
 
+    public Integer getTotalDepositsCount(String query) {
+        HttpEntity<?> response = get(brokerURL + "/admin/deposits/count?query="+query, Integer.class);
+        return (Integer)response.getBody();
+    }
 
     public DepositInfo[] getDepositsListingAll(String sort) {
         HttpEntity<?> response = get(brokerURL + "/admin/deposits?sort=" + sort, DepositInfo[].class);

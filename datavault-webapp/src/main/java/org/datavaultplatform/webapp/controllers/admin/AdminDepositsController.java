@@ -39,6 +39,7 @@ import java.util.*;
 public class AdminDepositsController {
 
     private RestService restService;
+    private static final int DEFAULT_RECORDS_PER_PAGE = 10;
 
     public void setRestService(RestService restService) {
         this.restService = restService;
@@ -49,18 +50,38 @@ public class AdminDepositsController {
     @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)
     public String getDepositsListing(ModelMap model,
                                      @RequestParam(value = "query", required = false) String query,
-                                     @RequestParam(value = "sort", required = false) String sort) throws Exception {
-        if ((query == null) || ("".equals(query))) {
-            if ((sort == null) || ("".equals(sort))) {
-                model.addAttribute("deposits", restService.getDepositsListingAll());
-            } else {
-                model.addAttribute("deposits", restService.getDepositsListingAll(sort));
-            }
-            model.addAttribute("query", "");
-        } else {
-            model.addAttribute("deposits", restService.searchDeposits(query, sort));
-            model.addAttribute("query", query);
-        }
+                                     @RequestParam(value = "sort", required = false) String sort,
+                                     @RequestParam(value = "order", required = false) String order,
+                                     @RequestParam(value = "pageId", defaultValue = "1") int pageId)
+            throws Exception {
+        if(sort == null) sort = "creationTime";
+        if(order == null) order = "desc";
+        if (query == null) query = "";
+        model.addAttribute("activePageId", pageId);
+
+        // calculate offset which is passed to the service to fetch records from that row Id
+        int offset = (pageId-1) * DEFAULT_RECORDS_PER_PAGE;
+
+        model.addAttribute("offset", offset);
+
+        DepositInfo[] deposits = restService.getDepositsListingAll(query, sort, order, offset, DEFAULT_RECORDS_PER_PAGE);
+
+        int totalDeposits = restService.getTotalDepositsCount(query);
+
+        order = ("desc".equals(order))? "asc" : "desc";
+
+        int numberOfPages = (int)Math.ceil(deposits.length/DEFAULT_RECORDS_PER_PAGE);
+
+        model.addAttribute("query", "");
+        model.addAttribute("sort", sort);
+        model.addAttribute("order", order);
+        model.addAttribute("deposits", deposits);
+        model.addAttribute("query", query);
+        model.addAttribute("recordPerPage", DEFAULT_RECORDS_PER_PAGE);
+        model.addAttribute("totalRecords", totalDeposits);
+        model.addAttribute("totalPages", (int)Math.ceil(totalDeposits/Double.valueOf(DEFAULT_RECORDS_PER_PAGE)));
+
+        model.addAttribute("numberOfPages", numberOfPages);
 
         return "admin/deposits/index";
     }
