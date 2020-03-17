@@ -23,7 +23,10 @@ import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A class that extends Task which is used to handle Deposits to the vault
@@ -31,7 +34,17 @@ import java.util.Map;
 public class Deposit extends Task {
 
     private static final Logger logger = LoggerFactory.getLogger(Deposit.class);
-
+    private static final Set<String> RESTART_FROM_BEGINNNING = new HashSet<>();
+    private static final Set<String> RESTART_FROM_TRANSFER = new HashSet<>();
+    private static final Set<String> RESTART_FROM_PACKAGING = new HashSet<>();
+    private static final Set<String> RESTART_FROM_TAR_CHECKSUM = new HashSet<>();
+    private static final Set<String> RESTART_FROM_ENC_CHECKSUM = new HashSet<>();
+    private static final Set<String> RESTART_FROM_UPLOAD = new HashSet<>();
+    private static final Set<String> RESTART_FROM_VALIDATION = new HashSet<>();
+    private static final Set<String> RESTART_FROM_COMPLETE = new HashSet<>();
+    {
+        this.setupRestartHashes();
+    }
     EventSender eventStream;
     HashMap<String, UserStore> userStores;
 
@@ -54,7 +67,37 @@ public class Deposit extends Task {
     File[] chunkFiles;
     String[] chunksHash;
     String[] encChunksHash;
-    
+
+    private void setupRestartHashes() {
+        Deposit.RESTART_FROM_BEGINNNING.add("org.datavaultplatform.common.event.deposit.Start");
+
+        Deposit.RESTART_FROM_TRANSFER.addAll(RESTART_FROM_BEGINNNING);
+        Deposit.RESTART_FROM_TRANSFER.add("org.datavaultplatform.common.event.deposit.ComputedSize");
+
+        Deposit.RESTART_FROM_PACKAGING.addAll(RESTART_FROM_TRANSFER);
+        Deposit.RESTART_FROM_PACKAGING.add("org.datavaultplatform.common.event.deposit.TransferComplete");
+
+        Deposit.RESTART_FROM_TAR_CHECKSUM.addAll(RESTART_FROM_PACKAGING);
+        Deposit.RESTART_FROM_TAR_CHECKSUM.add("org.datavaultplatform.common.event.deposit.PackageComplete");
+
+        Deposit.RESTART_FROM_ENC_CHECKSUM.addAll(RESTART_FROM_TAR_CHECKSUM);
+        Deposit.RESTART_FROM_ENC_CHECKSUM.add("org.datavaultplatform.common.event.deposit.ComputedDigest");
+
+        Deposit.RESTART_FROM_UPLOAD.addAll(RESTART_FROM_ENC_CHECKSUM);
+        Deposit.RESTART_FROM_UPLOAD.add("org.datavaultplatform.common.event.deposit.ComputedEncryption");
+        Deposit.RESTART_FROM_UPLOAD.add("org.datavaultplatform.common.event.deposit.StartCopyUpload");
+        Deposit.RESTART_FROM_UPLOAD.add("org.datavaultplatform.common.event.deposit.CompleteCopyUpload");
+
+        Deposit.RESTART_FROM_VALIDATION.addAll(RESTART_FROM_UPLOAD);
+        Deposit.RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.UploadComplete");
+        Deposit.RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.StartChunkValidation");
+        Deposit.RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.CompleteChunkValidation");
+        Deposit.RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.StartTarValidation");
+        Deposit.RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.CompleteTarValidation");
+
+        Deposit.RESTART_FROM_COMPLETE.addAll(RESTART_FROM_VALIDATION);
+        Deposit.RESTART_FROM_COMPLETE.add("org.datavaultplatform.common.event.deposit.ValidationComplete");
+    }
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
      */
@@ -109,9 +152,7 @@ public class Deposit extends Task {
 
         userStores = this.setupUserFileStores();
         this.setupArchiveFileStores();
-
-        if (lastEventClass == null || lastEventClass == "org.datavaultplatform.common.event.deposit.Start"
-                || lastEventClass == "org.datavaultplatform.common.event.deposit.ComputedSize"){
+        if (lastEventClass == null || RESTART_FROM_TRANSFER.contains(lastEventClass)) {
             logger.info("bagID: " + bagID);
             this.calculateTotalDepositSize(context);
 
@@ -126,26 +167,29 @@ public class Deposit extends Task {
             this.copySelectedUserDataToBagDir(bagDataPath);
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping initial File copy");
+            Path bagPath = context.getTempDir().resolve(bagID);
+            bagDataPath = bagPath.resolve("data");
+            bagDir = bagPath.toFile();
         }
         
         try {
             File tarFile = null;
             String tarHash = null;
-            if (lastEventClass == null || lastEventClass == "org.datavaultplatform.common.event.deposit.Start"
-                    || lastEventClass == "org.datavaultplatform.common.event.deposit.ComputedSize") {
+            if (lastEventClass == null || RESTART_FROM_TRANSFER.contains(lastEventClass)) {
                 this.copyAdditionalUserData(context, bagDataPath);
             } else {
                 logger.debug("Last event is: " + lastEventClass + " skipping secondary File copy");
             }
 
+//            if (lastEventClass == null) {
+//                throw new Exception("Failed after file transfer");
+//            }
+
             byte iv[] = null;
             String encTarHash = null;
             Map<Integer, byte[]> chunksIVs = null;
             Long archiveSize = null;
-            if (lastEventClass == null || lastEventClass == "org.datavaultplatform.common.event.deposit.Start"
-                    || lastEventClass == "org.datavaultplatform.common.event.deposit.ComputedSize"
-                    || lastEventClass == "org.datavaultplatform.common.event.deposit.TransferComplete"
-                    || lastEventClass == "org.datavaultplatform.common.event.deposit.ComputedDigest") {
+            if (lastEventClass == null || RESTART_FROM_PACKAGING.contains(lastEventClass)) {
                 logger.info("Creating bag ...");
                 this.createBag(bagDir, depositMetadata, vaultMetadata, externalMetadata);
 
@@ -188,6 +232,10 @@ public class Deposit extends Task {
                         encTarHash = helper.getEncTarHash();
                     }
                 }
+
+//                if (lastEventClass == null) {
+//                    throw new Exception("Failed after chunking / encryption");
+//                }
             } else {
                 logger.debug("Last event is: " + lastEventClass + " skipping packaging");
 
@@ -207,19 +255,31 @@ public class Deposit extends Task {
                 Path tarPath = context.getTempDir().resolve(tarFileName);
                 tarFile = tarPath.toFile();
                 tarHash = archiveDigest;
-                //archiveSize = Long.parseLong(properties.get("archiveSize"));
                 archiveSize = tarFile.length();
             }
             // Copy the resulting tar file to the archive area
             logger.info("Copying tar file(s) to archive ...");
-            //if (lastEventClass == null) {
-            //    throw new Exception("Failed after chunking / encryption");
-            //}
-            this.uploadToStorage(context, tarFile);
 
+            if (lastEventClass == null || RESTART_FROM_UPLOAD.contains(lastEventClass)) {
+                this.uploadToStorage(context, tarFile);
+            } else {
+                logger.debug("Last event is: " + lastEventClass + " skipping upload");
+                UploadComplete uc = (UploadComplete) this.getLastEvent();
+                archiveIds = uc.getArchiveIds();
+            }
+            if (lastEventClass == null) {
+                throw new Exception("Failed after upload");
+            }
             logger.info("Verifying archive package ...");
-            this.verifyArchive(context, tarFile, tarHash, iv, chunksIVs, encTarHash);
-            
+            if (lastEventClass == null || RESTART_FROM_VALIDATION.contains(lastEventClass)) {
+                this.verifyArchive(context, tarFile, tarHash, iv, chunksIVs, encTarHash);
+            } else {
+                logger.debug("Last event is: " + lastEventClass + " skipping validation");
+            }
+
+            //if (lastEventClass == null) {
+            //    throw new Exception("Failed after validation");
+            //}
             logger.info("Deposit complete");
 
             logger.debug("The jobID: " + jobID);
@@ -443,6 +503,9 @@ public class Deposit extends Task {
             } else {
             		copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
             }
+
+            //need to mock archive ids and other stuff the upload sets
+            //also keep tidying up the new code move the mocking and possibly the sections into methods
 
             // Decryption
             if(ivs != null) {
@@ -913,7 +976,8 @@ public class Deposit extends Task {
 		} else {
 			copyToArchiveStorage(tarFile);
 		}
-        eventStream.send(new UploadComplete(jobID, depositId).withUserId(userID));
+        TimeUnit.SECONDS.sleep(5);
+        eventStream.send(new UploadComplete(jobID, depositId, archiveIds).withUserId(userID));
 		eventStream.send(new UpdateProgress(jobID, depositId)
         .withUserId(userID)
         .withNextState(4));

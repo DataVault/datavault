@@ -11,7 +11,7 @@ public class CompleteTarValidation extends Event {
 
     public CompleteTarValidation(String jobId, String depositId) {
         super("Tar validation completed");
-        this.eventClass = StartTarValidation.class.getCanonicalName();
+        this.eventClass = CompleteTarValidation.class.getCanonicalName();
         this.depositId = depositId;
         this.jobId = jobId;
     }
