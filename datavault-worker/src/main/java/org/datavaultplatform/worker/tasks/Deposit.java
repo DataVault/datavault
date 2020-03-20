@@ -59,7 +59,6 @@ public class Deposit extends Task {
     String depositId;
     String bagID;
     String userID;
-    //private String vaultID;
 
     PackagerV2 packagerV2 = new PackagerV2();
     
@@ -118,13 +117,6 @@ public class Deposit extends Task {
             archiveDigest = properties.get("archiveDigest");
         }
 
-        // file copy complete org.datavaultplatform.common.event.deposit.TransferComplete
-        // bag complete
-        // tar complete
-        // chunk complete
-        // encrypt complete org.datavaultplatform.common.event.deposit.PackageComplete
-        // upload complete
-        // validate complete org.datavaultplatform.common.event.deposit.Complete
         String lastEventClass = (this.getLastEvent() != null) ? this.getLastEvent().getEventClass() : null;
         if (lastEventClass != null) {
             logger.debug("The last event was: " + lastEventClass);
@@ -264,12 +256,17 @@ public class Deposit extends Task {
                 this.uploadToStorage(context, tarFile);
             } else {
                 logger.debug("Last event is: " + lastEventClass + " skipping upload");
-                UploadComplete uc = (UploadComplete) this.getLastEvent();
-                archiveIds = uc.getArchiveIds();
+                if (this.getRestartArchiveIds() != null) {
+                    logger.debug("We have restart Archive Ids");
+                    archiveIds.putAll(this.getRestartArchiveIds());
+                } else {
+                    logger.debug("We don't have restart archive Ids");
+                }
+
             }
-            if (lastEventClass == null) {
-                throw new Exception("Failed after upload");
-            }
+//            if (lastEventClass == null) {
+//                throw new Exception("Failed after upload");
+//            }
             logger.info("Verifying archive package ...");
             if (lastEventClass == null || RESTART_FROM_VALIDATION.contains(lastEventClass)) {
                 this.verifyArchive(context, tarFile, tarHash, iv, chunksIVs, encTarHash);
@@ -277,9 +274,9 @@ public class Deposit extends Task {
                 logger.debug("Last event is: " + lastEventClass + " skipping validation");
             }
 
-            //if (lastEventClass == null) {
-            //    throw new Exception("Failed after validation");
-            //}
+//            if (lastEventClass == null) {
+//                throw new Exception("Failed after validation");
+//            }
             logger.info("Deposit complete");
 
             logger.debug("The jobID: " + jobID);
@@ -536,8 +533,10 @@ public class Deposit extends Task {
             FileSplitter.recomposeFile(chunkFiles, tarFile);
 
             // Verify the contents
+            TimeUnit.SECONDS.sleep(5);
             eventStream.send(new StartTarValidation(jobID, depositId).withUserId(userID));
             verifyTarFile(context.getTempDir(), tarFile, tarHash);
+            TimeUnit.SECONDS.sleep(5);
             eventStream.send(new CompleteTarValidation(jobID, depositId).withUserId(userID));
         }
     }
@@ -989,6 +988,7 @@ public class Deposit extends Task {
         } else {
             verifyArchive(context, tarFile, tarHash, iv, encTarHash);
         }
+        TimeUnit.SECONDS.sleep(5);
         eventStream.send(new ValidationComplete(jobID, depositId).withUserId(userID));
 
 	}

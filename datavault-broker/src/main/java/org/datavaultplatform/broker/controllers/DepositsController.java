@@ -600,6 +600,17 @@ public class DepositsController {
                 encChunksDigests.put(num, depositChunk.getEcnArchiveDigest());
             }
         }
+        HashMap<String, String> archiveIDs = null;
+        if (deposit.getArchives() != null) {
+            archiveIDs = new HashMap<>();
+            for (Archive archive : deposit.getArchives()) {
+                for (ArchiveStore archiveStore : archiveStores) {
+                    if (archive.getArchiveStore().getID().equals(archiveStore.getID())) {
+                        archiveIDs.put(archiveStore.getID(), archive.getArchiveId());
+                    }
+                }
+            }
+        }
 
         Task depositTask = new Task(
                 job, depositProperties, archiveStores,
@@ -607,6 +618,9 @@ public class DepositsController {
                 filestorePaths, userUploadPaths,
                 chunksDigest, tarIVs, chunksIVs, encTarDigest, encChunksDigests,
                 lastEvent);
+        if (archiveIDs != null) {
+            depositTask.setRestartArchiveIds(archiveIDs);
+        }
         String jsonDeposit = mapper.writeValueAsString(depositTask);
         sender.send(jsonDeposit);
 
