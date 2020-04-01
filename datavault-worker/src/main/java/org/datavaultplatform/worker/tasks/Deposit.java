@@ -129,15 +129,15 @@ public class Deposit extends Task {
             .withUserId(userID)
             .withNextState(0));
 
-        if (lastEventClass == null) {
-            Exception e = new Exception("Failed at start");
-            String msg = "Deposit failed: " + e.getMessage();
-            logger.error(msg, e);
-            eventStream.send(new Error(jobID, depositId, msg)
-                    .withUserId(userID));
-
-            throw new RuntimeException(e);
-        }
+//        if (lastEventClass == null) {
+//            Exception e = new Exception("Failed at start");
+//            String msg = "Deposit failed: " + e.getMessage();
+//            logger.error(msg, e);
+//            eventStream.send(new Error(jobID, depositId, msg)
+//                    .withUserId(userID));
+//
+//            throw new RuntimeException(e);
+//        }
 
 
         userStores = this.setupUserFileStores();
