@@ -72,9 +72,6 @@ public class Deposit extends Task {
 
         Deposit.RESTART_FROM_PACKAGING.addAll(RESTART_FROM_TRANSFER);
         Deposit.RESTART_FROM_PACKAGING.add("org.datavaultplatform.common.event.deposit.TransferComplete");
-        //Deposit.RESTART_FROM_PACKAGING.add("org.datavaultplatform.common.event.deposit.PackageComplete");
-        //Deposit.RESTART_FROM_PACKAGING.add("org.datavaultplatform.common.event.deposit.ComputedDigest");
-        //Deposit.RESTART_FROM_PACKAGING.add("org.datavaultplatform.common.event.deposit.ComputedEncryption");
 
         Deposit.RESTART_FROM_TAR_CHECKSUM.addAll(RESTART_FROM_PACKAGING);
         Deposit.RESTART_FROM_TAR_CHECKSUM.add("org.datavaultplatform.common.event.deposit.PackageComplete");
@@ -165,9 +162,9 @@ public class Deposit extends Task {
             Map<Integer, byte[]> chunksIVs = packageHelper.getChunksIVs();
             Long archiveSize = packageHelper.getArchiveSize();
 
- //           if (lastEventClass == null) {
- //               throw new Exception("Failed after chunking / encryption");
- //           }
+//            if (lastEventClass == null) {
+//                throw new Exception("Failed after chunking / encryption");
+//            }
 
             // Copy the resulting tar file to the archive area
             logger.info("Copying tar file(s) to archive ...");
@@ -194,9 +191,9 @@ public class Deposit extends Task {
                 logger.debug("Last event is: " + lastEventClass + " skipping validation");
             }
 
-            //if (lastEventClass == null) {
-            //    throw new Exception("Failed after validation");
-            //}
+//            if (lastEventClass == null) {
+//                throw new Exception("Failed after validation");
+//            }
             logger.info("Deposit complete");
 
             logger.debug("The jobID: " + jobID);
@@ -406,6 +403,10 @@ public class Deposit extends Task {
         for (int i = 0; i < chunkFiles.length; i++) {
 
             File chunkFile = chunkFiles[i];
+
+//            if (i > (chunkFiles.length / 2)) {
+//                throw new Exception("Failed during validation");
+//            }
             logger.debug("Validating chunk file: " + chunkFile.getAbsolutePath());
             //String chunkHash = chunksHash[i];
             
@@ -838,6 +839,9 @@ public class Deposit extends Task {
 
             logger.info("Chunk file " + i + ": " + chunk.length() + " bytes");
             logger.info("Encrypted chunk checksum: " + encChunksHash[i]);
+//            if (i > (chunkFiles.length / 2)) {
+//                throw new Exception("Failed during chunking encryption");
+//            }
             
             encChunksDigests.put(i+1, encChunksHash[i]);
             chunksIVs.put(i+1, chunkIV);
@@ -892,6 +896,9 @@ public class Deposit extends Task {
     		int chunkCount = 0;
     		for (File chunk : chunkFiles){
     			chunkCount++;
+//                if (chunkCount > (chunkFiles.length / 2)) {
+//                    throw new Exception("Failed during upload");
+//                }
     			logger.debug("Copying chunk: "+chunk.getName());
     			this.copyToArchiveStorage(chunk, chunkCount);
     			logger.debug("archiveIds: "+archiveIds);
@@ -1006,38 +1013,44 @@ public class Deposit extends Task {
     }
 
     private PackageHelper doPackageStep(Context context, Map<String, String> properties, File bagDir, PackageHelper retVal, String lastEventClass)  throws Exception {
-        //logger.info("Creating bag ...");
-        //this.createBag(bagDir, properties.get("depositMetadata"), properties.get("vaultMetadata"), properties.get("externalMetadata"));
         String tarHashAlgorithm = Verify.getAlgorithm();
         if (lastEventClass == null || RESTART_FROM_PACKAGING.contains(lastEventClass)) {
             logger.info("Creating bag ...");
+//            if (lastEventClass == null) {
+//                throw new Exception("Failed before create bag");
+//            }
             this.createBag(bagDir, properties.get("depositMetadata"), properties.get("vaultMetadata"), properties.get("externalMetadata"));
+//            if (lastEventClass == null) {
+//                throw new Exception("Failed after create bag");
+//            }
             // Tar the bag directory
             logger.info("Creating tar file ...");
+//            if (lastEventClass == null) {
+//                throw new Exception("Failed before create tar");
+//            }
             retVal.setTarFile(this.createTar(context, bagDir));
-            //retVal.setTarHash(Verify.getDigest(retVal.getTarFile()));
-            //String tarHashAlgorithm = Verify.getAlgorithm();
-
-            //retVal.setArchiveSize(retVal.getTarFile().length());
+//            if (lastEventClass == null) {
+//                throw new Exception("Failed after create tar");
+//            }
             logger.info("Tar file: " + retVal.getArchiveSize() + " bytes");
             logger.info("Tar file location: " + retVal.getTarFile().getAbsolutePath());
-//            logger.info("Checksum algorithm: " + tarHashAlgorithm);
-//            logger.info("Checksum: " + retVal.getTarHash());
 
             eventStream.send(new PackageComplete(jobID, depositId)
                     .withUserId(userID)
                     .withNextState(3));
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping actual packaging");
-            String tarFileName = bagID + ".tar";
-            Path tarPath = context.getTempDir().resolve(tarFileName);
-            retVal.setTarFile(tarPath.toFile());
+            this.skipActualPackaging(context, retVal);
         }
 
         if (lastEventClass == null || RESTART_FROM_TAR_CHECKSUM.contains(lastEventClass)) {
+//            if (lastEventClass == null) {
+//                throw new Exception("Failed before tar digest");
+//            }
             retVal.setTarHash(Verify.getDigest(retVal.getTarFile()));
-
-
+//            if (lastEventClass == null) {
+//                throw new Exception("Failed after tar digest");
+//            }
             retVal.setArchiveSize(retVal.getTarFile().length());
             logger.info("Checksum algorithm: " + tarHashAlgorithm);
             logger.info("Checksum: " + retVal.getTarHash());
@@ -1046,41 +1059,41 @@ public class Deposit extends Task {
                     .withUserId(userID));
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping tar checksum");
-            String archiveDigest = null;
-            if (properties.get("archiveDigest") != null) {
-                archiveDigest = properties.get("archiveDigest");
-            }
-            retVal.setTarHash(archiveDigest);
-            retVal.setArchiveSize(retVal.getTarFile().length());
+            this.skipTarChecksum(properties.get("archiveDigest"), retVal);
         }
 
         logger.info("We have successfully created the Tar, so lets delete the Bag to save space");
+//        if (lastEventClass == null) {
+//            throw new Exception("Failed before deleting bag dir");
+//        }
         FileUtils.deleteDirectory(bagDir);
-
+//        if (lastEventClass == null) {
+//            throw new Exception("Failed after deleting bag dir");
+//        }
         HashMap<Integer, String> chunksDigest = null;
         if ((lastEventClass == null || RESTART_FROM_CHUNKING.contains(lastEventClass)) && context.isChunkingEnabled()) {
-            //if (context.isChunkingEnabled()) {
-                chunksDigest = this.createChunks(retVal.getTarFile(), context, chunksDigest, tarHashAlgorithm);
-            //}
+//            if (lastEventClass == null) {
+//                throw new Exception("Failed before chunk creation");
+//            }
+            chunksDigest = this.createChunks(retVal.getTarFile(), context, chunksDigest, tarHashAlgorithm);
+//            if (lastEventClass == null) {
+//                throw new Exception("Failed after chunk creation");
+//            }
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping chunking");
             int numOfChunks =  0;
             if (properties.get("numOfChunks") != null) {
                 numOfChunks = Integer.parseInt(properties.get("numOfChunks"));
             }
-            this.chunkFiles = new File[numOfChunks];
-            for (int i = 0; i < numOfChunks; i++) {
-                String chunkFileName = bagID + ".tar." + (i + 1);
-                Path chunkPath = context.getTempDir().resolve(chunkFileName);
-                logger.debug("Mocked chunk file path: " + chunkPath.toAbsolutePath().toString());
-                this.chunkFiles[i] = chunkPath.toFile();
-            }
-
+            this.skipChunking(numOfChunks, context, retVal);
         }
 
         // Encryption
         if ((lastEventClass == null || RESTART_FROM_ENC_CHECKSUM.contains(lastEventClass)) && context.isEncryptionEnabled()) {
             logger.info("Encrypting file(s)...");
+//            if (lastEventClass == null) {
+//                throw new Exception("Failed before chunk encryption");
+//            }
             if (context.isChunkingEnabled()) {
                 retVal.setChunksIVs(this.encryptChunks(context, chunksDigest, tarHashAlgorithm));
             } else {
@@ -1088,6 +1101,9 @@ public class Deposit extends Task {
                 retVal.setIv(helper.getIv());
                 retVal.setEncTarHash(helper.getEncTarHash());
             }
+//            if (lastEventClass == null) {
+//                throw new Exception("Failed after chunk encryption");
+//            }
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping enc checksum");
         }
@@ -1103,6 +1119,33 @@ public class Deposit extends Task {
     private PackageHelper skipPackageStep(Context context, String lastEventClass, int numOfChunks, String archiveDigest,
                                           PackageHelper retVal)  {
         logger.debug("Last event is: " + lastEventClass + " skipping packaging");
+        retVal = this.skipChunking(numOfChunks, context, retVal);
+        retVal.setChunksIVs(this.chunksIVs);
+        retVal = this.skipActualPackaging(context, retVal);
+        retVal = this.skipTarChecksum(archiveDigest, retVal);
+
+        return retVal;
+    }
+
+    private PackageHelper skipActualPackaging(Context context, PackageHelper retVal) {
+
+        String tarFileName = bagID + ".tar";
+        Path tarPath = context.getTempDir().resolve(tarFileName);
+        retVal.setTarFile(tarPath.toFile());
+
+        return retVal;
+    }
+
+    private PackageHelper skipTarChecksum(String archiveDigest, PackageHelper retVal) {
+
+        retVal.setTarHash(archiveDigest);
+        retVal.setArchiveSize(retVal.getTarFile().length());
+
+        return retVal;
+    }
+
+    private PackageHelper skipChunking(int numOfChunks, Context context, PackageHelper retVal) {
+
         this.chunkFiles = new File[numOfChunks];
         for (int i = 0; i < numOfChunks; i++) {
             String chunkFileName = bagID + ".tar." + (i + 1);
@@ -1110,12 +1153,6 @@ public class Deposit extends Task {
             logger.debug("Mocked chunk file path: " + chunkPath.toAbsolutePath().toString());
             this.chunkFiles[i] = chunkPath.toFile();
         }
-        retVal.setChunksIVs(this.chunksIVs);
-        String tarFileName = bagID + ".tar";
-        Path tarPath = context.getTempDir().resolve(tarFileName);
-        retVal.setTarFile(tarPath.toFile());
-        retVal.setTarHash(archiveDigest);
-        retVal.setArchiveSize(retVal.getTarFile().length());
 
         return retVal;
     }
