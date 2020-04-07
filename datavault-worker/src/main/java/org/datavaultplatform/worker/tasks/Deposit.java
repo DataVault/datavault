@@ -126,17 +126,6 @@ public class Deposit extends Task {
             .withUserId(userID)
             .withNextState(0));
 
-//        if (lastEventClass == null) {
-//            Exception e = new Exception("Failed at start");
-//            String msg = "Deposit failed: " + e.getMessage();
-//            logger.error(msg, e);
-//            eventStream.send(new Error(jobID, depositId, msg)
-//                    .withUserId(userID));
-//
-//            throw new RuntimeException(e);
-//        }
-
-
         userStores = this.setupUserFileStores();
         this.setupArchiveFileStores();
         DepositTransferHelper uploadHelper = this.initialTransferStep(context,lastEventClass);
@@ -150,10 +139,6 @@ public class Deposit extends Task {
                 logger.debug("Last event is: " + lastEventClass + " skipping secondary File copy");
             }
 
-//            if (lastEventClass == null) {
-//                throw new Exception("Failed after file transfer");
-//            }
-
             PackageHelper packageHelper = this.packageStep(context, properties, lastEventClass, bagDir);
             File tarFile = packageHelper.getTarFile();
             String tarHash = packageHelper.getTarHash();
@@ -161,10 +146,6 @@ public class Deposit extends Task {
             String encTarHash = packageHelper.getEncTarHash();
             Map<Integer, byte[]> chunksIVs = packageHelper.getChunksIVs();
             Long archiveSize = packageHelper.getArchiveSize();
-
-//            if (lastEventClass == null) {
-//                throw new Exception("Failed after chunking / encryption");
-//            }
 
             // Copy the resulting tar file to the archive area
             logger.info("Copying tar file(s) to archive ...");
@@ -181,9 +162,7 @@ public class Deposit extends Task {
                 }
 
             }
-//            if (lastEventClass == null) {
-//                throw new Exception("Failed after upload");
-//            }
+
             logger.info("Verifying archive package ...");
             if (lastEventClass == null || RESTART_FROM_VALIDATION.contains(lastEventClass)) {
                 this.verifyArchive(context, tarFile, tarHash, iv, chunksIVs, encTarHash);
@@ -191,9 +170,6 @@ public class Deposit extends Task {
                 logger.debug("Last event is: " + lastEventClass + " skipping validation");
             }
 
-//            if (lastEventClass == null) {
-//                throw new Exception("Failed after validation");
-//            }
             logger.info("Deposit complete");
 
             logger.debug("The jobID: " + jobID);
@@ -1016,22 +992,11 @@ public class Deposit extends Task {
         String tarHashAlgorithm = Verify.getAlgorithm();
         if (lastEventClass == null || RESTART_FROM_PACKAGING.contains(lastEventClass)) {
             logger.info("Creating bag ...");
-//            if (lastEventClass == null) {
-//                throw new Exception("Failed before create bag");
-//            }
             this.createBag(bagDir, properties.get("depositMetadata"), properties.get("vaultMetadata"), properties.get("externalMetadata"));
-//            if (lastEventClass == null) {
-//                throw new Exception("Failed after create bag");
-//            }
             // Tar the bag directory
             logger.info("Creating tar file ...");
-//            if (lastEventClass == null) {
-//                throw new Exception("Failed before create tar");
-//            }
+
             retVal.setTarFile(this.createTar(context, bagDir));
-//            if (lastEventClass == null) {
-//                throw new Exception("Failed after create tar");
-//            }
             logger.info("Tar file: " + retVal.getArchiveSize() + " bytes");
             logger.info("Tar file location: " + retVal.getTarFile().getAbsolutePath());
 
@@ -1044,13 +1009,7 @@ public class Deposit extends Task {
         }
 
         if (lastEventClass == null || RESTART_FROM_TAR_CHECKSUM.contains(lastEventClass)) {
-//            if (lastEventClass == null) {
-//                throw new Exception("Failed before tar digest");
-//            }
             retVal.setTarHash(Verify.getDigest(retVal.getTarFile()));
-//            if (lastEventClass == null) {
-//                throw new Exception("Failed after tar digest");
-//            }
             retVal.setArchiveSize(retVal.getTarFile().length());
             logger.info("Checksum algorithm: " + tarHashAlgorithm);
             logger.info("Checksum: " + retVal.getTarHash());
@@ -1063,22 +1022,10 @@ public class Deposit extends Task {
         }
 
         logger.info("We have successfully created the Tar, so lets delete the Bag to save space");
-//        if (lastEventClass == null) {
-//            throw new Exception("Failed before deleting bag dir");
-//        }
         FileUtils.deleteDirectory(bagDir);
-//        if (lastEventClass == null) {
-//            throw new Exception("Failed after deleting bag dir");
-//        }
         HashMap<Integer, String> chunksDigest = null;
         if ((lastEventClass == null || RESTART_FROM_CHUNKING.contains(lastEventClass)) && context.isChunkingEnabled()) {
-//            if (lastEventClass == null) {
-//                throw new Exception("Failed before chunk creation");
-//            }
             chunksDigest = this.createChunks(retVal.getTarFile(), context, chunksDigest, tarHashAlgorithm);
-//            if (lastEventClass == null) {
-//                throw new Exception("Failed after chunk creation");
-//            }
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping chunking");
             int numOfChunks =  0;
@@ -1091,9 +1038,6 @@ public class Deposit extends Task {
         // Encryption
         if ((lastEventClass == null || RESTART_FROM_ENC_CHECKSUM.contains(lastEventClass)) && context.isEncryptionEnabled()) {
             logger.info("Encrypting file(s)...");
-//            if (lastEventClass == null) {
-//                throw new Exception("Failed before chunk encryption");
-//            }
             if (context.isChunkingEnabled()) {
                 retVal.setChunksIVs(this.encryptChunks(context, chunksDigest, tarHashAlgorithm));
             } else {
@@ -1101,9 +1045,6 @@ public class Deposit extends Task {
                 retVal.setIv(helper.getIv());
                 retVal.setEncTarHash(helper.getEncTarHash());
             }
-//            if (lastEventClass == null) {
-//                throw new Exception("Failed after chunk encryption");
-//            }
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping enc checksum");
         }
