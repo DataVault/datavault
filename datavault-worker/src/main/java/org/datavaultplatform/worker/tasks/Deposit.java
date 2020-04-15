@@ -269,7 +269,7 @@ public class Deposit extends Task {
             		depId = depId + "." + chunkCount;
             }
             String archiveId;
-
+            // kick off new thread for each device ( we may already have kicked off x threads for chunks)
             try {
             	eventStream.send(new StartCopyUpload(jobID, depositId, ((Device) archiveStore).name ).withUserId(userID));
 	            if (((Device)archiveStore).hasDepositIdStorageKey()) {
@@ -283,6 +283,7 @@ public class Deposit extends Task {
                 tracker.stop();
                 trackerThread.join();
             }
+            // wait for all 3 to finish
 
             logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
             
@@ -354,6 +355,7 @@ public class Deposit extends Task {
             String encTarHash, String[] encChunksHash, boolean doVerification) throws Exception {
         
         for (int i = 0; i < chunkFiles.length; i++) {
+            // if less that max threads started start new one
             File chunkFile = chunkFiles[i];
             String chunkHash = chunksHash[i];
             
@@ -816,7 +818,9 @@ public class Deposit extends Task {
 	private void uploadToStorage(Context context, File tarFile) throws Exception {
 		if ( context.isChunkingEnabled() ) {
     		int chunkCount = 0;
+    		// kick of 10 (maybe more) threads at a time?  each thread would kick off 3 threads of their own
     		for (File chunk : chunkFiles){
+                // kick of 10 (maybe more) threads at a time?  each thread would kick off 3 threads of their own
     			chunkCount++;
     			logger.debug("Copying chunk: "+chunk.getName());
     			this.copyToArchiveStorage(chunk, chunkCount);

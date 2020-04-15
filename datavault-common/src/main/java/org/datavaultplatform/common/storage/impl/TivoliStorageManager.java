@@ -17,7 +17,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class TivoliStorageManager extends Device implements ArchiveStore {
 
@@ -159,10 +160,73 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     		Files.createDirectory(destinationDir);
     		Files.move(sourcePath, destinationFile, StandardCopyOption.REPLACE_EXISTING);
     	}
-    	
     	File tsmFile = new File(pathPrefix + "/" + depositId + "/" + working.getName());
-        this.storeInTSMNode(tsmFile, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT, depositId);
-        this.storeInTSMNode(tsmFile, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT, depositId);
+    	// thread for each node
+
+//		TSMTracker loc1 = new TSMTracker();
+//		loc1.setLocation("loc1");
+//		Thread loc1Thread = new Thread(loc1);
+//		final AtomicReference throwableReference = new AtomicReference<Throwable>();
+//		loc1Thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+//			public void uncaughtException(Thread t, Throwable e) {
+//				throwableReference.set(e);
+//			}
+//		});
+//		loc1Thread.start();
+//		TSMTracker loc2 = new TSMTracker();
+//		loc2.setLocation("loc2");
+//		Thread loc2Thread = new Thread(loc2);
+//		loc2Thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+//			public void uncaughtException(Thread t, Throwable e) {
+//				throwableReference.set(e);
+//			}
+//		});
+//		loc2Thread.start();
+//
+//		while (loc1Thread.isAlive() && loc2Thread.isAlive()) {
+//			TimeUnit.MINUTES.sleep(1);
+//		}
+//
+//		Throwable throwable = (Throwable)throwableReference.get();
+//		if (throwable != null) {
+//			if (throwable instanceof Exception) {
+//				throw (Exception) throwable;
+//			} else if (throwable instanceof RuntimeException) {
+//				throw (RuntimeException)throwable;
+//			}
+//		}
+
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		TivoliStorageManager.TSMTrackerToo loc1 = new TivoliStorageManager.TSMTrackerToo();
+		loc1.setLocation(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+		loc1.setWorking(tsmFile);
+		loc1.setProgress(progress);
+		loc1.setDescription(depositId);
+		TivoliStorageManager.TSMTrackerToo loc2 = new TivoliStorageManager.TSMTrackerToo();
+		loc2.setLocation(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+		loc2.setWorking(tsmFile);
+		loc2.setProgress(progress);
+		loc2.setDescription(depositId);
+
+		Future<Void> loc1Future = executor.submit(loc1);
+		Future<Void> loc2Future = executor.submit(loc2);
+		executor.shutdown();
+		try {
+			loc1Future.get();
+			loc2Future.get();
+			logger.info("loc1 result " + loc1.result);
+			logger.info("loc2 result " + loc2.result);
+		} catch (ExecutionException ee) {
+			Throwable cause = ee.getCause();
+			if (cause instanceof Exception) {
+				logger.info("Upload failed. " + cause.getMessage());
+				throw (Exception) cause;
+			}
+		}
+
+
+        //this.storeInTSMNode(tsmFile, progress, TivoliStorageManager.TSM_SERVER_NODE1_OPT, depositId);
+        //this.storeInTSMNode(tsmFile, progress, TivoliStorageManager.TSM_SERVER_NODE2_OPT, depositId);
         
         if (Files.exists(destinationFile)) {
         	logger.info("Moving from deposit id to temp");
@@ -172,45 +236,45 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         return depositId;
     }
     
-    private String storeInTSMNode(File working, Progress progress, String optFilePath, String description) throws Exception {
-		
-        // check we have enough space to store the data (is the file bagged and tarred atm or is the actual space going to be different?)
-        // actually the Deposit  / Retreive worker classes check the free space it appears if we get here we don't need to check
-        
-        // The working file appears to be bagged and tarred when we get here
-		// in the local version of this class the FileCopy class adds info to the progress object
-		// I don't think we need to use the patch at all in this version
-    	//File path = working.getAbsoluteFile().getParentFile();
-        logger.info("Store command is " + "dsmc" + " archive " + working.getAbsolutePath() +  " -description=" + description + " -optfile=" + optFilePath);
-        ProcessBuilder pb = new ProcessBuilder("dsmc", "archive", working.getAbsolutePath(), "-description=" + description, "-optfile=" + optFilePath);
-        //pb.directory(path);
-		for (int r = 0; r < TivoliStorageManager.maxRetries; r++) {
-	        Process p = pb.start();
-	
-	        // This class is already running in its own thread so it can happily pause until finished.
-	        p.waitFor();
-	
-	        if (p.exitValue() != 0) {
-	            logger.info("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
-	            InputStream error = p.getErrorStream();
-	            if (error != null) {
-	            	logger.info(IOUtils.toString(error, StandardCharsets.UTF_8));
-	            }
-	            InputStream output = p.getInputStream();
-	            if (output != null) {
-	            	logger.info(IOUtils.toString(output, StandardCharsets.UTF_8));
-	            }
-	            if (r == (TivoliStorageManager.maxRetries -1)) {
-					throw new Exception("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
-				}
-	            logger.info("Deposit of " + working.getName() + " using " + optFilePath + " failed.  Retrying in " + TivoliStorageManager.retryTime + " mins");
-	            TimeUnit.MINUTES.sleep(TivoliStorageManager.retryTime);
-	        } else {
-	        	break;
-	        }
-        }
-        return description;
-    }
+//    private String storeInTSMNode(File working, Progress progress, String optFilePath, String description) throws Exception {
+//
+//        // check we have enough space to store the data (is the file bagged and tarred atm or is the actual space going to be different?)
+//        // actually the Deposit  / Retreive worker classes check the free space it appears if we get here we don't need to check
+//
+//        // The working file appears to be bagged and tarred when we get here
+//		// in the local version of this class the FileCopy class adds info to the progress object
+//		// I don't think we need to use the patch at all in this version
+//    	//File path = working.getAbsoluteFile().getParentFile();
+//        logger.info("Store command is " + "dsmc" + " archive " + working.getAbsolutePath() +  " -description=" + description + " -optfile=" + optFilePath);
+//        ProcessBuilder pb = new ProcessBuilder("dsmc", "archive", working.getAbsolutePath(), "-description=" + description, "-optfile=" + optFilePath);
+//        //pb.directory(path);
+//		for (int r = 0; r < TivoliStorageManager.maxRetries; r++) {
+//	        Process p = pb.start();
+//
+//	        // This class is already running in its own thread so it can happily pause until finished.
+//	        p.waitFor();
+//
+//	        if (p.exitValue() != 0) {
+//	            logger.info("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
+//	            InputStream error = p.getErrorStream();
+//	            if (error != null) {
+//	            	logger.info(IOUtils.toString(error, StandardCharsets.UTF_8));
+//	            }
+//	            InputStream output = p.getInputStream();
+//	            if (output != null) {
+//	            	logger.info(IOUtils.toString(output, StandardCharsets.UTF_8));
+//	            }
+//	            if (r == (TivoliStorageManager.maxRetries -1)) {
+//					throw new Exception("Deposit of " + working.getName() + " using " + optFilePath + " failed. ");
+//				}
+//	            logger.info("Deposit of " + working.getName() + " using " + optFilePath + " failed.  Retrying in " + TivoliStorageManager.retryTime + " mins");
+//	            TimeUnit.MINUTES.sleep(TivoliStorageManager.retryTime);
+//	        } else {
+//	        	break;
+//	        }
+//        }
+//        return description;
+//    }
     
 
 
@@ -247,4 +311,128 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 	        }
     	}
     }
+
+	protected static class TSMTracker implements Runnable {
+
+		private String location;
+
+		@Override
+		public void run() {
+			// do stuff
+			//String test = null;
+			logger.debug("Starting: " + this.getLocation());
+			//logger.debug("Force error: " + test.length());
+			//throw new Exception("Bad TSM stuff");
+		}
+
+
+		public String getLocation() {
+			return this.location;
+		}
+
+		public void setLocation(String location) {
+			this.location = location;
+		}
+	}
+
+	protected static class TSMTrackerToo implements Callable {
+
+    	private String location;
+    	private File working;
+    	private Progress progress;
+    	private String description;
+    	public String result;
+
+
+		@Override
+		public Object call() throws Exception {
+			// do stuff
+			//String test = null;
+			//logger.debug("Starting: " + this.getLocation());
+			//logger.debug("Force error: " + test.length());
+			//logger.debug("About to throw Exception");
+			//throw new Exception("Bad TSM stuff");
+			//result = this.getLocation() + " completed";
+
+			// @TODO check params all set
+
+			this.storeInTSMNode(this.getWorking(), this.getProgress(), this.getLocation(), this.getDescription());
+			return result;
+		}
+
+		public String getLocation() {
+			return this.location;
+		}
+
+		public void setLocation(String location) {
+			this.location = location;
+		}
+
+		private String storeInTSMNode(File working, Progress progress, String location, String description) throws Exception {
+
+			// check we have enough space to store the data (is the file bagged and tarred atm or is the actual space going to be different?)
+			// actually the Deposit  / Retreive worker classes check the free space it appears if we get here we don't need to check
+
+			// The working file appears to be bagged and tarred when we get here
+			// in the local version of this class the FileCopy class adds info to the progress object
+			// I don't think we need to use the patch at all in this version
+			//File path = working.getAbsoluteFile().getParentFile();
+			logger.info("Store command is " + "dsmc" + " archive " + working.getAbsolutePath() +  " -description=" + description + " -optfile=" + location);
+			ProcessBuilder pb = new ProcessBuilder("dsmc", "archive", working.getAbsolutePath(), "-description=" + description, "-optfile=" + location);
+			//pb.directory(path);
+			for (int r = 0; r < TivoliStorageManager.maxRetries; r++) {
+				Process p = pb.start();
+
+				// This class is already running in its own thread so it can happily pause until finished.
+				p.waitFor();
+
+				if (p.exitValue() != 0) {
+					logger.info("Deposit of " + working.getName() + " using " + location + " failed. ");
+					InputStream error = p.getErrorStream();
+					if (error != null) {
+						logger.info(IOUtils.toString(error, StandardCharsets.UTF_8));
+					}
+					InputStream output = p.getInputStream();
+					if (output != null) {
+						logger.info(IOUtils.toString(output, StandardCharsets.UTF_8));
+					}
+					if (r == (TivoliStorageManager.maxRetries -1)) {
+						throw new Exception("Deposit of " + working.getName() + " using " + location + " failed. ");
+					}
+					logger.info("Deposit of " + working.getName() + " using " + location + " failed.  Retrying in " + TivoliStorageManager.retryTime + " mins");
+					TimeUnit.MINUTES.sleep(TivoliStorageManager.retryTime);
+				} else {
+					break;
+				}
+			}
+			result = description;
+			return this.result;
+		}
+
+		public File getWorking() {
+			return this.working;
+		}
+
+		public void setWorking(File working) {
+			this.working = working;
+		}
+
+		public Progress getProgress() {
+			return this.progress;
+		}
+
+		public void setProgress(Progress progress) {
+			this.progress = progress;
+		}
+
+		public String getDescription() {
+			return this.description;
+		}
+
+		public void setDescription(String description) {
+			this.description = description;
+		}
+	}
 }
+
+
