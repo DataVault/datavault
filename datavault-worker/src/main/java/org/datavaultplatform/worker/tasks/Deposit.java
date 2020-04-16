@@ -23,7 +23,9 @@ import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * A class that extends Task which is used to handle Deposits to the vault
@@ -256,51 +258,86 @@ public class Deposit extends Task {
      */
     private void copyToArchiveStorage(File tarFile, int chunkCount) throws Exception {
 
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        List<Future<HashMap<String, String>>> futures = new ArrayList();
         for (String archiveStoreId : archiveStores.keySet() ) {
             ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
+            // add thread to executor
+            // add future to futures list
+            DeviceTracker dt = new DeviceTracker();
+            dt.setArchiveStore(archiveStore);
+            dt.setArchiveStoreId(archiveStoreId);
+            dt.setChunkCount(chunkCount);
+            dt.setDepositId(depositId);
+            dt.setJobID(jobID);
+            dt.setEventStream(eventStream);
+            dt.setTarFile(tarFile);
+            dt.setUserID(userID);
 
-            // Progress tracking (threaded)
-            Progress progress = new Progress();
-            ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, tarFile.length(), eventStream);
-            Thread trackerThread = new Thread(tracker);
-            trackerThread.start();
-            String depId = this.depositId;
-            if (chunkCount > 0) {
-            		depId = depId + "." + chunkCount;
-            }
-            String archiveId;
-            // kick off new thread for each device ( we may already have kicked off x threads for chunks)
+            Future<HashMap<String, String>> dtFuture = executor.submit(dt);
+            futures.add(dtFuture);
+
+//            // Progress tracking (threaded)
+//            Progress progress = new Progress();
+//            ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, tarFile.length(), eventStream);
+//            Thread trackerThread = new Thread(tracker);
+//            trackerThread.start();
+//            String depId = this.depositId;
+//            if (chunkCount > 0) {
+//            		depId = depId + "." + chunkCount;
+//            }
+//            String archiveId;
+//            // kick off new thread for each device ( we may already have kicked off x threads for chunks)
+//            try {
+//            	eventStream.send(new StartCopyUpload(jobID, depositId, ((Device) archiveStore).name ).withUserId(userID));
+//	            if (((Device)archiveStore).hasDepositIdStorageKey()) {
+//	            		archiveId = ((Device) archiveStore).store(depId, tarFile, progress);
+//	            } else {
+//	            		archiveId = ((Device) archiveStore).store("/", tarFile, progress);
+//	            }
+//	            eventStream.send(new CompleteCopyUpload(jobID, depositId, ((Device) archiveStore).name ).withUserId(userID));
+//            } finally {
+//                // Stop the tracking thread
+//                tracker.stop();
+//                trackerThread.join();
+//            }
+//
+//            logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+//            // wait for all 3 to finish
+//            // get the archiveIds has from the result and merge with the global one
+//
+//            if (chunkCount > 0 && archiveIds.get(archiveStoreId) == null) {
+//            		logger.info("ArchiveId is: " + archiveId);
+//            		String separator = FileSplitter.CHUNK_SEPARATOR;
+//            		logger.info("Separator is: " + separator);
+//            		int beginIndex = archiveId.lastIndexOf(separator);
+//            		logger.info("BeginIndex is: " + beginIndex);
+//            		archiveId = archiveId.substring(0, beginIndex);
+//            		logger.debug("Add to archiveIds: key: "+archiveStoreId+" ,value:"+archiveId);
+//            		archiveIds.put(archiveStoreId, archiveId);
+//            		logger.debug("archiveIds: "+archiveIds);
+//            } else if(chunkCount == 0) {
+//                archiveIds.put(archiveStoreId, archiveId);
+//            }
+        }
+        executor.shutdown();
+
+        for (Future<HashMap<String, String>> future : futures) {
             try {
-            	eventStream.send(new StartCopyUpload(jobID, depositId, ((Device) archiveStore).name ).withUserId(userID));
-	            if (((Device)archiveStore).hasDepositIdStorageKey()) {
-	            		archiveId = ((Device) archiveStore).store(depId, tarFile, progress);
-	            } else {
-	            		archiveId = ((Device) archiveStore).store("/", tarFile, progress);
-	            }
-	            eventStream.send(new CompleteCopyUpload(jobID, depositId, ((Device) archiveStore).name ).withUserId(userID));
-            } finally {
-                // Stop the tracking thread
-                tracker.stop();
-                trackerThread.join();
-            }
-            // wait for all 3 to finish
-
-            logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
-            
-            if (chunkCount > 0 && archiveIds.get(archiveStoreId) == null) {
-            		logger.info("ArchiveId is: " + archiveId);
-            		String separator = FileSplitter.CHUNK_SEPARATOR;
-            		logger.info("Separator is: " + separator);
-            		int beginIndex = archiveId.lastIndexOf(separator);
-            		logger.info("BeginIndex is: " + beginIndex); 
-            		archiveId = archiveId.substring(0, beginIndex);
-            		logger.debug("Add to archiveIds: key: "+archiveStoreId+" ,value:"+archiveId);
-            		archiveIds.put(archiveStoreId, archiveId);
-            		logger.debug("archiveIds: "+archiveIds);
-            } else if(chunkCount == 0) {
-                archiveIds.put(archiveStoreId, archiveId);
+                HashMap<String, String> result = future.get();
+                archiveIds.putAll(result);
+            } catch (ExecutionException ee) {
+                Throwable cause = ee.getCause();
+                if (cause instanceof Exception) {
+                    logger.info("Device upload failed. " + cause.getMessage());
+                    throw (Exception) cause;
+                }
             }
         }
+
+        // foreach future
+        // check for exception
+        // append archiveIds from future to global archiveIds
     }
     
     /**
@@ -877,4 +914,136 @@ public class Deposit extends Task {
             .withUserId(userID)
             .withNextState(2));
 	}
+
+	protected static class DeviceTracker implements Callable {
+
+        private String jobID;
+        private String depositId;
+        private File tarFile;
+        private EventSender eventStream;
+        private int chunkCount = 0;
+        private String archiveStoreId;
+        private ArchiveStore archiveStore;
+        private String userID;
+        //private HashMap<String, String> archiveIds = new HashMap<>();
+
+        @Override
+        public HashMap<String, String> call() throws Exception {
+            HashMap<String, String> archiveIds = new HashMap<>();
+            // Progress tracking (threaded)
+            Progress progress = new Progress();
+            ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.tarFile.length(), this.eventStream);
+            Thread trackerThread = new Thread(tracker);
+            trackerThread.start();
+            String depId = this.depositId;
+            if (this.chunkCount > 0) {
+                depId = depId + "." + this.chunkCount;
+            }
+            String archiveId;
+            // kick off new thread for each device ( we may already have kicked off x threads for chunks)
+            try {
+                this.eventStream.send(new StartCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name ).withUserId(this.userID));
+                if (((Device)this.archiveStore).hasDepositIdStorageKey()) {
+                    archiveId = ((Device) this.archiveStore).store(depId, this.tarFile, progress);
+                } else {
+                    archiveId = ((Device) this.archiveStore).store("/", this.tarFile, progress);
+                }
+                this.eventStream.send(new CompleteCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name ).withUserId(this.userID));
+            } finally {
+                // Stop the tracking thread
+                tracker.stop();
+                trackerThread.join();
+            }
+
+            logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+            // wait for all 3 to finish
+
+            if (this.chunkCount > 0 && archiveIds.get(this.archiveStoreId) == null) {
+                logger.info("ArchiveId is: " + archiveId);
+                String separator = FileSplitter.CHUNK_SEPARATOR;
+                logger.info("Separator is: " + separator);
+                int beginIndex = archiveId.lastIndexOf(separator);
+                logger.info("BeginIndex is: " + beginIndex);
+                archiveId = archiveId.substring(0, beginIndex);
+                logger.debug("Add to archiveIds: key: "+this.archiveStoreId+" ,value:"+archiveId);
+                archiveIds.put(archiveStoreId, archiveId);
+                logger.debug("archiveIds: "+archiveIds);
+            } else if(this.chunkCount == 0) {
+                archiveIds.put(archiveStoreId, archiveId);
+            }
+            return archiveIds;
+        }
+
+        public String getJobID() {
+            return this.jobID;
+        }
+
+        public void setJobID(String jobID) {
+            this.jobID = jobID;
+        }
+
+        public String getDepositId() {
+            return this.depositId;
+        }
+
+        public void setDepositId(String depositId) {
+            this.depositId = depositId;
+        }
+
+        public File getTarFile() {
+            return this.tarFile;
+        }
+
+        public void setTarFile(File tarFile) {
+            this.tarFile = tarFile;
+        }
+
+        public EventSender getEventStream() {
+            return this.eventStream;
+        }
+
+        public void setEventStream(EventSender eventStream) {
+            this.eventStream = eventStream;
+        }
+
+        public int getChunkCount() {
+            return this.chunkCount;
+        }
+
+        public void setChunkCount(int chunkCount) {
+            this.chunkCount = chunkCount;
+        }
+
+        public String getArchiveStoreId() {
+            return this.archiveStoreId;
+        }
+
+        public void setArchiveStoreId(String archiveStoreId) {
+            this.archiveStoreId = archiveStoreId;
+        }
+
+        public ArchiveStore getArchiveStore() {
+            return this.archiveStore;
+        }
+
+        public void setArchiveStore(ArchiveStore archiveStore) {
+            this.archiveStore = archiveStore;
+        }
+
+        public String getUserID() {
+            return this.userID;
+        }
+
+        public void setUserID(String userID) {
+            this.userID = userID;
+        }
+
+//        public HashMap<String, String> getArchiveIds() {
+//            return this.archiveIds;
+//        }
+//
+//        public void setArchiveIds(HashMap<String, String> archiveIds) {
+//            this.archiveIds = archiveIds;
+//        }
+    }
 }

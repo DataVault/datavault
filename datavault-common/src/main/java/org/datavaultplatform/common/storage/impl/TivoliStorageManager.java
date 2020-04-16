@@ -197,12 +197,12 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 //		}
 
 		ExecutorService executor = Executors.newSingleThreadExecutor();
-		TivoliStorageManager.TSMTrackerToo loc1 = new TivoliStorageManager.TSMTrackerToo();
+		TivoliStorageManager.TSMTracker loc1 = new TivoliStorageManager.TSMTracker();
 		loc1.setLocation(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
 		loc1.setWorking(tsmFile);
 		loc1.setProgress(progress);
 		loc1.setDescription(depositId);
-		TivoliStorageManager.TSMTrackerToo loc2 = new TivoliStorageManager.TSMTrackerToo();
+		TivoliStorageManager.TSMTracker loc2 = new TivoliStorageManager.TSMTracker();
 		loc2.setLocation(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
 		loc2.setWorking(tsmFile);
 		loc2.setProgress(progress);
@@ -219,7 +219,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 		} catch (ExecutionException ee) {
 			Throwable cause = ee.getCause();
 			if (cause instanceof Exception) {
-				logger.info("Upload failed. " + cause.getMessage());
+				logger.info("TSM upload failed. " + cause.getMessage());
 				throw (Exception) cause;
 			}
 		}
@@ -312,30 +312,30 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     	}
     }
 
-	protected static class TSMTracker implements Runnable {
+//	protected static class TSMTracker implements Runnable {
+//
+//		private String location;
+//
+//		@Override
+//		public void run() {
+//			// do stuff
+//			//String test = null;
+//			logger.debug("Starting: " + this.getLocation());
+//			//logger.debug("Force error: " + test.length());
+//			//throw new Exception("Bad TSM stuff");
+//		}
+//
+//
+//		public String getLocation() {
+//			return this.location;
+//		}
+//
+//		public void setLocation(String location) {
+//			this.location = location;
+//		}
+//	}
 
-		private String location;
-
-		@Override
-		public void run() {
-			// do stuff
-			//String test = null;
-			logger.debug("Starting: " + this.getLocation());
-			//logger.debug("Force error: " + test.length());
-			//throw new Exception("Bad TSM stuff");
-		}
-
-
-		public String getLocation() {
-			return this.location;
-		}
-
-		public void setLocation(String location) {
-			this.location = location;
-		}
-	}
-
-	protected static class TSMTrackerToo implements Callable {
+	protected static class TSMTracker implements Callable {
 
     	private String location;
     	private File working;
