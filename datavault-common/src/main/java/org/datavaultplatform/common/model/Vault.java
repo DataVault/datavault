@@ -87,6 +87,12 @@ public class Vault {
     @OneToMany(targetEntity=Deposit.class, mappedBy="vault", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
     @OrderBy("creationTime")
     private List<Deposit> deposits;
+
+    // A vault can have many reviews
+    @JsonIgnore
+    @OneToMany(targetEntity=VaultReview.class, mappedBy="vault", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
+    @OrderBy("creationTime")
+    private List<VaultReview> vaultReviews;
     
     @JsonIgnore
     @OneToOne(targetEntity=BillingInfo.class, mappedBy="vault", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
@@ -188,6 +194,11 @@ public class Vault {
     public List<Deposit> getDeposits() {
         if (deposits == null) return new ArrayList<Deposit>();
         return deposits;
+    }
+
+    public List<VaultReview> getVaultReviews() {
+        if (vaultReviews == null) return new ArrayList<VaultReview>();
+        return vaultReviews;
     }
 
     public void addDeposit(Deposit deposit) {

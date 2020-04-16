@@ -191,6 +191,19 @@ public class RestService {
         return (VaultInfo[])response.getBody();
     }
 
+    public VaultsData getVaultsForReview() {
+        HttpEntity<?> response = get(brokerURL + "/admin/vaultsForReview", VaultsData.class);
+        return (VaultsData) response.getBody();
+    }
+
+    public VaultReview[] getReviewsListing(String vaultId) {
+        HttpEntity<?> response = get(brokerURL +"/admin/vaults/" + vaultId + "/reviews", VaultReview[].class);
+        return (VaultReview[])response.getBody();
+
+    }
+
+
+
     public VaultsData searchVaultsForBilling(String query, String sort, String order, String offset, String maxResult) {
         HttpEntity<?> response = get(brokerURL + "/admin/billing/search?query=" + query + "&sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
         return (VaultsData)response.getBody();

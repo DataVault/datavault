@@ -124,6 +124,14 @@ public class AdminController {
         this.sender = sender;
     }
 
+    public ExternalMetadataService getExternalMetadataService() {
+        return externalMetadataService;
+    }
+
+    public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
+        this.externalMetadataService = externalMetadataService;
+    }
+
     @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)
     public List<DepositInfo> getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
                                             @RequestParam(value = "sort", required = false) String sort) throws Exception {
@@ -401,11 +409,54 @@ public class AdminController {
         return archiveStores;
     }
 
-    public ExternalMetadataService getExternalMetadataService() {
-        return externalMetadataService;
+
+
+    @ApiMethod(
+            path = "/admin/vaultsForReview",
+            verb = ApiVerb.GET,
+            description = "Gets a list of Vaults for Review",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
+    @RequestMapping(value = "/admin/vaultsForReview", method = RequestMethod.GET)
+    public VaultsData getVaultsForReview(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+
+        List<VaultInfo> vaultResponses = new ArrayList<>();
+        List<Vault> vaults = vaultsService.getVaultsForReview();
+        if(CollectionUtils.isNotEmpty(vaults)) {
+            for (Vault vault : vaults) {
+                vaultResponses.add(vault.convertToResponse());
+            }
+        }
+
+        VaultsData vaultsData = new VaultsData();
+        vaultsData.setData(vaultResponses);
+        return vaultsData;
     }
 
-    public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
-        this.externalMetadataService = externalMetadataService;
+    @ApiMethod(
+            path = "/admin/vaults/{vaultid}/reviews",
+            verb = ApiVerb.GET,
+            description = "Gets a list of Reviews for a Vault",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
+    @RequestMapping(value = "/admin/vaults/{vaultid}/reviews", method = RequestMethod.GET)
+    public List<VaultReview> getVaultReviews(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                         @PathVariable("vaultid") String vaultID) throws Exception {
+
+
+        User user = usersService.getUser(userID);
+        Vault vault = vaultsService.getUserVault(user, vaultID);
+
+        List<VaultReview> vaultReviews = vault.getVaultReviews();
+
+        return vaultReviews;
     }
 }

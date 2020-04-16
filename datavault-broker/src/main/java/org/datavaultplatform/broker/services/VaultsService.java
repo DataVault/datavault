@@ -1,9 +1,6 @@
 package org.datavaultplatform.broker.services;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleModel;
@@ -142,4 +139,34 @@ public class VaultsService {
         newDataOwnerAssignment.setRole(dataOwnerRole);
         rolesAndPermissionsService.createRoleAssignment(newDataOwnerAssignment);
     }
+
+    public List<Vault> getVaultsForReview() {
+	    List<Vault> vaults = vaultDAO.list();
+
+        // Now loop through and pick out those within 6 months of their review date.
+
+        List<Vault> vaultsForReview = new ArrayList<>();
+
+        Calendar today = Calendar.getInstance();
+
+        System.out.println("Today is = " + today.getTime());
+
+        Calendar minus6 = Calendar.getInstance();
+        minus6.add(Calendar.MONTH, -6);
+
+        System.out.println("Six months ago is = " + minus6.getTime());
+
+        for (Vault vault : vaults) {
+
+            // Comment out for testing
+            // todo :  check to see if a review has happened
+          //  if ((vault.getReviewDate().before(minus6.getTime())))
+          //  {
+                vaultsForReview.add(vault);
+          //  }
+        }
+
+        return vaultsForReview;
+
+	}
 }

@@ -167,6 +167,10 @@
         <property name="restService" ref="restService" />
     </bean>
 
+    <bean id="adminReviewsController" class="org.datavaultplatform.webapp.controllers.admin.AdminReviewsController">
+        <property name="restService" ref="restService" />
+    </bean>
+
     <bean id="adminEventsController" class="org.datavaultplatform.webapp.controllers.admin.AdminEventsController">
         <property name="restService" ref="restService" />
     </bean>

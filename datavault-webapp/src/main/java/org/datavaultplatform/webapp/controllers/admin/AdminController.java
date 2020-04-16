@@ -56,6 +56,10 @@ public class AdminController {
             modelMap.addAttribute("canViewRetrieves", true);
             modelMap.addAttribute("retrievecount", restService.getRetrievesCount());
         }
+        if (permissionsModel.hasPermission(Permission.CAN_MANAGE_REVIEWS)) {
+            modelMap.addAttribute("canManageReviews", true);
+            modelMap.addAttribute("vaultcount", restService.getVaultsCount());
+        }
         if (permissionsModel.hasPermission(Permission.CAN_MANAGE_BILLING_DETAILS)) {
             modelMap.addAttribute("canManageBillingDetails", true);
         }
