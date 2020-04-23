@@ -17,6 +17,7 @@ import org.datavaultplatform.worker.operations.*;
 import org.datavaultplatform.worker.queue.EventSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -347,167 +348,50 @@ public class Deposit extends Task {
     private void doArchive(Context context, File[] chunkFiles, String[] chunksHash, File tarFile, String tarHash, ArchiveStore archiveStore, 
             String archiveId, String location, boolean multipleCopies, HashMap<Integer, byte[]> ivs, 
             String encTarHash, String[] encChunksHash, boolean doVerification) throws Exception {
-        
+
+        ExecutorService executor = Executors.newFixedThreadPool(25);
+        List<Future<HashMap<String, String>>> futures = new ArrayList();
         for (int i = 0; i < chunkFiles.length; i++) {
             // if less that max threads started start new one
             File chunkFile = chunkFiles[i];
             String chunkHash = chunksHash[i];
-            
-            // Delete the existing temporary file
-            chunkFile.delete();
-            String archiveChunkId = archiveId+FileSplitter.CHUNK_SEPARATOR+(i+1);
-            // Copy file back from the archive storage
-            logger.debug("archiveChunkId: "+archiveChunkId);
-            if (multipleCopies && location != null) {
-            		copyBackFromArchive(archiveStore, archiveChunkId, chunkFile, location);
-            } else {
-            		copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
-            }
 
-            // Decryption
-            if(ivs != null) {
+            ChunkDownloadTracker cdt = new ChunkDownloadTracker();
+            cdt.setArchiveId(archiveId);
+            cdt.setArchiveStore(archiveStore);
+            cdt.setChunkFile(chunkFile);
+            cdt.setChunkHash(chunkHash);
+            cdt.setContext(context);
+            cdt.setCount(i);
+            cdt.setDoVerification(doVerification);
+            cdt.setEncChunksHash(encChunksHash);
+            cdt.setIvs(ivs);
+            cdt.setLocation(location);
+            cdt.setMultipleCopies(multipleCopies);
+            logger.debug("Creating chunk download thread:" + i);
+            Future<HashMap<String, String>> dtFuture = executor.submit(cdt);
+            futures.add(dtFuture);
+        }
+        executor.shutdown();
 
-                if(doVerification) {
-                    Encryption.decryptFile(context, chunkFile, ivs.get(i + 1));
-                } else {
-                    String encChunkHash = encChunksHash[i];
-
-                    // Check hash of encrypted file
-                    logger.debug("Verifying encrypted chunk file: "+chunkFile.getAbsolutePath());
-                    verifyChunkFile(context.getTempDir(), chunkFile, encChunkHash);
+        for (Future<HashMap<String, String>> future : futures) {
+            try {
+                future.get();
+            } catch (ExecutionException ee) {
+                Throwable cause = ee.getCause();
+                if (cause instanceof Exception) {
+                    logger.info("Chunk download failed. " + cause.getMessage());
+                    throw (Exception) cause;
                 }
             }
-                
-            //logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
-            //verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
         }
+
 
         if(doVerification) {
             FileSplitter.recomposeFile(chunkFiles, tarFile);
 
             // Verify the contents
             verifyTarFile(context.getTempDir(), tarFile, tarHash);
-        }
-    }
-    
-    /**
-     * @param context
-     * @param tarFile
-     * @param tarHash
-     * @throws Exception
-     */
-    private void verifyArchive(Context context, File tarFile, String tarHash, byte[] iv, String encTarHash) throws Exception {
-
-        boolean alreadyVerified = false;
-
-        for (String archiveStoreId : archiveStores.keySet() ) {
-            ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
-            String archiveId = archiveIds.get(archiveStoreId);
-
-            Verify.Method vm = archiveStore.getVerifyMethod();
-            logger.info("Verification method: " + vm);
-            
-            logger.debug("verifyArchive - archiveId: "+archiveId);
-
-            // Get the tar file
-
-            if ((vm == Verify.Method.LOCAL_ONLY) && (!alreadyVerified)){
-                
-                // Decryption
-                if(iv != null) {
-                    Encryption.decryptFile(context, tarFile, iv);
-                }
-                
-                // Verify the contents of the temporary file
-                verifyTarFile(context.getTempDir(), tarFile, null);
-
-            } else if (vm == Verify.Method.COPY_BACK) {
-
-                alreadyVerified = true;
-
-                // Delete the existing temporary file
-                tarFile.delete();
-                // Copy file back from the archive storage
-                if (((Device)archiveStore).hasMultipleCopies()) {
-                    for (String loc : ((Device)archiveStore).getLocations()) {
-                        copyBackFromArchive(archiveStore, archiveId, tarFile, loc);
-                        
-                        // check encrypted tar
-                        verifyTarFile(context.getTempDir(), tarFile, encTarHash);
-                        
-                        // Decryption
-                        if(iv != null) {
-                            Encryption.decryptFile(context, tarFile, iv);
-                        }
-                        
-                        // Verify the contents
-                        verifyTarFile(context.getTempDir(), tarFile, tarHash);
-                    }
-                } else {
-                    copyBackFromArchive(archiveStore, archiveId, tarFile);
-                    
-                    // check encrypted tar
-                    String encTarFileHash = Verify.getDigest(tarFile);
-                    logger.info("Checksum: " + encTarFileHash);
-                    if (!encTarFileHash.equals(encTarFileHash)) {
-                        throw new Exception("checksum failed: " + encTarFileHash + " != " + encTarFileHash);
-                    }
-                    
-                    // Decryption
-                    if(iv != null) {
-                        Encryption.decryptFile(context, tarFile, iv);
-                    }
-                    
-                    // Verify the contents
-                    verifyTarFile(context.getTempDir(), tarFile, tarHash);
-                }
-            } else if (vm == Verify.Method.CLOUD) {
-            	// do nothing for now but we hope to extend this so that we can compare checksums supplied by the cloud api
-            	logger.info("Skipping verification as a cloud plugin (for now)");
-            }
-        }
-    }
-
-    /**
-     * Not sure what this does yet the comment below suggests it copies an archive to the tmp dir
-     * why are deposit would do this I'm not sure
-     * 
-     * @param archiveStore
-     * @param archiveId
-     * @param tarFile
-     * @throws Exception
-     */
-    private void copyBackFromArchive(ArchiveStore archiveStore, String archiveId, File tarFile) throws Exception {
-
-//        // Ask the driver to copy files to the temp directory
-//        Progress progress = new Progress();
-//        ((Device)archiveStore).retrieve(archiveId, tarFile, progress);
-//        logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
-    		this.copyBackFromArchive(archiveStore, archiveId, tarFile, null);
-    }
-    
-    private void copyBackFromArchive(ArchiveStore archiveStore, String archiveId, File tarFile, String location) throws Exception {
-
-        	// Ask the driver to copy files to the temp directory
-        	Progress progress = new Progress();
-        	if (location == null) {
-        		((Device)archiveStore).retrieve(archiveId, tarFile, progress);
-        	} else {
-        		((Device)archiveStore).retrieve(archiveId, tarFile, progress, location);
-        	}
-        logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
-    }
-    
-    private void verifyChunkFile(Path tempPath, File chunkFile, String origChunkHash) throws Exception {
-
-        if (origChunkHash != null) {
-            logger.info("Get Digest from: " + chunkFile.getAbsolutePath());
-            // Compare the SHA hash
-            String chunkHash = Verify.getDigest(chunkFile);
-            logger.info("Checksum: " + chunkHash);
-            if (!chunkHash.equals(origChunkHash)) {
-                throw new Exception("checksum failed: " + chunkHash + " != " + origChunkHash);
-            }
         }
     }
     
@@ -812,7 +696,7 @@ public class Deposit extends Task {
 	private void uploadToStorage(Context context, File tarFile) throws Exception {
 
 		if ( context.isChunkingEnabled() ) {
-            ExecutorService executor = Executors.newFixedThreadPool(10);
+            ExecutorService executor = Executors.newFixedThreadPool(25);
             List<Future<HashMap<String, String>>> futures = new ArrayList();
     		int chunkCount = 0;
     		// kick of 10 (maybe more) threads at a time?  each thread would kick off 3 threads of their own
@@ -828,16 +712,9 @@ public class Deposit extends Task {
                 cut.setJobID(this.jobID);
                 cut.setTarFile(tarFile);
                 cut.setUserID(this.userID);
-                logger.debug("Creating chunk thread:" + chunkCount);
+                logger.debug("Creating chunk upload thread:" + chunkCount);
                 Future<HashMap<String, String>> dtFuture = executor.submit(cut);
                 futures.add(dtFuture);
-
-//                chunkCount++;
-//                logger.debug("Copying chunk: "+chunk.getName());
-//                this.copyToArchiveStorage(chunk, chunkCount);
-//                logger.debug("archiveIds: "+archiveIds);
-
-
             }
             executor.shutdown();
 
@@ -870,7 +747,8 @@ public class Deposit extends Task {
 		if( context.isChunkingEnabled() ) {
             verifyArchive(context, chunkFiles, chunksHash, tarFile, tarHash, chunksIVs, encChunksHash);
         } else {
-            verifyArchive(context, tarFile, tarHash, iv, encTarHash);
+		    throw new NotImplementedException();
+            //verifyArchive(context, tarFile, tarHash, iv, encTarHash);
         }
 	}
 	
@@ -908,250 +786,4 @@ public class Deposit extends Task {
             .withUserId(userID)
             .withNextState(2));
 	}
-
-	protected static class ChunkDownloadTracker implements Callable {
-
-        @Override
-        public Object call() throws Exception {
-            return null;
-        }
-    }
-	protected static class ChunkUploadTracker implements Callable {
-
-        private File chunk;
-        private int chunkCount;
-        private HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
-        private String depositId;
-        private String jobID;
-        private EventSender eventStream;
-        private File tarFile;
-        private String userID;
-
-
-        @Override
-        public HashMap<String, String> call() throws Exception {
-            logger.debug("Copying chunk: "+chunk.getName());
-            ExecutorService executor = Executors.newFixedThreadPool(2);
-            List<Future<HashMap<String, String>>> futures = new ArrayList();
-            HashMap<String, String> archiveIds = new HashMap<>();
-            for (String archiveStoreId : archiveStores.keySet() ) {
-                ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
-                DeviceTracker dt = new DeviceTracker();
-                dt.setArchiveStore(archiveStore);
-                dt.setArchiveStoreId(archiveStoreId);
-                dt.setChunkCount(chunkCount);
-                dt.setDepositId(depositId);
-                dt.setJobID(jobID);
-                dt.setEventStream(eventStream);
-                dt.setTarFile(chunk);
-                dt.setUserID(userID);
-                logger.debug("Creating device thread:" + archiveStore.getClass());
-                Future<HashMap<String, String>> dtFuture = executor.submit(dt);
-                futures.add(dtFuture);
-            }
-            executor.shutdown();
-
-            for (Future<HashMap<String, String>> future : futures) {
-                try {
-                    HashMap<String, String> result = future.get();
-                    archiveIds.putAll(result);
-                } catch (ExecutionException ee) {
-                    Throwable cause = ee.getCause();
-                    if (cause instanceof Exception) {
-                        logger.info("Device upload failed. " + cause.getMessage());
-                        throw (Exception) cause;
-                    }
-                }
-            }
-            logger.debug("Chunk thread completed: " + this.chunkCount);
-            return archiveIds;
-        }
-
-        public File getChunk() {
-            return this.chunk;
-        }
-
-        public void setChunk(File chunk) {
-            this.chunk = chunk;
-        }
-
-        public int getChunkCount() {
-            return this.chunkCount;
-        }
-
-        public void setChunkCount(int chunkCount) {
-            this.chunkCount = chunkCount;
-        }
-
-        public HashMap<String, ArchiveStore> getArchiveStores() {
-            return this.archiveStores;
-        }
-
-        public void setArchiveStores(HashMap<String, ArchiveStore> archiveStores) {
-            this.archiveStores = archiveStores;
-        }
-
-        public String getDepositId() {
-            return this.depositId;
-        }
-
-        public void setDepositId(String depositId) {
-            this.depositId = depositId;
-        }
-
-        public String getJobID() {
-            return this.jobID;
-        }
-
-        public void setJobID(String jobID) {
-            this.jobID = jobID;
-        }
-
-        public EventSender getEventStream() {
-            return this.eventStream;
-        }
-
-        public void setEventStream(EventSender eventStream) {
-            this.eventStream = eventStream;
-        }
-
-        public File getTarFile() {
-            return this.tarFile;
-        }
-
-        public void setTarFile(File tarFile) {
-            this.tarFile = tarFile;
-        }
-
-        public String getUserID() {
-            return userID;
-        }
-
-        public void setUserID(String userID) {
-            this.userID = userID;
-        }
-    }
-	protected static class DeviceTracker implements Callable {
-
-        private String jobID;
-        private String depositId;
-        private File tarFile;
-        private EventSender eventStream;
-        private int chunkCount = 0;
-        private String archiveStoreId;
-        private ArchiveStore archiveStore;
-        private String userID;
-
-        @Override
-        public HashMap<String, String> call() throws Exception {
-            HashMap<String, String> archiveIds = new HashMap<>();
-            // Progress tracking (threaded)
-            Progress progress = new Progress();
-            ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.tarFile.length(), this.eventStream);
-            Thread trackerThread = new Thread(tracker);
-            trackerThread.start();
-            String depId = this.depositId;
-            if (this.chunkCount > 0) {
-                depId = depId + "." + this.chunkCount;
-            }
-            String archiveId;
-            // kick off new thread for each device ( we may already have kicked off x threads for chunks)
-            try {
-                this.eventStream.send(new StartCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name ).withUserId(this.userID));
-                if (((Device)this.archiveStore).hasDepositIdStorageKey()) {
-                    archiveId = ((Device) this.archiveStore).store(depId, this.tarFile, progress);
-                } else {
-                    archiveId = ((Device) this.archiveStore).store("/", this.tarFile, progress);
-                }
-                this.eventStream.send(new CompleteCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name ).withUserId(this.userID));
-            } finally {
-                // Stop the tracking thread
-                tracker.stop();
-                trackerThread.join();
-            }
-
-            logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
-            // wait for all 3 to finish
-
-            if (this.chunkCount > 0 && archiveIds.get(this.archiveStoreId) == null) {
-                logger.info("ArchiveId is: " + archiveId);
-                String separator = FileSplitter.CHUNK_SEPARATOR;
-                logger.info("Separator is: " + separator);
-                int beginIndex = archiveId.lastIndexOf(separator);
-                logger.info("BeginIndex is: " + beginIndex);
-                archiveId = archiveId.substring(0, beginIndex);
-                logger.debug("Add to archiveIds: key: "+this.archiveStoreId+" ,value:"+archiveId);
-                archiveIds.put(archiveStoreId, archiveId);
-                logger.debug("archiveIds: "+archiveIds);
-            } else if(this.chunkCount == 0) {
-                archiveIds.put(archiveStoreId, archiveId);
-            }
-            logger.debug("Device thread completed: " + archiveId);
-            return archiveIds;
-        }
-
-        public String getJobID() {
-            return this.jobID;
-        }
-
-        public void setJobID(String jobID) {
-            this.jobID = jobID;
-        }
-
-        public String getDepositId() {
-            return this.depositId;
-        }
-
-        public void setDepositId(String depositId) {
-            this.depositId = depositId;
-        }
-
-        public File getTarFile() {
-            return this.tarFile;
-        }
-
-        public void setTarFile(File tarFile) {
-            this.tarFile = tarFile;
-        }
-
-        public EventSender getEventStream() {
-            return this.eventStream;
-        }
-
-        public void setEventStream(EventSender eventStream) {
-            this.eventStream = eventStream;
-        }
-
-        public int getChunkCount() {
-            return this.chunkCount;
-        }
-
-        public void setChunkCount(int chunkCount) {
-            this.chunkCount = chunkCount;
-        }
-
-        public String getArchiveStoreId() {
-            return this.archiveStoreId;
-        }
-
-        public void setArchiveStoreId(String archiveStoreId) {
-            this.archiveStoreId = archiveStoreId;
-        }
-
-        public ArchiveStore getArchiveStore() {
-            return this.archiveStore;
-        }
-
-        public void setArchiveStore(ArchiveStore archiveStore) {
-            this.archiveStore = archiveStore;
-        }
-
-        public String getUserID() {
-            return this.userID;
-        }
-
-        public void setUserID(String userID) {
-            this.userID = userID;
-        }
-    }
 }

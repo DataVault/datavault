@@ -162,48 +162,14 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     	}
     	File tsmFile = new File(pathPrefix + "/" + depositId + "/" + working.getName());
     	// thread for each node
-
-//		TSMTracker loc1 = new TSMTracker();
-//		loc1.setLocation("loc1");
-//		Thread loc1Thread = new Thread(loc1);
-//		final AtomicReference throwableReference = new AtomicReference<Throwable>();
-//		loc1Thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-//			public void uncaughtException(Thread t, Throwable e) {
-//				throwableReference.set(e);
-//			}
-//		});
-//		loc1Thread.start();
-//		TSMTracker loc2 = new TSMTracker();
-//		loc2.setLocation("loc2");
-//		Thread loc2Thread = new Thread(loc2);
-//		loc2Thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-//			public void uncaughtException(Thread t, Throwable e) {
-//				throwableReference.set(e);
-//			}
-//		});
-//		loc2Thread.start();
-//
-//		while (loc1Thread.isAlive() && loc2Thread.isAlive()) {
-//			TimeUnit.MINUTES.sleep(1);
-//		}
-//
-//		Throwable throwable = (Throwable)throwableReference.get();
-//		if (throwable != null) {
-//			if (throwable instanceof Exception) {
-//				throw (Exception) throwable;
-//			} else if (throwable instanceof RuntimeException) {
-//				throw (RuntimeException)throwable;
-//			}
-//		}
-
-		ExecutorService executor = Executors.newSingleThreadExecutor();
+		ExecutorService executor = Executors.newFixedThreadPool(2);
 		TivoliStorageManager.TSMTracker loc1 = new TivoliStorageManager.TSMTracker();
 		loc1.setLocation(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
 		loc1.setWorking(tsmFile);
 		loc1.setProgress(progress);
 		loc1.setDescription(depositId);
 		TivoliStorageManager.TSMTracker loc2 = new TivoliStorageManager.TSMTracker();
-		loc2.setLocation(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+		loc2.setLocation(TivoliStorageManager.TSM_SERVER_NODE2_OPT);
 		loc2.setWorking(tsmFile);
 		loc2.setProgress(progress);
 		loc2.setDescription(depositId);
