@@ -115,6 +115,7 @@
         <property name="vaultsService" ref="vaultsService" />
         <property name="vaultsReviewService" ref="vaultsReviewService" />
         <property name="depositsReviewService" ref="depositsReviewService" />
+        <property name="usersService" ref="usersService" />
     </bean>
 
     <bean id="billingController" class="org.datavaultplatform.broker.controllers.admin.BillingController">

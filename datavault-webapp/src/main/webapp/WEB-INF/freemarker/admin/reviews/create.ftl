@@ -2,6 +2,8 @@
 <#-- Specify which navbar element should be flagged as active -->
 <#global nav="admin">
 <@layout.vaultLayout>
+    <#import "/spring.ftl" as spring />
+
 <div class="container">
 
     <ol class="breadcrumb">
@@ -10,7 +12,7 @@
         <li class="active"><b>Vault:</b> ${vault.name?html}</li>
     </ol>
 
-    <form id="create-review" action="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}" method="post">
+    <form id="create-review" action="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}/reviews/${currentReview.getId()}" method="post">
 
     <div class="bs-callout">
         <h2>
@@ -24,29 +26,31 @@
         <hr>
         <p>
             <b>Owner:</b> ${vault.userID?html}<br/>
-            <b>Retention Policy:</b> ${retentionPolicy.name?html}<br/>
             <b>Dataset name:</b> ${vault.datasetName?html}<br/>
-            <b>Group:</b> ${group.name?html}<br/>
             <b>Created:</b> ${vault.creationTime?datetime}<br/>
-            <b>Review date:</b> ${vault.policyExpiry?datetime} (Status: ${vault.policyStatusStr?html})<br/>
-            <b>Size:</b> ${vault.getSizeStr()}
+            <b>Group:</b> ${group.name?html}<br/>
+            <b>Retention Policy:</b> ${retentionPolicy.name?html}<br/>
+            <b>Retention Policy expiry date:</b> ${vault.policyExpiry?datetime} (Status: ${vault.policyStatusStr?html})<br/>
+            <b>Size:</b> ${vault.getSizeStr()}<br/>
         </p>
 
-        <p>Current review date is ${vault.reviewDate?datetime}</p>
-        <p>New review date is ${currentReview.newReviewDate?datetime}</p>
+        <p>
+            <b>Current review date:</b> ${vault.reviewDate?datetime}</b>
+        </p>
 
         <div class="form-group">
-            <label for="newReviewDate" class="control-label">
-                <strong>Review Date</strong>
-            </label>
-            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                  title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault.">
-                                </span>
-            <@spring.bind "currentReview.newReviewDate"/>
-            <input class="form-control" id="newReviewDate" name="newReviewDate" placeholder="yyyy-mm-dd"/>
+            <label class="control-label">New Review Date</label>
+            <@spring.bind "vaultReviewModel.newReviewDate"/>
+            <input type="text" class="form-control" id="newReviewDate" name="${spring.status.expression}" value='${spring.status.value!""}'/>
         </div>
 
-        <#if deposits?has_content>
+        <div class="form-group">
+            <label class="control-label">Comment</label>
+            <@spring.bind "vaultReviewModel.comment" />
+            <input type="text" class="form-control" name="${spring.status.expression}" value="${spring.status.value!""}"/>
+        </div>
+
+        <#if drml.depositReviewModels?has_content>
 
             <div class="table-responsive">
                 <table class="table table-striped">
@@ -54,7 +58,6 @@
                         <tr class="tr">
                             <th>Deposit</th>
                             <th>Status</th>
-
                             <th>Timestamp</th>
                             <th>Delete</th>
                             <th>Comment</th>
@@ -62,63 +65,72 @@
                     </thead>
 
                     <tbody>
-                        <#list deposits as deposit>
+                        <#list drml.depositReviewModels as drm>
+
+                            <input type="hidden" name="depositReviewModels[${drm_index}].depositId" value="${drm.getDepositId()}">
+                            <input type="hidden" name="depositReviewModels[${drm_index}].depositReviewId" value="${drm.getDepositReviewId()}">
+
                             <tr class="tr">
                                 <td>
-                                    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}">${deposit.name?html}</a>
+                                    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${drm.depositId}">${drm.name?html}</a>
                                 </td>
 
                                 <td>
                                     <div id="deposit-status" class="job-status">
-                                        <#if deposit.status.name() == "COMPLETE">
+                                        <#if drm.statusName == "COMPLETE">
                                             <div class="text-success">
                                                 <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>&nbsp;Complete
                                             </div>
-                                        <#elseif deposit.status.name() == "FAILED">
+                                        <#elseif drm.statusName == "FAILED">
                                             <div class="text-danger">
                                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>&nbsp;Failed
                                             </div>
-                                        <#elseif deposit.status.name() == "NOT_STARTED">&nbsp;Queued
-                                        <#elseif deposit.status.name() == "IN_PROGRESS">
+                                        <#elseif drm.statusName == "NOT_STARTED">&nbsp;Queued
+                                        <#elseif drm.statusName == "IN_PROGRESS">
                                             <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>&nbsp;In progress
                                         <#else>
-                                            ${deposit.status}
+                                            ${drm.statusName}
                                         </#if>
                                     </div>
                                 </td>
 
-                                <td>${deposit.getCreationTime()?datetime}</td>
+                                <td> ${drm.getCreationTime()?datetime}</td>
 
                                 <td>
-                                    <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" id="deleteDeposit">
-                                    <#--<label class="custom-control-label" for="deleteDeposit">delete</label>-->
-
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="comment">
+                                    <div class="form-check">
+                                    <!--<div class="custom-control custom-checkbox">-->
+                                        <@spring.bind "drml.depositReviewModels[${drm_index}].toBeDeleted" />
+                                        <input type="checkbox" class="form-check-input" id="deleteDeposit"
+                                               name="${spring.status.expression}"
+                                               value="true" ${drm.toBeDeleted?then('checked', '')} />
                                     </div>
                                 </td>
 
+                                <td>
+                                <div class="form-group">
+                                    <@spring.bind "drml.depositReviewModels[${drm_index}].comment" />
+                                    <input type="text"
+                                           class="form-control"
+                                           name="${spring.status.expression}"
+                                           value="${spring.status.value!""}"/>
+                                </div>
+                                </td>
 
                             </tr>
                         </#list>
                     </tbody>
                 </table>
             </div>
-        <#else>
-            <p>No deposits</p>
-        </#if>
+            <#else>
+               <p>No deposits</p>
+         </#if>
 
-
-    </div>
+         </div>
 
         <div class="form-group">
-            <button type="submit" name="action" value="save" class="btn btn-info">Save</button>
-            <button type="submit" name="action" value="action" class="btn btn-success">Action</button>
-            <button type="submit" name="action" value="cancel" class="btn btn-danger">Cancel</button>
+            <input type="submit" name="action" value="Save" class="btn btn-info" />
+            <input type="submit" name="action" value="Action" class="btn btn-success" />
+            <input type="submit" name="action" value="Cancel" class="btn btn-danger" />
         </div>
 
 

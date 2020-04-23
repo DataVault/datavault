@@ -1,20 +1,27 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
+import org.datavaultplatform.common.model.Deposit;
+import org.datavaultplatform.common.model.DepositReview;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.VaultReview;
+
+import org.datavaultplatform.common.response.DepositInfo;
+import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.webapp.model.DepositReviewModel;
+import org.datavaultplatform.webapp.model.DepositReviewModelList;
+import org.datavaultplatform.webapp.model.VaultReviewModel;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,6 +46,9 @@ public class AdminReviewsController {
         VaultsData vaultsData = restService.getVaultsForReview();
         List<VaultInfo> vaultsInfo = vaultsData.getData();
 
+        // Now check to see whether each vault already has an active review record. This will determine whether
+        // the displayed 'review' link sends the user to a create or edit page.
+
         model.addAttribute("vaults", vaultsInfo);
 
         return "admin/reviews/index";
@@ -53,31 +63,39 @@ public class AdminReviewsController {
         model.addAttribute("vault", vault);
         model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
         model.addAttribute(restService.getGroup(vault.getGroupID()));
-        model.addAttribute("deposits", restService.getDepositsListing(vaultID));
 
-        // Fetch any existing review records for this vault.
-        VaultReview[] vaultReviews = restService.getReviewsListing(vaultID);
+        // In fact this creates a current Review if none exists.
+        ReviewInfo reviewInfo = restService.getCurrentReview(vaultID);
 
-        // Initialse the currentReview to be empty as the view an VaultReview object even if one doesn't exist yet.
-        System.out.println("Setting currentReview to new thing");
-        VaultReview currentReview = new VaultReview();
-        List<VaultReview> oldReviews = new ArrayList<VaultReview>();
+        VaultReview currentReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
+        VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview);
 
-        for (VaultReview vaultReview : vaultReviews) {
-            if (vaultReview.getActionedDate() == null) {
-                // We should be able to safely assume there is either zero or one such record.
-                currentReview = vaultReview;
-            } else {
-                oldReviews.add(vaultReview);
-            }
+        DepositReviewModelList drml = new DepositReviewModelList();
+        List<DepositReviewModel> depositReviewModels = new ArrayList<>();
+        for (int i = 0; i < reviewInfo.getDepositIds().size(); i++) {
+            DepositInfo depositInfo = restService.getDeposit(reviewInfo.getDepositIds().get(i));
+            DepositReview depositReview = restService.getDepositReview(reviewInfo.getDepositReviewIds().get(i));
+            DepositReviewModel drm = new DepositReviewModel();
+
+            // Set DepositReview stuff
+            drm.setDepositReviewId(depositReview.getId());
+            drm.setToBeDeleted(depositReview.isToBeDeleted());
+            drm.setComment(depositReview.getComment());
+
+            // Set Deposit stuff
+            drm.setDepositId(depositInfo.getID());
+            drm.setName(depositInfo.getName());
+            drm.setStatusName(depositInfo.getStatus().name());
+            drm.setCreationTime(depositInfo.getCreationTime());
+
+            depositReviewModels.add(drm);
         }
 
-        currentReview.setNewReviewDate(new Date());
-        System.out.println("currentReview is " + currentReview);
-        System.out.println("Id is " + currentReview.getId());
-        System.out.println("newReviewDate is " + currentReview.getNewReviewDate());
+        drml.setDepositReviewModels(depositReviewModels);
 
         model.addAttribute("currentReview", currentReview);
+        model.addAttribute("vaultReviewModel", vaultReviewModel);
+        model.addAttribute("drml" , drml);
 
         return "admin/reviews/create";
     }
@@ -85,38 +103,56 @@ public class AdminReviewsController {
 
     // Process the completed review page
     @RequestMapping(value = "/admin/vaults/{vaultid}/reviews/{reviewid}", method = RequestMethod.POST)
-    public String processReview(ModelMap model, @PathVariable("vaultid") String vaultID, @RequestParam String action) throws Exception {
-        // Was the cancel button pressed?
-        if ("cancel".equals(action)) {
-            return "redirect:/";
+    public String processReview(@ModelAttribute VaultReviewModel currentReview, @ModelAttribute DepositReviewModelList drml, ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("reviewid") String reviewID, @RequestParam String action) throws Exception {
+
+        for (String key : model.keySet()) {
+            System.out.println("model is " + model.get(key));
+
         }
 
-        VaultInfo vault = restService.getVault(vaultID);
+        // Note to self - The ModelAttributes made available here are not the same objects as those peassed to the View,
+        // they only contain the values entered on screen. With that in mind, fetch the original objects again and
+        // update them appropriately.
 
-        model.addAttribute("vault", vault);
-        model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
-        model.addAttribute(restService.getGroup(vault.getGroupID()));
-        model.addAttribute("deposits", restService.getDepositsListing(vaultID));
+        if ("Cancel".equals(action)) {
+            System.out.println("Cancel!!!!!!!!!!");
+            // Do nothing!
+        }
 
-        // Fetch any exiting review records for this vault.
-        VaultReview[] vaultReviews = restService.getReviewsListing(vaultID);
+        if ("Save".equals(action)) {
+            System.out.println("Save!!!!!!!!!!");
+            // Do stuff to save what the user entered ie. update the Vault and Deposit Review recs.
 
-        VaultReview currentReview = null;
-        List<VaultReview> oldReviews = new ArrayList<VaultReview>();
+            VaultReview originalReview = restService.getVaultReview(reviewID);
 
-        for (VaultReview vaultReview : vaultReviews) {
-            if (vaultReview.getActionedDate() == null) {
-                // We should be able to safely assume there is either zero or one such record.
-                currentReview = vaultReview;
-            } else {
-                oldReviews.add(vaultReview);
+            originalReview.setNewReviewDate(currentReview.StringToDate(currentReview.getNewReviewDate()));
+            originalReview.setComment(currentReview.getComment());
+
+            restService.editVaultReview(originalReview);
+
+            for (DepositReviewModel drm : drml.getDepositReviewModels()) {
+                System.out.println("Looping round the drm's ");
+
+                System.out.println("drm id is " + drm.getDepositReviewId());
+                System.out.println("drm comment is " + drm.getComment());
+                System.out.println("drm delete is "  + drm.isToBeDeleted());
+
+                // Reread the original depositRenewal and update it.
+                DepositReview originalDepositReview = restService.getDepositReview(drm.getDepositReviewId());
+                originalDepositReview.setToBeDeleted(drm.isToBeDeleted());
+                originalDepositReview.setComment(drm.getComment());
+                restService.editDepositReview(originalDepositReview);
+
             }
         }
 
-        model.addAttribute("currentReview", currentReview);
-        
+        if ("Action".equals(action)) {
+            System.out.println("Action!!!!!!!!!!");
+            // Do stuff to save what the user entered ie. update the Vault and Deposit Review recs.
+            // Now update the the actual Vault and Deposit recs.
+        }
 
-        return "admin/reviews/create";
+        return "redirect:/";
     }
 
 }

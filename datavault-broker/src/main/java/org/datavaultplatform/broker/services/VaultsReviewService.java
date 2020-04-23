@@ -1,10 +1,12 @@
 package org.datavaultplatform.broker.services;
 
+import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.VaultReview;
 import org.datavaultplatform.common.model.dao.VaultReviewDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.List;
 
 public class VaultsReviewService {
@@ -17,6 +19,16 @@ public class VaultsReviewService {
         this.vaultReviewDAO = vaultReviewDAO;
     }
 
+    public VaultReview createVaultReview(Vault vault) {
+        VaultReview vaultReview = new VaultReview();
+
+        vaultReview.setCreationTime(new Date());
+        vaultReview.setVault(vault);
+
+        vaultReviewDAO.save(vaultReview);
+
+        return vaultReview;
+    }
 
     public void addVaultReview(VaultReview vaultReview) {
         vaultReviewDAO.save(vaultReview);
@@ -40,7 +52,7 @@ public class VaultsReviewService {
     
 
 
-    public int count() { return vaultReviewDAO.count(); }
+
 
 
 

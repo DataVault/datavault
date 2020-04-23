@@ -45,10 +45,14 @@ public class VaultReview {
 
     // The date this review was finally actioned.
     // Serialise date in ISO 8601 format
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
-    @Temporal(TemporalType.DATE)
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "actionedDate", nullable = true)
     private Date actionedDate;
+
+    // A comment, what more can I say
+    @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
+    private String comment;
 
 
 
@@ -97,5 +101,13 @@ public class VaultReview {
 
     public void setActionedDate(Date actionedDate) {
         this.actionedDate = actionedDate;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }
