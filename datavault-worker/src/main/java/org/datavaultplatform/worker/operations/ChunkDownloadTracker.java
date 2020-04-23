@@ -27,7 +27,7 @@ public class ChunkDownloadTracker implements Callable {
     private Boolean doVerification;
     private HashMap<Integer, byte[]> ivs;
     private  String[] encChunksHash;
-    private static final Logger logger = LoggerFactory.getLogger(ProgressTracker.class);
+    private static final Logger logger = LoggerFactory.getLogger(ChunkDownloadTracker.class);
 
     @Override
     public Object call() throws Exception {
@@ -42,9 +42,9 @@ public class ChunkDownloadTracker implements Callable {
         // Copy file back from the archive storage
         logger.debug("archiveChunkId: "+archiveChunkId);
         if (multipleCopies && location != null) {
-            copyBackFromArchive(archiveStore, archiveChunkId, chunkFile, location);
+            CopyBackFromArchive.copyBackFromArchive(archiveStore, archiveChunkId, chunkFile, location);
         } else {
-            copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
+            CopyBackFromArchive.copyBackFromArchive(archiveStore, archiveChunkId, chunkFile);
         }
 
         // Decryption
@@ -78,23 +78,6 @@ public class ChunkDownloadTracker implements Callable {
                 throw new Exception("checksum failed: " + chunkHash + " != " + origChunkHash);
             }
         }
-    }
-
-    private void copyBackFromArchive(ArchiveStore archiveStore, String archiveId, File tarFile) throws Exception {
-
-        this.copyBackFromArchive(archiveStore, archiveId, tarFile, null);
-    }
-
-    private void copyBackFromArchive(ArchiveStore archiveStore, String archiveId, File tarFile, String location) throws Exception {
-
-        // Ask the driver to copy files to the temp directory
-        Progress progress = new Progress();
-        if (location == null) {
-            ((Device)archiveStore).retrieve(archiveId, tarFile, progress);
-        } else {
-            ((Device)archiveStore).retrieve(archiveId, tarFile, progress, location);
-        }
-        logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
     }
 
     public File getChunkFile() {

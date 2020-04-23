@@ -17,7 +17,6 @@ import org.datavaultplatform.worker.operations.*;
 import org.datavaultplatform.worker.queue.EventSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -332,6 +331,84 @@ public class Deposit extends Task {
             	} else {
             		this.doArchive();
             	}
+            }
+        }
+    }
+
+    /**
+     * @param context
+     * @param tarFile
+     * @param tarHash
+     * @throws Exception
+     */
+    private void verifyArchive(Context context, File tarFile, String tarHash, byte[] iv, String encTarHash) throws Exception {
+
+        boolean alreadyVerified = false;
+
+        for (String archiveStoreId : archiveStores.keySet() ) {
+            ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
+            String archiveId = archiveIds.get(archiveStoreId);
+
+            Verify.Method vm = archiveStore.getVerifyMethod();
+            logger.info("Verification method: " + vm);
+
+            logger.debug("verifyArchive - archiveId: "+archiveId);
+
+            // Get the tar file
+
+            if ((vm == Verify.Method.LOCAL_ONLY) && (!alreadyVerified)){
+
+                // Decryption
+                if(iv != null) {
+                    Encryption.decryptFile(context, tarFile, iv);
+                }
+
+                // Verify the contents of the temporary file
+                verifyTarFile(context.getTempDir(), tarFile, null);
+
+            } else if (vm == Verify.Method.COPY_BACK) {
+
+                alreadyVerified = true;
+
+                // Delete the existing temporary file
+                tarFile.delete();
+                // Copy file back from the archive storage
+                if (((Device)archiveStore).hasMultipleCopies()) {
+                    for (String loc : ((Device)archiveStore).getLocations()) {
+                        CopyBackFromArchive.copyBackFromArchive(archiveStore, archiveId, tarFile, loc);
+
+                        // check encrypted tar
+                        verifyTarFile(context.getTempDir(), tarFile, encTarHash);
+
+                        // Decryption
+                        if(iv != null) {
+                            Encryption.decryptFile(context, tarFile, iv);
+                        }
+
+                        // Verify the contents
+                        verifyTarFile(context.getTempDir(), tarFile, tarHash);
+                    }
+                } else {
+                    CopyBackFromArchive.copyBackFromArchive(archiveStore, archiveId, tarFile);
+
+                    // check encrypted tar
+                    String encTarFileHash = Verify.getDigest(tarFile);
+                    logger.info("Checksum: " + encTarFileHash);
+                    if (!encTarFileHash.equals(encTarFileHash)) {
+                        throw new Exception("checksum failed: " + encTarFileHash + " != " + encTarFileHash);
+                    }
+
+                    // Decryption
+                    if(iv != null) {
+                        Encryption.decryptFile(context, tarFile, iv);
+                    }
+
+                    // Verify the contents
+                    verifyTarFile(context.getTempDir(), tarFile, tarHash);
+                }
+            } else if (vm == Verify.Method.CLOUD) {
+                // do nothing for now but we hope to extend this so that we can compare checksums supplied by the cloud api
+                logger.info("Skipping verification as a cloud plugin (for now)");
             }
         }
     }
@@ -747,8 +824,7 @@ public class Deposit extends Task {
 		if( context.isChunkingEnabled() ) {
             verifyArchive(context, chunkFiles, chunksHash, tarFile, tarHash, chunksIVs, encChunksHash);
         } else {
-		    throw new NotImplementedException();
-            //verifyArchive(context, tarFile, tarHash, iv, encTarHash);
+            verifyArchive(context, tarFile, tarHash, iv, encTarHash);
         }
 	}
 	

@@ -23,7 +23,7 @@ public class DeviceTracker implements Callable {
     private String archiveStoreId;
     private ArchiveStore archiveStore;
     private String userID;
-    private static final Logger logger = LoggerFactory.getLogger(ProgressTracker.class);
+    private static final Logger logger = LoggerFactory.getLogger(DeviceTracker.class);
 
     @Override
     public HashMap<String, String> call() throws Exception {

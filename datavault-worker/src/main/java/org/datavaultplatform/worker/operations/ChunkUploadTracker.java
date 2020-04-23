@@ -21,7 +21,7 @@ public class ChunkUploadTracker implements Callable {
     private EventSender eventStream;
     private File tarFile;
     private String userID;
-    private static final Logger logger = LoggerFactory.getLogger(ProgressTracker.class);
+    private static final Logger logger = LoggerFactory.getLogger(ChunkUploadTracker.class);
 
     @Override
     public HashMap<String, String> call() throws Exception {
