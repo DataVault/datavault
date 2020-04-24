@@ -426,7 +426,12 @@ public class Deposit extends Task {
             String archiveId, String location, boolean multipleCopies, HashMap<Integer, byte[]> ivs, 
             String encTarHash, String[] encChunksHash, boolean doVerification) throws Exception {
 
-        ExecutorService executor = Executors.newFixedThreadPool(25);
+        int noOfThreads = context.getNoChunkThreads();
+        if (noOfThreads != 0 && noOfThreads < 0 ) {
+            noOfThreads = 25;
+        }
+        logger.debug("Number of threads: " + noOfThreads);
+        ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
         List<Future<HashMap<String, String>>> futures = new ArrayList();
         for (int i = 0; i < chunkFiles.length; i++) {
             // if less that max threads started start new one
@@ -773,7 +778,12 @@ public class Deposit extends Task {
 	private void uploadToStorage(Context context, File tarFile) throws Exception {
 
 		if ( context.isChunkingEnabled() ) {
-            ExecutorService executor = Executors.newFixedThreadPool(25);
+            int noOfThreads = context.getNoChunkThreads();
+            if (noOfThreads != 0 && noOfThreads < 0 ) {
+                noOfThreads = 25;
+            }
+            logger.debug("Number of threads:" + noOfThreads);
+            ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
             List<Future<HashMap<String, String>>> futures = new ArrayList();
     		int chunkCount = 0;
     		// kick of 10 (maybe more) threads at a time?  each thread would kick off 3 threads of their own
