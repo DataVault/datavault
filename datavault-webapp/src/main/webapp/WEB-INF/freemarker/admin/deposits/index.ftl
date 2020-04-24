@@ -33,6 +33,8 @@
         <form id="search-vaults" class="form" role="form" action="" method="get">
             <div class="input-group">
                 <input type="text" class="form-control" name="query" value="${query}" placeholder="Search for...">
+                <input type="hidden" class="form-control" name="sort" value="${sort}">
+                <input type="hidden" class="form-control" name="order" value="${order}">
                 <div class="input-group-btn">
                     <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
                 </div>
