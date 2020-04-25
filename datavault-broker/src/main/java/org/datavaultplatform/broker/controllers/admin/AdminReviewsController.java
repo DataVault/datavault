@@ -63,9 +63,11 @@ public class AdminReviewsController {
     public VaultsData getVaultsForReview(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
 
         List<VaultInfo> vaultResponses = new ArrayList<>();
-        List<Vault> vaults = vaultsService.getVaultsForReview();
-        if(CollectionUtils.isNotEmpty(vaults)) {
-            for (Vault vault : vaults) {
+        List<Vault> vaults = vaultsService.getVaults();
+        List<Vault> vaultsForReview = vaultsReviewService.getVaultsForReview(vaults);
+
+        if(CollectionUtils.isNotEmpty(vaultsForReview)) {
+            for (Vault vault : vaultsForReview) {
                 vaultResponses.add(vault.convertToResponse());
             }
         }
@@ -110,10 +112,7 @@ public class AdminReviewsController {
     public ReviewInfo getCurrentReview(@RequestHeader(value = "X-UserID", required = true) String userID,
                                              @PathVariable("vaultid") String vaultID) throws Exception {
 
-
         //////// todo : Split this into two endpoints. A GET shouldn't be creating new records.
-
-
 
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);

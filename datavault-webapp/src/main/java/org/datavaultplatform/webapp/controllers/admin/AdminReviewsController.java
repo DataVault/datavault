@@ -31,7 +31,7 @@ import java.util.List;
 @Controller
 public class AdminReviewsController {
 
-	private static final Logger logger = LoggerFactory.getLogger(AdminReviewsController.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdminReviewsController.class);
 
     private RestService restService;
 
@@ -45,9 +45,6 @@ public class AdminReviewsController {
 
         VaultsData vaultsData = restService.getVaultsForReview();
         List<VaultInfo> vaultsInfo = vaultsData.getData();
-
-        // Now check to see whether each vault already has an active review record. This will determine whether
-        // the displayed 'review' link sends the user to a create or edit page.
 
         model.addAttribute("vaults", vaultsInfo);
 
@@ -95,7 +92,7 @@ public class AdminReviewsController {
 
         model.addAttribute("currentReview", currentReview);
         model.addAttribute("vaultReviewModel", vaultReviewModel);
-        model.addAttribute("drml" , drml);
+        model.addAttribute("drml", drml);
 
         return "admin/reviews/create";
     }
@@ -105,54 +102,50 @@ public class AdminReviewsController {
     @RequestMapping(value = "/admin/vaults/{vaultid}/reviews/{reviewid}", method = RequestMethod.POST)
     public String processReview(@ModelAttribute VaultReviewModel currentReview, @ModelAttribute DepositReviewModelList drml, ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("reviewid") String reviewID, @RequestParam String action) throws Exception {
 
-        for (String key : model.keySet()) {
-            System.out.println("model is " + model.get(key));
-
-        }
-
-        // Note to self - The ModelAttributes made available here are not the same objects as those peassed to the View,
+        // Note - The ModelAttributes made available here are not the same objects as those passed to the View,
         // they only contain the values entered on screen. With that in mind, fetch the original objects again and
         // update them appropriately.
 
         if ("Cancel".equals(action)) {
             System.out.println("Cancel!!!!!!!!!!");
-            // Do nothing!
+            return "redirect:/admin/reviews";
         }
 
-        if ("Save".equals(action)) {
-            System.out.println("Save!!!!!!!!!!");
-            // Do stuff to save what the user entered ie. update the Vault and Deposit Review recs.
+        // todo: We need to throw back an error if the review date has not been changed
+        // but some deposits are being retained.
 
-            VaultReview originalReview = restService.getVaultReview(reviewID);
+        VaultReview originalReview = restService.getVaultReview(reviewID);
 
-            originalReview.setNewReviewDate(currentReview.StringToDate(currentReview.getNewReviewDate()));
-            originalReview.setComment(currentReview.getComment());
-
-            restService.editVaultReview(originalReview);
-
-            for (DepositReviewModel drm : drml.getDepositReviewModels()) {
-                System.out.println("Looping round the drm's ");
-
-                System.out.println("drm id is " + drm.getDepositReviewId());
-                System.out.println("drm comment is " + drm.getComment());
-                System.out.println("drm delete is "  + drm.isToBeDeleted());
-
-                // Reread the original depositRenewal and update it.
-                DepositReview originalDepositReview = restService.getDepositReview(drm.getDepositReviewId());
-                originalDepositReview.setToBeDeleted(drm.isToBeDeleted());
-                originalDepositReview.setComment(drm.getComment());
-                restService.editDepositReview(originalDepositReview);
-
-            }
-        }
+        originalReview.setNewReviewDate(currentReview.StringToDate(currentReview.getNewReviewDate()));
+        originalReview.setComment(currentReview.getComment());
 
         if ("Action".equals(action)) {
-            System.out.println("Action!!!!!!!!!!");
-            // Do stuff to save what the user entered ie. update the Vault and Deposit Review recs.
-            // Now update the the actual Vault and Deposit recs.
+            originalReview.setActionedDate(new Date());
         }
 
-        return "redirect:/";
+        logger.info("Editing Vault Review id " + originalReview.getId());
+        restService.editVaultReview(originalReview);
+
+        for (DepositReviewModel drm : drml.getDepositReviewModels()) {
+            DepositReview originalDepositReview = restService.getDepositReview(drm.getDepositReviewId());
+            originalDepositReview.setToBeDeleted(drm.isToBeDeleted());
+            originalDepositReview.setComment(drm.getComment());
+
+            if ("Action".equals(action)) {
+                originalDepositReview.setActionedDate(new Date());
+
+                if (drm.isToBeDeleted()) {
+                    // Stand back everyone!
+                    logger.info("Deleting deposit id " + drm.getDepositId());
+                    restService.deleteDeposit(drm.getDepositId());
+                }
+            }
+
+            logger.info("Editing Deposit Review id " + originalDepositReview.getId());
+            restService.editDepositReview(originalDepositReview);
+        }
+
+        return "redirect:/admin/reviews";
     }
 
 }

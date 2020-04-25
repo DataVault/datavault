@@ -6,6 +6,8 @@ import org.datavaultplatform.common.model.dao.VaultReviewDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -48,6 +50,42 @@ public class VaultsReviewService {
     
     public void updateVaultReview(VaultReview vaultReview) {
         vaultReviewDAO.update(vaultReview);
+    }
+
+    public List<Vault> getVaultsForReview(List<Vault> vaults) {
+        List<Vault> vaultsForReview = new ArrayList<>();
+
+        Date today = new Date();
+
+        for (Vault vault : vaults) {
+
+            Calendar c = Calendar.getInstance();
+            c.setTime(vault.getReviewDate());
+            c.add(Calendar.MONTH, -6);
+            Date reviewDateMinus6 = c.getTime();
+
+            if (today.after(reviewDateMinus6)) {
+                // Now look to see if the vault has already been reviewed ie. does it have a current review record
+                // already actioned.
+                VaultReview vaultReview = null;
+
+                // If we find a record that has been actioned after the review Date (minus6) then we know it
+                // has already been reviewed, so don't list it.
+                for (VaultReview vr : vault.getVaultReviews()) {
+
+                    if ((vr.getActionedDate() != null) && ((vr.getActionedDate().after(reviewDateMinus6)))) {
+                        vaultReview = vr;
+                    }
+                }
+
+                if (vaultReview == null) {
+                    vaultsForReview.add(vault);
+                }
+            }
+        }
+
+        return vaultsForReview;
+
     }
     
 
