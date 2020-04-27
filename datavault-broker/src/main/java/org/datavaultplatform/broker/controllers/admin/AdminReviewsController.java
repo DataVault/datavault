@@ -78,7 +78,7 @@ public class AdminReviewsController {
     }
 
     @ApiMethod(
-            path = "/admin/vaults/{vaultid}/reviews",
+            path = "/admin/vaults/{vaultid}/vaultreviews",
             verb = ApiVerb.GET,
             description = "Gets a list of Reviews for a Vault",
             produces = { MediaType.APPLICATION_JSON_VALUE },
@@ -87,7 +87,7 @@ public class AdminReviewsController {
     @ApiHeaders(headers={
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
-    @RequestMapping(value = "/admin/vaults/{vaultid}/reviews", method = RequestMethod.GET)
+    @RequestMapping(value = "/admin/vaults/{vaultid}/vaultreviews", method = RequestMethod.GET)
     public List<VaultReview> getVaultReviews(@RequestHeader(value = "X-UserID", required = true) String userID,
                                              @PathVariable("vaultid") String vaultID) throws Exception {
 
@@ -99,7 +99,7 @@ public class AdminReviewsController {
     }
 
     @ApiMethod(
-            path = "/admin/vaults/{vaultid}/reviews/current",
+            path = "/admin/vaults/{vaultid}/vaultreviews/current",
             verb = ApiVerb.GET,
             description = "Gets the current review for a Vault",
             produces = { MediaType.APPLICATION_JSON_VALUE },
@@ -108,7 +108,7 @@ public class AdminReviewsController {
     @ApiHeaders(headers={
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
-    @RequestMapping(value = "/admin/vaults/{vaultid}/reviews/current", method = RequestMethod.GET)
+    @RequestMapping(value = "/admin/vaults/{vaultid}/vaultreviews/current", method = RequestMethod.GET)
     public ReviewInfo getCurrentReview(@RequestHeader(value = "X-UserID", required = true) String userID,
                                              @PathVariable("vaultid") String vaultID) throws Exception {
 
@@ -167,7 +167,7 @@ public class AdminReviewsController {
     }
 
     @ApiMethod(
-            path = "/admin/vaults/reviews/current",
+            path = "/admin/vaults/vaultreviews/current",
             verb = ApiVerb.POST,
             description = "Create a new current review record for a Vault.",
             produces = { MediaType.APPLICATION_JSON_VALUE },
@@ -176,7 +176,7 @@ public class AdminReviewsController {
     @ApiHeaders(headers={
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
-    @RequestMapping(value = "/admin/vaults/reviews/current", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/vaults/vaultreviews/current", method = RequestMethod.POST)
     public VaultReview createCurrentReview(@RequestHeader(value = "X-UserID", required = true) String userID,
                                         @RequestBody String vaultId) throws Exception {
 
@@ -187,7 +187,7 @@ public class AdminReviewsController {
     }
 
     @ApiMethod(
-            path = "/admin/vaults/reviews",
+            path = "/admin/vaults/vaultreviews",
             verb = ApiVerb.PUT,
             description = "Edit a Vault Review",
             produces = { MediaType.APPLICATION_JSON_VALUE },
@@ -197,7 +197,7 @@ public class AdminReviewsController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
             @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
     })
-    @RequestMapping(value = "/admin/vaults/reviews", method = RequestMethod.PUT)
+    @RequestMapping(value = "/admin/vaults/vaultreviews", method = RequestMethod.PUT)
     public VaultReview editVaultReview(@RequestHeader(value = "X-UserID", required = true) String userID,
                          @RequestBody VaultReview vaultReview) throws Exception {
 
@@ -208,7 +208,7 @@ public class AdminReviewsController {
     }
 
     @ApiMethod(
-            path = "/admin/vaults/reviews/{vaultReviewId}",
+            path = "/admin/vaults/vaultreviews/{vaultReviewId}",
             verb = ApiVerb.GET,
             description = "Get a Vault Review",
             produces = { MediaType.APPLICATION_JSON_VALUE },
@@ -218,7 +218,7 @@ public class AdminReviewsController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
             @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
     })
-    @RequestMapping(value = "/admin/vaults/reviews/{vaultReviewId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/admin/vaults/vaultreviews/{vaultReviewId}", method = RequestMethod.GET)
     public VaultReview getVaultReview(@RequestHeader(value = "X-UserID", required = true) String userID,
                                 @PathVariable("vaultReviewId") String vaultReviewId) throws Exception {
 
@@ -228,7 +228,7 @@ public class AdminReviewsController {
 
 
     @ApiMethod(
-            path = "/admin/vaults/reviews/{vaultReviewId}/depositreviews",
+            path = "/admin/vaultreviews/{vaultReviewId}/depositreviews",
             verb = ApiVerb.GET,
             description = "Gets a list of Deposit Reviews for a Vault Review",
             produces = { MediaType.APPLICATION_JSON_VALUE },
@@ -237,7 +237,7 @@ public class AdminReviewsController {
     @ApiHeaders(headers={
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
-    @RequestMapping(value = "/admin/vaults/reviews/{vaultReviewId}/depositreviews", method = RequestMethod.GET)
+    @RequestMapping(value = "/admin/vaultreviews/{vaultReviewId}/depositreviews", method = RequestMethod.GET)
     public List<DepositReview> getDepositReviews(@RequestHeader(value = "X-UserID", required = true) String userID,
                                              @PathVariable("vaultReviewId") String vaultReviewId) throws Exception {
 
@@ -247,7 +247,7 @@ public class AdminReviewsController {
     }
 
     @ApiMethod(
-            path = "/admin/vaults/depositreviews/{depositReviewId}",
+            path = "/admin/vaultreviews/depositreviews/{depositReviewId}",
             verb = ApiVerb.GET,
             description = "Gets a particular Deposit Review",
             produces = { MediaType.APPLICATION_JSON_VALUE },
@@ -256,7 +256,7 @@ public class AdminReviewsController {
     @ApiHeaders(headers={
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
-    @RequestMapping(value = "/admin/vaults/depositreviews/{depositReviewId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/admin/vaultreviews/depositreviews/{depositReviewId}", method = RequestMethod.GET)
     public DepositReview getDepositReview(@RequestHeader(value = "X-UserID", required = true) String userID,
                                                  @PathVariable("depositReviewId") String depositReviewId) throws Exception {
 
@@ -266,7 +266,7 @@ public class AdminReviewsController {
     }
 
     @ApiMethod(
-            path = "/admin/vaults/depositreviews",
+            path = "/admin/vaultreviews/depositreviews",
             verb = ApiVerb.PUT,
             description = "Edit a Vault DepositReview",
             produces = { MediaType.APPLICATION_JSON_VALUE },
@@ -276,7 +276,7 @@ public class AdminReviewsController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
             @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
     })
-    @RequestMapping(value = "/admin/vaults/depositreviews", method = RequestMethod.PUT)
+    @RequestMapping(value = "/admin/vaultreviews/depositreviews", method = RequestMethod.PUT)
     public DepositReview editDepositReview(@RequestHeader(value = "X-UserID", required = true) String userID,
                                        @RequestBody DepositReview depositReview) throws Exception {
 
