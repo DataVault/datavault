@@ -112,8 +112,6 @@ public class AdminReviewsController {
     public ReviewInfo getCurrentReview(@RequestHeader(value = "X-UserID", required = true) String userID,
                                              @PathVariable("vaultid") String vaultID) throws Exception {
 
-        //////// todo : Split this into two endpoints. A GET shouldn't be creating new records.
-
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
         List<Deposit> deposits = vault.getDeposits();
@@ -129,21 +127,63 @@ public class AdminReviewsController {
             }
         }
 
-        // If we didn't find an active Vault Review then create one and associated DepositReviews.
         if (vaultReview == null) {
-            vaultReview = vaultsReviewService.createVaultReview(vault);
+           return null;
+        } else {
+            // If we pass back the Vault Review and Deposit Review we lose the links between the objects, so pass
+            // back a wee Transfer Object POJO that just contains the ids, and let the client then request whatever it needs.
 
-            depositReviews = new ArrayList<>();
+            // Create Lists of Deposit and DepositReview ids
+            List<String> depositIds = new ArrayList<>();
+            List<String> depositReviewIds = new ArrayList<>();
 
-            for (Deposit deposit : deposits) {
-                DepositReview depositReview = new DepositReview();
-
-                depositReview.setVaultReview(vaultReview);
-                depositReview.setDeposit(deposit);
-                depositsReviewService.addDepositReview(depositReview);
-
-                depositReviews.add(depositReview);
+            for (DepositReview depositReview : depositReviews) {
+                depositIds.add(depositReview.getDeposit().getID());
+                depositReviewIds.add(depositReview.getId());
             }
+
+            ReviewInfo reviewInfo = new ReviewInfo();
+            reviewInfo.setVaultReviewId(vaultReview.getId());
+            reviewInfo.setDepositIds(depositIds);
+            reviewInfo.setDepositReviewIds(depositReviewIds);
+
+            return reviewInfo;
+        }
+    }
+
+    @ApiMethod(
+            path = "/admin/vaults/vaultreviews/current",
+            verb = ApiVerb.POST,
+            description = "Creates the current review for a Vault",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
+    @RequestMapping(value = "/admin/vaults/vaultreviews/current", method = RequestMethod.POST)
+    public ReviewInfo createCurrentReview(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                       @RequestBody String vaultID) throws Exception {
+
+        User user = usersService.getUser(userID);
+        Vault vault = vaultsService.getUserVault(user, vaultID);
+        List<Deposit> deposits = vault.getDeposits();
+
+        VaultReview vaultReview = null;
+        List <DepositReview> depositReviews = null;
+
+        vaultReview = vaultsReviewService.createVaultReview(vault);
+
+        depositReviews = new ArrayList<>();
+
+        for (Deposit deposit : deposits) {
+            DepositReview depositReview = new DepositReview();
+
+            depositReview.setVaultReview(vaultReview);
+            depositReview.setDeposit(deposit);
+            depositsReviewService.addDepositReview(depositReview);
+
+            depositReviews.add(depositReview);
         }
 
         // If we pass back the Vault Review and Deposit Review we lose the links between the objects, so pass
@@ -157,7 +197,7 @@ public class AdminReviewsController {
             depositIds.add(depositReview.getDeposit().getID());
             depositReviewIds.add(depositReview.getId());
         }
-        
+
         ReviewInfo reviewInfo = new ReviewInfo();
         reviewInfo.setVaultReviewId(vaultReview.getId());
         reviewInfo.setDepositIds(depositIds);
@@ -166,25 +206,6 @@ public class AdminReviewsController {
         return reviewInfo;
     }
 
-    @ApiMethod(
-            path = "/admin/vaults/vaultreviews/current",
-            verb = ApiVerb.POST,
-            description = "Create a new current review record for a Vault.",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
-    })
-    @RequestMapping(value = "/admin/vaults/vaultreviews/current", method = RequestMethod.POST)
-    public VaultReview createCurrentReview(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                        @RequestBody String vaultId) throws Exception {
-
-        User user = usersService.getUser(userID);
-        Vault vault = vaultsService.getUserVault(user, vaultId);
-
-        return vaultsReviewService.createVaultReview(vault);
-    }
 
     @ApiMethod(
             path = "/admin/vaults/vaultreviews",

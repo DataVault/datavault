@@ -61,8 +61,11 @@ public class AdminReviewsController {
         model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
         model.addAttribute(restService.getGroup(vault.getGroupID()));
 
-        // In fact this creates a current Review if none exists.
         ReviewInfo reviewInfo = restService.getCurrentReview(vaultID);
+        if (reviewInfo == null) {
+            // There isn't a current review so create one.
+            reviewInfo = restService.createCurrentReview(vaultID);
+        }
 
         VaultReview currentReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
         VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview);

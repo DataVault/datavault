@@ -521,9 +521,9 @@ public class RestService {
         post(brokerURL + "/vaults/" + vaultId + "/transfer", VaultInfo.class, transfer);
     }
 
-    public VaultReview createCurrentReview(String vaultId) {
-        HttpEntity<?> response = post(brokerURL +"/admin/vaults/vaultreviews/current", VaultReview.class,  vaultId);
-        return (VaultReview)response.getBody();
+    public ReviewInfo createCurrentReview(String vaultId) {
+        HttpEntity<?> response = post(brokerURL +"/admin/vaults/vaultreviews/current", ReviewInfo.class,  vaultId);
+        return (ReviewInfo)response.getBody();
     }
 
     public VaultReview editVaultReview(VaultReview vaultReview) {
