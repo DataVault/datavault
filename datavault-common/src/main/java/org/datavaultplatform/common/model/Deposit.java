@@ -319,9 +319,15 @@ public class Deposit {
     }
 
     public List<Retrieve> getRetrieves() { return retrieves; }
-    
 
-    
+    public List<Retrieve> getDepositReviews() {
+        return depositReviews;
+    }
+
+    public void setDepositReviews(List<Retrieve> depositReviews) {
+        this.depositReviews = depositReviews;
+    }
+
     public byte[] getEncIV() { return encIV; }
     
     public void setEncIV(byte[] encIV) { this.encIV = encIV; }
