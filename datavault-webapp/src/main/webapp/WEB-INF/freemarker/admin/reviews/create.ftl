@@ -194,9 +194,7 @@
             debug: true,
             rules: {
                 newReviewDate : {
-                    required: true,
-                    date: true,
-                    newReviewDate: true
+                    date: true
                 }
             },
             highlight: function (element) {
