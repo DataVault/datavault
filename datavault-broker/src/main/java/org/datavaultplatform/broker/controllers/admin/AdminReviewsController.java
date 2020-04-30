@@ -1,10 +1,8 @@
 package org.datavaultplatform.broker.controllers.admin;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.datavaultplatform.broker.services.DepositsReviewService;
-import org.datavaultplatform.broker.services.UsersService;
-import org.datavaultplatform.broker.services.VaultsReviewService;
-import org.datavaultplatform.broker.services.VaultsService;
+import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.common.event.vault.Review;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.ReviewInfo;
@@ -32,6 +30,8 @@ public class AdminReviewsController {
     private VaultsReviewService vaultsReviewService;
     private DepositsReviewService depositsReviewService;
     private UsersService usersService;
+    private ClientsService clientsService;
+    private EventService eventService;
 
     public void setVaultsService(VaultsService vaultsService) {
         this.vaultsService = vaultsService;
@@ -47,6 +47,14 @@ public class AdminReviewsController {
 
     public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
+    }
+
+    public void setClientsService(ClientsService clientsService) {
+        this.clientsService = clientsService;
+    }
+
+    public void setEventService(EventService eventService) {
+        this.eventService = eventService;
     }
 
     @ApiMethod(
@@ -220,11 +228,22 @@ public class AdminReviewsController {
     })
     @RequestMapping(value = "/admin/vaults/vaultreviews", method = RequestMethod.PUT)
     public VaultReview editVaultReview(@RequestHeader(value = "X-UserID", required = true) String userID,
-                         @RequestBody VaultReview vaultReview) throws Exception {
+                                       @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
+                                       @RequestBody VaultReview vaultReview) throws Exception {
 
 
         vaultsReviewService.updateVaultReview(vaultReview);
 
+        // If the Review has been actioned then create an Event. The Review should only be actioned once.
+        if (vaultReview.getActionedDate() != null) {
+            Review vaultEvent = new Review(vaultReview.getVault().getID());
+            vaultEvent.setVault(vaultReview.getVault());
+            vaultEvent.setUser(usersService.getUser(userID));
+            vaultEvent.setAgentType(Agent.AgentType.BROKER);
+            vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+            eventService.addEvent(vaultEvent);
+        }
+        
         return vaultReview;
     }
 
