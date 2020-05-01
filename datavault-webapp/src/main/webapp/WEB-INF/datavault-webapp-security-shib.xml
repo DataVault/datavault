@@ -22,6 +22,7 @@
         <security:intercept-url pattern="/admin/roles/**" access="hasRole('ROLE_ADMIN_ROLES')" />
         <security:intercept-url pattern="/admin/schools/**" access="hasRole('ROLE_ADMIN_SCHOOLS')" />
         <security:intercept-url pattern="/admin/vaults/**" access="hasRole('ROLE_ADMIN_VAULTS')" />
+        <security:intercept-url pattern="/admin/reviews/**" access="hasRole('ROLE_ADMIN_REVIEWS')" />
         <security:intercept-url pattern="/**" access="hasRole('ROLE_USER')" />
         <security:expression-handler ref="webSecurityExpressionHandler"/>
 
