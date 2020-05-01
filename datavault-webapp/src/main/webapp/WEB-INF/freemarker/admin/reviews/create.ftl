@@ -141,6 +141,7 @@
 
 <script>
     $(document).ready(function () {
+
         $.datepicker.setDefaults({
             dateFormat: "yy-mm-dd",
             changeMonth: true,
@@ -194,7 +195,8 @@
             debug: true,
             rules: {
                 newReviewDate : {
-                    date: true
+                    date: true,
+                    newReviewDate: true
                 }
             },
             highlight: function (element) {
