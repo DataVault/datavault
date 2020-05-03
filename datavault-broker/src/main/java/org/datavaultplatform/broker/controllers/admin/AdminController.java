@@ -124,6 +124,14 @@ public class AdminController {
         this.sender = sender;
     }
 
+    public ExternalMetadataService getExternalMetadataService() {
+        return externalMetadataService;
+    }
+
+    public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
+        this.externalMetadataService = externalMetadataService;
+    }
+
     @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)
     public List<DepositInfo> getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
                                             @RequestParam(value = "sort", required = false) String sort) throws Exception {
@@ -399,13 +407,5 @@ public class AdminController {
         }
 
         return archiveStores;
-    }
-
-    public ExternalMetadataService getExternalMetadataService() {
-        return externalMetadataService;
-    }
-
-    public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
-        this.externalMetadataService = externalMetadataService;
     }
 }

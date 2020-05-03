@@ -84,6 +84,13 @@ public class Deposit {
     @OrderBy("timestamp")
     private List<Retrieve> retrieves;
 
+    // A Deposit can have a number of reviews
+    @JsonIgnore
+    @OneToMany(targetEntity=DepositReview.class, mappedBy="deposit", fetch=FetchType.LAZY)
+    @OrderBy("timestamp")
+    private List<Retrieve> depositReviews;
+
+
     @ApiObjectField(description = "Status of the Deposit", allowedvalues={"NOT_STARTED", "IN_PROGRESS", "COMPLETE"})
     private Status status;
 
@@ -312,9 +319,15 @@ public class Deposit {
     }
 
     public List<Retrieve> getRetrieves() { return retrieves; }
-    
 
-    
+    public List<Retrieve> getDepositReviews() {
+        return depositReviews;
+    }
+
+    public void setDepositReviews(List<Retrieve> depositReviews) {
+        this.depositReviews = depositReviews;
+    }
+
     public byte[] getEncIV() { return encIV; }
     
     public void setEncIV(byte[] encIV) { this.encIV = encIV; }

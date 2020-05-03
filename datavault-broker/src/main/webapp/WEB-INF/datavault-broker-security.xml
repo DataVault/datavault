@@ -26,6 +26,7 @@
         <security:intercept-url pattern="/admin/vaults/**" access="hasRole('ROLE_ADMIN_VAULTS')" />
         <security:intercept-url pattern="/admin/events/**" access="hasRole('ROLE_ADMIN_EVENTS')" />
         <security:intercept-url pattern="/admin/billing/**" access="hasRole('ROLE_ADMIN_BILLING')" />
+        <security:intercept-url pattern="/admin/reviews/**" access="hasRole('ROLE_ADMIN_REVIEWS')" />
     </security:http>
 
     <!-- If user is not authorised for request then throw back a 403 -->

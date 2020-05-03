@@ -110,6 +110,16 @@
         <property name="awsAccessKey" value="${s3.awsAccessKey:#{null}}" />
         <property name="awsSecretKey" value="${s3.awsSecretKey:#{null}}" />
     </bean>
+
+    <bean id="adminReviewsController" class="org.datavaultplatform.broker.controllers.admin.AdminReviewsController">
+        <property name="vaultsService" ref="vaultsService" />
+        <property name="vaultsReviewService" ref="vaultsReviewService" />
+        <property name="depositsReviewService" ref="depositsReviewService" />
+        <property name="usersService" ref="usersService" />
+        <property name="eventService" ref="eventService" />
+        <property name="clientsService" ref="clientsService" />
+    </bean>
+
     <bean id="billingController" class="org.datavaultplatform.broker.controllers.admin.BillingController">
     <property name="vaultsService" ref="vaultsService" />
     <property name="billingService" ref="billingService" />

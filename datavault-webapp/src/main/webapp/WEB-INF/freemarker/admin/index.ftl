@@ -113,6 +113,18 @@
             </div>
         </div>
     </#if>
+    <#if canManageReviews??>
+        <div class="col-xs-6 col-md-4">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Reviews</h3>
+                </div>
+                <div class="panel-body">
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/reviews"><span class="glyphicon glyphicon-folder-close"></span> ${reviewcount}</a></h1>
+                </div>
+            </div>
+        </div>
+    </#if>
     <#if canManageBillingDetails??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-success">
