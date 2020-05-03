@@ -38,6 +38,12 @@
             <b>Current review date:</b> ${vault.reviewDate?datetime}</b>
         </p>
 
+        <#if error?has_content>
+            <div class="alert alert-danger" role="alert">
+                ${error}
+            </div>
+        </#if>
+
         <div class="form-group">
             <label class="control-label">New Review Date</label>
             <@spring.bind "vaultReviewModel.newReviewDate"/>
@@ -129,7 +135,13 @@
 
         <div class="form-group">
             <input type="submit" name="action" value="Save" class="btn btn-info" />
-            <input type="submit" name="action" value="Action" class="btn btn-success" />
+            <br>Save the entered data but without completing the Review.</br>
+        </div>
+        <div class="form-group">
+            <input type="submit" name="action" value="Submit" class="btn btn-success" />
+            <br>Save the entered data and complete the Review. Selected deposits will be deleted.</br>
+        </div>
+        <div class="form-group">
             <input type="submit" name="action" value="Cancel" class="btn btn-danger" />
         </div>
 
