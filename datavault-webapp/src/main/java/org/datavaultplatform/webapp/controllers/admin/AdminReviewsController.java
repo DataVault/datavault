@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -53,7 +54,13 @@ public class AdminReviewsController {
 
     // Return a review page
     @RequestMapping(value = "/admin/vaults/{vaultid}/reviews", method = RequestMethod.GET)
-    public String showReview(ModelMap model, @PathVariable("vaultid") String vaultID) throws Exception {
+    public String showReview(ModelMap model, @PathVariable("vaultid") String vaultID, @RequestParam(value = "error", required = false) String error) throws Exception {
+
+        if (error != null) {
+            if (error.equals("reviewdate")) {
+                model.addAttribute("error", "If some deposits are to be retained then a new Review Date must be entered");
+            }
+        }
 
         VaultInfo vault = restService.getVault(vaultID);
 
@@ -103,27 +110,38 @@ public class AdminReviewsController {
 
     // Process the completed review page
     @RequestMapping(value = "/admin/vaults/{vaultid}/reviews/{reviewid}", method = RequestMethod.POST)
-    public String processReview(@ModelAttribute VaultReviewModel currentReview, @ModelAttribute DepositReviewModelList drml, ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("reviewid") String reviewID, @RequestParam String action) throws Exception {
+    public String processReview(@ModelAttribute VaultReviewModel currentReview, @ModelAttribute DepositReviewModelList drml, ModelMap model, RedirectAttributes redirectAttributes, @PathVariable("vaultid") String vaultID, @PathVariable("reviewid") String reviewID, @RequestParam String action) throws Exception {
 
         // Note - The ModelAttributes made available here are not the same objects as those passed to the View,
         // they only contain the values entered on screen. With that in mind, fetch the original objects again and
         // update them appropriately.
 
         if ("Cancel".equals(action)) {
-            System.out.println("Cancel!!!!!!!!!!");
             return "redirect:/admin/reviews";
         }
 
-        // todo: We need to throw back an error if the review date has not been changed
-        // but some deposits are being retained.
+        // We need to throw back an error if a new review date has not been entered but some deposits are being retained.
+        if ("Submit".equals(action) && currentReview.getNewReviewDate().isEmpty()) {
+            for (DepositReviewModel drm : drml.getDepositReviewModels()) {
+                if (drm.isToBeDeleted() == false) {
+                    redirectAttributes.addAttribute("error",  "reviewdate");
+                    return "redirect:/admin/vaults/" + vaultID + "/reviews";
+                }
+            }
+        }
 
         VaultReview originalReview = restService.getVaultReview(reviewID);
 
         originalReview.setNewReviewDate(currentReview.StringToDate(currentReview.getNewReviewDate()));
         originalReview.setComment(currentReview.getComment());
 
-        if ("Action".equals(action)) {
+        if ("Submit".equals(action)) {
             originalReview.setActionedDate(new Date());
+
+            // todo : Update the Vault with the new review date!!!!!!!!!!!!!!
+            logger.info("Editing Review Date for Vault id " + vaultID + " with new Review Date " + currentReview.getNewReviewDate());
+            restService.updateVaultReviewDate(vaultID, currentReview.getNewReviewDate());
+
         }
 
         logger.info("Editing Vault Review id " + originalReview.getId());
@@ -134,7 +152,7 @@ public class AdminReviewsController {
             originalDepositReview.setToBeDeleted(drm.isToBeDeleted());
             originalDepositReview.setComment(drm.getComment());
 
-            if ("Action".equals(action)) {
+            if ("Submit".equals(action)) {
                 originalDepositReview.setActionedDate(new Date());
 
                 if (drm.isToBeDeleted()) {

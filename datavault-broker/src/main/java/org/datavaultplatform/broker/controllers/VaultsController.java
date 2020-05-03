@@ -514,6 +514,23 @@ public class VaultsController {
         return vault.convertToResponse();
     }
 
+    @RequestMapping(value = "/vaults/{vaultid}/updatereviewdate", method = RequestMethod.POST)
+    public VaultInfo updateVaultReviewDate(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                            @PathVariable("vaultid") String vaultID,
+                                            @RequestBody() String reviewDate) throws Exception {
+        User user = usersService.getUser(userID);
+        Vault vault = vaultsService.getUserVault(user, vaultID);
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        vault.setReviewDate(formatter.parse(reviewDate));
+
+        logger.info("Updating Review Date for Vault Id " + vaultID);
+        vaultsService.updateVault(vault);
+
+        return vault.convertToResponse();
+    }
+
+
     private void sendEmails(String template, Vault vault, String userId, String newOwnerId) throws Exception {
 
         //sendEmails("transfer-vault-ownership.vm", vault, userID, transfer.getUserId());

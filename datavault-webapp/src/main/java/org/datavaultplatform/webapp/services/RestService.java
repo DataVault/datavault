@@ -643,6 +643,11 @@ public class RestService {
         return (VaultInfo)response.getBody();
     }
 
+    public VaultInfo updateVaultReviewDate(String vaultId, String reviewDate) {
+        HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/updatereviewdate", VaultInfo.class, reviewDate);
+        return (VaultInfo)response.getBody();
+    }
+
     public void deleteDeposit(String depositId) {
         delete(brokerURL + "/admin/deposits/" + depositId, String.class);
     }
