@@ -165,9 +165,12 @@ public class VaultsController {
 
             eventService.addEvent(orphanVaultEvent);
         } else {
+            String previousUserID = vault.getUser().getID();
+
             vaultsService.transferVault(vault, usersService.getUser(transfer.getUserId()), transfer.getReason());
 
-            sendEmails("transfer-vault-ownership.vm", vault, userID, transfer.getUserId());
+            logger.debug("send email for transfer ownership from: "+previousUserID+" to "+transfer.getUserId());
+            sendEmails("transfer-vault-ownership.vm", vault, previousUserID, transfer.getUserId());
 
             TransferVaultOwnership transferEvent = new TransferVaultOwnership(transfer, vault, userID);
             transferEvent.setVault(vault);
