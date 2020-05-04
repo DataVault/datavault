@@ -132,12 +132,44 @@ public class AdminController {
         this.externalMetadataService = externalMetadataService;
     }
 
+    @RequestMapping(value = "/admin/deposits/count", method = RequestMethod.GET)
+    public Integer getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                  @RequestParam(value = "query", required = false)
+                                  @ApiQueryParam(name = "query",
+                                          description = "Deposit query field",
+                                          required = false) String query) throws Exception {
+        return depositsService.getTotalDepositsCount(userID, query);
+    }
+
     @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)
     public List<DepositInfo> getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                            @RequestParam(value = "sort", required = false) String sort) throws Exception {
-
+                                            @RequestParam(value = "query", required = false)
+                                            @ApiQueryParam(name = "query",
+                                                    description = "Deposit query field",
+                                                    required = false) String query,
+                                            @RequestParam(value = "sort", required = false)
+                                                @ApiQueryParam(name = "sort",
+                                                        description = "Deposit sort field",
+                                                        allowedvalues = {"name", "depositSize", "creationTime", "status",
+                                                                "depositor", "vaultName", "pureId", "school", "id," +
+                                                                "vaultId", "owner", "reviewDate"},
+                                                        defaultvalue = "creationTime", required = false) String sort,
+                                            @RequestParam(value = "order", required = false)
+                                                @ApiQueryParam(name = "order",
+                                                        description = "Deposit sort order",
+                                                        allowedvalues = {"asc", "dec"},
+                                                        defaultvalue = "asc", required = false) String order,
+                                            @RequestParam(value = "offset", required = false)
+                                                @ApiQueryParam(name = "offset",
+                                                        description = "Deposit row id ",
+                                                        defaultvalue = "0", required = false) int offset,
+                                            @RequestParam(value = "maxResult", required = false)
+                                                @ApiQueryParam(name = "maxResult",
+                                                        description = "Number of records",
+                                                        required = false) int maxResult) throws Exception {
         List<DepositInfo> depositResponses = new ArrayList<>();
-        for (Deposit deposit : depositsService.getDeposits(sort, userID)) {
+        List<Deposit> deposits = depositsService.getDeposits(query, userID, sort, order, offset, maxResult);
+        for (Deposit deposit : deposits) {
             DepositInfo depositInfo = deposit.convertToResponse();
             User depositor = usersService.getUser(depositInfo.getUserID());
             depositInfo.setUserName(depositor.getFirstname() + " " + depositor.getLastname());
@@ -177,7 +209,7 @@ public class AdminController {
         if (sort == null) sort = "";
         Long recordsTotal = 0L;
         List<DepositInfo> depositResponses = new ArrayList<>();
-        List<Deposit> deposits = depositsService.getDeposits(sort, userID);
+        List<Deposit> deposits = depositsService.getDeposits("", userID, sort, null, 0, 10);
         if(CollectionUtils.isNotEmpty(deposits)) {
             for (Deposit deposit : deposits) {
                 DepositInfo depositInfo = deposit.convertToResponse();

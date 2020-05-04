@@ -26,8 +26,12 @@ public class DepositsService {
     private DepositChunkDAO depositChunkDAO;
     private AuditChunkStatusDAO auditChunkStatusDAO;
     
-    public List<Deposit> getDeposits(String sort, String userId) {
-        return depositDAO.list(sort, userId);
+    public List<Deposit> getDeposits(String query, String userId, String sort, String order, int offset, int maxResult) {
+        return depositDAO.list(query, userId, sort, order, offset, maxResult);
+    }
+
+    public int getTotalDepositsCount(String userID, String query) {
+        return depositDAO.count(userID, query);
     }
     
     public void addDeposit(Vault vault,
@@ -63,7 +67,7 @@ public class DepositsService {
     public void setDepositChunkDAO(DepositChunkDAO depositChunkDAO) { this.depositChunkDAO = depositChunkDAO; }
     public void setAuditChunkStatusDAO(AuditChunkStatusDAO auditChunkStatusDAO) { this.auditChunkStatusDAO = auditChunkStatusDAO; }
 
-    public int count(String userId) { return depositDAO.count(userId); }
+    public int count(String userId) { return depositDAO.count(userId, null); }
 
     public int queueCount(String userId) { return depositDAO.queueCount(userId); }
 
