@@ -37,6 +37,7 @@
         <property name="EncryptionEnabled" value="${encryption.enabled:false}"/>
         <property name="EncryptionMode" value="${encryption.mode:GCM}"/>
         <property name="multipleValidationEnabled" value="${validate.multiple.enabled:true}"/>
+        <property name="noChunkThreads" value="${chunk.threads:20}" />
     </bean>
 
     <bean id="eventSender" class="org.datavaultplatform.worker.queue.EventSender">
