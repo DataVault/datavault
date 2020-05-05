@@ -430,10 +430,8 @@ public class Deposit extends Task {
             FileSplitter.recomposeFile(chunkFiles, tarFile);
 
             // Verify the contents
-            TimeUnit.SECONDS.sleep(5);
             eventStream.send(new StartTarValidation(jobID, depositId).withUserId(userID));
             verifyTarFile(context.getTempDir(), tarFile, tarHash);
-            TimeUnit.SECONDS.sleep(5);
             eventStream.send(new CompleteTarValidation(jobID, depositId).withUserId(userID));
         }
     }
@@ -882,7 +880,6 @@ public class Deposit extends Task {
 		} else {
 			copyToArchiveStorage(tarFile);
 		}
-        TimeUnit.SECONDS.sleep(5);
         eventStream.send(new UploadComplete(jobID, depositId, archiveIds).withUserId(userID));
 		eventStream.send(new UpdateProgress(jobID, depositId)
         .withUserId(userID)
@@ -895,7 +892,6 @@ public class Deposit extends Task {
         } else {
             verifyArchive(context, tarFile, tarHash, iv, encTarHash);
         }
-        TimeUnit.SECONDS.sleep(5);
         eventStream.send(new ValidationComplete(jobID, depositId).withUserId(userID));
 
 	}
@@ -1013,7 +1009,6 @@ public class Deposit extends Task {
             retVal.setArchiveSize(retVal.getTarFile().length());
             logger.info("Checksum algorithm: " + tarHashAlgorithm);
             logger.info("Checksum: " + retVal.getTarHash());
-            TimeUnit.SECONDS.sleep(5);
             eventStream.send(new ComputedDigest(jobID, depositId, retVal.getTarHash(), tarHashAlgorithm)
                     .withUserId(userID));
         } else {

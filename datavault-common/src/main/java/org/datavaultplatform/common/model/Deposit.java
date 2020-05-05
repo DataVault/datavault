@@ -333,7 +333,7 @@ public class Deposit {
     public Event getLastEvent(){
         Event lastEvent = events
                 .stream()
-                .max(Comparator.comparing(Event::getTimestamp))
+                .max(Comparator.comparing(Event::getSequence))
                 .orElse(null);
         return lastEvent;
     }
@@ -343,7 +343,7 @@ public class Deposit {
         Event lastEvent = events
                 .stream()
                 .filter(event-> !"org.datavaultplatform.common.event.Error".equals(event.getEventClass()))
-                .max(Comparator.comparing(Event::getTimestamp))
+                .max(Comparator.comparing(Event::getSequence))
                 .orElse(null);
         return lastEvent;
     }
