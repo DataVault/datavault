@@ -6,7 +6,6 @@ import java.nio.file.Path;
 // Some common properties needed for all jobs
 
 public class Context {
-
     public enum AESMode {GCM, CBC};
 
     private Path tempDir;
@@ -22,6 +21,7 @@ public class Context {
     private String vaultKeyName;
     private String vaultSslPEMPath;
     private Boolean multipleValidationEnabled;
+    private int noChunkThreads;
     
     public Context() {};
     public Context(Path tempDir, Path metaDir, EventStream eventStream,
@@ -29,7 +29,8 @@ public class Context {
                    Boolean encryptionEnabled, AESMode encryptionMode, 
                    String vaultAddress, String vaultToken,
                    String vaultKeyPath, String vaultKeyName,
-                   String vaultSslPEMPath, Boolean multipleValidationEnabled) {
+                   String vaultSslPEMPath, Boolean multipleValidationEnabled
+                    ,int noChunkThreads) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.eventStream = eventStream;
@@ -43,6 +44,7 @@ public class Context {
         this.vaultKeyName = vaultKeyName;
         this.vaultSslPEMPath = vaultSslPEMPath;
         this.multipleValidationEnabled = multipleValidationEnabled;
+        this.noChunkThreads = noChunkThreads;
     }
 
     public Path getTempDir() {
@@ -143,5 +145,13 @@ public class Context {
 
     public void setMultipleValidationEnabled(Boolean multipleValidationEnabled) {
         this.multipleValidationEnabled = multipleValidationEnabled;
+    }
+
+    public int getNoChunkThreads() {
+        return noChunkThreads;
+    }
+
+    public void setNoChunkThreads(int noChunkThreads) {
+        this.noChunkThreads = noChunkThreads;
     }
 }

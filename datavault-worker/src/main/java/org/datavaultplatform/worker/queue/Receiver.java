@@ -43,6 +43,7 @@ public class Receiver {
     private String vaultSslPEMPath;
     AESMode encryptionMode = AESMode.GCM;
     private Boolean multipleValidationEnabled;
+    private int noChunkThreads;
 
     /**
      * Set the queue server
@@ -193,6 +194,12 @@ public class Receiver {
         this.multipleValidationEnabled = multipleValidationEnabled;
     }
 
+    public int getNoChunkThreads() { return this.noChunkThreads; }
+
+    public void setNoChunkThreads(int noChunkThreads) {
+        this.noChunkThreads = noChunkThreads;
+    }
+
     /**
      * Setup a connection to the queue then wait for messages to arrive.  When we recieve a message delivery
      * work out the type of task, check if it is a redelivery then complete the task.
@@ -220,7 +227,7 @@ public class Receiver {
         // Allow for priority messages so that a shutdown message can be prioritised if required.
         Map<String, Object> args = new HashMap<String, Object>();
         args.put("x-max-priority", 2);
-
+        
         channel.queueDeclare(queueName, true, false, false, args);
         logger.info("Waiting for messages");
         
@@ -277,7 +284,8 @@ public class Receiver {
                         chunkingEnabled, chunkingByteSize,
                         encryptionEnabled, encryptionMode, 
                         vaultAddress, vaultToken, 
-                        vaultKeyPath, vaultKeyName, vaultSslPEMPath, this.multipleValidationEnabled);
+                        vaultKeyPath, vaultKeyName, vaultSslPEMPath,
+                        this.multipleValidationEnabled, this.noChunkThreads);
                 concreteTask.performAction(context);
 
                 // Clean up the temporary directory (if success if failure we need it for retries)
