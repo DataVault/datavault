@@ -466,13 +466,13 @@ public class Deposit extends Task {
         for (int i = 0; i < chunkFiles.length; i++) {
             // if less that max threads started start new one
             File chunkFile = chunkFiles[i];
-            String chunkHash = chunksHash[i];
+            //String chunkHash = chunksHash[i];
 
             ChunkDownloadTracker cdt = new ChunkDownloadTracker();
             cdt.setArchiveId(archiveId);
             cdt.setArchiveStore(archiveStore);
             cdt.setChunkFile(chunkFile);
-            cdt.setChunkHash(chunkHash);
+            //cdt.setChunkHash(chunkHash);
             cdt.setContext(context);
             cdt.setCount(i);
             cdt.setDoVerification(doVerification);
