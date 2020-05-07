@@ -229,6 +229,9 @@ public class FileCopy {
                 count = size - pos > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : size - pos;
                 long copied = output.transferFrom(input, pos, count);
                 pos += copied;
+//                if ( pos > (size / 2)) {
+//                    throw new IOException("Failed during file transfer");
+//                }
                 if(progress != null) {
                     progress.byteCount += copied;
                     progress.timestamp = System.currentTimeMillis();

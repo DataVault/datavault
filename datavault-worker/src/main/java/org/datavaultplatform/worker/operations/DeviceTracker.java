@@ -40,13 +40,13 @@ public class DeviceTracker implements Callable {
         String archiveId;
         // kick off new thread for each device ( we may already have kicked off x threads for chunks)
         try {
-            this.eventStream.send(new StartCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name ).withUserId(this.userID));
+            this.eventStream.send(new StartCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name, this.chunkCount ).withUserId(this.userID));
             if (((Device)this.archiveStore).hasDepositIdStorageKey()) {
                 archiveId = ((Device) this.archiveStore).store(depId, this.tarFile, progress);
             } else {
                 archiveId = ((Device) this.archiveStore).store("/", this.tarFile, progress);
             }
-            this.eventStream.send(new CompleteCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name ).withUserId(this.userID));
+            this.eventStream.send(new CompleteCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name, this.chunkCount ).withUserId(this.userID));
         } finally {
             // Stop the tracking thread
             tracker.stop();

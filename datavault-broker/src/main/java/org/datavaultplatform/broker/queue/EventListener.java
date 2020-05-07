@@ -303,6 +303,50 @@ public class EventListener implements MessageListener {
                     }
                 }
                 
+            } else if (concreteEvent instanceof UploadComplete) {
+
+                // Update the deposit status and add archives
+                UploadComplete uploadCompleteEvent = (UploadComplete)concreteEvent;
+
+                Boolean success = false;
+                while (!success) {
+                    try {
+                        //deposit.setStatus(Deposit.Status.COMPLETE);
+                        //deposit.setArchiveSize(completeEvent.getArchiveSize());
+                        //depositsService.updateDeposit(deposit);
+
+                        // Add the archive objects, one for each archiveStore
+                        for (String archiveStoreId : uploadCompleteEvent.getArchiveIds().keySet()) {
+                            ArchiveStore archiveStore = archiveStoreService.getArchiveStore(archiveStoreId);
+                            archivesService.addArchive(deposit, archiveStore, uploadCompleteEvent.getArchiveIds().get(archiveStoreId));
+                        }
+
+                        // Add to the cumulative vault size
+                        //Vault vault = deposit.getVault();
+
+                        /*success = false;
+                        while (!success) {
+                            try {
+                                long vaultSize = vault.getSize();
+                                vault.setSize(vaultSize + deposit.getSize());
+                                vaultsService.updateVault(vault);
+                                success = true;
+                            } catch (org.hibernate.StaleObjectStateException e) {
+                                // Refresh from database and retry
+                                vault = vaultsService.getVault(vault.getID());
+                            }
+                        }*/
+                        success = true;
+                    } catch (org.hibernate.StaleObjectStateException e) {
+                        // Refresh from database and retry
+                        deposit = depositsService.getDeposit(concreteEvent.getDepositId());
+                    }
+                }
+
+                // Get related information for emails
+                //String type = "complete";
+                //this.sendEmails(deposit, completeEvent, type, "user-deposit-complete.vm", "group-admin-deposit-complete.vm");
+
             } else if (concreteEvent instanceof Complete) {
 
                 // Update the deposit status and add archives
@@ -316,10 +360,10 @@ public class EventListener implements MessageListener {
                         depositsService.updateDeposit(deposit);
 
                         // Add the archive objects, one for each archiveStore
-                        for (String archiveStoreId : completeEvent.getArchiveIds().keySet()) {
-                            ArchiveStore archiveStore = archiveStoreService.getArchiveStore(archiveStoreId);
-                            archivesService.addArchive(deposit, archiveStore, completeEvent.getArchiveIds().get(archiveStoreId));
-                        }
+                        //for (String archiveStoreId : completeEvent.getArchiveIds().keySet()) {
+                        //    ArchiveStore archiveStore = archiveStoreService.getArchiveStore(archiveStoreId);
+                        //    archivesService.addArchive(deposit, archiveStore, completeEvent.getArchiveIds().get(archiveStoreId));
+                        //}
 
                         // Add to the cumulative vault size
                         Vault vault = deposit.getVault();

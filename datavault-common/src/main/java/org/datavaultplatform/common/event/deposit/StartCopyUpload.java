@@ -10,8 +10,8 @@ public class StartCopyUpload extends Event {
 		
 	};
 
-	public StartCopyUpload(String jobId, String depositId, String type) {
-		super("Copy Upload started - (" + type + ")");
+	public StartCopyUpload(String jobId, String depositId, String type, int chunkNum) {
+		super("Chunk " + chunkNum + " upload started - (" + type + ")");
 		this.eventClass = StartCopyUpload.class.getCanonicalName();
 		this.depositId = depositId;
 		this.jobId = jobId;

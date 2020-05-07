@@ -1,9 +1,7 @@
 package org.datavaultplatform.worker.operations;
 
 import org.datavaultplatform.common.crypto.Encryption;
-import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.ArchiveStore;
-import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
 import org.slf4j.Logger;
@@ -12,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class ChunkDownloadTracker implements Callable {
@@ -25,7 +24,7 @@ public class ChunkDownloadTracker implements Callable {
     private ArchiveStore archiveStore;
     private int count;
     private Boolean doVerification;
-    private HashMap<Integer, byte[]> ivs;
+    private Map<Integer, byte[]> ivs;
     private  String[] encChunksHash;
     private static final Logger logger = LoggerFactory.getLogger(ChunkDownloadTracker.class);
 
@@ -152,11 +151,11 @@ public class ChunkDownloadTracker implements Callable {
         this.doVerification = doVerification;
     }
 
-    public HashMap<Integer, byte[]> getIvs() {
+    public Map<Integer, byte[]> getIvs() {
         return ivs;
     }
 
-    public void setIvs(HashMap<Integer, byte[]> ivs) {
+    public void setIvs(Map<Integer, byte[]> ivs) {
         this.ivs = ivs;
     }
 
