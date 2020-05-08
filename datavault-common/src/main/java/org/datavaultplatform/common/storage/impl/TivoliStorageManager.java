@@ -158,7 +158,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     	if (Files.exists(sourcePath)) {
     		logger.info("Moving from temp to deposit id");
     		Files.createDirectory(destinationDir);
-    		Files.move(sourcePath, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+    		//Files.move(sourcePath, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(sourcePath, destinationFile, StandardCopyOption.REPLACE_EXISTING);
     	}
     	File tsmFile = new File(pathPrefix + "/" + depositId + "/" + working.getName());
     	// thread for each node
@@ -196,7 +197,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
         
         if (Files.exists(destinationFile)) {
         	logger.info("Moving from deposit id to temp");
-        	Files.move(destinationFile, sourcePath, StandardCopyOption.REPLACE_EXISTING);
+        	//Files.move(destinationFile, sourcePath, StandardCopyOption.REPLACE_EXISTING);
+        	Files.delete(destinationFile);
         	Files.delete(destinationDir);
         }
         return depositId;
