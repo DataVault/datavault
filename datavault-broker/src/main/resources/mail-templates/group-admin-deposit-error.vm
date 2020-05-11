@@ -1,0 +1,22 @@
+<html>
+	<body>
+		
+		<p>Unfortunately the attempted operation (deposit or retrieval of a deposit) with the following details was unsuccessful:</p>
+		<ul>
+			<li>Deposit name: ${deposit-name}</li>
+			<li>Date of failed operation: ${timestamp}</li>
+			<li>Contains personal data: ${hasPersonalData}</li>
+			<li>Deposit ID: ${deposit-id}</li>
+			<li>Name of user who attempted the failed operation: ${retriever-firstname} ${retriever-lastname}</li>
+			<li>ID of the user who attempted the failed operation: ${retriever-id}</li>
+			<li>Name of the user who originally deposited the deposit::${user-firstname} ${user-lastname}</li>
+			<li>ID of the user who originally deposited the deposit: ${user-id}</li>
+		</ul>
+		<p>The deposit was being added to the following Vault:</p>
+		<ul>
+			<li>Vault name: ${vault-name}</li>
+			<li>Vault ID: ${vault-id}</li>
+			<li>Review date: ${vault-review-date}</li>
+		</ul>
+	</body>
+</html>
