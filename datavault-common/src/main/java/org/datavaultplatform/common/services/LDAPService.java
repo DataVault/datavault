@@ -1,4 +1,4 @@
-package org.datavaultplatform.webapp.services;
+package org.datavaultplatform.common.services;
 
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.cursor.EntryCursor;
@@ -206,5 +206,26 @@ public class LDAPService {
         searchRequest.setSizeLimit(sizeLimit);
 
         return searchRequest;
+    }
+
+    public HashMap<String, String> getLDAPAttributes(String name) throws LdapException, IOException, CursorException {
+        HashMap<String, String> attributes;
+
+        try {
+            getConnection();
+            attributes = search(name);
+
+        } catch (Exception e) {
+            throw e;
+
+        } finally {
+            try {
+                closeConnection();
+            } catch (LdapException e) {
+                throw e;
+            }
+        }
+
+        return attributes;
     }
 }

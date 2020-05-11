@@ -55,45 +55,88 @@ public class VaultsReviewService {
     public List<Vault> getVaultsForReview(List<Vault> vaults) {
         List<Vault> vaultsForReview = new ArrayList<>();
 
-        Date today = new Date();
-
         for (Vault vault : vaults) {
-
-            Calendar c = Calendar.getInstance();
-            c.setTime(vault.getReviewDate());
-            c.add(Calendar.MONTH, -6);
-            Date reviewDateMinus6 = c.getTime();
-
-            if (today.after(reviewDateMinus6)) {
-                // Now look to see if the vault has already been reviewed ie. does it have a current review record
-                // already actioned.
-                VaultReview vaultReview = null;
-
-                // If we find a record that has been actioned after the review Date (minus6) then we know it
-                // has already been reviewed, so don't list it.
-                for (VaultReview vr : vault.getVaultReviews()) {
-
-                    if ((vr.getActionedDate() != null) && ((vr.getActionedDate().after(reviewDateMinus6)))) {
-                        vaultReview = vr;
-                    }
-                }
-
-                if (vaultReview == null) {
-                    vaultsForReview.add(vault);
-                }
+            if (isVaultForReview(vault)) {
+                vaultsForReview.add(vault);
             }
         }
 
         return vaultsForReview;
-
     }
-    
+
+    /*
+     Returns true if the vault is due for review, or is currently being reviewed.
+     */
+    public boolean isVaultForReview(Vault vault) {
+
+        Date today = new Date();
+
+        Calendar c = Calendar.getInstance();
+        c.setTime(vault.getReviewDate());
+        c.add(Calendar.MONTH, -6);
+        Date reviewDateMinus6 = c.getTime();
+
+        if (today.after(reviewDateMinus6)) {
+
+            // Looks like its due for review, but has the review already happened.
+
+            boolean currentReviewExists = false;
+
+            for (VaultReview vr : vault.getVaultReviews()) {
+
+                if ((vr.getActionedDate() != null) && ((vr.getActionedDate().after(reviewDateMinus6)))) {
+
+                    // A review has already happened since the review date
+                    currentReviewExists = true;
+                }
+            }
+
+            if (!currentReviewExists) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
 
+    /*
+     Returns true only if the vault is due for review.
+     */
+    public boolean dueForReviewEmail(Vault vault) {
 
+        Date today = new Date();
 
+        Calendar c = Calendar.getInstance();
+        c.setTime(vault.getReviewDate());
+        c.add(Calendar.MONTH, -6);
+        Date reviewDateMinus6 = c.getTime();
 
+        if (today.after(reviewDateMinus6)) {
 
+            // Looks like its due an email, but check if a review is already underway or has happened.
+
+            boolean currentReviewExists = false;
+            for (VaultReview vr : vault.getVaultReviews()) {
+
+                if ((vr.getActionedDate() == null)) {
+                    // A review is underway
+                    currentReviewExists = true;
+                } else {
+                    if (vr.getActionedDate().after(reviewDateMinus6)) {
+                        // A review has already happened since the review date
+                        currentReviewExists = true;
+                    }
+                }
+            }
+
+            if (!currentReviewExists) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
 }
 
