@@ -828,14 +828,6 @@ public class Deposit extends Task {
     		int chunkCount = 0;
     		// kick of 10 (maybe more) threads at a time?  each thread would kick off 3 threads of their own
     		for (File chunk : chunkFiles){
-    			chunkCount++;
-//                if (chunkCount > (chunkFiles.length / 2)) {
-//                    throw new Exception("Failed during upload");
-//                }
-    			logger.debug("Copying chunk: "+chunk.getName());
-    			this.copyToArchiveStorage(chunk, chunkCount);
-    			logger.debug("archiveIds: "+archiveIds);
-
                 // kick of 10 (maybe more) threads at a time?  each thread would kick off 3 threads of their own
                 chunkCount++;
                 ChunkUploadTracker cut = new ChunkUploadTracker();
