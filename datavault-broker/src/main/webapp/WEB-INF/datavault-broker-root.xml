@@ -223,10 +223,12 @@
     <bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
         <property name="velocityProperties">
             <props>
-                <prop key="resource.loader">class</prop>
-                <prop key="class.resource.loader.class">
-                    org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
+                <prop key="resource.loader">file</prop>
+                <prop key="file.resource.loader.class">
+                    org.apache.velocity.runtime.resource.loader.FileResourceLoader
                 </prop>
+                <prop key="file.resource.loader.path">${DATAVAULT_HOME}/config/mail-templates</prop>
+                <prop key="file.resource.loader.cache">false</prop>
                 <prop key="eventhandler.referenceinsertion.class">
                     org.apache.velocity.app.event.implement.EscapeHtmlReference
                 </prop>
