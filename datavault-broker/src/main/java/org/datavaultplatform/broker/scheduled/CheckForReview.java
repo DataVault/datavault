@@ -93,7 +93,7 @@ public class CheckForReview {
                 model.put("help-mail", helpMail);
 
                 // Email the support team
-                emailService.sendTemplateMail(helpMail, "DataVault Vault needing reviewed", "mail-templates/user-review-due.vm", model);
+                emailService.sendTemplateMail(helpMail, "DataVault Vault needing reviewed", "user-review-due.vm", model);
 
                 List<RoleAssignment> roleAssignments = rolesAndPermissionsService.getRoleAssignmentsForVault(vault.getID());
 
