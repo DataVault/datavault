@@ -13,7 +13,7 @@
   PRIMARY KEY (`id`),
   KEY `FK_7mnsjibebjylwhoui5othfnus` (`vault_id`),
   CONSTRAINT `FK_7mnsjibebjylwhoui5othfnus` FOREIGN KEY (`vault_id`) REFERENCES `Vaults` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
 
 CREATE TABLE `DepositReviews` (
@@ -29,4 +29,4 @@ CREATE TABLE `DepositReviews` (
   KEY `FK_b7hilkosopp7ey1nlt5wsktlg` (`deposit_id`),
   CONSTRAINT `FK_b7hilkosopp7ey1nlt5wsktlg` FOREIGN KEY (`deposit_id`) REFERENCES `Deposits` (`id`),
   CONSTRAINT `FK_ce59sny0jfo3yc4hcp3kfy4r5` FOREIGN KEY (`vaultReview_id`) REFERENCES `VaultReviews` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4

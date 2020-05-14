@@ -162,6 +162,12 @@
             <version>16.0.3</version>
             <scope>compile</scope>
         </dependency>
+
+        <!-- LDAP -->
+        <dependency>
+            <groupId>org.apache.directory.api</groupId>
+            <artifactId>api-all</artifactId>
+        </dependency>
     </dependencies>
     
     <build>

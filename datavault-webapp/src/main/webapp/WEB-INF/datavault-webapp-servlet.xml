@@ -202,7 +202,7 @@
         <property name="restService" ref="restService" />
     </bean>
 
-    <bean id="ldapService" class="org.datavaultplatform.webapp.services.LDAPService">
+    <bean id="ldapService" class="org.datavaultplatform.common.services.LDAPService">
         <property name="host" value="${ldap.host}" />
         <property name="port" value="${ldap.port}" />
         <property name="useSsl" value="${ldap.useSsl}" />
