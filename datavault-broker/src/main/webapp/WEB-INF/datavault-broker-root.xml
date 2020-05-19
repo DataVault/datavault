@@ -151,6 +151,17 @@
         <property name="auditChunkStatusDAO" ref="auditChunkStatusDAO" />
     </bean>
 
+    <bean id="ldapService" class="org.datavaultplatform.common.services.LDAPService">
+        <property name="host" value="${ldap.host}" />
+        <property name="port" value="${ldap.port}" />
+        <property name="useSsl" value="${ldap.useSsl}" />
+        <property name="dn" value="${ldap.dn}" />
+        <property name="password" value="${ldap.password}" />
+        <property name="searchContext" value="${ldap.searchContext}" />
+        <property name="searchFilter" value="${ldap.searchFilter}" />
+        <property name="attrs" value="${ldap.attrs}" />
+    </bean>
+
     <bean id="checkRetentionPolicies" class="org.datavaultplatform.broker.scheduled.CheckRetentionPolicies">
         <property name="vaultsService" ref="vaultsService" />
     </bean>
@@ -177,6 +188,18 @@
         <property name="region" value="${s3.region:#{null}}" />
         <property name="awsAccessKey" value="${s3.awsAccessKey:#{null}}" />
         <property name="awsSecretKey" value="${s3.awsSecretKey:#{null}}" />
+    </bean>
+
+    <bean id="checkForReview" class="org.datavaultplatform.broker.scheduled.CheckForReview">
+        <property name="vaultsService" ref="vaultsService" />
+        <property name="vaultsReviewService" ref="vaultsReviewService" />
+        <property name="LDAPService" ref="ldapService" />
+        <property name="emailService" ref="emailService" />
+        <property name="rolesAndPermissionsService" ref="rolesAndPermissionsService" />
+        <property name="usersService" ref="usersService" />
+        <property name="homeUrl" value="${home.page}"/>
+        <property name="helpUrl" value="${help.page}"/>
+        <property name="helpMail" value="${help.mail}"/>
     </bean>
 
     <!-- Email -->
@@ -302,6 +325,10 @@
 
     <task:scheduled-tasks scheduler="scheduler">
         <task:scheduled ref="auditDepositsChunks" method="execute" cron="${auditdeposit.schedule}" />
+    </task:scheduled-tasks>
+
+    <task:scheduled-tasks scheduler="scheduler">
+        <task:scheduled ref="checkForReview" method="checkAll" cron="${review.schedule}" />
     </task:scheduled-tasks>
 
     <!-- Data Access Objects -->

@@ -6,7 +6,7 @@ import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.webapp.model.AdminDashboardPermissionsModel;
 import org.datavaultplatform.webapp.security.ScopedGrantedAuthority;
-import org.datavaultplatform.webapp.services.LDAPService;
+import org.datavaultplatform.common.services.LDAPService;
 import org.datavaultplatform.webapp.services.PermissionsService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;

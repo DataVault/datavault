@@ -4,6 +4,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.services.LDAPService;
 import org.datavaultplatform.webapp.exception.InvalidUunException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
