@@ -93,7 +93,7 @@
                 </div>
             </#if>
 
-        <#assign viewDepositsSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'MANAGE_SCHOOL_VAULT_DEPOSITS')">
+        <#assign viewDepositsSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'MANAGE_SCHOOL_VAULT_DEPOSITS') or hasPermission('${vault.groupID}', 'GROUP', 'MANAGE_SCHOOL_VAULT_DEPOSITS')">
         <@sec.authorize access=viewDepositsSecurityExpression>
             <#if deposits?has_content>
             <h4><strong>Deposit and Retrieve</strong></h4>
@@ -131,20 +131,24 @@
                         <td>${deposit.getCreationTime()?datetime}</td>
                         <td>
                             <#if deposit.status.name() != "NOT_STARTED">
-                            ${deposit.getSizeStr()}</td>
+                            ${deposit.getSizeStr()}
                             </#if>
+                        </td>
                         <td>
                             <#if deposit.status.name() == "COMPLETE">
                                 <div class="pull-right">
                                     <#if deposit.hasPersonalData == true>
                                         <span class="label label-info" style="margin-right: 10px">Personal data</span>
                                     </#if>
+                                    <#assign canRetrieveDataExpression = "hasPermission('${vault.groupID}', 'GROUP', 'CAN_RETRIEVE_DATA')">
+                                    <@sec.authorize access=canRetrieveDataExpression>
                                     <#if deposit.status.name() == "COMPLETE">
                                         <a id="retrievebtn" class="btn btn-default"
                                            href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve">
                                             <span class="fa fa-upload fa-rotate-180" aria-hidden="true"></span> Retrieve
                                         </a>
                                     </#if>
+                                    </@sec.authorize>
                                 </div>
                             <#elseif deposit.status.name() == "FAILED">
                             <span class="label label-danger pull-right">Failed</span>

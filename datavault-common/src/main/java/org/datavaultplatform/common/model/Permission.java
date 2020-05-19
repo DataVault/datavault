@@ -27,7 +27,8 @@ public enum Permission {
     TRANSFER_SCHOOL_VAULT_OWNERSHIP("TRANSFER_SCHOOL_VAULT_OWNERSHIP", PermissionModel.PermissionType.SCHOOL, "Transfer school vault ownership", null, false),
     EDIT_SCHOOL_VAULT_METADATA("EDIT_SCHOOL_VAULT_METADATA", PermissionModel.PermissionType.SCHOOL, "Edit school vault metadata", null, false),
     DELETE_SCHOOL_VAULT_DEPOSITS("DELETE_SCHOOL_VAULT_DEPOSITS", PermissionModel.PermissionType.SCHOOL, "Delete school vault deposits", null, false),
-
+    CAN_RETRIEVE_DATA("CAN_RETRIEVE_DATA", PermissionModel.PermissionType.SCHOOL, "Retrieve data", null, false),
+    
     // Admin permissions
     CAN_MANAGE_BILLING_DETAILS("CAN_MANAGE_BILLING_DETAILS", PermissionModel.PermissionType.ADMIN, "Manage billing details", "ROLE_ADMIN_BILLING", true),
     CAN_MANAGE_ROLES("CAN_MANAGE_ROLES", PermissionModel.PermissionType.ADMIN, "Manage roles", "ROLE_ADMIN_ROLES", true),

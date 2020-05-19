@@ -96,6 +96,7 @@ public class DepositsController {
     
     // Return a 'retrieve deposit' page
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}/retrieve", method = RequestMethod.GET)
+    @PreAuthorize("hasPermission(#vaultID, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultID, 'GROUP_VAULT', 'CAN_RETRIEVE_DATA')")
     public String retrieveDeposit(@ModelAttribute Retrieve retrieve, ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) throws Exception {
         model.addAttribute("retrieve", new Retrieve());
         model.addAttribute("vault", restService.getVault(vaultID));

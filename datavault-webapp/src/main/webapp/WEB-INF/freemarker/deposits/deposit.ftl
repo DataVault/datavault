@@ -1,6 +1,7 @@
 <#import "*/layout/defaultlayout.ftl" as layout>
 <#-- Specify which navbar element should be flagged as active -->
 <#global nav="home">
+<#assign sec=JspTaglibs["http://www.springframework.org/security/tags"] />
 <@layout.vaultLayout>
 <div class="container">
 
@@ -42,12 +43,15 @@
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
                 <span id="job-info-msq"></span>
             </div>
-            
+
+            <#assign canRetrieveDataExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_RETRIEVE_DATA')">
+            <@sec.authorize access=canRetrieveDataExpression>
             <#if deposit.status.name() == "COMPLETE">
                 <a id="retrievebtn" class="btn btn-primary pull-right" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve" disabled='disabled'>
                     <i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> Retrieve data
                 </a>
             </#if>
+            </@sec.authorize>
             
             <table class="table table-sm">
                 <tbody>
