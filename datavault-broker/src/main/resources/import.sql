@@ -125,6 +125,9 @@ insert into Groups (id, name, enabled) values ('SGS',   'School of GeoSciences',
 insert into Groups (id, name, enabled) values ('SI',    'School of Informatics', 1);
 insert into Groups (id, name, enabled) values ('SM',    'School of Mathematics', 1);
 insert into Groups (id, name, enabled) values ('SPA',   'School of Physics and Astronomy', 1);
+INSERT INTO Groups (id, name, enabled) VALUES ('BMED', 'Biomedical Sciences', 1);
+INSERT INTO Groups (id, name, enabled) VALUES ('CLIN', 'Clinical Sciences', 1);
+INSERT INTO Groups (id, name, enabled) VALUES ('MOLG', 'Molecular, Genetic and Population Health Sciences', 1);
 
 insert into GroupOwners (group_id, user_id) values ('BS', 'user1');
 insert into GroupOwners (group_id, user_id) values ('SD', 'user1');
