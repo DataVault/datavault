@@ -10,8 +10,8 @@ public class CompleteCopyUpload extends Event {
 		
 	};
 
-	public CompleteCopyUpload(String jobId, String depositId, String type) {
-		super("Copy Upload finished - (" + type + ")");
+	public CompleteCopyUpload(String jobId, String depositId, String type, int chunkNum) {
+		super("Chunk " + chunkNum + " upload finished - (" + type + ")");
 		this.eventClass = CompleteCopyUpload.class.getCanonicalName();
 		this.depositId = depositId;
 		this.jobId = jobId;

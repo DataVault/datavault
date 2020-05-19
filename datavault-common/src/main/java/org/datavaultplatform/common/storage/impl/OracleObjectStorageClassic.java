@@ -5,7 +5,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+//import java.util.concurrent.atomic.AtomicReference;
 
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.ArchiveStore;
@@ -126,6 +127,64 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	public String store(String depositId, File working, Progress progress) throws Exception {
 		for (int r = 0; r < OracleObjectStorageClassic.maxRetries; r++) {
 			try {
+
+//				TivoliStorageManager.TSMTracker loc1 = new TivoliStorageManager.TSMTracker();
+//				loc1.setLocation("loc1");
+//				Thread loc1Thread = new Thread(loc1);
+//				final AtomicReference throwableReference = new AtomicReference<Throwable>();
+//				loc1Thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+//					public void uncaughtException(Thread t, Throwable e) {
+//						throwableReference.set(e);
+//					}
+//				});
+//				loc1Thread.start();
+//				TivoliStorageManager.TSMTracker loc2 = new TivoliStorageManager.TSMTracker();
+//				loc2.setLocation("loc2");
+//				Thread loc2Thread = new Thread(loc2);
+//				loc2Thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+//					public void uncaughtException(Thread t, Throwable e) {
+//						throwableReference.set(e);
+//					}
+//				});
+//				loc2Thread.start();
+//
+//				while (loc1Thread.isAlive() && loc2Thread.isAlive()) {
+//					TimeUnit.MINUTES.sleep(1);
+//				}
+//
+//				Throwable throwable = (Throwable)throwableReference.get();
+//				if (throwable != null) {
+//					if (throwable instanceof Exception) {
+//						throw (Exception) throwable;
+//					} else if (throwable instanceof RuntimeException) {
+//						throw (RuntimeException)throwable;
+//					}
+//				}
+
+//				ExecutorService executor = Executors.newSingleThreadExecutor();
+//				TivoliStorageManager.TSMTrackerToo loc1 = new TivoliStorageManager.TSMTrackerToo();
+//				loc1.setLocation("loc1");
+//				TivoliStorageManager.TSMTrackerToo loc2 = new TivoliStorageManager.TSMTrackerToo();
+//				loc2.setLocation("loc2");
+//				Future<Void> loc1Future = executor.submit(loc1);
+//				Future<Void> loc2Future = executor.submit(loc2);
+//
+//				executor.shutdown();
+//				try {
+//					loc1Future.get();
+//					loc2Future.get();
+//					logger.info("loc1 result " + loc1.result);
+//					logger.info("loc2 result " + loc2.result);
+//				} catch (ExecutionException ee) {
+//					Throwable cause = ee.getCause();
+//					if (cause instanceof Exception) {
+//						logger.info("Upload failed. " + cause.getMessage());
+//						throw (Exception) cause;
+//					}
+//				}
+
+
+
 				String containerName = this.getContainerName();
 				this.manager = FileTransferManager.getDefaultFileTransferManager(this.getTransferAuth());
 				UploadConfig uploadConfig = new UploadConfig();

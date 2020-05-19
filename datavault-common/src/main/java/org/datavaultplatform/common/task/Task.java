@@ -35,6 +35,9 @@ public class Task {
     private List<HashMap<String, String>> chunksToAudit;
     String[] archiveIds;
 
+    // For restart
+    private Map<String, String> restartArchiveIds = new HashMap<>();
+
     private boolean isRedeliver;
 
     public Task() {};
@@ -195,5 +198,13 @@ public class Task {
 
     public void setArchiveIds(String[] archiveIds) {
         this.archiveIds = archiveIds;
+    }
+
+    public Map<String, String> getRestartArchiveIds() {
+        return this.restartArchiveIds;
+    }
+
+    public void setRestartArchiveIds(Map<String, String> restartArchiveIds) {
+        this.restartArchiveIds = restartArchiveIds;
     }
 }
