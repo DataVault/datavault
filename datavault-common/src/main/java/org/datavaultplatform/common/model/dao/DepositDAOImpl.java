@@ -57,27 +57,37 @@ public class DepositDAOImpl implements DepositDAO {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Deposit> list(String sort, String userId) {
+    public List<Deposit> list(String query,  String userId, String sort, String order, int offset, int maxResult) {
+        System.out.println("query:"+query+", sort: "+sort+", order: "+order+", offset: "+offset+", maxResult: "+maxResult);
         Session session = this.sessionFactory.openSession();
         SchoolPermissionCriteriaBuilder criteriaBuilder = createDepositCriteriaBuilder(userId, session, Permission.CAN_MANAGE_DEPOSITS);
         if (criteriaBuilder.hasNoAccess()) {
             return new ArrayList<>();
         }
         Criteria criteria = criteriaBuilder.build();
-        // See if there is a valid sort option
-        if ("id".equals(sort)) {
-            criteria.addOrder(Order.asc("id"));
-        } else if ("note".equals(sort)) {
-            criteria.addOrder(Order.asc("note"));
-        } else if ("status".equals(sort)) {
-            criteria.addOrder(Order.asc("status"));
-        } else if ("filePath".equals(sort)) {
-            criteria.addOrder(Order.asc("filePath"));
-        } else if ("depositSize".equals(sort)) {
-            criteria.addOrder(Order.asc("depositSize"));
-        } else {
-            criteria.addOrder(Order.asc("creationTime"));
+
+        System.out.println("DAO.list query="+query);
+        if((query == null || "".equals(query)) == false) {
+            System.out.println("apply restrictions");
+            criteria.add(Restrictions.or(
+                    Restrictions.ilike("id", "%" + query + "%"),
+                    Restrictions.ilike("name", "%" + query + "%")));
         }
+
+        // Sort by creation time by default
+        if(sort == null || "".equals(sort)) sort = "creationTime";
+        if(maxResult == 0) maxResult = 10;
+
+        if("userID".equals(sort)) sort = "user.id";
+        if("vaultID".equals(sort)) sort = "vault.id";
+
+        if ("asc".equals(order)) {
+            criteria.addOrder(Order.asc(sort));
+        } else {
+            criteria.addOrder(Order.desc(sort));
+        }
+        criteria.setMaxResults(maxResult);
+        criteria.setFirstResult(offset);
 
         List<Deposit> deposits = criteria.list();
         session.close();
@@ -95,13 +105,21 @@ public class DepositDAOImpl implements DepositDAO {
     }
 
     @Override
-    public int count(String userId) {
+    public int count(String userId, String query) {
         Session session = this.sessionFactory.openSession();
         SchoolPermissionCriteriaBuilder criteriaBuilder = createDepositCriteriaBuilder(userId, session, Permission.CAN_MANAGE_DEPOSITS);
         if (criteriaBuilder.hasNoAccess()) {
             return 0;
         }
         Criteria criteria = criteriaBuilder.build();
+
+        if((query == null || "".equals(query)) == false) {
+            System.out.println("apply restrictions");
+            criteria.add(Restrictions.or(
+                    Restrictions.ilike("id", "%" + query + "%"),
+                    Restrictions.ilike("name", "%" + query + "%")));
+        }
+
         return (int) (long) (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
     }
 
