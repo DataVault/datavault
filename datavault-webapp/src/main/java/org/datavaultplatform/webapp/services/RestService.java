@@ -191,6 +191,36 @@ public class RestService {
         return (VaultInfo[])response.getBody();
     }
 
+    public VaultsData getVaultsForReview() {
+        HttpEntity<?> response = get(brokerURL + "/admin/vaultsForReview", VaultsData.class);
+        return (VaultsData) response.getBody();
+    }
+
+    public VaultReview[] getReviewsListing(String vaultId) {
+        HttpEntity<?> response = get(brokerURL +"/admin/vaults/" + vaultId + "/vaultreviews", VaultReview[].class);
+        return (VaultReview[])response.getBody();
+    }
+
+    public ReviewInfo getCurrentReview(String vaultId) {
+        HttpEntity<?> response = get(brokerURL +"/admin/vaults/" + vaultId + "/vaultreviews/current", ReviewInfo.class);
+        return (ReviewInfo)response.getBody();
+
+    }
+
+    public VaultReview getVaultReview(String vaultReviewId) {
+        HttpEntity<?> response = get(brokerURL + "/admin/vaults/vaultreviews/" + vaultReviewId, VaultReview.class);
+        return (VaultReview)response.getBody();
+    }
+
+    public DepositReview getDepositReview(String depositReviewId) {
+        HttpEntity<?> response = get(brokerURL +"/admin/vaultreviews/depositreviews/" +  depositReviewId, DepositReview.class);
+        return (DepositReview)response.getBody();
+    }
+
+
+
+
+
     public VaultsData searchVaultsForBilling(String query, String sort, String order, String offset, String maxResult) {
         HttpEntity<?> response = get(brokerURL + "/admin/billing/search?query=" + query + "&sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
         return (VaultsData)response.getBody();
@@ -495,10 +525,31 @@ public class RestService {
         post(brokerURL + "/vaults/" + vaultId + "/transfer", VaultInfo.class, transfer);
     }
 
+    public ReviewInfo createCurrentReview(String vaultId) {
+        HttpEntity<?> response = post(brokerURL +"/admin/vaults/vaultreviews/current", ReviewInfo.class,  vaultId);
+        return (ReviewInfo)response.getBody();
+    }
+
+    public VaultReview editVaultReview(VaultReview vaultReview) {
+        HttpEntity<?> response = put(brokerURL + "/admin/vaults/vaultreviews", VaultReview.class, vaultReview);
+        return (VaultReview)response.getBody();
+    }
+
     public DepositInfo addDeposit(CreateDeposit createDeposit) {
         HttpEntity<?> response = post(brokerURL + "/deposits", DepositInfo.class, createDeposit);
         return (DepositInfo)response.getBody();
     }
+
+    public DepositReview addDepositReview(String depositId, String vaultReviewId) {
+        HttpEntity<?> response = post(brokerURL +"/admin/vaultreviews/" + vaultReviewId +  "/depositreviews", DepositReview.class, depositId);
+        return (DepositReview)response.getBody();
+    }
+
+    public DepositReview editDepositReview(DepositReview depositReview) {
+        HttpEntity<?> response = put(brokerURL + "/admin/vaultreviews/depositreviews", DepositReview.class, depositReview);
+        return (DepositReview)response.getBody();
+    }
+
 
     public Group addGroup(Group group) {
         HttpEntity<?> response = post(brokerURL + "/groups/", Group.class, group);
@@ -593,6 +644,11 @@ public class RestService {
 
     public VaultInfo updateVaultDescription(String vaultId, String vaultDescription) {
         HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/updateVaultDescription", VaultInfo.class, vaultDescription);
+        return (VaultInfo)response.getBody();
+    }
+
+    public VaultInfo updateVaultReviewDate(String vaultId, String reviewDate) {
+        HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/updatereviewdate", VaultInfo.class, reviewDate);
         return (VaultInfo)response.getBody();
     }
 

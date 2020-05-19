@@ -132,6 +132,14 @@ public class AdminController {
                                           required = false) String query) throws Exception {
         return depositsService.getTotalDepositsCount(userID, query);
     }
+  
+    public ExternalMetadataService getExternalMetadataService() {
+        return externalMetadataService;
+    }
+
+    public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
+        this.externalMetadataService = externalMetadataService;
+    }
 
     @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)
     public List<DepositInfo> getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
@@ -431,13 +439,5 @@ public class AdminController {
         }
 
         return archiveStores;
-    }
-
-    public ExternalMetadataService getExternalMetadataService() {
-        return externalMetadataService;
-    }
-
-    public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
-        this.externalMetadataService = externalMetadataService;
     }
 }

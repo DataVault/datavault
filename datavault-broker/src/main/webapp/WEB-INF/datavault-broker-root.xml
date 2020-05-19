@@ -41,7 +41,17 @@
         <property name="vaultDAO" ref="vaultDAO" />
         <property name="rolesAndPermissionsService" ref="rolesAndPermissionsService" />
     </bean>
-    
+
+    <bean id="vaultsReviewService" class="org.datavaultplatform.broker.services.VaultsReviewService">
+        <property name="vaultReviewDAO" ref="vaultReviewDAO" />
+    </bean>
+
+    <bean id="depositsReviewService" class="org.datavaultplatform.broker.services.DepositsReviewService">
+        <property name="depositReviewDAO" ref="depositReviewDAO" />
+    </bean>
+
+
+
     <bean id="billingService" class="org.datavaultplatform.broker.services.BillingService">
         <property name="billingDAO" ref="billingDAO" />
     </bean>
@@ -299,7 +309,15 @@
     <bean id="vaultDAO" class="org.datavaultplatform.common.model.dao.VaultDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
-    
+
+    <bean id="vaultReviewDAO" class="org.datavaultplatform.common.model.dao.VaultReviewDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="depositReviewDAO" class="org.datavaultplatform.common.model.dao.DepositReviewDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
     <bean id="billingDAO" class="org.datavaultplatform.common.model.dao.BillingDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>

@@ -165,9 +165,12 @@ public class VaultsController {
 
             eventService.addEvent(orphanVaultEvent);
         } else {
+            String previousUserID = vault.getUser().getID();
+
             vaultsService.transferVault(vault, usersService.getUser(transfer.getUserId()), transfer.getReason());
 
-            sendEmails("transfer-vault-ownership.vm", vault, userID, transfer.getUserId());
+            logger.debug("send email for transfer ownership from: "+previousUserID+" to "+transfer.getUserId());
+            sendEmails("transfer-vault-ownership.vm", vault, previousUserID, transfer.getUserId());
 
             TransferVaultOwnership transferEvent = new TransferVaultOwnership(transfer, vault, userID);
             transferEvent.setVault(vault);
@@ -513,6 +516,23 @@ public class VaultsController {
 
         return vault.convertToResponse();
     }
+
+    @RequestMapping(value = "/vaults/{vaultid}/updatereviewdate", method = RequestMethod.POST)
+    public VaultInfo updateVaultReviewDate(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                            @PathVariable("vaultid") String vaultID,
+                                            @RequestBody() String reviewDate) throws Exception {
+        User user = usersService.getUser(userID);
+        Vault vault = vaultsService.getUserVault(user, vaultID);
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        vault.setReviewDate(formatter.parse(reviewDate));
+
+        logger.info("Updating Review Date for Vault Id " + vaultID);
+        vaultsService.updateVault(vault);
+
+        return vault.convertToResponse();
+    }
+
 
     private void sendEmails(String template, Vault vault, String userId, String newOwnerId) throws Exception {
 

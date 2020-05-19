@@ -34,7 +34,8 @@ public enum Permission {
     CAN_VIEW_EVENTS("CAN_VIEW_EVENTS", PermissionModel.PermissionType.ADMIN, "View events", "ROLE_ADMIN_EVENTS", true),
     CAN_MANAGE_RETENTION_POLICIES("CAN_MANAGE_RETENTION_POLICIES", PermissionModel.PermissionType.ADMIN, "Manage retention policies", "ROLE_ADMIN_RETENTIONPOLICIES", true),
     CAN_MANAGE_ARCHIVE_STORES("CAN_MANAGE_ARCHIVE_STORES", PermissionModel.PermissionType.ADMIN, "Manage archive stores", "ROLE_ADMIN_ARCHIVESTORES", true),
-    CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS("CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS",PermissionModel.PermissionType.ADMIN, "Manage school role assignments", "ROLE_ADMIN_SCHOOLS", true);
+    CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS("CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS",PermissionModel.PermissionType.ADMIN, "Manage school role assignments", "ROLE_ADMIN_SCHOOLS", true),
+    CAN_MANAGE_REVIEWS("CAN_MANAGE_REVIEWS", PermissionModel.PermissionType.ADMIN, "Manage Reviews", "ROLE_ADMIN_REVIEWS", true);
 
     private final String id;
 

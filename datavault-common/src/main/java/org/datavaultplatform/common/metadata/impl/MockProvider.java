@@ -22,6 +22,7 @@ public class MockProvider implements Provider {
             d.setName("Sample dataset " + i);
             d.setContent("Mock Metadata");
             d.setVisible(true);
+            d.setCrisId("CRIS01");
             datasets.add(d);
             projectIds.put(d.getID(), "MOCK-PROJECTID-" + i);
         }
