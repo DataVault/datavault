@@ -157,7 +157,9 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     	Path destinationFile = Paths.get(pathPrefix + "/" + depositId + "/" + working.getName());
     	if (Files.exists(sourcePath)) {
     		logger.info("Moving from temp to deposit id");
-    		Files.createDirectory(destinationDir);
+    		if (! Files.exists(destinationDir)) {
+				Files.createDirectory(destinationDir);
+			}
     		//Files.move(sourcePath, destinationFile, StandardCopyOption.REPLACE_EXISTING);
 			Files.copy(sourcePath, destinationFile, StandardCopyOption.REPLACE_EXISTING);
     	}
