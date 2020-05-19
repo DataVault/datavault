@@ -196,6 +196,10 @@ public class Vault {
         return deposits;
     }
 
+    public void setVaultReviews(List<VaultReview> vaultReviews) {
+        this.vaultReviews = vaultReviews;
+    }
+
     public List<VaultReview> getVaultReviews() {
         if (vaultReviews == null) return new ArrayList<VaultReview>();
         return vaultReviews;
