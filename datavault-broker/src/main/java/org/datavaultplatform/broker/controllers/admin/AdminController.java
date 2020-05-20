@@ -123,15 +123,7 @@ public class AdminController {
     public void setSender(Sender sender) {
         this.sender = sender;
     }
-
-    public ExternalMetadataService getExternalMetadataService() {
-        return externalMetadataService;
-    }
-
-    public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
-        this.externalMetadataService = externalMetadataService;
-    }
-
+    
     @RequestMapping(value = "/admin/deposits/count", method = RequestMethod.GET)
     public Integer getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
                                   @RequestParam(value = "query", required = false)
@@ -139,6 +131,14 @@ public class AdminController {
                                           description = "Deposit query field",
                                           required = false) String query) throws Exception {
         return depositsService.getTotalDepositsCount(userID, query);
+    }
+  
+    public ExternalMetadataService getExternalMetadataService() {
+        return externalMetadataService;
+    }
+
+    public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
+        this.externalMetadataService = externalMetadataService;
     }
 
     @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)
