@@ -12,7 +12,7 @@
         <li class="active"><b>Vault:</b> ${vault.name?html}</li>
     </ol>
 
-    <form id="create-review" action="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}/reviews/${currentReview.getId()}" method="post">
+    <form id="create-review" action="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}/reviews/${vaultReviewModel.getVaultReviewId()}" method="post">
 
     <div class="bs-callout">
         <h2>
@@ -43,7 +43,6 @@
                 ${error}
             </div>
         </#if>
-
         <div class="form-group">
             <label class="control-label">New Review Date</label>
             <@spring.bind "vaultReviewModel.newReviewDate"/>
@@ -56,7 +55,7 @@
             <input type="text" class="form-control" name="${spring.status.expression}" value="${spring.status.value!""}"/>
         </div>
 
-        <#if drml.depositReviewModels?has_content>
+        <#if vaultReviewModel.depositReviewModels?has_content>
 
             <div class="table-responsive">
                 <table class="table table-striped">
@@ -71,7 +70,7 @@
                     </thead>
 
                     <tbody>
-                        <#list drml.depositReviewModels as drm>
+                        <#list vaultReviewModel.depositReviewModels as drm>
 
                             <input type="hidden" name="depositReviewModels[${drm_index}].depositId" value="${drm.getDepositId()}">
                             <input type="hidden" name="depositReviewModels[${drm_index}].depositReviewId" value="${drm.getDepositReviewId()}">
@@ -105,7 +104,7 @@
                                 <td>
                                     <div class="form-check">
                                     <!--<div class="custom-control custom-checkbox">-->
-                                        <@spring.bind "drml.depositReviewModels[${drm_index}].toBeDeleted" />
+                                        <@spring.bind "vaultReviewModel.depositReviewModels[${drm_index}].toBeDeleted" />
                                         <input type="checkbox" class="form-check-input" id="deleteDeposit"
                                                name="${spring.status.expression}"
                                                value="true" ${drm.toBeDeleted?then('checked', '')} />
@@ -114,7 +113,7 @@
 
                                 <td>
                                 <div class="form-group">
-                                    <@spring.bind "drml.depositReviewModels[${drm_index}].comment" />
+                                    <@spring.bind "vaultReviewModel.depositReviewModels[${drm_index}].comment" />
                                     <input type="text"
                                            class="form-control"
                                            name="${spring.status.expression}"

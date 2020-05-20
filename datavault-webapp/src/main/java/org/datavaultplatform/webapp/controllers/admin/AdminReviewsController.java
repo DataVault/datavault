@@ -11,7 +11,6 @@ import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.webapp.model.DepositReviewModel;
-import org.datavaultplatform.webapp.model.DepositReviewModelList;
 import org.datavaultplatform.webapp.model.VaultReviewModel;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
@@ -77,7 +76,6 @@ public class AdminReviewsController {
         VaultReview currentReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
         VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview);
 
-        DepositReviewModelList drml = new DepositReviewModelList();
         List<DepositReviewModel> depositReviewModels = new ArrayList<>();
         for (int i = 0; i < reviewInfo.getDepositIds().size(); i++) {
             DepositInfo depositInfo = restService.getDeposit(reviewInfo.getDepositIds().get(i));
@@ -98,11 +96,9 @@ public class AdminReviewsController {
             depositReviewModels.add(drm);
         }
 
-        drml.setDepositReviewModels(depositReviewModels);
+        vaultReviewModel.setDepositReviewModels(depositReviewModels);
 
-        model.addAttribute("currentReview", currentReview);
         model.addAttribute("vaultReviewModel", vaultReviewModel);
-        model.addAttribute("drml", drml);
 
         return "admin/reviews/create";
     }
@@ -110,7 +106,7 @@ public class AdminReviewsController {
 
     // Process the completed review page
     @RequestMapping(value = "/admin/vaults/{vaultid}/reviews/{reviewid}", method = RequestMethod.POST)
-    public String processReview(@ModelAttribute VaultReviewModel currentReview, @ModelAttribute DepositReviewModelList drml, ModelMap model, RedirectAttributes redirectAttributes, @PathVariable("vaultid") String vaultID, @PathVariable("reviewid") String reviewID, @RequestParam String action) throws Exception {
+    public String processReview(@ModelAttribute VaultReviewModel vaultReviewModel, ModelMap model, RedirectAttributes redirectAttributes, @PathVariable("vaultid") String vaultID, @PathVariable("reviewid") String reviewID, @RequestParam String action) throws Exception {
 
         // Note - The ModelAttributes made available here are not the same objects as those passed to the View,
         // they only contain the values entered on screen. With that in mind, fetch the original objects again and
@@ -121,8 +117,8 @@ public class AdminReviewsController {
         }
 
         // We need to throw back an error if a new review date has not been entered but some deposits are being retained.
-        if ("Submit".equals(action) && currentReview.getNewReviewDate().isEmpty()) {
-            for (DepositReviewModel drm : drml.getDepositReviewModels()) {
+        if ("Submit".equals(action) && vaultReviewModel.getNewReviewDate().isEmpty()) {
+            for (DepositReviewModel drm : vaultReviewModel.getDepositReviewModels()) {
                 if (drm.isToBeDeleted() == false) {
                     redirectAttributes.addAttribute("error",  "reviewdate");
                     return "redirect:/admin/vaults/" + vaultID + "/reviews";
@@ -132,22 +128,22 @@ public class AdminReviewsController {
 
         VaultReview originalReview = restService.getVaultReview(reviewID);
 
-        originalReview.setNewReviewDate(currentReview.StringToDate(currentReview.getNewReviewDate()));
-        originalReview.setComment(currentReview.getComment());
+        originalReview.setNewReviewDate(vaultReviewModel.StringToDate(vaultReviewModel.getNewReviewDate()));
+        originalReview.setComment(vaultReviewModel.getComment());
 
         if ("Submit".equals(action)) {
             originalReview.setActionedDate(new Date());
 
             // todo : Update the Vault with the new review date!!!!!!!!!!!!!!
-            logger.info("Editing Review Date for Vault id " + vaultID + " with new Review Date " + currentReview.getNewReviewDate());
-            restService.updateVaultReviewDate(vaultID, currentReview.getNewReviewDate());
+            logger.info("Editing Review Date for Vault id " + vaultID + " with new Review Date " + vaultReviewModel.getNewReviewDate());
+            restService.updateVaultReviewDate(vaultID, vaultReviewModel.getNewReviewDate());
 
         }
 
         logger.info("Editing Vault Review id " + originalReview.getId());
         restService.editVaultReview(originalReview);
 
-        for (DepositReviewModel drm : drml.getDepositReviewModels()) {
+        for (DepositReviewModel drm : vaultReviewModel.getDepositReviewModels()) {
             DepositReview originalDepositReview = restService.getDepositReview(drm.getDepositReviewId());
             originalDepositReview.setToBeDeleted(drm.isToBeDeleted());
             originalDepositReview.setComment(drm.getComment());

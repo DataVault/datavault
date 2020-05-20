@@ -6,19 +6,32 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 
 public class VaultReviewModel {
 
+    private String vaultReviewId;
     private String newReviewDate;
     private String comment;
+
+    private List<DepositReviewModel> depositReviewModels;
 
     public VaultReviewModel() {
     }
 
     public VaultReviewModel(VaultReview vaultReview) {
+        vaultReviewId = vaultReview.getId();
         newReviewDate = DateToString(vaultReview.getNewReviewDate());
         comment = vaultReview.getComment();
+    }
+
+    public String getVaultReviewId() {
+        return vaultReviewId;
+    }
+
+    public void setVaultReviewId(String vaultReviewId) {
+        this.vaultReviewId = vaultReviewId;
     }
 
     public String getNewReviewDate() {
@@ -35,6 +48,14 @@ public class VaultReviewModel {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public List<DepositReviewModel> getDepositReviewModels() {
+        return depositReviewModels;
+    }
+
+    public void setDepositReviewModels(List<DepositReviewModel> depositReviewModels) {
+        this.depositReviewModels = depositReviewModels;
     }
 
 
