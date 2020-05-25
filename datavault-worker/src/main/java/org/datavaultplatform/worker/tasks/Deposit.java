@@ -461,7 +461,9 @@ public class Deposit extends Task {
             noOfThreads = 25;
         }
         logger.debug("Number of threads: " + noOfThreads);
-        ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
+        int doubleNoOfThreads = noOfThreads * 2;
+        logger.debug("Validation so doubling the number of threads: " + doubleNoOfThreads);
+        ExecutorService executor = Executors.newFixedThreadPool(doubleNoOfThreads);
         List<Future<HashMap<String, String>>> futures = new ArrayList();
         for (int i = 0; i < chunkFiles.length; i++) {
             // if less that max threads started start new one
@@ -752,24 +754,43 @@ public class Deposit extends Task {
 		HashMap<Integer, String> encChunksDigests = new HashMap<Integer, String>();
 		HashMap<Integer, byte[]> chunksIVs = new HashMap<Integer, byte[]>();
         encChunksHash = new String[chunkFiles.length];
-        
-        for (int i = 0; i < chunkFiles.length; i++){
-            File chunk = chunkFiles[i];
-            
-            // Generating IV
-            byte[] chunkIV = Encryption.encryptFile(context, chunk);
-            
-            encChunksHash[i] = Verify.getDigest(chunk);
 
-            logger.info("Chunk file " + i + ": " + chunk.length() + " bytes");
-            logger.info("Encrypted chunk checksum: " + encChunksHash[i]);
-//            if (i > (chunkFiles.length / 2)) {
-//                throw new Exception("Failed during chunking encryption");
-//            }
-            
-            encChunksDigests.put(i+1, encChunksHash[i]);
-            chunksIVs.put(i+1, chunkIV);
+        int noOfThreads = context.getNoChunkThreads();
+        if (noOfThreads != 0 && noOfThreads < 0 ) {
+            noOfThreads = 25;
         }
+        
+        logger.debug("Number of threads:" + noOfThreads);
+        ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
+        List<Future<EncryptionHelper>> futures = new ArrayList();
+        for (int i = 0; i < chunkFiles.length; i++){
+            EncryptionTracker et = new EncryptionTracker();
+            et.setChunkCount(i);
+            et.setChunk(chunkFiles[i]);
+            et.setContext(context);
+            logger.debug("Creating chunk encryption thread:" + i);
+            Future<EncryptionHelper> etFuture = executor.submit(et);
+            futures.add(etFuture);
+        }
+        executor.shutdown();
+
+        for (Future<EncryptionHelper> future : futures) {
+            try {
+                EncryptionHelper result = future.get();
+                int i = result.getChunkCount();
+                encChunksHash[i] = result.getEncTarHash();
+                encChunksDigests.put(i+1, encChunksHash[i]);
+                chunksIVs.put(i+1, result.getIv());
+
+            } catch (ExecutionException ee) {
+                Throwable cause = ee.getCause();
+                if (cause instanceof Exception) {
+                    logger.info("Chunk encryption failed. " + cause.getMessage());
+                    throw (Exception) cause;
+                }
+            }
+        }
+
         
         logger.info(chunkFiles.length + " chunk files encrypted.");
         eventStream.send(new ComputedEncryption(jobID, depositId, chunksIVs, null, 
