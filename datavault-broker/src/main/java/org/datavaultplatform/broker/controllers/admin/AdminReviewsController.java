@@ -96,14 +96,37 @@ public class AdminReviewsController {
             @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
     })
     @RequestMapping(value = "/admin/vaults/{vaultid}/vaultreviews", method = RequestMethod.GET)
-    public List<VaultReview> getVaultReviews(@RequestHeader(value = "X-UserID", required = true) String userID,
+    public List<ReviewInfo> getVaultReviews(@RequestHeader(value = "X-UserID", required = true) String userID,
                                              @PathVariable("vaultid") String vaultID) throws Exception {
-
 
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
 
-        return vault.getVaultReviews();
+        List<ReviewInfo> reviewinfos = new ArrayList<ReviewInfo>();
+
+        for (VaultReview vr : vault.getVaultReviews()) {
+
+            VaultReview vaultReview = vr;
+            List <DepositReview> depositReviews = vr.getDepositReviews();
+
+            // Create Lists of Deposit and DepositReview ids
+            List<String> depositIds = new ArrayList<>();
+            List<String> depositReviewIds = new ArrayList<>();
+
+            for (DepositReview depositReview : depositReviews) {
+                depositIds.add(depositReview.getDeposit().getID());
+                depositReviewIds.add(depositReview.getId());
+            }
+
+            ReviewInfo reviewInfo = new ReviewInfo();
+            reviewInfo.setVaultReviewId(vaultReview.getId());
+            reviewInfo.setDepositIds(depositIds);
+            reviewInfo.setDepositReviewIds(depositReviewIds);
+
+            reviewinfos.add(reviewInfo);
+        }
+
+        return reviewinfos;
     }
 
     @ApiMethod(

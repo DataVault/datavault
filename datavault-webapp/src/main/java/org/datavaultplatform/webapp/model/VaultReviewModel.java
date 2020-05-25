@@ -12,6 +12,7 @@ import java.util.List;
 public class VaultReviewModel {
 
     private String vaultReviewId;
+    private Date actionedDate;
     private String newReviewDate;
     private String comment;
 
@@ -22,6 +23,7 @@ public class VaultReviewModel {
 
     public VaultReviewModel(VaultReview vaultReview) {
         vaultReviewId = vaultReview.getId();
+        actionedDate = vaultReview.getActionedDate();
         newReviewDate = DateToString(vaultReview.getNewReviewDate());
         comment = vaultReview.getComment();
     }
@@ -32,6 +34,14 @@ public class VaultReviewModel {
 
     public void setVaultReviewId(String vaultReviewId) {
         this.vaultReviewId = vaultReviewId;
+    }
+
+    public Date getActionedDate() {
+        return actionedDate;
+    }
+
+    public void setActionedDate(Date actionedDate) {
+        this.actionedDate = actionedDate;
     }
 
     public String getNewReviewDate() {
