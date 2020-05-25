@@ -27,15 +27,18 @@
         <p>
             <b>Owner:</b> ${vault.userID?html}<br/>
             <b>Dataset name:</b> ${vault.datasetName?html}<br/>
-            <b>Created:</b> ${vault.creationTime?datetime}<br/>
+            <#assign aDate = vault.creationTime?date>
+            <b>Created:</b> ${aDate?iso_utc}<br/>
             <b>Group:</b> ${group.name?html}<br/>
             <b>Retention Policy:</b> ${retentionPolicy.name?html}<br/>
-            <b>Retention Policy expiry date:</b> ${vault.policyExpiry?datetime} (Status: ${vault.policyStatusStr?html})<br/>
+            <#assign aDate = vault.policyExpiry?date>
+            <b>Retention Policy expiry date:</b> ${aDate?iso_utc} (Status: ${vault.policyStatusStr?html})<br/>
             <b>Size:</b> ${vault.getSizeStr()}<br/>
         </p>
 
         <p>
-            <b>Current review date:</b> ${vault.reviewDate?datetime}</b>
+            <#assign aDate = vault.reviewDate?date>
+            <b>Current review date:</b> ${aDate?iso_utc}
         </p>
 
         <#if error?has_content>
