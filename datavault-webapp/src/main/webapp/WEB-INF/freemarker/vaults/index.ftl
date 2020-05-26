@@ -214,8 +214,13 @@
                                     </div>
                                     <div class="col-md-12">
                                         <small><small>
-                                            “Edinburgh Medical School” includes Biomedical Sciences (e.g. Centre for Discovery Brain Sciences),
-                                            Clinical Sciences (e.g. MRC Centre for Inflammation Research), Molecular, Genetic and Population Health Sciences (e.g. IGMM).
+                                            Biomedical Sciences (e.g. Centre for Discovery Brain Sciences),
+                                            Clinical Sciences (e.g. MRC Centre for Inflammation Research)
+                                            and Molecular, Genetic and Population Health Sciences (e.g. IGMM)
+                                            are all ultimately under the stewardship of the Edinburgh Medical School.
+                                            We encourage colleagues to select their deanery rather than EMS,
+                                            for the ease of identifying the appropriate support staff for the
+                                            purposes of the review process and so on.
                                         </small></small>
                                     </div>
                                 </div>
