@@ -1,15 +1,14 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.DepositReview;
-import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.model.VaultReview;
+import org.apache.commons.lang.RandomStringUtils;
+import org.datavaultplatform.common.model.*;
 
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.model.DepositReviewModel;
 import org.datavaultplatform.webapp.model.VaultReviewModel;
 import org.datavaultplatform.webapp.services.RestService;
@@ -24,8 +23,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Controller
@@ -62,8 +63,20 @@ public class AdminReviewsController {
         }
 
         VaultInfo vault = restService.getVault(vaultID);
-
         model.addAttribute("vault", vault);
+
+        List<RoleAssignment> roleAssignmentsForVault = restService.getRoleAssignmentsForVault(vaultID);
+
+        List<RoleAssignment> dataManagers = roleAssignmentsForVault.stream()
+                .filter(roleAssignment -> RoleUtils.isRoleOfName(roleAssignment, "Data Manager"))
+                .collect(Collectors.toList());
+        model.addAttribute("dataManagers", dataManagers);
+
+        roleAssignmentsForVault.stream()
+                .filter(RoleUtils::isDataOwner)
+                .findFirst()
+                .ifPresent(roleAssignment -> model.addAttribute("dataOwner", roleAssignment));
+
         model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
         model.addAttribute(restService.getGroup(vault.getGroupID()));
 

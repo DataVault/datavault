@@ -25,7 +25,17 @@
         </h2>
         <hr>
         <p>
-            <b>Owner:</b> ${vault.userID?html}<br/>
+            <b>Owner:</b>
+            <#if dataOwner.userId?has_content>
+               ${dataOwner.userId}<br/>
+            </#if>
+            <b>Data Managers:</b>
+            <#if dataManagers?has_content>
+                <#list dataManagers as dataManager>
+                    ${dataManager.userId}&nbsp;
+                </#list>
+            </#if>
+            <br/>
             <b>Dataset name:</b> ${vault.datasetName?html}<br/>
             <#assign aDate = vault.creationTime?date>
             <b>Created:</b> ${aDate?iso_utc}<br/>
