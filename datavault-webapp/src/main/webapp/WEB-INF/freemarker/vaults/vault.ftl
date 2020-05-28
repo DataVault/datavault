@@ -367,6 +367,56 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <h4><strong>Reviews</strong></h4>
+                    <div class="scrollable">
+                        <table class="table table-bordered ">
+                             <#list vrhm.vaultReviewModels as vrm>
+
+                                 <thead>
+                                 <tr>
+                                     <th>Date Reviewed</th>
+                                     <th>New Review Date</th>
+                                     <th>Comment</th>
+                                 </tr>
+                                 </thead>
+
+                                 <tbody>
+                                 <tr>
+                                     <#if vrm.actionedDate??>
+                                        <#assign aDate = vrm.actionedDate?date>
+                                        <td>${aDate?iso_utc}</td>
+                                     <#else>
+                                         <td>Review still in progress</td>
+                                     </#if>
+                                     <td>${vrm.newReviewDate?html}</td>
+                                     <td>${vrm.comment?html}</td>
+                                 </tr>
+                                 </tbody>
+
+                                 <thead>
+                                 <tr>
+                                     <th>Deposit</th>
+                                     <th>Deleted</th>
+                                     <th>Comment</th>
+                                 </tr>
+                                 </thead>
+
+                                 <tbody>
+                                    <#list vrm.depositReviewModels as drm>
+                                    <tr>
+                                        <td>${drm.name}</td>
+                                        <td>${drm.toBeDeleted?string("Yes", "No")}</td>
+                                        <td>${drm.comment?html}</td>
+                                    </tr>
+                                    </#list>
+                                 </tbody>
+
+                                 <br/>
+                             </#list>
+
+                        </table>
+                    </div>
                 </div>
                 </@sec.authorize>
             </div>

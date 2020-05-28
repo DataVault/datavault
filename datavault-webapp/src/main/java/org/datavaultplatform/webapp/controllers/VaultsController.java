@@ -13,11 +13,15 @@ import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.TransferVault;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.EventInfo;
+import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
 import org.datavaultplatform.webapp.exception.ForbiddenException;
 import org.datavaultplatform.webapp.exception.InvalidUunException;
+import org.datavaultplatform.webapp.model.DepositReviewModel;
+import org.datavaultplatform.webapp.model.VaultReviewHistoryModel;
+import org.datavaultplatform.webapp.model.VaultReviewModel;
 import org.datavaultplatform.webapp.services.ForceLogoutService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
@@ -217,6 +221,46 @@ public class VaultsController {
 
         EventInfo[] roleEvents = restService.getVaultsRoleEvents(vaultID);
         model.addAttribute("roleEvents", roleEvents);
+
+        // todo: Get all the review history
+
+        ReviewInfo[] reviewInfos = restService.getReviewsListing(vaultID);
+        List<VaultReviewModel> vaultReviewModels = new ArrayList<VaultReviewModel>();
+
+        for (ReviewInfo reviewInfo : reviewInfos) {
+
+            VaultReview currentReview = restService.getVaultReview(reviewInfo.getVaultReviewId());
+            VaultReviewModel vaultReviewModel = new VaultReviewModel(currentReview);
+
+            List<DepositReviewModel> depositReviewModels = new ArrayList<>();
+            for (int i = 0; i < reviewInfo.getDepositIds().size(); i++) {
+                DepositInfo depositInfo = restService.getDeposit(reviewInfo.getDepositIds().get(i));
+                DepositReview depositReview = restService.getDepositReview(reviewInfo.getDepositReviewIds().get(i));
+                DepositReviewModel drm = new DepositReviewModel();
+
+                // Set DepositReview stuff
+                drm.setDepositReviewId(depositReview.getId());
+                drm.setToBeDeleted(depositReview.isToBeDeleted());
+                drm.setComment(depositReview.getComment());
+
+                // Set Deposit stuff
+                drm.setDepositId(depositInfo.getID());
+                drm.setName(depositInfo.getName());
+                drm.setStatusName(depositInfo.getStatus().name());
+                drm.setCreationTime(depositInfo.getCreationTime());
+
+                depositReviewModels.add(drm);
+            }
+
+            vaultReviewModel.setDepositReviewModels(depositReviewModels);
+
+            vaultReviewModels.add(vaultReviewModel);
+        }
+
+        VaultReviewHistoryModel vrhm = new VaultReviewHistoryModel();
+        vrhm.setVaultReviewModels(vaultReviewModels);
+
+        model.addAttribute("vrhm", vrhm);
 
         return "vaults/vault";
     }

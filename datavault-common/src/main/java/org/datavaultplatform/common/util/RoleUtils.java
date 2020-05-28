@@ -29,6 +29,10 @@ public class RoleUtils {
         return IS_ADMIN_ROLE_NAME.equals(roleAssignment.getRole().getName());
     }
 
+    public static boolean isRoleOfName(RoleAssignment roleAssignment, String roleName) {
+        return roleName.equals(roleAssignment.getRole().getName());
+    }
+
     public static boolean isRoleInVault(RoleAssignment roleAssignment, String vaultId) {
         return roleAssignment.getVaultId() != null && roleAssignment.getVaultId().equals(vaultId);
     }

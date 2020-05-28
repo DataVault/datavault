@@ -196,9 +196,9 @@ public class RestService {
         return (VaultsData) response.getBody();
     }
 
-    public VaultReview[] getReviewsListing(String vaultId) {
-        HttpEntity<?> response = get(brokerURL +"/admin/vaults/" + vaultId + "/vaultreviews", VaultReview[].class);
-        return (VaultReview[])response.getBody();
+    public ReviewInfo[] getReviewsListing(String vaultId) {
+        HttpEntity<?> response = get(brokerURL +"/admin/vaults/" + vaultId + "/vaultreviews", ReviewInfo[].class);
+        return (ReviewInfo[])response.getBody();
     }
 
     public ReviewInfo getCurrentReview(String vaultId) {

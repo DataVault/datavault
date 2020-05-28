@@ -12,7 +12,7 @@
         <li class="active"><b>Vault:</b> ${vault.name?html}</li>
     </ol>
 
-    <form id="create-review" action="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}/reviews/${currentReview.getId()}" method="post">
+    <form id="create-review" action="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}/reviews/${vaultReviewModel.getVaultReviewId()}" method="post">
 
     <div class="bs-callout">
         <h2>
@@ -25,17 +25,30 @@
         </h2>
         <hr>
         <p>
-            <b>Owner:</b> ${vault.userID?html}<br/>
+            <b>Owner:</b>
+            <#if dataOwner.userId?has_content>
+               ${dataOwner.userId}<br/>
+            </#if>
+            <b>Data Managers:</b>
+            <#if dataManagers?has_content>
+                <#list dataManagers as dataManager>
+                    ${dataManager.userId}&nbsp;
+                </#list>
+            </#if>
+            <br/>
             <b>Dataset name:</b> ${vault.datasetName?html}<br/>
-            <b>Created:</b> ${vault.creationTime?datetime}<br/>
+            <#assign aDate = vault.creationTime?date>
+            <b>Created:</b> ${aDate?iso_utc}<br/>
             <b>Group:</b> ${group.name?html}<br/>
             <b>Retention Policy:</b> ${retentionPolicy.name?html}<br/>
-            <b>Retention Policy expiry date:</b> ${vault.policyExpiry?datetime} (Status: ${vault.policyStatusStr?html})<br/>
+            <#assign aDate = vault.policyExpiry?date>
+            <b>Retention Policy expiry date:</b> ${aDate?iso_utc} (Status: ${vault.policyStatusStr?html})<br/>
             <b>Size:</b> ${vault.getSizeStr()}<br/>
         </p>
 
         <p>
-            <b>Current review date:</b> ${vault.reviewDate?datetime}</b>
+            <#assign aDate = vault.reviewDate?date>
+            <b>Current review date:</b> ${aDate?iso_utc}
         </p>
 
         <#if error?has_content>
@@ -43,7 +56,6 @@
                 ${error}
             </div>
         </#if>
-
         <div class="form-group">
             <label class="control-label">New Review Date</label>
             <@spring.bind "vaultReviewModel.newReviewDate"/>
@@ -56,7 +68,7 @@
             <input type="text" class="form-control" name="${spring.status.expression}" value="${spring.status.value!""}"/>
         </div>
 
-        <#if drml.depositReviewModels?has_content>
+        <#if vaultReviewModel.depositReviewModels?has_content>
 
             <div class="table-responsive">
                 <table class="table table-striped">
@@ -71,7 +83,7 @@
                     </thead>
 
                     <tbody>
-                        <#list drml.depositReviewModels as drm>
+                        <#list vaultReviewModel.depositReviewModels as drm>
 
                             <input type="hidden" name="depositReviewModels[${drm_index}].depositId" value="${drm.getDepositId()}">
                             <input type="hidden" name="depositReviewModels[${drm_index}].depositReviewId" value="${drm.getDepositReviewId()}">
@@ -105,7 +117,7 @@
                                 <td>
                                     <div class="form-check">
                                     <!--<div class="custom-control custom-checkbox">-->
-                                        <@spring.bind "drml.depositReviewModels[${drm_index}].toBeDeleted" />
+                                        <@spring.bind "vaultReviewModel.depositReviewModels[${drm_index}].toBeDeleted" />
                                         <input type="checkbox" class="form-check-input" id="deleteDeposit"
                                                name="${spring.status.expression}"
                                                value="true" ${drm.toBeDeleted?then('checked', '')} />
@@ -114,7 +126,7 @@
 
                                 <td>
                                 <div class="form-group">
-                                    <@spring.bind "drml.depositReviewModels[${drm_index}].comment" />
+                                    <@spring.bind "vaultReviewModel.depositReviewModels[${drm_index}].comment" />
                                     <input type="text"
                                            class="form-control"
                                            name="${spring.status.expression}"
