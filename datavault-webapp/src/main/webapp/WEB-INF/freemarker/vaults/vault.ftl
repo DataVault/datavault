@@ -390,7 +390,7 @@
                                          <td>Review still in progress</td>
                                      </#if>
                                      <td>${vrm.newReviewDate?html}</td>
-                                     <td>${vrm.comment?html}</td>
+                                     <td>${(vrm.comment?html)!}</td>
                                  </tr>
                                  </tbody>
 
@@ -407,7 +407,7 @@
                                     <tr>
                                         <td>${drm.name}</td>
                                         <td>${drm.toBeDeleted?string("Yes", "No")}</td>
-                                        <td>${drm.comment?html}</td>
+                                        <td>${(drm.comment?html)!}</td>
                                     </tr>
                                     </#list>
                                  </tbody>
