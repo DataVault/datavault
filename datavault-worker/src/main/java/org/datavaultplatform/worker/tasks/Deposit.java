@@ -722,20 +722,58 @@ public class Deposit extends Task {
         chunksHash = new String[chunkFiles.length];
         chunksDigest = new HashMap<Integer, String>();
 
+        int noOfThreads = context.getNoChunkThreads();
+        if (noOfThreads != 0 && noOfThreads < 0 ) {
+            noOfThreads = 25;
+        }
+
+        logger.debug("Number of threads:" + noOfThreads);
+        ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
+        List<Future<ChecksumHelper>> futures = new ArrayList();
         for (int i = 0; i < chunkFiles.length; i++){
             File chunk = chunkFiles[i];
-            chunksHash[i] = Verify.getDigest(chunk);
-            
-            long chunkSize = chunk.length();
-            logger.info("Chunk file " + i + ": " + chunkSize + " bytes");
-            logger.info("Chunk file location: " + chunk.getAbsolutePath());
-            logger.info("Checksum algorithm: " + tarHashAlgorithm);
-            logger.info("Checksum: " + chunksHash[i]);
+            ChecksumTracker ct = new ChecksumTracker();
+            ct.setChunk(chunk);
+            ct.setChunkCount(i);
 
-            //if (i > (chunkFiles.length / 2)) {
-            //    throw new Exception("Failed during chunking");
-            //}
-            chunksDigest.put(i+1, chunksHash[i]);
+            logger.debug("Creating chunk checksum thread:" + i);
+            Future<ChecksumHelper> ctFuture = executor.submit(ct);
+            futures.add(ctFuture);
+
+//            chunksHash[i] = Verify.getDigest(chunk);
+//
+//            long chunkSize = chunk.length();
+//            logger.info("Chunk file " + i + ": " + chunkSize + " bytes");
+//            logger.info("Chunk file location: " + chunk.getAbsolutePath());
+//            logger.info("Checksum algorithm: " + tarHashAlgorithm);
+//            logger.info("Checksum: " + chunksHash[i]);
+//
+//            //if (i > (chunkFiles.length / 2)) {
+//            //    throw new Exception("Failed during chunking");
+//            //}
+//            chunksDigest.put(i+1, chunksHash[i]);
+        }
+        executor.shutdown();
+
+        for (Future<ChecksumHelper> future : futures) {
+            try {
+                ChecksumHelper result = future.get();
+                int i = result.getChunkCount();
+                chunksHash[i] = result.getChunkHash();
+                chunksDigest.put(i + 1, chunksHash[i]);
+                File chunk = result.getChunk();
+                long chunkSize = chunk.length();
+                logger.info("Chunk file " + i + ": " + chunkSize + " bytes");
+                logger.info("Chunk file location: " + chunk.getAbsolutePath());
+                logger.info("Checksum algorithm: " + tarHashAlgorithm);
+                logger.info("Checksum: " + chunksHash[i]);
+            } catch (ExecutionException ee) {
+                Throwable cause = ee.getCause();
+                if (cause instanceof Exception) {
+                    logger.info("Chunk encryption failed. " + cause.getMessage());
+                    throw (Exception) cause;
+                }
+            }
         }
         
         if(!context.isEncryptionEnabled()) {
@@ -752,24 +790,43 @@ public class Deposit extends Task {
 		HashMap<Integer, String> encChunksDigests = new HashMap<Integer, String>();
 		HashMap<Integer, byte[]> chunksIVs = new HashMap<Integer, byte[]>();
         encChunksHash = new String[chunkFiles.length];
-        
-        for (int i = 0; i < chunkFiles.length; i++){
-            File chunk = chunkFiles[i];
-            
-            // Generating IV
-            byte[] chunkIV = Encryption.encryptFile(context, chunk);
-            
-            encChunksHash[i] = Verify.getDigest(chunk);
 
-            logger.info("Chunk file " + i + ": " + chunk.length() + " bytes");
-            logger.info("Encrypted chunk checksum: " + encChunksHash[i]);
-//            if (i > (chunkFiles.length / 2)) {
-//                throw new Exception("Failed during chunking encryption");
-//            }
-            
-            encChunksDigests.put(i+1, encChunksHash[i]);
-            chunksIVs.put(i+1, chunkIV);
+        int noOfThreads = context.getNoChunkThreads();
+        if (noOfThreads != 0 && noOfThreads < 0 ) {
+            noOfThreads = 25;
         }
+
+        logger.debug("Number of threads:" + noOfThreads);
+        ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
+        List<Future<EncryptionHelper>> futures = new ArrayList();
+        for (int i = 0; i < chunkFiles.length; i++){
+            EncryptionTracker et = new EncryptionTracker();
+            et.setChunkCount(i);
+            et.setChunk(chunkFiles[i]);
+            et.setContext(context);
+            logger.debug("Creating chunk encryption thread:" + i);
+            Future<EncryptionHelper> etFuture = executor.submit(et);
+            futures.add(etFuture);
+        }
+        executor.shutdown();
+
+        for (Future<EncryptionHelper> future : futures) {
+            try {
+                EncryptionHelper result = future.get();
+                int i = result.getChunkCount();
+                encChunksHash[i] = result.getEncTarHash();
+                encChunksDigests.put(i+1, encChunksHash[i]);
+                chunksIVs.put(i+1, result.getIv());
+
+            } catch (ExecutionException ee) {
+                Throwable cause = ee.getCause();
+                if (cause instanceof Exception) {
+                    logger.info("Chunk encryption failed. " + cause.getMessage());
+                    throw (Exception) cause;
+                }
+            }
+        }
+
         
         logger.info(chunkFiles.length + " chunk files encrypted.");
         eventStream.send(new ComputedEncryption(jobID, depositId, chunksIVs, null, 
