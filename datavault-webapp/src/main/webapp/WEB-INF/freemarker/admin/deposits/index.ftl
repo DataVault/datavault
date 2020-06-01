@@ -118,7 +118,7 @@
             <ul class="pagination pagination-lg" id="paginationButton">
                 <#list 1..totalPages as page>
                     <li <#if page == activePageId>class="page-item active"<#else>class="page-item"</#if> id="${page}">
-                        <a class="page-link" href="${springMacroRequestContext.getContextPath()}/admin/deposits?sort=${sort}&order=${order}&pageId=${page}" tabindex="-1">${page}</a>
+                        <a class="page-link" href="${springMacroRequestContext.getContextPath()}/admin/deposits?sort=${sort}&order=${order}&pageId=${page}&query=${query?url}" tabindex="-1">${page}</a>
                     </li>
                 </#list>
             </ul>
