@@ -26,6 +26,7 @@ public class VaultReview {
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "creationTime", nullable = false)
     private Date creationTime;
 
     @ManyToOne
@@ -45,7 +46,7 @@ public class VaultReview {
 
     // The date this review was finally actioned.
     // Serialise date in ISO 8601 format
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss")
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "actionedDate", nullable = true)
     private Date actionedDate;

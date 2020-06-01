@@ -461,9 +461,7 @@ public class Deposit extends Task {
             noOfThreads = 25;
         }
         logger.debug("Number of threads: " + noOfThreads);
-        int doubleNoOfThreads = noOfThreads * 2;
-        logger.debug("Validation so doubling the number of threads: " + doubleNoOfThreads);
-        ExecutorService executor = Executors.newFixedThreadPool(doubleNoOfThreads);
+        ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
         List<Future<HashMap<String, String>>> futures = new ArrayList();
         for (int i = 0; i < chunkFiles.length; i++) {
             // if less that max threads started start new one

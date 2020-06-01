@@ -5,28 +5,28 @@
 
  CREATE TABLE `VaultReviews` (
   `id` varchar(36) NOT NULL,
-  `actionedDate` date DEFAULT NULL,
-  `creationTime` datetime DEFAULT NULL,
+  `actionedDate` datetime DEFAULT NULL,
+  `comment` text,
+  `creationTime` datetime(3) NOT NULL,
   `newReviewDate` date DEFAULT NULL,
   `vault_id` varchar(36) DEFAULT NULL,
-  `comment` text,
   PRIMARY KEY (`id`),
   KEY `FK_7mnsjibebjylwhoui5othfnus` (`vault_id`),
   CONSTRAINT `FK_7mnsjibebjylwhoui5othfnus` FOREIGN KEY (`vault_id`) REFERENCES `Vaults` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
 
-CREATE TABLE `DepositReviews` (
+ CREATE TABLE `DepositReviews` (
   `id` varchar(36) NOT NULL,
-  `creationTime` datetime DEFAULT NULL,
-  `vaultReview_id` varchar(36) DEFAULT NULL,
-  `comment` text,
-  `toBeDeleted` bit(1) DEFAULT NULL,
   `actionedDate` datetime DEFAULT NULL,
+  `comment` text,
+  `creationTime` datetime(3) NOT NULL,
+  `toBeDeleted` bit(1) DEFAULT NULL,
   `deposit_id` varchar(36) DEFAULT NULL,
+  `vaultReview_id` varchar(36) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `FK_ce59sny0jfo3yc4hcp3kfy4r5` (`vaultReview_id`),
   KEY `FK_b7hilkosopp7ey1nlt5wsktlg` (`deposit_id`),
+  KEY `FK_ce59sny0jfo3yc4hcp3kfy4r5` (`vaultReview_id`),
   CONSTRAINT `FK_b7hilkosopp7ey1nlt5wsktlg` FOREIGN KEY (`deposit_id`) REFERENCES `Deposits` (`id`),
   CONSTRAINT `FK_ce59sny0jfo3yc4hcp3kfy4r5` FOREIGN KEY (`vaultReview_id`) REFERENCES `VaultReviews` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
