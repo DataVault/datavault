@@ -181,7 +181,7 @@ public class RestService {
         return (BillingInformation)response.getBody();
     }
 
-    public VaultsData getVaultsListingAll(String sort, String order, String offset, String maxResult) {
+    public VaultsData getVaultsListingAll(String sort, String order, int offset, int maxResult) {
         HttpEntity<?> response = get(brokerURL + "/admin/vaults?sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
         return (VaultsData)response.getBody();
     }
@@ -217,16 +217,12 @@ public class RestService {
         return (DepositReview)response.getBody();
     }
 
-
-
-
-
     public VaultsData searchVaultsForBilling(String query, String sort, String order, String offset, String maxResult) {
         HttpEntity<?> response = get(brokerURL + "/admin/billing/search?query=" + query + "&sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
         return (VaultsData)response.getBody();
     }
 
-    public VaultsData searchVaults(String query, String sort, String order, String offset, String maxResult) {
+    public VaultsData searchVaults(String query, String sort, String order, int offset, int maxResult) {
         HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query + "&sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
         return (VaultsData)response.getBody();
     }

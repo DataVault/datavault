@@ -34,7 +34,7 @@ public class AdminVaultsController {
 	private static final Logger logger = LoggerFactory.getLogger(AdminVaultsController.class);
 	
 	private static final String _0 = "0";
-	private static final String MAX_RECORDS_PER_PAGE = "10";
+	private static final int MAX_RECORDS_PER_PAGE = 10;
 
     private RestService restService;
 
@@ -45,62 +45,37 @@ public class AdminVaultsController {
 
     @RequestMapping(value = "/admin/vaults", method = RequestMethod.GET)
     public String searchVaults(ModelMap model,
-                               @RequestParam(value = "query", required = false) String query,
-                               @RequestParam(value = "sort", required = false) String sort,
-                               @RequestParam(value = "order", required = false) String order,
-                               @RequestParam(value = "pageId", required = false) String pageId) throws Exception {
+                               @RequestParam(value = "query", defaultValue = "") String query,
+                               @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
+                               @RequestParam(value = "order", defaultValue = "desc") String order,
+                               @RequestParam(value = "pageId", defaultValue = "1") int pageId) throws Exception {
 
-
-        String theSort = sort;
-        String theOrder = order;
-        String offset = pageId;
-        if (sort == null) theSort = "creationTime";
-        if (order == null) theOrder = "desc";
-        if(pageId == null) offset = "1";
-        model.addAttribute("activePageId", offset);
+        model.addAttribute("activePageId", pageId);
 
         // calculate offset which is passed to the service to fetch records from that row Id
-        int maxRecords = Integer.valueOf(MAX_RECORDS_PER_PAGE).intValue();
-        offset = String.valueOf(Integer.valueOf(offset).intValue() * maxRecords - maxRecords);
-        
-        if ((query == null) || ("".equals(query))) {
-        	VaultsData vaultData = restService.getVaultsListingAll(theSort, theOrder, offset, MAX_RECORDS_PER_PAGE);
-        	long recordsTotal = vaultData.getRecordsTotal();
-        	int numberOfPages = (int)Math.ceil(recordsTotal/(Double.valueOf(MAX_RECORDS_PER_PAGE)));
-        	List<String> pages = new ArrayList<>();
-        	int i =1;
-        	while(i <= numberOfPages) {
-        		pages.add(String.valueOf(i));
-        		i++;
-        	}
-        	model.addAttribute("pages", pages);
-			model.addAttribute("vaults", vaultData.getData());
-            model.addAttribute("query", "");
-            model.addAttribute("recordsInfo", constructTableRecordsInfo(offset, recordsTotal, vaultData.getRecordsFiltered(),
-            		vaultData.getData().size(), Boolean.FALSE));
-        } else {
-        	VaultsData filteredVaultsData = restService.searchVaults(query, theSort, theOrder, offset, MAX_RECORDS_PER_PAGE);
-            long filteredRecordsTotal = filteredVaultsData.getRecordsFiltered();
-            int numberOfPages = (int)Math.ceil(filteredRecordsTotal/(Double.valueOf(MAX_RECORDS_PER_PAGE)));
-            List<String> pages = new ArrayList<>();
-        	int i =1;
-        	while(i <= numberOfPages) {
-        		pages.add(String.valueOf(i));
-        		i++;
-        	}
-        	model.addAttribute("pages", pages);
-            model.addAttribute("vaults", filteredVaultsData.getData());
-            model.addAttribute("query", query);
-            model.addAttribute("recordsInfo", constructTableRecordsInfo(offset, filteredVaultsData.getRecordsTotal(),
-            		filteredRecordsTotal, filteredVaultsData.getData().size(), Boolean.TRUE));
-        }
-        
-        model.addAttribute("theSort", theSort);
-        model.addAttribute("theOrder", theOrder);
+        int offset = (pageId-1) * MAX_RECORDS_PER_PAGE;
+
+        VaultsData filteredVaultsData = restService.searchVaults(query, sort, order, offset, MAX_RECORDS_PER_PAGE);
+        int filteredRecordsTotal = filteredVaultsData.getRecordsFiltered();
+        int numberOfPages = (int)Math.ceil(filteredRecordsTotal/MAX_RECORDS_PER_PAGE);
+        model.addAttribute("numberOfPages", numberOfPages);
+        model.addAttribute("vaults", filteredVaultsData.getData());
+        model.addAttribute("query", query);
+
+        boolean isFiltered = query != null  && !query.equals("");
+        model.addAttribute("recordsInfo",
+                constructTableRecordsInfo(
+                        offset,
+                        filteredVaultsData.getRecordsTotal(),
+                        filteredRecordsTotal,
+                        filteredVaultsData.getData().size(),
+                        isFiltered
+                ) );
 
         // Pass the sort and order
         if (sort == null) sort = "";
         model.addAttribute("sort", sort);
+        model.addAttribute("order", sort);
         model.addAttribute("orderid", "asc");
         model.addAttribute("ordername", "asc");
         model.addAttribute("ordergroupID", "asc");
@@ -126,13 +101,12 @@ public class AdminVaultsController {
         return "admin/vaults/index";
     }
 
-	private String constructTableRecordsInfo(String offset, long recordsTotal, long filteredRecords, int numberOfRecordsonPage, boolean isFiltered) {
+	private String constructTableRecordsInfo(int offset, int recordsTotal, int filteredRecords, int numberOfRecordsonPage, boolean isFiltered) {
 		StringBuilder recordsInfo = new StringBuilder();
-		recordsInfo.append("Showing ").append(Integer.valueOf(offset).intValue() + 1)
-		.append(" - ").append(Integer.valueOf(offset).intValue()+  numberOfRecordsonPage);
+		recordsInfo.append("Showing ").append(offset + 1).append(" - ").append(offset + numberOfRecordsonPage);
 		if(isFiltered) {
 			recordsInfo.append(" vaults of ").append(filteredRecords)
-			.append(" (").append("filtered from ").append(recordsTotal).append(" total vaults)");
+                    .append(" (").append("filtered from ").append(recordsTotal).append(" total vaults)");
 		} else {
 			recordsInfo.append(" vaults of ").append(recordsTotal);
 		}
@@ -152,10 +126,10 @@ public class AdminVaultsController {
         List<VaultInfo> vaults = null;
 
         if ((query == null) || ("".equals(query))) {
-            VaultsData vaultData = restService.getVaultsListingAll(theSort, theOrder, _0, _0);
+            VaultsData vaultData = restService.getVaultsListingAll(theSort, theOrder, 0, 0);
 			vaults = vaultData.getData();
         } else {
-        	VaultsData vaultData =  restService.searchVaults(query, theSort, theOrder, _0, _0);
+        	VaultsData vaultData =  restService.searchVaults(query, theSort, theOrder, 0, 0);
         	vaults = vaultData.getData();
         }
 

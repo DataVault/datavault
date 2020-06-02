@@ -46,7 +46,7 @@ public class BillingController {
 
         if (sort == null) sort = "";
         if (order == null) order = "asc";
-        Long recordsTotal = 0L;
+        int recordsTotal = 0;
 		        
         List<VaultInfo> billingResponses = new ArrayList<>();
         List<Vault> vaultDetails = vaultsService.getVaults(userID, sort, order,offset, maxResult);
@@ -84,8 +84,8 @@ public class BillingController {
 											      @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) throws Exception {
 
         List<VaultInfo> billingResponses = new ArrayList<>();
-        Long recordsTotal = 0L;
-        Long recordsFiltered = 0L;
+        int recordsTotal = 0;
+        int recordsFiltered = 0;
         List<Vault> vaults = vaultsService.search(userID, query, sort, order, offset, maxResult);
         if(CollectionUtils.isNotEmpty(vaults)) {
 			for (Vault vault : vaults) {

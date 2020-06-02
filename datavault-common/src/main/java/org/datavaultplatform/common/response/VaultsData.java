@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class VaultsData {
 	
 	@ApiObjectField(description = "Total records, before filtering")
-    private long recordsTotal;
+    private int recordsTotal;
 
     /**
      * Total records, after filtering (i.e. the total number of records after
@@ -20,7 +20,7 @@ public class VaultsData {
      * for this page of data).
      */
 	@ApiObjectField(description = "Total records, after filtering")
-    private long recordsFiltered;
+    private int recordsFiltered;
 
     /**
      * The data to be displayed in the table. 
@@ -32,7 +32,7 @@ public class VaultsData {
 		
 	}
 	
-    public VaultsData(long recordsTotal, long recordsFiltered, List<VaultInfo> data) {
+    public VaultsData(int recordsTotal, int recordsFiltered, List<VaultInfo> data) {
 		super();
 		this.recordsTotal = recordsTotal;
 		this.recordsFiltered = recordsFiltered;
@@ -47,19 +47,19 @@ public class VaultsData {
 		this.data = data;
 	}
 
-	public long getRecordsTotal() {
+	public int getRecordsTotal() {
 		return recordsTotal;
 	}
 	
-	public void setRecordsTotal(long recordsTotal) {
+	public void setRecordsTotal(int recordsTotal) {
 		this.recordsTotal = recordsTotal;
 	}
 	
-	public long getRecordsFiltered() {
+	public int getRecordsFiltered() {
 		return recordsFiltered;
 	}
 	
-	public void setRecordsFiltered(long recordsFiltered) {
+	public void setRecordsFiltered(int recordsFiltered) {
 		this.recordsFiltered = recordsFiltered;
 	}
 
