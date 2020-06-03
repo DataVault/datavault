@@ -73,10 +73,10 @@ public class VaultsReviewService {
 
         Calendar c = Calendar.getInstance();
         c.setTime(vault.getReviewDate());
-        c.add(Calendar.MONTH, -6);
-        Date reviewDateMinus6 = c.getTime();
+        c.add(Calendar.MONTH, -3);
+        Date reviewDateMinus3 = c.getTime();
 
-        if (today.after(reviewDateMinus6)) {
+        if (today.after(reviewDateMinus3)) {
 
             // Looks like its due for review, but has the review already happened.
 
@@ -84,7 +84,7 @@ public class VaultsReviewService {
 
             for (VaultReview vr : vault.getVaultReviews()) {
 
-                if ((vr.getActionedDate() != null) && ((vr.getActionedDate().after(reviewDateMinus6)))) {
+                if ((vr.getActionedDate() != null) && ((vr.getActionedDate().after(reviewDateMinus3)))) {
 
                     // A review has already happened since the review date
                     currentReviewExists = true;
@@ -109,10 +109,10 @@ public class VaultsReviewService {
 
         Calendar c = Calendar.getInstance();
         c.setTime(vault.getReviewDate());
-        c.add(Calendar.MONTH, -6);
-        Date reviewDateMinus6 = c.getTime();
+        c.add(Calendar.MONTH, -3);
+        Date reviewDateMinus3 = c.getTime();
 
-        if (today.after(reviewDateMinus6)) {
+        if (today.after(reviewDateMinus3)) {
 
             // Looks like its due an email, but check if a review is already underway or has happened.
 
@@ -123,7 +123,7 @@ public class VaultsReviewService {
                     // A review is underway
                     currentReviewExists = true;
                 } else {
-                    if (vr.getActionedDate().after(reviewDateMinus6)) {
+                    if (vr.getActionedDate().after(reviewDateMinus3)) {
                         // A review has already happened since the review date
                         currentReviewExists = true;
                     }
