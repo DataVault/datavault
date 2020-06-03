@@ -19,7 +19,8 @@ public class FileSplitter {
     
     public static int DEFAULT_CHUNK_SIZE = 500 * 1000 * 1000; // 500MB
     
-    public static int BUFFER_SIZE = 8 * 1024; // 8KB
+    //public static int BUFFER_SIZE = 8 * 1024; // 8KB
+    public static int BUFFER_SIZE = 1024 * 1024; // 1MB
     
     public static String CHUNK_SEPARATOR = "."; // 8KB
     
@@ -120,6 +121,7 @@ public class FileSplitter {
             long fileSize = inputFile.length();
             
             log.debug("Add chunk file: "+inputFile.getName());
+            log.debug("Buffersize: " + BUFFER_SIZE);
             
             long numReads = fileSize/BUFFER_SIZE;
             long numRemainingRead = fileSize % BUFFER_SIZE;
