@@ -134,7 +134,12 @@ public class VaultDAOImpl implements VaultDAO {
             return new ArrayList<>();
         }
         Criteria criteria = criteriaBuilder.build();
-        criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
+        if( ! (query == null || query.equals("")) ) {
+            criteria.add(Restrictions.or(
+                    Restrictions.ilike("id", "%" + query + "%"),
+                    Restrictions.ilike("name", "%" + query + "%"),
+                    Restrictions.ilike("description", "%" + query + "%")));
+        }
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
         order(sort, order, criteria);
@@ -241,16 +246,16 @@ public class VaultDAOImpl implements VaultDAO {
     }
 
 	@Override
-	public Long getTotalNumberOfVaults(String userId) {
+	public int getTotalNumberOfVaults(String userId) {
 		Session session = this.sessionFactory.openSession();
         SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
         if (criteriaBuilder.hasNoAccess()) {
-            return 0L;
+            return 0;
         }
         Criteria criteria = criteriaBuilder.build();
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         criteria.setProjection(Projections.rowCount());
-        Long totalNumberOfVaults = (Long) criteria.uniqueResult();
+        int totalNumberOfVaults = ((Long) criteria.uniqueResult()).intValue();
         session.close();
         return totalNumberOfVaults;
 	}
@@ -259,17 +264,19 @@ public class VaultDAOImpl implements VaultDAO {
 	 * Retrieve Total NUmber of rows after applying the filter
 	 */
 	@Override
-	public Long getTotalNumberOfVaults(String userId, String query) {
+	public int getTotalNumberOfVaults(String userId, String query) {
 		Session session = this.sessionFactory.openSession();
         SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
         if (criteriaBuilder.hasNoAccess()) {
-            return 0L;
+            return 0;
         }
         Criteria criteria = criteriaBuilder.build();
-        criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
+        if (query != null && !query.equals("")) {
+            criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
+        }
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         criteria.setProjection(Projections.rowCount());
-        Long totalNumberOfVaults = (Long) criteria.uniqueResult();
+        int totalNumberOfVaults = ((Long) criteria.uniqueResult()).intValue();
         session.close();
         return totalNumberOfVaults;
 	}
