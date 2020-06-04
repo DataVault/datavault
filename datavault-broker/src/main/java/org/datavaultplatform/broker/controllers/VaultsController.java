@@ -151,8 +151,18 @@ public class VaultsController {
                                         @RequestBody TransferVault transfer) throws Exception {
 
         Vault vault = vaultsService.getVault(vaultId);
-        User currentOwner = vault.getUser();
 
+        User currentOwner = null;
+        List<RoleAssignment> roleAssignmentsForVault = permissionsService.getRoleAssignmentsForVault(vault.getID());
+
+        // Note - I think this could be better coded as a Lambda
+        for (RoleAssignment roleAssignment : roleAssignmentsForVault) {
+            if (RoleUtils.isDataOwner(roleAssignment)) {
+                currentOwner = usersService.getUser(roleAssignment.getUserId());
+            }
+        }
+
+        //User currentOwner = vault.getUser();
 
         if (transfer.isOrphaning()) {
             vaultsService.orphanVault(vault);
@@ -165,7 +175,7 @@ public class VaultsController {
 
             eventService.addEvent(orphanVaultEvent);
         } else {
-            String previousUserID = vault.getUser().getID();
+            String previousUserID = currentOwner.getID();
 
             vaultsService.transferVault(vault, usersService.getUser(transfer.getUserId()), transfer.getReason());
 
