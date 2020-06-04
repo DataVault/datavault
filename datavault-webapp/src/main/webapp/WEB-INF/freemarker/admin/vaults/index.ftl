@@ -84,9 +84,9 @@
             <div align="center">
             <nav aria-label="...">
 			    <ul class="pagination pagination-lg" id="paginationButton">
-            		<#list pages as page>
+                    <#list 1..numberOfPages as page>
 				    	<li <#if page == activePageId>class="page-item active"<#else>class="page-item"</#if> id="${page}">
-				     	 <a class="page-link" href="${springMacroRequestContext.getContextPath()}/admin/vaults?sort=${theSort}&order=${theOrder}&pageId=${page}" tabindex="-1">${page}</a>
+				     	 <a class="page-link" href="${springMacroRequestContext.getContextPath()}/admin/vaults?sort=${sort}&order=${order}&pageId=${page}&query=${query}" tabindex="-1">${page}</a>
 				    	</li>
 					</#list>
 				 </ul>

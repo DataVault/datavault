@@ -220,8 +220,8 @@ public class VaultsController {
                                       @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) {
 
         List<VaultInfo> vaultResponses = new ArrayList<>();
-        Long recordsTotal = 0L;
-        Long recordsFiltered = 0L;
+        int recordsTotal = 0;
+        int recordsFiltered = 0;
         List<Vault> vaults = vaultsService.search(userID, query, sort, order, offset, maxResult);
         if(CollectionUtils.isNotEmpty(vaults)) {
             for (Vault vault : vaults) {
@@ -236,7 +236,7 @@ public class VaultsController {
                 }
             }
             recordsTotal = vaultsService.getTotalNumberOfVaults(userID);
-            recordsFiltered = vaultsService.getTotalNumberOfVaults(query);
+            recordsFiltered = vaultsService.getTotalNumberOfVaults(userID, query);
         }
 
         VaultsData data = new VaultsData();

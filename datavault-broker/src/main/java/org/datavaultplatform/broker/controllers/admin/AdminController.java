@@ -265,7 +265,7 @@ public class AdminController {
 
         if (sort == null) sort = "";
         if (order == null) order = "asc";
-        Long recordsTotal = 0L;
+        int recordsTotal = 0;
         List<VaultInfo> vaultResponses = new ArrayList<>();
         List<Vault> vaults = vaultsService.getVaults(userID, sort, order,offset, maxResult);
         if(CollectionUtils.isNotEmpty(vaults)) {

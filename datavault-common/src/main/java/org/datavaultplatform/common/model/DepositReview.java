@@ -23,7 +23,7 @@ public class DepositReview {
     private String id;
 
     // Serialise date in ISO 8601 format
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creationTime", nullable = false)
     private Date creationTime;

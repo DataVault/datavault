@@ -102,7 +102,7 @@ public class VaultsService {
         return vault;
     }
 
-    public Long getTotalNumberOfVaults(String userId) {
+    public int getTotalNumberOfVaults(String userId) {
         return vaultDAO.getTotalNumberOfVaults(userId);
     }
 
@@ -112,7 +112,7 @@ public class VaultsService {
      * @param query
      * @return
      */
-    public Long getTotalNumberOfVaults(String userId, String query) {
+    public int getTotalNumberOfVaults(String userId, String query) {
         return vaultDAO.getTotalNumberOfVaults(userId, query);
     }
 
