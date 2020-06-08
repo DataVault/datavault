@@ -86,14 +86,16 @@ public class CheckForReview {
                 HashMap<String, Object> model = new HashMap<String, Object>();
                 model.put("vault-name", vault.getName());
                 model.put("vault-id", vault.getID());
-                model.put("vault-review-date", DateToString(vault.getReviewDate()));
+                model.put("vault-review-date", dateToString(vault.getReviewDate()));
+                model.put("retention-policy-expiry-date", dateToString(vault.getRetentionPolicyExpiry()));
                 model.put("group-name", vault.getGroup().getName());
                 model.put("home-page", homeUrl);
                 model.put("help-page", helpUrl);
                 model.put("help-mail", helpMail);
+                model.put("vault-review-link", homeUrl+ "/admin/vaults/" + vault.getID() + "/reviews");
 
                 // Email the support team
-                emailService.sendTemplateMail(helpMail, "DataVault Vault needing reviewed", "user-review-due.vm", model);
+                emailService.sendTemplateMail(helpMail, "DataVault Vault needing reviewed", "review-due-support.vm", model);
 
                 List<RoleAssignment> roleAssignments = rolesAndPermissionsService.getRoleAssignmentsForVault(vault.getID());
 
@@ -104,7 +106,7 @@ public class CheckForReview {
                         User user = usersService.getUser(roleAssignment.getUserId());
                         if (!LDAPService.getLDAPAttributes(user.getID()).isEmpty()) {
                             // User still appears to be at the Uni
-                            emailService.sendTemplateMail(user.getEmail(), "DataVault Vault needing reviewed", "user-review-due.vm", model);
+                            emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching ", "review-due-owner.vm", model);
                         }
                     } else {
                         if (roleAssignment.getRole().getName().equals("Data Manager")) {
@@ -112,7 +114,7 @@ public class CheckForReview {
                             User user = usersService.getUser(roleAssignment.getUserId());
                             if (!LDAPService.getLDAPAttributes(user.getID()).isEmpty()) {
                                 // User still appears to be at the Uni
-                                emailService.sendTemplateMail(user.getEmail(), "DataVault Vault needing reviewed", "user-review-due.vm", model);
+                                emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching ", "review-due-data-manager.vm", model);
                             }
                         }
                     }
@@ -126,7 +128,7 @@ public class CheckForReview {
     }
 
 
-    private String DateToString(Date date) {
+    private String dateToString(Date date) {
         if (date != null) {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             return dateFormat.format(date);
