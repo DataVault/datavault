@@ -23,6 +23,7 @@ public class CheckForReview {
 
     private VaultsService vaultsService;
     private VaultsReviewService vaultsReviewService;
+    private DepositsReviewService depositsReviewService;
     private LDAPService LDAPService;
     private EmailService emailService;
     private RolesAndPermissionsService rolesAndPermissionsService;
@@ -40,7 +41,11 @@ public class CheckForReview {
         this.vaultsReviewService = vaultsReviewService;
     }
 
-    public void setLDAPService(org.datavaultplatform.common.services.LDAPService LDAPService) {
+    public void setDepositsReviewService(DepositsReviewService depositsReviewService) {
+        this.depositsReviewService = depositsReviewService;
+    }
+
+    public void setLDAPService(LDAPService LDAPService) {
         this.LDAPService = LDAPService;
     }
 
@@ -82,6 +87,16 @@ public class CheckForReview {
             if (vaultsReviewService.dueForReviewEmail(vault)) {
 
                 log.info("Vault " + vault.getName() + " is due for review");
+
+                // Start the review process by creating the VaultReview and DepositReview objects. TBH I am not sure
+                // this should be done here. The review process should possibly only be started by a user. The reason
+                // it is done here is to prevent emails being sent over and over. Time will tell if this was a bad
+                // decision.
+
+                VaultReview vaultReview = vaultsReviewService.createVaultReview(vault);
+                List <DepositReview> depositReviews = depositsReviewService.addDepositReviews(vault, vaultReview);
+
+                // Now bash on with the emailing.
 
                 HashMap<String, Object> model = new HashMap<String, Object>();
                 model.put("vault-name", vault.getName());
