@@ -26,9 +26,10 @@
         <hr>
         <p>
             <b>Owner:</b>
-            <#if dataOwner.userId?has_content>
-               ${dataOwner.userId}<br/>
+            <#if dataOwner?has_content>
+               ${dataOwner.userId}
             </#if>
+            <br/>
             <b>Data Managers:</b>
             <#if dataManagers?has_content>
                 <#list dataManagers as dataManager>
