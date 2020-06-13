@@ -68,7 +68,7 @@ public class AdminReviewsController {
         List<RoleAssignment> roleAssignmentsForVault = restService.getRoleAssignmentsForVault(vaultID);
 
         List<RoleAssignment> dataManagers = roleAssignmentsForVault.stream()
-                .filter(roleAssignment -> RoleUtils.isRoleOfName(roleAssignment, "Data Manager"))
+                .filter(roleAssignment -> RoleUtils.isRoleOfName(roleAssignment, "Nominated Data Manager"))
                 .collect(Collectors.toList());
         model.addAttribute("dataManagers", dataManagers);
 
