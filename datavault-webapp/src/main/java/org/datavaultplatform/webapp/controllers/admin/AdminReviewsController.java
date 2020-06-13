@@ -129,28 +129,29 @@ public class AdminReviewsController {
             return "redirect:/admin/reviews";
         }
 
-        // We need to throw back an error if a new review date has not been entered but some deposits are being retained.
-        if ("Submit".equals(action) && vaultReviewModel.getNewReviewDate().isEmpty()) {
-            for (DepositReviewModel drm : vaultReviewModel.getDepositReviewModels()) {
-                if (drm.isToBeDeleted() == false) {
-                    redirectAttributes.addAttribute("error",  "reviewdate");
-                    return "redirect:/admin/vaults/" + vaultID + "/reviews";
+
+        if ("Submit".equals(action)) {
+            // Throw back an error if a new review date has not been entered but some deposits are being retained.
+            if (vaultReviewModel.getNewReviewDate().isEmpty()) {
+                for (DepositReviewModel drm : vaultReviewModel.getDepositReviewModels()) {
+                    if (drm.isToBeDeleted() == false) {
+                        redirectAttributes.addAttribute("error", "reviewdate");
+                        return "redirect:/admin/vaults/" + vaultID + "/reviews";
+                    }
                 }
+            } else {
+                // Update the review date in the Vault object.
+                logger.info("Editing Review Date for Vault id " + vaultID + " with new Review Date " + vaultReviewModel.getNewReviewDate());
+                restService.updateVaultReviewDate(vaultID, vaultReviewModel.getNewReviewDate());
             }
         }
 
         VaultReview originalReview = restService.getVaultReview(reviewID);
-
         originalReview.setNewReviewDate(vaultReviewModel.StringToDate(vaultReviewModel.getNewReviewDate()));
         originalReview.setComment(vaultReviewModel.getComment());
 
         if ("Submit".equals(action)) {
             originalReview.setActionedDate(new Date());
-
-            // todo : Update the Vault with the new review date!!!!!!!!!!!!!!
-            logger.info("Editing Review Date for Vault id " + vaultID + " with new Review Date " + vaultReviewModel.getNewReviewDate());
-            restService.updateVaultReviewDate(vaultID, vaultReviewModel.getNewReviewDate());
-
         }
 
         logger.info("Editing Vault Review id " + originalReview.getId());
