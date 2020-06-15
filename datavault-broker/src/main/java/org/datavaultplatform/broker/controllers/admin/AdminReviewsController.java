@@ -198,29 +198,13 @@ public class AdminReviewsController {
 
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
-        List<Deposit> deposits = vault.getDeposits();
 
-        VaultReview vaultReview = null;
-        List <DepositReview> depositReviews = null;
-
-        vaultReview = vaultsReviewService.createVaultReview(vault);
-
-        depositReviews = new ArrayList<>();
-
-        for (Deposit deposit : deposits) {
-            DepositReview depositReview = new DepositReview();
-
-            depositReview.setVaultReview(vaultReview);
-            depositReview.setDeposit(deposit);
-            depositsReviewService.addDepositReview(depositReview);
-
-            depositReviews.add(depositReview);
-        }
+        VaultReview vaultReview = vaultsReviewService.createVaultReview(vault);
+        List <DepositReview> depositReviews = depositsReviewService.addDepositReviews(vault, vaultReview);
 
         // If we pass back the Vault Review and Deposit Review we lose the links between the objects, so pass
         // back a wee Transfer Object POJO that just contains the ids, and let the client then request whatever it needs.
 
-        // Create Lists of Deposit and DepositReview ids
         List<String> depositIds = new ArrayList<>();
         List<String> depositReviewIds = new ArrayList<>();
 

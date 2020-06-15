@@ -23,6 +23,7 @@ public class CheckForReview {
 
     private VaultsService vaultsService;
     private VaultsReviewService vaultsReviewService;
+    private DepositsReviewService depositsReviewService;
     private LDAPService LDAPService;
     private EmailService emailService;
     private RolesAndPermissionsService rolesAndPermissionsService;
@@ -40,7 +41,11 @@ public class CheckForReview {
         this.vaultsReviewService = vaultsReviewService;
     }
 
-    public void setLDAPService(org.datavaultplatform.common.services.LDAPService LDAPService) {
+    public void setDepositsReviewService(DepositsReviewService depositsReviewService) {
+        this.depositsReviewService = depositsReviewService;
+    }
+
+    public void setLDAPService(LDAPService LDAPService) {
         this.LDAPService = LDAPService;
     }
 
@@ -83,6 +88,16 @@ public class CheckForReview {
 
                 log.info("Vault " + vault.getName() + " is due for review");
 
+                // Start the review process by creating the VaultReview and DepositReview objects. TBH I am not sure
+                // this should be done here. The review process should possibly only be started by a user. The reason
+                // it is done here is to prevent emails being sent over and over. Time will tell if this was a bad
+                // decision.
+
+                VaultReview vaultReview = vaultsReviewService.createVaultReview(vault);
+                List <DepositReview> depositReviews = depositsReviewService.addDepositReviews(vault, vaultReview);
+
+                // Now bash on with the emailing.
+
                 HashMap<String, Object> model = new HashMap<String, Object>();
                 model.put("vault-name", vault.getName());
                 model.put("vault-id", vault.getID());
@@ -109,7 +124,7 @@ public class CheckForReview {
                             emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching ", "review-due-owner.vm", model);
                         }
                     } else {
-                        if (roleAssignment.getRole().getName().equals("Data Manager")) {
+                        if (roleAssignment.getRole().getName().equals("Nominated Data Manager")) {
                             log.info("Email Data Manager " + roleAssignment.getUserId() + " as Review is due" );
                             User user = usersService.getUser(roleAssignment.getUserId());
                             if (!LDAPService.getLDAPAttributes(user.getID()).isEmpty()) {

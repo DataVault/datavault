@@ -3,6 +3,9 @@ FROM datavault/maven-build:latest
 
 FROM openjdk:8-jre-alpine
 
+RUN apk add --no-cache tzdata
+ENV TZ BST
+
 MAINTAINER William Petit <w.petit@ed.ac.uk>
 
 ENV DATAVAULT_HOME "/docker_datavault-home"

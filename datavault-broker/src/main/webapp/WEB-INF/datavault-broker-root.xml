@@ -193,6 +193,7 @@
     <bean id="checkForReview" class="org.datavaultplatform.broker.scheduled.CheckForReview">
         <property name="vaultsService" ref="vaultsService" />
         <property name="vaultsReviewService" ref="vaultsReviewService" />
+        <property name="depositsReviewService" ref="depositsReviewService" />
         <property name="LDAPService" ref="ldapService" />
         <property name="emailService" ref="emailService" />
         <property name="rolesAndPermissionsService" ref="rolesAndPermissionsService" />

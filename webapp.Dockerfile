@@ -3,6 +3,9 @@ FROM datavault/maven-build:latest
 
 FROM tomcat:7-jre8-alpine
 
+RUN apk add --no-cache tzdata
+ENV TZ BST
+
 MAINTAINER William Petit <w.petit@ed.ac.uk>
 
 ARG LOCAL_DATAVAULT_DIR="./datavault"
