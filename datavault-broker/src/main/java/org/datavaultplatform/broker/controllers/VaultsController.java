@@ -180,7 +180,7 @@ public class VaultsController {
             vaultsService.transferVault(vault, usersService.getUser(transfer.getUserId()), transfer.getReason());
 
             logger.debug("send email for transfer ownership from: "+previousUserID+" to "+transfer.getUserId());
-            sendEmails("transfer-vault-ownership.vm", vault, previousUserID, transfer.getUserId());
+            sendEmails("transfer-vault-ownership.vm", vault, userID, previousUserID, transfer.getUserId());
 
             TransferVaultOwnership transferEvent = new TransferVaultOwnership(transfer, vault, userID);
             transferEvent.setVault(vault);
@@ -203,7 +203,8 @@ public class VaultsController {
 
             permissionsService.createRoleAssignment(assignment);
 
-            sendEmails("transfer-vault-ownership.vm", vault, userID, transfer.getUserId());
+            // Jira RSS212-099 - 'Don't email the old owners under any circumstances', so commenting out this email.
+            //sendEmails("transfer-vault-ownership.vm", vault, userID, transfer.getUserId());
 
             CreateRoleAssignment roleAssignmentEvent = new CreateRoleAssignment(assignment, userID);
             roleAssignmentEvent.setVault(vaultsService.getVault(assignment.getVaultId()));
@@ -544,27 +545,23 @@ public class VaultsController {
     }
 
 
-    private void sendEmails(String template, Vault vault, String userId, String newOwnerId) throws Exception {
+    private void sendEmails(String template, Vault vault, String userId, String previousUserID, String newOwnerId) {
 
-        //sendEmails("transfer-vault-ownership.vm", vault, userID, transfer.getUserId());
+        User user = this.usersService.getUser(userId);
+        User previousOwner = this.usersService.getUser(previousUserID);
+        User newOwner = this.usersService.getUser(newOwnerId);
+
         HashMap<String, Object> model = new HashMap<String, Object>();
         model.put("homepage", this.homePage);
         model.put("helppage", this.helpPage);
-        User assignee = this.usersService.getUser(userId);
-        model.put("assignee", assignee.getFirstname() + " " + assignee.getLastname());
         model.put("vault", vault.getName());
-        User vaultOwner = vault.getUser();
-        model.put("previousowner", vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
-        User newOwner = this.usersService.getUser(newOwnerId);
+        model.put("assignee", user.getFirstname() + " " + user.getLastname());
+        model.put("previousowner", previousOwner.getFirstname() + " " + previousOwner.getLastname());
+
         if(newOwner != null) {
             model.put("newowner", newOwner.getFirstname() + " " + newOwner.getLastname());
-            // Send email to the deposit user
-            emailService.sendTemplateMailToUser(newOwner,
-                    "Datavault - Role Assignment",
-                    template,
-                    model);
-        }else{
-            model.put("newowner", "n/a");
+
+            emailService.sendTemplateMailToUser(newOwner, "Datavault - Role Assignment", template, model);
         }
     }
 }
