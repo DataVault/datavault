@@ -24,7 +24,7 @@
 
     <properties>
         <spring.version>4.3.26.RELEASE</spring.version>
-        <spring-security.version>4.2.14.RELEASE</spring-security.version>
+        <spring-security.version>5.3.3.RELEASE</spring-security.version>
         <spring-rabbit.version>1.4.5.RELEASE</spring-rabbit.version>
         <hibernate.version>4.3.10.Final</hibernate.version>
         <hibernate-validator.version>4.3.2.Final</hibernate-validator.version>
