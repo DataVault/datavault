@@ -109,7 +109,7 @@ public class CheckForReview {
                             emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching ", "review-due-owner.vm", model);
                         }
                     } else {
-                        if (roleAssignment.getRole().getName().equals("Data Manager")) {
+                        if (roleAssignment.getRole().getName().equals("Nominated Data Manager")) {
                             log.info("Email Data Manager " + roleAssignment.getUserId() + " as Review is due" );
                             User user = usersService.getUser(roleAssignment.getUserId());
                             if (!LDAPService.getLDAPAttributes(user.getID()).isEmpty()) {
