@@ -58,8 +58,8 @@
         <property name="activeDir" value="${activeDir}" />
         <property name="archiveDir" value="${archiveDir}" />
         <property name="emailService" ref="emailService" />
-        <property name="homePage" value="${homepage}" />
-        <property name="helpPage" value="${helppage}" />
+        <property name="homePage" value="${home.page}" />
+        <property name="helpPage" value="${help.page}" />
     </bean>
     
     <bean id="depositsController" class="org.datavaultplatform.broker.controllers.DepositsController">
