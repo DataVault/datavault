@@ -30,9 +30,8 @@ public class AdminBillingController {
 
 
 	private static final Logger logger = LoggerFactory.getLogger(AdminBillingController.class);
-	
-	private static final String _0 = "0";
-	private static final String MAX_RECORDS_PER_PAGE = "10";
+
+	private static final int MAX_RECORDS_PER_PAGE = 10;
 
     private RestService restService;
 
@@ -43,102 +42,52 @@ public class AdminBillingController {
 
     @RequestMapping(value = "/admin/billing", method = RequestMethod.GET)
     public String billingByVaults(ModelMap model,
-                               @RequestParam(value = "query", required = false) String query,
-                               @RequestParam(value = "sort", required = false) String sort,
-                               @RequestParam(value = "order", required = false) String order,
-                               @RequestParam(value = "pageId", required = false) String pageId) throws Exception {
-
-
-        String theSort = sort;
-        String theOrder = order;
-        String offset = pageId;
-        if (sort == null) theSort = "creationTime";
-        if (order == null) theOrder = "desc";
-        if(pageId == null) offset = "1";
-        model.addAttribute("activePageId", offset);
+                               @RequestParam(value = "query", required = false, defaultValue = "") String query,
+                               @RequestParam(value = "sort", required = false, defaultValue = "creationTime") String sort,
+                               @RequestParam(value = "order", required = false, defaultValue = "desc") String order,
+                               @RequestParam(value = "pageId", required = false, defaultValue = "1") int pageId)
+            throws Exception {
 
         // calculate offset which is passed to the service to fetch records from that row Id
-        int maxRecords = Integer.valueOf(MAX_RECORDS_PER_PAGE).intValue();
-        offset = String.valueOf(Integer.valueOf(offset).intValue() * maxRecords - maxRecords);
-        
-        if ((query == null) || ("".equals(query))) {
-        	VaultsData billingData = restService.getBillingVaultsAll(theSort, theOrder, offset, MAX_RECORDS_PER_PAGE);
-        	//restService.getVaultsListingAll(theSort, theOrder, offset, MAX_RECORDS_PER_PAGE);
-        	long recordsTotal = billingData.getRecordsTotal();
-        	int numberOfPages = (int)Math.ceil(recordsTotal/(Double.valueOf(MAX_RECORDS_PER_PAGE)));
-        	List<String> pages = new ArrayList<>();
-        	int i =1;
-        	while(i <= numberOfPages) {
-        		pages.add(String.valueOf(i));
-        		i++;
-        	}
-        	model.addAttribute("pages", pages);
-			model.addAttribute("vaults", billingData.getData());
-            model.addAttribute("query", "");
-            model.addAttribute("recordsInfo", constructTableRecordsInfo(offset, recordsTotal, billingData.getRecordsFiltered(),
-            		billingData.getData().size(), Boolean.FALSE));
-        } else {
-        	VaultsData filteredBillingData = restService.searchVaultsForBilling(query, theSort, theOrder, offset, MAX_RECORDS_PER_PAGE);
-            long filteredRecordsTotal = filteredBillingData.getRecordsFiltered();
-            int numberOfPages = (int)Math.ceil(filteredRecordsTotal/(Double.valueOf(MAX_RECORDS_PER_PAGE)));
-            List<String> pages = new ArrayList<>();
-        	int i =1;
-        	while(i <= numberOfPages) {
-        		pages.add(String.valueOf(i));
-        		i++;
-        	}
-        	model.addAttribute("pages", pages);
-            model.addAttribute("vaults", filteredBillingData.getData());
-            model.addAttribute("query", query);
-            model.addAttribute("recordsInfo", constructTableRecordsInfo(offset, filteredBillingData.getRecordsTotal(),
-            		filteredRecordsTotal, filteredBillingData.getData().size(), Boolean.TRUE));
-        }
-        
-        model.addAttribute("theSort", theSort);
-        model.addAttribute("theOrder", theOrder);
+        int offset = (pageId - 1) * MAX_RECORDS_PER_PAGE;
 
-        // Pass the sort and order
-        if (sort == null) sort = "";
+        VaultsData filteredBillingData = restService.searchVaultsForBilling(query, sort, order, offset, MAX_RECORDS_PER_PAGE);
+        int filteredRecordsTotal = filteredBillingData.getRecordsFiltered();
+        int numberOfPages = (int)Math.ceil((double)filteredRecordsTotal/MAX_RECORDS_PER_PAGE);
+        model.addAttribute("numberOfPages", numberOfPages);
+        model.addAttribute("activePageId", pageId);
+        model.addAttribute("vaults", filteredBillingData.getData());
+        model.addAttribute("query", query);
+
+        boolean isFiltered = !query.equals("");
+        model.addAttribute("recordsInfo",
+                constructTableRecordsInfo(offset, filteredBillingData.getRecordsTotal(),
+                        filteredRecordsTotal, filteredBillingData.getData().size(), isFiltered));
         model.addAttribute("sort", sort);
-        model.addAttribute("orderid", "asc");
-        model.addAttribute("ordername", "asc");       
-        model.addAttribute("orderuser", "asc");       
-        model.addAttribute("ordervaultsize", "asc");
-        model.addAttribute("orderProjectId", "asc");
-        model.addAttribute("ordercreationtime", "asc");
-        model.addAttribute("orderreviewDate", "asc");
-        if ("asc".equals(order)) {
-            if ("id".equals(sort)) model.addAttribute("orderid", "dec");
-            if ("name".equals(sort)) model.addAttribute("ordername", "dec");            
-            if ("reviewDate".equals(sort)) model.addAttribute("orderreviewDate", "dec");            
-            if ("user".equals(sort)) model.addAttribute("orderuser", "dec");
-            if ("vaultSize".equals(sort)) model.addAttribute("ordervaultsize", "dec");    
-            if ("projectId".equals(sort)) model.addAttribute("orderProjectId", "dec");  
-            if ("creationTime".equals(sort)) model.addAttribute("ordercreationtime", "dec");
-        }
+        model.addAttribute("order", order);
+
+        String otherOrder = order.equals("asc")?"desc":"asc";
+        model.addAttribute("ordername", "name".equals(sort)?otherOrder:"asc");
+        model.addAttribute("orderuser", "user".equals(sort)?otherOrder:"asc");
+        model.addAttribute("ordervaultsize", "vaultSize".equals(sort)?otherOrder:"asc");
+        model.addAttribute("orderProjectId", "projectId".equals(sort)?otherOrder:"asc");
+        model.addAttribute("ordercreationtime", "creationTime".equals(sort)?otherOrder:"asc");
+        model.addAttribute("orderreviewDate", "reviewDate".equals(sort)?otherOrder:"asc");
 
         return "admin/billing/index";
     }
     
     @RequestMapping(value = "/admin/billing/csv", method = RequestMethod.GET)
     public void exportBillingVaults(HttpServletResponse response,
-                               @RequestParam(value = "query", required = false) String query,
-                               @RequestParam(value = "sort", required = false) String sort,
-                               @RequestParam(value = "order", required = false) String order) throws Exception {
-        String theSort = sort;
-        String theOrder = order;
-        if (sort == null) theSort = "creationTime";
-        if (order == null) theOrder = "desc";
+                               @RequestParam(value = "query", required = false, defaultValue = "") String query,
+                               @RequestParam(value = "sort", required = false, defaultValue = "creationTime") String sort,
+                               @RequestParam(value = "order", required = false, defaultValue = "desc") String order)
+            throws Exception {
 
         List<VaultInfo> vaults = null;
 
-        if ((query == null) || ("".equals(query))) {
-            VaultsData vaultData = restService.getBillingVaultsAll(theSort, theOrder, _0, _0);
-			vaults = vaultData.getData();
-        } else {
-        	VaultsData vaultData =  restService.searchVaultsForBilling(query, theSort, theOrder, _0, _0);
-        	vaults = vaultData.getData();
-        }
+        VaultsData vaultData =  restService.searchVaultsForBilling(query, sort, order, 0, 0);
+        vaults = vaultData.getData();
 
         response.setContentType("text/csv");
 
@@ -169,13 +118,12 @@ public class AdminBillingController {
         }
     }
     
-    private String constructTableRecordsInfo(String offset, long recordsTotal, long filteredRecords, int numberOfRecordsonPage, boolean isFiltered) {
+    private String constructTableRecordsInfo(int offset, int recordsTotal, int filteredRecords, int numberOfRecordsonPage, boolean isFiltered) {
 		StringBuilder recordsInfo = new StringBuilder();
-		recordsInfo.append("Showing ").append(Integer.valueOf(offset).intValue() + 1)
-		.append(" - ").append(Integer.valueOf(offset).intValue()+  numberOfRecordsonPage);
+		recordsInfo.append("Showing ").append(offset).append(" - ").append(offset + numberOfRecordsonPage);
 		if(isFiltered) {
-			recordsInfo.append(" vaults of ").append(filteredRecords)
-			.append(" (").append("filtered from ").append(recordsTotal).append(" total vaults)");
+			recordsInfo.append(" vaults of ").append(filteredRecords).append(" (").append("filtered from ")
+                    .append(recordsTotal).append(" total vaults)");
 		} else {
 			recordsInfo.append(" vaults of ").append(recordsTotal);
 		}

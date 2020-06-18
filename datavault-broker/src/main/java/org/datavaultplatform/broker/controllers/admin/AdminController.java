@@ -148,25 +148,25 @@ public class AdminController {
                                                     description = "Deposit query field",
                                                     required = false) String query,
                                             @RequestParam(value = "sort", required = false)
-                                                @ApiQueryParam(name = "sort",
-                                                        description = "Deposit sort field",
-                                                        allowedvalues = {"name", "depositSize", "creationTime", "status",
-                                                                "depositor", "vaultName", "pureId", "school", "id," +
-                                                                "vaultId", "owner", "reviewDate"},
-                                                        defaultvalue = "creationTime", required = false) String sort,
+                                            @ApiQueryParam(name = "sort",
+                                                    description = "Deposit sort field",
+                                                    allowedvalues = {"name", "depositSize", "creationTime", "status",
+                                                            "depositor", "vaultName", "pureId", "school", "id",
+                                                            "vaultId", "owner", "reviewDate"},
+                                                    defaultvalue = "creationTime", required = false) String sort,
                                             @RequestParam(value = "order", required = false)
-                                                @ApiQueryParam(name = "order",
-                                                        description = "Deposit sort order",
-                                                        allowedvalues = {"asc", "dec"},
-                                                        defaultvalue = "asc", required = false) String order,
+                                            @ApiQueryParam(name = "order",
+                                                    description = "Deposit sort order",
+                                                    allowedvalues = {"asc", "desc"},
+                                                    defaultvalue = "desc", required = false) String order,
                                             @RequestParam(value = "offset", required = false)
-                                                @ApiQueryParam(name = "offset",
-                                                        description = "Deposit row id ",
-                                                        defaultvalue = "0", required = false) int offset,
+                                            @ApiQueryParam(name = "offset",
+                                                    description = "Deposit row id",
+                                                    defaultvalue = "0", required = false) int offset,
                                             @RequestParam(value = "maxResult", required = false)
-                                                @ApiQueryParam(name = "maxResult",
-                                                        description = "Number of records",
-                                                        required = false) int maxResult) throws Exception {
+                                            @ApiQueryParam(name = "maxResult",
+                                                    description = "Number of records",
+                                                    required = false) int maxResult) throws Exception {
         List<DepositInfo> depositResponses = new ArrayList<>();
         List<Deposit> deposits = depositsService.getDeposits(query, userID, sort, order, offset, maxResult);
         for (Deposit deposit : deposits) {

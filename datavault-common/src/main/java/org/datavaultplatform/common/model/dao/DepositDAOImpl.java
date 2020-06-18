@@ -170,7 +170,7 @@ public class DepositDAOImpl implements DepositDAO {
     }
 
     @Override
-    public List<Deposit> search(String query, String sort, String userId) {
+    public List<Deposit> search(String query, String sort, String order, String userId) {
         Session session = this.sessionFactory.openSession();
         SchoolPermissionCriteriaBuilder criteriaBuilder = createDepositCriteriaBuilder(userId, session, Permission.CAN_MANAGE_DEPOSITS);
         if (criteriaBuilder.hasNoAccess()) {
@@ -185,12 +185,11 @@ public class DepositDAOImpl implements DepositDAO {
 
         // See if there is a valid sort option
 
-        if ("id".equals(sort)) { criteria.addOrder(Order.asc("id")); }
-        else if ("name".equals(sort)) { criteria.addOrder(Order.asc("name")); }
-        else if ("status".equals(sort)) { criteria.addOrder(Order.asc("status")); }
-        else if ("filePath".equals(sort)) { criteria.addOrder(Order.asc("filePath")); }
-        else if ("depositSize".equals(sort)) { criteria.addOrder(Order.asc("depositSize")); }
-        else { criteria.addOrder(Order.asc("creationTime")); }
+        if("asc".equals(order)){
+            criteria.addOrder(Order.asc(sort));
+        } else {
+            criteria.addOrder(Order.desc(sort));
+        }
 
         List<Deposit> deposits = criteria.list();
         session.close();

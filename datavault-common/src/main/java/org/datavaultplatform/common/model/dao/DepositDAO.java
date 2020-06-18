@@ -24,7 +24,7 @@ public interface DepositDAO {
 
     public List<Deposit> completed();
 
-    public List<Deposit> search(String query, String sort, String userId);
+    public List<Deposit> search(String query, String sort, String order, String userId);
 
     public List<Deposit> getDepositsWaitingForAudit(Date olderThanDate);
 
