@@ -261,11 +261,12 @@ public class VaultsController {
 
     @RequestMapping(value = "/vaults/deposits/search", method = RequestMethod.GET)
     public List<DepositInfo> searchAllDeposits(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                               @RequestParam("query") String query,
-                                               @RequestParam(value = "sort", required = false) String sort) {
+                                               @RequestParam(value = "query", required = false, defaultValue = "") String query,
+                                               @RequestParam(value = "sort", required = false, defaultValue = "creationTime") String sort,
+                                               @RequestParam(value = "order", required = false, defaultValue = "desc") String order) {
 
         List<DepositInfo> depositResponses = new ArrayList<>();
-        for (Deposit deposit : depositsService.search(query, sort, userID)) {
+        for (Deposit deposit : depositsService.search(query, sort, order, userID)) {
             //deposit.convertToResponse();
             DepositInfo depositInfo = deposit.convertToResponse();
             User depositor = usersService.getUser(depositInfo.getUserID());
@@ -289,13 +290,15 @@ public class VaultsController {
 
     @RequestMapping(value = "/vaults/deposits/data/search", method = RequestMethod.GET)
     public DepositsData searchAllDepositsData(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                              @RequestParam("query") String query,
-                                              @RequestParam(value = "sort", required = false) String sort) throws Exception {
+                                              @RequestParam(value = "query", required = false, defaultValue = "") String query,
+                                              @RequestParam(value = "sort", required = false, defaultValue = "creationTime") String sort,
+                                              @RequestParam(value = "order", required = false, defaultValue = "desc") String order)
+            throws Exception {
 
 
         List<DepositInfo> depositResponses = new ArrayList<>();
 
-        List<Deposit> deposits = depositsService.search(query, sort, userID);
+        List<Deposit> deposits = depositsService.search(query, sort, order, userID);
         if(CollectionUtils.isNotEmpty(deposits)) {
             for (Deposit deposit : deposits) {
                 DepositInfo depositInfo = deposit.convertToResponse();
@@ -311,9 +314,7 @@ public class VaultsController {
                 depositInfo.setGroupID(vault.getGroup().getID());
                 depositInfo.setVaultReviewDate(vault.getReviewDate().toString());
                 depositResponses.add(depositInfo);
-
             }
-
         }
 
         DepositsData data = new DepositsData();

@@ -77,7 +77,9 @@ public class DepositsService {
 
     public List<Deposit> completed() { return depositDAO.completed(); }
 
-    public List<Deposit> search(String query, String sort, String userId) { return this.depositDAO.search(query, sort, userId); }
+    public List<Deposit> search(String query, String sort, String order, String userId) {
+        return this.depositDAO.search(query, sort, order, userId);
+    }
 
     public Long size(String userId) { return depositDAO.size(userId); }
     

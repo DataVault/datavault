@@ -33,45 +33,6 @@ public class BillingController {
 	private BillingService billingService;
 	private static final Logger LOGGER = LoggerFactory.getLogger(BillingController.class);
 
-    @RequestMapping(value = "/admin/billing", method = RequestMethod.GET)
-    public VaultsData getBillingVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                        @RequestParam(value = "sort", required = false)
-                                        @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "vaultSize", "user", "creationTime", "reviewDate"}, defaultvalue = "creationTime", required = false) String sort,
-                                        @RequestParam(value = "order", required = false)
-                                        @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order,
-                                        @RequestParam(value = "offset", required = false)
-									    @ApiQueryParam(name = "offset", description = "Vault row id ", defaultvalue = "0", required = false) String offset,
-									    @RequestParam(value = "maxResult", required = false)
-									    @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) throws Exception {
-
-        if (sort == null) sort = "";
-        if (order == null) order = "asc";
-        int recordsTotal = 0;
-		        
-        List<VaultInfo> billingResponses = new ArrayList<>();
-        List<Vault> vaultDetails = vaultsService.getVaults(userID, sort, order,offset, maxResult);
-        
-        if(CollectionUtils.isNotEmpty(vaultDetails)) {
-			for (Vault vaultList : vaultDetails) {				
-				billingResponses.add(vaultList.convertToResponseBilling());
-	        }
-	        recordsTotal = vaultsService.getTotalNumberOfVaults(userID);
-	        //Map of project with its size
-	        Map<String, Long> projectSizeMap = vaultsService.getAllProjectsSize();
-	        //update project Size in the response
-	        for(VaultInfo vault: billingResponses) {
-	        	if(vault.getProjectId() != null) {
-	        		vault.setProjectSize(projectSizeMap.get(vault.getProjectId()));
-	        	}
-	        }
-        }
-        //calculate and create a map of project size
-        VaultsData data = new VaultsData();
-        data.setRecordsTotal(recordsTotal);
-        data.setData(billingResponses);
-        return data;
-    }
-
     @RequestMapping(value = "/admin/billing/search", method = RequestMethod.GET)
     public VaultsData searchAllBillingVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
                                                   @RequestParam String query,
@@ -100,7 +61,7 @@ public class BillingController {
 	        	}
 	        }
 	        recordsTotal = vaultsService.getTotalNumberOfVaults(userID);
-	        recordsFiltered = vaultsService.getTotalNumberOfVaults(query);
+	        recordsFiltered = vaultsService.getTotalNumberOfVaults(userID, query);
         }
         
         VaultsData data = new VaultsData();
