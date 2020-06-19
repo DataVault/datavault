@@ -257,7 +257,7 @@ public class AdminController {
                                    @RequestParam(value = "sort", required = false)
                                    @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime", "groupID", "reviewDate"}, defaultvalue = "creationTime", required = false) String sort,
                                    @RequestParam(value = "order", required = false)
-                                   @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order,
+                                   @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "desc"}, defaultvalue = "desc", required = false) String order,
                                    @RequestParam(value = "offset", required = false)
                                    @ApiQueryParam(name = "offset", description = "Vault row id ", defaultvalue = "0", required = false) String offset,
                                    @RequestParam(value = "maxResult", required = false)

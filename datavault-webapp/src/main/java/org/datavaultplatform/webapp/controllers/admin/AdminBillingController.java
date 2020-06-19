@@ -68,7 +68,7 @@ public class AdminBillingController {
 
         String otherOrder = order.equals("asc")?"desc":"asc";
         model.addAttribute("ordername", "name".equals(sort)?otherOrder:"asc");
-        model.addAttribute("orderuser", "user".equals(sort)?otherOrder:"asc");
+        model.addAttribute("orderuser", "vault.user.id".equals(sort)?otherOrder:"asc");
         model.addAttribute("ordervaultsize", "vaultSize".equals(sort)?otherOrder:"asc");
         model.addAttribute("orderProjectId", "projectId".equals(sort)?otherOrder:"asc");
         model.addAttribute("ordercreationtime", "creationTime".equals(sort)?otherOrder:"asc");
