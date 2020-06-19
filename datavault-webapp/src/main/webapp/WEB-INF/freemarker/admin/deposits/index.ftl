@@ -32,7 +32,7 @@
 
         <form id="search-vaults" class="form" role="form" action="" method="get">
             <div class="input-group">
-                <input type="text" class="form-control" name="query" value="${query}" placeholder="Search for...">
+                <input type="text" class="form-control" name="query" value="${query?url}" placeholder="Search for...">
                 <input type="hidden" class="form-control" name="sort" value="${sort}">
                 <input type="hidden" class="form-control" name="order" value="${order}">
                 <div class="input-group-btn">
@@ -44,7 +44,9 @@
         <div align="right">
             <form id="search-vaults" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/deposits/csv" method="get">
                 <div class="input-group" align="right">
-                    <input type="text" class="form-control hidden" value="${query}" name="query" placeholder="Search for...">
+                    <input type="text" class="form-control hidden" value="${query?url}" name="query" placeholder="Search for...">
+                    <input type="text" class="form-control hidden" value="${sort}" name="sort" placeholder="Search for...">
+                    <input type="text" class="form-control hidden" value="${order}" name="order" placeholder="Search for...">
                     <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Download CSV File</button>
                 </div>
             </form>
@@ -55,16 +57,16 @@
             <table class="table table-striped">
                 <thead>
                     <tr class="tr">
-                        <th><a href="?sort=name&order=${order}&query=${query?url}">Deposit Name</a></th>
-                        <th><a href="?sort=depositSize&order=${order}&query=${query?url}">Size</a></th>
-                        <th><a href="?sort=creationTime&order=${order}&query=${query?url}">Date deposited</a></th>
-                        <th><a href="?sort=status&order=${order}&query=${query?url}">Status</a></th>
-                        <th><a href="?sort=userID&order=${order}&query=${query?url}">Depositor</a></th>
+                        <th><a href="?sort=name&order=${orderName}&query=${query?url}">Deposit Name<#if sort == "name"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
+                        <th><a href="?sort=depositSize&order=${orderDepositSize}&query=${query?url}">Size<#if sort == "depositSize"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
+                        <th><a href="?sort=creationTime&order=${orderCreationTime}&query=${query?url}">Date deposited<#if sort == "creationTime"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
+                        <th><a href="?sort=status&order=${orderStatus}&query=${query?url}">Status<#if sort == "status"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
+                        <th><a href="?sort=userID&order=${orderUserID}&query=${query?url}">Depositor<#if sort == "userID"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                         <th>Vault Name</th>
                         <th>Pure Record ID</th>
                         <th>School</th>
-                        <th><a href="?sort=id&order=${order}&query=${query?url}">Deposit ID</a></th>
-                        <th><a href="?sort=vaultID&order=${order}&query=${query?url}">Vault ID</a></th>
+                        <th><a href="?sort=id&order=${orderId}&query=${query?url}">Deposit ID<#if sort == "id"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
+                        <th><a href="?sort=vaultID&order=${orderVaultId}&query=${query?url}">Vault ID<#if sort == "vaultID"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                         <th>Vault Owner</th>
                         <th>Vault Review Date</th>
                         <th>Actions</th>
