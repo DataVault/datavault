@@ -142,26 +142,34 @@ public class VaultsController {
 
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
     public String getVaultsListing(ModelMap model) {
-        model.addAttribute("vaults", restService.getVaultsListing());
-        
-        // pass the view an empty Vault since the form expects it
-        model.addAttribute("vault", new CreateVault());
+        logger.debug("Getting the current vaults");
+        VaultInfo currentVaults[] = restService.getVaultsListing();
+        // go to vault list or vault create if no current vaults
+        if (currentVaults != null && currentVaults.length > 0) {
+            logger.debug("Current vaults: " + currentVaults.length);
+            model.addAttribute("vaults", currentVaults);
 
-        Dataset[] datasets = restService.getDatasets();
-        model.addAttribute("datasets", datasets);
-        
-        RetentionPolicy[] policies = restService.getRetentionPolicyListing();
-        model.addAttribute("policies", policies);
+            // pass the view an empty Vault since the form expects it
+            model.addAttribute("vault", new CreateVault());
 
-        Group[] groups = restService.getGroups();
-        model.addAttribute("groups", groups);
-        
-        model.put("system", system);
-        model.put("link", link);
+            Dataset[] datasets = restService.getDatasets();
+            model.addAttribute("datasets", datasets);
 
-        model.addAttribute("welcome", welcome);
+            RetentionPolicy[] policies = restService.getRetentionPolicyListing();
+            model.addAttribute("policies", policies);
 
-        return "vaults/index";
+            Group[] groups = restService.getGroups();
+            model.addAttribute("groups", groups);
+
+            model.put("system", system);
+            model.put("link", link);
+
+            model.addAttribute("welcome", welcome);
+
+            return "vaults/index";
+        }
+
+        return this.createVault(model);
     }
 
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
