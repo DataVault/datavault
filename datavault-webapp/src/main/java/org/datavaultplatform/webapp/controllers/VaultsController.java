@@ -280,6 +280,30 @@ public class VaultsController {
         return "vaults/userVaults";
     }
 
+    @RequestMapping(value = "/vaults/create", method = RequestMethod.GET)
+    public String createVault(ModelMap model) {
+        //model.addAttribute("vaults", restService.getVaultsListing());
+
+        // pass the view an empty Vault since the form expects it
+        model.addAttribute("vault", new CreateVault());
+
+        Dataset[] datasets = restService.getDatasets();
+        model.addAttribute("datasets", datasets);
+
+        RetentionPolicy[] policies = restService.getRetentionPolicyListing();
+        model.addAttribute("policies", policies);
+
+        Group[] groups = restService.getGroups();
+        model.addAttribute("groups", groups);
+
+        model.put("system", system);
+        model.put("link", link);
+
+        model.addAttribute("welcome", welcome);
+
+        return "vaults/create";
+    }
+
     // Process the completed 'create new vault' page
     @RequestMapping(value = "/vaults/create", method = RequestMethod.POST)
     public String addVault(@ModelAttribute CreateVault vault, ModelMap model) {
