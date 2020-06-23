@@ -61,12 +61,12 @@
                         <th><a href="?sort=depositSize&order=${orderDepositSize}&query=${query?url}">Size<#if sort == "depositSize"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                         <th><a href="?sort=creationTime&order=${orderCreationTime}&query=${query?url}">Date deposited<#if sort == "creationTime"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                         <th><a href="?sort=status&order=${orderStatus}&query=${query?url}">Status<#if sort == "status"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
-                        <th><a href="?sort=userID&order=${orderUserID}&query=${query?url}">Depositor<#if sort == "userID"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
+                        <th><a href="?sort=user.id&order=${orderUserID}&query=${query?url}">Depositor<#if sort == "userID"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                         <th>Vault Name</th>
                         <th>Pure Record ID</th>
                         <th>School</th>
                         <th><a href="?sort=id&order=${orderId}&query=${query?url}">Deposit ID<#if sort == "id"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
-                        <th><a href="?sort=vaultID&order=${orderVaultId}&query=${query?url}">Vault ID<#if sort == "vaultID"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
+                        <th><a href="?sort=vault.id&order=${orderVaultId}&query=${query?url}">Vault ID<#if sort == "vaultID"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                         <th>Vault Owner</th>
                         <th>Vault Review Date</th>
                         <th>Actions</th>

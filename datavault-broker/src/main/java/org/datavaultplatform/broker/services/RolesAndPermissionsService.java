@@ -22,7 +22,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
 
     private RoleAssignmentDAO roleAssignmentDao;
 
-    private UserDAO userDao;
+    private UsersService usersService;
 
     public void setRoleDao(RoleDAO roleDao) {
         this.roleDao = roleDao;
@@ -32,9 +32,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         this.permissionDao = permissionDao;
     }
 
-    public void setUserDao(UserDAO userDao) {
-        this.userDao = userDao;
-    }
+    public void setUsersService(UsersService usersService) { this.usersService = usersService; }
 
     public void setRoleAssignmentDao(RoleAssignmentDAO roleAssignmentDao) {
         this.roleAssignmentDao = roleAssignmentDao;
@@ -154,7 +152,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         if(ownerAssignment == null){
             return null;
         }
-        return userDao.findById(ownerAssignment.getUserId());
+        return usersService.getUser(ownerAssignment.getUserId());
     }
 
     public List<RoleAssignment> getRoleAssignmentsForUser(String userId) {
