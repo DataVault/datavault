@@ -384,8 +384,12 @@ public class RolesAndPermissionsController {
         if(roleAssignment.getVaultId() != null) {
             Vault vault = vaultsService.getVault(roleAssignment.getVaultId());
             model.put("vault", vault.getName());
-            User vaultOwner = vault.getUser();
-            model.put("owner", vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+            User vaultOwner = rolesAndPermissionsService.getVaultOwner(vault.getID());
+            if(vaultOwner != null) {
+                model.put("owner", vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+            } else {
+                model.put("owner", "None");
+            }
             model.put("target", "vault");
         }
         if(roleAssignment.getSchoolId() != null) {

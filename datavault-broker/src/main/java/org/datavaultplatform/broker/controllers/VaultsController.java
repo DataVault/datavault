@@ -273,9 +273,11 @@ public class VaultsController {
             depositInfo.setUserName(depositor.getFirstname() + " " + depositor.getLastname());
             Vault vault = vaultsService.getVault(depositInfo.getVaultID());
             depositInfo.setVaultName(vault.getName());
-            User vaultOwner = vault.getUser();
-            depositInfo.setVaultOwnerID(vaultOwner.getID());
-            depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+            User vaultOwner = permissionsService.getVaultOwner(vault.getID());
+            if(vaultOwner != null) {
+                depositInfo.setVaultOwnerID(vaultOwner.getID());
+                depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+            }
             depositInfo.setDatasetID(vault.getDataset().getID());
             depositInfo.setGroupName(vault.getGroup().getName());
             depositInfo.setGroupID(vault.getGroup().getID());
@@ -306,9 +308,11 @@ public class VaultsController {
                 depositInfo.setUserName(depositor.getFirstname() + " " + depositor.getLastname());
                 Vault vault = vaultsService.getVault(depositInfo.getVaultID());
                 depositInfo.setVaultName(vault.getName());
-                User vaultOwner = vault.getUser();
-                depositInfo.setVaultOwnerID(vaultOwner.getID());
-                depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+                User vaultOwner = permissionsService.getVaultOwner(vault.getID());
+                if(vaultOwner != null) {
+                    depositInfo.setVaultOwnerID(vaultOwner.getID());
+                    depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+                }
                 depositInfo.setDatasetID(vault.getDataset().getID());
                 depositInfo.setGroupName(vault.getGroup().getName());
                 depositInfo.setGroupID(vault.getGroup().getID());
