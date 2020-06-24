@@ -188,7 +188,7 @@ public class RestService {
     }
 
     public ReviewInfo[] getReviewsListing(String vaultId) {
-        HttpEntity<?> response = get(brokerURL +"/admin/vaults/" + vaultId + "/vaultreviews", ReviewInfo[].class);
+        HttpEntity<?> response = get(brokerURL +"/vaults/" + vaultId + "/vaultreviews", ReviewInfo[].class);
         return (ReviewInfo[])response.getBody();
     }
 
@@ -199,12 +199,12 @@ public class RestService {
     }
 
     public VaultReview getVaultReview(String vaultReviewId) {
-        HttpEntity<?> response = get(brokerURL + "/admin/vaults/vaultreviews/" + vaultReviewId, VaultReview.class);
+        HttpEntity<?> response = get(brokerURL + "/vaults/vaultreviews/" + vaultReviewId, VaultReview.class);
         return (VaultReview)response.getBody();
     }
 
     public DepositReview getDepositReview(String depositReviewId) {
-        HttpEntity<?> response = get(brokerURL +"/admin/vaultreviews/depositreviews/" +  depositReviewId, DepositReview.class);
+        HttpEntity<?> response = get(brokerURL +"/vaultreviews/depositreviews/" +  depositReviewId, DepositReview.class);
         return (DepositReview)response.getBody();
     }
 
