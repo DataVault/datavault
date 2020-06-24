@@ -85,49 +85,6 @@ public class AdminReviewsController {
         return vaultsData;
     }
 
-    @ApiMethod(
-            path = "/admin/vaults/{vaultid}/vaultreviews",
-            verb = ApiVerb.GET,
-            description = "Gets a list of Reviews for a Vault",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
-    })
-    @RequestMapping(value = "/admin/vaults/{vaultid}/vaultreviews", method = RequestMethod.GET)
-    public List<ReviewInfo> getVaultReviews(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                             @PathVariable("vaultid") String vaultID) throws Exception {
-
-        User user = usersService.getUser(userID);
-        Vault vault = vaultsService.getUserVault(user, vaultID);
-
-        List<ReviewInfo> reviewinfos = new ArrayList<ReviewInfo>();
-
-        for (VaultReview vr : vault.getVaultReviews()) {
-
-            VaultReview vaultReview = vr;
-            List <DepositReview> depositReviews = vr.getDepositReviews();
-
-            // Create Lists of Deposit and DepositReview ids
-            List<String> depositIds = new ArrayList<>();
-            List<String> depositReviewIds = new ArrayList<>();
-
-            for (DepositReview depositReview : depositReviews) {
-                depositIds.add(depositReview.getDeposit().getID());
-                depositReviewIds.add(depositReview.getId());
-            }
-
-            ReviewInfo reviewInfo = new ReviewInfo();
-            reviewInfo.setVaultReviewId(vaultReview.getId());
-            reviewInfo.setDepositIds(depositIds);
-            reviewInfo.setDepositReviewIds(depositReviewIds);
-
-            reviewinfos.add(reviewInfo);
-        }
-
-        return reviewinfos;
-    }
 
     @ApiMethod(
             path = "/admin/vaults/{vaultid}/vaultreviews/current",
@@ -254,63 +211,7 @@ public class AdminReviewsController {
         return vaultReview;
     }
 
-    @ApiMethod(
-            path = "/admin/vaults/vaultreviews/{vaultReviewId}",
-            verb = ApiVerb.GET,
-            description = "Get a Vault Review",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
-            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
-    })
-    @RequestMapping(value = "/admin/vaults/vaultreviews/{vaultReviewId}", method = RequestMethod.GET)
-    public VaultReview getVaultReview(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                @PathVariable("vaultReviewId") String vaultReviewId) throws Exception {
 
-        return vaultsReviewService.getVaultReview(vaultReviewId);
-    }
-
-
-
-    @ApiMethod(
-            path = "/admin/vaultreviews/{vaultReviewId}/depositreviews",
-            verb = ApiVerb.GET,
-            description = "Gets a list of Deposit Reviews for a Vault Review",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
-    })
-    @RequestMapping(value = "/admin/vaultreviews/{vaultReviewId}/depositreviews", method = RequestMethod.GET)
-    public List<DepositReview> getDepositReviews(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                             @PathVariable("vaultReviewId") String vaultReviewId) throws Exception {
-
-        VaultReview vaultReview = vaultsReviewService.getVaultReview(vaultReviewId);
-        return vaultReview.getDepositReviews();
-
-    }
-
-    @ApiMethod(
-            path = "/admin/vaultreviews/depositreviews/{depositReviewId}",
-            verb = ApiVerb.GET,
-            description = "Gets a particular Deposit Review",
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            responsestatuscode = "200 - OK"
-    )
-    @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
-    })
-    @RequestMapping(value = "/admin/vaultreviews/depositreviews/{depositReviewId}", method = RequestMethod.GET)
-    public DepositReview getDepositReview(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                                 @PathVariable("depositReviewId") String depositReviewId) throws Exception {
-
-        DepositReview depositReview = depositsReviewService.getDepositReview(depositReviewId);
-        return depositReview;
-
-    }
 
     @ApiMethod(
             path = "/admin/vaultreviews/depositreviews",
