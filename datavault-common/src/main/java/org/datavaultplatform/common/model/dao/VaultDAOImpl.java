@@ -175,47 +175,14 @@ public class VaultDAOImpl implements VaultDAO {
 
     private void order(String sort, String order, Criteria criteria) {
         // Default to ascending order
-        boolean asc = false;
-        if (!"dec".equals(order)) {
-            asc = true;
-        }
+        boolean asc = ("desc".equals(order))?false:true;
 
         // See if there is a valid sort option
-        if ("id".equals(sort)) {
+        if ("user".equals(sort)) {
             if (asc) {
-                criteria.addOrder(Order.asc("id"));
+                criteria.addOrder(Order.asc("user.id"));
             } else {
-                criteria.addOrder(Order.desc("id"));
-            }
-        } else if ("name".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("name"));
-            } else {
-                criteria.addOrder(Order.desc("name"));
-            }
-        } else if ("description".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("description"));
-            } else {
-                criteria.addOrder(Order.desc("description"));
-            }
-        } else if ("vaultSize".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("vaultSize"));
-            } else {
-                criteria.addOrder(Order.desc("vaultSize"));
-            }
-        } else if ("user".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("description"));
-            } else {
-                criteria.addOrder(Order.desc("description"));
-            }
-        } else if ("policy".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("policy"));
-            } else {
-                criteria.addOrder(Order.desc("policy"));
+                criteria.addOrder(Order.desc("user.id"));
             }
         } else if ("groupID".equals(sort)) {
         	criteria.createAlias("group", "g");
@@ -224,23 +191,11 @@ public class VaultDAOImpl implements VaultDAO {
             } else {
                 criteria.addOrder(Order.desc("g.id"));
             }
-        } else if ("reviewDate".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("reviewDate"));
-            } else {
-                criteria.addOrder(Order.desc("reviewDate"));
-            }
-        } else if ("projectId".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("projectId"));
-            } else {
-                criteria.addOrder(Order.desc("projectId"));
-            }
         } else {
             if (asc) {
-                criteria.addOrder(Order.asc("creationTime"));
+                criteria.addOrder(Order.asc(sort));
             } else {
-                criteria.addOrder(Order.desc("creationTime"));
+                criteria.addOrder(Order.desc(sort));
             }
         }
     }
