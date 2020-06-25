@@ -290,7 +290,6 @@ public class VaultsController {
 
     @RequestMapping(value = "/vaults/create", method = RequestMethod.GET)
     public String createVault(ModelMap model) {
-        //model.addAttribute("vaults", restService.getVaultsListing());
 
         // pass the view an empty Vault since the form expects it
         model.addAttribute("vault", new CreateVault());
