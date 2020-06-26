@@ -56,6 +56,7 @@ public class AdminController {
     private JobsService jobsService;
     private ExternalMetadataService externalMetadataService;
     private AuditsService auditsService;
+    private RolesAndPermissionsService permissionsService;
     private Sender sender;
     private String optionsDir;
     private String tempDir;
@@ -111,7 +112,11 @@ public class AdminController {
     public void setAuditsService(AuditsService auditsService) {
         this.auditsService = auditsService;
     }
-    
+
+    public void setPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
+        this.permissionsService = rolesAndPermissionsService;
+    }
+
     public void setArchiveStoreService(ArchiveStoreService archiveStoreService) {
         this.archiveStoreService = archiveStoreService;
     }
@@ -175,7 +180,7 @@ public class AdminController {
             depositInfo.setUserName(depositor.getFirstname() + " " + depositor.getLastname());
             Vault vault = vaultsService.getVault(depositInfo.getVaultID());
             depositInfo.setVaultName(vault.getName());
-            User vaultOwner = vault.getUser();
+            User vaultOwner = permissionsService.getVaultOwner(vault.getID());
             if (vaultOwner != null) {
                 depositInfo.setVaultOwnerID(vaultOwner.getID());
                 depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
@@ -217,9 +222,11 @@ public class AdminController {
                 depositInfo.setUserName(depositor.getFirstname() + " " + depositor.getLastname());
                 Vault vault = vaultsService.getVault(depositInfo.getVaultID());
                 depositInfo.setVaultName(vault.getName());
-                User vaultOwner = vault.getUser();
-                depositInfo.setVaultOwnerID(vaultOwner.getID());
-                depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+                User vaultOwner = permissionsService.getVaultOwner(vault.getID());
+                if(vaultOwner != null) {
+                    depositInfo.setVaultOwnerID(vaultOwner.getID());
+                    depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+                }
                 depositInfo.setDatasetID(vault.getDataset().getID());
                 depositInfo.setGroupName(vault.getGroup().getName());
                 depositInfo.setGroupID(vault.getGroup().getID());
@@ -257,7 +264,7 @@ public class AdminController {
                                    @RequestParam(value = "sort", required = false)
                                    @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime", "groupID", "reviewDate"}, defaultvalue = "creationTime", required = false) String sort,
                                    @RequestParam(value = "order", required = false)
-                                   @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order,
+                                   @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "desc"}, defaultvalue = "desc", required = false) String order,
                                    @RequestParam(value = "offset", required = false)
                                    @ApiQueryParam(name = "offset", description = "Vault row id ", defaultvalue = "0", required = false) String offset,
                                    @RequestParam(value = "maxResult", required = false)
