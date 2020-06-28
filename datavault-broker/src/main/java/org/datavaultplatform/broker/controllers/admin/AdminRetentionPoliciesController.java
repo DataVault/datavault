@@ -109,6 +109,13 @@ public class AdminRetentionPoliciesController {
 
     }
 
+    @RequestMapping(value = "/admin/retentionpolicies/delete/{id}", method = RequestMethod.DELETE)
+    public void deleteRetentionPolicy(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                      @PathVariable("id") String policyID) throws Exception {
+
+        retentionPoliciesService.delete(policyID);
+    }
+
 
 
 

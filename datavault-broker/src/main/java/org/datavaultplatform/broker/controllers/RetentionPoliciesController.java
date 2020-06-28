@@ -38,32 +38,6 @@ public class RetentionPoliciesController {
         return retentionPoliciesService.getRetentionPolicies();
     }
 
-    /*
-    @RequestMapping(value = "/retentionpolicies/{policyid}", method = RequestMethod.GET)
-    public RetentionPolicy getRetentionPolicy(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                              @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
-                                              @PathVariable("policyid") String policyID) {
-        return retentionPoliciesService.getPolicy(policyID);
-    }
 
-    @RequestMapping(value = "/retentionpolicies/update", method = RequestMethod.POST)
-    public ResponseEntity<Object> updateRetentionPolicy(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                              @RequestBody RetentionPolicy policy) throws Exception {
-
-        User user = adminService.ensureAdminUser(userID);
-
-        retentionPoliciesService.updateRetentionPolicy(policy);
-        return new ResponseEntity<>(policy, HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/retentionpolicies/delete/{id}", method = RequestMethod.DELETE)
-    public void deleteRetentionPolicy(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                                        @PathVariable("id") String policyID) throws Exception {
-
-        User user = adminService.ensureAdminUser(userID);
-
-        retentionPoliciesService.delete(policyID);
-    }
-    */
 
 }

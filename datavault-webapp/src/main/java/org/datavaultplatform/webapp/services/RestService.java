@@ -67,6 +67,8 @@ public class RestService {
         logger.debug("Calling Broker with url:" + url + " Method:" + method);
         System.out.println("Calling Broker with url:" + url + " Method:" + method);
 
+        // todo : check the http status code before returning?
+
         return restTemplate.exchange(url, method, entity, clazz);
 
     }
@@ -744,14 +746,11 @@ public class RestService {
     }
 
     public void deleteRetentionPolicy(String policyId) {
-        HttpEntity<?> response = delete(brokerURL + "/retentionpolicies/delete/" + policyId, Void.class);
+        HttpEntity<?> response = delete(brokerURL + "/admin/retentionpolicies/delete/" + policyId, Void.class);
     }
 
     public CreateRetentionPolicy addRetentionPolicy(CreateRetentionPolicy createRetentionPolicy) {
         HttpEntity<?> response = post(brokerURL + "/admin/retentionpolicies", CreateRetentionPolicy.class, createRetentionPolicy);
-
-        // todo : Could I check the http status code here?????
-
         return (CreateRetentionPolicy)response.getBody();
     }
 

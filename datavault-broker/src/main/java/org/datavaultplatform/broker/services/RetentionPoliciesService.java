@@ -1,15 +1,21 @@
 package org.datavaultplatform.broker.services;
 
 import org.datavaultplatform.broker.controllers.admin.AdminRetentionPoliciesController;
+import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.RetentionPolicy;
+import org.datavaultplatform.common.model.Retrieve;
+import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.dao.RetentionPolicyDAO;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
+import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -48,8 +54,6 @@ public class RetentionPoliciesService {
         logger.info("Build RetentionPolicy from CreateRetentionPolicy");
 
         RetentionPolicy retentionPolicy = new RetentionPolicy();
-
-        logger.info("createRetentionPolicy.getId() = " + createRetentionPolicy.getId());
 
         retentionPolicy.setId(createRetentionPolicy.getId());
         retentionPolicy.setName(createRetentionPolicy.getName());
@@ -107,18 +111,6 @@ public class RetentionPoliciesService {
 
     }
 
-
-    private int stringToInt(String string) {
-        int i;
-        try {i = Integer.parseInt(string);
-        } catch (Exception e) {
-            return 0;
-        }
-
-        return i;
-    }
-
-
     private String dateToString(Date date) {
         if (date != null) {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -126,7 +118,6 @@ public class RetentionPoliciesService {
         } else {
             return "";
         }
-
     }
 
     private Date stringToDate(String string) {
@@ -138,6 +129,69 @@ public class RetentionPoliciesService {
         }
 
         return date;
+    }
+
+    public int run(Vault v) {
+        RetentionPolicy rp = v.getRetentionPolicy();
+
+        if (rp.getMinRetentionPeriod() > 0) {
+            Date now = new Date();
+            Date check = getReviewDate(v);
+
+            // Is it time for review?
+            if (check.before(now)) {
+                v.setRetentionPolicyStatus(RetentionPolicyStatus.REVIEW);
+                return RetentionPolicyStatus.REVIEW;
+            }
+        }
+
+        v.setRetentionPolicyStatus(RetentionPolicyStatus.OK);
+        return RetentionPolicyStatus.OK;
+
+    }
+
+    public Date getReviewDate(Vault v) {
+
+        logger.info("Calculating Expiry Date for vault " + v.getName());
+
+        Date check;
+        if (v.getGrantEndDate() != null) {
+            check = v.getGrantEndDate();
+        } else {
+            check = v.getCreationTime();
+        }
+
+        logger.info("Start date is " + check);
+
+        RetentionPolicy rp = v.getRetentionPolicy();
+
+        if (rp.isExtendUponRetrieval()) {
+            // At the time of writing this means its EPSRC
+
+            // Get all the retrieve events
+            ArrayList<Retrieve> retrieves = new ArrayList();
+            for (Deposit d : v.getDeposits()) {
+                retrieves.addAll(d.getRetrieves());
+            }
+
+            // Have their been any retrieves?
+            if (!retrieves.isEmpty()) {
+                check = retrieves.get(0).getTimestamp();
+                for (Retrieve r : retrieves) {
+                    if (r.getTimestamp().after(check)) {
+                        check = r.getTimestamp();
+                    }
+                }
+            }
+        }
+
+        Calendar c = Calendar.getInstance();
+        c.setTime(check);
+        c.add(Calendar.YEAR, rp.getMinRetentionPeriod());
+        check = c.getTime();
+
+
+        return check;
     }
 }
 
