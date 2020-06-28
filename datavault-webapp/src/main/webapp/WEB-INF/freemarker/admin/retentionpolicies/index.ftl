@@ -23,11 +23,8 @@
 
                 <thead>
                     <tr class="tr">
-                        <th>ID</th>
                         <th>Name</th>
                         <th>Description</th>
-
-
                         <th></th>
                         <th></th>
                     </tr>
@@ -36,14 +33,12 @@
                 <tbody>
                     <#list policies as policy>
                         <tr id="policy-row-${policy.getID()}" class="tr">
-                            <td>${policy.getID()?html}</td>
                             <td>
-                                <input id="${policy.getID()}-name" value="${policy.name?html}"/>
+                                ${policy.name!""}
                             </td>
                             <td>
-                                <textarea id="${policy.getID()}-description" class="form-control" name="${policy.getID()}-description" rows="3">${policy.description!?html}</textarea>
+                                ${policy.description!""}
                             </td>
-
                             <td><a class="update-btn btn btn-default btn-sm" href="${springMacroRequestContext.getContextPath()}/admin/retentionpolicies/edit/${policy.getID()}"<span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Edit Retention Policy </a></td>
                             <td><button class="delete-btn btn btn-danger btn-sm" data-policyid="${policy.getID()}">Delete Policy</button></td>
                         </tr>
