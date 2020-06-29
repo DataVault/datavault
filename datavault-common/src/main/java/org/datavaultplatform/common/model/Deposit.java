@@ -88,7 +88,7 @@ public class Deposit {
     @JsonIgnore
     @OneToMany(targetEntity=DepositReview.class, mappedBy="deposit", fetch=FetchType.LAZY)
     @OrderBy("timestamp")
-    private List<Retrieve> depositReviews;
+    private List<DepositReview> depositReviews;
 
 
     @ApiObjectField(description = "Status of the Deposit", allowedvalues={"NOT_STARTED", "IN_PROGRESS", "COMPLETE"})
@@ -320,11 +320,11 @@ public class Deposit {
 
     public List<Retrieve> getRetrieves() { return retrieves; }
 
-    public List<Retrieve> getDepositReviews() {
+    public List<DepositReview> getDepositReviews() {
         return depositReviews;
     }
 
-    public void setDepositReviews(List<Retrieve> depositReviews) {
+    public void setDepositReviews(List<DepositReview> depositReviews) {
         this.depositReviews = depositReviews;
     }
 
