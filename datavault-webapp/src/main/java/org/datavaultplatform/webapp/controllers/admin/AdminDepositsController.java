@@ -49,14 +49,12 @@ public class AdminDepositsController {
 
     @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)
     public String getDepositsListing(ModelMap model,
-                                     @RequestParam(value = "query", required = false) String query,
-                                     @RequestParam(value = "sort", required = false) String sort,
-                                     @RequestParam(value = "order", required = false) String order,
+                                     @RequestParam(value = "query", required = false, defaultValue = "") String query,
+                                     @RequestParam(value = "sort", required = false, defaultValue = "creationTime") String sort,
+                                     @RequestParam(value = "order", required = false, defaultValue = "desc") String order,
                                      @RequestParam(value = "pageId", defaultValue = "1") int pageId)
             throws Exception {
-        if(sort == null) sort = "creationTime";
-        if(order == null) order = "desc";
-        if (query == null) query = "";
+
         model.addAttribute("activePageId", pageId);
 
         // calculate offset which is passed to the service to fetch records from that row Id
@@ -68,9 +66,7 @@ public class AdminDepositsController {
 
         int totalDeposits = restService.getTotalDepositsCount(query);
 
-        order = ("desc".equals(order))? "asc" : "desc";
-
-        int numberOfPages = (int)Math.ceil(deposits.length/DEFAULT_RECORDS_PER_PAGE);
+        int numberOfPages = (int)Math.ceil((double) deposits.length/DEFAULT_RECORDS_PER_PAGE);
 
         model.addAttribute("query", "");
         model.addAttribute("sort", sort);
@@ -79,35 +75,32 @@ public class AdminDepositsController {
         model.addAttribute("query", query);
         model.addAttribute("recordPerPage", DEFAULT_RECORDS_PER_PAGE);
         model.addAttribute("totalRecords", totalDeposits);
-        model.addAttribute("totalPages", (int)Math.ceil(totalDeposits/Double.valueOf(DEFAULT_RECORDS_PER_PAGE)));
+        model.addAttribute("totalPages", (int)Math.ceil((double)totalDeposits/DEFAULT_RECORDS_PER_PAGE));
 
         model.addAttribute("numberOfPages", numberOfPages);
+
+        String otherOrder = order.equals("asc")?"desc":"asc";
+        model.addAttribute("orderName", "name".equals(sort)?otherOrder:"asc");
+        model.addAttribute("orderDepositSize", "depositSize".equals(sort)?otherOrder:"asc");
+        model.addAttribute("orderCreationTime", "creationTime".equals(sort)?otherOrder:"asc");
+        model.addAttribute("orderStatus", "status".equals(sort)?otherOrder:"asc");
+        model.addAttribute("orderUserID", "userID".equals(sort)?otherOrder:"asc");
+        model.addAttribute("orderId", "id".equals(sort)?otherOrder:"asc");
+        model.addAttribute("orderVaultId", "vaultID".equals(sort)?otherOrder:"asc");
 
         return "admin/deposits/index";
     }
 
     @RequestMapping(value = "/admin/deposits/csv", method = RequestMethod.GET)
     public void exportVaults(HttpServletResponse response,
-                             @RequestParam(value = "query", required = false) String query,
-                             @RequestParam(value = "sort", required = false) String sort,
-                             @RequestParam(value = "order", required = false) String order) throws Exception {
+                             @RequestParam(value = "query", required = false, defaultValue = "") String query,
+                             @RequestParam(value = "sort", required = false, defaultValue = "creationTime") String sort,
+                             @RequestParam(value = "order", required = false, defaultValue = "desc") String order) throws Exception {
 
         List<DepositInfo> deposits = null;
-        if ((query == null) || ("".equals(query))) {
-            if ((sort == null) || ("".equals(sort))) {
-                DepositsData depositData =restService.getDepositsListingAllData();
-                deposits = depositData.getData();
-            } else {
-                DepositsData depositData = restService.getDepositsListingAllData(sort);
-                deposits = depositData.getData();
-            }
 
-        } else {
-
-            DepositsData depositData =restService.searchDepositsData(query, sort);
-            deposits = depositData.getData();
-        }
-
+        DepositsData depositData =restService.searchDepositsData(query, sort, order);
+        deposits = depositData.getData();
 
         response.setContentType("text/csv");
 

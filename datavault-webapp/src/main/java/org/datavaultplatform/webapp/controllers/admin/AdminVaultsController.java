@@ -30,7 +30,6 @@ import org.supercsv.prefs.CsvPreference;
 @Controller
 public class AdminVaultsController {
 
-
 	private static final Logger logger = LoggerFactory.getLogger(AdminVaultsController.class);
 	
 	private static final String _0 = "0";
@@ -57,7 +56,7 @@ public class AdminVaultsController {
 
         VaultsData filteredVaultsData = restService.searchVaults(query, sort, order, offset, MAX_RECORDS_PER_PAGE);
         int filteredRecordsTotal = filteredVaultsData.getRecordsFiltered();
-        int numberOfPages = (int)Math.ceil(filteredRecordsTotal/MAX_RECORDS_PER_PAGE);
+        int numberOfPages = (int)Math.ceil((double)filteredRecordsTotal/MAX_RECORDS_PER_PAGE);
         model.addAttribute("numberOfPages", numberOfPages);
         model.addAttribute("vaults", filteredVaultsData.getData());
         model.addAttribute("query", query);
@@ -75,28 +74,15 @@ public class AdminVaultsController {
         // Pass the sort and order
         if (sort == null) sort = "";
         model.addAttribute("sort", sort);
-        model.addAttribute("order", sort);
-        model.addAttribute("orderid", "asc");
-        model.addAttribute("ordername", "asc");
-        model.addAttribute("ordergroupID", "asc");
-        model.addAttribute("orderreviewDate", "asc");
-        model.addAttribute("orderdescription", "asc");
-        model.addAttribute("orderuser", "asc");
-        model.addAttribute("numberOfDeposits", "asc");
-        model.addAttribute("ordervaultsize", "asc");
-        model.addAttribute("orderpolicy", "asc");
-        model.addAttribute("ordercreationtime", "asc");
-        if ("asc".equals(order)) {
-            if ("id".equals(sort)) model.addAttribute("orderid", "dec");
-            if ("name".equals(sort)) model.addAttribute("ordername", "dec");
-            if ("groupID".equals(sort)) model.addAttribute("ordergroupID", "dec");
-            if ("reviewDate".equals(sort)) model.addAttribute("orderreviewDate", "dec");
-            if ("description".equals(sort)) model.addAttribute("orderdescription", "dec");
-            if ("user".equals(sort)) model.addAttribute("orderuser", "dec");
-            if ("vaultSize".equals(sort)) model.addAttribute("ordervaultsize", "dec");
-            if ("policy".equals(sort)) model.addAttribute("orderpolicy", "dec");
-            if ("creationTime".equals(sort)) model.addAttribute("ordercreationtime", "dec");
-        }
+        model.addAttribute("order", order);
+
+        String otherOrder = order.equals("asc")?"desc":"asc";
+        model.addAttribute("ordername", "name".equals(sort)?otherOrder:"asc");
+        model.addAttribute("ordervaultsize", "vaultSize".equals(sort)?otherOrder:"asc");
+        model.addAttribute("orderuser", "user".equals(sort)?otherOrder:"asc");
+        model.addAttribute("orderGroupId", "groupID".equals(sort)?otherOrder:"asc");
+        model.addAttribute("orderreviewDate", "reviewDate".equals(sort)?otherOrder:"asc");
+        model.addAttribute("ordercreationtime", "creationTime".equals(sort)?otherOrder:"asc");
 
         return "admin/vaults/index";
     }
@@ -125,13 +111,8 @@ public class AdminVaultsController {
 
         List<VaultInfo> vaults = null;
 
-        if ((query == null) || ("".equals(query))) {
-            VaultsData vaultData = restService.getVaultsListingAll(theSort, theOrder, 0, 0);
-			vaults = vaultData.getData();
-        } else {
-        	VaultsData vaultData =  restService.searchVaults(query, theSort, theOrder, 0, 0);
-        	vaults = vaultData.getData();
-        }
+        VaultsData vaultData =  restService.searchVaults(query, theSort, theOrder, 0, 0);
+        vaults = vaultData.getData();
 
         response.setContentType("text/csv");
 
