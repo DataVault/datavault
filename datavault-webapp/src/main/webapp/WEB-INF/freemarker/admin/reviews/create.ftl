@@ -41,15 +41,33 @@
             <#assign aDate = vault.creationTime?date>
             <b>Created:</b> ${aDate?iso_utc}<br/>
             <b>Group:</b> ${group.name?html}<br/>
-            <b>Retention Policy:</b> ${retentionPolicy.name?html}<br/>
+
+            <b>Retention Policy:</b> ${createRetentionPolicy.name} :
+            <#if createRetentionPolicy.extendUponRetrieval>
+            This policy does increase the length of time data must be kept if retrieved for an external user. To view retrievals, go to the event log.
+            <#else>
+            This policy does not increase the length of time data must be kept if retrieved for an external user. To view retrievals, go to the event log.
+            </#if>
+            <br/>
+
             <#assign aDate = vault.policyExpiry?date>
-            <b>Retention Policy expiry date:</b> ${aDate?iso_utc} (Status: ${vault.policyStatusStr?html})<br/>
+            <b>Retention Policy expiry date:</b> ${aDate?iso_utc}<br/>
+            (Date before which data should not be deleted, according to the funder retention policy, taking into account any extensions caused by retrievals for external users, if applicable. The expiry date is calculated by adding the minimum number of years to the grant end date. Data may be deleted sooner for overriding reason such as data protection, or if the funder counts the retention period as starting from the data creation date.)
+            <br/>
+
+            <#assign policyStatus = vault.policyStatusStr>
+            <#if policyStatus == "1">
+                <b>Status as of today's date: The funder's minimum retention period has not yet expired, data should not yet be deleted unless there is an overriding reason.<br/>
+            <#elseif policyStatus == "2">
+                <b>Status as of today's date: The funder's minimum retention period has expired.<br/>
+            </#if>
+
             <b>Size:</b> ${vault.getSizeStr()}<br/>
         </p>
 
         <p>
             <#assign aDate = vault.reviewDate?date>
-            <b>Current review date:</b> ${aDate?iso_utc}
+            <b>Current review date:</b> ${aDate?iso_utc}<br/>
         </p>
 
         <#if error?has_content>
