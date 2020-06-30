@@ -146,8 +146,12 @@ public class AdminReviewsController {
             }
         }
 
+        // Get the old stuff
         VaultReview originalReview = restService.getVaultReview(reviewID);
+        VaultInfo vault = restService.getVault(vaultID);
+        // Now update it
         originalReview.setNewReviewDate(vaultReviewModel.StringToDate(vaultReviewModel.getNewReviewDate()));
+        originalReview.setOldReviewDate(vault.getReviewDate());
         originalReview.setComment(vaultReviewModel.getComment());
 
         if ("Submit".equals(action)) {
