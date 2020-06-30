@@ -42,7 +42,7 @@
             </div>
 
             <div class="form-check">
-                <label  for="extendUponRetrieval" class="control-label">Should the retention period be extended if a deposit is retrieved?</label>
+                <label  for="extendUponRetrieval" class="control-label">Should the retention period be extended if a deposit is retrieved for an external user?</label>
                 <@spring.bind "retentionPolicy.extendUponRetrieval" />
                 <input type="checkbox" class="form-check-input" id="extendUponRetrieval"
                        name="${spring.status.expression}"
