@@ -77,7 +77,7 @@ public class AdminReviewsController {
                 .findFirst()
                 .ifPresent(roleAssignment -> model.addAttribute("dataOwner", roleAssignment));
 
-        model.addAttribute(restService.getRetentionPolicy(vault.getPolicyID()));
+        model.addAttribute("createRetentionPolicy", restService.getRetentionPolicy(vault.getPolicyID()));
         model.addAttribute(restService.getGroup(vault.getGroupID()));
 
         ReviewInfo reviewInfo = restService.getCurrentReview(vaultID);
