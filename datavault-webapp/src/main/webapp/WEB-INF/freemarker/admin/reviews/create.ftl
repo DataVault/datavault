@@ -96,7 +96,10 @@
                             <th>Deposit</th>
                             <th>Status</th>
                             <th>Timestamp</th>
-                            <th>Delete</th>
+                            <th>Retain</th>
+                            <th>Delete at<br/>review date</th>
+                            <th>Delete at<br/>expiry date</th>
+                            <th>Delete<br/>now</th>
                             <th>Comment</th>
                         </tr>
                     </thead>
@@ -133,14 +136,18 @@
 
                                 <td> ${drm.getCreationTime()?datetime}</td>
 
+                                <@spring.bind "vaultReviewModel.depositReviewModels[${drm_index}].deleteStatus" />
                                 <td>
-                                    <div class="form-check">
-                                    <!--<div class="custom-control custom-checkbox">-->
-                                        <@spring.bind "vaultReviewModel.depositReviewModels[${drm_index}].toBeDeleted" />
-                                        <input type="checkbox" class="form-check-input" id="deleteDeposit"
-                                               name="${spring.status.expression}"
-                                               value="true" ${drm.toBeDeleted?then('checked', '')} />
-                                    </div>
+                                    <input type="radio" class="radio-inline" name="${spring.status.expression}" value="0" ${(drm.deleteStatus == 0)?then('checked', '')} />
+                                </td>
+                                <td>
+                                    <input type="radio" class="radio-inline" name="${spring.status.expression}" value="1" ${(drm.deleteStatus == 1)?then('checked', '')} />
+                                </td>
+                                <td>
+                                    <input type="radio" class="radio-inline" name="${spring.status.expression}" value="2" ${(drm.deleteStatus == 2)?then('checked', '')}/>
+                                </td>
+                                <td>
+                                    <input type="radio" class="radio-inline" name="${spring.status.expression}" value="3" ${(drm.deleteStatus == 3)?then('checked', '')}/>
                                 </td>
 
                                 <td>

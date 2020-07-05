@@ -13,7 +13,7 @@ import java.util.Date;
 @ApiObject(name = "DepositReview")
 @Entity
 @Table(name="DepositReviews")
-public class DepositReview {
+public class DepositReview  {
 
     // Deposit Identifier
     @Id
@@ -31,6 +31,10 @@ public class DepositReview {
     // Has the user indicated the deposit can be deleted?
     @Column(name = "toBeDeleted")
     private boolean toBeDeleted;
+
+    // When should the deposit be deleted?
+    @Column(name="deleteStatus", nullable = false)
+    private int deleteStatus;
 
     // A comment, what more can I say
     @Column(name = "comment", columnDefinition = "TEXT")
@@ -73,6 +77,14 @@ public class DepositReview {
 
     public void setToBeDeleted(boolean toBeDeleted) {
         this.toBeDeleted = toBeDeleted;
+    }
+
+    public int getDeleteStatus() {
+        return deleteStatus;
+    }
+
+    public void setDeleteStatus(int deleteStatus) {
+        this.deleteStatus = deleteStatus;
     }
 
     public String getComment() {
