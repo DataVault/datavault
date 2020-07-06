@@ -1,0 +1,1 @@
+ALTER TABLE VaultReviews ADD oldReviewDate date DEFAULT NULL;

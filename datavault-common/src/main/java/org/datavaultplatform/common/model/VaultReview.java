@@ -44,6 +44,12 @@ public class VaultReview {
     @Column(name = "newReviewDate", nullable = true)
     private Date newReviewDate;
 
+    // Serialise date in ISO 8601 format
+    //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @Temporal(TemporalType.DATE)
+    @Column(name = "oldReviewDate", nullable = true)
+    private Date oldReviewDate;
+
     // The date this review was finally actioned.
     // Serialise date in ISO 8601 format
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss")
@@ -94,6 +100,14 @@ public class VaultReview {
 
     public void setNewReviewDate(Date newReviewDate) {
         this.newReviewDate = newReviewDate;
+    }
+
+    public Date getOldReviewDate() {
+        return oldReviewDate;
+    }
+
+    public void setOldReviewDate(Date oldReviewDate) {
+        this.oldReviewDate = oldReviewDate;
     }
 
     public Date getActionedDate() {
