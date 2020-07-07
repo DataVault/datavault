@@ -49,7 +49,7 @@
                         <th><a href="?sort=creationTime&order=${ordercreationtime}&query=${query?url}">Date created<#if sort == "creationTime"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                         <th>Amount to be Billed</th>
                         <th>Amount Billed</th>
-                        <th><a href="?sort=user&order=${orderuser}&query=${query?url}">Owner<#if sort == "user"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
+                        <th><a href="?sort=vault.user.id&order=${orderuser}&query=${query?url}">Owner<#if sort == "vault.user.id"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                       
                         <th></th>
                     </tr>

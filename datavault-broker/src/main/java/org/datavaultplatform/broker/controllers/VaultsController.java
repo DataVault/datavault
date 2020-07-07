@@ -224,7 +224,7 @@ public class VaultsController {
                                       @RequestParam String query,
                                       @RequestParam(value = "sort", required = false) String sort,
                                       @RequestParam(value = "order", required = false)
-                                      @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "dec"}, defaultvalue = "asc", required = false) String order,
+                                      @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "desc"}, defaultvalue = "asc", required = false) String order,
                                       @RequestParam(value = "offset", required = false)
                                       @ApiQueryParam(name = "offset", description = "Vault row id ", defaultvalue = "0", required = false) String offset,
                                       @RequestParam(value = "maxResult", required = false)
@@ -273,9 +273,11 @@ public class VaultsController {
             depositInfo.setUserName(depositor.getFirstname() + " " + depositor.getLastname());
             Vault vault = vaultsService.getVault(depositInfo.getVaultID());
             depositInfo.setVaultName(vault.getName());
-            User vaultOwner = vault.getUser();
-            depositInfo.setVaultOwnerID(vaultOwner.getID());
-            depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+            User vaultOwner = permissionsService.getVaultOwner(vault.getID());
+            if(vaultOwner != null) {
+                depositInfo.setVaultOwnerID(vaultOwner.getID());
+                depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+            }
             depositInfo.setDatasetID(vault.getDataset().getID());
             depositInfo.setGroupName(vault.getGroup().getName());
             depositInfo.setGroupID(vault.getGroup().getID());
@@ -306,9 +308,11 @@ public class VaultsController {
                 depositInfo.setUserName(depositor.getFirstname() + " " + depositor.getLastname());
                 Vault vault = vaultsService.getVault(depositInfo.getVaultID());
                 depositInfo.setVaultName(vault.getName());
-                User vaultOwner = vault.getUser();
-                depositInfo.setVaultOwnerID(vaultOwner.getID());
-                depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+                User vaultOwner = permissionsService.getVaultOwner(vault.getID());
+                if(vaultOwner != null) {
+                    depositInfo.setVaultOwnerID(vaultOwner.getID());
+                    depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+                }
                 depositInfo.setDatasetID(vault.getDataset().getID());
                 depositInfo.setGroupName(vault.getGroup().getName());
                 depositInfo.setGroupID(vault.getGroup().getID());
