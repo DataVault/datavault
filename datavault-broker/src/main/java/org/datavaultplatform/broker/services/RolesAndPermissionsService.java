@@ -4,17 +4,15 @@ import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.PermissionDAO;
 import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
 import org.datavaultplatform.common.model.dao.RoleDAO;
+import org.datavaultplatform.common.model.dao.UserDAO;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class RolesAndPermissionsService implements ApplicationListener<ContextRefreshedEvent> {
 
@@ -24,6 +22,8 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
 
     private RoleAssignmentDAO roleAssignmentDao;
 
+    private UsersService usersService;
+
     public void setRoleDao(RoleDAO roleDao) {
         this.roleDao = roleDao;
     }
@@ -31,6 +31,8 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
     public void setPermissionDao(PermissionDAO permissionDao) {
         this.permissionDao = permissionDao;
     }
+
+    public void setUsersService(UsersService usersService) { this.usersService = usersService; }
 
     public void setRoleAssignmentDao(RoleAssignmentDAO roleAssignmentDao) {
         this.roleAssignmentDao = roleAssignmentDao;
@@ -139,6 +141,18 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
 
     public List<RoleAssignment> getRoleAssignmentsForVault(String vaultId) {
         return roleAssignmentDao.findByVaultId(vaultId);
+    }
+
+    public User getVaultOwner(String vaultId) {
+        List<RoleAssignment> assignments = roleAssignmentDao.findByVaultId(vaultId);
+        RoleAssignment ownerAssignment = assignments.stream()
+                .filter(RoleUtils::isDataOwner)
+                .findAny()
+                .orElse(null);
+        if(ownerAssignment == null){
+            return null;
+        }
+        return usersService.getUser(ownerAssignment.getUserId());
     }
 
     public List<RoleAssignment> getRoleAssignmentsForUser(String userId) {

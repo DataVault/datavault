@@ -95,7 +95,11 @@ public class BillingDAOImpl implements BillingDAO {
         Criteria criteria = session.createCriteria(BillingInfo.class);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
-        order(sort, order, criteria);
+        if("asc".equals(order)){
+            criteria.addOrder(Order.asc(sort));
+        } else {
+            criteria.addOrder(Order.desc(sort));
+        }
         if((offset != null && maxResult != null) || !maxResult.equals("0")) {
         	criteria.setMaxResults(Integer.valueOf(maxResult));
         	criteria.setFirstResult(Integer.valueOf(offset));
@@ -124,7 +128,11 @@ public class BillingDAOImpl implements BillingDAO {
         criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
-        order(sort, order, criteria);
+        if(order.equals("desc")){
+            criteria.addOrder(Order.desc(sort));
+        } else {
+            criteria.addOrder(Order.asc(sort));
+        }
         if((offset != null && maxResult != null) || !maxResult.equals("0")) {
         	criteria.setMaxResults(Integer.valueOf(maxResult));
         	criteria.setFirstResult(Integer.valueOf(offset));
@@ -140,57 +148,6 @@ public class BillingDAOImpl implements BillingDAO {
         Session session = this.sessionFactory.openSession();
         return (int)(long)(Long)session.createCriteria(BillingInfo.class).setProjection(Projections.rowCount()).uniqueResult();
     }
-
-    
-
-    private void order(String sort, String order, Criteria criteria) {
-        // Default to ascending order
-        boolean asc = false;
-        if (!"dec".equals(order)) {
-            asc = true;
-        }
-
-        // See if there is a valid sort option
-        if ("id".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("id"));
-            } else {
-                criteria.addOrder(Order.desc("id"));
-            }
-        } else if ("name".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("name"));
-            } else {
-                criteria.addOrder(Order.desc("name"));
-            }
-        }
-        else if ("vaultSize".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("vaultSize"));
-            } else {
-                criteria.addOrder(Order.desc("vaultSize"));
-            }
-        
-        } else if ("reviewDate".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("reviewDate"));
-            } else {
-                criteria.addOrder(Order.desc("reviewDate"));
-            }
-        } else if ("projectId".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("projectId"));
-            } else {
-                criteria.addOrder(Order.desc("projectId"));
-            }
-        } else {
-            if (asc) {
-                criteria.addOrder(Order.asc("creationTime"));
-            } else {
-                criteria.addOrder(Order.desc("creationTime"));
-            }}
-        }
-
 
 	@Override
 	public Long getTotalNumberOfVaults() {

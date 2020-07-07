@@ -85,6 +85,7 @@
         <property name="permissionDao" ref="permissionDAO" />
         <property name="roleDao" ref="roleDAO" />
         <property name="roleAssignmentDao" ref="roleAssignmentDao" />
+        <property name="usersService" ref="usersService" />
     </bean>
 
     <bean id="adminService" class="org.datavaultplatform.broker.services.AdminService">

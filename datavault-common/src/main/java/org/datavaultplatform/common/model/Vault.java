@@ -250,9 +250,14 @@ public class Vault {
     public void setGroup(Group group) {
         this.group = group;
     }
-    
+
+    /* Deprecated:
+     * If you're trying to use this function you probably want to use VaultService.getOwner() instead
+     */
+    @Deprecated
     public User getUser() { return user; }
-    
+
+    @Deprecated
     public void setUser(User user) {
         this.user = user;
     }
