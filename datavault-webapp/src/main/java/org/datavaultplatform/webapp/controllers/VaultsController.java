@@ -248,7 +248,6 @@ public class VaultsController {
 
                 // Set DepositReview stuff
                 drm.setDepositReviewId(depositReview.getId());
-                drm.setToBeDeleted(depositReview.isToBeDeleted());
                 drm.setDeleteStatus(depositReview.getDeleteStatus());
                 drm.setComment(depositReview.getComment());
 

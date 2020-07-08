@@ -97,7 +97,6 @@ public class AdminReviewsController {
 
             // Set DepositReview stuff
             drm.setDepositReviewId(depositReview.getId());
-            drm.setToBeDeleted(depositReview.isToBeDeleted());
             drm.setDeleteStatus(depositReview.getDeleteStatus());
             drm.setComment(depositReview.getComment());
 
@@ -167,7 +166,6 @@ public class AdminReviewsController {
 
         for (DepositReviewModel drm : vaultReviewModel.getDepositReviewModels()) {
             DepositReview originalDepositReview = restService.getDepositReview(drm.getDepositReviewId());
-            //////originalDepositReview.setToBeDeleted(drm.isToBeDeleted());
             originalDepositReview.setDeleteStatus(drm.getDeleteStatus());
             originalDepositReview.setComment(drm.getComment());
 

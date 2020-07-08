@@ -28,6 +28,8 @@ public class DepositReview  {
     @Column(name = "creationTime", nullable = false)
     private Date creationTime;
 
+    /*  DEPRECATED */
+    @Deprecated
     // Has the user indicated the deposit can be deleted?
     @Column(name = "toBeDeleted")
     private boolean toBeDeleted;

@@ -6,6 +6,8 @@ public class DepositReviewModel {
 
     // DepositReview Identifier
     private String depositReviewId;
+    /*  DEPRECATED */
+    @Deprecated
     private boolean toBeDeleted;
     private int deleteStatus;
     private String comment;
