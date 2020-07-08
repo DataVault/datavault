@@ -407,7 +407,7 @@
                                     <tr>
                                         <td>${drm.name}</td>
                                         <td>${(drm.deleteStatus == 0)?string("No", "Yes")}</td>
-                                        <td>${drm.comment}</td>
+                                        <td>${drm.comment!""}</td>
                                     </tr>
                                     </#list>
                                  </tbody>
