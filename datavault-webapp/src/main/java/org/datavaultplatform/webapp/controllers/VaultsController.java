@@ -3,11 +3,6 @@ package org.datavaultplatform.webapp.controllers;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import org.apache.commons.lang.RandomStringUtils;
-import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
-import org.datavaultplatform.common.event.roles.DeleteRoleAssignment;
-import org.datavaultplatform.common.event.roles.OrphanVault;
-import org.datavaultplatform.common.event.roles.TransferVaultOwnership;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.TransferVault;
@@ -29,7 +24,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -40,8 +34,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
 import java.security.Principal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -309,6 +301,21 @@ public class VaultsController {
         model.addAttribute("welcome", welcome);
 
         return "vaults/create";
+    }
+
+    @RequestMapping(value = "/vaults/buildsteps", method = RequestMethod.GET)
+    public String buildVault(ModelMap model) {
+
+        // pass the view an empty Vault since the form expects it
+        model.addAttribute("vault", new CreateVault());
+
+        RetentionPolicy[] policies = restService.getRetentionPolicyListing();
+        model.addAttribute("policies", policies);
+
+        Group[] groups = restService.getGroups();
+        model.addAttribute("groups", groups);
+
+        return "vaults/newCreatePrototype";
     }
 
     // Process the completed 'create new vault' page

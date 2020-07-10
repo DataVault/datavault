@@ -58,7 +58,7 @@
         <br/>
         </#if>
         <div class="row">
-            <a href="${springMacroRequestContext.getContextPath()}/vaults/create" class="btn btn-lg btn-primary">
+            <a href="${springMacroRequestContext.getContextPath()}/vaults/buildsteps" class="btn btn-lg btn-primary">
                 <span class="glyphicon glyphicon-folder-close"></span>
                 Create vault
             </a>
