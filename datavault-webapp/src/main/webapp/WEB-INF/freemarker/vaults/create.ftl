@@ -117,8 +117,13 @@
                                         <select id="policyID" name="policyID" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick" <#if datasets?size == 0> disabled</#if>>
                                             <option selected disabled data-hidden="true">Please choose a retention policy</option>
                                             <#list policies as retentionPolicy>
+                                                <#if retentionPolicy.minRetentionPeriod == 0>
                                                 <option value="${retentionPolicy.getID()}"
-                                                        data-subtext="( Minimum period: ${retentionPolicy.minDataRetentionPeriod?html} )">${retentionPolicy.name?html}</option>
+                                                        data-subtext="( No minimum period )">${retentionPolicy.name}</option>
+                                                <#else>
+                                                 <option value="${retentionPolicy.getID()}"
+                                                         data-subtext="( Minimum period: ${retentionPolicy.minRetentionPeriod} )">${retentionPolicy.name}</option>
+                                                </#if>
                                             </#list>
                                         </select>
                                     </div>

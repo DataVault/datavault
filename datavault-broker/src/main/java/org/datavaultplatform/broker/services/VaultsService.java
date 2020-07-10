@@ -11,9 +11,18 @@ public class VaultsService {
     private VaultDAO vaultDAO;
 
     private RolesAndPermissionsService rolesAndPermissionsService;
+    private RetentionPoliciesService retentionPoliciesService;
 
     public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
         this.rolesAndPermissionsService = rolesAndPermissionsService;
+    }
+
+    public RetentionPoliciesService getRetentionPoliciesService() {
+        return retentionPoliciesService;
+    }
+
+    public void setRetentionPoliciesService(RetentionPoliciesService retentionPoliciesService) {
+        this.retentionPoliciesService = retentionPoliciesService;
     }
 
     public List<Vault> getVaults() {
@@ -73,15 +82,11 @@ public class VaultsService {
         // Get the vault
         Vault vault = vaultDAO.findById(vaultID);
 
-        // Get the right policy engine
-        Class clazz = Class.forName(vault.getRetentionPolicy().getEngine());
-        RetentionPolicy policy = (RetentionPolicy) clazz.newInstance();
-
         // Check the policy
-        policy.run(vault);
+        retentionPoliciesService.run(vault);
 
         // Set the expiry date
-        vault.setRetentionPolicyExpiry(policy.getReviewDate(vault));
+        vault.setRetentionPolicyExpiry(retentionPoliciesService.getReviewDate(vault));
 
         // Record when we checked it
         vault.setRetentionPolicyLastChecked(new Date());
