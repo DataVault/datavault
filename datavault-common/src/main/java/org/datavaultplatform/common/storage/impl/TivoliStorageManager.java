@@ -257,29 +257,30 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     public void delete(String depositId, File working, Progress progress, String optFilePath) throws Exception {
     	String fileDir = TivoliStorageManager.TEMP_PATH_PREFIX + "/" + depositId;
     	String filePath = fileDir + "/" + working.getName();
-		for (int r = 0; r < TivoliStorageManager.maxRetries; r++) {
-    		logger.info("Delete command is " + "dsmc delete archive " + filePath +  " -noprompt -optfile=" + optFilePath);
-	        ProcessBuilder pb = new ProcessBuilder("dsmc", "delete", "archive", filePath, "-noprompt" , "-optfile=" + optFilePath);
-	        Process p = pb.start();
-	        p.waitFor();
+		//for (int r = 0; r < TivoliStorageManager.maxRetries; r++) {
+		logger.info("Delete command is " + "dsmc delete archive " + filePath +  " -noprompt -optfile=" + optFilePath);
+		ProcessBuilder pb = new ProcessBuilder("dsmc", "delete", "archive", filePath, "-noprompt" , "-optfile=" + optFilePath);
+		Process p = pb.start();
+		p.waitFor();
 	
-	        if (p.exitValue() != 0) {
-	            logger.info("Delete of " + depositId + " failed.");
-	            InputStream error = p.getErrorStream();
-	            for (int i = 0; i < error.available(); i++) {
-	            		logger.info("" + error.read());
-	            }
-				if (r == (TivoliStorageManager.maxRetries -1)) {
-					throw new Exception("Delete of " + depositId + " using " + optFilePath + " failed. ");
-				}
-	            logger.info("Delete of " + depositId + " failed. Retrying in " + TivoliStorageManager.retryTime + " mins");
-	            TimeUnit.MINUTES.sleep(TivoliStorageManager.retryTime);
+		if (p.exitValue() != 0) {
+			logger.info("Delete of " + depositId + " failed.");
+			InputStream error = p.getErrorStream();
+			for (int i = 0; i < error.available(); i++) {
+				logger.info("" + error.read());
+			}
+			//if (r == (TivoliStorageManager.maxRetries -1)) {
+				//throw new Exception("Delete of " + depositId + " using " + optFilePath + " failed. ");
+				//	logger.info("Delete of " + depositId + " failed after max retries.  Attempt to remove manually");
+			//}
+			//logger.info("Delete of " + depositId + " failed. Retrying in " + TivoliStorageManager.retryTime + " mins");
+			//TimeUnit.MINUTES.sleep(TivoliStorageManager.retryTime);
 	            
-	        } else {
-	        	logger.info("Delete of " + depositId + " is Successful.");
-		        break;
-	        }
-    	}
+		} else {
+			logger.info("Delete of " + depositId + " is Successful.");
+			//break;
+		}
+    	//}
     }
 
 //	protected static class TSMTracker implements Runnable {
