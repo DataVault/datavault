@@ -40,6 +40,7 @@
     <bean id="vaultsService" class="org.datavaultplatform.broker.services.VaultsService">
         <property name="vaultDAO" ref="vaultDAO" />
         <property name="rolesAndPermissionsService" ref="rolesAndPermissionsService" />
+        <property name="retentionPoliciesService" ref="retentionPoliciesService" />
     </bean>
 
     <bean id="vaultsReviewService" class="org.datavaultplatform.broker.services.VaultsReviewService">
@@ -119,6 +120,16 @@
 
     <bean id="archiveStoreService" class="org.datavaultplatform.broker.services.ArchiveStoreService">
         <property name="archiveStoreDAO" ref="archiveStoreDAO" />
+        <property name="optionsDir" value="${optionsDir:#{null}}" />
+        <property name="tsmRetryTime" value="${tsmRetryTime:#{null}}" />
+        <property name="tsmMaxRetries" value="${tsmMaxRetries:#{null}}" />
+        <property name="occRetryTime" value="${occRetryTime:#{null}}" />
+        <property name="occMaxRetries" value="${occMaxRetries:#{null}}" />
+        <property name="tempDir" value="${tempDir:#{null}}" />
+        <property name="bucketName" value="${s3.bucketName:#{null}}" />
+        <property name="region" value="${s3.region:#{null}}" />
+        <property name="awsAccessKey" value="${s3.awsAccessKey:#{null}}" />
+        <property name="awsSecretKey" value="${s3.awsSecretKey:#{null}}" />
     </bean>
 
     <bean id="userKeyPairService" class="org.datavaultplatform.broker.services.UserKeyPairService">
@@ -202,6 +213,17 @@
         <property name="homeUrl" value="${home.page}"/>
         <property name="helpUrl" value="${help.page}"/>
         <property name="helpMail" value="${help.mail}"/>
+    </bean>
+
+    <bean id="checkForDelete" class="org.datavaultplatform.broker.scheduled.CheckForDelete">
+        <property name="vaultsService" ref="vaultsService" />
+        <property name="vaultsReviewService" ref="vaultsReviewService" />
+        <property name="depositsReviewService" ref="depositsReviewService" />
+        <property name="archiveStoreService" ref="archiveStoreService" />
+        <property name="jobsService" ref="jobsService" />
+        <property name="sender" ref="sender" />
+        <property name="rolesAndPermissionsService" ref="rolesAndPermissionsService" />
+        <property name="usersService" ref="usersService" />
     </bean>
 
     <!-- Email -->
@@ -331,6 +353,7 @@
 
     <task:scheduled-tasks scheduler="scheduler">
         <task:scheduled ref="checkForReview" method="checkAll" cron="${review.schedule}" />
+        <task:scheduled ref="checkForDelete" method="checkAll" cron="${delete.schedule}" />
     </task:scheduled-tasks>
 
     <!-- Data Access Objects -->

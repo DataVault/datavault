@@ -358,7 +358,7 @@
                             <tbody>
                             <#list roleEvents as event>
                                 <tr>
-                                    <td>${event.userID?html}</td>
+                                    <td>${event.userID!""}</td>
 <#--                                    <td>${event.eventClass?replace('org.datavaultplatform.common.event.', '')?html}</td>-->
                                     <td>${event.message?html}</td>
                                     <td>${event.timestamp?datetime}</td>
@@ -397,7 +397,7 @@
                                  <thead>
                                  <tr>
                                      <th>Deposit</th>
-                                     <th>Deleted</th>
+                                     <th>Marked for deletion</th>
                                      <th>Comment</th>
                                  </tr>
                                  </thead>
@@ -406,8 +406,8 @@
                                     <#list vrm.depositReviewModels as drm>
                                     <tr>
                                         <td>${drm.name}</td>
-                                        <td>${drm.toBeDeleted?string("Yes", "No")}</td>
-                                        <td>${(drm.comment?html)!}</td>
+                                        <td>${(drm.deleteStatus == 0)?string("No", "Yes")}</td>
+                                        <td>${drm.comment!""}</td>
                                     </tr>
                                     </#list>
                                  </tbody>

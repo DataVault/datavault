@@ -194,6 +194,11 @@
         <property name="archiveStoreService" ref="archiveStoreService" />
     </bean>
 
+    <bean id="adminRetentionPoliciesController" class="org.datavaultplatform.broker.controllers.admin.AdminRetentionPoliciesController">
+        <property name="retentionPoliciesService" ref="retentionPoliciesService" />
+        <!--<property name="adminService" ref="adminService"/>-->
+    </bean>
+
     <!--
     <bean id="initialiseDatabase" class="org.datavaultplatform.broker.scheduled.InitialiseDatabase">
         <property name="archiveStoreService" ref="archiveStoreService" />
