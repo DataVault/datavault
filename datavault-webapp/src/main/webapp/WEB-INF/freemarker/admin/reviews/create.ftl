@@ -62,7 +62,16 @@
             </#if>
 
             <b>Size:</b> ${vault.getSizeStr()}<br/>
+
+            <#if vault.grantEndDate?has_content>
+                <#assign aDate = vault.grantEndDate?date>
+                <b>Grant End Date:</b> ${aDate?iso_utc}<br/>
+            <#else>
+                <b>Grant End Date:</b> N/A<br/>
+            </#if>
         </p>
+
+
 
         <p>
             <#assign aDate = vault.reviewDate?date>
