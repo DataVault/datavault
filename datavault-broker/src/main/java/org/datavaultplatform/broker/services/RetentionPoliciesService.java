@@ -131,6 +131,7 @@ public class RetentionPoliciesService {
         return date;
     }
 
+    /**
     public int run(Vault v) {
         RetentionPolicy rp = v.getRetentionPolicy();
 
@@ -192,6 +193,59 @@ public class RetentionPoliciesService {
 
 
         return check;
+    }
+     **/
+
+    public void setRetention(Vault v) {
+
+        Date check;
+        if (v.getGrantEndDate() != null) {
+            check = v.getGrantEndDate();
+        } else {
+            check = v.getCreationTime();
+        }
+
+        RetentionPolicy rp = v.getRetentionPolicy();
+
+        if (rp.isExtendUponRetrieval()) {
+            // At the time of writing this means its EPSRC
+
+            // Get all the retrieve events
+            ArrayList<Retrieve> retrieves = new ArrayList();
+            for (Deposit d : v.getDeposits()) {
+                retrieves.addAll(d.getRetrieves());
+            }
+
+            // Have their been any retrieves?
+            if (!retrieves.isEmpty()) {
+                check = retrieves.get(0).getTimestamp();
+                for (Retrieve r : retrieves) {
+                    if (r.getTimestamp().after(check)) {
+                        check = r.getTimestamp();
+                    }
+                }
+            }
+        }
+
+        // Add on the minimum retention period (a number of years)
+        Calendar c = Calendar.getInstance();
+        c.setTime(check);
+        c.add(Calendar.YEAR, rp.getMinRetentionPeriod());
+        check = c.getTime();
+
+        v.setRetentionPolicyExpiry(check);
+
+        // Is it time for review?
+        Date now = new Date();
+        if (check.before(now)) {
+            v.setRetentionPolicyStatus(RetentionPolicyStatus.REVIEW);
+        } else {
+            v.setRetentionPolicyStatus(RetentionPolicyStatus.OK);
+        }
+
+        // Record when we checked it
+        v.setRetentionPolicyLastChecked(new Date());
+
     }
 }
 
