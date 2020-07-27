@@ -39,21 +39,17 @@ public class RetentionPolicy {
     @Column(name = "description", nullable = true, columnDefinition = "TEXT")
     private String description;
 
-    // Implementation class of the policy
-    @Column(name = "engine", nullable = false, columnDefinition = "TEXT")
-    private String engine;
-
-    // Implementation class of the policy
+    // URL of the Funder's Policy
     @Column(name = "url", nullable = true, columnDefinition = "TEXT")
     private String url;
 
-    // Sort order of the policy
-    @Column(name = "sort", nullable = false)
-    private int sort;
+    // Minimum retention period in years
+    @Column(name="minRetentionPeriod", nullable = false)
+    private int minRetentionPeriod;
 
-    // Sort order of the policy
-    @Column(name = "minDataRetentionPeriod", nullable = true, columnDefinition = "TEXT")
-    private String minDataRetentionPeriod;
+    // Extend the expiry date of a vault if a deposit is retrieved
+    @Column(name="extendUponRetrieval")
+    private boolean extendUponRetrieval;
 
     // Date policy in effect
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
@@ -78,13 +74,36 @@ public class RetentionPolicy {
     @OneToMany(targetEntity=Vault.class, mappedBy="retentionPolicy", fetch=FetchType.LAZY)
     @OrderBy("creationTime")
     private List<Vault> vaults;
-    
+
+
+    /*  DEPRECATED */
+    @Deprecated
+    // Implementation class of the policy
+    @Column(name = "engine", nullable = false, columnDefinition = "TEXT")
+    private String engine;
+
+    @Deprecated
+    // Sort order of the policy
+    @Column(name = "sort", nullable = false)
+    private int sort;
+
+    @Deprecated
+    // Sort order of the policy
+    @Column(name = "minDataRetentionPeriod", nullable = true, columnDefinition = "TEXT")
+    private String minDataRetentionPeriod;
+
+
+
     public RetentionPolicy() {}
     public RetentionPolicy(String name) {
         this.name = name;
     }
 
     public int getID() { return id; }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public void setName(String name) {
         this.name = name;
@@ -114,7 +133,23 @@ public class RetentionPolicy {
     public void setMinDataRetentionPeriod(String minDataRetentionPeriod) {
         this.minDataRetentionPeriod = minDataRetentionPeriod;
     }
-    
+
+    public int getMinRetentionPeriod() {
+        return minRetentionPeriod;
+    }
+
+    public void setMinRetentionPeriod(int minRetentionPeriod) {
+        this.minRetentionPeriod = minRetentionPeriod;
+    }
+
+    public boolean isExtendUponRetrieval() {
+        return extendUponRetrieval;
+    }
+
+    public void setExtendUponRetrieval(boolean extendUponRetrieval) {
+        this.extendUponRetrieval = extendUponRetrieval;
+    }
+
     public Date getInEffectDate() {
         return inEffectDate;
     }
