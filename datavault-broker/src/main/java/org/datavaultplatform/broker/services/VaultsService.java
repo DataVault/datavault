@@ -82,14 +82,16 @@ public class VaultsService {
         // Get the vault
         Vault vault = vaultDAO.findById(vaultID);
 
+        retentionPoliciesService.setRetention(vault);
+
         // Check the policy
-        retentionPoliciesService.run(vault);
+        //retentionPoliciesService.run(vault);
 
         // Set the expiry date
-        vault.setRetentionPolicyExpiry(retentionPoliciesService.getReviewDate(vault));
+        //vault.setRetentionPolicyExpiry(retentionPoliciesService.getReviewDate(vault));
 
         // Record when we checked it
-        vault.setRetentionPolicyLastChecked(new Date());
+        //vault.setRetentionPolicyLastChecked(new Date());
 
         // Update and return the policy
         vaultDAO.update(vault);
