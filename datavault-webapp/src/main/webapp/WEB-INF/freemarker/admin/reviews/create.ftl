@@ -55,15 +55,23 @@
             (Date before which data should not be deleted, according to the funder retention policy, taking into account any extensions caused by retrievals for external users, if applicable. The expiry date is calculated by adding the minimum number of years to the grant end date. Data may be deleted sooner for overriding reason such as data protection, or if the funder counts the retention period as starting from the data creation date.)
             <br/>
 
-            <#assign policyStatus = vault.policyStatusStr>
-            <#if policyStatus == "1">
-                <b>Status as of today's date: The funder's minimum retention period has not yet expired, data should not yet be deleted unless there is an overriding reason.<br/>
-            <#elseif policyStatus == "2">
-                <b>Status as of today's date: The funder's minimum retention period has expired.<br/>
+            <#if vault.policyStatus == 1>
+                <b>Status as of today's date:</b> The funder's minimum retention period has not yet expired, data should not yet be deleted unless there is an overriding reason.<br/>
+            <#elseif vault.policyStatus == 2>
+                <b>Status as of today's date:</b> The funder's minimum retention period has expired.<br/>
             </#if>
 
             <b>Size:</b> ${vault.getSizeStr()}<br/>
+
+            <#if vault.grantEndDate?has_content>
+                <#assign aDate = vault.grantEndDate?date>
+                <b>Grant End Date:</b> ${aDate?iso_utc}<br/>
+            <#else>
+                <b>Grant End Date:</b> N/A<br/>
+            </#if>
         </p>
+
+
 
         <p>
             <#assign aDate = vault.reviewDate?date>
