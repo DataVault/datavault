@@ -208,7 +208,7 @@ public class RetentionPoliciesService {
 
         RetentionPolicy rp = v.getRetentionPolicy();
 
-        if (rp.isExtendUponRetrieval()) {
+        if (rp.getMinRetentionPeriod() > 0 && rp.isExtendUponRetrieval()) {
             // At the time of writing this means its EPSRC
 
             // Get all the retrieve events
