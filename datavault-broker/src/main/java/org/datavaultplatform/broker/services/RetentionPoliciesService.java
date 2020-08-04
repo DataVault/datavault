@@ -239,7 +239,7 @@ public class RetentionPoliciesService {
 
         // Is it time for review?
         Date now = new Date();
-        if (rp.getMinRetentionPeriod() > 0 && check.before(now)) {
+        if (check.before(now)) {
             v.setRetentionPolicyStatus(RetentionPolicyStatus.REVIEW);
         } else {
             v.setRetentionPolicyStatus(RetentionPolicyStatus.OK);
