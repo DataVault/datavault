@@ -325,6 +325,16 @@ public class VaultsController {
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
         return "redirect:" + vaultUrl;        
     }
+
+    // Process the partially completed 'create new vault' pages
+    @RequestMapping(value = "/vaults/save", method = RequestMethod.POST)
+    public String savePartialVault(@ModelAttribute CreateVault vault, ModelMap model) {
+        VaultInfo newVault = restService.savePartialVault(vault);
+        String vaultUrl = "/vaults/" + newVault.getID() + "/";
+        logger.debug("Saving partial vault in web controller");
+        return "vaults/newCreatePrototype";
+        //return "redirect:" + vaultUrl;
+    }
     
     @RequestMapping(value = "/vaults/{vaultid}/addDataManager", method = RequestMethod.POST)
     public RedirectView addDataManager(ModelMap model,

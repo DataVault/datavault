@@ -495,6 +495,13 @@ public class RestService {
         return (VaultInfo)response.getBody();
     }
 
+    public VaultInfo savePartialVault(CreateVault createVault) {
+        //HttpEntity<?> response = post(brokerURL + "/vaults/", VaultInfo.class, createVault);
+        //return (VaultInfo)response.getBody();
+        logger.debug("Ran savePartialVault in rest service");
+        return null;
+    }
+
     public void transferVault(String vaultId, TransferVault transfer) {
         post(brokerURL + "/vaults/" + vaultId + "/transfer", VaultInfo.class, transfer);
     }

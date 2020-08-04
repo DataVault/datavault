@@ -34,7 +34,7 @@
                                     <div class="card px-0 pt-4 pb-0 mt-3 mb-3">
                                         <div class="row">
                                             <div class="col-md-12 mx-0">
-                                                <form id="vault-creation-form">
+                                                <form id="vault-creation-form" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/vaults/save" method="post" novalidate="novalidate" _lpchecked="1">
                                                     <#include "progressFieldset.ftl"/>
                                                     <!-- fieldsets -->
                                                     <#include "affirmationFieldset.ftl"/>
