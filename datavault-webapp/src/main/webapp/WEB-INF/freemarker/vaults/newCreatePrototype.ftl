@@ -34,7 +34,7 @@
                                     <div class="card px-0 pt-4 pb-0 mt-3 mb-3">
                                         <div class="row">
                                             <div class="col-md-12 mx-0">
-                                                <form id="vault-creation-form" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/vaults/save" method="post" novalidate="novalidate" _lpchecked="1">
+                                                <form id="vault-creation-form" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/vaults/stepCreate" method="post" novalidate="novalidate" _lpchecked="1">
                                                     <#include "progressFieldset.ftl"/>
                                                     <!-- fieldsets -->
                                                     <#include "affirmationFieldset.ftl"/>
@@ -43,6 +43,8 @@
                                                     <#include "usersFieldset.ftl"/>
                                                     <#include "summaryFieldset.ftl"/>
                                                     <#include "pendingFieldset.ftl"/>
+                                                    <input type="hidden" id="submitAction" name="action" value="submit" />
+                                                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                                 </form>
                                             </div>
                                         </div>
@@ -195,9 +197,13 @@ $(document).ready(function(){
         $(this).addClass('selected');
     });
 
-    $(".submit").click(function(){
-        return false;
-    })
+    //$(".submit").click(function(){
+    //    return false;
+    //})
+
+    $('button[type="submit"]').on("click", function() {
+        $('#submitAction').val($(this).attr('value'));
+    });
 
 });
     </script>

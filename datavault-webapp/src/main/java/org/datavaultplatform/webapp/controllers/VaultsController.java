@@ -318,15 +318,15 @@ public class VaultsController {
         return "vaults/newCreatePrototype";
     }
 
-    // Process the completed 'create new vault' page
+   /* // Process the completed 'create new vault' page
     @RequestMapping(value = "/vaults/create", method = RequestMethod.POST)
     public String addVault(@ModelAttribute CreateVault vault, ModelMap model) {
         VaultInfo newVault = restService.addVault(vault);
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
         return "redirect:" + vaultUrl;        
-    }
+    }*/
 
-    // Process the partially completed 'create new vault' pages
+    /*// Process the partially completed 'create new vault' pages
     @RequestMapping(value = "/vaults/save", method = RequestMethod.POST)
     public String savePartialVault(@ModelAttribute CreateVault vault, ModelMap model) {
         VaultInfo newVault = restService.savePartialVault(vault);
@@ -334,6 +334,35 @@ public class VaultsController {
         logger.debug("Saving partial vault in web controller");
         return "vaults/newCreatePrototype";
         //return "redirect:" + vaultUrl;
+    }*/
+
+    // Process the completed 'create new vault' page
+    @RequestMapping(value = "/vaults/stepCreate", method = RequestMethod.POST)
+    public String addVault(@ModelAttribute CreateVault vault, ModelMap model, @RequestParam String action) {
+
+
+
+        // if the confirm button has been clicked save what we have if everything isn't already saved
+        // and display the summary
+        logger.info("Action is:'" + action + "'");
+        String buildUrl = "/vaults/buildsteps/";
+        if ("Save".equals(action)) {
+            // if the save button has been clicked just save what we have and go back to the same page of the form
+            // already have something saved update if not new save
+            logger.info("Save button clicked");
+            return "redirect:" + buildUrl;
+        } else if ("Confirm".equals(action)) {
+            // if the confirm button has been clicked save what we have if everything isn't already saved
+            // and display the summary
+            logger.info("Confirm button clicked");
+            //VaultInfo newVault = restService.addVault(vault);
+            //return "redirect:" + vaultUrl;
+            return "redirect:" + buildUrl; // redirect to pending page if all goes well
+        } else {
+            logger.info("Invalid button clicked");
+            return "redirect:" + buildUrl;
+        }
+
     }
     
     @RequestMapping(value = "/vaults/{vaultid}/addDataManager", method = RequestMethod.POST)

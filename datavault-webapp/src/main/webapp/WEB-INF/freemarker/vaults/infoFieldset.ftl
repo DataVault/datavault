@@ -140,7 +140,7 @@
     </div>
 
     <button type="button" name="previous" class="previous action-button-previous btn btn-default" >&laquo; Previous</button>
-    <button type="button" name="save" class="save action-button-previous btn btn-default" >
+    <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-default" >
         <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
     </button>
     <button type="button" name="next" class="next action-button btn btn-primary">Next Step &raquo;</button>
