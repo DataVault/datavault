@@ -306,8 +306,12 @@ public class VaultsController {
     @RequestMapping(value = "/vaults/buildsteps", method = RequestMethod.GET)
     public String buildVault(ModelMap model) {
 
-        // pass the view an empty Vault since the form expects it
+        // pass the view an empty Vault since the form expects it if nothing has been saved so far
+
         model.addAttribute("vault", new CreateVault());
+
+        // if it has get that data from the db
+
 
         RetentionPolicy[] policies = restService.getRetentionPolicyListing();
         model.addAttribute("policies", policies);
@@ -350,14 +354,19 @@ public class VaultsController {
             // if the save button has been clicked just save what we have and go back to the same page of the form
             // already have something saved update if not new save
             logger.info("Save button clicked");
+            vault.setPartial(true);
+            VaultInfo newVault = restService.addPendingVault(vault);
+
             return "redirect:" + buildUrl;
         } else if ("Confirm".equals(action)) {
             // if the confirm button has been clicked save what we have if everything isn't already saved
             // and display the summary
             logger.info("Confirm button clicked");
             //VaultInfo newVault = restService.addVault(vault);
+            //String vaultUrl = "/vaults/" + newVault.getID() + "/";
+            // redirect to pending page if all goes well
             //return "redirect:" + vaultUrl;
-            return "redirect:" + buildUrl; // redirect to pending page if all goes well
+            return "redirect:" + buildUrl;
         } else {
             logger.info("Invalid button clicked");
             return "redirect:" + buildUrl;

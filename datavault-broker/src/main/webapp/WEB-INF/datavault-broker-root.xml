@@ -43,6 +43,10 @@
         <property name="retentionPoliciesService" ref="retentionPoliciesService" />
     </bean>
 
+    <bean id="pendingVaultsService" class="org.datavaultplatform.broker.services.PendingVaultsService">
+        <property name="pendingVaultDAO" ref="pendingVaultDAO" />
+    </bean>
+
     <bean id="vaultsReviewService" class="org.datavaultplatform.broker.services.VaultsReviewService">
         <property name="vaultReviewDAO" ref="vaultReviewDAO" />
     </bean>
@@ -323,7 +327,7 @@
                 <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
                 <prop key="hibernate.show_sql">false</prop>
                 <prop key="hibernate.format_sql">false</prop>
-                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.hbm2ddl.auto">validate</prop>
                 <prop key="hibernate.enable_lazy_load_no_trans">true</prop>
                 <prop key="hibernate.hbm2ddl.import_files">/import.sql</prop>
             </props>
@@ -359,6 +363,10 @@
     <!-- Data Access Objects -->
     
     <bean id="vaultDAO" class="org.datavaultplatform.common.model.dao.VaultDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="pendingVaultDAO" class="org.datavaultplatform.common.model.dao.PendingVaultDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 

@@ -22,7 +22,7 @@
                   title="This description should contain information to assist you and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
                                                                 </span>
             <@spring.bind "vault.description" />
-            <textarea type="text" class="form-control" name="description" id="description" rows="4" cols="60"></textarea>
+            <textarea type="text" class="form-control" name="${spring.status.expression}" value="${spring.status.value!""}" id="description" rows="4" cols="60"></textarea>
         </div>
 
         <div class="form-group required">

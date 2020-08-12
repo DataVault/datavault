@@ -81,7 +81,10 @@ public class VaultInfo {
     
     @ApiObjectField(description = "Sum of vaults size for a projectId")
     private long projectSize;
-    
+
+    @ApiObjectField(description = "Did the user accept the various rules on the create vault intro page")
+    private Boolean affirmed = false;
+
     public VaultInfo() { }
 
     public VaultInfo(String id, String userID, String userName, String datasetID, String datasetName, Date creationTime, String name, String description, String policyID, 
@@ -322,4 +325,12 @@ public class VaultInfo {
 	public void setAmountBilled(BigDecimal amountBilled) {
 		this.amountBilled = amountBilled;
 	}
+
+    public Boolean getAffirmed() {
+        return affirmed;
+    }
+
+    public void setAffirmed(Boolean affirmed) {
+        this.affirmed = affirmed;
+    }
 }

@@ -22,7 +22,10 @@
         </p>
         <div class="checkbox">
             <label>
-                <input id="affirmation-check" type="checkbox"> Accept
+                <@spring.bind "vault.affirmed" />
+                <input type="hidden" name="_${spring.status.expression}" value="false"/>
+                <input id="affirmation-check" type="checkbox" name="${spring.status.expression}"
+                       <#if spring.status.value?? && spring.status.value?string=="true">checked="true"</#if> /> Accept
             </label>
         </div>
     </div>

@@ -32,6 +32,7 @@ public class VaultsController {
 
     private EmailService emailService;
     private VaultsService vaultsService;
+    private PendingVaultsService pendingVaultsService;
     private DepositsService depositsService;
     private ExternalMetadataService externalMetadataService;
     private RetentionPoliciesService retentionPoliciesService;
@@ -64,6 +65,10 @@ public class VaultsController {
 
     public void setVaultsService(VaultsService vaultsService) {
         this.vaultsService = vaultsService;
+    }
+
+    public void setPendingVaultsService(PendingVaultsService pendingVaultsService) {
+        this.pendingVaultsService = pendingVaultsService;
     }
 
     public void setDepositsService(DepositsService depositsService) {
@@ -329,7 +334,107 @@ public class VaultsController {
 
     }
 
+    @RequestMapping(value = "/pendingVaults", method = RequestMethod.POST)
+    public VaultInfo addPendingVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+                              @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
+                              @RequestBody CreateVault createVault) throws Exception {
 
+        PendingVault vault = new PendingVault();
+        Boolean affirmed = createVault.getAffirmed();
+        logger.debug("Affirmed is: '" + affirmed + "'");
+        if (affirmed != null) {
+            vault.setAffirmed(affirmed);
+        }
+
+        String name = createVault.getName();
+        logger.debug("Name is: '" + name + "'");
+        if (name != null) {
+            vault.setName(name);
+        }
+
+        String desc = createVault.getDescription();
+        logger.debug("Description is: '" + desc + "'");
+        if (desc != null) {
+            vault.setDescription(desc);
+        }
+
+//        RetentionPolicy retentionPolicy = retentionPoliciesService.getPolicy(createVault.getPolicyID());
+//        if (retentionPolicy == null) {
+//            logger.error("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
+//            throw new Exception("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
+//        }
+//        vault.setRetentionPolicy(retentionPolicy);
+//
+//        Group group = groupsService.getGroup(createVault.getGroupID());
+//        if (group == null) {
+//            logger.error("Group '" + createVault.getGroupID() + "' does not exist");
+//            throw new Exception("Group '" + createVault.getGroupID() + "' does not exist");
+//        }
+//        vault.setGroup(group);
+//
+//        User user = usersService.getUser(userID);
+//        if (user == null) {
+//            logger.error("User '" + userID + "' does not exist");
+//            throw new Exception("User '" + userID + "' does not exist");
+//        }
+//        vault.setUser(user);
+//        String datasetId = createVault.getDatasetID();
+//        Dataset dataset = externalMetadataService.getCachedDataset(datasetId);
+//
+//        if (dataset == null) {
+//            dataset = externalMetadataService.getDataset(datasetId);
+//            if (dataset == null) {
+//                logger.error("Dataset metadata record '" + datasetId + "' does not exist");
+//                throw new Exception("Dataset metadata record '" + datasetId + "' does not exist");
+//            }
+//
+//            externalMetadataService.addCachedDataset(dataset);
+//        }
+//        vault.setDataset(dataset);
+//        vault.setSnapshot(externalMetadataService.getDatasetContent(datasetId));
+//        vault.setProjectId(externalMetadataService.getPureProjectId(dataset.getID()));
+//
+//        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+//        try {
+//            vault.setGrantEndDate(formatter.parse(createVault.getGrantEndDate()));
+//        } catch (ParseException|NullPointerException ex) {
+//            logger.error("Grant date is not in the right format: "+createVault.getGrantEndDate());
+//            vault.setGrantEndDate(null);
+//        }
+//
+//        try {
+//            vault.setReviewDate(formatter.parse(createVault.getReviewDate()));
+//        } catch (ParseException|NullPointerException ex) {
+//            logger.error("Review date is not in the right format: "+createVault.getReviewDate());
+//            vault.setGrantEndDate(null);
+//        }
+
+        pendingVaultsService.addPendingVault(vault);
+
+//        RoleAssignment dataOwnerRoleAssignment = new RoleAssignment();
+//        dataOwnerRoleAssignment.setUserId(userID);
+//        dataOwnerRoleAssignment.setVaultId(vault.getID());
+//        dataOwnerRoleAssignment.setRole(permissionsService.getDataOwner());
+//        permissionsService.createRoleAssignment(dataOwnerRoleAssignment);
+//
+//        Create vaultEvent = new Create(vault.getID());
+//        vaultEvent.setVault(vault);
+//        vaultEvent.setUser(usersService.getUser(userID));
+//        vaultEvent.setAgentType(Agent.AgentType.BROKER);
+//        vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+//
+//        eventService.addEvent(vaultEvent);
+//
+//        // Check the retention policy of the newly created vault
+//        try {
+//            vaultsService.checkRetentionPolicy(vault.getID());
+//        } catch (Exception e) {
+//            logger.error("Fail to check retention policy: "+e);
+//            e.printStackTrace();
+//            throw e;
+//        }
+        return vault.convertToResponse();
+    }
 
     @RequestMapping(value = "/vaults", method = RequestMethod.POST)
     public VaultInfo addVault(@RequestHeader(value = "X-UserID", required = true) String userID,
