@@ -199,40 +199,41 @@ public class RetentionPoliciesService {
 
     public void setRetention(Vault v) {
 
-        Date check;
-        if (v.getGrantEndDate() != null) {
-            check = v.getGrantEndDate();
-        } else {
-            check = v.getCreationTime();
-        }
-
         RetentionPolicy rp = v.getRetentionPolicy();
 
-        if (rp.isExtendUponRetrieval()) {
-            // At the time of writing this means its EPSRC
+        Date check;
+        if (v.getGrantEndDate() == null) {
+            check = v.getCreationTime();
+        } else {
+            check = v.getGrantEndDate();
 
-            // Get all the retrieve events
-            ArrayList<Retrieve> retrieves = new ArrayList();
-            for (Deposit d : v.getDeposits()) {
-                retrieves.addAll(d.getRetrieves());
-            }
+            if (rp.getMinRetentionPeriod() > 0 && rp.isExtendUponRetrieval()) {
+                // At the time of writing this means its EPSRC
 
-            // Have their been any retrieves?
-            if (!retrieves.isEmpty()) {
-                check = retrieves.get(0).getTimestamp();
-                for (Retrieve r : retrieves) {
-                    if (r.getTimestamp().after(check)) {
-                        check = r.getTimestamp();
+                // Get all the retrieve events
+                ArrayList<Retrieve> retrieves = new ArrayList();
+                for (Deposit d : v.getDeposits()) {
+                    retrieves.addAll(d.getRetrieves());
+                }
+
+                // Have their been any retrieves?
+                if (!retrieves.isEmpty()) {
+                    check = retrieves.get(0).getTimestamp();
+                    for (Retrieve r : retrieves) {
+                        if (r.getTimestamp().after(check)) {
+                            check = r.getTimestamp();
+                        }
                     }
                 }
             }
-        }
 
-        // Add on the minimum retention period (a number of years)
-        Calendar c = Calendar.getInstance();
-        c.setTime(check);
-        c.add(Calendar.YEAR, rp.getMinRetentionPeriod());
-        check = c.getTime();
+            // Add on the minimum retention period (a number of years)
+            Calendar c = Calendar.getInstance();
+            c.setTime(check);
+            c.add(Calendar.YEAR, rp.getMinRetentionPeriod());
+            check = c.getTime();
+
+        }
 
         v.setRetentionPolicyExpiry(check);
 
