@@ -358,19 +358,28 @@ public class VaultsController {
             vault.setDescription(desc);
         }
 
-//        RetentionPolicy retentionPolicy = retentionPoliciesService.getPolicy(createVault.getPolicyID());
-//        if (retentionPolicy == null) {
-//            logger.error("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
-//            throw new Exception("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
-//        }
-//        vault.setRetentionPolicy(retentionPolicy);
-//
-//        Group group = groupsService.getGroup(createVault.getGroupID());
-//        if (group == null) {
-//            logger.error("Group '" + createVault.getGroupID() + "' does not exist");
-//            throw new Exception("Group '" + createVault.getGroupID() + "' does not exist");
-//        }
-//        vault.setGroup(group);
+        String policyId = createVault.getPolicyID();
+        logger.debug("Retention policy id is: '" + policyId + "'");
+        if (policyId != null) {
+            RetentionPolicy retentionPolicy = retentionPoliciesService.getPolicy(policyId);
+
+            if (retentionPolicy == null) {
+                logger.error("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
+                throw new Exception("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
+            }
+            vault.setRetentionPolicy(retentionPolicy);
+        }
+
+        String groupId = createVault.getGroupID();
+        logger.debug("Group id is: '" + groupId + "'");
+        if (groupId != null) {
+            Group group = groupsService.getGroup(groupId);
+            if (group == null) {
+                logger.error("Group '" + groupId + "' does not exist");
+                throw new Exception("Group '" + groupId + "' does not exist");
+            }
+            vault.setGroup(group);
+        }
 //
 //        User user = usersService.getUser(userID);
 //        if (user == null) {
@@ -393,14 +402,16 @@ public class VaultsController {
 //        vault.setDataset(dataset);
 //        vault.setSnapshot(externalMetadataService.getDatasetContent(datasetId));
 //        vault.setProjectId(externalMetadataService.getPureProjectId(dataset.getID()));
-//
-//        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-//        try {
-//            vault.setGrantEndDate(formatter.parse(createVault.getGrantEndDate()));
-//        } catch (ParseException|NullPointerException ex) {
-//            logger.error("Grant date is not in the right format: "+createVault.getGrantEndDate());
-//            vault.setGrantEndDate(null);
-//        }
+        String grantEndDate = createVault.getGrantEndDate();
+        if (grantEndDate != null) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                vault.setGrantEndDate(formatter.parse(grantEndDate));
+            } catch (ParseException | NullPointerException ex) {
+                logger.error("Grant date is not in the right format: " + grantEndDate);
+                vault.setGrantEndDate(null);
+            }
+        }
 //
 //        try {
 //            vault.setReviewDate(formatter.parse(createVault.getReviewDate()));

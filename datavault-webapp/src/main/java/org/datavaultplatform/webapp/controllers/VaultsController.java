@@ -356,7 +356,8 @@ public class VaultsController {
             logger.info("Save button clicked");
             vault.setPartial(true);
             VaultInfo newVault = restService.addPendingVault(vault);
-
+            //buildUrl = buildUrl + newVault.getID();
+            //String vaultUrl = "/vaults/" + newVault.getID() + "/";
             return "redirect:" + buildUrl;
         } else if ("Confirm".equals(action)) {
             // if the confirm button has been clicked save what we have if everything isn't already saved

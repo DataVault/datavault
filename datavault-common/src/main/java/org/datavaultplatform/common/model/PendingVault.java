@@ -1,11 +1,14 @@
 package org.datavaultplatform.common.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "PendingVault")
@@ -35,8 +38,19 @@ public class PendingVault {
     @Column(columnDefinition = "TEXT", length = 6000)
     private String description;
 
+    // NOTE: This field is optional. Always remember to check for null when handling it!
+    // Serialise date in ISO 8601 format
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @Temporal(TemporalType.DATE)
+    @Column(name = "grantEndDate", nullable = true)
+    private Date grantEndDate;
+
     @ManyToOne
-    private User user;
+    private RetentionPolicy retentionPolicy;
+
+    @JsonIgnore
+    @ManyToOne
+    private Group group;
 
     public String getId() {
         return this.id;
@@ -74,12 +88,41 @@ public class PendingVault {
 
     public String getDescription() { return description; }
 
+    public RetentionPolicy getRetentionPolicy() {
+        return this.retentionPolicy;
+    }
+
+    public void setRetentionPolicy(RetentionPolicy retentionPolicy) {
+        this.retentionPolicy = retentionPolicy;
+    }
+
+    public void setGrantEndDate(Date grantEndDate) {
+        this.grantEndDate = grantEndDate;
+    }
+
+    public Date getGrantEndDate() {
+        return this.grantEndDate;
+    }
+
+    public Group getGroup() { return group; }
+
+    public void setGroup(Group group) {
+        this.group = group;
+    }
+
     public VaultInfo convertToResponse() {
         VaultInfo retVal = new VaultInfo();
         retVal.setID(this.id);
         retVal.setName(this.name);
         retVal.setDescription(this.description);
         retVal.setAffirmed(this.affirmed);
+        if (this.retentionPolicy != null) {
+            retVal.setPolicyID(String.valueOf(this.retentionPolicy.getID()));
+        }
+        retVal.setGrantEndDate(this.grantEndDate);
+        if (this.group != null) {
+            retVal.setGroupID(String.valueOf(this.group.getID()));
+        }
         return retVal;
     }
 }

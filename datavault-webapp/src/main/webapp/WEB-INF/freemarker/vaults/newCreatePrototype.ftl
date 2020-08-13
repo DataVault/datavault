@@ -62,6 +62,19 @@ $(document).ready(function(){
     var current_fs, next_fs, previous_fs;
     var opacity;
 
+    $.datepicker.setDefaults({
+        dateFormat: "yy-mm-dd",
+        changeMonth: true,
+        changeYear: true,
+        showOtherMonths: true,
+        selectOtherMonths: true
+    });
+
+    $( "#grantEndDate" ).datepicker();
+    $( "#reviewDate" ).datepicker({
+        minDate: '+1m'
+    });
+
     $("#affirmation-check").change(function(){
         $(this).parents("fieldset").children(".next").prop( "disabled", !$(this).is(":checked") );
     });
