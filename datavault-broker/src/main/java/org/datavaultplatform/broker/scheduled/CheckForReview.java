@@ -125,7 +125,7 @@ public class CheckForReview {
                         User user = usersService.getUser(roleAssignment.getUserId());
                         if (!LDAPService.getLDAPAttributes(user.getID()).isEmpty()) {
                             // User still appears to be at the Uni
-                            emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching ", "review-due-owner.vm", model);
+                            emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching (action required) ", "review-due-owner.vm", model);
                             ownerFound = true;
                         }
                     }
