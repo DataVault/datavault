@@ -31,12 +31,16 @@ public class PendingVault {
     private Boolean affirmed = false;
 
     // Name of the vault
-    @Column(name = "name", nullable = false, columnDefinition = "TEXT", length=400)
+    @Column(name = "name", nullable = true, columnDefinition = "TEXT", length=400)
     private String name;
 
     // Description of the vault
     @Column(columnDefinition = "TEXT", length = 6000)
     private String description;
+
+    // Description of the vault
+    @Column(columnDefinition = "TEXT", length = 6000)
+    private String notes;
 
     // NOTE: This field is optional. Always remember to check for null when handling it!
     // Serialise date in ISO 8601 format
@@ -44,6 +48,16 @@ public class PendingVault {
     @Temporal(TemporalType.DATE)
     @Column(name = "grantEndDate", nullable = true)
     private Date grantEndDate;
+
+    // Serialise date in ISO 8601 format
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @Temporal(TemporalType.DATE)
+    @Column(name = "reviewDate", nullable = true)
+    private Date reviewDate;
+
+    // Name of the vault
+    @Column(name = "estimate", nullable = true, columnDefinition = "TEXT", length=30)
+    private String estimate;
 
     @ManyToOne
     private RetentionPolicy retentionPolicy;
@@ -88,6 +102,12 @@ public class PendingVault {
 
     public String getDescription() { return description; }
 
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getNotes() { return this.notes; }
+
     public RetentionPolicy getRetentionPolicy() {
         return this.retentionPolicy;
     }
@@ -104,6 +124,20 @@ public class PendingVault {
         return this.grantEndDate;
     }
 
+    public void setReviewDate(Date reviewDate) {
+        this.reviewDate = reviewDate;
+    }
+
+    public void setEstimate(String estimate) {
+        this.estimate = estimate;
+    }
+
+    public String getEstimate() { return this.estimate; }
+
+    public Date getReviewDate() {
+        return this.reviewDate;
+    }
+
     public Group getGroup() { return group; }
 
     public void setGroup(Group group) {
@@ -115,6 +149,8 @@ public class PendingVault {
         retVal.setID(this.id);
         retVal.setName(this.name);
         retVal.setDescription(this.description);
+        retVal.setEstimate(this.estimate);
+        retVal.setNotes(this.notes);
         retVal.setAffirmed(this.affirmed);
         if (this.retentionPolicy != null) {
             retVal.setPolicyID(String.valueOf(this.retentionPolicy.getID()));
@@ -123,6 +159,7 @@ public class PendingVault {
         if (this.group != null) {
             retVal.setGroupID(String.valueOf(this.group.getID()));
         }
+        retVal.setReviewDate(this.reviewDate);
         return retVal;
     }
 }

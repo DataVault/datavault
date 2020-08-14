@@ -34,6 +34,12 @@ public class VaultInfo {
     
     @ApiObjectField(description = "The date and time when this vault was created")
     private String description;
+
+    @ApiObjectField(description = "Estimate of vault size")
+    private String estimate;
+
+    @ApiObjectField(description = "Notes regarding data retention")
+    private String notes;
     
     @ApiObjectField(description = "The policy that applies to this vault")
     private String policyID;
@@ -184,6 +190,22 @@ public class VaultInfo {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getNotes() {
+        return this.notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getEstimate() {
+        return this.estimate;
+    }
+
+    public void setEstimate(String estimate) {
+        this.estimate = estimate;
     }
 
     public String getPolicyID() {

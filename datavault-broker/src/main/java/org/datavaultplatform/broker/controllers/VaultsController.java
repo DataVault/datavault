@@ -358,6 +358,18 @@ public class VaultsController {
             vault.setDescription(desc);
         }
 
+        String notes = createVault.getNotes();
+        logger.debug("Notes is: '" + notes + "'");
+        if (notes != null) {
+            vault.setNotes(notes);
+        }
+
+        String estimate = createVault.getEstimate();
+        logger.debug("Estimate is: '" + estimate + "'");
+        if (estimate != null) {
+            vault.setEstimate(estimate);
+        }
+
         String policyId = createVault.getPolicyID();
         logger.debug("Retention policy id is: '" + policyId + "'");
         if (policyId != null) {
@@ -402,9 +414,10 @@ public class VaultsController {
 //        vault.setDataset(dataset);
 //        vault.setSnapshot(externalMetadataService.getDatasetContent(datasetId));
 //        vault.setProjectId(externalMetadataService.getPureProjectId(dataset.getID()));
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         String grantEndDate = createVault.getGrantEndDate();
         if (grantEndDate != null) {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
             try {
                 vault.setGrantEndDate(formatter.parse(grantEndDate));
             } catch (ParseException | NullPointerException ex) {
@@ -412,13 +425,16 @@ public class VaultsController {
                 vault.setGrantEndDate(null);
             }
         }
-//
-//        try {
-//            vault.setReviewDate(formatter.parse(createVault.getReviewDate()));
-//        } catch (ParseException|NullPointerException ex) {
-//            logger.error("Review date is not in the right format: "+createVault.getReviewDate());
-//            vault.setGrantEndDate(null);
-//        }
+
+        String reviewDate = createVault.getReviewDate();
+        if (reviewDate != null) {
+            try {
+                vault.setReviewDate(formatter.parse(reviewDate));
+            } catch (ParseException | NullPointerException ex) {
+                logger.error("Review date is not in the right format: " + reviewDate);
+                vault.setReviewDate(null);
+            }
+        }
 
         pendingVaultsService.addPendingVault(vault);
 

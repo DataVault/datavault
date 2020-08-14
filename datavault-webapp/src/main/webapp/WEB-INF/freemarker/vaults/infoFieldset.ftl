@@ -107,35 +107,37 @@
         </div>
 
         <div class="form-group" required>
+            <@spring.bind "vault.affirmed" />
             <label class="control-label">Rough estimate of the amount of data:</label>
             <div class="radio">
                 <label>
-                    <input type="radio" name="isOwner" value="true"> Under 100 GB
+                    <input type="radio" name="estimate" value="< 100 GB"> Under 100 GB
                 </label>
             </div>
             <div class="radio">
                 <label>
-                    <input type="radio" name="isOwner" value="false"> Between 100 GB and 10 TB
+                    <input type="radio" name="estimate" value="< 10 TB"> Between 100 GB and 10 TB
                 </label>
             </div>
             <div class="radio">
                 <label>
-                    <input type="radio" name="isOwner" value="false"> Over 10 TB
+                    <input type="radio" name="estimate" value="> 10 TB"> Over 10 TB
                 </label>
             </div>
             <div class="radio">
                 <label>
-                    <input type="radio" name="isOwner" value="false"> Don’t know
+                    <input type="radio" name="estimate" value="Unknown"> Don’t know
                 </label>
             </div>
         </div>
 
         <div class="form-group">
-            <label for="description" class="control-label">Notes regarding data retention</label>
+            <label for="notes" class="control-label">Notes regarding data retention</label>
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                   title="Please note anything that would inform a future data owner , more specific information can be added with each deposit.">
-                                                                </span>
-            <textarea type="text" class="form-control" name="description" id="description" rows="4" cols="60"></textarea>
+            </span>
+            <@spring.bind "vault.notes" />
+            <textarea type="text" class="form-control" name="notes" id="notes" name="${spring.status.expression}" value="${spring.status.value!""}" rows="4" cols="60"></textarea>
         </div>
     </div>
 

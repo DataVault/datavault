@@ -13,6 +13,12 @@ public class CreateVault {
     
     @ApiObjectField(description = "A description of the vault")
     private String description;
+
+    @ApiObjectField(description = "Notes regarding data retention")
+    private String notes;
+
+    @ApiObjectField(description = "Estimate of vault size")
+    private String estimate;
     
     @ApiObjectField(description = "The policy that will be applied to this vault")
     private String policyID;
@@ -38,9 +44,10 @@ public class CreateVault {
 
 
     public CreateVault() { }
-    public CreateVault(String name, String description, String policyID, String groupID, String datasetID, String grantEndDate, String reviewDate, Boolean partial, Boolean affirmed) {
+    public CreateVault(String name, String description, String notes, String policyID, String groupID, String datasetID, String grantEndDate, String reviewDate, Boolean partial, Boolean affirmed) {
         this.name = name;
         this.description = description;
+        this.notes = notes;
         this.policyID = policyID;
         this.groupID = groupID;
         this.datasetID = datasetID;
@@ -64,6 +71,22 @@ public class CreateVault {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getNotes() {
+        return this.notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getEstimate() {
+        return this.estimate;
+    }
+
+    public void setEstimate(String estimate) {
+        this.estimate = estimate;
     }
 
     public String getPolicyID() {
