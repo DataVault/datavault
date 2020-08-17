@@ -107,26 +107,25 @@
         </div>
 
         <div class="form-group" required>
-            <@spring.bind "vault.affirmed" />
             <label class="control-label">Rough estimate of the amount of data:</label>
             <div class="radio">
                 <label>
-                    <input type="radio" name="estimate" value="< 100 GB"> Under 100 GB
+                    <input type="radio" name="estimate" value="UNDER_100GB"> Under 100 GB
                 </label>
             </div>
             <div class="radio">
                 <label>
-                    <input type="radio" name="estimate" value="< 10 TB"> Between 100 GB and 10 TB
+                    <input type="radio" name="estimate" value="UNDER_10TB"> Between 100 GB and 10 TB
                 </label>
             </div>
             <div class="radio">
                 <label>
-                    <input type="radio" name="estimate" value="> 10 TB"> Over 10 TB
+                    <input type="radio" name="estimate" value="OVER_10TB"> Over 10 TB
                 </label>
             </div>
             <div class="radio">
                 <label>
-                    <input type="radio" name="estimate" value="Unknown"> Don’t know
+                    <input type="radio" name="estimate" value="UNKNOWN"> Don’t know
                 </label>
             </div>
         </div>

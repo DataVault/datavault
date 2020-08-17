@@ -16,6 +16,20 @@ import java.util.Date;
 @Table(name="PendingVaults")
 public class PendingVault {
     private static final long ZERO = 0l;
+
+    public enum Estimate {
+        UNDER_100GB,
+        UNDER_10TB,
+        OVER_10TB,
+        UNKNOWN
+    }
+
+    public enum Billing_Type {
+        NA,
+        GRANT_FUNDING,
+        BUDGET_CODE,
+        SLICE
+    }
     // Vault Identifier
     @Id
     @GeneratedValue(generator = "uuid")
@@ -55,9 +69,19 @@ public class PendingVault {
     @Column(name = "reviewDate", nullable = true)
     private Date reviewDate;
 
-    // Name of the vault
-    @Column(name = "estimate", nullable = true, columnDefinition = "TEXT", length=30)
-    private String estimate;
+    // Estimate of Vault size
+    @Column(name = "estimate", nullable = true, columnDefinition = "TEXT")
+    private Estimate estimate;
+
+    // Billing method
+    @Column(name = "billingType", nullable = true, columnDefinition = "TEXT")
+    private Billing_Type billingType;
+
+    // Billing method
+    @Column(name = "sliceID", nullable = true, columnDefinition = "TEXT")
+    private String sliceID;
+
+
 
     @ManyToOne
     private RetentionPolicy retentionPolicy;
@@ -80,6 +104,14 @@ public class PendingVault {
 
     public void setAffirmed(Boolean affirmed) {
         this.affirmed = affirmed;
+    }
+
+    public Billing_Type getBillingType() {
+        return this.billingType;
+    }
+
+    public void setBillingType(Billing_Type billingType) {
+        this.billingType = billingType;
     }
 
     public long getVersion() {
@@ -128,11 +160,11 @@ public class PendingVault {
         this.reviewDate = reviewDate;
     }
 
-    public void setEstimate(String estimate) {
+    public void setEstimate(Estimate estimate) {
         this.estimate = estimate;
     }
 
-    public String getEstimate() { return this.estimate; }
+    public Estimate getEstimate() { return this.estimate; }
 
     public Date getReviewDate() {
         return this.reviewDate;
@@ -142,6 +174,14 @@ public class PendingVault {
 
     public void setGroup(Group group) {
         this.group = group;
+    }
+
+    public String getSliceID() {
+        return this.sliceID;
+    }
+
+    public void setSliceID(String sliceID) {
+        this.sliceID = sliceID;
     }
 
     public VaultInfo convertToResponse() {
@@ -160,6 +200,8 @@ public class PendingVault {
             retVal.setGroupID(String.valueOf(this.group.getID()));
         }
         retVal.setReviewDate(this.reviewDate);
+        retVal.setBillingType(this.billingType);
+        retVal.setSliceID(this.sliceID);
         return retVal;
     }
 }

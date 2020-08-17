@@ -2,6 +2,7 @@ package org.datavaultplatform.common.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.datavaultplatform.common.model.PendingVault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
@@ -36,7 +37,10 @@ public class VaultInfo {
     private String description;
 
     @ApiObjectField(description = "Estimate of vault size")
-    private String estimate;
+    private PendingVault.Estimate estimate;
+
+    @ApiObjectField(description = "How we are billing")
+    private PendingVault.Billing_Type billingType;
 
     @ApiObjectField(description = "Notes regarding data retention")
     private String notes;
@@ -78,6 +82,9 @@ public class VaultInfo {
     
     @ApiObjectField(description = "Project Id from Pure")
     private String projectId;
+
+    @ApiObjectField(description = "Slice ID from erm somewhere")
+    private String sliceID;
     
     @ApiObjectField(description = "Amount to be Billed")
     private BigDecimal amountToBeBilled;
@@ -200,12 +207,20 @@ public class VaultInfo {
         this.notes = notes;
     }
 
-    public String getEstimate() {
+    public PendingVault.Estimate getEstimate() {
         return this.estimate;
     }
 
-    public void setEstimate(String estimate) {
+    public void setEstimate(PendingVault.Estimate estimate) {
         this.estimate = estimate;
+    }
+
+    public PendingVault.Billing_Type getBillingType() {
+        return this.billingType;
+    }
+
+    public void setBillingType(PendingVault.Billing_Type billingType) {
+        this.billingType = billingType;
     }
 
     public String getPolicyID() {
@@ -308,6 +323,14 @@ public class VaultInfo {
 	public void setProjectId(String projectId) {
 		this.projectId = projectId;
 	}
+
+    public String getSliceID() {
+        return this.sliceID;
+    }
+
+    public void setSliceID(String sliceID) {
+        this.sliceID = sliceID;
+    }
 
 	public long getProjectSize() {
 		return projectSize;

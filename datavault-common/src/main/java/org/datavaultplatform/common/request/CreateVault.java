@@ -1,6 +1,7 @@
 package org.datavaultplatform.common.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.datavaultplatform.common.model.PendingVault;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
@@ -8,6 +9,9 @@ import org.jsondoc.core.annotation.ApiObjectField;
 @ApiObject(name = "CreateVault")
 public class CreateVault {
 
+    /*
+    TODO: Make a base Vault class and move everything that is shared between Vault and Pending vault into it
+     */
     @ApiObjectField(description = "A name for the new vault")
     private String name;
     
@@ -19,6 +23,9 @@ public class CreateVault {
 
     @ApiObjectField(description = "Estimate of vault size")
     private String estimate;
+
+    @ApiObjectField(description = "How we are billing")
+    private String billingType;
     
     @ApiObjectField(description = "The policy that will be applied to this vault")
     private String policyID;
@@ -41,10 +48,14 @@ public class CreateVault {
     @ApiObjectField(description = "Did the user accept the various rules on the create vault intro page")
     private Boolean affirmed = false;
 
+    @ApiObjectField(description = "If the billng type is slice we will store and identifier for the slice")
+    private String sliceID;
+
 
 
     public CreateVault() { }
-    public CreateVault(String name, String description, String notes, String policyID, String groupID, String datasetID, String grantEndDate, String reviewDate, Boolean partial, Boolean affirmed) {
+    public CreateVault(String name, String description, String notes, String policyID, String groupID, String datasetID, String grantEndDate,
+                       String reviewDate, Boolean partial, Boolean affirmed, String estimate, String billingType, String sliceID) {
         this.name = name;
         this.description = description;
         this.notes = notes;
@@ -55,6 +66,9 @@ public class CreateVault {
         this.reviewDate = reviewDate;
         this.partial = partial;
         this.affirmed = affirmed;
+        this.estimate = estimate;
+        this.billingType = billingType;
+        this.sliceID = sliceID;
     }
 
     public String getName() {
@@ -87,6 +101,14 @@ public class CreateVault {
 
     public void setEstimate(String estimate) {
         this.estimate = estimate;
+    }
+
+    public String getBillingType() {
+        return this.billingType;
+    }
+
+    public void setBillingType(String billingType) {
+        this.billingType = billingType;
     }
 
     public String getPolicyID() {
@@ -143,5 +165,13 @@ public class CreateVault {
 
     public void setAffirmed(Boolean affirmed) {
         this.affirmed = affirmed;
+    }
+
+    public String getSliceID() {
+        return this.sliceID;
+    }
+
+    public void setSliceID(String sliceID) {
+        this.sliceID = sliceID;
     }
 }

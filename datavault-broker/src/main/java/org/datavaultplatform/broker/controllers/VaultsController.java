@@ -367,7 +367,21 @@ public class VaultsController {
         String estimate = createVault.getEstimate();
         logger.debug("Estimate is: '" + estimate + "'");
         if (estimate != null) {
-            vault.setEstimate(estimate);
+            PendingVault.Estimate enumEst = PendingVault.Estimate.valueOf(estimate);
+            if (enumEst != null) {
+                vault.setEstimate(enumEst);
+            } else {
+                vault.setEstimate(PendingVault.Estimate.UNKNOWN);
+            }
+        }
+
+        String billingType = createVault.getBillingType();
+        logger.debug("Billing Type is: '" + billingType + "'");
+        if (billingType != null) {
+            PendingVault.Billing_Type enumBT = PendingVault.Billing_Type.valueOf(billingType);
+            if (enumBT != null) {
+                vault.setBillingType(enumBT);
+            }
         }
 
         String policyId = createVault.getPolicyID();
@@ -391,6 +405,12 @@ public class VaultsController {
                 throw new Exception("Group '" + groupId + "' does not exist");
             }
             vault.setGroup(group);
+        }
+
+        String sliceID = createVault.getSliceID();
+        logger.debug("Slice ID is: '" + sliceID + "'");
+        if (sliceID != null) {
+            vault.setSliceID(sliceID);
         }
 //
 //        User user = usersService.getUser(userID);

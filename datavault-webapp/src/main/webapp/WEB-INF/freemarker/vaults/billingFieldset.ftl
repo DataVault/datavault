@@ -5,25 +5,25 @@
         <div id="billing-selection-box" class="row">
             <div class="radio">
                 <label>
-                    <input type="radio" name="billing-choices" id="billing-choice-na" class="billing-choice" value="na">
+                    <input type="radio" name="billingType" id="billing-choice-na" class="billing-choice" value="NA">
                     N/A – the data volume will be under the project fee waiver threshold (<100GB). ​
                 </label>
             </div>
             <div class="radio">
                 <label>
-                    <input type="radio" name="billing-choices" id="billing-choice-grantfunding" value="grantfunding">
+                    <input type="radio" name="billingType" id="billing-choice-grantfunding" value="GRANT_FUNDING">
                     Grant funding [open dialog to select/specify a project and provide the grant end date for the purposes of when the eIT must be sent by.]​
                 </label>
             </div>
             <div class="radio">
                 <label>
-                    <input type="radio" name="billing-choices" id="billing-choice-budgetcode" value="budgetcode">
+                    <input type="radio" name="billingType" id="billing-choice-budgetcode" value="BUDGET_CODE">
                     A budget code. ​
                 </label>
             </div>
             <div class="radio">
                 <label class="col-sm-2 control-label">
-                    <input type="radio" name="billing-choices" id="billing-choice-slice" value="slice">
+                    <input type="radio" name="billingType" id="billing-choice-slice" value="SLICE">
                     A Slice. ​
                 </label>
             </div>
@@ -39,7 +39,8 @@
                     </p>
                     <div class="form-group">
                         <label class="col-sm-2 control-label">Slice: </label>
-                        <input type="text" />
+                        <@spring.bind "vault.sliceID" />
+                        <input type="text" id="sliceID" name="${spring.status.expression}" value="${spring.status.value!""}"/>
                     </div>
                 </div>
             </div>
