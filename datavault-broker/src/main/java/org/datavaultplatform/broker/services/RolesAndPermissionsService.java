@@ -6,6 +6,8 @@ import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
 import org.datavaultplatform.common.model.dao.RoleDAO;
 import org.datavaultplatform.common.model.dao.UserDAO;
 import org.datavaultplatform.common.util.RoleUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 public class RolesAndPermissionsService implements ApplicationListener<ContextRefreshedEvent> {
+    private final Logger logger = LoggerFactory.getLogger(RolesAndPermissionsService.class);
 
     private RoleDAO roleDao;
 
@@ -73,6 +76,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
 
     public RoleAssignment createRoleAssignment(RoleAssignment roleAssignment) {
         validateRoleAssignment(roleAssignment);
+        logger.debug("Got past the rolesandpermissionsservice validation");
         roleAssignmentDao.store(roleAssignment);
         return roleAssignment;
     }

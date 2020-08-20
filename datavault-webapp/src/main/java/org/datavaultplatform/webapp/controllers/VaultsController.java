@@ -136,10 +136,14 @@ public class VaultsController {
     public String getVaultsListing(ModelMap model) {
         logger.debug("Getting the current vaults");
         VaultInfo currentVaults[] = restService.getVaultsListing();
-        // go to vault list or vault create if no current vaults
-        if (currentVaults != null && currentVaults.length > 0) {
+        VaultInfo pendingVaults[] = restService.getPendingVaultsListing();
+        //VaultInfo pendingVaults[] = null;
+        // go to vault list or vault create if no current / pending vaults
+        if ((currentVaults != null && currentVaults.length > 0)
+                || (pendingVaults != null && pendingVaults.length > 0)) {
             logger.debug("Current vaults: " + currentVaults.length);
             model.addAttribute("vaults", currentVaults);
+            model.addAttribute("pendingVaults", pendingVaults);
 
             // pass the view an empty Vault since the form expects it
             model.addAttribute("vault", new CreateVault());
@@ -267,12 +271,36 @@ public class VaultsController {
 
     private boolean canAccessVault(VaultInfo vault, Principal principal) {
         List<RoleAssignment> roleAssignmentsForUser = restService.getRoleAssignmentsForUser(principal.getName());
-        return roleAssignmentsForUser.stream().anyMatch(roleAssignment ->
-                RoleUtils.isISAdmin(roleAssignment)
-                        || RoleUtils.isRoleInVault(roleAssignment, vault.getID())
-                        || (RoleUtils.isRoleInSchool(roleAssignment, vault.getGroupID()) && RoleUtils.hasPermission(roleAssignment, Permission.CAN_MANAGE_VAULTS)));
+        //return roleAssignmentsForUser.stream().anyMatch(roleAssignment ->
+        //        RoleUtils.isISAdmin(roleAssignment)
+        //                || RoleUtils.isRoleInVault(roleAssignment, vault.getID())
+        //                || (RoleUtils.isRoleInSchool(roleAssignment, vault.getGroupID()) && RoleUtils.hasPermission(roleAssignment, Permission.CAN_MANAGE_VAULTS)));
+        return canAccessVault(vault, principal, false);
     }
 
+    private boolean canAccessPendingVault(VaultInfo vault, Principal principal) {
+        List<RoleAssignment> roleAssignmentsForUser = restService.getRoleAssignmentsForUser(principal.getName());
+        //return roleAssignmentsForUser.stream().anyMatch(roleAssignment ->
+        //        RoleUtils.isISAdmin(roleAssignment)
+        //                || RoleUtils.isRoleInPendingVault(roleAssignment, vault.getID())
+        //                || (RoleUtils.isRoleInSchool(roleAssignment, vault.getGroupID()) && RoleUtils.hasPermission(roleAssignment, Permission.CAN_MANAGE_VAULTS)));
+        return canAccessVault(vault, principal, true);
+    }
+
+    private boolean canAccessVault(VaultInfo vault, Principal principal, Boolean pending) {
+        List<RoleAssignment> roleAssignmentsForUser = restService.getRoleAssignmentsForUser(principal.getName());
+        if (pending) {
+            return roleAssignmentsForUser.stream().anyMatch(roleAssignment ->
+                    RoleUtils.isISAdmin(roleAssignment)
+                            || RoleUtils.isRoleInPendingVault(roleAssignment, vault.getID())
+                            || (RoleUtils.isRoleInSchool(roleAssignment, vault.getGroupID()) && RoleUtils.hasPermission(roleAssignment, Permission.CAN_MANAGE_VAULTS)));
+        } else {
+            return roleAssignmentsForUser.stream().anyMatch(roleAssignment ->
+                    RoleUtils.isISAdmin(roleAssignment)
+                            || RoleUtils.isRoleInPendingVault(roleAssignment, vault.getID())
+                            || (RoleUtils.isRoleInSchool(roleAssignment, vault.getGroupID()) && RoleUtils.hasPermission(roleAssignment, Permission.CAN_MANAGE_VAULTS)));
+        }
+    }
     @RequestMapping(value = "/vaults/{vaultid}/{userid}", method = RequestMethod.GET)
     public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("userid") String userID) {
     	model.addAttribute("vaults", restService.getVaultsListingAll(userID));
@@ -301,6 +329,42 @@ public class VaultsController {
         model.addAttribute("welcome", welcome);
 
         return "vaults/create";
+    }
+
+    @RequestMapping(value = "/pendingVaults/{vaultid}", method = RequestMethod.GET)
+    public String getPendingVault(ModelMap model, @PathVariable("vaultid") String vaultID, Principal principal) {
+        VaultInfo vault = restService.getPendingVault(vaultID);
+
+        if (!canAccessVault(vault, principal)) {
+            throw new ForbiddenException();
+        }
+
+        CreateVault cv = new CreateVault();
+        //cv.setPendingId(vault.getPendingID);
+        cv.setAffirmed(vault.getAffirmed());
+        logger.info("BillyingType raw from VaultInfo: '" + vault.getBillingType() + "'");
+        logger.info("BillyingType string from VaultInfo: '" + vault.getBillingType().toString() + "'");
+        logger.info("BillyingType name from VaultInfo: '" + vault.getBillingType().name() + "'");
+        cv.setBillingType(vault.getBillingType().toString());
+        cv.setSliceID(vault.getSliceID());
+        cv.setName(vault.getName());
+        cv.setDescription(vault.getDescription());
+        cv.setPolicyID(vault.getPolicyID());
+        cv.setGrantEndDate(vault.getGrantEndDate().toString());
+        cv.setGroupID(vault.getGroupID());
+        cv.setReviewDate(vault.getReviewDate().toString());
+        cv.setEstimate(vault.getEstimate().toString());
+        cv.setNotes(vault.getNotes());
+        cv.setPartial(true);
+
+        model.addAttribute("vault", cv);
+        RetentionPolicy[] policies = restService.getRetentionPolicyListing();
+        model.addAttribute("policies", policies);
+
+        Group[] groups = restService.getGroups();
+        model.addAttribute("groups", groups);
+
+        return "vaults/newCreatePrototype";
     }
 
     @RequestMapping(value = "/vaults/buildsteps", method = RequestMethod.GET)

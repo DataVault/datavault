@@ -37,6 +37,10 @@ public class RoleUtils {
         return roleAssignment.getVaultId() != null && roleAssignment.getVaultId().equals(vaultId);
     }
 
+    public static boolean isRoleInPendingVault(RoleAssignment roleAssignment, String vaultId) {
+        return roleAssignment.getPendingVaultId() != null && roleAssignment.getPendingVaultId().equals(vaultId);
+    }
+
     public static boolean isRoleInSchool(RoleAssignment roleAssignment, String schoolId) {
         return roleAssignment.getSchoolId() != null && roleAssignment.getSchoolId().equals(schoolId);
     }

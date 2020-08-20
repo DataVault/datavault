@@ -127,12 +127,37 @@ public class VaultsController {
     public List<VaultInfo> getVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
 
         List<VaultInfo> vaultResponses = permissionsService.getRoleAssignmentsForUser(userID).stream()
-                .filter(roleAssignment -> RoleType.VAULT == roleAssignment.getRole().getType() || RoleUtils.isDataOwner(roleAssignment))
+                .filter(roleAssignment -> (RoleType.VAULT == roleAssignment.getRole().getType() ||
+                        RoleUtils.isDataOwner(roleAssignment))  && (roleAssignment.getVaultId() != null))
                 .map(roleAssignment -> vaultsService.getVault(roleAssignment.getVaultId()).convertToResponse())
                 .sorted(Comparator.comparing(VaultInfo::getCreationTime))
                 .collect(Collectors.toList());
         Collections.reverse(vaultResponses);
         return vaultResponses;
+    }
+
+    @ApiMethod(
+            path = "/pendingVaults",
+            verb = ApiVerb.GET,
+            description = "Gets a list of all Pending Vaults for the specified User",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            responsestatuscode = "200 - OK"
+    )
+    @ApiHeaders(headers={
+            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+    })
+    @RequestMapping(value = "/pendingVaults", method = RequestMethod.GET)
+    public List<VaultInfo> getPendingVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
+
+        List<VaultInfo> vaultResponses = permissionsService.getRoleAssignmentsForUser(userID).stream()
+                .filter(roleAssignment -> (RoleType.VAULT == roleAssignment.getRole().getType() ||
+                        RoleUtils.isDataOwner(roleAssignment)) && (roleAssignment.getPendingVaultId() != null))
+                .map(roleAssignment -> pendingVaultsService.getVault(roleAssignment.getPendingVaultId()).convertToResponse())
+                .sorted(Comparator.comparing(VaultInfo::getCreationTime))
+                .collect(Collectors.toList());
+        Collections.reverse(vaultResponses);
+        return vaultResponses;
+        //return null;
     }
 
     @RequestMapping(value = "/vaults/user", method = RequestMethod.GET)
@@ -412,13 +437,13 @@ public class VaultsController {
         if (sliceID != null) {
             vault.setSliceID(sliceID);
         }
-//
-//        User user = usersService.getUser(userID);
-//        if (user == null) {
-//            logger.error("User '" + userID + "' does not exist");
-//            throw new Exception("User '" + userID + "' does not exist");
-//        }
-//        vault.setUser(user);
+
+        User user = usersService.getUser(userID);
+        if (user == null) {
+            logger.error("User '" + userID + "' does not exist");
+            throw new Exception("User '" + userID + "' does not exist");
+        }
+        vault.setUser(user);
 //        String datasetId = createVault.getDatasetID();
 //        Dataset dataset = externalMetadataService.getCachedDataset(datasetId);
 //
@@ -458,11 +483,15 @@ public class VaultsController {
 
         pendingVaultsService.addPendingVault(vault);
 
-//        RoleAssignment dataOwnerRoleAssignment = new RoleAssignment();
-//        dataOwnerRoleAssignment.setUserId(userID);
-//        dataOwnerRoleAssignment.setVaultId(vault.getID());
-//        dataOwnerRoleAssignment.setRole(permissionsService.getDataOwner());
-//        permissionsService.createRoleAssignment(dataOwnerRoleAssignment);
+        RoleAssignment dataOwnerRoleAssignment = new RoleAssignment();
+        dataOwnerRoleAssignment.setUserId(userID);
+        dataOwnerRoleAssignment.setPendingVaultId(vault.getId());
+        dataOwnerRoleAssignment.setRole(permissionsService.getDataOwner());
+
+        logger.debug("Role userID: '" + userID + "'");
+        logger.debug("Role vaultID: '" + vault.getId() + "'");
+        logger.debug("Role type: '" + dataOwnerRoleAssignment.getRole().getType() + "'");
+        permissionsService.createRoleAssignment(dataOwnerRoleAssignment);
 //
 //        Create vaultEvent = new Create(vault.getID());
 //        vaultEvent.setVault(vault);
@@ -576,6 +605,19 @@ public class VaultsController {
 
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
+        if (vault != null) {
+            return vault.convertToResponse();
+        } else {
+            return null;
+        }
+    }
+
+    @RequestMapping(value = "/pendingVaults/{vaultid}", method = RequestMethod.GET)
+    public VaultInfo getPendingVault(@RequestHeader(value = "X-UserID", required = true) String userID,
+                              @PathVariable("vaultid") String vaultID) throws Exception {
+
+        User user = usersService.getUser(userID);
+        PendingVault vault = pendingVaultsService.getUserVault(user, vaultID);
         if (vault != null) {
             return vault.convertToResponse();
         } else {

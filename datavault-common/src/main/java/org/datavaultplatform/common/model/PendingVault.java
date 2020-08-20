@@ -37,6 +37,11 @@ public class PendingVault {
     @Column(name = "id", unique = true, length = 36)
     private String id;
 
+    // Serialise date in ISO 8601 format
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date creationTime;
+
     // Hibernate version
     @Version
     private long version;
@@ -89,6 +94,9 @@ public class PendingVault {
     @JsonIgnore
     @ManyToOne
     private Group group;
+
+    @ManyToOne
+    private User user;
 
     public String getId() {
         return this.id;
@@ -184,6 +192,20 @@ public class PendingVault {
         this.sliceID = sliceID;
     }
 
+    public void setCreationTime(Date creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    public Date getCreationTime() {
+        return creationTime;
+    }
+
+    public User getUser() { return this.user; }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public VaultInfo convertToResponse() {
         VaultInfo retVal = new VaultInfo();
         retVal.setID(this.id);
@@ -202,6 +224,12 @@ public class PendingVault {
         retVal.setReviewDate(this.reviewDate);
         retVal.setBillingType(this.billingType);
         retVal.setSliceID(this.sliceID);
+        retVal.setCreationTime(this.creationTime);
+        String userId = this.user == null ? null : user.getID();
+        retVal.setUserID(userId);
+        String userName = user == null ? null : (user.getFirstname()+" "+user.getLastname());
+        retVal.setUserName(userName);
+
         return retVal;
     }
 }

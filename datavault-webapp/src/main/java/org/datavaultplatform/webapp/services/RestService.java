@@ -165,6 +165,11 @@ public class RestService {
         return (VaultInfo[])response.getBody();
     }
 
+    public VaultInfo[] getPendingVaultsListing() {
+        HttpEntity<?> response = get(brokerURL + "/pendingVaults", VaultInfo[].class);
+        return (VaultInfo[])response.getBody();
+    }
+
     public VaultInfo[] getVaultsListingForGroup(String groupID) {
         HttpEntity<?> response = get(brokerURL + "/groups/" + groupID + "/vaults", VaultInfo[].class);
         return (VaultInfo[])response.getBody();
@@ -299,6 +304,11 @@ public class RestService {
 
     public VaultInfo getVault(String id) {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + id, VaultInfo.class);
+        return (VaultInfo)response.getBody();
+    }
+
+    public VaultInfo getPendingVault(String id) {
+        HttpEntity<?> response = get(brokerURL + "/pendingVaults/" + id, VaultInfo.class);
         return (VaultInfo)response.getBody();
     }
 

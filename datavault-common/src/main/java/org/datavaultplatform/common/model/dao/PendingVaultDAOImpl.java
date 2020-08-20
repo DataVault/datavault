@@ -1,9 +1,12 @@
 package org.datavaultplatform.common.model.dao;
 
 import org.datavaultplatform.common.model.PendingVault;
+import org.datavaultplatform.common.model.Vault;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,5 +26,15 @@ public class PendingVaultDAOImpl implements PendingVaultDAO {
         session.persist(pendingVault);
         tx.commit();
         session.close();
+    }
+
+    @Override
+    public PendingVault findById(String Id) {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(PendingVault.class);
+        criteria.add(Restrictions.eq("id", Id));
+        PendingVault vault = (PendingVault)criteria.uniqueResult();
+        session.close();
+        return vault;
     }
 }
