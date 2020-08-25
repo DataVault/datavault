@@ -131,6 +131,7 @@ public class RetentionPoliciesService {
         return date;
     }
 
+    /**
     public int run(Vault v) {
         RetentionPolicy rp = v.getRetentionPolicy();
 
@@ -154,12 +155,12 @@ public class RetentionPoliciesService {
 
         logger.info("Calculating Expiry Date for vault " + v.getName());
 
-        Date check;
-        if (v.getGrantEndDate() != null) {
-            check = v.getGrantEndDate();
-        } else {
-            check = v.getCreationTime();
+        if (v.getGrantEndDate() == null) {
+            logger.info("No grant date entered for vault " + v.getName());
+            return v.getCreationTime();
         }
+
+        Date check = v.getGrantEndDate();
 
         logger.info("Start date is " + check);
 
@@ -169,7 +170,7 @@ public class RetentionPoliciesService {
             // At the time of writing this means its EPSRC
 
             // Get all the retrieve events
-            ArrayList<Retrieve> retrieves = new ArrayList();
+            ArrayList<Retrieve> retrieves = new ArrayList<Retrieve>();
             for (Deposit d : v.getDeposits()) {
                 retrieves.addAll(d.getRetrieves());
             }
@@ -190,8 +191,63 @@ public class RetentionPoliciesService {
         c.add(Calendar.YEAR, rp.getMinRetentionPeriod());
         check = c.getTime();
 
+        logger.info("Expiry date is " + check);
 
         return check;
+    }
+     **/
+
+    public void setRetention(Vault v) {
+
+        RetentionPolicy rp = v.getRetentionPolicy();
+
+        Date check;
+        if (v.getGrantEndDate() == null) {
+            check = v.getCreationTime();
+        } else {
+            check = v.getGrantEndDate();
+
+            if (rp.getMinRetentionPeriod() > 0 && rp.isExtendUponRetrieval()) {
+                // At the time of writing this means its EPSRC
+
+                // Get all the retrieve events
+                ArrayList<Retrieve> retrieves = new ArrayList();
+                for (Deposit d : v.getDeposits()) {
+                    retrieves.addAll(d.getRetrieves());
+                }
+
+                // Have their been any retrieves?
+                if (!retrieves.isEmpty()) {
+                    check = retrieves.get(0).getTimestamp();
+                    for (Retrieve r : retrieves) {
+                        if (r.getTimestamp().after(check)) {
+                            check = r.getTimestamp();
+                        }
+                    }
+                }
+            }
+
+            // Add on the minimum retention period (a number of years)
+            Calendar c = Calendar.getInstance();
+            c.setTime(check);
+            c.add(Calendar.YEAR, rp.getMinRetentionPeriod());
+            check = c.getTime();
+
+        }
+
+        v.setRetentionPolicyExpiry(check);
+
+        // Is it time for review?
+        Date now = new Date();
+        if (check.before(now)) {
+            v.setRetentionPolicyStatus(RetentionPolicyStatus.REVIEW);
+        } else {
+            v.setRetentionPolicyStatus(RetentionPolicyStatus.OK);
+        }
+
+        // Record when we checked it
+        v.setRetentionPolicyLastChecked(new Date());
+
     }
 }
 
