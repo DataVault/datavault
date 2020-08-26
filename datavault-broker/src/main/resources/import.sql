@@ -136,4 +136,4 @@ insert into GroupOwners (group_id, user_id) values ('ECA', 'user2');
 insert into GroupOwners (group_id, user_id) values ('MHSE', 'user3');
 insert into GroupOwners (group_id, user_id) values ('SHSS', 'user4');
 
-insert into Clients (id, name, apiKey, ipAddress) values ('datavault-webapp', 'Datavault Webapp', 'datavault-webapp', '127.0.0.1');
+insert ignore into Clients (id, name, apiKey, ipAddress) values ('datavault-webapp', 'Datavault Webapp', 'datavault-webapp', '127.0.0.1');
