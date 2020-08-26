@@ -12,6 +12,9 @@ public class CreateVault {
     /*
     TODO: Make a base Vault class and move everything that is shared between Vault and Pending vault into it
      */
+    @ApiObjectField(description = "An ID for the partially completed pending vault")
+    private String pendingID;
+
     @ApiObjectField(description = "A name for the new vault")
     private String name;
     
@@ -173,5 +176,13 @@ public class CreateVault {
 
     public void setSliceID(String sliceID) {
         this.sliceID = sliceID;
+    }
+
+    public String getPendingID() {
+        return this.pendingID;
+    }
+
+    public void setPendingID(String pendingID) {
+        this.pendingID = pendingID;
     }
 }

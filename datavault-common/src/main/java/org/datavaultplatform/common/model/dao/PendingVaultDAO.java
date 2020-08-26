@@ -7,4 +7,6 @@ public interface PendingVaultDAO {
     public void save(PendingVault pendingVault);
 
     public PendingVault findById(String Id);
+
+    public void update(PendingVault vault);
 }

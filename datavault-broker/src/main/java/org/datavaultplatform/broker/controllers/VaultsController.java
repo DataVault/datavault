@@ -365,6 +365,14 @@ public class VaultsController {
                               @RequestBody CreateVault createVault) throws Exception {
 
         PendingVault vault = new PendingVault();
+
+        String pendingId = createVault.getPendingID();
+        logger.debug("Pending ID is: '" + pendingId + "'");
+        if (pendingId != null && ! pendingId.isEmpty()) {
+            // this vault has previously been saved mid completion
+            vault.setId(pendingId);
+        }
+
         Boolean affirmed = createVault.getAffirmed();
         logger.debug("Affirmed is: '" + affirmed + "'");
         if (affirmed != null) {
@@ -491,7 +499,11 @@ public class VaultsController {
         logger.debug("Role userID: '" + userID + "'");
         logger.debug("Role vaultID: '" + vault.getId() + "'");
         logger.debug("Role type: '" + dataOwnerRoleAssignment.getRole().getType() + "'");
-        permissionsService.createRoleAssignment(dataOwnerRoleAssignment);
+        if (pendingId == null || pendingId.isEmpty()) {
+            permissionsService.createRoleAssignment(dataOwnerRoleAssignment);
+        } else {
+            permissionsService.updateRoleAssignment(dataOwnerRoleAssignment);
+        }
 //
 //        Create vaultEvent = new Create(vault.getID());
 //        vaultEvent.setVault(vault);

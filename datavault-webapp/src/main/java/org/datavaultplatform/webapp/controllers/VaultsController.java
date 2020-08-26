@@ -334,21 +334,21 @@ public class VaultsController {
     @RequestMapping(value = "/pendingVaults/{vaultid}", method = RequestMethod.GET)
     public String getPendingVault(ModelMap model, @PathVariable("vaultid") String vaultID, Principal principal) {
         VaultInfo vault = restService.getPendingVault(vaultID);
+        logger.info("Passed in id: '" + vaultID);
 
         if (!canAccessVault(vault, principal)) {
             throw new ForbiddenException();
         }
 
         CreateVault cv = new CreateVault();
-        //cv.setPendingId(vault.getPendingID);
+        cv.setPendingID(vault.getID());
         cv.setAffirmed(vault.getAffirmed());
-        logger.info("BillyingType raw from VaultInfo: '" + vault.getBillingType() + "'");
-        logger.info("BillyingType string from VaultInfo: '" + vault.getBillingType().toString() + "'");
-        logger.info("BillyingType name from VaultInfo: '" + vault.getBillingType().name() + "'");
         cv.setBillingType(vault.getBillingType().toString());
         cv.setSliceID(vault.getSliceID());
         cv.setName(vault.getName());
+        logger.info("Vault Description is: '" + vault.getDescription());
         cv.setDescription(vault.getDescription());
+        logger.info("Create Vault Description is: '" + cv.getDescription());
         cv.setPolicyID(vault.getPolicyID());
         cv.setGrantEndDate(vault.getGrantEndDate().toString());
         cv.setGroupID(vault.getGroupID());
@@ -418,8 +418,13 @@ public class VaultsController {
             // if the save button has been clicked just save what we have and go back to the same page of the form
             // already have something saved update if not new save
             logger.info("Save button clicked");
+
             vault.setPartial(true);
-            VaultInfo newVault = restService.addPendingVault(vault);
+            //if (vault.getPendingID() == null) {
+                VaultInfo newVault = restService.addPendingVault(vault);
+            //} else {
+            //    VaultInfo newVault = restService.updatePendingVault(vault);
+            //}
             //buildUrl = buildUrl + newVault.getID();
             //String vaultUrl = "/vaults/" + newVault.getID() + "/";
             return "redirect:" + buildUrl;

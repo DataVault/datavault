@@ -22,7 +22,7 @@
                   title="This description should contain information to assist you and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
                                                                 </span>
             <@spring.bind "vault.description" />
-            <textarea type="text" class="form-control" name="${spring.status.expression}" value="${spring.status.value!""}" id="description" rows="4" cols="60"></textarea>
+            <textarea type="text" class="form-control" name="${spring.status.expression}" value="${spring.status.value!""}" id="description" rows="4" cols="60"><#if vault.description??>${vault.description?html}</#if></textarea>
         </div>
 
         <div class="form-group required">
@@ -38,7 +38,7 @@
                     <select id="policyID" name="policyID" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick">
                         <option selected disabled data-hidden="true">Please choose a retention policy</option>
                         <#list policies as retentionPolicy>
-                            <option value="${retentionPolicy.getID()}"
+                            <option value="${retentionPolicy.getID()}" <#if vault.policyID??>${(vault.policyID == retentionPolicy.getID()?c)?then('selected', 'true')}</#if>
                                     data-subtext="( Minimum period: ${retentionPolicy.minDataRetentionPeriod?html} )">${retentionPolicy.name?html}</option>
                         </#list>
                     </select>

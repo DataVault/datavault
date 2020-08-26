@@ -4,11 +4,14 @@ import org.datavaultplatform.common.model.PendingVault;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.dao.PendingVaultDAO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
 public class PendingVaultsService {
     private PendingVaultDAO pendingVaultDAO;
+    private final Logger logger = LoggerFactory.getLogger(PendingVaultsService.class);
 
     public void setPendingVaultDAO(PendingVaultDAO pendingVaultDAO) {
         this.pendingVaultDAO = pendingVaultDAO;
@@ -17,7 +20,16 @@ public class PendingVaultsService {
     public void addPendingVault(PendingVault vault) {
         Date d = new Date();
         vault.setCreationTime(d);
-        pendingVaultDAO.save(vault);
+        if (vault != null) {
+            if (vault.getId() == null || vault.getId().isEmpty()) {
+                logger.info("Saving a new pending vault");
+                pendingVaultDAO.save(vault);
+            } else {
+                logger.info("Updating an existing pending vault (" + vault.getId() + ")");
+                pendingVaultDAO.update(vault);
+            }
+        }
+
     }
 
     public PendingVault getVault(String vaultID) {

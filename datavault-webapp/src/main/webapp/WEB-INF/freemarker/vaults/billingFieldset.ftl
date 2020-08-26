@@ -2,28 +2,29 @@
     <div class="form-card">
         <h2 class="fs-title">Billing</h2>
         Funding for this vault will be from:
+        <@spring.bind "vault.billingType" />
         <div id="billing-selection-box" class="row">
             <div class="radio">
                 <label>
-                    <input type="radio" name="billingType" id="billing-choice-na" class="billing-choice" value="NA">
+                    <input type="radio" name="${spring.status.expression}" id="billing-choice-na" class="billing-choice" value="NA" <#if vault.billingType??>${(vault.billingType == 'NA')?then('checked', '')}</#if>>
                     N/A – the data volume will be under the project fee waiver threshold (<100GB). ​
                 </label>
             </div>
             <div class="radio">
                 <label>
-                    <input type="radio" name="billingType" id="billing-choice-grantfunding" value="GRANT_FUNDING">
+                    <input type="radio" name="${spring.status.expression}" id="billing-choice-grantfunding" value="GRANT_FUNDING" <#if vault.billingType??>${(vault.billingType == 'GRANT_FUNDING')?then('checked', '')}</#if>>
                     Grant funding [open dialog to select/specify a project and provide the grant end date for the purposes of when the eIT must be sent by.]​
                 </label>
             </div>
             <div class="radio">
                 <label>
-                    <input type="radio" name="billingType" id="billing-choice-budgetcode" value="BUDGET_CODE">
+                    <input type="radio" name="${spring.status.expression}" id="billing-choice-budgetcode" value="BUDGET_CODE" <#if vault.billingType??>${(vault.billingType == 'BUDGET_CODE')?then('checked', '')}</#if>>
                     A budget code. ​
                 </label>
             </div>
             <div class="radio">
                 <label class="col-sm-2 control-label">
-                    <input type="radio" name="billingType" id="billing-choice-slice" value="SLICE">
+                    <input type="radio" name="${spring.status.expression}" id="billing-choice-slice" value="SLICE" <#if vault.billingType??>${(vault.billingType == 'SLICE')?then('checked', '')}</#if>>
                     A Slice. ​
                 </label>
             </div>
