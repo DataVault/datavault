@@ -54,7 +54,8 @@
                   title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;">
                                                                 </span>
             <@spring.bind "vault.grantEndDate" />
-            <input id="grantEndDate" name="grantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd"/>
+            <input id="grantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd" name="${spring.status.expression}"
+                   value="${spring.status.value!""}"/>
         </div>
 
         <div class="alert alert-info" role="alert">
@@ -76,7 +77,7 @@
                         <option selected disabled data-hidden="true">Please choose a School</option>
                         <#list groups as group>
                             <#if group.enabled>
-                                <option value="${group.getID()}">${group.name?html}</option>
+                                <option value="${group.getID()}" <#if vault.groupID??>${(vault.groupID == group.getID())?then('selected', 'true')}</#if>>${group.name?html}</option>
                             </#if>
                         </#list>
                     </select>
@@ -103,29 +104,30 @@
                   title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault.">
                                                                 </span>
             <@spring.bind "vault.reviewDate" />
-            <input class="form-control" id="reviewDate" name="reviewDate" placeholder="yyyy-mm-dd"/>
+            <input class="form-control" id="reviewDate" placeholder="yyyy-mm-dd" name="${spring.status.expression}"
+                   value="${spring.status.value!""}"/>
         </div>
 
         <div class="form-group" required>
             <label class="control-label">Rough estimate of the amount of data:</label>
             <div class="radio">
                 <label>
-                    <input type="radio" name="estimate" value="UNDER_100GB"> Under 100 GB
+                    <input type="radio" name="estimate" value="UNDER_100GB" <#if vault.estimate??>${(vault.estimate == 'UNDER_100GB')?then('checked', '')}</#if>> Under 100 GB
                 </label>
             </div>
             <div class="radio">
                 <label>
-                    <input type="radio" name="estimate" value="UNDER_10TB"> Between 100 GB and 10 TB
+                    <input type="radio" name="estimate" value="UNDER_10TB" <#if vault.estimate??>${(vault.estimate == 'UNDER_10TB')?then('checked', '')}</#if>> Between 100 GB and 10 TB
                 </label>
             </div>
             <div class="radio">
                 <label>
-                    <input type="radio" name="estimate" value="OVER_10TB"> Over 10 TB
+                    <input type="radio" name="estimate" value="OVER_10TB" <#if vault.estimate??>${(vault.estimate == 'OVER_10TB')?then('checked', '')}</#if>> Over 10 TB
                 </label>
             </div>
             <div class="radio">
                 <label>
-                    <input type="radio" name="estimate" value="UNKNOWN"> Don’t know
+                    <input type="radio" name="estimate" value="UNKNOWN" <#if vault.estimate??>${(vault.estimate == 'UNKNOWN')?then('checked', '')}</#if>> Don’t know
                 </label>
             </div>
         </div>
@@ -136,7 +138,7 @@
                   title="Please note anything that would inform a future data owner , more specific information can be added with each deposit.">
             </span>
             <@spring.bind "vault.notes" />
-            <textarea type="text" class="form-control" name="notes" id="notes" name="${spring.status.expression}" value="${spring.status.value!""}" rows="4" cols="60"></textarea>
+            <textarea type="text" class="form-control" name="notes" id="notes" name="${spring.status.expression}" value="${spring.status.value!""}" rows="4" cols="60"><#if vault.notes??>${vault.notes?html}</#if></textarea>
         </div>
     </div>
 
