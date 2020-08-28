@@ -526,7 +526,10 @@ public class VaultsController {
         if (pendingId == null || pendingId.isEmpty()) {
             permissionsService.createRoleAssignment(dataOwnerRoleAssignment);
         } else {
-            permissionsService.updateRoleAssignment(dataOwnerRoleAssignment);
+            /* TODO: once we add the ability to set a different owner this will be required
+                as it will be possible that the people who can see it will have changed
+             */
+            //permissionsService.updateRoleAssignment(dataOwnerRoleAssignment);
         }
 //
 //        Create vaultEvent = new Create(vault.getID());
