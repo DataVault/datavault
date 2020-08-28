@@ -82,11 +82,25 @@ public class PendingVault {
     @Column(name = "billingType", nullable = true, columnDefinition = "TEXT")
     private Billing_Type billingType;
 
-    // Billing method
+    // Billing method additional info
     @Column(name = "sliceID", nullable = true, columnDefinition = "TEXT")
     private String sliceID;
 
+    // Billing method additional info
+    @Column(name = "authoriser", nullable = true, columnDefinition = "TEXT")
+    private String authoriser;
 
+    // Billing method additional info
+    @Column(name = "schoolOrUnit", nullable = true, columnDefinition = "TEXT")
+    private String schoolOrUnit;
+
+    // Billing method additional info
+    @Column(name = "subunit", nullable = true, columnDefinition = "TEXT")
+    private String subunit;
+
+    // Billing method additional info
+    @Column(name = "projectID", nullable = true, columnDefinition = "TEXT")
+    private String projectID;
 
     @ManyToOne
     private RetentionPolicy retentionPolicy;
@@ -206,6 +220,38 @@ public class PendingVault {
         this.user = user;
     }
 
+    public String getAuthoriser() {
+        return this.authoriser;
+    }
+
+    public void setAuthoriser(String authoriser) {
+        this.authoriser = authoriser;
+    }
+
+    public String getSchoolOrUnit() {
+        return this.schoolOrUnit;
+    }
+
+    public void setSchoolOrUnit(String schoolOrUnit) {
+        this.schoolOrUnit = schoolOrUnit;
+    }
+
+    public String getSubunit() {
+        return this.subunit;
+    }
+
+    public void setSubunit(String subunit) {
+        this.subunit = subunit;
+    }
+
+    public String getProjectID() {
+        return this.projectID;
+    }
+
+    public void setProjectID(String projectID) {
+        this.projectID = projectID;
+    }
+
     public VaultInfo convertToResponse() {
         VaultInfo retVal = new VaultInfo();
         retVal.setID(this.id);
@@ -224,6 +270,10 @@ public class PendingVault {
         retVal.setReviewDate(this.reviewDate);
         retVal.setBillingType(this.billingType);
         retVal.setSliceID(this.sliceID);
+        retVal.setAuthoriser(this.authoriser);
+        retVal.setSchoolOrUnit(this.schoolOrUnit);
+        retVal.setSubunit(this.subunit);
+        retVal.setProjectId(this.projectID);
         retVal.setCreationTime(this.creationTime);
         String userId = this.user == null ? null : user.getID();
         retVal.setUserID(userId);

@@ -85,6 +85,15 @@ public class VaultInfo {
 
     @ApiObjectField(description = "Slice ID from erm somewhere")
     private String sliceID;
+
+    @ApiObjectField(description = "Authoriser of the billing")
+    private String authoriser;
+
+    @ApiObjectField(description = "School / Unit to be billed")
+    private String schoolOrUnit;
+
+    @ApiObjectField(description = "Subunit to be billed")
+    private String subunit;
     
     @ApiObjectField(description = "Amount to be Billed")
     private BigDecimal amountToBeBilled;
@@ -377,5 +386,29 @@ public class VaultInfo {
 
     public void setAffirmed(Boolean affirmed) {
         this.affirmed = affirmed;
+    }
+
+    public String getAuthoriser() {
+        return this.authoriser;
+    }
+
+    public void setAuthoriser(String authoriser) {
+        this.authoriser = authoriser;
+    }
+
+    public String getSchoolOrUnit() {
+        return this.schoolOrUnit;
+    }
+
+    public void setSchoolOrUnit(String schoolOrUnit) {
+        this.schoolOrUnit = schoolOrUnit;
+    }
+
+    public String getSubunit() {
+        return this.subunit;
+    }
+
+    public void setSubunit(String subunit) {
+        this.subunit = subunit;
     }
 }

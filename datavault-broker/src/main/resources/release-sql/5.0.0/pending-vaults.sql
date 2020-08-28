@@ -4,7 +4,7 @@ create table PendingVaults (
     creationTime datetime, description TEXT,
     estimate TEXT, grantEndDate date,
     name TEXT, notes TEXT, reviewDate date,
-    sliceID TEXT,
+    sliceID TEXT, subunit TEXT, authoriser TEXT, schoolOrUnit TEXT, projectID TEXT,
     version bigint not null,
     group_id varchar(180),
     retentionPolicy_id integer,

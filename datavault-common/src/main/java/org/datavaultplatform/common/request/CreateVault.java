@@ -51,14 +51,27 @@ public class CreateVault {
     @ApiObjectField(description = "Did the user accept the various rules on the create vault intro page")
     private Boolean affirmed = false;
 
-    @ApiObjectField(description = "If the billng type is slice we will store and identifier for the slice")
+    @ApiObjectField(description = "If the billng type is slice we will store an identifier for the slice")
     private String sliceID;
+
+    @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for authoriser")
+    private String authoriser;
+
+    @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for school / unit")
+    private String schoolOrUnit;
+
+    @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for subunit")
+    private String subunit;
+
+    @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for projectID")
+    private String projectID;
 
 
 
     public CreateVault() { }
     public CreateVault(String name, String description, String notes, String policyID, String groupID, String datasetID, String grantEndDate,
-                       String reviewDate, Boolean partial, Boolean affirmed, String estimate, String billingType, String sliceID) {
+                       String reviewDate, Boolean partial, Boolean affirmed, String estimate, String billingType, String sliceID,
+                       String authoriser, String schoolOrUnit, String subunit, String projectID) {
         this.name = name;
         this.description = description;
         this.notes = notes;
@@ -72,6 +85,10 @@ public class CreateVault {
         this.estimate = estimate;
         this.billingType = billingType;
         this.sliceID = sliceID;
+        this.authoriser = authoriser;
+        this.schoolOrUnit = schoolOrUnit;
+        this.subunit = subunit;
+        this.projectID = projectID;
     }
 
     public String getName() {
@@ -184,5 +201,37 @@ public class CreateVault {
 
     public void setPendingID(String pendingID) {
         this.pendingID = pendingID;
+    }
+
+    public String getAuthoriser() {
+        return this.authoriser;
+    }
+
+    public void setAuthoriser(String authoriser) {
+        this.authoriser = authoriser;
+    }
+
+    public String getSchoolOrUnit() {
+        return this.schoolOrUnit;
+    }
+
+    public void setSchoolOrUnit(String schoolOrUnit) {
+        this.schoolOrUnit = schoolOrUnit;
+    }
+
+    public String getSubunit() {
+        return this.subunit;
+    }
+
+    public void setSubunit(String subunit) {
+        this.subunit = subunit;
+    }
+
+    public String getProjectID() {
+        return this.projectID;
+    }
+
+    public void setProjectID(String projectID) {
+        this.projectID = projectID;
     }
 }

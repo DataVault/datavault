@@ -446,6 +446,30 @@ public class VaultsController {
             vault.setSliceID(sliceID);
         }
 
+        String authoriser = createVault.getAuthoriser();
+        logger.debug("Authoriser is: '" + authoriser+ "'");
+        if (authoriser != null) {
+            vault.setAuthoriser(authoriser);
+        }
+
+        String schoolOrUnit = createVault.getSchoolOrUnit();
+        logger.debug("schoolOrUnit is: '" + schoolOrUnit+ "'");
+        if (schoolOrUnit != null) {
+            vault.setSchoolOrUnit(schoolOrUnit);
+        }
+
+        String subunit = createVault.getSubunit();
+        logger.debug("Subunit is: '" + subunit+ "'");
+        if (subunit != null) {
+            vault.setSubunit(subunit);
+        }
+
+        String projectID = createVault.getProjectID();
+        logger.debug("ProjectID is: '" + projectID+ "'");
+        if (projectID != null) {
+            vault.setProjectID(projectID);
+        }
+
         User user = usersService.getUser(userID);
         if (user == null) {
             logger.error("User '" + userID + "' does not exist");

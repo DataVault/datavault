@@ -53,19 +53,26 @@
                             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                                   title="The name of someone in your School/Unit or Sub-Unit who can authorise the payment of the eIT."></span>
                         </label>
-                        <input type="text" />
+                        <@spring.bind "vault.authoriser" />
+                        <input type="text" id="authoriser" name="${spring.status.expression}" value="${spring.status.value!""}"/>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-2 control-label">School/Unit*:</label> <input type="text" />
+                        <label class="col-sm-2 control-label">School/Unit*:</label>
+                        <@spring.bind "vault.schoolOrUnit" />
+                        <input type="text" id="schoolOrUnit" name="${spring.status.expression}" value="${spring.status.value!""}" />
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-2 control-label">Subunit*:</label> <input type="text" />
+                        <label class="col-sm-2 control-label">Subunit*:</label>
+                        <@spring.bind "vault.subunit" />
+                        <input type="text" id="subunit" name="${spring.status.expression}" value="${spring.status.value!""}" />
                     </div>
                     <div class="form-group">
                         <label class="col-sm-2 control-label">ProjectId:
                             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                                   title="If you are planning to pay the bill from a grant, please select the Project from this list."></span>
-                        </label> <input type="text" />
+                        </label>
+                        <@spring.bind "vault.projectID" />
+                        <input type="text" id="projectID" name="${spring.status.expression}" value="${spring.status.value!""}" />
                     </div>
                 </div>
             </div>

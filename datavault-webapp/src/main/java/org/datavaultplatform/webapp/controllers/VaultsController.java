@@ -340,11 +340,18 @@ public class VaultsController {
             throw new ForbiddenException();
         }
 
+        /*
+        TODO: need to add validation / defend against nulls just a work in progress
+         */
         CreateVault cv = new CreateVault();
         cv.setPendingID(vault.getID());
         cv.setAffirmed(vault.getAffirmed());
         cv.setBillingType(vault.getBillingType().toString());
         cv.setSliceID(vault.getSliceID());
+        cv.setAuthoriser(vault.getAuthoriser());
+        cv.setSchoolOrUnit(vault.getSchoolOrUnit());
+        cv.setSubunit(vault.getSubunit());
+        cv.setProjectID(vault.getProjectId());
         cv.setName(vault.getName());
         logger.info("Vault Description is: '" + vault.getDescription());
         cv.setDescription(vault.getDescription());
