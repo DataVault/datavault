@@ -346,7 +346,9 @@ public class VaultsController {
         CreateVault cv = new CreateVault();
         cv.setPendingID(vault.getID());
         cv.setAffirmed(vault.getAffirmed());
-        cv.setBillingType(vault.getBillingType().toString());
+        if (vault.getBillingType() != null) {
+            cv.setBillingType(vault.getBillingType().toString());
+        }
         cv.setSliceID(vault.getSliceID());
         cv.setAuthoriser(vault.getAuthoriser());
         cv.setSchoolOrUnit(vault.getSchoolOrUnit());
@@ -357,10 +359,17 @@ public class VaultsController {
         cv.setDescription(vault.getDescription());
         logger.info("Create Vault Description is: '" + cv.getDescription());
         cv.setPolicyID(vault.getPolicyID());
-        cv.setGrantEndDate(vault.getGrantEndDate().toString());
+        if (vault.getGrantEndDate() != null) {
+            cv.setGrantEndDate(vault.getGrantEndDate().toString());
+        }
         cv.setGroupID(vault.getGroupID());
-        cv.setReviewDate(vault.getReviewDate().toString());
-        cv.setEstimate(vault.getEstimate().toString());
+        if (vault.getReviewDate() != null) {
+            cv.setReviewDate(vault.getReviewDate().toString());
+        }
+        if (vault.getEstimate() != null) {
+            cv.setEstimate(vault.getEstimate().toString());
+        }
+
         cv.setNotes(vault.getNotes());
         cv.setPartial(true);
 
