@@ -16,10 +16,10 @@
         <!-- This is the path to the root directory. -->
         <root.basedir>${basedir}/..</root.basedir>
     </properties>
-    
-    <!-- Amazon AWS -->
+
     <dependencyManagement>
         <dependencies>
+            <!-- Amazon AWS -->
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-bom</artifactId>
@@ -27,10 +27,17 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- Oracle Gen 2 -->
+            <dependency>
+                <groupId>com.oracle.oci.sdk</groupId>
+                <artifactId>oci-java-sdk-bom</artifactId>
+                <!-- replace the version below with your required version -->
+                <version>1.23.2</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-    
-    
     
     <dependencies>
         <!-- Jackson JSON Processor -->
@@ -117,6 +124,15 @@
             <version>1.14.19</version>
             <scope>system</scope>
             <systemPath>${root.basedir}/lib/low-level-api-core-1.14.19.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.oracle.oci.sdk</groupId>
+            <artifactId>oci-java-sdk-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.oci.sdk</groupId>
+            <artifactId>oci-java-sdk-objectstorage</artifactId>
         </dependency>
 
         <dependency>

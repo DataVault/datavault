@@ -1,0 +1,6 @@
+[DEFAULT]
+user=?
+fingerprint=?
+key_file=?
+tenancy=?
+region=uk-london-1
