@@ -143,9 +143,10 @@
 
             <p>
                 If you experience an issue after clicking on the 'Open Key Registration Dialog' button while adding a location please go directly to
-                https://registration.ecdf.ed.ac.uk/storage/public_keys/add. If you are then asked to accept warnings about the security certificate, accept them.
-                You might have to click on 'Advanced' before you can accept them. If you need help contact the Research Data Support team using the 'Contact'
-                link at the top of this page.
+                <a href="https://registration.ecdf.ed.ac.uk/storage/public_keys/add" target="_blank">https://registration.ecdf.ed.ac.uk/storage/public_keys/add</a>.
+                If you are then asked to accept warnings about the security certificate, accept them.
+                You might have to click on 'Advanced' before you can accept them. If you need help contact the Research Data Support team using the
+                <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/contact" target="_blank">'Contact'</a> link at the top of this page.
             </p>
             <p>
             We need to know a little about where you wish to archive data from by SFTP (i.e. DataStore). <br/>
