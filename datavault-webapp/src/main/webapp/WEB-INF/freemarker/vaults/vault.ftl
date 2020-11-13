@@ -140,7 +140,8 @@
                                     <#if deposit.hasPersonalData == true>
                                         <span class="label label-info" style="margin-right: 10px">Personal data</span>
                                     </#if>
-                                    <#assign canRetrieveDataExpression = "hasPermission('${vault.groupID}', 'GROUP', 'CAN_RETRIEVE_DATA')">
+                                    <#assign canRetrieveDataExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES')
+                                    or hasPermission('${vault.groupID}', 'GROUP', 'CAN_RETRIEVE_DATA')">
                                     <@sec.authorize access=canRetrieveDataExpression>
                                     <#if deposit.status.name() == "COMPLETE">
                                         <a id="retrievebtn" class="btn btn-default"
