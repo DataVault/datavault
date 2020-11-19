@@ -104,7 +104,21 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		logger.info("Oracle Gen 2 Store method start 1");
 		// TODO: Remember the retries stuff
 		//this.client = new ObjectStorageAsyncClient(this.getAuthDetailsProvider());
-		this.client = new ObjectStorageClient(this.getAuthDetailsProvider());
+		AuthenticationDetailsProvider auth = this.getAuthDetailsProvider();
+		if (auth == null) {
+			logger.debug("Auth is null");
+			throw new Exception("Auth is null");
+		} else {
+			logger.debug("Auth is not null");
+		}
+
+		logger.debug("TenantId '" + auth.getTenantId() + "'");
+		logger.debug("UserId '" + auth.getUserId() + "'");
+		logger.debug("Fingerprint '" + auth.getFingerprint() + "'");
+		logger.debug("KeyId '" + auth.getKeyId() + "'");
+		logger.debug("PrivateKey '" + auth.getPrivateKey() + "'");
+
+		this.client = new ObjectStorageClient(auth);
 		if (this.client == null) {
 			logger.debug("Client is null");
 			throw new Exception("Client is null");
