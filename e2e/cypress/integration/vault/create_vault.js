@@ -99,11 +99,11 @@ describe('Vault page', function(){
         cy.get('button[title="Please choose a School"]')
             .click()
         cy.get('div.bootstrap-select.group-select.open > div > ul > li[data-original-index="1"] > a')
-            .contains('Business School')
+            .contains('Biomedical Sciences')
             .click()
         cy.get('button[data-id="groupID"]')
-            .should('have.attr', 'title', 'Business School')
-            .contains('Business School')
+            .should('have.attr', 'title', 'Biomedical Sciences')
+            .contains('Biomedical Sciences')
 
         // Open date picker for review date
         cy.get('#reviewDate').click()
