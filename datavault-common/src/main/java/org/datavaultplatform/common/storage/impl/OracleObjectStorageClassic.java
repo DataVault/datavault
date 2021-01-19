@@ -9,17 +9,9 @@ package org.datavaultplatform.common.storage.impl;
 		import com.oracle.bmc.objectstorage.ObjectStorageAsyncClient;
 		import com.oracle.bmc.objectstorage.ObjectStorageClient;
 		import com.oracle.bmc.objectstorage.requests.GetNamespaceRequest;
-//import com.sun.tools.internal.jxc.ConfigReader;
-		import com.oracle.bmc.objectstorage.requests.PutObjectRequest;
 		import com.oracle.bmc.objectstorage.responses.GetNamespaceResponse;
-		import com.oracle.bmc.objectstorage.transfer.UploadConfiguration;
 		import com.oracle.bmc.objectstorage.transfer.UploadManager;
 		import com.oracle.bmc.responses.AsyncHandler;
-		import oracle.cloudstorage.ftm.*;
-		import oracle.cloudstorage.ftm.exception.ClientException;
-		import oracle.cloudstorage.ftm.exception.ObjectExists;
-		import oracle.cloudstorage.ftm.exception.ObjectNotFound;
-		import org.apache.commons.collections.map.HashedMap;
 		import org.datavaultplatform.common.io.Progress;
 		import org.datavaultplatform.common.storage.ArchiveStore;
 		import org.datavaultplatform.common.storage.Device;
@@ -28,12 +20,9 @@ package org.datavaultplatform.common.storage.impl;
 		import org.slf4j.LoggerFactory;
 
 		import java.io.File;
-		import java.io.FileInputStream;
-		import java.io.InputStream;
 		import java.util.Map;
-		import java.util.Properties;
 		import java.util.concurrent.CountDownLatch;
-		import java.util.concurrent.TimeUnit;
+		import java.util.concurrent.ExecutionException;
 
 public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 
@@ -43,8 +32,8 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	private static final String CONFIG_FILE_PATH = System.getProperty("user.home") + "/.oci/config";
 	private static final String PROFILE = "DEFAULT";
 	//private FileTransferManager manager = null;
-	//private ObjectStorageAsync client = null;
-	private ObjectStorage client = null;
+	private ObjectStorageAsync client = null;
+	//private ObjectStorage client = null;
 	private UploadManager manager = null;
 	private static String USER_NAME = "user-name";
 	private static String PASSWORD = "password";
@@ -104,31 +93,57 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		logger.info("Oracle Gen 2 Store method start 1");
 		// TODO: Remember the retries stuff
 		//this.client = new ObjectStorageAsyncClient(this.getAuthDetailsProvider());
-		AuthenticationDetailsProvider auth = this.getAuthDetailsProvider();
-		if (auth == null) {
-			logger.debug("Auth is null");
-			throw new Exception("Auth is null");
+		ConfigFileReader.ConfigFile configFile = ConfigFileReader.parseDefault();
+		ConfigFileAuthenticationDetailsProvider provider = new ConfigFileAuthenticationDetailsProvider(configFile);
+		//AuthenticationDetailsProvider auth = this.getAuthDetailsProvider();
+		if (provider == null) {
+			logger.debug("Provider is null");
+			throw new Exception("Provider is null");
 		} else {
-			logger.debug("Auth is not null");
+			logger.debug("Provider is not null");
 		}
 
-		logger.debug("TenantId '" + auth.getTenantId() + "'");
-		logger.debug("UserId '" + auth.getUserId() + "'");
-		logger.debug("Fingerprint '" + auth.getFingerprint() + "'");
-		logger.debug("KeyId '" + auth.getKeyId() + "'");
-		logger.debug("PrivateKey '" + auth.getPrivateKey() + "'");
+		logger.debug("TenantId '" + provider.getTenantId() + "'");
+		logger.debug("UserId '" + provider.getUserId() + "'");
+		logger.debug("Fingerprint '" + provider.getFingerprint() + "'");
+		logger.debug("KeyId '" + provider.getKeyId() + "'");
+		logger.debug("PrivateKey '" + provider.getPrivateKey() + "'");
+		logger.debug("Passphrase '" + provider.getPassphraseCharacters() + "'");
 
-		this.client = new ObjectStorageClient(auth);
-		if (this.client == null) {
-			logger.debug("Client is null");
-			throw new Exception("Client is null");
-		} else {
-			logger.debug("Client is not null");
+		//this.client = new ObjectStorageClient(provider);
+		//this.client = new ObjectStorageAsyncClient(provider);
+
+		logger.debug("Initialised client");
+		try {
+			ObjectStorageAsync client = new ObjectStorageAsyncClient(provider);
+
+			logger.debug("Initialised client");
+			if (client == null) {
+				logger.debug("Client is null");
+				throw new Exception("Client is null");
+			} else {
+				logger.debug("Client is not null");
+			}
+			logger.info("Oracle Gen 2 Store method start 2");
+			//this.client.setRegion(Region.UK_LONDON_1);
+			/*client.setRegion(Region.UK_LONDON_1);
+			GetNamespaceResponse namespaceResponse =
+					client.getNamespace(GetNamespaceRequest.builder().build());
+			String namespaceName = namespaceResponse.getValue();
+			logger.info("Using namespace: " + namespaceName);*/
+
+
+			ResponseHandler<GetNamespaceRequest, GetNamespaceResponse> namespaceHandler = new ResponseHandler<>();
+			client.getNamespace(GetNamespaceRequest.builder().build(), namespaceHandler);
+			GetNamespaceResponse namespaceResponse = namespaceHandler.waitForCompletion();
+			String namespaceName = namespaceResponse.getValue();
+			logger.info("Using namespace:" + namespaceName);
+		} catch (Exception ee) {
+			logger.debug("Caught Exception from ObjectStorage");
+			throw ee;
 		}
-		logger.info("Oracle Gen 2 Store method start 2");
-		this.client.setRegion(Region.UK_LONDON_1);
 
-		String contentType = "";
+		/*String contentType = "";
 		String contentLanguage = "";
 		String contentEncoding = "";
 		Map<String, String> metadata = new HashedMap();
@@ -159,6 +174,8 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		UploadManager.UploadResponse response = this.manager.upload(uploadDetails);
 		logger.info("Upload completed successfully.");
 		logger.info("Upload result:" + response.toString());
+
+		*/
 		logger.info("Oracle Gen 2 Store method finish");
 		return depositId;
 	}
@@ -224,6 +241,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		private CountDownLatch latch = new CountDownLatch(1);
 
 		private OUT waitForCompletion() throws Exception {
+			logger.debug("Waiting for completion");
 			latch.await();
 			if (failed != null) {
 				if (failed instanceof Exception) {
@@ -231,6 +249,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 				}
 				throw (Error) failed;
 			}
+			logger.debug("Waited for completion");
 			return item;
 		}
 
@@ -242,8 +261,197 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 
 		@Override
 		public void onError(IN request, Throwable error) {
+			logger.debug("Error in RespnseHandler");
 			failed = error;
 			latch.countDown();
 		}
 	}
 }
+
+/*
+public class OracleObjectStorageGen2 extends Device implements ArchiveStore {
+
+	private static final Logger logger = LoggerFactory.getLogger(OracleObjectStorageGen2.class);
+	private static String DEFAULT_CONTAINER_NAME = "datavault-container-edina";
+	public Verify.Method verificationMethod = Verify.Method.CLOUD;
+	private static final String PROPERTIES_FILE_PATH = System.getProperty("user.home") + "/.occ/occ.properties";
+	private FileTransferManager manager = null;
+	private static String USER_NAME = "user-name";
+	private static String PASSWORD = "password";
+	private static String SERVICE_NAME = "service-name";
+	private static String SERVICE_URL = "service-url";
+	private static String IDENTITY_DOMAIN = "identity-domain";
+	private static String CONTAINER_NAME = "container-name";
+	private static int defaultRetryTime = 30;
+	private static int defaultMaxRetries = 48; // 24 hours if retry time is 30 minutes
+	private static int retryTime = OracleObjectStorageGen2.defaultRetryTime;
+	private static int maxRetries = OracleObjectStorageGen2.defaultMaxRetries;
+
+	*/
+/*
+	 * Add local jars to mvn
+	 * mvn install:install-file -Dfile=/Users/dspeed2/Downloads/ftm-sdk-2.4.2/libs/ftm-api-2.4.2.jar -DgroupId=oracle.cloudstorage.ftm -DartifactId=ftm-api -Dversion=1.0 -Dpackaging=jar
+	 * mvn install:install-file -Dfile=/Users/dspeed2/Downloads/ftm-sdk-2.4.2/libs/low-level-api-core-1.14.19.jar -DgroupId=oracle.cloudstorage.ftm -DartifactId=low-level-api-core -Dversion=1.0 -Dpackaging=jar
+	 *
+	 * javax.json-1.0.4.jar has been added to the common project pom file and when I tried to add the other jars from the sample code to the pom the validator said they were
+	 * already managed ( log4j-1.2.17.jar, slf4j-api-1.7.7.jar, slf4j-log4j12-1.7.7.jar)
+	 *//*
+
+	public OracleObjectStorageGen2(String name, Map<String, String> config) throws Exception {
+		super(name, config);
+		super.depositIdStorageKey = true;
+		String retryKey = "occRetryTime";
+		String maxKey = "occMaxRetries";
+
+		if (config.containsKey(retryKey)) {
+			try {
+				OracleObjectStorageGen2.retryTime = Integer.parseInt(config.get(retryKey));
+			} catch (NumberFormatException nfe) {
+				OracleObjectStorageGen2.retryTime = OracleObjectStorageGen2.defaultRetryTime;
+			}
+		}
+		if (config.containsKey(maxKey)) {
+			try {
+				OracleObjectStorageGen2.maxRetries = Integer.parseInt(config.get(maxKey));
+			} catch (NumberFormatException nfe) {
+				OracleObjectStorageGen2.maxRetries = OracleObjectStorageGen2.defaultMaxRetries;
+			}
+		}
+	}
+
+	@Override
+	public Verify.Method getVerifyMethod() {
+		return this.verificationMethod;
+	}
+
+	@Override
+	public long getUsableSpace() throws Exception {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void retrieve(String depositId, File working, Progress progress) throws Exception {
+		for (int r = 0; r < OracleObjectStorageGen2.maxRetries; r++) {
+			try {
+				this.manager = FileTransferManager.getDefaultFileTransferManager(this.getTransferAuth());
+				DownloadConfig downloadConfig = new DownloadConfig();
+				String containerName = this.getContainerName();
+				TransferResult downloadResult = manager.download(downloadConfig, containerName, depositId, working);
+				logger.info("Task completed. State:" + downloadResult.toString());
+				TransferState ts = downloadResult.getState();
+				while (ts.equals(TransferState.RestoreInProgress)) {
+					logger.info("Restore in progress. % completed: " + downloadResult.getRestoreCompletedPercentage());
+					Thread.sleep(1 * 60 * 1000); // Wait for 1 mins.
+					downloadResult = manager.download(downloadConfig, containerName, depositId, working);
+					ts = downloadResult.getState();
+				}
+				logger.info("Download Result:" + downloadResult.toString());
+				break;
+			} catch (ClientException ce) {
+				logger.error("Download failed. " + ce.getMessage());
+				if (r == (OracleObjectStorageGen2.maxRetries - 1)) {
+					throw ce;
+				}
+				TimeUnit.MINUTES.sleep(OracleObjectStorageGen2.retryTime);
+			} catch (Exception e) {
+				logger.error("Download failed. " + e.getMessage());
+				if (r == (OracleObjectStorageGen2.maxRetries - 1)) {
+					throw e;
+				}
+				TimeUnit.MINUTES.sleep(OracleObjectStorageGen2.retryTime);
+			} finally {
+				if (this.manager != null) {
+					this.manager.shutdown();
+				}
+			}
+		}
+
+	}
+
+	@Override
+	public String store(String depositId, File working, Progress progress) throws Exception {
+		for (int r = 0; r < OracleObjectStorageGen2.maxRetries; r++) {
+			try {
+				String containerName = this.getContainerName();
+				this.manager = FileTransferManager.getDefaultFileTransferManager(this.getTransferAuth());
+				UploadConfig uploadConfig = new UploadConfig();
+				uploadConfig.setOverwrite(false);
+				uploadConfig.setStorageClass(CloudStorageClass.Archive);
+				logger.info("Uploading file " + working.getName() + " to container " + containerName + " as " + depositId);
+				TransferResult uploadResult = this.manager.upload(uploadConfig, containerName, depositId, working);
+				logger.info("Upload completed successfully.");
+				logger.info("Upload result:" + uploadResult.toString());
+				break;
+			} catch (ObjectExists oe) {
+				// if the object already exists we must be attempting to restart a job
+				// so just ignore exception and carry on
+				logger.info("Uploaded previously: skipping.");
+				break;
+			} catch (ClientException ce) {
+				logger.error("Upload failed. " + "Retrying in " + OracleObjectStorageGen2.retryTime + " mins " + ce.getMessage());
+				if (r == (OracleObjectStorageGen2.maxRetries - 1)) {
+					throw ce;
+				}
+				TimeUnit.MINUTES.sleep(OracleObjectStorageGen2.retryTime);
+			} catch (Exception e) {
+				logger.error("Upload failed. " + "Retrying in " + OracleObjectStorageGen2.retryTime + " mins " + e.getMessage());
+				if (r == (OracleObjectStorageGen2.maxRetries - 1)) {
+					throw e;
+				}
+				TimeUnit.MINUTES.sleep(OracleObjectStorageGen2.retryTime);
+			} finally {
+				if (this.manager != null) {
+					this.manager.shutdown();
+				}
+			}
+		}
+
+		return depositId;
+	}
+
+	@Override
+	public void delete(String path, File working, Progress progress) throws Exception {
+		try {
+			this.manager = FileTransferManager.getDefaultFileTransferManager(this.getTransferAuth());
+			manager.deleteObject(this.getContainerName(), path);
+			logger.info("Delete Successful from Oracle Cloud Storage");
+		} catch (ObjectNotFound ce) {
+			logger.error("Object does not exists in Oracle Cloud Storage " + ce.getMessage());
+		} finally {
+			if (this.manager != null) {
+				this.manager.shutdown();
+			}
+		}
+	}
+
+	private String getContainerName() throws Exception {
+		Properties prop = this.getProperties();
+		String contName = prop.getProperty(OracleObjectStorageGen2.CONTAINER_NAME);
+		return (contName != null) ? contName : OracleObjectStorageGen2.DEFAULT_CONTAINER_NAME;
+	}
+
+	private FileTransferAuth getTransferAuth() throws Exception {
+		Properties prop = this.getProperties();
+		FileTransferAuth retVal = new FileTransferAuth(
+				prop.getProperty(OracleObjectStorageGen2.USER_NAME),
+				prop.getProperty(OracleObjectStorageGen2.PASSWORD).toCharArray(),
+				prop.getProperty(OracleObjectStorageGen2.SERVICE_NAME),
+				prop.getProperty(OracleObjectStorageGen2.SERVICE_URL),
+				prop.getProperty(OracleObjectStorageGen2.IDENTITY_DOMAIN)
+		);
+		return retVal;
+	}
+
+	private Properties getProperties() throws Exception {
+		Properties retVal = new Properties();
+		try (InputStream is = new FileInputStream(OracleObjectStorageGen2.PROPERTIES_FILE_PATH)) {
+			retVal.load(is);
+		} catch (Exception e) {
+			logger.info("Failed to read Occ properties file.");
+			throw e;
+		}
+
+		return retVal;
+	}
+
+}*/

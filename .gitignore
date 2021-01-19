@@ -30,3 +30,6 @@ docker/mysql
 docker/config/mail-templates
 
 .idea/
+scripts/oci-java-sdk-1
+docker/oci-java-sdk-1
+docker/scripts/oci-java-sdk-1
