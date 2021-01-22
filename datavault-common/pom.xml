@@ -72,11 +72,11 @@
         </dependency>
         
         <!-- DropBox -->
-        <dependency>
+        <!--<dependency>
             <groupId>com.dropbox.core</groupId>
             <artifactId>dropbox-core-sdk</artifactId>
             <version>1.8.2</version>
-        </dependency>
+        </dependency> -->
         
         <!-- Amazon Glacier -->
         <dependency>
