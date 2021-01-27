@@ -1,13 +1,16 @@
 package org.datavaultplatform.common.storage.impl;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.*;
-//import java.util.concurrent.atomic.AtomicReference;
 
+import com.oracle.bmc.ConfigFileReader;
+import com.oracle.bmc.auth.AuthenticationDetailsProvider;
+import com.oracle.bmc.auth.ConfigFileAuthenticationDetailsProvider;
+import com.oracle.bmc.objectstorage.ObjectStorage;
+import com.oracle.bmc.objectstorage.ObjectStorageClient;
+import com.oracle.bmc.objectstorage.requests.PutObjectRequest;
+import com.oracle.bmc.objectstorage.transfer.UploadConfiguration;
+import com.oracle.bmc.objectstorage.transfer.UploadManager;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
@@ -15,24 +18,19 @@ import org.datavaultplatform.common.storage.Verify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import oracle.cloudstorage.ftm.CloudStorageClass;
-import oracle.cloudstorage.ftm.DownloadConfig;
-import oracle.cloudstorage.ftm.FileTransferAuth;
-import oracle.cloudstorage.ftm.FileTransferManager;
-import oracle.cloudstorage.ftm.TransferResult;
-import oracle.cloudstorage.ftm.TransferState;
-import oracle.cloudstorage.ftm.UploadConfig;
-import oracle.cloudstorage.ftm.exception.ClientException;
-import oracle.cloudstorage.ftm.exception.ObjectExists;
-import oracle.cloudstorage.ftm.exception.ObjectNotFound;
-
+/*
+This class has been upgraded to use the Gen 2 Oracle Object Storage rather than classic.
+For reasons it was easier to do this than add a new Gen 2 plugin due to there currently
+being no mechanism for changing the plugins of a deployed instance.
+ */
 public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	
 	private static final Logger logger = LoggerFactory.getLogger(OracleObjectStorageClassic.class);
 	private static String DEFAULT_CONTAINER_NAME = "datavault-container-edina";
 	public Verify.Method verificationMethod = Verify.Method.CLOUD;
-	private static final String PROPERTIES_FILE_PATH = System.getProperty("user.home") + "/.occ/occ.properties";
-	private FileTransferManager manager = null;
+	private ObjectStorage client = null;
+	private static final String CONFIG_FILE_PATH = System.getProperty("user.home") + "/.oci/config";
+	private static final String PROFILE = "DEFAULT";
 	private static String USER_NAME = "user-name";
 	private static String PASSWORD = "password";
 	private static String SERVICE_NAME = "service-name";
@@ -43,15 +41,9 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	private static int defaultMaxRetries = 48; // 24 hours if retry time is 30 minutes
 	private static int retryTime = OracleObjectStorageClassic.defaultRetryTime;
 	private static int maxRetries = OracleObjectStorageClassic.defaultMaxRetries;
-	
-	/*
-	 * Add local jars to mvn
-	 * mvn install:install-file -Dfile=/Users/dspeed2/Downloads/ftm-sdk-2.4.2/libs/ftm-api-2.4.2.jar -DgroupId=oracle.cloudstorage.ftm -DartifactId=ftm-api -Dversion=1.0 -Dpackaging=jar
-	 * mvn install:install-file -Dfile=/Users/dspeed2/Downloads/ftm-sdk-2.4.2/libs/low-level-api-core-1.14.19.jar -DgroupId=oracle.cloudstorage.ftm -DartifactId=low-level-api-core -Dversion=1.0 -Dpackaging=jar
-	 * 
-	 * javax.json-1.0.4.jar has been added to the common project pom file and when I tried to add the other jars from the sample code to the pom the validator said they were 
-	 * already managed ( log4j-1.2.17.jar, slf4j-api-1.7.7.jar, slf4j-log4j12-1.7.7.jar) 
-	 */
+	private final ConfigFileReader.ConfigFile configFile = ConfigFileReader.parseDefault();
+	private final ConfigFileAuthenticationDetailsProvider provider = new ConfigFileAuthenticationDetailsProvider(configFile);
+
 	public OracleObjectStorageClassic(String name, Map<String, String> config) throws Exception {
 		super(name, config);
 		super.depositIdStorageKey = true;
@@ -87,7 +79,8 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	@Override
 	public void retrieve(String depositId, File working, Progress progress) throws Exception {
 		for (int r = 0; r < OracleObjectStorageClassic.maxRetries; r++) {
-			try {
+			break;
+			/*try {
 				this.manager = FileTransferManager.getDefaultFileTransferManager(this.getTransferAuth());
 				DownloadConfig downloadConfig = new DownloadConfig();
 				String containerName = this.getContainerName();
@@ -118,7 +111,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 				if (this.manager != null) {
 					this.manager.shutdown();
 				}
-			}
+			}*/
 		}
 		
 	}
@@ -126,7 +119,70 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	@Override
 	public String store(String depositId, File working, Progress progress) throws Exception {
 		for (int r = 0; r < OracleObjectStorageClassic.maxRetries; r++) {
-			try {
+			logger.info("Oracle Gen 2 Store method start 1");
+
+			Map<String, String> metadata = null;
+			String contentType = null;
+			String contentEncoding = null;
+			String contentLanguage = null;
+
+			logger.debug("TenantId '" + this.provider.getTenantId() + "'");
+			logger.debug("UserId '" + this.provider.getUserId() + "'");
+			logger.debug("Fingerprint '" + this.provider.getFingerprint() + "'");
+			logger.debug("KeyId '" + this.provider.getKeyId() + "'");
+			logger.debug("PrivateKey '" + this.provider.getPrivateKey() + "'");
+			logger.debug("Get AuthDetailsProvider End");
+
+			logger.debug("Creating client");
+			ObjectStorage client = new ObjectStorageClient(this.provider);
+
+			UploadConfiguration uploadConfiguration =
+					UploadConfiguration.builder()
+							.allowMultipartUploads(true)
+							.allowParallelUploads(true)
+							.build();
+
+			logger.debug("Creating upload manager");
+
+			UploadManager uploadManager = new UploadManager(client, uploadConfiguration);
+			PutObjectRequest request =
+					PutObjectRequest.builder()
+							.bucketName("datavault-demo-container-san")
+							.namespaceName("uoedatavault")
+							.objectName(depositId)
+							.contentType(contentType)
+							.contentLanguage(contentLanguage)
+							.contentEncoding(contentEncoding)
+							.opcMeta(metadata)
+							.build();
+
+			UploadManager.UploadRequest uploadDetails =
+					UploadManager.UploadRequest.builder(working).allowOverwrite(true).build(request);
+
+			UploadManager.UploadResponse response = uploadManager.upload(uploadDetails);
+			logger.info("Oracle response:" + response.toString());
+			break;
+			// TODO: Remember the retries stuff
+			//this.client = new ObjectStorageAsyncClient(this.getAuthDetailsProvider());
+			//AuthenticationDetailsProvider auth = this.getAuthDetailsProvider();
+			//if (configFile == null) {
+			//	logger.debug("Auth is null");
+			//	throw new Exception("Auth is null");
+			//} else {
+			//	logger.debug("Auth is not null");
+			//}
+
+			//this.client = new ObjectStorageClient(auth);
+			//if (this.client == null) {
+			//	logger.debug("Client is null");
+			//	throw new Exception("Client is null");
+			//} else {
+			//	logger.debug("Client is not null");
+			//}
+			//logger.debug("Oracle Gen 2 Store method start 2");
+			//this.client.setRegion(Region.UK_LONDON_1);
+			//break;
+			/*try {
 				String containerName = this.getContainerName();
 				this.manager = FileTransferManager.getDefaultFileTransferManager(this.getTransferAuth());
 				UploadConfig uploadConfig = new UploadConfig();
@@ -158,7 +214,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 				if (this.manager != null) {
 					this.manager.shutdown();
 				}
-			}
+			}*/
 		}
 		
 		return depositId;
@@ -166,7 +222,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	
 	@Override
 	public void delete(String path, File working, Progress progress) throws Exception {
-		try {
+		/*try {
 			this.manager = FileTransferManager.getDefaultFileTransferManager(this.getTransferAuth());
 			manager.deleteObject(this.getContainerName(), path);
             logger.info("Delete Successful from Oracle Cloud Storage");
@@ -176,16 +232,16 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 			if (this.manager != null) {
 				this.manager.shutdown();
 			}
-		}
+		}*/
 	}
 
-	private String getContainerName() throws Exception {
+	/*private String getContainerName() throws Exception {
 		Properties prop = this.getProperties();
 		String contName = prop.getProperty(OracleObjectStorageClassic.CONTAINER_NAME);
 		return (contName != null) ? contName : OracleObjectStorageClassic.DEFAULT_CONTAINER_NAME;
-	}
+	}*/
 
-	private FileTransferAuth getTransferAuth() throws Exception {
+	/*private FileTransferAuth getTransferAuth() throws Exception {
 		Properties prop = this.getProperties();
 		FileTransferAuth retVal = new FileTransferAuth(
 				prop.getProperty(OracleObjectStorageClassic.USER_NAME),
@@ -195,9 +251,9 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 				prop.getProperty(OracleObjectStorageClassic.IDENTITY_DOMAIN)
 		);
 		return retVal;
-	}
+	}*/
 
-	private Properties getProperties() throws Exception {
+	/*private Properties getProperties() throws Exception {
 		Properties retVal = new Properties();
 		try (InputStream is = new FileInputStream(OracleObjectStorageClassic.PROPERTIES_FILE_PATH)) {
 			retVal.load(is);
@@ -206,6 +262,32 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 			throw e;
 		}
 
+		return retVal;
+	}*/
+
+	private AuthenticationDetailsProvider getAuthDetailsProvider() throws Exception {
+		ConfigFileReader.ConfigFile config = this.getProperties();
+		AuthenticationDetailsProvider provider = new ConfigFileAuthenticationDetailsProvider(config);
+		if (provider == null) {
+			logger.debug("Failed to get provider");
+			throw new Exception("Failed to get provider");
+		}
+		logger.debug("TenantId '" + provider.getTenantId() + "'");
+		logger.debug("UserId '" + provider.getUserId() + "'");
+		logger.debug("Fingerprint '" + provider.getFingerprint() + "'");
+		logger.debug("KeyId '" + provider.getKeyId() + "'");
+		logger.debug("PrivateKey '" + provider.getPrivateKey() + "'");
+		logger.debug("Get AuthDetailsProvider End");
+		return provider;
+	}
+
+	private ConfigFileReader.ConfigFile getProperties() throws Exception {
+		ConfigFileReader.ConfigFile retVal = ConfigFileReader.parse(OracleObjectStorageClassic.CONFIG_FILE_PATH, OracleObjectStorageClassic.PROFILE);
+		if (retVal == null) {
+			logger.debug("Problem getting the Oracle config");
+			throw new Exception("Oracle Config is null");
+		}
+		
 		return retVal;
 	}
 		
