@@ -83,6 +83,7 @@
         </dependency>
         
         <!-- DropBox -->
+        <!--
         <dependency>
             <groupId>com.dropbox.core</groupId>
             <artifactId>dropbox-core-sdk</artifactId>
@@ -94,7 +95,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        
+        -->
         <!-- Amazon Glacier -->
         <dependency>
             <groupId>com.amazonaws</groupId>
