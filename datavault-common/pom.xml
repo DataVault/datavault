@@ -138,7 +138,11 @@
             <systemPath>${root.basedir}/lib/low-level-api-core-1.14.19.jar</systemPath>
         </dependency>
         -->
-        
+
+        <dependency>
+            <groupId>com.oracle.oci.sdk</groupId>
+            <artifactId>oci-java-sdk-common</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.oracle.oci.sdk</groupId>
             <artifactId>oci-java-sdk-core</artifactId>
@@ -147,7 +151,16 @@
             <groupId>com.oracle.oci.sdk</groupId>
             <artifactId>oci-java-sdk-objectstorage</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>com.oracle.oci.sdk</groupId>
+            <artifactId>oci-java-sdk-objectstorage-extensions</artifactId>
+            <version>1.23.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.oci.sdk</groupId>
+            <artifactId>oci-java-sdk-objectstorage-generated</artifactId>
+            <version>1.23.2</version>
+        </dependency>
         <!--
         <dependency>
             <groupId>com.oracle.oci.sdk</groupId>
