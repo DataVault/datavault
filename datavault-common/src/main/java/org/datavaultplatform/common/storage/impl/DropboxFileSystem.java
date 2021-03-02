@@ -1,20 +1,20 @@
 package org.datavaultplatform.common.storage.impl;
 
-import com.dropbox.core.*;
-import org.apache.commons.io.IOUtils;
-import org.datavaultplatform.common.io.FileCopy;
+//import com.dropbox.core.*;
+//import org.apache.commons.io.IOUtils;
+//import org.datavaultplatform.common.io.FileCopy;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
 
 import java.io.*;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
+//import java.nio.file.DirectoryStream;
+//import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+//import java.util.Locale;
 import java.util.Map;
 
 // Documentation:
@@ -24,38 +24,38 @@ import java.util.Map;
 
 public class DropboxFileSystem extends Device implements UserStore {
 
-    private final String dbxAppName = "DataVault/1.0";
+    /*private final String dbxAppName = "DataVault/1.0";
     private final String PATH_SEPARATOR = "/";
     private static final long FILE_COPY_BUFFER_SIZE = FileCopy.ONE_KB * 64;
     
     private final DbxRequestConfig dbxConfig;
     private final DbxClient dbxClient;
     
-    private String accessToken = null;
+    private String accessToken = null;*/
     
-    public DropboxFileSystem(String name, Map<String,String> config) throws IOException, DbxException  {
+    public DropboxFileSystem(String name, Map<String,String> config) throws IOException  {
         super(name, config);
         
-        // Unpack the config parameters (in an implementation-specific way)
+        /*// Unpack the config parameters (in an implementation-specific way)
         accessToken = config.get("accessToken");
         
         dbxConfig = new DbxRequestConfig(dbxAppName, Locale.getDefault().toString());
         dbxClient = new DbxClient(dbxConfig, accessToken);
         
         // Verify parameters are correct.
-        System.out.println("Connected to Dropbox account: " + dbxClient.getAccountInfo().displayName);
+        System.out.println("Connected to Dropbox account: " + dbxClient.getAccountInfo().displayName);*/
     }
     
     @Override
     public List<FileInfo> list(String path) {
         
-        if (!path.startsWith(PATH_SEPARATOR)) {
+        /*if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
-        }
+        }*/
         
         ArrayList<FileInfo> files = new ArrayList<>();
 
-        try {
+        /*try {
             DbxEntry.WithChildren listing = dbxClient.getMetadataWithChildren(path);
             for (DbxEntry child : listing.children) {
                 
@@ -67,7 +67,7 @@ public class DropboxFileSystem extends Device implements UserStore {
             }
         } catch (DbxException e) {
             System.out.println(e.toString());
-        }
+        }*/
 
         return files;
     }
@@ -81,32 +81,32 @@ public class DropboxFileSystem extends Device implements UserStore {
     @Override
     public boolean exists(String path) throws Exception {
 
-        if (!path.startsWith(PATH_SEPARATOR)) {
+        /*if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
         }
         
         DbxEntry entry = dbxClient.getMetadata(path);
         if (entry != null) {
             return true;
-        } else {
+        } else {*/
             return false;
-        }
+        //}
     }
     
     @Override
     public long getSize(String path) throws Exception {
 
-        if (!path.startsWith(PATH_SEPARATOR)) {
+        /*if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
         }
         
         DbxEntry entry = dbxClient.getMetadata(path);
         if (entry == null) {
             throw new FileNotFoundException();
-        } else {
+        } else {*/
             long bytes = 0;
             
-            if (entry instanceof DbxEntry.File) {
+            /*if (entry instanceof DbxEntry.File) {
                 bytes = ((DbxEntry.File)entry).numBytes;
             
             } else if (entry instanceof DbxEntry.Folder) {
@@ -118,15 +118,15 @@ public class DropboxFileSystem extends Device implements UserStore {
                         bytes += getSize(child.path);
                     }
                 }
-            }
+            }*/
             
             return bytes;
-        }
+        //}
     }
     
     public void get(Progress progress, String path, File localFile) throws Exception {
 
-        if (!path.startsWith(PATH_SEPARATOR)) {
+        /*if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
         }
         
@@ -154,12 +154,12 @@ public class DropboxFileSystem extends Device implements UserStore {
                 
                 progress.dirCount += 1;
             }
-        }
+        }*/
     }
     
     private void getFile(Progress progress, String path, File localFile) throws Exception {
         
-        FileOutputStream fos = new FileOutputStream(localFile);
+        /*FileOutputStream fos = new FileOutputStream(localFile);
         DbxClient.Downloader downloader = dbxClient.startGetFile(path, null);
         InputStream is = downloader.body;
         
@@ -180,12 +180,12 @@ public class DropboxFileSystem extends Device implements UserStore {
             downloader.close();
         }
         
-        progress.fileCount += 1;
+        progress.fileCount += 1;*/
     }
     
     public void put(Progress progress, String path, Path basePath, Path localPath) throws Exception {
         
-        DirectoryStream<Path> stream = Files.newDirectoryStream(localPath);
+        /*DirectoryStream<Path> stream = Files.newDirectoryStream(localPath);
         
         for (Path entry : stream) {
             
@@ -207,12 +207,12 @@ public class DropboxFileSystem extends Device implements UserStore {
             } else {
                 putFile(progress, dropboxPath, entryFile);
             }
-        }
+        }*/
     }
     
     private void putFile(Progress progress, String path, File localFile) throws Exception {
         
-        FileInputStream fis = new FileInputStream(localFile);
+        /*FileInputStream fis = new FileInputStream(localFile);
         DbxClient.Uploader uploader = dbxClient.startUploadFile(path, DbxWriteMode.add(), localFile.length());
         OutputStream os = uploader.getBody();
         
@@ -235,13 +235,13 @@ public class DropboxFileSystem extends Device implements UserStore {
             uploader.close();
         }
         
-        progress.fileCount += 1;
+        progress.fileCount += 1;*/
     }
     
     @Override
     public boolean isDirectory(String path) throws Exception {
         
-        if (!path.startsWith(PATH_SEPARATOR)) {
+        /*if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
         }
         
@@ -252,15 +252,15 @@ public class DropboxFileSystem extends Device implements UserStore {
             } else {
                 return false;
             }
-        } else {
+        } else {*/
             return false;
-        }
+        //}
     }
     
     @Override
     public String getName(String path) throws Exception {
         
-        if (!path.startsWith(PATH_SEPARATOR)) {
+        /*if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
         }
         
@@ -269,13 +269,14 @@ public class DropboxFileSystem extends Device implements UserStore {
             return null;
         } else {
             return entry.name;
-        }
+        }*/
+        return "";
     }
     
     @Override
     public long getUsableSpace() throws Exception {
         
-        DbxAccountInfo dbxAccountInfo = dbxClient.getAccountInfo();
+        /*DbxAccountInfo dbxAccountInfo = dbxClient.getAccountInfo();
         DbxAccountInfo.Quota quota = dbxAccountInfo.quota;
         
         // The user's used quota outside of shared folders (bytes).
@@ -293,23 +294,24 @@ public class DropboxFileSystem extends Device implements UserStore {
         long total = quota.total;
         
         // TODO: is this correct?
-        return total - (used + shared);
+        return total - (used + shared);*/
+        return 0;
     }
 
     @Override
     public void retrieve(String path, File working, Progress progress) throws Exception {
         
-        if (!path.startsWith(PATH_SEPARATOR)) {
+        /*if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
         }
         
-        get(progress, path, working);
+        get(progress, path, working);*/
     }
 
     @Override
     public String store(String path, File working, Progress progress) throws Exception {
 
-        // TODO: cleanup path handling - Dropbox paths MUST start with a "/"
+        /*// TODO: cleanup path handling - Dropbox paths MUST start with a "/"
         
         if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
@@ -328,6 +330,7 @@ public class DropboxFileSystem extends Device implements UserStore {
         
         put(progress, path, working.toPath(), working.toPath());
         
-        return path;
+        return path;*/
+        return "";
     }
 }
