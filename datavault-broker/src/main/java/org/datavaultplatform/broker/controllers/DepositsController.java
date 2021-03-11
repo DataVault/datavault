@@ -47,6 +47,8 @@ public class DepositsController {
     private String occRetryTime;
     private String tsmMaxRetries;
     private String occMaxRetries;
+    private String ociNameSpace;
+    private String ociBucketName;
 
     private static final Logger logger = LoggerFactory.getLogger(DepositsController.class);
     
@@ -133,6 +135,10 @@ public class DepositsController {
     public void setOccMaxRetries(String occMaxRetries) {
         this.occMaxRetries = occMaxRetries;
     }
+
+    public void setOciNameSpace(String ociNameSpace) { this.ociNameSpace = ociNameSpace; }
+
+    public void setOciBucketName(String ociBucketName) { this.ociBucketName = ociBucketName; }
 
     @RequestMapping(value = "/deposits/{depositid}", method = RequestMethod.GET)
     public DepositInfo getDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
@@ -409,6 +415,12 @@ public class DepositsController {
                     }
                     if (this.occMaxRetries != null && ! this.occMaxRetries.equals("")) {
                         asProps.put("occMaxRetries", this.occMaxRetries);
+                    }
+                    if (this.ociBucketName != null && ! this.ociBucketName.equals("")) {
+                        asProps.put("ociBucketName", this.ociBucketName);
+                    }
+                    if (this.ociNameSpace != null && ! this.ociNameSpace.equals("")) {
+                        asProps.put("ociNameSpace", this.ociNameSpace);
                     }
                     archiveStore.setProperties(asProps);
                 }
