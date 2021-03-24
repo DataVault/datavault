@@ -186,6 +186,18 @@ public class WorkerInstanceIT {
                             	break;
                             } else if (concreteEvent instanceof CompleteCopyUpload) {
                             	break;
+                            } else if (concreteEvent instanceof UploadComplete) {
+                                break;
+                            } else if (concreteEvent instanceof StartChunkValidation) {
+                                break;
+                            } else if (concreteEvent instanceof CompleteChunkValidation) {
+                                break;
+                            } else if (concreteEvent instanceof StartTarValidation) {
+                                break;
+                            } else if (concreteEvent instanceof CompleteTarValidation) {
+                                break;
+                            } else if (concreteEvent instanceof ValidationComplete) {
+                                break;
                             }else{
                                 assertThat(concreteEvent, instanceOf(Complete.class));
                                 state++;

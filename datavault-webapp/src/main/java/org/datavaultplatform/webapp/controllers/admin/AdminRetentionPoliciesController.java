@@ -2,13 +2,13 @@ package org.datavaultplatform.webapp.controllers.admin;
 
 import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
-import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.webapp.services.RestService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
 /**
  * User: Stuart Lewis
@@ -18,6 +18,8 @@ import org.springframework.web.servlet.view.RedirectView;
 @Controller
 public class AdminRetentionPoliciesController {
 
+    private final Logger logger = LoggerFactory.getLogger(AdminRetentionPoliciesController.class);
+
     private RestService restService;
 
     public void setRestService(RestService restService) {
@@ -26,47 +28,71 @@ public class AdminRetentionPoliciesController {
 
     @RequestMapping(value = "/admin/retentionpolicies", method = RequestMethod.GET)
     public String getRetentionPoliciesListing(ModelMap model) throws Exception {
-        model.addAttribute("policies", restService.getRetentionPolicyListing());
 
-        // pass the view an empty Retention Policy since the form expects it
-        model.addAttribute("retentionPolicy", new CreateRetentionPolicy());
+        model.addAttribute("policies", restService.getRetentionPolicyListing());
 
         return "admin/retentionpolicies/index";
     }
 
-    @RequestMapping(value = "/admin/retentionpolicies/create", method = RequestMethod.POST)
-    public RedirectView addRetentionPoliciesListing(@ModelAttribute CreateRetentionPolicy createRetentionPolicy, ModelMap model) throws Exception {
-        String defaultEngine = "org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy";
-
-        restService.addRetentionPolicy(createRetentionPolicy);
-
-        return new RedirectView("/admin/retentionpolicies", true);
-    }
     @RequestMapping(value = "/admin/retentionpolicies/delete/{id}", method = RequestMethod.DELETE)
     public ResponseEntity deleteRetentionPoliciesListing(ModelMap model, @PathVariable("id") String policyId) throws Exception {
+
+        // todo : Check if it is being used and if so then error.
 
         restService.deleteRetentionPolicy(policyId);
 
         return ResponseEntity.ok().build();
     }
 
-    // Process the 'update policy name' Ajax request
-    @RequestMapping(value = "/admin/retentionpolicies/{id}/update", method = RequestMethod.POST)
-    public @ResponseBody
-    void updateRetentionPolicy(ModelMap model,
-                                      @PathVariable("id") String policyId,
-                                      @RequestParam(name = "name", required = false) String name,
-                                      @RequestParam(name = "description", required = false) String description) throws Exception {
-        System.out.println("Calling updateRetentionPolicyName");
-        RetentionPolicy policy = restService.getRetentionPolicy(policyId);
-        if(name != null) {
-            System.out.println("Update Name");
-            policy.setName(name);
-        }
-        if(description != null){
-            System.out.println("Update Description");
-            policy.setDescription(description);
-        }
-        restService.updateRententionPolicy(policy);
+    // Return an empty 'add new retention policy' page
+    @RequestMapping(value = "/admin/retentionpolicies/add", method = RequestMethod.GET)
+    public String addRetentionPolicy(ModelMap model) {
+        // pass the view an empty RetentionPolicy since the form expects it
+        model.addAttribute("retentionPolicy", new CreateRetentionPolicy());
+
+        return "admin/retentionpolicies/add";
     }
+
+    // Process the completed 'add new retention policy' page
+    @RequestMapping(value = "/admin/retentionpolicies/add", method = RequestMethod.POST)
+    public String addRetentionPolicy(@ModelAttribute CreateRetentionPolicy createRetentionPolicy, ModelMap model, @RequestParam String action) throws Exception {
+        // Was the cancel button pressed?
+        if ("cancel".equals(action)) {
+            return "redirect:/";
+        }
+
+        logger.info("Adding new RetentionPolicy with name = " + createRetentionPolicy.getName());
+
+        restService.addRetentionPolicy(createRetentionPolicy);
+
+        return "redirect:/admin/retentionpolicies";
+    }
+
+    // Return an 'edit retention policy' page
+    @RequestMapping(value = "/admin/retentionpolicies/edit/{retentionpolicyid}", method = RequestMethod.GET)
+    public String editRetentionPolicy(ModelMap model, @PathVariable("retentionpolicyid") String retentionPolicyId) throws Exception {
+
+        logger.info("Getting RetentionPolicy with id = " +  retentionPolicyId);
+
+        CreateRetentionPolicy crp = restService.getRetentionPolicy(retentionPolicyId);
+        model.addAttribute("retentionPolicy", crp);
+
+        return "/admin/retentionpolicies/edit";
+    }
+
+    // Process the completed 'edit retention policy' page
+    @RequestMapping(value = "/admin/retentionpolicies/edit/{retentionpolicyid}", method = RequestMethod.POST)
+    public String editRetentionPolicy(@ModelAttribute CreateRetentionPolicy createRetentionPolicy, ModelMap model, @PathVariable("retentionpolicyid") String retentionPolicyId, @RequestParam String action) throws Exception {
+        // Was the cancel button pressed?
+        if ("cancel".equals(action)) {
+            return "redirect:/";
+        }
+
+        logger.info("Editing RetentionPolicy with id and name = " + createRetentionPolicy.getId() + " " + createRetentionPolicy.getName());
+
+        restService.editRetentionPolicy(createRetentionPolicy);
+
+        return "redirect:/admin/retentionpolicies";
+    }
+
 }

@@ -6,7 +6,10 @@ public class DepositReviewModel {
 
     // DepositReview Identifier
     private String depositReviewId;
+    /*  DEPRECATED */
+    @Deprecated
     private boolean toBeDeleted;
+    private int deleteStatus;
     private String comment;
 
     ////// Add in here any fields from the Deposit that we want to display
@@ -30,6 +33,14 @@ public class DepositReviewModel {
 
     public void setToBeDeleted(boolean toBeDeleted) {
         this.toBeDeleted = toBeDeleted;
+    }
+
+    public int getDeleteStatus() {
+        return deleteStatus;
+    }
+
+    public void setDeleteStatus(int deleteStatus) {
+        this.deleteStatus = deleteStatus;
     }
 
     public String getComment() {

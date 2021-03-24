@@ -140,7 +140,8 @@
                                     <#if deposit.hasPersonalData == true>
                                         <span class="label label-info" style="margin-right: 10px">Personal data</span>
                                     </#if>
-                                    <#assign canRetrieveDataExpression = "hasPermission('${vault.groupID}', 'GROUP', 'CAN_RETRIEVE_DATA')">
+                                    <#assign canRetrieveDataExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES')
+                                    or hasPermission('${vault.groupID}', 'GROUP', 'CAN_RETRIEVE_DATA')">
                                     <@sec.authorize access=canRetrieveDataExpression>
                                     <#if deposit.status.name() == "COMPLETE">
                                         <a id="retrievebtn" class="btn btn-default"
@@ -358,7 +359,7 @@
                             <tbody>
                             <#list roleEvents as event>
                                 <tr>
-                                    <td>${event.userID?html}</td>
+                                    <td>${event.userID!""}</td>
 <#--                                    <td>${event.eventClass?replace('org.datavaultplatform.common.event.', '')?html}</td>-->
                                     <td>${event.message?html}</td>
                                     <td>${event.timestamp?datetime}</td>
@@ -397,7 +398,7 @@
                                  <thead>
                                  <tr>
                                      <th>Deposit</th>
-                                     <th>Deleted</th>
+                                     <th>Marked for deletion</th>
                                      <th>Comment</th>
                                  </tr>
                                  </thead>
@@ -406,8 +407,8 @@
                                     <#list vrm.depositReviewModels as drm>
                                     <tr>
                                         <td>${drm.name}</td>
-                                        <td>${drm.toBeDeleted?string("Yes", "No")}</td>
-                                        <td>${(drm.comment?html)!}</td>
+                                        <td>${(drm.deleteStatus == 0)?string("No", "Yes")}</td>
+                                        <td>${drm.comment!""}</td>
                                     </tr>
                                     </#list>
                                  </tbody>

@@ -67,6 +67,8 @@ public class RestService {
         logger.debug("Calling Broker with url:" + url + " Method:" + method);
         System.out.println("Calling Broker with url:" + url + " Method:" + method);
 
+        // todo : check the http status code before returning?
+
         return restTemplate.exchange(url, method, entity, clazz);
 
     }
@@ -376,14 +378,9 @@ public class RestService {
         return (RetentionPolicy[])response.getBody();
     }
 
-    public RetentionPolicy getRetentionPolicy(String retentionPolicyId) {
-        HttpEntity<?> response = get(brokerURL + "/retentionpolicies/" + retentionPolicyId, RetentionPolicy.class);
-        return (RetentionPolicy)response.getBody();
-    }
-
-    public RetentionPolicy updateRententionPolicy(RetentionPolicy policy) {
-        HttpEntity<?> response = post(brokerURL + "/retentionpolicies/update", RetentionPolicy.class, policy);
-        return (RetentionPolicy)response.getBody();
+    public CreateRetentionPolicy getRetentionPolicy(String retentionPolicyId) {
+        HttpEntity<?> response = get(brokerURL + "/admin/retentionpolicies/" + retentionPolicyId, CreateRetentionPolicy.class);
+        return (CreateRetentionPolicy)response.getBody();
     }
 
     public User getUser(String userId) {
@@ -729,12 +726,19 @@ public class RestService {
         return (EventInfo[])response.getBody();
     }
 
-    public RetentionPolicy addRetentionPolicy(CreateRetentionPolicy createRetentionPolicy) {
-        HttpEntity<?> response = put(brokerURL + "/retentionpolicies/add", RetentionPolicy.class, createRetentionPolicy);
-        return (RetentionPolicy)response.getBody();
+    public void deleteRetentionPolicy(String policyId) {
+        HttpEntity<?> response = delete(brokerURL + "/admin/retentionpolicies/delete/" + policyId, Void.class);
     }
 
-    public void deleteRetentionPolicy(String policyId) {
-        HttpEntity<?> response = delete(brokerURL + "/retentionpolicies/delete/" + policyId, Void.class);
+    public CreateRetentionPolicy addRetentionPolicy(CreateRetentionPolicy createRetentionPolicy) {
+        HttpEntity<?> response = post(brokerURL + "/admin/retentionpolicies", CreateRetentionPolicy.class, createRetentionPolicy);
+        return (CreateRetentionPolicy)response.getBody();
     }
+
+    public CreateRetentionPolicy editRetentionPolicy(CreateRetentionPolicy createRetentionPolicy) {
+        HttpEntity<?> response = put(brokerURL + "/admin/retentionpolicies", CreateRetentionPolicy.class, createRetentionPolicy);
+        return (CreateRetentionPolicy)response.getBody();
+    }
+
+
 }

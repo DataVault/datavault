@@ -11,11 +11,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class CheckForReview {
 
@@ -111,21 +109,33 @@ public class CheckForReview {
 
                 // Email the support team
                 emailService.sendTemplateMail(helpMail, "DataVault Vault needing reviewed", "review-due-support.vm", model);
+                
+                /*
+                The following code is really old school and should be replaced with Streams and Lambdas,
+                I just don't have time to do it, sorry!
+                */
 
                 List<RoleAssignment> roleAssignments = rolesAndPermissionsService.getRoleAssignmentsForVault(vault.getID());
 
+                // Loop round once to see if we have a valid owner
+                boolean ownerFound = false;
                 for (RoleAssignment roleAssignment : roleAssignments) {
                     if (RoleUtils.isDataOwner(roleAssignment)) {
-
                         log.info("Email Data Owner " + roleAssignment.getUserId() + " as Review is due" );
                         User user = usersService.getUser(roleAssignment.getUserId());
                         if (!LDAPService.getLDAPAttributes(user.getID()).isEmpty()) {
                             // User still appears to be at the Uni
-                            emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching ", "review-due-owner.vm", model);
+                            emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching (action required) ", "review-due-owner.vm", model);
+                            ownerFound = true;
                         }
-                    } else {
+                    }
+                }
+
+                // If we didn't find an owner then email any data managers
+                if (!ownerFound) {
+                    for (RoleAssignment roleAssignment : roleAssignments) {
                         if (roleAssignment.getRole().getName().equals("Nominated Data Manager")) {
-                            log.info("Email Data Manager " + roleAssignment.getUserId() + " as Review is due" );
+                            log.info("Email Data Manager " + roleAssignment.getUserId() + " as Review is due");
                             User user = usersService.getUser(roleAssignment.getUserId());
                             if (!LDAPService.getLDAPAttributes(user.getID()).isEmpty()) {
                                 // User still appears to be at the Uni
