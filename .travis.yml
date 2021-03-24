@@ -47,6 +47,9 @@ script:
   # Run Cypress functional test
   - sed -i 's/encryption\.enabled = false/encryption.enabled = true/' docker/config/datavault.properties
   - docker-compose -f docker-compose-test.yml restart workers
+  - sudo docker-compose -f docker-compose-test.yml up -d --build web broker
+  - cat ./datavault-broker/src/main/resources/import.sql | docker exec -i $(docker-compose ps -q mysql) mysql -udatavault -pdatavault datavault
+  - docker-compose -f docker-compose-test.yml ps
   - sudo docker-compose -f docker-compose-test.yml up --build e2e
 
 after_script:
