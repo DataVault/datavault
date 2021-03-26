@@ -533,6 +533,19 @@ public class VaultsController {
         return vault.convertToResponse();
     }
 
+    @RequestMapping(value = "/vaults/{vaultid}/updateVaultName", method = RequestMethod.POST)
+    public VaultInfo updateVaultName(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                            @PathVariable("vaultid") String vaultID,
+                                            @RequestBody() String name) throws Exception {
+        User user = usersService.getUser(userID);
+        Vault vault = vaultsService.getUserVault(user, vaultID);
+
+        vault.setName(name);
+        vaultsService.updateVault(vault);
+
+        return vault.convertToResponse();
+    }
+
     @RequestMapping(value = "/vaults/{vaultid}/updatereviewdate", method = RequestMethod.POST)
     public VaultInfo updateVaultReviewDate(@RequestHeader(value = "X-UserID", required = true) String userID,
                                             @PathVariable("vaultid") String vaultID,
