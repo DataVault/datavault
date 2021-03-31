@@ -223,8 +223,9 @@
                                 <th scope="col">Vault Name</th>
                                 <td>${vault.name?html}</td>
                                 <td>
+                                    <#assign editVaultNameSecurityExpression = "hasRole('ROLE_ADMIN')">
                                     <#assign editVaultSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_METADATA') or hasPermission('${vault.getGroupID()}', 'GROUP', 'EDIT_SCHOOL_VAULT_METADATA')">
-                                    <@sec.authorize access=editVaultSecurityExpression>
+                                    <@sec.authorize access=editVaultNameSecurityExpression>
                                         <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#update-vault-name">
                                             Edit
                                         </button>
