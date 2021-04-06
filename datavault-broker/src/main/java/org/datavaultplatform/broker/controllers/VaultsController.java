@@ -7,6 +7,8 @@ import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
 import org.datavaultplatform.common.event.roles.OrphanVault;
 import org.datavaultplatform.common.event.roles.TransferVaultOwnership;
 import org.datavaultplatform.common.event.vault.Create;
+import org.datavaultplatform.common.event.vault.UpdatedDescription;
+import org.datavaultplatform.common.event.vault.UpdatedName;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.TransferVault;
@@ -522,26 +524,44 @@ public class VaultsController {
 
     @RequestMapping(value = "/vaults/{vaultid}/updateVaultDescription", method = RequestMethod.POST)
     public VaultInfo updateVaultDescription(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                            @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
                                             @PathVariable("vaultid") String vaultID,
                                             @RequestBody() String description) throws Exception {
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
-
+        String oldDesc = vault.getDescription();
         vault.setDescription(description);
         vaultsService.updateVault(vault);
+
+        UpdatedDescription descEvent = new UpdatedDescription(oldDesc, description);
+        descEvent.setVault(vault);
+        descEvent.setUser(usersService.getUser(userID));
+        descEvent.setAgentType(Agent.AgentType.BROKER);
+        descEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+
+        eventService.addEvent(descEvent);
 
         return vault.convertToResponse();
     }
 
     @RequestMapping(value = "/vaults/{vaultid}/updateVaultName", method = RequestMethod.POST)
     public VaultInfo updateVaultName(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                            @PathVariable("vaultid") String vaultID,
-                                            @RequestBody() String name) throws Exception {
+                                     @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
+                                     @PathVariable("vaultid") String vaultID,
+                                     @RequestBody() String name) throws Exception {
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
-
+        String oldName = vault.getName();
         vault.setName(name);
         vaultsService.updateVault(vault);
+
+        UpdatedName nameEvent = new UpdatedName(oldName, name);
+        nameEvent.setVault(vault);
+        nameEvent.setUser(usersService.getUser(userID));
+        nameEvent.setAgentType(Agent.AgentType.BROKER);
+        nameEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+
+        eventService.addEvent(nameEvent);
 
         return vault.convertToResponse();
     }
