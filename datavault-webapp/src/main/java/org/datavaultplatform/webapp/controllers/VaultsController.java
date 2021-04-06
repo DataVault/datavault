@@ -381,6 +381,15 @@ public class VaultsController {
         return "redirect:" + vaultUrl;
     }
 
+    @RequestMapping(value = "/vaults/{vaultid}/updateVaultName", method = RequestMethod.POST)
+    public String updateVaultName(ModelMap model,
+                                         @PathVariable("vaultid") String vaultID,
+                                         @RequestParam("name") String name) {
+        VaultInfo vault = restService.updateVaultName(vaultID, name);
+        String vaultUrl = "/vaults/" + vault.getID() + "/";
+        return "redirect:" + vaultUrl;
+    }
+
     @RequestMapping(value = "/vaults/autocompleteuun/{term}", method = RequestMethod.GET)
     @ResponseBody
     public String autocompleteUUN(@PathVariable("term") String term) {

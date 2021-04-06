@@ -9,13 +9,9 @@ import com.oracle.bmc.auth.AuthenticationDetailsProvider;
 import com.oracle.bmc.auth.ConfigFileAuthenticationDetailsProvider;
 import com.oracle.bmc.objectstorage.ObjectStorage;
 import com.oracle.bmc.objectstorage.ObjectStorageClient;
-import com.oracle.bmc.objectstorage.requests.DeleteObjectRequest;
-import com.oracle.bmc.objectstorage.requests.GetNamespaceRequest;
-import com.oracle.bmc.objectstorage.requests.GetObjectRequest;
-import com.oracle.bmc.objectstorage.requests.PutObjectRequest;
-import com.oracle.bmc.objectstorage.responses.DeleteBucketResponse;
-import com.oracle.bmc.objectstorage.responses.GetNamespaceResponse;
-import com.oracle.bmc.objectstorage.responses.GetObjectResponse;
+import com.oracle.bmc.objectstorage.model.RestoreObjectsDetails;
+import com.oracle.bmc.objectstorage.requests.*;
+import com.oracle.bmc.objectstorage.responses.*;
 import com.oracle.bmc.objectstorage.transfer.UploadConfiguration;
 import com.oracle.bmc.objectstorage.transfer.UploadManager;
 import org.apache.commons.io.FileUtils;
@@ -30,6 +26,8 @@ import org.slf4j.LoggerFactory;
 This class has been upgraded to use the Gen 2 Oracle Object Storage rather than classic.
 For reasons it was easier to do this than add a new Gen 2 plugin due to there currently
 being no mechanism for changing the plugins of a deployed instance.
+
+To be clean despite being named OracleObjecStorageClassic it uses OCI not OCC
  */
 public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	
@@ -43,6 +41,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	private static int defaultMaxRetries = 48; // 24 hours if retry time is 30 minutes
 	private static int retryTime = OracleObjectStorageClassic.defaultRetryTime;
 	private static int maxRetries = OracleObjectStorageClassic.defaultMaxRetries;
+	private static String restoredKey = "Restored";
 	private static String nameSpaceName = "testNameSpace";
 	private static String bucketName = "testBucketName";
 
@@ -92,23 +91,61 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 
 	@Override
 	public void retrieve(String depositId, File working, Progress progress) throws Exception {
+		RestoreObjectsDetails restoreObjectDetails = RestoreObjectsDetails.builder()
+				.objectName(depositId)
+				.hours(24)
+				.build();
+
+		RestoreObjectsRequest restoreObjectsRequest = RestoreObjectsRequest.builder()
+				.namespaceName(OracleObjectStorageClassic.nameSpaceName)
+				.bucketName(OracleObjectStorageClassic.bucketName)
+				.restoreObjectsDetails(restoreObjectDetails)
+				.build();
+
+		HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
+				.namespaceName(OracleObjectStorageClassic.nameSpaceName)
+				.bucketName(OracleObjectStorageClassic.bucketName)
+				.objectName(depositId)
+				.build();
+
+		GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+				.namespaceName(OracleObjectStorageClassic.nameSpaceName)
+				.bucketName(OracleObjectStorageClassic.bucketName)
+				.objectName(depositId)
+				.build();
+
 		for (int r = 0; r < OracleObjectStorageClassic.maxRetries; r++) {
 			try {
 				// create new client / manager each time so we can update the config
 				// while in the holding pattern
 				this.client = new ObjectStorageClient(this.getAuthDetailsProvider());
-				GetObjectResponse getResponse =
-						client.getObject(
-								GetObjectRequest.builder()
-										.namespaceName(OracleObjectStorageClassic.nameSpaceName)
-										.bucketName(OracleObjectStorageClassic.bucketName)
-										.objectName(depositId)
-										.build());
-				FileUtils.copyInputStreamToFile(getResponse.getInputStream(), working);
-				logger.info("Oracle response:" + getResponse.toString());
+				// ask for the object to be restored
+				this.client.restoreObjects(restoreObjectsRequest);
+
+				// check if it has been restored
+				//Boolean restored = false;
+				int attemptCount = 0;
+
+				while (true) {
+					// retry for two hours (restores should be approx 1 hr)
+					if (attemptCount > (60 / OracleObjectStorageClassic.retryTime) * 2) {
+						throw new Exception("Restore failed");
+					}
+					HeadObjectResponse getHeadObjectResponse = this.client.headObject(headObjectRequest);
+					logger.debug("Object status is: " + getHeadObjectResponse.getArchivalState());
+					if (getHeadObjectResponse.getArchivalState().equals(OracleObjectStorageClassic.restoredKey)) {
+						break;
+					}
+					attemptCount++;
+					TimeUnit.MINUTES.sleep(OracleObjectStorageClassic.retryTime);
+				}
+				// once restored get it
+				GetObjectResponse getObjectResponse = client.getObject(getObjectRequest);
+				FileUtils.copyInputStreamToFile(getObjectResponse.getInputStream(), working);
+				logger.info("Oracle response:" + getObjectResponse.toString());
 				break;
 			} catch (Exception e) {
-				logger.error("Upload failed. " + "Retrying in " + OracleObjectStorageClassic.retryTime + " mins " + e.getMessage());
+				logger.error("Retrieve failed. " + "Retrying in " + OracleObjectStorageClassic.retryTime + " mins " + e.getMessage());
 				if (r == (OracleObjectStorageClassic.maxRetries - 1)) {
 					throw e;
 				}
