@@ -59,7 +59,7 @@
                     <#list vaults as vault>
                         <tr class="tr">
                             <td>
-                                <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}">${vault.name?html}</a>
+                                <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/">${vault.name?html}</a>
                             </td>
                             <td> <#if vault.getProjectId()??>${vault.getProjectId()}<#else> </#if></td>
                             
