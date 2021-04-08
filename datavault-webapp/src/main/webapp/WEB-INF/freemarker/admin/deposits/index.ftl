@@ -84,7 +84,7 @@
                         <td><#if deposit.getCrisID()??>${deposit.getCrisID()}<#else> </#if> </td>
                         <td>${deposit.groupName}</td>
                         <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}/deposits/${deposit.getID()?html}">${deposit.getID()?html}</a></td>
-                        <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}">${deposit.vaultID?html}</a></td>
+                        <td><a href="${springMacroRequestContext.getContextPath()}/vaults/${deposit.vaultID}/">${deposit.vaultID?html}</a></td>
                         <td><#if deposit.vaultOwnerID??>${deposit.vaultOwnerName} (${deposit.vaultOwnerID})</#if></td>
                         <td>${deposit.vaultReviewDate}</td>
                         <td>
