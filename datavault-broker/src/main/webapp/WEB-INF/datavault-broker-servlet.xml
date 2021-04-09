@@ -79,6 +79,8 @@
         <property name="tsmMaxRetries" value="${tsmMaxRetries:#{null}}" />
         <property name="occRetryTime" value="${occRetryTime:#{null}}" />
         <property name="occMaxRetries" value="${occMaxRetries:#{null}}" />
+        <property name="ociNameSpace" value="${ociNameSpace:#{null}}" />
+        <property name="ociBucketName" value="${ociBucketName:#{null}}" />
         <property name="tempDir" value="${tempDir:#{null}}" />
         <property name="bucketName" value="${s3.bucketName:#{null}}" />
         <property name="region" value="${s3.region:#{null}}" />
