@@ -108,11 +108,17 @@ public class VaultsController {
                     .stream()
                     .anyMatch(role -> role.getVaultId() != null && role.getVaultId().equals(vaultId));
 
-            if (hasVaultRole) {
-                return ResponseEntity.status(422).body("User already has a role in this vault");
+            String userId = vault.getUserID();
+            // DAS 20210409 If the we are changing owner to a new user who isn't the same owner
+            // and he has an existing role remove it
+            if (hasVaultRole && (userId != null && ! userId.equals(request.user))) {
+                // delete the users existing vault role
+                restService.getRoleAssignmentsForUser(request.user).stream()
+                        .filter(roleAssignment -> vault.getID().equals(roleAssignment.getVaultId()))
+                        .findFirst()
+                        .ifPresent(roleAssignment -> restService.deleteRoleAssignment(roleAssignment.getId()));
             }
 
-            String userId = vault.getUserID();
             if (userId != null && userId.equals(request.user)) {
                 return ResponseEntity.status(422).body("Cannot transfer ownership to the current owner");
             }
