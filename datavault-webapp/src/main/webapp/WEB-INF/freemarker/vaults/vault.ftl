@@ -47,7 +47,7 @@
                         <div class="form-group">
                             <label class="control-label">Vault description:</label>
                             <@spring.bind "vault.description" />
-                            <textarea type="text" class="form-control" name="description" id="description" rows="4" cols="60"></textarea>
+                            <textarea type="text" class="form-control" name="${spring.status.expression}" id="description" rows="4" cols="60">${spring.status.value!""}</textarea>
                         </div>
                     </div>
 
