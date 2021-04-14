@@ -336,6 +336,22 @@
                     </td>
                     </@sec.authorize>
                 </tr>
+            <#else>
+                <tr>
+                    <td>Orphaned</td>
+                    <td class="role-column">N/A</td>
+                    <@sec.authorize access=showActionsColumnSecurityExpression>
+                        <td class="action-column">
+                            <@sec.authorize access=transferOwnershipSecurityExpression>
+                                <a href="#" class="btn btn-default" data-toggle="modal"
+                                   data-target="#orphan-dialog"
+                                   data-user-name=""
+                                   title="Transfer ownership of this vault."><i
+                                            class="glyphicon glyphicon-transfer"></i></a>
+                            </@sec.authorize>
+                        </td>
+                    </@sec.authorize>
+                </tr>
             </#if>
 
             <#list roleAssignments as assignment>

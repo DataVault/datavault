@@ -111,7 +111,7 @@ public class VaultsController {
             String userId = vault.getUserID();
             // DAS 20210409 If the we are changing owner to a new user who isn't the same owner
             // and he has an existing role remove it
-            if (hasVaultRole && (userId != null && ! userId.equals(request.user))) {
+            if (hasVaultRole && (userId == null || ! userId.equals(request.user))) {
                 // delete the users existing vault role
                 restService.getRoleAssignmentsForUser(request.user).stream()
                         .filter(roleAssignment -> vault.getID().equals(roleAssignment.getVaultId()))
@@ -125,7 +125,6 @@ public class VaultsController {
 
             logoutService.logoutUser(newOwner.getID());
         }
-
         TransferVault transfer = new TransferVault();
         transfer.setUserId(request.user);
         transfer.setRoleId(request.role);
