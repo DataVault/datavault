@@ -27,6 +27,15 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- Oracle Gen 2 -->
+            <dependency>
+                <groupId>com.oracle.oci.sdk</groupId>
+                <artifactId>oci-java-sdk-bom</artifactId>
+                <!-- replace the version below with your required version -->
+                <version>1.23.2</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     
@@ -70,15 +79,7 @@
             <artifactId>jsondoc-core</artifactId>
             <version>1.2.9</version>
         </dependency>
-        
-        <!-- DropBox -->
-        <!--
-        <dependency>
-            <groupId>com.dropbox.core</groupId>
-            <artifactId>dropbox-core-sdk</artifactId>
-            <version>1.8.2</version>
-        </dependency>
-        -->
+
         <!-- Amazon Glacier -->
         <dependency>
             <groupId>com.amazonaws</groupId>
@@ -92,34 +93,29 @@
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-sns</artifactId>
         </dependency>
-        <!--  Oracle Cloud Storage Classic -->
-        <!--
-        <dependency>
-    		<groupId>oracle.cloudstorage.ftm</groupId>
-    		<artifactId>ftm-api</artifactId>
-    		<version>1.0</version>
-  		</dependency>
-        <dependency>
-            <groupId>oracle.cloudstorage.ftm</groupId>
-            <artifactId>low-level-api-core</artifactId>
-            <version>1.0</version>
-        </dependency>
-        -->
-        <dependency>
-            <groupId>ftm-sdk-2.4.2</groupId>
-            <artifactId>ftm-api</artifactId>
-            <version>2.4.2</version>
-            <scope>system</scope>
-            <systemPath>${root.basedir}/lib/ftm-api-2.4.2.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>oracle.cloudstorage.ftm</groupId>
-            <artifactId>low-level-api-core</artifactId>
-            <version>1.14.19</version>
-            <scope>system</scope>
-            <systemPath>${root.basedir}/lib/low-level-api-core-1.14.19.jar</systemPath>
-        </dependency>
 
+        <dependency>
+            <groupId>com.oracle.oci.sdk</groupId>
+            <artifactId>oci-java-sdk-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.oci.sdk</groupId>
+            <artifactId>oci-java-sdk-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.oci.sdk</groupId>
+            <artifactId>oci-java-sdk-objectstorage</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.oci.sdk</groupId>
+            <artifactId>oci-java-sdk-objectstorage-extensions</artifactId>
+            <version>1.23.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.oci.sdk</groupId>
+            <artifactId>oci-java-sdk-objectstorage-generated</artifactId>
+            <version>1.23.2</version>
+        </dependency>
         <dependency>
     		<groupId>org.glassfish</groupId>
     		<artifactId>javax.json</artifactId>
