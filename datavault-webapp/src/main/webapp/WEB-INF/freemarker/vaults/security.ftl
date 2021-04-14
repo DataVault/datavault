@@ -136,37 +136,29 @@
                     </div>
 
                     <div class="form-group ui-widget col-sm-10 form-confirm">
-                        <#if dataOwner??>
-                            <div class="checkbox">
-                                <input class="form-check-input" id="confirm-checkbox" type="checkbox"
-                                       name="assigningRole" checked="checked"/>
-                            </div>
-                            <label for="confirm-checkbox" class="control-label">Assign role to previous data
-                                owner?</label>
-                        <#else>
-                            <div class="checkbox">
+                        <div class="checkbox">
+                            <#if dataOwner??>
+                                <input class="form-check-input" id="confirm-checkbox" type="checkbox" name="assigningRole" checked="checked"/>
+                            <#else>
                                 <input class="form-check-input" id="confirm-checkbox" type="checkbox"
                                        name="assigningRole" disabled/>
+                            </#if>
                             </div>
                             <label for="confirm-checkbox" class="control-label">Assign role to previous data
                                 owner?</label>
-                        </#if>
                     </div>
                     </@sec.authorize>
 
                     <@sec.authorize access="hasRole('ROLE_IS_ADMIN') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_ORPHAN_SCHOOL_VAULTS')">
                         <div class="form-group ui-widget col-sm-10 form-confirm">
-                           <#if dataOwner??>
-                                <div class="checkbox">
+                            <div class="checkbox">
+                                <#if dataOwner??>
                                     <input class="form-check-input" id="orphan-checkbox" type="checkbox" name="orphaning"/>
-                                </div>
-                                <label for="orphan-checkbox" class="control-label">Temporarily orphan this vault?</label>
-                            <#else>
-                                <div class="checkbox">
+                                <#else>
                                     <input class="form-check-input" id="orphan-checkbox" type="checkbox" name="orphaning" disabled/>
-                                </div>
-                                <label for="orphan-checkbox" class="control-label">Temporarily orphan this vault?</label>
-                            </#if>
+                                </#if>
+                            </div>
+                            <label for="orphan-checkbox" class="control-label">Temporarily orphan this vault?</label>
                         </div>
                     </@sec.authorize>
 
