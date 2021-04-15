@@ -48,7 +48,7 @@ public class DropboxFileSystem extends Device implements UserStore {
     
     @Override
     public List<FileInfo> list(String path) {
-        
+
         /*if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
         }*/
@@ -300,7 +300,7 @@ public class DropboxFileSystem extends Device implements UserStore {
 
     @Override
     public void retrieve(String path, File working, Progress progress) throws Exception {
-        
+
         /*if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
         }
@@ -313,7 +313,7 @@ public class DropboxFileSystem extends Device implements UserStore {
 
         /*// TODO: cleanup path handling - Dropbox paths MUST start with a "/"
         
-        if (!path.startsWith(PATH_SEPARATOR)) {
+        /*if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
         }
         

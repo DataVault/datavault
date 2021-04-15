@@ -28,6 +28,8 @@ public class AuditDepositsChunks {
     private String occRetryTime;
     private String tsmMaxRetries;
     private String occMaxRetries;
+    private String ociNameSpace;
+    private String ociBucketName;
 
     public void setDepositsService(DepositsService depositsService) {
         this.depositsService = depositsService;
@@ -69,6 +71,8 @@ public class AuditDepositsChunks {
         this.occMaxRetries = occMaxRetries;
     }
     public void setSender(Sender sender) { this.sender = sender; }
+    public void setOciNameSpace(String ociNameSpace) { this.ociNameSpace = ociNameSpace; }
+    public void setOciBucketName(String ociBucketName) { this.ociBucketName = ociBucketName; }
 
     public void execute() throws Exception {
         Date now = new Date();
@@ -191,6 +195,12 @@ public class AuditDepositsChunks {
                     }
                     if (this.occMaxRetries != null && ! this.occMaxRetries.equals("")) {
                         asProps.put("occMaxRetries", this.occMaxRetries);
+                    }
+                    if (this.ociBucketName != null && ! this.ociBucketName.equals("")) {
+                        asProps.put("ociBucketName", this.ociBucketName);
+                    }
+                    if (this.ociNameSpace != null && ! this.ociNameSpace.equals("")) {
+                        asProps.put("ociNameSpace", this.ociNameSpace);
                     }
                     archiveStore.setProperties(asProps);
                 }
