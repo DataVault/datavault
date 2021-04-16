@@ -50,6 +50,9 @@ public class VaultInfo {
     @ApiObjectField(description = "A reference to an external metadata record that describes this vault")
     private String datasetID;
 
+    @ApiObjectField(description = "Another reference to an external metadata record that describes this vault")
+    private String crisID;
+
     @ApiObjectField(description = "The name of the external metadata record that describes this vault")
     private String datasetName;
 
@@ -84,7 +87,7 @@ public class VaultInfo {
     
     public VaultInfo() { }
 
-    public VaultInfo(String id, String userID, String userName, String datasetID, String datasetName, Date creationTime, String name, String description, String policyID, 
+    public VaultInfo(String id, String userID, String userName, String datasetID, String crisID, String datasetName, Date creationTime, String name, String description, String policyID,
     		String groupID, long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked, Date grantEndDate, Date reviewDate, long numberOfDeposits, String projectId) {
         this.id = id;
         this.userID = userID;
@@ -104,6 +107,7 @@ public class VaultInfo {
         this.reviewDate = reviewDate;
         this.numberOfDeposits = numberOfDeposits;
         this.projectId = projectId;
+        this.crisID = crisID;
     }
     
     public VaultInfo(String id,String userName, Date creationTime, String name,  
@@ -149,6 +153,14 @@ public class VaultInfo {
 
     public void setDatasetID(String datasetID) {
         this.datasetID = datasetID;
+    }
+
+    public String getCrisID() {
+        return crisID;
+    }
+
+    public void setCrisID(String crisID) {
+        this.crisID = crisID;
     }
 
     public String getDatasetName() {
