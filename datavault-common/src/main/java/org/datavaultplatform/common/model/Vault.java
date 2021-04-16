@@ -299,6 +299,7 @@ public class Vault {
                 user == null ? null : user.getID(),
                 user == null ? null : (user.getFirstname()+" "+user.getLastname()),
                 dataset.getID(),
+                dataset.getCrisId(),
                 dataset.getName(),
                 creationTime,
                 name,
