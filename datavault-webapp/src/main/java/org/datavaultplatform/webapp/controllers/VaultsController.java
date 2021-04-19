@@ -123,7 +123,19 @@ public class VaultsController {
                 return ResponseEntity.status(422).body("Cannot transfer ownership to the current owner");
             }
 
+            // if currently orphaned can't give new role
+            if (vaultOwner == null && request.assigningRole) {
+                return ResponseEntity.status(422).body("Cannot assign role to the previous owner");
+            }
+
+
+
             logoutService.logoutUser(newOwner.getID());
+        } else {
+            // if currently orphaned can't orphan
+            if (vaultOwner == null) {
+                return ResponseEntity.status(422).body("Cannot orphan an vault that is already orphaned");
+            }
         }
         TransferVault transfer = new TransferVault();
         transfer.setUserId(request.user);

@@ -81,6 +81,7 @@ public class AdminVaultsController {
         model.addAttribute("ordervaultsize", "vaultSize".equals(sort)?otherOrder:"asc");
         model.addAttribute("orderuser", "user".equals(sort)?otherOrder:"asc");
         model.addAttribute("orderGroupId", "groupID".equals(sort)?otherOrder:"asc");
+        model.addAttribute("orderCrisId", "crisID".equals(sort)?otherOrder:"asc");
         model.addAttribute("orderreviewDate", "reviewDate".equals(sort)?otherOrder:"asc");
         model.addAttribute("ordercreationtime", "creationTime".equals(sort)?otherOrder:"asc");
 
