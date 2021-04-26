@@ -636,6 +636,11 @@ public class RestService {
         return (VaultInfo)response.getBody();
     }
 
+    public VaultInfo updateVaultName(String vaultId, String vaultName) {
+        HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/updateVaultName", VaultInfo.class, vaultName);
+        return (VaultInfo)response.getBody();
+    }
+
     public VaultInfo updateVaultReviewDate(String vaultId, String reviewDate) {
         HttpEntity<?> response = post(brokerURL + "/vaults/" + vaultId + "/updatereviewdate", VaultInfo.class, reviewDate);
         return (VaultInfo)response.getBody();
