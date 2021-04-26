@@ -41,13 +41,46 @@
                 <form id="update-vault-description-form" class="form" role="form" action="updateVaultDescription" method="post">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
-                        <h4 class="modal-title" id="addDataManger">Add Data Manager</h4>
+                        <h4 class="modal-title" id="editDescription">Edit Description</h4>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
                             <label class="control-label">Vault description:</label>
                             <@spring.bind "vault.description" />
-                            <textarea type="text" class="form-control" name="description" id="description" rows="4" cols="60"></textarea>
+                            <textarea type="text" class="form-control" name="${spring.status.expression}" id="description" rows="4" cols="60">${spring.status.value!""}</textarea>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="submitAction" name="action" value="submit"/>
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
+                        <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="update-vault-name" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="updateVaultName" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form id="update-vault-name-form" class="form" role="form" action="updateVaultName" method="post">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
+                        <h4 class="modal-title" id="editName">Edit Name</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="control-label">Vault name:</label>
+                            <@spring.bind "vault.name" />
+                            <input type="text"
+                                   class="form-control"
+                                   name="${spring.status.expression}"
+                                   value="${spring.status.value!""}"
+                                   id="vaultName"
+                                   placeholder="Enter a descriptive name for the Vault e.g. the project or experiment."/>
                         </div>
                     </div>
 
@@ -189,7 +222,15 @@
                             <tr>
                                 <th scope="col">Vault Name</th>
                                 <td>${vault.name?html}</td>
-                                <td></td>
+                                <td>
+                                    <#assign editVaultNameSecurityExpression = "hasRole('ROLE_ADMIN')">
+                                    <#assign editVaultSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_VAULT_METADATA') or hasPermission('${vault.getGroupID()}', 'GROUP', 'EDIT_SCHOOL_VAULT_METADATA')">
+                                    <@sec.authorize access=editVaultNameSecurityExpression>
+                                        <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#update-vault-name">
+                                            Edit
+                                        </button>
+                                    </@sec.authorize>
+                                </td>
                             </tr>
                             <tr>
                                 <th scope="col">Description</th>
