@@ -191,6 +191,13 @@ public class VaultDAOImpl implements VaultDAO {
             } else {
                 criteria.addOrder(Order.desc("g.id"));
             }
+        } else if ("crisID".equals(sort)) {
+            criteria.createAlias("dataset", "d");
+            if (asc) {
+                criteria.addOrder(Order.asc("d.crisId"));
+            } else {
+                criteria.addOrder(Order.desc("d.crisId"));
+            }
         } else {
             if (asc) {
                 criteria.addOrder(Order.asc(sort));

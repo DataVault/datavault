@@ -39,6 +39,7 @@
                        <th><a href="?sort=name&order=${ordername}&query=${query?url}">Vault Name<#if sort == "name"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                        <th>Deposits</th>
                        <th>Project ID</th>
+                        <th><a href="?sort=crisID&order=${orderCrisId}&query=${query?url}">Cris ID<#if sort == "crisID"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                        <th>Project Size</th>
                        <th><a href="?sort=vaultSize&order=${ordervaultsize}&query=${query?url}">Vault Size<#if sort == "vaultSize"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
                        <th><a href="?sort=user&order=${orderuser}&query=${query?url}">Owner(UUN)<#if sort == "user"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>
@@ -57,6 +58,7 @@
                             </td>
                             <td>${vault.getNumberOfDeposits()}</td>
                             <td> <#if vault.getProjectId()??>${vault.getProjectId()}<#else> </#if></td>
+                            <td> <#if vault.getCrisID??>${vault.getCrisID()}<#else> </#if></td>
                             <td>${vault.getProjectSizeStr()}</td>
                            <td>${vault.getSizeStr()}</td>
                             <td>
