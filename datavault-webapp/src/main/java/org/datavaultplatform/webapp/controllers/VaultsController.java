@@ -171,7 +171,8 @@ public class VaultsController {
             return "vaults/index";
         }
 
-        return this.createVault(model);
+        //return this.createVault(model);
+        return this.buildVault(model);
     }
 
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
@@ -314,7 +315,7 @@ public class VaultsController {
         return "vaults/userVaults";
     }
 
-    @RequestMapping(value = "/vaults/create", method = RequestMethod.GET)
+    /*@RequestMapping(value = "/vaults/create", method = RequestMethod.GET)
     public String createVault(ModelMap model) {
 
         // pass the view an empty Vault since the form expects it
@@ -335,7 +336,7 @@ public class VaultsController {
         model.addAttribute("welcome", welcome);
 
         return "vaults/create";
-    }
+    }*/
 
     @RequestMapping(value = "/pendingVaults/{vaultid}", method = RequestMethod.GET)
     public String getPendingVault(ModelMap model, @PathVariable("vaultid") String vaultID, Principal principal) {
