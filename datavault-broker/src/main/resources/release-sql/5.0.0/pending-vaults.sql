@@ -16,7 +16,7 @@ CREATE TABLE `hibernate_sequence` (
     `next_val` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO hibernate_sequence (next_val) VALUES (0);
+INSERT INTO hibernate_sequence (next_val) VALUES (1);
 alter table PendingVaults add constraint FK1oqxrihj71uwiynk4m8u0n0vj foreign key (group_id) references Groups (id);
 alter table PendingVaults add constraint FKtqmx003465315spj99suwf1ta foreign key (retentionPolicy_id) references RetentionPolicies (id);
 alter table PendingVaults add constraint FKjj6cuk6m88qn7th5df64ui3cw foreign key (user_id) references Users (id);
