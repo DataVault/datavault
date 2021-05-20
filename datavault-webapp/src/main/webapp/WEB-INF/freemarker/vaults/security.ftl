@@ -137,18 +137,26 @@
 
                     <div class="form-group ui-widget col-sm-10 form-confirm">
                         <div class="checkbox">
-                            <input class="form-check-input" id="confirm-checkbox" type="checkbox"
-                                   name="assigningRole" checked="checked"/>
-                        </div>
-                        <label for="confirm-checkbox" class="control-label">Assign role to previous data
-                            owner?</label>
+                            <#if dataOwner??>
+                                <input class="form-check-input" id="confirm-checkbox" type="checkbox" name="assigningRole" checked="checked"/>
+                            <#else>
+                                <input class="form-check-input" id="confirm-checkbox" type="checkbox"
+                                       name="assigningRole" disabled/>
+                            </#if>
+                            </div>
+                            <label for="confirm-checkbox" class="control-label">Assign role to previous data
+                                owner?</label>
                     </div>
                     </@sec.authorize>
 
                     <@sec.authorize access="hasRole('ROLE_IS_ADMIN') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_ORPHAN_SCHOOL_VAULTS')">
                         <div class="form-group ui-widget col-sm-10 form-confirm">
                             <div class="checkbox">
-                                <input class="form-check-input" id="orphan-checkbox" type="checkbox" name="orphaning"/>
+                                <#if dataOwner??>
+                                    <input class="form-check-input" id="orphan-checkbox" type="checkbox" name="orphaning"/>
+                                <#else>
+                                    <input class="form-check-input" id="orphan-checkbox" type="checkbox" name="orphaning" disabled/>
+                                </#if>
                             </div>
                             <label for="orphan-checkbox" class="control-label">Temporarily orphan this vault?</label>
                         </div>
@@ -334,6 +342,22 @@
                                     class="glyphicon glyphicon-transfer"></i></a>
                         </@sec.authorize>
                     </td>
+                    </@sec.authorize>
+                </tr>
+            <#else>
+                <tr>
+                    <td>Orphaned</td>
+                    <td class="role-column">N/A</td>
+                    <@sec.authorize access=showActionsColumnSecurityExpression>
+                        <td class="action-column">
+                            <@sec.authorize access=transferOwnershipSecurityExpression>
+                                <a href="#" class="btn btn-default" data-toggle="modal"
+                                   data-target="#orphan-dialog"
+                                   data-user-name=""
+                                   title="Transfer ownership of this vault."><i
+                                            class="glyphicon glyphicon-transfer"></i></a>
+                            </@sec.authorize>
+                        </td>
                     </@sec.authorize>
                 </tr>
             </#if>

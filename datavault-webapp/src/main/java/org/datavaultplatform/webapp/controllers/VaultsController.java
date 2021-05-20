@@ -111,7 +111,7 @@ public class VaultsController {
             String userId = vault.getUserID();
             // DAS 20210409 If the we are changing owner to a new user who isn't the same owner
             // and he has an existing role remove it
-            if (hasVaultRole && (userId != null && ! userId.equals(request.user))) {
+            if (hasVaultRole && (userId == null || ! userId.equals(request.user))) {
                 // delete the users existing vault role
                 restService.getRoleAssignmentsForUser(request.user).stream()
                         .filter(roleAssignment -> vault.getID().equals(roleAssignment.getVaultId()))
@@ -123,9 +123,20 @@ public class VaultsController {
                 return ResponseEntity.status(422).body("Cannot transfer ownership to the current owner");
             }
 
-            logoutService.logoutUser(newOwner.getID());
-        }
+            // if currently orphaned can't give new role
+            if (vaultOwner == null && request.assigningRole) {
+                return ResponseEntity.status(422).body("Cannot assign role to the previous owner");
+            }
 
+
+
+            logoutService.logoutUser(newOwner.getID());
+        } else {
+            // if currently orphaned can't orphan
+            if (vaultOwner == null) {
+                return ResponseEntity.status(422).body("Cannot orphan an vault that is already orphaned");
+            }
+        }
         TransferVault transfer = new TransferVault();
         transfer.setUserId(request.user);
         transfer.setRoleId(request.role);
