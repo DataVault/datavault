@@ -216,9 +216,7 @@ public class PureFlatFileProvider implements Provider {
     	System.out.println("flat file dir is : " + this.getFlatFileDir());
         File projectIdsFullFile  = new File(this.getFlatFileDir() + PureFlatFileProvider.PURE_PROJECT_IDS_FILE_NAME);
         if (projectIdsFullFile.exists()) {
-	        LineIterator fullIt = null;
-			try {
-				fullIt = FileUtils.lineIterator(projectIdsFullFile, "UTF-8");
+			try (LineIterator fullIt = FileUtils.lineIterator(projectIdsFullFile, "UTF-8")) {
 				while (fullIt.hasNext()) {
 		    	    String line = fullIt.nextLine();
 		    	    String[] splitLine = line.split("\t");
@@ -228,9 +226,7 @@ public class PureFlatFileProvider implements Provider {
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
-			} finally {
-				fullIt.close();
-	    	}
+			}
         }
     	
     	return projectIds;
