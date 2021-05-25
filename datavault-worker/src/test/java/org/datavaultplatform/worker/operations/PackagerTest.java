@@ -117,6 +117,7 @@ public class PackagerTest {
         File emptyDir =  new File(parentDir, EMPTY_DIR_NAME);
         emptyDir.mkdir();
         File childDir =  new File(parentDir, CHILD_DIR_NAME);
+        childDir.mkdir();
         File test1file = null;
         File test2file = null;
         File test3file = null;
@@ -181,6 +182,7 @@ public class PackagerTest {
                     "data" + File.separator + CHILD_DIR_WITH_SPACE);
             assertTrue(new File(childDirWithSpace, TEST_FILE_WITH_US).exists());
             assertTrue(new File(childDirWithSpace, TEST_FILE_WITH_HY).exists());
+            Files.delete(simLink.toPath());
         }        
         catch(Exception ex){
             ex.printStackTrace();

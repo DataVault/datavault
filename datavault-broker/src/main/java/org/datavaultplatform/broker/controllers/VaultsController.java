@@ -50,6 +50,8 @@ public class VaultsController {
     private String homePage;
     private String helpPage;
 
+    private static final String ORPHANED_ID = "Orphaned";
+
     public void setHomePage(String homePage) {
         this.homePage = homePage;
     }
@@ -207,7 +209,10 @@ public class VaultsController {
 
             eventService.addEvent(orphanVaultEvent);
         } else {
-            String previousUserID = currentOwner.getID();
+            String previousUserID = VaultsController.ORPHANED_ID;
+            if (currentOwner != null) {
+                previousUserID = currentOwner.getID();
+            }
 
             vaultsService.transferVault(vault, usersService.getUser(transfer.getUserId()), transfer.getReason());
 
@@ -819,7 +824,10 @@ public class VaultsController {
     private void sendEmails(String template, Vault vault, String userId, String previousUserID, String newOwnerId) {
 
         User user = this.usersService.getUser(userId);
-        User previousOwner = this.usersService.getUser(previousUserID);
+        User previousOwner = null;
+        if (! previousUserID.equals(VaultsController.ORPHANED_ID)) {
+            previousOwner = this.usersService.getUser(previousUserID);
+        }
         User newOwner = this.usersService.getUser(newOwnerId);
 
         HashMap<String, Object> model = new HashMap<String, Object>();
@@ -827,7 +835,11 @@ public class VaultsController {
         model.put("helppage", this.helpPage);
         model.put("vault", vault.getName());
         model.put("assignee", user.getFirstname() + " " + user.getLastname());
-        model.put("previousowner", previousOwner.getFirstname() + " " + previousOwner.getLastname());
+        if (previousOwner != null) {
+            model.put("previousowner", previousOwner.getFirstname() + " " + previousOwner.getLastname());
+        } else {
+            model.put("previousowner", VaultsController.ORPHANED_ID);
+        }
 
         if(newOwner != null) {
             model.put("newowner", newOwner.getFirstname() + " " + newOwner.getLastname());
