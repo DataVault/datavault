@@ -49,7 +49,7 @@
                 <div class="well">
                     <p>Please provide the details we should use to send your bill (your eIT) to the correct finance team.</p>
                     <div class="form-group">
-                        <label class="col-sm-2 control-label">Athoriser*:
+                        <label class="col-sm-2 control-label">Authoriser*:
                             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                                   title="The name of someone in your School/Unit or Sub-Unit who can authorise the payment of the eIT."></span>
                         </label>
