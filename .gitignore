@@ -30,3 +30,6 @@ docker/mysql
 docker/config/mail-templates
 
 .idea/
+docker/mysql-master
+docker/mysql-master-backup
+.gitignore
