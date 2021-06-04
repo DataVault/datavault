@@ -457,20 +457,32 @@ public class VaultsController {
             //if (vault.getPendingID() == null) {
                 VaultInfo newVault = restService.addPendingVault(vault);
             //} else {
-            //    VaultInfo newVault = restService.updatePendingVault(vault);
+                //VaultInfo newVault = restService.updatePendingVault(vault);
             //}
             //buildUrl = buildUrl + newVault.getID();
-            //String vaultUrl = "/vaults/" + newVault.getID() + "/";
-            return "redirect:" + buildUrl;
+            String vaultUrl = "/pendingVaults/" + newVault.getID() + "/";
+            return "redirect:" + vaultUrl;
         } else if ("Confirm".equals(action)) {
             // if the confirm button has been clicked save what we have if everything isn't already saved
             // and display the summary
             logger.info("Confirm button clicked");
+            vault.setPartial(true);
+            VaultInfo newVault = restService.addPendingVault(vault);
             //VaultInfo newVault = restService.addVault(vault);
-            //String vaultUrl = "/vaults/" + newVault.getID() + "/";
+            String vaultUrl = "/pendingVaults/" + newVault.getID() + "/";
             // redirect to pending page if all goes well
-            //return "redirect:" + vaultUrl;
-            return "redirect:" + buildUrl;
+            return "redirect:" + vaultUrl;
+            //return "redirect:" + buildUrl;
+        } else if ("Validate".equals(action)) {
+            // this will be the code that moves from pending vault to validated vault
+            // when an admin gives the ok
+            vault.setPartial(false);
+
+            // add the new vault
+            // remove all the pending stuff for the vault;
+            //String vaultUrl = "/pendingVaults/" + newVault.getID() + "/";
+            //VaultInfo newVault = restService.addVault(vault);
+            return "";
         } else {
             logger.info("Invalid button clicked");
             return "redirect:" + buildUrl;
