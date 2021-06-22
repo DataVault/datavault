@@ -5,6 +5,8 @@ import org.datavaultplatform.common.model.PendingVault;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "CreateVault")
 public class CreateVault {
@@ -66,12 +68,17 @@ public class CreateVault {
     @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for projectID")
     private String projectID;
 
+    @ApiObjectField(description = "List of creators of the dataset")
+    private List<String> dataCreators;
+
+
+
 
 
     public CreateVault() { }
     public CreateVault(String name, String description, String notes, String policyID, String groupID, String datasetID, String grantEndDate,
                        String reviewDate, Boolean partial, Boolean affirmed, String estimate, String billingType, String sliceID,
-                       String authoriser, String schoolOrUnit, String subunit, String projectID) {
+                       String authoriser, String schoolOrUnit, String subunit, String projectID, List<String> dataCreators) {
         this.name = name;
         this.description = description;
         this.notes = notes;
@@ -89,6 +96,7 @@ public class CreateVault {
         this.schoolOrUnit = schoolOrUnit;
         this.subunit = subunit;
         this.projectID = projectID;
+        this.dataCreators = dataCreators;
     }
 
     public String getName() {
@@ -234,4 +242,8 @@ public class CreateVault {
     public void setProjectID(String projectID) {
         this.projectID = projectID;
     }
+
+    public List<String> getDataCreators() { return this.dataCreators; }
+
+    public void setDataCreators(List<String> dataCreators) { this.dataCreators = dataCreators; }
 }

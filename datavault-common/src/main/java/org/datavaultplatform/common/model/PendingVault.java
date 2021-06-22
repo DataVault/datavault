@@ -9,6 +9,7 @@ import org.jsondoc.core.annotation.ApiObject;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "PendingVault")
@@ -111,6 +112,10 @@ public class PendingVault {
 
     @ManyToOne
     private User user;
+
+    @JsonIgnore
+    @OneToMany(targetEntity=PendingDataCreator.class, mappedBy="pendingVault", fetch=FetchType.LAZY)
+    private List<PendingDataCreator> dataCreators;
 
     public String getId() {
         return this.id;
@@ -250,6 +255,14 @@ public class PendingVault {
 
     public void setProjectID(String projectID) {
         this.projectID = projectID;
+    }
+
+    public List<PendingDataCreator> getDataCreators() {
+        return this.dataCreators;
+    }
+
+    public void setDataCreator(List<PendingDataCreator> dataCreators) {
+        this.dataCreators = dataCreators;
     }
 
     public VaultInfo convertToResponse() {

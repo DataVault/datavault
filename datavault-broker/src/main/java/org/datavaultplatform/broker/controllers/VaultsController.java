@@ -447,6 +447,18 @@ public class VaultsController {
             vault.setGroup(group);
         }
 
+        // for each dc
+        // create dc object
+        // add to list
+        // add to pending vault
+
+        List<String> dcs = createVault.getDataCreators();
+        if (dcs != null) {
+            logger.debug("Data creator list is :'" + dcs.toString() + "'");
+        } else {
+            logger.debug("Data creator list is :null");
+        }
+
         String sliceID = createVault.getSliceID();
         logger.debug("Slice ID is: '" + sliceID + "'");
         if (sliceID != null) {
