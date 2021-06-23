@@ -159,6 +159,10 @@
         <property name="restService" ref="restService" />
     </bean>
 
+    <bean id="adminPendingVaultsController" class="org.datavaultplatform.webapp.controllers.admin.AdminPendingVaultsController">
+        <property name="restService" ref="restService" />
+    </bean>
+
     <bean id="adminDepositsController" class="org.datavaultplatform.webapp.controllers.admin.AdminDepositsController">
         <property name="restService" ref="restService" />
     </bean>

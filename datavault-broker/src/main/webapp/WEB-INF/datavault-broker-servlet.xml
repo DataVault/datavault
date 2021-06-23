@@ -91,6 +91,7 @@
 
     <bean id="statisticsController" class="org.datavaultplatform.broker.controllers.StatisticsController">
         <property name="vaultsService" ref="vaultsService" />
+        <property name="pendingVaultsService" ref="pendingVaultsService" />
         <property name="depositsService" ref="depositsService" />
         <property name="retrievesService" ref="retrievesService" />
         <property name="eventService" ref="eventService" />
@@ -200,6 +201,10 @@
     <bean id="adminRetentionPoliciesController" class="org.datavaultplatform.broker.controllers.admin.AdminRetentionPoliciesController">
         <property name="retentionPoliciesService" ref="retentionPoliciesService" />
         <!--<property name="adminService" ref="adminService"/>-->
+    </bean>
+    
+     <bean id="adminPendingVaultsController" class="org.datavaultplatform.broker.controllers.admin.AdminPendingVaultsController">
+        <property name="pendingVaultsService" ref="pendingVaultsService" />
     </bean>
 
     <!--
