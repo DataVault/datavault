@@ -54,11 +54,11 @@
         <div id="creators-form-group" class="form-group">
             <label class="col-sm-2 control-label">Data Creator: </label>
             <@spring.bind "vault.dataCreators" />
-            <input name="creator-uun" class="creator" type="text" placeholder="autofilled uun with ldap" name="${spring.status.expression}" value="${spring.status.value!""}"/>
+            <input class="creator" type="text" placeholder="autofilled uun with ldap" id="dataCreators" name="${spring.status.expression}" value="${spring.status.value!""}"/>
             <button type="button" id="add-creator-btn" class="btn btn-default btn-sm">Add a Data Creator</button>
             <div id="extra-creator-list"></div>
             <div class="example-creator hidden col-sm-offset-2">
-                <input name="creator-uun" class="creator" type="text"  placeholder="autofilled uun with ldap"/>
+                <input class="creator" type="text" placeholder="autofilled uun with ldap" id="dataCreators" name="${spring.status.expression}" value="${spring.status.value!""}"/>
                 <button type="button" class="remove-creator-btn btn btn-danger btn-xs">Remove</button>
             </div>
         </div>

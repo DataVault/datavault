@@ -35,6 +35,7 @@ public class VaultsController {
     private EmailService emailService;
     private VaultsService vaultsService;
     private PendingVaultsService pendingVaultsService;
+    private PendingDataCreatorsService pendingDataCreatorsService;
     private DepositsService depositsService;
     private ExternalMetadataService externalMetadataService;
     private RetentionPoliciesService retentionPoliciesService;
@@ -73,6 +74,10 @@ public class VaultsController {
 
     public void setPendingVaultsService(PendingVaultsService pendingVaultsService) {
         this.pendingVaultsService = pendingVaultsService;
+    }
+
+    public void setPendingDataCreatorsService(PendingDataCreatorsService pendingDataCreatorsService) {
+        this.pendingDataCreatorsService = pendingDataCreatorsService;
     }
 
     public void setDepositsService(DepositsService depositsService) {
@@ -447,18 +452,6 @@ public class VaultsController {
             vault.setGroup(group);
         }
 
-        // for each dc
-        // create dc object
-        // add to list
-        // add to pending vault
-
-        List<String> dcs = createVault.getDataCreators();
-        if (dcs != null) {
-            logger.debug("Data creator list is :'" + dcs.toString() + "'");
-        } else {
-            logger.debug("Data creator list is :null");
-        }
-
         String sliceID = createVault.getSliceID();
         logger.debug("Slice ID is: '" + sliceID + "'");
         if (sliceID != null) {
@@ -495,21 +488,6 @@ public class VaultsController {
             throw new Exception("User '" + userID + "' does not exist");
         }
         vault.setUser(user);
-//        String datasetId = createVault.getDatasetID();
-//        Dataset dataset = externalMetadataService.getCachedDataset(datasetId);
-//
-//        if (dataset == null) {
-//            dataset = externalMetadataService.getDataset(datasetId);
-//            if (dataset == null) {
-//                logger.error("Dataset metadata record '" + datasetId + "' does not exist");
-//                throw new Exception("Dataset metadata record '" + datasetId + "' does not exist");
-//            }
-//
-//            externalMetadataService.addCachedDataset(dataset);
-//        }
-//        vault.setDataset(dataset);
-//        vault.setSnapshot(externalMetadataService.getDatasetContent(datasetId));
-//        vault.setProjectId(externalMetadataService.getPureProjectId(dataset.getID()));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         String grantEndDate = createVault.getGrantEndDate();
         if (grantEndDate != null) {
@@ -533,6 +511,27 @@ public class VaultsController {
         }
 
         pendingVaultsService.addPendingVault(vault);
+        List<String> dcs = createVault.getDataCreators();
+        if (dcs != null) {
+            logger.debug("Data creator list is :'" + dcs.toString() + "'");
+            List<PendingDataCreator> creators = new ArrayList();
+            for (String creator : dcs) {
+                if (creator != null && !creator.isEmpty()) {
+                    PendingDataCreator dc = new PendingDataCreator();
+                    dc.setName(creator);
+                    dc.setPendingVault(vault);
+                    creators.add(dc);
+                }
+            }
+            vault.setDataCreator(creators);
+        } else {
+            logger.debug("Data creator list is :null");
+        }
+
+        List<PendingDataCreator> creators = vault.getDataCreators();
+        if (creators != null && ! creators.isEmpty()) {
+            pendingDataCreatorsService.addPendingCreators(creators);
+        }
 
         RoleAssignment dataOwnerRoleAssignment = new RoleAssignment();
         dataOwnerRoleAssignment.setUserId(userID);

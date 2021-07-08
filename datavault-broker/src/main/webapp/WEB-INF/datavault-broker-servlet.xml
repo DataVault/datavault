@@ -48,6 +48,7 @@
         <property name="permissionsService" ref="rolesAndPermissionsService" />
         <property name="vaultsService" ref="vaultsService" />
         <property name="pendingVaultsService" ref="pendingVaultsService" />
+        <property name="pendingDataCreatorsService" ref="pendingDataCreatorsService" />
         <property name="depositsService" ref="depositsService" />
         <property name="externalMetadataService" ref="externalMetadataService" />
         <property name="retentionPoliciesService" ref="retentionPoliciesService" />

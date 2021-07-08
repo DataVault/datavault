@@ -47,6 +47,10 @@
         <property name="pendingVaultDAO" ref="pendingVaultDAO" />
     </bean>
 
+    <bean id="pendingDataCreatorsService" class="org.datavaultplatform.broker.services.PendingDataCreatorsService">
+        <property name="pendingDataCreatorDAO" ref="pendingDataCreatorDAO" />
+    </bean>
+
     <bean id="vaultsReviewService" class="org.datavaultplatform.broker.services.VaultsReviewService">
         <property name="vaultReviewDAO" ref="vaultReviewDAO" />
     </bean>
@@ -371,6 +375,10 @@
     </bean>
 
     <bean id="pendingVaultDAO" class="org.datavaultplatform.common.model.dao.PendingVaultDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="pendingDataCreatorDAO" class="org.datavaultplatform.common.model.dao.PendingDataCreatorDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
