@@ -18,6 +18,10 @@ public interface RoleDAO {
 
     RoleModel getDataOwner();
 
+    RoleModel getVaultCreator();
+
+    //RoleModel getNominatedDataManager();
+
     Collection<RoleModel> findAll();
 
     Collection<RoleModel> findAll(RoleType roleType);

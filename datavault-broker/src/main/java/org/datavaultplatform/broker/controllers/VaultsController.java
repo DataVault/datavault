@@ -160,7 +160,7 @@ public class VaultsController {
 
         List<VaultInfo> vaultResponses = permissionsService.getRoleAssignmentsForUser(userID).stream()
                 .filter(roleAssignment -> (RoleType.VAULT == roleAssignment.getRole().getType() ||
-                        RoleUtils.isDataOwner(roleAssignment)) && (roleAssignment.getPendingVaultId() != null))
+                        RoleUtils.isVaultCreator(roleAssignment)) && (roleAssignment.getPendingVaultId() != null))
                 .map(roleAssignment -> pendingVaultsService.getVault(roleAssignment.getPendingVaultId()).convertToResponse())
                 .sorted(Comparator.comparing(VaultInfo::getCreationTime))
                 .collect(Collectors.toList());
@@ -482,6 +482,7 @@ public class VaultsController {
             vault.setProjectID(projectID);
         }
 
+        // this the creator of the pending vault not necessarily the prospective owner
         User user = usersService.getUser(userID);
         if (user == null) {
             logger.error("User '" + userID + "' does not exist");
@@ -510,6 +511,30 @@ public class VaultsController {
             }
         }
 
+        String isOwner = createVault.getIsOwner();
+        if (isOwner != null && !isOwner.isEmpty()) {
+            logger.debug("IsOwner is '" + isOwner + "'");
+        }
+
+        String vaultOwner = createVault.getVaultOwner();
+        if (vaultOwner != null) {
+            logger.debug("VaultOwner is '" + vaultOwner + "'");
+        }
+
+        List<String> depositors = createVault.getDepositors();
+        if (depositors != null) {
+            for (String dep: depositors) {
+                if (dep != null && ! dep.isEmpty()) {
+                    logger.debug("Depositor + '" + dep + "'");
+                }
+            }
+        }
+
+        String contact = createVault.getContactPerson();
+        if (contact != null) {
+            logger.debug("Contact is '" + contact + "'");
+        }
+
         pendingVaultsService.addPendingVault(vault);
         List<String> dcs = createVault.getDataCreators();
         if (dcs != null) {
@@ -533,16 +558,33 @@ public class VaultsController {
             pendingDataCreatorsService.addPendingCreators(creators);
         }
 
-        RoleAssignment dataOwnerRoleAssignment = new RoleAssignment();
-        dataOwnerRoleAssignment.setUserId(userID);
-        dataOwnerRoleAssignment.setPendingVaultId(vault.getId());
-        dataOwnerRoleAssignment.setRole(permissionsService.getDataOwner());
+        // add pending roles (owner, ndm, depositor)
+
+        List<String> ndms = createVault.getNominatedDataManagers();
+        if (ndms != null) {
+            for (String ndm: ndms) {
+                if (ndm != null && !ndm.isEmpty()) {
+                    //PendingRoleAssignment ra = new PendingRoleAssignment();
+                    //ra.setPendingVaultId(vault.getId());
+                    //ra.setRole(permissionsService.getNominatedDataManager());
+                    //ra.setUserId(ndm);
+                    //pendingPermissionsService.createRoleAssignment(ra);
+                    logger.debug("NDMS + '" + ndm + "'");
+                }
+            }
+        }
+
+        // this adds the creator to the full role assignments table as owner (so it is displayed only to the creator while still pending)
+        RoleAssignment pendingVaultCreatorRoleAssignment = new RoleAssignment();
+        pendingVaultCreatorRoleAssignment.setUserId(userID);
+        pendingVaultCreatorRoleAssignment.setPendingVaultId(vault.getId());
+        pendingVaultCreatorRoleAssignment.setRole(permissionsService.getVaultCreator());
 
         logger.debug("Role userID: '" + userID + "'");
         logger.debug("Role vaultID: '" + vault.getId() + "'");
-        logger.debug("Role type: '" + dataOwnerRoleAssignment.getRole().getType() + "'");
+        logger.debug("Role type: '" + pendingVaultCreatorRoleAssignment.getRole().getType() + "'");
         if (pendingId == null || pendingId.isEmpty()) {
-            permissionsService.createRoleAssignment(dataOwnerRoleAssignment);
+            permissionsService.createRoleAssignment(pendingVaultCreatorRoleAssignment);
         } else {
             /* TODO: once we add the ability to set a different owner this will be required
                 as it will be possible that the people who can see it will have changed

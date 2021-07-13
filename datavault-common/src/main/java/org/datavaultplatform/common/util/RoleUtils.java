@@ -14,6 +14,10 @@ public class RoleUtils {
     public static final String IS_ADMIN_ROLE_DESCRIPTION = "An admin of the whole system, with full permissions over the system.";
     public static final String DATA_OWNER_ROLE_NAME = "Data Owner";
     public static final String DATA_OWNER_ROLE_DESCRIPTION = "An admin of a specific vault, with full permissions over that vault.";
+    public static final String NOMINATED_DATA_MANAGER_ROLE_NAME = "NOMINATED_DATA_MANAGER";
+    public static final String NOMINATED_DATA_MANAGER_ROLE_DESCRIPTION = "Acting on behalf of the Data Owner, may view the vault, edit metadata fields, deposit data and retrieve  any deposit in the vault. Can assign other users to the Depositor role. ";
+    public static final String VAULT_CREATOR_ROLE_NAME = "Vault Creator";
+    public static final String VAULT_CREATOR_ROLE_DESCRIPTION = "The creator of the vault pending acceptance to full vault status";
 
     private RoleUtils() {}
 
@@ -23,6 +27,14 @@ public class RoleUtils {
 
     public static boolean isDataOwner(RoleAssignment roleAssignment) {
         return DATA_OWNER_ROLE_NAME.equals(roleAssignment.getRole().getName());
+    }
+
+    public static boolean isVaultCreator(RoleAssignment roleAssignment) {
+        return VAULT_CREATOR_ROLE_NAME.equals(roleAssignment.getRole().getName());
+    }
+
+    public static boolean isNominatedDataManager(RoleAssignment roleAssignment) {
+        return NOMINATED_DATA_MANAGER_ROLE_NAME.equals(roleAssignment.getRole().getName());
     }
 
     public static boolean isISAdmin(RoleAssignment roleAssignment) {

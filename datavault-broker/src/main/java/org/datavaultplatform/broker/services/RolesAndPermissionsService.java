@@ -119,6 +119,10 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         return roleDao.getDataOwner();
     }
 
+    public RoleModel getVaultCreator() {
+        return roleDao.getVaultCreator();
+    }
+
     public List<RoleModel> getEditableRoles() {
         return roleDao.findAllEditableRoles();
     }
