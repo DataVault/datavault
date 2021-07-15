@@ -159,8 +159,7 @@ public class VaultsController {
     public List<VaultInfo> getPendingVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
 
         List<VaultInfo> vaultResponses = permissionsService.getRoleAssignmentsForUser(userID).stream()
-                .filter(roleAssignment -> (RoleType.VAULT == roleAssignment.getRole().getType() ||
-                        RoleUtils.isVaultCreator(roleAssignment)) && (roleAssignment.getPendingVaultId() != null))
+                .filter(roleAssignment -> (RoleUtils.isVaultCreator(roleAssignment)) && (roleAssignment.getPendingVaultId() != null))
                 .map(roleAssignment -> pendingVaultsService.getVault(roleAssignment.getPendingVaultId()).convertToResponse())
                 .sorted(Comparator.comparing(VaultInfo::getCreationTime))
                 .collect(Collectors.toList());
@@ -511,16 +510,6 @@ public class VaultsController {
             }
         }
 
-        String isOwner = createVault.getIsOwner();
-        if (isOwner != null && !isOwner.isEmpty()) {
-            logger.debug("IsOwner is '" + isOwner + "'");
-        }
-
-        String vaultOwner = createVault.getVaultOwner();
-        if (vaultOwner != null) {
-            logger.debug("VaultOwner is '" + vaultOwner + "'");
-        }
-
         List<String> depositors = createVault.getDepositors();
         if (depositors != null) {
             for (String dep: depositors) {
@@ -536,6 +525,24 @@ public class VaultsController {
         }
 
         pendingVaultsService.addPendingVault(vault);
+
+        String isOwner = createVault.getIsOwner();
+        logger.debug("IsOwner is '" + isOwner + "'");
+        String ownerId = userID;
+        if (isOwner != null && "false".equals(isOwner)) {
+            ownerId = createVault.getVaultOwner();
+        }
+        logger.debug("VaultOwner is '" + ownerId + "'");
+        if (ownerId != null) {
+            RoleAssignment ownerRoleAssignment = new RoleAssignment();
+            ownerRoleAssignment.setUserId(ownerId);
+            ownerRoleAssignment.setPendingVaultId(vault.getId());
+            ownerRoleAssignment.setRole(permissionsService.getDataOwner());
+            permissionsService.createRoleAssignment(ownerRoleAssignment);
+        } else {
+            // error!
+        }
+
         List<String> dcs = createVault.getDataCreators();
         if (dcs != null) {
             logger.debug("Data creator list is :'" + dcs.toString() + "'");
@@ -564,11 +571,11 @@ public class VaultsController {
         if (ndms != null) {
             for (String ndm: ndms) {
                 if (ndm != null && !ndm.isEmpty()) {
-                    //PendingRoleAssignment ra = new PendingRoleAssignment();
-                    //ra.setPendingVaultId(vault.getId());
-                    //ra.setRole(permissionsService.getNominatedDataManager());
-                    //ra.setUserId(ndm);
-                    //pendingPermissionsService.createRoleAssignment(ra);
+                    RoleAssignment ra = new RoleAssignment();
+                    ra.setPendingVaultId(vault.getId());
+                    ra.setRole(permissionsService.getNominatedDataManager());
+                    ra.setUserId(ndm);
+                    permissionsService.createRoleAssignment(ra);
                     logger.debug("NDMS + '" + ndm + "'");
                 }
             }

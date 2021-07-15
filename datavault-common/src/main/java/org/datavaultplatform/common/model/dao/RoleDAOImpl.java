@@ -31,6 +31,7 @@ public class RoleDAOImpl implements RoleDAO {
 
         ensureIsAdminExists(session);
         ensureDataOwnerExists(session);
+        ensureNominatedDataManagerExists(session);
         ensureVaultCreatorExists(session);
 
         tx.commit();
@@ -125,15 +126,15 @@ public class RoleDAOImpl implements RoleDAO {
     }
 
     private void ensureNominatedDataManagerExists(Session session) {
-        Criteria vaultPermissionsCriteria = session.createCriteria(PermissionModel.class);
-        vaultPermissionsCriteria.add(Restrictions.eq("type", PermissionModel.PermissionType.VAULT));
-        List<PermissionModel> vaultPermissions = vaultPermissionsCriteria.list();
+        //Criteria vaultPermissionsCriteria = session.createCriteria(PermissionModel.class);
+        //vaultPermissionsCriteria.add(Restrictions.eq("type", PermissionModel.PermissionType.VAULT));
+        //List<PermissionModel> vaultPermissions = vaultPermissionsCriteria.list();
 
         Criteria ndmCriteria = session.createCriteria(RoleModel.class);
         ndmCriteria.add(Restrictions.eq("name", RoleUtils.NOMINATED_DATA_MANAGER_ROLE_NAME));
         RoleModel storedNDM = (RoleModel) ndmCriteria.uniqueResult();
         if (storedNDM != null) {
-            Set<Permission> storedNDMPermissions = storedNDM.getPermissions().stream()
+            /*Set<Permission> storedNDMPermissions = storedNDM.getPermissions().stream()
                     .map(PermissionModel::getPermission)
                     .collect(Collectors.toSet());
             Set<Permission> expectedNDMPermissions = vaultPermissions.stream()
@@ -142,7 +143,7 @@ public class RoleDAOImpl implements RoleDAO {
             if (!storedNDMPermissions.equals(expectedNDMPermissions)) {
                 storedNDM.setPermissions(vaultPermissions);
                 session.update(storedNDM);
-            }
+            }*/
         } else {
             RoleModel ndm = new RoleModel();
             ndm.setType(RoleType.VAULT);
@@ -210,6 +211,17 @@ public class RoleDAOImpl implements RoleDAO {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(RoleModel.class);
         criteria.add(Restrictions.eq("name", RoleUtils.VAULT_CREATOR_ROLE_NAME));
+        RoleModel role = (RoleModel) criteria.uniqueResult();
+        populateAssignedUserCount(session, role);
+        session.close();
+        return role;
+    }
+
+    @Override
+    public RoleModel getNominatedDataManager() {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(RoleModel.class);
+        criteria.add(Restrictions.eq("name", RoleUtils.NOMINATED_DATA_MANAGER_ROLE_NAME));
         RoleModel role = (RoleModel) criteria.uniqueResult();
         populateAssignedUserCount(session, role);
         session.close();

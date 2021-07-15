@@ -20,7 +20,7 @@ public interface RoleDAO {
 
     RoleModel getVaultCreator();
 
-    //RoleModel getNominatedDataManager();
+    RoleModel getNominatedDataManager();
 
     Collection<RoleModel> findAll();
 
