@@ -103,6 +103,10 @@ public class PendingVault {
     @Column(name = "projectID", nullable = true, columnDefinition = "TEXT")
     private String projectID;
 
+    // Name of the creator
+    @Column(name = "contact", nullable = false, columnDefinition = "TEXT")
+    private String contact;
+
     @ManyToOne
     private RetentionPolicy retentionPolicy;
 
@@ -257,6 +261,15 @@ public class PendingVault {
         this.projectID = projectID;
     }
 
+    public String getContact() {
+        return this.contact;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
+
+
     public List<PendingDataCreator> getDataCreators() {
         return this.dataCreators;
     }
@@ -292,6 +305,7 @@ public class PendingVault {
         retVal.setUserID(userId);
         String userName = user == null ? null : (user.getFirstname()+" "+user.getLastname());
         retVal.setUserName(userName);
+        retVal.setContact(this.contact);
 
         return retVal;
     }

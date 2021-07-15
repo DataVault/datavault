@@ -513,6 +513,7 @@ public class VaultsController {
         String contact = createVault.getContactPerson();
         if (contact != null) {
             logger.debug("Contact is '" + contact + "'");
+            vault.setContact(contact);
         }
 
         pendingVaultsService.addPendingVault(vault);

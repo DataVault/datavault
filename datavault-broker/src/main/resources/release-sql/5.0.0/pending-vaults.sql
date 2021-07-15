@@ -32,3 +32,4 @@ alter table PendingDataCreators add constraint FK1oncea34ucfe9u54oi2mmj3qw forei
 ALTER TABLE Role_assignments ADD COLUMN pending_vault_id varchar(36) default null;
 ALTER TABLE Role_assignments ADD CONSTRAINT `FK_Pending_Vault_ID` FOREIGN KEY (`pending_vault_id`) REFERENCES `PendingVaults` (`id`);
 ALTER TABLE Role_assignments ADD UNIQUE KEY `UK_Pending_Vault_ID` (`role_id`,`user_id`,`pending_vault_id`);
+ALTER TABLE PendingVaults add column contact TEXT;
