@@ -510,21 +510,27 @@ public class VaultsController {
             }
         }
 
-        List<String> depositors = createVault.getDepositors();
-        if (depositors != null) {
-            for (String dep: depositors) {
-                if (dep != null && ! dep.isEmpty()) {
-                    logger.debug("Depositor + '" + dep + "'");
-                }
-            }
-        }
-
         String contact = createVault.getContactPerson();
         if (contact != null) {
             logger.debug("Contact is '" + contact + "'");
         }
 
         pendingVaultsService.addPendingVault(vault);
+
+
+        List<String> depositors = createVault.getDepositors();
+        if (depositors != null) {
+            for (String dep: depositors) {
+                if (dep != null && ! dep.isEmpty()) {
+                    RoleAssignment ra = new RoleAssignment();
+                    ra.setPendingVaultId(vault.getId());
+                    ra.setRole(permissionsService.getDepositor());
+                    ra.setUserId(dep);
+                    permissionsService.createRoleAssignment(ra);
+                    logger.debug("Depositor + '" + dep + "'");
+                }
+            }
+        }
 
         String isOwner = createVault.getIsOwner();
         logger.debug("IsOwner is '" + isOwner + "'");

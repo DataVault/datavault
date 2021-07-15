@@ -31,6 +31,7 @@ public class RoleDAOImpl implements RoleDAO {
 
         ensureIsAdminExists(session);
         ensureDataOwnerExists(session);
+        ensureDepositorExists(session);
         ensureNominatedDataManagerExists(session);
         ensureVaultCreatorExists(session);
 
@@ -156,6 +157,37 @@ public class RoleDAOImpl implements RoleDAO {
         }
     }
 
+    private void ensureDepositorExists(Session session) {
+        //Criteria vaultPermissionsCriteria = session.createCriteria(PermissionModel.class);
+        //vaultPermissionsCriteria.add(Restrictions.eq("type", PermissionModel.PermissionType.VAULT));
+        //List<PermissionModel> vaultPermissions = vaultPermissionsCriteria.list();
+
+        Criteria depCriteria = session.createCriteria(RoleModel.class);
+        depCriteria.add(Restrictions.eq("name", RoleUtils.DEPOSITOR_ROLE_NAME));
+        RoleModel storedDep = (RoleModel) depCriteria.uniqueResult();
+        if (storedDep != null) {
+            /*Set<Permission> storedNDMPermissions = storedNDM.getPermissions().stream()
+                    .map(PermissionModel::getPermission)
+                    .collect(Collectors.toSet());
+            Set<Permission> expectedNDMPermissions = vaultPermissions.stream()
+                    .map(PermissionModel::getPermission)
+                    .collect(Collectors.toSet());
+            if (!storedNDMPermissions.equals(expectedNDMPermissions)) {
+                storedNDM.setPermissions(vaultPermissions);
+                session.update(storedNDM);
+            }*/
+        } else {
+            RoleModel dep= new RoleModel();
+            dep.setType(RoleType.VAULT);
+            dep.setName(RoleUtils.DEPOSITOR_ROLE_NAME);
+            dep.setDescription(RoleUtils.DEPOSITOR_ROLE_DESCRIPTION);
+            /* todo: fix default NDM permissions */
+            //ndm.setPermissions(vaultPermissions);
+            dep.setStatus("2");
+            session.persist(dep);
+        }
+    }
+
     @Override
     public void store(RoleModel role) {
         Session session = this.sessionFactory.openSession();
@@ -200,6 +232,17 @@ public class RoleDAOImpl implements RoleDAO {
         Session session = this.sessionFactory.openSession();
         Criteria criteria = session.createCriteria(RoleModel.class);
         criteria.add(Restrictions.eq("name", RoleUtils.DATA_OWNER_ROLE_NAME));
+        RoleModel role = (RoleModel) criteria.uniqueResult();
+        populateAssignedUserCount(session, role);
+        session.close();
+        return role;
+    }
+
+    @Override
+    public RoleModel getDepositor() {
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(RoleModel.class);
+        criteria.add(Restrictions.eq("name", RoleUtils.DEPOSITOR_ROLE_NAME));
         RoleModel role = (RoleModel) criteria.uniqueResult();
         populateAssignedUserCount(session, role);
         session.close();

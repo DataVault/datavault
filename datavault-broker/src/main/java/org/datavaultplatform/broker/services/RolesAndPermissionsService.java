@@ -120,6 +120,10 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         return roleDao.getDataOwner();
     }
 
+    public RoleModel getDepositor() {
+        return roleDao.getDepositor();
+    }
+
     public RoleModel getNominatedDataManager() {
         return roleDao.getNominatedDataManager();
     }
