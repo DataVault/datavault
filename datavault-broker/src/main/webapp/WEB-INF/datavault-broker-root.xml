@@ -45,6 +45,11 @@
 
     <bean id="pendingVaultsService" class="org.datavaultplatform.broker.services.PendingVaultsService">
         <property name="pendingVaultDAO" ref="pendingVaultDAO" />
+        <property name="retentionPoliciesService" ref="retentionPoliciesService" />
+        <property name="groupsService" ref="groupsService" />
+        <property name="usersService" ref="usersService" />
+        <property name="rolesAndPermissionsService" ref="rolesAndPermissionsService" />
+        <property name="pendingDataCreatorsService" ref="pendingDataCreatorsService" />
     </bean>
 
     <bean id="pendingDataCreatorsService" class="org.datavaultplatform.broker.services.PendingDataCreatorsService">

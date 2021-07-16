@@ -375,253 +375,36 @@ public class VaultsController {
                               @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
                               @RequestBody CreateVault createVault) throws Exception {
 
-        PendingVault vault = new PendingVault();
-
-        String pendingId = createVault.getPendingID();
-        logger.debug("Pending ID is: '" + pendingId + "'");
-        if (pendingId != null && ! pendingId.isEmpty()) {
-            // this vault has previously been saved mid completion
-            vault.setId(pendingId);
-        }
-
-        Boolean affirmed = createVault.getAffirmed();
-        logger.debug("Affirmed is: '" + affirmed + "'");
-        if (affirmed != null) {
-            vault.setAffirmed(affirmed);
-        }
-
-        String name = createVault.getName();
-        logger.debug("Name is: '" + name + "'");
-        if (name != null) {
-            vault.setName(name);
-        }
-
-        String desc = createVault.getDescription();
-        logger.debug("Description is: '" + desc + "'");
-        if (desc != null) {
-            vault.setDescription(desc);
-        }
-
-        String notes = createVault.getNotes();
-        logger.debug("Notes is: '" + notes + "'");
-        if (notes != null) {
-            vault.setNotes(notes);
-        }
-
-        String estimate = createVault.getEstimate();
-        logger.debug("Estimate is: '" + estimate + "'");
-        if (estimate != null) {
-            PendingVault.Estimate enumEst = PendingVault.Estimate.valueOf(estimate);
-            if (enumEst != null) {
-                vault.setEstimate(enumEst);
-            } else {
-                vault.setEstimate(PendingVault.Estimate.UNKNOWN);
-            }
-        }
-
-        String billingType = createVault.getBillingType();
-        logger.debug("Billing Type is: '" + billingType + "'");
-        if (billingType != null) {
-            PendingVault.Billing_Type enumBT = PendingVault.Billing_Type.valueOf(billingType);
-            if (enumBT != null) {
-                vault.setBillingType(enumBT);
-            }
-        }
-
-        String policyId = createVault.getPolicyID();
-        logger.debug("Retention policy id is: '" + policyId + "'");
-        if (policyId != null) {
-            RetentionPolicy retentionPolicy = retentionPoliciesService.getPolicy(policyId);
-
-            if (retentionPolicy == null) {
-                logger.error("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
-                throw new Exception("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
-            }
-            vault.setRetentionPolicy(retentionPolicy);
-        }
-
-        String groupId = createVault.getGroupID();
-        logger.debug("Group id is: '" + groupId + "'");
-        if (groupId != null) {
-            Group group = groupsService.getGroup(groupId);
-            if (group == null) {
-                logger.error("Group '" + groupId + "' does not exist");
-                throw new Exception("Group '" + groupId + "' does not exist");
-            }
-            vault.setGroup(group);
-        }
-
-        String sliceID = createVault.getSliceID();
-        logger.debug("Slice ID is: '" + sliceID + "'");
-        if (sliceID != null) {
-            vault.setSliceID(sliceID);
-        }
-
-        String authoriser = createVault.getAuthoriser();
-        logger.debug("Authoriser is: '" + authoriser+ "'");
-        if (authoriser != null) {
-            vault.setAuthoriser(authoriser);
-        }
-
-        String schoolOrUnit = createVault.getSchoolOrUnit();
-        logger.debug("schoolOrUnit is: '" + schoolOrUnit+ "'");
-        if (schoolOrUnit != null) {
-            vault.setSchoolOrUnit(schoolOrUnit);
-        }
-
-        String subunit = createVault.getSubunit();
-        logger.debug("Subunit is: '" + subunit+ "'");
-        if (subunit != null) {
-            vault.setSubunit(subunit);
-        }
-
-        String projectID = createVault.getProjectID();
-        logger.debug("ProjectID is: '" + projectID+ "'");
-        if (projectID != null) {
-            vault.setProjectID(projectID);
-        }
-
-        // this the creator of the pending vault not necessarily the prospective owner
-        User user = usersService.getUser(userID);
-        if (user == null) {
-            logger.error("User '" + userID + "' does not exist");
-            throw new Exception("User '" + userID + "' does not exist");
-        }
-        vault.setUser(user);
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        String grantEndDate = createVault.getGrantEndDate();
-        if (grantEndDate != null) {
-
-            try {
-                vault.setGrantEndDate(formatter.parse(grantEndDate));
-            } catch (ParseException | NullPointerException ex) {
-                logger.error("Grant date is not in the right format: " + grantEndDate);
-                vault.setGrantEndDate(null);
-            }
-        }
-
-        String reviewDate = createVault.getReviewDate();
-        if (reviewDate != null) {
-            try {
-                vault.setReviewDate(formatter.parse(reviewDate));
-            } catch (ParseException | NullPointerException ex) {
-                logger.error("Review date is not in the right format: " + reviewDate);
-                vault.setReviewDate(null);
-            }
-        }
-
-        String contact = createVault.getContactPerson();
-        if (contact != null) {
-            logger.debug("Contact is '" + contact + "'");
-            vault.setContact(contact);
-        }
+        PendingVault vault = pendingVaultsService.processVaultParams(createVault, userID);
 
         pendingVaultsService.addPendingVault(vault);
 
+        pendingVaultsService.addDepositorRoles(createVault, vault.getId());
 
-        List<String> depositors = createVault.getDepositors();
-        if (depositors != null) {
-            for (String dep: depositors) {
-                if (dep != null && ! dep.isEmpty()) {
-                    RoleAssignment ra = new RoleAssignment();
-                    ra.setPendingVaultId(vault.getId());
-                    ra.setRole(permissionsService.getDepositor());
-                    ra.setUserId(dep);
-                    permissionsService.createRoleAssignment(ra);
-                    logger.debug("Depositor + '" + dep + "'");
-                }
-            }
-        }
+        pendingVaultsService.addOwnerRole(createVault, vault.getId(), userID);
 
-        String isOwner = createVault.getIsOwner();
-        logger.debug("IsOwner is '" + isOwner + "'");
-        String ownerId = userID;
-        if (isOwner != null && "false".equals(isOwner)) {
-            ownerId = createVault.getVaultOwner();
-        }
-        logger.debug("VaultOwner is '" + ownerId + "'");
-        if (ownerId != null) {
-            RoleAssignment ownerRoleAssignment = new RoleAssignment();
-            ownerRoleAssignment.setUserId(ownerId);
-            ownerRoleAssignment.setPendingVaultId(vault.getId());
-            ownerRoleAssignment.setRole(permissionsService.getDataOwner());
-            permissionsService.createRoleAssignment(ownerRoleAssignment);
-        } else {
-            // error!
-        }
+        vault = pendingVaultsService.processDataCreatorParams(createVault, vault);
 
-        List<String> dcs = createVault.getDataCreators();
-        if (dcs != null) {
-            logger.debug("Data creator list is :'" + dcs.toString() + "'");
-            List<PendingDataCreator> creators = new ArrayList();
-            for (String creator : dcs) {
-                if (creator != null && !creator.isEmpty()) {
-                    PendingDataCreator dc = new PendingDataCreator();
-                    dc.setName(creator);
-                    dc.setPendingVault(vault);
-                    creators.add(dc);
-                }
-            }
-            vault.setDataCreator(creators);
-        } else {
-            logger.debug("Data creator list is :null");
-        }
+        pendingVaultsService.addNDMRoles(createVault, vault.getId());
 
-        List<PendingDataCreator> creators = vault.getDataCreators();
-        if (creators != null && ! creators.isEmpty()) {
-            pendingDataCreatorsService.addPendingCreators(creators);
-        }
+        pendingVaultsService.addCreator(createVault, userID, vault.getId());
 
-        // add pending roles (owner, ndm, depositor)
+        //Create vaultEvent = new Create(vault.getId());
+        //vaultEvent.setVault(vault);
+        //vaultEvent.setUser(usersService.getUser(userID));
+        //vaultEvent.setAgentType(Agent.AgentType.BROKER);
+        //vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
 
-        List<String> ndms = createVault.getNominatedDataManagers();
-        if (ndms != null) {
-            for (String ndm: ndms) {
-                if (ndm != null && !ndm.isEmpty()) {
-                    RoleAssignment ra = new RoleAssignment();
-                    ra.setPendingVaultId(vault.getId());
-                    ra.setRole(permissionsService.getNominatedDataManager());
-                    ra.setUserId(ndm);
-                    permissionsService.createRoleAssignment(ra);
-                    logger.debug("NDMS + '" + ndm + "'");
-                }
-            }
-        }
+        //eventService.addEvent(vaultEvent);
 
-        // this adds the creator to the full role assignments table as owner (so it is displayed only to the creator while still pending)
-        RoleAssignment pendingVaultCreatorRoleAssignment = new RoleAssignment();
-        pendingVaultCreatorRoleAssignment.setUserId(userID);
-        pendingVaultCreatorRoleAssignment.setPendingVaultId(vault.getId());
-        pendingVaultCreatorRoleAssignment.setRole(permissionsService.getVaultCreator());
-
-        logger.debug("Role userID: '" + userID + "'");
-        logger.debug("Role vaultID: '" + vault.getId() + "'");
-        logger.debug("Role type: '" + pendingVaultCreatorRoleAssignment.getRole().getType() + "'");
-        if (pendingId == null || pendingId.isEmpty()) {
-            permissionsService.createRoleAssignment(pendingVaultCreatorRoleAssignment);
-        } else {
-            /* TODO: once we add the ability to set a different owner this will be required
-                as it will be possible that the people who can see it will have changed
-             */
-            //permissionsService.updateRoleAssignment(dataOwnerRoleAssignment);
-        }
-//
-//        Create vaultEvent = new Create(vault.getID());
-//        vaultEvent.setVault(vault);
-//        vaultEvent.setUser(usersService.getUser(userID));
-//        vaultEvent.setAgentType(Agent.AgentType.BROKER);
-//        vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
-//
-//        eventService.addEvent(vaultEvent);
-//
-//        // Check the retention policy of the newly created vault
-//        try {
-//            vaultsService.checkRetentionPolicy(vault.getID());
-//        } catch (Exception e) {
-//            logger.error("Fail to check retention policy: "+e);
-//            e.printStackTrace();
-//            throw e;
-//        }
+        // Check the retention policy of the newly created vault
+        //try {
+        //    vaultsService.checkRetentionPolicy(vault.getId());
+        //} catch (Exception e) {
+        //    logger.error("Fail to check retention policy: "+e);
+        //    e.printStackTrace();
+        //    throw e;
+        //}
         return vault.convertToResponse();
     }
 
