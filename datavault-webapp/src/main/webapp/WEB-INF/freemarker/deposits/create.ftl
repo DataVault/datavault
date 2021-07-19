@@ -246,8 +246,8 @@
                     </label>
                     <small>
                         (More about personal data 
-                        [<a href="https://www.ed.ac.uk/records-management/data-protection/what-is-it/definitions/personal-data">
-                            https://www.ed.ac.uk/records-management/data-protection/what-is-it/definitions/personal-data
+                        [<a href="https://www.ed.ac.uk/data-protection/data-protection-guidance/definitions/definitions-personal-data">
+                            https://www.ed.ac.uk/data-protection/data-protection-guidance/definitions/definitions-personal-data
                         </a>])
                     </small>
                     <br/>
