@@ -91,7 +91,8 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         if (RoleType.SCHOOL == roleAssignment.getRole().getType() && roleAssignment.getSchoolId() == null) {
             throw new IllegalStateException("Cannot create school role assignment without a school");
         }
-        if (RoleType.VAULT == roleAssignment.getRole().getType() && roleAssignment.getVaultId() == null) {
+        if (RoleType.VAULT == roleAssignment.getRole().getType() && (roleAssignment.getVaultId() == null
+                && roleAssignment.getPendingVaultId() == null)) {
             throw new IllegalStateException("Cannot create vault role assignment without a vault");
         }
         if (roleAssignmentDao.roleAssignmentExists(roleAssignment)) {
@@ -117,6 +118,18 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
 
     public RoleModel getDataOwner() {
         return roleDao.getDataOwner();
+    }
+
+    public RoleModel getDepositor() {
+        return roleDao.getDepositor();
+    }
+
+    public RoleModel getNominatedDataManager() {
+        return roleDao.getNominatedDataManager();
+    }
+
+    public RoleModel getVaultCreator() {
+        return roleDao.getVaultCreator();
     }
 
     public List<RoleModel> getEditableRoles() {

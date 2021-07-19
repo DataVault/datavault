@@ -35,6 +35,7 @@ public class VaultsController {
     private EmailService emailService;
     private VaultsService vaultsService;
     private PendingVaultsService pendingVaultsService;
+    private PendingDataCreatorsService pendingDataCreatorsService;
     private DepositsService depositsService;
     private ExternalMetadataService externalMetadataService;
     private RetentionPoliciesService retentionPoliciesService;
@@ -73,6 +74,10 @@ public class VaultsController {
 
     public void setPendingVaultsService(PendingVaultsService pendingVaultsService) {
         this.pendingVaultsService = pendingVaultsService;
+    }
+
+    public void setPendingDataCreatorsService(PendingDataCreatorsService pendingDataCreatorsService) {
+        this.pendingDataCreatorsService = pendingDataCreatorsService;
     }
 
     public void setDepositsService(DepositsService depositsService) {
@@ -154,9 +159,8 @@ public class VaultsController {
     public List<VaultInfo> getPendingVaults(@RequestHeader(value = "X-UserID", required = true) String userID) {
 
         List<VaultInfo> vaultResponses = permissionsService.getRoleAssignmentsForUser(userID).stream()
-                .filter(roleAssignment -> (RoleType.VAULT == roleAssignment.getRole().getType() ||
-                        RoleUtils.isDataOwner(roleAssignment)) && (roleAssignment.getPendingVaultId() != null))
-                .map(roleAssignment -> pendingVaultsService.getVault(roleAssignment.getPendingVaultId()).convertToResponse())
+                .filter(roleAssignment -> (RoleUtils.isVaultCreator(roleAssignment)) && (roleAssignment.getPendingVaultId() != null))
+                .map(roleAssignment -> pendingVaultsService.getPendingVault(roleAssignment.getPendingVaultId()).convertToResponse())
                 .sorted(Comparator.comparing(VaultInfo::getCreationTime))
                 .collect(Collectors.toList());
         Collections.reverse(vaultResponses);
@@ -294,7 +298,36 @@ public class VaultsController {
         return data;
     }
 
+    @RequestMapping(value = "/pendingVaults/search", method = RequestMethod.GET)
+    public VaultsData searchAllPendingVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                      @RequestParam String query,
+                                      @RequestParam(value = "sort", required = false) String sort,
+                                      @RequestParam(value = "order", required = false)
+                                      @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "desc"}, defaultvalue = "asc", required = false) String order,
+                                      @RequestParam(value = "offset", required = false)
+                                      @ApiQueryParam(name = "offset", description = "Vault row id ", defaultvalue = "0", required = false) String offset,
+                                      @RequestParam(value = "maxResult", required = false)
+                                      @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) {
 
+        List<VaultInfo> vaultResponses = new ArrayList<>();
+        int recordsTotal = 0;
+        int recordsFiltered = 0;
+        List<PendingVault> vaults = pendingVaultsService.search(userID, query, sort, order, offset, maxResult);
+        if(CollectionUtils.isNotEmpty(vaults)) {
+            for (PendingVault vault : vaults) {
+                vaultResponses.add(vault.convertToResponse());
+            }
+
+            recordsTotal = pendingVaultsService.getTotalNumberOfPendingVaults(userID);
+            recordsFiltered = pendingVaultsService.getTotalNumberOfPendingVaults(userID, query);
+        }
+
+        VaultsData data = new VaultsData();
+        data.setRecordsTotal(recordsTotal);
+        data.setRecordsFiltered(recordsFiltered);
+        data.setData(vaultResponses);
+        return data;
+    }
 
     @RequestMapping(value = "/vaults/deposits/search", method = RequestMethod.GET)
     public List<DepositInfo> searchAllDeposits(@RequestHeader(value = "X-UserID", required = true) String userID,
@@ -371,190 +404,36 @@ public class VaultsController {
                               @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
                               @RequestBody CreateVault createVault) throws Exception {
 
-        PendingVault vault = new PendingVault();
-
-        String pendingId = createVault.getPendingID();
-        logger.debug("Pending ID is: '" + pendingId + "'");
-        if (pendingId != null && ! pendingId.isEmpty()) {
-            // this vault has previously been saved mid completion
-            vault.setId(pendingId);
-        }
-
-        Boolean affirmed = createVault.getAffirmed();
-        logger.debug("Affirmed is: '" + affirmed + "'");
-        if (affirmed != null) {
-            vault.setAffirmed(affirmed);
-        }
-
-        String name = createVault.getName();
-        logger.debug("Name is: '" + name + "'");
-        if (name != null) {
-            vault.setName(name);
-        }
-
-        String desc = createVault.getDescription();
-        logger.debug("Description is: '" + desc + "'");
-        if (desc != null) {
-            vault.setDescription(desc);
-        }
-
-        String notes = createVault.getNotes();
-        logger.debug("Notes is: '" + notes + "'");
-        if (notes != null) {
-            vault.setNotes(notes);
-        }
-
-        String estimate = createVault.getEstimate();
-        logger.debug("Estimate is: '" + estimate + "'");
-        if (estimate != null) {
-            PendingVault.Estimate enumEst = PendingVault.Estimate.valueOf(estimate);
-            if (enumEst != null) {
-                vault.setEstimate(enumEst);
-            } else {
-                vault.setEstimate(PendingVault.Estimate.UNKNOWN);
-            }
-        }
-
-        String billingType = createVault.getBillingType();
-        logger.debug("Billing Type is: '" + billingType + "'");
-        if (billingType != null) {
-            PendingVault.Billing_Type enumBT = PendingVault.Billing_Type.valueOf(billingType);
-            if (enumBT != null) {
-                vault.setBillingType(enumBT);
-            }
-        }
-
-        String policyId = createVault.getPolicyID();
-        logger.debug("Retention policy id is: '" + policyId + "'");
-        if (policyId != null) {
-            RetentionPolicy retentionPolicy = retentionPoliciesService.getPolicy(policyId);
-
-            if (retentionPolicy == null) {
-                logger.error("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
-                throw new Exception("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
-            }
-            vault.setRetentionPolicy(retentionPolicy);
-        }
-
-        String groupId = createVault.getGroupID();
-        logger.debug("Group id is: '" + groupId + "'");
-        if (groupId != null) {
-            Group group = groupsService.getGroup(groupId);
-            if (group == null) {
-                logger.error("Group '" + groupId + "' does not exist");
-                throw new Exception("Group '" + groupId + "' does not exist");
-            }
-            vault.setGroup(group);
-        }
-
-        String sliceID = createVault.getSliceID();
-        logger.debug("Slice ID is: '" + sliceID + "'");
-        if (sliceID != null) {
-            vault.setSliceID(sliceID);
-        }
-
-        String authoriser = createVault.getAuthoriser();
-        logger.debug("Authoriser is: '" + authoriser+ "'");
-        if (authoriser != null) {
-            vault.setAuthoriser(authoriser);
-        }
-
-        String schoolOrUnit = createVault.getSchoolOrUnit();
-        logger.debug("schoolOrUnit is: '" + schoolOrUnit+ "'");
-        if (schoolOrUnit != null) {
-            vault.setSchoolOrUnit(schoolOrUnit);
-        }
-
-        String subunit = createVault.getSubunit();
-        logger.debug("Subunit is: '" + subunit+ "'");
-        if (subunit != null) {
-            vault.setSubunit(subunit);
-        }
-
-        String projectID = createVault.getProjectID();
-        logger.debug("ProjectID is: '" + projectID+ "'");
-        if (projectID != null) {
-            vault.setProjectID(projectID);
-        }
-
-        User user = usersService.getUser(userID);
-        if (user == null) {
-            logger.error("User '" + userID + "' does not exist");
-            throw new Exception("User '" + userID + "' does not exist");
-        }
-        vault.setUser(user);
-//        String datasetId = createVault.getDatasetID();
-//        Dataset dataset = externalMetadataService.getCachedDataset(datasetId);
-//
-//        if (dataset == null) {
-//            dataset = externalMetadataService.getDataset(datasetId);
-//            if (dataset == null) {
-//                logger.error("Dataset metadata record '" + datasetId + "' does not exist");
-//                throw new Exception("Dataset metadata record '" + datasetId + "' does not exist");
-//            }
-//
-//            externalMetadataService.addCachedDataset(dataset);
-//        }
-//        vault.setDataset(dataset);
-//        vault.setSnapshot(externalMetadataService.getDatasetContent(datasetId));
-//        vault.setProjectId(externalMetadataService.getPureProjectId(dataset.getID()));
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        String grantEndDate = createVault.getGrantEndDate();
-        if (grantEndDate != null) {
-
-            try {
-                vault.setGrantEndDate(formatter.parse(grantEndDate));
-            } catch (ParseException | NullPointerException ex) {
-                logger.error("Grant date is not in the right format: " + grantEndDate);
-                vault.setGrantEndDate(null);
-            }
-        }
-
-        String reviewDate = createVault.getReviewDate();
-        if (reviewDate != null) {
-            try {
-                vault.setReviewDate(formatter.parse(reviewDate));
-            } catch (ParseException | NullPointerException ex) {
-                logger.error("Review date is not in the right format: " + reviewDate);
-                vault.setReviewDate(null);
-            }
-        }
+        PendingVault vault = pendingVaultsService.processVaultParams(createVault, userID);
 
         pendingVaultsService.addPendingVault(vault);
 
-        RoleAssignment dataOwnerRoleAssignment = new RoleAssignment();
-        dataOwnerRoleAssignment.setUserId(userID);
-        dataOwnerRoleAssignment.setPendingVaultId(vault.getId());
-        dataOwnerRoleAssignment.setRole(permissionsService.getDataOwner());
+        pendingVaultsService.addDepositorRoles(createVault, vault.getId());
 
-        logger.debug("Role userID: '" + userID + "'");
-        logger.debug("Role vaultID: '" + vault.getId() + "'");
-        logger.debug("Role type: '" + dataOwnerRoleAssignment.getRole().getType() + "'");
-        if (pendingId == null || pendingId.isEmpty()) {
-            permissionsService.createRoleAssignment(dataOwnerRoleAssignment);
-        } else {
-            /* TODO: once we add the ability to set a different owner this will be required
-                as it will be possible that the people who can see it will have changed
-             */
-            //permissionsService.updateRoleAssignment(dataOwnerRoleAssignment);
-        }
-//
-//        Create vaultEvent = new Create(vault.getID());
-//        vaultEvent.setVault(vault);
-//        vaultEvent.setUser(usersService.getUser(userID));
-//        vaultEvent.setAgentType(Agent.AgentType.BROKER);
-//        vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
-//
-//        eventService.addEvent(vaultEvent);
-//
-//        // Check the retention policy of the newly created vault
-//        try {
-//            vaultsService.checkRetentionPolicy(vault.getID());
-//        } catch (Exception e) {
-//            logger.error("Fail to check retention policy: "+e);
-//            e.printStackTrace();
-//            throw e;
-//        }
+        pendingVaultsService.addOwnerRole(createVault, vault.getId(), userID);
+
+        vault = pendingVaultsService.processDataCreatorParams(createVault, vault);
+
+        pendingVaultsService.addNDMRoles(createVault, vault.getId());
+
+        pendingVaultsService.addCreator(createVault, userID, vault.getId());
+
+        //Create vaultEvent = new Create(vault.getId());
+        //vaultEvent.setVault(vault);
+        //vaultEvent.setUser(usersService.getUser(userID));
+        //vaultEvent.setAgentType(Agent.AgentType.BROKER);
+        //vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+
+        //eventService.addEvent(vaultEvent);
+
+        // Check the retention policy of the newly created vault
+        //try {
+        //    vaultsService.checkRetentionPolicy(vault.getId());
+        //} catch (Exception e) {
+        //    logger.error("Fail to check retention policy: "+e);
+        //    e.printStackTrace();
+        //    throw e;
+        //}
         return vault.convertToResponse();
     }
 
@@ -663,13 +542,14 @@ public class VaultsController {
                               @PathVariable("vaultid") String vaultID) throws Exception {
 
         User user = usersService.getUser(userID);
-        PendingVault vault = pendingVaultsService.getUserVault(user, vaultID);
+        PendingVault vault = pendingVaultsService.getUserPendingVault(user, vaultID);
         if (vault != null) {
             return vault.convertToResponse();
         } else {
             return null;
         }
     }
+    
 
     @RequestMapping(value = "/vaults/{vaultid}/checkretentionpolicy", method = RequestMethod.GET)
     public Vault checkVaultRetentionPolicy(@RequestHeader(value = "X-UserID", required = true) String userID,
@@ -683,6 +563,13 @@ public class VaultsController {
                                 @PathVariable("vaultid") String vaultID) {
 
         return vaultsService.getVault(vaultID);
+    }
+    
+    @RequestMapping(value = "/pendingVaults/{vaultid}/record", method = RequestMethod.GET)
+    public PendingVault getPendingVaultRecord(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                @PathVariable("vaultid") String vaultID) {
+
+        return pendingVaultsService.getPendingVault(vaultID);
     }
 
     @RequestMapping(value = "/vaults/{vaultid}/deposits", method = RequestMethod.GET)

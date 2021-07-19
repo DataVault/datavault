@@ -9,6 +9,7 @@ import org.jsondoc.core.annotation.ApiObject;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "PendingVault")
@@ -102,6 +103,10 @@ public class PendingVault {
     @Column(name = "projectID", nullable = true, columnDefinition = "TEXT")
     private String projectID;
 
+    // Name of the creator
+    @Column(name = "contact", nullable = false, columnDefinition = "TEXT")
+    private String contact;
+
     @ManyToOne
     private RetentionPolicy retentionPolicy;
 
@@ -111,6 +116,10 @@ public class PendingVault {
 
     @ManyToOne
     private User user;
+
+    @JsonIgnore
+    @OneToMany(targetEntity=PendingDataCreator.class, mappedBy="pendingVault", fetch=FetchType.LAZY)
+    private List<PendingDataCreator> dataCreators;
 
     public String getId() {
         return this.id;
@@ -252,6 +261,23 @@ public class PendingVault {
         this.projectID = projectID;
     }
 
+    public String getContact() {
+        return this.contact;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
+
+
+    public List<PendingDataCreator> getDataCreators() {
+        return this.dataCreators;
+    }
+
+    public void setDataCreator(List<PendingDataCreator> dataCreators) {
+        this.dataCreators = dataCreators;
+    }
+
     public VaultInfo convertToResponse() {
         VaultInfo retVal = new VaultInfo();
         retVal.setID(this.id);
@@ -279,6 +305,7 @@ public class PendingVault {
         retVal.setUserID(userId);
         String userName = user == null ? null : (user.getFirstname()+" "+user.getLastname());
         retVal.setUserName(userName);
+        retVal.setContact(this.contact);
 
         return retVal;
     }

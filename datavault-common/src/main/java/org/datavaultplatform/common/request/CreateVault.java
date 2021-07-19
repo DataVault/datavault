@@ -5,6 +5,8 @@ import org.datavaultplatform.common.model.PendingVault;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "CreateVault")
 public class CreateVault {
@@ -66,12 +68,29 @@ public class CreateVault {
     @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for projectID")
     private String projectID;
 
+    @ApiObjectField(description = "Is the logged in user the vault owner")
+    private String isOwner;
 
+    @ApiObjectField(description = "Prospective Owner of the vault (who can be different from who is creating the pending vault)")
+    private String vaultOwner;
+
+    @ApiObjectField(description = "List of pending Nominated Data Managers")
+    private List<String> nominatedDataManagers;
+
+    @ApiObjectField(description = "List of pending depositors")
+    private List<String> depositors;
+
+    @ApiObjectField(description = "contact person for Pure")
+    private String contactPerson;
+
+    @ApiObjectField(description = "List of creators of the dataset")
+    private List<String> dataCreators;
 
     public CreateVault() { }
-    public CreateVault(String name, String description, String notes, String policyID, String groupID, String datasetID, String grantEndDate,
+    /*public CreateVault(String name, String description, String notes, String policyID, String groupID, String datasetID, String grantEndDate,
                        String reviewDate, Boolean partial, Boolean affirmed, String estimate, String billingType, String sliceID,
-                       String authoriser, String schoolOrUnit, String subunit, String projectID) {
+                       String authoriser, String schoolOrUnit, String subunit, String projectID, List<String> dataCreators,
+                       String vaultOwner, List<String> nominatedDataManagers, List<String> depositors, String contactPerson) {
         this.name = name;
         this.description = description;
         this.notes = notes;
@@ -89,7 +108,12 @@ public class CreateVault {
         this.schoolOrUnit = schoolOrUnit;
         this.subunit = subunit;
         this.projectID = projectID;
-    }
+        this.dataCreators = dataCreators;
+        this.vaultOwner = vaultOwner;
+        this.nominatedDataManagers = nominatedDataManagers;
+        this.depositors = depositors;
+        this.contactPerson = contactPerson;
+    }*/
 
     public String getName() {
         return name;
@@ -233,5 +257,33 @@ public class CreateVault {
 
     public void setProjectID(String projectID) {
         this.projectID = projectID;
+    }
+
+    public String getVaultOwner() { return this.vaultOwner; }
+
+    public void setVaultOwner(String vaultOwner) { this.vaultOwner = vaultOwner; }
+
+    public List<String> getNominatedDataManagers() { return this.nominatedDataManagers; }
+
+    public void setNominatedDataManagers(List<String> nominatedDataManagers) { this.nominatedDataManagers = nominatedDataManagers; }
+
+    public List<String> getDepositors() { return this.depositors; }
+
+    public void setDepositors(List<String> depositors) { this.depositors = depositors; }
+
+    public String getContactPerson() { return this.contactPerson; }
+
+    public void setContactPerson(String contactPerson) { this.contactPerson = contactPerson; }
+
+    public List<String> getDataCreators() { return this.dataCreators; }
+
+    public void setDataCreators(List<String> dataCreators) { this.dataCreators = dataCreators; }
+
+    public String getIsOwner() {
+        return this.isOwner;
+    }
+
+    public void setIsOwner(String isOwner) {
+        this.isOwner = isOwner;
     }
 }

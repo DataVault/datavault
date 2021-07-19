@@ -110,10 +110,15 @@ public class VaultInfo {
     @ApiObjectField(description = "Did the user accept the various rules on the create vault intro page")
     private Boolean affirmed = false;
 
+    @ApiObjectField(description = "Pure Contact")
+    private String contact;
+
     public VaultInfo() { }
 
-    public VaultInfo(String id, String userID, String userName, String datasetID, String crisID, String datasetName, Date creationTime, String name, String description, String policyID,
-    		String groupID, long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked, Date grantEndDate, Date reviewDate, long numberOfDeposits, String projectId) {
+    public VaultInfo(String id, String userID, String userName, String datasetID, String crisID, String datasetName,
+                     Date creationTime, String name, String description, String policyID, String groupID,
+                     long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked, Date grantEndDate,
+                     Date reviewDate, long numberOfDeposits, String projectId) {
         this.id = id;
         this.userID = userID;
         this.userName = userName;
@@ -422,5 +427,13 @@ public class VaultInfo {
 
     public void setSubunit(String subunit) {
         this.subunit = subunit;
+    }
+
+    public String getContact() {
+        return this.contact;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
     }
 }
