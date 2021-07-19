@@ -160,7 +160,7 @@ public class VaultsController {
 
         List<VaultInfo> vaultResponses = permissionsService.getRoleAssignmentsForUser(userID).stream()
                 .filter(roleAssignment -> (RoleUtils.isVaultCreator(roleAssignment)) && (roleAssignment.getPendingVaultId() != null))
-                .map(roleAssignment -> pendingVaultsService.getVault(roleAssignment.getPendingVaultId()).convertToResponse())
+                .map(roleAssignment -> pendingVaultsService.getPendingVault(roleAssignment.getPendingVaultId()).convertToResponse())
                 .sorted(Comparator.comparing(VaultInfo::getCreationTime))
                 .collect(Collectors.toList());
         Collections.reverse(vaultResponses);
@@ -298,7 +298,36 @@ public class VaultsController {
         return data;
     }
 
+    @RequestMapping(value = "/pendingVaults/search", method = RequestMethod.GET)
+    public VaultsData searchAllPendingVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                      @RequestParam String query,
+                                      @RequestParam(value = "sort", required = false) String sort,
+                                      @RequestParam(value = "order", required = false)
+                                      @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "desc"}, defaultvalue = "asc", required = false) String order,
+                                      @RequestParam(value = "offset", required = false)
+                                      @ApiQueryParam(name = "offset", description = "Vault row id ", defaultvalue = "0", required = false) String offset,
+                                      @RequestParam(value = "maxResult", required = false)
+                                      @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) {
 
+        List<VaultInfo> vaultResponses = new ArrayList<>();
+        int recordsTotal = 0;
+        int recordsFiltered = 0;
+        List<PendingVault> vaults = pendingVaultsService.search(userID, query, sort, order, offset, maxResult);
+        if(CollectionUtils.isNotEmpty(vaults)) {
+            for (PendingVault vault : vaults) {
+                vaultResponses.add(vault.convertToResponse());
+            }
+
+            recordsTotal = pendingVaultsService.getTotalNumberOfPendingVaults(userID);
+            recordsFiltered = pendingVaultsService.getTotalNumberOfPendingVaults(userID, query);
+        }
+
+        VaultsData data = new VaultsData();
+        data.setRecordsTotal(recordsTotal);
+        data.setRecordsFiltered(recordsFiltered);
+        data.setData(vaultResponses);
+        return data;
+    }
 
     @RequestMapping(value = "/vaults/deposits/search", method = RequestMethod.GET)
     public List<DepositInfo> searchAllDeposits(@RequestHeader(value = "X-UserID", required = true) String userID,
@@ -513,13 +542,14 @@ public class VaultsController {
                               @PathVariable("vaultid") String vaultID) throws Exception {
 
         User user = usersService.getUser(userID);
-        PendingVault vault = pendingVaultsService.getUserVault(user, vaultID);
+        PendingVault vault = pendingVaultsService.getUserPendingVault(user, vaultID);
         if (vault != null) {
             return vault.convertToResponse();
         } else {
             return null;
         }
     }
+    
 
     @RequestMapping(value = "/vaults/{vaultid}/checkretentionpolicy", method = RequestMethod.GET)
     public Vault checkVaultRetentionPolicy(@RequestHeader(value = "X-UserID", required = true) String userID,
@@ -533,6 +563,13 @@ public class VaultsController {
                                 @PathVariable("vaultid") String vaultID) {
 
         return vaultsService.getVault(vaultID);
+    }
+    
+    @RequestMapping(value = "/pendingVaults/{vaultid}/record", method = RequestMethod.GET)
+    public PendingVault getPendingVaultRecord(@RequestHeader(value = "X-UserID", required = true) String userID,
+                                @PathVariable("vaultid") String vaultID) {
+
+        return pendingVaultsService.getPendingVault(vaultID);
     }
 
     @RequestMapping(value = "/vaults/{vaultid}/deposits", method = RequestMethod.GET)

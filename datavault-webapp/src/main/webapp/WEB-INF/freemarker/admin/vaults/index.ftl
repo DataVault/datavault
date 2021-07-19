@@ -63,7 +63,9 @@
                            <td>${vault.getSizeStr()}</td>
                             <td>
                                 <#if vault.getUserID()??>
-                                <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/${vault.getUserID()}">${vault.getUserName()?html} (${vault.getUserID()?html})</a>
+                                    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/${vault.getUserID()}">${vault.getUserName()?html} (${vault.getUserID()?html})</a>
+                                <#else> 
+                                   User missing
                                 </#if>
                             </td>
                             

@@ -89,6 +89,18 @@
             </div>
         </div>
     </#if>
+    <#if canManageVaults??>
+        <div class="col-xs-6 col-md-4">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Pending Vaults</h3>
+                </div>
+                <div class="panel-body">
+                    <h1 class="text-center"><a href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults"><span class="glyphicon glyphicon-folder-close"></span> ${pendingvaultcount}</a></h1>
+                </div>
+            </div>
+        </div>
+    </#if>
     <#if canManageDeposits??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-info">
