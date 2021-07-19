@@ -18,12 +18,12 @@ $(document).ready(function(){
 
     $("#affirmation-check").change(function(){
         $(this).parents("fieldset").children(".next").prop( "disabled", !$(this).is(":checked") );
-    });
+    }).trigger('change');  ;
 
     $("#billing-choice-na").change(function(){
         $('.collapse').collapse('hide');
         $(this).parents("fieldset").children(".next").prop( "disabled", false );
-    });
+    }).trigger('change');  ;
 
     $("#billing-choice-grantfunding").change(function(){
         if($(this).is(":checked")){
@@ -31,7 +31,7 @@ $(document).ready(function(){
             $('#billing-form').collapse('show');
             $(this).parents("fieldset").children(".next").prop( "disabled", false );
         }
-    });
+    }).trigger('change');  ;
 
     $("#billing-choice-budgetcode").change(function(){
         if($(this).is(":checked")) {
@@ -39,7 +39,7 @@ $(document).ready(function(){
             $('#billing-form').collapse('show');
             $(this).parents("fieldset").children(".next").prop( "disabled", false );
         }
-    });
+    }).trigger('change');  ;
 
     $("#billing-choice-slice").change(function(){
         if($(this).is(":checked")) {
@@ -55,7 +55,7 @@ $(document).ready(function(){
         } else {
             $('#owner-uun').prop('disabled', false);
         }
-    })
+    }).trigger('change');  
 
     $("#add-depositor-btn").click(function(){
         $(".example-depositor").clone(true).appendTo("#extra-depositor-list")
