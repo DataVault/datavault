@@ -39,14 +39,14 @@
       <td>${pendingVault.name?html}</td>
     </tr>
     <tr class="tr">
-      <td>Creator(UUN) - TO BE CLARIFIED</td>
+      <td>Creator</td>
        <td>
-         <#if (pendingVault.user)??>
-             ${pendingVault.user.getFirstname()?html} ${pendingVault.user.getLastname()?html} (${pendingVault.user.getID()?html}) 
+         <#if (pendingVault.contact)??>
+             ${pendingVault.contact?html}
          </#if>
        </td>
     </tr>
-    <td>Owner(UUN) - TO BE CLARIFIED</td>
+    <td>Owner(UUN)</td>
        <td>
          <#if (pendingVault.user)??>
              ${pendingVault.user.getFirstname()?html} ${pendingVault.user.getLastname()?html} (${pendingVault.user.getID()?html}) 
@@ -87,7 +87,7 @@
       </td>
     </tr>
     <tr class="tr">
-      <td>Estimate</td>
+      <td>Estimate Size</td>
       <td>
          <#if (pendingVault.estimate)??>
            ${pendingVault.estimate?html}

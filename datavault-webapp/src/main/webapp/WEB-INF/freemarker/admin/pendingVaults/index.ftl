@@ -30,8 +30,8 @@
                     <tr class="tr">
                        <th><a href="?sort=name&order=${ordername}&query=${query?url}">Vault Name<#if sort == "name"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>     
                        
-                       <th>Creator(UUN) - TO BE CLARIFIED</th>
-                        <th>Owner(UUN) - TO BE CLARIFIED</th>
+                       <th>Creator(UUN)</th>
+                        <th>Owner(UUN)</th>
                        <th>Date created</th>
                        <th>View</th>
                     </tr>
@@ -43,23 +43,11 @@
                             <td>
                                 ${pendingVault.name?html}
                             </td>
+                             
+                         
                              <td>
-                                <#if (pendingVault.getUserID())??>
-                                   ${pendingVault.getUserName()?html}(${pendingVault.getUserID()?html})
-                                 <#else> 
-                                   User missing
-                                </#if>
-                            </td>
-                            <td>
-                                <#if (pendingVault.getUserID())??>
-                                   ${pendingVault.getUserName()?html}(${pendingVault.getUserID()?html})
-                                 <#else> 
-                                   User missing
-                                </#if>
-                            </td>
-                             <td>
-                                <#if (pendingVault.getCreationTime())??>
-                                  ${pendingVault.getCreationTime()?date}
+                                <#if (pendingVault.creationTime)??>
+                                  ${pendingVault.creationTime?date}
                                 </#if>
                              </td>
                              <td>
