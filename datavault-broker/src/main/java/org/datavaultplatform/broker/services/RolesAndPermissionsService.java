@@ -160,6 +160,10 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         return roleAssignmentDao.findByVaultId(vaultId);
     }
 
+    public List<RoleAssignment> getRoleAssignmentsForPendingVault(String vaultId) {
+        return roleAssignmentDao.findByPendingVaultId(vaultId);
+    }
+
     public User getVaultOwner(String vaultId) {
         List<RoleAssignment> assignments = roleAssignmentDao.findByVaultId(vaultId);
         RoleAssignment ownerAssignment = assignments.stream()

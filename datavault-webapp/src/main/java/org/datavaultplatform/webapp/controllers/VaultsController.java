@@ -447,18 +447,20 @@ public class VaultsController {
         // if the confirm button has been clicked save what we have if everything isn't already saved
         // and display the summary
         logger.info("Action is:'" + action + "'");
+        logger.info("PendingID is:'" + vault.getPendingID() + "'");
         String buildUrl = "/vaults/buildsteps/";
+        VaultInfo newVault = null;
         if ("Save".equals(action)) {
             // if the save button has been clicked just save what we have and go back to the same page of the form
             // already have something saved update if not new save
             logger.info("Save button clicked");
 
             vault.setPartial(true);
-            //if (vault.getPendingID() == null) {
-                VaultInfo newVault = restService.addPendingVault(vault);
-            //} else {
-                //VaultInfo newVault = restService.updatePendingVault(vault);
-            //}
+            if (vault.getPendingID() == null || vault.getPendingID().isEmpty()) {
+                newVault = restService.addPendingVault(vault);
+            } else {
+                newVault = restService.updatePendingVault(vault);
+            }
             //buildUrl = buildUrl + newVault.getID();
             String vaultUrl = "/pendingVaults/" + newVault.getID() + "/";
             return "redirect:" + vaultUrl;
@@ -466,13 +468,18 @@ public class VaultsController {
             // if the confirm button has been clicked save what we have if everything isn't already saved
             // and display the summary
             logger.info("Confirm button clicked");
-            vault.setPartial(true);
-            VaultInfo newVault = restService.addPendingVault(vault);
-            //VaultInfo newVault = restService.addVault(vault);
+            vault.setPartial(false);
+            if (vault.getPendingID() == null || vault.getPendingID().isEmpty()) {
+                newVault = restService.addPendingVault(vault);
+            } else {
+                newVault = restService.updatePendingVault(vault);
+            }
             String vaultUrl = "/pendingVaults/" + newVault.getID() + "/";
+            String vaultsUrl = "/vaults/";
             // redirect to pending page if all goes well
-            return "redirect:" + vaultUrl;
+            //return "redirect:" + vaultUrl;
             //return "redirect:" + buildUrl;
+            return "redirect:" + vaultsUrl;
         } else if ("Validate".equals(action)) {
             // this will be the code that moves from pending vault to validated vault
             // when an admin gives the ok

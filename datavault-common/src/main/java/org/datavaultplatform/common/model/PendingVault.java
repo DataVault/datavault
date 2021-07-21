@@ -103,7 +103,7 @@ public class PendingVault {
     @Column(name = "projectID", nullable = true, columnDefinition = "TEXT")
     private String projectID;
 
-    // Name of the creator
+    // Name of the pure contact
     @Column(name = "contact", nullable = false, columnDefinition = "TEXT")
     private String contact;
 

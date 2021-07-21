@@ -22,6 +22,8 @@ public interface RoleAssignmentDAO {
 
     List<RoleAssignment> findByVaultId(String vaultId);
 
+    List<RoleAssignment> findByPendingVaultId(String vaultId);
+
     List<RoleAssignment> findByUserId(String userId);
 
     List<RoleAssignment> findByRoleId(Long roleId);
