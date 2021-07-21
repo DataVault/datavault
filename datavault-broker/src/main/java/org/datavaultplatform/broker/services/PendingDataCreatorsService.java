@@ -1,6 +1,7 @@
 package org.datavaultplatform.broker.services;
 
 import org.datavaultplatform.common.model.PendingDataCreator;
+import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.dao.PendingDataCreatorDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,5 +21,12 @@ public class PendingDataCreatorsService {
         if (creators != null  && ! creators.isEmpty()) {
             this.pendingDataCreatorDAO.save(creators);
         }
+    }
+
+    public void deletePendingDataCreator(String creatorId) {
+        if (pendingDataCreatorDAO.findById(creatorId) == null) {
+            throw new IllegalStateException("Cannot delete a role assignment that does not exist");
+        }
+        this.pendingDataCreatorDAO.delete(creatorId);
     }
 }

@@ -2,6 +2,7 @@ package org.datavaultplatform.common.model.dao;
 
 import org.datavaultplatform.common.model.PendingDataCreator;
 import org.datavaultplatform.common.model.PendingVault;
+import org.datavaultplatform.common.model.RoleAssignment;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -62,6 +63,21 @@ public class PendingDataCreatorDAOImpl implements PendingDataCreatorDAO{
             if (session != null) {
                 session.close();
             }
+        }
+    }
+
+    @Override
+    public void delete(String id) {
+        PendingDataCreator creator = findById(id);
+        Session session = null;
+        try {
+            session = this.sessionFactory.openSession();
+
+            Transaction tx = session.beginTransaction();
+            session.delete(creator);
+            tx.commit();
+        } finally {
+            if (session != null) session.close();
         }
     }
 }

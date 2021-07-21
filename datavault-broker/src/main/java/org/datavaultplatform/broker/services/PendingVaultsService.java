@@ -43,7 +43,7 @@ public class PendingVaultsService {
 
     public void setPendingDataCreatorsService(PendingDataCreatorsService pendingDataCreatorsService) { this.pendingDataCreatorsService = pendingDataCreatorsService; }
 
-    public void addPendingVault(PendingVault vault) {
+    public void addOrUpdatePendingVault(PendingVault vault) {
         Date d = new Date();
         vault.setCreationTime(d);
         if (vault != null) {
@@ -115,6 +115,8 @@ public class PendingVaultsService {
     }
 
     public void addDepositorRoles(CreateVault createVault, String pendingVaultId) {
+
+        // if vault already has depositors delete them and readd
         List<String> depositors = createVault.getDepositors();
         if (depositors != null) {
             for (String dep: depositors) {
@@ -159,15 +161,15 @@ public class PendingVaultsService {
         logger.debug("Role userID: '" + userID + "'");
         logger.debug("Role vaultID: '" + pendingVaultId + "'");
         logger.debug("Role type: '" + pendingVaultCreatorRoleAssignment.getRole().getType() + "'");
-        String pendingId = createVault.getPendingID();
-        if (pendingId == null || pendingId.isEmpty()) {
+        //String pendingId = createVault.getPendingID();
+        //if (pendingId == null || pendingId.isEmpty()) {
             permissionsService.createRoleAssignment(pendingVaultCreatorRoleAssignment);
-        } else {
+        //} else {
             /* TODO: once we add the ability to set a different owner this will be required
                 as it will be possible that the people who can see it will have changed
              */
             //permissionsService.updateRoleAssignment(dataOwnerRoleAssignment);
-        }
+        //}
     }
 
     public PendingVault processDataCreatorParams(CreateVault createVault, PendingVault vault) {
@@ -196,8 +198,8 @@ public class PendingVaultsService {
         return vault;
     }
 
-    public PendingVault processVaultParams(CreateVault createVault, String userID) throws Exception{
-        PendingVault vault = new PendingVault();
+    public PendingVault processVaultParams(PendingVault vault, CreateVault createVault, String userID) throws Exception{
+        //PendingVault vault = new PendingVault();
 
         String pendingId = createVault.getPendingID();
         logger.debug("Pending ID is: '" + pendingId + "'");

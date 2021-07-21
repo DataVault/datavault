@@ -158,6 +158,20 @@ public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
     }
 
     @Override
+    public List<RoleAssignment> findByPendingVaultId(String vaultId) {
+        Session session = null;
+        try {
+            session = sessionFactory.openSession();
+
+            List<RoleAssignment> vaultAssignments = findBy(session, "pendingVaultId", vaultId);
+            return vaultAssignments;
+        } finally {
+            if (session != null) session.close();
+        }
+
+    }
+
+    @Override
     public List<RoleAssignment> findByUserId(String userId) {
         Session session = null;
         try {

@@ -10,4 +10,6 @@ public interface PendingDataCreatorDAO {
     PendingDataCreator findById(String Id);
 
     void update(PendingDataCreator pendingDataCreator);
+
+    void delete(String id);
 }

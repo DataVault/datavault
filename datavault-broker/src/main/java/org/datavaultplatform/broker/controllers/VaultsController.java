@@ -399,14 +399,66 @@ public class VaultsController {
 
     }
 
+    @RequestMapping(value = "/pendingVaults/update", method = RequestMethod.POST)
+    public VaultInfo updatePendingVault(@RequestHeader(value = "X-UserID", required=true) String userID,
+                                        @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
+                                        @RequestBody CreateVault createVault) throws Exception {
+        PendingVault vault = pendingVaultsService.getPendingVault(createVault.getPendingID());
+        vault = pendingVaultsService.processVaultParams(vault, createVault, userID);
+
+        pendingVaultsService.addOrUpdatePendingVault(vault);
+
+        // delete all the previously assigned roles / creatores etc. and re-add (whether they have changed or not easier than working out what has changed)
+        List<RoleAssignment> previousRoles = permissionsService.getRoleAssignmentsForPendingVault(vault.getId());
+        if (previousRoles != null && ! previousRoles.isEmpty()) {
+            for (RoleAssignment pr : previousRoles) {
+                permissionsService.deleteRoleAssignment(pr.getId());
+            }
+        }
+
+        List<PendingDataCreator> previousCreators = vault.getDataCreators();
+        if (previousCreators != null && ! previousCreators.isEmpty()) {
+            for (PendingDataCreator pdc : previousCreators) {
+                pendingDataCreatorsService.deletePendingDataCreator(pdc.getId());
+            }
+        }
+
+        pendingVaultsService.addDepositorRoles(createVault, vault.getId());
+
+        pendingVaultsService.addOwnerRole(createVault, vault.getId(), userID);
+
+        vault = pendingVaultsService.processDataCreatorParams(createVault, vault);
+
+        pendingVaultsService.addNDMRoles(createVault, vault.getId());
+
+        pendingVaultsService.addCreator(createVault, userID, vault.getId());
+
+        //Create vaultEvent = new Create(vault.getId());
+        //vaultEvent.setVault(vault);
+        //vaultEvent.setUser(usersService.getUser(userID));
+        //vaultEvent.setAgentType(Agent.AgentType.BROKER);
+        //vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+
+        //eventService.addEvent(vaultEvent);
+
+        // Check the retention policy of the newly created vault
+        //try {
+        //    vaultsService.checkRetentionPolicy(vault.getId());
+        //} catch (Exception e) {
+        //    logger.error("Fail to check retention policy: "+e);
+        //    e.printStackTrace();
+        //    throw e;
+        //}
+        return vault.convertToResponse();
+    }
     @RequestMapping(value = "/pendingVaults", method = RequestMethod.POST)
     public VaultInfo addPendingVault(@RequestHeader(value = "X-UserID", required = true) String userID,
                               @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
                               @RequestBody CreateVault createVault) throws Exception {
+        PendingVault vault = new PendingVault();
+        vault = pendingVaultsService.processVaultParams(vault, createVault, userID);
 
-        PendingVault vault = pendingVaultsService.processVaultParams(createVault, userID);
-
-        pendingVaultsService.addPendingVault(vault);
+        pendingVaultsService.addOrUpdatePendingVault(vault);
 
         pendingVaultsService.addDepositorRoles(createVault, vault.getId());
 
