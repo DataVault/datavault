@@ -34,10 +34,9 @@ import org.springframework.web.servlet.view.RedirectView;
 import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -377,12 +376,14 @@ public class VaultsController {
         cv.setDescription(vault.getDescription());
         logger.info("Create Vault Description is: '" + cv.getDescription());
         cv.setPolicyID(vault.getPolicyID());
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.UK);
+
         if (vault.getGrantEndDate() != null) {
-            cv.setGrantEndDate(vault.getGrantEndDate().toString());
+            cv.setGrantEndDate(formatter.format(vault.getGrantEndDate()));
         }
         cv.setGroupID(vault.getGroupID());
         if (vault.getReviewDate() != null) {
-            cv.setReviewDate(vault.getReviewDate().toString());
+            cv.setReviewDate(formatter.format(vault.getReviewDate()));
         }
         if (vault.getEstimate() != null) {
             cv.setEstimate(vault.getEstimate().toString());
