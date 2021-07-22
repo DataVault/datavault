@@ -1,5 +1,3 @@
-
-
 <fieldset>
    <div class="form-card">
       <h2 class="fs-title">Summary</h2>
@@ -9,114 +7,82 @@
                <tr>
                   <th scope="col">Vault Name</th>
                   <td>
-                  <@spring.bind "vault.name">
-                      <span name="name" name="${spring.status.expression}">${spring.status.value!""}"</span>
-                  </@spring.bind>
-                  </td>
-               </tr>
-               
-               <tr>
-                  <th scope="col">Creation Date</th>
-                  <td>
-                     <#if (vault.creationTime)??>
-                     ${vault.creationTime?date}
-                     </#if>
+                    <@spring.bind "vault.name" />
+                    <span name="${spring.status.expression}">${spring.status.value!""}</span>
                   </td>
                </tr>
                <tr>
                   <th scope="col">Description</th>
                   <td> 
-                     <#if (vault.description)??>
-                     ${vault.description?html}
-                     </#if>
+                     <@spring.bind "vault.description" />
+                     <span name="${spring.status.expression}">${spring.status.value!""}</span>
                   </td>
                </tr>
                <tr>
                   <th scope="col">Billing Type</td>
                   <td>
-                     <#if (vault.billingType)??>
-                     ${vault.billingType?html}
-                     </#if>
+                     <@spring.bind "vault.billingType" />
+                     <span name="${spring.status.expression}">${spring.status.value!""}</span>
                   </td>
                </tr>
                <tr>
                   <th scope="col">Billing Notes</td>
                   <td>
-                     <#if (vault.notes)??>
-                     ${vault.notes?html}
-                     </#if>
+                     <@spring.bind "vault.notes" />
+                     <span name="${spring.status.expression}">${spring.status.value!""}</span>
                   </td>
                </tr>
                <tr>
                   <th scope="col">Estimate Size</td>
                   <td>
-                     <#if (vault.estimate)??>
-                     ${vault.estimate?html}
-                     </#if>
+                     <@spring.bind "vault.estimate" />
+                     <span name="${spring.status.expression}">${spring.status.value!""}</span>
+                     
                   </td>
                </tr>
                <tr>
                   <th scope="col">School or Unit</td>
                   <td>
-                     <#if (vault.schoolOrUnit)??>
-                       ${vault.schoolOrUnit?html}
-                     </#if>
+                     <@spring.bind "vault.schoolOrUnit" />
+                     <span name="${spring.status.expression}">${spring.status.value!""}</span>
+                     
                   </td>
                </tr>
                <tr>
                   <th scope="col">Subunit</td>
                   <td>
-                     <#if (vault.subunit)??>
-                       ${vault.subunit?html}
-                     </#if>
+                     <@spring.bind "vault.subunit" />
+                      <span name="${spring.status.expression}">${spring.status.value!""}</span>
                   </td>
                </tr>
                <tr>
                   <th scope="col">Project ID</td>
                   <td>
-                     <#if (vault.projectID)??>
-                       ${vault.projectID?html}
-                     </#if>
+                     <@spring.bind "vault.projectID" />
+                      <span name="${spring.status.expression}">${spring.status.value!""}</span>
+                     
                   </td>
                </tr>
                <tr>
                   <th scope="col">Slice ID</td>
                   <td>
-                     <#if (vault.sliceID)??>
-                        ${vault.sliceID?html}
-                     </#if>
+                     <@spring.bind "vault.sliceID" />
+                     <span name="${spring.status.expression}">${spring.status.value!""}</span>
                   </td>
                </tr>
-               <tr>
-                  <th scope="col">RetentionPolicy</td>
-                  <td>
-                     <#if (vault.retentionPolicy.getName())??>
-                     ${vault.retentionPolicy.getName()?html}
-                     </#if>
-                  </td>
-               </tr>
-               <tr>
-                  <th scope="col">Group</td>
-                  <td>
-                     <#if (vault.group.getName())??>
-                     ${vault.group.getName()?html}
-                     </#if>
-                  </td>
-               </tr>
+     
                <tr>
                   <th scope="col">Grant End Date</td>
                   <td>
-                     <#if (vault.grantEndDate)??>
-                     ${vault.grantEndDate?date}
-                     </#if>
+                     <@spring.bind "vault.grantEndDate" />
+                     <span name="${spring.status.expression}">${spring.status.value!""}</span>
                   </td>
                </tr>
                <tr>
                   <th scope="col">Review Date</td>
                   <td>
-                     <#if (vault.reviewDate)??>
-                     ${vault.reviewDate?date}" 
-                     </#if>
+                     <@spring.bind "vault.reviewDate" />
+                     <span name="${spring.status.expression}">${spring.status.value!""}</span> 
                   </td>
                </tr>
             </tbody>

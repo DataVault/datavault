@@ -29,9 +29,7 @@
                 <thead>
                     <tr class="tr">
                        <th><a href="?sort=name&order=${ordername}&query=${query?url}">Vault Name<#if sort == "name"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>     
-                       
-                       <th>Creator(UUN)</th>
-                        <th>Owner(UUN)</th>
+                       <th>Creator</th>
                        <th>Date created</th>
                        <th>View</th>
                     </tr>
@@ -44,6 +42,9 @@
                                 ${pendingVault.name?html}
                             </td>
                              
+                             <td>
+                                TBD
+                             </td>
                          
                              <td>
                                 <#if (pendingVault.creationTime)??>
