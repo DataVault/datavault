@@ -388,7 +388,12 @@ public class VaultsController {
         if (vault.getEstimate() != null) {
             cv.setEstimate(vault.getEstimate().toString());
         }
-
+        cv.setContactPerson(vault.getContact());
+        //cv.setIsOwner(vault.getIsOwner());
+        //cv.setVaultOwner(vault.getOwner());
+        //cv.setNominatedDataManagers(vault.getNominatedDataManagers());
+        //cv.setDepositors(vault.getDepositors());
+        cv.setDataCreators(vault.getDataCreators());
         cv.setNotes(vault.getNotes());
         cv.setPartial(true);
 

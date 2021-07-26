@@ -51,7 +51,7 @@
         <h4>Pure Information</h4>
 
         <div id="contact-form-group" class="form-group">
-            <label class="col-sm-2 control-label">Contact person: </label>
+            <label for="contactPerson" class="col-sm-2 control-label">Contact person: </label>
             <@spring.bind "vault.contactPerson" />
             <input id="contactPerson" name="${spring.status.expression}" value="${spring.status.value!""}" class="contact" type="text" placeholder="autofilled uun with ldap"/>
         </div>

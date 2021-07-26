@@ -8,6 +8,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -305,6 +306,14 @@ public class PendingVault {
         retVal.setUserID(userId);
         String userName = user == null ? null : (user.getFirstname()+" "+user.getLastname());
         retVal.setUserName(userName);
+        if (this.dataCreators != null || ! this.dataCreators.isEmpty()) {
+            List<String> creators = new ArrayList<>();
+            for (PendingDataCreator pdc : this.dataCreators) {
+                creators.add(pdc.getName());
+            }
+            retVal.setDataCreators(creators);
+        }
+        retVal.setOwner();
         retVal.setContact(this.contact);
 
         return retVal;

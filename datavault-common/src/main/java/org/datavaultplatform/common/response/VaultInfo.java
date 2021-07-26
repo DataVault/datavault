@@ -10,6 +10,7 @@ import org.jsondoc.core.annotation.ApiObjectField;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "VaultInfo")
@@ -112,6 +113,9 @@ public class VaultInfo {
 
     @ApiObjectField(description = "Pure Contact")
     private String contact;
+
+    @ApiObjectField(description = "Data Creators")
+    private List<String> creators;
 
     public VaultInfo() { }
 
@@ -435,5 +439,13 @@ public class VaultInfo {
 
     public void setContact(String contact) {
         this.contact = contact;
+    }
+
+    public void setDataCreators(List<String> creators) {
+        this.creators = creators;
+    }
+
+    public List<String> getDataCreators() {
+        return this.creators;
     }
 }
