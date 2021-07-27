@@ -114,8 +114,17 @@ public class VaultInfo {
     @ApiObjectField(description = "Pure Contact")
     private String contact;
 
+    @ApiObjectField(description = "Pending Vault Owner ID")
+    private String ownerId;
+
     @ApiObjectField(description = "Data Creators")
     private List<String> creators;
+
+    @ApiObjectField(description = "Nominated Data Managers")
+    private List<String> nominatedDataManagerIds;
+
+    @ApiObjectField(description = "Depositors")
+    private List<String> depositorIds;
 
     public VaultInfo() { }
 
@@ -441,11 +450,35 @@ public class VaultInfo {
         this.contact = contact;
     }
 
+    public String getOwnerId() {
+        return this.ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
     public void setDataCreators(List<String> creators) {
         this.creators = creators;
     }
 
     public List<String> getDataCreators() {
         return this.creators;
+    }
+
+    public List<String> getNominatedDataManagerIds() {
+        return nominatedDataManagerIds;
+    }
+
+    public void setNominatedDataManagerIds(List<String> nominatedDataManagerIds) {
+        this.nominatedDataManagerIds = nominatedDataManagerIds;
+    }
+
+    public List<String> getDepositorIds() {
+        return depositorIds;
+    }
+
+    public void setDepositorIds(List<String> depositorIds) {
+        this.depositorIds = depositorIds;
     }
 }

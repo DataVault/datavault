@@ -69,7 +69,7 @@ public class CreateVault {
     private String projectID;
 
     @ApiObjectField(description = "Is the logged in user the vault owner")
-    private String isOwner;
+    private Boolean isOwner;
 
     @ApiObjectField(description = "Prospective Owner of the vault (who can be different from who is creating the pending vault)")
     private String vaultOwner;
@@ -279,11 +279,11 @@ public class CreateVault {
 
     public void setDataCreators(List<String> dataCreators) { this.dataCreators = dataCreators; }
 
-    public String getIsOwner() {
+    public Boolean getIsOwner() {
         return this.isOwner;
     }
 
-    public void setIsOwner(String isOwner) {
+    public void setIsOwner(Boolean isOwner) {
         this.isOwner = isOwner;
     }
 }

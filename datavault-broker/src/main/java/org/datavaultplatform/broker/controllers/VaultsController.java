@@ -595,6 +595,13 @@ public class VaultsController {
 
         User user = usersService.getUser(userID);
         PendingVault vault = pendingVaultsService.getUserPendingVault(user, vaultID);
+        User owner = permissionsService.getPendingVaultOwner(vaultID);
+        List<User> ndms = permissionsService.getPendingVaultNDMs(vaultID);
+        List<User> deps = permissionsService.getPendingVaultDepositors(vaultID);
+
+        vault.setOwner(owner);
+        vault.setNominatedDataManagers(ndms);
+        vault.setDepositors(deps);
         if (vault != null) {
             return vault.convertToResponse();
         } else {

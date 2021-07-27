@@ -351,6 +351,7 @@ public class VaultsController {
     @RequestMapping(value = "/pendingVaults/{vaultid}", method = RequestMethod.GET)
     public String getPendingVault(ModelMap model, @PathVariable("vaultid") String vaultID, Principal principal) {
         VaultInfo vault = restService.getPendingVault(vaultID);
+
         logger.info("Passed in id: '" + vaultID);
 
         if (!canAccessVault(vault, principal)) {
@@ -389,10 +390,21 @@ public class VaultsController {
             cv.setEstimate(vault.getEstimate().toString());
         }
         cv.setContactPerson(vault.getContact());
+
         //cv.setIsOwner(vault.getIsOwner());
-        //cv.setVaultOwner(vault.getOwner());
-        //cv.setNominatedDataManagers(vault.getNominatedDataManagers());
-        //cv.setDepositors(vault.getDepositors());
+        // if vault owner is null set isowner to true
+        // if vault owner is the same as the logged in user set isowner to true
+        // if vault owner is different ot hte logged in user set to false
+        logger.debug("Setting default isOwner");
+        Boolean isOwner = true;
+        if (vault.getOwnerId() != null && ! vault.getOwnerId().equals(vault.getUserID())) {
+            logger.debug("Changing default isOwner");
+            isOwner = false;
+        }
+        cv.setIsOwner(isOwner);
+        cv.setVaultOwner(vault.getOwnerId());
+        cv.setNominatedDataManagers(vault.getNominatedDataManagerIds());
+        cv.setDepositors(vault.getDepositorIds());
         cv.setDataCreators(vault.getDataCreators());
         cv.setNotes(vault.getNotes());
         cv.setPartial(true);
@@ -412,7 +424,9 @@ public class VaultsController {
 
         // pass the view an empty Vault since the form expects it if nothing has been saved so far
 
-        model.addAttribute("vault", new CreateVault());
+        CreateVault vault = new CreateVault();
+        vault.setIsOwner(true);
+        model.addAttribute("vault", vault);
 
         // if it has get that data from the db
 
