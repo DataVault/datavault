@@ -404,7 +404,7 @@ public class VaultsController {
         cv.setIsOwner(isOwner);
         cv.setVaultOwner(vault.getOwnerId());
         cv.setNominatedDataManagers(vault.getNominatedDataManagerIds());
-        //cv.setDepositors(vault.getDepositors());
+        cv.setDepositors(vault.getDepositorIds());
         cv.setDataCreators(vault.getDataCreators());
         cv.setNotes(vault.getNotes());
         cv.setPartial(true);

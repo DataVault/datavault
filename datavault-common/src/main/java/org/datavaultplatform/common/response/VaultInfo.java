@@ -123,6 +123,9 @@ public class VaultInfo {
     @ApiObjectField(description = "Nominated Data Managers")
     private List<String> nominatedDataManagerIds;
 
+    @ApiObjectField(description = "Depositors")
+    private List<String> depositorIds;
+
     public VaultInfo() { }
 
     public VaultInfo(String id, String userID, String userName, String datasetID, String crisID, String datasetName,
@@ -469,5 +472,13 @@ public class VaultInfo {
 
     public void setNominatedDataManagerIds(List<String> nominatedDataManagerIds) {
         this.nominatedDataManagerIds = nominatedDataManagerIds;
+    }
+
+    public List<String> getDepositorIds() {
+        return depositorIds;
+    }
+
+    public void setDepositorIds(List<String> depositorIds) {
+        this.depositorIds = depositorIds;
     }
 }

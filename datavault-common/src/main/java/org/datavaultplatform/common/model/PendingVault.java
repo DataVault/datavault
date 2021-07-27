@@ -356,6 +356,13 @@ public class PendingVault {
             }
             retVal.setNominatedDataManagerIds(ndmIds);
         }
+        if (this.depositors != null) {
+            List<String> deps = new ArrayList<>();
+            for (User ndm : this.depositors) {
+                deps.add(ndm.getID());
+            }
+            retVal.setDepositorIds(deps);
+        }
         retVal.setContact(this.contact);
 
         return retVal;

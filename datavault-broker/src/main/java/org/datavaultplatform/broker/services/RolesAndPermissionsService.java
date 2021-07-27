@@ -210,6 +210,27 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         return retVal;
     }
 
+    public List<User> getPendingVaultDepositors(String pendingVaultId) {
+        List<RoleAssignment> assignments = roleAssignmentDao.findByPendingVaultId(pendingVaultId);
+        List<RoleAssignment> ndmAssignments = assignments.stream()
+                .filter(RoleUtils::isDepositor)
+                .collect(Collectors.toList());
+        List<User> retVal = new ArrayList<>();
+        if(ndmAssignments == null){
+            return null;
+        } else {
+            for (RoleAssignment ra : ndmAssignments) {
+                User u = usersService.getUser(ra.getUserId());
+                if (u != null){
+                    retVal.add(u);
+                }
+            }
+        }
+
+
+        return retVal;
+    }
+
     public List<RoleAssignment> getRoleAssignmentsForUser(String userId) {
         return roleAssignmentDao.findByUserId(userId);
     }

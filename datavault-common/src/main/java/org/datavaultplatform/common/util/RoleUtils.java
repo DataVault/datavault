@@ -39,6 +39,10 @@ public class RoleUtils {
         return NOMINATED_DATA_MANAGER_ROLE_NAME.equals(roleAssignment.getRole().getName());
     }
 
+    public static boolean isDepositor(RoleAssignment roleAssignment) {
+        return DEPOSITOR_ROLE_NAME.equals(roleAssignment.getRole().getName());
+    }
+
     public static boolean isISAdmin(RoleAssignment roleAssignment) {
         return IS_ADMIN_ROLE_NAME.equals(roleAssignment.getRole().getName());
     }
