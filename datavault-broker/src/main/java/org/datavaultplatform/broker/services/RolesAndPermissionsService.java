@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class RolesAndPermissionsService implements ApplicationListener<ContextRefreshedEvent> {
     private final Logger logger = LoggerFactory.getLogger(RolesAndPermissionsService.class);
@@ -186,6 +187,27 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
             return null;
         }
         return usersService.getUser(ownerAssignment.getUserId());
+    }
+
+    public List<User> getPendingVaultNDMs(String pendingVaultId) {
+        List<RoleAssignment> assignments = roleAssignmentDao.findByPendingVaultId(pendingVaultId);
+        List<RoleAssignment> ndmAssignments = assignments.stream()
+                .filter(RoleUtils::isNominatedDataManager)
+                .collect(Collectors.toList());
+        List<User> retVal = new ArrayList<>();
+        if(ndmAssignments == null){
+            return null;
+        } else {
+            for (RoleAssignment ra : ndmAssignments) {
+                User u = usersService.getUser(ra.getUserId());
+                if (u != null){
+                    retVal.add(u);
+                }
+            }
+        }
+
+
+        return retVal;
     }
 
     public List<RoleAssignment> getRoleAssignmentsForUser(String userId) {

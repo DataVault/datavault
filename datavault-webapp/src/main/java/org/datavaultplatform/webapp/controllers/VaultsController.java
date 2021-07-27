@@ -403,8 +403,7 @@ public class VaultsController {
         }
         cv.setIsOwner(isOwner);
         cv.setVaultOwner(vault.getOwnerId());
-
-        //cv.setNominatedDataManagers(vault.getNominatedDataManagerIds());
+        cv.setNominatedDataManagers(vault.getNominatedDataManagerIds());
         //cv.setDepositors(vault.getDepositors());
         cv.setDataCreators(vault.getDataCreators());
         cv.setNotes(vault.getNotes());
