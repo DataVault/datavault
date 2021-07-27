@@ -118,6 +118,15 @@ public class PendingVault {
     @ManyToOne
     private User user;
 
+    @Transient
+    private User owner;
+
+    @Transient
+    private List<User> depositors;
+
+    @Transient
+    private List<User> nominatedDataManagers;
+
     @JsonIgnore
     @OneToMany(targetEntity=PendingDataCreator.class, mappedBy="pendingVault", fetch=FetchType.LAZY)
     private List<PendingDataCreator> dataCreators;
@@ -279,6 +288,30 @@ public class PendingVault {
         this.dataCreators = dataCreators;
     }
 
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
+    public List<User> getDepositors() {
+        return depositors;
+    }
+
+    public void setDepositors(List<User> depositors) {
+        this.depositors = depositors;
+    }
+
+    public List<User> getNominatedDataManagers() {
+        return nominatedDataManagers;
+    }
+
+    public void setNominatedDataManagers(List<User> nominatedDataManagers) {
+        this.nominatedDataManagers = nominatedDataManagers;
+    }
+
     public VaultInfo convertToResponse() {
         VaultInfo retVal = new VaultInfo();
         retVal.setID(this.id);
@@ -313,7 +346,9 @@ public class PendingVault {
             }
             retVal.setDataCreators(creators);
         }
-        retVal.setOwner();
+        if (this.owner != null) {
+            retVal.setOwnerId(this.owner.getID());
+        }
         retVal.setContact(this.contact);
 
         return retVal;

@@ -595,6 +595,10 @@ public class VaultsController {
 
         User user = usersService.getUser(userID);
         PendingVault vault = pendingVaultsService.getUserPendingVault(user, vaultID);
+        User owner = permissionsService.getPendingVaultOwner(vaultID);
+        logger.debug("Owner: " + "'" + owner.getID() + "'");
+        //List<User> depositors = permissionsService.get
+        vault.setOwner(owner);
         if (vault != null) {
             return vault.convertToResponse();
         } else {

@@ -351,6 +351,7 @@ public class VaultsController {
     @RequestMapping(value = "/pendingVaults/{vaultid}", method = RequestMethod.GET)
     public String getPendingVault(ModelMap model, @PathVariable("vaultid") String vaultID, Principal principal) {
         VaultInfo vault = restService.getPendingVault(vaultID);
+
         logger.info("Passed in id: '" + vaultID);
 
         if (!canAccessVault(vault, principal)) {
@@ -389,9 +390,11 @@ public class VaultsController {
             cv.setEstimate(vault.getEstimate().toString());
         }
         cv.setContactPerson(vault.getContact());
+
         //cv.setIsOwner(vault.getIsOwner());
-        //cv.setVaultOwner(vault.getOwner());
-        //cv.setNominatedDataManagers(vault.getNominatedDataManagers());
+        cv.setVaultOwner(vault.getOwnerId());
+        
+        //cv.setNominatedDataManagers(vault.getNominatedDataManagerIds());
         //cv.setDepositors(vault.getDepositors());
         cv.setDataCreators(vault.getDataCreators());
         cv.setNotes(vault.getNotes());
