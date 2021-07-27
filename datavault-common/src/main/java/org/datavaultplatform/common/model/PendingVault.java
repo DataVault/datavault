@@ -313,7 +313,6 @@ public class PendingVault {
             }
             retVal.setDataCreators(creators);
         }
-        retVal.setOwner();
         retVal.setContact(this.contact);
 
         return retVal;
