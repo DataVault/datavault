@@ -392,8 +392,18 @@ public class VaultsController {
         cv.setContactPerson(vault.getContact());
 
         //cv.setIsOwner(vault.getIsOwner());
+        // if vault owner is null set isowner to true
+        // if vault owner is the same as the logged in user set isowner to true
+        // if vault owner is different ot hte logged in user set to false
+        logger.debug("Setting default isOwner");
+        Boolean isOwner = true;
+        if (vault.getOwnerId() != null && ! vault.getOwnerId().equals(vault.getUserID())) {
+            logger.debug("Changing default isOwner");
+            isOwner = false;
+        }
+        cv.setIsOwner(isOwner);
         cv.setVaultOwner(vault.getOwnerId());
-        
+
         //cv.setNominatedDataManagers(vault.getNominatedDataManagerIds());
         //cv.setDepositors(vault.getDepositors());
         cv.setDataCreators(vault.getDataCreators());
@@ -415,7 +425,9 @@ public class VaultsController {
 
         // pass the view an empty Vault since the form expects it if nothing has been saved so far
 
-        model.addAttribute("vault", new CreateVault());
+        CreateVault vault = new CreateVault();
+        vault.setIsOwner(true);
+        model.addAttribute("vault", vault);
 
         // if it has get that data from the db
 

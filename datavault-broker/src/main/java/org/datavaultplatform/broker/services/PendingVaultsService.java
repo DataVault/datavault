@@ -133,10 +133,10 @@ public class PendingVaultsService {
     }
 
     public void addOwnerRole(CreateVault createVault, String pendingVaultId, String userID) {
-        String isOwner = createVault.getIsOwner();
+        Boolean isOwner = createVault.getIsOwner();
         logger.debug("IsOwner is '" + isOwner + "'");
         String ownerId = userID;
-        if (isOwner != null && "false".equals(isOwner)) {
+        if (isOwner != null && !isOwner) {
             ownerId = createVault.getVaultOwner();
         }
         logger.debug("VaultOwner is '" + ownerId + "'");
