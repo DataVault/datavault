@@ -26,11 +26,12 @@
 
         <div class="form-group">
             <label class="col-sm-2 control-label">NDMs: </label>
-            <@spring.bind "vault.nominatedDataManagers" />
+            <@spring.bind "vault.nominatedDataManagers[0]" />
             <input id="nominatedDataManagers" name="${spring.status.expression}" value="${spring.status.value!""}" type="text" placeholder="autofilled uun with ldap" />
             <button type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
             <div id="extra-ndm-list"></div>
             <div class="example-ndm hidden col-sm-offset-2">
+                <@spring.bind "vault.nominatedDataManagers[1]" />
                 <input id="nominatedDataManagers" name="${spring.status.expression}" value="${spring.status.value!""}" class="ndm" type="text"  placeholder="autofilled uun with ldap"/>
                 <button type="button" class="remove-ndm-btn btn btn-danger btn-xs">Remove</button>
             </div>
@@ -38,11 +39,12 @@
 
         <div id="depositors-form-group" class="form-group">
             <label class="col-sm-2 control-label">Depositors: </label>
-            <@spring.bind "vault.depositors" />
+            <@spring.bind "vault.depositors[0]" />
             <input id="depositors" name="${spring.status.expression}" value="${spring.status.value!""}" class="depositor" type="text" placeholder="autofilled uun with ldap"/>
             <button type="button" id="add-depositor-btn" class="btn btn-default btn-sm">Add a Depositor</button>
             <div id="extra-depositor-list"></div>
             <div class="example-depositor hidden col-sm-offset-2">
+                <@spring.bind "vault.depositors[1]" />
                 <input id="depositors" name="${spring.status.expression}" value="${spring.status.value!""}" class="depositor" type="text"  placeholder="autofilled uun with ldap"/>
                 <button type="button" class="remove-depositor-btn btn btn-danger btn-xs">Remove</button>
             </div>
@@ -58,11 +60,12 @@
 
         <div id="creators-form-group" class="form-group">
             <label class="col-sm-2 control-label">Data Creator: </label>
-            <@spring.bind "vault.dataCreators" />
+            <@spring.bind "vault.dataCreators[0]" />
             <input class="creator" type="text" placeholder="autofilled uun with ldap" id="dataCreators" name="${spring.status.expression}" value="${spring.status.value!""}"/>
             <button type="button" id="add-creator-btn" class="btn btn-default btn-sm">Add a Data Creator</button>
             <div id="extra-creator-list"></div>
             <div class="example-creator hidden col-sm-offset-2">
+                <@spring.bind "vault.dataCreators[1]" />
                 <input class="creator" type="text" placeholder="autofilled uun with ldap" id="dataCreators" name="${spring.status.expression}" value="${spring.status.value!""}"/>
                 <button type="button" class="remove-creator-btn btn btn-danger btn-xs">Remove</button>
             </div>
