@@ -339,7 +339,7 @@ public class PendingVault {
         retVal.setUserID(userId);
         String userName = user == null ? null : (user.getFirstname()+" "+user.getLastname());
         retVal.setUserName(userName);
-        if (this.dataCreators != null || ! this.dataCreators.isEmpty()) {
+        if (this.dataCreators != null) {
             List<String> creators = new ArrayList<>();
             for (PendingDataCreator pdc : this.dataCreators) {
                 creators.add(pdc.getName());
