@@ -1,5 +1,5 @@
 <fieldset>
-    <div class="form-card">
+    <div id="add-role-vault-dialog" class="form-card">
         <h2 class="fs-title text-center">Vault Users</h2> <br><br>
 
         <h4>Vault Access</h4>
@@ -9,12 +9,12 @@
             <@spring.bind "vault.isOwner" />
             <div class="radio-inline">
                 <label>
-                    <input type="radio" id="nominatedDataManagers" name="${spring.status.expression}" value="true" <#if vault.isOwner??>${(vault.isOwner)?then('checked', '')}</#if>> Yes
+                    <input type="radio" id="isNominatedDataManagers" name="${spring.status.expression}" value="true" <#if vault.isOwner??>${(vault.isOwner)?then('checked', '')}</#if>> Yes
                 </label>
             </div>
             <div class="radio-inline">
                 <label>
-                    <input type="radio" id="nominatedDataManagers" name="${spring.status.expression}" value="false" <#if vault.isOwner??>${(!vault.isOwner)?then('checked', '')}</#if>> No
+                    <input type="radio" id="isNominatedDataManagers" name="${spring.status.expression}" value="false" <#if vault.isOwner??>${(!vault.isOwner)?then('checked', '')}</#if>> No
                 </label>
             </div>
         </div>
@@ -28,7 +28,7 @@
         <div class="ndm-form-group">
             <label class="col-sm-2 control-label">NDMs: </label>
             <@spring.bind "vault.nominatedDataManagers[${ndmCount}]" />
-            <input id="nominatedDataManagers" name="${spring.status.expression}" value="${spring.status.value!""}" type="text" placeholder="autofilled uun with ldap" />
+            <input id="nominatedDataManagers" name="${spring.status.expression}" value="${spring.status.value!""}" class="ndm" type="text" />
             <button type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
             <div id="extra-ndm-list"></div>
             <div class="example-ndm hidden col-sm-offset-2">
@@ -93,4 +93,130 @@
         <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
     </button>
     <button type="button" name="next" class="next action-button btn btn-primary">Next Step &raquo;</button>
+    <script>
+        $(".ndm").autocomplete({
+            autoFocus: true,
+            appendTo: "#add-role-vault-dialog",
+            minLength: 2,
+            source: function (request, response) {
+                var term = request.term;
+                $.ajax({
+                    url: "${springMacroRequestContext.getContextPath()}/vaults/autocompleteuun/" + term,
+                    type: 'GET',
+                    dataType: "json",
+                    success: function (data) {
+                        response(data);
+                    },
+                    error: function(xhr) {
+                        ErrorHandler.handleAjaxError('#orphan-dialog-error', xhr);
+                    }
+                });
+            },
+            select: function (event, ui) {
+                var attributes = ui.item.value.split(" - ");
+                this.value = attributes[0];
+                return false;
+            }
+        });
+
+        $(".depositor").autocomplete({
+            autoFocus: true,
+            appendTo: "#add-role-vault-dialog",
+            minLength: 2,
+            source: function (request, response) {
+                var term = request.term;
+                $.ajax({
+                    url: "${springMacroRequestContext.getContextPath()}/vaults/autocompleteuun/" + term,
+                    type: 'GET',
+                    dataType: "json",
+                    success: function (data) {
+                        response(data);
+                    },
+                    error: function(xhr) {
+                        ErrorHandler.handleAjaxError('#orphan-dialog-error', xhr);
+                    }
+                });
+            },
+            select: function (event, ui) {
+                var attributes = ui.item.value.split(" - ");
+                this.value = attributes[0];
+                return false;
+            }
+        });
+
+        $(".creator").autocomplete({
+            autoFocus: true,
+            appendTo: "#add-role-vault-dialog",
+            minLength: 2,
+            source: function (request, response) {
+                var term = request.term;
+                $.ajax({
+                    url: "${springMacroRequestContext.getContextPath()}/vaults/autocompleteuun/" + term,
+                    type: 'GET',
+                    dataType: "json",
+                    success: function (data) {
+                        response(data);
+                    },
+                    error: function(xhr) {
+                        ErrorHandler.handleAjaxError('#orphan-dialog-error', xhr);
+                    }
+                });
+            },
+            select: function (event, ui) {
+                var attributes = ui.item.value.split(" - ");
+                this.value = attributes[0];
+                return false;
+            }
+        });
+
+        $("#vaultOwner").autocomplete({
+            autoFocus: true,
+            appendTo: "#add-role-vault-dialog",
+            minLength: 2,
+            source: function (request, response) {
+                var term = request.term;
+                $.ajax({
+                    url: "${springMacroRequestContext.getContextPath()}/vaults/autocompleteuun/" + term,
+                    type: 'GET',
+                    dataType: "json",
+                    success: function (data) {
+                        response(data);
+                    },
+                    error: function(xhr) {
+                        ErrorHandler.handleAjaxError('#orphan-dialog-error', xhr);
+                    }
+                });
+            },
+            select: function (event, ui) {
+                var attributes = ui.item.value.split(" - ");
+                this.value = attributes[0];
+                return false;
+            }
+        });
+
+        $("#contactPerson").autocomplete({
+            autoFocus: true,
+            appendTo: "#add-role-vault-dialog",
+            minLength: 2,
+            source: function (request, response) {
+                var term = request.term;
+                $.ajax({
+                    url: "${springMacroRequestContext.getContextPath()}/vaults/autocompleteuun/" + term,
+                    type: 'GET',
+                    dataType: "json",
+                    success: function (data) {
+                        response(data);
+                    },
+                    error: function(xhr) {
+                        ErrorHandler.handleAjaxError('#orphan-dialog-error', xhr);
+                    }
+                });
+            },
+            select: function (event, ui) {
+                var attributes = ui.item.value.split(" - ");
+                this.value = attributes[0];
+                return false;
+            }
+        });
+    </script>
 </fieldset>
