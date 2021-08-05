@@ -21,21 +21,21 @@
         <div class="form-group" required>
             <label class="col-sm-2 control-label">Owner UUN: </label>
             <@spring.bind "vault.vaultOwner" />
-            <input id="vaultOwner" name="${spring.status.expression}" value="${spring.status.value!""}" type="text"  placeholder="autofilled uun with ldap"/>
+            <input id="vaultOwner" name="${spring.status.expression}" value="${spring.status.value!""}" type="text"  class="autocomplete" placeholder=""/>
         </div>
 
         <#assign ndmCount = 0>
         <div class="ndm-form-group">
             <label class="col-sm-2 control-label">NDMs: </label>
             <@spring.bind "vault.nominatedDataManagers[${ndmCount}]" />
-            <input id="nominatedDataManagers" name="${spring.status.expression}" value="${spring.status.value!""}" class="ndm" type="text" />
+            <input id="nominatedDataManagers" name="${spring.status.expression}" value="${spring.status.value!""}" class="autocomplete" type="text" />
             <button type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
             <div id="extra-ndm-list"></div>
             <div class="example-ndm hidden col-sm-offset-2">
                 <#assign ndmCount++>
                 <input type="hidden" id="counter" name="id" value="0"/>
                 <@spring.bind "vault.nominatedDataManagers[${ndmCount}]" />
-                <input id="nominatedDataManagers" name="${spring.status.expression}" value="${spring.status.value!""}" class="ndm" type="text"  placeholder="autofilled uun with ldap"/>
+                <input id="nominatedDataManagers" name="${spring.status.expression}" value="${spring.status.value!""}" class="autocomplete" type="text"  placeholder=""/>
                 <button type="button" class="remove-ndm-btn btn btn-danger btn-xs">Remove</button>
             </div>
         </div>
@@ -44,13 +44,13 @@
         <div id="depositors-form-group" class="form-group">
             <label class="col-sm-2 control-label">Depositors: </label>
             <@spring.bind "vault.depositors[${depCount}]" />
-            <input id="depositors" name="${spring.status.expression}" value="${spring.status.value!""}" class="depositor" type="text" placeholder="autofilled uun with ldap"/>
+            <input id="depositors" name="${spring.status.expression}" value="${spring.status.value!""}" class="autocomplete" type="text" placeholder=""/>
             <button type="button" id="add-depositor-btn" class="btn btn-default btn-sm">Add a Depositor</button>
             <div id="extra-depositor-list"></div>
             <div class="example-depositor hidden col-sm-offset-2">
                 <#assign depCount++>
                 <@spring.bind "vault.depositors[${depCount}]" />
-                <input id="depositors" name="${spring.status.expression}" value="${spring.status.value!""}" class="depositor" type="text"  placeholder="autofilled uun with ldap"/>
+                <input id="depositors" name="${spring.status.expression}" value="${spring.status.value!""}" class="autocomplete" type="text"  placeholder=""/>
                 <button type="button" class="remove-depositor-btn btn btn-danger btn-xs">Remove</button>
             </div>
         </div>
@@ -60,20 +60,20 @@
         <div id="contact-form-group" class="form-group">
             <label for="contactPerson" class="col-sm-2 control-label">Contact person: </label>
             <@spring.bind "vault.contactPerson" />
-            <input id="contactPerson" name="${spring.status.expression}" value="${spring.status.value!""}" class="contact" type="text" placeholder="autofilled uun with ldap"/>
+            <input id="contactPerson" name="${spring.status.expression}" value="${spring.status.value!""}" class="autocomplete" type="text" placeholder=""/>
         </div>
 
         <#assign creatorCount = 0>
         <div id="creators-form-group" class="form-group">
             <label class="col-sm-2 control-label">Data Creator: </label>
             <@spring.bind "vault.dataCreators[${creatorCount}]" />
-            <input class="creator" type="text" placeholder="autofilled uun with ldap" id="dataCreators" name="${spring.status.expression}" value="${spring.status.value!""}"/>
+            <input class="autocomplete" type="text" placeholder="" id="dataCreators" name="${spring.status.expression}" value="${spring.status.value!""}"/>
             <button type="button" id="add-creator-btn" class="btn btn-default btn-sm">Add a Data Creator</button>
             <div id="extra-creator-list"></div>
             <div class="example-creator hidden col-sm-offset-2">
                 <#assign creatorCount++>
                 <@spring.bind "vault.dataCreators[${creatorCount}]" />
-                <input class="creator" type="text" placeholder="autofilled uun with ldap" id="dataCreators" name="${spring.status.expression}" value="${spring.status.value!""}"/>
+                <input class="autocomplete" type="text" placeholder="" id="dataCreators" name="${spring.status.expression}" value="${spring.status.value!""}"/>
                 <button type="button" class="remove-creator-btn btn btn-danger btn-xs">Remove</button>
             </div>
         </div>
@@ -94,107 +94,7 @@
     </button>
     <button type="button" name="next" class="next action-button btn btn-primary">Next Step &raquo;</button>
     <script>
-        $(".ndm").autocomplete({
-            autoFocus: true,
-            appendTo: "#add-role-vault-dialog",
-            minLength: 2,
-            source: function (request, response) {
-                var term = request.term;
-                $.ajax({
-                    url: "${springMacroRequestContext.getContextPath()}/vaults/autocompleteuun/" + term,
-                    type: 'GET',
-                    dataType: "json",
-                    success: function (data) {
-                        response(data);
-                    },
-                    error: function(xhr) {
-                        ErrorHandler.handleAjaxError('#orphan-dialog-error', xhr);
-                    }
-                });
-            },
-            select: function (event, ui) {
-                var attributes = ui.item.value.split(" - ");
-                this.value = attributes[0];
-                return false;
-            }
-        });
-
-        $(".depositor").autocomplete({
-            autoFocus: true,
-            appendTo: "#add-role-vault-dialog",
-            minLength: 2,
-            source: function (request, response) {
-                var term = request.term;
-                $.ajax({
-                    url: "${springMacroRequestContext.getContextPath()}/vaults/autocompleteuun/" + term,
-                    type: 'GET',
-                    dataType: "json",
-                    success: function (data) {
-                        response(data);
-                    },
-                    error: function(xhr) {
-                        ErrorHandler.handleAjaxError('#orphan-dialog-error', xhr);
-                    }
-                });
-            },
-            select: function (event, ui) {
-                var attributes = ui.item.value.split(" - ");
-                this.value = attributes[0];
-                return false;
-            }
-        });
-
-        $(".creator").autocomplete({
-            autoFocus: true,
-            appendTo: "#add-role-vault-dialog",
-            minLength: 2,
-            source: function (request, response) {
-                var term = request.term;
-                $.ajax({
-                    url: "${springMacroRequestContext.getContextPath()}/vaults/autocompleteuun/" + term,
-                    type: 'GET',
-                    dataType: "json",
-                    success: function (data) {
-                        response(data);
-                    },
-                    error: function(xhr) {
-                        ErrorHandler.handleAjaxError('#orphan-dialog-error', xhr);
-                    }
-                });
-            },
-            select: function (event, ui) {
-                var attributes = ui.item.value.split(" - ");
-                this.value = attributes[0];
-                return false;
-            }
-        });
-
-        $("#vaultOwner").autocomplete({
-            autoFocus: true,
-            appendTo: "#add-role-vault-dialog",
-            minLength: 2,
-            source: function (request, response) {
-                var term = request.term;
-                $.ajax({
-                    url: "${springMacroRequestContext.getContextPath()}/vaults/autocompleteuun/" + term,
-                    type: 'GET',
-                    dataType: "json",
-                    success: function (data) {
-                        response(data);
-                    },
-                    error: function(xhr) {
-                        ErrorHandler.handleAjaxError('#orphan-dialog-error', xhr);
-                    }
-                });
-            },
-            select: function (event, ui) {
-                var attributes = ui.item.value.split(" - ");
-                this.value = attributes[0];
-                return false;
-            }
-        });
-
-        $("#contactPerson").autocomplete({
+        $(".autocomplete").autocomplete({
             autoFocus: true,
             appendTo: "#add-role-vault-dialog",
             minLength: 2,
