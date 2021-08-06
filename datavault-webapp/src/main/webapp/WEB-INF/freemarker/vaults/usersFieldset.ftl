@@ -1,7 +1,7 @@
 <fieldset>
     <div id="add-role-vault-dialog" class="form-card">
         <h2 class="fs-title text-center">Vault Users</h2> <br><br>
-
+        <div id="autocomplete-error" class="alert alert-danger hidden error" role="alert"></div>
         <h4>Vault Access</h4>
 
         <div class="form-group" required>
@@ -108,7 +108,7 @@
                         response(data);
                     },
                     error: function(xhr) {
-                        ErrorHandler.handleAjaxError('#orphan-dialog-error', xhr);
+                        ErrorHandler.handleAjaxError('#autocomplete-error', xhr);
                     }
                 });
             },
