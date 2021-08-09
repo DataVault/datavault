@@ -101,7 +101,7 @@
             source: function (request, response) {
                 var term = request.term;
                 $.ajax({
-                    url: "${springMacroRequestContext.getContextPath()}/vaults/autocompleteuun/" + term,
+                    url: ErrorHandler._springContextPath + "/vaults/autocompleteuun/" + term,
                     type: 'GET',
                     dataType: "json",
                     success: function (data) {
