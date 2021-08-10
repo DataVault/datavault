@@ -7,16 +7,23 @@
                 <tbody>
                 <tr>
                     <th scope="col">Vault Name</th>
-                    <td>Vault #1</td>
+                    <td>
+                        <@spring.bind "vault.name" />
+                        ${spring.status.value!""}
+                    </td>
                 </tr>
                 <tr>
                     <th scope="col">Description</th>
-                    <td>Created just for demo purpuses</td>
+                    <td>
+                        <@spring.bind "vault.description" />
+                        ${spring.status.value!""}
+                    </td>
                 </tr>
                 <tr>
                     <th scope="col">Estimate Size</th>
                     <td>
-                        Over 100GB
+                        <@spring.bind "vault.estimate" />
+                        ${spring.status.value!""}
                     </td>
                 </tr>
                 <tr>
@@ -62,7 +69,10 @@
             <strong>PLEASE NOTE – this information will be public, and will be linked to the PI’s Pure profile.</strong>
             <div class="checkbox">
                 <label>
-                    <input id="affirmation-check" type="checkbox"> I agree
+                    <@spring.bind "vault.pureLink" />
+                    <input type="hidden" name="_${spring.status.expression}" value="false"/>
+                    <input id="pureLink-check" type="checkbox" name="${spring.status.expression}"
+                           <#if spring.status.value?? && spring.status.value?string=="true">checked="true"</#if> /> I agree
                 </label>
             </div>
         </div>

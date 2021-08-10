@@ -408,6 +408,7 @@ public class VaultsController {
         cv.setDataCreators(vault.getDataCreators());
         cv.setNotes(vault.getNotes());
         cv.setPartial(true);
+        cv.setPureLink(vault.getPureLink());
 
         model.addAttribute("vault", cv);
         RetentionPolicy[] policies = restService.getRetentionPolicyListing();

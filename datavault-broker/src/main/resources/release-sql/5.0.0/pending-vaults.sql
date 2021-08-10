@@ -33,3 +33,4 @@ ALTER TABLE Role_assignments ADD COLUMN pending_vault_id varchar(36) default nul
 ALTER TABLE Role_assignments ADD CONSTRAINT `FK_Pending_Vault_ID` FOREIGN KEY (`pending_vault_id`) REFERENCES `PendingVaults` (`id`);
 ALTER TABLE Role_assignments ADD UNIQUE KEY `UK_Pending_Vault_ID` (`role_id`,`user_id`,`pending_vault_id`);
 ALTER TABLE PendingVaults add column contact TEXT;
+ALTER TABLE PendingVaults add column pureLink bit not null default true;

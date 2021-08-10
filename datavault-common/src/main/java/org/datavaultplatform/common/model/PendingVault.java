@@ -131,6 +131,9 @@ public class PendingVault {
     @OneToMany(targetEntity=PendingDataCreator.class, mappedBy="pendingVault", fetch=FetchType.LAZY)
     private List<PendingDataCreator> dataCreators;
 
+    @Column(name = "pureLink", nullable = false)
+    private Boolean pureLink = false;
+
     public String getId() {
         return this.id;
     }
@@ -312,6 +315,14 @@ public class PendingVault {
         this.nominatedDataManagers = nominatedDataManagers;
     }
 
+    public Boolean getPureLink() {
+        return this.pureLink;
+    }
+
+    public void setPureLink(Boolean pureLink) {
+        this.pureLink = pureLink;
+    }
+
     public VaultInfo convertToResponse() {
         VaultInfo retVal = new VaultInfo();
         retVal.setID(this.id);
@@ -365,6 +376,7 @@ public class PendingVault {
             retVal.setDepositorIds(deps);
         }
         retVal.setContact(this.contact);
+        retVal.setPureLink(this.pureLink);
 
         return retVal;
     }

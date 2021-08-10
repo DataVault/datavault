@@ -340,6 +340,12 @@ public class PendingVaultsService {
             vault.setContact(contact);
         }
 
+        Boolean pureLink = createVault.getPureLink();
+        logger.debug("Pure Link is: '" + pureLink + "'");
+        if (pureLink != null) {
+            vault.setPureLink(pureLink);
+        }
+
         return vault;
     }
     

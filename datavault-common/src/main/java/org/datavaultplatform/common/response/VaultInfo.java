@@ -111,6 +111,9 @@ public class VaultInfo {
     @ApiObjectField(description = "Did the user accept the various rules on the create vault intro page")
     private Boolean affirmed = false;
 
+    @ApiObjectField(description = "Did the user accept the Pure Link rule on the summary page")
+    private Boolean pureLink = false;
+
     @ApiObjectField(description = "Pure Contact")
     private String contact;
 
@@ -480,5 +483,13 @@ public class VaultInfo {
 
     public void setDepositorIds(List<String> depositorIds) {
         this.depositorIds = depositorIds;
+    }
+
+    public Boolean getPureLink() {
+        return pureLink;
+    }
+
+    public void setPureLink(Boolean pureLink) {
+        this.pureLink = pureLink;
     }
 }

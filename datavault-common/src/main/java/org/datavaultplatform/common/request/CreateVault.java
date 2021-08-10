@@ -86,6 +86,9 @@ public class CreateVault {
     @ApiObjectField(description = "List of creators of the dataset")
     private List<String> dataCreators;
 
+    @ApiObjectField(description = "Agree to Pure Link")
+    private Boolean pureLink;
+
     public CreateVault() { }
     /*public CreateVault(String name, String description, String notes, String policyID, String groupID, String datasetID, String grantEndDate,
                        String reviewDate, Boolean partial, Boolean affirmed, String estimate, String billingType, String sliceID,
@@ -285,5 +288,13 @@ public class CreateVault {
 
     public void setIsOwner(Boolean isOwner) {
         this.isOwner = isOwner;
+    }
+
+    public Boolean getPureLink() {
+        return this.pureLink;
+    }
+
+    public void setPureLink(Boolean pureLink) {
+        this.pureLink = pureLink;
     }
 }
