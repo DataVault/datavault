@@ -28,36 +28,50 @@
                 </tr>
                 <tr>
                     <th scope="col">PURE ID</th>
-                    <td>67d7sad6asd69ad</td>
-                    <td></td>
+                    <td>Not available yet (not sure it ever will be at this stage unless we can create the pure record in DV)</td>
                 </tr>
                 <tr>
                     <th scope="col">Grant End Date</th>
-                    <td>27 Septembre 2030</td>
+                    <td><@spring.bind "vault.grantEndDate" />
+                        ${spring.status.value!""}
+                    </td>
                 </tr>
                 <tr>
                     <th scope="col">Review Date</th>
-                    <td>01 August 2025</td>
+                    <td><@spring.bind "vault.reviewDate" />
+                        ${spring.status.value!""}
+                    </td>
                 </tr>
                 <tr>
                     <th scope="col">Billing</th>
-                    <td>Slice [Slice008]</td>
+                    <td><@spring.bind "vault.billingType" />
+                        ${spring.status.value!""}
+                    </td>
+                    <!-- add extra info depending on type-->
                 </tr>
                 <tr>
                     <th scope="col">Owner</th>
-                    <td>wpetit</td>
+                    <td><@spring.bind "vault.vaultOwner" />
+                        ${spring.status.value!""}
+                    </td>
                 </tr>
                 <tr>
                     <th scope="col">Named Data Manager</th>
-                    <td>wpetit, dspeed2</td>
+                    <td><@spring.bind "vault.nominatedDataManagers" />
+                        ${spring.status.value!""}
+                    </td>
                 </tr>
                 <tr>
                     <th scope="col">Data Creators</th>
-                    <td>wpetit, dspeed2</td>
+                    <td><@spring.bind "vault.dataCreators" />
+                        ${spring.status.value!""}
+                    </td>
                 </tr>
                 <tr>
                     <th scope="col">Depositors</th>
-                    <td>wpetit, dspeed2</td>
+                    <td><@spring.bind "vault.depositors" />
+                        ${spring.status.value!""}
+                    </td>
                 </tr>
                 </tbody>
             </table>
