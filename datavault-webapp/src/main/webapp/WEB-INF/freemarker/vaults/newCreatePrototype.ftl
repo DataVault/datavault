@@ -42,7 +42,6 @@
                                                     <#include "infoFieldset.ftl"/>
                                                     <#include "usersFieldset.ftl"/>
                                                     <#include "summaryFieldset.ftl"/>
-                                                    <#include "pendingFieldset.ftl"/>
                                                     <input type="hidden" id="submitAction" name="action" value="submit" />
                                                     <@spring.bind "vault.pendingID" />
                                                     <input type="hidden" id="pendingID" name="${spring.status.expression}" value="${spring.status.value!""}" />
