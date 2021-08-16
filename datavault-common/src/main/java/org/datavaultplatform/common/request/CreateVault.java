@@ -313,6 +313,32 @@ public class CreateVault {
         return retVal;
     }
 
+    public String getBillingAsString() {
+        StringBuilder retVal = new StringBuilder();
+
+        if (this.billingType != null && !this.billingType.equals("")) {
+            // add billing type
+            retVal.append(this.billingType);
+            if (! this.billingType.equals("NA")) {
+                // if not N/A add [
+                retVal.append(" [");
+                // if grant type or budget code add authoriser, school/ unit, subunit and project id
+                if (this.billingType.equals("GRANT_FUNDING") || this.billingType.equals("BUDGET_CODE")) {
+                    retVal.append(this.authoriser + ",");
+                    retVal.append(this.schoolOrUnit + ",");
+                    retVal.append(this.subunit + ",");
+                    retVal.append(this.projectID);
+                }
+                // if slice add slice
+                if (this.billingType.equals("SLICE")) {
+                   retVal.append(this.sliceID);
+                }
+                retVal.append("]");
+            }
+        }
+        return retVal.toString();
+    }
+
     public void setDataCreators(List<String> dataCreators) { this.dataCreators = dataCreators; }
 
     public Boolean getIsOwner() {

@@ -44,10 +44,7 @@
                 </tr>
                 <tr>
                     <th scope="col">Billing</th>
-                    <td><@spring.bind "vault.billingType" />
-                        ${spring.status.value!""}
-                    </td>
-                    <!-- add extra info depending on type-->
+                    <td>${vault.getBillingAsString()}</td>
                 </tr>
                 <tr>
                     <th scope="col">Owner</th>
