@@ -52,26 +52,20 @@
                 <tr>
                     <th scope="col">Owner</th>
                     <td><@spring.bind "vault.vaultOwner" />
-                        ${spring.status.value!""}
-                    </td>
+                        ${spring.status.value!""}</td>
                 </tr>
                 <tr>
                     <th scope="col">Named Data Manager</th>
-                    <td><@spring.bind "vault.nominatedDataManagers" />
-                        ${spring.status.value!""}
-                    </td>
+                    <td>${vault.getNDMsAsString()}</td>
                 </tr>
                 <tr>
                     <th scope="col">Data Creators</th>
-                    <td><@spring.bind "vault.dataCreators" />
-                        ${spring.status.value!""}
+                    <td>${vault.getDataCreatorsAsString()}
                     </td>
                 </tr>
                 <tr>
                     <th scope="col">Depositors</th>
-                    <td><@spring.bind "vault.depositors" />
-                        ${spring.status.value!""}
-                    </td>
+                    <td>${vault.getDepositorsAsString()}</td>
                 </tr>
                 </tbody>
             </table>

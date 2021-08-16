@@ -1,10 +1,12 @@
 package org.datavaultplatform.common.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.model.PendingVault;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -279,6 +281,37 @@ public class CreateVault {
     public void setContactPerson(String contactPerson) { this.contactPerson = contactPerson; }
 
     public List<String> getDataCreators() { return this.dataCreators; }
+
+    public String getDataCreatorsAsString() {
+
+        return this.getListValueAsString(this.dataCreators);
+    }
+
+    public String getDepositorsAsString() {
+
+        return this.getListValueAsString(this.depositors);
+    }
+
+    public String getNDMsAsString() {
+
+        return this.getListValueAsString(this.nominatedDataManagers);
+    }
+
+    private String getListValueAsString(List<String> value) {
+        String retVal = "";
+
+        if (value != null  && ! value.isEmpty()) {
+            List<String> tmp = new ArrayList<>();
+            for (String v : value) {
+
+                if (v != null && ! v.equals("")) {
+                    tmp.add(v);
+                }
+            }
+            retVal = StringUtils.join(tmp, ",");
+        }
+        return retVal;
+    }
 
     public void setDataCreators(List<String> dataCreators) { this.dataCreators = dataCreators; }
 
