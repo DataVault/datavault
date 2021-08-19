@@ -475,6 +475,10 @@ public class VaultsController {
             // if the save button has been clicked just save what we have and go back to the same page of the form
             // already have something saved update if not new save
             logger.info("Save button clicked");
+            String result = userLookupService.checkNewRolesUserExists(vault, buildUrl);
+            if (result != null && ! result.isEmpty()) {
+                return result;
+            }
 
             vault.setPartial(true);
             if (vault.getPendingID() == null || vault.getPendingID().isEmpty()) {
@@ -489,6 +493,10 @@ public class VaultsController {
             // if the confirm button has been clicked save what we have if everything isn't already saved
             // and display the summary
             logger.info("Confirm button clicked");
+            String result = userLookupService.checkNewRolesUserExists(vault, buildUrl);
+            if (result != null && ! result.isEmpty()) {
+                return result;
+            }
             vault.setPartial(false);
             if (vault.getPendingID() == null || vault.getPendingID().isEmpty()) {
                 newVault = restService.addPendingVault(vault);
@@ -597,6 +605,81 @@ public class VaultsController {
         return gson.toJson(result);
     }
 
+//    private String checkUserList(List<String> list, String errorUrl) {
+//        String retVal = "";
+//
+//        for (String li : list) {
+//            String result = this.checkUser(li, errorUrl);
+//            if (result != null && ! result.isEmpty()) {
+//                return result;
+//            }
+//        }
+//
+//        return retVal;
+//
+//    }
+//
+//    private String checkUser(String user, String errorUrl) {
+//        String retVal = "";
+//        // exclude the empty dummy user
+//        if (user != null && ! user.equals("")) {
+//            try {
+//                userLookupService.ensureUserExists(user);
+//            } catch (InvalidUunException e) {
+//                    /* @TODO: need to go back to the entered values plus an error message about the problem user.
+//                    This will do none of that but will return to an empty from
+//                    Would be good if we checked all of them before erroring too
+//                    */
+//                return errorUrl;
+//            }
+//        }
+//        return retVal;
+//    }
+//
+//    private String checkNewRolesUserExists(CreateVault vault, String buildUrl) {
+//        String retVal = "";
+//
+//        // foreach depositor
+//        List<String> deps = vault.getDepositors();
+//        String depResult = this.checkUserList(deps, buildUrl);
+//
+//        if (depResult != null && ! depResult.isEmpty()) {
+//            return "redirect:" + depResult;
+//        }
+//        // foreach ndm
+//        List<String> ndms = vault.getNominatedDataManagers();
+//        String ndmResult = this.checkUserList(ndms, buildUrl);
+//
+//        if (ndmResult != null && ! ndmResult.isEmpty()) {
+//            return "redirect:" + ndmResult;
+//        }
+//
+//        // foreach data creator
+//        List<String> creators = vault.getDataCreators();
+//        String creatorResult = this.checkUserList(creators, buildUrl);
+//
+//        if (creatorResult != null && ! creatorResult.isEmpty()) {
+//            return "redirect:" + creatorResult;
+//        }
+//        // owner
+//        String owner = vault.getVaultOwner();
+//        String ownerResult = this.checkUser(owner, buildUrl);
+//
+//        if (ownerResult != null && !ownerResult.isEmpty()) {
+//            return "redirect:" + ownerResult;
+//        }
+//
+//        // contact
+//        String contact = vault.getContactPerson();
+//        String contactResult = this.checkUser(contact, buildUrl);
+//
+//        if (contactResult != null && !contactResult.isEmpty()) {
+//            return "redirect:" + contactResult;
+//        }
+//
+//        return retVal;
+//    }
+
     private static class VaultTransferRequest {
         private Long role;
         private String user;
@@ -654,6 +737,7 @@ public class VaultsController {
         public boolean isRoleSelectionValid() {
             return !assigningRole || role != null;
         }
+
     }
 }
 
