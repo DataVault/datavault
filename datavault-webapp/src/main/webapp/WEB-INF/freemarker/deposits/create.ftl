@@ -245,7 +245,7 @@
                         Does this deposit contain personally identifying information?
                     </label>
                     <small>
-                        (More about personal data 
+                        (More about personal data
                         [<a href="https://www.ed.ac.uk/data-protection/data-protection-guidance/definitions/definitions-personal-data">
                             https://www.ed.ac.uk/data-protection/data-protection-guidance/definitions/definitions-personal-data
                         </a>])

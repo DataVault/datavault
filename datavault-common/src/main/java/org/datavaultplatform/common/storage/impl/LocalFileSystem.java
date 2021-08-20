@@ -12,6 +12,7 @@ import org.datavaultplatform.common.storage.Verify;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -121,8 +122,8 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
     @Override
     public void retrieve(String path, File working, Progress progress) throws Exception {
         Path absolutePath = getAbsolutePath(path);
-        File file = absolutePath.toFile();
-        
+        File file = new File(absolutePath.toUri());
+
         if (file.isFile()) {
             FileCopy.copyFile(progress, file, working);
         } else if (file.isDirectory()) {
@@ -132,15 +133,15 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
 
     @Override
     public String store(String path, File working, Progress progress) throws Exception {
-        Path absolutePath = getAbsolutePath(path);
-        File retrieveFile = absolutePath.resolve(working.getName()).toFile();
-        
+        Path absolutePath = getAbsolutePath(path);    
+        File retrieveFile = new File(absolutePath.resolve(working.getName()).toUri());
+
         if (working.isFile()) {
             FileCopy.copyFile(progress, working, retrieveFile);
         } else if (working.isDirectory()) {
             FileCopy.copyDirectory(progress, working, retrieveFile);
         }
-        
+
         return working.getName();
     }
     
@@ -164,8 +165,9 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
                 // A leading '/' would cause the path to be treated as absolute
                 while (filePath.startsWith("/")) {
                     filePath = filePath.replaceFirst("/", "");
+                    
                 }
-
+                
                 absolute = base.resolve(filePath);
                 absolute = Paths.get(absolute.toFile().getCanonicalPath());
             }
