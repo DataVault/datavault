@@ -109,7 +109,7 @@ public class ValidateService {
 //        Review Date
         String reviewDate = vault.getReviewDate();
         if (reviewDate == null || reviewDate.isEmpty()) {
-            retVal.add("Review Data missing");
+            retVal.add("Review Date missing");
         }
 
         return retVal;

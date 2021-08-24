@@ -29,6 +29,14 @@
 
                         <!-- MultiStep Form -->
                         <div class="container">
+                            <#if errors?has_content>
+                            <div id="create-error" class="alert alert-danger" role="alert">
+                                Your request contains the following errors<br/>
+                                <#list errors as error>
+                                    ${error}<br/>
+                                </#list>
+                            </div>
+                            </#if>
                             <div class="row justify-content-center mt-0">
                                 <div class="col-10 text-center p-0 mt-3 mb-2">
                                     <div class="card px-0 pt-4 pb-0 mt-3 mb-3">
