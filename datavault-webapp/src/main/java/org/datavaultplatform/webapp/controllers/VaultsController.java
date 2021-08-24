@@ -20,6 +20,7 @@ import org.datavaultplatform.webapp.model.VaultReviewModel;
 import org.datavaultplatform.webapp.services.ForceLogoutService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
+import org.datavaultplatform.webapp.services.ValidateService;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,7 @@ public class VaultsController {
 
     private RestService restService;
     private UserLookupService userLookupService;
+    private ValidateService validateService;
     private ForceLogoutService logoutService;
     private String system;
     private String link;
@@ -66,6 +68,10 @@ public class VaultsController {
 
     public void setRestService(RestService restService) {
         this.restService = restService;
+    }
+
+    public void setValidateService(ValidateService validateService) {
+        this.validateService = validateService;
     }
 
     public void setWelcome(String welcome) {
@@ -493,9 +499,22 @@ public class VaultsController {
             // if the confirm button has been clicked save what we have if everything isn't already saved
             // and display the summary
             logger.info("Confirm button clicked");
-            String result = userLookupService.checkNewRolesUserExists(vault, buildUrl);
-            if (result != null && ! result.isEmpty()) {
-                return result;
+
+            // confirm we have enough data entered to proceed
+            List<String> validateResult = validateService.validate(vault);
+            if (validateResult != null && !validateResult.isEmpty()) {
+                // return to create vault page with the entered data and error message(s)
+                // (just redirects to empty page without error atm
+                logger.info("Validation Errors");
+                for (String error : validateResult) {
+                    logger.info(error);
+                }
+                return "redirect:" + buildUrl;
+            }
+
+            String userResult = userLookupService.checkNewRolesUserExists(vault, buildUrl);
+            if (userResult != null && ! userResult.isEmpty()) {
+                return userResult;
             }
             vault.setPartial(false);
             if (vault.getPendingID() == null || vault.getPendingID().isEmpty()) {
