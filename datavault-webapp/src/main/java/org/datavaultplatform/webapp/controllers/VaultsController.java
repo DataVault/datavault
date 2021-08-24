@@ -509,7 +509,15 @@ public class VaultsController {
                 for (String error : validateResult) {
                     logger.info(error);
                 }
-                return "redirect:" + buildUrl;
+                model.addAttribute("errors", validateResult);
+                model.addAttribute("vault", vault);
+                RetentionPolicy[] policies = restService.getRetentionPolicyListing();
+                model.addAttribute("policies", policies);
+
+                Group[] groups = restService.getGroups();
+                model.addAttribute("groups", groups);
+                //return "redirect:" + buildUrl;
+                return "vaults/newCreatePrototype";
             }
 
             String userResult = userLookupService.checkNewRolesUserExists(vault, buildUrl);
