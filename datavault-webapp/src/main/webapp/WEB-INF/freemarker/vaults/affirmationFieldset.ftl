@@ -29,8 +29,10 @@
             </label>
         </div>
     </div>
+    <#if vault.confirmed?c=="false">
     <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-default" >
         <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
     </button>
+    </#if>
     <button type="button" name="next" class="next action-button btn btn-primary" disabled>Next Step &raquo;</button>
 </fieldset>

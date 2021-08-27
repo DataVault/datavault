@@ -114,6 +114,9 @@ public class VaultInfo {
     @ApiObjectField(description = "Did the user accept the Pure Link rule on the summary page")
     private Boolean pureLink = false;
 
+    @ApiObjectField(description = "Did the user confirm the pending vault yet")
+    private Boolean confirmed = false;
+
     @ApiObjectField(description = "Pure Contact")
     private String contact;
 
@@ -491,5 +494,13 @@ public class VaultInfo {
 
     public void setPureLink(Boolean pureLink) {
         this.pureLink = pureLink;
+    }
+
+    public Boolean getConfirmed() {
+        return confirmed;
+    }
+
+    public void setConfirmed(Boolean confirmed) {
+        this.confirmed = confirmed;
     }
 }

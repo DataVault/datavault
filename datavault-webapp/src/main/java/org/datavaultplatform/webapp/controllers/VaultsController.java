@@ -413,8 +413,8 @@ public class VaultsController {
         cv.setDepositors(vault.getDepositorIds());
         cv.setDataCreators(vault.getDataCreators());
         cv.setNotes(vault.getNotes());
-        cv.setPartial(true);
         cv.setPureLink(vault.getPureLink());
+        cv.setConfirmed(vault.getConfirmed());
 
         model.addAttribute("vault", cv);
         RetentionPolicy[] policies = restService.getRetentionPolicyListing();
@@ -486,7 +486,6 @@ public class VaultsController {
                 return result;
             }
 
-            vault.setPartial(true);
             if (vault.getPendingID() == null || vault.getPendingID().isEmpty()) {
                 newVault = restService.addPendingVault(vault);
             } else {
@@ -524,7 +523,7 @@ public class VaultsController {
             if (userResult != null && ! userResult.isEmpty()) {
                 return userResult;
             }
-            vault.setPartial(false);
+            vault.setConfirmed(true);
             if (vault.getPendingID() == null || vault.getPendingID().isEmpty()) {
                 newVault = restService.addPendingVault(vault);
             } else {
@@ -539,7 +538,6 @@ public class VaultsController {
         } else if ("Validate".equals(action)) {
             // this will be the code that moves from pending vault to validated vault
             // when an admin gives the ok
-            vault.setPartial(false);
 
             // add the new vault
             // remove all the pending stuff for the vault;

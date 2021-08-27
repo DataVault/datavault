@@ -64,6 +64,11 @@
                     <th scope="col">Depositors</th>
                     <td>${vault.getDepositorsAsString()}</td>
                 </tr>
+                <tr>
+                    <th scope="col">Confirmed</th>
+                    <td><@spring.bind "vault.confirmed" />
+                        ${spring.status.value!""}</td>
+                </tr>
                 </tbody>
             </table>
         </div>
@@ -84,10 +89,12 @@
         </div>
     </div>
     <button type="button" name="previous" class="previous action-button-previous btn btn-default" >&laquo; Previous</button>
+    <#if vault.confirmed?c=="false">
     <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-default" >
         <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
     </button>
     <button type="submit" name="confirm" value="Confirm" class="action-button btn btn-success">
         <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Confirm
     </button>
+    </#if>
 </fieldset>

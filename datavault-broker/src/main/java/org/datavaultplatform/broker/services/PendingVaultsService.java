@@ -346,6 +346,12 @@ public class PendingVaultsService {
             vault.setPureLink(pureLink);
         }
 
+        Boolean confirmed = createVault.getConfirmed();
+        logger.debug("Confirmed is: '" + confirmed + "'");
+        if (confirmed != null) {
+            vault.setConfirmed(confirmed);
+        }
+
         return vault;
     }
     

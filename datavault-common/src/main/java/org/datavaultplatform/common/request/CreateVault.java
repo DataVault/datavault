@@ -49,8 +49,8 @@ public class CreateVault {
     @ApiObjectField(description = "The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage")
     private String reviewDate;
 
-    @ApiObjectField(description = "Is the data a mid completion save")
-    private Boolean partial = false;
+    @ApiObjectField(description = "Has the pending vault been confirmed")
+    private Boolean confirmed = false;
 
     @ApiObjectField(description = "Did the user accept the various rules on the create vault intro page")
     private Boolean affirmed = false;
@@ -200,12 +200,12 @@ public class CreateVault {
         this.reviewDate = reviewDate;
     }
 
-    public Boolean isPartial() {
-        return this.partial;
+    public Boolean getConfirmed() {
+        return this.confirmed;
     }
 
-    public void setPartial(Boolean partial) {
-        this.partial = partial;
+    public void setConfirmed(Boolean confirmed) {
+        this.confirmed = confirmed;
     }
 
     public Boolean getAffirmed() {

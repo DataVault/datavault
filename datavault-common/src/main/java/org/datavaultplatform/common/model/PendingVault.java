@@ -131,6 +131,9 @@ public class PendingVault {
     @OneToMany(targetEntity=PendingDataCreator.class, mappedBy="pendingVault", fetch=FetchType.LAZY)
     private List<PendingDataCreator> dataCreators;
 
+    @Column(name = "confirmed", nullable = false)
+    private Boolean confirmed = false;
+
     @Column(name = "pureLink", nullable = false)
     private Boolean pureLink = false;
 
@@ -323,6 +326,16 @@ public class PendingVault {
         this.pureLink = pureLink;
     }
 
+    public Boolean getConfirmed() {
+        return this.confirmed;
+    }
+
+    public void setConfirmed(Boolean confirmed) {
+        this.confirmed = confirmed;
+    }
+
+
+
     public VaultInfo convertToResponse() {
         VaultInfo retVal = new VaultInfo();
         retVal.setID(this.id);
@@ -377,6 +390,7 @@ public class PendingVault {
         }
         retVal.setContact(this.contact);
         retVal.setPureLink(this.pureLink);
+        retVal.setConfirmed(this.confirmed);
 
         return retVal;
     }
