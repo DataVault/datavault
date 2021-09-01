@@ -18,7 +18,7 @@ $(document).ready(function(){
 
     $("#affirmation-check").change(function(){
         $(this).parents("fieldset").children(".next").prop( "disabled", !$(this).is(":checked") );
-    }).trigger('change');  ;
+    }).trigger('change');
 
     $("#vaultName, #description, #policyID, #groupID, #reviewDate").change(function(){
         // if all the mandatory values in the info field set are non null or empty set the next button
@@ -137,6 +137,8 @@ $(document).ready(function(){
             },
             duration: 600
         });
+        
+        populateSummaryPage();
     });
 
     $(".previous").click(function(){
@@ -179,4 +181,100 @@ $(document).ready(function(){
         $('#submitAction').val($(this).attr('value'));
     });
 
+    function populateSummaryPage() {
+    	console.log("populateSummaryPage()");
+    	// Check if an element with id="summary-fieldset" currently exists,
+    	// then populate the Summary page either values from form elements on previous pages
+    	if ($('#summary-fieldset').length) {
+    	  $("#summary-affirmation-check").text($("#affirmation-check").is(":checked") ? "accepted" : "");
+          
+    	  //  To get input tag text we need to use val() not text().
+    	  
+    	  // VaultInfo
+    	  $("#summary-vaultName").text($("#vaultName").val());
+    	  $("#summary-description").text($("#description").val());
+    	  $("#summary-policyID").text($("#policyID option:selected").text());
+    	  $("#summary-grantEndDate").text($("#grantEndDate").val());
+          $("#summary-groupID").text($("#groupID option:selected").text());
+          $("#summary-reviewDate").text($("#reviewDate").val());
+          // remove line breaks from string with replace(/(\r\n|\n|\r)/gm, "") and need to trim
+          var estimateEl = $("input[name='estimate']:checked");
+          if(typeof estimateEl !== 'undefined' && estimateEl !== null) {
+        	  $("#summary-estimate").text(estimateEl.parent().text().replace(/(\r\n|\n|\r)/gm, "").trim());
+          }
+          $("#summary-notes").text($("#notes").val());
+          
+          // Billing
+          var billingTypeEl = $("input[id^='billing-choice']:checked");
+          if(typeof billingTypeEl !== 'undefined' && billingTypeEl !== null) {
+        	  var billingType = billingTypeEl.parent().text().replace(/(\r\n|\n|\r)/gm, "").trim();
+        	  // Hack to ensure text after "[" is not added
+        	  if(billingType.indexOf("[") > -1) {
+        		  billingType = billingType.split("[")[0];
+        	  }
+        	  $("#summary-billing-type").text(billingType);
+        	  //Hide or show billing fields
+        	  if(billingType.startsWith("N/A")) {
+        		  $(".summary-grant-or_budget-billing-row").hide();
+        		  $(".summary-slice-billing-row").hide();
+        	  } else if(billingType.startsWith("A Slice")) {
+        		  $(".summary-grant-or_budget-billing-row").hide();
+        		  $(".summary-slice-billing-row").show();
+        	  } else {
+        		  $(".summary-slice-billing-row").hide();
+        		  $(".summary-grant-or_budget-billing-row").show();
+        	  }
+          }
+          $("#summary-sliceID").text($("#sliceID").val());
+          $("#summary-authoriser").text($("#authoriser").val());
+          $("#summary-schoolOrUnit").text($("#schoolOrUnit").val());
+          $("#summary-subunit").text($("#subunit").val());
+          $("#summary-projectID").text($("#projectID").val());
+          
+          // Vault Users
+          
+          // Vault Access
+          $("#summary-vaultOwner").text($("#vaultOwner").val());
+          
+          var ndmsArray = [];
+          $("input[name^='nominatedDataManagers']").each(function() {
+        	  ndmsArray.push($(this).val());
+          });
+          // comma-separated text
+          var ndmsHtml = createArrayHtml(ndmsArray);
+          $("#summary-nominatedDataManagers").html(ndmsHtml);
+          
+          var depositorsArray = [];
+          $("input[name^='depositors']").each(function() {
+        	  depositorsArray.push($(this).val());
+          });
+          
+          var depositorsHtml = createArrayHtml(depositorsArray);
+          $("#summary-depositors").html(depositorsHtml);
+          
+          // Pure Information
+          $("#summary-contactPerson").text($("#contactPerson").val());
+          
+          var dataCreatorsArray = [];
+          $("input[name^='dataCreators']").each(function() {
+        	  dataCreatorsArray.push($(this).val());
+          });
+          
+          var dataCreatorsHtml = createArrayHtml(dataCreatorsArray);
+          $("#summary-dataCreators").html(dataCreatorsHtml);
+    	}
+    	
+    	
+    	function createArrayHtml(array) {
+    		var html = "";
+    		for (var i = 0; i < array.length; i++) {
+    			// To only add  non-empty strings
+    			if(array[i].trim().length > 0) {
+    			  html += array[i] + "<br>";
+    			}
+    	    } 
+    		return html;
+    	}
+    	
+    }
 });

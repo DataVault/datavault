@@ -1,76 +1,159 @@
-<fieldset>
+<fieldset id="summary-fieldset">
     <div class="form-card">
         <h2 class="fs-title">Summary</h2>
         <div>
+            <h3 class="fs-title">Vault Information</h3>
             <table class="table table-sm">
 
                 <tbody>
                 <tr>
+                    <th scope="col">Affirmation</th>
+                    <td>
+                       <span id="summary-affirmation-check"></span>
+                    </td>
+                </tr>
+                <tr>
                     <th scope="col">Vault Name</th>
                     <td>
-                        <@spring.bind "vault.name" />
-                        ${spring.status.value!""}
+                        <span id="summary-vaultName"></span>
                     </td>
                 </tr>
                 <tr>
                     <th scope="col">Description</th>
-                    <td>
-                        <@spring.bind "vault.description" />
-                        ${spring.status.value!""}
+                     <td>
+                        <span id="summary-description"></span>
                     </td>
                 </tr>
                 <tr>
-                    <th scope="col">Estimate Size</th>
-                    <td>
-                        <@spring.bind "vault.estimate" />
-                        ${spring.status.value!""}
+                    <th scope="col">Retention Policy</th>
+                     <td>
+                        <span id="summary-policyID"></span>
                     </td>
-                </tr>
-                <tr>
-                    <th scope="col">PURE ID</th>
-                    <td>Not available yet (not sure it ever will be at this stage unless we can create the pure record in DV)</td>
                 </tr>
                 <tr>
                     <th scope="col">Grant End Date</th>
-                    <td><@spring.bind "vault.grantEndDate" />
-                        ${spring.status.value!""}
+                     <td>
+                        <span id="summary-grantEndDate"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="col">School</th>
+                     <td>
+                        <span id="summary-groupID"></span>
                     </td>
                 </tr>
                 <tr>
                     <th scope="col">Review Date</th>
-                    <td><@spring.bind "vault.reviewDate" />
-                        ${spring.status.value!""}
+                     <td>
+                        <span id="summary-reviewDate"></span>
                     </td>
                 </tr>
                 <tr>
-                    <th scope="col">Billing</th>
-                    <td>${vault.getBillingAsString()}</td>
+                    <th scope="col">Estimate of the amount of data</th>
+                     <td>
+                        <span id="summary-estimate"></span>
+                    </td>
                 </tr>
                 <tr>
-                    <th scope="col">Owner</th>
-                    <td><@spring.bind "vault.vaultOwner" />
-                        ${spring.status.value!""}</td>
+                    <th scope="col">Notes regarding data retention</th>
+                     <td>
+                        <span id="summary-notes"></span>
+                    </td>
+                </tr>
+                
+                </tbody>
+            </table>
+               
+            <h3 class="fs-title">Billing</h3>
+            <table class="table table-sm">
+
+                <tbody>
+                <tr>
+                    <th scope="col">Funding for this vault will be from</th>
+                    <td>
+                       <span id="summary-billing-type"></span>
+                    </td>
+                </tr>
+                
+                <tr class="summary-slice-billing-row">
+                    <th scope="col">Slice</th>
+                    <td>
+                       <span id="summary-sliceID"></span>
+                    </td>
+                </tr>
+               <tr class="summary-grant-or_budget-billing-row">
+                    <th scope="col">Authoriser</th>
+                    <td>
+                       <span id="summary-authoriser"></span>
+                    </td>
+                </tr>
+                <tr class="summary-grant-or_budget-billing-row">
+                    <th scope="col">School/Unit</th>
+                    <td>
+                       <span id="summary-schoolOrUnit"></span>
+                    </td>
+                </tr>
+                <tr class="summary-grant-or_budget-billing-row">
+                    <th scope="col">Subunit</th>
+                    <td>
+                       <span id="summary-subunit"></span>
+                    </td>
+                </tr>
+                <tr class="summary-grant-or_budget-billing-row">
+                    <th scope="col">ProjectId</th>
+                    <td>
+                       <span id="summary-projectID"></span>
+                    </td>
+                </tr>
+               </tbody>
+            </table>
+            
+          
+            <h3 class="fs-title">Vault Access</h3>
+            <table class="table table-sm">
+
+                <tbody>
+                <tr>
+                    <th scope="col">Owner UUN:</th>
+                    <td>
+                       <span id="summary-vaultOwner"></span>
+                    </td>
                 </tr>
                 <tr>
-                    <th scope="col">Named Data Manager</th>
-                    <td>${vault.getNDMsAsString()}</td>
-                </tr>
-                <tr>
-                    <th scope="col">Data Creators</th>
-                    <td>${vault.getDataCreatorsAsString()}
+                    <th scope="col">NDMs</th>
+                    <td>
+                       <span id="summary-nominatedDataManagers"></span>
                     </td>
                 </tr>
                 <tr>
                     <th scope="col">Depositors</th>
-                    <td>${vault.getDepositorsAsString()}</td>
+                    <td>
+                       <span id="summary-depositors"></span>
+                    </td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <h3 class="fs-title">Pure Information</h3>
+            
+            <table class="table table-sm">
+
+                <tbody>
+               <tr>
+                    <th scope="col">Contact Person</th>
+                    <td>
+                       <span id="summary-contactPerson"></span>
+                    </td>
                 </tr>
                 <tr>
-                    <th scope="col">Confirmed</th>
-                    <td><@spring.bind "vault.confirmed" />
-                        ${spring.status.value!""}</td>
+                    <th scope="col">Data Creators</th>
+                    <td>
+                       <span id="summary-dataCreators"></span>
+                    </td>
                 </tr>
-                </tbody>
+                   </tbody>
             </table>
+
         </div>
         <div>
             Please make sure all information above is correct and click on confirm to process to your vault creation.
