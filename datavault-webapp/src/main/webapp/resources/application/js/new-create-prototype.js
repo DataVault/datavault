@@ -20,6 +20,26 @@ $(document).ready(function(){
         $(this).parents("fieldset").children(".next").prop( "disabled", !$(this).is(":checked") );
     }).trigger('change');  ;
 
+    $("#vaultName, #description, #policyID, #groupID, #reviewDate").change(function(){
+        // if all the mandatory values in the info field set are non null or empty set the next button
+        // display value to true
+        // name
+        var nameResult = ($( "input[type=text][id=vaultName]").val().trim() === '');
+        // description
+        var descResult = ($( "textarea[type=text][id=description]").val() === '');
+        // retention policy
+        var rpResult = ($("#policyID option:selected").val() === '' || $("#policyID option:selected").prop("disabled"));
+        // school
+        var schoolResult = ($("#groupID option:selected").val() === '' || $("#groupID option:selected").prop("disabled"));
+        // review date
+        var reviewResult = ($( "input[id=reviewDate]").val().trim() === '');
+        if (nameResult === false && descResult === false && rpResult === false && schoolResult === false  && reviewResult === false) {
+            $(this).parents("fieldset").children(".next").prop("disabled", false);
+        } else {
+            $(this).parents("fieldset").children(".next").prop("disabled", true);
+        }
+    }).trigger('change');  ;
+
     $("#billing-choice-na").change(function(){
         $('.collapse').collapse('hide');
         $(this).parents("fieldset").children(".next").prop( "disabled", false );
