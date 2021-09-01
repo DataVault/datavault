@@ -148,5 +148,5 @@
         <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
     </button>
     </#if>
-    <button type="button" name="next" class="next action-button btn btn-primary">Next Step &raquo;</button>
+    <button type="button" name="next" class="next action-button btn btn-primary" disabled>Next Step &raquo;</button>
 </fieldset>
