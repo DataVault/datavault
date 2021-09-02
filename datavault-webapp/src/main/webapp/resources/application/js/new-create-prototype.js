@@ -40,6 +40,19 @@ $(document).ready(function(){
         }
     }).trigger('change');  ;
 
+    $("#pureLink-check").change(function(){
+        alert("pureLink changed");
+        var result = $(this).is(":checked");
+        alert("Result is " + result);
+        if (result) {
+            alert("1 Setting disabled false");
+            $("#confirm").prop("disabled", false);
+        } else {
+            alert("1 Setting disabled true");
+            $("#confirm").prop("disabled", true);
+        }
+    }).trigger('change');
+
     $("#billing-choice-na").change(function(){
         $('.collapse').collapse('hide');
         $(this).parents("fieldset").children(".next").prop( "disabled", false );
