@@ -42,7 +42,6 @@ $(document).ready(function(){
 
     $("#pureLink-check").change(function(){
         var result = $(this).is(":checked");
-        alert("Result is " + result);
         if (result) {
             $("#confirm").prop("disabled", false);
         } else {
