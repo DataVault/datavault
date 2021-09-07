@@ -9,12 +9,12 @@
             <@spring.bind "vault.isOwner" />
             <div class="radio-inline">
                 <label>
-                    <input type="radio" id="isNominatedDataManagers" name="${spring.status.expression}" value="true" <#if vault.isOwner??>${(vault.isOwner)?then('checked', '')}</#if>> Yes
+                    <input type="radio" id="isOwnerTrue" name="${spring.status.expression}" value="true" <#if vault.isOwner??>${(vault.isOwner)?then('checked', '')}</#if>> Yes
                 </label>
             </div>
             <div class="radio-inline">
                 <label>
-                    <input type="radio" id="isNominatedDataManagers" name="${spring.status.expression}" value="false" <#if vault.isOwner??>${(!vault.isOwner)?then('checked', '')}</#if>> No
+                    <input type="radio" id="isOwnerFalse" name="${spring.status.expression}" value="false" <#if vault.isOwner??>${(!vault.isOwner)?then('checked', '')}</#if>> No
                 </label>
             </div>
         </div>

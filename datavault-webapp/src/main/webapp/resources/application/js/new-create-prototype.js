@@ -40,6 +40,27 @@ $(document).ready(function(){
         }
     }).trigger('change');  ;
 
+    $("#pureLink-check").change(function(){
+        var result = $(this).is(":checked");
+        if (result) {
+            $("#confirm").prop("disabled", false);
+        } else {
+            $("#confirm").prop("disabled", true);
+        }
+    }).trigger('change');
+
+    $("#isOwnerTrue, #isOwnerFalse, #vaultOwner").change(function(){
+        //var ownerTrueResult = $( "input[type=radio][id=isOwnerTrue]").is(":checked");
+        var ownerFalseResult = $( "input[type=radio][id=isOwnerFalse]").is(":checked");
+        var uunResult = ($( "input[type=text][id=vaultOwner]").val().trim() === '');
+
+        if (ownerFalseResult && uunResult) {
+            $(this).parents("fieldset").children(".next").prop("disabled", true);
+        } else {
+            $(this).parents("fieldset").children(".next").prop("disabled", false);
+        }
+    }).trigger('change');
+
     $("#billing-choice-na").change(function(){
         $('.collapse').collapse('hide');
         $(this).parents("fieldset").children(".next").prop( "disabled", false );
