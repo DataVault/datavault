@@ -3,14 +3,18 @@ package org.datavaultplatform.common.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.datavaultplatform.common.model.PendingVault;
+import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "VaultInfo")
@@ -502,5 +506,61 @@ public class VaultInfo {
 
     public void setConfirmed(Boolean confirmed) {
         this.confirmed = confirmed;
+    }
+
+    public CreateVault convertToCreate() {
+        /*
+        TODO: need to add validation / defend against nulls just a work in progress
+         */
+        CreateVault cv = new CreateVault();
+        cv.setPendingID(this.getID());
+        cv.setAffirmed(this.getAffirmed());
+        if (this.getBillingType() != null) {
+            cv.setBillingType(this.getBillingType().toString());
+        }
+        cv.setSliceID(this.getSliceID());
+        cv.setAuthoriser(this.getAuthoriser());
+        cv.setSchoolOrUnit(this.getSchoolOrUnit());
+        cv.setSubunit(this.getSubunit());
+        cv.setProjectID(this.getProjectId());
+        cv.setName(this.getName());
+        //logger.info("Vault Description is: '" + vault.getDescription());
+        cv.setDescription(this.getDescription());
+        //logger.info("Create Vault Description is: '" + cv.getDescription());
+        cv.setPolicyID(this.getPolicyID());
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.UK);
+
+        if (this.getGrantEndDate() != null) {
+            cv.setGrantEndDate(formatter.format(this.getGrantEndDate()));
+        }
+        cv.setGroupID(this.getGroupID());
+        if (this.getReviewDate() != null) {
+            cv.setReviewDate(formatter.format(this.getReviewDate()));
+        }
+        if (this.getEstimate() != null) {
+            cv.setEstimate(this.getEstimate().toString());
+        }
+        cv.setContactPerson(this.getContact());
+
+        //cv.setIsOwner(vault.getIsOwner());
+        // if vault owner is null set isowner to true
+        // if vault owner is the same as the logged in user set isowner to true
+        // if vault owner is different ot hte logged in user set to false
+        //logger.debug("Setting default isOwner");
+        Boolean isOwner = true;
+        if (this.getOwnerId() != null && ! this.getOwnerId().equals(this.getUserID())) {
+            //logger.debug("Changing default isOwner");
+            isOwner = false;
+        }
+        cv.setIsOwner(isOwner);
+        cv.setVaultOwner(this.getOwnerId());
+        cv.setNominatedDataManagers(this.getNominatedDataManagerIds());
+        cv.setDepositors(this.getDepositorIds());
+        cv.setDataCreators(this.getDataCreators());
+        cv.setNotes(this.getNotes());
+        cv.setPureLink(this.getPureLink());
+        cv.setConfirmed(this.getConfirmed());
+
+        return cv;
     }
 }

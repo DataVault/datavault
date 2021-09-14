@@ -23,6 +23,7 @@ import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.VaultReview;
+import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.EventInfo;
 import org.datavaultplatform.common.response.ReviewInfo;
@@ -114,12 +115,47 @@ public class AdminPendingVaultsController {
     
     @RequestMapping(value = "/admin/pendingVaults/summary/{pendingVaultId}", method = RequestMethod.GET)
     public String getVault(ModelMap model, @PathVariable("pendingVaultId") String vaultID, Principal principal) {
-        PendingVault pendingVault = restService.getPendingVaultRecord(vaultID);
+        logger.info("VaultID:'" + vaultID + "'");
+        VaultInfo pendingVault = restService.getPendingVault(vaultID);
+        logger.info("pendingVault.id:'" + pendingVault.getID() + "'");
         model.addAttribute("pendingVault", pendingVault);
 
         return "admin/pendingVaults/summary";
     }
-    
+/*
+    // Upgrade a pending vault to a full vault
+    @RequestMapping(value = "/admin/pendingVaults/upgrade/{pendingVaultId}/", method = RequestMethod.POST)
+    public String upgradeVault(ModelMap model, @PathVariable("pendingVaultId") String vaultID, Principal principal) {
+
+        // need to either pass in create vault or get vaultnfo from the pending id param
+        // and convert it to create vault object like in VaultController.getPendingVault
+        VaultInfo pendingVault = restService.getPendingVault(vaultID);
+        CreateVault cv = pendingVault.convertToCreate();
+        logger.info("Attempting to upgrade pending vault to pull vault");
+        VaultInfo newVault = restService.addVault(cv);
+        logger.info("Completed upgrading pending vault to pull vault");
+        //need to add full vault datacreators, roles etc.
+        // any other new info too pure stuff billing etc.
+        String vaultUrl = "/vaults/" + newVault.getID() + "/";
+        return "redirect:" + vaultUrl;
+    }
+*/
+    @RequestMapping(value = "/admin/pendingVaults/upgrade/{pendingVaultId}", method = RequestMethod.GET)
+    public String upgradeVault(@PathVariable("pendingVaultId") String pendingVaultID) {
+        // need to either pass in create vault or get vaultnfo from the pending id param
+        // and convert it to create vault object like in VaultController.getPendingVault
+        VaultInfo pendingVault = restService.getPendingVault(pendingVaultID);
+        CreateVault cv = pendingVault.convertToCreate();
+        logger.info("Attempting to upgrade pending vault to pull vault");
+        VaultInfo newVault = restService.addVault(cv);
+        logger.info("Completed upgrading pending vault to pull vault");
+        //need to add full vault datacreators, roles etc.
+        // any other new info too pure stuff billing etc.
+        String vaultUrl = "/vaults/" + newVault.getID() + "/";
+        return "redirect:" + vaultUrl;
+    }
+
+/*
     @RequestMapping(value = "/admin/pendingVaults/addVault/{pendingVaultId}", method = RequestMethod.GET)
     public String addVault(@PathVariable("pendingVaultId") String pendingVaultID,
     	                   @RequestParam("reviewDate") String reviewDateString) {
@@ -143,6 +179,8 @@ public class AdminPendingVaultsController {
 
         return "redirect:/admin/pendingVaults";
     }
+
+
     
     @RequestMapping(value = "/admin/pendingVaults/delete/{pendingVaultId}", method = RequestMethod.GET)
     public String deletePendingVault(@PathVariable("pendingVaultId") String pendingVaultID) {
@@ -152,7 +190,7 @@ public class AdminPendingVaultsController {
 
         return "redirect:/admin/pendingVaults";
     }
-
+*/
     private String constructTableRecordsInfo(int offset, int recordsTotal, int filteredRecords, int numberOfRecordsonPage, boolean isFiltered) {
 		StringBuilder recordsInfo = new StringBuilder();
 		recordsInfo.append("Showing ").append(offset + 1).append(" - ").append(offset + numberOfRecordsonPage);

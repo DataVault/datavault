@@ -331,29 +331,6 @@ public class VaultsController {
         return "vaults/userVaults";
     }
 
-    /*@RequestMapping(value = "/vaults/create", method = RequestMethod.GET)
-    public String createVault(ModelMap model) {
-
-        // pass the view an empty Vault since the form expects it
-        model.addAttribute("vault", new CreateVault());
-
-        Dataset[] datasets = restService.getDatasets();
-        model.addAttribute("datasets", datasets);
-
-        RetentionPolicy[] policies = restService.getRetentionPolicyListing();
-        model.addAttribute("policies", policies);
-
-        Group[] groups = restService.getGroups();
-        model.addAttribute("groups", groups);
-
-        model.put("system", system);
-        model.put("link", link);
-
-        model.addAttribute("welcome", welcome);
-
-        return "vaults/create";
-    }*/
-
     @RequestMapping(value = "/pendingVaults/{vaultid}", method = RequestMethod.GET)
     public String getPendingVault(ModelMap model, @PathVariable("vaultid") String vaultID, Principal principal) {
         VaultInfo vault = restService.getPendingVault(vaultID);
@@ -364,58 +341,7 @@ public class VaultsController {
             throw new ForbiddenException();
         }
 
-        /*
-        TODO: need to add validation / defend against nulls just a work in progress
-         */
-        CreateVault cv = new CreateVault();
-        cv.setPendingID(vault.getID());
-        cv.setAffirmed(vault.getAffirmed());
-        if (vault.getBillingType() != null) {
-            cv.setBillingType(vault.getBillingType().toString());
-        }
-        cv.setSliceID(vault.getSliceID());
-        cv.setAuthoriser(vault.getAuthoriser());
-        cv.setSchoolOrUnit(vault.getSchoolOrUnit());
-        cv.setSubunit(vault.getSubunit());
-        cv.setProjectID(vault.getProjectId());
-        cv.setName(vault.getName());
-        logger.info("Vault Description is: '" + vault.getDescription());
-        cv.setDescription(vault.getDescription());
-        logger.info("Create Vault Description is: '" + cv.getDescription());
-        cv.setPolicyID(vault.getPolicyID());
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.UK);
-
-        if (vault.getGrantEndDate() != null) {
-            cv.setGrantEndDate(formatter.format(vault.getGrantEndDate()));
-        }
-        cv.setGroupID(vault.getGroupID());
-        if (vault.getReviewDate() != null) {
-            cv.setReviewDate(formatter.format(vault.getReviewDate()));
-        }
-        if (vault.getEstimate() != null) {
-            cv.setEstimate(vault.getEstimate().toString());
-        }
-        cv.setContactPerson(vault.getContact());
-
-        //cv.setIsOwner(vault.getIsOwner());
-        // if vault owner is null set isowner to true
-        // if vault owner is the same as the logged in user set isowner to true
-        // if vault owner is different ot hte logged in user set to false
-        logger.debug("Setting default isOwner");
-        Boolean isOwner = true;
-        if (vault.getOwnerId() != null && ! vault.getOwnerId().equals(vault.getUserID())) {
-            logger.debug("Changing default isOwner");
-            isOwner = false;
-        }
-        cv.setIsOwner(isOwner);
-        cv.setVaultOwner(vault.getOwnerId());
-        cv.setNominatedDataManagers(vault.getNominatedDataManagerIds());
-        cv.setDepositors(vault.getDepositorIds());
-        cv.setDataCreators(vault.getDataCreators());
-        cv.setNotes(vault.getNotes());
-        cv.setPureLink(vault.getPureLink());
-        cv.setConfirmed(vault.getConfirmed());
-
+        CreateVault cv = vault.convertToCreate();
         model.addAttribute("vault", cv);
         RetentionPolicy[] policies = restService.getRetentionPolicyListing();
         model.addAttribute("policies", policies);
@@ -452,17 +378,7 @@ public class VaultsController {
     public String addVault(@ModelAttribute CreateVault vault, ModelMap model) {
         VaultInfo newVault = restService.addVault(vault);
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
-        return "redirect:" + vaultUrl;        
-    }*/
-
-    /*// Process the partially completed 'create new vault' pages
-    @RequestMapping(value = "/vaults/save", method = RequestMethod.POST)
-    public String savePartialVault(@ModelAttribute CreateVault vault, ModelMap model) {
-        VaultInfo newVault = restService.savePartialVault(vault);
-        String vaultUrl = "/vaults/" + newVault.getID() + "/";
-        logger.debug("Saving partial vault in web controller");
-        return "vaults/newCreatePrototype";
-        //return "redirect:" + vaultUrl;
+        return "redirect:" + vaultUrl;
     }*/
 
     // Process the completed 'create new vault' page

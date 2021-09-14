@@ -19,9 +19,9 @@
   
   <a name="previous" class="btn btn-primary" 
       href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults">&laquo; Return</a>
-     
-  
- <form id="create-vault" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/addVault/${pendingVault.id}" method="get" novalidate="novalidate" _lpchecked="1">
+
+
+ <form id="create-vault" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/upgrade/${pendingVault.ID}" method="get" novalidate="novalidate" _lpchecked="1">
     <div class="table-responsive" id="pendingVaultsTable">
          <table class="table table-striped">
                 <thead>
@@ -39,18 +39,19 @@
       <td>${pendingVault.name?html}</td>
     </tr>
     <tr class="tr">
-      <td>Creator(UUN) - TO BE CLARIFIED</td>
+      <td>Creator</td>
        <td>
-         <#if (pendingVault.user)??>
-             ${pendingVault.user.getFirstname()?html} ${pendingVault.user.getLastname()?html} (${pendingVault.user.getID()?html}) 
-         </#if>
+           <#if (pendingVault.userID)??>
+               ${pendingVault.userID?html}
+           </#if>
        </td>
     </tr>
-    <td>Owner(UUN) - TO BE CLARIFIED</td>
+    <tr class="tr">
+    <td>Owner</td>
        <td>
-         <#if (pendingVault.user)??>
-             ${pendingVault.user.getFirstname()?html} ${pendingVault.user.getLastname()?html} (${pendingVault.user.getID()?html}) 
-         </#if>
+           <#if (pendingVault.ownerId)??>
+               ${pendingVault.ownerId?html}
+           </#if>
        </td>
     </tr>
     
@@ -129,16 +130,16 @@
     <tr class="tr">
       <td>RetentionPolicy</td>
       <td>
-         <#if (pendingVault.retentionPolicy.getName())??>
-           ${pendingVault.retentionPolicy.getName()?html}
+         <#if (pendingVault.policyID)??>
+           ${pendingVault.policyID?html}
          </#if>
       </td>
     </tr>
     <tr class="tr">
       <td>Group</td>
       <td>
-         <#if (pendingVault.group.getName())??>
-           ${pendingVault.group.getName()?html}
+         <#if (pendingVault.groupID)??>
+           ${pendingVault.groupID?html}
          </#if>
       </td>
     </tr>
@@ -152,19 +153,11 @@
     </tr>
    <tr class="tr">
       <td>Review Date</td>
-      <td>
-        
-         <#if (pendingVault.reviewDate)??>
-           <input id="reviewDate" name="reviewDate" 
-           class="form-control date-picker" 
-           value="${pendingVault.reviewDate?date}" 
-           placeholder="Select date from calendar by clicking in input box"/>
-         <#else>
-           <input id="reviewDate" name="reviewDate" 
-           class="form-control date-picker" placeholder="Select date from calendar by clicking in input box"/>
-         </#if>
-         
-      </td>
+       <td>
+           <#if (pendingVault.reviewDate)??>
+               ${pendingVault.reviewDate?date}
+           </#if>
+       </td>
     </tr>
     
   </tbody>
@@ -173,14 +166,14 @@
 
  <div class="container">
    <div class="col-md-12 text-center">
-     <#if (pendingVault.id)??>
+     <#if (pendingVault.ID)??>
           <a name="delete-pending-vault" class="btn btn-default" 
           href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Cancel</a>
        
 
           <a name="delete-pending-vault" class="btn btn-danger" 
-          href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/delete/${pendingVault.id}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Delete Pending Vault</a>
-       
+          href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/delete/${pendingVault.getID()}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Delete Pending Vault</a>
+
          
          <button type="submit" value="submit" class="btn btn-success">
               <span class="glyphicon glyphicon-folder-close"></span>
@@ -192,71 +185,10 @@
      
   </div>
 </div>
-<form>
+</form>
                             
 </div>
 
-<script>
-$(document).ready(function () {
-    $.datepicker.setDefaults({
-        dateFormat: "dd-M-yy",
-        changeMonth: true,
-        changeYear: true,
-        showOtherMonths: true,
-        selectOtherMonths: true
-    });
-     
-    
-    $("#reviewDate").datepicker({
-       minDate: '+1m'
-    });
-    
-
-     $.validator.addMethod(
-                "reviewDate",
-                function(value, element) {
-                    // put your own logic here, this is just a (crappy) example
-
-                    if (value){
-                        var inAMonth = new Date();
-                        inAMonth.setMonth(inAMonth.getMonth() + 1);
-                        inAMonth.setHours( 0,0,0,0 );
-
-                        var selectedDate = new Date(value);
-
-                        return selectedDate >= inAMonth;
-                    } else {
-                        return true;
-                    }
-                },
-                "The review date must be at least one month in the future."
-     );
-     
-     $('#create-vault').validate({
-                debug: true,
-                rules: {
-              
-                    reviewDate : {
-                        required: true,
-                        date: true,
-                        reviewDate: true
-                    }
-                },
-                highlight: function (element) {
-                    $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
-                },
-                success: function (element) {
-                    element.addClass('valid')
-                        .closest('.form-group').removeClass('has-error').addClass('has-success');
-                },
-                submitHandler: function (form) {
-                    $('button[type="submit"]').prop('disabled', true);
-                    form.submit();
-                }
-            });
-     
-});
-</script>
 </@layout.vaultLayout>
        
   
