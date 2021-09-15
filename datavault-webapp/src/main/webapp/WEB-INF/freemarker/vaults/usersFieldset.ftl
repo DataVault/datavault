@@ -30,6 +30,7 @@
           <label class="col-sm-2 control-label">NDMs: </label>
         </div>
         
+        <#if vault.nominatedDataManagers?has_content>
         <#list vault.nominatedDataManagers as ndm>
         <#assign ndmCount = ndm?index>
            <div class="extra-ndm form-group col-sm-offset-2">
@@ -43,6 +44,13 @@
               </#if>
             </div>
         </#list>
+        <#else>
+           <div class="extra-ndm form-group col-sm-offset-2">
+              <@spring.bind "vault.nominatedDataManagers[0]" />
+              <input name="nominatedDataManagers[0]" value="${spring.status.value!""}" class="autocomplete" type="text" />
+               <button type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
+            </div>
+        </#if>
            
         <div id="extra-ndm-list"></div>
           
@@ -67,6 +75,7 @@
           <label class="col-sm-2 control-label">Depositors: </label>
         </div>
         
+        <#if vault.depositors?has_content>
         <#list vault.depositors as depositor>
         <#assign depositorCount = depositor?index>
            <div class="extra-depositor form-group col-sm-offset-2">
@@ -80,6 +89,13 @@
               </#if>
             </div>
         </#list>
+        <#else>
+          <div class="extra-depositor form-group col-sm-offset-2">
+              <@spring.bind "vault.depositors[0]" />
+              <input name="depositors[0]" value="${spring.status.value!""}" class="autocomplete" type="text" />
+              <button type="button" id="add-depositor-btn" class="btn btn-default btn-sm">Add a depositor</button>
+          </div>
+        </#if>
            
         <div id="extra-depositor-list"></div>
           
@@ -111,6 +127,7 @@
           <label class="col-sm-2 control-label">Data Creators: </label>
         </div>
         
+        <#if vault.dataCreators?has_content>
         <#list vault.dataCreators as dataCreator>
         <#assign dataCreatorCount = dataCreator?index>
            <div class="extra-data-creator form-group col-sm-offset-2">
@@ -124,6 +141,13 @@
               </#if>
             </div>
         </#list>
+        <#else>
+          <div class="extra-data-creator form-group col-sm-offset-2">
+              <@spring.bind "vault.dataCreators[0]" />
+              <input name="dataCreators[0]" value="${spring.status.value!""}" class="autocomplete" type="text" />
+              <button type="button" id="add-data-creator-btn" class="btn btn-default btn-sm">Add a Data Creator</button>
+          </div>
+        </#if>
            
         <div id="extra-data-creator-list"></div>
           
