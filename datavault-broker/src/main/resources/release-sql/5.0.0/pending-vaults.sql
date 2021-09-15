@@ -21,7 +21,7 @@ CREATE TABLE `PendingDataCreators` (
     `name` text NOT NULL,
     `version` bigint(20) NOT NULL,
     `pendingVault_id` varchar(36) DEFAULT NULL,
-    PRIMARY KEY (`id`),
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO hibernate_sequence (next_val) VALUES (1);
@@ -35,3 +35,4 @@ ALTER TABLE Role_assignments ADD UNIQUE KEY `UK_Pending_Vault_ID` (`role_id`,`us
 ALTER TABLE PendingVaults add column contact TEXT;
 ALTER TABLE PendingVaults add column pureLink bit not null default false;
 ALTER TABLE PendingVaults add column confirmed bit not null default false;
+ALTER TABLE Vaults MODIFY snapshot longtext NULL DEFAULT null;
