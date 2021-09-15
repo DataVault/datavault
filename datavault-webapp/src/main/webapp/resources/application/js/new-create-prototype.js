@@ -98,41 +98,64 @@ $(document).ready(function(){
         }
     }).trigger('change');  
 
-    $("#add-depositor-btn").click(function(){
-        $(".example-depositor").clone(true).appendTo("#extra-depositor-list")
-            .removeClass("example-depositor")
-            .removeClass("hidden")
-            .addClass("extra-depositor").show();
-    });
-
-    $(".remove-depositor-btn").click(function(){
-        const current_depositor = $(this).closest('.extra-depositor');
-        current_depositor.remove();
-    });
 
     $("#add-ndm-btn").click(function(){
-        $(".example-ndm").clone(true).appendTo("#extra-ndm-list")
-            .removeClass("example-ndm")
-            .removeClass("hidden")
-            .addClass("extra-ndm").show();
+        const firstEmptyNdm = $("#hidden-empty-ndms > div.empty-ndm").first();
+        firstEmptyNdm.removeClass("empty-ndm")
+                     .addClass("extra-ndm");
+        firstEmptyNdm.appendTo("#extra-ndm-list");
+        firstEmptyNdm.show();
     });
 
     $(".remove-ndm-btn").click(function(){
-        const current_depositor = $(this).closest('.extra-ndm');
-        current_depositor.remove();
+        const currentNdm = $(this).closest('.extra-ndm');
+        // Reset value of input to empty string
+        currentNdm.find("input:first-child").val("");
+        currentNdm.removeClass("extra-ndm")
+                   .addClass("empty-ndm");
+        // Prepend element to hidden-empty-ndms
+        currentNdm.prependTo($("#hidden-empty-ndms"));
+        
+    });
+    
+    $("#add-depositor-btn").click(function(){
+        const firstEmptyDepositor = $("#hidden-empty-depositors > div.empty-depositor").first();
+        firstEmptyDepositor.removeClass("empty-depositor")
+                     .addClass("extra-depositor");
+        firstEmptyDepositor.appendTo("#extra-depositor-list");
+        firstEmptyDepositor.show();
     });
 
-    $("#add-creator-btn").click(function(){
-        $(".example-creator").clone(true).appendTo("#extra-creator-list")
-            .removeClass("example-creator")
-            .removeClass("hidden")
-            .addClass("extra-creator").show();
+    $(".remove-depositor-btn").click(function(){
+        const currentDepositor = $(this).closest('.extra-depositor');
+        // Reset value of input to empty string
+        currentDepositor.find("input:first-child").val("");
+        currentDepositor.removeClass("extra-depositor")
+                   .addClass("empty-depositor");
+        // Prepend element to hidden-empty-depositors
+        currentDepositor.prependTo($("#hidden-empty-depositors"));
+        
     });
 
-    $(".remove-creator-btn").click(function(){
-        const current_creator = $(this).closest('.extra-creator');
-        current_creator.remove();
+    $("#add-data-creator-btn").click(function(){
+        const firstEmptyDataCreator = $("#hidden-empty-data-creators > div.empty-data-creator").first();
+        firstEmptyDataCreator.removeClass("empty-data-creator")
+                     .addClass("extra-data-creator");
+        firstEmptyDataCreator.appendTo("#extra-data-creator-list");
+        firstEmptyDataCreator.show();
     });
+
+    $(".remove-data-creator-btn").click(function(){
+        const currentDataCreator = $(this).closest('.extra-data-creator');
+        // Reset value of input to empty string
+        currentDataCreator.find("input:first-child").val("");
+        currentDataCreator.removeClass("extra-data-creator")
+                   .addClass("empty-data-creator");
+        // Prepend element to hidden-empty-data-creators
+        currentDataCreator.prependTo($("#hidden-empty-data-creators"));
+        
+    });
+   
 
     $(".next").click(function(){
 
