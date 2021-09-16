@@ -230,7 +230,7 @@
                 
                 <div class="alert alert-info" role="alert">
                     <p>
-                        Your dataset ID: <strong>${vault.datasetName?html}</strong><br>
+                        Your dataset ID: <strong><#if vault.datasetName??>${vault.datasetName?html}<#else>N/A</#if></strong><br>
                         Before you make this deposit, please make sure the Pure record describing the Vault you have selected is appropriate.
                         For example, if the files you are planning to upload belong to a different project or 
                         should have a different review date from the rest of the data, 

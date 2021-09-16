@@ -253,7 +253,7 @@
                             </tr>
                             <tr>
                                 <th scope="col">PURE ID</th>
-                                <td>${vault.datasetName?html}</td>
+                                <td><#if vault.datasetName??>${vault.datasetName?html}<#else>N/A</#if></td>
                                 <td></td>
                             </tr>
                             <tr>
