@@ -115,7 +115,8 @@ $(document).ready(function(){
                    .addClass("empty-ndm");
         // Prepend element to hidden-empty-ndms
         currentNdm.prependTo($("#hidden-empty-ndms"));
-        
+       // Clear Error text     
+       $(this).siblings(".uun-required-error-span").text("");
     });
     
     $("#add-depositor-btn").click(function(){
@@ -134,6 +135,8 @@ $(document).ready(function(){
                    .addClass("empty-depositor");
         // Prepend element to hidden-empty-depositors
         currentDepositor.prependTo($("#hidden-empty-depositors"));
+        // Clear Error text     
+        $(this).siblings(".uun-required-error-span").text("");
         
     });
 
@@ -153,6 +156,8 @@ $(document).ready(function(){
                    .addClass("empty-data-creator");
         // Prepend element to hidden-empty-data-creators
         currentDataCreator.prependTo($("#hidden-empty-data-creators"));
+        // Clear Error text     
+        $(this).siblings(".uun-required-error-span").text("");
         
     });
    

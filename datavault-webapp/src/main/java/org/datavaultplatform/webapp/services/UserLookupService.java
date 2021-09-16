@@ -86,6 +86,24 @@ public class UserLookupService {
             return user;
         }
     }
+    
+    public boolean isUUN(String uun) {
+    	boolean exists = false;
+    	try {
+    		HashMap<String, String> attributes = ldapService.getLdapUserInfo(uun);
+    		logger.info("isUUN - uun: {} ", uun);
+    		logger.info("isUUN - ATTRIBUTES: {} ", attributes);
+    		logger.info("isUUN - attributes.size(): {} ", attributes.size());
+            if (attributes.size() > 0){
+            	exists = true;
+            }
+            
+        } catch (Exception e) {
+        	
+        }
+    	
+    	return exists;
+    }
 
     private String checkUserList(List<String> list, String errorUrl) {
         String retVal = "";
