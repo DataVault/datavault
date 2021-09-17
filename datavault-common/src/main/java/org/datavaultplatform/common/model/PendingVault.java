@@ -128,7 +128,7 @@ public class PendingVault {
     private List<User> nominatedDataManagers;
 
     @JsonIgnore
-    @OneToMany(targetEntity=PendingDataCreator.class, mappedBy="pendingVault", fetch=FetchType.LAZY)
+    @OneToMany(targetEntity=PendingDataCreator.class, mappedBy="pendingVault", orphanRemoval = true, cascade = CascadeType.PERSIST, fetch=FetchType.LAZY)
     private List<PendingDataCreator> dataCreators;
 
     @Column(name = "confirmed", nullable = false)

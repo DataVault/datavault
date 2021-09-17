@@ -23,4 +23,6 @@ public interface PendingVaultDAO {
     public int getTotalNumberOfPendingVaults(String userId);
 
 	public int getTotalNumberOfPendingVaults(String userId, String query);
+
+    public void deleteById(String Id);
 }

@@ -122,24 +122,7 @@ public class AdminPendingVaultsController {
 
         return "admin/pendingVaults/summary";
     }
-/*
-    // Upgrade a pending vault to a full vault
-    @RequestMapping(value = "/admin/pendingVaults/upgrade/{pendingVaultId}/", method = RequestMethod.POST)
-    public String upgradeVault(ModelMap model, @PathVariable("pendingVaultId") String vaultID, Principal principal) {
 
-        // need to either pass in create vault or get vaultnfo from the pending id param
-        // and convert it to create vault object like in VaultController.getPendingVault
-        VaultInfo pendingVault = restService.getPendingVault(vaultID);
-        CreateVault cv = pendingVault.convertToCreate();
-        logger.info("Attempting to upgrade pending vault to pull vault");
-        VaultInfo newVault = restService.addVault(cv);
-        logger.info("Completed upgrading pending vault to pull vault");
-        //need to add full vault datacreators, roles etc.
-        // any other new info too pure stuff billing etc.
-        String vaultUrl = "/vaults/" + newVault.getID() + "/";
-        return "redirect:" + vaultUrl;
-    }
-*/
     @RequestMapping(value = "/admin/pendingVaults/upgrade/{pendingVaultId}", method = RequestMethod.GET)
     public String upgradeVault(@PathVariable("pendingVaultId") String pendingVaultID) {
         // need to either pass in create vault or get vaultnfo from the pending id param
@@ -180,17 +163,25 @@ public class AdminPendingVaultsController {
         return "redirect:/admin/pendingVaults";
     }
 
+*/
 
-    
+    /*
     @RequestMapping(value = "/admin/pendingVaults/delete/{pendingVaultId}", method = RequestMethod.GET)
     public String deletePendingVault(@PathVariable("pendingVaultId") String pendingVaultID) {
     	logger.info("pendingVaultID: " + pendingVaultID);
-//        PendingVault pendingVault = restService.getPendingVaultRecord(vaultID);
-//        model.addAttribute("pendingVault", pendingVault);
+        PendingVault pendingVault = restService.getPendingVaultRecord(vaultID);
+        model.addAttribute("pendingVault", pendingVault);
 
         return "redirect:/admin/pendingVaults";
+    }*/
+
+    @RequestMapping(value = "/admin/pendingVaults/{pendingVaultID}", method = RequestMethod.GET)
+    public String deletePendingVault(ModelMap model, @PathVariable("pendingVaultID") String pendingVaultID) throws Exception {
+
+        restService.deletePendingVault(pendingVaultID);
+        return "redirect:/admin/pendingVaults";
     }
-*/
+
     private String constructTableRecordsInfo(int offset, int recordsTotal, int filteredRecords, int numberOfRecordsonPage, boolean isFiltered) {
 		StringBuilder recordsInfo = new StringBuilder();
 		recordsInfo.append("Showing ").append(offset + 1).append(" - ").append(offset + numberOfRecordsonPage);
