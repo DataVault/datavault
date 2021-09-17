@@ -169,12 +169,9 @@
      <#if (pendingVault.ID)??>
           <a name="delete-pending-vault" class="btn btn-default" 
           href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Cancel</a>
-       
 
           <a name="delete-pending-vault" class="btn btn-danger" 
-          href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/delete/${pendingVault.getID()}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Delete Pending Vault</a>
-
-         
+          href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/${pendingVault.getID()}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Delete Pending Vault</a>
          <button type="submit" value="submit" class="btn btn-success">
               <span class="glyphicon glyphicon-folder-close"></span>
                                     Create Vault

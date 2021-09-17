@@ -204,4 +204,21 @@ public class PendingVaultDAOImpl implements PendingVaultDAO {
             }
         }
     }
+
+    @Override
+    public void deleteById(String Id) {
+
+        Session session = this.sessionFactory.openSession();
+        Criteria criteria = session.createCriteria(PendingVault.class);
+        criteria.add(Restrictions.eq("id", Id));
+        PendingVault pv = (PendingVault) criteria.uniqueResult();
+        //session.delete(pv);
+        //session.flush();
+        //session.close();
+
+        Transaction tx = session.beginTransaction();
+        session.delete(pv);
+        tx.commit();
+        session.close();
+    }
 }

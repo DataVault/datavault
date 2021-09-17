@@ -676,6 +676,10 @@ public class RestService {
         delete(brokerURL + "/admin/deposits/" + depositId, String.class);
     }
 
+    public void deletePendingVault(String pendingVaultId) {
+        delete(brokerURL + "/admin/pendingVaults/" + pendingVaultId, Void.class);
+    }
+
     public BillingInformation updateBillingInfo(String vaultId,BillingInformation billingInfo) {
         HttpEntity<?> response = post(brokerURL + "/admin/billing/" + vaultId+ "/updateBilling" , BillingInformation.class,billingInfo);
         return (BillingInformation)response.getBody();

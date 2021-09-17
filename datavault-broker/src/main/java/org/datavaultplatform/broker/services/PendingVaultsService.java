@@ -58,6 +58,21 @@ public class PendingVaultsService {
 
     }
 
+    public void delete(String id) {
+        logger.info("Called delete for '" + id + "'");
+        // delete role_assigmnets for id
+        //for each role
+        List<RoleAssignment> roles = permissionsService.getRoleAssignmentsForPendingVault(id);
+        for (RoleAssignment role : roles) {
+            permissionsService.deleteRoleAssignment(role.getId());
+        }
+        // delete pending data creators
+        // deleted by cascade in PendingVaults hibernate config
+        //for each creator
+        //pendingDataCreatorsService.deletePendingDataCreator(creatorID);
+        // delete pending vault
+        pendingVaultDAO.deleteById(id);
+    }
     public PendingVault getPendingVault(String vaultID) {
         return pendingVaultDAO.findById(vaultID);
     }

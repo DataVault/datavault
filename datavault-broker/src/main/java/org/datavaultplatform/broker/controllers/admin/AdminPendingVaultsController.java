@@ -31,11 +31,18 @@ public class AdminPendingVaultsController {
 	public void setPendingVaultsService(PendingVaultsService pendingVaultsService) {
         this.pendingVaultsService = pendingVaultsService;
     }
-	
+	/*
 	@RequestMapping(value = "/admin/pendingVaults/addVault/{pendingVaultId}", method = RequestMethod.POST)
 	public boolean addVaultForPendingVault(@PathVariable("pendingVaultId") String pendingVaultId,
 			                               @RequestBody Date reviewDate) throws Exception {
 		return false;
+	}*/
+
+	@RequestMapping(value = "/admin/pendingVaults/{id}", method = RequestMethod.DELETE)
+	public void delete(@RequestHeader(value = "X-UserID", required = true) String userID,
+									  @PathVariable("id") String vaultID) throws Exception {
+
+		pendingVaultsService.delete(vaultID);
 	}
 
 
