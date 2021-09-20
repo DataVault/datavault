@@ -129,11 +129,13 @@ public class AdminPendingVaultsController {
         // and convert it to create vault object like in VaultController.getPendingVault
         VaultInfo pendingVault = restService.getPendingVault(pendingVaultID);
         CreateVault cv = pendingVault.convertToCreate();
-        logger.info("Attempting to upgrade pending vault to pull vault");
+        logger.info("Attempting to upgrade pending vault to full vault");
         VaultInfo newVault = restService.addVault(cv);
-        logger.info("Completed upgrading pending vault to pull vault");
+        logger.info("Completed upgrading pending vault to full vault");
         //need to add full vault datacreators, roles etc.
         // any other new info too pure stuff billing etc.
+        // then delete the pending vault
+        restService.deletePendingVault(cv.getPendingID());
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
         return "redirect:" + vaultUrl;
     }

@@ -4,6 +4,7 @@ import java.util.*;
 
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.VaultDAO;
+import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ public class VaultsService {
     private VaultDAO vaultDAO;
 
     private RolesAndPermissionsService rolesAndPermissionsService;
+
     private RetentionPoliciesService retentionPoliciesService;
 
     public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
@@ -152,5 +154,84 @@ public class VaultsService {
         newDataOwnerAssignment.setVaultId(vault.getID());
         newDataOwnerAssignment.setRole(dataOwnerRole);
         rolesAndPermissionsService.createRoleAssignment(newDataOwnerAssignment);
+    }
+
+    public void addDepositorRoles(CreateVault createVault, String vaultId) {
+
+        // if vault already has depositors delete them and readd
+        List<String> depositors = createVault.getDepositors();
+        if (depositors != null) {
+            for (String dep: depositors) {
+                if (dep != null && ! dep.isEmpty()) {
+                    RoleAssignment ra = new RoleAssignment();
+                    ra.setVaultId(vaultId);
+                    ra.setRole(rolesAndPermissionsService.getDepositor());
+                    ra.setUserId(dep);
+                    rolesAndPermissionsService.createRoleAssignment(ra);
+                    logger.debug("Depositor + '" + dep + "'");
+                }
+            }
+        }
+    }
+
+    public void addOwnerRole(CreateVault createVault, String vaultId, String userID) {
+        Boolean isOwner = createVault.getIsOwner();
+        logger.debug("IsOwner is '" + isOwner + "'");
+        String ownerId = userID;
+        if (isOwner != null && !isOwner) {
+            ownerId = createVault.getVaultOwner();
+        }
+        logger.debug("VaultOwner is '" + ownerId + "'");
+        if (ownerId != null) {
+            RoleAssignment ownerRoleAssignment = new RoleAssignment();
+            ownerRoleAssignment.setUserId(ownerId);
+            ownerRoleAssignment.setVaultId(vaultId);
+            ownerRoleAssignment.setRole(rolesAndPermissionsService.getDataOwner());
+            rolesAndPermissionsService.createRoleAssignment(ownerRoleAssignment);
+        } else {
+            // error!
+        }
+    }
+
+    public Vault processDataCreatorParams(CreateVault createVault, Vault vault) {
+        List<String> dcs = createVault.getDataCreators();
+//        if (dcs != null) {
+//            logger.debug("Data creator list is :'" + dcs + "'");
+//            List<PendingDataCreator> creators = new ArrayList();
+//            for (String creator : dcs) {
+//                if (creator != null && !creator.isEmpty()) {
+//                    DataCreator dc = new DataCreator();
+//                    dc.setName(creator);
+//                    dc.setVault(vault);
+//                    creators.add(dc);
+//                }
+//            }
+//            vault.setDataCreator(creators);
+//        } else {
+//            logger.debug("Data creator list is :null");
+//        }
+//
+//        List<PendingDataCreator> creators = vault.getDataCreators();
+//        if (creators != null && ! creators.isEmpty()) {
+//            dataCreatorsService.addPendingCreators(creators);
+//        }
+
+        return vault;
+    }
+
+    public void addNDMRoles(CreateVault createVault, String vaultId) {
+        List<String> ndms = createVault.getNominatedDataManagers();
+        if (ndms != null) {
+            for (String ndm: ndms) {
+                if (ndm != null && !ndm.isEmpty()) {
+                    RoleAssignment ra = new RoleAssignment();
+                    ra.setVaultId(vaultId);
+                    ra.setRole(rolesAndPermissionsService.getNominatedDataManager());
+                    ra.setUserId(ndm);
+                    rolesAndPermissionsService.createRoleAssignment(ra);
+                    logger.debug("NDMS + '" + ndm + "'");
+                }
+            }
+        }
     }
 }
