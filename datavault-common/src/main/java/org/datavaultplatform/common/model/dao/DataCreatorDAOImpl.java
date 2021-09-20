@@ -1,8 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.PendingDataCreator;
-import org.datavaultplatform.common.model.PendingVault;
-import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.DataCreator;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -13,9 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class PendingDataCreatorDAOImpl implements PendingDataCreatorDAO{
+public class DataCreatorDAOImpl implements DataCreatorDAO{
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PendingDataCreatorDAOImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataCreatorDAOImpl.class);
 
     private SessionFactory sessionFactory;
 
@@ -24,10 +22,10 @@ public class PendingDataCreatorDAOImpl implements PendingDataCreatorDAO{
     }
 
     @Override
-    public void save(List<PendingDataCreator> pendingDataCreators) {
+    public void save(List<DataCreator> dataCreators) {
         Session session = this.sessionFactory.openSession();
         Transaction tx = session.beginTransaction();
-        for (PendingDataCreator pdc : pendingDataCreators) {
+        for (DataCreator pdc : dataCreators) {
             session.persist(pdc);
         }
         tx.commit();
@@ -35,28 +33,28 @@ public class PendingDataCreatorDAOImpl implements PendingDataCreatorDAO{
     }
 
     @Override
-    public PendingDataCreator findById(String Id) {
+    public DataCreator findById(String Id) {
         Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(PendingDataCreator.class);
+        Criteria criteria = session.createCriteria(DataCreator.class);
         criteria.add(Restrictions.eq("id", Id));
-        PendingDataCreator creator = (PendingDataCreator) criteria.uniqueResult();
+        DataCreator creator = (DataCreator) criteria.uniqueResult();
         session.close();
         return creator;
     }
 
     @Override
-    public void update(PendingDataCreator pendingDataCreator) {
+    public void update(DataCreator dataCreator) {
         Session session = null;
         Transaction tx = null;
         try {
             session = this.sessionFactory.openSession();
             tx = session.beginTransaction();
-            session.update(pendingDataCreator);
+            session.update(dataCreator);
             tx.commit();
         } catch (RuntimeException e) {
             if (tx != null) {
                 tx.rollback();
-                System.out.println("PendingDataCreator.update - ROLLBACK");
+                System.out.println("DataCreator.update - ROLLBACK");
             }
             throw e;
         } finally {
@@ -68,7 +66,7 @@ public class PendingDataCreatorDAOImpl implements PendingDataCreatorDAO{
 
     @Override
     public void delete(String id) {
-        PendingDataCreator creator = findById(id);
+        DataCreator creator = findById(id);
         Session session = null;
         try {
             session = this.sessionFactory.openSession();

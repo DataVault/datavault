@@ -41,6 +41,7 @@
         <property name="vaultDAO" ref="vaultDAO" />
         <property name="rolesAndPermissionsService" ref="rolesAndPermissionsService" />
         <property name="retentionPoliciesService" ref="retentionPoliciesService" />
+        <property name="dataCreatorsService" ref="dataCreatorsService" />
     </bean>
 
     <bean id="pendingVaultsService" class="org.datavaultplatform.broker.services.PendingVaultsService">
@@ -54,6 +55,10 @@
 
     <bean id="pendingDataCreatorsService" class="org.datavaultplatform.broker.services.PendingDataCreatorsService">
         <property name="pendingDataCreatorDAO" ref="pendingDataCreatorDAO" />
+    </bean>
+
+    <bean id="dataCreatorsService" class="org.datavaultplatform.broker.services.DataCreatorsService">
+        <property name="dataCreatorDAO" ref="dataCreatorDAO" />
     </bean>
 
     <bean id="vaultsReviewService" class="org.datavaultplatform.broker.services.VaultsReviewService">
@@ -384,6 +389,10 @@
     </bean>
 
     <bean id="pendingDataCreatorDAO" class="org.datavaultplatform.common.model.dao.PendingDataCreatorDAOImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="dataCreatorDAO" class="org.datavaultplatform.common.model.dao.DataCreatorDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
