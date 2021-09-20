@@ -137,6 +137,10 @@ public class Vault {
     @Lob
     @Column(name = "snapshot", nullable = false)
     private String snapshot;
+
+    @JsonIgnore
+    @OneToMany(targetEntity=DataCreator.class, mappedBy="vault", fetch=FetchType.LAZY)
+    private List<DataCreator> dataCreators;
     
     public Vault() {}
     public Vault(String name) {
@@ -290,9 +294,19 @@ public class Vault {
 		return billinginfo;
 		
 	}
+
 	public void setBillinginfo(BillingInfo billinginfo) {
 		this.billinginfo = billinginfo;
 	}
+
+    public List<DataCreator> getDataCreators() {
+        return this.dataCreators;
+    }
+
+    public void setDataCreator(List<DataCreator> dataCreators) {
+        this.dataCreators = dataCreators;
+    }
+
 	public VaultInfo convertToResponse() {
         return new VaultInfo(
                 id,

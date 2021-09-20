@@ -36,3 +36,11 @@ ALTER TABLE PendingVaults add column contact TEXT;
 ALTER TABLE PendingVaults add column pureLink bit not null default false;
 ALTER TABLE PendingVaults add column confirmed bit not null default false;
 ALTER TABLE Vaults MODIFY snapshot longtext NULL DEFAULT null;
+
+CREATE TABLE `DataCreators` (
+                                       `id` varchar(36) NOT NULL,
+                                       `name` text NOT NULL,
+                                       `version` bigint(20) NOT NULL,
+                                       `vault_id` varchar(36) DEFAULT NULL,
+                                       PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

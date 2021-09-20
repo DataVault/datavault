@@ -18,6 +18,8 @@ public class VaultsService {
 
     private RetentionPoliciesService retentionPoliciesService;
 
+    private DataCreatorsService dataCreatorsService;
+
     public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
         this.rolesAndPermissionsService = rolesAndPermissionsService;
     }
@@ -29,6 +31,8 @@ public class VaultsService {
     public void setRetentionPoliciesService(RetentionPoliciesService retentionPoliciesService) {
         this.retentionPoliciesService = retentionPoliciesService;
     }
+
+    public void setDataCreatorsService(DataCreatorsService dataCreatorsService) { this.dataCreatorsService = dataCreatorsService; }
 
     public List<Vault> getVaults() {
         return vaultDAO.list();
@@ -195,26 +199,26 @@ public class VaultsService {
 
     public Vault processDataCreatorParams(CreateVault createVault, Vault vault) {
         List<String> dcs = createVault.getDataCreators();
-//        if (dcs != null) {
-//            logger.debug("Data creator list is :'" + dcs + "'");
-//            List<PendingDataCreator> creators = new ArrayList();
-//            for (String creator : dcs) {
-//                if (creator != null && !creator.isEmpty()) {
-//                    DataCreator dc = new DataCreator();
-//                    dc.setName(creator);
-//                    dc.setVault(vault);
-//                    creators.add(dc);
-//                }
-//            }
-//            vault.setDataCreator(creators);
-//        } else {
-//            logger.debug("Data creator list is :null");
-//        }
-//
-//        List<PendingDataCreator> creators = vault.getDataCreators();
-//        if (creators != null && ! creators.isEmpty()) {
-//            dataCreatorsService.addPendingCreators(creators);
-//        }
+        if (dcs != null) {
+            logger.debug("Data creator list is :'" + dcs + "'");
+            List<DataCreator> creators = new ArrayList();
+            for (String creator : dcs) {
+                if (creator != null && !creator.isEmpty()) {
+                    DataCreator dc = new DataCreator();
+                    dc.setName(creator);
+                    dc.setVault(vault);
+                    creators.add(dc);
+                }
+            }
+            vault.setDataCreator(creators);
+        } else {
+            logger.debug("Data creator list is :null");
+        }
+
+        List<DataCreator> creators = vault.getDataCreators();
+        if (creators != null && ! creators.isEmpty()) {
+            dataCreatorsService.addCreators(creators);
+        }
 
         return vault;
     }

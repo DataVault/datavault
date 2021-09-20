@@ -1,7 +1,6 @@
 package org.datavaultplatform.broker.services;
 
 import org.datavaultplatform.common.model.PendingDataCreator;
-import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.dao.PendingDataCreatorDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
