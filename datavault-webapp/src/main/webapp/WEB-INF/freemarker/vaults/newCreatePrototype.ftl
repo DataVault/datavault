@@ -68,6 +68,6 @@
     </div>
     
    <!-- Custom javascript -->
-   <script src="/datavault-webapp/resources/application/js/new-create-prototype.js"></script>
+   <script src="<@spring.url '/resources/application/js/new-create-prototype.js'/>"></script>
     
 </@layout.vaultLayout>
