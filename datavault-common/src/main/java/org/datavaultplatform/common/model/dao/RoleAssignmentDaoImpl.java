@@ -35,10 +35,14 @@ public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
             criteria.add(Restrictions.eq("role", roleAssignment.getRole()));
             criteria.add(Restrictions.eq("userId", roleAssignment.getUserId()));
             if (roleAssignment.getSchoolId() != null) {
+
                 criteria.add(Restrictions.eq("schoolId", roleAssignment.getSchoolId()));
             }
             if (roleAssignment.getVaultId() != null) {
                 criteria.add(Restrictions.eq("vaultId", roleAssignment.getVaultId()));
+            }
+            if (roleAssignment.getPendingVaultId() != null) {
+                criteria.add(Restrictions.eq("pendingVaultId", roleAssignment.getPendingVaultId()));
             }
             return criteria.uniqueResult() != null;
         } finally {
@@ -146,6 +150,20 @@ public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
             session = sessionFactory.openSession();
 
             List<RoleAssignment> vaultAssignments = findBy(session, "vaultId", vaultId);
+            return vaultAssignments;
+        } finally {
+            if (session != null) session.close();
+        }
+
+    }
+
+    @Override
+    public List<RoleAssignment> findByPendingVaultId(String vaultId) {
+        Session session = null;
+        try {
+            session = sessionFactory.openSession();
+
+            List<RoleAssignment> vaultAssignments = findBy(session, "pendingVaultId", vaultId);
             return vaultAssignments;
         } finally {
             if (session != null) session.close();

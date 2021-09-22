@@ -2,13 +2,19 @@ package org.datavaultplatform.common.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.datavaultplatform.common.model.PendingVault;
+import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "VaultInfo")
@@ -34,6 +40,15 @@ public class VaultInfo {
     
     @ApiObjectField(description = "The date and time when this vault was created")
     private String description;
+
+    @ApiObjectField(description = "Estimate of vault size")
+    private PendingVault.Estimate estimate;
+
+    @ApiObjectField(description = "How we are billing")
+    private PendingVault.Billing_Type billingType;
+
+    @ApiObjectField(description = "Notes regarding data retention")
+    private String notes;
     
     @ApiObjectField(description = "The policy that applies to this vault")
     private String policyID;
@@ -75,6 +90,18 @@ public class VaultInfo {
     
     @ApiObjectField(description = "Project Id from Pure")
     private String projectId;
+
+    @ApiObjectField(description = "Slice ID from erm somewhere")
+    private String sliceID;
+
+    @ApiObjectField(description = "Authoriser of the billing")
+    private String authoriser;
+
+    @ApiObjectField(description = "School / Unit to be billed")
+    private String schoolOrUnit;
+
+    @ApiObjectField(description = "Subunit to be billed")
+    private String subunit;
     
     @ApiObjectField(description = "Amount to be Billed")
     private BigDecimal amountToBeBilled;
@@ -84,11 +111,37 @@ public class VaultInfo {
     
     @ApiObjectField(description = "Sum of vaults size for a projectId")
     private long projectSize;
-    
+
+    @ApiObjectField(description = "Did the user accept the various rules on the create vault intro page")
+    private Boolean affirmed = false;
+
+    @ApiObjectField(description = "Did the user accept the Pure Link rule on the summary page")
+    private Boolean pureLink = false;
+
+    @ApiObjectField(description = "Did the user confirm the pending vault yet")
+    private Boolean confirmed = false;
+
+    @ApiObjectField(description = "Pure Contact")
+    private String contact;
+
+    @ApiObjectField(description = "Pending Vault Owner ID")
+    private String ownerId;
+
+    @ApiObjectField(description = "Data Creators")
+    private List<String> creators;
+
+    @ApiObjectField(description = "Nominated Data Managers")
+    private List<String> nominatedDataManagerIds;
+
+    @ApiObjectField(description = "Depositors")
+    private List<String> depositorIds;
+
     public VaultInfo() { }
 
-    public VaultInfo(String id, String userID, String userName, String datasetID, String crisID, String datasetName, Date creationTime, String name, String description, String policyID,
-    		String groupID, long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked, Date grantEndDate, Date reviewDate, long numberOfDeposits, String projectId) {
+    public VaultInfo(String id, String userID, String userName, String datasetID, String crisID, String datasetName,
+                     Date creationTime, String name, String description, String policyID, String groupID,
+                     long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked, Date grantEndDate,
+                     Date reviewDate, long numberOfDeposits, String projectId) {
         this.id = id;
         this.userID = userID;
         this.userName = userName;
@@ -195,6 +248,30 @@ public class VaultInfo {
         this.description = description;
     }
 
+    public String getNotes() {
+        return this.notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public PendingVault.Estimate getEstimate() {
+        return this.estimate;
+    }
+
+    public void setEstimate(PendingVault.Estimate estimate) {
+        this.estimate = estimate;
+    }
+
+    public PendingVault.Billing_Type getBillingType() {
+        return this.billingType;
+    }
+
+    public void setBillingType(PendingVault.Billing_Type billingType) {
+        this.billingType = billingType;
+    }
+
     public String getPolicyID() {
         return policyID;
     }
@@ -296,6 +373,14 @@ public class VaultInfo {
 		this.projectId = projectId;
 	}
 
+    public String getSliceID() {
+        return this.sliceID;
+    }
+
+    public void setSliceID(String sliceID) {
+        this.sliceID = sliceID;
+    }
+
 	public long getProjectSize() {
 		return projectSize;
 	}
@@ -334,4 +419,148 @@ public class VaultInfo {
 	public void setAmountBilled(BigDecimal amountBilled) {
 		this.amountBilled = amountBilled;
 	}
+
+    public Boolean getAffirmed() {
+        return affirmed;
+    }
+
+    public void setAffirmed(Boolean affirmed) {
+        this.affirmed = affirmed;
+    }
+
+    public String getAuthoriser() {
+        return this.authoriser;
+    }
+
+    public void setAuthoriser(String authoriser) {
+        this.authoriser = authoriser;
+    }
+
+    public String getSchoolOrUnit() {
+        return this.schoolOrUnit;
+    }
+
+    public void setSchoolOrUnit(String schoolOrUnit) {
+        this.schoolOrUnit = schoolOrUnit;
+    }
+
+    public String getSubunit() {
+        return this.subunit;
+    }
+
+    public void setSubunit(String subunit) {
+        this.subunit = subunit;
+    }
+
+    public String getContact() {
+        return this.contact;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
+
+    public String getOwnerId() {
+        return this.ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public void setDataCreators(List<String> creators) {
+        this.creators = creators;
+    }
+
+    public List<String> getDataCreators() {
+        return this.creators;
+    }
+
+    public List<String> getNominatedDataManagerIds() {
+        return nominatedDataManagerIds;
+    }
+
+    public void setNominatedDataManagerIds(List<String> nominatedDataManagerIds) {
+        this.nominatedDataManagerIds = nominatedDataManagerIds;
+    }
+
+    public List<String> getDepositorIds() {
+        return depositorIds;
+    }
+
+    public void setDepositorIds(List<String> depositorIds) {
+        this.depositorIds = depositorIds;
+    }
+
+    public Boolean getPureLink() {
+        return pureLink;
+    }
+
+    public void setPureLink(Boolean pureLink) {
+        this.pureLink = pureLink;
+    }
+
+    public Boolean getConfirmed() {
+        return confirmed;
+    }
+
+    public void setConfirmed(Boolean confirmed) {
+        this.confirmed = confirmed;
+    }
+
+    public CreateVault convertToCreate() {
+        /*
+        TODO: need to add validation / defend against nulls just a work in progress
+         */
+        CreateVault cv = new CreateVault();
+        cv.setPendingID(this.getID());
+        cv.setAffirmed(this.getAffirmed());
+        if (this.getBillingType() != null) {
+            cv.setBillingType(this.getBillingType().toString());
+        }
+        cv.setSliceID(this.getSliceID());
+        cv.setAuthoriser(this.getAuthoriser());
+        cv.setSchoolOrUnit(this.getSchoolOrUnit());
+        cv.setSubunit(this.getSubunit());
+        cv.setProjectID(this.getProjectId());
+        cv.setName(this.getName());
+        //logger.info("Vault Description is: '" + vault.getDescription());
+        cv.setDescription(this.getDescription());
+        //logger.info("Create Vault Description is: '" + cv.getDescription());
+        cv.setPolicyID(this.getPolicyID());
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.UK);
+
+        if (this.getGrantEndDate() != null) {
+            cv.setGrantEndDate(formatter.format(this.getGrantEndDate()));
+        }
+        cv.setGroupID(this.getGroupID());
+        if (this.getReviewDate() != null) {
+            cv.setReviewDate(formatter.format(this.getReviewDate()));
+        }
+        if (this.getEstimate() != null) {
+            cv.setEstimate(this.getEstimate().toString());
+        }
+        cv.setContactPerson(this.getContact());
+
+        //cv.setIsOwner(vault.getIsOwner());
+        // if vault owner is null set isowner to true
+        // if vault owner is the same as the logged in user set isowner to true
+        // if vault owner is different ot hte logged in user set to false
+        //logger.debug("Setting default isOwner");
+        Boolean isOwner = true;
+        if (this.getOwnerId() != null && ! this.getOwnerId().equals(this.getUserID())) {
+            //logger.debug("Changing default isOwner");
+            isOwner = false;
+        }
+        cv.setIsOwner(isOwner);
+        cv.setVaultOwner(this.getOwnerId());
+        cv.setNominatedDataManagers(this.getNominatedDataManagerIds());
+        cv.setDepositors(this.getDepositorIds());
+        cv.setDataCreators(this.getDataCreators());
+        cv.setNotes(this.getNotes());
+        cv.setPureLink(this.getPureLink());
+        cv.setConfirmed(this.getConfirmed());
+
+        return cv;
+    }
 }

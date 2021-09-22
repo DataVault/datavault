@@ -6,6 +6,8 @@ import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
 import org.datavaultplatform.common.model.dao.RoleDAO;
 import org.datavaultplatform.common.model.dao.UserDAO;
 import org.datavaultplatform.common.util.RoleUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
@@ -13,8 +15,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class RolesAndPermissionsService implements ApplicationListener<ContextRefreshedEvent> {
+    private final Logger logger = LoggerFactory.getLogger(RolesAndPermissionsService.class);
 
     private RoleDAO roleDao;
 
@@ -73,6 +77,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
 
     public RoleAssignment createRoleAssignment(RoleAssignment roleAssignment) {
         validateRoleAssignment(roleAssignment);
+        logger.debug("Got past the rolesandpermissionsservice validation");
         roleAssignmentDao.store(roleAssignment);
         return roleAssignment;
     }
@@ -87,7 +92,8 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         if (RoleType.SCHOOL == roleAssignment.getRole().getType() && roleAssignment.getSchoolId() == null) {
             throw new IllegalStateException("Cannot create school role assignment without a school");
         }
-        if (RoleType.VAULT == roleAssignment.getRole().getType() && roleAssignment.getVaultId() == null) {
+        if (RoleType.VAULT == roleAssignment.getRole().getType() && (roleAssignment.getVaultId() == null
+                && roleAssignment.getPendingVaultId() == null)) {
             throw new IllegalStateException("Cannot create vault role assignment without a vault");
         }
         if (roleAssignmentDao.roleAssignmentExists(roleAssignment)) {
@@ -113,6 +119,18 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
 
     public RoleModel getDataOwner() {
         return roleDao.getDataOwner();
+    }
+
+    public RoleModel getDepositor() {
+        return roleDao.getDepositor();
+    }
+
+    public RoleModel getNominatedDataManager() {
+        return roleDao.getNominatedDataManager();
+    }
+
+    public RoleModel getVaultCreator() {
+        return roleDao.getVaultCreator();
     }
 
     public List<RoleModel> getEditableRoles() {
@@ -143,6 +161,10 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         return roleAssignmentDao.findByVaultId(vaultId);
     }
 
+    public List<RoleAssignment> getRoleAssignmentsForPendingVault(String vaultId) {
+        return roleAssignmentDao.findByPendingVaultId(vaultId);
+    }
+
     public User getVaultOwner(String vaultId) {
         List<RoleAssignment> assignments = roleAssignmentDao.findByVaultId(vaultId);
         RoleAssignment ownerAssignment = assignments.stream()
@@ -153,6 +175,60 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
             return null;
         }
         return usersService.getUser(ownerAssignment.getUserId());
+    }
+
+    public User getPendingVaultOwner(String pendingVaultId) {
+        List<RoleAssignment> assignments = roleAssignmentDao.findByPendingVaultId(pendingVaultId);
+        RoleAssignment ownerAssignment = assignments.stream()
+                .filter(RoleUtils::isDataOwner)
+                .findAny()
+                .orElse(null);
+        if(ownerAssignment == null){
+            return null;
+        }
+        return usersService.getUser(ownerAssignment.getUserId());
+    }
+
+    public List<User> getPendingVaultNDMs(String pendingVaultId) {
+        List<RoleAssignment> assignments = roleAssignmentDao.findByPendingVaultId(pendingVaultId);
+        List<RoleAssignment> ndmAssignments = assignments.stream()
+                .filter(RoleUtils::isNominatedDataManager)
+                .collect(Collectors.toList());
+        List<User> retVal = new ArrayList<>();
+        if(ndmAssignments == null){
+            return null;
+        } else {
+            for (RoleAssignment ra : ndmAssignments) {
+                User u = usersService.getUser(ra.getUserId());
+                if (u != null){
+                    retVal.add(u);
+                }
+            }
+        }
+
+
+        return retVal;
+    }
+
+    public List<User> getPendingVaultDepositors(String pendingVaultId) {
+        List<RoleAssignment> assignments = roleAssignmentDao.findByPendingVaultId(pendingVaultId);
+        List<RoleAssignment> ndmAssignments = assignments.stream()
+                .filter(RoleUtils::isDepositor)
+                .collect(Collectors.toList());
+        List<User> retVal = new ArrayList<>();
+        if(ndmAssignments == null){
+            return null;
+        } else {
+            for (RoleAssignment ra : ndmAssignments) {
+                User u = usersService.getUser(ra.getUserId());
+                if (u != null){
+                    retVal.add(u);
+                }
+            }
+        }
+
+
+        return retVal;
     }
 
     public List<RoleAssignment> getRoleAssignmentsForUser(String userId) {

@@ -12,7 +12,8 @@ import java.util.Objects;
         name="Role_assignments",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = { "role_id", "user_id", "school_id" }),
-                @UniqueConstraint(columnNames = { "role_id", "user_id", "vault_id" })
+                @UniqueConstraint(columnNames = { "role_id", "user_id", "vault_id" }),
+                @UniqueConstraint(columnNames = { "role_id", "user_id", "pending_vault_id" })
         }
 )
 public class RoleAssignment {
@@ -33,6 +34,9 @@ public class RoleAssignment {
 
     @Column(name = "vault_id")
     private String vaultId;
+
+    @Column(name = "pending_vault_id")
+    private String pendingVaultId;
 
     public RoleAssignment() {}
 
@@ -76,6 +80,14 @@ public class RoleAssignment {
         return vaultId;
     }
 
+    public void setPendingVaultId(String pendingVaultId) {
+        this.pendingVaultId = pendingVaultId;
+    }
+
+    public String getPendingVaultId() {
+        return this.pendingVaultId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -89,12 +101,13 @@ public class RoleAssignment {
                 Objects.equals(role, that.role) &&
                 Objects.equals(userId, that.userId) &&
                 Objects.equals(schoolId, that.schoolId) &&
-                Objects.equals(vaultId, that.vaultId);
+                Objects.equals(vaultId, that.vaultId) &&
+                Objects.equals(pendingVaultId, that.pendingVaultId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, role, userId, schoolId, vaultId);
+        return Objects.hash(id, role, userId, schoolId, vaultId, pendingVaultId);
     }
 
     @JsonIgnore
@@ -103,6 +116,8 @@ public class RoleAssignment {
             return schoolId;
         } else if (vaultId != null) {
             return vaultId;
+        } else if (pendingVaultId != null) {
+            return pendingVaultId;
         } else {
             throw new IllegalStateException("Target ID requested global role assignment");
         }
