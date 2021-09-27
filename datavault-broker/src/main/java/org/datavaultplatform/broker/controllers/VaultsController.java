@@ -490,6 +490,11 @@ public class VaultsController {
         Vault vault = new Vault();
         vault.setName(createVault.getName());
         vault.setDescription(createVault.getDescription());
+        vault.setAffirmed(createVault.getAffirmed());
+        vault.setNotes(createVault.getNotes());
+        vault.setEstimate(PendingVault.Estimate.valueOf(createVault.getEstimate()));
+        vault.setContact(createVault.getContactPerson());
+        vault.setPureLink(createVault.getPureLink());
 
         RetentionPolicy retentionPolicy = retentionPoliciesService.getPolicy(createVault.getPolicyID());
         if (retentionPolicy == null) {

@@ -44,3 +44,10 @@ CREATE TABLE `DataCreators` (
                                        `vault_id` varchar(36) DEFAULT NULL,
                                        PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE Vaults add column affirmed bit not null default false;
+update Vaults set affirmed = true where affirmed is false;
+ALTER TABLE Vaults add column estimate TEXT;
+ALTER TABLE Vaults add column notes TEXT;
+ALTER TABLE Vaults add column pureLink bit not null default false;
+ALTER TABLE Vaults add column contact TEXT;

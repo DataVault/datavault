@@ -141,6 +141,23 @@ public class Vault {
     @JsonIgnore
     @OneToMany(targetEntity=DataCreator.class, mappedBy="vault", fetch=FetchType.LAZY)
     private List<DataCreator> dataCreators;
+
+    @Column(name = "affirmed", nullable = false)
+    private Boolean affirmed = false;
+
+    @Column(columnDefinition = "TEXT", length = 6000)
+    private String notes;
+
+    // Estimate of Vault size
+    @Column(name = "estimate", nullable = true, columnDefinition = "TEXT")
+    private PendingVault.Estimate estimate;
+
+    // Name of the pure contact
+    @Column(name = "contact", nullable = false, columnDefinition = "TEXT")
+    private String contact;
+
+    @Column(name = "pureLink", nullable = false)
+    private Boolean pureLink = false;
     
     public Vault() {}
     public Vault(String name) {
@@ -305,6 +322,42 @@ public class Vault {
 
     public void setDataCreator(List<DataCreator> dataCreators) {
         this.dataCreators = dataCreators;
+    }
+
+    public Boolean getAffirmed() {
+        return this.affirmed;
+    }
+
+    public void setAffirmed(Boolean affirmed) {
+        this.affirmed = affirmed;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getNotes() { return this.notes; }
+
+    public void setEstimate(PendingVault.Estimate estimate) {
+        this.estimate = estimate;
+    }
+
+    public PendingVault.Estimate getEstimate() { return this.estimate; }
+
+    public String getContact() {
+        return this.contact;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
+
+    public Boolean getPureLink() {
+        return this.pureLink;
+    }
+
+    public void setPureLink(Boolean pureLink) {
+        this.pureLink = pureLink;
     }
 
 	public VaultInfo convertToResponse() {
