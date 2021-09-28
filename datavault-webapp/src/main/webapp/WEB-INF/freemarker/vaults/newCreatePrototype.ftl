@@ -20,7 +20,7 @@
                             Create new vault
                             <small>
                             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                                  title="Multiple deposits may be made into one vault. Usually one vault will correspond to one Pure record">
+                                  title="You can make multiple deposits into a vault. Each deposit may contain multiple files and folders. You no longer need to create a Pure record before creating your Vault.">
                             </span>
                             </small>
                         </h2>
