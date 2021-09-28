@@ -2,23 +2,18 @@
     <div class="form-card">
         <h2 class="fs-title">Affirmation</h2>
         <p>
-            In order to create a Vault you'll have to answer several questions.
-            You can go through each steps at your own pace and
-            come back to previous steps whenever you want.
-            <strong>
-                Don't forget to save your progress if your leaving the website
-                to make sure everything is there when you come back.
-            </strong>
+            We need some information about your new Vault. You can save your progress at any time before completing this form.
         </p>
         <p>
-            I understand that the ‘owner’ /PI will be billed for any deposit
-            (rates are advertised on the Research Services charges page).
-            I understand that any files I deposit in the Vault belong to
-            the University of Edinburgh. I understand that access is for
-            authorised University of Edinburgh users only.
-            Therefore I will only be able to retrieve the data as long as
-            I am employed by the University of Edinburgh (as long as my
-            University login is active).
+            Once we have approved your Vault, you will receive an email confirming that you can go ahead and start archiving your data.
+            If you have any questions please don’t hesitate to contact the Research Data Service using the
+            <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/contact" target="_blank">Contact</a> link at the top of this page.
+        </p>
+        <p>
+            I understand that the ‘owner’ /PI will be billed for any deposit (for information about rates, please use the
+            <a href="http://www.ed.ac.uk/is/research-support/datavault" target="_blank">More Info</a> link at the top of
+            the page to the university website DataVault information, and go to the
+            <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/after/datavault/cost" target="_blank">Cost</a> page).
         </p>
         <div class="checkbox">
             <label>

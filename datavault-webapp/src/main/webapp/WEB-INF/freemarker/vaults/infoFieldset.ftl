@@ -19,7 +19,7 @@
         <div class="form-group required">
             <label for="description" class="control-label">Description</label>
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                  title="This description should contain information to assist you and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
+                  title="Maximum 6,000 characters.">
                                                                 </span>
             <@spring.bind "vault.description" />
             <textarea type="text" class="form-control" name="${spring.status.expression}" value="${spring.status.value!""}" id="description" rows="4" cols="60"><#if vault.description??>${vault.description?html}</#if></textarea>
@@ -52,7 +52,7 @@
             </label>
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                   title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;">
-                                                                </span>
+            </span>
             <@spring.bind "vault.grantEndDate" />
             <input id="grantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd" name="${spring.status.expression}"
                    value="${spring.status.value!""}"/>
@@ -133,9 +133,9 @@
         </div>
 
         <div class="form-group">
-            <label for="notes" class="control-label">Notes regarding data retention</label>
+            <label for="notes" class="control-label">Notes regarding data retention and possible sharing</label>
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                  title="Please note anything that would inform a future data owner , more specific information can be added with each deposit.">
+                  title="Information to assist you and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Please also use this field to explain whether requests for access to the data should be refused on a vault-wide basis, or whether certain criteria should be applied and/or any Data Sharing Agreement signed before any requests are granted. Please add a blank copy of the Data Sharing Agreement to your Vault as a separate deposit.">
             </span>
             <@spring.bind "vault.notes" />
             <textarea type="text" class="form-control" name="notes" id="notes" name="${spring.status.expression}" value="${spring.status.value!""}" rows="4" cols="60"><#if vault.notes??>${vault.notes?html}</#if></textarea>

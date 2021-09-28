@@ -34,9 +34,8 @@
             <div id="slice-form" class="collapse">
                 <div class="well">
                     <p>
-                        A slice is when you have reserved a DataVault storage by paying before creating the vault.
-                        Usually called something like 'Slice008' or 'CSMB2020'.
-                        If you have a slice, fill in the follow field with the name or code of the Slice.
+                        A slice is reserved DataVault storage. If unsure, please check with your PI whether they have reserved a slice.
+                        If you do have a slice, please enter the name or code such as 'Slice004'.
                     </p>
                     <div class="form-group">
                         <label class="col-sm-2 control-label">Slice: </label>
