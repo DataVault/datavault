@@ -492,7 +492,9 @@ public class VaultsController {
         vault.setDescription(createVault.getDescription());
         vault.setAffirmed(createVault.getAffirmed());
         vault.setNotes(createVault.getNotes());
-        vault.setEstimate(PendingVault.Estimate.valueOf(createVault.getEstimate()));
+        if (createVault.getEstimate() != null  && ! createVault.getEstimate().isEmpty()) {
+            vault.setEstimate(PendingVault.Estimate.valueOf(createVault.getEstimate()));
+        }
         vault.setContact(createVault.getContactPerson());
         vault.setPureLink(createVault.getPureLink());
 
