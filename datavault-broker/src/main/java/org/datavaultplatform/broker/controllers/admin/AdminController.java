@@ -185,11 +185,15 @@ public class AdminController {
                 depositInfo.setVaultOwnerID(vaultOwner.getID());
                 depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
             }
-            depositInfo.setDatasetID(vault.getDataset().getID());
+            if (vault.getDataset() != null) {
+                depositInfo.setDatasetID(vault.getDataset().getID());
+            }
             depositInfo.setGroupName(vault.getGroup().getName());
             depositInfo.setGroupID(vault.getGroup().getID());
             depositInfo.setVaultReviewDate(vault.getReviewDate().toString());
-            depositInfo.setCrisID(vault.getDataset().getCrisId());
+            if (vault.getDataset() != null) {
+                depositInfo.setCrisID(vault.getDataset().getCrisId());
+            }
             depositResponses.add(depositInfo);
         }
         return depositResponses;
