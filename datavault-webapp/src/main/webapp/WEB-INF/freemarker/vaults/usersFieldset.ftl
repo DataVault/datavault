@@ -174,7 +174,7 @@
         
         <div class="well">
             <div class="alert alert-info">
-                <strong>We recommend you review the Pure metadata record for accuracy and add a description, abstract and links to research outputs and other projects/ people.”</strong>
+                <strong>We recommend you review the Pure metadata record for accuracy and add a description, abstract and links to research outputs and other projects/ people.</strong>
             </div>
         </div>
     </div>
