@@ -113,7 +113,7 @@
             Once a member of our staff validates your request you'll receive a confirmation email and be good to go!
         </div>
         <div class="alert alert-warning">
-            <strong>PLEASE NOTE – this information will be public, and will be linked to the PI’s Pure profile.</strong>
+			<span class="glyphicon glyphicon glyphicon-alert" aria-hidden="true"></span><strong>PLEASE NOTE – this information will be public, and will be linked to the PI’s Pure profile.</strong>
             <div class="checkbox">
                 <label>
                     <@spring.bind "vault.pureLink" />
