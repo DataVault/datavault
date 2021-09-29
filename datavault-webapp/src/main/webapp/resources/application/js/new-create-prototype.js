@@ -2,6 +2,11 @@
 $(document).ready(function(){
     var current_fs, next_fs, previous_fs;
     var opacity;
+    
+    // Prevent Enter Key Submitting Form
+    $("form input").on("keypress", function(e) {
+        return e.keyCode != 13;
+    });
 
     $.datepicker.setDefaults({
         dateFormat: "yy-mm-dd",
