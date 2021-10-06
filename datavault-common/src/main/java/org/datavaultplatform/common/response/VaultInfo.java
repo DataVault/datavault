@@ -127,6 +127,9 @@ public class VaultInfo {
     @ApiObjectField(description = "Pending Vault Owner ID")
     private String ownerId;
 
+    @ApiObjectField(description = "Pending Vault Creator ID")
+    private String vaultCreatorId;
+    
     @ApiObjectField(description = "Data Creators")
     private List<String> creators;
 
@@ -507,8 +510,17 @@ public class VaultInfo {
     public void setConfirmed(Boolean confirmed) {
         this.confirmed = confirmed;
     }
+    
 
-    public CreateVault convertToCreate() {
+    public String getVaultCreatorId() {
+		return vaultCreatorId;
+	}
+
+	public void setVaultCreatorId(String vaultCreatorId) {
+		this.vaultCreatorId = vaultCreatorId;
+	}
+
+	public CreateVault convertToCreate() {
         /*
         TODO: need to add validation / defend against nulls just a work in progress
          */
