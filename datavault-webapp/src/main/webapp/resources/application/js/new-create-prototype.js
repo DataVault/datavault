@@ -17,9 +17,16 @@ $(document).ready(function(){
     });
 
     $( "#grantEndDate" ).datepicker();
+    $( "#billingGrantEndDate" ).datepicker();
     $( "#reviewDate" ).datepicker({
         minDate: '+1m'
     });
+
+    $( "#billingGrantEndDate" ).change(function() {
+        $("#grantEndDate").prop("placeholder", $(this).val());
+        $("#grantEndDate").text($(this).val());
+        $("#grantEndDate").prop("disabled", true);
+    }).trigger('change');
 
     $("#affirmation-check").change(function(){
         $(this).parents("fieldset").children(".next").prop( "disabled", !$(this).is(":checked") );
@@ -73,16 +80,16 @@ $(document).ready(function(){
 
     $("#billing-choice-grantfunding").change(function(){
         if($(this).is(":checked")){
-            $('.collapse').not('#billing-form').collapse('hide');
-            $('#billing-form').collapse('show');
+            $('.collapse').not('#grant-billing-form').collapse('hide');
+            $('#grant-billing-form').collapse('show');
             $(this).parents("fieldset").children(".next").prop( "disabled", false );
         }
     }).trigger('change');  ;
 
     $("#billing-choice-budgetcode").change(function(){
         if($(this).is(":checked")) {
-            $('.collapse').not('#billing-form').collapse('hide');
-            $('#billing-form').collapse('show');
+            $('.collapse').not('#budget-billing-form').collapse('hide');
+            $('#budget-billing-form').collapse('show');
             $(this).parents("fieldset").children(".next").prop( "disabled", false );
         }
     }).trigger('change');  ;
