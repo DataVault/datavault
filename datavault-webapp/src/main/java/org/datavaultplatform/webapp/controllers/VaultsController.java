@@ -545,6 +545,14 @@ public class VaultsController {
         Gson gson = new Gson();
         return gson.toJson(result);
     }
+    
+    @RequestMapping(value = "/vaults/isuun/{uun}", method = RequestMethod.GET)
+    @ResponseBody
+    public String isUUN(@PathVariable("uun") String uun) {
+        boolean result = userLookupService.isUUN(uun);
+        Gson gson = new Gson();
+        return gson.toJson(result);
+    }
 
 //    private String checkUserList(List<String> list, String errorUrl) {
 //        String retVal = "";
