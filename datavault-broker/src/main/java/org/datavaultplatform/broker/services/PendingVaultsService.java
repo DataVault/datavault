@@ -296,28 +296,50 @@ public class PendingVaultsService {
             vault.setSliceID(sliceID);
         }
 
-        String authoriser = createVault.getAuthoriser();
-        logger.debug("Authoriser is: '" + authoriser+ "'");
-        if (authoriser != null) {
-            vault.setAuthoriser(authoriser);
+        if (vault.getBillingType().equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
+            String authoriser = createVault.getGrantAuthoriser();
+            logger.debug("Authoriser is: '" + authoriser + "'");
+            if (authoriser != null) {
+                vault.setAuthoriser(authoriser);
+            }
+
+            String schoolOrUnit = createVault.getGrantSchoolOrUnit();
+            logger.debug("schoolOrUnit is: '" + schoolOrUnit + "'");
+            if (schoolOrUnit != null) {
+                vault.setSchoolOrUnit(schoolOrUnit);
+            }
+
+            String subunit = createVault.getGrantSubunit();
+            logger.debug("Subunit is: '" + subunit + "'");
+            if (subunit != null) {
+                vault.setSubunit(subunit);
+            }
+
+            String projectID = createVault.getProjectID();
+            logger.debug("ProjectID is: '" + projectID + "'");
+            if (projectID != null) {
+                vault.setProjectID(projectID);
+            }
         }
 
-        String schoolOrUnit = createVault.getSchoolOrUnit();
-        logger.debug("schoolOrUnit is: '" + schoolOrUnit+ "'");
-        if (schoolOrUnit != null) {
-            vault.setSchoolOrUnit(schoolOrUnit);
-        }
+        if (vault.getBillingType().equals(PendingVault.Billing_Type.BUDGET_CODE)) {
+            String authoriser = createVault.getBudgetAuthoriser();
+            logger.debug("Authoriser is: '" + authoriser + "'");
+            if (authoriser != null) {
+                vault.setAuthoriser(authoriser);
+            }
 
-        String subunit = createVault.getSubunit();
-        logger.debug("Subunit is: '" + subunit+ "'");
-        if (subunit != null) {
-            vault.setSubunit(subunit);
-        }
+            String schoolOrUnit = createVault.getBudgetSchoolOrUnit();
+            logger.debug("schoolOrUnit is: '" + schoolOrUnit + "'");
+            if (schoolOrUnit != null) {
+                vault.setSchoolOrUnit(schoolOrUnit);
+            }
 
-        String projectID = createVault.getProjectID();
-        logger.debug("ProjectID is: '" + projectID+ "'");
-        if (projectID != null) {
-            vault.setProjectID(projectID);
+            String subunit = createVault.getBudgetSubunit();
+            logger.debug("Subunit is: '" + subunit + "'");
+            if (subunit != null) {
+                vault.setSubunit(subunit);
+            }
         }
 
         // this the creator of the pending vault not necessarily the prospective owner

@@ -52,17 +52,17 @@
                             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                                   title="The name of someone in your School/Unit or Sub-Unit who can authorise the payment of the eIT."></span>
                         </label>
-                        <@spring.bind "vault.authoriser" />
+                        <@spring.bind "vault.grantAuthoriser" />
                         <input type="text" id="authoriser" name="${spring.status.expression}" value="${spring.status.value!""}"/>
                     </div>
                     <div class="form-group required">
                         <label class="col-sm-2 control-label">School/Unit:</label>
-                        <@spring.bind "vault.schoolOrUnit" />
+                        <@spring.bind "vault.grantSchoolOrUnit" />
                         <input type="text" id="schoolOrUnit" name="${spring.status.expression}" value="${spring.status.value!""}" />
                     </div>
                     <div class="form-group required">
                         <label class="col-sm-2 control-label">Subunit:</label>
-                        <@spring.bind "vault.subunit" />
+                        <@spring.bind "vault.grantSubunit" />
                         <input type="text" id="subunit" name="${spring.status.expression}" value="${spring.status.value!""}" />
                     </div>
                     <div class="form-group required">
@@ -93,18 +93,18 @@
                             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                                   title="The name of someone in your School/Unit or Sub-Unit who can authorise the payment of the eIT."></span>
                         </label>
-                        <@spring.bind "vault.authoriser" />
-                        <input type="text" id="authoriser" name="${spring.status.expression}" value="${spring.status.value!""}"/>
+                        <@spring.bind "vault.budgetAuthoriser" />
+                        <input type="text" id="bugdet-authoriser" name="${spring.status.expression}" value="${spring.status.value!""}"/>
                     </div>
                     <div class="form-group required">
                         <label class="col-sm-2 control-label">School/Unit:</label>
-                        <@spring.bind "vault.schoolOrUnit" />
-                        <input type="text" id="schoolOrUnit" name="${spring.status.expression}" value="${spring.status.value!""}" />
+                        <@spring.bind "vault.budgetSchoolOrUnit" />
+                        <input type="text" id="budget-schoolOrUnit" name="${spring.status.expression}" value="${spring.status.value!""}" />
                     </div>
                     <div class="form-group required">
                         <label class="col-sm-2 control-label">Subunit:</label>
-                        <@spring.bind "vault.subunit" />
-                        <input type="text" id="subunit" name="${spring.status.expression}" value="${spring.status.value!""}" />
+                        <@spring.bind "vault.budgetSubunit" />
+                        <input type="text" id="budget-subunit" name="${spring.status.expression}" value="${spring.status.value!""}" />
                     </div>
                 </div>
             </div>
