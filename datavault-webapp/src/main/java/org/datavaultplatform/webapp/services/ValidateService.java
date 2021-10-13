@@ -50,24 +50,14 @@ public class ValidateService {
         }
 
         //If type GRANT_FUNDING or BUDGET_CODE
-        if (type.equals("GRANT_FUNDING") || type.equals("BUDGET_CODE")) {
+        if (type.equals("GRANT_FUNDING")) {
 
-            //Authoriser
-            String authoriser = vault.getAuthoriser();
-            if (authoriser == null || authoriser.isEmpty()) {
-                retVal.add("Authoriser missing");
-            }
-            //School / Unit
-            String schoolOrUnit = vault.getSchoolOrUnit();
-            if (schoolOrUnit == null || schoolOrUnit.isEmpty()) {
-                retVal.add("School / Unit missing");
-            }
-            //Subunit
-            String subunit = vault.getSubunit();
-            if (subunit == null || subunit.isEmpty()) {
-                retVal.add("Subunit missing");
-            }
-            return retVal;
+            return this.validateGrantBillingType(vault);
+        }
+
+        if (type.equals("BUDGET_CODE")) {
+
+            return this.validateBudgetBillingType(vault);
         }
 
         //If type SLICE
@@ -80,6 +70,57 @@ public class ValidateService {
         }
 
 
+        return retVal;
+    }
+
+    private List<String> validateBudgetBillingType(CreateVault vault) {
+        List<String> retVal = new ArrayList<>();
+
+        //Authoriser
+        String authoriser = vault.getBudgetAuthoriser();
+        if (authoriser == null || authoriser.isEmpty()) {
+            retVal.add("Authoriser missing");
+        }
+        //School / Unit
+        String schoolOrUnit = vault.getBudgetSchoolOrUnit();
+        if (schoolOrUnit == null || schoolOrUnit.isEmpty()) {
+            retVal.add("School / Unit missing");
+        }
+        //Subunit
+        String subunit = vault.getBudgetSubunit();
+        if (subunit == null || subunit.isEmpty()) {
+            retVal.add("Subunit missing");
+        }
+        return retVal;
+
+    }
+    private List<String> validateGrantBillingType(CreateVault vault) {
+        List<String> retVal = new ArrayList<>();
+
+        String authoriser = vault.getGrantAuthoriser();
+        if (authoriser == null || authoriser.isEmpty()) {
+            retVal.add("Authoriser missing");
+        }
+        //School / Unit
+        String schoolOrUnit = vault.getGrantSchoolOrUnit();
+        if (schoolOrUnit == null || schoolOrUnit.isEmpty()) {
+            retVal.add("School / Unit missing");
+        }
+        //Subunit
+        String subunit = vault.getGrantSubunit();
+        if (subunit == null || subunit.isEmpty()) {
+            retVal.add("Subunit missing");
+        }
+        // Project Title
+        String projectTitle = vault.getProjectID();
+        if (projectTitle == null || projectTitle.isEmpty()) {
+            retVal.add("Project Title missing");
+        }
+        // Grant end date
+        String grantEndDate = vault.getReviewDate();
+        if (grantEndDate == null || grantEndDate.isEmpty()) {
+            retVal.add("Review Date missing");
+        }
         return retVal;
     }
 

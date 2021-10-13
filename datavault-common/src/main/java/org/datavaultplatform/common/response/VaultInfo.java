@@ -518,11 +518,23 @@ public class VaultInfo {
         if (this.getBillingType() != null) {
             cv.setBillingType(this.getBillingType().toString());
         }
-        cv.setSliceID(this.getSliceID());
-        cv.setAuthoriser(this.getAuthoriser());
-        cv.setSchoolOrUnit(this.getSchoolOrUnit());
-        cv.setSubunit(this.getSubunit());
-        cv.setProjectID(this.getProjectId());
+        if (this.getBillingType().equals(PendingVault.Billing_Type.SLICE)) {
+            cv.setSliceID(this.getSliceID());
+        }
+
+        if (this.getBillingType().equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
+            cv.setGrantAuthoriser(this.getAuthoriser());
+            cv.setGrantSchoolOrUnit(this.getSchoolOrUnit());
+            cv.setGrantSubunit(this.getSubunit());
+            cv.setProjectID(this.getProjectId());
+        }
+
+        if (this.getBillingType().equals(PendingVault.Billing_Type.BUDGET_CODE)) {
+            cv.setBudgetAuthoriser(this.getAuthoriser());
+            cv.setBudgetSchoolOrUnit(this.getSchoolOrUnit());
+            cv.setBudgetSubunit(this.getSubunit());
+        }
+
         cv.setName(this.getName());
         //logger.info("Vault Description is: '" + vault.getDescription());
         cv.setDescription(this.getDescription());
