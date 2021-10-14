@@ -21,7 +21,8 @@
         <div class="form-group" required>
             <label class="col-sm-4 control-label">Owner UUN: </label>
             <@spring.bind "vault.vaultOwner" />
-            <input id="vaultOwner" name="${spring.status.expression}" value="${spring.status.value!""}" type="text"  class="autocomplete" placeholder=""/>
+            <input id="vaultOwner" name="${spring.status.expression}" value="${spring.status.value!""}" type="text"  class="autocomplete uun-required" placeholder=""/>
+            <span class="uun-required-error-span"></span>
         </div>
 
         <div class="form-group">
@@ -39,20 +40,22 @@
         <#assign ndmCount = ndm?index>
            <div class="extra-ndm form-group col-sm-offset-4">
               <@spring.bind "vault.nominatedDataManagers[${ndmCount}]" />
-              <input name="nominatedDataManagers[${ndmCount}]" value="${spring.status.value!""}" class="autocomplete" type="text" />
+              <input name="nominatedDataManagers[${ndmCount}]" value="${spring.status.value!""}" class="autocomplete uun-required" type="text" />
               <!-- Add  remove button for inputs apart from first for which we add an add button. -->
               <#if (ndmCount == 0)>
                 <button type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
               <#else>
                  <button type="button" class="remove-ndm-btn btn btn-danger btn-xs">Remove</button>
               </#if>
+              <span class="uun-required-error-span"></span>
             </div>
         </#list>
         <#else>
-           <div class="extra-ndm form-group col-sm-offset-2">
+           <div class="extra-ndm form-group col-sm-offset-4">
               <@spring.bind "vault.nominatedDataManagers[0]" />
-              <input name="nominatedDataManagers[0]" value="${spring.status.value!""}" class="autocomplete" type="text" />
+              <input name="nominatedDataManagers[0]" value="${spring.status.value!""}" class="autocomplete uun-required" type="text" />
                <button type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
+               <span class="uun-required-error-span"></span>
             </div>
         </#if>
            
@@ -64,8 +67,9 @@
           <#assign ndmCount++>
             <div class="empty-ndm form-group col-sm-offset-4 my-1">
                <@spring.bind "vault.nominatedDataManagers[${ndmCount}]" />
-               <input name="nominatedDataManagers[${ndmCount}]"  value="${spring.status.value!""}" class="autocomplete" type="text"  placeholder=""/>
+               <input name="nominatedDataManagers[${ndmCount}]"  value="${spring.status.value!""}" class="autocomplete uun-required" type="text"  placeholder=""/>
                <button type="button" class="remove-ndm-btn btn btn-danger btn-xs">Remove</button>
+               <span class="uun-required-error-span"></span>
             </div>
           </#list>
         </div>
@@ -82,22 +86,24 @@
         <#if vault.depositors?has_content>
         <#list vault.depositors as depositor>
         <#assign depositorCount = depositor?index>
-           <div class="extra-depositor form-group col-sm-offset-2">
+           <div class="extra-depositor form-group col-sm-offset-4">
               <@spring.bind "vault.depositors[${depositorCount}]" />
-              <input name="depositors[${depositorCount}]" value="${spring.status.value!""}" class="autocomplete" type="text" />
+              <input name="depositors[${depositorCount}]" value="${spring.status.value!""}" class="autocomplete uun-required" type="text" />
               <!-- Add  remove button for inputs apart from first for which we add an add button. -->
               <#if (depositorCount == 0)>
                 <button type="button" id="add-depositor-btn" class="btn btn-default btn-sm">Add a depositor</button>
               <#else>
                  <button type="button" class="remove-depositor-btn btn btn-danger btn-xs">Remove</button>
               </#if>
+              <span class="uun-required-error-span"></span>
             </div>
         </#list>
         <#else>
           <div class="extra-depositor form-group col-sm-offset-4">
               <@spring.bind "vault.depositors[0]" />
-              <input name="depositors[0]" value="${spring.status.value!""}" class="autocomplete" type="text" />
+              <input name="depositors[0]" value="${spring.status.value!""}" class="autocomplete uun-required" type="text" />
               <button type="button" id="add-depositor-btn" class="btn btn-default btn-sm">Add a depositor</button>
+              <span class="uun-required-error-span"></span>
           </div>
         </#if>
            
@@ -109,8 +115,9 @@
           <#assign depositorCount++>
             <div class="empty-depositor form-group col-sm-offset-4 my-1">
                <@spring.bind "vault.depositors[${depositorCount}]" />
-               <input name="depositors[${depositorCount}]"  value="${spring.status.value!""}" class="autocomplete" type="text"  placeholder=""/>
+               <input name="depositors[${depositorCount}]"  value="${spring.status.value!""}" class="autocomplete uun-required" type="text"  placeholder=""/>
                <button type="button" class="remove-depositor-btn btn btn-danger btn-xs">Remove</button>
+               <span class="uun-required-error-span"></span>
             </div>
           </#list>
         </div>
@@ -125,7 +132,8 @@
         <div id="contact-form-group" class="form-group">
             <label for="contactPerson" class="col-sm-4 control-label">Contact person: </label>
             <@spring.bind "vault.contactPerson" />
-            <input id="contactPerson" name="${spring.status.expression}" value="${spring.status.value!""}" class="autocomplete" type="text" placeholder=""/>
+            <input id="contactPerson" name="${spring.status.expression}" value="${spring.status.value!""}" class="autocomplete uun-required" type="text" placeholder=""/>
+            <span class="uun-required-error-span"></span>
         </div>
 
         <!-- Start: dataCreators -->
@@ -137,22 +145,24 @@
         <#if vault.dataCreators?has_content>
         <#list vault.dataCreators as dataCreator>
         <#assign dataCreatorCount = dataCreator?index>
-           <div class="extra-data-creator form-group col-sm-offset-2">
+           <div class="extra-data-creator form-group col-sm-offset-4">
               <@spring.bind "vault.dataCreators[${dataCreatorCount}]" />
-              <input name="dataCreators[${dataCreatorCount}]" value="${spring.status.value!""}" class="autocomplete" type="text" />
+              <input name="dataCreators[${dataCreatorCount}]" value="${spring.status.value!""}" class="autocomplete uun-required" type="text" />
               <!-- Add  remove button for inputs apart from first for which we add an add button. -->
               <#if (dataCreatorCount == 0)>
                 <button type="button" id="add-data-creator-btn" class="btn btn-default btn-sm">Add a Data Creator</button>
               <#else>
                  <button type="button" class="remove-data-creator-btn btn btn-danger btn-xs">Remove</button>
               </#if>
+              <span class="uun-required-error-span"></span>
             </div>
         </#list>
         <#else>
           <div class="extra-data-creator form-group col-sm-offset-4">
               <@spring.bind "vault.dataCreators[0]" />
-              <input name="dataCreators[0]" value="${spring.status.value!""}" class="autocomplete" type="text" />
+              <input name="dataCreators[0]" value="${spring.status.value!""}" class="autocomplete uun-required" type="text" />
               <button type="button" id="add-data-creator-btn" class="btn btn-default btn-sm">Add a Data Creator</button>
+              <span class="uun-required-error-span"></span>
           </div>
         </#if>
            
@@ -164,8 +174,9 @@
           <#assign dataCreatorCount++>
             <div class="empty-data-creator form-group col-sm-offset-4 my-1">
                <@spring.bind "vault.dataCreators[${dataCreatorCount}]" />
-               <input name="dataCreators[${dataCreatorCount}]"  value="${spring.status.value!""}" class="autocomplete" type="text"  placeholder=""/>
+               <input name="dataCreators[${dataCreatorCount}]"  value="${spring.status.value!""}" class="autocomplete uun-required" type="text"  placeholder=""/>
                <button type="button" class="remove-data-creator-btn btn btn-danger btn-xs">Remove</button>
+               <span class="uun-required-error-span"></span>
             </div>
           </#list>
         </div>
@@ -174,7 +185,7 @@
         
         <div class="well">
             <div class="alert alert-info">
-                <strong>We recommend you review the Pure metadata record for accuracy and add a description, abstract and links to research outputs and other projects/ people.”</strong>
+                <strong>We recommend you review the Pure metadata record for accuracy and add a description, abstract and links to research outputs and other projects/ people.</strong>
             </div>
         </div>
     </div>
@@ -184,8 +195,9 @@
         <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
     </button>
     </#if>
-    <button type="button" name="next" class="next action-button btn btn-primary">Next Step &raquo;</button>
+    <button type="button" id="user-fields-next" name="next" class="next action-button btn btn-primary">Next Step &raquo;</button>
     <script>
+    $(document).ready(function(){
         $(".autocomplete").autocomplete({
             autoFocus: true,
             appendTo: "#add-role-vault-dialog",
@@ -207,8 +219,80 @@
             select: function (event, ui) {
                 var attributes = ui.item.value.split(" - ");
                 this.value = attributes[0];
+                // Trigger keyup event as select will not be detected 
+                // by the input element
+                $(this).trigger("keyup");
                 return false;
             }
         });
+        
+        // Hide all spans with class uun-required-span and set text red
+        $(".uun-required-error-span").css({"color" : "red"});
+        $(".uun-required-error-span").val("");
+        $(".uun-required-error-span").hide();
+        
+        
+        // Function that validates uun 
+        function validateUUN(inputText,errorSpan) {
+          if(inputText !== "") {
+            console.log("inputText: ", inputText);
+            $.ajax({
+                    url: ErrorHandler._springContextPath + "/vaults/isuun/" + inputText,
+                    type: 'GET',
+                    dataType: "json",
+                    success: function(isUUN) {
+                        if(isUUN) {
+                          errorSpan.text("");
+                          errorSpan.hide();     
+                        } else {
+                          errorSpan.text("Invalid UUN");
+                          errorSpan.show();
+                        }
+                      // As <span> does not have assign a 'change' event by default.
+                      // This event is limited to <input> elements, <textarea> boxes and <select> elements
+                      // We assign a 'change' event to errorSpan.
+                      errorSpan.change();  
+                    },
+                    error: function(xhr) {
+                        //ErrorHandler.handleAjaxError('#autocomplete-error', xhr);
+                    }
+            });
+          } else {
+             errorSpan.text("");
+             errorSpan.hide();   
+          }
+        
+        }
+        
+        // Validate input is uun for keyup
+        // for input tags with class "uun-required"
+        $(".uun-required").on("keyup", function() {
+          var inputText = $(this).val().trim();
+          var errorSpan =  $(this).siblings(".uun-required-error-span");
+          console.log("ON EVENT: inputText: ", inputText);
+          validateUUN(inputText,errorSpan);
+        });
+        
+       // Ensure  Next button only enabled if no "Invalid UUN present 
+       // on Dom change within within div with id="add-role-vault-dialog"
+       $("#add-role-vault-dialog").bind('DOMSubtreeModified', function () {
+         var validationErrorPresent = false;
+         // loop through all spans with .uun-required-error-span
+         $(".uun-required-error-span").each(function() {
+              if($(this).text().trim() !== "") {
+                 validationErrorPresent = true;
+              }
+         });
+
+         console.log("validationErrorPresent: ", validationErrorPresent);
+         // If no validation errors enable next button
+         if(validationErrorPresent) {
+             $('#user-fields-next').prop("disabled", true);
+         } else {
+           $('#user-fields-next').prop("disabled", false);
+         }
+       });
+   
+      });  
     </script>
 </fieldset>

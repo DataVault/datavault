@@ -58,7 +58,7 @@
                             </td>
                             <td>${vault.getNumberOfDeposits()}</td>
                             <td> <#if vault.getProjectId()??>${vault.getProjectId()}<#else> </#if></td>
-                            <td> <#if vault.getCrisID??>${vault.getCrisID()}<#else> </#if></td>
+                            <td> <#if vault.getCrisID()??>${vault.getCrisID()}<#else> </#if></td>
                             <td>${vault.getProjectSizeStr()}</td>
                            <td>${vault.getSizeStr()}</td>
                             <td>

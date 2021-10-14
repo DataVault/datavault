@@ -2,6 +2,11 @@
 $(document).ready(function(){
     var current_fs, next_fs, previous_fs;
     var opacity;
+    
+    // Prevent Enter Key Submitting Form
+    $("form input").on("keypress", function(e) {
+        return e.keyCode != 13;
+    });
 
     $.datepicker.setDefaults({
         dateFormat: "yy-mm-dd",
@@ -12,9 +17,26 @@ $(document).ready(function(){
     });
 
     $( "#grantEndDate" ).datepicker();
+    $( "#billingGrantEndDate" ).datepicker();
     $( "#reviewDate" ).datepicker({
         minDate: '+1m'
     });
+
+    // if billingtype changes blank all billing fields (remember to fix date on info page)
+    $( "#billingGrantEndDate" ).change(function() {
+        // :todo make sure info version of field is only disabled if the billing one has a valid value
+        var dateResult = ($(this).val().trim() === '');
+        var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
+
+        if (dateResult === false && grantChecked === true) {
+            $("#grantEndDate").prop("placeholder", $(this).val());
+            $("#grantEndDate").text($(this).val());
+            $("#grantEndDate").prop("disabled", true);
+        } else {
+            $("#grantEndDate").prop("disabled", false);
+            $("#grantEndDate").prop("placeholder", "yyyy-mm-dd");
+        }
+    }).trigger('change');
 
     $("#affirmation-check").change(function(){
         $(this).parents("fieldset").children(".next").prop( "disabled", !$(this).is(":checked") );
@@ -62,27 +84,38 @@ $(document).ready(function(){
     }).trigger('change');
 
     $("#billing-choice-na").change(function(){
+        clearBillingOptions();
+
         $('.collapse').collapse('hide');
         $(this).parents("fieldset").children(".next").prop( "disabled", false );
     }).trigger('change');  ;
 
     $("#billing-choice-grantfunding").change(function(){
+
+        clearBillingOptions();
+
         if($(this).is(":checked")){
-            $('.collapse').not('#billing-form').collapse('hide');
-            $('#billing-form').collapse('show');
+            $('.collapse').not('#grant-billing-form').collapse('hide');
+            $('#grant-billing-form').collapse('show');
             $(this).parents("fieldset").children(".next").prop( "disabled", false );
         }
     }).trigger('change');  ;
 
     $("#billing-choice-budgetcode").change(function(){
+
+        clearBillingOptions();
+
         if($(this).is(":checked")) {
-            $('.collapse').not('#billing-form').collapse('hide');
-            $('#billing-form').collapse('show');
+            $('.collapse').not('#budget-billing-form').collapse('hide');
+            $('#budget-billing-form').collapse('show');
             $(this).parents("fieldset").children(".next").prop( "disabled", false );
         }
     }).trigger('change');  ;
 
     $("#billing-choice-slice").change(function(){
+
+        clearBillingOptions();
+
         if($(this).is(":checked")) {
             $('.collapse').not('#slice-form').collapse('hide');
             $('#slice-form').collapse('show');
@@ -115,7 +148,8 @@ $(document).ready(function(){
                    .addClass("empty-ndm");
         // Prepend element to hidden-empty-ndms
         currentNdm.prependTo($("#hidden-empty-ndms"));
-        
+       // Clear Error text     
+       $(this).siblings(".uun-required-error-span").text("");
     });
     
     $("#add-depositor-btn").click(function(){
@@ -134,6 +168,8 @@ $(document).ready(function(){
                    .addClass("empty-depositor");
         // Prepend element to hidden-empty-depositors
         currentDepositor.prependTo($("#hidden-empty-depositors"));
+        // Clear Error text     
+        $(this).siblings(".uun-required-error-span").text("");
         
     });
 
@@ -153,6 +189,8 @@ $(document).ready(function(){
                    .addClass("empty-data-creator");
         // Prepend element to hidden-empty-data-creators
         currentDataCreator.prependTo($("#hidden-empty-data-creators"));
+        // Clear Error text     
+        $(this).siblings(".uun-required-error-span").text("");
         
     });
    
@@ -225,6 +263,47 @@ $(document).ready(function(){
         $('#submitAction').val($(this).attr('value'));
     });
 
+    function clearBillingOptions() {
+        // enable or disable the grant end date field on the info fieldset
+        var dateResult = ($("#billingGrantEndDate").val().trim() === '');
+        var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
+
+        if (dateResult === false && grantChecked === true) {
+            $("#grantEndDate").prop("placeholder", $("#billingGrantEndDate").val());
+            $("#grantEndDate").text($("#billingGrantEndDate").val());
+            $("#grantEndDate").prop("disabled", true);
+        } else {
+            $("#grantEndDate").prop("disabled", false);
+            $("#grantEndDate").prop("placeholder", "yyyy-mm-dd");
+        }
+
+        // clear the unused fieldsets
+        var naChecked = ($("#billing-choice-na").is(":checked"));
+        var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
+        var budgetChecked = ($("#billing-choice-budgetcode").is(":checked"));
+        var sliceChecked = ($("#billing-choice-slice").is(":checked"));
+        // if billing type is not grant clear fieldset
+        if (naChecked === true) {
+            $("#grant-billing-form input").val("");
+            $("#budget-billing-form input").val("");
+            $("#slice-form input").val("");
+        }
+        if (grantChecked === true) {
+            $("#budget-billing-form input").val("");
+            $("#slice-form input").val("");
+        }
+
+        if (budgetChecked === true) {
+            $("#grant-billing-form input").val("");
+            $("#slice-form input").val("");
+        }
+
+        if (sliceChecked === true) {
+            $("#grant-billing-form input").val("");
+            $("#budget-billing-form input").val("");
+        }
+    }
+
     function populateSummaryPage() {
     	console.log("populateSummaryPage()");
     	// Check if an element with id="summary-fieldset" currently exists,
@@ -238,7 +317,12 @@ $(document).ready(function(){
     	  $("#summary-vaultName").text($("#vaultName").val());
     	  $("#summary-description").text($("#description").val());
     	  $("#summary-policyID").text($("#policyID option:selected").text());
-    	  $("#summary-grantEndDate").text($("#grantEndDate").val());
+    	  var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
+    	  if (grantChecked === true) {
+              $("#summary-grantEndDate").text($("#billingGrantEndDate").val());
+          } else {
+              $("#summary-grantEndDate").text($("#grantEndDate").val());
+          }
           $("#summary-groupID").text($("#groupID option:selected").text());
           $("#summary-reviewDate").text($("#reviewDate").val());
           // remove line breaks from string with replace(/(\r\n|\n|\r)/gm, "") and need to trim

@@ -13,7 +13,7 @@
             <div class="radio">
                 <label>
                     <input type="radio" name="${spring.status.expression}" id="billing-choice-grantfunding" value="GRANT_FUNDING" <#if vault.billingType??>${(vault.billingType == 'GRANT_FUNDING')?then('checked', '')}</#if>>
-                    Grant funding [open dialog to select/specify a project and provide the grant end date for the purposes of when the eIT must be sent by.]​
+                    Grant funding ​
                 </label>
             </div>
             <div class="radio">
@@ -44,34 +44,67 @@
                     </div>
                 </div>
             </div>
-            <div id="billing-form" class="collapse">
+            <div id="grant-billing-form" class="collapse">
                 <div class="well">
                     <p>Please provide the details we should use to send your bill (your eIT) to the correct finance team.</p>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">Authoriser*:
+                    <div class="form-group required">
+                        <label class="col-sm-2 control-label">Authoriser:
                             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                                   title="The name of someone in your School/Unit or Sub-Unit who can authorise the payment of the eIT."></span>
                         </label>
-                        <@spring.bind "vault.authoriser" />
+                        <@spring.bind "vault.grantAuthoriser" />
                         <input type="text" id="authoriser" name="${spring.status.expression}" value="${spring.status.value!""}"/>
                     </div>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">School/Unit*:</label>
-                        <@spring.bind "vault.schoolOrUnit" />
+                    <div class="form-group required">
+                        <label class="col-sm-2 control-label">School/Unit:</label>
+                        <@spring.bind "vault.grantSchoolOrUnit" />
                         <input type="text" id="schoolOrUnit" name="${spring.status.expression}" value="${spring.status.value!""}" />
                     </div>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">Subunit*:</label>
-                        <@spring.bind "vault.subunit" />
+                    <div class="form-group required">
+                        <label class="col-sm-2 control-label">Subunit:</label>
+                        <@spring.bind "vault.grantSubunit" />
                         <input type="text" id="subunit" name="${spring.status.expression}" value="${spring.status.value!""}" />
                     </div>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">ProjectId:
+                    <div class="form-group required">
+                        <label class="col-sm-2 control-label">Project Title:
                             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                                  title="If you are planning to pay the bill from a grant, please select the Project from this list."></span>
+                                  title="If you are planning to pay the bill from a grant, please enter the Project Title."></span>
                         </label>
                         <@spring.bind "vault.projectID" />
                         <input type="text" id="projectID" name="${spring.status.expression}" value="${spring.status.value!""}" />
+                    </div>
+                    <div class="form-group required">
+                        <label  for="billingGrantEndDate" class="col-sm-2 control-label">
+                            Grant End Date:<span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
+                                                 title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;"></span>
+                        </label>
+
+                        <@spring.bind "vault.grantEndDate" />
+                        <input id="billingGrantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd" name="${spring.status.expression}"
+                               value="${spring.status.value!""}"/>
+                    </div>
+                </div>
+            </div>
+            <div id="budget-billing-form" class="collapse">
+                <div class="well">
+                    <p>Please provide the details we should use to send your bill (your eIT) to the correct finance team.</p>
+                    <div class="form-group required">
+                        <label class="col-sm-2 control-label">Authoriser:
+                            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
+                                  title="The name of someone in your School/Unit or Sub-Unit who can authorise the payment of the eIT."></span>
+                        </label>
+                        <@spring.bind "vault.budgetAuthoriser" />
+                        <input type="text" id="bugdet-authoriser" name="${spring.status.expression}" value="${spring.status.value!""}"/>
+                    </div>
+                    <div class="form-group required">
+                        <label class="col-sm-2 control-label">School/Unit:</label>
+                        <@spring.bind "vault.budgetSchoolOrUnit" />
+                        <input type="text" id="budget-schoolOrUnit" name="${spring.status.expression}" value="${spring.status.value!""}" />
+                    </div>
+                    <div class="form-group required">
+                        <label class="col-sm-2 control-label">Subunit:</label>
+                        <@spring.bind "vault.budgetSubunit" />
+                        <input type="text" id="budget-subunit" name="${spring.status.expression}" value="${spring.status.value!""}" />
                     </div>
                 </div>
             </div>

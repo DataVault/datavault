@@ -6,8 +6,12 @@ import org.datavaultplatform.common.model.PendingVault;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "CreateVault")
@@ -59,13 +63,21 @@ public class CreateVault {
     private String sliceID;
 
     @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for authoriser")
-    private String authoriser;
+    private String grantAuthoriser;
+    @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for authoriser")
+    private String budgetAuthoriser;
 
     @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for school / unit")
-    private String schoolOrUnit;
+    private String grantSchoolOrUnit;
+
+    @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for school / unit")
+    private String budgetSchoolOrUnit;
 
     @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for subunit")
-    private String subunit;
+    private String grantSubunit;
+
+    @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for subunit")
+    private String budgetSubunit;
 
     @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for projectID")
     private String projectID;
@@ -232,28 +244,52 @@ public class CreateVault {
         this.pendingID = pendingID;
     }
 
-    public String getAuthoriser() {
-        return this.authoriser;
+    public String getGrantAuthoriser() {
+        return this.grantAuthoriser;
     }
 
-    public void setAuthoriser(String authoriser) {
-        this.authoriser = authoriser;
+    public void setGrantAuthoriser(String grantAuthoriser) {
+        this.grantAuthoriser = grantAuthoriser;
     }
 
-    public String getSchoolOrUnit() {
-        return this.schoolOrUnit;
+    public String getBudgetAuthoriser() {
+        return this.budgetAuthoriser;
     }
 
-    public void setSchoolOrUnit(String schoolOrUnit) {
-        this.schoolOrUnit = schoolOrUnit;
+    public void setBudgetAuthoriser(String budgetAuthoriser) {
+        this.budgetAuthoriser = budgetAuthoriser;
     }
 
-    public String getSubunit() {
-        return this.subunit;
+    public String getGrantSchoolOrUnit() {
+        return this.grantSchoolOrUnit;
     }
 
-    public void setSubunit(String subunit) {
-        this.subunit = subunit;
+    public void setGrantSchoolOrUnit(String grantSchoolOrUnit) {
+        this.grantSchoolOrUnit = grantSchoolOrUnit;
+    }
+
+    public String getBudgetSchoolOrUnit() {
+        return this.budgetSchoolOrUnit;
+    }
+
+    public void setBudgetSchoolOrUnit(String budgetSchoolOrUnit) {
+        this.budgetSchoolOrUnit = budgetSchoolOrUnit;
+    }
+
+    public String getGrantSubunit() {
+        return this.grantSubunit;
+    }
+
+    public void setGrantSubunit(String grantSubunit) {
+        this.grantSubunit = grantSubunit;
+    }
+
+    public String getBudgetSubunit() {
+        return this.budgetSubunit;
+    }
+
+    public void setBudgetSubunit(String budgetSubunit) {
+        this.budgetSubunit = budgetSubunit;
     }
 
     public String getProjectID() {
@@ -313,31 +349,42 @@ public class CreateVault {
         return retVal;
     }
 
-    public String getBillingAsString() {
-        StringBuilder retVal = new StringBuilder();
-
-        if (this.billingType != null && !this.billingType.equals("")) {
-            // add billing type
-            retVal.append(this.billingType);
-            if (! this.billingType.equals("NA")) {
-                // if not N/A add [
-                retVal.append(" [");
-                // if grant type or budget code add authoriser, school/ unit, subunit and project id
-                if (this.billingType.equals("GRANT_FUNDING") || this.billingType.equals("BUDGET_CODE")) {
-                    retVal.append(this.authoriser + ",");
-                    retVal.append(this.schoolOrUnit + ",");
-                    retVal.append(this.subunit + ",");
-                    retVal.append(this.projectID);
-                }
-                // if slice add slice
-                if (this.billingType.equals("SLICE")) {
-                   retVal.append(this.sliceID);
-                }
-                retVal.append("]");
-            }
-        }
-        return retVal.toString();
-    }
+//    public String getBillingAsString() {
+//        StringBuilder retVal = new StringBuilder();
+//
+//        if (this.billingType != null && !this.billingType.equals("")) {
+//            // add billing type
+//            retVal.append(this.billingType);
+//            if (! this.billingType.equals("NA")) {
+//                // if not N/A add [
+//                retVal.append(" [");
+//                // if grant type or budget code add authoriser, school/ unit, subunit and project id
+//                if (this.billingType.equals("GRANT_FUNDING") || this.billingType.equals("BUDGET_CODE")) {
+//                    retVal.append(this.grantAuthoriser + ",");
+//                    retVal.append(this.grantSchoolOrUnit + ",");
+//                    retVal.append(this.grantSubunit + ",");
+//                    retVal.append(this.projectID);
+//                    DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.UK);
+//                    try {
+//                        retVal.append(formatter.parse(this.grantEndDate));
+//                    } catch (ParseException|NullPointerException ex) {
+//                        // do what?
+//                    }
+//                }
+//                if (this.billingType.equals("BUDGET_CODE")) {
+//                    retVal.append(this.budgetAuthoriser + ",");
+//                    retVal.append(this.budgetSchoolOrUnit + ",");
+//                    retVal.append(this.budgetSubunit + ",");
+//                }
+//                // if slice add slice
+//                if (this.billingType.equals("SLICE")) {
+//                   retVal.append(this.sliceID);
+//                }
+//                retVal.append("]");
+//            }
+//        }
+//        return retVal.toString();
+//    }
 
     public void setDataCreators(List<String> dataCreators) { this.dataCreators = dataCreators; }
 
