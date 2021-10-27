@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.services;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import org.datavaultplatform.common.model.*;
@@ -20,6 +21,8 @@ public class VaultsService {
 
     private DataCreatorsService dataCreatorsService;
 
+    private BillingService billingService;
+
     public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
         this.rolesAndPermissionsService = rolesAndPermissionsService;
     }
@@ -33,6 +36,8 @@ public class VaultsService {
     }
 
     public void setDataCreatorsService(DataCreatorsService dataCreatorsService) { this.dataCreatorsService = dataCreatorsService; }
+
+    public void setBillingService(BillingService billingService) { this.billingService = billingService; }
 
     public List<Vault> getVaults() {
         return vaultDAO.list();
@@ -237,5 +242,34 @@ public class VaultsService {
                 }
             }
         }
+    }
+
+    public void addBillingInfo(CreateVault createVault, Vault vault) {
+        BillingInfo billinginfo =  new BillingInfo();
+        billinginfo.setAmountBilled(new BigDecimal(0));
+        billinginfo.setAmountToBeBilled(new BigDecimal(0));
+        billinginfo.setVault(vault);
+        String billingType = createVault.getBillingType();
+
+        PendingVault.Billing_Type enumBT = PendingVault.Billing_Type.valueOf(billingType);
+        billinginfo.setBillingType(enumBT);
+
+        if (enumBT.equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
+            billinginfo.setContactName(createVault.getGrantAuthoriser());
+            billinginfo.setSchool(createVault.getGrantSchoolOrUnit());
+            billinginfo.setSubUnit(createVault.getGrantSubunit());
+            billinginfo.setProjectTitle(createVault.getProjectID());
+        }
+
+        if (enumBT.equals(PendingVault.Billing_Type.BUDGET_CODE)) {
+            billinginfo.setContactName(createVault.getBudgetAuthoriser());
+            billinginfo.setSchool(createVault.getBudgetSchoolOrUnit());
+            billinginfo.setSubUnit(createVault.getBudgetSubunit());
+        }
+
+        if (enumBT.equals(PendingVault.Billing_Type.SLICE)) {
+            billinginfo.setSliceID(createVault.getSliceID());
+        }
+        billingService.saveOrUpdateVault(billinginfo);
     }
 }

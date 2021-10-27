@@ -53,6 +53,15 @@ public class BillingInfo {
     
 	@Column(name = "school", nullable = true, columnDefinition = "TEXT", length=400)
     private String school;
+
+	@Column(name = "billingType", nullable = false, columnDefinition = "TEXT", length=10)
+	private PendingVault.Billing_Type billingType;
+
+	@Column(name = "sliceID", nullable = true, columnDefinition = "TEXT", length=40)
+	private String sliceID;
+
+	@Column(name = "projectTitle", nullable = true, columnDefinition = "TEXT", length=400)
+	private String projectTitle;
 	
 	@OneToOne
 	@JoinColumn(name="vaultID", nullable = false)
@@ -110,6 +119,31 @@ public class BillingInfo {
 	public void setVault(Vault vault) {
 		this.vault = vault;
 	}
+
+	public PendingVault.Billing_Type getBillingType() {
+		return this.billingType;
+	}
+
+	public void setBillingType(PendingVault.Billing_Type billingType) {
+		this.billingType = billingType;
+	}
+
+	public String getSliceID() {
+		return this.sliceID;
+	}
+
+	public void setSliceID(String sliceID) {
+		this.sliceID = sliceID;
+	}
+
+	public String getProjectTitle() {
+		return this.projectTitle;
+	}
+
+	public void setProjectTitle(String projectTitle) {
+		this.projectTitle = projectTitle;
+	}
+
 	public BillingInfo() {}
  
     public String getID() { 

@@ -7,7 +7,6 @@ import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
 import org.datavaultplatform.common.event.roles.OrphanVault;
 import org.datavaultplatform.common.event.roles.TransferVaultOwnership;
 import org.datavaultplatform.common.event.vault.Create;
-import org.datavaultplatform.common.event.vault.Pending;
 import org.datavaultplatform.common.event.vault.UpdatedDescription;
 import org.datavaultplatform.common.event.vault.UpdatedName;
 import org.datavaultplatform.common.model.*;
@@ -518,21 +517,6 @@ public class VaultsController {
             throw new Exception("User '" + userID + "' does not exist");
         }
         vault.setUser(user);
-        //String datasetId = createVault.getDatasetID();
-        //Dataset dataset = externalMetadataService.getCachedDataset(datasetId);
-
-        //if (dataset == null) {
-        //    dataset = externalMetadataService.getDataset(datasetId);
-        //    if (dataset == null) {
-        //        logger.error("Dataset metadata record '" + datasetId + "' does not exist");
-        //        throw new Exception("Dataset metadata record '" + datasetId + "' does not exist");
-        //    }
-
-        //    externalMetadataService.addCachedDataset(dataset);
-        //}
-        //vault.setDataset(dataset);
-        //vault.setSnapshot(externalMetadataService.getDatasetContent(datasetId));
-        //vault.setProjectId(externalMetadataService.getPureProjectId(dataset.getID()));
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -550,18 +534,11 @@ public class VaultsController {
         }
 
         vaultsService.addVault(vault);
-
-        //RoleAssignment dataOwnerRoleAssignment = new RoleAssignment();
-        //dataOwnerRoleAssignment.setUserId(userID);
-        //dataOwnerRoleAssignment.setVaultId(vault.getID());
-        //dataOwnerRoleAssignment.setRole(permissionsService.getDataOwner());
-        //permissionsService.createRoleAssignment(dataOwnerRoleAssignment);
-
         vaultsService.addDepositorRoles(createVault, vault.getID());
         vaultsService.addOwnerRole(createVault, vault.getID(), userID);
         vault = vaultsService.processDataCreatorParams(createVault, vault);
         vaultsService.addNDMRoles(createVault, vault.getID());
-        //pendingVaultsService.addCreator(createVault, userID, vault.getId());
+        vaultsService.addBillingInfo(createVault, vault);
 
         // TODO: Add new Pending Vault created event that includes the creators name as that will be lost when the vault is upgraded
         //Pending pendingEvent = new Pending(createVault.getPendingID());
@@ -577,7 +554,6 @@ public class VaultsController {
         vaultEvent.setUser(usersService.getUser(userID));
         vaultEvent.setAgentType(Agent.AgentType.BROKER);
         vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
-
         eventService.addEvent(vaultEvent);
 
         // Check the retention policy of the newly created vault

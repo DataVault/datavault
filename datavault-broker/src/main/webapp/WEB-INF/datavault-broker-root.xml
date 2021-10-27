@@ -42,6 +42,7 @@
         <property name="rolesAndPermissionsService" ref="rolesAndPermissionsService" />
         <property name="retentionPoliciesService" ref="retentionPoliciesService" />
         <property name="dataCreatorsService" ref="dataCreatorsService" />
+        <property name="billingService" ref="billingService" />
     </bean>
 
     <bean id="pendingVaultsService" class="org.datavaultplatform.broker.services.PendingVaultsService">
