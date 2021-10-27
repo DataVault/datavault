@@ -1,6 +1,5 @@
 <fieldset>
     <div class="form-card">
-        <h2 class="fs-title">Affirmation</h2>
         <p>
             We need some information about your new Vault. You can save your progress at any time before completing this form.
         </p>
@@ -9,11 +8,16 @@
             If you have any questions please don’t hesitate to contact the Research Data Service using the
             <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/contact" target="_blank">Contact</a> link at the top of this page.
         </p>
+        <h2 class="fs-title">Affirmation</h2>
         <p>
             I understand that the ‘owner’ /PI will be billed for any deposit (for information about rates, please use the
             <a href="http://www.ed.ac.uk/is/research-support/datavault" target="_blank">More Info</a> link at the top of
             the page to the university website DataVault information, and go to the
             <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/after/datavault/cost" target="_blank">Cost</a> page).
+        </p>
+        <p>
+            I understand that any data I and my team deposit in this vault belongs to the University of Edinburgh,
+            and I will only be able to retrieve the data as long as I have an active University of Edinburgh login.
         </p>
         <div class="checkbox">
             <label>
