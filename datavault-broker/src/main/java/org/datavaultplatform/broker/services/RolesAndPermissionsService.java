@@ -189,6 +189,18 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         return usersService.getUser(ownerAssignment.getUserId());
     }
 
+    public User getPendingVaultCreator(String pendingVaultId) {
+        List<RoleAssignment> assignments = roleAssignmentDao.findByPendingVaultId(pendingVaultId);
+        RoleAssignment ownerAssignment = assignments.stream()
+                .filter(RoleUtils::isVaultCreator)
+                .findAny()
+                .orElse(null);
+        if(ownerAssignment == null){
+            return null;
+        }
+        return usersService.getUser(ownerAssignment.getUserId());
+    }
+
     public List<User> getPendingVaultNDMs(String pendingVaultId) {
         List<RoleAssignment> assignments = roleAssignmentDao.findByPendingVaultId(pendingVaultId);
         List<RoleAssignment> ndmAssignments = assignments.stream()
