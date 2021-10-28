@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.datavaultplatform.common.model.PendingVault;
 import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
@@ -133,8 +134,19 @@ public class AdminBillingController {
     @RequestMapping(value = "/admin/billing/{vaultId}", method = RequestMethod.GET)
     public String retrieveBillingInfo(ModelMap model, @PathVariable("vaultId") String vaultId) {
     	BillingInformation billingDetails = restService.getVaultBillingInfo(vaultId);
-        model.addAttribute("billingDetails", billingDetails);       
-        return "admin/billing/billingDetails";
+        model.addAttribute("billingDetails", billingDetails);
+        String billingPage = "admin/billing/billingDetailsNA";
+
+        /*if (billingDetails.getBillingType().equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
+            billingPage = "admin/billing/billingDetailsGrant";
+        }
+        if (billingDetails.getBillingType().equals(PendingVault.Billing_Type.BUDGET_CODE)) {
+            billingPage = "admin/billing/billingDetailsBudget";
+        }
+        if (billingDetails.getBillingType().equals(PendingVault.Billing_Type.SLICE)) {
+            billingPage = "admin/billing/billingDetailsSlice";
+        }*/
+        return this.getBillingInfoPage(billingDetails.getBillingType());
     }
    
     @RequestMapping(value = "/admin/billing/updateBillingDetails", method = RequestMethod.POST)
@@ -143,7 +155,32 @@ public class AdminBillingController {
             ) throws Exception {
     	 System.out.println("-----------getBudgetCode---------"+billingDetails.getBudgetCode());
     	restService.updateBillingInfo(billingDetails.getVaultID(),billingDetails);
-    	return "admin/billing/billingDetails";
+    	//return "admin/billing/billingDetails";
+        return this.getBillingInfoPage(billingDetails.getBillingType());
+    }
+
+    private String getBillingInfoPage(PendingVault.Billing_Type type) {
+        String retVal = "admin/billing/billingDetails";
+
+        // so the old pre new interface vaults still go to the old page
+        if (type == null) {
+            return retVal;
+        }
+
+        if (type.equals(PendingVault.Billing_Type.NA)) {
+            retVal = "admin/billing/billingDetailsNA";
+        }
+
+        if (type.equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
+            retVal = "admin/billing/billingDetailsGrant";
+        }
+        if (type.equals(PendingVault.Billing_Type.BUDGET_CODE)) {
+            retVal = "admin/billing/billingDetailsBudget";
+        }
+        if (type.equals(PendingVault.Billing_Type.SLICE)) {
+            retVal = "admin/billing/billingDetailsSlice";
+        }
+        return retVal;
     }
 
 	

@@ -166,7 +166,10 @@ public class BillingInfo {
                 amountToBeBilled,
                 amountBilled,
                 vault.getProjectId(),
-                vault.getName()
+                vault.getName(),
+				sliceID,
+				projectTitle,
+				billingType
             );
     }
      
