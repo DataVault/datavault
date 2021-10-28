@@ -122,6 +122,9 @@ public class PendingVault {
     private User owner;
 
     @Transient
+    private User creator;
+
+    @Transient
     private List<User> depositors;
 
     @Transient
@@ -300,6 +303,14 @@ public class PendingVault {
 
     public void setOwner(User owner) {
         this.owner = owner;
+    }
+
+    public User getCreator() {
+        return this.creator;
+    }
+
+    public void setCreator(User creator) {
+        this.creator = creator;
     }
 
     public List<User> getDepositors() {

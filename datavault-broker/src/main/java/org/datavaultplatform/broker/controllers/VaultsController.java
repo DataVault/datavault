@@ -613,10 +613,12 @@ public class VaultsController {
         User owner = permissionsService.getPendingVaultOwner(vaultID);
         List<User> ndms = permissionsService.getPendingVaultNDMs(vaultID);
         List<User> deps = permissionsService.getPendingVaultDepositors(vaultID);
-
+        User creator = permissionsService.getPendingVaultCreator(vaultID);
+        
         vault.setOwner(owner);
         vault.setNominatedDataManagers(ndms);
         vault.setDepositors(deps);
+        vault.setCreator(creator);
         if (vault != null) {
             return vault.convertToResponse();
         } else {
