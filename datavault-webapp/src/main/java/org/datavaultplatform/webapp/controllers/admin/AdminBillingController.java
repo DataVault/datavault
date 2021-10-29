@@ -167,6 +167,10 @@ public class AdminBillingController {
             return retVal;
         }
 
+        if (type.equals(PendingVault.Billing_Type.ORIG)) {
+            retVal = "admin/billing/billingDetails";
+        }
+
         if (type.equals(PendingVault.Billing_Type.NA)) {
             retVal = "admin/billing/billingDetailsNA";
         }

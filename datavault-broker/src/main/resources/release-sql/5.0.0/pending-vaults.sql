@@ -52,16 +52,8 @@ ALTER TABLE Vaults add column notes TEXT;
 ALTER TABLE Vaults add column pureLink bit not null default false;
 ALTER TABLE Vaults add column contact TEXT;
 
-ALTER TABLE BillingInfo add column billingType TEXT NOT NULL default 'NA';
+ALTER TABLE BillingInfo add column billingType TEXT NOT NULL;
 ALTER TABLE BillingInfo add column sliceID TEXT;
-ALTER TABLE BillingInfo add column projectTitle TEXT
-
-
-    @Column(name = "billingType", nullable = false, columnDefinition = "TEXT", length=10)
-    private PendingVault.Billing_Type billingType;
-
-@Column(name = "sliceID", nullable = true, columnDefinition = "TEXT", length=40)
-	private String sliceID;
-
-@Column(name = "projectTitle", nullable = true, columnDefinition = "TEXT", length=400)
-	private String projectTitle;
+ALTER TABLE BillingInfo add column projectTitle TEXT;
+/* might have to drop the not null and add back in do do this */
+update BillingInfo set billingType = '4' where billingType = '';
