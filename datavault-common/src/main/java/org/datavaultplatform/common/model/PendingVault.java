@@ -30,7 +30,8 @@ public class PendingVault {
         NA,
         GRANT_FUNDING,
         BUDGET_CODE,
-        SLICE
+        SLICE,
+        ORIG
     }
     // Vault Identifier
     @Id
@@ -120,6 +121,9 @@ public class PendingVault {
 
     @Transient
     private User owner;
+
+    @Transient
+    private User creator;
 
     @Transient
     private List<User> depositors;
@@ -300,6 +304,14 @@ public class PendingVault {
 
     public void setOwner(User owner) {
         this.owner = owner;
+    }
+
+    public User getCreator() {
+        return this.creator;
+    }
+
+    public void setCreator(User creator) {
+        this.creator = creator;
     }
 
     public List<User> getDepositors() {
