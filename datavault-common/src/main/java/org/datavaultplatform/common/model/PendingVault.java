@@ -30,7 +30,8 @@ public class PendingVault {
         NA,
         GRANT_FUNDING,
         BUDGET_CODE,
-        SLICE
+        SLICE,
+        ORIG
     }
     // Vault Identifier
     @Id

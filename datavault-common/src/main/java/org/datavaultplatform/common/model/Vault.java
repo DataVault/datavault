@@ -407,7 +407,10 @@ public class Vault {
                 billinginfo != null? billinginfo.getAmountToBeBilled() : null,
                 billinginfo != null? billinginfo.getAmountBilled() : null,
                 projectId,
-                name
+                name,
+                billinginfo != null? billinginfo.getSliceID() : null,
+                billinginfo != null? billinginfo.getProjectTitle() : null,
+                billinginfo != null? billinginfo.getBillingType() : null
             );
     }
     
