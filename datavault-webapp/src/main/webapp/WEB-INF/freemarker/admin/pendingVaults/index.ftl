@@ -30,9 +30,9 @@
                     <tr class="tr">
                        <th><a href="?sort=name&order=${ordername}&query=${query?url}">Vault Name<#if sort == "name"><#if order == "desc"><span class="dropup"><span class="caret"></span></span><#else><span class="caret"></span></#if></#if></a></th>     
                        
-                       <th>Creator(UUN) - TO BE CLARIFIED</th>
-                        <th>Owner(UUN) - TO BE CLARIFIED</th>
-                       <th>Date created</th>
+                       <th>Owner</th>
+                       <th>Vault Creator</th>
+                       <th>Date Created</th>
                        <th>View</th>
                     </tr>
                 </thead>
@@ -44,18 +44,16 @@
                                 ${pendingVault.name?html}
                             </td>
                              <td>
-                                <#if (pendingVault.getUserID())??>
-                                   ${pendingVault.getUserName()?html}(${pendingVault.getUserID()?html})
-                                 <#else> 
-                                   User missing
-                                </#if>
+                               <#if (pendingVault.ownerId)??>
+                                  ${pendingVault.ownerId?html}
+                               </#if>
+                              
                             </td>
-                            <td>
-                                <#if (pendingVault.getUserID())??>
-                                   ${pendingVault.getUserName()?html}(${pendingVault.getUserID()?html})
-                                 <#else> 
-                                   User missing
-                                </#if>
+                             <td>
+                               <#if (pendingVault.vaultCreatorId)??>
+                                  ${pendingVault.vaultCreatorId?html}
+                               </#if>
+                              
                             </td>
                              <td>
                                 <#if (pendingVault.getCreationTime())??>
@@ -65,7 +63,6 @@
                              <td>
                                
                                  <#if (pendingVault.getUserID())??>
-                                    
                                     <a href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/summary/${pendingVault.getID()}" class="btn btn-primary">
                                       View 
                                     </a>
