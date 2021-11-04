@@ -94,7 +94,7 @@
                                   title="The name of someone in your School/Unit or Sub-Unit who can authorise the payment of the eIT."></span>
                         </label>
                         <@spring.bind "vault.budgetAuthoriser" />
-                        <input type="text" id="bugdet-authoriser" name="${spring.status.expression}" value="${spring.status.value!""}"/>
+                        <input type="text" id="budget-authoriser" name="${spring.status.expression}" value="${spring.status.value!""}"/>
                     </div>
                     <div class="form-group required">
                         <label class="col-sm-2 control-label">School/Unit:</label>
