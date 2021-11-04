@@ -179,10 +179,10 @@
             </td>
 		</tr>
 		<tr class="summary-grant-or_budget-billing-row">
-			<th scope="col">ProjectId</th>
+			<th scope="col">ProjectTitle</th>
 			<td>
-              <#if (pendingVault.projectId)??>
-                ${pendingVault.projectId?html}
+              <#if (pendingVault.projectTitle)??>
+                ${pendingVault.projectTitle?html}
               </#if>
             </td>
 		</tr>

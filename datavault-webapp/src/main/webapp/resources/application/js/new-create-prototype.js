@@ -357,7 +357,7 @@ $(document).ready(function(){
           $("#summary-authoriser").text($("#authoriser").val());
           $("#summary-schoolOrUnit").text($("#schoolOrUnit").val());
           $("#summary-subunit").text($("#subunit").val());
-          $("#summary-projectID").text($("#projectID").val());
+          $("#summary-projectTitle").text($("#projectTitle").val());
           
           // Vault Users
           

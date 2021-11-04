@@ -71,8 +71,8 @@
 			<td><span id="summary-subunit"></span> </td>
 		</tr>
 		<tr class="summary-grant-or_budget-billing-row">
-			<th scope="col">ProjectId</th>
-			<td><span id="summary-projectID"></span> </td>
+			<th scope="col">ProjectTitle</th>
+			<td><span id="summary-projectTitle"></span> </td>
 		</tr>
 		<tr>
 			<th scope="col">

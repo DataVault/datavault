@@ -273,6 +273,9 @@ public class PendingVault {
         this.subunit = subunit;
     }
 
+    /* TODO: rename this column to Project Title (in the original mock up it was called
+    project id
+     */
     public String getProjectID() {
         return this.projectID;
     }
@@ -369,7 +372,8 @@ public class PendingVault {
         retVal.setAuthoriser(this.authoriser);
         retVal.setSchoolOrUnit(this.schoolOrUnit);
         retVal.setSubunit(this.subunit);
-        retVal.setProjectId(this.projectID);
+        //retVal.setProjectId(this.projectID);
+        retVal.setProjectTitle(this.projectID);
         retVal.setCreationTime(this.creationTime);
         String userId = this.user == null ? null : user.getID();
         retVal.setUserID(userId);

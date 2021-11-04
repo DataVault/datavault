@@ -258,7 +258,7 @@ public class VaultsService {
             billinginfo.setContactName(createVault.getGrantAuthoriser());
             billinginfo.setSchool(createVault.getGrantSchoolOrUnit());
             billinginfo.setSubUnit(createVault.getGrantSubunit());
-            billinginfo.setProjectTitle(createVault.getProjectID());
+            billinginfo.setProjectTitle(createVault.getProjectTitle());
         }
 
         if (enumBT.equals(PendingVault.Billing_Type.BUDGET_CODE)) {
