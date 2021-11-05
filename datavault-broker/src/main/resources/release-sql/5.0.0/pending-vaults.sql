@@ -55,5 +55,8 @@ ALTER TABLE Vaults add column contact TEXT;
 ALTER TABLE BillingInfo add column billingType TEXT NOT NULL;
 ALTER TABLE BillingInfo add column sliceID TEXT;
 ALTER TABLE BillingInfo add column projectTitle TEXT;
-/* might have to drop the not null and add back in do do this */
+/* might have to drop the not null and add back in do do this (worked fine when I deployed to demo though) */
 update BillingInfo set billingType = '4' where billingType = '';
+
+ALTER TABLE PendingVaults CHANGE projectID projectTitle TEXT;
+

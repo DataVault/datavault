@@ -318,7 +318,7 @@ public class PendingVaultsService {
             String projectTitle = createVault.getProjectTitle();
             logger.debug("ProjectTitle is: '" + projectTitle + "'");
             if (projectTitle != null) {
-                vault.setProjectID(projectTitle);
+                vault.setProjectTitle(projectTitle);
             }
         }
 
