@@ -15,15 +15,18 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.DataManager;
 import org.datavaultplatform.common.model.DepositReview;
 import org.datavaultplatform.common.model.PendingVault;
+import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.VaultReview;
 import org.datavaultplatform.common.request.CreateVault;
+import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.EventInfo;
 import org.datavaultplatform.common.response.ReviewInfo;
@@ -119,6 +122,12 @@ public class AdminPendingVaultsController {
         VaultInfo pendingVault = restService.getPendingVault(vaultID);
         logger.info("pendingVault.id:'" + pendingVault.getID() + "'");
         model.addAttribute("pendingVault", pendingVault);
+        
+        CreateRetentionPolicy createRetentionPolicy = restService.getRetentionPolicy(pendingVault.getPolicyID());
+        model.addAttribute("createRetentionPolicy", createRetentionPolicy);
+        
+        Group group = restService.getGroup(pendingVault.getGroupID());
+        model.addAttribute("group", group);
 
         return "admin/pendingVaults/summary";
     }

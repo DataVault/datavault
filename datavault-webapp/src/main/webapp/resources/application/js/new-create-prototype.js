@@ -83,44 +83,83 @@ $(document).ready(function(){
         }
     }).trigger('change');
 
+    // Initially, disable next on doc initialisation
+    $("input[name=\"billingType\"]").parents("fieldset").children(".next").prop( "disabled", true );
+    
     $("#billing-choice-na").change(function(){
         clearBillingOptions();
-
         $('.collapse').collapse('hide');
-        $(this).parents("fieldset").children(".next").prop( "disabled", false );
+        validateBillingNA();
     }).trigger('change');  ;
-
+    		
     $("#billing-choice-grantfunding").change(function(){
-
         clearBillingOptions();
 
         if($(this).is(":checked")){
             $('.collapse').not('#grant-billing-form').collapse('hide');
             $('#grant-billing-form').collapse('show');
-            $(this).parents("fieldset").children(".next").prop( "disabled", false );
         }
-    }).trigger('change');  ;
+        validateBillingGrantFundingFields();
+    }).trigger('change');
+    
+    $("#authoriser").change(function() {
+    	validateBillingGrantFundingFields();
+    });
+    
+    $("#schoolOrUnit").change(function() {
+    	validateBillingGrantFundingFields();
+    });
+    
+    $("#subunit").change(function() {
+    	validateBillingGrantFundingFields();
+    });
+    
+    $("#projectTitle").change(function() {
+    	validateBillingGrantFundingFields();
+    });
+    
+    $("#billingGrantEndDate").change(function() {
+    	validateBillingGrantFundingFields();
+    });
+    
 
     $("#billing-choice-budgetcode").change(function(){
-
         clearBillingOptions();
 
         if($(this).is(":checked")) {
             $('.collapse').not('#budget-billing-form').collapse('hide');
             $('#budget-billing-form').collapse('show');
-            $(this).parents("fieldset").children(".next").prop( "disabled", false );
         }
-    }).trigger('change');  ;
+
+        validateBillingBudgetCodeFields();
+    }).trigger('change');
+    
+    $("#budget-authoriser").change(function() {
+    	validateBillingBudgetCodeFields();
+    });
+    
+    $("#budget-schoolOrUnit").change(function() {
+    	validateBillingBudgetCodeFields();
+    });
+    
+    $("#budget-subunit").change(function() {
+    	validateBillingBudgetCodeFields();
+    });
+    
+    
 
     $("#billing-choice-slice").change(function(){
-
         clearBillingOptions();
-
         if($(this).is(":checked")) {
             $('.collapse').not('#slice-form').collapse('hide');
             $('#slice-form').collapse('show');
-            $(this).parents("fieldset").children(".next").prop( "disabled", false );
         }
+        validateBillingSliceFields();
+    }).trigger('change');
+    
+    // Validates Slice fields
+    $("#sliceID").change(function() {
+    	validateBillingSliceFields();
     });
 
     $("input[name='isOwner']").change(function(){
@@ -221,6 +260,7 @@ $(document).ready(function(){
         });
         
         populateSummaryPage();
+        validateBillingPageForNextClick();
     });
 
     $(".previous").click(function(){
@@ -262,7 +302,71 @@ $(document).ready(function(){
     $('button[type="submit"]').on("click", function() {
         $('#submitAction').val($(this).attr('value'));
     });
-
+    
+    function validateBillingNA() {
+    	console.log("called validateBillingNAFields");
+    	if($("#billing-choice-na").is(":checked")) {
+    	   $("#billing-choice-na").parents("fieldset").children(".next").prop( "disabled", false );
+    	   console.log("called validateBillingNAFields: ENABLED");	
+    	}
+    }
+    
+    function validateBillingSliceFields() {
+    	console.log("called validateBillingSliceFields");
+    	if($("#billing-choice-slice").is(":checked")) {
+    		if($("#sliceID").val().trim() !== '') {
+    	       $("#billing-choice-slice").parents("fieldset").children(".next").prop( "disabled", false );
+    	       console.log("called validateBillingSliceFields: ENABLED");
+    	    } else {
+    	       $("#billing-choice-slice").parents("fieldset").children(".next").prop( "disabled", true );
+    	       console.log("called validateBillingSliceFields: DISABLED");
+    	    }
+    		
+    	}	
+    }
+    
+    function validateBillingGrantFundingFields() {
+    	console.log("called validateBillingGrantFundingFields");
+    	if($("#billing-choice-grantfunding").is(":checked")) {
+    		if($("#authoriser").val().trim() !== '' &&
+    	       $("#schoolOrUnit").val().trim() !== '' &&
+    	       $("#subunit").val().trim() !== '' &&
+    	       $("#projectTitle").val().trim() !== '' &&
+    	       $("#billingGrantEndDate").val().trim() !== '') {
+    	       $("#billing-choice-grantfunding").parents("fieldset").children(".next").prop( "disabled", false );
+    	       console.log("called validateBillingGrantFundedFields: ENABLED");
+    	    } else {
+    	       $("#billing-choice-grantfunding").parents("fieldset").children(".next").prop( "disabled", true );
+    	       console.log("called validateBillingGrantFundingFields: DISABLED");
+    	    }
+    		
+    	}	
+    }
+    
+    function validateBillingBudgetCodeFields() {
+    	console.log("called validateBillingBudgetCodeFields");
+    	if($("#billing-choice-budgetcode").is(":checked")) {
+    		if($("#budget-authoriser").val().trim() !== '' &&
+    	       $("#budget-schoolOrUnit").val().trim() !== '' &&
+    	       $("#budget-subunit").val().trim() !== '' ) {
+    	       $("#billing-choice-budgetcode").parents("fieldset").children(".next").prop( "disabled", false );
+    	       console.log("called validateBillingBudgetCodeFields: ENABLED");
+    	    } else {
+    	       $("#billing-choice-budgetcode").parents("fieldset").children(".next").prop( "disabled", true );
+    	       console.log("called validateBillingBudgetCodeFields: DISABLED");
+    	    }
+    		
+    	}	
+    }
+    
+   // We will call this in $(".next").click()
+   function validateBillingPageForNextClick() {
+	   validateBillingNA();
+	   validateBillingSliceFields();
+	   validateBillingGrantFundingFields();
+	   validateBillingBudgetCodeFields();
+   }
+    
     function clearBillingOptions() {
         // enable or disable the grant end date field on the info fieldset
         var dateResult = ($("#billingGrantEndDate").val().trim() === '');
@@ -357,7 +461,7 @@ $(document).ready(function(){
           $("#summary-authoriser").text($("#authoriser").val());
           $("#summary-schoolOrUnit").text($("#schoolOrUnit").val());
           $("#summary-subunit").text($("#subunit").val());
-          $("#summary-projectID").text($("#projectID").val());
+          $("#summary-projectTitle").text($("#projectTitle").val());
           
           // Vault Users
           

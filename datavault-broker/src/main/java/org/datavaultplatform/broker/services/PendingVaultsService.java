@@ -315,10 +315,10 @@ public class PendingVaultsService {
                 vault.setSubunit(subunit);
             }
 
-            String projectID = createVault.getProjectID();
-            logger.debug("ProjectID is: '" + projectID + "'");
-            if (projectID != null) {
-                vault.setProjectID(projectID);
+            String projectTitle = createVault.getProjectTitle();
+            logger.debug("ProjectTitle is: '" + projectTitle + "'");
+            if (projectTitle != null) {
+                vault.setProjectTitle(projectTitle);
             }
         }
 

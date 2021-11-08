@@ -112,7 +112,7 @@ public class ValidateService {
             retVal.add("Subunit missing");
         }
         // Project Title
-        String projectTitle = vault.getProjectID();
+        String projectTitle = vault.getProjectTitle();
         if (projectTitle == null || projectTitle.isEmpty()) {
             retVal.add("Project Title missing");
         }

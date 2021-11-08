@@ -70,8 +70,8 @@
                             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                                   title="If you are planning to pay the bill from a grant, please enter the Project Title."></span>
                         </label>
-                        <@spring.bind "vault.projectID" />
-                        <input type="text" id="projectID" name="${spring.status.expression}" value="${spring.status.value!""}" />
+                        <@spring.bind "vault.projectTitle" />
+                        <input type="text" id="projectTitle" name="${spring.status.expression}" value="${spring.status.value!""}" />
                     </div>
                     <div class="form-group required">
                         <label  for="billingGrantEndDate" class="col-sm-2 control-label">
@@ -94,7 +94,7 @@
                                   title="The name of someone in your School/Unit or Sub-Unit who can authorise the payment of the eIT."></span>
                         </label>
                         <@spring.bind "vault.budgetAuthoriser" />
-                        <input type="text" id="bugdet-authoriser" name="${spring.status.expression}" value="${spring.status.value!""}"/>
+                        <input type="text" id="budget-authoriser" name="${spring.status.expression}" value="${spring.status.value!""}"/>
                     </div>
                     <div class="form-group required">
                         <label class="col-sm-2 control-label">School/Unit:</label>

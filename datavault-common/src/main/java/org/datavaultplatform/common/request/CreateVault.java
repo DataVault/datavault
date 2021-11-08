@@ -79,8 +79,8 @@ public class CreateVault {
     @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for subunit")
     private String budgetSubunit;
 
-    @ApiObjectField(description = "If the billng type is grant or budget we will store an identifier for projectID")
-    private String projectID;
+    @ApiObjectField(description = "If the billng type is grant we will store an identifier for project title")
+    private String projectTitle;
 
     @ApiObjectField(description = "Is the logged in user the vault owner")
     private Boolean isOwner;
@@ -292,12 +292,12 @@ public class CreateVault {
         this.budgetSubunit = budgetSubunit;
     }
 
-    public String getProjectID() {
-        return this.projectID;
+    public String getProjectTitle() {
+        return this.projectTitle;
     }
 
-    public void setProjectID(String projectID) {
-        this.projectID = projectID;
+    public void setProjectTitle(String projectTitle) {
+        this.projectTitle = projectTitle;
     }
 
     public String getVaultOwner() { return this.vaultOwner; }

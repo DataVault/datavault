@@ -102,6 +102,9 @@ public class VaultInfo {
 
     @ApiObjectField(description = "Subunit to be billed")
     private String subunit;
+
+    @ApiObjectField(description = "Project Title (from Grant billing fieldset)")
+    private String projectTitle;
     
     @ApiObjectField(description = "Amount to be Billed")
     private BigDecimal amountToBeBilled;
@@ -127,6 +130,9 @@ public class VaultInfo {
     @ApiObjectField(description = "Pending Vault Owner ID")
     private String ownerId;
 
+    @ApiObjectField(description = "Pending Vault Creator ID")
+    private String vaultCreatorId;
+    
     @ApiObjectField(description = "Data Creators")
     private List<String> creators;
 
@@ -373,6 +379,14 @@ public class VaultInfo {
 		this.projectId = projectId;
 	}
 
+    public String getProjectTitle() {
+        return projectTitle;
+    }
+
+    public void setProjectTitle(String projectTitle) {
+        this.projectTitle = projectTitle;
+    }
+
     public String getSliceID() {
         return this.sliceID;
     }
@@ -507,8 +521,17 @@ public class VaultInfo {
     public void setConfirmed(Boolean confirmed) {
         this.confirmed = confirmed;
     }
+    
 
-    public CreateVault convertToCreate() {
+    public String getVaultCreatorId() {
+		return vaultCreatorId;
+	}
+
+	public void setVaultCreatorId(String vaultCreatorId) {
+		this.vaultCreatorId = vaultCreatorId;
+	}
+
+	public CreateVault convertToCreate() {
         /*
         TODO: need to add validation / defend against nulls just a work in progress
          */
@@ -526,7 +549,7 @@ public class VaultInfo {
             cv.setGrantAuthoriser(this.getAuthoriser());
             cv.setGrantSchoolOrUnit(this.getSchoolOrUnit());
             cv.setGrantSubunit(this.getSubunit());
-            cv.setProjectID(this.getProjectId());
+            cv.setProjectTitle(this.getProjectTitle());
         }
 
         if (this.getBillingType().equals(PendingVault.Billing_Type.BUDGET_CODE)) {

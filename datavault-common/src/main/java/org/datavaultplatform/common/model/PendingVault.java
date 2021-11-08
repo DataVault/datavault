@@ -102,8 +102,8 @@ public class PendingVault {
     private String subunit;
 
     // Billing method additional info
-    @Column(name = "projectID", nullable = true, columnDefinition = "TEXT")
-    private String projectID;
+    @Column(name = "projectTitle", nullable = true, columnDefinition = "TEXT")
+    private String projectTitle;
 
     // Name of the pure contact
     @Column(name = "contact", nullable = false, columnDefinition = "TEXT")
@@ -273,12 +273,15 @@ public class PendingVault {
         this.subunit = subunit;
     }
 
-    public String getProjectID() {
-        return this.projectID;
+    /* TODO: rename this column to Project Title (in the original mock up it was called
+    project id
+     */
+    public String getProjectTitle() {
+        return this.projectTitle;
     }
 
-    public void setProjectID(String projectID) {
-        this.projectID = projectID;
+    public void setProjectTitle(String projectTitle) {
+        this.projectTitle = projectTitle;
     }
 
     public String getContact() {
@@ -369,7 +372,8 @@ public class PendingVault {
         retVal.setAuthoriser(this.authoriser);
         retVal.setSchoolOrUnit(this.schoolOrUnit);
         retVal.setSubunit(this.subunit);
-        retVal.setProjectId(this.projectID);
+        //retVal.setProjectId(this.projectID);
+        retVal.setProjectTitle(this.projectTitle);
         retVal.setCreationTime(this.creationTime);
         String userId = this.user == null ? null : user.getID();
         retVal.setUserID(userId);

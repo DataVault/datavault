@@ -315,7 +315,18 @@ public class VaultsController {
         List<PendingVault> vaults = pendingVaultsService.search(userID, query, sort, order, offset, maxResult);
         if(CollectionUtils.isNotEmpty(vaults)) {
             for (PendingVault vault : vaults) {
-                vaultResponses.add(vault.convertToResponse());
+            	User owner = permissionsService.getPendingVaultOwner(vault.getId());
+            	if(owner != null) {
+            		vault.setOwner(owner);
+            	}
+            	
+            	VaultInfo vaultInfo = vault.convertToResponse();
+            	User vaultCreator = permissionsService.getPendingVaultCreator(vault.getId());
+            	if(vaultCreator != null) {
+            		vaultInfo.setVaultCreatorId(vaultCreator.getID());
+            	}
+            	
+                vaultResponses.add(vaultInfo);
             }
 
             recordsTotal = pendingVaultsService.getTotalNumberOfPendingVaults(userID);
