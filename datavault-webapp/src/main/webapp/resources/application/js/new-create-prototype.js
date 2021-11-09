@@ -74,6 +74,13 @@ $(document).ready(function(){
     $("#isOwnerTrue, #isOwnerFalse, #vaultOwner").change(function(){
         //var ownerTrueResult = $( "input[type=radio][id=isOwnerTrue]").is(":checked");
         var ownerFalseResult = $( "input[type=radio][id=isOwnerFalse]").is(":checked");
+        if(ownerFalseResult === true){
+            $('#vaultOwner').prop('disabled', false);
+        } else {
+            $('#vaultOwner').val("");
+            $('#vaultOwner').prop('disabled', true);
+        }
+
         var uunResult = ($( "input[type=text][id=vaultOwner]").val().trim() === '');
 
         if (ownerFalseResult && uunResult) {
@@ -85,7 +92,8 @@ $(document).ready(function(){
 
     // Initially, disable next on doc initialisation
     $("input[name=\"billingType\"]").parents("fieldset").children(".next").prop( "disabled", true );
-    
+    $('#vaultOwner').prop('disabled', true);
+
     $("#billing-choice-na").change(function(){
         clearBillingOptions();
         $('.collapse').collapse('hide');
@@ -161,14 +169,6 @@ $(document).ready(function(){
     $("#sliceID").change(function() {
     	validateBillingSliceFields();
     });
-
-    $("input[name='isOwner']").change(function(){
-        if(this.value === 'true'){
-            $('#owner-uun').prop('disabled', true);
-        } else {
-            $('#owner-uun').prop('disabled', false);
-        }
-    }).trigger('change');  
 
 
     $("#add-ndm-btn").click(function(){
