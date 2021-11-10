@@ -36,7 +36,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
 import java.security.Principal;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -360,9 +362,8 @@ public class VaultsController {
         CreateVault vault = new CreateVault();
         vault.setIsOwner(true);
         model.addAttribute("vault", vault);
-
-        // if it has get that data from the db
-
+        String defaultReviewDate = validateService.getDefaultReviewDate();
+        vault.setReviewDate(defaultReviewDate);
 
         RetentionPolicy[] policies = restService.getRetentionPolicyListing();
         model.addAttribute("policies", policies);

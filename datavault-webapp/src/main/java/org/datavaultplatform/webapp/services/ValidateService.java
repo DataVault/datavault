@@ -4,8 +4,8 @@ import org.datavaultplatform.common.request.CreateVault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class ValidateService {
     private static final Logger logger = LoggerFactory.getLogger(ValidateService.class);
@@ -173,6 +173,18 @@ public class ValidateService {
         if (pureLink == null || pureLink == false) {
             retVal.add("Pure link not accepted");
         }
+        return retVal;
+    }
+
+    public String getDefaultReviewDate() {
+        String retVal = "";
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeZone(TimeZone.getTimeZone("Europe/London"));
+        cal.add(Calendar.YEAR, 3);
+        Date todayPlus3Years = cal.getTime();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        retVal = formatter.format(todayPlus3Years);
+
         return retVal;
     }
 }
