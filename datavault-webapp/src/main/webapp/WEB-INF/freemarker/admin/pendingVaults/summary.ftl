@@ -74,8 +74,8 @@
 			  <span>
                <#if (createRetentionPolicy)??>
                  ${createRetentionPolicy.name?html} (Minimum period:
-                 <#if (createRetentionPolicy.minDataRetentionPeriod)??>
-                  ${createRetentionPolicy.minDataRetentionPeriod?html}
+                 <#if (createRetentionPolicy.minRetentionPeriod)??>
+                  ${createRetentionPolicy.minRetentionPeriod?html}
                  <#else>
                    not stated
                  </#if>
