@@ -74,31 +74,26 @@ $(document).ready(function(){
         if (noRP === false && noGED === false) {
             // if we have both then ged + policy length = review date
             estimatedReviewDate = String(gedDate.getFullYear() + policyLength) + '-' + gedMm + '-' + gedDd;
-            alert("We have ged and policy change review date to length for '" + policyLength + "' ged: '" + estimatedReviewDate + "'");
         }
 
         if (noRP === false && noBillingGED === false) {
             // if we have both then billing ged + policy length = review date
             estimatedReviewDate = String(billingGedDate.getFullYear() + policyLength) + '-' + billingGedMm + '-' + billingGedDd;
-            alert("We have billing ged and policy change review date to length for '" + policyLength + "'ged: '" + estimatedReviewDate + "'");
         }
 
         if (noRP === false && noGED === true && noBillingGED === true) {
             // if we only have policy then length + current date = review date
             estimatedReviewDate = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
-            alert("We only have the policy '" + policyLength + "' change review date to length + current date: '" + estimatedReviewDate + "'");
         }
 
         if (noRP === true && noGED === false) {
             // if we only have ged then ged + 3 = review date
             estimatedReviewDate = String(gedDate.getFullYear() + defaultLength) + '-' + gedMm + '-' + gedDd;
-            alert("We only have the ged change review date to ged + 3: '" + estimatedReviewDate + "'");
         }
 
         if (noRP === true && noBillingGED === false) {
             // if we only have a ged in the billing fieldset then ged + 3 = review date
             estimatedReviewDate = String(billingGedDate.getFullYear() + defaultLength) + '-' + billingGedMm + '-' + billingGedDd;
-            alert("We only have the billing ged change review date to ged + 3: '" + estimatedReviewDate + "'");
         }
 
         $( "#reviewDate" ).val(estimatedReviewDate);
