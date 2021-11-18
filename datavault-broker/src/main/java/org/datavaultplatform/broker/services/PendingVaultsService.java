@@ -267,14 +267,14 @@ public class PendingVaultsService {
             }
         }
 
-        String policyId = createVault.getPolicyID();
+        String policyId = createVault.getPolicyInfo().split("-")[0];
         logger.debug("Retention policy id is: '" + policyId + "'");
         if (policyId != null) {
             RetentionPolicy retentionPolicy = retentionPoliciesService.getPolicy(policyId);
 
             if (retentionPolicy == null) {
-                logger.error("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
-                throw new Exception("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
+                logger.error("RetentionPolicy '" + policyId + "' does not exist");
+                throw new Exception("RetentionPolicy '" + policyId + "' does not exist");
             }
             vault.setRetentionPolicy(retentionPolicy);
         }

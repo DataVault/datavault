@@ -508,10 +508,11 @@ public class VaultsController {
         vault.setContact(createVault.getContactPerson());
         vault.setPureLink(createVault.getPureLink());
 
-        RetentionPolicy retentionPolicy = retentionPoliciesService.getPolicy(createVault.getPolicyID());
+        String policyID = createVault.getPolicyInfo().split("-")[0];
+        RetentionPolicy retentionPolicy = retentionPoliciesService.getPolicy(policyID);
         if (retentionPolicy == null) {
-            logger.error("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
-            throw new Exception("RetentionPolicy '" + createVault.getPolicyID() + "' does not exist");
+            logger.error("RetentionPolicy '" + policyID + "' does not exist");
+            throw new Exception("RetentionPolicy '" + policyID + "' does not exist");
         }
         vault.setRetentionPolicy(retentionPolicy);
 
@@ -606,8 +607,14 @@ public class VaultsController {
         vault.setNominatedDataManagers(ndms);
         vault.setDepositors(deps);
         vault.setCreator(creator);
+        logger.debug("Vault Policy ID is '" + vault.getRetentionPolicy().getID());
+        logger.debug("Vault Policy length is '" + vault.getRetentionPolicy().getMinRetentionPeriod());
+
         if (vault != null) {
-            return vault.convertToResponse();
+            VaultInfo retVal = vault.convertToResponse();
+            logger.debug("VaultInfo policy ID is '" + retVal.getPolicyID());
+            logger.debug("VaultInfo policy length is '" + retVal.getPolicyLength());
+            return retVal;
         } else {
             return null;
         }

@@ -46,7 +46,7 @@
         </div>
 
         <div class="form-group required">
-            <label for="policyID" class="control-label">Retention Policy (tell us how long we must keep the data)</label>
+            <label for="policyInfo" class="control-label">Retention Policy (tell us how long we must keep the data)</label>
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                   title="Tell us which funder's policy we must comply with. This tells us the minimum amount of time we must keep the data. This information is important when deciding on the Review Date. If there is no funder, choose the University of Edinburgh retention policy. If there are multiple funders, choose the one with the longest minimum retention period. ">
                                                                 </span>
@@ -55,11 +55,11 @@
             </a>
             <div class="row">
                 <div class="col-md-12">
-                    <select id="policyID" name="policyID" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick">
+                    <select id="policyInfo" name="policyInfo" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick">
                         <option selected disabled data-hidden="true">Please choose a retention policy</option>
                         <#list policies as retentionPolicy>
-                            <option value="${retentionPolicy.getID()}" <#if vault.policyID??>${(vault.policyID == retentionPolicy.getID()?c)?then('selected', 'true')}</#if>
-                                    data-subtext="( Minimum period: ${retentionPolicy.minDataRetentionPeriod?html} )">${retentionPolicy.name?html}</option>
+                            <option value="${retentionPolicy.getID()}-${retentionPolicy.minRetentionPeriod}" <#if vault.policyInfo??>${(vault.policyInfo == retentionPolicy.getPolicyInfo())?then('selected', 'true')}</#if>
+                                    data-subtext="( Minimum period: ${retentionPolicy.minRetentionPeriod?html} )">${retentionPolicy.name?html}</option>
                         </#list>
                     </select>
                 </div>

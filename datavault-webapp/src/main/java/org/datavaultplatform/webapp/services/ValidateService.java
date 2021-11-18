@@ -138,7 +138,7 @@ public class ValidateService {
             retVal.add("Description missing");
         }
 //        Retention policy
-        String policy = vault.getPolicyID();
+        String policy = vault.getPolicyInfo();
         if (policy == null || policy.isEmpty()) {
             retVal.add("Retention policy missing");
         }

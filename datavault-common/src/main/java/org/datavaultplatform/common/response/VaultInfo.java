@@ -52,6 +52,9 @@ public class VaultInfo {
     
     @ApiObjectField(description = "The policy that applies to this vault")
     private String policyID;
+
+    @ApiObjectField(description = "The length of the policy that applies to this vault")
+    private String policyLength;
     
     @ApiObjectField(description = "The group which is related to this vault")
     private String groupID;
@@ -145,7 +148,7 @@ public class VaultInfo {
     public VaultInfo() { }
 
     public VaultInfo(String id, String userID, String userName, String datasetID, String crisID, String datasetName,
-                     Date creationTime, String name, String description, String policyID, String groupID,
+                     Date creationTime, String name, String description, String policyID, String policyLength, String groupID,
                      long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked, Date grantEndDate,
                      Date reviewDate, long numberOfDeposits, String projectId) {
         this.id = id;
@@ -157,6 +160,7 @@ public class VaultInfo {
         this.name = name;
         this.description = description;
         this.policyID = policyID;
+        this.policyLength = policyLength;
         this.groupID = groupID;
         this.vaultSize = vaultSize;
         this.policyStatus = policyStatus;
@@ -284,6 +288,14 @@ public class VaultInfo {
 
     public void setPolicyID(String policyID) {
         this.policyID = policyID;
+    }
+
+    public String getPolicyLength() {
+        return policyLength;
+    }
+
+    public void setPolicyLength(String policyLength) {
+        this.policyLength = policyLength;
     }
 
     public String getGroupID() {
@@ -562,7 +574,7 @@ public class VaultInfo {
         //logger.info("Vault Description is: '" + vault.getDescription());
         cv.setDescription(this.getDescription());
         //logger.info("Create Vault Description is: '" + cv.getDescription());
-        cv.setPolicyID(this.getPolicyID());
+        cv.setPolicyInfo(this.getPolicyID() + "-" + this.getPolicyLength());
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.UK);
 
         if (this.getGrantEndDate() != null) {

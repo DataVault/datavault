@@ -2,16 +2,11 @@ package org.datavaultplatform.common.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.lang3.StringUtils;
-import org.datavaultplatform.common.model.PendingVault;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "CreateVault")
@@ -38,8 +33,8 @@ public class CreateVault {
     @ApiObjectField(description = "How we are billing")
     private String billingType;
     
-    @ApiObjectField(description = "The policy that will be applied to this vault")
-    private String policyID;
+    @ApiObjectField(description = "The policy that will be applied to this vault the format of the string is policyID-lengthofPolicy")
+    private String policyInfo;
     
     @ApiObjectField(description = "The group which is related to this vault")
     private String groupID;
@@ -172,12 +167,12 @@ public class CreateVault {
         this.billingType = billingType;
     }
 
-    public String getPolicyID() {
-        return policyID;
+    public String getPolicyInfo() {
+        return policyInfo;
     }
 
-    public void setPolicyID(String policyID) {
-        this.policyID = policyID;
+    public void setPolicyInfo(String policyInfo) {
+        this.policyInfo = policyInfo;
     }
 
     public String getGroupID() {

@@ -38,13 +38,13 @@ $(document).ready(function(){
         }
     }).trigger('change');
 
-    $("#billingGrantEndDate, #grantEndDate, #policyID").change(function(){
+    $("#billingGrantEndDate, #grantEndDate, #policyInfo").change(function(){
         // if the ged changes update the suggested review date
 
         // if no retention policy picked yet ged + 3 years
 
         // if a retention policy has been picked ged + policy length
-        var noRP = ($("#policyID option:selected").val() === '' || $("#policyID option:selected").prop("disabled"));
+        var noRP = ($("#policyInfo option:selected").val() === '' || $("#policyInfo option:selected").prop("disabled"));
         var noGED = ($("#grantEndDate").val().trim() === '');
         var noBillingGED = ($("#billingGrantEndDate").val().trim() === '');
         var ged = $("#grantEndDate").val().trim();
@@ -56,8 +56,14 @@ $(document).ready(function(){
         var billingGedMm = String(billingGedDate.getMonth() + 1).padStart(2,'0');
         var billingGedDd = String(billingGedDate.getDate()).padStart(2,'0');
         var defaultLength = 3;
+        var policyInfoString = $("#policyInfo option:selected").val();
+        //alert("policy info string:'" + policyInfoString + "'");
+        var policyInfoArray = policyInfoString.split("-");
         // need to get this from the policy somehow!  10 is just a mock value
-        var policyLength = 10;
+        var policyLength = defaultLength;
+        if (noRP === false && policyInfoString !== '' && policyInfoArray[1] !== '') {
+            policyLength = parseInt(policyInfoArray[1], 10);
+        }
         var today = new Date();
         var dd = String(today.getDate()).padStart(2,'0');
         var mm = String(today.getMonth() + 1).padStart(2,'0'); // January is 0
@@ -68,19 +74,19 @@ $(document).ready(function(){
         if (noRP === false && noGED === false) {
             // if we have both then ged + policy length = review date
             estimatedReviewDate = String(gedDate.getFullYear() + policyLength) + '-' + gedMm + '-' + gedDd;
-            alert("We have ged and policy change review date to length + ged: '" + estimatedReviewDate + "'");
+            alert("We have ged and policy change review date to length for '" + policyLength + "' ged: '" + estimatedReviewDate + "'");
         }
 
         if (noRP === false && noBillingGED === false) {
             // if we have both then billing ged + policy length = review date
             estimatedReviewDate = String(billingGedDate.getFullYear() + policyLength) + '-' + billingGedMm + '-' + billingGedDd;
-            alert("We have billing ged and policy change review date to length + ged: '" + estimatedReviewDate + "'");
+            alert("We have billing ged and policy change review date to length for '" + policyLength + "'ged: '" + estimatedReviewDate + "'");
         }
 
         if (noRP === false && noGED === true && noBillingGED === true) {
             // if we only have policy then length + current date = review date
             estimatedReviewDate = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
-            alert("We only have the policy change review date to length + current date: '" + estimatedReviewDate + "'");
+            alert("We only have the policy '" + policyLength + "' change review date to length + current date: '" + estimatedReviewDate + "'");
         }
 
         if (noRP === true && noGED === false) {
@@ -98,19 +104,11 @@ $(document).ready(function(){
         $( "#reviewDate" ).val(estimatedReviewDate);
     }).trigger('change');
 
-    $("#policyID").change(function(){
-        // if the policy ID changes update the suggested review date
-
-        // if no ged picked yet rt length from todau
-
-        // if a ged has been picked ged + policy length
-    }).trigger('change');
-
     $("#affirmation-check").change(function(){
         $(this).parents("fieldset").children(".next").prop( "disabled", !$(this).is(":checked") );
     }).trigger('change');
 
-    $("#vaultName, #description, #policyID, #groupID, #reviewDate").change(function(){
+    $("#vaultName, #description, #policyInfo, #groupID, #reviewDate").change(function(){
         // if all the mandatory values in the info field set are non null or empty set the next button
         // display value to true
         // name
@@ -118,7 +116,7 @@ $(document).ready(function(){
         // description
         var descResult = ($( "textarea[type=text][id=description]").val() === '');
         // retention policy
-        var rpResult = ($("#policyID option:selected").val() === '' || $("#policyID option:selected").prop("disabled"));
+        var rpResult = ($("#policyInfo option:selected").val() === '' || $("#policyInfo option:selected").prop("disabled"));
         // school
         var schoolResult = ($("#groupID option:selected").val() === '' || $("#groupID option:selected").prop("disabled"));
         // review date
@@ -488,7 +486,7 @@ $(document).ready(function(){
     	  // VaultInfo
     	  $("#summary-vaultName").text($("#vaultName").val());
     	  $("#summary-description").text($("#description").val());
-    	  $("#summary-policyID").text($("#policyID option:selected").text());
+    	  $("#summary-policyID").text($("#policyInfo option:selected").text());
     	  var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
     	  if (grantChecked === true) {
               $("#summary-grantEndDate").text($("#billingGrantEndDate").val());
