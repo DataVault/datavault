@@ -142,6 +142,14 @@ public class VaultsController {
                 .sorted(Comparator.comparing(VaultInfo::getCreationTime))
                 .collect(Collectors.toList());
         Collections.reverse(vaultResponses);
+        if(CollectionUtils.isNotEmpty(vaultResponses)) {
+            for (VaultInfo vault : vaultResponses) {
+                User owner = permissionsService.getVaultOwner(vault.getID());
+                if(owner != null) {
+                    vault.setOwnerId(owner.getID());
+                }
+            }
+        }
         return vaultResponses;
     }
 
@@ -164,6 +172,19 @@ public class VaultsController {
                 .sorted(Comparator.comparing(VaultInfo::getCreationTime))
                 .collect(Collectors.toList());
         Collections.reverse(vaultResponses);
+        if(CollectionUtils.isNotEmpty(vaultResponses)) {
+            for (VaultInfo vault : vaultResponses) {
+                User owner = permissionsService.getPendingVaultOwner(vault.getID());
+                if(owner != null) {
+                    vault.setOwnerId(owner.getID());
+                }
+
+                User vaultCreator = permissionsService.getPendingVaultCreator(vault.getID());
+                if(vaultCreator != null) {
+                    vault.setVaultCreatorId(vaultCreator.getID());
+                }
+            }
+        }
         return vaultResponses;
         //return null;
     }
@@ -283,6 +304,12 @@ public class VaultsController {
             Map<String, Long> projectSizeMap = vaultsService.getAllProjectsSize();
             //update project Size in the response
             for(VaultInfo vault: vaultResponses) {
+                User owner = permissionsService.getVaultOwner(vault.getID());
+                if(owner != null) {
+                    vault.setOwnerId(owner.getID());
+                    vault.setOwnerName(owner.getFirstname() + " " + owner.getLastname());
+                }
+
                 if(vault.getProjectId() != null) {
                     vault.setProjectSize(projectSizeMap.get(vault.getProjectId()));
                 }

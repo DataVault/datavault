@@ -130,8 +130,11 @@ public class VaultInfo {
     @ApiObjectField(description = "Pure Contact")
     private String contact;
 
-    @ApiObjectField(description = "Pending Vault Owner ID")
+    @ApiObjectField(description = "Pending / Vault Owner ID")
     private String ownerId;
+
+    @ApiObjectField(description = "Vault Owner Name")
+    private String ownerName;
 
     @ApiObjectField(description = "Pending Vault Creator ID")
     private String vaultCreatorId;
@@ -492,6 +495,14 @@ public class VaultInfo {
 
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public String getOwnerName() {
+        return this.ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
     }
 
     public void setDataCreators(List<String> creators) {
