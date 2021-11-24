@@ -44,7 +44,7 @@
                                     </a>
                                     </@sec.authorize>
                                 </td>
-                                <td><#if vault.getUserID()??>${vault.getUserID()}</#if></td>
+                                <td><#if vault.getOwnerId()??>${vault.getOwnerId()}</#if></td>
                                 <td>${vault.getCreationTime()?datetime}</td>
                                 <td class="text-muted">${vault.getReviewDate()?string('dd/MM/yyyy')}</td>
                             </tr>
@@ -84,7 +84,7 @@
                                             ${pendingVault.name?html}
                                         </a>
                                     </td>
-                                    <td><#if pendingVault.getUserID()??>${pendingVault.getUserID()}</#if></td>
+                                    <td><#if pendingVault.getOwnerId()??>${pendingVault.getOwnerId()}</#if></td>
                                     <td>${pendingVault.getCreationTime()?datetime}</td>
                                 </tr>
                             </#list>
