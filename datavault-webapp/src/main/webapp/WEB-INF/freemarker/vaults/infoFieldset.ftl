@@ -39,7 +39,7 @@
                         <option selected disabled data-hidden="true">Please choose a retention policy</option>
                         <#list policies as retentionPolicy>
                             <option value="${retentionPolicy.getID()}" <#if vault.policyID??>${(vault.policyID == retentionPolicy.getID()?c)?then('selected', 'true')}</#if>
-                                    data-subtext="(Minimum period: ${retentionPolicy.minRetentionPeriod?html})">${retentionPolicy.name?html} (Minimum period: ${retentionPolicy.minRetentionPeriod?html})</option>
+                                    data-subtext="(Minimum period: ${retentionPolicy.minRetentionPeriod?html})">${retentionPolicy.name?html}</option>
                         </#list>
                     </select>
                 </div>
