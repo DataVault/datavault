@@ -351,6 +351,12 @@ public class PendingVaultsService {
         vault.setUser(user);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         String grantEndDate = createVault.getGrantEndDate();
+        // Note this appears as a comma-separated string 
+        // because we have two <@spring.bind "vault.grantEndDate" /> tags on form.
+        if(grantEndDate != null) {
+        	grantEndDate.replace(",", "");
+        }
+        logger.info("grantEndDate: " + grantEndDate);
         if (grantEndDate != null) {
 
             try {
@@ -362,6 +368,7 @@ public class PendingVaultsService {
         }
 
         String reviewDate = createVault.getReviewDate();
+        logger.info("reviewDate: " + reviewDate);
         if (reviewDate != null) {
             try {
                 vault.setReviewDate(formatter.parse(reviewDate));
