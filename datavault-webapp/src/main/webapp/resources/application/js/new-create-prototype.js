@@ -27,14 +27,16 @@ $(document).ready(function(){
         // :todo make sure info version of field is only disabled if the billing one has a valid value
         var dateResult = ($(this).val().trim() === '');
         var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
-
+        console.log("#billingGrantEndDate: ", $(this).val());
+        
         if (dateResult === false && grantChecked === true) {
-            $("#grantEndDate").prop("placeholder", $(this).val());
-            $("#grantEndDate").text($(this).val());
+//            $("#grantEndDate").prop("placeholder", $(this).val());
+            $("#grantEndDate").val($(this).val());
             $("#grantEndDate").prop("disabled", true);
         } else {
             $("#grantEndDate").prop("disabled", false);
-            $("#grantEndDate").prop("placeholder", "yyyy-mm-dd");
+//            $("#grantEndDate").prop("placeholder", "yyyy-mm-dd");
+            $("#grantEndDate").val("");
         }
     }).trigger('change');
 
@@ -373,12 +375,12 @@ $(document).ready(function(){
         var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
 
         if (dateResult === false && grantChecked === true) {
-            $("#grantEndDate").prop("placeholder", $("#billingGrantEndDate").val());
-            $("#grantEndDate").text($("#billingGrantEndDate").val());
+//            $("#grantEndDate").prop("placeholder", $("#billingGrantEndDate").val());
+            $("#grantEndDate").val($("#billingGrantEndDate").val());
             $("#grantEndDate").prop("disabled", true);
         } else {
             $("#grantEndDate").prop("disabled", false);
-            $("#grantEndDate").prop("placeholder", "yyyy-mm-dd");
+//            $("#grantEndDate").prop("placeholder", "yyyy-mm-dd");
         }
 
         // clear the unused fieldsets
@@ -389,6 +391,7 @@ $(document).ready(function(){
         // if billing type is not grant clear fieldset
         if (naChecked === true) {
             $("#grant-billing-form input").val("");
+            $("#billingGrantEndDate").val("");
             $("#budget-billing-form input").val("");
             $("#slice-form input").val("");
         }
@@ -405,6 +408,7 @@ $(document).ready(function(){
         if (sliceChecked === true) {
             $("#grant-billing-form input").val("");
             $("#budget-billing-form input").val("");
+            $("#billingGrantEndDate").val("");
         }
     }
 
