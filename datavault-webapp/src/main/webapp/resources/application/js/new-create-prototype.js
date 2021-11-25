@@ -22,19 +22,38 @@ $(document).ready(function(){
         minDate: '+1m'
     });
 
-    // if billingtype changes blank all billing fields (remember to fix date on info page)
+    /*
+    if billinGrantEndDate is filled in, disable granteddate on the info page and populate it with the billing value
+    if billingGrantEndDate is cleared enable grantenddate on the info page and populate it with placeholder also reset review date
+     */
     $( "#billingGrantEndDate" ).change(function() {
-        // :todo make sure info version of field is only disabled if the billing one has a valid value
+        alert("Enabling / disabling grantEndDate");
         var dateResult = ($(this).val().trim() === '');
         var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
 
         if (dateResult === false && grantChecked === true) {
+            // disable false now so any updates will be picked up (even if currently disabled)
+            $("#grantEndDate").prop("disabled", false);
             $("#grantEndDate").prop("placeholder", $(this).val());
             $("#grantEndDate").text($(this).val());
+            // disalbe or disable again if it was already disabled before these changes
             $("#grantEndDate").prop("disabled", true);
         } else {
+            /* todo: reset the review date to 3 years from today or the length of the policy is one
+            has been selected
+             */
+            /*
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2,'0');
+            var mm = String(today.getMonth() + 1).padStart(2,'0'); // January is 0
+            var yyyy = String(today.getFullYear() + 3);
+
+            var estimatedReviewDate = yyyy + '-' + mm + '-' + dd;*/
+
             $("#grantEndDate").prop("disabled", false);
+            $("#grantEndDate").text("");
             $("#grantEndDate").prop("placeholder", "yyyy-mm-dd");
+            /*$("reviewDate").val(estimatedReviewDate);*/
         }
     }).trigger('change');
 

@@ -58,8 +58,8 @@
                     <select id="policyInfo" name="policyInfo" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick">
                         <option selected disabled data-hidden="true">Please choose a retention policy</option>
                         <#list policies as retentionPolicy>
-                            <option value="${retentionPolicy.getID()}" <#if vault.policyID??>${(vault.policyID == retentionPolicy.getID()?c)?then('selected', 'true')}</#if>
-                                    data-subtext="(Minimum period: ${retentionPolicy.minRetentionPeriod?html})">${retentionPolicy.name?html}</option>å
+                            <option value="${retentionPolicy.getID()}-${retentionPolicy.minRetentionPeriod}" <#if vault.policyInfo??>${(vault.policyInfo == retentionPolicy.getPolicyInfo())?then('selected', 'true')}</#if>
+                                    data-subtext="( Minimum period: ${retentionPolicy.minRetentionPeriod?html} )">${retentionPolicy.name?html}</option>
                         </#list>
                     </select>
                 </div>
