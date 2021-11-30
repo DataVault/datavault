@@ -350,7 +350,8 @@ public class PendingVaultsService {
         }
         vault.setUser(user);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        String grantEndDate = createVault.getGrantEndDate();
+        String grantEndDate = (createVault.getBillingGrantEndDate() != null &&
+                !createVault.getBillingGrantEndDate().isEmpty()) ? createVault.getBillingGrantEndDate() : createVault.getGrantEndDate();
         if (grantEndDate != null) {
 
             try {

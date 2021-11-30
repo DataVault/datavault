@@ -336,7 +336,7 @@ public class VaultsController {
     @RequestMapping(value = "/pendingVaults/{vaultid}", method = RequestMethod.GET)
     public String getPendingVault(ModelMap model, @PathVariable("vaultid") String vaultID, Principal principal) {
         VaultInfo vault = restService.getPendingVault(vaultID);
-
+        logger.info("VI Grant End Date is: ':" + vault.getGrantEndDate() + "'");
         logger.info("Passed in id: '" + vaultID);
 
         if (!canAccessVault(vault, principal)) {
@@ -344,6 +344,7 @@ public class VaultsController {
         }
 
         CreateVault cv = vault.convertToCreate();
+        logger.info("CV Grant End Date is: ':" + cv.getGrantEndDate() + "' - '" + cv.getBillingGrantEndDate() + "'");
         model.addAttribute("vault", cv);
         RetentionPolicy[] policies = restService.getRetentionPolicyListing();
         model.addAttribute("policies", policies);

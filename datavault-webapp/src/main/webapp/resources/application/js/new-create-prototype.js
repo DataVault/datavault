@@ -27,33 +27,26 @@ $(document).ready(function(){
     if billingGrantEndDate is cleared enable grantenddate on the info page and populate it with placeholder also reset review date
      */
     $( "#billingGrantEndDate" ).change(function() {
-        alert("Enabling / disabling grantEndDate");
-        var dateResult = ($(this).val().trim() === '');
+        var dateResult = ($("#billingGrantEndDate").val().trim() === '');
         var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
 
         if (dateResult === false && grantChecked === true) {
             // disable false now so any updates will be picked up (even if currently disabled)
-            $("#grantEndDate").prop("disabled", false);
-            $("#grantEndDate").prop("placeholder", $(this).val());
-            $("#grantEndDate").text($(this).val());
-            // disalbe or disable again if it was already disabled before these changes
+            //$("#grantEndDate").prop("disabled", false);
+            $("#grantEndDate").prop("placeholder", $("#billingGrantEndDate").val());
+            $("#grantEndDate").val($("#billingGrantEndDate").val());
+            // disable or disable again if it was already disabled before these changes
             $("#grantEndDate").prop("disabled", true);
         } else {
             /* todo: reset the review date to 3 years from today or the length of the policy is one
             has been selected
-             */
-            /*
-            var today = new Date();
-            var dd = String(today.getDate()).padStart(2,'0');
-            var mm = String(today.getMonth() + 1).padStart(2,'0'); // January is 0
-            var yyyy = String(today.getFullYear() + 3);
-
-            var estimatedReviewDate = yyyy + '-' + mm + '-' + dd;*/
+            */
+            var estimatedReviewDate = calculateReviewDateForToday();
 
             $("#grantEndDate").prop("disabled", false);
             $("#grantEndDate").text("");
             $("#grantEndDate").prop("placeholder", "yyyy-mm-dd");
-            /*$("reviewDate").val(estimatedReviewDate);*/
+            $("#reviewDate").val(estimatedReviewDate);
         }
     }).trigger('change');
 
@@ -86,9 +79,10 @@ $(document).ready(function(){
         var today = new Date();
         var dd = String(today.getDate()).padStart(2,'0');
         var mm = String(today.getMonth() + 1).padStart(2,'0'); // January is 0
-        var yyyy = String(today.getFullYear() + 3);
+        //var yyyy = String(today.getFullYear() + 3);
 
-        var estimatedReviewDate = yyyy + '-' + mm + '-' + dd;
+        //var estimatedReviewDate = yyyy + '-' + mm + '-' + dd;
+        var estimatedReviewDate = calculateReviewDateForToday();
 
         if (noRP === false && noGED === false) {
             // if we have both then ged + policy length = review date
@@ -454,11 +448,14 @@ $(document).ready(function(){
 
         if (dateResult === false && grantChecked === true) {
             $("#grantEndDate").prop("placeholder", $("#billingGrantEndDate").val());
-            $("#grantEndDate").text($("#billingGrantEndDate").val());
+            $("#grantEndDate").val($("#billingGrantEndDate").val());
             $("#grantEndDate").prop("disabled", true);
         } else {
+            var estimatedReviewDate = calculateReviewDateForToday();
             $("#grantEndDate").prop("disabled", false);
+            $("#grantEndDate").val("");
             $("#grantEndDate").prop("placeholder", "yyyy-mm-dd");
+            $("#reviewDate").val(estimatedReviewDate);
         }
 
         // clear the unused fieldsets
@@ -588,5 +585,18 @@ $(document).ready(function(){
     		return html;
     	}
     	
+    }
+
+    function calculateReviewDateForToday() {
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2,'0');
+        var mm = String(today.getMonth() + 1).padStart(2,'0'); // January is 0
+        // do we have a retention policy
+        // if yes use it's length if not use the default
+        var defaultLength = 3;
+        var length = defaultLength;
+        var yyyy = String(today.getFullYear() + length);
+
+        return yyyy + '-' + mm + '-' + dd;
     }
 });

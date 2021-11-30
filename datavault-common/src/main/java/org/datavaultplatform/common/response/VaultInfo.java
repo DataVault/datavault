@@ -573,6 +573,11 @@ public class VaultInfo {
             cv.setGrantSchoolOrUnit(this.getSchoolOrUnit());
             cv.setGrantSubunit(this.getSubunit());
             cv.setProjectTitle(this.getProjectTitle());
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.UK);
+
+            if (this.getGrantEndDate() != null) {
+                cv.setBillingGrantEndDate(formatter.format(this.getGrantEndDate()));
+            }
         }
 
         if (this.getBillingType().equals(PendingVault.Billing_Type.BUDGET_CODE)) {
@@ -593,6 +598,7 @@ public class VaultInfo {
         }
         cv.setGroupID(this.getGroupID());
         if (this.getReviewDate() != null) {
+
             cv.setReviewDate(formatter.format(this.getReviewDate()));
         }
         if (this.getEstimate() != null) {

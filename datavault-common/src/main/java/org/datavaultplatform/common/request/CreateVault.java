@@ -41,7 +41,10 @@ public class CreateVault {
     
     @ApiObjectField(description = "A reference to an external metadata record that describes this vault")
     private String datasetID;
-    
+
+    @ApiObjectField(description = "Define the minimum of time the archive will be kept")
+    private String billingGrantEndDate;
+
     @ApiObjectField(description = "Define the minimum of time the archive will be kept")
     private String grantEndDate;
     
@@ -197,6 +200,14 @@ public class CreateVault {
 
     public void setGrantEndDate(String grantEndDate) {
         this.grantEndDate = grantEndDate;
+    }
+
+    public String getBillingGrantEndDate() {
+        return billingGrantEndDate;
+    }
+
+    public void setBillingGrantEndDate(String billingGrantEndDate) {
+        this.billingGrantEndDate = billingGrantEndDate;
     }
 
     public String getReviewDate() {
