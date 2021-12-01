@@ -12,9 +12,7 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "VaultInfo")
@@ -370,12 +368,30 @@ public class VaultInfo {
         this.grantEndDate = grantEndDate;
     }
 
+    public String getGrantEndDateAsString() {
+        String retVal = "";
+        if (this.getGrantEndDate() != null) {
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            retVal = formatter.format(this.plusOneDay(this.getGrantEndDate()));
+        }
+        return retVal;
+    }
+
     public Date getReviewDate() {
         return reviewDate;
     }
 
     public void setReviewDate(Date reviewDate) {
         this.reviewDate = reviewDate;
+    }
+
+    public String getReviewDateAsString() {
+        String retVal = "";
+        if (this.getReviewDate() != null) {
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            retVal = formatter.format(this.plusOneDay(this.getReviewDate()));
+        }
+        return retVal;
     }
 
 	public long getNumberOfDeposits() {
@@ -573,10 +589,9 @@ public class VaultInfo {
             cv.setGrantSchoolOrUnit(this.getSchoolOrUnit());
             cv.setGrantSubunit(this.getSubunit());
             cv.setProjectTitle(this.getProjectTitle());
-            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.UK);
 
             if (this.getGrantEndDate() != null) {
-                cv.setBillingGrantEndDate(formatter.format(this.getGrantEndDate()));
+                cv.setBillingGrantEndDate(this.getGrantEndDateAsString());
             }
         }
 
@@ -587,19 +602,15 @@ public class VaultInfo {
         }
 
         cv.setName(this.getName());
-        //logger.info("Vault Description is: '" + vault.getDescription());
         cv.setDescription(this.getDescription());
-        //logger.info("Create Vault Description is: '" + cv.getDescription());
         cv.setPolicyInfo(this.getPolicyID() + "-" + this.getPolicyLength());
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.UK);
 
         if (this.getGrantEndDate() != null) {
-            cv.setGrantEndDate(formatter.format(this.getGrantEndDate()));
+            cv.setGrantEndDate(this.getGrantEndDateAsString());
         }
         cv.setGroupID(this.getGroupID());
         if (this.getReviewDate() != null) {
-
-            cv.setReviewDate(formatter.format(this.getReviewDate()));
+            cv.setReviewDate(this.getReviewDateAsString());
         }
         if (this.getEstimate() != null) {
             cv.setEstimate(this.getEstimate().toString());
@@ -610,10 +621,8 @@ public class VaultInfo {
         // if vault owner is null set isowner to true
         // if vault owner is the same as the logged in user set isowner to true
         // if vault owner is different ot hte logged in user set to false
-        //logger.debug("Setting default isOwner");
         Boolean isOwner = true;
         if (this.getOwnerId() != null && ! this.getOwnerId().equals(this.getUserID())) {
-            //logger.debug("Changing default isOwner");
             isOwner = false;
         }
         cv.setIsOwner(isOwner);
@@ -626,5 +635,18 @@ public class VaultInfo {
         cv.setConfirmed(this.getConfirmed());
 
         return cv;
+    }
+
+    private Date plusOneDay(Date date) {
+        Date retVal = null;
+        if (date != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.add(Calendar.DATE, 1);
+            retVal =  cal.getTime();
+        }
+
+        return retVal;
+
     }
 }
