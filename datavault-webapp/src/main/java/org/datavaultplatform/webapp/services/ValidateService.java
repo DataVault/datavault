@@ -3,8 +3,11 @@ package org.datavaultplatform.webapp.services;
 import org.datavaultplatform.common.request.CreateVault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.method.P;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class ValidateService {
@@ -151,6 +154,20 @@ public class ValidateService {
         String reviewDate = vault.getReviewDate();
         if (reviewDate == null || reviewDate.isEmpty()) {
             retVal.add("Review Date missing");
+        } else {
+        // if review date is less than 3 years from today
+            int length = 3;
+            if (policy != null && !policy.isEmpty())  {
+                try {
+                    length = Integer.parseInt(policy.split("-")[1]);
+                } catch (NumberFormatException ne) {
+                    length = 3;
+                }
+            }
+            if (LocalDate.parse(reviewDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    .isBefore(LocalDate.parse(this.getDefaultReviewDate(length), DateTimeFormatter.ofPattern("yyyy-MM-dd")))) {
+                retVal.add("Review Date for selected policy is required to be at least " + length + " years");
+            }
         }
 
         return retVal;
@@ -176,15 +193,19 @@ public class ValidateService {
         return retVal;
     }
 
-    public String getDefaultReviewDate() {
+    public String getDefaultReviewDate(int length) {
         String retVal = "";
         Calendar cal = Calendar.getInstance();
         cal.setTimeZone(TimeZone.getTimeZone("Europe/London"));
-        cal.add(Calendar.YEAR, 3);
+        cal.add(Calendar.YEAR, length);
         Date todayPlus3Years = cal.getTime();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         retVal = formatter.format(todayPlus3Years);
 
         return retVal;
+    }
+
+    public String getDefaultReviewDate() {
+        return this.getDefaultReviewDate(3);
     }
 }
