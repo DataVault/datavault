@@ -31,24 +31,12 @@ $(document).ready(function(){
         if (confirmedTrue === false) {
             var dateResult = ($("#billingGrantEndDate").val().trim() === '');
             var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
-            //var noRP = ($("#policyInfo option:selected").val() === '' || $("#policyInfo option:selected").prop("disabled"));
 
             if (dateResult === false && grantChecked === true) {
                 $("#grantEndDate").prop("placeholder", $("#billingGrantEndDate").val());
                 $("#grantEndDate").val($("#billingGrantEndDate").val());
                 $("#grantEndDate").prop("disabled", true);
             } else {
-                /* todo: reset the review date to 3 years from today or the length of the policy is one
-                has been selected
-                */
-                //alert("Reseting Review date");
-                //var length = 3;
-                //var policyInfoString = $("#policyInfo option:selected").val();
-                //var policyInfoArray = policyInfoString.split("-");
-                //if (noRP === false && policyInfoString !== '' && policyInfoArray[1] !== '') {
-                //    alert("Reseting Review date with policy length:" + length);
-                //    length = parseInt(policyInfoArray[1], 10);
-                //}
                 var length = calculateReviewLength();
                 var estimatedReviewDate = calculateReviewDateForToday(length);
 
@@ -381,10 +369,6 @@ $(document).ready(function(){
         $(this).addClass('selected');
     });
 
-    //$(".submit").click(function(){
-    //    return false;
-    //})
-
     $('button[type="submit"]').on("click", function() {
         $('#submitAction').val($(this).attr('value'));
     });
@@ -458,22 +442,12 @@ $(document).ready(function(){
             // enable or disable the grant end date field on the info fieldset
             var dateResult = ($("#billingGrantEndDate").val().trim() === '');
             var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
-            //var noRP = ($("#policyInfo option:selected").val() === '' || $("#policyInfo option:selected").prop("disabled"));
 
             if (dateResult === false && grantChecked === true) {
                 $("#grantEndDate").prop("placeholder", $("#billingGrantEndDate").val());
                 $("#grantEndDate").val($("#billingGrantEndDate").val());
                 $("#grantEndDate").prop("disabled", true);
             } else {
-                //alert("Reseting Review date");
-                //var length = 3;
-                //var policyInfoString = $("#policyInfo option:selected").val();
-                //var policyInfoArray = policyInfoString.split("-");
-                // need to get this from the policy somehow!  10 is just a mock value
-                //if (noRP === false && policyInfoString !== '' && policyInfoArray[1] !== '') {
-                //    length = parseInt(policyInfoArray[1], 10);
-                //    alert("Reseting Review date with policy length:" + length);
-                //}
                 var length = calculateReviewLength();
                 var estimatedReviewDate = calculateReviewDateForToday(length);
                 $("#grantEndDate").prop("disabled", false);
