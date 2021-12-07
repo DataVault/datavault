@@ -361,6 +361,7 @@ public class PendingVault {
         retVal.setAffirmed(this.affirmed);
         if (this.retentionPolicy != null) {
             retVal.setPolicyID(String.valueOf(this.retentionPolicy.getID()));
+            retVal.setPolicyLength(String.valueOf(this.retentionPolicy.getMinRetentionPeriod()));
         }
         retVal.setGrantEndDate(this.grantEndDate);
         if (this.group != null) {

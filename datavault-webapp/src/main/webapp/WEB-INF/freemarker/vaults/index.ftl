@@ -46,7 +46,7 @@
                                 </td>
                                 <td><#if vault.getOwnerId()??>${vault.getOwnerId()}</#if></td>
                                 <td>${vault.getCreationTime()?datetime}</td>
-                                <td class="text-muted">${vault.getReviewDate()?string('dd/MM/yyyy')}</td>
+                                <td class="text-muted">${vault.getReviewDateAsString()}</td>
                             </tr>
                             </#list>
                         </tbody>

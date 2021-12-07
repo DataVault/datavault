@@ -25,27 +25,6 @@
             <textarea type="text" class="form-control" name="${spring.status.expression}" value="${spring.status.value!""}" id="description" rows="4" cols="60"><#if vault.description??>${vault.description?html}</#if></textarea>
         </div>
 
-        <div class="form-group required">
-            <label for="policyID" class="control-label">Retention Policy</label>
-            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                  title="This field indicates the policy with which we must comply, for the purpose of deciding the minimum amount of time for which this dataset &nbsp;must be archived. In most cases this will be the funder's policy. If there are multiple funders, it should be the one with the longest minimum among them.">
-                                                                </span>
-            <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/planning-your-data/funder-requirements">
-                Read more about retention policies
-            </a>
-            <div class="row">
-                <div class="col-md-12">
-                    <select id="policyID" name="policyID" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick">
-                        <option selected disabled data-hidden="true">Please choose a retention policy</option>
-                        <#list policies as retentionPolicy>
-                            <option value="${retentionPolicy.getID()}" <#if vault.policyID??>${(vault.policyID == retentionPolicy.getID()?c)?then('selected', 'true')}</#if>
-                                    data-subtext="(Minimum period: ${retentionPolicy.minRetentionPeriod?html})">${retentionPolicy.name?html}</option>
-                        </#list>
-                    </select>
-                </div>
-            </div>
-        </div>
-
         <div class="form-group">
             <label  for="grantEndDate" class="control-label">
                 <strong>Grant End Date</strong>
@@ -64,6 +43,39 @@
                 The Vault will be closed ONE calendar year after the first deposit.
                 Or, if you specify a Grant End Date, ONE calendar year after the Grant End Date IF that falls later than one year after the first deposit.
             </p>
+        </div>
+
+        <div class="form-group required">
+            <label for="policyInfo" class="control-label">Retention Policy (tell us how long we must keep the data)</label>
+            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
+                  title="Tell us which funder's policy we must comply with. This tells us the minimum amount of time we must keep the data. This information is important when deciding on the Review Date. If there is no funder, choose the University of Edinburgh retention policy. If there are multiple funders, choose the one with the longest minimum retention period. ">
+                                                                </span>
+            <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/planning-your-data/funder-requirements">
+                Read more about retention policies
+            </a>
+            <div class="row">
+                <div class="col-md-12">
+                    <select id="policyInfo" name="policyInfo" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick">
+                        <option selected disabled data-hidden="true">Please choose a retention policy</option>
+                        <#list policies as retentionPolicy>
+                            <option value="${retentionPolicy.getID()}-${retentionPolicy.minRetentionPeriod}" <#if vault.policyInfo??>${(vault.policyInfo == retentionPolicy.getPolicyInfo())?then('selected', 'true')}</#if>
+                                    data-subtext="( Minimum period: ${retentionPolicy.minRetentionPeriod?html} )">${retentionPolicy.name?html}</option>
+                        </#list>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group required">
+            <label for="reviewDate" class="control-label">
+                <strong>Review Date (tell us how long you want us to keep the data)</strong>
+            </label>
+            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
+                  title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault.">
+                                                                </span>
+            <@spring.bind "vault.reviewDate" />
+            <input class="form-control" id="reviewDate" placeholder="yyyy-mm-dd" name="${spring.status.expression}"
+                   value="${spring.status.value!""}"/>
         </div>
 
         <div class="form-group required">
@@ -94,18 +106,6 @@
                         </small></small>
                 </div>
             </div>
-        </div>
-
-        <div class="form-group required">
-            <label for="reviewDate" class="control-label">
-                <strong>Review Date (typically ten years from now)</strong>
-            </label>
-            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                  title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault.">
-                                                                </span>
-            <@spring.bind "vault.reviewDate" />
-            <input class="form-control" id="reviewDate" placeholder="yyyy-mm-dd" name="${spring.status.expression}"
-                   value="${spring.status.value!""}"/>
         </div>
 
         <div class="form-group" required>

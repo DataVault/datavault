@@ -332,7 +332,6 @@ public class VaultsController {
     @RequestMapping(value = "/pendingVaults/{vaultid}", method = RequestMethod.GET)
     public String getPendingVault(ModelMap model, @PathVariable("vaultid") String vaultID, Principal principal) {
         VaultInfo vault = restService.getPendingVault(vaultID);
-
         logger.info("Passed in id: '" + vaultID);
 
         if (!canAccessVault(vault, principal)) {
@@ -358,9 +357,8 @@ public class VaultsController {
         CreateVault vault = new CreateVault();
         vault.setIsOwner(true);
         model.addAttribute("vault", vault);
-
-        // if it has get that data from the db
-
+        String defaultReviewDate = validateService.getDefaultReviewDate();
+        vault.setReviewDate(defaultReviewDate);
 
         RetentionPolicy[] policies = restService.getRetentionPolicyListing();
         model.addAttribute("policies", policies);

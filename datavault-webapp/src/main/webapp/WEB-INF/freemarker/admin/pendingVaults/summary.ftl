@@ -86,8 +86,8 @@
 		<tr>
 			<th scope="col">Grant End Date</th>
 			 <td>
-                <#if (pendingVault.grantEndDate)??>
-                    ${pendingVault.grantEndDate?date}
+                <#if (pendingVault.getGrantEndDate())??>
+                    ${pendingVault.getGrantEndDateAsString()}
                 </#if>
              </td>
 		</tr>
@@ -103,8 +103,8 @@
 		<tr>
 			<th scope="col">Review Date</th>
 			<td>
-              <#if (pendingVault.reviewDate)??>
-                ${pendingVault.reviewDate?date}
+              <#if (pendingVault.getReviewDate())??>
+                ${pendingVault.getReviewDateAsString()}
               </#if>
             </td>
 		</tr>
