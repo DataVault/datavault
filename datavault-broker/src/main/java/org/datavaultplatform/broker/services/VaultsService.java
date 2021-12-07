@@ -6,7 +6,6 @@ import java.util.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.VaultDAO;
 import org.datavaultplatform.common.request.CreateVault;
-import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

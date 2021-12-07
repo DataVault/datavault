@@ -79,7 +79,7 @@
                                                  title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;"></span>
                         </label>
 
-                        <@spring.bind "vault.grantEndDate" />
+                        <@spring.bind "vault.billingGrantEndDate" />
                         <input id="billingGrantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd" name="${spring.status.expression}"
                                value="${spring.status.value!""}"/>
                     </div>
