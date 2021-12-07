@@ -35,10 +35,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
 import java.security.Principal;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -380,7 +376,11 @@ public class VaultsController {
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
         return "redirect:" + vaultUrl;
     }*/
+   @RequestMapping(value = "/vaults/confirmed", method = RequestMethod.GET)
+    public String confirmPendingVault() {
+       return "vaults/confirmed";
 
+    }
     // Process the completed 'create new vault' page
     @RequestMapping(value = "/vaults/stepCreate", method = RequestMethod.POST)
     public String addVault(@ModelAttribute CreateVault vault, ModelMap model, @RequestParam String action) {
@@ -431,7 +431,6 @@ public class VaultsController {
 
                 Group[] groups = restService.getGroups();
                 model.addAttribute("groups", groups);
-                //return "redirect:" + buildUrl;
                 return "vaults/newCreatePrototype";
             }
 
@@ -445,12 +444,8 @@ public class VaultsController {
             } else {
                 newVault = restService.updatePendingVault(vault);
             }
-            String vaultUrl = "/pendingVaults/" + newVault.getID() + "/";
-            String vaultsUrl = "/vaults/";
-            // redirect to pending page if all goes well
-            //return "redirect:" + vaultUrl;
-            //return "redirect:" + buildUrl;
-            return "redirect:" + vaultsUrl;
+
+            return "redirect:" + "/vaults/confirmed";
         } else if ("Validate".equals(action)) {
             // this will be the code that moves from pending vault to validated vault
             // when an admin gives the ok
