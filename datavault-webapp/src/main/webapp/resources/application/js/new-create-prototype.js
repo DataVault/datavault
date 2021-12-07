@@ -2,6 +2,7 @@
 $(document).ready(function(){
     var current_fs, next_fs, previous_fs;
     var opacity;
+    var confirmedTrue = ($("#confirmed").val() === 'true');
     
     // Prevent Enter Key Submitting Form
     $("form input").on("keypress", function(e) {
@@ -22,19 +23,92 @@ $(document).ready(function(){
         minDate: '+1m'
     });
 
-    // if billingtype changes blank all billing fields (remember to fix date on info page)
+    /*
+    if billinGrantEndDate is filled in, disable granteddate on the info page and populate it with the billing value
+    if billingGrantEndDate is cleared enable grantenddate on the info page and populate it with placeholder also reset review date
+     */
     $( "#billingGrantEndDate" ).change(function() {
-        // :todo make sure info version of field is only disabled if the billing one has a valid value
-        var dateResult = ($(this).val().trim() === '');
-        var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
+        if (confirmedTrue === false) {
+            var dateResult = ($("#billingGrantEndDate").val().trim() === '');
+            var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
 
-        if (dateResult === false && grantChecked === true) {
-            $("#grantEndDate").prop("placeholder", $(this).val());
-            $("#grantEndDate").text($(this).val());
-            $("#grantEndDate").prop("disabled", true);
-        } else {
-            $("#grantEndDate").prop("disabled", false);
-            $("#grantEndDate").prop("placeholder", "yyyy-mm-dd");
+            if (dateResult === false && grantChecked === true) {
+                $("#grantEndDate").prop("placeholder", $("#billingGrantEndDate").val());
+                $("#grantEndDate").val($("#billingGrantEndDate").val());
+                $("#grantEndDate").prop("disabled", true);
+            } else {
+                var length = calculateReviewLength();
+                var estimatedReviewDate = calculateReviewDateForToday(length);
+
+                $("#grantEndDate").prop("disabled", false);
+                $("#grantEndDate").val("");
+                $("#grantEndDate").prop("placeholder", "yyyy-mm-dd");
+                $("#reviewDate").val(estimatedReviewDate);
+            }
+        }
+    }).trigger('change');
+
+    $("#billingGrantEndDate, #grantEndDate, #policyInfo").change(function(){
+        // if the ged changes update the suggested review date
+
+        // if no retention policy picked yet ged + 3 years
+
+        // if a retention policy has been picked ged + policy length
+        if (confirmedTrue === false) {
+            var noRP = ($("#policyInfo option:selected").val() === '' || $("#policyInfo option:selected").prop("disabled"));
+            var noGED = ($("#grantEndDate").val().trim() === '');
+            var noBillingGED = ($("#billingGrantEndDate").val().trim() === '');
+            var ged = $("#grantEndDate").val().trim();
+            var gedDate = new Date(ged);
+            var gedMm = String(gedDate.getMonth() + 1).padStart(2, '0');
+            var gedDd = String(gedDate.getDate()).padStart(2, '0');
+            var billingGed = $("#billingGrantEndDate").val().trim();
+            var billingGedDate = new Date(billingGed);
+            var billingGedMm = String(billingGedDate.getMonth() + 1).padStart(2, '0');
+            var billingGedDd = String(billingGedDate.getDate()).padStart(2, '0');
+            var defaultLength = 3;
+            var policyInfoString = $("#policyInfo option:selected").val();
+            //alert("policy info string:'" + policyInfoString + "'");
+            var policyInfoArray = policyInfoString.split("-");
+            // need to get this from the policy somehow!  10 is just a mock value
+            var policyLength = defaultLength;
+            if (noRP === false && policyInfoString !== '' && policyInfoArray[1] !== '') {
+                policyLength = parseInt(policyInfoArray[1], 10);
+            }
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0
+            //var yyyy = String(today.getFullYear() + 3);
+
+            //var estimatedReviewDate = yyyy + '-' + mm + '-' + dd;
+            var estimatedReviewDate = calculateReviewDateForToday(defaultLength);
+
+            if (noRP === false && noGED === false) {
+                // if we have both then ged + policy length = review date
+                estimatedReviewDate = String(gedDate.getFullYear() + policyLength) + '-' + gedMm + '-' + gedDd;
+            }
+
+            if (noRP === false && noBillingGED === false) {
+                // if we have both then billing ged + policy length = review date
+                estimatedReviewDate = String(billingGedDate.getFullYear() + policyLength) + '-' + billingGedMm + '-' + billingGedDd;
+            }
+
+            if (noRP === false && noGED === true && noBillingGED === true) {
+                // if we only have policy then length + current date = review date
+                estimatedReviewDate = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
+            }
+
+            if (noRP === true && noGED === false) {
+                // if we only have ged then ged + 3 = review date
+                estimatedReviewDate = String(gedDate.getFullYear() + defaultLength) + '-' + gedMm + '-' + gedDd;
+            }
+
+            if (noRP === true && noBillingGED === false) {
+                // if we only have a ged in the billing fieldset then ged + 3 = review date
+                estimatedReviewDate = String(billingGedDate.getFullYear() + defaultLength) + '-' + billingGedMm + '-' + billingGedDd;
+            }
+
+            $("#reviewDate").val(estimatedReviewDate);
         }
     }).trigger('change');
 
@@ -42,7 +116,7 @@ $(document).ready(function(){
         $(this).parents("fieldset").children(".next").prop( "disabled", !$(this).is(":checked") );
     }).trigger('change');
 
-    $("#vaultName, #description, #policyID, #groupID, #reviewDate").change(function(){
+    $("#vaultName, #description, #policyInfo, #groupID, #reviewDate").change(function(){
         // if all the mandatory values in the info field set are non null or empty set the next button
         // display value to true
         // name
@@ -50,7 +124,7 @@ $(document).ready(function(){
         // description
         var descResult = ($( "textarea[type=text][id=description]").val() === '');
         // retention policy
-        var rpResult = ($("#policyID option:selected").val() === '' || $("#policyID option:selected").prop("disabled"));
+        var rpResult = ($("#policyInfo option:selected").val() === '' || $("#policyInfo option:selected").prop("disabled"));
         // school
         var schoolResult = ($("#groupID option:selected").val() === '' || $("#groupID option:selected").prop("disabled"));
         // review date
@@ -295,10 +369,6 @@ $(document).ready(function(){
         $(this).addClass('selected');
     });
 
-    //$(".submit").click(function(){
-    //    return false;
-    //})
-
     $('button[type="submit"]').on("click", function() {
         $('#submitAction').val($(this).attr('value'));
     });
@@ -368,43 +438,49 @@ $(document).ready(function(){
    }
     
     function clearBillingOptions() {
-        // enable or disable the grant end date field on the info fieldset
-        var dateResult = ($("#billingGrantEndDate").val().trim() === '');
-        var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
+        if (confirmedTrue === false) {
+            // enable or disable the grant end date field on the info fieldset
+            var dateResult = ($("#billingGrantEndDate").val().trim() === '');
+            var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
 
-        if (dateResult === false && grantChecked === true) {
-            $("#grantEndDate").prop("placeholder", $("#billingGrantEndDate").val());
-            $("#grantEndDate").text($("#billingGrantEndDate").val());
-            $("#grantEndDate").prop("disabled", true);
-        } else {
-            $("#grantEndDate").prop("disabled", false);
-            $("#grantEndDate").prop("placeholder", "yyyy-mm-dd");
-        }
+            if (dateResult === false && grantChecked === true) {
+                $("#grantEndDate").prop("placeholder", $("#billingGrantEndDate").val());
+                $("#grantEndDate").val($("#billingGrantEndDate").val());
+                $("#grantEndDate").prop("disabled", true);
+            } else {
+                var length = calculateReviewLength();
+                var estimatedReviewDate = calculateReviewDateForToday(length);
+                $("#grantEndDate").prop("disabled", false);
+                $("#grantEndDate").val("");
+                $("#grantEndDate").prop("placeholder", "yyyy-mm-dd");
+                $("#reviewDate").val(estimatedReviewDate);
+            }
 
-        // clear the unused fieldsets
-        var naChecked = ($("#billing-choice-na").is(":checked"));
-        var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
-        var budgetChecked = ($("#billing-choice-budgetcode").is(":checked"));
-        var sliceChecked = ($("#billing-choice-slice").is(":checked"));
-        // if billing type is not grant clear fieldset
-        if (naChecked === true) {
-            $("#grant-billing-form input").val("");
-            $("#budget-billing-form input").val("");
-            $("#slice-form input").val("");
-        }
-        if (grantChecked === true) {
-            $("#budget-billing-form input").val("");
-            $("#slice-form input").val("");
-        }
+            // clear the unused fieldsets
+            var naChecked = ($("#billing-choice-na").is(":checked"));
+            var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
+            var budgetChecked = ($("#billing-choice-budgetcode").is(":checked"));
+            var sliceChecked = ($("#billing-choice-slice").is(":checked"));
+            // if billing type is not grant clear fieldset
+            if (naChecked === true) {
+                $("#grant-billing-form input").val("");
+                $("#budget-billing-form input").val("");
+                $("#slice-form input").val("");
+            }
+            if (grantChecked === true) {
+                $("#budget-billing-form input").val("");
+                $("#slice-form input").val("");
+            }
 
-        if (budgetChecked === true) {
-            $("#grant-billing-form input").val("");
-            $("#slice-form input").val("");
-        }
+            if (budgetChecked === true) {
+                $("#grant-billing-form input").val("");
+                $("#slice-form input").val("");
+            }
 
-        if (sliceChecked === true) {
-            $("#grant-billing-form input").val("");
-            $("#budget-billing-form input").val("");
+            if (sliceChecked === true) {
+                $("#grant-billing-form input").val("");
+                $("#budget-billing-form input").val("");
+            }
         }
     }
 
@@ -420,7 +496,7 @@ $(document).ready(function(){
     	  // VaultInfo
     	  $("#summary-vaultName").text($("#vaultName").val());
     	  $("#summary-description").text($("#description").val());
-    	  $("#summary-policyID").text($("#policyID option:selected").text());
+    	  $("#summary-policyID").text($("#policyInfo option:selected").text());
     	  var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
     	  if (grantChecked === true) {
               $("#summary-grantEndDate").text($("#billingGrantEndDate").val());
@@ -508,5 +584,28 @@ $(document).ready(function(){
     		return html;
     	}
     	
+    }
+
+    function calculateReviewDateForToday(length) {
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2,'0');
+        var mm = String(today.getMonth() + 1).padStart(2,'0'); // January is 0
+        var yyyy = String(today.getFullYear() + parseInt(length, 10));
+
+        return yyyy + '-' + mm + '-' + dd;
+    }
+
+    function calculateReviewLength() {
+        var noRP = ($("#policyInfo option:selected").val() === '' || $("#policyInfo option:selected").prop("disabled"));
+
+        var length = 3;
+        var policyInfoString = $("#policyInfo option:selected").val();
+        var policyInfoArray = policyInfoString.split("-");
+
+        if (noRP === false && policyInfoString !== '' && policyInfoArray[1] !== '') {
+            length = parseInt(policyInfoArray[1], 10);
+        }
+
+        return length
     }
 });

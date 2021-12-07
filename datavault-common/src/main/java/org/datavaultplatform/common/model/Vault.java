@@ -372,6 +372,7 @@ public class Vault {
                 name,
                 description,
                 String.valueOf(retentionPolicy.getID()),
+                String.valueOf(retentionPolicy.getMinRetentionPeriod()),
                 group.getID(),
                 vaultSize,
                 retentionPolicyStatus,

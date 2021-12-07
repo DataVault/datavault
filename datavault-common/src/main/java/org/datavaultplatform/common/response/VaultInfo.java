@@ -12,9 +12,7 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "VaultInfo")
@@ -52,6 +50,9 @@ public class VaultInfo {
     
     @ApiObjectField(description = "The policy that applies to this vault")
     private String policyID;
+
+    @ApiObjectField(description = "The length of the policy that applies to this vault")
+    private String policyLength;
     
     @ApiObjectField(description = "The group which is related to this vault")
     private String groupID;
@@ -148,7 +149,7 @@ public class VaultInfo {
     public VaultInfo() { }
 
     public VaultInfo(String id, String userID, String userName, String datasetID, String crisID, String datasetName,
-                     Date creationTime, String name, String description, String policyID, String groupID,
+                     Date creationTime, String name, String description, String policyID, String policyLength, String groupID,
                      long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked, Date grantEndDate,
                      Date reviewDate, long numberOfDeposits, String projectId) {
         this.id = id;
@@ -160,6 +161,7 @@ public class VaultInfo {
         this.name = name;
         this.description = description;
         this.policyID = policyID;
+        this.policyLength = policyLength;
         this.groupID = groupID;
         this.vaultSize = vaultSize;
         this.policyStatus = policyStatus;
@@ -289,6 +291,14 @@ public class VaultInfo {
         this.policyID = policyID;
     }
 
+    public String getPolicyLength() {
+        return policyLength;
+    }
+
+    public void setPolicyLength(String policyLength) {
+        this.policyLength = policyLength;
+    }
+
     public String getGroupID() {
         return groupID;
     }
@@ -358,12 +368,30 @@ public class VaultInfo {
         this.grantEndDate = grantEndDate;
     }
 
+    public String getGrantEndDateAsString() {
+        String retVal = "";
+        if (this.getGrantEndDate() != null) {
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            retVal = formatter.format(this.plusOneDay(this.getGrantEndDate()));
+        }
+        return retVal;
+    }
+
     public Date getReviewDate() {
         return reviewDate;
     }
 
     public void setReviewDate(Date reviewDate) {
         this.reviewDate = reviewDate;
+    }
+
+    public String getReviewDateAsString() {
+        String retVal = "";
+        if (this.getReviewDate() != null) {
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            retVal = formatter.format(this.plusOneDay(this.getReviewDate()));
+        }
+        return retVal;
     }
 
 	public long getNumberOfDeposits() {
@@ -561,6 +589,10 @@ public class VaultInfo {
             cv.setGrantSchoolOrUnit(this.getSchoolOrUnit());
             cv.setGrantSubunit(this.getSubunit());
             cv.setProjectTitle(this.getProjectTitle());
+
+            if (this.getGrantEndDate() != null) {
+                cv.setBillingGrantEndDate(this.getGrantEndDateAsString());
+            }
         }
 
         if (this.getBillingType().equals(PendingVault.Billing_Type.BUDGET_CODE)) {
@@ -570,18 +602,15 @@ public class VaultInfo {
         }
 
         cv.setName(this.getName());
-        //logger.info("Vault Description is: '" + vault.getDescription());
         cv.setDescription(this.getDescription());
-        //logger.info("Create Vault Description is: '" + cv.getDescription());
-        cv.setPolicyID(this.getPolicyID());
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.UK);
+        cv.setPolicyInfo(this.getPolicyID() + "-" + this.getPolicyLength());
 
         if (this.getGrantEndDate() != null) {
-            cv.setGrantEndDate(formatter.format(this.getGrantEndDate()));
+            cv.setGrantEndDate(this.getGrantEndDateAsString());
         }
         cv.setGroupID(this.getGroupID());
         if (this.getReviewDate() != null) {
-            cv.setReviewDate(formatter.format(this.getReviewDate()));
+            cv.setReviewDate(this.getReviewDateAsString());
         }
         if (this.getEstimate() != null) {
             cv.setEstimate(this.getEstimate().toString());
@@ -592,10 +621,8 @@ public class VaultInfo {
         // if vault owner is null set isowner to true
         // if vault owner is the same as the logged in user set isowner to true
         // if vault owner is different ot hte logged in user set to false
-        //logger.debug("Setting default isOwner");
         Boolean isOwner = true;
         if (this.getOwnerId() != null && ! this.getOwnerId().equals(this.getUserID())) {
-            //logger.debug("Changing default isOwner");
             isOwner = false;
         }
         cv.setIsOwner(isOwner);
@@ -608,5 +635,18 @@ public class VaultInfo {
         cv.setConfirmed(this.getConfirmed());
 
         return cv;
+    }
+
+    private Date plusOneDay(Date date) {
+        Date retVal = null;
+        if (date != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.add(Calendar.DATE, 1);
+            retVal =  cal.getTime();
+        }
+
+        return retVal;
+
     }
 }

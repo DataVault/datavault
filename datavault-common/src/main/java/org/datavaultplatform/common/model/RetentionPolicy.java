@@ -173,4 +173,10 @@ public class RetentionPolicy {
     public void setDataGuidanceReviewed(Date dataGuidanceReviewed) {
         this.dataGuidanceReviewed = dataGuidanceReviewed;
     }
+
+    public String getPolicyInfo() {
+        String retVal = "";
+        retVal = this.id + "-" + this.minRetentionPeriod;
+        return retVal;
+    }
 }
