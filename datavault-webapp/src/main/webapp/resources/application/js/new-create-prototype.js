@@ -111,6 +111,42 @@ $(document).ready(function(){
             $("#reviewDate").val(estimatedReviewDate);
         }
     }).trigger('change');
+    
+    $("#reviewDate").change(function() {
+    	var defaultLength = 3;
+    	var policyInfoString = $("#policyInfo option:selected").val();
+        var policyInfoArray = policyInfoString.split("-");
+    	var minReviewDatePeriod =  policyInfoArray[1] !== 0? policyInfoArray[1]: defaultLength;
+    	var now = new Date();
+    	
+    	console.log("minReviewDatePeriod: ", minReviewDatePeriod);
+    	console.log("now", now);
+    	
+    	var reviewDateString = $("#reviewDate").val();
+    	if(new Date(reviewDateString)) {
+    	  var reviewDate = new Date(reviewDateString);
+    	  console.log("reviewDate", reviewDate);
+    	  var diffYear = dateDiffInYears(now, reviewDate);
+    	  console.log("diffYear: ", diffYear);
+    	  console.log("diffYear < minReviewDatePeriod: ", diffYear < minReviewDatePeriod);
+    	  if(diffYear < minReviewDatePeriod) {
+    		  console.log("Invalid date: ", reviewDateString);
+    		// Add error message     
+    		var errorMessage = "Invalid Review Date as the date must be at least " + minReviewDatePeriod + " years in the future."
+    	    $(".invalid-review-date-span").text(errorMessage);
+    	  } else {
+    		// Clear Error text     
+      	    $(".invalid-review-date-span").text(""); 
+    	  }
+    	  
+    	} else {
+    		console.log("Invalid date format: ", reviewDateString);
+    		// Add error message     
+    		var errorMessage = "Invalid Review Date format it must be YYYY-MM-DD."
+    	    $(".invalid-review-date-span").text(errorMessage);
+    	}
+        
+    }).trigger('change');
 
     $("#affirmation-check").change(function(){
         $(this).parents("fieldset").children(".next").prop( "disabled", !$(this).is(":checked") );
@@ -128,7 +164,7 @@ $(document).ready(function(){
         // school
         var schoolResult = ($("#groupID option:selected").val() === '' || $("#groupID option:selected").prop("disabled"));
         // review date
-        var reviewResult = ($( "input[id=reviewDate]").val().trim() === '');
+        var reviewResult = ($( "input[id=reviewDate]").val().trim() === '' ||  $(".invalid-review-date-span").text().trim() !== '');
         if (nameResult === false && descResult === false && rpResult === false && schoolResult === false  && reviewResult === false) {
             $(this).parents("fieldset").children(".next").prop("disabled", false);
         } else {
@@ -607,5 +643,23 @@ $(document).ready(function(){
         }
 
         return length
+    }
+    
+    // Code from https://www.scriptol.com/javascript/dates-difference.php
+    function dateDiffInYears(dateold, datenew) {
+        var ynew = datenew.getFullYear();
+        var mnew = datenew.getMonth();
+        var dnew = datenew.getDate();
+        var yold = dateold.getFullYear();
+        var mold = dateold.getMonth();
+        var dold = dateold.getDate();
+        var diff = ynew - yold;
+        if (mold > mnew) diff--;
+        else {
+            if (mold == mnew) {
+                if (dold > dnew) diff--;
+            }
+        }
+        return diff;
     }
 });
