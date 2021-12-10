@@ -81,7 +81,7 @@ public class VaultsService {
         eventService.addEvent(vaultEvent);
     }
 
-    private void addRoleEvent(RoleAssignment ra, String userId, String assigneeId, String clientKey) {
+    private void addRoleEvent(RoleAssignment ra, String assigneeId, String clientKey) {
         CreateRoleAssignment roleAssignmentEvent = new CreateRoleAssignment(ra, assigneeId);
         roleAssignmentEvent.setVault(this.getVault(ra.getVaultId()));
         roleAssignmentEvent.setUser(usersService.getUser(assigneeId));
@@ -233,7 +233,7 @@ public class VaultsService {
                     logger.debug("Depositor + '" + dep + "'");
                     logger.debug("Owner + '" + createVault.getVaultOwner() + "'");
 
-                    this.addRoleEvent(ra, dep, createVault.getVaultOwner(), clientKey);
+                    this.addRoleEvent(ra, createVault.getVaultOwner(), clientKey);
                 }
             }
         }
@@ -254,7 +254,7 @@ public class VaultsService {
             ownerRoleAssignment.setRole(rolesAndPermissionsService.getDataOwner());
             rolesAndPermissionsService.createRoleAssignment(ownerRoleAssignment);
 
-            this.addRoleEvent(ownerRoleAssignment, ownerId, ownerId, clientKey);
+            this.addRoleEvent(ownerRoleAssignment, ownerId, clientKey);
         } else {
             // error!
         }
@@ -299,7 +299,7 @@ public class VaultsService {
                     logger.debug("NDMS + '" + ndm + "'");
                     logger.debug("Owner + '" + createVault.getVaultOwner() + "'");
 
-                    this.addRoleEvent(ra, ndm, createVault.getVaultOwner(), clientKey);
+                    this.addRoleEvent(ra, createVault.getVaultOwner(), clientKey);
                 }
             }
         }
