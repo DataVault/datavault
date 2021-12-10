@@ -43,6 +43,10 @@
         <property name="retentionPoliciesService" ref="retentionPoliciesService" />
         <property name="dataCreatorsService" ref="dataCreatorsService" />
         <property name="billingService" ref="billingService" />
+        <property name="usersService" ref="usersService" />
+        <property name="eventService" ref="eventService" />
+        <property name="clientsService" ref="clientsService" />
+        <property name="emailService" ref="emailService" />
     </bean>
 
     <bean id="pendingVaultsService" class="org.datavaultplatform.broker.services.PendingVaultsService">
