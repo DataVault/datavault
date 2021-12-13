@@ -95,6 +95,23 @@ public class VaultsService {
 
     public void sendVaultOwnerEmail(Vault vault, String homePage, String helpPage, User user) {
         // send mail to owner
+        this.sendEmail(vault, user.getEmail(), "A new vault you own has been created", "Owner",
+                "user-vault-create.vm", homePage, helpPage);
+    }
+
+    public void sendVaultDepositorsEmail(Vault vault, String homePage, String helpPage, User user) {
+        // send mail to depositor
+        this.sendEmail(vault, user.getEmail(), "A new vault you have a role on has been created", "Depositor",
+                "user-vault-create.vm", homePage, helpPage);
+    }
+
+    public void sendVaultNDMsEmail(Vault vault, String homePage, String helpPage, User user) {
+        // send mail to ndm
+        this.sendEmail(vault, user.getEmail(), "A new vault you have a role on has been created", "Nominated Data Manager",
+                "user-vault-create.vm", homePage, helpPage);
+    }
+
+    private void sendEmail(Vault vault, String email, String subject, String role, String template, String homePage, String helpPage) {
         HashMap<String, Object> model = new HashMap<String, Object>();
         model.put("homepage", homePage);
         model.put("helppage", helpPage);
@@ -102,8 +119,8 @@ public class VaultsService {
         model.put("group-name", vault.getGroup().getName());
         model.put("vault-id", vault.getID());
         model.put("vault-review-date", vault.getReviewDate());
-        model.put("role-name", "Owner");
-        emailService.sendTemplateMail(user.getEmail(), "A new vault you own has been created", "user-vault-create.vm", model);
+        model.put("role-name", role);
+        emailService.sendTemplateMail(email, subject, template, model);
     }
 
     public void orphanVault(Vault vault) {
@@ -218,7 +235,7 @@ public class VaultsService {
         rolesAndPermissionsService.createRoleAssignment(newDataOwnerAssignment);
     }
 
-    public void addDepositorRoles(CreateVault createVault, String vaultId, String clientKey) {
+    public void addDepositorRoles(CreateVault createVault, Vault vault, String clientKey, String homePage, String helpPage) {
 
         // if vault already has depositors delete them and readd
         List<String> depositors = createVault.getDepositors();
@@ -226,14 +243,13 @@ public class VaultsService {
             for (String dep: depositors) {
                 if (dep != null && ! dep.isEmpty()) {
                     RoleAssignment ra = new RoleAssignment();
-                    ra.setVaultId(vaultId);
+                    ra.setVaultId(vault.getID());
                     ra.setRole(rolesAndPermissionsService.getDepositor());
                     ra.setUserId(dep);
                     rolesAndPermissionsService.createRoleAssignment(ra);
-                    logger.debug("Depositor + '" + dep + "'");
-                    logger.debug("Owner + '" + createVault.getVaultOwner() + "'");
 
                     this.addRoleEvent(ra, createVault.getVaultOwner(), clientKey);
+                    this.sendVaultDepositorsEmail(vault, homePage, helpPage, usersService.getUser(dep));
                 }
             }
         }
@@ -241,12 +257,12 @@ public class VaultsService {
 
     public void addOwnerRole(CreateVault createVault, Vault vault, String userID, String clientKey) {
         Boolean isOwner = createVault.getIsOwner();
-        logger.debug("IsOwner is '" + isOwner + "'");
+
         String ownerId = userID;
         if (isOwner != null && !isOwner) {
             ownerId = createVault.getVaultOwner();
         }
-        logger.debug("VaultOwner is '" + ownerId + "'");
+
         if (ownerId != null) {
             RoleAssignment ownerRoleAssignment = new RoleAssignment();
             ownerRoleAssignment.setUserId(ownerId);
@@ -286,20 +302,18 @@ public class VaultsService {
         return vault;
     }
 
-    public void addNDMRoles(CreateVault createVault, String vaultId, String clientKey) {
+    public void addNDMRoles(CreateVault createVault, Vault vault, String clientKey, String homePage, String helpPage) {
         List<String> ndms = createVault.getNominatedDataManagers();
         if (ndms != null) {
             for (String ndm: ndms) {
                 if (ndm != null && !ndm.isEmpty()) {
                     RoleAssignment ra = new RoleAssignment();
-                    ra.setVaultId(vaultId);
+                    ra.setVaultId(vault.getID());
                     ra.setRole(rolesAndPermissionsService.getNominatedDataManager());
                     ra.setUserId(ndm);
                     rolesAndPermissionsService.createRoleAssignment(ra);
-                    logger.debug("NDMS + '" + ndm + "'");
-                    logger.debug("Owner + '" + createVault.getVaultOwner() + "'");
-
                     this.addRoleEvent(ra, createVault.getVaultOwner(), clientKey);
+                    this.sendVaultNDMsEmail(vault, homePage, helpPage, usersService.getUser(ndm));
                 }
             }
         }

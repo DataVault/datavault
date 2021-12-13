@@ -582,14 +582,13 @@ public class VaultsController {
         //pendingEvent.setAgentType(Agent.AgentType.BROKER);
         //pendingEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         vaultsService.addVaultEvent(vault, clientKey, userID);
-
-        vaultsService.addDepositorRoles(createVault, vault.getID(), clientKey);
-        // send mail to depositors
         vaultsService.addOwnerRole(createVault, vault, userID, clientKey);
         // send mail to owner
         vaultsService.sendVaultOwnerEmail(vault, homePage, helpPage, user);
+        vaultsService.addDepositorRoles(createVault, vault, clientKey, homePage, helpPage);
+        // send mail to depositors
         vault = vaultsService.processDataCreatorParams(createVault, vault);
-        vaultsService.addNDMRoles(createVault, vault.getID(),clientKey);
+        vaultsService.addNDMRoles(createVault, vault, clientKey, homePage, helpPage);
         // send mail to ndms
         vaultsService.addBillingInfo(createVault, vault);
 
