@@ -77,7 +77,8 @@
             <@spring.bind "vault.reviewDate" />
             <input class="form-control" id="reviewDate" placeholder="yyyy-mm-dd" name="${spring.status.expression}"
                    value="${spring.status.value!""}"/>
-                   <span class="invalid-review-date-span" style="color: #f00; display: inline;"></span>
+                    <span id="updated-review-date-span" style="font-size: 1.2em; font: bold; color: #0f0; display: inline;"></span>
+                   <span id="invalid-review-date-span" style="font-size: 1.2em; font: bold; color: #f00; display: inline;"></span>
         </div>
 
         <div class="form-group required">

@@ -109,18 +109,34 @@ $(document).ready(function(){
             }
 
             $("#reviewDate").val(estimatedReviewDate);
+            
+         // Clear Error text and update message 
+      	    $("#invalid-review-date-span").text(""); 
+            var reviewDateUpdatedMsg = "Note the Review Date has been updated based on your selections.";
+            $("#updated-review-date-span").text(reviewDateUpdatedMsg);
+            
         }
     }).trigger('change');
     
     $("#reviewDate").change(function() {
     	var defaultLength = 3;
+    	var minReviewDatePeriod = defaultLength;
     	var policyInfoString = $("#policyInfo option:selected").val();
-        var policyInfoArray = policyInfoString.split("-");
-    	var minReviewDatePeriod =  policyInfoArray[1] !== 0? policyInfoArray[1]: defaultLength;
+    	if(policyInfoString && policyInfoString.split("-")[1] && 
+    			Number.isInteger(policyInfoString.split("-")[1]) && 
+    			policyInfoString.split("-")[1] > 0) {
+    		var policyInfoArray = policyInfoString.split("-");
+    		minReviewDatePeriod =  policyInfoArray[1];
+    	}
+    	
     	var now = new Date();
     	
     	console.log("minReviewDatePeriod: ", minReviewDatePeriod);
     	console.log("now", now);
+    	
+    	// Clear old messages beside the review date
+    	$("#updated-review-date-span").text("");
+    	$("#invalid-review-date-span").text(""); 
     	
     	var reviewDateString = $("#reviewDate").val();
     	if(new Date(reviewDateString)) {
@@ -133,17 +149,17 @@ $(document).ready(function(){
     		  console.log("Invalid date: ", reviewDateString);
     		// Add error message     
     		var errorMessage = "Invalid Review Date as the date must be at least " + minReviewDatePeriod + " years in the future."
-    	    $(".invalid-review-date-span").text(errorMessage);
+    		$("#invalid-review-date-span").text(errorMessage); 
     	  } else {
     		// Clear Error text     
-      	    $(".invalid-review-date-span").text(""); 
+      	    $("#invalid-review-date-span").text(""); 
     	  }
     	  
     	} else {
     		console.log("Invalid date format: ", reviewDateString);
     		// Add error message     
     		var errorMessage = "Invalid Review Date format it must be YYYY-MM-DD."
-    	    $(".invalid-review-date-span").text(errorMessage);
+    	    $("#invalid-review-date-span").text(errorMessage);
     	}
         
     }).trigger('change');
@@ -164,7 +180,7 @@ $(document).ready(function(){
         // school
         var schoolResult = ($("#groupID option:selected").val() === '' || $("#groupID option:selected").prop("disabled"));
         // review date
-        var reviewResult = ($( "input[id=reviewDate]").val().trim() === '' ||  $(".invalid-review-date-span").text().trim() !== '');
+        var reviewResult = ($( "input[id=reviewDate]").val().trim() === '' ||  $("#invalid-review-date-span").text().trim() !== '');
         if (nameResult === false && descResult === false && rpResult === false && schoolResult === false  && reviewResult === false) {
             $(this).parents("fieldset").children(".next").prop("disabled", false);
         } else {
