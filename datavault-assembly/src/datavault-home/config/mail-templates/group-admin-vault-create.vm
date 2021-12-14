@@ -1,0 +1,14 @@
+<html>
+<body>
+<p>A new vault is now ready to use.</p>
+
+<p>Vault info:</p>
+<ul>
+    <li>Vault name: ${vault-name}</li>
+    <li>School: ${group-name}</li>
+    <li>Vault ID: ${vault-id}</li>
+    <li>Review date: ${vault-review-date}</li>
+    <li>Role: ${role-name}</li>
+</ul>
+</body>
+</html>
