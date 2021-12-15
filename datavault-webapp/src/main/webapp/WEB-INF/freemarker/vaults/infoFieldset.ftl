@@ -58,8 +58,9 @@
                     <select id="policyInfo" name="policyInfo" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick">
                         <option selected disabled data-hidden="true">Please choose a retention policy</option>
                         <#list policies as retentionPolicy>
-                            <option value="${retentionPolicy.getID()}-${retentionPolicy.minRetentionPeriod}" <#if vault.policyInfo??>${(vault.policyInfo == retentionPolicy.getPolicyInfo())?then('selected', 'true')}</#if>
-                                    data-subtext="( Minimum period: ${retentionPolicy.minRetentionPeriod?html} )">${retentionPolicy.name?html}</option>
+                            <option value="${retentionPolicy.getID()}-${retentionPolicy.minRetentionPeriod}" 
+                            <#if vault.policyInfo??>${(vault.policyInfo == retentionPolicy.getPolicyInfo())?then('selected', 'true')}</#if>
+                            >${retentionPolicy.name?html} (Minimum period: ${retentionPolicy.minRetentionPeriod?html})</option>
                         </#list>
                     </select>
                 </div>
@@ -76,6 +77,8 @@
             <@spring.bind "vault.reviewDate" />
             <input class="form-control" id="reviewDate" placeholder="yyyy-mm-dd" name="${spring.status.expression}"
                    value="${spring.status.value!""}"/>
+                    <span id="updated-review-date-span" style="font-size: 1.2em; font: bold; color: #0f0; display: inline;"></span>
+                   <span id="invalid-review-date-span" style="font-size: 1.2em; font: bold; color: #f00; display: inline;"></span>
         </div>
 
         <div class="form-group required">
