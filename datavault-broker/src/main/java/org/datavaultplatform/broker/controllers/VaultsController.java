@@ -572,13 +572,8 @@ public class VaultsController {
             vault.setGrantEndDate(null);
         }
 
-        vaultsService.addVault(vault);
-        vaultsService.addDepositorRoles(createVault, vault.getID());
-        vaultsService.addOwnerRole(createVault, vault.getID(), userID);
-        vault = vaultsService.processDataCreatorParams(createVault, vault);
-        vaultsService.addNDMRoles(createVault, vault.getID());
-        vaultsService.addBillingInfo(createVault, vault);
 
+        vaultsService.addVault(vault);
         // TODO: Add new Pending Vault created event that includes the creators name as that will be lost when the vault is upgraded
         //Pending pendingEvent = new Pending(createVault.getPendingID());
         //pendingEvent.setVault(vault);
@@ -586,14 +581,16 @@ public class VaultsController {
         //pendingEvent.setUser(usersService.getUser(createVault.get);
         //pendingEvent.setAgentType(Agent.AgentType.BROKER);
         //pendingEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
-
-        //eventService.addEvent(pendingEvent);
-        Create vaultEvent = new Create(vault.getID());
-        vaultEvent.setVault(vault);
-        vaultEvent.setUser(usersService.getUser(userID));
-        vaultEvent.setAgentType(Agent.AgentType.BROKER);
-        vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
-        eventService.addEvent(vaultEvent);
+        vaultsService.addVaultEvent(vault, clientKey, userID);
+        vaultsService.addOwnerRole(createVault, vault, userID, clientKey);
+        // send mail to owner
+        vaultsService.sendVaultOwnerEmail(vault, homePage, helpPage, user);
+        vaultsService.addDepositorRoles(createVault, vault, clientKey, homePage, helpPage);
+        // send mail to depositors
+        vault = vaultsService.processDataCreatorParams(createVault, vault);
+        vaultsService.addNDMRoles(createVault, vault, clientKey, homePage, helpPage);
+        // send mail to ndms
+        vaultsService.addBillingInfo(createVault, vault);
 
         // Check the retention policy of the newly created vault
         try {
