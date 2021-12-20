@@ -367,6 +367,14 @@ $(document).ready(function(){
 
         //Add Class Active
         $("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
+        // Add aria-* attributes to progress bar
+       
+        var currentProgressText = $("#progressbar > li.active").last().attr("data-progress-text");
+        var currentProgressValue = $("#progressbar > li.active").last().attr("data-progress-value");
+        console.log("currentProgressText: ", currentProgressText);
+        console.log("currentProgressValue: ", currentProgressValue);
+        $("#progressbar").attr("aria-valuetext", currentProgressText);
+        $("#progressbar").attr("aria-valuenow", currentProgressValue);
 
         //show the next fieldset
         next_fs.show();

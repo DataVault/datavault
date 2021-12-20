@@ -126,7 +126,7 @@
 
 #progressbar li.active:before,
 #progressbar li.active:after {
-    background: skyblue
+    background: #046B99;
 }
 
 #billing-selection-box {
