@@ -381,7 +381,7 @@ $(document).ready(function(){
         //hide the current fieldset with style
         current_fs.animate({opacity: 0}, {
             step: function(now) {
-                // for making fielset appear animation
+                // for making fieldset appear animation
                 opacity = 1 - now;
 
                 current_fs.css({
@@ -411,7 +411,7 @@ $(document).ready(function(){
         //hide the current fieldset with style
         current_fs.animate({opacity: 0}, {
             step: function(now) {
-                // for making fielset appear animation
+                // for making fieldset appear animation
                 opacity = 1 - now;
 
                 current_fs.css({
@@ -432,6 +432,24 @@ $(document).ready(function(){
     $('button[type="submit"]').on("click", function() {
         $('#submitAction').val($(this).attr('value'));
     });
+    
+    // If PV is confirmed go to last page
+    if($('#confirmed').val() === 'true') {
+    	// We need to populate the summary page with data from other fielset pages
+    	populateSummaryPage();
+    	// Set the Progress
+    	$("#progressbar li").eq(1).addClass("active");
+    	$("#progressbar li").eq(2).addClass("active");
+    	$("#progressbar li").eq(3).addClass("active");
+    	$("#progressbar li").eq(4).addClass("active");
+    	
+    	// Hide the previous button on Summary page and disable Pure link checkbox
+    	$('#summary-fieldset').find('.previous').hide();
+    	$('#pureLink-check').prop("disabled", true);
+    	// Show Summary page and hide the Affirmation page we first land on
+    	$('#summary-fieldset').show();
+    	$('#affirmation-fieldset').hide();
+    }
     
     function validateBillingNA() {
     	console.log("called validateBillingNAFields");
