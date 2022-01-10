@@ -7,3 +7,30 @@
     background-color: #337ab7;
     border-color: #337ab7;
 }
+
+/* Overriding Edgel defaults for better Accessibility contrast */
+
+body {
+	color: #000;
+}
+
+.h3, .h4, .h5, .h6, h3, h4, h5, h6 {
+    color: #000;
+}
+
+p {
+	color: #000;
+}
+
+.small, cite, small {
+   color: #000;
+}
+
+/* A more accessible blue link http://web-accessibility.carnegiemuseums.org/design/color/ */
+a {
+	color: #0071bc;
+}
+
+.text-muted {
+	color: #000;
+}
