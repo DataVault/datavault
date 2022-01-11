@@ -631,8 +631,10 @@ public class VaultsController {
         vault.setNominatedDataManagers(ndms);
         vault.setDepositors(deps);
         vault.setCreator(creator);
-        logger.debug("Vault Policy ID is '" + vault.getRetentionPolicy().getID());
-        logger.debug("Vault Policy length is '" + vault.getRetentionPolicy().getMinRetentionPeriod());
+        if (vault.getRetentionPolicy() != null) {
+            logger.debug("Vault Policy ID is '" + vault.getRetentionPolicy().getID());
+            logger.debug("Vault Policy length is '" + vault.getRetentionPolicy().getMinRetentionPeriod());
+        }
 
         if (vault != null) {
             VaultInfo retVal = vault.convertToResponse();
