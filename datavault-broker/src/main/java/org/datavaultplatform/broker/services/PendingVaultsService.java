@@ -267,7 +267,7 @@ public class PendingVaultsService {
             }
         }
 
-        String policyId = createVault.getPolicyInfo().split("-")[0];
+        String policyId = (createVault.getPolicyInfo() != null) ? createVault.getPolicyInfo().split("-")[0] : null;
         logger.debug("Retention policy id is: '" + policyId + "'");
         if (policyId != null) {
             RetentionPolicy retentionPolicy = retentionPoliciesService.getPolicy(policyId);
