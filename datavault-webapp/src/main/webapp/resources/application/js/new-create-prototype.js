@@ -115,7 +115,7 @@ $(document).ready(function(){
     	var policyInfoString = $("#policyInfo option:selected").val();
         var policyInfoArray = policyInfoString.split("-");
 
-        if (policyInfoString !== '' && policyInfoArray[1] !== '') {
+        if (policyInfoString !== '' && policyInfoArray[1] !== '' && policyInfoArray[1] > defaultLength) {
             console.log("Setting minReviewDatePeriod", policyInfoArray[1]);
     		minReviewDatePeriod =  policyInfoArray[1];
     	}
