@@ -67,20 +67,11 @@ $(document).ready(function(){
             var billingGedMm = String(billingGedDate.getMonth() + 1).padStart(2, '0');
             var billingGedDd = String(billingGedDate.getDate()).padStart(2, '0');
             var defaultLength = 3;
-            var policyInfoString = $("#policyInfo option:selected").val();
-            //alert("policy info string:'" + policyInfoString + "'");
-            var policyInfoArray = policyInfoString.split("-");
-            // need to get this from the policy somehow!  10 is just a mock value
-            var policyLength = defaultLength;
-            if (noRP === false && policyInfoString !== '' && policyInfoArray[1] !== '') {
-                policyLength = parseInt(policyInfoArray[1], 10);
-            }
+            var policyLength = calculateReviewLength();
+
             var today = new Date();
             var dd = String(today.getDate()).padStart(2, '0');
             var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0
-            //var yyyy = String(today.getFullYear() + 3);
-
-            //var estimatedReviewDate = yyyy + '-' + mm + '-' + dd;
             var estimatedReviewDate = calculateReviewDateForToday(defaultLength);
 
             if (noRP === false && noGED === false) {
@@ -122,10 +113,10 @@ $(document).ready(function(){
     	var defaultLength = 3;
     	var minReviewDatePeriod = defaultLength;
     	var policyInfoString = $("#policyInfo option:selected").val();
-    	if(policyInfoString && policyInfoString.split("-")[1] && 
-    			Number.isInteger(policyInfoString.split("-")[1]) && 
-    			policyInfoString.split("-")[1] > 0) {
-    		var policyInfoArray = policyInfoString.split("-");
+        var policyInfoArray = policyInfoString.split("-");
+
+        if (policyInfoString !== '' && policyInfoArray[1] !== '' && policyInfoArray[1] > defaultLength) {
+            console.log("Setting minReviewDatePeriod", policyInfoArray[1]);
     		minReviewDatePeriod =  policyInfoArray[1];
     	}
     	
@@ -381,7 +372,7 @@ $(document).ready(function(){
         //hide the current fieldset with style
         current_fs.animate({opacity: 0}, {
             step: function(now) {
-                // for making fielset appear animation
+                // for making fieldset appear animation
                 opacity = 1 - now;
 
                 current_fs.css({
@@ -411,7 +402,7 @@ $(document).ready(function(){
         //hide the current fieldset with style
         current_fs.animate({opacity: 0}, {
             step: function(now) {
-                // for making fielset appear animation
+                // for making fieldset appear animation
                 opacity = 1 - now;
 
                 current_fs.css({
@@ -432,6 +423,24 @@ $(document).ready(function(){
     $('button[type="submit"]').on("click", function() {
         $('#submitAction').val($(this).attr('value'));
     });
+    
+    // If PV is confirmed go to last page
+    if($('#confirmed').val() === 'true') {
+    	// We need to populate the summary page with data from other fielset pages
+    	populateSummaryPage();
+    	// Set the Progress
+    	$("#progressbar li").eq(1).addClass("active");
+    	$("#progressbar li").eq(2).addClass("active");
+    	$("#progressbar li").eq(3).addClass("active");
+    	$("#progressbar li").eq(4).addClass("active");
+    	
+    	// Hide the previous button on Summary page and disable Pure link checkbox
+    	$('#summary-fieldset').find('.previous').hide();
+    	$('#pureLink-check').prop("disabled", true);
+    	// Show Summary page and hide the Affirmation page we first land on
+    	$('#summary-fieldset').show();
+    	$('#affirmation-fieldset').hide();
+    }
     
     function validateBillingNA() {
     	console.log("called validateBillingNAFields");
@@ -663,7 +672,10 @@ $(document).ready(function(){
         var policyInfoArray = policyInfoString.split("-");
 
         if (noRP === false && policyInfoString !== '' && policyInfoArray[1] !== '') {
-            length = parseInt(policyInfoArray[1], 10);
+            var policyLength = parseInt(policyInfoArray[1], 10);
+            if (policyLength > length) {
+                length = policyLength;
+            }
         }
 
         return length

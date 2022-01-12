@@ -1,4 +1,4 @@
-<fieldset>
+<fieldset id="affirmation-fieldset">
     <div class="form-card">
         <p>
             We need some information about your new Vault. You can save your progress at any time before completing this form.

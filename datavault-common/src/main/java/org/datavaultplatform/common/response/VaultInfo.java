@@ -579,26 +579,27 @@ public class VaultInfo {
         cv.setAffirmed(this.getAffirmed());
         if (this.getBillingType() != null) {
             cv.setBillingType(this.getBillingType().toString());
-        }
-        if (this.getBillingType().equals(PendingVault.Billing_Type.SLICE)) {
-            cv.setSliceID(this.getSliceID());
-        }
 
-        if (this.getBillingType().equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
-            cv.setGrantAuthoriser(this.getAuthoriser());
-            cv.setGrantSchoolOrUnit(this.getSchoolOrUnit());
-            cv.setGrantSubunit(this.getSubunit());
-            cv.setProjectTitle(this.getProjectTitle());
-
-            if (this.getGrantEndDate() != null) {
-                cv.setBillingGrantEndDate(this.getGrantEndDateAsString());
+            if (this.getBillingType().equals(PendingVault.Billing_Type.SLICE)) {
+                cv.setSliceID(this.getSliceID());
             }
-        }
 
-        if (this.getBillingType().equals(PendingVault.Billing_Type.BUDGET_CODE)) {
-            cv.setBudgetAuthoriser(this.getAuthoriser());
-            cv.setBudgetSchoolOrUnit(this.getSchoolOrUnit());
-            cv.setBudgetSubunit(this.getSubunit());
+            if (this.getBillingType().equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
+                cv.setGrantAuthoriser(this.getAuthoriser());
+                cv.setGrantSchoolOrUnit(this.getSchoolOrUnit());
+                cv.setGrantSubunit(this.getSubunit());
+                cv.setProjectTitle(this.getProjectTitle());
+
+                if (this.getGrantEndDate() != null) {
+                    cv.setBillingGrantEndDate(this.getGrantEndDateAsString());
+                }
+            }
+
+            if (this.getBillingType().equals(PendingVault.Billing_Type.BUDGET_CODE)) {
+                cv.setBudgetAuthoriser(this.getAuthoriser());
+                cv.setBudgetSchoolOrUnit(this.getSchoolOrUnit());
+                cv.setBudgetSubunit(this.getSubunit());
+            }
         }
 
         cv.setName(this.getName());

@@ -3,6 +3,7 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang.StringUtils;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
@@ -18,6 +19,8 @@ import java.util.List;
 @Table(name="PendingVaults")
 public class PendingVault {
     private static final long ZERO = 0l;
+    
+    private static String DEFAULT_PENDING_VAULT_NAME = "*** UNNAMED VAULT ***";
 
     public enum Estimate {
         UNDER_100GB,
@@ -174,7 +177,7 @@ public class PendingVault {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = StringUtils.isBlank(name)? DEFAULT_PENDING_VAULT_NAME : name;
     }
 
     public String getName() { return name; }

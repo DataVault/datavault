@@ -267,7 +267,7 @@ public class PendingVaultsService {
             }
         }
 
-        String policyId = createVault.getPolicyInfo().split("-")[0];
+        String policyId = (createVault.getPolicyInfo() != null) ? createVault.getPolicyInfo().split("-")[0] : null;
         logger.debug("Retention policy id is: '" + policyId + "'");
         if (policyId != null) {
             RetentionPolicy retentionPolicy = retentionPoliciesService.getPolicy(policyId);
@@ -296,49 +296,51 @@ public class PendingVaultsService {
             vault.setSliceID(sliceID);
         }
 
-        if (vault.getBillingType().equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
-            String authoriser = createVault.getGrantAuthoriser();
-            logger.debug("Authoriser is: '" + authoriser + "'");
-            if (authoriser != null) {
-                vault.setAuthoriser(authoriser);
+        if (vault.getBillingType() != null) {
+            if (vault.getBillingType().equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
+                String authoriser = createVault.getGrantAuthoriser();
+                logger.debug("Authoriser is: '" + authoriser + "'");
+                if (authoriser != null) {
+                    vault.setAuthoriser(authoriser);
+                }
+
+                String schoolOrUnit = createVault.getGrantSchoolOrUnit();
+                logger.debug("schoolOrUnit is: '" + schoolOrUnit + "'");
+                if (schoolOrUnit != null) {
+                    vault.setSchoolOrUnit(schoolOrUnit);
+                }
+
+                String subunit = createVault.getGrantSubunit();
+                logger.debug("Subunit is: '" + subunit + "'");
+                if (subunit != null) {
+                    vault.setSubunit(subunit);
+                }
+
+                String projectTitle = createVault.getProjectTitle();
+                logger.debug("ProjectTitle is: '" + projectTitle + "'");
+                if (projectTitle != null) {
+                    vault.setProjectTitle(projectTitle);
+                }
             }
 
-            String schoolOrUnit = createVault.getGrantSchoolOrUnit();
-            logger.debug("schoolOrUnit is: '" + schoolOrUnit + "'");
-            if (schoolOrUnit != null) {
-                vault.setSchoolOrUnit(schoolOrUnit);
-            }
+            if (vault.getBillingType().equals(PendingVault.Billing_Type.BUDGET_CODE)) {
+                String authoriser = createVault.getBudgetAuthoriser();
+                logger.debug("Authoriser is: '" + authoriser + "'");
+                if (authoriser != null) {
+                    vault.setAuthoriser(authoriser);
+                }
 
-            String subunit = createVault.getGrantSubunit();
-            logger.debug("Subunit is: '" + subunit + "'");
-            if (subunit != null) {
-                vault.setSubunit(subunit);
-            }
+                String schoolOrUnit = createVault.getBudgetSchoolOrUnit();
+                logger.debug("schoolOrUnit is: '" + schoolOrUnit + "'");
+                if (schoolOrUnit != null) {
+                    vault.setSchoolOrUnit(schoolOrUnit);
+                }
 
-            String projectTitle = createVault.getProjectTitle();
-            logger.debug("ProjectTitle is: '" + projectTitle + "'");
-            if (projectTitle != null) {
-                vault.setProjectTitle(projectTitle);
-            }
-        }
-
-        if (vault.getBillingType().equals(PendingVault.Billing_Type.BUDGET_CODE)) {
-            String authoriser = createVault.getBudgetAuthoriser();
-            logger.debug("Authoriser is: '" + authoriser + "'");
-            if (authoriser != null) {
-                vault.setAuthoriser(authoriser);
-            }
-
-            String schoolOrUnit = createVault.getBudgetSchoolOrUnit();
-            logger.debug("schoolOrUnit is: '" + schoolOrUnit + "'");
-            if (schoolOrUnit != null) {
-                vault.setSchoolOrUnit(schoolOrUnit);
-            }
-
-            String subunit = createVault.getBudgetSubunit();
-            logger.debug("Subunit is: '" + subunit + "'");
-            if (subunit != null) {
-                vault.setSubunit(subunit);
+                String subunit = createVault.getBudgetSubunit();
+                logger.debug("Subunit is: '" + subunit + "'");
+                if (subunit != null) {
+                    vault.setSubunit(subunit);
+                }
             }
         }
 
