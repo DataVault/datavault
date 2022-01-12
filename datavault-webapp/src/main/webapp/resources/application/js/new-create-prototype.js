@@ -67,20 +67,11 @@ $(document).ready(function(){
             var billingGedMm = String(billingGedDate.getMonth() + 1).padStart(2, '0');
             var billingGedDd = String(billingGedDate.getDate()).padStart(2, '0');
             var defaultLength = 3;
-            var policyInfoString = $("#policyInfo option:selected").val();
-            //alert("policy info string:'" + policyInfoString + "'");
-            var policyInfoArray = policyInfoString.split("-");
-            // need to get this from the policy somehow!  10 is just a mock value
-            var policyLength = defaultLength;
-            if (noRP === false && policyInfoString !== '' && policyInfoArray[1] !== '') {
-                policyLength = parseInt(policyInfoArray[1], 10);
-            }
+            var policyLength = calculateReviewLength();
+
             var today = new Date();
             var dd = String(today.getDate()).padStart(2, '0');
             var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0
-            //var yyyy = String(today.getFullYear() + 3);
-
-            //var estimatedReviewDate = yyyy + '-' + mm + '-' + dd;
             var estimatedReviewDate = calculateReviewDateForToday(defaultLength);
 
             if (noRP === false && noGED === false) {
@@ -122,10 +113,10 @@ $(document).ready(function(){
     	var defaultLength = 3;
     	var minReviewDatePeriod = defaultLength;
     	var policyInfoString = $("#policyInfo option:selected").val();
-    	if(policyInfoString && policyInfoString.split("-")[1] && 
-    			Number.isInteger(policyInfoString.split("-")[1]) && 
-    			policyInfoString.split("-")[1] > 0) {
-    		var policyInfoArray = policyInfoString.split("-");
+        var policyInfoArray = policyInfoString.split("-");
+
+        if (policyInfoString !== '' && policyInfoArray[1] !== '' && policyInfoArray[1] > defaultLength) {
+            console.log("Setting minReviewDatePeriod", policyInfoArray[1]);
     		minReviewDatePeriod =  policyInfoArray[1];
     	}
     	
@@ -681,7 +672,10 @@ $(document).ready(function(){
         var policyInfoArray = policyInfoString.split("-");
 
         if (noRP === false && policyInfoString !== '' && policyInfoArray[1] !== '') {
-            length = parseInt(policyInfoArray[1], 10);
+            var policyLength = parseInt(policyInfoArray[1], 10);
+            if (policyLength > length) {
+                length = policyLength;
+            }
         }
 
         return length
