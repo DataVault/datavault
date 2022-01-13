@@ -123,7 +123,10 @@ public class AdminPendingVaultsController {
         logger.info("pendingVault.id:'" + pendingVault.getID() + "'");
         model.addAttribute("pendingVault", pendingVault);
         
-        CreateRetentionPolicy createRetentionPolicy = restService.getRetentionPolicy(pendingVault.getPolicyID());
+        CreateRetentionPolicy createRetentionPolicy = null;
+        if (pendingVault.getPolicyID() != null) {
+            createRetentionPolicy = restService.getRetentionPolicy(pendingVault.getPolicyID());
+        }
         model.addAttribute("createRetentionPolicy", createRetentionPolicy);
         
         Group group = restService.getGroup(pendingVault.getGroupID());
