@@ -5,26 +5,13 @@ import java.security.Principal;
 import java.text.DateFormat;
 import java.text.ParseException; 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.DataManager;
-import org.datavaultplatform.common.model.DepositReview;
-import org.datavaultplatform.common.model.PendingVault;
-import org.datavaultplatform.common.model.RetentionPolicy;
-import org.datavaultplatform.common.model.Retrieve;
-import org.datavaultplatform.common.model.RoleAssignment;
-import org.datavaultplatform.common.model.RoleModel;
-import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.VaultReview;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.datavaultplatform.common.response.DepositInfo;
@@ -82,19 +69,36 @@ public class AdminPendingVaultsController {
         int offset = (pageId-1) * MAX_RECORDS_PER_PAGE;
 
         VaultsData filteredVaultsData = restService.searchPendingVaults(query, sort, order, offset, MAX_RECORDS_PER_PAGE);
-        int filteredRecordsTotal = filteredVaultsData.getRecordsFiltered();
-        int numberOfPages = (int)Math.ceil((double)filteredRecordsTotal/MAX_RECORDS_PER_PAGE);
-        model.addAttribute("numberOfPages", numberOfPages);
-        model.addAttribute("pendingVaults", filteredVaultsData.getData());
+        //int filteredRecordsTotal = filteredVaultsData.getRecordsFiltered();
+        List<VaultInfo> confirmedPv = filteredVaultsData.getData().stream().filter(pv->pv.getConfirmed()).collect(Collectors.toList());
+        List<VaultInfo> savedPv = filteredVaultsData.getData().stream().filter(pv->!pv.getConfirmed()).collect(Collectors.toList());
+        int numberOfSavedPages = (int)Math.ceil((double)savedPv.size()/MAX_RECORDS_PER_PAGE);
+        int numberOfConfirmedPages = (int)Math.ceil((double)confirmedPv.size()/MAX_RECORDS_PER_PAGE);
+        model.addAttribute("numberOfSavedPages", numberOfSavedPages);
+        model.addAttribute("numberOfConfirmedPages", numberOfConfirmedPages);
+        model.addAttribute("confirmedPendingVaults", confirmedPv);
+        model.addAttribute("savedPendingVaults", savedPv);
         model.addAttribute("query", query);
 
         boolean isFiltered = query != null  && !query.equals("");
-        model.addAttribute("recordsInfo",
+        model.addAttribute("confirmedRecordsInfo",
                 constructTableRecordsInfo(
                         offset,
-                        filteredVaultsData.getRecordsTotal(),
-                        filteredRecordsTotal,
-                        filteredVaultsData.getData().size(),
+                        //filteredVaultsData.getRecordsTotal(),
+                        //filteredRecordsTotal,
+                        //filteredVaultsData.getData().size(),
+                        confirmedPv.size(),
+                        confirmedPv.size(),
+                        confirmedPv.size(),
+                        isFiltered
+                ) );
+
+        model.addAttribute("savedRecordsInfo",
+                constructTableRecordsInfo(
+                        offset,
+                        savedPv.size(),
+                        savedPv.size(),
+                        savedPv.size(),
                         isFiltered
                 ) );
 
