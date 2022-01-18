@@ -136,10 +136,24 @@ public class AdminPendingVaultsController {
     }
 
     @RequestMapping(value = "/admin/pendingVaults/upgrade/{pendingVaultId}", method = RequestMethod.GET)
-    public String upgradeVault(@PathVariable("pendingVaultId") String pendingVaultID) {
+    public String upgradeVault(@PathVariable("pendingVaultId") String pendingVaultID,
+    		                   @RequestParam("reviewDate") String reviewDateString) {
         // need to either pass in create vault or get vaultnfo from the pending id param
         // and convert it to create vault object like in VaultController.getPendingVault
-        VaultInfo pendingVault = restService.getPendingVault(pendingVaultID);
+    	Date reviewDate = null;
+		try {
+			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			reviewDate = formatter.parse(reviewDateString);
+
+		} catch(ParseException pe ) {
+			logger.info("Parse error: " + pe);
+		}
+		VaultInfo pendingVault = restService.getPendingVault(pendingVaultID);
+		// We compare date strings as both will be in format yyyy-MM-dd, 
+		// as date comparision can be problematic
+		if(reviewDate != null && !pendingVault.getReviewDateAsString().equals(reviewDateString) ){
+			pendingVault.setReviewDate(reviewDate);
+		}
         CreateVault cv = pendingVault.convertToCreate();
         logger.info("Attempting to upgrade pending vault to full vault");
         VaultInfo newVault = restService.addVault(cv);

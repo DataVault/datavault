@@ -1,6 +1,7 @@
 <#import "*/layout/defaultlayout.ftl" as layout>
 <#-- Specify which navbar element should be flagged as active -->
 <#global nav="admin">
+<#import "/spring.ftl" as spring />
 <#assign sec=JspTaglibs["http://www.springframework.org/security/tags"] />
 <@layout.vaultLayout>
 
@@ -103,9 +104,8 @@
 		<tr>
 			<th scope="col">Review Date</th>
 			<td>
-              <#if (pendingVault.getReviewDate())??>
-                ${pendingVault.getReviewDateAsString()}
-              </#if>
+                <input class="form-control" id="reviewDate" placeholder="yyyy-mm-dd" name="reviewDate"
+                     value="${pendingVault.getReviewDateAsString()}"/>
             </td>
 		</tr>
 		<tr>
@@ -271,6 +271,8 @@
 </div>                        
 </div>
 
+<!-- Custom javascript -->
+<script src="<@spring.url '/resources/application/js/admin-pending-vault-summary.js'/>"></script>
 </@layout.vaultLayout>
        
   
