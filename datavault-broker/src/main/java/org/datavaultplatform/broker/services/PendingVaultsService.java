@@ -92,8 +92,8 @@ public class PendingVaultsService {
     }
 
     
-    public List<PendingVault> search(String userId, String query, String sort, String order, String offset, String maxResult) {
-        return this.pendingVaultDAO.search(userId, query, sort, order, offset, maxResult);
+    public List<PendingVault> search(String userId, String query, String sort, String order, String offset, String maxResult, String confirmed) {
+        return this.pendingVaultDAO.search(userId, query, sort, order, offset, maxResult, confirmed);
     }
 
     public int count(String userId) {

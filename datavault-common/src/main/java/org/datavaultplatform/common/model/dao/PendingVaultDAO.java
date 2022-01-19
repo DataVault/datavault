@@ -16,7 +16,7 @@ public interface PendingVaultDAO {
 
     public List<PendingVault> list(String userId, String sort, String order, String offset, String maxResult);
 
-    public List<PendingVault> search(String userId, String query, String sort, String order, String offset, String maxResult);
+    public List<PendingVault> search(String userId, String query, String sort, String order, String offset, String maxResult, String confirmed);
 
     public int count(String userId);
     

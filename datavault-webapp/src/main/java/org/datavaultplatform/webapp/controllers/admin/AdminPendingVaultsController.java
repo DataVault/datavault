@@ -68,37 +68,22 @@ public class AdminPendingVaultsController {
         // calculate offset which is passed to the service to fetch records from that row Id
         int offset = (pageId-1) * MAX_RECORDS_PER_PAGE;
 
-        VaultsData filteredVaultsData = restService.searchPendingVaults(query, sort, order, offset, MAX_RECORDS_PER_PAGE);
-        //int filteredRecordsTotal = filteredVaultsData.getRecordsFiltered();
-        List<VaultInfo> confirmedPv = filteredVaultsData.getData().stream().filter(pv->pv.getConfirmed()).collect(Collectors.toList());
-        List<VaultInfo> savedPv = filteredVaultsData.getData().stream().filter(pv->!pv.getConfirmed()).collect(Collectors.toList());
-        int numberOfSavedPages = (int)Math.ceil((double)savedPv.size()/MAX_RECORDS_PER_PAGE);
-        int numberOfConfirmedPages = (int)Math.ceil((double)confirmedPv.size()/MAX_RECORDS_PER_PAGE);
-        model.addAttribute("numberOfSavedPages", numberOfSavedPages);
-        model.addAttribute("numberOfConfirmedPages", numberOfConfirmedPages);
-        model.addAttribute("confirmedPendingVaults", confirmedPv);
-        model.addAttribute("savedPendingVaults", savedPv);
+        VaultsData filteredVaultsData = restService.searchPendingVaults(query, sort, order, offset, MAX_RECORDS_PER_PAGE, null);
+        int filteredRecordsTotal = filteredVaultsData.getRecordsFiltered();
+        int numberOfPages = (int)Math.ceil((double)filteredRecordsTotal/MAX_RECORDS_PER_PAGE);
+        model.addAttribute("numberOfPages", numberOfPages);
+        model.addAttribute("pendingVaults", filteredVaultsData.getData());
+
         model.addAttribute("query", query);
 
         boolean isFiltered = query != null  && !query.equals("");
-        model.addAttribute("confirmedRecordsInfo",
+        model.addAttribute("recordsInfo",
                 constructTableRecordsInfo(
                         offset,
-                        //filteredVaultsData.getRecordsTotal(),
-                        //filteredRecordsTotal,
-                        //filteredVaultsData.getData().size(),
-                        confirmedPv.size(),
-                        confirmedPv.size(),
-                        confirmedPv.size(),
-                        isFiltered
-                ) );
+                        filteredVaultsData.getRecordsTotal(),
+                        filteredRecordsTotal,
+                        filteredVaultsData.getData().size(),
 
-        model.addAttribute("savedRecordsInfo",
-                constructTableRecordsInfo(
-                        offset,
-                        savedPv.size(),
-                        savedPv.size(),
-                        savedPv.size(),
                         isFiltered
                 ) );
 
@@ -109,14 +94,92 @@ public class AdminPendingVaultsController {
 
         String otherOrder = order.equals("asc")?"desc":"asc";
         model.addAttribute("ordername", "name".equals(sort)?otherOrder:"asc");
-//        model.addAttribute("ordervaultsize", "vaultSize".equals(sort)?otherOrder:"asc");
-//        model.addAttribute("orderuser", "user".equals(sort)?otherOrder:"asc");
-//        model.addAttribute("orderGroupId", "groupID".equals(sort)?otherOrder:"asc");
-//        model.addAttribute("orderCrisId", "crisID".equals(sort)?otherOrder:"asc");
-//        model.addAttribute("orderreviewDate", "reviewDate".equals(sort)?otherOrder:"asc");
-//        model.addAttribute("ordercreationtime", "creationTime".equals(sort)?otherOrder:"asc");
 
         return "admin/pendingVaults/index";
+    }
+
+    @RequestMapping(value = "/admin/pendingVaults/saved", method = RequestMethod.GET)
+    public String searchSavedPendingVaults(ModelMap model,
+                                      @RequestParam(value = "query", defaultValue = "") String query,
+                                      @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
+                                      @RequestParam(value = "order", defaultValue = "desc") String order,
+                                      @RequestParam(value = "pageId", defaultValue = "1") int pageId) throws Exception {
+
+        model.addAttribute("activePageId", pageId);
+
+        // calculate offset which is passed to the service to fetch records from that row Id
+        int offset = (pageId-1) * MAX_RECORDS_PER_PAGE;
+
+        VaultsData filteredVaultsData = restService.searchPendingVaults(query, sort, order, offset, MAX_RECORDS_PER_PAGE, false);
+        int filteredRecordsTotal = filteredVaultsData.getRecordsFiltered();
+        int numberOfPages = (int)Math.ceil((double)filteredRecordsTotal/MAX_RECORDS_PER_PAGE);
+        model.addAttribute("numberOfPages", numberOfPages);
+        model.addAttribute("pendingVaults", filteredVaultsData.getData());
+
+        model.addAttribute("query", query);
+
+        boolean isFiltered = query != null  && !query.equals("");
+        model.addAttribute("recordsInfo",
+                constructTableRecordsInfo(
+                        offset,
+                        filteredVaultsData.getRecordsTotal(),
+                        filteredRecordsTotal,
+                        filteredVaultsData.getData().size(),
+
+                        isFiltered
+                ) );
+
+        // Pass the sort and order
+        if (sort == null) sort = "";
+        model.addAttribute("sort", sort);
+        model.addAttribute("order", order);
+
+        String otherOrder = order.equals("asc")?"desc":"asc";
+        model.addAttribute("ordername", "name".equals(sort)?otherOrder:"asc");
+
+        return "admin/pendingVaults/saved";
+    }
+
+    @RequestMapping(value = "/admin/pendingVaults/confirmed", method = RequestMethod.GET)
+    public String searchConfirmedPendingVaults(ModelMap model,
+                                      @RequestParam(value = "query", defaultValue = "") String query,
+                                      @RequestParam(value = "sort", defaultValue = "creationTime") String sort,
+                                      @RequestParam(value = "order", defaultValue = "desc") String order,
+                                      @RequestParam(value = "pageId", defaultValue = "1") int pageId) throws Exception {
+
+        model.addAttribute("activePageId", pageId);
+
+        // calculate offset which is passed to the service to fetch records from that row Id
+        int offset = (pageId-1) * MAX_RECORDS_PER_PAGE;
+
+        VaultsData filteredVaultsData = restService.searchPendingVaults(query, sort, order, offset, MAX_RECORDS_PER_PAGE, true);
+        int filteredRecordsTotal = filteredVaultsData.getRecordsFiltered();
+        int numberOfPages = (int)Math.ceil((double)filteredRecordsTotal/MAX_RECORDS_PER_PAGE);
+        model.addAttribute("numberOfPages", numberOfPages);
+        model.addAttribute("pendingVaults", filteredVaultsData.getData());
+
+        model.addAttribute("query", query);
+
+        boolean isFiltered = query != null  && !query.equals("");
+        model.addAttribute("recordsInfo",
+                constructTableRecordsInfo(
+                        offset,
+                        filteredVaultsData.getRecordsTotal(),
+                        filteredRecordsTotal,
+                        filteredVaultsData.getData().size(),
+
+                        isFiltered
+                ) );
+
+        // Pass the sort and order
+        if (sort == null) sort = "";
+        model.addAttribute("sort", sort);
+        model.addAttribute("order", order);
+
+        String otherOrder = order.equals("asc")?"desc":"asc";
+        model.addAttribute("ordername", "name".equals(sort)?otherOrder:"asc");
+
+        return "admin/pendingVaults/confirmed";
     }
     
     

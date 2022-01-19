@@ -139,7 +139,7 @@ public class PendingVaultDAOImpl implements PendingVaultDAO {
     
     @SuppressWarnings("unchecked")
     @Override
-    public List<PendingVault> search(String userId, String query, String sort, String order, String offset, String maxResult) {
+    public List<PendingVault> search(String userId, String query, String sort, String order, String offset, String maxResult, String confirmed) {
         Session session = this.sessionFactory.openSession();
         SchoolPermissionCriteriaBuilder criteriaBuilder = createPendingVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
         if (criteriaBuilder.hasNoAccess()) {
@@ -151,6 +151,13 @@ public class PendingVaultDAOImpl implements PendingVaultDAO {
                     Restrictions.ilike("id", "%" + query + "%"),
                     Restrictions.ilike("name", "%" + query + "%"),
                     Restrictions.ilike("description", "%" + query + "%")));
+        }
+        System.out.println("Confirmed: " + confirmed);
+        if (confirmed != null && ! confirmed.equals("null") && ! confirmed.equals("")){
+            System.out.println("Confirmed: " + confirmed);
+            Boolean conf = new Boolean(confirmed);
+            System.out.println("Setting confirmed criteria: " + conf);
+            criteria.add(Restrictions.eq("confirmed", conf));
         }
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 

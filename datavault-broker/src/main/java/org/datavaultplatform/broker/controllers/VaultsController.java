@@ -333,13 +333,15 @@ public class VaultsController {
                                       @ApiQueryParam(name = "order", description = "Vault sort order", allowedvalues = {"asc", "desc"}, defaultvalue = "asc", required = false) String order,
                                       @RequestParam(value = "offset", required = false)
                                       @ApiQueryParam(name = "offset", description = "Vault row id ", defaultvalue = "0", required = false) String offset,
+                                      @RequestParam(value = "confirmed", required = false)
+                                      @ApiQueryParam(name = "confirmed", description = "True = confirmed records only, false saved ones and null all", required = false) String confirmed,
                                       @RequestParam(value = "maxResult", required = false)
                                       @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) {
 
         List<VaultInfo> vaultResponses = new ArrayList<>();
         int recordsTotal = 0;
         int recordsFiltered = 0;
-        List<PendingVault> vaults = pendingVaultsService.search(userID, query, sort, order, offset, maxResult);
+        List<PendingVault> vaults = pendingVaultsService.search(userID, query, sort, order, offset, maxResult, confirmed);
         if(CollectionUtils.isNotEmpty(vaults)) {
             for (PendingVault vault : vaults) {
             	User owner = permissionsService.getPendingVaultOwner(vault.getId());
