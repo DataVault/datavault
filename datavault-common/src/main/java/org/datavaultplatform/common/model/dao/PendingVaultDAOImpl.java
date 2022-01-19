@@ -102,13 +102,17 @@ public class PendingVaultDAOImpl implements PendingVaultDAO {
     }
     
     @Override
-	public int getTotalNumberOfPendingVaults(String userId) {
+	public int getTotalNumberOfPendingVaults(String userId, String confirmed) {
 		Session session = this.sessionFactory.openSession();
         SchoolPermissionCriteriaBuilder criteriaBuilder = createPendingVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
         if (criteriaBuilder.hasNoAccess()) {
             return 0;
         }
         Criteria criteria = criteriaBuilder.build();
+        if (confirmed != null && ! confirmed.equals("null") && ! confirmed.equals("")){
+            Boolean conf = new Boolean(confirmed);
+            criteria.add(Restrictions.eq("confirmed", conf));
+        }
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         criteria.setProjection(Projections.rowCount());
         int totalNumberOfVaults = ((Long) criteria.uniqueResult()).intValue();
@@ -120,7 +124,7 @@ public class PendingVaultDAOImpl implements PendingVaultDAO {
 	 * Retrieve Total NUmber of rows after applying the filter
 	 */
 	@Override
-	public int getTotalNumberOfPendingVaults(String userId, String query) {
+	public int getTotalNumberOfPendingVaults(String userId, String query, String confirmed) {
 		Session session = this.sessionFactory.openSession();
         SchoolPermissionCriteriaBuilder criteriaBuilder = createPendingVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
         if (criteriaBuilder.hasNoAccess()) {
@@ -129,6 +133,10 @@ public class PendingVaultDAOImpl implements PendingVaultDAO {
         Criteria criteria = criteriaBuilder.build();
         if (query != null && !query.equals("")) {
             criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
+        }
+        if (confirmed != null && ! confirmed.equals("null") && ! confirmed.equals("")){
+            Boolean conf = new Boolean(confirmed);
+            criteria.add(Restrictions.eq("confirmed", conf));
         }
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         criteria.setProjection(Projections.rowCount());
@@ -152,11 +160,9 @@ public class PendingVaultDAOImpl implements PendingVaultDAO {
                     Restrictions.ilike("name", "%" + query + "%"),
                     Restrictions.ilike("description", "%" + query + "%")));
         }
-        System.out.println("Confirmed: " + confirmed);
+
         if (confirmed != null && ! confirmed.equals("null") && ! confirmed.equals("")){
-            System.out.println("Confirmed: " + confirmed);
             Boolean conf = new Boolean(confirmed);
-            System.out.println("Setting confirmed criteria: " + conf);
             criteria.add(Restrictions.eq("confirmed", conf));
         }
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);

@@ -20,9 +20,9 @@ public interface PendingVaultDAO {
 
     public int count(String userId);
     
-    public int getTotalNumberOfPendingVaults(String userId);
+    public int getTotalNumberOfPendingVaults(String userId, String confirmed);
 
-	public int getTotalNumberOfPendingVaults(String userId, String query);
+	public int getTotalNumberOfPendingVaults(String userId, String query, String confirmed);
 
     public void deleteById(String Id);
 }

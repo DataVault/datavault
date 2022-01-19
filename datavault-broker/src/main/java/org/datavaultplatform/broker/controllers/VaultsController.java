@@ -358,8 +358,8 @@ public class VaultsController {
                 vaultResponses.add(vaultInfo);
             }
 
-            recordsTotal = pendingVaultsService.getTotalNumberOfPendingVaults(userID);
-            recordsFiltered = pendingVaultsService.getTotalNumberOfPendingVaults(userID, query);
+            recordsTotal = pendingVaultsService.getTotalNumberOfPendingVaults(userID, confirmed);
+            recordsFiltered = pendingVaultsService.getTotalNumberOfPendingVaults(userID, query, confirmed);
         }
 
         VaultsData data = new VaultsData();

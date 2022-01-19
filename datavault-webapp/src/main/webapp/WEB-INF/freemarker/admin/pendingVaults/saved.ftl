@@ -82,7 +82,7 @@
                     <ul class="pagination pagination-lg" id="paginationButton">
                         <#list 1..numberOfPages as page>
                             <li <#if page == activePageId>class="page-item active"<#else>class="page-item"</#if> id="${page}">
-                                <a class="page-link" href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults?sort=${sort}&order=${order}&pageId=${page}&query=${query}" tabindex="-1">${page}</a>
+                                <a class="page-link" href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/saved?sort=${sort}&order=${order}&pageId=${page}&query=${query}" tabindex="-1">${page}</a>
                             </li>
                         </#list>
                     </ul>

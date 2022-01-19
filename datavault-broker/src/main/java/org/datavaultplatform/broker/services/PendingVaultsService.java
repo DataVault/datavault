@@ -77,8 +77,8 @@ public class PendingVaultsService {
         return pendingVaultDAO.findById(vaultID);
     }
     
-    public int getTotalNumberOfPendingVaults(String userId) {
-        return pendingVaultDAO.getTotalNumberOfPendingVaults(userId);
+    public int getTotalNumberOfPendingVaults(String userId, String confirmed) {
+        return pendingVaultDAO.getTotalNumberOfPendingVaults(userId, confirmed);
     }
 
     /**
@@ -87,8 +87,8 @@ public class PendingVaultsService {
      * @param query
      * @return
      */
-    public int getTotalNumberOfPendingVaults(String userId, String query) {
-        return pendingVaultDAO.getTotalNumberOfPendingVaults(userId, query);
+    public int getTotalNumberOfPendingVaults(String userId, String query, String confirmed) {
+        return pendingVaultDAO.getTotalNumberOfPendingVaults(userId, query, confirmed);
     }
 
     
