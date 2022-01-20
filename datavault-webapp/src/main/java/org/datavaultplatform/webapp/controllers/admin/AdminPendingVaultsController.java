@@ -23,7 +23,7 @@ public class AdminPendingVaultsController {
 
 	private static final Logger logger = LoggerFactory.getLogger(AdminPendingVaultsController.class);
 
-	private static final int MAX_RECORDS_PER_PAGE = 5;
+	private static final int MAX_RECORDS_PER_PAGE = 10;
 
     private RestService restService;
 
