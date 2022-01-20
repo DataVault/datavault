@@ -389,7 +389,7 @@ public class VaultInfo {
         String retVal = "";
         if (this.getReviewDate() != null) {
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            retVal = formatter.format(this.plusOneDay(this.getReviewDate()));
+            retVal = formatter.format(this.getReviewDate());
         }
         return retVal;
     }
