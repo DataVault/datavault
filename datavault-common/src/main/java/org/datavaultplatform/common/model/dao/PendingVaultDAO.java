@@ -16,13 +16,13 @@ public interface PendingVaultDAO {
 
     public List<PendingVault> list(String userId, String sort, String order, String offset, String maxResult);
 
-    public List<PendingVault> search(String userId, String query, String sort, String order, String offset, String maxResult);
+    public List<PendingVault> search(String userId, String query, String sort, String order, String offset, String maxResult, String confirmed);
 
     public int count(String userId);
     
-    public int getTotalNumberOfPendingVaults(String userId);
+    public int getTotalNumberOfPendingVaults(String userId, String confirmed);
 
-	public int getTotalNumberOfPendingVaults(String userId, String query);
+	public int getTotalNumberOfPendingVaults(String userId, String query, String confirmed);
 
     public void deleteById(String Id);
 }

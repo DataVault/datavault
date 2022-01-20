@@ -236,8 +236,8 @@ public class RestService {
         return (Long)response.getBody();
     }
     
-    public VaultsData searchPendingVaults(String query, String sort, String order, int offset, int maxResult) {
-        HttpEntity<?> response = get(brokerURL + "/pendingVaults/search?query=" + query + "&sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
+    public VaultsData searchPendingVaults(String query, String sort, String order, int offset, int maxResult, Boolean confirmed) {
+        HttpEntity<?> response = get(brokerURL + "/pendingVaults/search?query=" + query + "&sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult + "&confirmed=" + confirmed, VaultsData.class);
         return (VaultsData)response.getBody();
     }
     
