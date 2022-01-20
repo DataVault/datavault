@@ -7,7 +7,8 @@
 
         <ol class="breadcrumb">
             <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
-            <li class="active"><b>Pending Vaults</b></li>
+            <li><a href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults"><b>Pending Vaults</b></a></li>
+            <li class="active"><b>Saved Pending Vaults</b></li>
         </ol>
 
         <h1>Saved Pending Vaults</h1>

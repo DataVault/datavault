@@ -2,51 +2,27 @@ package org.datavaultplatform.webapp.controllers.admin;
 
 
 import java.security.Principal;
-import java.text.DateFormat;
-import java.text.ParseException; 
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang.RandomStringUtils;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
-import org.datavaultplatform.common.response.DepositInfo;
-import org.datavaultplatform.common.response.EventInfo;
-import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
-import org.datavaultplatform.common.util.RoleUtils;
-import org.datavaultplatform.webapp.exception.ForbiddenException;
-import org.datavaultplatform.webapp.model.DepositReviewModel;
-import org.datavaultplatform.webapp.model.VaultReviewHistoryModel;
-import org.datavaultplatform.webapp.model.VaultReviewModel;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.supercsv.io.CsvBeanWriter;
-import org.supercsv.io.ICsvBeanWriter;
-import org.supercsv.prefs.CsvPreference;
 
 
 @Controller
 public class AdminPendingVaultsController {
 
 	private static final Logger logger = LoggerFactory.getLogger(AdminPendingVaultsController.class);
-	
-	private static final String _0 = "0";
+
 	private static final int MAX_RECORDS_PER_PAGE = 5;
 
     private RestService restService;
@@ -68,32 +44,12 @@ public class AdminPendingVaultsController {
         // calculate offset which is passed to the service to fetch records from that row Id
         int offset = (pageId-1) * MAX_RECORDS_PER_PAGE;
 
-        VaultsData filteredVaultsData = restService.searchPendingVaults(query, sort, order, offset, MAX_RECORDS_PER_PAGE, null);
-        int filteredRecordsTotal = filteredVaultsData.getRecordsFiltered();
-        int numberOfPages = (int)Math.ceil((double)filteredRecordsTotal/MAX_RECORDS_PER_PAGE);
-        model.addAttribute("numberOfPages", numberOfPages);
-        model.addAttribute("pendingVaults", filteredVaultsData.getData());
-
-        model.addAttribute("query", query);
-
-        boolean isFiltered = query != null  && !query.equals("");
-        model.addAttribute("recordsInfo",
-                constructTableRecordsInfo(
-                        offset,
-                        filteredVaultsData.getRecordsTotal(),
-                        filteredRecordsTotal,
-                        filteredVaultsData.getData().size(),
-
-                        isFiltered
-                ) );
-
-        // Pass the sort and order
-        if (sort == null) sort = "";
-        model.addAttribute("sort", sort);
-        model.addAttribute("order", order);
-
-        String otherOrder = order.equals("asc")?"desc":"asc";
-        model.addAttribute("ordername", "name".equals(sort)?otherOrder:"asc");
+        VaultsData savedVaultsData = restService.searchPendingVaults(query, sort, order, offset, MAX_RECORDS_PER_PAGE, false);
+        VaultsData confirmedVaultsData = restService.searchPendingVaults(query, sort, order, offset, MAX_RECORDS_PER_PAGE, true);
+        int savedRecordsTotal = savedVaultsData.getRecordsFiltered();
+        int confirmedRecordsTotal = confirmedVaultsData.getRecordsFiltered();
+        model.addAttribute("savedVaultsTotal", savedRecordsTotal);
+        model.addAttribute("confirmedVaultsTotal", confirmedRecordsTotal);
 
         return "admin/pendingVaults/index";
     }
@@ -112,30 +68,7 @@ public class AdminPendingVaultsController {
 
         VaultsData filteredVaultsData = restService.searchPendingVaults(query, sort, order, offset, MAX_RECORDS_PER_PAGE, false);
         int filteredRecordsTotal = filteredVaultsData.getRecordsFiltered();
-        int numberOfPages = (int)Math.ceil((double)filteredRecordsTotal/MAX_RECORDS_PER_PAGE);
-        model.addAttribute("numberOfPages", numberOfPages);
-        model.addAttribute("pendingVaults", filteredVaultsData.getData());
-
-        model.addAttribute("query", query);
-
-        boolean isFiltered = query != null  && !query.equals("");
-        model.addAttribute("recordsInfo",
-                constructTableRecordsInfo(
-                        offset,
-                        filteredVaultsData.getRecordsTotal(),
-                        filteredRecordsTotal,
-                        filteredVaultsData.getData().size(),
-
-                        isFiltered
-                ) );
-
-        // Pass the sort and order
-        if (sort == null) sort = "";
-        model.addAttribute("sort", sort);
-        model.addAttribute("order", order);
-
-        String otherOrder = order.equals("asc")?"desc":"asc";
-        model.addAttribute("ordername", "name".equals(sort)?otherOrder:"asc");
+        this.createModelMap(model,filteredRecordsTotal, filteredVaultsData, query, offset, sort, order);
 
         return "admin/pendingVaults/saved";
     }
@@ -154,6 +87,14 @@ public class AdminPendingVaultsController {
 
         VaultsData filteredVaultsData = restService.searchPendingVaults(query, sort, order, offset, MAX_RECORDS_PER_PAGE, true);
         int filteredRecordsTotal = filteredVaultsData.getRecordsFiltered();
+        this.createModelMap(model,filteredRecordsTotal, filteredVaultsData, query, offset, sort, order);
+
+        return "admin/pendingVaults/confirmed";
+    }
+
+    private ModelMap createModelMap(ModelMap model, int filteredRecordsTotal, VaultsData filteredVaultsData,
+                                    String query, int offset, String sort, String order) {
+
         int numberOfPages = (int)Math.ceil((double)filteredRecordsTotal/MAX_RECORDS_PER_PAGE);
         model.addAttribute("numberOfPages", numberOfPages);
         model.addAttribute("pendingVaults", filteredVaultsData.getData());
@@ -179,7 +120,7 @@ public class AdminPendingVaultsController {
         String otherOrder = order.equals("asc")?"desc":"asc";
         model.addAttribute("ordername", "name".equals(sort)?otherOrder:"asc");
 
-        return "admin/pendingVaults/confirmed";
+        return model;
     }
     
     
