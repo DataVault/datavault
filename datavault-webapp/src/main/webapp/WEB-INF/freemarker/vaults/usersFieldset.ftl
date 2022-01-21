@@ -32,7 +32,11 @@
         <!-- Start: NDMs -->
         <#assign ndmCount = 0>
         <div class="form-group">
-            <label class="col-sm-4 control-label">Nominated Data Managers: </label>
+            <label class="col-sm-4 control-label">Nominated Data Managers: 
+                <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
+                      title="Nominated Data Manager: Acting on behalf of the Data Owner, may view the vault, edit metadata fields, deposit data and retrieve any deposit in the vault. Can assign other users to the Depositor role.">
+                </span> 
+            </label>
         </div>
         
         <#if vault.nominatedDataManagers?has_content>
@@ -80,7 +84,11 @@
        <!-- Start: Depositors -->
         <#assign depositorCount = 0>
         <div class="form-group">
-          <label class="col-sm-4 control-label">Depositors: </label>
+          <label class="col-sm-4 control-label">Depositors: 
+              <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
+                    title="Depositor: Acting on behalf of the Data Owner, may view the vault, deposit data and retrieve any deposit in the vault.">
+              </span>
+          </label>
         </div>
         
         <#if vault.depositors?has_content>

@@ -168,6 +168,11 @@ public class ValidateService {
                     .isBefore(LocalDate.parse(this.getDefaultReviewDate(length), DateTimeFormatter.ofPattern("yyyy-MM-dd")))) {
                 retVal.add("Review Date for selected policy is required to be at least " + length + " years");
             }
+
+            if (LocalDate.parse(reviewDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    .isAfter(LocalDate.parse(this.getMaxReviewDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd")))) {
+                retVal.add("Review Date for selected policy is required to be less than 30 years in the future");
+            }
         }
 
         return retVal;
@@ -198,14 +203,18 @@ public class ValidateService {
         Calendar cal = Calendar.getInstance();
         cal.setTimeZone(TimeZone.getTimeZone("Europe/London"));
         cal.add(Calendar.YEAR, length);
-        Date todayPlus3Years = cal.getTime();
+        Date todayPlusXYears = cal.getTime();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        retVal = formatter.format(todayPlus3Years);
+        retVal = formatter.format(todayPlusXYears);
 
         return retVal;
     }
 
     public String getDefaultReviewDate() {
         return this.getDefaultReviewDate(3);
+    }
+
+    public String getMaxReviewDate() {
+        return this.getDefaultReviewDate(30);
     }
 }
