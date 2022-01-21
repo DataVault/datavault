@@ -9,12 +9,19 @@ $(document).ready(function(){
         return e.keyCode != 13;
     });
 
+    var todayForDatepicker = new Date();
+    todayForDatepicker.setHours(0,0,0,0);
+    var _30YearsFromToday= new Date();
+    _30YearsFromToday.setFullYear(_30YearsFromToday.getFullYear() + 30);
+    
     $.datepicker.setDefaults({
         dateFormat: "yy-mm-dd",
         changeMonth: true,
         changeYear: true,
         showOtherMonths: true,
-        selectOtherMonths: true
+        selectOtherMonths: true,
+        minDate: todayForDatepicker,
+    	maxDate: _30YearsFromToday
     });
 
     $( "#grantEndDate" ).datepicker();
