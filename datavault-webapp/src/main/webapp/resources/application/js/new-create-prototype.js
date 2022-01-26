@@ -26,7 +26,7 @@ $(document).ready(function(){
 	$( "#grantEndDate" ).datepicker();
 	$( "#billingGrantEndDate" ).datepicker();
 	$( "#reviewDate" ).datepicker({
-		minDate: '+1m'
+		minDate: '+36m'
 	});
 
 	/*
@@ -42,7 +42,7 @@ $(document).ready(function(){
 			var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
 
 			if (dateResult === false && grantChecked === true) {
-				var validationMessage = validateDateString($("#billingGrantEndDate").val().trim());
+				var validationMessage = validateDateString($("#billingGrantEndDate").val().trim(), "Grant End Date");
 				if (validationMessage != "") {
 					$('#invalid-billing-grant-end-date-span').text(validationMessage);
 				}
@@ -65,7 +65,7 @@ $(document).ready(function(){
 	$("#billingGrantEndDate, #grantEndDate, #policyInfo").change(function(){
 		// if the ged changes update the suggested review date
 		if($("#grantEndDate").val().trim() !== '') {
-			var grantEndDateValidationMessage = validateDateString($("#grantEndDate").val().trim());
+			var grantEndDateValidationMessage = validateDateString($("#grantEndDate").val().trim(), "Grant End Date");
 			$('#invalid-grant-end-date-span').text(grantEndDateValidationMessage);
 		} else {
 			// clear any validation
@@ -152,7 +152,7 @@ $(document).ready(function(){
 
 		var reviewDateString = $("#reviewDate").val().trim();
 		console.log("reviewDateString", reviewDateString);
-		var validationMessage = validateReviewDateString(reviewDateString);
+		var validationMessage = validateReviewDateString(reviewDateString, minReviewDatePeriod);
 
 		if(validationMessage.trim() !== '') {
 			console.log(validationMessage);

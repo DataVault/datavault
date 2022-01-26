@@ -44,8 +44,8 @@ function dateDiffInYears(d1, d2) {
 	return diff;
 }
 
-
-function validateDateString(dateString, startNumOfMonthsInFuture = 0) {
+// Note textforDateNameInMsg and startYearsInFuture are optional parameters in function.
+function validateDateString(dateString, textforDateNameInMsg = "Date", startYearsInFuture = 0, ) {
 	// Regex for format yyyy-mm-dd
 	var date_regex =  /^([2]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$/;
 	var matchDate = dateString.match(date_regex);
@@ -54,7 +54,7 @@ function validateDateString(dateString, startNumOfMonthsInFuture = 0) {
 	console.log("validateDateString: ", dateString, "matchDate: ", matchDate);
 
 	if(matchDate === null) {
-		msg = "Invalid date format, it must be yyyy-mm-dd, e.g., 2027-02-03."
+		msg = "Invalid Date format, it must be yyyy-mm-dd, e.g., 2030-02-03."
 	} else {
 		var today = new Date();
 		var dateToValidate = new Date(dateString);
@@ -64,29 +64,31 @@ function validateDateString(dateString, startNumOfMonthsInFuture = 0) {
 		console.log("differenceInYears: ", differenceInYears);
 
 		if (differenceInDays < 0) {
-			msg = "Invalid date, it must be in the future.";
+			msg = "Invalid " + textforDateNameInMsg + ", it must be in the future.";
 		} else if (differenceInYears > 30) {
-			msg = "Invalid date, it must be less than 30 years in the future.";
-		} else {
-			var differenceInMonths = dateDiffInMonths(today, dateToValidate);
-			console.log("differenceInMonths: ", differenceInMonths);
-
-			if(differenceInMonths < startNumOfMonthsInFuture) {
-				if (startNumOfMonthsInFuture === 0) {
-					// It should not get here as this should be dealt with above
-					msg = "Invalid date, it must be in the future.";
-				} else if (startNumOfMonthsInFuture === 1) {
-					msg = "Invalid date, it must be 1 month in the future.";
-				} else if (startNumOfMonthsInFuture > 1 ) {
-					msg = "Invalid date, it must be " +  startNumOfMonthsInFuture + "months in the future.";
-				}
-			}   
+			msg = "Invalid " + textforDateNameInMsg + ", it  must be less than 30 years in the future.";
+		} else if (differenceInYears < startYearsInFuture) {
+			msg = "Invalid " + textforDateNameInMsg + ", it  must be " +  startYearsInFuture + " years in the future.";   
 		}
 	}
 	return msg;
 }
 
-function validateReviewDateString(dateString) {
-	return validateDateString(dateString, 1);
+//Use in PV Creation by User
+function validateReviewDateString(dateString, minReviewDatePeriodFromRetentionPolicy) {
+	var textforDateNameInMsg = "Review Date";
+	// It must be 3  years in future.
+	if(minReviewDatePeriodFromRetentionPolicy <= 3) {
+		return validateDateString(dateString, textforDateNameInMsg, 3);
+	} else {
+		return validateDateString(dateString, textforDateNameInMsg, minReviewDatePeriodFromRetentionPolicy);
+	}
 }
+
+//Used by Admin 
+function validateAdminCurationReviewDateString(dateString) {
+	var textforDateNameInMsg = "Review Date";
+	return validateDateString(dateString, 0, textforDateNameInMsg);
+}
+
 
