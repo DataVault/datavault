@@ -568,6 +568,7 @@ public class Deposit extends Task {
 	private void calculateTotalDepositSize(Context context) {
 		// Calculate the total deposit size of selected files
 		long depositTotalSize = 0;
+		logger.info("Calculating Total Deposit Size");
 		for (String filePath : fileStorePaths) {
 			String storageID = filePath.substring(0, filePath.indexOf('/'));
 			String storagePath = filePath.substring(filePath.indexOf('/') + 1);
@@ -575,6 +576,7 @@ public class Deposit extends Task {
 			try {
 				UserStore userStore = userStores.get(storageID);
 				depositTotalSize += userStore.getSize(storagePath);
+				logger.info("Total Deposit size currently: " + depositTotalSize);
 			} catch (Exception e) {
 				String msg = "Deposit failed: could not access user filesystem";
 				logger.error(msg, e);
@@ -587,6 +589,7 @@ public class Deposit extends Task {
 //		depositTotalSize += this.calculateUserUploads(depositTotalSize, context);
 
 		// Store the calculated deposit size
+        logger.info("Final Total Deposit size: " + depositTotalSize);
         eventStream.send(new ComputedSize(jobID, depositId, depositTotalSize)
             .withUserId(userID));
 	}
