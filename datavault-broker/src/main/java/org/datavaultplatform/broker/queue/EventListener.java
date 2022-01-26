@@ -182,11 +182,13 @@ public class EventListener implements MessageListener {
                 Boolean success = false;
                 while (!success) {
                     try {
+                        logger.info("Setting Deposit Size from computedSizeEvent to: " + computedSizeEvent.getBytes());
                         deposit.setSize(computedSizeEvent.getBytes());
                         depositsService.updateDeposit(deposit);
                         success = true;
                     } catch (org.hibernate.StaleObjectStateException e) {
                         // Refresh from database and retry
+                        logger.info("Refresh from DB and retry");
                         deposit = depositsService.getDeposit(concreteEvent.getDepositId());
                     }
                 }
