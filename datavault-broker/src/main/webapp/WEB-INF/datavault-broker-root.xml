@@ -70,6 +70,9 @@
         <property name="vaultReviewDAO" ref="vaultReviewDAO" />
     </bean>
 
+    <bean id="vaultsPureService" class="org.datavaultplatform.broker.services.VaultsPureService">
+    </bean>
+
     <bean id="depositsReviewService" class="org.datavaultplatform.broker.services.DepositsReviewService">
         <property name="depositReviewDAO" ref="depositReviewDAO" />
     </bean>
@@ -242,6 +245,12 @@
         <property name="helpMail" value="${help.mail}"/>
     </bean>
 
+    <bean id="checkForPure" class="org.datavaultplatform.broker.scheduled.CheckForPure">
+        <property name="vaultsService" ref="vaultsService" />
+        <property name="vaultsPureService" ref="vaultsPureService" />
+        <property name="emailService" ref="emailService" />
+    </bean>
+
     <bean id="checkForDelete" class="org.datavaultplatform.broker.scheduled.CheckForDelete">
         <property name="vaultsService" ref="vaultsService" />
         <property name="vaultsReviewService" ref="vaultsReviewService" />
@@ -379,6 +388,7 @@
     </task:scheduled-tasks>
 
     <task:scheduled-tasks scheduler="scheduler">
+        <task:scheduled ref="checkForPure" method="checkAll" cron="${pure.schedule}" />
         <task:scheduled ref="checkForReview" method="checkAll" cron="${review.schedule}" />
         <task:scheduled ref="checkForDelete" method="checkAll" cron="${delete.schedule}" />
     </task:scheduled-tasks>
