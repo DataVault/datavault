@@ -568,27 +568,44 @@ public class Deposit extends Task {
 	private void calculateTotalDepositSize(Context context) {
 		// Calculate the total deposit size of selected files
 		long depositTotalSize = 0;
-		for (String filePath : fileStorePaths) {
-			String storageID = filePath.substring(0, filePath.indexOf('/'));
-			String storagePath = filePath.substring(filePath.indexOf('/') + 1);
 
-			try {
-				UserStore userStore = userStores.get(storageID);
-				depositTotalSize += userStore.getSize(storagePath);
-			} catch (Exception e) {
-				String msg = "Deposit failed: could not access user filesystem";
-				logger.error(msg, e);
-				eventStream.send(new Error(jobID, depositId, msg).withUserId(userID));
-				throw new RuntimeException(e);
-			}
+        if (fileStorePaths != null && ! fileStorePaths.isEmpty()) {
+            for (String filePath : fileStorePaths) {
+                String storageID = filePath.substring(0, filePath.indexOf('/'));
+                String storagePath = filePath.substring(filePath.indexOf('/') + 1);
 
-		}
-		
+                try {
+                    UserStore userStore = userStores.get(storageID);
+                    long fileSize = userStore.getSize(storagePath);
+                    //logger.info("FileSize = '" + fileSize + "'");
+                    //if (fileSize == 0) {
+                    //    String msg = "Deposit failed: file size is 0";
+                    //    logger.error(msg);
+                    //    eventStream.send(new Error(jobID, depositId, msg).withUserId(userID));
+                    //    throw new RuntimeException(new Exception(msg));
+                    //}
+                    depositTotalSize += fileSize;
+
+                } catch (Exception e) {
+                    String msg = "Deposit failed: could not access user filesystem";
+                    logger.error(msg, e);
+                    eventStream.send(new Error(jobID, depositId, msg).withUserId(userID));
+                    throw new RuntimeException(e);
+                }
+
+            }
+
 //		depositTotalSize += this.calculateUserUploads(depositTotalSize, context);
-
-		// Store the calculated deposit size
-        eventStream.send(new ComputedSize(jobID, depositId, depositTotalSize)
-            .withUserId(userID));
+            // Store the calculated deposit size
+            eventStream.send(new ComputedSize(jobID, depositId, depositTotalSize)
+                    .withUserId(userID));
+        } else {
+            String msg = "Deposit failed: could not access local user filesystem";
+            Exception e = new Exception(msg);
+            logger.error(msg);
+            eventStream.send(new Error(jobID, depositId, msg).withUserId(userID));
+            throw new RuntimeException(e);
+        }
 	}
 
 	// TO REMOVE
