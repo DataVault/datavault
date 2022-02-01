@@ -132,7 +132,7 @@
                   Files larger than 5GB cannot be uploaded directly from your computer.
                 </div>
         
-                <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
+                <div class="flow-drop">
     
                     <div class="btn-toolbar">
                         <button type="button" class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage">
@@ -445,8 +445,8 @@
         // Keep track of uploaded directory names (top level only)
         var uploadDirs = {};
 
-        r.assignDrop($('.flow-drop')[0]);
-        r.assignBrowse($('.flow-browse')[0]);
+        //r.assignDrop($('.flow-drop')[0]);
+        //r.assignBrowse($('.flow-browse')[0]);
 
         // Handle file add event
         r.on('fileAdded', function(file){
