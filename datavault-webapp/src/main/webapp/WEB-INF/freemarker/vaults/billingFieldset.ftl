@@ -82,6 +82,7 @@
                         <@spring.bind "vault.billingGrantEndDate" />
                         <input id="billingGrantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd" name="${spring.status.expression}"
                                value="${spring.status.value!""}"/>
+                         <span id="invalid-billing-grant-end-date-span" style="font-size: 1.2em; font: bold; color: #f00; display: inline;"></span>
                     </div>
                 </div>
             </div>
