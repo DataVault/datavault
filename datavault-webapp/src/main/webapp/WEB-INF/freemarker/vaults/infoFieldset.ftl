@@ -35,6 +35,7 @@
             <@spring.bind "vault.grantEndDate" />
             <input id="grantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd" name="${spring.status.expression}"
                    value="${spring.status.value!""}"/>
+             <span id="invalid-grant-end-date-span" style="font-size: 1.2em; font: bold; color: #f00; display: inline;"></span>
         </div>
 
         <div class="alert alert-info" role="alert">
