@@ -397,9 +397,9 @@
                 'name': {
                     required: true
                 },
-                /*'depositPaths': {
+                'depositPaths': {
                     required: true
-                },*/
+                },
                 'hasPersonalData': {
                     required: true
                 },
