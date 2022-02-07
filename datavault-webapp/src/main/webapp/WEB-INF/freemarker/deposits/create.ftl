@@ -5,10 +5,8 @@
     <#import "/spring.ftl" as spring />
 
 <style>
-    /* Uploader: Drag & Drop */
-    .flow-error {display:none; font-size:14px; font-style:italic;}
+    /* Uploader: border */
     .flow-drop {padding:30px; font-size:13px; text-align:center; color:#666; font-weight:bold;background-color:#eee; border:2px dashed #aaa; border-radius:10px; z-index:9999;}
-    .flow-dragover {padding:30px; color:#555; background-color:#ddd; border:1px solid #999;}
 
     /* Uploader: List of items being uploaded */
     .uploader-item {width:148px; height:90px; background-color:#666; position:relative; border:2px solid black; float:left; margin:0 6px 6px 0;}
@@ -127,19 +125,11 @@
                        value="${spring.status.value!""}">
                 </select>
         
-                <div id="uploadMaxSizeAlert" class="alert alert-warning" role="alert" style="display:none;">
-                  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                  Files larger than 5GB cannot be uploaded directly from your computer.
-                </div>
-        
-                <div class="flow-drop" ondragenter="jQuery(this).addClass('flow-dragover');" ondragend="jQuery(this).removeClass('flow-dragover');" ondrop="jQuery(this).removeClass('flow-dragover');">
+                <div class="flow-drop">
     
                     <div class="btn-toolbar">
                         <button type="button" class="btn btn-default" href="#" data-toggle="modal" data-target="#add-from-storage">
                             <i class="fa fa-hdd-o" aria-hidden="true"></i> Data Storage (SFTP)
-                        </button>
-                        <button type="button" class="btn btn-default flow-browse hidden" data-toggle="tooltip" title="Maximum file size: 5GB">
-                            <i class="fa fa-laptop" aria-hidden="true"></i> My Computer
                         </button>
                     </div>
     
@@ -407,9 +397,9 @@
                 'name': {
                     required: true
                 },
-                /*'depositPaths': {
+                'depositPaths': {
                     required: true
-                },*/
+                },
                 'hasPersonalData': {
                     required: true
                 },
@@ -444,135 +434,6 @@
         $('[data-toggle="tooltip"]').tooltip({
             'placement': 'top'
         });
-
-        var r = new Flow({
-            target:'${springMacroRequestContext.getContextPath()}/fileupload',
-            query:{fileUploadHandle:$('.file-upload-handle').val()},
-            headers:{'${_csrf.headerName}': '${_csrf.token}'},
-            chunkSize:10*1024*1024,
-            testChunks: false,
-            maxChunkRetries:1
-        });
-    
-        // Keep track of uploaded directory names (top level only)
-        var uploadDirs = {};
-
-        r.assignDrop($('.flow-drop')[0]);
-        r.assignBrowse($('.flow-browse')[0]);
-
-        // Handle file add event
-        r.on('fileAdded', function(file){
-            // Prevent browser upload of large files (5GB)
-            if (file.size > (5 * 1024 * 1024 * 1024)) {
-                $('#uploadMaxSizeAlert').show();
-                return false;
-            }
-
-            // Show progress bar
-            $('.progress').show();
-
-            // Prevent completion of deposit
-            $('#deposit-submit-btn').prop('disabled', true);
-
-            // Add the file to the list
-            $("#upload-tree").show();
-     
-            var uploadsNode = $("#upload-tree").fancytree("getNodeByKey", "uploads");
-            if (!uploadsNode) {
-                var rootNode = $("#upload-tree").fancytree("getRootNode");
-                uploadsNode = rootNode.addChildren({
-                    key: "uploads",
-                    title: "My Computer",
-                    tooltip: "Browser uploads.",
-                    folder: true,
-                    expanded: true
-                });
-            }
-      
-            if (file.relativePath == file.name) {
-                var childNode = uploadsNode.addChildren({
-                    key: file.name,
-                    title: file.name,
-                    tooltip: file.name,
-                    folder: false
-                });
-            } else {
-                var dirName = file.relativePath.split('/')[0];
-                if (!(dirName in uploadDirs)) {
-                    uploadDirs[dirName] = true;
-                    var childNode = uploadsNode.addChildren({
-                        key: dirName,
-                        title: dirName,
-                        tooltip: dirName,
-                        folder: true
-                    });
-                }
-            }
-
-            // extraClasses: 'progress-item'
-
-            var $self = $('.flow-file-'+file.uniqueIdentifier);
-            $self.find('.flow-file-name').text(file.name);
-            $self.find('.flow-file-size').text(readablizeBytes(file.size));
-            $self.find('.flow-file-download').attr('href', '/download/' + file.uniqueIdentifier).hide();
-            $self.find('.flow-file-pause').on('click', function () {
-                file.pause();
-                $self.find('.flow-file-pause').hide();
-                $self.find('.flow-file-resume').show();
-            });
-            $self.find('.flow-file-resume').on('click', function () {
-                file.resume();
-                $self.find('.flow-file-pause').show();
-                $self.find('.flow-file-resume').hide();
-            });
-            $self.find('.flow-file-cancel').on('click', function () {
-                file.cancel();
-                $self.remove();
-            });
-        });
-        r.on('filesSubmitted', function(file) {
-            r.upload();
-        });
-        
-        r.on('fileSuccess', function(file,message){
-            // Reflect that the file upload has completed
-            /*
-            $("#upload-tree").fancytree("getTree").getNodeByKey(file.relativePath).extraClasses = '';
-            $("#upload-tree").fancytree("getTree").getNodeByKey(file.relativePath).renderTitle();
-            */
-        });
-        r.on('fileError', function(file, message){
-            // Reflect that the file upload has resulted in error
-            $('.flow-file-'+file.uniqueIdentifier+' .flow-file-progress').html('(file could not be uploaded: '+message+')');
-        });
-        r.on('fileProgress', function(file){
-            if (r.progress() == 1.0) {
-                // Hide progress bar
-                $('.progress').hide();
-                // Allow completion of deposit
-                $('#deposit-submit-btn').prop('disabled', false);
-            } else {
-                updateProgress(Math.floor(r.progress()*100));
-            }
-        });
-        r.on('catchAll', function() {
-            // console.log.apply(console, arguments);
-        });
-        window.r = {
-            pause: function () {
-                r.pause();
-            },
-            cancel: function() {
-                r.cancel();
-                $('.flow-file').remove();
-            },
-            upload: function() {
-                $('.flow-file-pause').show();
-                $('.flow-file-resume').hide();
-                r.resume();
-            },
-            flow: r
-        };
     });
 
     function readablizeBytes(bytes) {
