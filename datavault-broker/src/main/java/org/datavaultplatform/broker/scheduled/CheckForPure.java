@@ -81,7 +81,7 @@ public class CheckForPure {
         }
 
         Date end = new Date();
-        log.info("Finished check of Vaults for review at " + start);
+        log.info("Finished check of Vaults for Pure record at " + start);
         log.info("Check took " + TimeUnit.MILLISECONDS.toSeconds(end.getTime() - start.getTime()) + " seconds");
     }
 }

@@ -8,7 +8,11 @@ public class VaultsPureService {
     private static final Logger logger = LoggerFactory.getLogger(VaultsPureService.class);
 
     public Boolean hasProducedPureRecord(Vault vault) {
-        return true;
+        Boolean retVal = false;
+        if (vault.getSnapshot() != null && ! vault.getSnapshot().isEmpty()) {
+            retVal = true;
+        }
+        return retVal;
     }
 
 }
