@@ -70,6 +70,8 @@
     </div>
     
    <!-- Custom javascript -->
+   <!-- import date-validation-utils.j first -->
+   <script src="<@spring.url '/resources/application/js/date-validation-utils.js'/>"></script>
    <script src="<@spring.url '/resources/application/js/new-create-prototype.js'/>"></script>
     
 </@layout.vaultLayout>
