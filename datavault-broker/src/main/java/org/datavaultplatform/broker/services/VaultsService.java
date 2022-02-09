@@ -113,8 +113,8 @@ public class VaultsService {
 
     private void sendEmail(Vault vault, String email, String subject, String role, String template, String homePage, String helpPage) {
         HashMap<String, Object> model = new HashMap<String, Object>();
-        model.put("homepage", homePage);
-        model.put("helppage", helpPage);
+        model.put("home-page", homePage);
+        model.put("help-page", helpPage);
         model.put("vault-name", vault.getName());
         model.put("group-name", vault.getGroup().getName());
         model.put("vault-id", vault.getID());
