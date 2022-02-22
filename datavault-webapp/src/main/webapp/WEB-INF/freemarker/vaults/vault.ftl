@@ -252,11 +252,6 @@
                                 <td></td>
                             </tr>
                             <tr>
-                                <th scope="col">PURE ID</th>
-                                <td><#if vault.datasetName??>${vault.datasetName?html}<#else>N/A</#if></td>
-                                <td></td>
-                            </tr>
-                            <tr>
                                 <th scope="col">Grant End Date</th>
                                 <td><#if vault.grantEndDate??>${vault.getGrantEndDateAsString()}<#else>No end date</#if></td>
                                 <td>
