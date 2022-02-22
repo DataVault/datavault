@@ -64,67 +64,7 @@ public class CheckForPure {
 
                 log.info("Vault " + vault.getName() + " has not produced a Pure Record");
 
-                // Build the Pure XML record for the Vault
-                // 1.Create a DocumentBuilder instance
-                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder dbuilder = dbFactory.newDocumentBuilder();
-
-                // 2. Create a Document from the above DocumentBuilder.
-                Document document = dbuilder.newDocument();
-
-                // 3. Create the elements you want using the Element class and its appendChild method.
-
-                // root element
-                String ns = "v1:";
-                //<v1:datasets xmlns:v1="v1.dataset.pure.atira.dk" xmlns:v3="v3.commons.pure.atira.dk">
-                //<v1:datasets xmlns:ns0="v1" ns0:v11="v1.dataset.pure.atira.dk" xmlns:ns1="v3" ns1:v33="v3.commons.pure.atira.dk" xmlns:v1="v1:">
-                Element datasets = document.createElementNS(ns, "v1:datasets");
-                //datasets.setPrefix("xmlns:v1");
-
-                //Element datasets = document.createElement("datasets");
-                document.appendChild(datasets);
-                datasets.setPrefix("v1");
-                datasets.setAttributeNS("v1", "v11", "v1.dataset.pure.atira.dk");
-                datasets.setPrefix("v3");
-                datasets.setAttributeNS("v3", "v33", "v3.commons.pure.atira.dk");
-                // child element
-                Element dataset = document.createElementNS(ns, "dataset");
-                datasets.appendChild(dataset);
-
-                // Attribute of child element
-                dataset.setAttribute("id", "1");
-                dataset.setAttribute("type", "dataset");
-
-                // firstname Element
-                Element title = document.createElementNS(ns, "title");
-                title.appendChild(document.createTextNode("Test Title 2022"));
-                dataset.appendChild(title);
-
-                // lastName element
-                //Element lastName = document.createElement("lastName");
-                //lastName.appendChild(document.createTextNode("Bubble"));
-                //user.appendChild(lastName);
-
-                // email element
-                //Element email = document.createElement("email");
-                //email.appendChild(document.createTextNode("admin@interviewBubble.com"));
-                //user.appendChild(email);
-
-                // write content into xml file
-
-                // 4. Create a new Transformer instance and a new DOMSource instance.
-                TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                Transformer transformer = transformerFactory.newTransformer();
-                DOMSource source = new DOMSource(document);
-
-                // 5. Create a new StreamResult to the output stream you want to use.
-                //StreamResult result = new StreamResult(new File("/Users/admin/Desktop/users.xml"));
-                StreamResult result = new StreamResult(System.out); // to print on console
-
-                // 6. Use transform method to write the DOM object to the output stream.
-                transformer.transform(source, result);
-
-                System.out.println("File created successfully");
+                vaultsPureService.produceXml(vault);
 
                 // deliver to the Pure mob
 

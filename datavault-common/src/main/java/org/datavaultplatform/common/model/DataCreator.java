@@ -60,7 +60,7 @@ public class DataCreator {
 
     public String getName() { return name; }
 
-    public void setVault(Vault Vault) {
+    public void setVault(Vault vault) {
         this.vault = vault;
     }
 
