@@ -82,6 +82,8 @@ public class VaultsPureService {
             Element persons = this.addPersons(document, vault.getDataCreators());
             dataset.appendChild(persons);
         }
+        Element openAccess = this.addOpenAccess(document, "Restricted");
+        dataset.appendChild(openAccess);
 
         // write content into xml file
 
@@ -188,6 +190,12 @@ public class VaultsPureService {
         Element visibilityElement = document.createElementNS("v1.dataset.pure.atira.dk", "v1:visibility");
         visibilityElement.appendChild(document.createTextNode(visibility));
         return visibilityElement;
+    }
+
+    private Element addOpenAccess(Document document, String access) {
+        Element oaElement = document.createElementNS("v1.dataset.pure.atira.dk", "v1:openAccess");
+        oaElement.appendChild(document.createTextNode(access));
+        return oaElement;
     }
 
 }
