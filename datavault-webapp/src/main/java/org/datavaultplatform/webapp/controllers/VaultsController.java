@@ -383,7 +383,7 @@ public class VaultsController {
     }
     // Process the completed 'create new vault' page
     @RequestMapping(value = "/vaults/stepCreate", method = RequestMethod.POST)
-    public String addVault(@ModelAttribute CreateVault vault, ModelMap model, @RequestParam String action) {
+    public String addVault(@ModelAttribute CreateVault vault, ModelMap model, @RequestParam String action, Principal principal) {
 
 
 
@@ -416,7 +416,7 @@ public class VaultsController {
             logger.info("Confirm button clicked");
 
             // confirm we have enough data entered to proceed
-            List<String> validateResult = validateService.validate(vault);
+            List<String> validateResult = validateService.validate(vault, principal.getName());
             if (validateResult != null && !validateResult.isEmpty()) {
                 // return to create vault page with the entered data and error message(s)
                 // (just redirects to empty page without error atm
