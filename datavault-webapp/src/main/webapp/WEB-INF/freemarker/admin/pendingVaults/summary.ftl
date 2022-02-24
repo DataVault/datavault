@@ -26,11 +26,13 @@
   
   <a name="previous" class="btn btn-primary" 
       href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults">&laquo; Return</a>
+ 
+  <a name="edit" class="btn btn-primary pull-right" href="${springMacroRequestContext.getContextPath()}/pendingVaults/${pendingVault.getID()}/">Edit</a>
 </div>
 </div>
 
 
- <form id="create-vault" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/upgrade/${pendingVault.ID}" method="get" novalidate="novalidate" _lpchecked="1">
+<form id="create-vault" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/upgrade/${pendingVault.ID}" method="get" novalidate="novalidate" _lpchecked="1">
 <div class="row">
  <div class="col-md-12">
     <table class="table table-sm">
@@ -87,8 +89,8 @@
 		<tr>
 			<th scope="col">Grant End Date</th>
 			 <td>
-                <#if (pendingVault.getGrantEndDate())??>
-                    ${pendingVault.getGrantEndDateAsString()}
+                <#if (pendingVault.grantEndDate) ??>
+                   ${pendingVault.grantEndDate?date}   
                 </#if>
              </td>
 		</tr>
@@ -104,9 +106,9 @@
 		<tr>
 			<th scope="col">Review Date</th>
 			<td>
-                <input class="form-control" id="reviewDate" placeholder="yyyy-mm-dd" name="reviewDate"
-                     value="${pendingVault.getReviewDateAsString()}"/>
-                <span id="invalid-review-date-span" style="font-size: 1.2em; font: bold; color: #f00; display: inline;"></span>
+			  <#if (pendingVault.reviewDate)??>
+                ${pendingVault.reviewDate?date}
+              </#if>
             </td>
 		</tr>
 		<tr>
@@ -272,10 +274,6 @@
 </div>                        
 </div>
 
-<!-- Custom javascript -->
-<!-- import date-validation-utils.j first -->
-<script src="<@spring.url '/resources/application/js/date-validation-utils.js'/>"></script>
-<script src="<@spring.url '/resources/application/js/admin-pending-vault-summary.js'/>"></script>
 
 </@layout.vaultLayout>
        

@@ -125,7 +125,7 @@
         </div>
     </div>
     <button type="button" name="previous" class="previous action-button-previous btn btn-default" >&laquo; Previous</button>
-    <#if vault.confirmed?c=="false">
+    <#if vault.confirmed?c=="false" || isISAdmin?c=="true">
     <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-default" >
         <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
     </button>

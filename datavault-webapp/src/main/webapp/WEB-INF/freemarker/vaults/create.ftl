@@ -4,7 +4,9 @@
 <#import "/spring.ftl" as spring />
 <#assign sec=JspTaglibs["http://www.springframework.org/security/tags"] />
 <@layout.vaultLayout>
-
+    <#if isISAdmin?c=="true">
+       <div id="userAdmin" hidden></div>
+    </#if>
     <div class="container">
         <div class="row">
             <div class="col-md-12">
@@ -208,6 +210,7 @@
 
     <script>
         $(document).ready(function () {
+        
             $.datepicker.setDefaults({
                 dateFormat: "yy-mm-dd",
                 changeMonth: true,

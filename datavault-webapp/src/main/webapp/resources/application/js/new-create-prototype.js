@@ -25,9 +25,16 @@ $(document).ready(function(){
 
 	$( "#grantEndDate" ).datepicker();
 	$( "#billingGrantEndDate" ).datepicker();
+	
+	var reviewMinDate = '+36m';
+	if($("isISAdmin")) {
+		reviewMinDate = null;
+	}
+	
 	$( "#reviewDate" ).datepicker({
-		minDate: '+36m'
+		minDate: reviewMinDate
 	});
+	
 
 	/*
     if billinGrantEndDate is filled in, disable granteddate on the info page and populate it with the billing value
@@ -131,6 +138,12 @@ $(document).ready(function(){
 	}).trigger('change');
 
 	$("#reviewDate").change(function() {
+		if($("isISAdmin")) {
+			// Clear old messages beside the review date
+			$("#updated-review-date-span").text("");
+			$("#invalid-review-date-span").text(""); 
+            return;
+		}
 		var defaultLength = 3;
 		var minReviewDatePeriod = defaultLength;
 		var policyInfoString = $("#policyInfo option:selected").val();

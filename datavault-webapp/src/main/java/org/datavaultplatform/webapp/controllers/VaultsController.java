@@ -322,6 +322,12 @@ public class VaultsController {
                             || (RoleUtils.isRoleInSchool(roleAssignment, vault.getGroupID()) && RoleUtils.hasPermission(roleAssignment, Permission.CAN_MANAGE_VAULTS)));
         }
     }
+    
+    private boolean isISAdmin(VaultInfo vault, Principal principal) {
+        List<RoleAssignment> roleAssignmentsForUser = restService.getRoleAssignmentsForUser(principal.getName());
+        return roleAssignmentsForUser.stream().anyMatch(roleAssignment -> RoleUtils.isISAdmin(roleAssignment));
+    }
+    
     @RequestMapping(value = "/vaults/{vaultid}/{userid}", method = RequestMethod.GET)
     public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("userid") String userID) {
     	model.addAttribute("vaults", restService.getVaultsListingAll(userID));
@@ -337,11 +343,14 @@ public class VaultsController {
         if (!canAccessVault(vault, principal)) {
             throw new ForbiddenException();
         }
+        
 
         CreateVault cv = vault.convertToCreate();
         model.addAttribute("vault", cv);
         RetentionPolicy[] policies = restService.getRetentionPolicyListing();
         model.addAttribute("policies", policies);
+        boolean isISAdmin = isISAdmin(vault, principal);
+        model.addAttribute("isISAdmin", isISAdmin);
 
         Group[] groups = restService.getGroups();
         model.addAttribute("groups", groups);
