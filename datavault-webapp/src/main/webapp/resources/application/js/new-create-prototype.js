@@ -131,20 +131,7 @@ $(document).ready(function(){
 	}).trigger('change');
 
 	$("#reviewDate").change(function() {
-		var defaultLength = 3;
-		var minReviewDatePeriod = defaultLength;
-		var policyInfoString = $("#policyInfo option:selected").val();
-		var policyInfoArray = policyInfoString.split("-");
-
-		if (policyInfoString !== '' && policyInfoArray[1] !== '' && policyInfoArray[1] > defaultLength) {
-			console.log("Setting minReviewDatePeriod", policyInfoArray[1]);
-			minReviewDatePeriod =  policyInfoArray[1];
-		}
-
-		var now = new Date();
-
-		console.log("minReviewDatePeriod: ", minReviewDatePeriod);
-		console.log("now", now);
+		var startYearsInFuture  = 3; // Min allowed years in future for  Review Date
 
 		// Clear old messages beside the review date
 		$("#updated-review-date-span").text("");
@@ -152,7 +139,8 @@ $(document).ready(function(){
 
 		var reviewDateString = $("#reviewDate").val().trim();
 		console.log("reviewDateString", reviewDateString);
-		var validationMessage = validateReviewDateString(reviewDateString, minReviewDatePeriod);
+		
+		var validationMessage = validateDateString(reviewDateString, "Review Date",  startYearsInFuture );
 
 		if(validationMessage.trim() !== '') {
 			console.log(validationMessage);
