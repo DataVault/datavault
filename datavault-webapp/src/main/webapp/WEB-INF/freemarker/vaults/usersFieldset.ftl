@@ -241,7 +241,7 @@
         
         
         // Function that validates uun 
-        function validateUUN(inputText,errorSpan) {
+        function validateUUN(inputText,errorSpan,loggedInUUn) {
           if(inputText !== "") {
             console.log("inputText: ", inputText);
             $.ajax({
@@ -250,8 +250,48 @@
                     dataType: "json",
                     success: function(isUUN) {
                         if(isUUN) {
-                          errorSpan.text("");
-                          errorSpan.hide();     
+                            // get owner if logged in user (id isOwnerTrue)
+                            // get owner if not logged in user (id vaultOwner)
+
+                            var count = 0;
+                            // check if logged in owner
+                            var ownerUun = $( "input[type=text][id=vaultOwner]").val().trim();
+                            if (ownerUun === '') {
+                                ownerUun = loggedInUUn;
+                                console.log("Checking (logged in Owner) ", inputText, " v ",  ownerUun);
+                                if(ownerUun === inputText) {
+                                    console.log(inputText, " Already has a role" );
+                                    count++;
+                                } else {
+                                    errorSpan.text("");
+                                    errorSpan.hide();
+                                }
+                            }
+
+                            // foreach uuid input get uuid if not empty string
+                            // check if inputText only appears once in all role fields
+                            // (includes manually entered owner)
+                            $(".uun-required").each(function() {
+                                var uun = $(this).val().trim();
+                                if (uun !== '') {
+                                    console.log("Checking (Role)", inputText, " v ",  uun);
+                                    if(uun === inputText) {
+                                        count++;
+                                    } else {
+                                        errorSpan.text("");
+                                        errorSpan.hide();
+                                    }
+                                }
+                            });
+                            if (count > 1) {
+                                console.log(inputText, " Already has a role" );
+                                errorSpan.text("UUN cannot have multiple roles");
+                                errorSpan.show();
+                            } else {
+                                errorSpan.text("");
+                                errorSpan.hide();
+                            }
+
                         } else {
                           errorSpan.text("Invalid UUN");
                           errorSpan.show();
@@ -277,8 +317,9 @@
         $(".uun-required").on("keyup", function() {
           var inputText = $(this).val().trim();
           var errorSpan =  $(this).siblings(".uun-required-error-span");
+          var loggedInAS = $("#loggedInAs").val().trim()
           console.log("ON EVENT: inputText: ", inputText);
-          validateUUN(inputText,errorSpan);
+          validateUUN(inputText,errorSpan, loggedInAS);
         });
         
        // Ensure  Next button only enabled if no "Invalid UUN present 

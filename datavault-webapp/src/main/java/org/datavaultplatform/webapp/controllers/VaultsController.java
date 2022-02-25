@@ -153,7 +153,7 @@ public class VaultsController {
 
 
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
-    public String getVaultsListing(ModelMap model) {
+    public String getVaultsListing(ModelMap model, Principal principal) {
         logger.debug("Getting the current vaults");
         VaultInfo currentVaults[] = restService.getVaultsListing();
         VaultInfo pendingVaults[] = restService.getPendingVaultsListing();
@@ -186,7 +186,7 @@ public class VaultsController {
         }
 
         //return this.createVault(model);
-        return this.buildVault(model);
+        return this.buildVault(model, principal);
     }
 
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
@@ -350,12 +350,13 @@ public class VaultsController {
     }
 
     @RequestMapping(value = "/vaults/buildsteps", method = RequestMethod.GET)
-    public String buildVault(ModelMap model) {
+    public String buildVault(ModelMap model, Principal principal) {
 
         // pass the view an empty Vault since the form expects it if nothing has been saved so far
 
         CreateVault vault = new CreateVault();
         vault.setIsOwner(true);
+        vault.setLoggedInAs(principal.getName());
         model.addAttribute("vault", vault);
         String defaultReviewDate = validateService.getDefaultReviewDate();
         vault.setReviewDate(defaultReviewDate);
