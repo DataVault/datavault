@@ -240,14 +240,20 @@
         $(".uun-required-error-span").hide();
         
         
-        // Function that validates uun 
+        // Function that validates uun
+        var currentRequest = null;
         function validateUUN(inputText,errorSpan,loggedInUUn) {
           if(inputText !== "") {
             console.log("inputText: ", inputText);
-            $.ajax({
+            currentRequest = $.ajax({
                     url: ErrorHandler._springContextPath + "/vaults/isuun/" + inputText,
                     type: 'GET',
                     dataType: "json",
+                    beforeSend: function() {
+                        if(currentRequest != null) {
+                            currentRequest.abort();
+                        }
+                    },
                     success: function(isUUN) {
                         if(isUUN) {
                             // get owner if logged in user (id isOwnerTrue)
