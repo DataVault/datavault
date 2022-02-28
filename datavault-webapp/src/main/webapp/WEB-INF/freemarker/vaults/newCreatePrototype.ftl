@@ -53,6 +53,8 @@
                                                     <input type="hidden" id="submitAction" name="action" value="submit" />
                                                     <@spring.bind "vault.pendingID" />
                                                     <input type="hidden" id="pendingID" name="${spring.status.expression}" value="${spring.status.value!""}" />
+                                                    <@spring.bind "vault.loggedInAs" />
+                                                    <input type="hidden" id="loggedInAs" name="${spring.status.expression}" value="${spring.status.value!""}" />
                                                     <@spring.bind "vault.confirmed" />
                                                     <input type="hidden" id="confirmed" name="${spring.status.expression}" value="${spring.status.value!""}" />
                                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />

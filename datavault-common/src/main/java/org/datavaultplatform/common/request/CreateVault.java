@@ -18,6 +18,9 @@ public class CreateVault {
     @ApiObjectField(description = "An ID for the partially completed pending vault")
     private String pendingID;
 
+    @ApiObjectField(description = "The logged in user's UUN (used to pass to JS validation)")
+    private String loggedInAs;
+
     @ApiObjectField(description = "A name for the new vault")
     private String name;
     
@@ -250,6 +253,14 @@ public class CreateVault {
         this.pendingID = pendingID;
     }
 
+    public String getLoggedInAs() {
+        return this.loggedInAs;
+    }
+
+    public void setLoggedInAs(String loggedInAs) {
+        this.loggedInAs = loggedInAs;
+    }
+
     public String getGrantAuthoriser() {
         return this.grantAuthoriser;
     }
@@ -354,43 +365,6 @@ public class CreateVault {
         }
         return retVal;
     }
-
-//    public String getBillingAsString() {
-//        StringBuilder retVal = new StringBuilder();
-//
-//        if (this.billingType != null && !this.billingType.equals("")) {
-//            // add billing type
-//            retVal.append(this.billingType);
-//            if (! this.billingType.equals("NA")) {
-//                // if not N/A add [
-//                retVal.append(" [");
-//                // if grant type or budget code add authoriser, school/ unit, subunit and project id
-//                if (this.billingType.equals("GRANT_FUNDING") || this.billingType.equals("BUDGET_CODE")) {
-//                    retVal.append(this.grantAuthoriser + ",");
-//                    retVal.append(this.grantSchoolOrUnit + ",");
-//                    retVal.append(this.grantSubunit + ",");
-//                    retVal.append(this.projectID);
-//                    DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.UK);
-//                    try {
-//                        retVal.append(formatter.parse(this.grantEndDate));
-//                    } catch (ParseException|NullPointerException ex) {
-//                        // do what?
-//                    }
-//                }
-//                if (this.billingType.equals("BUDGET_CODE")) {
-//                    retVal.append(this.budgetAuthoriser + ",");
-//                    retVal.append(this.budgetSchoolOrUnit + ",");
-//                    retVal.append(this.budgetSubunit + ",");
-//                }
-//                // if slice add slice
-//                if (this.billingType.equals("SLICE")) {
-//                   retVal.append(this.sliceID);
-//                }
-//                retVal.append("]");
-//            }
-//        }
-//        return retVal.toString();
-//    }
 
     public void setDataCreators(List<String> dataCreators) { this.dataCreators = dataCreators; }
 
