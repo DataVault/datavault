@@ -13,12 +13,12 @@ import java.util.*;
 public class ValidateService {
     private static final Logger logger = LoggerFactory.getLogger(ValidateService.class);
 
-    public List<String> validate(CreateVault vault) {
+    public List<String> validate(CreateVault vault, String userID) {
         List<String> retVal = new ArrayList<>();
         retVal.addAll(this.validateFieldset1(vault));
         retVal.addAll(this.validateFieldset2(vault));
         retVal.addAll(this.validateFieldset3(vault));
-        retVal.addAll(this.validateFieldset4(vault));
+        retVal.addAll(this.validateFieldset4(vault, userID));
         retVal.addAll(this.validateFieldset5(vault));
         return retVal;
     }
@@ -178,10 +178,30 @@ public class ValidateService {
         return retVal;
     }
 
-    private List<String> validateFieldset4(CreateVault vault) {
+    private List<String> validateFieldset4(CreateVault vault, String userID) {
         List<String> retVal = new ArrayList<>();
 
-//        Field set 4 should have completed
+//        Field set 4 should have only one role per uuid
+        String owner = vault.getVaultOwner() != null && !vault.getVaultOwner().isEmpty() ? vault.getVaultOwner() : userID;
+        List<String> ownerList = new ArrayList<>();
+        ownerList.add(owner);
+        List<String> ndms = vault.getNominatedDataManagers();
+        List<String> deps = vault.getDepositors();
+        boolean match1 = ndms.stream().filter(x -> x!="").anyMatch(deps::contains);
+        boolean match2 = ndms.stream().filter(x -> x!="").anyMatch(ownerList::contains);
+        boolean match3 = deps.stream().filter(x -> x!="").anyMatch(ownerList::contains);
+
+        if (match1) {
+            retVal.add("A user cannot have the role of both a NDM and a depositor");
+        }
+
+        if (match2) {
+            retVal.add("A user cannot have the role of both a NDM and an owner");
+        }
+
+        if (match3) {
+            retVal.add("A user cannot have the role of both a depositor and an owner");
+        }
 
         return retVal;
     }
