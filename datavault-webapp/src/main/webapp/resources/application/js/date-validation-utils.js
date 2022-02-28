@@ -74,16 +74,6 @@ function validateDateString(dateString, textforDateNameInMsg = "Date", startYear
 	return msg;
 }
 
-//Use in PV Creation by User
-function validateReviewDateString(dateString, minReviewDatePeriodFromRetentionPolicy) {
-	var textforDateNameInMsg = "Review Date";
-	// It must be 3  years in future.
-	if(minReviewDatePeriodFromRetentionPolicy <= 3) {
-		return validateDateString(dateString, textforDateNameInMsg, 3);
-	} else {
-		return validateDateString(dateString, textforDateNameInMsg, minReviewDatePeriodFromRetentionPolicy);
-	}
-}
 
 //Used by Admin 
 function validateAdminCurationReviewDateString(dateString) {
