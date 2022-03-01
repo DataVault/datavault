@@ -21,7 +21,7 @@
         <div class="form-group" required>
             <label class="col-sm-4 control-label">Owner UUN: </label>
             <@spring.bind "vault.vaultOwner" />
-            <input id="vaultOwner" name="${spring.status.expression}" value="${spring.status.value!""}" type="text"  class="autocomplete uun-required" placeholder=""/>
+            <input id="vaultOwner" name="${spring.status.expression}" value="${spring.status.value!""}" type="text"  class="autocomplete uun-required unique-uun-required" placeholder=""/>
             <span class="uun-required-error-span"></span>
         </div>
 
@@ -44,7 +44,7 @@
         <#assign ndmCount = ndm?index>
            <div class="extra-ndm form-group col-sm-offset-4">
               <@spring.bind "vault.nominatedDataManagers[${ndmCount}]" />
-              <input name="nominatedDataManagers[${ndmCount}]" value="${spring.status.value!""}" class="autocomplete uun-required" type="text" />
+              <input name="nominatedDataManagers[${ndmCount}]" value="${spring.status.value!""}" class="autocomplete uun-required unique-uun-required" type="text" />
               <!-- Add  remove button for inputs apart from first for which we add an add button. -->
               <#if (ndmCount == 0)>
                 <button type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
@@ -57,7 +57,7 @@
         <#else>
            <div class="extra-ndm form-group col-sm-offset-4">
               <@spring.bind "vault.nominatedDataManagers[0]" />
-              <input name="nominatedDataManagers[0]" value="${spring.status.value!""}" class="autocomplete uun-required" type="text" />
+              <input name="nominatedDataManagers[0]" value="${spring.status.value!""}" class="autocomplete uun-required unique-uun-required" type="text" />
                <button type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
                <span class="uun-required-error-span"></span>
             </div>
@@ -71,7 +71,7 @@
           <#assign ndmCount++>
             <div class="empty-ndm form-group col-sm-offset-4 my-1">
                <@spring.bind "vault.nominatedDataManagers[${ndmCount}]" />
-               <input name="nominatedDataManagers[${ndmCount}]"  value="${spring.status.value!""}" class="autocomplete uun-required" type="text"  placeholder=""/>
+               <input name="nominatedDataManagers[${ndmCount}]"  value="${spring.status.value!""}" class="autocomplete uun-required unique-uun-required" type="text"  placeholder=""/>
                <button type="button" class="remove-ndm-btn btn btn-danger btn-xs">Remove</button>
                <span class="uun-required-error-span"></span>
             </div>
@@ -96,7 +96,7 @@
         <#assign depositorCount = depositor?index>
            <div class="extra-depositor form-group col-sm-offset-4">
               <@spring.bind "vault.depositors[${depositorCount}]" />
-              <input name="depositors[${depositorCount}]" value="${spring.status.value!""}" class="autocomplete uun-required" type="text" />
+              <input name="depositors[${depositorCount}]" value="${spring.status.value!""}" class="autocomplete uun-required unique-uun-required" type="text" />
               <!-- Add  remove button for inputs apart from first for which we add an add button. -->
               <#if (depositorCount == 0)>
                 <button type="button" id="add-depositor-btn" class="btn btn-default btn-sm">Add a depositor</button>
@@ -109,7 +109,7 @@
         <#else>
           <div class="extra-depositor form-group col-sm-offset-4">
               <@spring.bind "vault.depositors[0]" />
-              <input name="depositors[0]" value="${spring.status.value!""}" class="autocomplete uun-required" type="text" />
+              <input name="depositors[0]" value="${spring.status.value!""}" class="autocomplete uun-required unique-uun-required" type="text" />
               <button type="button" id="add-depositor-btn" class="btn btn-default btn-sm">Add a depositor</button>
               <span class="uun-required-error-span"></span>
           </div>
@@ -123,7 +123,7 @@
           <#assign depositorCount++>
             <div class="empty-depositor form-group col-sm-offset-4 my-1">
                <@spring.bind "vault.depositors[${depositorCount}]" />
-               <input name="depositors[${depositorCount}]"  value="${spring.status.value!""}" class="autocomplete uun-required" type="text"  placeholder=""/>
+               <input name="depositors[${depositorCount}]"  value="${spring.status.value!""}" class="autocomplete uun-required unique-uun-required" type="text"  placeholder=""/>
                <button type="button" class="remove-depositor-btn btn btn-danger btn-xs">Remove</button>
                <span class="uun-required-error-span"></span>
             </div>
@@ -277,7 +277,7 @@
                             // foreach uuid input get uuid if not empty string
                             // check if inputText only appears once in all role fields
                             // (includes manually entered owner)
-                            $(".uun-required").each(function() {
+                            $(".unique-uun-required").each(function() {
                                 var uun = $(this).val().trim();
                                 if (uun !== '') {
                                     console.log("Checking (Role)", inputText, " v ",  uun);
@@ -291,7 +291,8 @@
                             });
                             if (count > 1) {
                                 console.log(inputText, " Already has a role" );
-                                errorSpan.text("UUN cannot have multiple roles");
+                                errorSpan.text("A user may have only one vault-level user role, either Owner, NDM or Depositor. For further information please ");
+                                errorSpan.append('<a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/after/datavault/roles-and-access" target="_blank">click here</a>.');
                                 errorSpan.show();
                             } else {
                                 errorSpan.text("");
