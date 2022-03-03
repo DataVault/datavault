@@ -193,7 +193,6 @@ $(document).ready(function(){
 	}).trigger('change');
 
 	$("#isOwnerTrue, #isOwnerFalse, #vaultOwner").change(function(){
-		//var ownerTrueResult = $( "input[type=radio][id=isOwnerTrue]").is(":checked");
 		var ownerFalseResult = $( "input[type=radio][id=isOwnerFalse]").is(":checked");
 		if(ownerFalseResult === true){
 			$('#vaultOwner').prop('disabled', false);
@@ -206,8 +205,12 @@ $(document).ready(function(){
 
 		if (ownerFalseResult && uunResult) {
 			$(this).parents("fieldset").children(".next").prop("disabled", true);
+			$('.owner-uun-required-error-span').text("You have not specified any user as the Owner of this vault. Please add an owner, or contact the Research Data Support team if you want to request this vault to be treated as legacy data ie an orphan vault.");
+			$('.owner-uun-required-error-span').show();
 		} else {
 			$(this).parents("fieldset").children(".next").prop("disabled", false);
+			$('.owner-uun-required-error-span').text("");
+			$('.owner-uun-required-error-span').hide();
 		}
 	}).trigger('change');
 
