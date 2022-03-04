@@ -202,11 +202,40 @@ $(document).ready(function(){
 		}
 
 		var uunResult = ($( "input[type=text][id=vaultOwner]").val().trim() === '');
+		var ownerTrueResult = $( "input[type=radio][id=isOwnerTrue]").is(":checked");
 
 		if (ownerFalseResult && uunResult) {
 			$(this).parents("fieldset").children(".next").prop("disabled", true);
 			$('.owner-uun-required-error-span').text("You have not specified any user as the Owner of this vault. Please add an owner, or contact the Research Data Support team if you want to request this vault to be treated as legacy data ie an orphan vault.");
 			$('.owner-uun-required-error-span').show();
+
+		} else if (ownerTrueResult) {
+			// if ownerTrue and one of the other completed roles is the same uun
+			var count = 0;
+			var loggedInAS = $("#loggedInAs").val().trim()
+			$(".unique-uun-required").each(function() {
+				var uun = $(this).val().trim();
+				if (uun !== '') {
+					console.log("Checking (Role)", loggedInAS, " v ",  uun);
+					if(uun === loggedInAS) {
+						count++;
+					} else {
+						$('.owner-uun-required-error-span').text("");
+						$('.owner-uun-required-error-span').hide();
+					}
+				}
+
+				if (count > 0) {
+					console.log(loggedInAS, " Already has a role" );
+					$('.owner-uun-required-error-span').text("A user may have only one vault-level user role, either Owner, NDM or Depositor. For further information please ");
+					$('.owner-uun-required-error-span').append('<a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/after/datavault/roles-and-access" target="_blank">click here</a>.');
+					$('.owner-uun-required-error-span').show();
+				} else {
+					$('.owner-uun-required-error-span').text("");
+					$('.owner-uun-required-error-span').hide();
+				}
+			});
+
 		} else {
 			$(this).parents("fieldset").children(".next").prop("disabled", false);
 			$('.owner-uun-required-error-span').text("");

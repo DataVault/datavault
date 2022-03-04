@@ -287,12 +287,12 @@
 
                             var count = 0;
                             // check if logged in owner
-                            var ownerUun = $( "input[type=text][id=vaultOwner]").val().trim();
-                            var ownerTrueResult = $( "input[type=radio][id=isOwnerFalse]").is(":checked");
+                            //var ownerUun = $( "input[type=text][id=vaultOwner]").val().trim();
+                            var ownerTrueResult = $( "input[type=radio][id=isOwnerTrue]").is(":checked");
                             if (ownerTrueResult === true) {
-                                ownerUun = loggedInUUn;
-                                console.log("Checking (logged in Owner) ", inputText, " v ",  ownerUun);
-                                if(ownerUun === inputText) {
+                                //ownerUun = loggedInUUn;
+                                console.log("Checking (logged in Owner) ", inputText, " v ", loggedInUUn);
+                                if(loggedInUUn === inputText) {
                                     console.log(inputText, " Already has a role" );
                                     count++;
                                 } else {
