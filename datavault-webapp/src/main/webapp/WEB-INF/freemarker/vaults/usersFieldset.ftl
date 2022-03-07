@@ -21,8 +21,9 @@
         <div class="form-group" required>
             <label class="col-sm-4 control-label">Owner UUN: </label>
             <@spring.bind "vault.vaultOwner" />
-            <input id="vaultOwner" name="${spring.status.expression}" value="${spring.status.value!""}" type="text"  class="autocomplete uun-required unique-uun-required" placeholder=""/>
-            <span class="uun-required-error-span"></span>
+            <input id="vaultOwner" name="${spring.status.expression}" value="${spring.status.value!""}" type="text"
+                   class="autocomplete uun-required unique-uun-required owner-uun-required" placeholder=""/>
+            <span class="uun-required-error-span owner-uun-required-error-span"></span>
         </div>
 
         <div class="form-group">
@@ -238,7 +239,32 @@
         $(".uun-required-error-span").css({"color" : "red"});
         $(".uun-required-error-span").val("");
         $(".uun-required-error-span").hide();
-        
+
+
+        // Function that validates owner never empty
+        function validateOwnerUUN() {
+
+            if($( "input[type=text][id=vaultOwner]").val().trim() === '') {
+                // if ownerUUN and isOwner is false
+                // show error and disable next button (this is done via the validationErrorPresent function)
+                var ownerFalseResult = $( "input[type=radio][id=isOwnerFalse]").is(":checked");
+                console.log("OwnerFalseResult: ", ownerFalseResult);
+                // and vault owner is empty
+                if (ownerFalseResult === true) {
+                    console.log("OwnerFalseResult is true and input text is empty");
+                    $(".owner-uun-required-error-span").text("You have not specified any user as the Owner of this vault. Please add an owner, or contact the Research Data Support team if you want to request this vault to be treated as legacy data ie an orphan vault.");
+                    $(".owner-uun-required-error-span").show();
+                } else {
+
+                    $(".owner-uun-required-error-span").text("");
+                    $(".owner-uun-required-error-span").hide();
+                }
+                // As <span> does not have assign a 'change' event by default.
+                // This event is limited to <input> elements, <textarea> boxes and <select> elements
+                // We assign a 'change' event to errorSpan.
+                $(".owner-uun-required-error-span").change();
+            }
+        }
         
         // Function that validates uun
         var currentRequest = null;
@@ -261,11 +287,12 @@
 
                             var count = 0;
                             // check if logged in owner
-                            var ownerUun = $( "input[type=text][id=vaultOwner]").val().trim();
-                            if (ownerUun === '') {
-                                ownerUun = loggedInUUn;
-                                console.log("Checking (logged in Owner) ", inputText, " v ",  ownerUun);
-                                if(ownerUun === inputText) {
+                            //var ownerUun = $( "input[type=text][id=vaultOwner]").val().trim();
+                            var ownerTrueResult = $( "input[type=radio][id=isOwnerTrue]").is(":checked");
+                            if (ownerTrueResult === true) {
+                                //ownerUun = loggedInUUn;
+                                console.log("Checking (logged in Owner) ", inputText, " v ", loggedInUUn);
+                                if(loggedInUUn === inputText) {
                                     console.log(inputText, " Already has a role" );
                                     count++;
                                 } else {
@@ -313,10 +340,11 @@
                     }
             });
           } else {
-             errorSpan.text("");
-             errorSpan.hide();   
+              errorSpan.text("");
+              errorSpan.hide();
           }
-        
+          validateOwnerUUN();
+
         }
         
         // Validate input is uun for keyup
