@@ -87,8 +87,8 @@
 		<tr>
 			<th scope="col">Grant End Date</th>
 			 <td>
-                <#if (pendingVault.getGrantEndDate())??>
-                    ${pendingVault.getGrantEndDateAsString()}
+                <#if (pendingVault.grantEndDate)??>
+                    ${pendingVault.grantEndDate?date}
                 </#if>
              </td>
 		</tr>
@@ -104,9 +104,16 @@
 		<tr>
 			<th scope="col">Review Date</th>
 			<td>
+			<#if pendingVault.confirmed?c=="true">
                 <input class="form-control" id="reviewDate" placeholder="yyyy-mm-dd" name="reviewDate"
                      value="${pendingVault.getReviewDateAsString()}"/>
                 <span id="invalid-review-date-span" style="font-size: 1.2em; font: bold; color: #f00; display: inline;"></span>
+            <#else>
+                <#if (pendingVault.reviewDate)??>
+                    ${pendingVault.reviewDate?date}
+                </#if>
+               
+            </#if>
             </td>
 		</tr>
 		<tr>
@@ -251,6 +258,8 @@
 </table>
 </div>
 </div>
+
+<#if pendingVault.confirmed?c=="true">
 <div class="row">
 <div class="col-md-12 text-center">
      <#if (pendingVault.ID)??>
@@ -267,6 +276,7 @@
     
   </div>
   </div>
+</#if>
 </form>
    
 </div>                        
