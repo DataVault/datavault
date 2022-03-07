@@ -45,7 +45,7 @@ function dateDiffInYears(d1, d2) {
 }
 
 // Note textforDateNameInMsg and startYearsInFuture are optional parameters in function.
-function validateDateString(dateString, textforDateNameInMsg = "Date", startYearsInFuture = 0, ) {
+function validateDateString(dateString, textforDateNameInMsg = "Date", startYearsInFuture = 0) {
 	// Regex for format yyyy-mm-dd
 	var date_regex =  /^([2]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$/;
 	var matchDate = dateString.match(date_regex);
@@ -63,9 +63,7 @@ function validateDateString(dateString, textforDateNameInMsg = "Date", startYear
 		console.log("differenceInDays: ", differenceInDays);
 		console.log("differenceInYears: ", differenceInYears);
 
-		if (differenceInDays < 0) {
-			msg = "Invalid " + textforDateNameInMsg + ", it must be in the future.";
-		} else if (differenceInYears > 30) {
+		if (differenceInYears > 30) {
 			msg = "Invalid " + textforDateNameInMsg + ", it  must be less than 30 years in the future.";
 		} else if (differenceInYears < startYearsInFuture) {
 			msg = "Invalid " + textforDateNameInMsg + ", it  must be " +  startYearsInFuture + " years in the future.";   
