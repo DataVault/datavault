@@ -8,6 +8,8 @@ $(document).ready(function(){
 		return e.keyCode != 13;
 	});
 
+	var startYearsInFutureForGEDNegative = -30;
+	
 	var todayForDatepicker = new Date();
 	todayForDatepicker.setHours(0,0,0,0);
 	var _30YearsFromToday= new Date();
@@ -19,15 +21,12 @@ $(document).ready(function(){
 		changeYear: true,
 		showOtherMonths: true,
 		selectOtherMonths: true,
-		minDate: todayForDatepicker,
 		maxDate: _30YearsFromToday
 	});
 
 	$( "#grantEndDate" ).datepicker();
 	$( "#billingGrantEndDate" ).datepicker();
-	$( "#reviewDate" ).datepicker({
-		minDate: '+36m'
-	});
+	$( "#reviewDate" ).datepicker({ minDate: '+36m' });
 
 	/*
     if billinGrantEndDate is filled in, disable granteddate on the info page and populate it with the billing value
@@ -42,7 +41,8 @@ $(document).ready(function(){
 			var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
 
 			if (dateResult === false && grantChecked === true) {
-				var validationMessage = validateDateString($("#billingGrantEndDate").val().trim(), "Grant End Date");
+				// 
+				var validationMessage = validateDateString($("#billingGrantEndDate").val().trim(), "Grant End Date", startYearsInFutureForGEDNegative);
 				if (validationMessage != "") {
 					$('#invalid-billing-grant-end-date-span').text(validationMessage);
 				}
@@ -65,7 +65,7 @@ $(document).ready(function(){
 	$("#billingGrantEndDate, #grantEndDate, #policyInfo").change(function(){
 		// if the ged changes update the suggested review date
 		if($("#grantEndDate").val().trim() !== '') {
-			var grantEndDateValidationMessage = validateDateString($("#grantEndDate").val().trim(), "Grant End Date");
+			var grantEndDateValidationMessage = validateDateString($("#grantEndDate").val().trim(), "Grant End Date", startYearsInFutureForGEDNegative);
 			$('#invalid-grant-end-date-span').text(grantEndDateValidationMessage);
 		} else {
 			// clear any validation
