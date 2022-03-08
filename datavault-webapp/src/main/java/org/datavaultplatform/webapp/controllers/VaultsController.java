@@ -194,6 +194,7 @@ public class VaultsController {
         VaultInfo vault = restService.getVault(vaultID);
 
         if (!canAccessVault(vault, principal)) {
+            logger.info("getVault no permission.");
             throw new ForbiddenException();
         }
 
@@ -291,20 +292,10 @@ public class VaultsController {
     }
 
     private boolean canAccessVault(VaultInfo vault, Principal principal) {
-        List<RoleAssignment> roleAssignmentsForUser = restService.getRoleAssignmentsForUser(principal.getName());
-        //return roleAssignmentsForUser.stream().anyMatch(roleAssignment ->
-        //        RoleUtils.isISAdmin(roleAssignment)
-        //                || RoleUtils.isRoleInVault(roleAssignment, vault.getID())
-        //                || (RoleUtils.isRoleInSchool(roleAssignment, vault.getGroupID()) && RoleUtils.hasPermission(roleAssignment, Permission.CAN_MANAGE_VAULTS)));
         return canAccessVault(vault, principal, false);
     }
 
     private boolean canAccessPendingVault(VaultInfo vault, Principal principal) {
-        List<RoleAssignment> roleAssignmentsForUser = restService.getRoleAssignmentsForUser(principal.getName());
-        //return roleAssignmentsForUser.stream().anyMatch(roleAssignment ->
-        //        RoleUtils.isISAdmin(roleAssignment)
-        //                || RoleUtils.isRoleInPendingVault(roleAssignment, vault.getID())
-        //                || (RoleUtils.isRoleInSchool(roleAssignment, vault.getGroupID()) && RoleUtils.hasPermission(roleAssignment, Permission.CAN_MANAGE_VAULTS)));
         return canAccessVault(vault, principal, true);
     }
 
@@ -318,7 +309,7 @@ public class VaultsController {
         } else {
             return roleAssignmentsForUser.stream().anyMatch(roleAssignment ->
                     RoleUtils.isISAdmin(roleAssignment)
-                            || RoleUtils.isRoleInPendingVault(roleAssignment, vault.getID())
+                            || RoleUtils.isRoleInVault(roleAssignment, vault.getID())
                             || (RoleUtils.isRoleInSchool(roleAssignment, vault.getGroupID()) && RoleUtils.hasPermission(roleAssignment, Permission.CAN_MANAGE_VAULTS)));
         }
     }
@@ -334,7 +325,7 @@ public class VaultsController {
         VaultInfo vault = restService.getPendingVault(vaultID);
         logger.info("Passed in id: '" + vaultID);
 
-        if (!canAccessVault(vault, principal)) {
+        if (!canAccessPendingVault(vault, principal)) {
             throw new ForbiddenException();
         }
 
