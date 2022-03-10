@@ -634,6 +634,7 @@ public class VaultInfo {
         cv.setNotes(this.getNotes());
         cv.setPureLink(this.getPureLink());
         cv.setConfirmed(this.getConfirmed());
+        cv.setVaultCreator(this.getVaultCreatorId());
 
         return cv;
     }

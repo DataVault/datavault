@@ -584,7 +584,7 @@ public class VaultsController {
         //pendingEvent.setAgentType(Agent.AgentType.BROKER);
         //pendingEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         vaultsService.addVaultEvent(vault, clientKey, userID);
-        vaultsService.addOwnerRole(createVault, vault, userID, clientKey);
+        vaultsService.addOwnerRole(createVault, vault, clientKey);
         // send mail to owner
         vaultsService.sendVaultOwnerEmail(vault, homePage, helpPage, user);
         vaultsService.addDepositorRoles(createVault, vault, clientKey, homePage, helpPage);

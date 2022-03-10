@@ -89,6 +89,9 @@ public class CreateVault {
     @ApiObjectField(description = "Prospective Owner of the vault (who can be different from who is creating the pending vault)")
     private String vaultOwner;
 
+    @ApiObjectField(description = "Creator of the pending vault (who can be different from who owns the pending vault)")
+    private String vaultCreator;
+
     @ApiObjectField(description = "List of pending Nominated Data Managers")
     private List<String> nominatedDataManagers;
 
@@ -320,6 +323,10 @@ public class CreateVault {
     public String getVaultOwner() { return this.vaultOwner; }
 
     public void setVaultOwner(String vaultOwner) { this.vaultOwner = vaultOwner; }
+
+    public String getVaultCreator() { return this.vaultCreator; }
+
+    public void setVaultCreator(String vaultCreator) { this.vaultCreator = vaultCreator; }
 
     public List<String> getNominatedDataManagers() { return this.nominatedDataManagers; }
 

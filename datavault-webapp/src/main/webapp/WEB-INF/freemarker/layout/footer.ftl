@@ -37,7 +37,7 @@
                     </a>
                 </div>
                 <div class="col-sm-8 col-sm-pull-4">
-                    <p>
+                    <p style="color: #ccc;">
                         The University of Edinburgh is a charitable body, registered in Scotland, with registration number
                         SC005336, VAT Registration Number GB&nbsp;592&nbsp;9507&nbsp;00, and is acknowledged by the UK authorities as a
                         “<a href="https://www.gov.uk/guidance/recognised-uk-degrees">Recognised body</a>” which has been

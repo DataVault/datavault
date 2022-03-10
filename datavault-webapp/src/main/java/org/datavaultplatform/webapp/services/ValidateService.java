@@ -155,15 +155,8 @@ public class ValidateService {
         if (reviewDate == null || reviewDate.isEmpty()) {
             retVal.add("Review Date missing");
         } else {
-        // if review date is less than 3 years from today
+            // if review date is less than 3 years from today
             int length = 3;
-            if (policy != null && !policy.isEmpty())  {
-                try {
-                    length = Integer.parseInt(policy.split("-")[1]);
-                } catch (NumberFormatException ne) {
-                    length = 3;
-                }
-            }
             if (LocalDate.parse(reviewDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                     .isBefore(LocalDate.parse(this.getDefaultReviewDate(length), DateTimeFormatter.ofPattern("yyyy-MM-dd")))) {
                 retVal.add("Review Date for selected policy is required to be at least " + length + " years");
