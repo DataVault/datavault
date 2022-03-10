@@ -81,10 +81,10 @@ public class VaultsService {
         eventService.addEvent(vaultEvent);
     }
 
-    private void addRoleEvent(RoleAssignment ra, String assigneeId, String clientKey) {
-        CreateRoleAssignment roleAssignmentEvent = new CreateRoleAssignment(ra, assigneeId);
+    private void addRoleEvent(RoleAssignment ra, String assigneeId, String creatorId, String clientKey) {
+        CreateRoleAssignment roleAssignmentEvent = new CreateRoleAssignment(ra, creatorId);
         roleAssignmentEvent.setVault(this.getVault(ra.getVaultId()));
-        roleAssignmentEvent.setUser(usersService.getUser(assigneeId));
+        roleAssignmentEvent.setUser(usersService.getUser(creatorId));
         roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
         roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         roleAssignmentEvent.setAssignee(usersService.getUser(assigneeId));
@@ -248,20 +248,16 @@ public class VaultsService {
                     ra.setUserId(dep);
                     rolesAndPermissionsService.createRoleAssignment(ra);
 
-                    this.addRoleEvent(ra, createVault.getVaultOwner(), clientKey);
+                    this.addRoleEvent(ra, createVault.getVaultOwner(), createVault.getVaultCreator(), clientKey);
                     this.sendVaultDepositorsEmail(vault, homePage, helpPage, usersService.getUser(dep));
                 }
             }
         }
     }
 
-    public void addOwnerRole(CreateVault createVault, Vault vault, String userID, String clientKey) {
-        Boolean isOwner = createVault.getIsOwner();
-
-        String ownerId = userID;
-        if (isOwner != null && !isOwner) {
-            ownerId = createVault.getVaultOwner();
-        }
+    public void addOwnerRole(CreateVault createVault, Vault vault, String clientKey) {
+        String ownerId = createVault.getVaultOwner();
+        String creatorId = createVault.getVaultCreator();
 
         if (ownerId != null) {
             RoleAssignment ownerRoleAssignment = new RoleAssignment();
@@ -270,7 +266,7 @@ public class VaultsService {
             ownerRoleAssignment.setRole(rolesAndPermissionsService.getDataOwner());
             rolesAndPermissionsService.createRoleAssignment(ownerRoleAssignment);
 
-            this.addRoleEvent(ownerRoleAssignment, ownerId, clientKey);
+            this.addRoleEvent(ownerRoleAssignment, ownerId, creatorId, clientKey);
         } else {
             // error!
         }
@@ -312,7 +308,7 @@ public class VaultsService {
                     ra.setRole(rolesAndPermissionsService.getNominatedDataManager());
                     ra.setUserId(ndm);
                     rolesAndPermissionsService.createRoleAssignment(ra);
-                    this.addRoleEvent(ra, createVault.getVaultOwner(), clientKey);
+                    this.addRoleEvent(ra, createVault.getVaultOwner(), createVault.getVaultCreator(), clientKey);
                     this.sendVaultNDMsEmail(vault, homePage, helpPage, usersService.getUser(ndm));
                 }
             }

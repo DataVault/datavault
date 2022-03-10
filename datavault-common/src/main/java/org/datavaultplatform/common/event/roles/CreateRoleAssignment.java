@@ -10,8 +10,8 @@ import javax.persistence.Entity;
 public class CreateRoleAssignment extends Event {
 
     CreateRoleAssignment() {};
-    public CreateRoleAssignment(RoleAssignment roleAssignment, String userId) {
-        super(roleAssignment.getRole().getName()+" role given to "+roleAssignment.getUserId()+" by "+userId);
+    public CreateRoleAssignment(RoleAssignment roleAssignment, String creatorId) {
+        super(roleAssignment.getRole().getName()+" role given to "+roleAssignment.getUserId()+" by "+creatorId);
         this.eventClass = CreateRoleAssignment.class.getCanonicalName();
     }
 }

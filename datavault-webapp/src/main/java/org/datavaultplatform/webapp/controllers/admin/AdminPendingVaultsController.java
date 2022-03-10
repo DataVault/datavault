@@ -179,43 +179,6 @@ public class AdminPendingVaultsController {
         return "redirect:" + vaultUrl;
     }
 
-/*
-    @RequestMapping(value = "/admin/pendingVaults/addVault/{pendingVaultId}", method = RequestMethod.GET)
-    public String addVault(@PathVariable("pendingVaultId") String pendingVaultID,
-    	                   @RequestParam("reviewDate") String reviewDateString) {
-    	logger.info("pendingVaultID: " + pendingVaultID);
-    	logger.info("reviewDateString: " + reviewDateString);
-    	
-    	try {
-    		DateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy");
-    		Date reviewDate = new SimpleDateFormat("dd-MMM-yyy").parse(reviewDateString);
-
-    		boolean vaultAdded = restService.addVaultForPendingVault(pendingVaultID, reviewDate);
-    		logger.info("vaultAdded: " + vaultAdded);
-        
-    	} catch(ParseException pe ) {
-    		logger.info("Parse error: " + pe);
-    	}
-    	
-//    	if ("cancel".equals(action)) {
-//            return "redirect:/admin/pendingVaults";
-//        }
-
-        return "redirect:/admin/pendingVaults";
-    }
-
-*/
-
-    /*
-    @RequestMapping(value = "/admin/pendingVaults/delete/{pendingVaultId}", method = RequestMethod.GET)
-    public String deletePendingVault(@PathVariable("pendingVaultId") String pendingVaultID) {
-    	logger.info("pendingVaultID: " + pendingVaultID);
-        PendingVault pendingVault = restService.getPendingVaultRecord(vaultID);
-        model.addAttribute("pendingVault", pendingVault);
-
-        return "redirect:/admin/pendingVaults";
-    }*/
-
     @RequestMapping(value = "/admin/pendingVaults/{pendingVaultID}", method = RequestMethod.GET)
     public String deletePendingVault(ModelMap model, @PathVariable("pendingVaultID") String pendingVaultID) throws Exception {
 

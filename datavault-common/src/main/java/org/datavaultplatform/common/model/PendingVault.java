@@ -394,6 +394,9 @@ public class PendingVault {
         if (this.owner != null) {
             retVal.setOwnerId(this.owner.getID());
         }
+        if (this.creator != null) {
+            retVal.setVaultCreatorId(this.creator.getID());
+        }
         if (this.nominatedDataManagers != null) {
             List<String> ndmIds = new ArrayList<>();
             for (User ndm : this.nominatedDataManagers) {
