@@ -135,7 +135,7 @@ public class Vault {
     
  // The raw content from the metadata provider e.g. XML
     @Lob
-    @Column(name = "snapshot", nullable = false)
+    @Column(name = "snapshot", nullable = true)
     private String snapshot;
 
     @JsonIgnore

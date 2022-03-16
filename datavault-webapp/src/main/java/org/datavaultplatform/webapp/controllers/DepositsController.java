@@ -73,6 +73,7 @@ public class DepositsController {
 
     // View properties of a single deposit
     @RequestMapping(value = "/vaults/{vaultid}/deposits/{depositid}", method = RequestMethod.GET)
+    @PreAuthorize("hasPermission(#vaultID, 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission(#vaultID, 'GROUP_VAULT', 'CAN_RETRIEVE_DATA')")
     public String getDeposit(ModelMap model, @PathVariable("vaultid") String vaultID, @PathVariable("depositid") String depositID) throws Exception {
         model.addAttribute("vault", restService.getVault(vaultID));
         model.addAttribute("deposit", restService.getDeposit(depositID));
