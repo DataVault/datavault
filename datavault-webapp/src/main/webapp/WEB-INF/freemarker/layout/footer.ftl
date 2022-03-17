@@ -50,7 +50,7 @@
     
     <div class="container footer-copyright">
         <div class="copyright">
-            <p>Unless explicitly stated otherwise, all material is copyright © The University of Edinburgh 2019.</p>
+            <p>Unless explicitly stated otherwise, all material is copyright © The University of Edinburgh 2022.</p>
         </div>
     </div>
     
