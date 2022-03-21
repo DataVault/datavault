@@ -259,7 +259,6 @@
 </div>
 </div>
 
-<#if pendingVault.confirmed?c=="true">
 <div class="row">
 <div class="col-md-12 text-center">
      <#if (pendingVault.ID)??>
@@ -268,15 +267,16 @@
 
           <a name="delete-pending-vault" class="btn btn-danger" 
           href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/${pendingVault.getID()}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Delete Pending Vault</a>
+		<#if pendingVault.confirmed?c=="true">
          <button id="create-vault-btn" type="submit" value="submit" class="btn btn-success">
               <span class="glyphicon glyphicon-folder-close"></span>
                                     Create Vault
-         </button> 
+         </button>
+		</#if>
      </#if>
     
   </div>
   </div>
-</#if>
 </form>
    
 </div>                        
