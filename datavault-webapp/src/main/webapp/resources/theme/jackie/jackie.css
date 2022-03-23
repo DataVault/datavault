@@ -137,6 +137,12 @@ h3.white {
     font-size:140%;
     text-align:center;
 }
+h3.leftwhite {
+    color:#FFF;
+    margin-bottom:20px;
+    font-size:140%;
+    text-align:left;
+}
 .whitebackground {
     background-color:#FFF;
 }
