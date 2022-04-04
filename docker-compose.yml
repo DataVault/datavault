@@ -1,6 +1,7 @@
 version: '3'
 services:
   rabbitmq:
+    platform: linux/x86_64
     image: rabbitmq:3-management-alpine
     volumes:
       - ./docker/rabbitmq_data:/bitnami
@@ -19,6 +20,7 @@ services:
       retries: 5
 
   mysql:
+    platform: linux/x86_64
     image: mysql:5.7
     ports:
       - "53306:3306"
@@ -33,6 +35,7 @@ services:
       - dbnet
 
   maven-build:
+    platform: linux/x86_64
     image: datavault/maven-build
     build:
       context: .
@@ -100,6 +103,7 @@ services:
       - maven-build
 
   vault:
+    platform: linux/x86_64
     image: vault
     command: server -dev
     ports:
@@ -115,6 +119,7 @@ services:
       - vault
 
   vault-administration:
+    platform: linux/x86_64
     image: vault
     command:
       - /bin/sh 
@@ -144,6 +149,7 @@ services:
       - web
 
   sftp:
+    platform: linux/x86_64
     image: atmoz/sftp
     volumes:
       - ./docker/tmp/datavault/filestore:/home/admin1/upload

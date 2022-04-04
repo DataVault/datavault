@@ -10,6 +10,7 @@
 -- insert into RetentionPolicies (name, engine, description, sort, minDataRetentionPeriod, inEffectDate, endDate, url, dataGuidanceReviewed) values ('Wellcome Trust Basic', 'org.datavaultplatform.common.retentionpolicy.impl.uk.WTBasicRetentionPolicy', 'Vaults are due for review 10 years after the date the last deposit was made.', 9, 'https://wellcome.ac.uk/funding/managing-grant/policy-data-software-materials-management-and-sharing');
 -- insert into RetentionPolicies (name, engine, description, sort, minDataRetentionPeriod, inEffectDate, endDate, url, dataGuidanceReviewed) values ('Wellcome Trust Population Health / Clinical', 'org.datavaultplatform.common.retentionpolicy.impl.uk.WTPHCRetentionPolicy', 'Vaults are due for review 20 years after the date the last deposit was made.', 10, 'https://wellcome.ac.uk/funding/managing-grant/policy-data-software-materials-management-and-sharing');
 -- insert into RetentionPolicies (id, name, engine, description, sort, url) values ('5MIN', '5 minute test policy', 'org.datavaultplatform.common.retentionpolicy.impl.FiveMinuteRetentionPolicy', 'Test policy that flags for review any vault over 5 minutes old.', 11);
+INSERT INTO hibernate_sequence (next_val) VALUES (10);
 
 INSERT INTO RetentionPolicies(name,sort,engine,extendUponRetrieval,minDataRetentionPeriod,minRetentionPeriod,inEffectDate,endDate,url,dataGuidanceReviewed) VALUES ('Alzheimers Society',3,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',TRUE,'N/A',5,NULL,NULL,'https://www.alzheimers.org.uk/downloads/download/1454/alzheimers_society_grant_application_guidance_2018',STR_TO_DATE('01/02/2018', '%d/%m/%Y'));
 INSERT INTO RetentionPolicies(name,sort,engine,extendUponRetrieval,minDataRetentionPeriod,minRetentionPeriod,inEffectDate,endDate,url,dataGuidanceReviewed) VALUES ('AHRC Data Management Plan',2,'org.datavaultplatform.common.retentionpolicy.impl.uk.AHRCRetentionPolicy',TRUE,'3',5,STR_TO_DATE('29/03/2018', '%d/%m/%Y'),NULL,'http://www.ahrc.ac.uk/peerreview/peer-review-updates-and-guidance/',STR_TO_DATE('08/03/2018', '%d/%m/%Y'));
@@ -100,10 +101,10 @@ insert into Users (id, firstname, lastname, password) values ('user26', 'user 26
 insert into Users (id, firstname, lastname, password) values ('user27', 'user 27', 'Test', 'password27');
 insert into Users (id, firstname, lastname, password) values ('user28', 'user 28', 'Test', 'password28');
 insert into Users (id, firstname, lastname, password) values ('user29', 'user 29', 'Test', 'password29');
-insert into Users (id, firstname, lastname, password) values ('user30', 'user 30', 'Test', 'password30');
+insert into Users (id, firstname, lastname, password) values ('dspeed2', 'user 30', 'Test', 'password30');
 
 insert into Users (id, firstname, lastname, password) values ('admin1', 'admin user 1', 'Test', 'password1');
-insert into Role_assignments (user_id, role_id) values ('admin1', (select id from Roles where name='IS Admin'));
+-- insert into Role_assignments (id, user_id, role_id) values ('1', 'admin1', (select id from Roles where name='IS Admin'));
 
 insert into Groups (id, name, enabled) values ('BS',    'Business School', 1);
 insert into Groups (id, name, enabled) values ('SD',    'School of Divinity', 1);
