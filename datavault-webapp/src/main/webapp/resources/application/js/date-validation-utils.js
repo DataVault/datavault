@@ -47,7 +47,7 @@ function dateDiffInYears(d1, d2) {
 // Note textforDateNameInMsg and startYearsInFuture are optional parameters in function.
 function validateDateString(dateString, textforDateNameInMsg = "Date", startYearsInFuture = 0) {
 	// Regex for format yyyy-mm-dd
-	var date_regex =  /^([2]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$/;
+	var date_regex =  /^([1-2]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$/;
 	var matchDate = dateString.match(date_regex);
 	var msg = "";
 
