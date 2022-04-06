@@ -8,7 +8,7 @@ $(document).ready(function(){
 		return e.keyCode != 13;
 	});
 
-	var startYearsInFutureForGEDNegative = -30;
+	var startYearsInFutureForGEDNegative = -60; // 60 years in past
 	
 	var todayForDatepicker = new Date();
 	todayForDatepicker.setHours(0,0,0,0);
