@@ -7,17 +7,21 @@ import org.datavaultplatform.webapp.model.FancytreeNode;
 import org.datavaultplatform.webapp.services.RestService;
 import java.util.ArrayList;
 import javax.servlet.http.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.*;
 import org.apache.commons.codec.binary.Base64;
 
 @Controller
+@ConditionalOnBean(RestService.class)
 public class FilesController {
 
-    private RestService restService;
-    
-    public void setRestService(RestService restService) {
+    private final RestService restService;
+
+    @Autowired
+    public FilesController(RestService restService) {
         this.restService = restService;
     }
 

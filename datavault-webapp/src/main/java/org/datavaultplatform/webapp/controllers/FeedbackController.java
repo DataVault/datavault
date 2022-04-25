@@ -1,7 +1,10 @@
 package org.datavaultplatform.webapp.controllers;
 
 import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.webapp.config.MailConfig.MessageCreator;
 import org.datavaultplatform.webapp.services.RestService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -14,17 +17,17 @@ import org.springframework.web.bind.annotation.*;
  * Date: 29/11/2015
  */
 @Controller
+@ConditionalOnBean(RestService.class)
 public class FeedbackController {
 
-    private MailSender mailSender;
-    private SimpleMailMessage templateMessage;
+    private final MailSender mailSender;
+    private final MessageCreator messageCreator;
 
-    public void setMailSender(MailSender mailSender) {
+    @Autowired
+    public FeedbackController(MailSender mailSender,
+        MessageCreator messageCreator) {
         this.mailSender = mailSender;
-    }
-
-    public void setTemplateMessage(SimpleMailMessage templateMessage) {
-        this.templateMessage = templateMessage;
+        this.messageCreator = messageCreator;
     }
 
     /*

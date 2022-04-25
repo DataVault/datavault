@@ -1,6 +1,6 @@
 package org.datavaultplatform.webapp.services;
 
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.datavaultplatform.common.model.User;
@@ -15,7 +15,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.stereotype.Service;
 
+@Service
+@ConditionalOnBean(RestService.class)
 public class UserLookupService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserLookupService.class);
@@ -99,7 +103,9 @@ public class UserLookupService {
             }
             
         } catch (Exception e) {
-        	
+        	if(logger.isDebugEnabled()){
+                logger.error("isUUN {}", uun, e);
+            }
         }
     	
     	return exists;

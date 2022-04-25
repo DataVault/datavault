@@ -4,16 +4,22 @@ import org.datavaultplatform.common.model.PermissionModel;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.webapp.model.AdminDashboardPermissionsModel;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Service
+@ConditionalOnBean(RestService.class)
 public class PermissionsService {
 
-    private RestService restService;
+    private final RestService restService;
 
-    public void setRestService(RestService restService) {
+    @Autowired
+    public PermissionsService(RestService restService) {
         this.restService = restService;
     }
 

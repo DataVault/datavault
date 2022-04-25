@@ -7,8 +7,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.model.VaultReview;
 
 
+@Slf4j
 public class VaultReviewModel {
 
     private String vaultReviewId;
@@ -83,8 +86,8 @@ public class VaultReviewModel {
         Date date = null;
         try {
             date = new SimpleDateFormat("yyyy-MM-dd").parse(string);
-        } catch (ParseException e) {
-            e.printStackTrace();
+        } catch (ParseException ex) {
+            log.error("problem parsing date from {}", string, ex);
         }
 
         return date;

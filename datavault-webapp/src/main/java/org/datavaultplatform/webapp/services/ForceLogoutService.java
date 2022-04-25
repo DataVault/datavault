@@ -3,26 +3,31 @@ package org.datavaultplatform.webapp.services;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.stereotype.Service;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Service
+@ConditionalOnBean(RestService.class)
 public class ForceLogoutService {
 
     private static final Logger logger = LoggerFactory.getLogger(ForceLogoutService.class);
 
-    private SessionRegistry sessionRegistry;
+    private final SessionRegistry sessionRegistry;
 
-    private RestService restService;
+    private final RestService supportService;
 
-    public void setSessionRegistry(SessionRegistry sessionRegistry) {
+    @Autowired
+    public ForceLogoutService(
+        SessionRegistry sessionRegistry,
+        RestService supportService) {
         this.sessionRegistry = sessionRegistry;
-    }
-
-    public void setRestService(RestService restService) {
-        this.restService = restService;
+        this.supportService = supportService;
     }
 
     public void logoutUser(String userId) {
@@ -32,7 +37,7 @@ public class ForceLogoutService {
 
     public void logoutRole(long roleId) {
         logger.warn("Forcing a logout for all users assigned to role {}", roleId);
-        Set<String> userIds = restService.getRoleAssignmentsForRole(roleId).stream()
+        Set<String> userIds = supportService.getRoleAssignmentsForRole(roleId).stream()
                 .map(roleAssignment -> roleAssignment.getUserId())
                 .collect(Collectors.toSet());
         logoutUsers(userIds);

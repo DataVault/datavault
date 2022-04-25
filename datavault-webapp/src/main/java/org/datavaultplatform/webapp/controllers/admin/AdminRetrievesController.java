@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 import org.datavaultplatform.webapp.services.RestService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,11 +13,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 
 @Controller
+@ConditionalOnBean(RestService.class)
 public class AdminRetrievesController {
 
-    private RestService restService;
+    private final RestService restService;
 
-    public void setRestService(RestService restService) {
+    public AdminRetrievesController(RestService restService) {
         this.restService = restService;
     }
 

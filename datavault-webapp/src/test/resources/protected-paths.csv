@@ -1,0 +1,21 @@
+PATH, ROLE
+/admin , ROLE_ADMIN
+/admin/ , ROLE_ADMIN
+/admin/archivestores/ , ROLE_ADMIN_ARCHIVESTORES
+/admin/billing/ , ROLE_ADMIN_BILLING
+/admin/deposits/  ,ROLE_ADMIN_DEPOSITS
+/admin/events/ , ROLE_ADMIN_EVENTS
+/admin/retentionpolicies/ , ROLE_ADMIN_RETENTIONPOLICIES
+/admin/retrieves/ , ROLE_ADMIN_RETRIEVES
+/admin/roles/ , ROLE_ADMIN_ROLES
+/admin/schools/ , ROLE_ADMIN_SCHOOLS
+/admin/vaults/ , ROLE_ADMIN_VAULTS
+/admin/reviews/ , ROLE_ADMIN_REVIEWS
+/welcome , ROLE_USER
+/resources/favicon.ico,
+/actuator/info,
+/actuator/health,
+/actuator/customtime,
+/auth/login,
+/auth/confirmation,
+/auth/denied,

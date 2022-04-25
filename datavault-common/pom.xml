@@ -1,187 +1,115 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>datavault</groupId>
-        <artifactId>datavault</artifactId>
-        <version>1.0-SNAPSHOT</version>
-    </parent>
-    <artifactId>datavault-common</artifactId>
-    <packaging>jar</packaging>
-    
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <!-- This is the path to the root directory. -->
-        <root.basedir>${basedir}/..</root.basedir>
-    </properties>
-    
-    <!-- Amazon AWS -->
-    <dependencyManagement>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>datavault</artifactId>
+    <groupId>datavault</groupId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>datavault-common</artifactId>
+  <name>datavault-common</name>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.bettercloud</groupId>
+      <artifactId>vault-java-driver</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jsondoc</groupId>
+      <artifactId>jsondoc-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.directory.api</groupId>
+      <artifactId>api-all</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.jcraft</groupId>
+      <artifactId>jsch</artifactId>
+    </dependency>
+
+    <!-- Amazon Glacier -->
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-glacier</artifactId>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-objectstorage -->
+    <dependency>
+      <groupId>com.oracle.oci.sdk</groupId>
+      <artifactId>oci-java-sdk-objectstorage</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>${skip.unit.tests}</skipTests>
+
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+
+          <excludedGroups>slow,org.datavaultplatform.test.TSMTest</excludedGroups>
+        </configuration>
         <dependencies>
-            <dependency>
-                <groupId>com.amazonaws</groupId>
-                <artifactId>aws-java-sdk-bom</artifactId>
-                <version>1.11.321</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <!-- Oracle Gen 2 -->
-            <dependency>
-                <groupId>com.oracle.oci.sdk</groupId>
-                <artifactId>oci-java-sdk-bom</artifactId>
-                <!-- replace the version below with your required version -->
-                <version>1.23.2</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+          <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit-jupiter.version}</version>
+          </dependency>
         </dependencies>
-    </dependencyManagement>
-    
-    
-    
-    <dependencies>
-        <!-- Jackson JSON Processor -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-        
-        <!-- Hibernate -->
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-        </dependency>
-        
-        <!-- Apache Commons IO -->
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.7</version>
-        </dependency>
-        
-        <!-- Java Secure Channel (SSH) -->
-        <dependency>
-            <groupId>com.jcraft</groupId>
-            <artifactId>jsch</artifactId>
-            <version>0.1.55</version>
-        </dependency>
+      </plugin>
+    </plugins>
+  </build>
 
-        <!-- JSONDOC -->
-        <dependency>
-            <groupId>org.jsondoc</groupId>
-            <artifactId>jsondoc-core</artifactId>
-            <version>1.2.9</version>
-        </dependency>
-
-        <!-- Amazon Glacier -->
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-glacier</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-sqs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-sns</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.oracle.oci.sdk</groupId>
-            <artifactId>oci-java-sdk-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.oci.sdk</groupId>
-            <artifactId>oci-java-sdk-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.oci.sdk</groupId>
-            <artifactId>oci-java-sdk-objectstorage</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.oci.sdk</groupId>
-            <artifactId>oci-java-sdk-objectstorage-extensions</artifactId>
-            <version>1.23.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.oci.sdk</groupId>
-            <artifactId>oci-java-sdk-objectstorage-generated</artifactId>
-            <version>1.23.2</version>
-        </dependency>
-        <dependency>
-    		<groupId>org.glassfish</groupId>
-    		<artifactId>javax.json</artifactId>
-    		<version>1.0.4</version>
-		</dependency>
-	<!-- Tests -->
-        <dependency>
-         <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>hamcrest-core</artifactId>
-                    <groupId>org.hamcrest</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!-- Encryption - Bouncy Castle -->
-        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.67</version>
-        </dependency>
-
-        <!--  HashiCorp Vault -->
-        <dependency>
-            <groupId>com.bettercloud</groupId>
-            <artifactId>vault-java-driver</artifactId>
-            <version>3.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <version>16.0.3</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <!-- LDAP -->
-        <dependency>
-            <groupId>org.apache.directory.api</groupId>
-            <artifactId>api-all</artifactId>
-        </dependency>
-    </dependencies>
-    
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.1</version>
-                <configuration>
-                    <skipTests>${skip.unit.tests}</skipTests>
-                    
-                    <includes>
-                        <include>**/*Test.java</include>
-                    </includes>
-                    
-                    <excludedGroups>org.datavaultplatform.test.SlowTest,org.datavaultplatform.test.TSMTest</excludedGroups>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

@@ -2,10 +2,7 @@ package org.datavaultplatform.common.crypto;
 
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.util.encoders.Base64;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -21,15 +18,21 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
+import org.datavaultplatform.test.SlowTest;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EncryptionTest {
 
     private static File bigdataResourcesDir;
     private static File testDir;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
         String resourcesPath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "test"
                 + File.separator + "resources";
@@ -45,7 +48,7 @@ public class EncryptionTest {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         try {
             testDir.mkdir();
@@ -348,7 +351,7 @@ public class EncryptionTest {
     }
 
     @Test
-    @Category(org.datavaultplatform.test.SlowTest.class)
+    @SlowTest
     public void testHugeFileGCMCriptoWithAAD() {
         System.out.println("Start testHugeFileGCMCriptoWithAAD...");
 
@@ -444,7 +447,7 @@ public class EncryptionTest {
     }
 
     @Test
-    @Category(org.datavaultplatform.test.SlowTest.class)
+    @SlowTest
     public void testHugeFileCBCCriptoWithAAD() {
         System.out.println("Start testHugeFileCBCCriptoWithAAD...");
 

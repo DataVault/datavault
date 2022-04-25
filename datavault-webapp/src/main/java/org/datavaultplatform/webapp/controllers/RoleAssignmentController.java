@@ -12,6 +12,7 @@ import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,13 +27,14 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @Controller
+@ConditionalOnBean(RestService.class)
 public class RoleAssignmentController {
 
     private final RestService rest;
 
     private final ForceLogoutService forceLogoutService;
 
-    private UserLookupService userLookupService;
+    private final UserLookupService userLookupService;
 
     @Autowired
     public RoleAssignmentController(RestService rest, ForceLogoutService forceLogoutService, UserLookupService userLookupService) {

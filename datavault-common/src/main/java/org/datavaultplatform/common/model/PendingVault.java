@@ -3,7 +3,7 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;

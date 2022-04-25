@@ -4,6 +4,8 @@ package org.datavaultplatform.webapp.controllers.groups;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.RestService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -17,11 +19,13 @@ import java.util.ArrayList;
  */
 
 @Controller
+@ConditionalOnBean(RestService.class)
 public class GroupVaultsController {
 
-    private RestService restService;
+    private final RestService restService;
 
-    public void setRestService(RestService restService) {
+    @Autowired
+    public GroupVaultsController(RestService restService) {
         this.restService = restService;
     }
 

@@ -5,19 +5,24 @@ import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.request.CreateClientEvent;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Group;
+import org.datavaultplatform.webapp.services.NotifyLoginService;
 import org.datavaultplatform.webapp.services.RestService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 
+@Slf4j
 public class AuthenticationSuccess extends SavedRequestAwareAuthenticationSuccessHandler {
 
-    private RestService restService;
+    private final NotifyLoginService service;
 
-    public void setRestService(RestService restService) {
-        this.restService = restService;
+    @Autowired
+    public AuthenticationSuccess(NotifyLoginService service){
+        this.service = service;
     }
     
     @Override
@@ -27,23 +32,24 @@ public class AuthenticationSuccess extends SavedRequestAwareAuthenticationSucces
         String remoteAddress = request.getRemoteAddr();
         String userAgent = request.getHeader("User-Agent");
         CreateClientEvent clientEvent = new CreateClientEvent(remoteAddress, userAgent);
-        
+
+        //putting the SessionId in the clientEvent helps with testing
+        clientEvent.setSessionId(request.getSession().getId());
+
         // Log the authentication success with the broker
         try {
-            restService.notifyLogin(clientEvent);
-        } catch(Exception e){
-            System.err.println("Error when Logging the authentication success with the broker");
-            e.printStackTrace();
+            service.notifyLogin(clientEvent);
+        } catch(Exception ex){
+            log.error("Error when Logging the authentication success with the broker", ex);
         }
         
         // Check whether the user is an owner of any groups
         boolean groupOwner = false;
         Group[] groups = new Group[0];
         try{
-            groups = restService.getGroups();
-        }catch (Exception e){
-            System.err.println("Error when trying to get groups from broker");
-            e.printStackTrace();
+            groups = service.getGroups();
+        }catch (Exception ex){
+            log.error("Error when trying to get groups from broker", ex);
         }
         for (Group group : groups) {
             for (User owner : group.getOwners()) {

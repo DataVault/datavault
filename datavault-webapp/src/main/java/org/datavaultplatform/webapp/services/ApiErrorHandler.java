@@ -35,9 +35,11 @@ public class ApiErrorHandler extends DefaultResponseErrorHandler {
 
             HttpEntity<ApiError> extractedData = responseExtractor.extractData(response);
 
-            System.err.println("There has been an error while calling the broker Api, here is the stackTrace of the broker:");
+            logger.error("api error [{}]", extractedData.getBody());
+
+            logger.error("There has been an error while calling the broker Api, here is the stackTrace of the broker:");
             Exception ex = extractedData.getBody().getException();
-            ex.printStackTrace();
+            logger.error("There has been an error while calling the broker Api:", ex);
 
             throw new ServerException("There has been an error while calling the broker Api:", ex);
         }

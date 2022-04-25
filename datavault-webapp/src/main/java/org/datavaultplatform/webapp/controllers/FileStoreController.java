@@ -4,6 +4,9 @@ import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -16,33 +19,27 @@ import java.util.HashMap;
  * Time: 11:00
  */
 @Controller
+@ConditionalOnBean(RestService.class)
 public class FileStoreController {
 
     private static final Logger logger = LoggerFactory.getLogger(FileStoreController.class);
 
-    private RestService restService;
-    private String activeDir;
-    private String sftpHost;
-    private String sftpPort;
-    private String sftpRootPath;
+    private final RestService restService;
+    private final String activeDir;
+    private final String sftpHost;
+    private final String sftpPort;
+    private final String sftpRootPath;
 
-    public void setRestService(RestService restService) {
+    @Autowired
+    public FileStoreController(RestService restService,
+        @Value("${activeDir}") String activeDir,
+        @Value("${sftp.host}") String sftpHost,
+        @Value("${sftp.port}") String sftpPort,
+        @Value("${sftp.rootPath}") String sftpRootPath) {
         this.restService = restService;
-    }
-
-    public void setActiveDir(String activeDir) {
         this.activeDir = activeDir;
-    }
-
-    public void setSftpHost(String sftpHost) {
         this.sftpHost = sftpHost;
-    }
-
-    public void setSftpPort(String sftpPort) {
         this.sftpPort = sftpPort;
-    }
-
-    public void setSftpRootPath(String sftpRootPath) {
         this.sftpRootPath = sftpRootPath;
     }
 

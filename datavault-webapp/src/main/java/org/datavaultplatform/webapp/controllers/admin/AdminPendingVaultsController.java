@@ -15,6 +15,8 @@ import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,15 +26,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 @Controller
+@ConditionalOnBean(RestService.class)
 public class AdminPendingVaultsController {
 
 	private static final Logger logger = LoggerFactory.getLogger(AdminPendingVaultsController.class);
 
 	private static final int MAX_RECORDS_PER_PAGE = 10;
 
-    private RestService restService;
+    private final RestService restService;
 
-    public void setRestService(RestService restService) {
+    @Autowired
+    public AdminPendingVaultsController(RestService restService) {
         this.restService = restService;
     }
     

@@ -2,7 +2,7 @@ package org.datavaultplatform.webapp.controllers;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.TransferVault;
@@ -24,6 +24,9 @@ import org.datavaultplatform.webapp.services.ValidateService;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -39,45 +42,35 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
+@ConditionalOnBean(RestService.class)
 //@RequestMapping("/vaults")
 public class VaultsController {
 
     private static final Logger logger = LoggerFactory.getLogger(VaultsController.class);
 
-    private RestService restService;
-    private UserLookupService userLookupService;
+    private final RestService restService;
+    private final UserLookupService userLookupService;
     private ValidateService validateService;
-    private ForceLogoutService logoutService;
-    private String system;
-    private String link;
-    private String welcome;
+    private final ForceLogoutService logoutService;
+    private final String system;
+    private final String link;
+    private final String welcome;
 
-    public void setForceLogoutService(ForceLogoutService service) {
-        this.logoutService = service;
-    }
-
-    public void setSystem(String system) {
-        this.system = system;
-    }
-
-    public void setLink(String link) {
-        this.link = link;
-    }
-
-    public void setRestService(RestService restService) {
+    @Autowired
+    public VaultsController(RestService restService,
+        UserLookupService userLookupService,
+        ForceLogoutService logoutService,
+        ValidateService validateService,
+        @Value("${metadata.system}") String system,
+        @Value("${metadata.link}") String link,
+        @Value("${metadata.motd}") String welcome) {
         this.restService = restService;
-    }
-
-    public void setValidateService(ValidateService validateService) {
-        this.validateService = validateService;
-    }
-
-    public void setWelcome(String welcome) {
-        this.welcome = welcome;
-    }
-
-    public void setUserLookupService(UserLookupService userLookupService) {
         this.userLookupService = userLookupService;
+        this.logoutService = logoutService;
+        this.validateService = validateService;
+        this.system = system;
+        this.link = link;
+        this.welcome = welcome;
     }
 
     @PreAuthorize("hasPermission(#vaultId, 'VAULT', 'CAN_TRANSFER_VAULT_OWNERSHIP') or hasPermission(#vaultId, 'GROUP_VAULT', 'TRANSFER_SCHOOL_VAULT_OWNERSHIP')")

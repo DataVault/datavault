@@ -5,6 +5,9 @@ import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -19,18 +22,18 @@ import java.util.List;
  * Time: 11:00
  */
 @Controller
+@ConditionalOnBean(RestService.class)
 public class AdminArchiveStoreController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminArchiveStoreController.class);
 
-    private RestService restService;
-    private String archiveDir;
+    private final RestService restService;
+    private final String archiveDir;
 
-    public void setRestService(RestService restService) throws Exception {
+    @Autowired
+    public AdminArchiveStoreController(
+        RestService restService, @Value("${archiveDir}") String archiveDir) {
         this.restService = restService;
-    }
-
-    public void setArchiveDir(String archiveDir) throws Exception {
         this.archiveDir = archiveDir;
     }
 

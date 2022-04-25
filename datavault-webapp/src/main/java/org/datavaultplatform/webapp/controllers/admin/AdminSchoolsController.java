@@ -1,6 +1,6 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
@@ -11,6 +11,8 @@ import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -22,25 +24,23 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
+@ConditionalOnBean(RestService.class)
 public class AdminSchoolsController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminSchoolsController.class);
 
-    private RestService restService;
+    private final RestService restService;
 
-    private UserLookupService userLookupService;
+    private final UserLookupService userLookupService;
 
-    private ForceLogoutService forceLogoutService;
+    private final ForceLogoutService forceLogoutService;
 
-    public void setRestService(RestService restService) {
+    @Autowired
+    public AdminSchoolsController(RestService restService,
+        UserLookupService userLookupService,
+        ForceLogoutService forceLogoutService) {
         this.restService = restService;
-    }
-
-    public void setUserLookupService(UserLookupService userLookupService) {
         this.userLookupService = userLookupService;
-    }
-
-    public void setForceLogoutService(ForceLogoutService forceLogoutService) {
         this.forceLogoutService = forceLogoutService;
     }
 

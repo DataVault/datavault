@@ -3,6 +3,9 @@ package org.datavaultplatform.webapp.controllers;
 import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.webapp.services.RestService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,24 +17,23 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Time: 14:20
  */
 @Controller
+@ConditionalOnBean(RestService.class)
 public class WelcomeController {
 
-    private RestService restService;
+    private final RestService restService;
 
-    private String system;
-    private String link;
+    private final String system;
+    private final String link;
 
-    public void setSystem(String system) {
+    @Autowired
+    public WelcomeController(RestService restService,
+        @Value("${metadata.system}") String system,
+        @Value("${metadata.link}") String link) {
+        this.restService = restService;
         this.system = system;
-    }
-    public void setLink(String link) {
         this.link = link;
     }
 
-    public void setRestService(RestService restService) {
-        this.restService = restService;
-    }
-    
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String getVaultsListing(ModelMap model) {
         return "redirect:/vaults";

@@ -3,6 +3,10 @@ package org.datavaultplatform.webapp.controllers;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.datavaultplatform.webapp.services.RestService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,15 +18,17 @@ import org.springframework.web.bind.annotation.RequestParam;
  * Date: 27/02/2016
  */
 @Controller
+@ConditionalOnBean(RestService.class)
 public class HelpController {
 
-    private String system;
-    private String link;
+    private final String system;
+    private final String link;
 
-    public void setSystem(String system) {
+    @Autowired
+    public HelpController(
+        @Value("${metadata.system}") String system,
+        @Value("${metadata.link}") String link) {
         this.system = system;
-    }
-    public void setLink(String link) {
         this.link = link;
     }
 

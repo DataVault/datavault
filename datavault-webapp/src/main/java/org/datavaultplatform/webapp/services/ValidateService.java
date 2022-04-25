@@ -9,7 +9,9 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ValidateService {
     private static final Logger logger = LoggerFactory.getLogger(ValidateService.class);
 

@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.services;
 
+import org.springframework.util.Assert;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.cursor.EntryCursor;
 import org.apache.directory.api.ldap.model.entry.Attribute;
@@ -27,55 +28,120 @@ import java.util.List;
  * Time: 11:33
  */
 
+/**
+ * Without Builder, it's easy to get the constructor parameters in the wrong order.
+ */
 public class LDAPService {
 
     private static final Logger logger = LoggerFactory.getLogger(LDAPService.class);
 
     private LdapConnection connection;
 
-    private String host;
-    private String port;
-    private String useSsl;
-    private String dn;
-    private String password;
-    private String searchContext;
-    private String searchFilter;
-    private String attrs;
+    private final String host;
+    private final int port;
+    private final boolean useSsl;
+    private final String dn;
+    private final String password;
+    private final String searchContext;
+    private final String searchFilter;
+    private final String attrs;
 
-    public void setHost(String host) {
+    private LDAPService(String host, Integer port, Boolean useSsl, String dn,
+        String password, String searchContext, String searchFilter, String attrs) {
+
+        //1 HOST
+        Assert.notNull(host, () -> "host must not be null");
+
+        //2 PORT
+        Assert.notNull(port, () -> "port must not be null");
+        Assert.isTrue(port > 0, () -> "port must be > 0");
+
+        //3 UseSSL
+        Assert.notNull(useSsl, () -> "useSsl must not be null");
+
+        //4 DN
+        Assert.notNull(dn, () -> "dn must not be null");
+
+        //5 PASSWORD
+        Assert.notNull(password, () -> "password must not be null");
+
+        //6 SEARCH CONTEXT
+        Assert.notNull(searchContext, () -> "searchContext must not be null");
+
+        //7 SEARCH FILTER
+        Assert.notNull(searchFilter, () -> "searchFilter must not be null");
+
+        //8 ATTRS
+        Assert.notNull(attrs, () -> "attrs must not be null");
+
         this.host = host;
-    }
-
-    public void setPort(String port) {
         this.port = port;
-    }
-
-    public void setUseSsl(String useSsl) {
         this.useSsl = useSsl;
-    }
-
-    public void setDn(String dn) {
         this.dn = dn;
-    }
-
-    public void setPassword(String password) {
         this.password = password;
-    }
-
-    public void setSearchContext(String searchContext) {
         this.searchContext = searchContext;
-    }
-
-    public void setSearchFilter(String searchFilter) {
         this.searchFilter = searchFilter;
+        this.attrs = attrs;
+
     }
 
-    public void setAttrs(String attrs) {
-        this.attrs = attrs;
+    public static LDAPServiceBuilder builder(){
+        return new LDAPServiceBuilder();
+    }
+
+    public static class LDAPServiceBuilder {
+        private  String host;
+        private  Integer port;
+        private  Boolean useSsl;
+        private  String dn;
+        private  String password;
+        private  String searchContext;
+        private  String searchFilter;
+        private  String attrs;
+
+        private LDAPServiceBuilder() {
+        }
+
+        public LDAPServiceBuilder host(String host){
+            this.host = host;
+            return this;
+        }
+        public LDAPServiceBuilder port(int port){
+            this.port = port;
+            return this;
+        }
+        public LDAPServiceBuilder useSSL(boolean useSSL){
+            this.useSsl = useSSL;
+            return this;
+        }
+        public LDAPServiceBuilder dn(String dn){
+            this.dn = dn;
+            return this;
+        }
+        public LDAPServiceBuilder password(String password){
+            this.password = password;
+            return this;
+        }
+        public LDAPServiceBuilder searchContext(String searchContext){
+            this.searchContext = searchContext;
+            return this;
+        }
+        public LDAPServiceBuilder searchFilter(String searchFilter){
+            this.searchFilter = searchFilter;
+            return this;
+        }
+        public LDAPServiceBuilder attrs(String attrs){
+            this.attrs = attrs;
+            return this;
+        }
+        public LDAPService build() {
+            return new LDAPService(host, port, useSsl,  dn,
+                password,  searchContext,  searchFilter,  attrs);
+        }
     }
 
     public void getConnection() throws LdapException, CursorException {
-        connection = new LdapNetworkConnection(host, Integer.parseInt(port), Boolean.parseBoolean(useSsl));
+        connection = new LdapNetworkConnection(host, port, useSsl);
         connection.setTimeOut(0);
         connection.bind(dn, password);
     }

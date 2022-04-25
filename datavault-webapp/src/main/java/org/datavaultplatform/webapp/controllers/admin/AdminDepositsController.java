@@ -16,6 +16,8 @@ import org.datavaultplatform.common.response.AuditInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,17 +37,19 @@ import java.util.*;
  * Date: 27/09/2015
  */
 
+@ConditionalOnBean(RestService.class)
 @Controller
 public class AdminDepositsController {
 
-    private RestService restService;
+    private final RestService restService;
     private static final int DEFAULT_RECORDS_PER_PAGE = 10;
 
-    public void setRestService(RestService restService) {
-        this.restService = restService;
-    }
     private static final Logger logger = LoggerFactory.getLogger(AdminDepositsController.class);
 
+    @Autowired
+    public AdminDepositsController(RestService restService) {
+        this.restService = restService;
+    }
 
     @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)
     public String getDepositsListing(ModelMap model,

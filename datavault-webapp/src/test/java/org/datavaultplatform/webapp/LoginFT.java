@@ -4,11 +4,13 @@ package org.datavaultplatform.webapp;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.testng.Assert;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import org.datavaultplatform.webapp.page.FirstRunPage;
 import org.datavaultplatform.webapp.page.LoginPage;
 
+@Ignore
 public class LoginFT extends BaseFT {
     @Test
     public void testLogin() {
