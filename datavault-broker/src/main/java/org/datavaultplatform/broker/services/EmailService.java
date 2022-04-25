@@ -8,9 +8,9 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
-import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.apache.velocity.app.VelocityEngine;
 import javax.mail.internet.MimeMessage;
+import  org.datavaultplatform.broker.utils.VelocityEngineUtils;
 import java.io.IOException;
 import java.util.HashMap;
 

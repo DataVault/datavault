@@ -6,6 +6,7 @@
   <modules>
     <module>datavault-common</module>
     <module>datavault-webapp</module>
+    <module>datavault-broker</module>
   </modules>
   <parent>
     <groupId>org.springframework.boot</groupId>
@@ -48,6 +49,11 @@
     <spring.cloud.version>3.1.1</spring.cloud.version>
     <testcontainers.version>1.17.1</testcontainers.version>
     <json.path.version>2.7.0</json.path.version>
+    <mysql.version>8.0.28</mysql.version>
+    <bagit.version>4.9.0</bagit.version>
+    <velocity.version>2.3</velocity.version>
+    <oro.version>2.0.8</oro.version>
+    <commons.collection4.version>4.4</commons.collection4.version>
   </properties>
 
   <dependencyManagement>
@@ -138,6 +144,38 @@
         <version>${json.path.version}</version>
         <scope>test</scope>
       </dependency>
+
+      <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>${mysql.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>gov.loc</groupId>
+        <artifactId>bagit</artifactId>
+        <version>${bagit.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.velocity</groupId>
+        <artifactId>velocity-engine-core</artifactId>
+        <version>${velocity.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>oro</groupId>
+        <artifactId>oro</artifactId>
+        <version>${oro.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-collections4</artifactId>
+        <version>${commons.collection4.version}</version>
+      </dependency>
+
+
     </dependencies>
   </dependencyManagement>
 

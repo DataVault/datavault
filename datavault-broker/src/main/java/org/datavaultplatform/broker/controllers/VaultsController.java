@@ -1,6 +1,6 @@
 package org.datavaultplatform.broker.controllers;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
