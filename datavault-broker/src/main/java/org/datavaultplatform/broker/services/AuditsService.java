@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+@Service
 public class AuditsService {
 
     private AuditDAO auditDAO;

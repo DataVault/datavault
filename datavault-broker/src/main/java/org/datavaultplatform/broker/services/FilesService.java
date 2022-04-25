@@ -13,6 +13,8 @@ import org.datavaultplatform.common.storage.UserStore;
  * Date: 19/03/2015
  * Time: 13:34
  */
+import org.springframework.stereotype.Service;
+@Service
 public class FilesService {
 
     private UserStore userStore;

@@ -6,7 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-
+import org.springframework.stereotype.Service;
+@Service
 public class UsersService {
 
     private static final Logger logger = LoggerFactory.getLogger(UsersService.class);

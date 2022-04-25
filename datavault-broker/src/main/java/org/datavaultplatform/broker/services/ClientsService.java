@@ -4,7 +4,10 @@ import org.datavaultplatform.common.model.Client;
 import org.datavaultplatform.common.model.dao.ClientDAO;
 
 import java.util.List;
+import org.springframework.stereotype.Service;
 
+import org.springframework.stereotype.Service;
+@Service
 public class ClientsService {
 
     private ClientDAO clientDAO;

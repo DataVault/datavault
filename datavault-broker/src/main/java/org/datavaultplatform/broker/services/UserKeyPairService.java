@@ -10,6 +10,8 @@ import com.jcraft.jsch.*;
  * Date: 04/11/2015
  * Time: 09:54
  */
+import org.springframework.stereotype.Service;
+@Service
 public class UserKeyPairService {
 
     // comment added at the end of public key

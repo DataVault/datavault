@@ -5,6 +5,8 @@ import org.datavaultplatform.common.model.dao.DataManagerDAO;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+@Service
 public class DataManagersService {
 
     private DataManagerDAO dataManagerDAO;

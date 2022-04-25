@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+@Service
 public class PendingDataCreatorsService {
     private PendingDataCreatorDAO pendingDataCreatorDAO;
     private final Logger logger = LoggerFactory.getLogger(PendingDataCreatorsService.class);

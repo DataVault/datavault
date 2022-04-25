@@ -5,6 +5,8 @@ import org.datavaultplatform.common.model.dao.FileStoreDAO;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+@Service
 public class FileStoreService {
 
     private FileStoreDAO fileStoreDAO;

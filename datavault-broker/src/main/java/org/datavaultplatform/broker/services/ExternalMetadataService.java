@@ -12,6 +12,8 @@ import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.dao.DatasetDAO;
 
+import org.springframework.stereotype.Service;
+@Service
 public class ExternalMetadataService {
 
     private String metadataURL;

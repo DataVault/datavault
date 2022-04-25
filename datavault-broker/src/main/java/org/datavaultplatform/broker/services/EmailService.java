@@ -14,6 +14,8 @@ import  org.datavaultplatform.broker.utils.VelocityEngineUtils;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.springframework.stereotype.Service;
+@Service
 public class EmailService {
 
     private UsersService usersService;

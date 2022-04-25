@@ -6,6 +6,8 @@ import org.datavaultplatform.common.model.dao.ArchiveStoreDAO;
 import java.util.HashMap;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+@Service
 public class ArchiveStoreService {
 
     private String optionsDir;

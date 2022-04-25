@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Service;
+@Service
 public class RolesAndPermissionsService implements ApplicationListener<ContextRefreshedEvent> {
     private final Logger logger = LoggerFactory.getLogger(RolesAndPermissionsService.class);
 
@@ -44,6 +46,9 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        if(permissionDao == null || roleDao == null){
+            return;
+        }
         permissionDao.synchronisePermissions();
         roleDao.storeSpecialRoles();
     }

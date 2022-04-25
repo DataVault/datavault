@@ -20,6 +20,8 @@ import gov.loc.repository.bagit.ManifestReader;
 
 import org.datavaultplatform.common.model.FileFixity;
 
+import org.springframework.stereotype.Service;
+@Service
 public class MetadataService {
 
     private String metaDir;

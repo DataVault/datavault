@@ -11,6 +11,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+@Service
 public class VaultsReviewService {
 
     private static final Logger logger = LoggerFactory.getLogger(VaultsReviewService.class);

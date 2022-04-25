@@ -5,6 +5,8 @@ import org.datavaultplatform.common.model.dao.GroupDAO;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+@Service
 public class GroupsService {
 
     private GroupDAO groupDAO;

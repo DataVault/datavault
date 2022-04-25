@@ -6,6 +6,8 @@ import org.datavaultplatform.common.model.dao.EventDAO;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+@Service
 public class EventService {
 
     private EventDAO eventDAO;

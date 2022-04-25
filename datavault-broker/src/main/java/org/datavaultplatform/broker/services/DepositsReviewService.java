@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+@Service
 public class DepositsReviewService {
 
     private static final Logger logger = LoggerFactory.getLogger(DepositsReviewService.class);

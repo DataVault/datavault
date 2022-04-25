@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+@Service
 public class DataCreatorsService {
     private DataCreatorDAO dataCreatorDAO;
     private final Logger logger = LoggerFactory.getLogger(DataCreatorsService.class);

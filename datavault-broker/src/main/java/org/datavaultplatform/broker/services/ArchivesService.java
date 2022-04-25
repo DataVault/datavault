@@ -7,8 +7,10 @@ import org.datavaultplatform.common.model.dao.ArchiveDAO;
 
 import java.util.Date;
 import java.util.List;
+import org.springframework.stereotype.Service;
 
 
+@Service
 public class ArchivesService {
 
     private ArchiveDAO archiveDAO;
