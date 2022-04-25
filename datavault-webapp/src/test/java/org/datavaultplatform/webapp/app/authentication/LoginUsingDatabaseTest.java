@@ -11,6 +11,7 @@ import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.test.ProfileDatabase;
 import org.datavaultplatform.webapp.test.TestUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -52,6 +53,11 @@ public class LoginUsingDatabaseTest {
 
   @Autowired
   SessionRegistry registry;
+
+  @BeforeEach
+  void setup() {
+    TestUtils.cleanRegistry(registry);
+  }
 
   @Test
   void testLoginUsesRestService() {

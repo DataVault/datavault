@@ -1,7 +1,10 @@
 package org.datavaultplatform.webapp.config.shib;
 
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.services.LDAPService;
+import org.datavaultplatform.webapp.authentication.shib.ShibAuthenticationListener;
 import org.datavaultplatform.webapp.authentication.shib.ShibAuthenticationProvider;
+import org.datavaultplatform.webapp.authentication.shib.ShibGrantedAuthorityService;
 import org.datavaultplatform.webapp.authentication.shib.ShibWebAuthenticationDetailsSource;
 import org.datavaultplatform.webapp.services.PermissionsService;
 import org.datavaultplatform.webapp.services.RestService;
@@ -15,6 +18,7 @@ import org.springframework.security.web.authentication.Http403ForbiddenEntryPoin
 @Configuration
 @Profile("shib")
 @Import(ShibWebSecurityConfig.class)
+@Slf4j
 public class ShibProfileConfig {
 
   /*
@@ -29,14 +33,10 @@ public class ShibProfileConfig {
   ShibAuthenticationProvider shibAuthenticationProvider(
       RestService restService,
       LDAPService ldapService,
-      PermissionsService permissionService,
-      @Value("${ldap.enabled}") boolean ldapEnabled
+      @Value("${ldap.enabled}") boolean ldapEnabled,
+      ShibGrantedAuthorityService shibGrantedAuthorityService
   ){
-    ShibAuthenticationProvider result = new ShibAuthenticationProvider();
-    result.setRestService(restService);
-    result.setLdapService(ldapService);
-    result.setPermissionsService(permissionService);
-    result.setLdapEnabled(ldapEnabled);
+    ShibAuthenticationProvider result = new ShibAuthenticationProvider(restService, ldapService, ldapEnabled, shibGrantedAuthorityService);
     return result;
   }
 
@@ -49,14 +49,14 @@ public class ShibProfileConfig {
    */
   @Bean
   ShibWebAuthenticationDetailsSource shibWebAuthenticationDetailsSource(
-      @Value("${shibboleth.firstname}") String firstNameHeader,
-      @Value("${shibboleth.lastname}")String lastNameHeader,
-      @Value("${shibboleth.email}")String emailHeader
+      @Value("${shibboleth.firstname}") String firstnameRequestHeader,
+      @Value("${shibboleth.lastname}")String lastnameRequestHeader,
+      @Value("${shibboleth.email}")String emailRequestHeader
   ) {
     ShibWebAuthenticationDetailsSource result = new ShibWebAuthenticationDetailsSource();
-    result.setFirstnameRequestHeader(firstNameHeader);
-    result.setLastnameRequestHeader(lastNameHeader);
-    result.setEmailRequestHeader(emailHeader);
+    result.setFirstnameRequestHeader(firstnameRequestHeader);
+    result.setLastnameRequestHeader(lastnameRequestHeader);
+    result.setEmailRequestHeader(emailRequestHeader);
     return result;
   }
 
@@ -66,4 +66,13 @@ public class ShibProfileConfig {
     return new Http403ForbiddenEntryPoint();
   }
 
+  @Bean
+  ShibGrantedAuthorityService shibGrantedAuthorityService(RestService restService, PermissionsService permissionsService) {
+    return new ShibGrantedAuthorityService(restService, permissionsService);
+  }
+
+  @Bean
+  ShibAuthenticationListener shibAuthenticationListener() {
+    return new ShibAuthenticationListener();
+  }
 }

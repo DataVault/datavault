@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.util.Map;
 import lombok.SneakyThrows;
 import org.datavaultplatform.webapp.test.AddTestProperties;
+import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,7 +18,7 @@ import org.springframework.security.access.expression.AbstractSecurityExpression
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 
 @SpringBootTest
-@AddTestProperties
+@ProfileStandalone
 public class SecurityConfigTest {
 
   @Autowired

@@ -1,30 +1,24 @@
 package org.datavaultplatform.webapp.authentication.shib;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
-import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.ValidateUser;
-import org.datavaultplatform.webapp.model.AdminDashboardPermissionsModel;
-import org.datavaultplatform.webapp.security.ScopedGrantedAuthority;
 import org.datavaultplatform.common.services.LDAPService;
-import org.datavaultplatform.webapp.services.PermissionsService;
+import org.datavaultplatform.webapp.authentication.AuthenticationSuccess;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
-import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * In truth this class does not do any true authentication as the user was pre-authenticated by Shib, it just
@@ -39,26 +33,23 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(ShibAuthenticationProvider.class);
 
-    private RestService restService;
-    private LDAPService ldapService;
-    private PermissionsService permissionsService;
-    private Boolean ldapEnabled;
+    private final RestService restService;
+    private final LDAPService ldapService;
 
-    public void setRestService(RestService restService) {
+    private final ShibGrantedAuthorityService shibGrantedAuthorityService;
+
+    private final boolean ldapEnabled;
+
+    @Autowired
+    private AuthenticationSuccess authenticationSuccess;
+
+    public ShibAuthenticationProvider(RestService restService, LDAPService ldapService, boolean ldapEnabled, ShibGrantedAuthorityService shibGrantedAuthorityService ) {
         this.restService = restService;
-    }
-
-    public void setLdapService(LDAPService ldapService) {
         this.ldapService = ldapService;
-    }
-
-    public void setPermissionsService(PermissionsService permissionsService) {
-        this.permissionsService = permissionsService;
-    }
-
-    public void setLdapEnabled(Boolean ldapEnabled) {
         this.ldapEnabled = ldapEnabled;
+        this.shibGrantedAuthorityService = shibGrantedAuthorityService;
     }
+
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -73,8 +64,7 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
         try{
             userExists = restService.userExists(new ValidateUser(name, password));
         } catch(Exception e){
-            System.err.println("Error when trying to check if user exists with Broker!");
-            e.printStackTrace();
+            logger.error("Error when trying to check if user exists with Broker!", e);
         }
 
         if (!userExists) {
@@ -92,47 +82,18 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
             try{
                 restService.addUser(user);
             } catch(Exception e){
-                System.err.println("Error when trying to add user with Broker!");
-                e.printStackTrace();
+                logger.error("Error when trying to add user with Broker!",e);
             }
         } else {
-            List<RoleAssignment> roles = restService.getRoleAssignmentsForUser(name);
-            List<ScopedGrantedAuthority> scopedAuthorities = ScopedGrantedAuthority.fromRoleAssignments(roles);
-
-            grantedAuths.addAll(scopedAuthorities);
-
-            logger.info("Existing user " + name);
-            boolean isAdmin;
-            try{
-                isAdmin = restService.isAdmin(new ValidateUser(name, null));
-                if (isAdmin) {
-                    grantedAuths.add(new SimpleGrantedAuthority("ROLE_IS_ADMIN"));
-                }
-            } catch(Exception e){
-                System.err.println("Error when trying to check if user is admin with Broker!");
-                e.printStackTrace();
-            }
-
-            Collection<GrantedAuthority> adminAuthorities = getAdminAuthorities(authentication);
-            if (!adminAuthorities.isEmpty()) {
-                logger.info("Granting user " + name + " ROLE_ADMIN");
-                grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-                grantedAuths.addAll(adminAuthorities);
-            }
+            List<GrantedAuthority> grantedAuthsForUser = this.shibGrantedAuthorityService.getGrantedAuthoritiesForUser(name, authentication);
+            grantedAuths.addAll(grantedAuthsForUser);
         }
 
-        grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
+        grantedAuths.add(ShibUtils.ROLE_USER);
         return new PreAuthenticatedAuthenticationToken(name, password, grantedAuths);
 
     }
 
-    private Collection<GrantedAuthority> getAdminAuthorities(Principal principal) {
-        AdminDashboardPermissionsModel adminPermissions = permissionsService.getDashboardPermissions(principal);
-        return adminPermissions.getUnscopedPermissions().stream()
-                .filter(p -> p.getPermission().getRoleName() != null)
-                .map(p -> new SimpleGrantedAuthority(p.getPermission().getRoleName()))
-                .collect(Collectors.toSet());
-    }
 
     @Override
     public boolean supports(Class<?> authentication) {

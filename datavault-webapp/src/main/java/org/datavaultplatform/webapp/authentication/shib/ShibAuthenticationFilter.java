@@ -1,9 +1,14 @@
 package org.datavaultplatform.webapp.authentication.shib;
 
+import java.io.IOException;
+import java.util.Arrays;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedCredentialsNotFoundException;
-
-import javax.servlet.http.HttpServletRequest;
 import org.springframework.util.Assert;
 
 /**
@@ -15,6 +20,8 @@ import org.springframework.util.Assert;
  * Time: 13:16
  */
 public class ShibAuthenticationFilter extends AbstractPreAuthenticatedProcessingFilter {
+
+    public static final String[] BYPASS_STARTING_WITH = {"/error", "/resources", "/actuator/info","/actuator/health", "/actuator/customtime"};
 
     private String principalRequestHeader;
     private boolean exceptionIfHeaderMissing = true;
@@ -68,4 +75,19 @@ public class ShibAuthenticationFilter extends AbstractPreAuthenticatedProcessing
         Assert.notNull(this.principalRequestHeader, "The principal request header must be set");
     }
 
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        if (request instanceof HttpServletRequest) {
+            HttpServletRequest req = (HttpServletRequest) request;
+            String path = req.getRequestURI();
+
+            //We allow the error page and resources to bypass this filter
+            boolean bypassShibFilter = Arrays.stream(BYPASS_STARTING_WITH).anyMatch(path::startsWith);
+            if (bypassShibFilter) {
+                chain.doFilter(request, response);
+                return;
+            }
+        }
+        super.doFilter(request, response, chain);
+    }
 }

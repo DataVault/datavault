@@ -128,4 +128,12 @@ public abstract class TestUtils {
     return new HashSet(Arrays.asList(items));
   }
 
+  public static void cleanRegistry(SessionRegistry registry) {
+    registry.getAllPrincipals().forEach(p -> {
+      registry.getAllSessions(p, true).forEach(sessionInformation -> {
+        registry.removeSessionInformation(sessionInformation.getSessionId());
+      });
+    });
+
+  }
 }

@@ -76,6 +76,7 @@ public class SessionRegistryUsageTest {
   @BeforeEach
   void setup() {
     Mockito.when(mNotifyLoginService.getGroups()).thenReturn(new Group[0]);
+    TestUtils.cleanRegistry(sessionRegistry);
   }
 
   private static ResponseEntity<String> makeGetRequestWithSession(TestRestTemplate template,

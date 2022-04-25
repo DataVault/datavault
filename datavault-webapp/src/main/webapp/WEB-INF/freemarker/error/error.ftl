@@ -9,10 +9,10 @@
 
     <div class="alert alert-danger" role="alert">
         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-        <span class="sr-only">Error:</span>
+        <span id="error-heading" class="sr-only">Error:</span>
         An error has occured!<br/><br/>
         <#if message?has_content>
-            <span>${message}</span>
+            <span id="error-message">${message}</span>
         </#if>
     </div>
 

@@ -88,6 +88,7 @@ public class SessionTimedOutTest {
   @BeforeEach
   void setup() {
     Mockito.when(mNotifyLoginService.getGroups()).thenReturn(new Group[0]);
+    TestUtils.cleanRegistry(sessionRegistry);
   }
 
   @Test
