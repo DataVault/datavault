@@ -3,22 +3,24 @@ package org.datavaultplatform.common.model.dao;
 import java.util.List;
 
 import org.datavaultplatform.common.model.RetentionPolicy;
-import org.datavaultplatform.common.model.RoleModel;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class RetentionPolicyDAOImpl implements RetentionPolicyDAO {
 
-    private SessionFactory sessionFactory;
- 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    private final SessionFactory sessionFactory;
+
+    public RetentionPolicyDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-     
+
+
     @Override
     public void save(RetentionPolicy retentionPolicy) {
         Session session = this.sessionFactory.openSession();

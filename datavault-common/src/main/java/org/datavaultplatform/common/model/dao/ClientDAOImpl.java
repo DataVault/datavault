@@ -11,6 +11,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
 /**
  * User: Robin Taylor
@@ -18,15 +19,17 @@ import org.slf4j.LoggerFactory;
  * Time: 11:01
  */
 
+@Repository
 public class ClientDAOImpl implements ClientDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientDAOImpl.class);
 
-    private SessionFactory sessionFactory;
+    private final SessionFactory sessionFactory;
 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    public ClientDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
+
 
     @Override
     public void save(Client client) {

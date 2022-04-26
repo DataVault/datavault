@@ -9,15 +9,17 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import java.util.List;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class DepositReviewDAOImpl implements DepositReviewDAO {
 
-    private SessionFactory sessionFactory;
- 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    private final SessionFactory sessionFactory;
+
+    public DepositReviewDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-     
+
     @Override
     public void save(DepositReview depositReview) {
         Session session = this.sessionFactory.openSession();

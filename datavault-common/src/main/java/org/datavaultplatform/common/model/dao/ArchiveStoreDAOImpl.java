@@ -2,7 +2,6 @@ package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
 
-import org.datavaultplatform.common.model.FileStore;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -12,17 +11,19 @@ import org.hibernate.criterion.Restrictions;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class ArchiveStoreDAOImpl implements ArchiveStoreDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(ArchiveStoreDAOImpl.class);
 
-    private SessionFactory sessionFactory;
- 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    private final SessionFactory sessionFactory;
+
+    public ArchiveStoreDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-     
+
     @Override
     public void save(ArchiveStore archiveStore) {
         Session session = this.sessionFactory.openSession();

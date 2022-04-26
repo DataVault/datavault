@@ -12,15 +12,17 @@ import org.hibernate.criterion.Restrictions;
 import org.datavaultplatform.common.event.Event;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class EventDAOImpl implements EventDAO {
     
-    private SessionFactory sessionFactory;
- 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    private final SessionFactory sessionFactory;
+
+    public EventDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-    
+
     @Override
     public void save(Event event) {
         Session session = this.sessionFactory.openSession();

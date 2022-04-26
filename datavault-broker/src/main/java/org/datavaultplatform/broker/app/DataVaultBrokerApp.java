@@ -1,6 +1,7 @@
 package org.datavaultplatform.broker.app;
 
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.broker.config.DatabaseConfig;
 import org.datavaultplatform.broker.config.SecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -12,9 +13,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
 @SpringBootApplication
-@ComponentScan({"org.datavaultplatform.broker.controllers",
+@ComponentScan({
+    "org.datavaultplatform.broker.controllers",
     "org.datavaultplatform.broker.services"})
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, DatabaseConfig.class})
 @Slf4j
 public class DataVaultBrokerApp implements CommandLineRunner {
   @Autowired

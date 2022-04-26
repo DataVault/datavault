@@ -12,17 +12,19 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class BillingDAOImpl implements BillingDAO {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(BillingDAOImpl.class);
 
-    private SessionFactory sessionFactory;
- 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    private final SessionFactory sessionFactory;
+
+    public BillingDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-     
+
     @Override
     public void save(BillingInfo billing) {
         Session session = this.sessionFactory.openSession();

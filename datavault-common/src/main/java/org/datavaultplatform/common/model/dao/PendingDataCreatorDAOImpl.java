@@ -1,8 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
 import org.datavaultplatform.common.model.PendingDataCreator;
-import org.datavaultplatform.common.model.PendingVault;
-import org.datavaultplatform.common.model.RoleAssignment;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -12,16 +10,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class PendingDataCreatorDAOImpl implements PendingDataCreatorDAO{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PendingDataCreatorDAOImpl.class);
 
-    private SessionFactory sessionFactory;
+    private final SessionFactory sessionFactory;
 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    public PendingDataCreatorDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
+
 
     @Override
     public void save(List<PendingDataCreator> pendingDataCreators) {

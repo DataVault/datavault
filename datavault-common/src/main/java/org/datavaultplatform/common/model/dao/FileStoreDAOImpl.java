@@ -11,17 +11,19 @@ import org.hibernate.criterion.Restrictions;
 import org.datavaultplatform.common.model.FileStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class FileStoreDAOImpl implements FileStoreDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(FileStoreDAOImpl.class);
 
-    private SessionFactory sessionFactory;
- 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    private final SessionFactory sessionFactory;
+
+    public FileStoreDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-     
+
     @Override
     public void save(FileStore fileStore) {
         Session session = this.sessionFactory.openSession();

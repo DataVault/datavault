@@ -1,6 +1,5 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.VaultReview;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -9,17 +8,18 @@ import org.hibernate.Transaction;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
-import java.util.Date;
 import java.util.List;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class VaultReviewDAOImpl implements VaultReviewDAO {
 
-    private SessionFactory sessionFactory;
- 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    private final SessionFactory sessionFactory;
+
+    public VaultReviewDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-     
+
     @Override
     public void save(VaultReview vaultReview) {
         Session session = this.sessionFactory.openSession();

@@ -11,17 +11,17 @@ import org.hibernate.criterion.Restrictions;
 
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class RoleAssignmentDaoImpl implements RoleAssignmentDAO {
 
-    private SessionFactory sessionFactory;
+    private final SessionFactory sessionFactory;
 
-    public RoleAssignmentDaoImpl() {
-    }
-
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    @Autowired
+    public RoleAssignmentDaoImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 

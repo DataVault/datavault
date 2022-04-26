@@ -1,24 +1,26 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
- 
+import org.datavaultplatform.common.model.User;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.Criteria;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-import org.datavaultplatform.common.model.User;
-
+@Repository
 public class UserDAOImpl implements UserDAO {
 
-    private SessionFactory sessionFactory;
- 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    private final SessionFactory sessionFactory;
+
+    @Autowired
+    public UserDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-     
+
     @Override
     public void save(User user) {
         Session session = this.sessionFactory.openSession();
@@ -71,6 +73,8 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public int count() {
         Session session = this.sessionFactory.openSession();
-        return (int)(long)(Long)session.createCriteria(User.class).setProjection(Projections.rowCount()).uniqueResult();
+        Long result = (Long)session.createCriteria(User.class).setProjection(Projections.rowCount()).uniqueResult();
+        session.close();
+        return result.intValue();
     }
 }

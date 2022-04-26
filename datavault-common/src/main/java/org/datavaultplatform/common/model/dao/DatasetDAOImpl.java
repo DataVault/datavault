@@ -10,15 +10,17 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import org.datavaultplatform.common.model.Dataset;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class DatasetDAOImpl implements DatasetDAO {
 
-    private SessionFactory sessionFactory;
- 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    private final SessionFactory sessionFactory;
+
+    public DatasetDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-     
+
     @Override
     public void save(Dataset dataset) {
         Session session = this.sessionFactory.openSession();

@@ -15,17 +15,20 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class VaultDAOImpl implements VaultDAO {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(VaultDAOImpl.class);
 
-    private SessionFactory sessionFactory;
- 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    private final SessionFactory sessionFactory;
+
+    public VaultDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-     
+
+
     @Override
     public void save(Vault vault) {
         Session session = this.sessionFactory.openSession();

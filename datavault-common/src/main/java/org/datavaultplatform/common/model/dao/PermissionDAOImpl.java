@@ -13,14 +13,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class PermissionDAOImpl implements PermissionDAO {
 
-    private SessionFactory sessionFactory;
+    private final SessionFactory sessionFactory;
 
-    public PermissionDAOImpl() {}
-
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    @Autowired
+    public PermissionDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 

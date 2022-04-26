@@ -6,14 +6,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 @Service
 public class UsersService {
 
     private static final Logger logger = LoggerFactory.getLogger(UsersService.class);
 
-    private UserDAO userDAO;
-    
+    private final UserDAO userDAO;
+
+    @Autowired
+    public UsersService(UserDAO userDAO) {
+        this.userDAO = userDAO;
+    }
+
     public List<User> getUsers() {
         return userDAO.list();
     }
@@ -30,10 +36,6 @@ public class UsersService {
     
     public User getUser(String userID) {
         return userDAO.findById(userID);
-    }
-    
-    public void setUserDAO(UserDAO userDAO) {
-        this.userDAO = userDAO;
     }
 
     public int count() { return userDAO.count(); }

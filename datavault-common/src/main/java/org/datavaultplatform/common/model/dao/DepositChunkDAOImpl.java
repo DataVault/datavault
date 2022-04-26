@@ -9,15 +9,18 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import java.util.List;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class DepositChunkDAOImpl implements DepositChunkDAO {
 
-    private SessionFactory sessionFactory;
- 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    private final SessionFactory sessionFactory;
+
+    public DepositChunkDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-     
+
+
     @Override
     public void save(DepositChunk chunk) {
         Session session = this.sessionFactory.openSession();

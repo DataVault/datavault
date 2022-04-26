@@ -10,15 +10,17 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import org.datavaultplatform.common.model.Job;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class JobDAOImpl implements JobDAO {
 
-    private SessionFactory sessionFactory;
- 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    private final SessionFactory sessionFactory;
+
+    public JobDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-     
+
     @Override
     public void save(Job job) {
         Session session = this.sessionFactory.openSession();

@@ -2,7 +2,6 @@ package org.datavaultplatform.broker.services;
 
 import org.datavaultplatform.common.model.DataCreator;
 import org.datavaultplatform.common.model.dao.DataCreatorDAO;
-import org.datavaultplatform.common.model.dao.PendingDataCreatorDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,12 +10,15 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 @Service
 public class DataCreatorsService {
-    private DataCreatorDAO dataCreatorDAO;
+
     private final Logger logger = LoggerFactory.getLogger(DataCreatorsService.class);
 
-    public void setDataCreatorDAO(DataCreatorDAO dataCreatorDAO) {
+    private final DataCreatorDAO dataCreatorDAO;
+
+    public DataCreatorsService(DataCreatorDAO dataCreatorDAO) {
         this.dataCreatorDAO = dataCreatorDAO;
     }
+
 
     public void addCreators(List<DataCreator> creators) {
 

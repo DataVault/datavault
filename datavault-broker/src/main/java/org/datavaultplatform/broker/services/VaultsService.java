@@ -11,54 +11,46 @@ import org.datavaultplatform.common.request.CreateVault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 @Service
 public class VaultsService {
 
     private final Logger logger = LoggerFactory.getLogger(VaultsService.class);
-    private VaultDAO vaultDAO;
+    private final VaultDAO vaultDAO;
 
-    private RolesAndPermissionsService rolesAndPermissionsService;
+    private final RolesAndPermissionsService rolesAndPermissionsService;
 
-    private RetentionPoliciesService retentionPoliciesService;
+    private final RetentionPoliciesService retentionPoliciesService;
 
-    private DataCreatorsService dataCreatorsService;
+    private final DataCreatorsService dataCreatorsService;
 
-    private BillingService billingService;
-    private UsersService usersService;
-    private EventService eventService;
-    private ClientsService clientsService;
-    private EmailService emailService;
+    private final BillingService billingService;
+    private final UsersService usersService;
+    private final EventService eventService;
+    private final ClientsService clientsService;
+    private final EmailService emailService;
 
-    public void setEmailService(EmailService emailService) { this.emailService = emailService; }
-
-    public void setUsersService(UsersService usersService) {
-        this.usersService = usersService;
-    }
-
-    public void setEventService(EventService eventService) {
-        this.eventService = eventService;
-    }
-
-    public void setClientsService(ClientsService clientsService) {
-        this.clientsService = clientsService;
-    }
-
-    public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
+    @Autowired
+    public VaultsService(VaultDAO vaultDAO, RolesAndPermissionsService rolesAndPermissionsService,
+        RetentionPoliciesService retentionPoliciesService, DataCreatorsService dataCreatorsService,
+        BillingService billingService, UsersService usersService, EventService eventService,
+        ClientsService clientsService, EmailService emailService) {
+        this.vaultDAO = vaultDAO;
         this.rolesAndPermissionsService = rolesAndPermissionsService;
+        this.retentionPoliciesService = retentionPoliciesService;
+        this.dataCreatorsService = dataCreatorsService;
+        this.billingService = billingService;
+        this.usersService = usersService;
+        this.eventService = eventService;
+        this.clientsService = clientsService;
+        this.emailService = emailService;
     }
+
 
     public RetentionPoliciesService getRetentionPoliciesService() {
         return retentionPoliciesService;
     }
-
-    public void setRetentionPoliciesService(RetentionPoliciesService retentionPoliciesService) {
-        this.retentionPoliciesService = retentionPoliciesService;
-    }
-
-    public void setDataCreatorsService(DataCreatorsService dataCreatorsService) { this.dataCreatorsService = dataCreatorsService; }
-
-    public void setBillingService(BillingService billingService) { this.billingService = billingService; }
 
     public List<Vault> getVaults() {
         return vaultDAO.list();
@@ -146,10 +138,6 @@ public class VaultsService {
 
     public Vault getVault(String vaultID) {
         return vaultDAO.findById(vaultID);
-    }
-
-    public void setVaultDAO(VaultDAO vaultDAO) {
-        this.vaultDAO = vaultDAO;
     }
 
     public List<Vault> search(String userId, String query, String sort, String order, String offset, String maxResult) {

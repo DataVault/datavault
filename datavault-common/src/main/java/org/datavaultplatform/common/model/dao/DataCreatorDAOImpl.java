@@ -10,16 +10,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class DataCreatorDAOImpl implements DataCreatorDAO{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataCreatorDAOImpl.class);
 
-    private SessionFactory sessionFactory;
+    private final SessionFactory sessionFactory;
 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    public DataCreatorDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
+
 
     @Override
     public void save(List<DataCreator> dataCreators) {

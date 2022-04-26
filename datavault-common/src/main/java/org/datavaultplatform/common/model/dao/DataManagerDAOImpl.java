@@ -11,17 +11,19 @@ import org.hibernate.criterion.Restrictions;
 import org.datavaultplatform.common.model.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class DataManagerDAOImpl implements DataManagerDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(DataManagerDAOImpl.class);
 
-    private SessionFactory sessionFactory;
- 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    private final SessionFactory sessionFactory;
+
+    public DataManagerDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-     
+
     @Override
     public void save(DataManager dataManager) {
         Session session = this.sessionFactory.openSession();

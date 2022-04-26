@@ -15,12 +15,14 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import org.datavaultplatform.common.model.Deposit;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class DepositDAOImpl implements DepositDAO {
 
-    private SessionFactory sessionFactory;
+    private final SessionFactory sessionFactory;
 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    public DepositDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 

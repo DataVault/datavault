@@ -4,10 +4,10 @@ import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.PermissionDAO;
 import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
 import org.datavaultplatform.common.model.dao.RoleDAO;
-import org.datavaultplatform.common.model.dao.UserDAO;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
@@ -22,26 +22,21 @@ import org.springframework.stereotype.Service;
 public class RolesAndPermissionsService implements ApplicationListener<ContextRefreshedEvent> {
     private final Logger logger = LoggerFactory.getLogger(RolesAndPermissionsService.class);
 
-    private RoleDAO roleDao;
+    private final RoleDAO roleDao;
 
-    private PermissionDAO permissionDao;
+    private final PermissionDAO permissionDao;
 
-    private RoleAssignmentDAO roleAssignmentDao;
+    private final RoleAssignmentDAO roleAssignmentDao;
 
-    private UsersService usersService;
+    private final UsersService usersService;
 
-    public void setRoleDao(RoleDAO roleDao) {
+    @Autowired
+    public RolesAndPermissionsService(RoleDAO roleDao, PermissionDAO permissionDao,
+        RoleAssignmentDAO roleAssignmentDao, UsersService usersService) {
         this.roleDao = roleDao;
-    }
-
-    public void setPermissionDao(PermissionDAO permissionDao) {
         this.permissionDao = permissionDao;
-    }
-
-    public void setUsersService(UsersService usersService) { this.usersService = usersService; }
-
-    public void setRoleAssignmentDao(RoleAssignmentDAO roleAssignmentDao) {
         this.roleAssignmentDao = roleAssignmentDao;
+        this.usersService = usersService;
     }
 
     @Override

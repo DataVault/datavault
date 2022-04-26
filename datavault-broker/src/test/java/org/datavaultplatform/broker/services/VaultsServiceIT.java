@@ -1,31 +1,23 @@
 package org.datavaultplatform.broker.services;
 
 
-import org.datavaultplatform.common.model.RoleAssignment;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Date;
-
+import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.broker.app.DataVaultBrokerApp;
+import org.datavaultplatform.broker.test.AddTestProperties;
+import org.datavaultplatform.broker.test.BaseDatabaseTest;
+import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.Vault;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-//import org.springframework.test.context.transaction.TransactionConfiguration;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-//@DataJpaTest
-@AutoConfigureTestDatabase(replace = NONE)
-@ActiveProfiles("it")
-@ContextConfiguration(locations = {"classpath:datavault-broker-root.xml"})
-//@TransactionConfiguration(defaultRollback=true,transactionManager="transactionManager")
-public class VaultsServiceIT {
+@SpringBootTest(classes = DataVaultBrokerApp.class)
+@AddTestProperties
+@Slf4j
+public class VaultsServiceIT extends BaseDatabaseTest {
     @Autowired
     private VaultsService vaultsService;
 
@@ -42,6 +34,7 @@ public class VaultsServiceIT {
         int prevVaultCount = vaultsService.count("admin1");
         
         Vault vault = new Vault("Vault Test");
+        vault.setContact("vault contact");
         vault.setDescription("Vault for test");
         vault.setGrantEndDate(new Date());
         vault.setReviewDate(new Date());

@@ -1,6 +1,5 @@
 package org.datavaultplatform.broker.services;
 
-import org.datavaultplatform.broker.controllers.admin.AdminRetentionPoliciesController;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.model.Retrieve;
@@ -25,8 +24,12 @@ public class RetentionPoliciesService {
 
     private final Logger logger = LoggerFactory.getLogger(RetentionPoliciesService.class);
 
-    private RetentionPolicyDAO retentionPolicyDAO;
-    
+    private final RetentionPolicyDAO retentionPolicyDAO;
+
+    public RetentionPoliciesService(RetentionPolicyDAO retentionPolicyDAO) {
+        this.retentionPolicyDAO = retentionPolicyDAO;
+    }
+
     public List<RetentionPolicy> getRetentionPolicies() {
         return retentionPolicyDAO.list();
     }
@@ -41,10 +44,6 @@ public class RetentionPoliciesService {
     
     public RetentionPolicy getPolicy(String policyID) {
         return retentionPolicyDAO.findById(policyID);
-    }
-    
-    public void setRetentionPolicyDAO(RetentionPolicyDAO retentionPolicyDAO) {
-        this.retentionPolicyDAO = retentionPolicyDAO;
     }
 
     public void delete(String policyID) {

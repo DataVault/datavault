@@ -14,12 +14,14 @@ import org.hibernate.criterion.Restrictions;
 
 import java.util.HashMap;
 import java.util.List;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class AuditChunkStatusDAOImpl implements AuditChunkStatusDAO {
 
-    private SessionFactory sessionFactory;
+    private final SessionFactory sessionFactory;
 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    public AuditChunkStatusDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 

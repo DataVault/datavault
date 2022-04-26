@@ -6,7 +6,6 @@ import java.util.List;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.util.DaoUtils;
 import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -15,13 +14,15 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class PendingVaultDAOImpl implements PendingVaultDAO {
     private static final Logger LOGGER = LoggerFactory.getLogger(PendingVaultDAOImpl.class);
 
-    private SessionFactory sessionFactory;
+    private final SessionFactory sessionFactory;
 
-    public void setSessionFactory(SessionFactory sessionFactory) {
+    public PendingVaultDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 
