@@ -51,8 +51,8 @@
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                   title="Tell us which funder's policy we must comply with. This tells us the minimum amount of time we must keep the data. This information is important when deciding on the Review Date. If there is no funder, choose the University of Edinburgh retention policy. If there are multiple funders, choose the one with the longest minimum retention period. ">
                                                                 </span>
-            <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/planning-your-data/funder-requirements">
-                Read more about retention policies
+            <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/planning-your-data/funder-requirements" target="_blank">
+                Read more about funder requirements
             </a>
             <div class="row">
                 <div class="col-md-12">
