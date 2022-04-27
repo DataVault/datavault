@@ -28,7 +28,7 @@
         <spring-security.version>4.2.17.RELEASE</spring-security.version>
 	<!-- <spring-security.version>5.0.17.RELEASE</spring-security.version>-->
         <spring-rabbit.version>1.4.5.RELEASE</spring-rabbit.version>
-        <hibernate.version>5.4.19.Final</hibernate.version>
+        <hibernate.version>5.4.24.Final</hibernate.version>
         <hibernate-validator.version>4.3.2.Final</hibernate-validator.version>
         <mysql.version>8.0.21</mysql.version>
         <root.basedir>${basedir}</root.basedir>
