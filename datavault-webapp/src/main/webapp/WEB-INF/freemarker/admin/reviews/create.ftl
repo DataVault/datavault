@@ -37,7 +37,7 @@
                 </#list>
             </#if>
             <br/>
-            <b>Dataset name:</b> ${vault.datasetName?html}<br/>
+            <b>Dataset name:</b> <#if vault.datasetName??>${vault.datasetName?html}<#else> </#if><br/>
             <#assign aDate = vault.creationTime?date>
             <b>Created:</b> ${aDate?iso_utc}<br/>
             <b>Group:</b> ${group.name?html}<br/>

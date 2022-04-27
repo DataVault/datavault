@@ -121,6 +121,9 @@
                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                     <input type="hidden" name="vaultID" value="${billingDetails.getVaultID()}"/>
 					<input type="hidden" name="vaultName" value="${billingDetails.getVaultName()}"/>
+                    <#if billingDetails.getBillingType()??>
+                    <input type="hidden" name="billingType" value="${billingDetails.getBillingType()}"/>
+                    </#if>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                         <button type="submit" id="update-billingDetails-btn" class="btn btn-primary btn-ok">Save</button>

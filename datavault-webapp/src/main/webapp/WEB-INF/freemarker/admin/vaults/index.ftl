@@ -58,12 +58,14 @@
                             </td>
                             <td>${vault.getNumberOfDeposits()}</td>
                             <td> <#if vault.getProjectId()??>${vault.getProjectId()}<#else> </#if></td>
-                            <td> <#if vault.getCrisID??>${vault.getCrisID()}<#else> </#if></td>
+                            <td> <#if vault.getCrisID()??>${vault.getCrisID()}<#else> </#if></td>
                             <td>${vault.getProjectSizeStr()}</td>
                            <td>${vault.getSizeStr()}</td>
                             <td>
-                                <#if vault.getUserID()??>
-                                <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/${vault.getUserID()}">${vault.getUserName()?html} (${vault.getUserID()?html})</a>
+                                <#if vault.getOwnerId()??>
+                                    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/${vault.getOwnerId()}">${vault.getOwnerName()?html} (${vault.getOwnerId()?html})</a>
+                                <#else> 
+                                   User missing
                                 </#if>
                             </td>
                             

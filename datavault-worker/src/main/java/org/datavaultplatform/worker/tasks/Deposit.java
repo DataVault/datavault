@@ -596,6 +596,7 @@ public class Deposit extends Task {
             }
 
 //		depositTotalSize += this.calculateUserUploads(depositTotalSize, context);
+
             // Store the calculated deposit size
             eventStream.send(new ComputedSize(jobID, depositId, depositTotalSize)
                     .withUserId(userID));

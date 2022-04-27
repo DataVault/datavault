@@ -17,7 +17,7 @@
         <div id="datavault-body">
             <#nested/>
         </div>
-        <div id="datavault-footer">
+        <div id="datavault-footer" style="z-index: -10">
             <#include "footer.ftl"/>
         </div>
     </div>

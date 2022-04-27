@@ -2,6 +2,7 @@ package org.datavaultplatform.broker.controllers;
 
 import org.datavaultplatform.broker.services.DepositsService;
 import org.datavaultplatform.broker.services.EventService;
+import org.datavaultplatform.broker.services.PendingVaultsService;
 import org.datavaultplatform.broker.services.RetrievesService;
 import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.common.model.Deposit;
@@ -18,6 +19,7 @@ import java.util.List;
 public class StatisticsController {
 
     private VaultsService vaultsService;
+    private PendingVaultsService pendingVaultsService;
     private DepositsService depositsService;
     private RetrievesService retrievesService;
     private EventService eventService;
@@ -26,6 +28,10 @@ public class StatisticsController {
 
     public void setVaultsService(VaultsService vaultsService) {
         this.vaultsService = vaultsService;
+    }
+    
+    public void setPendingVaultsService(PendingVaultsService pendingVaultsService) {
+        this.pendingVaultsService = pendingVaultsService;
     }
 
     public void setDepositsService(DepositsService depositsService) {
@@ -44,6 +50,12 @@ public class StatisticsController {
     public int getVaultsCount(@RequestHeader(value = "X-UserID", required = true) String userID) {
 
         return vaultsService.count(userID);
+    }
+    
+    @RequestMapping(value = "/statistics/pendingVaultsTotal", method = RequestMethod.GET)
+    public int getTotalNumberOfPendingVaults() {
+
+        return pendingVaultsService.getTotalNumberOfPendingVaults();
     }
 
     @RequestMapping(value = "/statistics/size", method = RequestMethod.GET)

@@ -2,13 +2,17 @@ package org.datavaultplatform.common.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.datavaultplatform.common.model.PendingVault;
+import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "VaultInfo")
@@ -34,9 +38,21 @@ public class VaultInfo {
     
     @ApiObjectField(description = "The date and time when this vault was created")
     private String description;
+
+    @ApiObjectField(description = "Estimate of vault size")
+    private PendingVault.Estimate estimate;
+
+    @ApiObjectField(description = "How we are billing")
+    private PendingVault.Billing_Type billingType;
+
+    @ApiObjectField(description = "Notes regarding data retention")
+    private String notes;
     
     @ApiObjectField(description = "The policy that applies to this vault")
     private String policyID;
+
+    @ApiObjectField(description = "The length of the policy that applies to this vault")
+    private String policyLength;
     
     @ApiObjectField(description = "The group which is related to this vault")
     private String groupID;
@@ -75,6 +91,21 @@ public class VaultInfo {
     
     @ApiObjectField(description = "Project Id from Pure")
     private String projectId;
+
+    @ApiObjectField(description = "Slice ID from erm somewhere")
+    private String sliceID;
+
+    @ApiObjectField(description = "Authoriser of the billing")
+    private String authoriser;
+
+    @ApiObjectField(description = "School / Unit to be billed")
+    private String schoolOrUnit;
+
+    @ApiObjectField(description = "Subunit to be billed")
+    private String subunit;
+
+    @ApiObjectField(description = "Project Title (from Grant billing fieldset)")
+    private String projectTitle;
     
     @ApiObjectField(description = "Amount to be Billed")
     private BigDecimal amountToBeBilled;
@@ -84,11 +115,43 @@ public class VaultInfo {
     
     @ApiObjectField(description = "Sum of vaults size for a projectId")
     private long projectSize;
+
+    @ApiObjectField(description = "Did the user accept the various rules on the create vault intro page")
+    private Boolean affirmed = false;
+
+    @ApiObjectField(description = "Did the user accept the Pure Link rule on the summary page")
+    private Boolean pureLink = false;
+
+    @ApiObjectField(description = "Did the user confirm the pending vault yet")
+    private Boolean confirmed = false;
+
+    @ApiObjectField(description = "Pure Contact")
+    private String contact;
+
+    @ApiObjectField(description = "Pending / Vault Owner ID")
+    private String ownerId;
+
+    @ApiObjectField(description = "Vault Owner Name")
+    private String ownerName;
+
+    @ApiObjectField(description = "Pending Vault Creator ID")
+    private String vaultCreatorId;
     
+    @ApiObjectField(description = "Data Creators")
+    private List<String> creators;
+
+    @ApiObjectField(description = "Nominated Data Managers")
+    private List<String> nominatedDataManagerIds;
+
+    @ApiObjectField(description = "Depositors")
+    private List<String> depositorIds;
+
     public VaultInfo() { }
 
-    public VaultInfo(String id, String userID, String userName, String datasetID, String crisID, String datasetName, Date creationTime, String name, String description, String policyID,
-    		String groupID, long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked, Date grantEndDate, Date reviewDate, long numberOfDeposits, String projectId) {
+    public VaultInfo(String id, String userID, String userName, String datasetID, String crisID, String datasetName,
+                     Date creationTime, String name, String description, String policyID, String policyLength, String groupID,
+                     long vaultSize, int policyStatus, Date policyExpiry, Date policyLastChecked, Date grantEndDate,
+                     Date reviewDate, long numberOfDeposits, String projectId) {
         this.id = id;
         this.userID = userID;
         this.userName = userName;
@@ -98,6 +161,7 @@ public class VaultInfo {
         this.name = name;
         this.description = description;
         this.policyID = policyID;
+        this.policyLength = policyLength;
         this.groupID = groupID;
         this.vaultSize = vaultSize;
         this.policyStatus = policyStatus;
@@ -195,12 +259,44 @@ public class VaultInfo {
         this.description = description;
     }
 
+    public String getNotes() {
+        return this.notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public PendingVault.Estimate getEstimate() {
+        return this.estimate;
+    }
+
+    public void setEstimate(PendingVault.Estimate estimate) {
+        this.estimate = estimate;
+    }
+
+    public PendingVault.Billing_Type getBillingType() {
+        return this.billingType;
+    }
+
+    public void setBillingType(PendingVault.Billing_Type billingType) {
+        this.billingType = billingType;
+    }
+
     public String getPolicyID() {
         return policyID;
     }
 
     public void setPolicyID(String policyID) {
         this.policyID = policyID;
+    }
+
+    public String getPolicyLength() {
+        return policyLength;
+    }
+
+    public void setPolicyLength(String policyLength) {
+        this.policyLength = policyLength;
     }
 
     public String getGroupID() {
@@ -272,12 +368,30 @@ public class VaultInfo {
         this.grantEndDate = grantEndDate;
     }
 
+    public String getGrantEndDateAsString() {
+        String retVal = "";
+        if (this.getGrantEndDate() != null) {
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            retVal = formatter.format(this.plusOneDay(this.getGrantEndDate()));
+        }
+        return retVal;
+    }
+
     public Date getReviewDate() {
         return reviewDate;
     }
 
     public void setReviewDate(Date reviewDate) {
         this.reviewDate = reviewDate;
+    }
+
+    public String getReviewDateAsString() {
+        String retVal = "";
+        if (this.getReviewDate() != null) {
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            retVal = formatter.format(this.getReviewDate());
+        }
+        return retVal;
     }
 
 	public long getNumberOfDeposits() {
@@ -295,6 +409,22 @@ public class VaultInfo {
 	public void setProjectId(String projectId) {
 		this.projectId = projectId;
 	}
+
+    public String getProjectTitle() {
+        return projectTitle;
+    }
+
+    public void setProjectTitle(String projectTitle) {
+        this.projectTitle = projectTitle;
+    }
+
+    public String getSliceID() {
+        return this.sliceID;
+    }
+
+    public void setSliceID(String sliceID) {
+        this.sliceID = sliceID;
+    }
 
 	public long getProjectSize() {
 		return projectSize;
@@ -334,4 +464,191 @@ public class VaultInfo {
 	public void setAmountBilled(BigDecimal amountBilled) {
 		this.amountBilled = amountBilled;
 	}
+
+    public Boolean getAffirmed() {
+        return affirmed;
+    }
+
+    public void setAffirmed(Boolean affirmed) {
+        this.affirmed = affirmed;
+    }
+
+    public String getAuthoriser() {
+        return this.authoriser;
+    }
+
+    public void setAuthoriser(String authoriser) {
+        this.authoriser = authoriser;
+    }
+
+    public String getSchoolOrUnit() {
+        return this.schoolOrUnit;
+    }
+
+    public void setSchoolOrUnit(String schoolOrUnit) {
+        this.schoolOrUnit = schoolOrUnit;
+    }
+
+    public String getSubunit() {
+        return this.subunit;
+    }
+
+    public void setSubunit(String subunit) {
+        this.subunit = subunit;
+    }
+
+    public String getContact() {
+        return this.contact;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
+
+    public String getOwnerId() {
+        return this.ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerName() {
+        return this.ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
+
+    public void setDataCreators(List<String> creators) {
+        this.creators = creators;
+    }
+
+    public List<String> getDataCreators() {
+        return this.creators;
+    }
+
+    public List<String> getNominatedDataManagerIds() {
+        return nominatedDataManagerIds;
+    }
+
+    public void setNominatedDataManagerIds(List<String> nominatedDataManagerIds) {
+        this.nominatedDataManagerIds = nominatedDataManagerIds;
+    }
+
+    public List<String> getDepositorIds() {
+        return depositorIds;
+    }
+
+    public void setDepositorIds(List<String> depositorIds) {
+        this.depositorIds = depositorIds;
+    }
+
+    public Boolean getPureLink() {
+        return pureLink;
+    }
+
+    public void setPureLink(Boolean pureLink) {
+        this.pureLink = pureLink;
+    }
+
+    public Boolean getConfirmed() {
+        return confirmed;
+    }
+
+    public void setConfirmed(Boolean confirmed) {
+        this.confirmed = confirmed;
+    }
+    
+
+    public String getVaultCreatorId() {
+		return vaultCreatorId;
+	}
+
+	public void setVaultCreatorId(String vaultCreatorId) {
+		this.vaultCreatorId = vaultCreatorId;
+	}
+
+	public CreateVault convertToCreate() {
+        /*
+        TODO: need to add validation / defend against nulls just a work in progress
+         */
+        CreateVault cv = new CreateVault();
+        cv.setPendingID(this.getID());
+        cv.setAffirmed(this.getAffirmed());
+        if (this.getBillingType() != null) {
+            cv.setBillingType(this.getBillingType().toString());
+
+            if (this.getBillingType().equals(PendingVault.Billing_Type.SLICE)) {
+                cv.setSliceID(this.getSliceID());
+            }
+
+            if (this.getBillingType().equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
+                cv.setGrantAuthoriser(this.getAuthoriser());
+                cv.setGrantSchoolOrUnit(this.getSchoolOrUnit());
+                cv.setGrantSubunit(this.getSubunit());
+                cv.setProjectTitle(this.getProjectTitle());
+
+                if (this.getGrantEndDate() != null) {
+                    cv.setBillingGrantEndDate(this.getGrantEndDateAsString());
+                }
+            }
+
+            if (this.getBillingType().equals(PendingVault.Billing_Type.BUDGET_CODE)) {
+                cv.setBudgetAuthoriser(this.getAuthoriser());
+                cv.setBudgetSchoolOrUnit(this.getSchoolOrUnit());
+                cv.setBudgetSubunit(this.getSubunit());
+            }
+        }
+
+        cv.setName(this.getName());
+        cv.setDescription(this.getDescription());
+        cv.setPolicyInfo(this.getPolicyID() + "-" + this.getPolicyLength());
+
+        if (this.getGrantEndDate() != null) {
+            cv.setGrantEndDate(this.getGrantEndDateAsString());
+        }
+        cv.setGroupID(this.getGroupID());
+        if (this.getReviewDate() != null) {
+            cv.setReviewDate(this.getReviewDateAsString());
+        }
+        if (this.getEstimate() != null) {
+            cv.setEstimate(this.getEstimate().toString());
+        }
+        cv.setContactPerson(this.getContact());
+
+        //cv.setIsOwner(vault.getIsOwner());
+        // if vault owner is null set isowner to true
+        // if vault owner is the same as the logged in user set isowner to true
+        // if vault owner is different ot hte logged in user set to false
+        Boolean isOwner = true;
+        if (this.getOwnerId() != null && ! this.getOwnerId().equals(this.getUserID())) {
+            isOwner = false;
+        }
+        cv.setIsOwner(isOwner);
+        cv.setVaultOwner(this.getOwnerId());
+        cv.setNominatedDataManagers(this.getNominatedDataManagerIds());
+        cv.setDepositors(this.getDepositorIds());
+        cv.setDataCreators(this.getDataCreators());
+        cv.setNotes(this.getNotes());
+        cv.setPureLink(this.getPureLink());
+        cv.setConfirmed(this.getConfirmed());
+        cv.setVaultCreator(this.getVaultCreatorId());
+
+        return cv;
+    }
+
+    private Date plusOneDay(Date date) {
+        Date retVal = null;
+        if (date != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.add(Calendar.DATE, 1);
+            retVal =  cal.getTime();
+        }
+
+        return retVal;
+
+    }
 }

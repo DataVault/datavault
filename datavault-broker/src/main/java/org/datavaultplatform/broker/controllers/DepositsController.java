@@ -489,7 +489,7 @@ public class DepositsController {
         User user = deposit.getUser();
         Vault vault = deposit.getVault();
 
-        String externalMetadata = externalMetadataService.getDatasetContent(vault.getDataset().getID());
+        //String externalMetadata = externalMetadataService.getDatasetContent(vault.getDataset().getID());
 
         List<FileStore> userStores = user.getFileStores();
 
@@ -577,7 +577,7 @@ public class DepositsController {
         depositProperties.put("vaultMetadata", mapper.writeValueAsString(vault));
 
         // External metadata is text from an external system - e.g. XML or JSON
-        depositProperties.put("externalMetadata", externalMetadata);
+        //depositProperties.put("externalMetadata", externalMetadata);
 
         ArrayList<String> filestorePaths = new ArrayList<>();
         ArrayList<String> userUploadPaths = new ArrayList<>();

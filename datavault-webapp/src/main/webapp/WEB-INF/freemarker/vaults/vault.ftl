@@ -252,13 +252,8 @@
                                 <td></td>
                             </tr>
                             <tr>
-                                <th scope="col">PURE ID</th>
-                                <td>${vault.datasetName?html}</td>
-                                <td></td>
-                            </tr>
-                            <tr>
                                 <th scope="col">Grant End Date</th>
-                                <td><#if vault.grantEndDate??>${vault.grantEndDate?string('dd/MM/yyyy')}<#else>No end date</#if></td>
+                                <td><#if vault.grantEndDate??>${vault.getGrantEndDateAsString()}<#else>No end date</#if></td>
                                 <td>
                                     <button type="button" class="btn btn-default pull-right" disabled>
                                         Edit review date
@@ -267,7 +262,7 @@
                             </tr>
                             <tr>
                                 <th scope="col">Review Date</th>
-                                <td>${vault.reviewDate?string('dd/MM/yyyy')}</td>
+                                <td>${vault.getReviewDateAsString()}</td>
                                 <td>
                                     <button type="button" class="btn btn-default pull-right" disabled>
                                         Edit review date

@@ -9,6 +9,7 @@ import org.datavaultplatform.broker.services.BillingService;
 import org.datavaultplatform.broker.services.ExternalMetadataService;
 import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.common.model.BillingInfo;
+import org.datavaultplatform.common.model.PendingVault;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.VaultInfo;
@@ -92,6 +93,9 @@ public class BillingController {
     		if(billinginfo == null) {
     			billinginfo =  new BillingInfo();
     		}
+    		if (billinginfo.getBillingType() == null) {
+    			billinginfo.setBillingType(PendingVault.Billing_Type.ORIG);
+			}
     		billinginfo.setAmountBilled(billingDetails.getAmountBilled());
     		billinginfo.setAmountToBeBilled(billingDetails.getAmountToBeBilled());
     		billinginfo.setBudgetCode(billingDetails.getBudgetCode());

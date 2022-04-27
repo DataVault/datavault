@@ -1,10 +1,13 @@
 package org.datavaultplatform.broker.services;
 
+import java.math.BigDecimal;
 import java.util.*;
 
+import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
+import org.datavaultplatform.common.event.vault.Create;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.VaultDAO;
-import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
+import org.datavaultplatform.common.request.CreateVault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +17,30 @@ public class VaultsService {
     private VaultDAO vaultDAO;
 
     private RolesAndPermissionsService rolesAndPermissionsService;
+
     private RetentionPoliciesService retentionPoliciesService;
+
+    private DataCreatorsService dataCreatorsService;
+
+    private BillingService billingService;
+    private UsersService usersService;
+    private EventService eventService;
+    private ClientsService clientsService;
+    private EmailService emailService;
+
+    public void setEmailService(EmailService emailService) { this.emailService = emailService; }
+
+    public void setUsersService(UsersService usersService) {
+        this.usersService = usersService;
+    }
+
+    public void setEventService(EventService eventService) {
+        this.eventService = eventService;
+    }
+
+    public void setClientsService(ClientsService clientsService) {
+        this.clientsService = clientsService;
+    }
 
     public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
         this.rolesAndPermissionsService = rolesAndPermissionsService;
@@ -28,6 +54,10 @@ public class VaultsService {
         this.retentionPoliciesService = retentionPoliciesService;
     }
 
+    public void setDataCreatorsService(DataCreatorsService dataCreatorsService) { this.dataCreatorsService = dataCreatorsService; }
+
+    public void setBillingService(BillingService billingService) { this.billingService = billingService; }
+
     public List<Vault> getVaults() {
         return vaultDAO.list();
     }
@@ -40,6 +70,57 @@ public class VaultsService {
         Date d = new Date();
         vault.setCreationTime(d);
         vaultDAO.save(vault);
+    }
+
+    public void addVaultEvent(Vault vault, String clientKey, String userID) {
+        Create vaultEvent = new Create(vault.getID());
+        vaultEvent.setVault(vault);
+        vaultEvent.setUser(usersService.getUser(userID));
+        vaultEvent.setAgentType(Agent.AgentType.BROKER);
+        vaultEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+        eventService.addEvent(vaultEvent);
+    }
+
+    private void addRoleEvent(RoleAssignment ra, String assigneeId, String creatorId, String clientKey) {
+        CreateRoleAssignment roleAssignmentEvent = new CreateRoleAssignment(ra, creatorId);
+        roleAssignmentEvent.setVault(this.getVault(ra.getVaultId()));
+        roleAssignmentEvent.setUser(usersService.getUser(creatorId));
+        roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
+        roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
+        roleAssignmentEvent.setAssignee(usersService.getUser(assigneeId));
+        roleAssignmentEvent.setRole(ra.getRole());
+
+        eventService.addEvent(roleAssignmentEvent);
+    }
+
+    public void sendVaultOwnerEmail(Vault vault, String homePage, String helpPage, User user) {
+        // send mail to owner
+        this.sendEmail(vault, user.getEmail(), "A new vault you own has been created", "Owner",
+                "user-vault-create.vm", homePage, helpPage);
+    }
+
+    public void sendVaultDepositorsEmail(Vault vault, String homePage, String helpPage, User user) {
+        // send mail to depositor
+        this.sendEmail(vault, user.getEmail(), "A new vault you have a role on has been created", "Depositor",
+                "user-vault-create.vm", homePage, helpPage);
+    }
+
+    public void sendVaultNDMsEmail(Vault vault, String homePage, String helpPage, User user) {
+        // send mail to ndm
+        this.sendEmail(vault, user.getEmail(), "A new vault you have a role on has been created", "Nominated Data Manager",
+                "user-vault-create.vm", homePage, helpPage);
+    }
+
+    private void sendEmail(Vault vault, String email, String subject, String role, String template, String homePage, String helpPage) {
+        HashMap<String, Object> model = new HashMap<String, Object>();
+        model.put("home-page", homePage);
+        model.put("help-page", helpPage);
+        model.put("vault-name", vault.getName());
+        model.put("group-name", vault.getGroup().getName());
+        model.put("vault-id", vault.getID());
+        model.put("vault-review-date", vault.getReviewDate());
+        model.put("role-name", role);
+        emailService.sendTemplateMail(email, subject, template, model);
     }
 
     public void orphanVault(Vault vault) {
@@ -152,5 +233,114 @@ public class VaultsService {
         newDataOwnerAssignment.setVaultId(vault.getID());
         newDataOwnerAssignment.setRole(dataOwnerRole);
         rolesAndPermissionsService.createRoleAssignment(newDataOwnerAssignment);
+    }
+
+    public void addDepositorRoles(CreateVault createVault, Vault vault, String clientKey, String homePage, String helpPage) {
+
+        // if vault already has depositors delete them and readd
+        List<String> depositors = createVault.getDepositors();
+        if (depositors != null) {
+            for (String dep: depositors) {
+                if (dep != null && ! dep.isEmpty()) {
+                    RoleAssignment ra = new RoleAssignment();
+                    ra.setVaultId(vault.getID());
+                    ra.setRole(rolesAndPermissionsService.getDepositor());
+                    ra.setUserId(dep);
+                    rolesAndPermissionsService.createRoleAssignment(ra);
+
+                    this.addRoleEvent(ra, createVault.getVaultOwner(), createVault.getVaultCreator(), clientKey);
+                    this.sendVaultDepositorsEmail(vault, homePage, helpPage, usersService.getUser(dep));
+                }
+            }
+        }
+    }
+
+    public void addOwnerRole(CreateVault createVault, Vault vault, String clientKey) {
+        String ownerId = createVault.getVaultOwner();
+        String creatorId = createVault.getVaultCreator();
+
+        if (ownerId != null) {
+            RoleAssignment ownerRoleAssignment = new RoleAssignment();
+            ownerRoleAssignment.setUserId(ownerId);
+            ownerRoleAssignment.setVaultId(vault.getID());
+            ownerRoleAssignment.setRole(rolesAndPermissionsService.getDataOwner());
+            rolesAndPermissionsService.createRoleAssignment(ownerRoleAssignment);
+
+            this.addRoleEvent(ownerRoleAssignment, ownerId, creatorId, clientKey);
+        } else {
+            // error!
+        }
+    }
+
+    public Vault processDataCreatorParams(CreateVault createVault, Vault vault) {
+        List<String> dcs = createVault.getDataCreators();
+        if (dcs != null) {
+            logger.debug("Data creator list is :'" + dcs + "'");
+            List<DataCreator> creators = new ArrayList();
+            for (String creator : dcs) {
+                if (creator != null && !creator.isEmpty()) {
+                    DataCreator dc = new DataCreator();
+                    dc.setName(creator);
+                    dc.setVault(vault);
+                    creators.add(dc);
+                }
+            }
+            vault.setDataCreator(creators);
+        } else {
+            logger.debug("Data creator list is :null");
+        }
+
+        List<DataCreator> creators = vault.getDataCreators();
+        if (creators != null && ! creators.isEmpty()) {
+            dataCreatorsService.addCreators(creators);
+        }
+
+        return vault;
+    }
+
+    public void addNDMRoles(CreateVault createVault, Vault vault, String clientKey, String homePage, String helpPage) {
+        List<String> ndms = createVault.getNominatedDataManagers();
+        if (ndms != null) {
+            for (String ndm: ndms) {
+                if (ndm != null && !ndm.isEmpty()) {
+                    RoleAssignment ra = new RoleAssignment();
+                    ra.setVaultId(vault.getID());
+                    ra.setRole(rolesAndPermissionsService.getNominatedDataManager());
+                    ra.setUserId(ndm);
+                    rolesAndPermissionsService.createRoleAssignment(ra);
+                    this.addRoleEvent(ra, createVault.getVaultOwner(), createVault.getVaultCreator(), clientKey);
+                    this.sendVaultNDMsEmail(vault, homePage, helpPage, usersService.getUser(ndm));
+                }
+            }
+        }
+    }
+
+    public void addBillingInfo(CreateVault createVault, Vault vault) {
+        BillingInfo billinginfo =  new BillingInfo();
+        billinginfo.setAmountBilled(new BigDecimal(0));
+        billinginfo.setAmountToBeBilled(new BigDecimal(0));
+        billinginfo.setVault(vault);
+        String billingType = createVault.getBillingType();
+
+        PendingVault.Billing_Type enumBT = PendingVault.Billing_Type.valueOf(billingType);
+        billinginfo.setBillingType(enumBT);
+
+        if (enumBT.equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
+            billinginfo.setContactName(createVault.getGrantAuthoriser());
+            billinginfo.setSchool(createVault.getGrantSchoolOrUnit());
+            billinginfo.setSubUnit(createVault.getGrantSubunit());
+            billinginfo.setProjectTitle(createVault.getProjectTitle());
+        }
+
+        if (enumBT.equals(PendingVault.Billing_Type.BUDGET_CODE)) {
+            billinginfo.setContactName(createVault.getBudgetAuthoriser());
+            billinginfo.setSchool(createVault.getBudgetSchoolOrUnit());
+            billinginfo.setSubUnit(createVault.getBudgetSubunit());
+        }
+
+        if (enumBT.equals(PendingVault.Billing_Type.SLICE)) {
+            billinginfo.setSliceID(createVault.getSliceID());
+        }
+        billingService.saveOrUpdateVault(billinginfo);
     }
 }

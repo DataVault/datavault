@@ -27,7 +27,9 @@
             <div id="progress-transfer" style="display:none;">
                 <span id="progress-copied">Placeholder</span>
                 <div class="progress">
-                  <div id="progress" class="progress-bar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                  <div id="progress" class="progress-bar progress-bar-striped active" 
+                  role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" 
+                  aria-valuetext="0% Complete">
                     <span id="progress-label" class="sr-only">0% Complete</span>
                   </div>
                 </div>
@@ -241,6 +243,7 @@
             }
             
             $('#progress').css('width', percentComplete + '%').attr('aria-valuenow', percentComplete);
+            $('#progress').attr('aria-valuetext', percentComplete + '% Complete');
             $('#progress-label').text(percentComplete + '% Complete')
             $('#progress-copied').text(job.progressMessage)
         }
@@ -331,6 +334,15 @@
 </script>
 
 <style>
+    /** Overrides color of progress bar */
+    ol.progtrckr li.progtrckr-done {
+      border-bottom: 4px solid #046B99;
+    }
+    
+    ol.progtrckr li.progtrckr-done:before {
+      background-color: #046B99;
+    }
+    
     .glyphicon-refresh-animate {
         -animation: spin 2.8s infinite linear;
         -webkit-animation: spinWebkit 2.8s infinite linear;

@@ -109,6 +109,7 @@
         <property name="forceLogoutService" ref="forceLogoutService" />
         <property name="restService" ref="restService" />
         <property name="userLookupService" ref="userLookupService" />
+        <property name="validateService" ref="validateService" />
         <property name="system" value="${metadata.system}" />
         <property name="link" value="${metadata.link}" />
         <property name="welcome" value="${webapp.motd}"/>
@@ -156,6 +157,10 @@
         <property name="restService" ref="restService" />
     </bean>
     <bean id="adminVaultsController" class="org.datavaultplatform.webapp.controllers.admin.AdminVaultsController">
+        <property name="restService" ref="restService" />
+    </bean>
+
+    <bean id="adminPendingVaultsController" class="org.datavaultplatform.webapp.controllers.admin.AdminPendingVaultsController">
         <property name="restService" ref="restService" />
     </bean>
 
@@ -216,6 +221,9 @@
     <bean id="userLookupService" class="org.datavaultplatform.webapp.services.UserLookupService">
         <property name="restService" ref="restService" />
         <property name="ldapService" ref="ldapService" />
+    </bean>
+
+    <bean id="validateService" class="org.datavaultplatform.webapp.services.ValidateService">
     </bean>
 
     <bean id="forceLogoutService" class="org.datavaultplatform.webapp.services.ForceLogoutService">

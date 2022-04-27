@@ -135,8 +135,29 @@ public class Vault {
     
  // The raw content from the metadata provider e.g. XML
     @Lob
-    @Column(name = "snapshot", nullable = false)
+    @Column(name = "snapshot", nullable = true)
     private String snapshot;
+
+    @JsonIgnore
+    @OneToMany(targetEntity=DataCreator.class, mappedBy="vault", fetch=FetchType.LAZY)
+    private List<DataCreator> dataCreators;
+
+    @Column(name = "affirmed", nullable = false)
+    private Boolean affirmed = false;
+
+    @Column(columnDefinition = "TEXT", length = 6000)
+    private String notes;
+
+    // Estimate of Vault size
+    @Column(name = "estimate", nullable = true, columnDefinition = "TEXT")
+    private PendingVault.Estimate estimate;
+
+    // Name of the pure contact
+    @Column(name = "contact", nullable = false, columnDefinition = "TEXT")
+    private String contact;
+
+    @Column(name = "pureLink", nullable = false)
+    private Boolean pureLink = false;
     
     public Vault() {}
     public Vault(String name) {
@@ -290,21 +311,68 @@ public class Vault {
 		return billinginfo;
 		
 	}
+
 	public void setBillinginfo(BillingInfo billinginfo) {
 		this.billinginfo = billinginfo;
 	}
+
+    public List<DataCreator> getDataCreators() {
+        return this.dataCreators;
+    }
+
+    public void setDataCreator(List<DataCreator> dataCreators) {
+        this.dataCreators = dataCreators;
+    }
+
+    public Boolean getAffirmed() {
+        return this.affirmed;
+    }
+
+    public void setAffirmed(Boolean affirmed) {
+        this.affirmed = affirmed;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getNotes() { return this.notes; }
+
+    public void setEstimate(PendingVault.Estimate estimate) {
+        this.estimate = estimate;
+    }
+
+    public PendingVault.Estimate getEstimate() { return this.estimate; }
+
+    public String getContact() {
+        return this.contact;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
+
+    public Boolean getPureLink() {
+        return this.pureLink;
+    }
+
+    public void setPureLink(Boolean pureLink) {
+        this.pureLink = pureLink;
+    }
+
 	public VaultInfo convertToResponse() {
         return new VaultInfo(
                 id,
                 user == null ? null : user.getID(),
                 user == null ? null : (user.getFirstname()+" "+user.getLastname()),
-                dataset.getID(),
-                dataset.getCrisId(),
-                dataset.getName(),
+                dataset == null ? null : dataset.getID(),
+                dataset == null ? null : dataset.getCrisId(),
+                dataset == null ? null : dataset.getName(),
                 creationTime,
                 name,
                 description,
                 String.valueOf(retentionPolicy.getID()),
+                String.valueOf(retentionPolicy.getMinRetentionPeriod()),
                 group.getID(),
                 vaultSize,
                 retentionPolicyStatus,
@@ -340,7 +408,10 @@ public class Vault {
                 billinginfo != null? billinginfo.getAmountToBeBilled() : null,
                 billinginfo != null? billinginfo.getAmountBilled() : null,
                 projectId,
-                name
+                name,
+                billinginfo != null? billinginfo.getSliceID() : null,
+                billinginfo != null? billinginfo.getProjectTitle() : null,
+                billinginfo != null? billinginfo.getBillingType() : null
             );
     }
     

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
 
+import org.datavaultplatform.common.model.PendingVault;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
@@ -19,7 +20,9 @@ public class BillingInformation {
     @ApiObjectField(description = "The vault ID")
     private String vaultID;
 
-   
+	@ApiObjectField(description = "The Billing type")
+	private PendingVault.Billing_Type billingType;
+
     @ApiObjectField(description = "Billing Details Contact Name")
     private String contactName;
         
@@ -28,9 +31,15 @@ public class BillingInformation {
 
     @ApiObjectField(description = "The Billing Subunit")
     private String subUnit;
+
+	@ApiObjectField(description = "The Billing Project title")
+	private String projectTitle;
     
     @ApiObjectField(description = "To know if the user uses BudgetCode")
     private Boolean budgetCode;
+
+	@ApiObjectField(description = "The Billing SliceID")
+	private String sliceID;
     
     @ApiObjectField(description = "The comments entered by Admin")
     private String specialComments;
@@ -67,7 +76,9 @@ public class BillingInformation {
     }
 
 	public BillingInformation(String id, String vaultID, String contactName, String school, String subUnit, Boolean budgetCode,
-			String specialComments, BigDecimal amountToBeBilled, BigDecimal amountBilled, long vaultSize, Date reviewDate, Date creationTime, String vaultName,String projectId,String userName) {
+			String specialComments, BigDecimal amountToBeBilled, BigDecimal amountBilled, long vaultSize, Date reviewDate,
+							  Date creationTime, String vaultName,String projectId,String userName, String sliceID,
+							  String projectTitle, PendingVault.Billing_Type billingType) {
     	this.id = id;        
         this.vaultID = vaultID;    
         this.contactName = contactName; 
@@ -81,12 +92,16 @@ public class BillingInformation {
         this.reviewDate = reviewDate;       
         this.creationTime = creationTime;
         this.vaultName = vaultName;
-        this.projectId= projectId;
-        this.userName= userName;
+        this.projectId = projectId;
+        this.userName = userName;
+        this.sliceID = sliceID;
+        this.projectTitle = projectTitle;
+        this.billingType = billingType;
 	}
 	
 	public BillingInformation(String id, String vaultID, String contactName, String school, String subUnit, Boolean budgetCode,
-			String specialComments, BigDecimal amountToBeBilled, BigDecimal amountBilled, String projectId, String vaultName) {
+			String specialComments, BigDecimal amountToBeBilled, BigDecimal amountBilled, String projectId, String vaultName,
+							  String sliceID, String projectTitle, PendingVault.Billing_Type billingType) {
     	this.id = id;        
         this.vaultID = vaultID;    
         this.contactName = contactName; 
@@ -98,6 +113,9 @@ public class BillingInformation {
         this.amountBilled = amountBilled;
         this.projectId= projectId;
         this.vaultName = vaultName;
+        this.sliceID = sliceID;
+        this.projectTitle = projectTitle;
+        this.billingType = billingType;
 	}
 
     public String getUserName() {
@@ -226,6 +244,30 @@ public class BillingInformation {
 
 	public void setProjectSize(long projectSize) {
 		this.projectSize = projectSize;
+	}
+
+	public PendingVault.Billing_Type getBillingType() {
+		return billingType;
+	}
+
+	public void setBillingType(PendingVault.Billing_Type billingType) {
+		this.billingType = billingType;
+	}
+
+	public String getProjectTitle() {
+		return projectTitle;
+	}
+
+	public void setProjectTitle(String projectTitle) {
+		this.projectTitle = projectTitle;
+	}
+
+	public String getSliceID() {
+		return sliceID;
+	}
+
+	public void setSliceID(String sliceID) {
+		this.sliceID = sliceID;
 	}
 	
 	public String getProjectSizeStr() {

@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -165,6 +166,11 @@ public class RestService {
         return (VaultInfo[])response.getBody();
     }
 
+    public VaultInfo[] getPendingVaultsListing() {
+        HttpEntity<?> response = get(brokerURL + "/pendingVaults", VaultInfo[].class);
+        return (VaultInfo[])response.getBody();
+    }
+
     public VaultInfo[] getVaultsListingForGroup(String groupID) {
         HttpEntity<?> response = get(brokerURL + "/groups/" + groupID + "/vaults", VaultInfo[].class);
         return (VaultInfo[])response.getBody();
@@ -219,7 +225,7 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/vaults/search?query=" + query + "&sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult, VaultsData.class);
         return (VaultsData)response.getBody();
     }
-
+    
     public int getVaultsCount() {
         HttpEntity<?> response = get(brokerURL + "/statistics/count", Integer.class);
         return (Integer)response.getBody();
@@ -229,7 +235,17 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/statistics/size", Long.class);
         return (Long)response.getBody();
     }
-
+    
+    public VaultsData searchPendingVaults(String query, String sort, String order, int offset, int maxResult, Boolean confirmed) {
+        HttpEntity<?> response = get(brokerURL + "/pendingVaults/search?query=" + query + "&sort=" + sort + "&order=" + order+ "&offset=" + offset+ "&maxResult=" + maxResult + "&confirmed=" + confirmed, VaultsData.class);
+        return (VaultsData)response.getBody();
+    }
+    
+    public int getTotalNumberOfPendingVaults() {
+    	HttpEntity<?> response = get(brokerURL + "/statistics/pendingVaultsTotal", Integer.class);
+    	return (Integer)response.getBody();
+    }
+    
     public int getDepositsCount() {
         HttpEntity<?> response = get(brokerURL + "/statistics/depositcount", Integer.class);
         return (Integer)response.getBody();
@@ -296,9 +312,19 @@ public class RestService {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + id + "/record", Vault.class);
         return (Vault)response.getBody();
     }
+    
+    public PendingVault getPendingVaultRecord(String id) {
+        HttpEntity<?> response = get(brokerURL + "/pendingVaults/" + id + "/record", PendingVault.class);
+        return (PendingVault)response.getBody();
+    }
 
     public VaultInfo getVault(String id) {
         HttpEntity<?> response = get(brokerURL + "/vaults/" + id, VaultInfo.class);
+        return (VaultInfo)response.getBody();
+    }
+
+    public VaultInfo getPendingVault(String id) {
+        HttpEntity<?> response = get(brokerURL + "/pendingVaults/" + id, VaultInfo.class);
         return (VaultInfo)response.getBody();
     }
 
@@ -495,6 +521,21 @@ public class RestService {
         return (VaultInfo)response.getBody();
     }
 
+    public VaultInfo addPendingVault(CreateVault createVault) {
+        HttpEntity<?> response = post(brokerURL + "/pendingVaults/", VaultInfo.class, createVault);
+        return (VaultInfo)response.getBody();
+    }
+
+    public VaultInfo updatePendingVault(CreateVault createVault) {
+        HttpEntity<?> response = post(brokerURL + "/pendingVaults/update", VaultInfo.class, createVault);
+        return (VaultInfo)response.getBody();
+    }
+    
+    public  Boolean addVaultForPendingVault(String pendingVaultId, Date reviewDate) {
+        HttpEntity<?> response = post(brokerURL + "/admin/pendingVaults/addVault/" + pendingVaultId, Boolean.class, reviewDate);
+        return (Boolean)response.getBody();
+    }
+
     public void transferVault(String vaultId, TransferVault transfer) {
         post(brokerURL + "/vaults/" + vaultId + "/transfer", VaultInfo.class, transfer);
     }
@@ -633,6 +674,10 @@ public class RestService {
 
     public void deleteDeposit(String depositId) {
         delete(brokerURL + "/admin/deposits/" + depositId, String.class);
+    }
+
+    public void deletePendingVault(String pendingVaultId) {
+        delete(brokerURL + "/admin/pendingVaults/" + pendingVaultId, Void.class);
     }
 
     public BillingInformation updateBillingInfo(String vaultId,BillingInformation billingInfo) {
