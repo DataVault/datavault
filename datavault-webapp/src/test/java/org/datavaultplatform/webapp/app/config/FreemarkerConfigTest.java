@@ -15,6 +15,8 @@ import java.lang.reflect.Field;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.core.io.ClassPathResource;
@@ -49,6 +51,7 @@ public class FreemarkerConfigTest {
   }
 
   @Test
+  @DisabledOnOs(OS.WINDOWS)
   void testFreemarkerConfigurer() throws IOException, IllegalAccessException {
     assertNotNull(freeMarkerConfigurer);
     Configuration config = freeMarkerConfigurer.getConfiguration();

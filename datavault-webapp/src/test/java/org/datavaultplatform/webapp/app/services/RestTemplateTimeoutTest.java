@@ -68,7 +68,7 @@ public class RestTemplateTimeoutTest {
       long diff = System.currentTimeMillis() - start;
       log.info("diff is {}",diff);
       assertTrue(diff > 2_000);
-      assertTrue(diff < 2_500);
+      assertTrue(diff < 2_600);
       assertThat(ex.getMessage()).startsWith("I/O error on GET request for \"http://example.com:9999/resource\": Connect to example.com:9999 ");
   }
 

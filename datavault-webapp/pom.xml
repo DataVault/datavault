@@ -135,6 +135,11 @@
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
+                <configuration>
+                    <excludeProperties>
+                        <excludeProperty>git.remote.origin.url*</excludeProperty>
+                    </excludeProperties>
+                </configuration>
             </plugin>
         </plugins>
     </build>

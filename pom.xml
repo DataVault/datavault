@@ -32,7 +32,6 @@
     <skip.unit.tests>false</skip.unit.tests>
 
     <!-- dependency versions -->
-    <git.commit.plugin.version>4.9.10</git.commit.plugin.version>
     <aws.java.sdk.bom.version>1.12.196</aws.java.sdk.bom.version>
     <oci.java.sdk.bom.version>2.22.0</oci.java.sdk.bom.version>
     <jsoup.version>1.14.2</jsoup.version>
@@ -217,15 +216,6 @@
               </goals>
             </execution>
           </executions>
-        </plugin>
-        <plugin>
-          <groupId>pl.project13.maven</groupId>
-          <artifactId>git-commit-id-plugin</artifactId>
-          <version>${git.commit.plugin.version}</version>
-          <configuration>
-            <failOnNoGitDirectory>false</failOnNoGitDirectory>
-            <offline>true</offline>
-          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
