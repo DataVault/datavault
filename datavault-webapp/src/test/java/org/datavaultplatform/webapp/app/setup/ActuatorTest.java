@@ -1,6 +1,5 @@
 package org.datavaultplatform.webapp.app.setup;
 
-import static java.util.stream.Collectors.toMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,16 +10,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
-import java.nio.file.FileSystems;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.datavaultplatform.webapp.test.TestClockConfig;
@@ -87,11 +83,13 @@ public class ActuatorTest {
         .filter(elem -> elem.endsWith("classes"))
         .collect(Collectors.toList());
 
+    elements.forEach(el -> log.info("path element [{}]", el));
+
+    assertTrue(elements.size() >= 2);
+
     assertTrue(elements.get(0).endsWith("datavault-webapp/target/test-classes"));
     assertTrue(elements.get(1).endsWith("datavault-webapp/target/classes"));
-    assertTrue(elements.get(2).endsWith("datavault-common/target/classes"));
 
-    assertEquals(3, elements.size());
   }
 
   @Test
