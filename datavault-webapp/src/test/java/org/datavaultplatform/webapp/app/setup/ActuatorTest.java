@@ -56,6 +56,7 @@ public class ActuatorTest {
   private Set<String> endpoints;
 
   @Test
+  @DisabledOnOs(OS.WINDOWS)
   void testInfo() throws Exception {
     mvc.perform(get("/actuator/info"))
         .andExpect(jsonPath("$.app.name").value(Matchers.is("datavault-webapp")))
@@ -72,6 +73,7 @@ public class ActuatorTest {
 
   /* just checking that 'test-classes' come before the other 'classes' directories */
   @Test
+  @DisabledOnOs(OS.WINDOWS)
   void testClassPath() {
     String classpath = System.getProperty("java.class.path");
     String sep = File.pathSeparator;
