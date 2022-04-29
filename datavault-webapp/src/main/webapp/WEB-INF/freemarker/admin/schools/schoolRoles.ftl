@@ -79,7 +79,7 @@
                             <div class="col-sm-10">
                                 <select id="new-user-role" name="role" class="form-control">
                                     <option value="">Please select</option>
-                                    <#list roles as role><option value="${role.id}">${role.name}</option></#list>
+                                    <#list roles as role><option value="${role.getIdAsString()}">${role.name}</option></#list>
                                 </select>
                             </div>
                         </div>
