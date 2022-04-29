@@ -2,6 +2,7 @@ package org.datavaultplatform.broker.config;
 
 import java.util.Properties;
 import javax.sql.DataSource;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 //Scan for the all the DAO classes which are spring components
+@ConditionalOnExpression("${broker.database.enabled:true}")
 @ComponentScan("org.datavaultplatform.common.model.dao")
 @EnableTransactionManagement
 public class DatabaseConfig {

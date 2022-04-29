@@ -1,79 +1,71 @@
 package org.datavaultplatform.broker.scheduled;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.datavaultplatform.broker.services.*;
-import org.datavaultplatform.common.model.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import org.datavaultplatform.broker.services.DepositsReviewService;
+import org.datavaultplatform.broker.services.EmailService;
+import org.datavaultplatform.broker.services.RolesAndPermissionsService;
+import org.datavaultplatform.broker.services.UsersService;
+import org.datavaultplatform.broker.services.VaultsReviewService;
+import org.datavaultplatform.broker.services.VaultsService;
+import org.datavaultplatform.common.model.DepositReview;
+import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.VaultReview;
 import org.datavaultplatform.common.services.LDAPService;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-public class CheckForReview {
+@Component
+public class CheckForReview implements ScheduledTask {
 
     private static final Logger log = LoggerFactory.getLogger(CheckForReview.class);
 
-    private VaultsService vaultsService;
-    private VaultsReviewService vaultsReviewService;
-    private DepositsReviewService depositsReviewService;
-    private LDAPService LDAPService;
-    private EmailService emailService;
-    private RolesAndPermissionsService rolesAndPermissionsService;
-    private UsersService usersService;
+    private final VaultsService vaultsService;
+    private final VaultsReviewService vaultsReviewService;
+    private final DepositsReviewService depositsReviewService;
+    private final LDAPService LDAPService;
+    private final EmailService emailService;
+    private final RolesAndPermissionsService rolesAndPermissionsService;
+    private final UsersService usersService;
 
-    private String homeUrl;
-    private String helpUrl;
-    private String helpMail;
+    private final String homeUrl;
+    private final String helpUrl;
+    private final String helpMail;
 
-    public void setVaultsService(VaultsService vaultsService) {
+    @Autowired
+    public CheckForReview(VaultsService vaultsService, VaultsReviewService vaultsReviewService,
+        DepositsReviewService depositsReviewService,
+        org.datavaultplatform.common.services.LDAPService ldapService, EmailService emailService,
+        RolesAndPermissionsService rolesAndPermissionsService, UsersService usersService,
+        @Value("${home.page}") String homeUrl,
+        @Value("${help.page}") String helpUrl,
+        @Value("${help.mail}") String helpMail) {
         this.vaultsService = vaultsService;
-    }
-
-    public void setVaultsReviewService(VaultsReviewService vaultsReviewService) {
         this.vaultsReviewService = vaultsReviewService;
-    }
-
-    public void setDepositsReviewService(DepositsReviewService depositsReviewService) {
         this.depositsReviewService = depositsReviewService;
-    }
-
-    public void setLDAPService(LDAPService LDAPService) {
-        this.LDAPService = LDAPService;
-    }
-
-    public void setEmailService(EmailService emailService) {
+        LDAPService = ldapService;
         this.emailService = emailService;
-    }
-
-    public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
         this.rolesAndPermissionsService = rolesAndPermissionsService;
-    }
-
-    public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
-    }
-
-    public void setHomeUrl(String homeUrl) {
         this.homeUrl = homeUrl;
-    }
-
-    public void setHelpUrl(String helpUrl) {
         this.helpUrl = helpUrl;
-    }
-
-    public void setHelpMail(String helpMail) {
         this.helpMail = helpMail;
     }
 
 
-    @Scheduled(cron = "${review.schedule}")
-    public void checkAll() throws Exception {
+    @Scheduled(cron = ScheduledUtils.SCHEDULE_4_REVIEW)
+    public void execute() throws Exception {
 
         Date start = new Date();
         log.info("Initiating check of Vaults for review at " + start);

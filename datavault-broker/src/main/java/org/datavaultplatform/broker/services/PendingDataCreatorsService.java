@@ -1,19 +1,18 @@
 package org.datavaultplatform.broker.services;
 
+import java.util.List;
 import org.datavaultplatform.common.model.PendingDataCreator;
 import org.datavaultplatform.common.model.dao.PendingDataCreatorDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 @Service
 public class PendingDataCreatorsService {
-    private PendingDataCreatorDAO pendingDataCreatorDAO;
+    private final PendingDataCreatorDAO pendingDataCreatorDAO;
+
     private final Logger logger = LoggerFactory.getLogger(PendingDataCreatorsService.class);
 
-    public void setPendingDataCreatorDAO(PendingDataCreatorDAO pendingDataCreatorDAO) {
+    public PendingDataCreatorsService(PendingDataCreatorDAO pendingDataCreatorDAO) {
         this.pendingDataCreatorDAO = pendingDataCreatorDAO;
     }
 

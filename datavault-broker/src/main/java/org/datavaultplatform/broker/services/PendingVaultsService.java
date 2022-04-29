@@ -1,49 +1,48 @@
 package org.datavaultplatform.broker.services;
 
 
-import org.datavaultplatform.broker.services.VaultsService;
-import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.model.dao.PendingVaultDAO;
-import org.datavaultplatform.common.request.CreateVault;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
+import org.datavaultplatform.common.model.Group;
+import org.datavaultplatform.common.model.PendingDataCreator;
+import org.datavaultplatform.common.model.PendingVault;
+import org.datavaultplatform.common.model.RetentionPolicy;
+import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.dao.PendingVaultDAO;
+import org.datavaultplatform.common.request.CreateVault;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 @Service
 public class PendingVaultsService {
 	private final Logger logger = LoggerFactory.getLogger(PendingVaultsService.class);
 	
-    private PendingVaultDAO pendingVaultDAO;
-    private GroupsService groupsService;
-    private RetentionPoliciesService retentionPoliciesService;
-    private UsersService usersService;
-    private RolesAndPermissionsService permissionsService;
-    private PendingDataCreatorsService pendingDataCreatorsService;
-    private VaultsService vaultsService;
+    private final PendingVaultDAO pendingVaultDAO;
+    private final GroupsService groupsService;
+    private final RetentionPoliciesService retentionPoliciesService;
+    private final UsersService usersService;
+    private final RolesAndPermissionsService permissionsService;
+    private final PendingDataCreatorsService pendingDataCreatorsService;
 
-    public void setPendingVaultDAO(PendingVaultDAO pendingVaultDAO) {
+    private final VaultsService vaultsService;
+
+    public PendingVaultsService(PendingVaultDAO pendingVaultDAO, GroupsService groupsService,
+        RetentionPoliciesService retentionPoliciesService, UsersService usersService,
+        RolesAndPermissionsService permissionsService,
+        PendingDataCreatorsService pendingDataCreatorsService, VaultsService vaultsService) {
         this.pendingVaultDAO = pendingVaultDAO;
-    }
-    
-    public void setVaultsService(VaultsService vaultsService) {
+        this.groupsService = groupsService;
+        this.retentionPoliciesService = retentionPoliciesService;
+        this.usersService = usersService;
+        this.permissionsService = permissionsService;
+        this.pendingDataCreatorsService = pendingDataCreatorsService;
         this.vaultsService = vaultsService;
     }
 
-    public void setRetentionPoliciesService(RetentionPoliciesService retentionPoliciesService) { this.retentionPoliciesService = retentionPoliciesService; }
-
-    public void setGroupsService(GroupsService groupsService) { this.groupsService = groupsService; }
-
-    public void setUsersService(UsersService usersService) { this.usersService = usersService; }
-
-    public void setRolesAndPermissionsService(RolesAndPermissionsService permissionsService) { this.permissionsService = permissionsService; }
-
-    public void setPendingDataCreatorsService(PendingDataCreatorsService pendingDataCreatorsService) { this.pendingDataCreatorsService = pendingDataCreatorsService; }
 
     public void addOrUpdatePendingVault(PendingVault vault) {
         Date d = new Date();

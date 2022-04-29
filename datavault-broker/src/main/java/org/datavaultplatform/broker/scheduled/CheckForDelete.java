@@ -1,73 +1,72 @@
 package org.datavaultplatform.broker.scheduled;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.datavaultplatform.broker.queue.Sender;
-import org.datavaultplatform.broker.services.*;
-import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.broker.services.ArchiveStoreService;
+import org.datavaultplatform.broker.services.DepositsReviewService;
+import org.datavaultplatform.broker.services.JobsService;
+import org.datavaultplatform.broker.services.RolesAndPermissionsService;
+import org.datavaultplatform.broker.services.UsersService;
+import org.datavaultplatform.broker.services.VaultsReviewService;
+import org.datavaultplatform.broker.services.VaultsService;
+import org.datavaultplatform.common.model.Archive;
+import org.datavaultplatform.common.model.ArchiveStore;
+import org.datavaultplatform.common.model.Deposit;
+import org.datavaultplatform.common.model.DepositReview;
+import org.datavaultplatform.common.model.DepositReviewDeleteStatus;
+import org.datavaultplatform.common.model.Job;
+import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.VaultReview;
+import org.datavaultplatform.common.model.VaultReviewComparator;
 import org.datavaultplatform.common.task.Task;
-import org.datavaultplatform.common.util.RoleUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import org.springframework.stereotype.Component;
 
 /**
  * As part of the Review process, deposits can be flagged for deletion at a later date. Check the deposits
  * and delete any that are due for deletion.
  */
 
-public class CheckForDelete {
+@Component
+public class CheckForDelete implements ScheduledTask {
 
     private static final Logger log = LoggerFactory.getLogger(CheckForDelete.class);
 
-    private VaultsService vaultsService;
-    private VaultsReviewService vaultsReviewService;
-    private DepositsReviewService depositsReviewService;
-    private ArchiveStoreService archiveStoreService;
-    private RolesAndPermissionsService rolesAndPermissionsService;
-    private UsersService usersService;
-    private JobsService jobsService;
-    private Sender sender;
+    private final VaultsService vaultsService;
+    private final VaultsReviewService vaultsReviewService;
+    private final DepositsReviewService depositsReviewService;
+    private final ArchiveStoreService archiveStoreService;
+    private final RolesAndPermissionsService rolesAndPermissionsService;
+    private final UsersService usersService;
+    private final JobsService jobsService;
+    private final Sender sender;
 
-    public void setVaultsService(VaultsService vaultsService) {
+    @Autowired
+    public CheckForDelete(VaultsService vaultsService, VaultsReviewService vaultsReviewService,
+        DepositsReviewService depositsReviewService, ArchiveStoreService archiveStoreService,
+        RolesAndPermissionsService rolesAndPermissionsService, UsersService usersService,
+        JobsService jobsService, Sender sender) {
         this.vaultsService = vaultsService;
-    }
-
-    public void setVaultsReviewService(VaultsReviewService vaultsReviewService) {
         this.vaultsReviewService = vaultsReviewService;
-    }
-
-    public void setDepositsReviewService(DepositsReviewService depositsReviewService) {
         this.depositsReviewService = depositsReviewService;
-    }
-
-    public void setArchiveStoreService(ArchiveStoreService archiveStoreService) {
         this.archiveStoreService = archiveStoreService;
-    }
-
-    public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
         this.rolesAndPermissionsService = rolesAndPermissionsService;
-    }
-
-    public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
-    }
-
-    public void setJobsService(JobsService jobsService) {
         this.jobsService = jobsService;
-    }
-
-    public void setSender(Sender sender) {
         this.sender = sender;
     }
 
-
-
-
-    @Scheduled(cron = "${delete.schedule}")
-    public void checkAll() throws Exception {
+    @Override
+    @Scheduled(cron = ScheduledUtils.SCHEDULE_3_DELETE)
+    public void execute() throws Exception {
 
         Date today = new Date();
         log.info("Initiating check of Vaults with deposits to delete at " + today);

@@ -1,32 +1,32 @@
 package org.datavaultplatform.broker.services;
 
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.KeyPair;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
-
-import com.jcraft.jsch.*;
-
-/**
- * User: Robin Taylor
- * Date: 04/11/2015
- * Time: 09:54
- */
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 @Service
+//TODO - change this class - it is NOT thread safe!
 public class UserKeyPairService {
 
     // comment added at the end of public key
     private static final String PUBKEY_COMMENT = "datavault";
-    private String passphrase;
+    private final String passphrase;
     private String privateKey;
     private String publicKey;
+
+    @Autowired
+    public UserKeyPairService(@Value("${sftp.passphrase}") String passphrase) {
+        this.passphrase = passphrase;
+    }
 
     public String getPassphrase() {
         return passphrase;
     }
 
-    public void setPassphrase(String passphrase) {
-        this.passphrase = passphrase;
-    }
 
     public String getPrivateKey() {
         return privateKey;

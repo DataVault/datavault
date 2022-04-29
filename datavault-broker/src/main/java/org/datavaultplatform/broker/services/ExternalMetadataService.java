@@ -1,50 +1,57 @@
 package org.datavaultplatform.broker.services;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.datavaultplatform.common.metadata.Provider;
 import org.datavaultplatform.common.metadata.impl.MockProvider;
 import org.datavaultplatform.common.metadata.impl.PureFlatFileProvider;
 import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.dao.DatasetDAO;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 @Service
 public class ExternalMetadataService {
 
-    private String metadataURL;
-    private String flatFileLocation;
-    private Provider metadataProvider;
-    private DatasetDAO datasetDAO;
-    private UsersService usersService;
+    private final String metadataURL;
+    private final String flatFileLocation;
+    private final Provider metadataProvider;
+    private final DatasetDAO datasetDAO;
+    private final UsersService usersService;
     public static final String EDUNIREFNO = "edunirefno";
 
-    public void setUsersService(UsersService usersService) {
-		this.usersService = usersService;
-	}
-    
-    public void setFlatFileLocation(String flatFileLocation) {
-    	System.out.println("Setting flat file location to : " + flatFileLocation);
-		this.flatFileLocation = flatFileLocation;
-	}
-    
-    public void setMetadataURL(String metadataURL) {
-        this.metadataURL = metadataURL;
-        
-        if (metadataURL.equals("")) {
-            this.metadataProvider = new MockProvider();
-        } else {
-        	Provider prov = new PureFlatFileProvider();
-        	((PureFlatFileProvider) prov).setFlatFileDir(this.flatFileLocation);
-        	this.metadataProvider = prov;
-            //this.metadataProvider = new PureProvider(metadataURL);
-        }
+
+    /*
+     <bean id="externalMetadataService" class="org.datavaultplatform.broker.services.ExternalMetadataService">
+    	  <property name="flatFileLocation" value="${flatfile.location:/tmp/}" />
+        <property name="metadataURL" value="${metadata.url}" />
+        <property name="datasetDAO" ref="datasetDAO" />
+        <property name="usersService" ref="usersService" />
+    </bean>
+     */
+  @Autowired
+  public ExternalMetadataService(
+      @Value("${metadata.url}") String metadataURL,
+      @Value("${flatfile.location:/tmp/}") String flatFileLocation,
+      DatasetDAO datasetDAO,
+      UsersService usersService) {
+    this.metadataURL = metadataURL;
+    this.flatFileLocation = flatFileLocation;
+    this.datasetDAO = datasetDAO;
+    this.usersService = usersService;
+
+    if (metadataURL.equals("")) {
+      this.metadataProvider = new MockProvider();
+    } else {
+      Provider prov = new PureFlatFileProvider();
+      ((PureFlatFileProvider) prov).setFlatFileDir(this.flatFileLocation);
+      this.metadataProvider = prov;
+      //this.metadataProvider = new PureProvider(metadataURL);
     }
-    
+  }
+
     public List<Dataset> getDatasets(String userID) {
     	System.out.println("Getting Datasets for UUN " + userID);
     	if (this.metadataProvider instanceof PureFlatFileProvider) {
@@ -124,7 +131,4 @@ public class ExternalMetadataService {
         return datasetDAO.findById(id);
     }
     
-    public void setDatasetDAO(DatasetDAO datasetDAO) {
-        this.datasetDAO = datasetDAO;
-    }
 }

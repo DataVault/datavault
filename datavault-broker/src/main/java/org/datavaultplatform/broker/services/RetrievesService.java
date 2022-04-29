@@ -1,18 +1,20 @@
 package org.datavaultplatform.broker.services;
 
+import java.util.Date;
+import java.util.List;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.dao.RetrieveDAO;
-
-import java.util.Date;
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 @Service
 public class RetrievesService {
 
-    private RetrieveDAO retrieveDAO;
-    
+    private final RetrieveDAO retrieveDAO;
+
+    public RetrievesService(RetrieveDAO retrieveDAO) {
+        this.retrieveDAO = retrieveDAO;
+    }
+
     public List<Retrieve> getRetrieves(String userId) {
         return retrieveDAO.list(userId);
     }
@@ -36,10 +38,6 @@ public class RetrievesService {
     
     public Retrieve getRetrieve(String retrieveID) {
         return retrieveDAO.findById(retrieveID);
-    }
-    
-    public void setRetrieveDAO(RetrieveDAO retrieveDAO) {
-        this.retrieveDAO = retrieveDAO;
     }
 
     public int count(String userId) { return retrieveDAO.count(userId); }

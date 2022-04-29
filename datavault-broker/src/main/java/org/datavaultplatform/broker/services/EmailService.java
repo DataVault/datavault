@@ -1,47 +1,51 @@
 package org.datavaultplatform.broker.services;
 
-import org.datavaultplatform.common.model.RoleAssignment;
+import java.util.HashMap;
+import javax.mail.internet.MimeMessage;
+import org.apache.velocity.app.VelocityEngine;
+import org.datavaultplatform.broker.utils.VelocityEngineUtils;
 import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.Vault;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
-import org.apache.velocity.app.VelocityEngine;
-import javax.mail.internet.MimeMessage;
-import  org.datavaultplatform.broker.utils.VelocityEngineUtils;
-import java.io.IOException;
-import java.util.HashMap;
-
 import org.springframework.stereotype.Service;
 @Service
 public class EmailService {
 
-    private UsersService usersService;
+    private final UsersService usersService;
 
-    private JavaMailSender mailSender;
-    private VelocityEngine velocityEngine;
-    private String mailAdministrator;
+    private final JavaMailSender mailSender;
+    private final VelocityEngine velocityEngine;
+    private final String mailAdministrator;
     
     private final String encoding = "UTF-8";
 
-    public UsersService getUsersService() { return usersService; }
-
-    public void setUsersService(UsersService usersService) { this.usersService = usersService; }
-
-    public void setMailSender(JavaMailSender mailSender) {
+    /*
+        <bean id="emailService" class="org.datavaultplatform.broker.services.EmailService">
+        <property name="mailSender" ref="mailSender"/>
+        <property name="usersService" ref="usersService" />
+        <property name="velocityEngine" ref="velocityEngine"/>
+        <property name="mailAdministrator" value="${mail.administrator}" />
+        </bean>
+     */
+    @Autowired
+    public EmailService(UsersService usersService,
+        JavaMailSender mailSender,
+        VelocityEngine velocityEngine,
+        @Value("${mail.administrator}") String mailAdministrator) {
+        this.usersService = usersService;
         this.mailSender = mailSender;
-    }
-    
-    public void setVelocityEngine(VelocityEngine velocityEngine) {
         this.velocityEngine = velocityEngine;
-    }
-    
-    public void setMailAdministrator(String mailAdministrator) {
         this.mailAdministrator = mailAdministrator;
     }
-    
+
+    public UsersService getUsersService() { return usersService; }
+
+
     // Send a plain-text email
     public void sendPlaintextMail(final String to, final String subject, final String message) {
         

@@ -13,9 +13,11 @@ import org.datavaultplatform.common.model.Vault;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
 @AddTestProperties
+@TestPropertySource(properties = {"broker.scheduled.enabled=false","broker.initialise.enabled=false"})
 @Slf4j
 public class VaultsServiceIT extends BaseDatabaseTest {
     @Autowired

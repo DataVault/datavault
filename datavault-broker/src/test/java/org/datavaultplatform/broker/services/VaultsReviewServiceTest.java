@@ -1,17 +1,19 @@
 package org.datavaultplatform.broker.services;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.VaultReview;
 import org.junit.Test;
 
-import java.util.*;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 public class VaultsReviewServiceTest {
 
-    private VaultsReviewService vaultsReviewService = new VaultsReviewService();
+    private VaultsReviewService vaultsReviewService = new VaultsReviewService(null);
 
     @Test
     public void testIsVaultForReview() {

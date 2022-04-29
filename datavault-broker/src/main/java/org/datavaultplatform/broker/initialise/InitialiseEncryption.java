@@ -1,12 +1,11 @@
-package org.datavaultplatform.broker.scheduled;
+package org.datavaultplatform.broker.initialise;
 
+import java.security.Security;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-
-import java.security.Security;
 
 /**
  *  By default this class is enabled in the Spring XML config, to disable it just comment it out.

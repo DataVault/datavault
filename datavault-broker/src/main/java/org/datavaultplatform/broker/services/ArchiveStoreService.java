@@ -1,73 +1,60 @@
 package org.datavaultplatform.broker.services;
 
-import org.datavaultplatform.common.model.ArchiveStore;
-import org.datavaultplatform.common.model.dao.ArchiveStoreDAO;
-
 import java.util.HashMap;
 import java.util.List;
-
+import org.datavaultplatform.common.model.ArchiveStore;
+import org.datavaultplatform.common.model.dao.ArchiveStoreDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 @Service
 public class ArchiveStoreService {
 
-    private String optionsDir;
-    private String tempDir;
-    private String bucketName;
-    private String region;
-    private String awsAccessKey;
-    private String awsSecretKey;
-    private String tsmRetryTime;
-    private String occRetryTime;
-    private String tsmMaxRetries;
-    private String occMaxRetries;
-    private String ociNameSpace;
-    private String ociBucketName;
+    private final String optionsDir;
+    private final String tempDir;
+    private final String bucketName;
+    private final String region;
+    private final String awsAccessKey;
+    private final String awsSecretKey;
+    private final String tsmRetryTime;
+    private final String occRetryTime;
+    private final String tsmMaxRetries;
+    private final String occMaxRetries;
+    private final String ociNameSpace;
+    private final String ociBucketName;
 
-    private ArchiveStoreDAO archiveStoreDAO;
+    private final ArchiveStoreDAO archiveStoreDAO;
 
-    public void setOptionsDir(String optionsDir) {
+    @Autowired
+    public ArchiveStoreService
+        (   @Value("${optionsDir:#{null}}")String optionsDir,
+            @Value("${tempDir:#{null}}") String tempDir,
+            @Value("${s3.bucketName:#{null}}") String bucketName,
+            @Value("${s3.region:#{null}}") String region,
+            @Value("${s3.awsAccessKey:#{null}}") String awsAccessKey,
+            @Value("${s3.awsSecretKey:#{null}}") String awsSecretKey,
+            @Value("${tsmRetryTime:#{null}}") String tsmRetryTime,
+            @Value("${occRetryTime:#{null}}") String occRetryTime,
+            @Value("${tsmMaxRetries:#{null}}") String tsmMaxRetries,
+            @Value("${occMaxRetries:#{null}}") String occMaxRetries,
+            @Value("${ociNameSpace:#{null}}") String ociNameSpace,
+            @Value("${s3.bucketName:#{null}}") String ociBucketName,
+        ArchiveStoreDAO archiveStoreDAO) {
         this.optionsDir = optionsDir;
-    }
-
-    public void setTempDir(String tempDir) {
         this.tempDir = tempDir;
-    }
-
-    public void setBucketName(String bucketName) {
         this.bucketName = bucketName;
-    }
-
-    public void setRegion(String region) {
         this.region = region;
-    }
-
-    public void setAwsAccessKey(String awsAccessKey) {
         this.awsAccessKey = awsAccessKey;
-    }
-
-    public void setAwsSecretKey(String awsSecretKey) {
         this.awsSecretKey = awsSecretKey;
-    }
-
-    public void setTsmRetryTime(String tsmRetryTime) {
         this.tsmRetryTime = tsmRetryTime;
-    }
-
-    public void setOccRetryTime(String occRetryTime) {
         this.occRetryTime = occRetryTime;
-    }
-
-    public void setTsmMaxRetries(String tsmMaxRetries) {
         this.tsmMaxRetries = tsmMaxRetries;
-    }
-
-    public void setOccMaxRetries(String occMaxRetries) {
         this.occMaxRetries = occMaxRetries;
+        this.ociNameSpace = ociNameSpace;
+        this.ociBucketName = ociBucketName;
+        this.archiveStoreDAO = archiveStoreDAO;
     }
 
-    public void setOciNameSpace(String ociNameSpace) { this.ociNameSpace = ociNameSpace; }
-
-    public void setOciBucketName(String ociBucketName) { this.ociBucketName = ociBucketName; }
 
     public List<ArchiveStore> getArchiveStores() {
         return archiveStoreDAO.list();
@@ -93,11 +80,6 @@ public class ArchiveStoreService {
     public void deleteArchiveStore(String archiveStoreID) {
         archiveStoreDAO.deleteById(archiveStoreID);
     }
-
-    public void setArchiveStoreDAO(ArchiveStoreDAO archiveStoreDAO) {
-        this.archiveStoreDAO = archiveStoreDAO;
-    }
-
 
     /*
     There are copies of this code elsewhere. Someone with spare time should delete them and call this method instead.

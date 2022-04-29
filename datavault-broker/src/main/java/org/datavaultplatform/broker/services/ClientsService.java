@@ -1,17 +1,21 @@
 package org.datavaultplatform.broker.services;
 
+import java.util.List;
 import org.datavaultplatform.common.model.Client;
 import org.datavaultplatform.common.model.dao.ClientDAO;
-
-import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import org.springframework.stereotype.Service;
 @Service
 public class ClientsService {
 
-    private ClientDAO clientDAO;
-    
+    private final ClientDAO clientDAO;
+
+    @Autowired
+    public ClientsService(ClientDAO clientDAO) {
+        this.clientDAO = clientDAO;
+    }
+
     public List<Client> getClients() {
         return clientDAO.list();
     }
@@ -26,10 +30,6 @@ public class ClientsService {
 
     public Client getClientByApiKey(String key) {
         return clientDAO.findByApiKey(key);
-    }
-    
-    public void setClientDAO(ClientDAO clientDAO) {
-        this.clientDAO = clientDAO;
     }
 
     public int count() { return clientDAO.count(); }

@@ -1,22 +1,30 @@
 package org.datavaultplatform.broker.app;
 
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.broker.config.ControllerConfig;
 import org.datavaultplatform.broker.config.DatabaseConfig;
+import org.datavaultplatform.broker.config.InitialiseConfig;
+import org.datavaultplatform.broker.config.LdapConfig;
+import org.datavaultplatform.broker.config.MailConfig;
+import org.datavaultplatform.broker.config.ScheduleConfig;
 import org.datavaultplatform.broker.config.SecurityConfig;
+import org.datavaultplatform.broker.config.ServiceConfig;
+import org.datavaultplatform.broker.config.VelocityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
 @SpringBootApplication
-@ComponentScan({
-    "org.datavaultplatform.broker.controllers",
-    "org.datavaultplatform.broker.services"})
-@Import({SecurityConfig.class, DatabaseConfig.class})
+@Import({
+    SecurityConfig.class, ControllerConfig.class,
+    ServiceConfig.class,  DatabaseConfig.class,
+    ScheduleConfig.class, InitialiseConfig.class,
+    LdapConfig.class, VelocityConfig.class, MailConfig.class
+})
 @Slf4j
 public class DataVaultBrokerApp implements CommandLineRunner {
   @Autowired

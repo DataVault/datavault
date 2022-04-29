@@ -1,79 +1,102 @@
 package org.datavaultplatform.broker.scheduled;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import org.datavaultplatform.broker.queue.Sender;
-import org.datavaultplatform.broker.services.*;
-import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.broker.services.ArchiveStoreService;
+import org.datavaultplatform.broker.services.AuditsService;
+import org.datavaultplatform.broker.services.DepositsService;
+import org.datavaultplatform.broker.services.EmailService;
+import org.datavaultplatform.broker.services.JobsService;
+import org.datavaultplatform.common.model.Archive;
+import org.datavaultplatform.common.model.ArchiveStore;
+import org.datavaultplatform.common.model.Audit;
+import org.datavaultplatform.common.model.DepositChunk;
+import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.task.Task;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
-import java.util.*;
+@Component
+public class AuditDepositsChunks implements ScheduledTask {
 
-public class AuditDepositsChunks {
+    private final ArchiveStoreService archiveStoreService;
+    private final DepositsService depositsService;
+    private final EmailService emailService;
+    private final JobsService jobsService;
+    private final AuditsService auditsService;
+    private final Sender sender;
 
-    private ArchiveStoreService archiveStoreService;
-    private DepositsService depositsService;
-    private EmailService emailService;
-    private JobsService jobsService;
-    private AuditsService auditsService;
-    private Sender sender;
+    private final String optionsDir;
+    private final String tempDir;
+    private final String bucketName;
+    private final String region;
+    private final String awsAccessKey;
+    private final String awsSecretKey;
+    private final String tsmRetryTime;
+    private final String occRetryTime;
+    private final String tsmMaxRetries;
+    private final String occMaxRetries;
+    private final String ociNameSpace;
+    private final String ociBucketName;
 
-    private String optionsDir;
-    private String tempDir;
-    private String bucketName;
-    private String region;
-    private String awsAccessKey;
-    private String awsSecretKey;
-    private String tsmRetryTime;
-    private String occRetryTime;
-    private String tsmMaxRetries;
-    private String occMaxRetries;
-    private String ociNameSpace;
-    private String ociBucketName;
-
-    public void setDepositsService(DepositsService depositsService) {
+    /*
+        <property name="optionsDir" value="${optionsDir:#{null}}" />
+        <property name="tsmRetryTime" value="${tsmRetryTime:#{null}}" />
+        <property name="tsmMaxRetries" value="${tsmMaxRetries:#{null}}" />
+        <property name="occRetryTime" value="${occRetryTime:#{null}}" />
+        <property name="occMaxRetries" value="${occMaxRetries:#{null}}" />
+        <property name="ociNameSpace" value="${ociNameSpace:#{null}}" />
+        <property name="ociBucketName" value="${ociBucketName:#{null}}" />
+        <property name="tempDir" value="${tempDir:#{null}}" />
+        <property name="bucketName" value="${s3.bucketName:#{null}}" />
+        <property name="region" value="${s3.region:#{null}}" />
+        <property name="awsAccessKey" value="${s3.awsAccessKey:#{null}}" />
+        <property name="awsSecretKey" value="${s3.awsSecretKey:#{null}}" />
+     */
+    @Autowired
+    public AuditDepositsChunks(ArchiveStoreService archiveStoreService,
+        DepositsService depositsService, EmailService emailService, JobsService jobsService,
+        AuditsService auditsService, Sender sender,
+        @Value("${optionsDir:#{null}}") String optionsDir,
+        @Value("${tempDir:#{null}}") String tempDir,
+        @Value("${s3.bucketName:#{null}}") String bucketName,
+        @Value("${s3.region:#{null}}") String region,
+        @Value("${s3.awsAccessKey:#{null}}") String awsAccessKey,
+        @Value("${s3.awsSecretKey:#{null}}") String awsSecretKey,
+        @Value("${tsmRetryTime:#{null}}") String tsmRetryTime,
+        @Value("${occRetryTime:#{null}}") String occRetryTime,
+        @Value("${tsmMaxRetries:#{null}}") String tsmMaxRetries,
+        @Value("${occMaxRetries:#{null}}") String occMaxRetries,
+        @Value("${ociNameSpace:#{null}}") String ociNameSpace,
+        @Value("${ociBucketName:#{null}}") String ociBucketName) {
+        this.archiveStoreService = archiveStoreService;
         this.depositsService = depositsService;
-    }
-    public void setEmailService(EmailService emailService) {
         this.emailService = emailService;
-    }
-    public void setArchiveStoreService(ArchiveStoreService archiveStoreService) { this.archiveStoreService = archiveStoreService; }
-    public void setJobsService(JobsService jobsService) {
         this.jobsService = jobsService;
-    }
-    public void setAuditsService(AuditsService auditsService) { this.auditsService = auditsService; }
-    public void setTempDir(String tempDir) {
-        this.tempDir = tempDir;
-    }
-    public void setOptionsDir(String optionsDir) {
+        this.auditsService = auditsService;
+        this.sender = sender;
         this.optionsDir = optionsDir;
-    }
-    public void setBucketName(String bucketName) {
+        this.tempDir = tempDir;
         this.bucketName = bucketName;
-    }
-    public void setRegion(String region) {
         this.region = region;
-    }
-    public void setAwsAccessKey(String awsAccessKey) {
         this.awsAccessKey = awsAccessKey;
-    }
-    public void setAwsSecretKey(String awsSecretKey) {
         this.awsSecretKey = awsSecretKey;
-    }
-    public void setTsmRetryTime(String tsmRetryTime) {
         this.tsmRetryTime = tsmRetryTime;
-    }
-    public void setOccRetryTime(String occRetryTime) {
         this.occRetryTime = occRetryTime;
-    }
-    public void setTsmMaxRetries(String tsmMaxRetries) { this.tsmMaxRetries = tsmMaxRetries; }
-    public void setOccMaxRetries(String occMaxRetries) {
+        this.tsmMaxRetries = tsmMaxRetries;
         this.occMaxRetries = occMaxRetries;
+        this.ociNameSpace = ociNameSpace;
+        this.ociBucketName = ociBucketName;
     }
-    public void setSender(Sender sender) { this.sender = sender; }
-    public void setOciNameSpace(String ociNameSpace) { this.ociNameSpace = ociNameSpace; }
-    public void setOciBucketName(String ociBucketName) { this.ociBucketName = ociBucketName; }
 
+
+    @Scheduled(cron = ScheduledUtils.SCHEDULE_1_AUDIT_DEPOSIT)
     public void execute() throws Exception {
         Date now = new Date();
         System.out.println("Start Audit Job "+now.toString());

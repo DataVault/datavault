@@ -1,21 +1,22 @@
 package org.datavaultplatform.broker.services;
 
+import java.util.Date;
+import java.util.List;
 import org.datavaultplatform.common.model.Archive;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.dao.ArchiveDAO;
-
-import java.util.Date;
-import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
 @Service
 public class ArchivesService {
 
-    private ArchiveDAO archiveDAO;
+    private final ArchiveDAO archiveDAO;
 
-    public void setArchiveDAO(ArchiveDAO archiveDAO) {
+    @Autowired
+    public ArchivesService(ArchiveDAO archiveDAO) {
         this.archiveDAO = archiveDAO;
     }
 

@@ -1,38 +1,42 @@
 package org.datavaultplatform.broker.scheduled;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.broker.services.DepositsService;
 import org.datavaultplatform.broker.services.EmailService;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.deposit.ComputedEncryption;
-import org.datavaultplatform.common.model.*;
-
+import org.datavaultplatform.common.model.Deposit;
+import org.datavaultplatform.common.model.DepositChunk;
+import org.datavaultplatform.common.model.Group;
+import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.Vault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import org.bouncycastle.util.encoders.Base64;
+import org.springframework.stereotype.Component;
 
 
-public class CheckEncryptionData {
+@Component
+public class CheckEncryptionData implements ScheduledTask {
 
-    private DepositsService depositsService;
-    private EmailService emailService;
-
-    public void setDepositsService(DepositsService depositsService) {
-        this.depositsService = depositsService;
-    }
-    public void setEmailService(EmailService emailService) {
-        this.emailService = emailService;
-    }
+    private final DepositsService depositsService;
+    private final EmailService emailService;
 
     private static final Logger log = LoggerFactory.getLogger(CheckEncryptionData.class);
 
-    @Scheduled(cron = "${cron.expression}")
-    public void checkAll() throws Exception {
+    @Autowired
+    public CheckEncryptionData(DepositsService depositsService, EmailService emailService) {
+        this.depositsService = depositsService;
+        this.emailService = emailService;
+    }
+
+    @Scheduled(cron = ScheduledUtils.SCHEDULE_2_ENCRYPTION_CHECK)
+    public void execute() throws Exception {
 
         Date start = new Date();
         log.info("Initiating check of encryption data at " + start);

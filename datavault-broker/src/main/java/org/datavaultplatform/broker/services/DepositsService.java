@@ -1,33 +1,75 @@
 package org.datavaultplatform.broker.services;
 
-import java.util.*;
-
-import org.datavaultplatform.common.model.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import org.datavaultplatform.common.model.AuditChunkStatus;
+import org.datavaultplatform.common.model.Deposit;
+import org.datavaultplatform.common.model.DepositChunk;
+import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
-import org.datavaultplatform.common.model.dao.AuditChunkStatusDAOImpl;
 import org.datavaultplatform.common.model.dao.DepositChunkDAO;
 import org.datavaultplatform.common.model.dao.DepositDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 @Service
 public class DepositsService {
 
     private static final Logger logger = LoggerFactory.getLogger(DepositsService.class);
 
-    private int auditPeriodMinutes = 0;
-    private int auditPeriodHours = 0;
-    private int auditPeriodDays = 0;
-    private int auditPeriodMonths = 0;
-    private int auditPeriodYears = 2;
-    private int auditMaxChunksPerDeposits = 50;
-    private int auditMaxTotalChunks = 2000;
+    private final int auditPeriodMinutes;
+    private final int auditPeriodHours;
+    private final int auditPeriodDays;
+    private final int auditPeriodMonths;
+    private final int auditPeriodYears;
+    private final int auditMaxChunksPerDeposits;
+    private final int auditMaxTotalChunks;
 
-    private DepositDAO depositDAO;
-    private DepositChunkDAO depositChunkDAO;
-    private AuditChunkStatusDAO auditChunkStatusDAO;
-    
+    private final DepositDAO depositDAO;
+    private final DepositChunkDAO depositChunkDAO;
+    private final AuditChunkStatusDAO auditChunkStatusDAO;
+
+    /*
+        <property name="depositDAO" ref="depositDAO" />
+        <property name="depositChunkDAO" ref="depositChunkDAO" />
+        <property name="auditChunkStatusDAO" ref="auditChunkStatusDAO" />
+        <property name="auditPeriodMinutes" value="${audit.period.minutes:0}"/>
+        <property name="auditPeriodHours" value="${audit.period.hours:0}"/>
+        <property name="auditPeriodDays" value="${audit.period.days:0}"/>
+        <property name="auditPeriodMonths" value="${audit.period.months:0}"/>
+        <property name="auditPeriodYears" value="${audit.period.years:2}"/>
+        <property name="auditMaxChunksPerDeposits" value="${audit.maxChunksPerDeposits:50}"/>
+        <property name="auditMaxTotalChunks" value="${audit.maxTotalChunks:2000}"/>
+     */
+    public DepositsService(
+        DepositDAO depositDAO,
+        DepositChunkDAO depositChunkDAO,
+        AuditChunkStatusDAO auditChunkStatusDAO,
+        @Value("${audit.period.minutes:0}") int auditPeriodMinutes,
+        @Value("${audit.period.hours:0}") int auditPeriodHours,
+        @Value("${audit.period.days:0}") int auditPeriodDays,
+        @Value("${audit.period.months:0}") int auditPeriodMonths,
+        @Value("${audit.period.years:2}") int auditPeriodYears,
+        @Value("${audit.maxChunksPerDeposits:50}") int auditMaxChunksPerDeposits,
+        @Value("${audit.maxTotalChunks:2000}") int auditMaxTotalChunks){
+        this.depositDAO = depositDAO;
+        this.depositChunkDAO = depositChunkDAO;
+        this.auditChunkStatusDAO = auditChunkStatusDAO;
+        this.auditPeriodMinutes = auditPeriodMinutes;
+        this.auditPeriodHours = auditPeriodHours;
+        this.auditPeriodDays = auditPeriodDays;
+        this.auditPeriodMonths = auditPeriodMonths;
+        this.auditPeriodYears = auditPeriodYears;
+        this.auditMaxChunksPerDeposits = auditMaxChunksPerDeposits;
+        this.auditMaxTotalChunks  = auditMaxTotalChunks;
+    }
     public List<Deposit> getDeposits(String query, String userId, String sort, String order, int offset, int maxResult) {
         return depositDAO.list(query, userId, sort, order, offset, maxResult);
     }
@@ -65,10 +107,6 @@ public class DepositsService {
         return depositDAO.findById(depositID);
     }
     
-    public void setDepositDAO(DepositDAO depositDAO) { this.depositDAO = depositDAO; }
-    public void setDepositChunkDAO(DepositChunkDAO depositChunkDAO) { this.depositChunkDAO = depositChunkDAO; }
-    public void setAuditChunkStatusDAO(AuditChunkStatusDAO auditChunkStatusDAO) { this.auditChunkStatusDAO = auditChunkStatusDAO; }
-
     public int count(String userId) { return depositDAO.count(userId, null); }
 
     public int queueCount(String userId) { return depositDAO.queueCount(userId); }
@@ -198,56 +236,31 @@ public class DepositsService {
         return auditPeriodMinutes;
     }
 
-    public void setAuditPeriodMinutes(int auditPeriodMinutes) {
-        this.auditPeriodMinutes = auditPeriodMinutes;
-    }
 
     public int getAuditPeriodHours() {
         return auditPeriodHours;
     }
 
-    public void setAuditPeriodHours(int auditPeriodHours) {
-        this.auditPeriodHours = auditPeriodHours;
-    }
 
     public int getAuditPeriodDays() {
         return auditPeriodDays;
     }
 
-    public void setAuditPeriodDays(int auditPeriodDays) {
-        this.auditPeriodDays = auditPeriodDays;
-    }
 
     public int getAuditPeriodMonths() {
         return auditPeriodMonths;
-    }
-
-    public void setAuditPeriodMonths(int auditPeriodMonths) {
-        this.auditPeriodMonths = auditPeriodMonths;
     }
 
     public int getAuditPeriodYears() {
         return auditPeriodYears;
     }
 
-    public void setAuditPeriodYears(int auditPeriodYears) {
-        this.auditPeriodYears = auditPeriodYears;
-    }
-
     public int getAuditMaxChunksPerDeposits() {
         return auditMaxChunksPerDeposits;
     }
 
-    public void setAuditMaxChunksPerDeposits(int auditMaxChunksPerDeposits) {
-        this.auditMaxChunksPerDeposits = auditMaxChunksPerDeposits;
-    }
-
     public int getAuditMaxTotalChunks() {
         return auditMaxTotalChunks;
-    }
-
-    public void setAuditMaxTotalChunks(int auditMaxTotalChunks) {
-        this.auditMaxTotalChunks = auditMaxTotalChunks;
     }
 
     public DepositChunk getDepositChunkById(String id){

@@ -1,22 +1,27 @@
 package org.datavaultplatform.broker.services;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import org.datavaultplatform.common.model.Audit;
 import org.datavaultplatform.common.model.AuditChunkStatus;
 import org.datavaultplatform.common.model.DepositChunk;
 import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
 import org.datavaultplatform.common.model.dao.AuditDAO;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 @Service
 public class AuditsService {
 
-    private AuditDAO auditDAO;
-    private AuditChunkStatusDAO auditChunkStatusDAO;
-    
+    private final AuditDAO auditDAO;
+    private final AuditChunkStatusDAO auditChunkStatusDAO;
+
+    @Autowired
+    public AuditsService(AuditDAO auditDAO, AuditChunkStatusDAO auditChunkStatusDAO) {
+        this.auditDAO = auditDAO;
+        this.auditChunkStatusDAO = auditChunkStatusDAO;
+    }
+
     public List<Audit> getAudits() {
         return auditDAO.list();
     }
@@ -47,14 +52,6 @@ public class AuditsService {
     
     public Audit getAudit(String AuditID) {
         return auditDAO.findById(AuditID);
-    }
-    
-    public void setAuditDAO(AuditDAO auditDAO) {
-        this.auditDAO = auditDAO;
-    }
-
-    public void setAuditChunkStatusDAO(AuditChunkStatusDAO auditChunkStatusDAO) {
-        this.auditChunkStatusDAO = auditChunkStatusDAO;
     }
 
     public AuditChunkStatus addAuditStatus(Audit audit, DepositChunk chunk, String archiveId, String location){

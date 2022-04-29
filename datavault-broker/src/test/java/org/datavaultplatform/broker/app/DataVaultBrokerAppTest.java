@@ -1,12 +1,13 @@
 package org.datavaultplatform.broker.app;
 
+import static org.datavaultplatform.broker.test.ScheduledTestUtils.setAllCronExpressionToNever;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import javax.sql.DataSource;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.broker.test.AddTestProperties;
@@ -19,13 +20,10 @@ import org.hibernate.Transaction;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.TransactionManager;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
 @AddTestProperties
@@ -43,6 +41,10 @@ public class DataVaultBrokerAppTest extends BaseDatabaseTest {
 
   @Autowired
   UserDAO userDAO;
+
+  //TODO - this is temporary
+  @MockBean
+  Sender mSender;
 
   @Autowired
   SessionFactory sessionFactory;
@@ -79,5 +81,9 @@ public class DataVaultBrokerAppTest extends BaseDatabaseTest {
     assertNotNull(this.rolesAndPermissionsService);
   }
 
-
+  @DynamicPropertySource
+  static void setupCronExpressions(DynamicPropertyRegistry registry) {
+    BaseDatabaseTest.setupDatabaseProperties(registry);
+    setAllCronExpressionToNever(registry);
+  }
 }

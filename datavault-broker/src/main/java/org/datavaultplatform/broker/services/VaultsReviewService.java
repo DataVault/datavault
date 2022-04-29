@@ -1,16 +1,14 @@
 package org.datavaultplatform.broker.services;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.VaultReview;
 import org.datavaultplatform.common.model.dao.VaultReviewDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 @Service
 public class VaultsReviewService {
@@ -21,9 +19,9 @@ public class VaultsReviewService {
     // This could be moved into datavault.properties if they keep on changing their minds about the value.
     private int x = -6;
 
-    private VaultReviewDAO vaultReviewDAO;
+    private final VaultReviewDAO vaultReviewDAO;
 
-    public void setVaultReviewDAO(VaultReviewDAO vaultReviewDAO) {
+    public VaultsReviewService(VaultReviewDAO vaultReviewDAO) {
         this.vaultReviewDAO = vaultReviewDAO;
     }
 
