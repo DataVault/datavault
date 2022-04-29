@@ -198,10 +198,10 @@
                             <td>${role.getAssignedUserCount()}</td>
                             <td>${role.getStatus()}</td>
                             <td class="action-column">
-                                <a href="#" class="btn btn-default editRoleButton" role="button" value="${role.getId()}" title="Edit the ${role.name} role.">
+                                <a href="#" class="btn btn-default editRoleButton" role="button" value="${role.getIdAsString()}" title="Edit the ${role.name} role.">
                                     <i class="fa fa-pencil"></i>
                                 </a>
-                                <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog" data-role-id="${role.id}" data-role-name="${role.name}" role="button" title="Delete the ${role.name} role.">
+                                <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog" data-role-id="${role.getIdAsString()}" data-role-name="${role.name}" role="button" title="Delete the ${role.name} role.">
                                     <i class="fa fa-trash-o"></i>
                                 </a>
                             </td>
