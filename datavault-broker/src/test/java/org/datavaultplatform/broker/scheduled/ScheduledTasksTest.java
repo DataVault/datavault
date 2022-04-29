@@ -17,9 +17,9 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 /*
-This test uses @SpyBean to change the frequency of scheduled tasks to once-every-5-seconds.
-It also changes the behaviour of scheduled tasks to increment a count each time a scheduled task is invoked.
-By waiting 12 seconds - each of the 5 scheduled tasks should increment their counters two times.
+The scheduled tasks are configured to be once-every-5-seconds.
+This test uses @SpyBean to capture the timestamps of scheduled task invocations.
+By waiting 12 seconds - each of the 5 scheduled tasks should by invoked twice.
  */
 public class ScheduledTasksTest extends BaseScheduledTest {
 
@@ -51,11 +51,11 @@ public class ScheduledTasksTest extends BaseScheduledTest {
 
   @Test
   void testTasksEvery5secsHappenAtLeastTwiceIn12secs() throws Exception {
-    stubIncrementCounter(timestamps1, task1AuditDepositChunks);
-    stubIncrementCounter(timestamps2, task2CheckEncryptionData);
-    stubIncrementCounter(timestamps3, task3CheckForDelete);
-    stubIncrementCounter(timestamps4, task4CheckForReview);
-    stubIncrementCounter(timestamps5, task5CheckRetentionPolicies);
+    captureTaskInvocationTimestamps(timestamps1, task1AuditDepositChunks);
+    captureTaskInvocationTimestamps(timestamps2, task2CheckEncryptionData);
+    captureTaskInvocationTimestamps(timestamps3, task3CheckForDelete);
+    captureTaskInvocationTimestamps(timestamps4, task4CheckForReview);
+    captureTaskInvocationTimestamps(timestamps5, task5CheckRetentionPolicies);
 
     //12 seconds is long enough for 2 task invocations of each scheduled task
     //no counter should be incremented more than 2 times within twelve seconds.
@@ -72,7 +72,7 @@ public class ScheduledTasksTest extends BaseScheduledTest {
 
   }
 
-  void stubIncrementCounter(List<Instant> timestamps, ScheduledTask scheduledTask) throws Exception {
+  void captureTaskInvocationTimestamps(List<Instant> timestamps, ScheduledTask scheduledTask) throws Exception {
     doAnswer(invocation -> {
       timestamps.add(Instant.now());
       return null;
