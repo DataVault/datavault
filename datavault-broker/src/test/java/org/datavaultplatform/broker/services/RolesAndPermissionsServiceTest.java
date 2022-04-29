@@ -2,6 +2,7 @@ package org.datavaultplatform.broker.services;
 
 import org.datavaultplatform.broker.test.TestUtils;
 import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.model.PermissionModel.PermissionType;
 import org.datavaultplatform.common.model.dao.PermissionDAO;
 import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
 import org.datavaultplatform.common.model.dao.RoleDAO;
@@ -23,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 public class RolesAndPermissionsServiceTest {
@@ -45,6 +47,10 @@ public class RolesAndPermissionsServiceTest {
 
     void checkIllegalStateExcepton(String message, ThrowingRunnable runnable){
         TestUtils.checkException(IllegalStateException.class, message, runnable);
+    }
+
+    void verifyNoMoreMockInteractions() {
+        verifyNoMoreInteractions(mockRoleAssignmentDao, mockPermissionDao, mockPermissionDao, mockUsersService);
     }
 
     @Test
@@ -217,23 +223,19 @@ public class RolesAndPermissionsServiceTest {
         PermissionModel school2 = aPermission(Permission.CAN_VIEW_IN_PROGRESS, PermissionModel.PermissionType.SCHOOL);
         PermissionModel school3 = aPermission(Permission.CAN_VIEW_QUEUES, PermissionModel.PermissionType.SCHOOL);
 
-        List<PermissionModel> allPermissions = Arrays.asList(
+        List<PermissionModel> permissionModels = Arrays.asList(
                 school1,
                 school2,
-                school3,
-                aPermission(Permission.VIEW_VAULT_ROLES, PermissionModel.PermissionType.VAULT),
-                aPermission(Permission.CAN_MANAGE_ROLES, PermissionModel.PermissionType.ADMIN),
-                aPermission(Permission.CAN_MANAGE_BILLING_DETAILS, PermissionModel.PermissionType.ADMIN),
-                aPermission(Permission.CAN_VIEW_EVENTS, PermissionModel.PermissionType.ADMIN));
+                school3);
 
-        given(mockPermissionDao.findAll()).willReturn(allPermissions);
-
+        given(mockPermissionDao.findByType(PermissionType.SCHOOL)).willReturn(permissionModels);
         // When
         Collection<PermissionModel> actual = underTest.getSchoolPermissions();
 
         // Then
-        List<PermissionModel> expected = Arrays.asList(school1, school2, school3);
-        assertEquals(expected, actual);
+        assertEquals(permissionModels, actual);
+        verify(mockPermissionDao).findByType(PermissionType.SCHOOL);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -244,24 +246,19 @@ public class RolesAndPermissionsServiceTest {
         PermissionModel vault3 = aPermission(Permission.VIEW_VAULT_ROLES, PermissionModel.PermissionType.VAULT);
 
         List<PermissionModel> allPermissions = Arrays.asList(
-                aPermission(Permission.CAN_VIEW_VAULTS_SIZE, PermissionModel.PermissionType.SCHOOL),
-                aPermission(Permission.CAN_VIEW_IN_PROGRESS, PermissionModel.PermissionType.SCHOOL),
-                aPermission(Permission.CAN_VIEW_QUEUES, PermissionModel.PermissionType.SCHOOL),
                 vault1,
                 vault2,
-                vault3,
-                aPermission(Permission.CAN_MANAGE_BILLING_DETAILS, PermissionModel.PermissionType.ADMIN),
-                aPermission(Permission.CAN_MANAGE_ROLES, PermissionModel.PermissionType.ADMIN),
-                aPermission(Permission.CAN_MANAGE_RETENTION_POLICIES, PermissionModel.PermissionType.ADMIN));
+                vault3);
 
-        given(mockPermissionDao.findAll()).willReturn(allPermissions);
+        given(mockPermissionDao.findByType(PermissionType.VAULT)).willReturn(allPermissions);
 
         // When
         Collection<PermissionModel> actual = underTest.getVaultPermissions();
 
         // Then
-        List<PermissionModel> expected = Arrays.asList(vault1, vault2, vault3);
-        assertEquals(expected, actual);
+        assertEquals(allPermissions, actual);
+        verify(mockPermissionDao).findByType(PermissionType.VAULT);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -271,14 +268,16 @@ public class RolesAndPermissionsServiceTest {
         RoleModel vaultRole = aRole(RoleType.VAULT);
         RoleModel adminRole = aRole(RoleType.ADMIN);
 
-        given(mockRoleDao.findAll()).willReturn(Arrays.asList(schoolRole, vaultRole, adminRole));
+        given(mockRoleDao.findAllEditableRoles()).willReturn(Arrays.asList(schoolRole, vaultRole, adminRole));
 
         // When
         List<RoleModel> actual = underTest.getEditableRoles();
 
         // Then
-        List<RoleModel> expected = Arrays.asList(schoolRole, vaultRole);
+        List<RoleModel> expected = Arrays.asList(schoolRole, vaultRole, adminRole);
         assertEquals(expected, actual);
+        verify(mockRoleDao).findAllEditableRoles();
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -358,27 +357,32 @@ public class RolesAndPermissionsServiceTest {
     public void updateRoleAssignmentShouldPersistAnUpdate() {
         // Given
         Group school = new Group();
-        String schoolId = "school1";
+        String schoolId1 = "school1";
+        String schoolId2 = "school2";
 
         RoleModel originalRole = aRole(RoleType.SCHOOL);
-        originalRole.setName("Role 1");
         RoleAssignment original = aRoleAssignment(originalRole);
-        original.setSchoolId(schoolId);
+        original.setSchoolId(schoolId1);
         original.setId(1L);
 
         given(mockRoleAssignmentDao.find(1L)).willReturn(original);
 
         RoleModel newRole = aRole(RoleType.SCHOOL);
-        newRole.setName("Role 2");
+
         RoleAssignment updatedRoleAssignment = aRoleAssignment(newRole);
-        updatedRoleAssignment.setSchoolId(schoolId);
+        updatedRoleAssignment.setSchoolId(schoolId2);
         updatedRoleAssignment.setId(1L);
+
+        given(mockRoleAssignmentDao.roleAssignmentExists(updatedRoleAssignment)).willReturn(false);
 
         // When
         underTest.updateRoleAssignment(updatedRoleAssignment);
 
         // Then
+        verify(mockRoleAssignmentDao).find(1L);
         verify(mockRoleAssignmentDao).update(updatedRoleAssignment);
+        verify(mockRoleAssignmentDao).roleAssignmentExists(updatedRoleAssignment);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
