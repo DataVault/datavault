@@ -1,13 +1,15 @@
 package org.datavaultplatform.webapp.actuator;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Clock;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
-import org.springframework.boot.actuate.endpoint.annotation.Selector;
 
 @Endpoint(id="customtime")
 public class CurrentTimeEndpoint {
@@ -21,9 +23,11 @@ public class CurrentTimeEndpoint {
 
   @ReadOperation
   public CurrentTime currentTime() {
+    DateFormat df = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz YYYY");
+    df.setTimeZone(TimeZone.getTimeZone(clock.getZone()));
     Map<String, Object> details = new LinkedHashMap<>();
     long ts = clock.millis();
-    details.put("current-time", new Date(ts).toString());
+    details.put("current-time", df.format(new Date(ts)));
     CurrentTime health = new CurrentTime(details);
     return health;
   }

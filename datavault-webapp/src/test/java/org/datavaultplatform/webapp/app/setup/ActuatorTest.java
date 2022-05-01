@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -56,15 +57,14 @@ public class ActuatorTest {
   private Set<String> endpoints;
 
   @Test
-  @DisabledOnOs(OS.WINDOWS)
   void testInfo() throws Exception {
     mvc.perform(get("/actuator/info"))
         .andExpect(jsonPath("$.app.name").value(Matchers.is("datavault-webapp")))
         .andExpect(jsonPath("$.app.description").value(Matchers.is("webapp for datavault")))
         .andExpect(jsonPath("$.git.commit.time").exists())
+        .andExpect(jsonPath("$.git.commit.time").value(Matchers.is("2022-03-30T10:25:54Z")))
         .andExpect(jsonPath("$.git.commit.id").value(Matchers.is("a16f01e")))
         .andExpect(jsonPath("$.build.artifact").value(Matchers.is("datavault-webapp")))
-        .andExpect(jsonPath("$.build.time").value(Matchers.is("2022-03-30T12:41:50.383Z")))
         .andExpect(jsonPath("$.java.vendor").exists())
         .andExpect(jsonPath("$.java.runtime.version").exists())
         .andExpect(jsonPath("$.java.jvm.version").exists());
@@ -73,7 +73,6 @@ public class ActuatorTest {
 
   /* just checking that 'test-classes' come before the other 'classes' directories */
   @Test
-  @DisabledOnOs(OS.WINDOWS)
   void testClassPath() {
     String classpath = System.getProperty("java.class.path");
     String sep = File.pathSeparator;
@@ -89,13 +88,17 @@ public class ActuatorTest {
 
     assertTrue(elements.size() >= 2);
 
-    assertTrue(elements.get(0).endsWith("datavault-webapp/target/test-classes"));
-    assertTrue(elements.get(1).endsWith("datavault-webapp/target/classes"));
+    checkEndsWith(elements.get(0),"datavault-webapp", "target", "test-classes");
+    checkEndsWith(elements.get(1),"datavault-webapp", "target", "classes");
+  }
 
+  void checkEndsWith(String elements, String... expectedEndElements) {
+    String head = expectedEndElements[0];
+    String[] tail = Arrays.copyOfRange(expectedEndElements, 1, expectedEndElements.length);
+    assertTrue(Paths.get(elements).endsWith(Paths.get(head, tail)));
   }
 
   @Test
-  @DisabledOnOs(OS.WINDOWS)
   void testCurrentTime() throws Exception {
     MvcResult mvcResult = mvc.perform(
             get("/actuator/customtime"))
