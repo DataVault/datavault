@@ -15,8 +15,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
@@ -40,8 +38,6 @@ import org.springframework.util.FileSystemUtils;
 @ProfileStandalone
 @Slf4j
 @DirtiesContext
-@DisabledOnOs(OS.WINDOWS)
-//TODO - fix this test on windows
 public class ExternalPropertyFileConfigTest {
 
   private static final String RAND_1 = UUID.randomUUID().toString();
@@ -53,13 +49,12 @@ public class ExternalPropertyFileConfigTest {
   static Path etcDir;
   static Path dvHomeDir;
 
-  @Value("${prop.home}")
+  @Value("${prop.dv.home}")
   String fromDvHome;
 
   @Value("${prop.dv.etc}")
   String fromDvEtc;
-
-  @Value("${prop.dv.home}")
+  @Value("${prop.home}")
   String fromHome;
 
   @Value("${prop.override.test}")
@@ -69,14 +64,15 @@ public class ExternalPropertyFileConfigTest {
   static void setupFiles() throws IOException {
     parentDir = Files.createTempDirectory("test").normalize();
     log.info("TEMP PROPERTY FILES PARENT DIR {}", parentDir);
-    homeDir = Files.createDirectories(parentDir.resolve("home"));
-    etcDir = Files.createDirectories(parentDir.resolve("etc"));
+
     dvHomeDir = Files.createDirectories(parentDir.resolve("dvhome"));
+    etcDir = Files.createDirectories(parentDir.resolve("etc"));
+    homeDir = Files.createDirectories(parentDir.resolve("home"));
 
 
-    createFile(dvHomeDir, "config/datavault.properties", "prop.home="+RAND_1, "prop.override.test=1");
+    createFile(dvHomeDir, "config/datavault.properties", "prop.dv.home="+RAND_1, "prop.override.test=1");
     createFile(etcDir, "datavault/datavault.properties", "prop.dv.etc="+RAND_2, "prop.override.test=2");
-    createFile(homeDir, ".config/datavault/datavault.properties", "prop.dv.home="+RAND_3, "prop.override.test=3");
+    createFile(homeDir, ".config/datavault/datavault.properties", "prop.home="+RAND_3, "prop.override.test=3");
   }
 
   static void createFile(Path parentDir, String relativePath, String... lines) throws IOException {
@@ -90,9 +86,9 @@ public class ExternalPropertyFileConfigTest {
    */
   @DynamicPropertySource
   static void registerPgProperties(DynamicPropertyRegistry registry) {
-    registry.add("HOME", () -> homeDir.toString());
-    registry.add("DATAVAULT_ETC", () -> etcDir.toString());
     registry.add("DATAVAULT_HOME", () -> dvHomeDir.toString());
+    registry.add("DATAVAULT_ETC", () -> etcDir.toString());
+    registry.add("HOME", () -> homeDir.toString());
   }
 
   /**
@@ -100,14 +96,14 @@ public class ExternalPropertyFileConfigTest {
    */
   @BeforeEach
   void preCheck(ApplicationContext ctx) {
+    assertTrue(Files.isDirectory(dvHomeDir));
     assertTrue(Files.isDirectory(etcDir));
     assertTrue(Files.isDirectory(homeDir));
-    assertTrue(Files.isDirectory(dvHomeDir));
 
     Environment env = ctx.getEnvironment();
-    assertEquals(env.getProperty("HOME"), homeDir.toString());
     assertEquals(env.getProperty("DATAVAULT_HOME"), dvHomeDir.toString());
     assertEquals(env.getProperty("DATAVAULT_ETC"), etcDir.toString());
+    assertEquals(env.getProperty("HOME"), homeDir.toString());
   }
 
   /**

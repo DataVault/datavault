@@ -4,7 +4,6 @@ import java.util.Arrays;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
@@ -20,15 +19,15 @@ import org.springframework.core.env.Environment;
             ignoreResourceNotFound = true),
 
     @PropertySource(
-        value = "file://${DATAVAULT_HOME}/config/datavault.properties",
+        value = "file:${DATAVAULT_HOME}/config/datavault.properties",
         ignoreResourceNotFound = true),
 
     @PropertySource(
-        value = "file://${DATAVAULT_ETC:/etc}/datavault/datavault.properties",
+        value = "file:${DATAVAULT_ETC:/etc}/datavault/datavault.properties",
         ignoreResourceNotFound = true),
 
     @PropertySource(
-        value = "file://${HOME}/.config/datavault/datavault.properties",
+        value = "file:${HOME}/.config/datavault/datavault.properties",
         ignoreResourceNotFound = true)
 })
 @Slf4j
@@ -39,7 +38,7 @@ public class PropertiesConfig {
 
   @PostConstruct
   void init() {
-    Arrays.asList("HOME", "DATAVAULT_HOME", "DATAVAULT_ETC").forEach(
+    Arrays.asList("DATAVAULT_HOME", "DATAVAULT_ETC", "HOME").forEach(
         name ->
             log.info("ENV VARIABLE [{}]=[{}]", name, env.getProperty(name))
     );
