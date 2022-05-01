@@ -1,6 +1,5 @@
 package org.datavaultplatform.webapp.app.config;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,10 +12,9 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.lang.reflect.Field;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
+import org.datavaultplatform.webapp.test.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.core.io.ClassPathResource;
@@ -51,7 +49,6 @@ public class FreemarkerConfigTest {
   }
 
   @Test
-  @DisabledOnOs(OS.WINDOWS)
   void testFreemarkerConfigurer() throws IOException, IllegalAccessException {
     assertNotNull(freeMarkerConfigurer);
     Configuration config = freeMarkerConfigurer.getConfiguration();
@@ -62,11 +59,11 @@ public class FreemarkerConfigTest {
     TemplateLoader loader = config.getTemplateLoader();
     Object helloTemplateSource = loader.findTemplateSource("test/hello.ftl");
     String helloTemplateSourceStr = helloTemplateSource.toString();
-    assertThat(helloTemplateSourceStr).endsWith("classes/WEB-INF/freemarker/test/hello.ftl");
+    TestUtils.checkEndsWith(helloTemplateSourceStr,"classes","WEB-INF","freemarker","test","hello.ftl");
 
     Object errorTemplatesource = loader.findTemplateSource("error/error.ftl");
     String errorTemplatesourceStr = errorTemplatesource.toString();
-    assertThat(errorTemplatesourceStr).endsWith("classes/WEB-INF/freemarker/error/error.ftl");
+    TestUtils.checkEndsWith(errorTemplatesourceStr,"classes","WEB-INF","freemarker","error","error.ftl");
 
     XmlEscape esc = (XmlEscape) config.getSharedVariable("xml_escape");
     Assertions.assertNotNull(esc);

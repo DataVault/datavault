@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.datavaultplatform.webapp.test.TestClockConfig;
+import org.datavaultplatform.webapp.test.TestUtils;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -88,15 +89,11 @@ public class ActuatorTest {
 
     assertTrue(elements.size() >= 2);
 
-    checkEndsWith(elements.get(0),"datavault-webapp", "target", "test-classes");
-    checkEndsWith(elements.get(1),"datavault-webapp", "target", "classes");
+    TestUtils.checkEndsWith(elements.get(0),"datavault-webapp", "target", "test-classes");
+    TestUtils.checkEndsWith(elements.get(1),"datavault-webapp", "target", "classes");
   }
 
-  void checkEndsWith(String elements, String... expectedEndElements) {
-    String head = expectedEndElements[0];
-    String[] tail = Arrays.copyOfRange(expectedEndElements, 1, expectedEndElements.length);
-    assertTrue(Paths.get(elements).endsWith(Paths.get(head, tail)));
-  }
+
 
   @Test
   void testCurrentTime() throws Exception {

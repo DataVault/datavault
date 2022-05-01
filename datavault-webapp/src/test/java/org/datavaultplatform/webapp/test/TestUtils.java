@@ -1,9 +1,11 @@
 package org.datavaultplatform.webapp.test;
 
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 import java.net.URI;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -134,6 +136,11 @@ public abstract class TestUtils {
         registry.removeSessionInformation(sessionInformation.getSessionId());
       });
     });
+  }
 
+  public static void checkEndsWith(String elements, String... expectedEndElements) {
+    String head = expectedEndElements[0];
+    String[] tail = Arrays.copyOfRange(expectedEndElements, 1, expectedEndElements.length);
+    assertTrue(Paths.get(elements).endsWith(Paths.get(head, tail)));
   }
 }
