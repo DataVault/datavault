@@ -1,9 +1,9 @@
 package org.datavaultplatform.broker.services;
 
-import java.util.HashMap;
+import java.util.Map;
 import javax.mail.internet.MimeMessage;
-import org.apache.velocity.app.VelocityEngine;
-import org.datavaultplatform.broker.utils.VelocityEngineUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.broker.email.EmailBodyGenerator;
 import org.datavaultplatform.common.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,15 +14,15 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
 @Service
+@Slf4j
 public class EmailService {
 
     private final UsersService usersService;
 
     private final JavaMailSender mailSender;
-    private final VelocityEngine velocityEngine;
     private final String mailAdministrator;
-    
-    private final String encoding = "UTF-8";
+
+    private EmailBodyGenerator emailBodyGenerator;
 
     /*
         <bean id="emailService" class="org.datavaultplatform.broker.services.EmailService">
@@ -35,11 +35,11 @@ public class EmailService {
     @Autowired
     public EmailService(UsersService usersService,
         JavaMailSender mailSender,
-        VelocityEngine velocityEngine,
+        EmailBodyGenerator emailBodyGenerator,
         @Value("${mail.administrator}") String mailAdministrator) {
         this.usersService = usersService;
         this.mailSender = mailSender;
-        this.velocityEngine = velocityEngine;
+        this.emailBodyGenerator = emailBodyGenerator;
         this.mailAdministrator = mailAdministrator;
     }
 
@@ -58,16 +58,16 @@ public class EmailService {
         try {
             mailSender.send(msg);
         } catch (MailException ex) {
-            System.err.println(ex.getMessage());
+            log.error("problem sending email",ex);
         }
     }
 
-    public void sendTemplateMailToUser(String userID, final String subject, final String template, final HashMap model) {
+    public void sendTemplateMailToUser(String userID, final String subject, final String template, final Map<String,Object> model) {
         User user = usersService.getUser(userID);
         sendTemplateMailToUser(user, subject, template, model);
     }
 
-    public void sendTemplateMailToUser(User user, final String subject, final String template, final HashMap model) {
+    public void sendTemplateMailToUser(User user, final String subject, final String template, final Map<String,Object> model) {
         if (user.getEmail() != null) {
             sendTemplateMail(user.getEmail(),
                     subject,
@@ -75,12 +75,12 @@ public class EmailService {
                     model);
         } else {
             // TODO: email admin "User missing email"
-            System.out.println("Email missing for " + user.getID() + ".  Can't send role assignment email");
+            log.info("Email missing for {}.  Can't send role assignment email", user.getID());
         }
     }
 
     // Send an HTML email based on a Velocity template using data from the provided model
-    public void sendTemplateMail(final String to, final String subject, final String template, final HashMap model) {
+    public void sendTemplateMail(final String to, final String subject, final String template, final Map<String,Object> model) {
 
         MimeMessagePreparator preparator = new MimeMessagePreparator() {
             @Override
@@ -89,8 +89,7 @@ public class EmailService {
                 message.setTo(to);
                 message.setFrom(mailAdministrator);
                 message.setSubject(subject);
-                String text = VelocityEngineUtils.mergeTemplateIntoString(
-                        velocityEngine, template, encoding, model);
+                String text = emailBodyGenerator.generate(template, model);
                 message.setText(text, true);
             }
         };
@@ -98,7 +97,7 @@ public class EmailService {
         try {
             this.mailSender.send(preparator);
         } catch (MailException ex) {
-            System.err.println(ex.getMessage());
+            log.error("problem sending email", ex);
         }
     }
 }

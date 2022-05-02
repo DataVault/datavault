@@ -12,4 +12,7 @@ public abstract class TestUtils {
     assertEquals(message, ex.getMessage());
   }
 
+  public static String useNewLines(String value) {
+    return value.replace("\r\n","\n").replace("\r","\n");
+  }
 }

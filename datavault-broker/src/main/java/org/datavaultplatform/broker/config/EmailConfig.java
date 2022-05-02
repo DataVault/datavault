@@ -1,16 +1,22 @@
 package org.datavaultplatform.broker.config;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.Properties;
+import org.apache.velocity.app.VelocityEngine;
+import org.datavaultplatform.broker.email.EmailBodyGenerator;
+import org.datavaultplatform.broker.email.TemplateResolver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 @Configuration
-public class MailConfig {
+public class EmailConfig {
 
   @Value("${mail.host}")
   private String mailHost;
@@ -63,6 +69,29 @@ public class MailConfig {
 
     result.setJavaMailProperties(javaMailProperties());
     return result;
+  }
+
+  @Value("classpath:velocity.properties")
+  Resource velocityProps;
+
+  @Bean
+  VelocityEngine velocityEngine() throws IOException {
+    Properties props = new Properties();
+    props.load(velocityProps.getInputStream());
+
+    VelocityEngine engine = new VelocityEngine(props);
+    engine.init();
+    return engine;
+  }
+
+  @Bean
+  TemplateResolver templateResolver() {
+    return templateName -> Paths.get("mail-templates", templateName).toString();
+  }
+
+  @Bean
+  public EmailBodyGenerator mailBodyGenerator() throws IOException {
+    return new EmailBodyGenerator(velocityEngine(), templateResolver());
   }
 
 }

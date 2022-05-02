@@ -1,0 +1,25 @@
+<html>
+	<body>
+		<p>Thank you for your deposit into the University of Edinburgh DataVault. Deposit details:</p>
+		<ul>
+			<li>Deposit name: ${deposit-name}</li>
+			<li>Size: ${size-bytes} bytes</li>
+			<li>Date of deposit: ${timestamp}</li>
+			<li>Contains personal data: ${hasPersonalData}</li>
+			<li>Deposit ID: ${deposit-id}</li>
+			<li>Depositor name: ${user-firstname} ${user-lastname}</li>
+			<li>Depositor ID: ${user-id}</li>
+		</ul>
+		
+		<p>The deposit belongs to the following Vault:</p>
+		<ul>
+			<li>Vault name: ${vault-name}</li>
+			<li>School: ${group-name}</li>
+			<li>Vault ID: ${vault-id}</li>
+			<li>Review date: ${vault-review-date}</li>
+		</ul>
+		
+		<p>You may view the details of your deposit or retrieve your deposit by logging in with EASE at <a href=${home-page}>${home-page}</a>. 
+		Further information about the service is available at <a href=${help-page}>${help-page}</a>.</p>
+	</body>
+</html>

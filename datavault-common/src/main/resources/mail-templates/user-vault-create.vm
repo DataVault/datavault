@@ -1,0 +1,17 @@
+<html>
+<body>
+    <p>A new vault you have a role on is now ready to use.</p>
+
+    <p>Vault info:</p>
+    <ul>
+        <li>Vault name: ${vault-name}</li>
+        <li>School: ${group-name}</li>
+        <li>Vault ID: ${vault-id}</li>
+        <li>Review date: ${vault-review-date}</li>
+        <li>Role: ${role-name}</li>
+    </ul>
+    <p>You may view the details of your vault by logging in with your university login at <a href=${home-page}>${home-page}</a>.
+        Further information about the service is available at <a href=${help-page}>${help-page}</a>.
+    </p>
+</body>
+</html>

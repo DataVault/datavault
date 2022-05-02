@@ -1,0 +1,21 @@
+<html>
+<body>
+<p>The following vault in the University of Edinburgh DataVault is now due for review.</p>
+
+<ul>
+    <li>Vault name: ${vault-name}</li>
+    <li>School: ${group-name}</li>
+    <li>Vault ID: ${vault-id}</li>
+    <li>Review date: ${vault-review-date}</li>
+</ul>
+
+<p>
+    <a href=${vault-review-link}>Go to this vault’s Review page</a>
+</p>
+<p>
+    To access the review dashboard please go to the admin section of the DataVault datavault.ed.ac.uk .
+    For further information about the review process, please see wiki.ed.ac.uk and/or user information on EdWeb
+    <a href=${help-page}>${help-page}</a>.
+</p>
+</body>
+</html>
