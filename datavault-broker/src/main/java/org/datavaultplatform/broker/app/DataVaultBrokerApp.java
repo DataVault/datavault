@@ -6,6 +6,7 @@ import org.datavaultplatform.broker.config.DatabaseConfig;
 import org.datavaultplatform.broker.config.InitialiseConfig;
 import org.datavaultplatform.broker.config.LdapConfig;
 import org.datavaultplatform.broker.config.MailConfig;
+import org.datavaultplatform.broker.config.PropertiesConfig;
 import org.datavaultplatform.broker.config.ScheduleConfig;
 import org.datavaultplatform.broker.config.SecurityConfig;
 import org.datavaultplatform.broker.config.ServiceConfig;
@@ -20,6 +21,7 @@ import org.springframework.core.env.Environment;
 
 @SpringBootApplication
 @Import({
+    PropertiesConfig.class,
     SecurityConfig.class, ControllerConfig.class,
     ServiceConfig.class,  DatabaseConfig.class,
     ScheduleConfig.class, InitialiseConfig.class,

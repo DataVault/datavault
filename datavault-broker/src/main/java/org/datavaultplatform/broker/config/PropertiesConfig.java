@@ -1,4 +1,4 @@
-package org.datavaultplatform.webapp.config;
+package org.datavaultplatform.broker.config;
 
 import org.datavaultplatform.common.config.BasePropertiesConfig;
 
