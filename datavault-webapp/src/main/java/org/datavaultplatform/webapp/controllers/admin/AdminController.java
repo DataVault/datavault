@@ -47,6 +47,9 @@ public class AdminController {
         if (permissionsModel.hasPermission(Permission.CAN_MANAGE_VAULTS)) {
             modelMap.addAttribute("canManageVaults", true);
             modelMap.addAttribute("vaultcount", restService.getVaultsCount());
+        }
+        if (permissionsModel.hasPermission(Permission.CAN_MANAGE_PENDING_VAULTS)) {
+            modelMap.addAttribute("canManagePendingVaults", true);
             modelMap.addAttribute("pendingvaultcount", restService.getTotalNumberOfPendingVaults());
         }
         if (permissionsModel.hasPermission(Permission.CAN_MANAGE_DEPOSITS)) {
