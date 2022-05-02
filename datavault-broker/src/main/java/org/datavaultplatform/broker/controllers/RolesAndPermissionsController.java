@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.controllers;
 
+import org.datavaultplatform.common.email.EmailTemplate;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
 import org.datavaultplatform.common.event.roles.DeleteRoleAssignment;
@@ -81,7 +82,7 @@ public class RolesAndPermissionsController {
     public RoleAssignment createRoleAssignment(@RequestHeader(value = "X-UserID", required = true) String userID,
                                                @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
                                                @RequestBody RoleAssignment roleAssignment) throws Exception {
-        sendEmails("new-role-assignment.vm", roleAssignment, userID);
+        sendEmails(EmailTemplate.NEW_ROLE_ASSIGNMENT, roleAssignment, userID);
 
         RoleAssignment assignment = rolesAndPermissionsService.createRoleAssignment(roleAssignment);
 
@@ -299,7 +300,7 @@ public class RolesAndPermissionsController {
     public RoleAssignment updateRoleAssignment(@RequestHeader(value = "X-UserID", required = true) String userID,
                                                @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
                                                      @RequestBody RoleAssignment roleAssignment) throws Exception {
-        sendEmails("update-role-assignment.vm", roleAssignment, userID);
+        sendEmails(EmailTemplate.UPDATE_ROLE_ASSIGNMENT, roleAssignment, userID);
 
         UpdateRoleAssignment roleAssignmentEvent = new UpdateRoleAssignment(roleAssignment, userID);
 

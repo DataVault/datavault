@@ -2,6 +2,7 @@ package org.datavaultplatform.broker.queue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.common.email.EmailTemplate;
 import org.datavaultplatform.common.event.*;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.audit.*;
@@ -172,7 +173,7 @@ public class EventListener implements MessageListener {
                 
 //              // Get related information for emails
               String type = "start";
-              this.sendEmails(deposit, concreteEvent, type, "user-deposit-start.vm", "group-admin-deposit-start.vm");
+              this.sendEmails(deposit, concreteEvent, type, EmailTemplate.USER_DEPOSIT_START, EmailTemplate.GROUP_ADMIN_DEPOSIT_START);
                 
             } else if (concreteEvent instanceof ComputedSize) {
                 
@@ -347,7 +348,7 @@ public class EventListener implements MessageListener {
 
                 // Get related information for emails
                 //String type = "complete";
-                //this.sendEmails(deposit, completeEvent, type, "user-deposit-complete.vm", "group-admin-deposit-complete.vm");
+                //this.sendEmails(deposit, completeEvent, type, EmailTemplate.USER_DEPOSIT_COMPLETE, EmailTemplate.GROUP_ADMIN_DEPOSIT_COMPLETE);
 
             } else if (concreteEvent instanceof Complete) {
 
@@ -391,7 +392,7 @@ public class EventListener implements MessageListener {
                 
 //                // Get related information for emails
                 String type = "complete";
-                this.sendEmails(deposit, completeEvent, type, "user-deposit-complete.vm", "group-admin-deposit-complete.vm");
+                this.sendEmails(deposit, completeEvent, type, EmailTemplate.USER_DEPOSIT_COMPLETE, EmailTemplate.GROUP_ADMIN_DEPOSIT_COMPLETE);
                 
             } else if (concreteEvent instanceof Error) {
 
@@ -433,7 +434,7 @@ public class EventListener implements MessageListener {
                     //TODO - send email by using correct template when deposit delete fails
                     // Get related information for emails
                     String type = "error";
-                    this.sendEmails(deposit, errorEvent, type, "user-deposit-error.vm", "group-admin-deposit-error.vm");
+                    this.sendEmails(deposit, errorEvent, type, EmailTemplate.USER_DEPOSIT_ERROR, EmailTemplate.GROUP_ADMIN_DEPOSIT_ERROR);
                 }
                 else if(errorEvent.getAuditId() != null) {
                     // TODO: what to do with audit eror
@@ -447,7 +448,7 @@ public class EventListener implements MessageListener {
                 retrievesService.updateRetrieve(retrieve);
                 
                 String type = "retrievestart";
-                this.sendEmails(deposit, startEvent, type, "user-retrieve-start.vm", "group-admin-retrieve-start.vm");
+                this.sendEmails(deposit, startEvent, type, EmailTemplate.USER_RETRIEVE_START, EmailTemplate.GROUP_ADMIN_RETRIEVE_START);
             } else if (concreteEvent instanceof RetrieveComplete) {
 
             	RetrieveComplete completeEvent = (RetrieveComplete)concreteEvent;
@@ -457,7 +458,7 @@ public class EventListener implements MessageListener {
                 retrievesService.updateRetrieve(retrieve);
                 
                 String type = "retrievecomplete";
-                this.sendEmails(deposit, completeEvent, type, "user-retrieve-complete.vm", "group-admin-retrieve-complete.vm");
+                this.sendEmails(deposit, completeEvent, type, EmailTemplate.USER_RETRIEVE_COMPLETE, EmailTemplate.GROUP_ADMIN_RETRIEVE_COMPLETE);
             } else if (concreteEvent instanceof DeleteStart) {
                 preDeletionStatus = deposit.getStatus();
                 logger.info("Pre Deletion Status:" + preDeletionStatus);
@@ -557,7 +558,7 @@ public class EventListener implements MessageListener {
 
                 // At the moment just email
                 logger.info("Sending Error email to Admin");
-                sendAuditEmails(concreteEvent, "error", "audit-chunk-error.vm");
+                sendAuditEmails(concreteEvent, "error", EmailTemplate.AUDIT_CHUNK_ERROR);
 
                 // TODO: try to fix chunk
             }

@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.broker.services.DepositsService;
 import org.datavaultplatform.broker.services.EmailService;
+import org.datavaultplatform.common.email.EmailTemplate;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.deposit.ComputedEncryption;
 import org.datavaultplatform.common.model.Deposit;
@@ -126,7 +127,7 @@ public class CheckEncryptionData implements ScheduledTask {
             if (groupAdmin.getEmail() != null) {
                 emailService.sendTemplateMail(groupAdmin.getEmail(),
                         "Found missing IV in Deposit",
-                        "group-admin-missing-iv.vm",
+                        EmailTemplate.GROUP_ADMIN_MISSING_IV,
                         model);
             }
         }

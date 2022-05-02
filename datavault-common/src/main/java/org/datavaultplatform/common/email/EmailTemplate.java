@@ -14,7 +14,7 @@ public abstract class EmailTemplate {
   public static final String GROUP_ADMIN_RETRIEVE_START = "group-admin-retrieve-start.vm";
   public static final String GROUP_ADMIN_VAULT_CREATE = "group-admin-vault-create.vm";
   public static final String NEW_ROLE_ASSIGNMENT = "new-role-assignment.vm";
-  public static final String REVIEW_DUE_DATE_DATA_MANAGER = "review-due-data-manager.vm";
+  public static final String REVIEW_DUE_DATA_MANAGER = "review-due-data-manager.vm";
   public static final String REVIEW_DUE_OWNER = "review-due-owner.vm";
   public static final String REVIEW_DUE_SUPPORT = "review-due-support.vm";
   public static final String TRANSFER_VAULT_OWNERSHIP = "transfer-vault-ownership.vm";

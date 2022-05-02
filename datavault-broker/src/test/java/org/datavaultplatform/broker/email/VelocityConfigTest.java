@@ -3,6 +3,7 @@ package org.datavaultplatform.broker.email;
 import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -57,15 +58,15 @@ public class VelocityConfigTest {
   @ParameterizedTest
   @MethodSource("templateNameProvider")
   void testTemplatesExist(String templateName){
-    assertTrue(doesTemlateExist(templateName));
+    assertTrue(doesTemplateExist(templateName));
   }
 
   @Test
   void testBadTemplate() {
-    assertFalse(doesTemlateExist("nonExistantTemplpate.vm"));
+    assertFalse(doesTemplateExist("nonExistantTemplate.vm"));
   }
 
-  private boolean doesTemlateExist(String templateName) {
+  private boolean doesTemplateExist(String templateName) {
     return engine.resourceExists(resolver.resolve(templateName));
   }
 
@@ -78,7 +79,10 @@ public class VelocityConfigTest {
 
   @SneakyThrows
   private static String getValue(Field f){
-    return (String)f.get(null);
+    String result =  (String)f.get(null);
+    String expected = f.getName().toLowerCase().replace("_","-")+".vm";
+    assertEquals(expected, result);
+    return result;
   }
 
   private static boolean isPublicStaticFinalString(Field f) {

@@ -12,6 +12,7 @@ import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.broker.services.VaultsReviewService;
 import org.datavaultplatform.broker.services.VaultsService;
+import org.datavaultplatform.common.email.EmailTemplate;
 import org.datavaultplatform.common.model.DepositReview;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.User;
@@ -100,7 +101,7 @@ public class CheckForReview implements ScheduledTask {
                 model.put("vault-review-link", homeUrl+ "/admin/vaults/" + vault.getID() + "/reviews");
 
                 // Email the support team
-                emailService.sendTemplateMail(helpMail, "DataVault Vault needing reviewed", "review-due-support.vm", model);
+                emailService.sendTemplateMail(helpMail, "DataVault Vault needing reviewed", EmailTemplate.REVIEW_DUE_SUPPORT, model);
                 
                 /*
                 The following code is really old school and should be replaced with Streams and Lambdas,
@@ -117,7 +118,7 @@ public class CheckForReview implements ScheduledTask {
                         User user = usersService.getUser(roleAssignment.getUserId());
                         if (!LDAPService.getLDAPAttributes(user.getID()).isEmpty()) {
                             // User still appears to be at the Uni
-                            emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching (action required) ", "review-due-owner.vm", model);
+                            emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching (action required) ", EmailTemplate.REVIEW_DUE_OWNER, model);
                             ownerFound = true;
                         }
                     }
@@ -131,7 +132,7 @@ public class CheckForReview implements ScheduledTask {
                             User user = usersService.getUser(roleAssignment.getUserId());
                             if (!LDAPService.getLDAPAttributes(user.getID()).isEmpty()) {
                                 // User still appears to be at the Uni
-                                emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching ", "review-due-data-manager.vm", model);
+                                emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching ", EmailTemplate.REVIEW_DUE_DATA_MANAGER, model);
                             }
                         }
                     }

@@ -2,6 +2,7 @@ package org.datavaultplatform.broker.controllers;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.common.email.EmailTemplate;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
 import org.datavaultplatform.common.event.roles.OrphanVault;
@@ -242,7 +243,7 @@ public class VaultsController {
             vaultsService.transferVault(vault, usersService.getUser(transfer.getUserId()), transfer.getReason());
 
             logger.debug("send email for transfer ownership from: "+previousUserID+" to "+transfer.getUserId());
-            sendEmails("transfer-vault-ownership.vm", vault, userID, previousUserID, transfer.getUserId());
+            sendEmails(EmailTemplate.TRANSFER_VAULT_OWNERSHIP, vault, userID, previousUserID, transfer.getUserId());
 
             TransferVaultOwnership transferEvent = new TransferVaultOwnership(transfer, vault, userID);
             transferEvent.setVault(vault);
@@ -266,7 +267,7 @@ public class VaultsController {
             permissionsService.createRoleAssignment(assignment);
 
             // Jira RSS212-099 - 'Don't email the old owners under any circumstances', so commenting out this email.
-            //sendEmails("transfer-vault-ownership.vm", vault, userID, transfer.getUserId());
+            //sendEmails(EmailTemplate.TRANSFER_VAULT_OWNERSHIP, vault, userID, transfer.getUserId());
 
             CreateRoleAssignment roleAssignmentEvent = new CreateRoleAssignment(assignment, userID);
             roleAssignmentEvent.setVault(vaultsService.getVault(assignment.getVaultId()));
