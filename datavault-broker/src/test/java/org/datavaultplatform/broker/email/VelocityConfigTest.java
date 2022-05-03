@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
@@ -73,16 +72,23 @@ public class VelocityConfigTest {
   private static Stream<Arguments> templateNameProvider() {
       return Arrays.stream(EmailTemplate.class.getDeclaredFields())
           .filter(VelocityConfigTest::isPublicStaticFinalString)
-          .map(VelocityConfigTest::getValue)
+          .map(VelocityConfigTest::getTemplateName)
           .map(Arguments::of);
   }
 
   @SneakyThrows
-  private static String getValue(Field f){
-    String result =  (String)f.get(null);
-    String expected = f.getName().toLowerCase().replace("_","-")+".vm";
-    assertEquals(expected, result);
-    return result;
+  private static String getTemplateName(Field templateNameField){
+    String templateName =  (String)templateNameField.get(null);
+    checkEmailTemplateConstantField(templateNameField, templateName);
+    return templateName;
+  }
+
+  private static void checkEmailTemplateConstantField(Field templateNameField, String templateName){
+    //double check that the name of the 'public static final String' template constant maps to the name of the template file
+    String expectedTemplateName = templateNameField.getName()
+        .toLowerCase()
+        .replace("_", "-") + ".vm";
+    assertEquals(expectedTemplateName, templateName);
   }
 
   private static boolean isPublicStaticFinalString(Field f) {
