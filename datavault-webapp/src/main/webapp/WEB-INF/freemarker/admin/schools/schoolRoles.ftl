@@ -79,7 +79,7 @@
                             <div class="col-sm-10">
                                 <select id="new-user-role" name="role" class="form-control">
                                     <option value="">Please select</option>
-                                    <#list roles as role><option value="${role.id}">${role.name}</option></#list>
+                                    <#list roles as role><option value="${role.getIdAsString()}">${role.name}</option></#list>
                                 </select>
                             </div>
                         </div>
@@ -249,6 +249,8 @@
         });
         $('[data-target="#update-existing-dialog"]').click(function() {
             var assignmentId = $(this).data('assignment-id');
+            assignmentId = assignmentId.replace(/\,/g,'');
+            assignmentId = parseInt(assignmentId,10);
             var userName = $(this).data('user-name');
             var role = $(this).data('user-role');
             $('#role-update-assignment-id').val(assignmentId);
@@ -258,6 +260,8 @@
         });
         $('[data-target="#delete-dialog"]').click(function() {
             var assignmentId = $(this).data('assignment-id');
+            assignmentId = assignmentId.replace(/\,/g,'');
+            assignmentId = parseInt(assignmentId,10);
             var userName = $(this).data('user-name');
             $('#delete-role-assignment-id').val(assignmentId);
             $('#delete-role-user-name').text(userName);
