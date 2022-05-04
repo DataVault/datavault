@@ -1,8 +1,5 @@
 package org.datavaultplatform.broker.services;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.DepositReview;
 import org.datavaultplatform.common.model.Vault;
@@ -12,6 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 @Service
 public class DepositsReviewService {
 
@@ -23,6 +24,7 @@ public class DepositsReviewService {
     public DepositsReviewService(DepositReviewDAO depositReviewDAO) {
         this.depositReviewDAO = depositReviewDAO;
     }
+
 
     public void addDepositReview(DepositReview depositReview) {
         depositReview.setCreationTime(new Date());

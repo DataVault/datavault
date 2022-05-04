@@ -3,7 +3,6 @@ package org.datavaultplatform.broker.services;
 import java.math.BigDecimal;
 import java.util.*;
 
-import org.datavaultplatform.common.email.EmailTemplate;
 import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
 import org.datavaultplatform.common.event.vault.Create;
 import org.datavaultplatform.common.model.*;
@@ -11,9 +10,10 @@ import org.datavaultplatform.common.model.dao.VaultDAO;
 import org.datavaultplatform.common.request.CreateVault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.datavaultplatform.common.email.EmailTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 @Service
 public class VaultsService {
 

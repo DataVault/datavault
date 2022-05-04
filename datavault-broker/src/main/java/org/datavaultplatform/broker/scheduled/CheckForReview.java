@@ -1,30 +1,20 @@
 package org.datavaultplatform.broker.scheduled;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import org.datavaultplatform.broker.services.DepositsReviewService;
-import org.datavaultplatform.broker.services.EmailService;
-import org.datavaultplatform.broker.services.RolesAndPermissionsService;
-import org.datavaultplatform.broker.services.UsersService;
-import org.datavaultplatform.broker.services.VaultsReviewService;
-import org.datavaultplatform.broker.services.VaultsService;
-import org.datavaultplatform.common.email.EmailTemplate;
-import org.datavaultplatform.common.model.DepositReview;
-import org.datavaultplatform.common.model.RoleAssignment;
-import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.model.VaultReview;
+import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.services.LDAPService;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import org.datavaultplatform.common.email.EmailTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component

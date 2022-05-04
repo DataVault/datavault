@@ -1,24 +1,18 @@
 package org.datavaultplatform.broker.services;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import org.datavaultplatform.common.model.AuditChunkStatus;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.DepositChunk;
-import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.Vault;
+import java.util.*;
+
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
+import org.datavaultplatform.common.model.dao.AuditChunkStatusDAOImpl;
 import org.datavaultplatform.common.model.dao.DepositChunkDAO;
 import org.datavaultplatform.common.model.dao.DepositDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 @Service
 public class DepositsService {
 
@@ -48,6 +42,7 @@ public class DepositsService {
         <property name="auditMaxChunksPerDeposits" value="${audit.maxChunksPerDeposits:50}"/>
         <property name="auditMaxTotalChunks" value="${audit.maxTotalChunks:2000}"/>
      */
+    @Autowired
     public DepositsService(
         DepositDAO depositDAO,
         DepositChunkDAO depositChunkDAO,
@@ -70,6 +65,7 @@ public class DepositsService {
         this.auditMaxChunksPerDeposits = auditMaxChunksPerDeposits;
         this.auditMaxTotalChunks  = auditMaxTotalChunks;
     }
+
     public List<Deposit> getDeposits(String query, String userId, String sort, String order, int offset, int maxResult) {
         return depositDAO.list(query, userId, sort, order, offset, maxResult);
     }

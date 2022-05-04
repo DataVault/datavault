@@ -3,14 +3,20 @@ package org.datavaultplatform.broker.services;
 import org.datavaultplatform.common.model.BillingInfo;
 import org.datavaultplatform.common.model.dao.BillingDAO;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 @Service
 public class BillingService {
 
-    private BillingDAO billingDAO;
+    private final BillingDAO billingDAO;
 
-    
-    public void saveOrUpdateVault(BillingInfo billing) {
+	@Autowired
+	public BillingService(BillingDAO billingDAO) {
+		this.billingDAO = billingDAO;
+	}
+
+
+	public void saveOrUpdateVault(BillingInfo billing) {
     	billingDAO.saveOrUpdateVault(billing);
     }
 
@@ -18,12 +24,5 @@ public class BillingService {
 	public BillingDAO getBillingDAO() {
 		return billingDAO;
 	}
-
-
-	public void setBillingDAO(BillingDAO billingDAO) {
-		this.billingDAO = billingDAO;
-	}
-    
-    
 }
 

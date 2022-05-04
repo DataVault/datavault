@@ -1,15 +1,17 @@
 package org.datavaultplatform.broker.services;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.VaultReview;
 import org.datavaultplatform.common.model.dao.VaultReviewDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
 @Service
 public class VaultsReviewService {
 
@@ -21,6 +23,7 @@ public class VaultsReviewService {
 
     private final VaultReviewDAO vaultReviewDAO;
 
+    @Autowired
     public VaultsReviewService(VaultReviewDAO vaultReviewDAO) {
         this.vaultReviewDAO = vaultReviewDAO;
     }

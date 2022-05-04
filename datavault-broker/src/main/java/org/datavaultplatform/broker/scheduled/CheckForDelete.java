@@ -1,35 +1,20 @@
 package org.datavaultplatform.broker.scheduled;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.datavaultplatform.broker.queue.Sender;
-import org.datavaultplatform.broker.services.ArchiveStoreService;
-import org.datavaultplatform.broker.services.DepositsReviewService;
-import org.datavaultplatform.broker.services.JobsService;
-import org.datavaultplatform.broker.services.RolesAndPermissionsService;
-import org.datavaultplatform.broker.services.UsersService;
-import org.datavaultplatform.broker.services.VaultsReviewService;
-import org.datavaultplatform.broker.services.VaultsService;
-import org.datavaultplatform.common.model.Archive;
-import org.datavaultplatform.common.model.ArchiveStore;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.DepositReview;
-import org.datavaultplatform.common.model.DepositReviewDeleteStatus;
-import org.datavaultplatform.common.model.Job;
-import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.model.VaultReview;
-import org.datavaultplatform.common.model.VaultReviewComparator;
+import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.util.RoleUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 /**
  * As part of the Review process, deposits can be flagged for deletion at a later date. Check the deposits
  * and delete any that are due for deletion.

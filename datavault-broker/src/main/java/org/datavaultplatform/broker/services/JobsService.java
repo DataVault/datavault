@@ -1,11 +1,12 @@
 package org.datavaultplatform.broker.services;
 
-import java.util.Date;
-import java.util.List;
-import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Job;
+import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.dao.JobDAO;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.List;
 @Service
 public class JobsService {
 

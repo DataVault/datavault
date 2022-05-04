@@ -7,16 +7,16 @@ import java.util.concurrent.*;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.storage.UserStore;
-
+import org.springframework.stereotype.Service;
 /**
  * User: Robin Taylor
  * Date: 19/03/2015
  * Time: 13:34
  */
-import org.springframework.stereotype.Service;
 @Service
 public class FilesService {
 
+    //TODO - DHAY this does not seem thread safe
     private UserStore userStore;
     private final long TIMEOUT_SECONDS = 40;
     

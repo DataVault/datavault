@@ -1,16 +1,18 @@
 package org.datavaultplatform.broker.services;
 
-import java.util.Date;
-import java.util.List;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.dao.RetrieveDAO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.Date;
+import java.util.List;
 @Service
 public class RetrievesService {
 
     private final RetrieveDAO retrieveDAO;
 
+    @Autowired
     public RetrievesService(RetrieveDAO retrieveDAO) {
         this.retrieveDAO = retrieveDAO;
     }

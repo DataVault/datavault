@@ -1,8 +1,10 @@
 package org.datavaultplatform.broker.services;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.datavaultplatform.common.metadata.Provider;
 import org.datavaultplatform.common.metadata.impl.MockProvider;
 import org.datavaultplatform.common.metadata.impl.PureFlatFileProvider;
@@ -12,6 +14,7 @@ import org.datavaultplatform.common.model.dao.DatasetDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 @Service
 public class ExternalMetadataService {
 

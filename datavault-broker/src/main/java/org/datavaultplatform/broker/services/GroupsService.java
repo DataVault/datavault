@@ -1,9 +1,10 @@
 package org.datavaultplatform.broker.services;
 
-import java.util.List;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.dao.GroupDAO;
 import org.springframework.stereotype.Service;
+import java.util.List;
+
 @Service
 public class GroupsService {
 

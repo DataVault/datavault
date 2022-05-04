@@ -1,11 +1,13 @@
 package org.datavaultplatform.broker.services;
 
-import java.util.List;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.dao.EventDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+
 @Service
 public class EventService {
 

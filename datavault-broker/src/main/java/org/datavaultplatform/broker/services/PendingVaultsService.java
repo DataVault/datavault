@@ -1,22 +1,20 @@
 package org.datavaultplatform.broker.services;
 
 
+import org.datavaultplatform.broker.services.VaultsService;
+import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.model.dao.PendingVaultDAO;
+import org.datavaultplatform.common.request.CreateVault;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.PendingDataCreator;
-import org.datavaultplatform.common.model.PendingVault;
-import org.datavaultplatform.common.model.RetentionPolicy;
-import org.datavaultplatform.common.model.RoleAssignment;
-import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.dao.PendingVaultDAO;
-import org.datavaultplatform.common.request.CreateVault;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+
 @Service
 public class PendingVaultsService {
 	private final Logger logger = LoggerFactory.getLogger(PendingVaultsService.class);
@@ -30,6 +28,7 @@ public class PendingVaultsService {
 
     private final VaultsService vaultsService;
 
+    @Autowired
     public PendingVaultsService(PendingVaultDAO pendingVaultDAO, GroupsService groupsService,
         RetentionPoliciesService retentionPoliciesService, UsersService usersService,
         RolesAndPermissionsService permissionsService,

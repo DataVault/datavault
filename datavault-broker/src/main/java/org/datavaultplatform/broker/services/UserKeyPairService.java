@@ -1,15 +1,19 @@
 package org.datavaultplatform.broker.services;
 
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.KeyPair;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import com.jcraft.jsch.*;
+
+/**
+ * User: Robin Taylor
+ * Date: 04/11/2015
+ * Time: 09:54
+ */
 @Service
-//TODO - change this class - it is NOT thread safe!
+//TODO - DHAY change this class - it is NOT thread safe!
 public class UserKeyPairService {
 
     // comment added at the end of public key

@@ -29,6 +29,6 @@ We create any services that are still required (by the scheduled beans ) via Moc
     "broker.controllers.enabled=false",
     "broker.services.enabled=false",
     "broker.database.enabled=false"})
-@Import(MockServicesConfig.class)
+@Import(MockServicesConfig.class) //cos spring security requries some services so we have to mock them
 public abstract class BaseScheduledTest {
 }

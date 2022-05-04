@@ -1,23 +1,27 @@
 package org.datavaultplatform.broker.services;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.loc.repository.bagit.Bag;
-import gov.loc.repository.bagit.Bag.BagPartFactory;
-import gov.loc.repository.bagit.BagFactory;
-import gov.loc.repository.bagit.Manifest;
-import gov.loc.repository.bagit.ManifestReader;
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import org.datavaultplatform.common.model.FileFixity;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import gov.loc.repository.bagit.BagFactory;
+import gov.loc.repository.bagit.Bag;
+import gov.loc.repository.bagit.Bag.BagPartFactory;
+import gov.loc.repository.bagit.Manifest;
+import gov.loc.repository.bagit.ManifestReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import org.datavaultplatform.common.model.FileFixity;
+
 @Service
 public class MetadataService {
 

@@ -1,10 +1,10 @@
 package org.datavaultplatform.broker.services;
 
-import java.util.List;
 import org.datavaultplatform.common.model.Client;
 import org.datavaultplatform.common.model.dao.ClientDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 public class ClientsService {

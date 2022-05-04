@@ -1,9 +1,10 @@
 package org.datavaultplatform.broker.services;
 
-import java.util.List;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.dao.FileStoreDAO;
 import org.springframework.stereotype.Service;
+import java.util.List;
+
 @Service
 public class FileStoreService {
 
@@ -33,6 +34,5 @@ public class FileStoreService {
     public void deleteFileStore(String fileStoreID) {
         fileStoreDAO.deleteById(fileStoreID);
     }
-    
 }
 

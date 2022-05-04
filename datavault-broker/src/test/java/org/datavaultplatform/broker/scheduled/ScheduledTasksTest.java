@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -19,7 +18,7 @@ import org.springframework.test.context.DynamicPropertySource;
 /*
 The scheduled tasks are configured to be once-every-5-seconds.
 This test uses @SpyBean to capture the timestamps of scheduled task invocations.
-By waiting 12 seconds - each of the 5 scheduled tasks should by invoked twice.
+By waiting 12 seconds - each of the 5 scheduled tasks should be invoked twice.
  */
 public class ScheduledTasksTest extends BaseScheduledTest {
 
@@ -35,7 +34,6 @@ public class ScheduledTasksTest extends BaseScheduledTest {
 
   @SpyBean
   CheckForDelete task3CheckForDelete;
-  AtomicInteger counter3CheckForDelete = new AtomicInteger();
   List<Instant> timestamps3 = new ArrayList<>();
 
   @SpyBean
@@ -58,7 +56,7 @@ public class ScheduledTasksTest extends BaseScheduledTest {
     captureTaskInvocationTimestamps(timestamps5, task5CheckRetentionPolicies);
 
     //12 seconds is long enough for 2 task invocations of each scheduled task
-    //no counter should be incremented more than 2 times within twelve seconds.
+    //no task should be executed more than 2 times within twelve seconds.
     TimeUnit.SECONDS.sleep(12);
 
     for (List<Instant> timestamps : allTimestamps) {

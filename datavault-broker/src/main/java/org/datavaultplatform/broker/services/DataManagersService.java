@@ -1,10 +1,11 @@
 package org.datavaultplatform.broker.services;
 
-import java.util.List;
 import org.datavaultplatform.common.model.DataManager;
 import org.datavaultplatform.common.model.dao.DataManagerDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.List;
+
 @Service
 public class DataManagersService {
 
@@ -30,6 +31,5 @@ public class DataManagersService {
     public void deleteDataManager(String dataManagerID) {
         dataManagerDAO.deleteById(dataManagerID);
     }
-
 }
 

@@ -1,18 +1,26 @@
 package org.datavaultplatform.broker.services;
 
-import java.util.Map;
-import javax.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.email.EmailBodyGenerator;
 import org.datavaultplatform.common.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.Vault;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
-import org.springframework.stereotype.Service;
+import org.apache.velocity.app.VelocityEngine;
+import javax.mail.internet.MimeMessage;
+import java.io.IOException;
+import java.util.Map;
+
+
 @Service
 @Slf4j
 public class EmailService {
