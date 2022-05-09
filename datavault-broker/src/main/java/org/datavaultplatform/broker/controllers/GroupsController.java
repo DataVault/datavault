@@ -9,6 +9,7 @@ import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,21 +22,18 @@ import java.util.List;
 @Api(name="Groups", description = "Interact with DataVault Groups")
 public class GroupsController {
     
-    private GroupsService groupsService;
-    private UsersService usersService;
-    private AdminService adminService;
+    private final GroupsService groupsService;
+    private final UsersService usersService;
+    private final AdminService adminService;
 
-    public void setGroupsService(GroupsService groupsService) {
+    @Autowired
+    public GroupsController(GroupsService groupsService, UsersService usersService,
+        AdminService adminService) {
         this.groupsService = groupsService;
-    }
-    
-    public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
-    }
-
-    public void setAdminService(AdminService adminService) {
         this.adminService = adminService;
     }
+
     @ApiMethod(
             path = "/groups",
             verb = ApiVerb.GET,

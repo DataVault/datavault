@@ -5,34 +5,29 @@ import org.datavaultplatform.broker.services.ClientsService;
 import org.datavaultplatform.broker.services.UsersService;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.datavaultplatform.common.request.CreateClientEvent;
 import org.datavaultplatform.common.event.client.*;
 import org.datavaultplatform.common.model.Agent;
-import org.datavaultplatform.common.model.Client;
-import org.datavaultplatform.common.model.User;
 
 @RestController
 @Api(name="Notify", description = "Inform the broker about an event")
 public class NotifyController {
     
-    private EventService eventService;
-    private ClientsService clientsService;
-    private UsersService usersService;
-    
-    public void setEventService(EventService eventService) {
-        this.eventService = eventService;
-    }
+    private final EventService eventService;
+    private final ClientsService clientsService;
+    private final UsersService usersService;
 
-    public void setClientsService(ClientsService clientsService) {
+    @Autowired
+    public NotifyController(EventService eventService, ClientsService clientsService,
+        UsersService usersService) {
+        this.eventService = eventService;
         this.clientsService = clientsService;
-    }
-    
-    public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
     }
-    
+
     @ApiMethod(
             path = "/notify/login}",
             verb = ApiVerb.PUT,

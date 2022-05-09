@@ -4,7 +4,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.vault.Review;
 import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.ReviewInfo;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
@@ -13,12 +12,11 @@ import org.jsondoc.core.annotation.ApiHeader;
 import org.jsondoc.core.annotation.ApiHeaders;
 import org.jsondoc.core.annotation.ApiMethod;
 import org.jsondoc.core.pojo.ApiVerb;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 
@@ -26,36 +24,25 @@ import java.util.List;
 @Api(name="AdminReviews", description = "Administrator Review functions")
 public class AdminReviewsController {
 
-    private VaultsService vaultsService;
-    private VaultsReviewService vaultsReviewService;
-    private DepositsReviewService depositsReviewService;
-    private UsersService usersService;
-    private ClientsService clientsService;
-    private EventService eventService;
+    private final VaultsService vaultsService;
+    private final VaultsReviewService vaultsReviewService;
+    private final DepositsReviewService depositsReviewService;
+    private final UsersService usersService;
+    private final ClientsService clientsService;
+    private final EventService eventService;
 
-    public void setVaultsService(VaultsService vaultsService) {
+    @Autowired
+    public AdminReviewsController(VaultsService vaultsService,
+        VaultsReviewService vaultsReviewService, DepositsReviewService depositsReviewService,
+        UsersService usersService, ClientsService clientsService, EventService eventService) {
         this.vaultsService = vaultsService;
-    }
-
-    public void setVaultsReviewService(VaultsReviewService vaultsReviewService) {
         this.vaultsReviewService = vaultsReviewService;
-    }
-
-    public void setDepositsReviewService(DepositsReviewService depositsReviewService) {
         this.depositsReviewService = depositsReviewService;
-    }
-
-    public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
-    }
-
-    public void setClientsService(ClientsService clientsService) {
         this.clientsService = clientsService;
-    }
-
-    public void setEventService(EventService eventService) {
         this.eventService = eventService;
     }
+
 
     @ApiMethod(
             path = "/admin/vaultsForReview",

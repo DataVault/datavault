@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.broker.services.ExternalMetadataService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 
@@ -14,12 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MetadataController {
     
-    private ExternalMetadataService externalMetadataService;
+    private final ExternalMetadataService externalMetadataService;
 
-    public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
+    @Autowired
+    public MetadataController(ExternalMetadataService externalMetadataService) {
         this.externalMetadataService = externalMetadataService;
     }
-    
+
     @RequestMapping(value = "/metadata/datasets", method = RequestMethod.GET)
     public List<Dataset> getDatasets(@RequestHeader(value = "X-UserID", required = true) String userID) {
         return externalMetadataService.getDatasets(userID);

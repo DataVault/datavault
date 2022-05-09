@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
+import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseDatabaseTest;
 import org.datavaultplatform.common.model.RoleAssignment;
@@ -13,6 +14,7 @@ import org.datavaultplatform.common.model.Vault;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
@@ -22,6 +24,9 @@ import org.springframework.test.context.TestPropertySource;
 public class VaultsServiceIT extends BaseDatabaseTest {
     @Autowired
     private VaultsService vaultsService;
+
+    @MockBean
+    Sender sender;
 
     @Autowired
     private RolesAndPermissionsService rolesAndPermissionsService;

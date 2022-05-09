@@ -22,9 +22,9 @@ import java.util.List;
 @Api(name="AdminUsers", description = "Administrator User functions")
 public class AdminUsersController {
 
-    private UsersService usersService;
+    private final UsersService usersService;
 
-    public void setUsersService(UsersService usersService) {
+    public AdminUsersController(UsersService usersService) {
         this.usersService = usersService;
     }
 

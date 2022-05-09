@@ -2,7 +2,6 @@ package org.datavaultplatform.broker.controllers.admin;
 
 import org.datavaultplatform.broker.services.RetentionPoliciesService;
 import org.datavaultplatform.common.model.RetentionPolicy;
-import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.jsondoc.core.annotation.Api;
 import org.jsondoc.core.annotation.ApiHeader;
@@ -22,9 +21,9 @@ public class AdminRetentionPoliciesController {
 
     private final Logger logger = LoggerFactory.getLogger(AdminRetentionPoliciesController.class);
 
-    private RetentionPoliciesService retentionPoliciesService;
+    private final RetentionPoliciesService retentionPoliciesService;
 
-    public void setRetentionPoliciesService(RetentionPoliciesService retentionPoliciesService) {
+    public AdminRetentionPoliciesController(RetentionPoliciesService retentionPoliciesService) {
         this.retentionPoliciesService = retentionPoliciesService;
     }
 

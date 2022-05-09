@@ -17,6 +17,7 @@ import org.datavaultplatform.common.response.VaultsData;
 import org.jsondoc.core.annotation.ApiQueryParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -29,12 +30,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class BillingController {
-	private ExternalMetadataService externalMetadataService;
-	private VaultsService vaultsService;
-	private BillingService billingService;
+	private final ExternalMetadataService externalMetadataService;
+	private final VaultsService vaultsService;
+	private final BillingService billingService;
 	private static final Logger LOGGER = LoggerFactory.getLogger(BillingController.class);
 
-    @RequestMapping(value = "/admin/billing/search", method = RequestMethod.GET)
+	@Autowired
+	public BillingController(ExternalMetadataService externalMetadataService,
+			VaultsService vaultsService, BillingService billingService) {
+		this.externalMetadataService = externalMetadataService;
+		this.vaultsService = vaultsService;
+		this.billingService = billingService;
+	}
+
+	@RequestMapping(value = "/admin/billing/search", method = RequestMethod.GET)
     public VaultsData searchAllBillingVaults(@RequestHeader(value = "X-UserID", required = true) String userID,
                                                   @RequestParam String query,
                                                   @RequestParam(value = "sort", required = false) String sort,
@@ -116,22 +125,12 @@ public class BillingController {
 		return externalMetadataService;
 	}
 
-	public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
-		this.externalMetadataService = externalMetadataService;
-	}
-
 	public VaultsService getVaultsService() {
 		return vaultsService;
-	}
-	public void setVaultsService(VaultsService vaultsService) {
-		this.vaultsService = vaultsService;
 	}
 
 	public BillingService getBillingService() {
 		return billingService;
 	}
 
-	public void setBillingService(BillingService billingService) {
-		this.billingService = billingService;
-	}
 }

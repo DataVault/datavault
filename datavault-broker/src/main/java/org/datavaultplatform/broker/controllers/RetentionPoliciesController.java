@@ -3,13 +3,8 @@ package org.datavaultplatform.broker.controllers;
 import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.RetentionPoliciesService;
 import org.datavaultplatform.common.model.RetentionPolicy;
-import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.request.CreateRetentionPolicy;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -21,14 +16,12 @@ import java.util.List;
 @RestController
 public class RetentionPoliciesController {
     
-    private RetentionPoliciesService retentionPoliciesService;
-    private AdminService adminService;
-    
-    public void setRetentionPoliciesService(RetentionPoliciesService retentionPoliciesService) {
-        this.retentionPoliciesService = retentionPoliciesService;
-    }
+    private final RetentionPoliciesService retentionPoliciesService;
+    private final AdminService adminService;
 
-    public void setAdminService(AdminService adminService) {
+    public RetentionPoliciesController(RetentionPoliciesService retentionPoliciesService,
+        AdminService adminService) {
+        this.retentionPoliciesService = retentionPoliciesService;
         this.adminService = adminService;
     }
 

@@ -6,6 +6,7 @@ import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,15 +16,13 @@ import java.util.List;
 @Api(name="Users", description = "Interact with DataVault Users")
 public class UsersController {
 
-    private AdminService adminService;
+    private final AdminService adminService;
     
-    private UsersService usersService;
+    private final UsersService usersService;
 
-    public void setAdminService(AdminService adminService) {
+    @Autowired
+    public UsersController(AdminService adminService, UsersService usersService) {
         this.adminService = adminService;
-    }
-
-    public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
     }
 

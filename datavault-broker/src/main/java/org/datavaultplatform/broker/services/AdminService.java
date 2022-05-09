@@ -9,14 +9,12 @@ import org.springframework.stereotype.Service;
 public class AdminService {
     private static final Logger Log = LoggerFactory.getLogger(AdminService.class);
 
-    private UsersService usersService;
-    private RolesAndPermissionsService rolesAndPermissionsService;
+    private final UsersService usersService;
+    private final RolesAndPermissionsService rolesAndPermissionsService;
 
-    public void setUsersService(UsersService usersService) {
+    public AdminService(UsersService usersService,
+        RolesAndPermissionsService rolesAndPermissionsService) {
         this.usersService = usersService;
-    }
-
-    public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
         this.rolesAndPermissionsService = rolesAndPermissionsService;
     }
 

@@ -9,6 +9,8 @@ import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,39 +24,27 @@ public class FileStoreController {
 
     private static final Logger logger = LoggerFactory.getLogger(FileStoreController.class);
 
-    private UsersService usersService;
-    private FileStoreService fileStoreService;
-    private UserKeyPairService userKeyPairService;
-    private String host;
-    private String port;
-    private String rootPath;
-    private String passphrase;
-    
-    public void setFileStoreService(FileStoreService fileStoreService) {
-        this.fileStoreService = fileStoreService;
-    }
-    
-    public void setUsersService(UsersService usersService) {
+    private final UsersService usersService;
+    private final FileStoreService fileStoreService;
+    private final UserKeyPairService userKeyPairService;
+    private final String host;
+    private final String port;
+    private final String rootPath;
+    private final String passphrase;
+
+    @Autowired
+    public FileStoreController(UsersService usersService, FileStoreService fileStoreService,
+        UserKeyPairService userKeyPairService,
+        @Value("${sftp.host}") String host,
+        @Value("${sftp.port}") String port,
+        @Value("${sftp.rootPath}") String rootPath,
+        @Value("${sftp.passphrase}") String passphrase) {
         this.usersService = usersService;
-    }
-
-    public void setUserKeyPairService(UserKeyPairService userKeyPairService) {
+        this.fileStoreService = fileStoreService;
         this.userKeyPairService = userKeyPairService;
-    }
-
-    public void setHost(String host) {
         this.host = host;
-    }
-
-    public void setPort(String port) {
         this.port = port;
-    }
-
-    public void setRootPath(String rootPath) {
         this.rootPath = rootPath;
-    }
-
-    public void setPassphrase(String passphrase) {
         this.passphrase = passphrase;
     }
 

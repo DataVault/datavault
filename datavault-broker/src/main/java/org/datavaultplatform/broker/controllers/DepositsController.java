@@ -12,6 +12,8 @@ import org.datavaultplatform.common.task.Task;
 import org.jsondoc.core.annotation.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,119 +28,74 @@ import java.util.Map;
 @Api(name="Deposits", description = "Interact with DataVault Deposits")
 public class DepositsController {
 
-    private VaultsService vaultsService;
-    private DepositsService depositsService;
-    private RetrievesService retrievesService;
-    private MetadataService metadataService;
-    private ExternalMetadataService externalMetadataService;
-    private FilesService filesService;
-    private UsersService usersService;
-    private ArchiveStoreService archiveStoreService;
-    private JobsService jobsService;
-    private AdminService adminService;
-    private Sender sender;
+    private final VaultsService vaultsService;
+    private final DepositsService depositsService;
+    private final RetrievesService retrievesService;
+    private final MetadataService metadataService;
+    private final ExternalMetadataService externalMetadataService;
+    private final FilesService filesService;
+    private final UsersService usersService;
+    private final ArchiveStoreService archiveStoreService;
+    private final JobsService jobsService;
+    private final AdminService adminService;
+    private final Sender sender;
     private String optionsDir;
-	private String tempDir;
-    private String bucketName;
-    private String region;
-    private String awsAccessKey;
-    private String awsSecretKey;
-    private String tsmRetryTime;
-    private String occRetryTime;
-    private String tsmMaxRetries;
-    private String occMaxRetries;
-    private String ociNameSpace;
-    private String ociBucketName;
+	private final String tempDir;
+    private final String bucketName;
+    private final String region;
+    private final String awsAccessKey;
+    private final String awsSecretKey;
+    private final String tsmRetryTime;
+    private final String occRetryTime;
+    private final String tsmMaxRetries;
+    private final String occMaxRetries;
+    private final String ociNameSpace;
+    private final String ociBucketName;
 
     private static final Logger logger = LoggerFactory.getLogger(DepositsController.class);
-    
-    public void setVaultsService(VaultsService vaultsService) {
+
+    @Autowired
+    public DepositsController(VaultsService vaultsService, DepositsService depositsService,
+        RetrievesService retrievesService, MetadataService metadataService,
+        ExternalMetadataService externalMetadataService, FilesService filesService,
+        UsersService usersService, ArchiveStoreService archiveStoreService, JobsService jobsService,
+        AdminService adminService, Sender sender,
+        @Value("${tempDir:#{null}}") String tempDir,
+        @Value("${s3.bucketName:#{null}}") String bucketName,
+        @Value("${s3.region:#{null}}") String region,
+        @Value("${s3.awsAccessKey:#{null}}") String awsAccessKey,
+        @Value("${s3.awsSecretKey:#{null}}") String awsSecretKey,
+        @Value("${tsmRetryTime:#{null}}") String tsmRetryTime,
+        @Value("${occRetryTime:#{null}}") String occRetryTime,
+        @Value("${tsmMaxRetries:#{null}}") String tsmMaxRetries,
+        @Value("${occMaxRetries:#{null}}") String occMaxRetries,
+        @Value("${ociNameSpace:#{null}}") String ociNameSpace,
+        @Value("${ociBucketName:#{null}}") String ociBucketName) {
         this.vaultsService = vaultsService;
-    }
-
-    public void setDepositsService(DepositsService depositsService) {
         this.depositsService = depositsService;
-    }
-
-    public void setRetrievesService(RetrievesService retrievesService) {
         this.retrievesService = retrievesService;
-    }
-
-    public void setMetadataService(MetadataService metadataService) {
         this.metadataService = metadataService;
-    }
-    
-    public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
         this.externalMetadataService = externalMetadataService;
-    }
-
-    public void setFilesService(FilesService filesService) {
         this.filesService = filesService;
-    }
-
-    public void setArchiveStoreService(ArchiveStoreService archiveStoreService) {
-        this.archiveStoreService = archiveStoreService;
-    }
-
-    public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
-    }
-
-    public void setJobsService(JobsService jobsService) {
+        this.archiveStoreService = archiveStoreService;
         this.jobsService = jobsService;
-    }
-
-    public void setAdminService(AdminService adminService) {
         this.adminService = adminService;
-    }
-
-    public void setSender(Sender sender) {
         this.sender = sender;
-    }
-    
-    public void setTempDir(String tempDir) {
-		this.tempDir = tempDir;
-	}
-    
-    public void setOptionsDir(String optionsDir) {
-    	this.optionsDir = optionsDir;
-    }
-    
-    public void setBucketName(String bucketName) {
-    	this.bucketName = bucketName;
-    }
-
-    public void setRegion(String region) {
-    	this.region = region;
-    }
-
-    public void setAwsAccessKey(String awsAccessKey) {
-    	this.awsAccessKey = awsAccessKey;
-    }
-
-    public void setAwsSecretKey(String awsSecretKey) {
-    	this.awsSecretKey = awsSecretKey;
-    }
-
-    public void setTsmRetryTime(String tsmRetryTime) {
+        this.tempDir = tempDir;
+        this.bucketName = bucketName;
+        this.region = region;
+        this.awsAccessKey = awsAccessKey;
+        this.awsSecretKey = awsSecretKey;
         this.tsmRetryTime = tsmRetryTime;
-    }
-
-    public void setOccRetryTime(String occRetryTime) {
         this.occRetryTime = occRetryTime;
-    }
-
-    public void setTsmMaxRetries(String tsmMaxRetries) {
         this.tsmMaxRetries = tsmMaxRetries;
-    }
-
-    public void setOccMaxRetries(String occMaxRetries) {
         this.occMaxRetries = occMaxRetries;
+        this.ociNameSpace = ociNameSpace;
+        this.ociBucketName = ociBucketName;
     }
 
-    public void setOciNameSpace(String ociNameSpace) { this.ociNameSpace = ociNameSpace; }
 
-    public void setOciBucketName(String ociBucketName) { this.ociBucketName = ociBucketName; }
 
     @RequestMapping(value = "/deposits/{depositid}", method = RequestMethod.GET)
     public DepositInfo getDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,

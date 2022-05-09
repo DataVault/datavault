@@ -7,7 +7,6 @@ import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
 import org.datavaultplatform.common.event.roles.OrphanVault;
 import org.datavaultplatform.common.event.roles.TransferVaultOwnership;
-import org.datavaultplatform.common.event.vault.Create;
 import org.datavaultplatform.common.event.vault.UpdatedDescription;
 import org.datavaultplatform.common.event.vault.UpdatedName;
 import org.datavaultplatform.common.model.*;
@@ -19,6 +18,8 @@ import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,95 +34,64 @@ import java.util.stream.Collectors;
 @Api(name="Vaults", description = "Interact with DataVault Vaults")
 public class VaultsController {
 
-    private EmailService emailService;
-    private VaultsService vaultsService;
-    private PendingVaultsService pendingVaultsService;
-    private PendingDataCreatorsService pendingDataCreatorsService;
-    private DepositsService depositsService;
-    private ExternalMetadataService externalMetadataService;
-    private RetentionPoliciesService retentionPoliciesService;
-    private GroupsService groupsService;
-    private UsersService usersService;
-    private EventService eventService;
-    private ClientsService clientsService;
-    private DataManagersService dataManagersService;
-    private RolesAndPermissionsService permissionsService;
-    private String activeDir;
-    private String archiveDir;
-
-    private String homePage;
-    private String helpPage;
+    private static final Logger logger = LoggerFactory.getLogger(VaultsController.class);
 
     private static final String ORPHANED_ID = "Orphaned";
 
-    public void setHomePage(String homePage) {
+    private final EmailService emailService;
+    private final VaultsService vaultsService;
+    private final PendingVaultsService pendingVaultsService;
+    private final PendingDataCreatorsService pendingDataCreatorsService;
+    private final DepositsService depositsService;
+    private final ExternalMetadataService externalMetadataService;
+    private final RetentionPoliciesService retentionPoliciesService;
+    private final GroupsService groupsService;
+    private final UsersService usersService;
+    private final EventService eventService;
+    private final ClientsService clientsService;
+    private final DataManagersService dataManagersService;
+    private final RolesAndPermissionsService permissionsService;
+
+    // NOTE: this a placeholder and will eventually be handled by per-user config
+    private final String activeDir;
+
+    // NOTE: this a placeholder and will eventually be handled by system config
+    private final String archiveDir;
+
+    private final String homePage;
+    private final String helpPage;
+
+    @Autowired
+    public VaultsController(EmailService emailService, VaultsService vaultsService,
+        PendingVaultsService pendingVaultsService,
+        PendingDataCreatorsService pendingDataCreatorsService, DepositsService depositsService,
+        ExternalMetadataService externalMetadataService,
+        RetentionPoliciesService retentionPoliciesService, GroupsService groupsService,
+        UsersService usersService, EventService eventService, ClientsService clientsService,
+        DataManagersService dataManagersService, RolesAndPermissionsService permissionsService,
+        @Value("${activeDir}") String activeDir,
+        @Value("${archiveDir}") String archiveDir,
+        @Value("${home.page}") String homePage,
+        @Value("${help.page}") String helpPage) {
+        this.emailService = emailService;
+        this.vaultsService = vaultsService;
+        this.pendingVaultsService = pendingVaultsService;
+        this.pendingDataCreatorsService = pendingDataCreatorsService;
+        this.depositsService = depositsService;
+        this.externalMetadataService = externalMetadataService;
+        this.retentionPoliciesService = retentionPoliciesService;
+        this.groupsService = groupsService;
+        this.usersService = usersService;
+        this.eventService = eventService;
+        this.clientsService = clientsService;
+        this.dataManagersService = dataManagersService;
+        this.permissionsService = permissionsService;
+        this.activeDir = activeDir;
+        this.archiveDir = archiveDir;
         this.homePage = homePage;
-    }
-    public void setHelpPage(String helpPage) {
         this.helpPage = helpPage;
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(VaultsController.class);
-
-    public void setPermissionsService(RolesAndPermissionsService permissionsService) {
-        this.permissionsService = permissionsService;
-    }
-
-    public void setEmailService(EmailService emailService) { this.emailService = emailService; }
-
-    public void setVaultsService(VaultsService vaultsService) {
-        this.vaultsService = vaultsService;
-    }
-
-    public void setPendingVaultsService(PendingVaultsService pendingVaultsService) {
-        this.pendingVaultsService = pendingVaultsService;
-    }
-
-    public void setPendingDataCreatorsService(PendingDataCreatorsService pendingDataCreatorsService) {
-        this.pendingDataCreatorsService = pendingDataCreatorsService;
-    }
-
-    public void setDepositsService(DepositsService depositsService) {
-        this.depositsService = depositsService;
-    }
-
-    public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
-        this.externalMetadataService = externalMetadataService;
-    }
-
-    public void setRetentionPoliciesService(RetentionPoliciesService retentionPoliciesService) {
-        this.retentionPoliciesService = retentionPoliciesService;
-    }
-
-    public void setGroupsService(GroupsService groupsService) {
-        this.groupsService = groupsService;
-    }
-
-    public void setUsersService(UsersService usersService) {
-        this.usersService = usersService;
-    }
-
-    public void setEventService(EventService eventService) {
-        this.eventService = eventService;
-    }
-
-    public void setClientsService(ClientsService clientsService) {
-        this.clientsService = clientsService;
-    }
-
-    public void setDataManagersService(DataManagersService dataManagersService) {
-        this.dataManagersService = dataManagersService;
-    }
-
-    // NOTE: this a placeholder and will eventually be handled by per-user config
-    public void setActiveDir(String activeDir) {
-        this.activeDir = activeDir;
-    }
-
-    // NOTE: this a placeholder and will eventually be handled by system config
-    public void setArchiveDir(String archiveDir) {
-        this.archiveDir = archiveDir;
-    }
 
     @ApiMethod(
             path = "/vaults",

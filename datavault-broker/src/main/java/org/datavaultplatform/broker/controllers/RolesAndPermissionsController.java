@@ -10,6 +10,8 @@ import org.jsondoc.core.annotation.Api;
 import org.jsondoc.core.annotation.ApiMethod;
 import org.jsondoc.core.annotation.ApiPathParam;
 import org.jsondoc.core.pojo.ApiVerb;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,39 +24,32 @@ import java.util.List;
 @Api(name="Permissions", description = "Interact with DataVault Roles and Permissions")
 public class RolesAndPermissionsController {
 
-    private EventService eventService;
-    private EmailService emailService;
-    private VaultsService vaultsService;
-    private GroupsService groupsService;
-    private UsersService usersService;
-    private String homePage;
-    private String helpPage;
+    private final EventService eventService;
+    private final EmailService emailService;
+    private final VaultsService vaultsService;
+    private final GroupsService groupsService;
+    private final UsersService usersService;
+    private final String homePage;
+    private final String helpPage;
 
-    private RolesAndPermissionsService rolesAndPermissionsService;
-    private ClientsService clientsService;
+    private final RolesAndPermissionsService rolesAndPermissionsService;
+    private final ClientsService clientsService;
 
-    public void setClientsService(ClientsService clientsService) { this.clientsService = clientsService; }
-
-    public void setEventService(EventService eventService) { this.eventService = eventService; }
-
-    public void setEmailService(EmailService emailService) { this.emailService = emailService; }
-
-    public void setVaultsService(VaultsService vaultsService) { this.vaultsService = vaultsService; }
-
-    public void setGroupsService(GroupsService groupsService) { this.groupsService = groupsService; }
-
-    public void setUsersService(UsersService usersService) { this.usersService = usersService; }
-
-    public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
-        this.rolesAndPermissionsService = rolesAndPermissionsService;
-    }
-
-    public void setHomePage(String homePage) {
+    @Autowired
+    public RolesAndPermissionsController(EventService eventService, EmailService emailService,
+        VaultsService vaultsService, GroupsService groupsService, UsersService usersService,
+        @Value("${home.page}") String homePage,
+        @Value("${help.roles}") String helpPage, RolesAndPermissionsService rolesAndPermissionsService,
+        ClientsService clientsService) {
+        this.eventService = eventService;
+        this.emailService = emailService;
+        this.vaultsService = vaultsService;
+        this.groupsService = groupsService;
+        this.usersService = usersService;
         this.homePage = homePage;
-    }
-
-    public void setHelpPage(String helpPage) {
         this.helpPage = helpPage;
+        this.rolesAndPermissionsService = rolesAndPermissionsService;
+        this.clientsService = clientsService;
     }
 
     @ApiMethod(

@@ -10,6 +10,7 @@ import org.datavaultplatform.common.model.Retrieve;
 import org.jsondoc.core.annotation.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,31 +19,22 @@ import java.util.List;
 @Api(name="Statistics", description = "System statistics")
 public class StatisticsController {
 
-    private VaultsService vaultsService;
-    private PendingVaultsService pendingVaultsService;
-    private DepositsService depositsService;
-    private RetrievesService retrievesService;
-    private EventService eventService;
+    private final VaultsService vaultsService;
+    private final PendingVaultsService pendingVaultsService;
+    private final DepositsService depositsService;
+    private final RetrievesService retrievesService;
+    private final EventService eventService;
 
     private static final Logger logger = LoggerFactory.getLogger(StatisticsController.class);
 
-    public void setVaultsService(VaultsService vaultsService) {
+    @Autowired
+    public StatisticsController(VaultsService vaultsService,
+        PendingVaultsService pendingVaultsService, DepositsService depositsService,
+        RetrievesService retrievesService, EventService eventService) {
         this.vaultsService = vaultsService;
-    }
-    
-    public void setPendingVaultsService(PendingVaultsService pendingVaultsService) {
         this.pendingVaultsService = pendingVaultsService;
-    }
-
-    public void setDepositsService(DepositsService depositsService) {
         this.depositsService = depositsService;
-    }
-
-    public void setRetrievesService(RetrievesService retrievesService) {
         this.retrievesService = retrievesService;
-    }
-    
-    public void setEventService(EventService eventService) {
         this.eventService = eventService;
     }
 

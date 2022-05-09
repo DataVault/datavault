@@ -22,6 +22,8 @@ import org.jsondoc.core.annotation.ApiQueryParam;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -47,87 +49,55 @@ public class AdminController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminController.class);
 
-    private VaultsService vaultsService;
-    private UsersService usersService;
-    private DepositsService depositsService;
-    private RetrievesService retrievesService;
-    private EventService eventService;
-    private ArchiveStoreService archiveStoreService;
-    private JobsService jobsService;
-    private ExternalMetadataService externalMetadataService;
-    private AuditsService auditsService;
-    private RolesAndPermissionsService permissionsService;
-    private Sender sender;
-    private String optionsDir;
-    private String tempDir;
-    private String bucketName;
-    private String region;
-    private String awsAccessKey;
-    private String awsSecretKey;
+    private final VaultsService vaultsService;
+    private final UsersService usersService;
+    private final DepositsService depositsService;
+    private final RetrievesService retrievesService;
+    private final EventService eventService;
+    private final ArchiveStoreService archiveStoreService;
+    private final JobsService jobsService;
+    private final ExternalMetadataService externalMetadataService;
+    private final AuditsService auditsService;
+    private final RolesAndPermissionsService permissionsService;
+    private final Sender sender;
+    private final String optionsDir;
+    private final String tempDir;
+    private final String bucketName;
+    private final String region;
+    private final String awsAccessKey;
+    private final String awsSecretKey;
 
-    public void setOptionsDir(String optionsDir) {
+    @Autowired
+    public AdminController(VaultsService vaultsService, UsersService usersService,
+        DepositsService depositsService, RetrievesService retrievesService,
+        EventService eventService, ArchiveStoreService archiveStoreService, JobsService jobsService,
+        ExternalMetadataService externalMetadataService, AuditsService auditsService,
+        RolesAndPermissionsService permissionsService, Sender sender,
+        @Value("${optionsDir:#{null}}") String optionsDir,
+        @Value("${tempDir:#{null}}") String tempDir,
+        @Value("${s3.bucketName:#{null}}") String bucketName,
+        @Value("${s3.region:#{null}}") String region,
+        @Value("${s3.awsAccessKey:#{null}}") String awsAccessKey,
+        @Value("${s3.awsSecretKey:#{null}}") String awsSecretKey) {
+        this.vaultsService = vaultsService;
+        this.usersService = usersService;
+        this.depositsService = depositsService;
+        this.retrievesService = retrievesService;
+        this.eventService = eventService;
+        this.archiveStoreService = archiveStoreService;
+        this.jobsService = jobsService;
+        this.externalMetadataService = externalMetadataService;
+        this.auditsService = auditsService;
+        this.permissionsService = permissionsService;
+        this.sender = sender;
         this.optionsDir = optionsDir;
-    }
-
-    public void setTempDir(String tempDir) {
         this.tempDir = tempDir;
-    }
-
-    public void setBucketName(String bucketName) {
         this.bucketName = bucketName;
-    }
-
-    public void setRegion(String region) {
         this.region = region;
-    }
-
-    public void setAwsAccessKey(String awsAccessKey) {
         this.awsAccessKey = awsAccessKey;
-    }
-
-    public void setAwsSecretKey(String awsSecretKey) {
         this.awsSecretKey = awsSecretKey;
     }
 
-    public void setDepositsService(DepositsService depositsService) {
-        this.depositsService = depositsService;
-    }
-
-    public void setRetrievesService(RetrievesService retrievesService) {
-        this.retrievesService = retrievesService;
-    }
-
-    public void setVaultsService(VaultsService vaultsService) {
-        this.vaultsService = vaultsService;
-    }
-
-    public void setEventService(EventService eventService) {
-        this.eventService = eventService;
-    }
-
-    public void setUsersService(UsersService usersService) {
-        this.usersService = usersService;
-    }
-
-    public void setAuditsService(AuditsService auditsService) {
-        this.auditsService = auditsService;
-    }
-
-    public void setPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
-        this.permissionsService = rolesAndPermissionsService;
-    }
-
-    public void setArchiveStoreService(ArchiveStoreService archiveStoreService) {
-        this.archiveStoreService = archiveStoreService;
-    }
-
-    public void setJobsService(JobsService jobsService) {
-        this.jobsService = jobsService;
-    }
-
-    public void setSender(Sender sender) {
-        this.sender = sender;
-    }
 
     @RequestMapping(value = "/admin/deposits/count", method = RequestMethod.GET)
     public Integer getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
@@ -140,10 +110,6 @@ public class AdminController {
   
     public ExternalMetadataService getExternalMetadataService() {
         return externalMetadataService;
-    }
-
-    public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
-        this.externalMetadataService = externalMetadataService;
     }
 
     @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)

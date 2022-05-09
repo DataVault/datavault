@@ -3,14 +3,13 @@ package org.datavaultplatform.broker.controllers;
 import org.apache.commons.codec.binary.Base64;
 import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.FilesService;
-import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.io.FileUtils;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
-import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.response.DepositSize;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -33,37 +32,26 @@ import java.util.List;
 @RestController
 public class FilesController {
     
-    private FilesService filesService;
-    private UsersService usersService;
-    private AdminService adminService;
-    private String tempDir;
-    private Long maxDepositByteSize;
-    private Long maxAdminDepositByteSize;
+    private final FilesService filesService;
+    private final UsersService usersService;
+    private final AdminService adminService;
+    private final String tempDir;
+    private final Long maxDepositByteSize;
+    private final Long maxAdminDepositByteSize;
 
-    public void setFilesService(FilesService filesService) {
+    public FilesController(FilesService filesService, UsersService usersService,
+        AdminService adminService,
+        @Value("${tempDir}") String tempDir,
+        @Value("${max.deposit.size}") String maxDepositByteSize,
+        @Value("${max.admin.deposit.size}") String maxAdminDepositByteSize) {
         this.filesService = filesService;
-    }
-    
-    public void setUsersService(UsersService usersService) { this.usersService = usersService; }
-
-    public void setAdminService(AdminService adminService) {
+        this.usersService = usersService;
         this.adminService = adminService;
-    }
-
-    public void setTempDir(String tempDir) {
         this.tempDir = tempDir;
+        this.maxDepositByteSize = FileUtils.parseFormattedSizeToBytes(maxDepositByteSize);
+        this.maxAdminDepositByteSize = FileUtils.parseFormattedSizeToBytes(maxAdminDepositByteSize);
     }
 
-    public void setMaxDepositByteSize(String maxDepositByteSize) {
-        long bytes = FileUtils.parseFormattedSizeToBytes(maxDepositByteSize);
-        this.maxDepositByteSize = bytes;
-    }
-
-    public void setMaxAdminDepositByteSize(String maxAdminDepositByteSize) {
-        long bytes = FileUtils.parseFormattedSizeToBytes(maxAdminDepositByteSize);
-        this.maxAdminDepositByteSize = bytes;
-    }
-    
     @RequestMapping("/files")
     public List<FileInfo> getStorageListing(@RequestHeader(value = "X-UserID", required = true) String userID,
                                             HttpServletRequest request) {
