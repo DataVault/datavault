@@ -423,10 +423,16 @@ public class VaultsController {
                     depositInfo.setVaultOwnerID(vaultOwner.getID());
                     depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
                 }
-                depositInfo.setDatasetID(vault.getDataset().getID());
-                depositInfo.setGroupName(vault.getGroup().getName());
-                depositInfo.setGroupID(vault.getGroup().getID());
-                depositInfo.setVaultReviewDate(vault.getReviewDate().toString());
+                if(vault.getDataset() != null) {
+                	depositInfo.setDatasetID(vault.getDataset().getID());
+                }
+                if(vault.getGroup() != null) {
+                	depositInfo.setGroupName(vault.getGroup().getName());
+                	depositInfo.setGroupID(vault.getGroup().getID());
+                }
+                if(vault.getReviewDate() != null) {
+                	depositInfo.setVaultReviewDate(vault.getReviewDate().toString());
+                }
                 depositResponses.add(depositInfo);
             }
         }
