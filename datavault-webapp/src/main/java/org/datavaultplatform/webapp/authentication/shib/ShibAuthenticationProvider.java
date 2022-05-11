@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.authentication.shib;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.apache.directory.ldap.client.api.LdapConnection;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.common.services.LDAPService;
@@ -101,23 +102,10 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
     }
 
     private HashMap<String, String> getLDAPAttributes(String name) {
-        HashMap<String, String> attributes;
-
         try {
-            ldapService.getConnection();
-            attributes = ldapService.search(name);
-
+            return ldapService.getLDAPAttributes(name);
         }catch (Exception e) {
             throw new AuthenticationServiceException("LDAP Exception", e);
-
-        } finally {
-            try {
-                ldapService.closeConnection();
-            } catch (LdapException e) {
-                throw new AuthenticationServiceException("LDAP Exception", e);
-            }
         }
-
-        return attributes;
     }
 }

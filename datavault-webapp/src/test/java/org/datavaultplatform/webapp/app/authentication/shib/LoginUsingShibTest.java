@@ -142,10 +142,8 @@ public class LoginUsingShibTest {
 
         when(mRestService.addUser(argUser.capture())).thenReturn(mUser);
 
-        doNothing().when(mLdapService).closeConnection();
-        doNothing().when(mLdapService).getConnection();
         HashMap<String,String> ldapInfo = new HashMap<>();
-        when(mLdapService.search(argId.capture())).thenReturn(ldapInfo);
+        when(mLdapService.getLDAPAttributes(argId.capture())).thenReturn(ldapInfo);
 
         MockHttpSession session = new MockHttpSession();
         String sessionId = session.changeSessionId();
@@ -160,9 +158,7 @@ public class LoginUsingShibTest {
         assertEquals("shib-user-1",argValidateUser.getValue().getUserid());
         assertEquals("N/A",argValidateUser.getValue().getPassword());
 
-        verify(mLdapService).getConnection();
-        verify(mLdapService).search(argId.getValue());
-        verify(mLdapService).closeConnection();
+        verify(mLdapService).getLDAPAttributes(argId.getValue());
         assertEquals("shib-user-1", argId.getValue());
 
         verify(mRestService).addUser(argUser.getValue());

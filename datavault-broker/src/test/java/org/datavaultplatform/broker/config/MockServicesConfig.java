@@ -104,9 +104,6 @@ public class MockServicesConfig {
   RetentionPoliciesService mRetentionPoliciesService;
 
   @MockBean
-  LDAPService mLdapService;
-
-  @MockBean
   RetrievesService mRetrievesService;
 
   @MockBean

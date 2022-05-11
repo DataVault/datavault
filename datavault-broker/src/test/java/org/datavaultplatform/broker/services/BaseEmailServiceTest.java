@@ -112,6 +112,7 @@ public abstract class BaseEmailServiceTest {
     registry.add("tc.mailhog.http", () -> MAILHOG_CONTAINER.getMappedPort(PORT_HTTP));
     registry.add("mail.host", MAILHOG_CONTAINER::getHost);
     registry.add("mail.port", () -> MAILHOG_CONTAINER.getMappedPort(PORT_SMTP));
+    log.info("email http://localhost:{}", MAILHOG_CONTAINER.getMappedPort(PORT_HTTP));
   }
 
   public final ResponseEntity<String> lookupSentEmailsContaining(String query) {

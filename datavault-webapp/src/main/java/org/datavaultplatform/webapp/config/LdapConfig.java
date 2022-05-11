@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.config;
 
+import java.util.List;
 import org.datavaultplatform.common.services.LDAPService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +31,7 @@ public class LdapConfig {
   String searchFilter;
 
   @Value("${ldap.attrs}")
-  String attrs;
+  List<String> attrs;
 
   @Bean
   LDAPService ldapService() {

@@ -3,7 +3,10 @@ package org.datavaultplatform.webapp.app.setup;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import io.vavr.collection.Set;
 import java.lang.reflect.Field;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import org.datavaultplatform.common.services.LDAPService;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
@@ -27,12 +30,12 @@ public class LdapSetupTest {
   void testLdapServiceProperties() {
     checkField("host", "hostname");
     checkField("port", 636);
-    checkField("useSsl", true);
+    checkField("useSsl", false);
     checkField("dn", "uid=uun,ou=people,o=myu.ed");
-    checkField("password", "dummy-password");
-    checkField("searchContext", "u=people,o=myu.ed");
+    checkField("password", "hello123");
+    checkField("searchContext", "ou=people,o=myu.ed");
     checkField("searchFilter", "uid");
-    checkField("attrs", "attr1,attr2,etc");
+    checkField("attrs", Stream.of("attr1","attr2","etc").collect(Collectors.toSet()));
   }
 
   @SneakyThrows
