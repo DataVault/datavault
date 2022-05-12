@@ -52,6 +52,11 @@ public class VaultsController {
     private String helpPage;
 
     private static final String ORPHANED_ID = "Orphaned";
+    private static final String ROLE_DATA_OWNER = "Data Owner";
+    private static final String ROLE_DEPOSITOR = "Depositor";
+    private static final String ROLE_NDM = "Nominated Data Manager";
+    
+    
 
     public void setHomePage(String homePage) {
         this.homePage = homePage;
@@ -465,6 +470,7 @@ public class VaultsController {
 
         pendingVaultsService.addDepositorRoles(createVault, vault.getId());
 
+        // This should be present
         pendingVaultsService.addOwnerRole(createVault, vault.getId(), userID);
 
         vault = pendingVaultsService.processDataCreatorParams(createVault, vault);
@@ -491,6 +497,95 @@ public class VaultsController {
         //}
         return vault.convertToResponse();
     }
+    
+    @RequestMapping(value = "/admin/pendingVaults/edit", method = RequestMethod.POST)
+    public VaultInfo editPendingVault(@RequestHeader(value = "X-UserID", required=true) String userID,
+                                        @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
+                                        @RequestBody CreateVault createVault) throws Exception {
+        PendingVault vault = pendingVaultsService.getPendingVault(createVault.getPendingID());
+        
+        // Note whilst Data Owner may change, 
+        // the Vault Creator is set when the Pending Vault was created. 
+        // So will not be changed.
+        User owner = vault.getOwner();
+        logger.info("owner: " + owner);
+        if(owner != null) {
+        	logger.info("owner id:" + owner.getID());
+        }
+       
+        //Set affirmed = true as it is not set in Admin Edit UI
+        createVault.setAffirmed(true);
+        //Set pureLink = true as it is not set in Admin Edit UI
+        createVault.setPureLink(true);
+        
+        vault = pendingVaultsService.processVaultParams(vault, createVault, userID);
+        
+        // Update all the data except Role Assignments and Data creators
+        pendingVaultsService.addOrUpdatePendingVault(vault);
+        
+        // Now update the Role Assignments and Data Creators, 
+        // except the Vault Creator.
+        
+        // Delete the previously assigned Data Owner
+        List<RoleAssignment> previousRoles = permissionsService.getRoleAssignmentsForPendingVault(vault.getId());
+        if (previousRoles != null && !previousRoles.isEmpty()) {
+            for (RoleAssignment pr : previousRoles) {
+            	if(pr.getRole().getName().equals(ROLE_DATA_OWNER)) {
+            		permissionsService.deleteRoleAssignment(pr.getId());
+            	}
+            }
+        }
+        
+        if(owner != null) {
+        	pendingVaultsService.addOwnerRole(createVault, vault.getId(), owner.getID());
+        } else {
+        	pendingVaultsService.addOwnerRole(createVault, vault.getId(), null);
+        }
+        
+        List<PendingDataCreator> previousCreators = vault.getDataCreators();
+        if (previousCreators != null && ! previousCreators.isEmpty()) {
+            for (PendingDataCreator pdc : previousCreators) {
+                pendingDataCreatorsService.deletePendingDataCreator(pdc.getId());
+            }
+        }
+        
+        logger.info("pendingVaultsService.processDataCreatorParams");
+        logger.info("createVault.getDataCreatorsAsString(): " + createVault.getDataCreatorsAsString());
+        vault = pendingVaultsService.processDataCreatorParams(createVault, vault);
+
+        // delete all the previously assigned Depositors
+        previousRoles = permissionsService.getRoleAssignmentsForPendingVault(vault.getId());
+        if (previousRoles != null && !previousRoles.isEmpty()) {
+            for (RoleAssignment pr : previousRoles) {
+            	// Only delete Depositor roles
+            	if(pr.getRole().getName().equals(ROLE_DEPOSITOR)) {
+            		permissionsService.deleteRoleAssignment(pr.getId());
+            	}
+            }
+        }
+        
+        logger.info("pendingVaultsService.addDepositorRoles");
+        logger.info("createVault.getDepositorsAsString(): " + createVault.getDepositorsAsString());
+        pendingVaultsService.addDepositorRoles(createVault, vault.getId());
+         
+        // delete all the previously assigned Nominated Data Managers
+        previousRoles = permissionsService.getRoleAssignmentsForPendingVault(vault.getId());
+        if (previousRoles != null && !previousRoles.isEmpty()) {
+            for (RoleAssignment pr : previousRoles) {
+            	// Only delete NDM roles
+            	if(pr.getRole().getName().equals(ROLE_NDM)) {
+            		permissionsService.deleteRoleAssignment(pr.getId());
+            	}
+            }
+        }
+        
+        logger.info("pendingVaultsService.addNDMRoles");
+        logger.info("createVault.getNDMsAsString(): " + createVault.getNDMsAsString());
+        pendingVaultsService.addNDMRoles(createVault, vault.getId());
+
+        return vault.convertToResponse();
+    }
+
     @RequestMapping(value = "/pendingVaults", method = RequestMethod.POST)
     public VaultInfo addPendingVault(@RequestHeader(value = "X-UserID", required = true) String userID,
                               @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
