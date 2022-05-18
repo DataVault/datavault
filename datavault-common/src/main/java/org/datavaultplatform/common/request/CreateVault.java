@@ -1,6 +1,7 @@
 package org.datavaultplatform.common.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
@@ -10,6 +11,7 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "CreateVault")
+@Data
 public class CreateVault {
 
     /*

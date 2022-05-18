@@ -79,7 +79,7 @@ public class CheckForReview implements ScheduledTask {
 
                 // Now bash on with the emailing.
 
-                HashMap<String, Object> model = new HashMap<String, Object>();
+                HashMap<String, Object> model = new HashMap<>();
                 model.put("vault-name", vault.getName());
                 model.put("vault-id", vault.getID());
                 model.put("vault-review-date", dateToString(vault.getReviewDate()));

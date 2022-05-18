@@ -4,7 +4,6 @@ import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.PermissionDAO;
 import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
 import org.datavaultplatform.common.model.dao.RoleDAO;
-import org.datavaultplatform.common.model.dao.UserDAO;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -191,7 +191,7 @@ public class PendingVaultsService {
         List<String> dcs = createVault.getDataCreators();
         if (dcs != null) {
             logger.debug("Data creator list is :'" + dcs + "'");
-            List<PendingDataCreator> creators = new ArrayList();
+            List<PendingDataCreator> creators = new ArrayList<>();
             for (String creator : dcs) {
                 if (creator != null && !creator.isEmpty()) {
                     PendingDataCreator dc = new PendingDataCreator();

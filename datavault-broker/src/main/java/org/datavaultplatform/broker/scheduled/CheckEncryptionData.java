@@ -13,7 +13,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -35,7 +34,7 @@ public class CheckEncryptionData implements ScheduledTask {
     private static final Logger log = LoggerFactory.getLogger(CheckEncryptionData.class);
 
     @Scheduled(cron = ScheduledUtils.SCHEDULE_2_ENCRYPTION_CHECK)
-    public void execute() throws Exception {
+    public void execute() {
 
         Date start = new Date();
         log.info("Initiating check of encryption data at " + start);
@@ -102,7 +101,7 @@ public class CheckEncryptionData implements ScheduledTask {
         Group group = vault.getGroup();
         User depositUser = deposit.getUser();
 
-        HashMap<String, Object> model = new HashMap<String, Object>();
+        HashMap<String, Object> model = new HashMap<>();
         model.put("group-name", group.getName());
         model.put("deposit-name", deposit.getName());
         model.put("deposit-id", deposit.getID());

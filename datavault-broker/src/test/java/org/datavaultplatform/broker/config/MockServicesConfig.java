@@ -28,7 +28,6 @@ import org.datavaultplatform.broker.services.UserKeyPairService;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.broker.services.VaultsReviewService;
 import org.datavaultplatform.broker.services.VaultsService;
-import org.datavaultplatform.common.services.LDAPService;
 
 import org.springframework.boot.test.context.TestConfiguration;
 

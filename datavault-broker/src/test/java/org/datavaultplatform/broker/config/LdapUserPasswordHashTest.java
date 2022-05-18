@@ -3,6 +3,7 @@ package org.datavaultplatform.broker.config;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -34,7 +35,7 @@ public class LdapUserPasswordHashTest {
   String hashMD5Password(String password) throws NoSuchAlgorithmException,
       UnsupportedEncodingException {
     MessageDigest digest = MessageDigest.getInstance("MD5");
-    digest.update(password.getBytes("UTF8"));
+    digest.update(password.getBytes(StandardCharsets.UTF_8));
     String md5Password = Base64.getEncoder().encodeToString(digest.digest());
     return "{MD5}" + md5Password;
   }

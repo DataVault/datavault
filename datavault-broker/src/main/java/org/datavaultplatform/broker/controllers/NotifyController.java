@@ -1,5 +1,8 @@
 package org.datavaultplatform.broker.controllers;
 
+import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
 import org.datavaultplatform.broker.services.EventService;
 import org.datavaultplatform.broker.services.ClientsService;
 import org.datavaultplatform.broker.services.UsersService;
@@ -36,12 +39,12 @@ public class NotifyController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
     })
-    @RequestMapping(value = "/notify/login", method = RequestMethod.PUT)
-    public String login(@RequestHeader(value = "X-UserID", required = true) String userID,
-                        @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
-                        @RequestBody CreateClientEvent clientEvent) throws Exception {
+    @PutMapping("/notify/login")
+    public String login(@RequestHeader(HEADER_USER_ID) String userID,
+                        @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
+                        @RequestBody CreateClientEvent clientEvent) {
         
         Login loginEvent = new Login(clientEvent.getRemoteAddress(), clientEvent.getUserAgent());
         loginEvent.setUser(usersService.getUser(userID));
@@ -60,12 +63,12 @@ public class NotifyController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
     })
-    @RequestMapping(value = "/notify/logout", method = RequestMethod.PUT)
-    public String logout(@RequestHeader(value = "X-UserID", required = true) String userID,
-                         @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
-                         @RequestBody CreateClientEvent clientEvent) throws Exception {
+    @PutMapping("/notify/logout")
+    public String logout(@RequestHeader(HEADER_USER_ID) String userID,
+                         @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
+                         @RequestBody CreateClientEvent clientEvent) {
         
         Logout logoutEvent = new Logout(clientEvent.getRemoteAddress());
         logoutEvent.setUser(usersService.getUser(userID));

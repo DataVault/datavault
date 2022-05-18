@@ -34,8 +34,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(classes = DataVaultBrokerApp.class)
 @Testcontainers
 @TestPropertySource(properties = {
+    "broker.email.enabled=true",
     "broker.controllers.enabled=false",
     "broker.services.enabled=false",
+    "broker.rabbit.enabled=false",
     "broker.database.enabled=false",
     "broker.scheduled.enabled=false",
     "broker.initialise.enabled=false",

@@ -11,7 +11,6 @@ import org.jsondoc.core.annotation.ApiObjectField;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "CreateClientEvent")
 public class CreateClientEvent {
-
     @JsonIgnore
     private String sessionId;
 

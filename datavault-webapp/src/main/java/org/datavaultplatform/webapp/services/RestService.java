@@ -1,10 +1,13 @@
 package org.datavaultplatform.webapp.services;
 
+import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
+
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;
+import org.datavaultplatform.common.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,10 +58,10 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
 
         // If we have a logged on user then pass that information.
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            headers.set("X-UserID", SecurityContextHolder.getContext().getAuthentication().getName());
+            headers.set(Constants.HEADER_USER_ID, SecurityContextHolder.getContext().getAuthentication().getName());
         }
 
-        headers.set("X-Client-Key", brokerApiKey);
+        headers.set(HEADER_CLIENT_KEY, brokerApiKey);
 
         HttpEntity entity;
         if (method == HttpMethod.GET) {

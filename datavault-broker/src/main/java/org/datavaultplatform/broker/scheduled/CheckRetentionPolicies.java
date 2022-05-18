@@ -26,7 +26,7 @@ public class CheckRetentionPolicies implements ScheduledTask {
     }
 
     @Scheduled(cron = ScheduledUtils.SCHEDULE_5_RETENTION_CHECK)
-    public void execute() throws Exception {
+    public void execute() {
         // Start the check
         Date start = new Date();
         log.info("Initiating check of retention policies at " + start);

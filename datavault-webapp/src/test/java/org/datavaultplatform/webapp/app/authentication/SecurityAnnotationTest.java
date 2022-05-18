@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
+import org.datavaultplatform.common.model.RoleName;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -169,7 +170,7 @@ public class SecurityAnnotationTest {
     }
 
     @GetMapping(value = "/admin/secured")
-    @Secured("ROLE_ADMIN")
+    @Secured(RoleName.ROLE_ADMIN)
     public String getSecuredForAdminOnly(){
       return "isAdmin@Secured";
     }

@@ -5,7 +5,6 @@ import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.task.Task;
-import org.datavaultplatform.common.util.RoleUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;

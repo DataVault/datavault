@@ -1,5 +1,8 @@
 package org.datavaultplatform.broker.controllers;
 
+import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.ReviewInfo;
@@ -47,16 +50,16 @@ public class ReviewsController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
     })
-    @RequestMapping(value = "/vaults/{vaultid}/vaultreviews", method = RequestMethod.GET)
-    public List<ReviewInfo> getVaultReviews(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/vaults/{vaultid}/vaultreviews")
+    public List<ReviewInfo> getVaultReviews(@RequestHeader(HEADER_USER_ID) String userID,
                                              @PathVariable("vaultid") String vaultID) throws Exception {
 
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
 
-        List<ReviewInfo> reviewinfos = new ArrayList<ReviewInfo>();
+        List<ReviewInfo> reviewinfos = new ArrayList<>();
 
         for (VaultReview vr : vault.getVaultReviews()) {
 
@@ -92,12 +95,12 @@ public class ReviewsController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
-            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
+            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID"),
+            @ApiHeader(name=HEADER_CLIENT_KEY, description="DataVault API Client Key")
     })
-    @RequestMapping(value = "/vaults/vaultreviews/{vaultReviewId}", method = RequestMethod.GET)
-    public VaultReview getVaultReview(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                @PathVariable("vaultReviewId") String vaultReviewId) throws Exception {
+    @GetMapping( "/vaults/vaultreviews/{vaultReviewId}")
+    public VaultReview getVaultReview(@RequestHeader(HEADER_USER_ID) String userID,
+                                @PathVariable("vaultReviewId") String vaultReviewId) {
 
         return vaultsReviewService.getVaultReview(vaultReviewId);
     }
@@ -112,11 +115,11 @@ public class ReviewsController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
     })
-    @RequestMapping(value = "/vaultreviews/{vaultReviewId}/depositreviews", method = RequestMethod.GET)
-    public List<DepositReview> getDepositReviews(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                             @PathVariable("vaultReviewId") String vaultReviewId) throws Exception {
+    @GetMapping("/vaultreviews/{vaultReviewId}/depositreviews")
+    public List<DepositReview> getDepositReviews(@RequestHeader(HEADER_USER_ID) String userID,
+                                             @PathVariable("vaultReviewId") String vaultReviewId) {
 
         VaultReview vaultReview = vaultsReviewService.getVaultReview(vaultReviewId);
         return vaultReview.getDepositReviews();
@@ -131,11 +134,11 @@ public class ReviewsController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
     })
-    @RequestMapping(value = "/vaultreviews/depositreviews/{depositReviewId}", method = RequestMethod.GET)
-    public DepositReview getDepositReview(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                                 @PathVariable("depositReviewId") String depositReviewId) throws Exception {
+    @GetMapping("/vaultreviews/depositreviews/{depositReviewId}")
+    public DepositReview getDepositReview(@RequestHeader(HEADER_USER_ID) String userID,
+                                                 @PathVariable("depositReviewId") String depositReviewId) {
 
         DepositReview depositReview = depositsReviewService.getDepositReview(depositReviewId);
         return depositReview;

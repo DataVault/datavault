@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.datavaultplatform.broker.queue.EventListener;
 import org.datavaultplatform.broker.queue.Sender;
-//import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;

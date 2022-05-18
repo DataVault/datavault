@@ -42,7 +42,7 @@ public class InitialiseDatabase {
 
         List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
         if (archiveStores.isEmpty()) {
-            HashMap<String,String> storeProperties = new HashMap<String,String>();
+            HashMap<String,String> storeProperties = new HashMap<>();
             storeProperties.put("rootPath", archiveDir);
             ArchiveStore tsm = new ArchiveStore("org.datavaultplatform.common.storage.impl.TivoliStorageManager", storeProperties, "Default archive store (TSM)", true);
             //ArchiveStore s3 = new ArchiveStore("org.datavaultplatform.common.storage.impl.S3Cloud", storeProperties, "Cloud archive store", false);

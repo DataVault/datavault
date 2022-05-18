@@ -97,9 +97,9 @@ public class AuditDepositsChunks implements ScheduledTask {
 
 
     @Scheduled(cron = ScheduledUtils.SCHEDULE_1_AUDIT_DEPOSIT)
-    public void execute() throws Exception {
+    public void execute() {
         Date now = new Date();
-        System.out.println("Start Audit Job "+now.toString());
+        System.out.println("Start Audit Job "+ now);
 
         // TODO: Make sure this is not a Deposit that is still running
         List<DepositChunk> chunks = depositsService.getChunksForAudit();
@@ -109,7 +109,7 @@ public class AuditDepositsChunks implements ScheduledTask {
         if(chunks.size() > 0) {
             // Fetch the ArchiveStore that is flagged for retrieval. We store it in a list as the Task parameters require a list.
             ArchiveStore archiveStore = archiveStoreService.getForRetrieval();
-            List<ArchiveStore> archiveStores = new ArrayList<ArchiveStore>();
+            List<ArchiveStore> archiveStores = new ArrayList<>();
             archiveStores.add(archiveStore);
             archiveStores = this.addArchiveSpecificOptions(archiveStores);
 
@@ -129,21 +129,21 @@ public class AuditDepositsChunks implements ScheduledTask {
                 auditProperties.put("numOfChunks", Integer.toString(chunks.size()));
 
                 // get chunks checksums
-                HashMap<Integer, String> chunksDigest = new HashMap<Integer, String>();
+                HashMap<Integer, String> chunksDigest = new HashMap<>();
                 for (int i = 0; i < chunks.size(); i++) {
                     DepositChunk chunk = chunks.get(i);
                     chunksDigest.put(i, chunk.getArchiveDigest());
                 }
 
                 // Get encryption IVs
-                HashMap<Integer, byte[]> chunksIVs = new HashMap<Integer, byte[]>();
+                HashMap<Integer, byte[]> chunksIVs = new HashMap<>();
                 for (int i = 0; i < chunks.size(); i++) {
                     DepositChunk chunk = chunks.get(i);
                     chunksIVs.put(i, chunk.getEncIV());
                 }
 
                 // Get encrypted digests
-                HashMap<Integer, String> encChunksDigests = new HashMap<Integer, String>();
+                HashMap<Integer, String> encChunksDigests = new HashMap<>();
                 for (int i = 0; i < chunks.size(); i++) {
                     DepositChunk chunk = chunks.get(i);
                     encChunksDigests.put(i, chunk.getEcnArchiveDigest());
@@ -157,11 +157,11 @@ public class AuditDepositsChunks implements ScheduledTask {
                         null, chunksIVs,
                         null, encChunksDigests, null);
 
-                List<HashMap<String, String>> chunksInfo = new ArrayList<HashMap<String, String>>();
+                List<HashMap<String, String>> chunksInfo = new ArrayList<>();
                 String[] archiveIds = new String[chunks.size()];
                 for (int i = 0; i < chunks.size(); i++) {
                     DepositChunk chunk = chunks.get(i);
-                    HashMap<String, String> info = new HashMap<String, String>();
+                    HashMap<String, String> info = new HashMap<>();
                     info.put("id", chunk.getID());
                     info.put("bagId", chunk.getDeposit().getBagId());
                     info.put("chunkNum", String.valueOf(chunk.getChunkNum()));

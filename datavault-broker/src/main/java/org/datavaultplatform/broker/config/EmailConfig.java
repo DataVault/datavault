@@ -11,6 +11,7 @@ import org.apache.velocity.runtime.resource.loader.FileResourceLoader;
 import org.datavaultplatform.broker.email.EmailBodyGenerator;
 import org.datavaultplatform.broker.email.TemplateResolver;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 @Configuration
 @Slf4j
+@ConditionalOnExpression("${broker.emailed.enabled:true}")
 public class EmailConfig {
 
   public static final String EXTERNAL_EMAIL_TEMPLATE_DIR = "external.email.template.dir";
@@ -86,7 +88,7 @@ public class EmailConfig {
   VelocityEngine velocityEngine(
       @Value("${external.email.template.dir:#{null}}") String externalMailTemplateDir)
       throws IOException {
-    log.info("{}[]", EXTERNAL_EMAIL_TEMPLATE_DIR, externalMailTemplateDir);
+    log.info("{}{}", EXTERNAL_EMAIL_TEMPLATE_DIR, externalMailTemplateDir);
     Properties props = new Properties();
     props.load(velocityProps.getInputStream());
 

@@ -1,5 +1,8 @@
 package org.datavaultplatform.broker.controllers;
 
+import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
 import org.datavaultplatform.common.email.EmailTemplate;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
@@ -74,9 +77,9 @@ public class RolesAndPermissionsController {
             responsestatuscode = "200 - OK"
     )
     @PostMapping("/roleAssignment")
-    public RoleAssignment createRoleAssignment(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                               @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
-                                               @RequestBody RoleAssignment roleAssignment) throws Exception {
+    public RoleAssignment createRoleAssignment(@RequestHeader(HEADER_USER_ID) String userID,
+                                               @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
+                                               @RequestBody RoleAssignment roleAssignment) {
         sendEmails(EmailTemplate.NEW_ROLE_ASSIGNMENT, roleAssignment, userID);
 
         RoleAssignment assignment = rolesAndPermissionsService.createRoleAssignment(roleAssignment);
@@ -92,7 +95,7 @@ public class RolesAndPermissionsController {
         roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
         roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         roleAssignmentEvent.setAssignee(usersService.getUser(roleAssignment.getUserId()));
-        roleAssignmentEvent.setRole(roleAssignment.getRole());;
+        roleAssignmentEvent.setRole(roleAssignment.getRole());
 
         eventService.addEvent(roleAssignmentEvent);
 
@@ -292,9 +295,9 @@ public class RolesAndPermissionsController {
             responsestatuscode = "200 - OK"
     )
     @PutMapping("/roleAssignment")
-    public RoleAssignment updateRoleAssignment(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                               @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
-                                                     @RequestBody RoleAssignment roleAssignment) throws Exception {
+    public RoleAssignment updateRoleAssignment(@RequestHeader(HEADER_USER_ID) String userID,
+                                               @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
+                                                     @RequestBody RoleAssignment roleAssignment) {
         sendEmails(EmailTemplate.UPDATE_ROLE_ASSIGNMENT, roleAssignment, userID);
 
         UpdateRoleAssignment roleAssignmentEvent = new UpdateRoleAssignment(roleAssignment, userID);
@@ -309,7 +312,7 @@ public class RolesAndPermissionsController {
         roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
         roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         roleAssignmentEvent.setAssignee(usersService.getUser(roleAssignment.getUserId()));
-        roleAssignmentEvent.setRole(roleAssignment.getRole());;
+        roleAssignmentEvent.setRole(roleAssignment.getRole());
 
         eventService.addEvent(roleAssignmentEvent);
 
@@ -325,7 +328,7 @@ public class RolesAndPermissionsController {
             responsestatuscode = "200 - OK"
     )
     @DeleteMapping("/role/{roleId}")
-    public ResponseEntity deleteRole(@PathVariable("roleId") @ApiPathParam(name = "Role ID", description = "The ID of the role to delete") Long roleId) {
+    public ResponseEntity<Void> deleteRole(@PathVariable("roleId") @ApiPathParam(name = "Role ID", description = "The ID of the role to delete") Long roleId) {
         rolesAndPermissionsService.deleteRole(roleId);
         return ResponseEntity.ok().build();
     }
@@ -339,11 +342,10 @@ public class RolesAndPermissionsController {
             responsestatuscode = "200 - OK"
     )
     @DeleteMapping("/roleAssignment/{roleAssignmentId}")
-    public ResponseEntity deleteRoleAssignment(
-            @RequestHeader(value = "X-UserID", required = true) String userID,
-            @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
-            @PathVariable("roleAssignmentId") @ApiPathParam(name = "Role ID", description = "The ID of the role assignment to delete") Long roleAssignmentId)
-            throws Exception {
+    public ResponseEntity<Void> deleteRoleAssignment(
+            @RequestHeader(HEADER_USER_ID) String userID,
+            @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
+            @PathVariable("roleAssignmentId") @ApiPathParam(name = "Role ID", description = "The ID of the role assignment to delete") Long roleAssignmentId) {
 
         RoleAssignment assignment = rolesAndPermissionsService.getRoleAssignment(roleAssignmentId);
 
@@ -361,7 +363,7 @@ public class RolesAndPermissionsController {
         roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
         roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         roleAssignmentEvent.setAssignee(usersService.getUser(assignment.getUserId()));
-        roleAssignmentEvent.setRole(assignment.getRole());;
+        roleAssignmentEvent.setRole(assignment.getRole());
 
         eventService.addEvent(roleAssignmentEvent);
 
@@ -369,9 +371,9 @@ public class RolesAndPermissionsController {
         return ResponseEntity.ok().build();
     }
 
-    private void sendEmails(String template, RoleAssignment roleAssignment, String userId) throws Exception {
+    private void sendEmails(String template, RoleAssignment roleAssignment, String userId) {
 
-        HashMap<String, Object> model = new HashMap<String, Object>();
+        HashMap<String, Object> model = new HashMap<>();
         model.put("role", roleAssignment.getRole().getName());
         model.put("homepage", this.homePage);
         model.put("helppage", this.helpPage);

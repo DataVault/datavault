@@ -1,5 +1,7 @@
 package org.datavaultplatform.broker.controllers;
 
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
 import org.datavaultplatform.broker.services.DepositsService;
 import org.datavaultplatform.broker.services.EventService;
 import org.datavaultplatform.broker.services.PendingVaultsService;
@@ -38,82 +40,82 @@ public class StatisticsController {
         this.eventService = eventService;
     }
 
-    @RequestMapping(value = "/statistics/count", method = RequestMethod.GET)
-    public int getVaultsCount(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    @GetMapping("/statistics/count")
+    public int getVaultsCount(@RequestHeader(HEADER_USER_ID) String userID) {
 
         return vaultsService.count(userID);
     }
     
-    @RequestMapping(value = "/statistics/pendingVaultsTotal", method = RequestMethod.GET)
+    @GetMapping("/statistics/pendingVaultsTotal")
     public int getTotalNumberOfPendingVaults() {
 
         return pendingVaultsService.getTotalNumberOfPendingVaults();
     }
 
-    @RequestMapping(value = "/statistics/size", method = RequestMethod.GET)
-    public Long getVaultsSize(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    @GetMapping("/statistics/size")
+    public Long getVaultsSize(@RequestHeader(HEADER_USER_ID) String userID) {
 
         return depositsService.size(userID);
     }
 
-    @RequestMapping(value = "/statistics/depositcount", method = RequestMethod.GET)
-    public int getDepositsCount(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    @GetMapping(value = "/statistics/depositcount")
+    public int getDepositsCount(@RequestHeader(HEADER_USER_ID) String userID) {
 
         return depositsService.count(userID);
     }
 
-    @RequestMapping(value = "/statistics/depositinprogresscount", method = RequestMethod.GET)
-    public int getDepositsInProgressCount(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    @GetMapping("/statistics/depositinprogresscount")
+    public int getDepositsInProgressCount(@RequestHeader(HEADER_USER_ID) String userID) {
 
         return depositsService.inProgressCount(userID);
     }
 
-    @RequestMapping(value = "/statistics/retrievecount", method = RequestMethod.GET)
-    public int getRetrievesCount(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    @GetMapping("/statistics/retrievecount")
+    public int getRetrievesCount(@RequestHeader(HEADER_USER_ID) String userID) {
 
         return retrievesService.count(userID);
     }
 
-    @RequestMapping(value = "/statistics/retrieveinprogresscount", method = RequestMethod.GET)
-    public int getRetrievesInProgressCount(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    @GetMapping("/statistics/retrieveinprogresscount")
+    public int getRetrievesInProgressCount(@RequestHeader(HEADER_USER_ID) String userID) {
 
         return retrievesService.inProgressCount(userID);
     }
 
-    @RequestMapping(value = "/vaults/depositqueuecount", method = RequestMethod.GET)
-    public int getDepositsQueueCount(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    @GetMapping("/vaults/depositqueuecount")
+    public int getDepositsQueueCount(@RequestHeader(HEADER_USER_ID) String userID) {
 
         return depositsService.queueCount(userID);
     }
 
-    @RequestMapping(value = "/vaults/depositinprogress", method = RequestMethod.GET)
-    public List<Deposit> getDepositsInProgress(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    @GetMapping("/vaults/depositinprogress")
+    public List<Deposit> getDepositsInProgress(@RequestHeader(HEADER_USER_ID) String userID) {
 
         return depositsService.inProgress();
     }
 
-    @RequestMapping(value = "/vaults/retrievequeuecount", method = RequestMethod.GET)
-    public int getRetrievesQueuedCount(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    @GetMapping("/vaults/retrievequeuecount")
+    public int getRetrievesQueuedCount(@RequestHeader(HEADER_USER_ID) String userID) {
 
         return retrievesService.queueCount(userID);
     }
 
-    @RequestMapping(value = "/vaults/retrieveinprogress", method = RequestMethod.GET)
-    public List<Retrieve> getRetrievesInProgress(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    @GetMapping("/vaults/retrieveinprogress")
+    public List<Retrieve> getRetrievesInProgress(@RequestHeader(HEADER_USER_ID) String userID) {
 
         return retrievesService.inProgress();
     }
 
 
-    @RequestMapping(value = "/vaults/retentionpolicycount/{status}", method = RequestMethod.GET)
-    public int getPolicyStatusCount(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping(value = "/vaults/retentionpolicycount/{status}")
+    public int getPolicyStatusCount(@RequestHeader(HEADER_USER_ID) String userID,
                                     @PathVariable("status") int status) {
 
         return vaultsService.getRetentionPolicyCount(status);
     }
     
-    @RequestMapping(value = "/statistics/eventcount", method = RequestMethod.GET)
-    public int getEventCount(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    @GetMapping("/statistics/eventcount")
+    public int getEventCount(@RequestHeader(HEADER_USER_ID) String userID) {
 
         return eventService.count();
     }

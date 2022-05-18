@@ -1,5 +1,8 @@
 package org.datavaultplatform.broker.controllers;
 
+import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
 import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.RetentionPoliciesService;
 import org.datavaultplatform.common.model.RetentionPolicy;
@@ -25,9 +28,9 @@ public class RetentionPoliciesController {
         this.adminService = adminService;
     }
 
-    @RequestMapping(value = "/retentionpolicies", method = RequestMethod.GET)
-    public List<RetentionPolicy> getPolicies(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                             @RequestHeader(value = "X-Client-Key", required = true) String clientKey) {
+    @GetMapping("/retentionpolicies")
+    public List<RetentionPolicy> getPolicies(@RequestHeader(HEADER_USER_ID) String userID,
+                                             @RequestHeader(HEADER_CLIENT_KEY) String clientKey) {
         return retentionPoliciesService.getRetentionPolicies();
     }
 

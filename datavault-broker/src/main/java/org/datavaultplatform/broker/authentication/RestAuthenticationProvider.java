@@ -6,6 +6,7 @@ import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.model.Client;
 import org.datavaultplatform.common.model.Permission;
+import org.datavaultplatform.common.model.RoleName;
 import org.datavaultplatform.common.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,10 +81,10 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
             // If we got here then we found a matching User record.
             if (adminService.isAdminUser(user)) {
                 logger.debug(user.getID() + " is an admin user");
-                grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                grantedAuths.add(new SimpleGrantedAuthority(RoleName.ROLE_ADMIN));
             } else {
                 logger.debug(user.getID() + " is an ordinary user");
-                grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
+                grantedAuths.add(new SimpleGrantedAuthority(RoleName.ROLE_USER));
             }
 
             Set<Permission> userPermissions = rolesAndPermissionsService.getUserPermissions(user.getID());
@@ -116,7 +117,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
                 throw new RestAuthenticationException("Invalid client credentials");
             }
 
-            grantedAuths.add(new SimpleGrantedAuthority("ROLE_CLIENT_USER"));
+            grantedAuths.add(new SimpleGrantedAuthority(RoleName.ROLE_CLIENT_USER));
         }
 
         return new PreAuthenticatedAuthenticationToken(name, password, grantedAuths);

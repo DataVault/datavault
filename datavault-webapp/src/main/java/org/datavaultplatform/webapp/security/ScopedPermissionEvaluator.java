@@ -3,6 +3,7 @@ package org.datavaultplatform.webapp.security;
 import com.google.common.collect.Multimap;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Permission;
+import org.datavaultplatform.common.model.RoleName;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.webapp.services.EvaluatorService;
@@ -61,7 +62,7 @@ public class ScopedPermissionEvaluator implements PermissionEvaluator {
         }
 
         Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
-        if (authorities.contains(new SimpleGrantedAuthority("ROLE_IS_ADMIN"))) {
+        if (authorities.contains(new SimpleGrantedAuthority(RoleName.ROLE_IS_ADMIN))) {
             return true;
         }
 

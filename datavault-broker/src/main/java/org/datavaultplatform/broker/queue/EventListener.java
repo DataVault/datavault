@@ -48,7 +48,7 @@ public class EventListener implements MessageListener {
     
 	private static final Map<String, String> EMAIL_SUBJECTS;
     static {
-    	EMAIL_SUBJECTS = new HashMap<String, String>();
+    	EMAIL_SUBJECTS = new HashMap<>();
     	EMAIL_SUBJECTS.put("user-deposit-start", "Confirmation - a new DataVault deposit is starting.");
     	EMAIL_SUBJECTS.put("user-deposit-complete", "Confirmation - a new DataVault deposit is complete.");
     	EMAIL_SUBJECTS.put("user-deposit-error", "DataVault ERROR - attempted deposit or retrieval of a deposit failed");
@@ -255,7 +255,7 @@ public class EventListener implements MessageListener {
                         deposit.setNumOfChunks(chunksDigest.size());
                         depositsService.updateDeposit(deposit);
                         
-                        deposit.setDepositChunks(new ArrayList<DepositChunk>());
+                        deposit.setDepositChunks(new ArrayList<>());
                         
                         for(Integer chunkNum : chunksDigest.keySet()) {
                             String hash = chunksDigest.get(chunkNum);
@@ -285,7 +285,7 @@ public class EventListener implements MessageListener {
                         deposit.setNumOfChunks(chunksDigest.size());
                         depositsService.updateDeposit(deposit);
 
-                        deposit.setDepositChunks(new ArrayList<DepositChunk>());
+                        deposit.setDepositChunks(new ArrayList<>());
 
                         for(Integer chunkNum : chunksDigest.keySet()) {
                             String hash = chunksDigest.get(chunkNum);
@@ -600,7 +600,7 @@ public class EventListener implements MessageListener {
         }
     }
     
-    private void sendEmails(Deposit deposit, Event event, String type, String userTemplate, String adminTemplate) throws Exception {
+    private void sendEmails(Deposit deposit, Event event, String type, String userTemplate, String adminTemplate) {
     	// Get related information for emails
         Vault vault = deposit.getVault();
         Group group = vault.getGroup();
@@ -612,7 +612,7 @@ public class EventListener implements MessageListener {
         logger.info("Admin title key: " + "admin-deposit-" + type);
         String adminTitle = EventListener.EMAIL_SUBJECTS.get("admin-deposit-" + type);
         
-        HashMap<String, Object> model = new HashMap<String, Object>();
+        HashMap<String, Object> model = new HashMap<>();
         model.put("group-name", group.getName());
         model.put("deposit-name", deposit.getName());
         model.put("deposit-id", deposit.getID());
@@ -659,14 +659,14 @@ public class EventListener implements MessageListener {
         }
     }
 
-    private void sendAuditEmails(Event event, String type, String template) throws Exception {
+    private void sendAuditEmails(Event event, String type, String template) {
 
         AuditError auditErrorEven = (AuditError) event;
 
         logger.info("title key: " + "audit-chunk-" + type);
         String title = EventListener.EMAIL_SUBJECTS.get("audit-chunk-" + type);
 
-        HashMap<String, Object> model = new HashMap<String, Object>();
+        HashMap<String, Object> model = new HashMap<>();
         model.put("audit-id", auditErrorEven.getAuditId());
         model.put("chunk-id", auditErrorEven.getChunkId());
         model.put("archive-id", auditErrorEven.getArchiveId());

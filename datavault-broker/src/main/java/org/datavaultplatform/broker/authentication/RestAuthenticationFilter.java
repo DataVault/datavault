@@ -1,5 +1,9 @@
 package org.datavaultplatform.broker.authentication;
 
+
+
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -32,7 +36,7 @@ public class RestAuthenticationFilter extends AbstractAuthenticationProcessingFi
     private static final Logger logger = LoggerFactory.getLogger(RestAuthenticationFilter.class);
 
     // Can be overridden in Spring config
-    private String principalRequestHeader = "X-UserID";
+    private String principalRequestHeader = HEADER_USER_ID;
 
 
     public RestAuthenticationFilter() {
@@ -94,7 +98,7 @@ public class RestAuthenticationFilter extends AbstractAuthenticationProcessingFi
     }
 
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-            throws AuthenticationException, IOException, ServletException {
+            throws AuthenticationException, ServletException {
 
         Object principal = getPreAuthenticatedPrincipal(request);
         Object credentials = getPreAuthenticatedCredentials(request);

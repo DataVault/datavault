@@ -3,6 +3,8 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Sets;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Objects;
@@ -37,7 +39,7 @@ public class RoleModel {
             joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
-    private Collection<PermissionModel> permissions;
+    private final List<PermissionModel> permissions = new ArrayList<>();
 
     private int assignedUserCount;
 
@@ -75,15 +77,16 @@ public class RoleModel {
         this.type = type;
     }
 
-    public Collection<PermissionModel> getPermissions() {
+    public synchronized Collection<PermissionModel> getPermissions() {
         return Sets.newHashSet(permissions);
     }
 
-    public void setPermissions(Collection<PermissionModel> permissions) {
-        this.permissions = permissions;
+    public synchronized void setPermissions(Collection<PermissionModel> permissions) {
+        this.permissions.clear();
+        this.permissions.addAll(permissions);
     }
 
-    public boolean addPermission(PermissionModel permissionModel) {
+    public synchronized boolean addPermission(PermissionModel permissionModel) {
         if (!hasPermission(permissionModel.getPermission())) {
             permissions.add(permissionModel);
             return true;
@@ -91,7 +94,7 @@ public class RoleModel {
         return false;
     }
 
-    public boolean hasPermission(Permission permission) {
+    public synchronized boolean hasPermission(Permission permission) {
         return permissions.stream()
                 .map(PermissionModel::getPermission)
                 .anyMatch(p -> p.equals(permission));

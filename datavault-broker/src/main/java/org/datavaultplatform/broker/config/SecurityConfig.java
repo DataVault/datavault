@@ -1,5 +1,7 @@
 package org.datavaultplatform.broker.config;
 
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.authentication.RestAuthenticationFailureHandler;
 import org.datavaultplatform.broker.authentication.RestAuthenticationFilter;
@@ -10,7 +12,9 @@ import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.ClientsService;
 import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.broker.services.UsersService;
+import org.datavaultplatform.common.util.Constants;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,6 +25,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
+@ConditionalOnExpression("${broker.security.enabled:true}")
 @EnableWebSecurity
 @Slf4j
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
@@ -30,7 +35,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   boolean securityDebug;
 
   @Override
-  public void configure(WebSecurity web) throws Exception {
+  public void configure(WebSecurity web) {
     web.debug(securityDebug);
   }
 
@@ -38,6 +43,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
 
     http.antMatcher("/**")
+    /*
+    http.authorizeRequests( requests -> {
+      requests.antMatchers("/actuator/info").permitAll();  //OKAY
+      requests.antMatchers("/actuator/health").permitAll();  //OKAY
+      requests.antMatchers("/actuator/customtime").permitAll();  //OKAY
+      requests.antMatchers("/actuator","/actuator/").permitAll(); //OKAY
+      requests.antMatchers("/actuator/**").hasRole("ADMIN"); //TODO - check this
+      requests.antMatchers("/","/resources/**","jsondoc").permitAll();
+    });
+    */
         .csrf().disable()
         .addFilterAt(restFilter(), AbstractPreAuthenticatedProcessingFilter.class)
         .exceptionHandling(ex -> ex.authenticationEntryPoint(http403EntryPoint()))
@@ -48,7 +63,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     <security:http pattern="/resources/**" security="none"/>
     <security:http pattern="/jsondoc" security="none"/>
            */
-          .antMatchers("/","/resources/**","jsondoc").permitAll()
+          .antMatchers("/","/resources/**","jsondoc").permitAll() //pretty sure this DOES NOT WORK
         /*
         <security:intercept-url pattern="/admin/users/**" access="hasRole('ROLE_ADMIN')" />
         <security:intercept-url pattern="/admin/archivestores/**" access="hasRole('ROLE_ADMIN_ARCHIVESTORES')" />
@@ -68,6 +83,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .antMatchers("/admin/pendingVaults/**").access("hasRole('ROLE_ADMIN_VAULTS')")
         .antMatchers("/admin/events/**").access("hasRole('ROLE_ADMIN_EVENTS')")
         .antMatchers("/admin/billing/**").access("hasRole('ROLE_ADMIN_BILLING')")
+        /* TODO : DavidHay : no controller mapped to /admin/reviews ! */
         .antMatchers("/admin/reviews/**").access("hasRole('ROLE_ADMIN_REVIEWS')");
 
   }
@@ -82,10 +98,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
    <property name="filterProcessesUrl" value="/**" />
    </bean>
    */
-  @Bean
+
   RestAuthenticationFilter restFilter() throws Exception {
     RestAuthenticationFilter result = new RestAuthenticationFilter();
-    result.setPrincipalRequestHeader("X-UserID");
+    result.setPrincipalRequestHeader(HEADER_USER_ID);
     result.setAuthenticationManager(authenticationManager());
     result.setAuthenticationDetailsSource(restWebAuthenticationDetailsSource());
     result.setAuthenticationSuccessHandler(authenticationSuccessHandler());
@@ -127,7 +143,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   @Bean
   RestWebAuthenticationDetailsSource restWebAuthenticationDetailsSource(){
     RestWebAuthenticationDetailsSource result = new RestWebAuthenticationDetailsSource();
-    result.setClientKeyRequestHeader("X-Client-Key");
+    result.setClientKeyRequestHeader(Constants.HEADER_CLIENT_KEY);
     return result;
   }
 

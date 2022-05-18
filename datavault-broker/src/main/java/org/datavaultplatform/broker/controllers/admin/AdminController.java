@@ -1,10 +1,13 @@
 package org.datavaultplatform.broker.controllers.admin;
 
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.*;
@@ -27,10 +30,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -45,6 +48,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @Api(name="Admin", description = "Administrator functions")
+@Slf4j
 public class AdminController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminController.class);
@@ -99,12 +103,12 @@ public class AdminController {
     }
 
 
-    @RequestMapping(value = "/admin/deposits/count", method = RequestMethod.GET)
-    public Integer getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping(value = "/admin/deposits/count")
+    public Integer getDepositsCount(@RequestHeader(HEADER_USER_ID) String userID,
                                   @RequestParam(value = "query", required = false)
                                   @ApiQueryParam(name = "query",
                                           description = "Deposit query field",
-                                          required = false) String query) throws Exception {
+                                          required = false) String query) {
         return depositsService.getTotalDepositsCount(userID, query);
     }
   
@@ -112,8 +116,8 @@ public class AdminController {
         return externalMetadataService;
     }
 
-    @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)
-    public List<DepositInfo> getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/admin/deposits")
+    public List<DepositInfo> getDepositsAll(@RequestHeader(HEADER_USER_ID) String userID,
                                             @RequestParam(value = "query", required = false)
                                             @ApiQueryParam(name = "query",
                                                     description = "Deposit query field",
@@ -137,7 +141,7 @@ public class AdminController {
                                             @RequestParam(value = "maxResult", required = false)
                                             @ApiQueryParam(name = "maxResult",
                                                     description = "Number of records",
-                                                    required = false) int maxResult) throws Exception {
+                                                    required = false) int maxResult) {
         List<DepositInfo> depositResponses = new ArrayList<>();
         List<Deposit> deposits = depositsService.getDeposits(query, userID, sort, order, offset, maxResult);
         for (Deposit deposit : deposits) {
@@ -173,13 +177,13 @@ public class AdminController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
     })
-    @RequestMapping(value = "/admin/deposits/data", method = RequestMethod.GET)
-    public DepositsData getDepositsAllData(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/admin/deposits/data")
+    public DepositsData getDepositsAllData(@RequestHeader(HEADER_USER_ID) String userID,
                                            @RequestParam(value = "sort", required = false)
                                            @ApiQueryParam(name = "sort", description = "Vault sort field") String sort
-    ) throws Exception {
+    ) {
 
         if (sort == null) sort = "";
         Long recordsTotal = 0L;
@@ -213,8 +217,8 @@ public class AdminController {
 
 
 
-    @RequestMapping(value = "/admin/retrieves", method = RequestMethod.GET)
-    public List<Retrieve> getRetrievesAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    @GetMapping("/admin/retrieves")
+    public List<Retrieve> getRetrievesAll(@RequestHeader(HEADER_USER_ID) String userID) {
 
         return retrievesService.getRetrieves(userID);
     }
@@ -227,10 +231,10 @@ public class AdminController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
     })
-    @RequestMapping(value = "/admin/vaults", method = RequestMethod.GET)
-    public VaultsData getVaultsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping(value = "/admin/vaults")
+    public VaultsData getVaultsAll(@RequestHeader(HEADER_USER_ID) String userID,
                                    @RequestParam(value = "sort", required = false)
                                    @ApiQueryParam(name = "sort", description = "Vault sort field", allowedvalues = {"id", "name", "description", "vaultSize", "user", "policy", "creationTime", "groupID", "reviewDate"}, defaultvalue = "creationTime", required = false) String sort,
                                    @RequestParam(value = "order", required = false)
@@ -238,7 +242,7 @@ public class AdminController {
                                    @RequestParam(value = "offset", required = false)
                                    @ApiQueryParam(name = "offset", description = "Vault row id ", defaultvalue = "0", required = false) String offset,
                                    @RequestParam(value = "maxResult", required = false)
-                                   @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) throws Exception {
+                                   @ApiQueryParam(name = "maxResult", description = "Number of records", required = false) String maxResult) {
 
         if (sort == null) sort = "";
         if (order == null) order = "asc";
@@ -265,9 +269,9 @@ public class AdminController {
         return data;
     }
 
-    @RequestMapping(value = "/admin/events", method = RequestMethod.GET)
-    public List<EventInfo> getEventsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                        @RequestParam(value = "sort", required = false) String sort) throws Exception {
+    @GetMapping(value = "/admin/events")
+    public List<EventInfo> getEventsAll(@RequestHeader(HEADER_USER_ID) String userID,
+                                        @RequestParam(value = "sort", required = false) String sort) {
 
         List<EventInfo> events = new ArrayList<>();
         for (Event event : eventService.getEvents(sort)) {
@@ -276,15 +280,15 @@ public class AdminController {
         return events;
     }
 
-    @RequestMapping(value = "/admin/audits", method = RequestMethod.GET)
-    public List<AuditInfo> getAuditsAll(@RequestHeader(value = "X-UserID", required = true) String userID) throws Exception {
+    @GetMapping("/admin/audits")
+    public List<AuditInfo> getAuditsAll(@RequestHeader(HEADER_USER_ID) String userID) {
 	    List<AuditInfo> audits = new ArrayList<>();
 
 	    for (Audit audit : auditsService.getAudits()){
             AuditInfo auditInfo = audit.convertToResponse();
 
             List<AuditChunkStatus> auditChunks = auditsService.getAuditChunkStatus(audit);
-            ArrayList<AuditChunkStatusInfo> auditChunksInfo = new ArrayList<AuditChunkStatusInfo>();
+            ArrayList<AuditChunkStatusInfo> auditChunksInfo = new ArrayList<>();
             for (AuditChunkStatus auditChunk : auditChunks){
                 auditChunksInfo.add(auditChunk.convertToResponse());
             }
@@ -296,23 +300,24 @@ public class AdminController {
 	    return audits;
     }
 
-    @RequestMapping(value = "/admin/deposits/audit", method = RequestMethod.GET)
-    public String runDepositAudit(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                HttpServletRequest request) throws Exception{
+    //TODO - looks like this method could do with TLC
+    @GetMapping("/admin/deposits/audit")
+    public String runDepositAudit(@RequestHeader(HEADER_USER_ID) String userID,
+                                HttpServletRequest request) {
         // Make sure it's admin or localhost
-        String remoteAdrr = request.getRemoteAddr();
-        System.out.println("remoteAdrr: "+remoteAdrr);
+        String remoteAddr = request.getRemoteAddr();
+        log.info("remoteAddr: {}", remoteAddr);
 
         // Get oldest Audit
         String query = "";
         String sort = "";
         List<DepositChunk> chunks = depositsService.getChunksForAudit();
-
+        //TODO - doesn't seem right - ignores 'chunks'
         return "Success";
     }
     
-    @RequestMapping(value = "/admin/deposits/{depositID}", method = RequestMethod.DELETE)
-    public ResponseEntity<Object> deleteDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @DeleteMapping("/admin/deposits/{depositID}")
+    public ResponseEntity<Object> deleteDeposit(@RequestHeader(HEADER_USER_ID) String userID,
                                                 @PathVariable("depositID") String depositID) throws Exception {
 
         LOGGER.info("Delete deposit with ID : {}", depositID);

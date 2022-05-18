@@ -1,6 +1,5 @@
 package org.datavaultplatform.broker.services;
 
-import org.datavaultplatform.broker.controllers.admin.AdminRetentionPoliciesController;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.model.Retrieve;
@@ -214,7 +213,7 @@ public class RetentionPoliciesService {
                 // At the time of writing this means its EPSRC
 
                 // Get all the retrieve events
-                ArrayList<Retrieve> retrieves = new ArrayList();
+                ArrayList<Retrieve> retrieves = new ArrayList<>();
                 for (Deposit d : v.getDeposits()) {
                     retrieves.addAll(d.getRetrieves());
                 }

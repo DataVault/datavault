@@ -4,6 +4,7 @@ import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
 import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.RoleName;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.webapp.security.ScopedGrantedAuthority;
@@ -76,7 +77,7 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         try{
             isAdmin = restService.isAdmin(new ValidateUser(name, null));
             if (isAdmin) {
-                grantedAuths.add(new SimpleGrantedAuthority("ROLE_IS_ADMIN"));
+                grantedAuths.add(new SimpleGrantedAuthority(RoleName.ROLE_IS_ADMIN));
             }
         } catch(Exception e){
             System.err.println("Error when trying to check if user is admin with Broker!");
@@ -85,13 +86,13 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
 
         Collection<GrantedAuthority> adminAuthorities = getAdminAuthorities(authentication);
         if (!adminAuthorities.isEmpty()) {
-            logger.info("Granting user " + name + " ROLE_ADMIN");
-            grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            logger.info("Granting user " + name + " " + RoleName.ROLE_ADMIN);
+            grantedAuths.add(new SimpleGrantedAuthority(RoleName.ROLE_ADMIN));
             grantedAuths.addAll(adminAuthorities);
         }
 
-        logger.info("Granting user " + name + " ROLE_USER");
-        grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
+        logger.info("Granting user " + name + " " + RoleName.ROLE_USER);
+        grantedAuths.add(new SimpleGrantedAuthority(RoleName.ROLE_USER));
         return new UsernamePasswordAuthenticationToken(name, password, grantedAuths);
 
     }

@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpSession;
 import org.datavaultplatform.common.model.Group;
+import org.datavaultplatform.common.model.RoleName;
 import org.datavaultplatform.common.request.CreateClientEvent;
 import org.datavaultplatform.webapp.services.NotifyLoginService;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
@@ -100,7 +101,7 @@ public class LoginTest {
           .map(GrantedAuthority::getAuthority)
           .collect(Collectors.toSet());
 
-      assertEquals(Collections.singleton("ROLE_USER"), actualGrantedAuthorityNames);
+      assertEquals(Collections.singleton(RoleName.ROLE_USER), actualGrantedAuthorityNames);
 
       Mockito.verify(mNotifyLoginService, times(1)).notifyLogin(argClientEvent.getValue());
       Mockito.verify(mNotifyLoginService, times(1)).getGroups();

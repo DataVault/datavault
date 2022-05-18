@@ -7,6 +7,7 @@ import org.datavaultplatform.broker.config.EmailConfig;
 import org.datavaultplatform.broker.config.InitialiseConfig;
 import org.datavaultplatform.broker.config.LdapConfig;
 import org.datavaultplatform.broker.config.PropertiesConfig;
+import org.datavaultplatform.broker.config.RabbitConfig;
 import org.datavaultplatform.broker.config.ScheduleConfig;
 import org.datavaultplatform.broker.config.SecurityConfig;
 import org.datavaultplatform.broker.config.ServiceConfig;
@@ -21,10 +22,10 @@ import org.springframework.core.env.Environment;
 @SpringBootApplication
 @Import({
     PropertiesConfig.class,
+    ScheduleConfig.class, InitialiseConfig.class,
     SecurityConfig.class, ControllerConfig.class,
     ServiceConfig.class,  DatabaseConfig.class,
-    ScheduleConfig.class, InitialiseConfig.class,
-    LdapConfig.class, EmailConfig.class
+    LdapConfig.class, EmailConfig.class, RabbitConfig.class
 })
 @Slf4j
 public class DataVaultBrokerApp implements CommandLineRunner {

@@ -1,5 +1,7 @@
 package org.datavaultplatform.broker.controllers;
 
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.*;
@@ -97,8 +99,8 @@ public class DepositsController {
 
 
 
-    @RequestMapping(value = "/deposits/{depositid}", method = RequestMethod.GET)
-    public DepositInfo getDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/deposits/{depositid}")
+    public DepositInfo getDeposit(@RequestHeader(HEADER_USER_ID) String userID,
                                   @PathVariable("depositid") String depositID) throws Exception {
 
         User user = usersService.getUser(userID);
@@ -106,8 +108,8 @@ public class DepositsController {
         return depositsService.getUserDeposit(user, depositID).convertToResponse();
     }
 
-    @RequestMapping(value = "/deposits", method = RequestMethod.POST)
-    public ResponseEntity<Object> addDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @PostMapping("/deposits")
+    public ResponseEntity<DepositInfo> addDeposit(@RequestHeader(HEADER_USER_ID) String userID,
                                              @RequestBody CreateDeposit createDeposit) throws Exception {
 
         Deposit deposit = new Deposit();
@@ -117,7 +119,7 @@ public class DepositsController {
 
         deposit.setName(createDeposit.getName());
         deposit.setDescription(createDeposit.getDescription());
-        if (createDeposit.getHasPersonalData().toLowerCase().equals("yes")) {
+        if (createDeposit.getHasPersonalData().equalsIgnoreCase("yes")) {
             deposit.setHasPersonalData(true);
         } else {
             deposit.setHasPersonalData(false);
@@ -157,8 +159,8 @@ public class DepositsController {
         return new ResponseEntity<>(deposit.convertToResponse(), HttpStatus.OK);
     }
     
-    @RequestMapping(value = "/deposits/{depositid}/manifest", method = RequestMethod.GET)
-    public List<FileFixity> getDepositManifest(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/deposits/{depositid}/manifest")
+    public List<FileFixity> getDepositManifest(@RequestHeader(HEADER_USER_ID) String userID,
                                                @PathVariable("depositid") String depositID) throws Exception {
 
         User user = usersService.getUser(userID);
@@ -173,8 +175,8 @@ public class DepositsController {
         return manifest;
     }
 
-    @RequestMapping(value = "/deposits/{depositid}/events", method = RequestMethod.GET)
-    public List<EventInfo> getDepositEvents(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/deposits/{depositid}/events")
+    public List<EventInfo> getDepositEvents(@RequestHeader(HEADER_USER_ID) String userID,
                                             @PathVariable("depositid") String depositID) throws Exception {
 
         User user = usersService.getUser(userID);
@@ -189,8 +191,8 @@ public class DepositsController {
         return events;
     }
 
-    @RequestMapping(value = "/deposits/{depositid}/retrieves", method = RequestMethod.GET)
-    public List<Retrieve> getDepositRetrieves(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/deposits/{depositid}/retrieves")
+    public List<Retrieve> getDepositRetrieves(@RequestHeader(HEADER_USER_ID) String userID,
                                             @PathVariable("depositid") String depositID) throws Exception {
 
         User user = usersService.getUser(userID);
@@ -199,8 +201,8 @@ public class DepositsController {
         return deposit.getRetrieves();
     }
 
-    @RequestMapping(value = "/deposits/{depositid}/jobs", method = RequestMethod.GET)
-    public List<Job> getDepositJobs(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/deposits/{depositid}/jobs")
+    public List<Job> getDepositJobs(@RequestHeader(HEADER_USER_ID) String userID,
                                     @PathVariable("depositid") String depositID) throws Exception {
 
         User user = usersService.getUser(userID);
@@ -209,8 +211,9 @@ public class DepositsController {
         return deposit.getJobs();
     }
 
-    @RequestMapping(value = "/deposits/{depositid}/retrieve", method = RequestMethod.POST)
-    public Boolean retrieveDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
+    //TODO - from DavidHay - the name of this method seems wrong for a POST method
+    @PostMapping( "/deposits/{depositid}/retrieve")
+    public Boolean retrieveDeposit(@RequestHeader(HEADER_USER_ID) String userID,
                                   @PathVariable("depositid") String depositID,
                                   @RequestBody Retrieve retrieve) throws Exception {
         User user = usersService.getUser(userID);
@@ -408,8 +411,8 @@ public class DepositsController {
     	return archiveStores;
     }
 
-    @RequestMapping(value = "/deposits/{depositid}/restart", method = RequestMethod.POST)
-    public Deposit restartDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @PostMapping("/deposits/{depositid}/restart")
+    public Deposit restartDeposit(@RequestHeader(HEADER_USER_ID) String userID,
                                    @PathVariable("depositid") String depositID) throws Exception{
 
         User user = adminService.ensureAdminUser(userID);
@@ -520,7 +523,7 @@ public class DepositsController {
         depositProperties.put("bagId", deposit.getBagId());
         depositProperties.put("userId", user.getID());
         if (deposit.getNumOfChunks() != 0) {
-            logger.debug("Restart num of chunks: " + Integer.toString(deposit.getNumOfChunks()));
+            logger.debug("Restart num of chunks: " + deposit.getNumOfChunks());
             depositProperties.put("numOfChunks", Integer.toString(deposit.getNumOfChunks()));
         }
         if (deposit.getArchiveDigest() != null) {

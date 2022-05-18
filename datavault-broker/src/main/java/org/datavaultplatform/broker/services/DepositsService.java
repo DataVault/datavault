@@ -4,7 +4,6 @@ import java.util.*;
 
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
-import org.datavaultplatform.common.model.dao.AuditChunkStatusDAOImpl;
 import org.datavaultplatform.common.model.dao.DepositChunkDAO;
 import org.datavaultplatform.common.model.dao.DepositDAO;
 import org.slf4j.Logger;
@@ -168,7 +167,7 @@ public class DepositsService {
         logger.debug("older than date: "+olderThanDate);
 
         List<Deposit> deposits = depositDAO.getDepositsWaitingForAudit(olderThanDate);
-        List<DepositChunk> chunksToAudit = new ArrayList<DepositChunk>();
+        List<DepositChunk> chunksToAudit = new ArrayList<>();
 
         int totalCount = 0;
         for(Deposit deposit : deposits){

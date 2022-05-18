@@ -71,7 +71,7 @@ public class AuditsService {
     }
 
     public List<AuditChunkStatus> getRunningAuditChunkStatus(Audit audit, DepositChunk chunk, String archiveId, String location){
-        HashMap<String, Object> properties = new HashMap<String, Object>();
+        HashMap<String, Object> properties = new HashMap<>();
         properties.put("audit", audit);
         properties.put("depositChunk", chunk);
         properties.put("archiveId", archiveId);
@@ -83,7 +83,7 @@ public class AuditsService {
     }
 
     public List<AuditChunkStatus> getAuditChunkStatusFromAudit(Audit audit){
-        HashMap<String, Object> properties = new HashMap<String, Object>();
+        HashMap<String, Object> properties = new HashMap<>();
         properties.put("audit", audit);
         List<AuditChunkStatus> chunkStatusList = this.auditChunkStatusDAO.findBy(properties);
 

@@ -1,7 +1,6 @@
 package org.datavaultplatform.broker.services;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -81,7 +80,7 @@ public class ExternalMetadataService {
     		return metadataProvider.getDatasetsForUser(userID);
     	}
     	
-    	return new ArrayList<Dataset>();
+    	return new ArrayList<>();
     }
     
     public Dataset getDataset(String id) {

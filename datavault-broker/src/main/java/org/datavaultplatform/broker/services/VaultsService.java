@@ -107,7 +107,7 @@ public class VaultsService {
     }
 
     private void sendEmail(Vault vault, String email, String subject, String role, String template, String homePage, String helpPage) {
-        HashMap<String, Object> model = new HashMap<String, Object>();
+        HashMap<String, Object> model = new HashMap<>();
         model.put("home-page", homePage);
         model.put("help-page", helpPage);
         model.put("vault-name", vault.getName());
@@ -153,7 +153,7 @@ public class VaultsService {
         return vaultDAO.getRetentionPolicyCount(status);
     }
 
-    public Vault checkRetentionPolicy(String vaultID) throws Exception {
+    public Vault checkRetentionPolicy(String vaultID) {
         // Get the vault
         Vault vault = vaultDAO.findById(vaultID);
 
@@ -267,7 +267,7 @@ public class VaultsService {
         List<String> dcs = createVault.getDataCreators();
         if (dcs != null) {
             logger.debug("Data creator list is :'" + dcs + "'");
-            List<DataCreator> creators = new ArrayList();
+            List<DataCreator> creators = new ArrayList<>();
             for (String creator : dcs) {
                 if (creator != null && !creator.isEmpty()) {
                     DataCreator dc = new DataCreator();

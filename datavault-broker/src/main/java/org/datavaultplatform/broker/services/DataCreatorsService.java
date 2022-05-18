@@ -2,7 +2,6 @@ package org.datavaultplatform.broker.services;
 
 import org.datavaultplatform.common.model.DataCreator;
 import org.datavaultplatform.common.model.dao.DataCreatorDAO;
-import org.datavaultplatform.common.model.dao.PendingDataCreatorDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
