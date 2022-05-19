@@ -32,6 +32,21 @@ $(document).ready(function(){
 	var dbGrantEndDate = $("#grantEndDate").val().trim();
 	console.log("dbGrantEndDate: ", dbGrantEndDate);
 	
+	// Ownership display
+	$("#isOwnerTrue").change(function(){
+        if($(this).is(":checked")) {
+          $('#owner-uun-span').show();
+          $("#vaultOwner").hide();
+        } 
+	 }).trigger('change');
+	    
+	 $("#isOwnerFalse").change(function(){
+        if($(this).is(":checked")) {
+          $('#owner-uun-span').hide();
+          $("#vaultOwner").show();
+        } 
+	 }).trigger('change');
+     
 	/*
     if billinGrantEndDate is filled in, disable granteddate on the info page and populate it with the billing value
     if billingGrantEndDate is cleared enable grantenddate on the info page and populate it with dbGrantEndDate also reset review date
@@ -667,7 +682,13 @@ $(document).ready(function(){
 			// Vault Users
 
 			// Vault Access
-			$("#summary-vaultOwner").text($("#vaultOwner").val());
+			if($('#isOwnerFalse').is(":checked"))  {
+				$("#summary-vaultOwner").text($("#vaultOwner").val());
+			} 
+			
+			if($('#isOwnerTrue').is(":checked")) {
+			  $("#summary-vaultOwner").text($('#owner-uun-span').text());
+			}
 
 			var ndmsArray = [];
 			$("input[name^='nominatedDataManagers']").each(function() {

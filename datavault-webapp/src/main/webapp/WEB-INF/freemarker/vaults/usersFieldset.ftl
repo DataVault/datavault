@@ -20,6 +20,7 @@
         </div>
         <div class="form-group" required>
             <label class="col-sm-4 control-label">Owner UUN: </label>
+            <span id="owner-uun-span" style="display:none"><#if loggedInAs??>${loggedInAs}</#if></span>
             <@spring.bind "vault.vaultOwner" />
             <input id="vaultOwner" name="${spring.status.expression}" value="${spring.status.value!""}" type="text"
                    class="autocomplete uun-required unique-uun-required owner-uun-required" placeholder=""/>
@@ -207,6 +208,7 @@
     <button type="button" id="user-fields-next" name="next" class="next action-button btn btn-primary">Next Step &raquo;</button>
     <script>
     $(document).ready(function(){
+
         $(".autocomplete").autocomplete({
             autoFocus: true,
             appendTo: "#add-role-vault-dialog",
