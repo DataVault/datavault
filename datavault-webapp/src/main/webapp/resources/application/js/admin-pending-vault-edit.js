@@ -31,10 +31,13 @@ $(document).ready(function(){
 	$( "#billingGrantEndDate" ).datepicker();
 	$( "#reviewDate" ).datepicker({ minDate: '+36m' });
 
+	// Get db Grant End Date when page set
+	var dbGrantEndDate = $("#grantEndDate").val().trim();
+	console.log("dbGrantEndDate: ", dbGrantEndDate);
 
 	/*
     if billinGrantEndDate is filled in, disable granteddate on the info page and populate it with the billing value
-    if billingGrantEndDate is cleared enable grantenddate on the info page and populate it with placeholder also reset review date
+    if billingGrantEndDate is cleared enable grantenddate on the info page and populate it with dbGrantEndDate also reset review date
 	 */
 	$( "#billingGrantEndDate" ).change(function() {
 		// clear any validation
@@ -50,7 +53,6 @@ $(document).ready(function(){
 				$('#invalid-billing-grant-end-date-span').text(validationMessage);
 			}
 
-			$("#grantEndDate").prop("placeholder", $("#billingGrantEndDate").val().trim());
 			$("#grantEndDate").val($("#billingGrantEndDate").val().trim());
 			$("#grantEndDate").prop("disabled", true);
 		} else {
@@ -58,8 +60,8 @@ $(document).ready(function(){
 			var estimatedReviewDate = calculateReviewDateForToday(length);
 
 			$("#grantEndDate").prop("disabled", false);
-			$("#grantEndDate").val("");
-			$("#grantEndDate").prop("placeholder", "yyyy-mm-dd");
+			// Reset to dbGrantEndDate
+			$("#grantEndDate").val(dbGrantEndDate);
 			$("#reviewDate").val(estimatedReviewDate);
 		}
 	}).trigger('change');
@@ -504,15 +506,14 @@ $(document).ready(function(){
 		var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
 
 		if (dateResult === false && grantChecked === true) {
-			$("#grantEndDate").prop("placeholder", $("#billingGrantEndDate").val());
 			$("#grantEndDate").val($("#billingGrantEndDate").val());
 			$("#grantEndDate").prop("disabled", true);
 		} else {
 			var length = calculateReviewLength();
 			var estimatedReviewDate = calculateReviewDateForToday(length);
 			$("#grantEndDate").prop("disabled", false);
-			$("#grantEndDate").val("");
-			$("#grantEndDate").prop("placeholder", "yyyy-mm-dd");
+			// Reset to dbGrantEndDate
+			$("#grantEndDate").val(dbGrantEndDate);
 			$("#reviewDate").val(estimatedReviewDate);
 		}
 
