@@ -238,11 +238,11 @@
 
             if($( "input[type=text][id=vaultOwner]").val().trim() === '') {
                
-                    $(".owner-uun-required-error-span").text("You have not specified any user as the Owner of this vault. Please add an owner, or contact the Research Data Support team if you want to request this vault to be treated as legacy data ie an orphan vault.");
+                    $(".owner-uun-required-error-span").html("<br>You have not specified any user as the Owner of this vault. Please add an owner, or contact the Research Data Support team if you want to request this vault to be treated as legacy data ie an orphan vault.");
                     $(".owner-uun-required-error-span").show();
                 } else {
 
-                    $(".owner-uun-required-error-span").text("");
+                    $(".owner-uun-required-error-span").html("");
                     $(".owner-uun-required-error-span").hide();
                 }
                 // As <span> does not have assign a 'change' event by default.
@@ -283,18 +283,18 @@
                                     if(uun === inputText) {
                                         count++;
                                     } else {
-                                        errorSpan.text("");
+                                        errorSpan.html("");
                                         errorSpan.hide();
                                     }
                                 }
                             });
                             if (count > 1) {
                                 console.log(inputText, " Already has a role" );
-                                errorSpan.text("A user may have only one vault-level user role, either Owner, NDM or Depositor. For further information please ");
+                                errorSpan.html("<br>A user may have only one vault-level user role, either Owner, NDM or Depositor. For further information please ");
                                 errorSpan.append('<a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/after/datavault/roles-and-access" target="_blank">click here</a>.');
                                 errorSpan.show();
                             } else {
-                                errorSpan.text("");
+                                errorSpan.html("");
                                 errorSpan.hide();
                             }
 
@@ -312,7 +312,7 @@
                     }
             });
           } else {
-              errorSpan.text("");
+              errorSpan.html("");
               errorSpan.hide();
           }
           validateOwnerUUN();
