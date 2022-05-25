@@ -135,7 +135,7 @@ public class PendingVaultsService {
         List<String> depositors = createVault.getDepositors();
         if (depositors != null) {
             for (String dep: depositors) {
-                if (dep != null && ! dep.isEmpty()) {
+                if (dep != null && !dep.isEmpty()) {
                     RoleAssignment ra = new RoleAssignment();
                     ra.setPendingVaultId(pendingVaultId);
                     ra.setRole(permissionsService.getDepositor());
@@ -151,7 +151,7 @@ public class PendingVaultsService {
         Boolean isOwner = createVault.getIsOwner();
         logger.debug("IsOwner is '" + isOwner + "'");
         String ownerId = userID;
-        if (isOwner != null && !isOwner) {
+        if ((isOwner != null && !isOwner) || userID == null) {
             ownerId = createVault.getVaultOwner();
         }
         logger.debug("VaultOwner is '" + ownerId + "'");
@@ -218,7 +218,7 @@ public class PendingVaultsService {
 
         String pendingId = createVault.getPendingID();
         logger.debug("Pending ID is: '" + pendingId + "'");
-        if (pendingId != null && ! pendingId.isEmpty()) {
+        if (pendingId != null && !pendingId.isEmpty()) {
             // this vault has previously been saved mid completion
             vault.setId(pendingId);
         }
@@ -344,13 +344,16 @@ public class PendingVaultsService {
             }
         }
 
-        // this the creator of the pending vault not necessarily the prospective owner
+        // this the creator of the pending vault not necessarily 
+        // the prospective owner.
         User user = usersService.getUser(userID);
         if (user == null) {
-            logger.error("User '" + userID + "' does not exist");
-            throw new Exception("User '" + userID + "' does not exist");
+        	logger.error("User '" + userID + "' does not exist");
+        	throw new Exception("User '" + userID + "' does not exist");
         }
         vault.setUser(user);
+        
+        
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         String grantEndDate = (createVault.getBillingGrantEndDate() != null &&
                 !createVault.getBillingGrantEndDate().isEmpty()) ? createVault.getBillingGrantEndDate() : createVault.getGrantEndDate();
