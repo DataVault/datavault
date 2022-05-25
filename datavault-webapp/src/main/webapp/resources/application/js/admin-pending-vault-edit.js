@@ -431,6 +431,14 @@ $(document).ready(function(){
 	// We need to populate the summary page with data from 
 	// other fieldset pages at start
 	populateSummaryPage();
+	// Set the Progress to go to Billing when we first enter
+    var start = (new URL(window.location.href)).searchParams.get('start');
+	if(start == 2) {
+		$("#progressbar li").eq(1).addClass("active");
+		// Show Summary page
+		$('#summary-fieldset').hide();
+		$('#billing-fieldset').show();
+	}
 
 
 
