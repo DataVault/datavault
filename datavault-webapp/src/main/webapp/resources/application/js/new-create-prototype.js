@@ -497,7 +497,7 @@ $(document).ready(function(){
 
 	// If PV is confirmed go to last page
 	if($('#confirmed').val() === 'true') {
-		// We need to populate the summary page with data from other fielset pages
+		// We need to populate the summary page with data from other fieldset pages
 		populateSummaryPage();
 		// Set the Progress
 		$("#progressbar li").eq(1).addClass("active");

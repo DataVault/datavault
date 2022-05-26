@@ -268,9 +268,9 @@
 
           <a name="delete-pending-vault" class="btn btn-danger" 
           href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/${pendingVault.getID()}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Delete Pending Vault</a>
-		
+		<!-- Note: start=2 added to ensure we go the Billing page of Edit Pending Vault -->
 		<a name="edit-pending-vault" class="btn btn-primary"  style="margin-bottom: 0;"
-          href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/edit/${pendingVault.getID()}">Edit Pending Vault Metadata</a>
+          href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/edit/${pendingVault.getID()}?start=2">Edit Pending Vault Metadata</a>
 		
 		<#if pendingVault.confirmed?c=="true">
          <button id="create-vault-btn" type="submit" value="submit" class="btn btn-success">

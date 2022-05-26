@@ -73,6 +73,11 @@
     position: relative
 }
 
+/** The progressbar has one fewer <li> (4 instead of 5) so width 25% */
+#pendingvault-edit-form > #progressbar li {
+	width: 25%;
+}
+
 #progressbar #affirmation:before {
     font-family: FontAwesome;
     content: "\f00c"
