@@ -1,10 +1,11 @@
-#vault-creation-form {
+#vault-creation-form, #pendingvault-edit-form {
     text-align: center;
     position: relative;
     margin-top: 20px
 }
 
-#vault-creation-form fieldset .form-card {
+#vault-creation-form fieldset .form-card,
+#pendingvault-edit-form fieldset .form-card {
     background: white;
     border: 0 none;
     border-radius: 0px;
@@ -16,7 +17,8 @@
     position: relative
 }
 
-#vault-creation-form fieldset {
+#vault-creation-form fieldset,
+#pendingvault-edit-form fieldset {
     background: white;
     border: 0 none;
     border-radius: 0.5rem;
@@ -27,11 +29,13 @@
     position: relative
 }
 
-#vault-creation-form fieldset:not(:first-of-type) {
+#vault-creation-form fieldset:not(:first-of-type),
+#pendingvault-edit-form fieldset:not(:first-of-type)  {
     display: none
 }
 
-#vault-creation-form fieldset .form-card {
+#vault-creation-form fieldset .form-card,
+#pendingvault-edit-form fieldset .form-card {
     text-align: left;
     color: #000;
 }
@@ -67,6 +71,11 @@
     width: 20.0%;
     float: left;
     position: relative
+}
+
+/** The progressbar has one fewer <li> (4 instead of 5) so width 25% */
+#pendingvault-edit-form > #progressbar li {
+	width: 25%;
 }
 
 #progressbar #affirmation:before {
