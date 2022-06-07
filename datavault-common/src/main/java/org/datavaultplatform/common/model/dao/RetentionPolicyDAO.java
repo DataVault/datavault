@@ -1,17 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
-import java.util.List;
-import org.datavaultplatform.common.model.RetentionPolicy;
+import org.datavaultplatform.common.model.dao.custom.RetentionPolicyCustomDAO;
 
-public interface RetentionPolicyDAO {
-
-    public void save(RetentionPolicy retentionPolicy);
-    
-    public void update(RetentionPolicy retentionPolicy);
-    
-    public List<RetentionPolicy> list();
-
-    public RetentionPolicy findById(String Id);
-
-    public void delete(String id);
+public interface RetentionPolicyDAO extends RetentionPolicyCustomDAO {
 }

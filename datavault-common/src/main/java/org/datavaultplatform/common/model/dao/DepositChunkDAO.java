@@ -1,16 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.DepositChunk;
+import org.datavaultplatform.common.model.dao.custom.DepositChunkCustomDAO;
 
-import java.util.List;
-
-public interface DepositChunkDAO {
-
-    public void save(DepositChunk deposit);
-    
-    public void update(DepositChunk deposit);
-    
-    public List<DepositChunk> list(String sort);
-
-    public DepositChunk findById(String Id);
+public interface DepositChunkDAO extends DepositChunkCustomDAO {
 }

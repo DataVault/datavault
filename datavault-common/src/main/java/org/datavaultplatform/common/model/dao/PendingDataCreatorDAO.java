@@ -1,15 +1,6 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.PendingDataCreator;
+import org.datavaultplatform.common.model.dao.custom.PendingDataCreatorCustomDAO;
 
-import java.util.List;
-
-public interface PendingDataCreatorDAO {
-    void save(List<PendingDataCreator> pendingDataCreators);
-
-    PendingDataCreator findById(String Id);
-
-    void update(PendingDataCreator pendingDataCreator);
-
-    void delete(String id);
+public interface PendingDataCreatorDAO extends PendingDataCreatorCustomDAO {
 }
