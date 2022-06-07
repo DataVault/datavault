@@ -126,8 +126,8 @@ public abstract class TestUtils {
     return value.replaceFirst("^"+prefix,"");
   }
 
-  public static Set toSet(String... items) {
-    return new HashSet(Arrays.asList(items));
+  public static Set<String> toSet(String... items) {
+    return new HashSet<>(Arrays.asList(items));
   }
 
   public static void cleanRegistry(SessionRegistry registry) {

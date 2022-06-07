@@ -13,7 +13,7 @@ import org.junit.Test;
 
 public class VaultsReviewServiceTest {
 
-    private VaultsReviewService vaultsReviewService = new VaultsReviewService(null);
+    private final VaultsReviewService vaultsReviewService = new VaultsReviewService(null);
 
     @Test
     public void testIsVaultForReview() {

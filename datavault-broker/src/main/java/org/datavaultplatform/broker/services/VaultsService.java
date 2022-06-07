@@ -6,6 +6,7 @@ import java.util.*;
 import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
 import org.datavaultplatform.common.event.vault.Create;
 import org.datavaultplatform.common.model.*;
+
 import org.datavaultplatform.common.model.dao.VaultDAO;
 import org.datavaultplatform.common.request.CreateVault;
 import org.slf4j.Logger;
@@ -138,7 +139,7 @@ public class VaultsService {
     }
 
     public Vault getVault(String vaultID) {
-        return vaultDAO.findById(vaultID);
+        return vaultDAO.findById(vaultID).orElse(null);
     }
 
     public List<Vault> search(String userId, String query, String sort, String order, String offset, String maxResult) {
@@ -155,7 +156,7 @@ public class VaultsService {
 
     public Vault checkRetentionPolicy(String vaultID) {
         // Get the vault
-        Vault vault = vaultDAO.findById(vaultID);
+        Vault vault = vaultDAO.findById(vaultID).orElse(null);
 
         retentionPoliciesService.setRetention(vault);
 

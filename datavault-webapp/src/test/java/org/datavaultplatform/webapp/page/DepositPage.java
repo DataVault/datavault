@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.page;
 
+import java.time.Duration;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -17,7 +18,7 @@ public class DepositPage extends Page {
     }
 
     public DepositPage waitForStatus(String status) {
-        WebDriverWait wait = new WebDriverWait(driver, 10);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         wait.until(ExpectedConditions.textToBe(By.cssSelector(".job-status"), status));
         return this;
     }
@@ -30,7 +31,7 @@ public class DepositPage extends Page {
     }
 
     public DepositPage waitForRetrievalStatus(String status) throws InterruptedException {
-        WebDriverWait wait = new WebDriverWait(driver, 10);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         // See the note in clickRetrievalsTab - the table is not visible so getText() returns nothing
         wait.until(ExpectedConditions.attributeToBe(By.cssSelector("#retrievals tbody tr td:nth-child(2)"), "innerHTML", status));
         return this;

@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.page;
 
+import java.time.Duration;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -30,7 +31,7 @@ public class AddVaultPage extends Page {
         // For some unknown reason, this one doesn't show up unless it's clicked twice
         driver.findElement(By.xpath("//button[@data-id='datasetID']")).click();
         WebElement menu = driver.findElement(By.cssSelector(".dataset-select div.dropdown-menu"));
-        WebDriverWait wait = new WebDriverWait(driver, 1);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
         wait.until(ExpectedConditions.visibilityOf(menu));
         menu.findElement(By.linkText(dataset)).click();
         return this;
@@ -40,7 +41,7 @@ public class AddVaultPage extends Page {
         driver.findElement(By.xpath("//button[@data-id='policyID']")).click();
         WebElement menu = driver.findElement(By.cssSelector(".dataset-select div.dropdown-menu"));
         menu = driver.findElement(By.cssSelector(".retentionPolicy-select div.dropdown-menu"));
-        WebDriverWait wait = new WebDriverWait(driver, 1);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
         wait.until(ExpectedConditions.visibilityOf(menu));
         menu.findElement(By.partialLinkText(policy)).click();
         return this;
@@ -50,7 +51,7 @@ public class AddVaultPage extends Page {
         driver.findElement(By.xpath("//button[@data-id='groupID']")).click();
         WebElement menu = driver.findElement(By.cssSelector(".dataset-select div.dropdown-menu"));
         menu = driver.findElement(By.cssSelector(".group-select div.dropdown-menu"));
-        WebDriverWait wait = new WebDriverWait(driver, 1);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
         wait.until(ExpectedConditions.visibilityOf(menu));
         menu.findElement(By.linkText(group)).click();
         return this;

@@ -1,53 +1,25 @@
 package org.datavaultplatform.common.model.dao.custom;
 
 import java.util.List;
-
+import javax.persistence.EntityManager;
+import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.model.dao.EventDAO;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import org.datavaultplatform.common.event.Event;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.springframework.stereotype.Repository;
 
-@Repository
-public class EventCustomDAOImpl implements EventDAO {
-    
-    private final SessionFactory sessionFactory;
+public class EventCustomDAOImpl extends BaseCustomDAOImpl implements EventCustomDAO {
 
-    public EventCustomDAOImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+    public EventCustomDAOImpl(EntityManager em) {
+        super(em);
     }
 
-    @Override
-    public void save(Event event) {
-        Session session = this.sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-        session.persist(event);
-        tx.commit();
-        session.close();
-    }
-    
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<Event> list() {        
-        Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Event.class);
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        List<Event> events = criteria.list();
-        session.close();
-        return events;
-    }
-    
     @SuppressWarnings("unchecked")
     @Override
     public List<Event> list(String sort) {
-        Session session = this.sessionFactory.openSession();
+        Session session = this.getCurrentSession();
         Criteria criteria = session.createCriteria(Event.class);
         // See if there is a valid sort option
         if ("id".equals(sort)) {
@@ -57,34 +29,16 @@ public class EventCustomDAOImpl implements EventDAO {
         }
 
         List<Event> events = criteria.list();
-        session.close();
         return events;
-    }
-    
-    @Override
-    public Event findById(String Id) {
-        Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Event.class);
-        criteria.add(Restrictions.eq("id",Id));
-        Event event = (Event)criteria.uniqueResult();
-        session.close();
-        return event;
     }
 
     @Override
     public List<Event> findVaultEvents(Vault vault) {
-        Session session = this.sessionFactory.openSession();
+        Session session = this.getCurrentSession();
         Criteria criteria = session.createCriteria(Event.class);
         criteria.add(Restrictions.eq("vault",vault));
         criteria.addOrder(Order.asc("timestamp"));
         List<Event> events = criteria.list();
-        session.close();
         return events;
-    }
-    
-    @Override
-    public int count() {
-        Session session = this.sessionFactory.openSession();
-        return (int)(long)(Long)session.createCriteria(Event.class).setProjection(Projections.rowCount()).uniqueResult();
     }
 }

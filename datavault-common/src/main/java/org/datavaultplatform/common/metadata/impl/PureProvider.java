@@ -14,7 +14,7 @@ import org.w3c.dom.*;
 
 public class PureProvider implements Provider {
     
-    private String endpoint;
+    private final String endpoint;
     
     // A metadata provider for the Pure REST API (datasets)
     

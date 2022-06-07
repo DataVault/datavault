@@ -1,7 +1,6 @@
 package org.datavaultplatform.common.event;
 
 import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.persistence.Transient;
 
 @Entity
@@ -16,7 +15,8 @@ public class UpdateProgress extends Event {
     @Transient
     public String progressMessage;
     
-    UpdateProgress() {};
+    public UpdateProgress() {
+    }
     public UpdateProgress(String jobId, String depositId) {
         this(jobId, depositId, 0, 0, "");
     }

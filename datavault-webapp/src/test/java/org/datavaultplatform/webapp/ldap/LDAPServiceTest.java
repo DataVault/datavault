@@ -11,7 +11,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(classes = DataVaultWebApp.class)
 @ProfileDatabase
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 /*
  The LDAPService is defined in datavault-commons but we have to test it in -broker because are not just testing LDAPService functionality
  but also that it's wired up/configured correctly within the datavault-broker too.

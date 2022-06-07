@@ -18,7 +18,6 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.datavaultplatform.common.response.BillingInformation;
@@ -41,7 +40,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name="Vaults")
 public class Vault {
 
-	private static final long ZERO = 0l;
+    private static final long ZERO = 0L;
     // Vault Identifier
     @Id
     @GeneratedValue(generator = "uuid")
@@ -168,9 +167,9 @@ public class Vault {
 
     public String getID() { return id; }
 
-    public long getVersion() { return version; };
-    
-    public void setCreationTime(Date creationTime) {
+    public long getVersion() { return version; }
+
+  public void setCreationTime(Date creationTime) {
         this.creationTime = creationTime;
     }
 
@@ -213,7 +212,7 @@ public class Vault {
     public long getSize() { return vaultSize; }
     
     public List<Deposit> getDeposits() {
-        if (deposits == null) return new ArrayList<Deposit>();
+        if (deposits == null) return new ArrayList<>();
         return deposits;
     }
 
@@ -222,7 +221,7 @@ public class Vault {
     }
 
     public List<VaultReview> getVaultReviews() {
-        if (vaultReviews == null) return new ArrayList<VaultReview>();
+        if (vaultReviews == null) return new ArrayList<>();
         return vaultReviews;
     }
 
@@ -231,7 +230,7 @@ public class Vault {
     }
 
     public List<DataManager> getDataManagers() {
-        if (dataManagers == null) return new ArrayList<DataManager>();
+        if (dataManagers == null) return new ArrayList<>();
         return dataManagers;
     }
 

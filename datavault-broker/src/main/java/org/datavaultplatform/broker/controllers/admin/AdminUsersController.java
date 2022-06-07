@@ -58,7 +58,7 @@ public class AdminUsersController {
             @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
     })
     @GetMapping("/admin/users/count")
-    public int getUsersCount(@RequestHeader(HEADER_USER_ID) String userID) {
+    public long getUsersCount(@RequestHeader(HEADER_USER_ID) String userID) {
         return usersService.count();
     }
 

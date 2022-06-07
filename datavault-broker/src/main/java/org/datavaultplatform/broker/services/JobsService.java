@@ -35,9 +35,9 @@ public class JobsService {
     }
     
     public Job getJob(String jobID) {
-        return jobDAO.findById(jobID);
+        return jobDAO.findById(jobID).orElse(null);
     }
 
-    public int count() { return jobDAO.count(); }
+    public long count() { return jobDAO.count(); }
 }
 

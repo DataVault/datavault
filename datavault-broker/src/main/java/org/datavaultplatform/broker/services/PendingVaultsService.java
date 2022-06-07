@@ -1,7 +1,6 @@
 package org.datavaultplatform.broker.services;
 
 
-import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.PendingVaultDAO;
 import org.datavaultplatform.common.request.CreateVault;
@@ -74,7 +73,7 @@ public class PendingVaultsService {
         pendingVaultDAO.deleteById(id);
     }
     public PendingVault getPendingVault(String vaultID) {
-        return pendingVaultDAO.findById(vaultID);
+        return pendingVaultDAO.findById(vaultID).orElse(null);
     }
     
     public int getTotalNumberOfPendingVaults(String userId, String confirmed) {

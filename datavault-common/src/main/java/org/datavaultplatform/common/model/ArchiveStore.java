@@ -43,7 +43,7 @@ public class ArchiveStore {
     // Properties to use for this storage system
     // NOTE: this is not a secure mechanism for storing credentials!
     @Lob
-    private HashMap<String,String> properties;
+    private HashMap<String,String> properties = new HashMap<>();
     
     public ArchiveStore() {}
     public ArchiveStore(String storageClass, HashMap<String,String> properties, String label, boolean retrieveEnabled) {

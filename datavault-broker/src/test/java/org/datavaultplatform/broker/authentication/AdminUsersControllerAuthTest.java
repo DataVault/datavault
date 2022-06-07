@@ -40,7 +40,7 @@ public class AdminUsersControllerAuthTest extends BaseControllerAuthTest {
   void testGetAdminUsersCount() {
 
     when(controller.getUsersCount(
-        USER_ID_1)).thenReturn(2112);
+        USER_ID_1)).thenReturn(2112L);
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/admin/users/count"),

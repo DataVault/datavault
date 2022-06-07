@@ -52,7 +52,7 @@ public class DepositsReviewService {
     }
 
     public DepositReview getDepositReview(String depositReviewID) {
-        return depositReviewDAO.findById(depositReviewID);
+        return depositReviewDAO.findById(depositReviewID).orElse(null);
     }
 
     public List<DepositReview> search(String query) {
@@ -65,7 +65,7 @@ public class DepositsReviewService {
     
 
 
-    public int count() { return depositReviewDAO.count(); }
+    public long count() { return depositReviewDAO.count(); }
 
 
 

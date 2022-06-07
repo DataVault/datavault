@@ -43,9 +43,9 @@ public class Audit {
     
     // Additional properties might go here - e.g. format
     
-    public Audit() {};
+    public Audit() {}
 
-    public String getID() { return id; };
+    public String getID() { return id; }
 
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;

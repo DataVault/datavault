@@ -1,36 +1,27 @@
 package org.datavaultplatform.common.model.dao.custom;
 
-import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.PermissionModel;
-import org.datavaultplatform.common.model.dao.PermissionDAO;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.criterion.Restrictions;
-
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import javax.persistence.EntityManager;
+import org.datavaultplatform.common.model.Permission;
+import org.datavaultplatform.common.model.PermissionModel;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 
-@Repository
-public class PermissionCustomDAOImpl implements PermissionDAO {
 
-    private final SessionFactory sessionFactory;
+public class PermissionCustomDAOImpl extends BaseCustomDAOImpl implements
+    PermissionCustomDAO {
 
-    @Autowired
-    public PermissionCustomDAOImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+    public PermissionCustomDAOImpl(EntityManager em) {
+        super(em);
     }
 
     @Override
     public void synchronisePermissions() {
-        Session session = this.sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
+        Session session = this.getCurrentSession();
 
         // First, remove any permissions that are no longer found in the Permission enum from all roles...
         String commaSeparatedPermissionIds = Arrays.stream(Permission.values())
@@ -61,37 +52,23 @@ public class PermissionCustomDAOImpl implements PermissionDAO {
                 session.persist(PermissionModel.createDefault(p));
             }
         }
-
-        tx.commit();
-        session.close();
     }
 
     @Override
     public PermissionModel find(Permission permission) {
-        Session session = this.sessionFactory.openSession();
+        Session session = this.getCurrentSession();
         Criteria criteria = session.createCriteria(PermissionModel.class);
         criteria.add(Restrictions.eq("id", permission.name()));
         PermissionModel permissionModel = (PermissionModel) criteria.uniqueResult();
-        session.close();
         return permissionModel;
     }
 
     @Override
-    public Collection<PermissionModel> findAll() {
-        Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(PermissionModel.class);
-        List<PermissionModel> permissions = criteria.list();
-        session.close();
-        return permissions;
-    }
-
-    @Override
     public List<PermissionModel> findByType(PermissionModel.PermissionType type) {
-        Session session = sessionFactory.openSession();
+        Session session = getCurrentSession();
         Criteria criteria = session.createCriteria(PermissionModel.class);
         criteria.add(Restrictions.eq("type", type));
         List<PermissionModel> permissions = criteria.list();
-        session.close();
         return permissions;
     }
 }

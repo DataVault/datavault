@@ -1,89 +1,24 @@
 package org.datavaultplatform.common.model.dao.custom;
 
-import java.util.List;
-
-import org.datavaultplatform.common.model.dao.ArchiveStoreDAO;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
+import javax.persistence.EntityManager;
+import org.datavaultplatform.common.model.ArchiveStore;
 import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
-import org.datavaultplatform.common.model.ArchiveStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Repository;
+public class ArchiveStoreCustomDAOImpl extends BaseCustomDAOImpl implements
+    ArchiveStoreCustomDAO {
 
-@Repository
-public class ArchiveStoreCustomDAOImpl implements ArchiveStoreDAO {
-
-    private static final Logger logger = LoggerFactory.getLogger(ArchiveStoreCustomDAOImpl.class);
-
-    private final SessionFactory sessionFactory;
-
-    public ArchiveStoreCustomDAOImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
-
-    @Override
-    public void save(ArchiveStore archiveStore) {
-        Session session = this.sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-        session.persist(archiveStore);
-        tx.commit();
-        session.close();
-    }
- 
-    @Override
-    public void update(ArchiveStore archiveStore) {
-        Session session = this.sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-        session.update(archiveStore);
-        tx.commit();
-        session.close();
-    }
-    
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<ArchiveStore> list() {        
-        Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(ArchiveStore.class);
-        List<ArchiveStore> archiveStores = criteria.list();
-        session.close();
-        return archiveStores;
-    }
-    
-    @Override
-    public ArchiveStore findById(String Id) {
-        Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(ArchiveStore.class);
-        criteria.add(Restrictions.eq("id",Id));
-        ArchiveStore archiveStore = (ArchiveStore)criteria.uniqueResult();
-        session.close();
-        return archiveStore;
+    public ArchiveStoreCustomDAOImpl(EntityManager em) {
+        super(em);
     }
 
     @Override
     public ArchiveStore findForRetrieval() {
-        Session session = this.sessionFactory.openSession();
+        Session session = this.getCurrentSession();
         Criteria criteria = session.createCriteria(ArchiveStore.class);
         criteria.add(Restrictions.eq("retrieveEnabled",true));
         ArchiveStore archiveStore = (ArchiveStore)criteria.uniqueResult();
-        session.close();
         return archiveStore;
     }
-
-    @Override
-    public void deleteById(String Id) {
-        logger.info("Deleting Archivestore with id " + Id);
-
-        Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(ArchiveStore.class);
-        criteria.add(Restrictions.eq("id", Id));
-        ArchiveStore archiveStore = (ArchiveStore)criteria.uniqueResult();
-        session.delete(archiveStore);
-        session.flush();
-        session.close();
-    }
-
 }

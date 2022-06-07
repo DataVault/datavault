@@ -7,16 +7,16 @@ import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @Slf4j
 public abstract class BaseRabbitTCTest extends BaseRabbitTest {
 
   @Container
-  private static RabbitMQContainer RABBIT = new RabbitMQContainer(
-      "rabbitmq:3.10.0-management-alpine");//.withExposedPorts(15672);
+  private static final RabbitMQContainer RABBIT = new RabbitMQContainer(
+      "rabbitmq:3.10.0-management-alpine").withExposedPorts(5672,15672);
 
   @DynamicPropertySource
-  static void tellSpringAboutRabbitInTestContainer(DynamicPropertyRegistry registry) {
+  static void setupProperties(DynamicPropertyRegistry registry) {
     log.info("RABBIT HTTP URL [ {} ]",RABBIT.getHttpUrl());
     registry.add("spring.rabbitmq.host", RABBIT::getHost);
     registry.add("spring.rabbitmq.port", RABBIT::getAmqpPort);

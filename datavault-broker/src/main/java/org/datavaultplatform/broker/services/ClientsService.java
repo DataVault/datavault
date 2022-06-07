@@ -25,14 +25,14 @@ public class ClientsService {
     }
     
     public Client getClient(String clientID) {
-        return clientDAO.findById(clientID);
+        return clientDAO.findById(clientID).orElse(null);
     }
 
     public Client getClientByApiKey(String key) {
         return clientDAO.findByApiKey(key);
     }
 
-    public int count() { return clientDAO.count(); }
+    public long count() { return clientDAO.count(); }
 
     public void addClient(Client client) {
         clientDAO.save(client);

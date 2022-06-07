@@ -7,8 +7,6 @@ import org.datavaultplatform.common.model.dao.RoleDAO;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
@@ -18,7 +16,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class RolesAndPermissionsService implements ApplicationListener<ContextRefreshedEvent> {
+public class RolesAndPermissionsService {
     private final Logger logger = LoggerFactory.getLogger(RolesAndPermissionsService.class);
 
     private final RoleDAO roleDao;
@@ -38,12 +36,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         this.usersService = usersService;
     }
 
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        // TODO - DHAY do I need this if statement
-        if(permissionDao == null || roleDao == null){
-            return;
-        }
+    public void initialiseRolesAndPermissions() {
         permissionDao.synchronisePermissions();
         roleDao.storeSpecialRoles();
     }
@@ -56,12 +49,12 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
             throw new IllegalStateException("Cannot create a role with reserved role name: " + role.getName());
         }
         validateRolePermissions(role);
-        roleDao.store(role);
+        roleDao.save(role);
         return role;
     }
 
     private boolean roleExists(Long roleId) {
-        return roleId != null && roleDao.find(roleId) != null;
+        return roleId != null && roleDao.findById(roleId).isPresent();
     }
 
     private void validateRolePermissions(RoleModel role) {
@@ -78,7 +71,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
     public RoleAssignment createRoleAssignment(RoleAssignment roleAssignment) {
         validateRoleAssignment(roleAssignment);
         logger.debug("Got past the rolesandpermissionsservice validation");
-        roleAssignmentDao.store(roleAssignment);
+        roleAssignmentDao.save(roleAssignment);
         return roleAssignment;
     }
 
@@ -110,7 +103,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
     }
 
     public RoleModel getRole(long id) {
-        return roleDao.find(id);
+        return roleDao.findById(id).orElse(null);
     }
 
     public RoleModel getIsAdmin() {
@@ -150,7 +143,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
     }
 
     public RoleAssignment getRoleAssignment(long id) {
-        return roleAssignmentDao.find(id);
+        return roleAssignmentDao.findById(id).orElse(null);
     }
 
     public List<RoleAssignment> getRoleAssignmentsForSchool(String schoolId) {
@@ -279,7 +272,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
     }
 
     public RoleAssignment updateRoleAssignment(RoleAssignment roleAssignment) {
-        RoleAssignment original = roleAssignmentDao.find(roleAssignment.getId());
+        RoleAssignment original = roleAssignmentDao.findById(roleAssignment.getId()).orElse(null);
         if (original == null) {
             throw new IllegalStateException("Cannot update a role assignment that does not exist");
         }
@@ -294,13 +287,13 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         if (!roleExists(roleId)) {
             throw new IllegalStateException("Cannot delete a role that does not exist");
         }
-        roleDao.delete(roleId);
+        roleDao.deleteById(roleId);
     }
 
     public void deleteRoleAssignment(Long roleAssignmentId) {
-        if (roleAssignmentDao.find(roleAssignmentId) == null) {
+        if (roleAssignmentDao.findById(roleAssignmentId) == null) {
             throw new IllegalStateException("Cannot delete a role assignment that does not exist");
         }
-        roleAssignmentDao.delete(roleAssignmentId);
+        roleAssignmentDao.deleteById(roleAssignmentId);
     }
 }

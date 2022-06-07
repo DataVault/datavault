@@ -32,7 +32,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  See https://hub.docker.com/r/mailhog/mailhog
  */
 @SpringBootTest(classes = DataVaultBrokerApp.class)
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @TestPropertySource(properties = {
     "broker.email.enabled=true",
     "broker.controllers.enabled=false",
@@ -45,6 +45,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @AddTestProperties
 @TestPropertySource(properties = {
     "spring.jpa.properties.hibernate.hbm2ddl.auto=none",
+    "broker.scheduled.enabled=false",
+    "broker.rabbit.enabled=false",
     "mail.administrator=test@datavaultplatform.org"})
 @Import(EmailService.class)
 @Slf4j
@@ -84,7 +86,7 @@ public abstract class BaseEmailServiceTest {
   @Autowired
   EmailService emailService;
 
-  private static Map<String, Object> TEMPLATE_MODEL = new HashMap<String, Object>() {{
+  private static final Map<String, Object> TEMPLATE_MODEL = new HashMap<String, Object>() {{
     put("audit-id", "aud-id-001");
     put("timestamp", "timestamp-002");
     put("chunk-id", "chunk-id-003");
@@ -107,7 +109,7 @@ public abstract class BaseEmailServiceTest {
       + "</html>";
 
   @Container
-  private static GenericContainer<?> MAILHOG_CONTAINER = new GenericContainer<>(MAILHOG_IMAGE_NAME)
+  private static final GenericContainer<?> MAILHOG_CONTAINER = new GenericContainer<>(MAILHOG_IMAGE_NAME)
       .withExposedPorts(PORT_SMTP, PORT_HTTP);
 
   public static void setupMailProperties(DynamicPropertyRegistry registry) {

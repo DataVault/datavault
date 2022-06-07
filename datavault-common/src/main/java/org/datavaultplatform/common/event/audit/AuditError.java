@@ -7,7 +7,8 @@ import javax.persistence.Entity;
 @Entity
 public class AuditError extends Event {
 
-    AuditError(){}
+    public AuditError() {
+    }
     public AuditError(String jobId, String auditId, String chunkId, String archiveId, String location) {
         super(jobId, auditId, chunkId, archiveId, location, "Error while Auditing: "+chunkId);
         this.eventClass = AuditError.class.getCanonicalName();

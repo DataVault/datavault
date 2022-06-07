@@ -385,7 +385,7 @@
 
     <!-- Data Access Objects -->
     
-    <bean id="vaultDAO" class="org.datavaultplatform.common.model.dao.VaultDAOImpl">
+    <bean id="vaultDAO" class="org.datavaultplatform.common.model.repo.custom.VaultCustomDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
@@ -401,27 +401,27 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="vaultReviewDAO" class="org.datavaultplatform.common.model.dao.VaultReviewDAOImpl">
+    <bean id="vaultReviewDAO" class="org.datavaultplatform.common.model.repo.VaultReviewDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="depositReviewDAO" class="org.datavaultplatform.common.model.dao.DepositReviewDAOImpl">
+    <bean id="depositReviewDAO" class="org.datavaultplatform.common.model.repo.DepositReviewDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="billingDAO" class="org.datavaultplatform.common.model.dao.BillingDAOImpl">
+    <bean id="billingDAO" class="org.datavaultplatform.common.model.repo.BillingDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="depositDAO" class="org.datavaultplatform.common.model.dao.DepositDAOImpl">
+    <bean id="depositDAO" class="org.datavaultplatform.common.model.repo.DepositDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="depositChunkDAO" class="org.datavaultplatform.common.model.dao.DepositChunkDAOImpl">
+    <bean id="depositChunkDAO" class="org.datavaultplatform.common.model.repo.DepositChunkDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="auditChunkStatusDAO" class="org.datavaultplatform.common.model.dao.AuditChunkStatusDAOImpl">
+    <bean id="auditChunkStatusDAO" class="org.datavaultplatform.common.model.repo.AuditChunkStatusDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
@@ -441,15 +441,15 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="userDAO" class="org.datavaultplatform.common.model.dao.UserDAOImpl">
+    <bean id="userDAO" class="org.datavaultplatform.common.model.repo.UserDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="roleDAO" class="org.datavaultplatform.common.model.dao.RoleDAOImpl">
+    <bean id="roleDAO" class="org.datavaultplatform.common.model.repo.RoleDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="roleAssignmentDao" class="org.datavaultplatform.common.model.dao.RoleAssignmentDaoImpl">
+    <bean id="roleAssignmentDao" class="org.datavaultplatform.common.model.repo.RoleAssignmentDaoImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
@@ -457,7 +457,7 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="groupDAO" class="org.datavaultplatform.common.model.dao.GroupDAOImpl">
+    <bean id="groupDAO" class="org.datavaultplatform.common.model.repo.custom.GroupCustomDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
@@ -489,7 +489,7 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="DepositChunkDAO" class="org.datavaultplatform.common.model.dao.DepositChunkDAOImpl">
+    <bean id="DepositChunkDAO" class="org.datavaultplatform.common.model.repo.DepositChunkDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
     

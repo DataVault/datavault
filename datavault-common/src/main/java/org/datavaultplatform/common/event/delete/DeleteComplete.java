@@ -7,7 +7,8 @@ import org.datavaultplatform.common.event.Event;
 @Entity
 public class DeleteComplete extends Event {
 
-    DeleteComplete() {};
+    public DeleteComplete() {
+    }
     public DeleteComplete(String jobId, String depositId) {
     	super("Deposit Delete finished");
         this.eventClass = DeleteComplete.class.getCanonicalName();

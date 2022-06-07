@@ -8,7 +8,8 @@ import javax.persistence.Entity;
 @Entity
 public class DeleteRoleAssignment extends Event {
 
-    DeleteRoleAssignment() {};
+    public DeleteRoleAssignment() {
+    }
     public DeleteRoleAssignment(RoleAssignment roleAssignment, String userId) {
         super(roleAssignment.getRole().getName()+" role removed from "+roleAssignment.getUserId()+" by "+userId);
         this.eventClass = DeleteRoleAssignment.class.getCanonicalName();

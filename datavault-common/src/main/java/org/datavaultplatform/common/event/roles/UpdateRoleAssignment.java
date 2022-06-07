@@ -8,7 +8,8 @@ import javax.persistence.Entity;
 @Entity
 public class UpdateRoleAssignment extends Event {
 
-    UpdateRoleAssignment() {};
+    public UpdateRoleAssignment() {
+    }
     public UpdateRoleAssignment(RoleAssignment roleAssignment, String userId) {
         super(roleAssignment.getUserId()+" role has been change to "+roleAssignment.getRole().getName()+ " by "+userId);
         this.eventClass = UpdateRoleAssignment.class.getCanonicalName();

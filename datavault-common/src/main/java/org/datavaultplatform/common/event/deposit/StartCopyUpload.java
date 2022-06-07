@@ -6,9 +6,8 @@ import org.datavaultplatform.common.event.Event;
 @Entity
 public class StartCopyUpload extends Event {
 
-	StartCopyUpload() {
-		
-	};
+	public StartCopyUpload() {
+	}
 
 	public StartCopyUpload(String jobId, String depositId, String type, int chunkNum) {
 		super("Chunk " + chunkNum + " upload started - (" + type + ")");

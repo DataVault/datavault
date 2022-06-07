@@ -1,45 +1,34 @@
 package org.datavaultplatform.common.model.dao.custom;
 
 import com.google.common.collect.Sets;
-import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.model.dao.RoleDAO;
-import org.datavaultplatform.common.util.RoleUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.criterion.Restrictions;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import javax.persistence.EntityManager;
+import org.datavaultplatform.common.model.Permission;
+import org.datavaultplatform.common.model.PermissionModel;
+import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.RoleModel;
+import org.datavaultplatform.common.model.RoleType;
+import org.datavaultplatform.common.util.RoleUtils;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 
-@Repository
-public class RoleCustomDAOImpl implements RoleDAO {
 
-    private final SessionFactory sessionFactory;
-
-    @Autowired
-    public RoleCustomDAOImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDAO {
+    public RoleCustomDAOImpl(EntityManager em) {
+        super(em);
     }
-
     @Override
     public void storeSpecialRoles() {
-        Session session = this.sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-
+        Session session = this.getCurrentSession();
         ensureIsAdminExists(session);
         ensureDataOwnerExists(session);
         ensureDepositorExists(session);
         ensureNominatedDataManagerExists(session);
         ensureVaultCreatorExists(session);
-
-        tx.commit();
-        session.close();
     }
 
     private void ensureIsAdminExists(Session session) {
@@ -190,27 +179,6 @@ public class RoleCustomDAOImpl implements RoleDAO {
             session.persist(dep);
         }
     }
-
-    @Override
-    public void store(RoleModel role) {
-        Session session = this.sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-        session.persist(role);
-        tx.commit();
-        session.close();
-    }
-
-    @Override
-    public RoleModel find(Long id) {
-        Session session = this.sessionFactory.openSession();
-        Criteria roleCriteria = session.createCriteria(RoleModel.class);
-        roleCriteria.add(Restrictions.eq("id", id));
-        RoleModel role = (RoleModel) roleCriteria.uniqueResult();
-        populateAssignedUserCount(session, role);
-        session.close();
-        return role;
-    }
-
     private void populateAssignedUserCount(Session session, RoleModel role) {
         if (role != null) {
             Criteria assignedUserCountCriteria = session.createCriteria(RoleAssignment.class);
@@ -221,87 +189,80 @@ public class RoleCustomDAOImpl implements RoleDAO {
 
     @Override
     public RoleModel getIsAdmin() {
-        Session session = this.sessionFactory.openSession();
+        Session session = this.getCurrentSession();
         Criteria criteria = session.createCriteria(RoleModel.class);
         criteria.add(Restrictions.eq("name", RoleUtils.IS_ADMIN_ROLE_NAME));
         RoleModel role = (RoleModel) criteria.uniqueResult();
         populateAssignedUserCount(session, role);
-        session.close();
         return role;
     }
 
     @Override
     public RoleModel getDataOwner() {
-        Session session = this.sessionFactory.openSession();
+        Session session = this.getCurrentSession();
         Criteria criteria = session.createCriteria(RoleModel.class);
         criteria.add(Restrictions.eq("name", RoleUtils.DATA_OWNER_ROLE_NAME));
         RoleModel role = (RoleModel) criteria.uniqueResult();
         populateAssignedUserCount(session, role);
-        session.close();
         return role;
     }
 
     @Override
     public RoleModel getDepositor() {
-        Session session = this.sessionFactory.openSession();
+        Session session = this.getCurrentSession();
         Criteria criteria = session.createCriteria(RoleModel.class);
         criteria.add(Restrictions.eq("name", RoleUtils.DEPOSITOR_ROLE_NAME));
         RoleModel role = (RoleModel) criteria.uniqueResult();
         populateAssignedUserCount(session, role);
-        session.close();
         return role;
     }
 
     @Override
     public RoleModel getVaultCreator() {
-        Session session = this.sessionFactory.openSession();
+        Session session = this.getCurrentSession();
         Criteria criteria = session.createCriteria(RoleModel.class);
         criteria.add(Restrictions.eq("name", RoleUtils.VAULT_CREATOR_ROLE_NAME));
         RoleModel role = (RoleModel) criteria.uniqueResult();
         populateAssignedUserCount(session, role);
-        session.close();
         return role;
     }
 
     @Override
     public RoleModel getNominatedDataManager() {
-        Session session = this.sessionFactory.openSession();
+        Session session = this.getCurrentSession();
         Criteria criteria = session.createCriteria(RoleModel.class);
         criteria.add(Restrictions.eq("name", RoleUtils.NOMINATED_DATA_MANAGER_ROLE_NAME));
         RoleModel role = (RoleModel) criteria.uniqueResult();
         populateAssignedUserCount(session, role);
-        session.close();
         return role;
     }
 
     @Override
-    public Collection<RoleModel> findAll() {
-        Session session = this.sessionFactory.openSession();
+    public List<RoleModel> listAndPopulate() {
+        Session session = this.getCurrentSession();
         Criteria criteria = session.createCriteria(RoleModel.class);
         List<RoleModel> roles = criteria.list();
         for (RoleModel role : roles) {
             populateAssignedUserCount(session, role);
         }
-        session.close();
         return roles;
     }
 
     @Override
     public Collection<RoleModel> findAll(RoleType roleType) {
-        Session session = this.sessionFactory.openSession();
+        Session session = this.getCurrentSession();
         Criteria criteria = session.createCriteria(RoleModel.class);
         criteria.add(Restrictions.eq("type", roleType));
         List<RoleModel> roles = criteria.list();
         for (RoleModel role : roles) {
             populateAssignedUserCount(session, role);
         }
-        session.close();
         return roles;
     }
 
     @Override
     public List<RoleModel> findAllEditableRoles() {
-        Session session = sessionFactory.openSession();
+        Session session = getCurrentSession();
         Criteria criteria = session.createCriteria(RoleModel.class);
         criteria.add(Restrictions.or(
                 Restrictions.eq("type", RoleType.SCHOOL),
@@ -311,26 +272,6 @@ public class RoleCustomDAOImpl implements RoleDAO {
         for (RoleModel role : roles) {
             populateAssignedUserCount(session, role);
         }
-        session.close();
         return roles;
-    }
-
-    @Override
-    public void update(RoleModel role) {
-        Session session = this.sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-        session.update(role);
-        tx.commit();
-        session.close();
-    }
-
-    @Override
-    public void delete(Long id) {
-        RoleModel role = find(id);
-        Session session = this.sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-        session.delete(role);
-        tx.commit();
-        session.close();
     }
 }

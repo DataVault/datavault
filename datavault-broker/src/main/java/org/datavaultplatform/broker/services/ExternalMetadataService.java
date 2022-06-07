@@ -130,7 +130,7 @@ public class ExternalMetadataService {
     }
     
     public Dataset getCachedDataset(String id) {
-        return datasetDAO.findById(id);
+        return datasetDAO.findById(id).orElse(null);
     }
     
 }

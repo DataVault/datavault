@@ -99,7 +99,7 @@ public class DepositsService {
     }
     
     public Deposit getDeposit(String depositID) {
-        return depositDAO.findById(depositID);
+        return depositDAO.findById(depositID).orElse(null);
     }
     
     public int count(String userId) { return depositDAO.count(userId, null); }
@@ -137,7 +137,7 @@ public class DepositsService {
     }
     
     public void deleteDeposit(String depositId) {
-    	Deposit deposit = depositDAO.findById(depositId);
+    	Deposit deposit = depositDAO.findById(depositId).orElse(null);
     	deposit.setSize(0);
     	depositDAO.update(deposit);
     }
@@ -259,7 +259,7 @@ public class DepositsService {
     }
 
     public DepositChunk getDepositChunkById(String id){
-        return depositChunkDAO.findById(id);
+        return depositChunkDAO.findById(id).orElse(null);
     }
 
     public void updateDepositChunk(DepositChunk chunk) {

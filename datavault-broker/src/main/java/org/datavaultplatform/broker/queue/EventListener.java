@@ -37,7 +37,7 @@ public class EventListener implements MessageListener {
     private final ArchiveStoreService archiveStoreService;
     private final ArchivesService archivesService;
     private final RetrievesService retrievesService;
-    private UsersService usersService;
+    private final UsersService usersService;
     private final EmailService emailService;
     private final AuditsService auditsService;
     private final String homeUrl;

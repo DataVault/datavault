@@ -39,7 +39,7 @@ public class GroupsService {
     }
 
     public Group getGroup(String groupID) {
-        return groupDAO.findById(groupID);
+        return groupDAO.findById(groupID).orElse(null);
     }
 
     public int count(String userId) { return groupDAO.count(userId); }

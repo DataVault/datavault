@@ -6,27 +6,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
-import org.datavaultplatform.broker.queue.Sender;
+import org.datavaultplatform.broker.config.MockRabbitConfig;
 import org.datavaultplatform.broker.test.AddTestProperties;
-import org.datavaultplatform.broker.test.BaseDatabaseTest;
+import org.datavaultplatform.broker.test.BaseReuseDatabaseTest;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.Vault;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
 @AddTestProperties
-@TestPropertySource(properties = {"broker.scheduled.enabled=false","broker.initialise.enabled=false"})
+@TestPropertySource(properties = {
+    "broker.scheduled.enabled=false",
+    "broker.rabbit.enabled=false"
+})
+@Import(MockRabbitConfig.class)
 @Slf4j
-public class VaultsServiceIT extends BaseDatabaseTest {
+public class VaultsServiceIT extends BaseReuseDatabaseTest {
     @Autowired
     private VaultsService vaultsService;
-
-    @MockBean
-    Sender sender;
 
     @Autowired
     private RolesAndPermissionsService rolesAndPermissionsService;
@@ -51,4 +52,5 @@ public class VaultsServiceIT extends BaseDatabaseTest {
         int newVaultCount = prevVaultCount + 1;
         assertThat(vaultsService.count("admin1")).isEqualTo(newVaultCount);
     }
+
 }

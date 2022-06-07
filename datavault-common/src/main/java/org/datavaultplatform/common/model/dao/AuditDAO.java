@@ -1,6 +1,18 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.dao.custom.AuditCustomDAO;
+import java.util.List;
+import org.datavaultplatform.common.model.Audit;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface AuditDAO extends AuditCustomDAO {
+@Repository
+@Transactional
+public interface AuditDAO extends BaseDAO<Audit> {
+
+  @Override
+  default List<Audit> list() {
+    return findAll(Sort.by(Order.asc("timestamp")));
+  }
 }

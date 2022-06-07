@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class SFTPFileSystem extends Device implements UserStore {
 
@@ -33,7 +34,7 @@ public class SFTPFileSystem extends Device implements UserStore {
     
     private Session session = null;
     private ChannelSftp channelSftp = null;
-    private int port;
+    private final int port;
     private final String PATH_SEPARATOR = "/";
     
     private Utility.SFTPMonitor monitor = null;
@@ -341,6 +342,7 @@ public class SFTPFileSystem extends Device implements UserStore {
             channelSftp.cd(path);
 
             // Create timestamped folder to avoid overwriting files
+            TimeUnit.SECONDS.sleep(2);
             String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
             String timestampDirName = "dv_" + timeStamp;
             path = path + PATH_SEPARATOR + timestampDirName;

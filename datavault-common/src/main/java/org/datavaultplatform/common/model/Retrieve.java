@@ -3,7 +3,6 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
-import org.jsondoc.core.annotation.ApiObjectField;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -63,9 +62,9 @@ public class Retrieve {
     
     // Additional properties might go here - e.g. format
     
-    public Retrieve() {};
+    public Retrieve() {}
 
-    public String getID() { return id; };
+    public String getID() { return id; }
 
     public String getRetrievePath() {
         return retrievePath;

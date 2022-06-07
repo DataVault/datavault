@@ -28,6 +28,6 @@ public class PendingDataCreatorsService {
         if (pendingDataCreatorDAO.findById(creatorId) == null) {
             throw new IllegalStateException("Cannot delete a role assignment that does not exist");
         }
-        this.pendingDataCreatorDAO.delete(creatorId);
+        this.pendingDataCreatorDAO.deleteById(creatorId);
     }
 }

@@ -24,7 +24,7 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final String mailAdministrator;
 
-    private EmailBodyGenerator emailBodyGenerator;
+    private final EmailBodyGenerator emailBodyGenerator;
 
     /*
         <bean id="emailService" class="org.datavaultplatform.broker.services.EmailService">

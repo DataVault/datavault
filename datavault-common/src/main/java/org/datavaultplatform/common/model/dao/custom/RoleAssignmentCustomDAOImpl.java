@@ -1,36 +1,32 @@
 package org.datavaultplatform.common.model.dao.custom;
 
-import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import org.datavaultplatform.common.model.Permission;
+import org.datavaultplatform.common.model.PermissionModel;
+import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 
-@Repository
-public class RoleAssignmentCustomDAOImpl implements RoleAssignmentDAO {
+public class RoleAssignmentCustomDAOImpl extends BaseCustomDAOImpl implements
+    RoleAssignmentCustomDAO {
 
-    private final SessionFactory sessionFactory;
-
-    @Autowired
-    public RoleAssignmentCustomDAOImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
+  public RoleAssignmentCustomDAOImpl(EntityManager em) {
+    super(em);
+  }
 
     @Override
     public boolean roleAssignmentExists(RoleAssignment roleAssignment) {
         Session session = null;
         try {
-            session = this.sessionFactory.openSession();
+            session = this.getCurrentSession();
 
             Criteria criteria = session.createCriteria(RoleAssignment.class);
             criteria.add(Restrictions.eq("role", roleAssignment.getRole()));
@@ -47,37 +43,6 @@ public class RoleAssignmentCustomDAOImpl implements RoleAssignmentDAO {
             }
             return criteria.uniqueResult() != null;
         } finally {
-            if (session != null) session.close();
-        }
-
-    }
-
-    @Override
-    public void store(RoleAssignment roleAssignment) {
-        Session session = null;
-        try {
-            session = this.sessionFactory.openSession();
-
-            Transaction tx = session.beginTransaction();
-            session.persist(roleAssignment);
-            tx.commit();
-        } finally {
-            if (session != null) session.close();
-        }
-    }
-
-    @Override
-    public RoleAssignment find(Long id) {
-        Session session = null;
-        try {
-            session = this.sessionFactory.openSession();
-
-            Criteria criteria = session.createCriteria(RoleAssignment.class);
-            criteria.add(Restrictions.eq("id", id));
-            RoleAssignment roleAssignment = (RoleAssignment) criteria.uniqueResult();
-            return roleAssignment;
-        } finally {
-            if (session != null) session.close();
         }
 
     }
@@ -87,7 +52,7 @@ public class RoleAssignmentCustomDAOImpl implements RoleAssignmentDAO {
         Session session = null;
 
         try {
-            session = sessionFactory.openSession();
+            session = getCurrentSession();
             Query query = session.createQuery("SELECT DISTINCT role.permissions \n" +
                     "FROM org.datavaultplatform.common.model.RoleAssignment ra\n" +
                     "INNER JOIN ra.role as role\n" +
@@ -99,35 +64,18 @@ public class RoleAssignmentCustomDAOImpl implements RoleAssignmentDAO {
                     .map(PermissionModel::getPermission)
                     .collect(Collectors.toSet());
         } finally {
-            if (session != null) session.close();
         }
-    }
-
-    @Override
-    public List<RoleAssignment> findAll() {
-        Session session = null;
-        try {
-            session = this.sessionFactory.openSession();
-
-            Criteria criteria = session.createCriteria(RoleAssignment.class);
-            List<RoleAssignment> roleAssignments = criteria.list();
-            return roleAssignments;
-        } finally {
-            if (session != null) session.close();
-        }
-
     }
 
     @Override
     public List<RoleAssignment> findBySchoolId(String schoolId) {
         Session session = null;
         try {
-            session = sessionFactory.openSession();
+            session = getCurrentSession();
 
             List<RoleAssignment> schoolAssignments = findBy(session, "schoolId", schoolId);
             return schoolAssignments;
         } finally {
-            if (session != null) session.close();
         }
 
     }
@@ -148,12 +96,11 @@ public class RoleAssignmentCustomDAOImpl implements RoleAssignmentDAO {
     public List<RoleAssignment> findByVaultId(String vaultId) {
         Session session = null;
         try {
-            session = sessionFactory.openSession();
+            session = getCurrentSession();
 
             List<RoleAssignment> vaultAssignments = findBy(session, "vaultId", vaultId);
             return vaultAssignments;
         } finally {
-            if (session != null) session.close();
         }
 
     }
@@ -162,12 +109,11 @@ public class RoleAssignmentCustomDAOImpl implements RoleAssignmentDAO {
     public List<RoleAssignment> findByPendingVaultId(String vaultId) {
         Session session = null;
         try {
-            session = sessionFactory.openSession();
+            session = getCurrentSession();
 
             List<RoleAssignment> vaultAssignments = findBy(session, "pendingVaultId", vaultId);
             return vaultAssignments;
         } finally {
-            if (session != null) session.close();
         }
 
     }
@@ -176,12 +122,11 @@ public class RoleAssignmentCustomDAOImpl implements RoleAssignmentDAO {
     public List<RoleAssignment> findByUserId(String userId) {
         Session session = null;
         try {
-            session = sessionFactory.openSession();
+            session = getCurrentSession();
 
             List<RoleAssignment> schoolAssignments = findBy(session, "userId", userId);
             return schoolAssignments;
         } finally {
-            if (session != null) session.close();
         }
 
     }
@@ -190,13 +135,12 @@ public class RoleAssignmentCustomDAOImpl implements RoleAssignmentDAO {
     public List<RoleAssignment> findByRoleId(Long roleId) {
         Session session = null;
         try {
-            session = sessionFactory.openSession();
+            session = getCurrentSession();
 
             RoleModel role = findObjectById(session, RoleModel.class, "id", roleId);
             List<RoleAssignment> assignments = findBy(session, "role", role);
             return assignments;
         } finally {
-            if (session != null) session.close();
         }
 
     }
@@ -205,7 +149,7 @@ public class RoleAssignmentCustomDAOImpl implements RoleAssignmentDAO {
     public boolean hasPermission(String userId, Permission permission) {
         Session session = null;
         try {
-            session = sessionFactory.openSession();
+            session = getCurrentSession();
             Criteria criteria = session.createCriteria(RoleAssignment.class, "assignment");
             criteria.createAlias("assignment.role", "role");
             criteria.createAlias("role.permissions", "permission");
@@ -214,9 +158,6 @@ public class RoleAssignmentCustomDAOImpl implements RoleAssignmentDAO {
             return criteria.list().size() > 0;
 
         } finally {
-            if (session != null) {
-                session.close();
-            }
         }
     }
 
@@ -224,7 +165,7 @@ public class RoleAssignmentCustomDAOImpl implements RoleAssignmentDAO {
     public boolean isAdminUser(String userId) {
         Session session = null;
         try {
-            session = sessionFactory.openSession();
+            session = getCurrentSession();
             Criteria criteria = session.createCriteria(RoleAssignment.class, "assignment");
             criteria.createAlias("assignment.role", "role");
             criteria.add(Restrictions.eq("assignment.userId", userId));
@@ -232,38 +173,6 @@ public class RoleAssignmentCustomDAOImpl implements RoleAssignmentDAO {
             return criteria.list().size() > 0;
 
         } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
-    }
-
-    @Override
-    public void update(RoleAssignment roleAssignment) {
-        Session session = null;
-        try {
-            session = this.sessionFactory.openSession();
-
-            Transaction tx = session.beginTransaction();
-            session.update(roleAssignment);
-            tx.commit();
-        } finally {
-            if (session != null) session.close();
-        }
-    }
-
-    @Override
-    public void delete(Long id) {
-        RoleAssignment roleAssignment = find(id);
-        Session session = null;
-        try {
-            session = this.sessionFactory.openSession();
-
-            Transaction tx = session.beginTransaction();
-            session.delete(roleAssignment);
-            tx.commit();
-        } finally {
-            if (session != null) session.close();
         }
     }
 }

@@ -1,6 +1,7 @@
 package org.datavaultplatform.broker.initialise;
 
 import org.datavaultplatform.broker.services.ArchiveStoreService;
+import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,24 +28,42 @@ public class InitialiseDatabase {
     private final ArchiveStoreService archiveStoreService;
     private final String archiveDir;
 
+    private final RolesAndPermissionsService rolesAndPermissionsService;
+
     @Autowired
     public InitialiseDatabase(ArchiveStoreService archiveStoreService,
-        @Value("${archiveDir}") String archiveDir) {
+        @Value("${archiveDir}") String archiveDir, RolesAndPermissionsService rolesAndPermissionsService) {
         this.archiveStoreService = archiveStoreService;
         this.archiveDir = archiveDir;
+        this.rolesAndPermissionsService = rolesAndPermissionsService;
     }
 
 
     @EventListener
     public void handleContextRefresh(ContextRefreshedEvent event) {
+        BrokerInitialisedEvent initEvent = initialiseDatabase();
+        event.getApplicationContext().publishEvent(initEvent);
 
+    }
+    public BrokerInitialisedEvent initialiseDatabase() {
         logger.info("Initialising database");
+
+        rolesAndPermissionsService.initialiseRolesAndPermissions();
+
+        return initialiseDataStores();
+    }
+
+
+    private BrokerInitialisedEvent initialiseDataStores(){
+
+        final BrokerInitialisedEvent initEvent;
 
         List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
         if (archiveStores.isEmpty()) {
             HashMap<String,String> storeProperties = new HashMap<>();
             storeProperties.put("rootPath", archiveDir);
-            ArchiveStore tsm = new ArchiveStore("org.datavaultplatform.common.storage.impl.TivoliStorageManager", storeProperties, "Default archive store (TSM)", true);
+            ArchiveStore tsm = new ArchiveStore(
+                "org.datavaultplatform.common.storage.impl.TivoliStorageManager", storeProperties, "Default archive store (TSM)", true);
             //ArchiveStore s3 = new ArchiveStore("org.datavaultplatform.common.storage.impl.S3Cloud", storeProperties, "Cloud archive store", false);
             ArchiveStore oracle = new ArchiveStore("org.datavaultplatform.common.storage.impl.OracleObjectStorageClassic", storeProperties, "Cloud archive store", false);
             //ArchiveStore lsf = new ArchiveStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Default archive store (Local)", true);
@@ -52,7 +71,10 @@ public class InitialiseDatabase {
             //archiveStoreService.addArchiveStore(s3);
             //archiveStoreService.addArchiveStore(local);
             archiveStoreService.addArchiveStore(oracle);
+            initEvent = new BrokerInitialisedEvent(this,tsm,oracle);
+        }else{
+            initEvent = new BrokerInitialisedEvent(this);
         }
-
+        return initEvent;
     }
 }

@@ -1,6 +1,18 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.dao.custom.RetentionPolicyCustomDAO;
+import java.util.List;
+import org.datavaultplatform.common.model.RetentionPolicy;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface RetentionPolicyDAO extends RetentionPolicyCustomDAO {
+@Repository
+@Transactional
+public interface RetentionPolicyDAO extends AbstractDAO<RetentionPolicy,Integer> {
+
+  @Override
+  default List<RetentionPolicy> list() {
+    return findAll(Sort.by(Order.asc("name")));
+  }
 }

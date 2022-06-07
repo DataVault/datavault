@@ -32,6 +32,9 @@ public class Client {
     @Column(name = "ipAddress", columnDefinition = "TEXT")
     private String ipAddress;
 
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getId() {
         return id;

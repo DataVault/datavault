@@ -18,7 +18,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class TivoliStorageManager extends Device implements ArchiveStore {
 
@@ -63,7 +62,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 				TivoliStorageManager.maxRetries = TivoliStorageManager.defaultMaxRetries;
 			}
 		}
-        locations = new ArrayList<String>();
+        locations = new ArrayList<>();
         locations.add(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
         locations.add(TivoliStorageManager.TSM_SERVER_NODE2_OPT);
         super.multipleCopies = true;

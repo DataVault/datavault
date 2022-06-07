@@ -19,8 +19,8 @@ public class Dataset {
     // The raw content from the metadata provider e.g. XML
     @JsonIgnore
     @Transient
-    @Lob
 
+    //@Lob - COMMENTED OUT BY DAVIDHAY - no column mapping reqd if TRANSIENT
     private String content;
     
     @Transient

@@ -115,7 +115,7 @@ public class StatisticsController {
     }
     
     @GetMapping("/statistics/eventcount")
-    public int getEventCount(@RequestHeader(HEADER_USER_ID) String userID) {
+    public long getEventCount(@RequestHeader(HEADER_USER_ID) String userID) {
 
         return eventService.count();
     }

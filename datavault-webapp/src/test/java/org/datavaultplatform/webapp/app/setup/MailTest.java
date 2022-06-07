@@ -30,7 +30,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ProfileStandalone
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 public class MailTest {
 
   public static final String MAILHOG_IMAGE_NAME = "mailhog/mailhog:v1.0.1";

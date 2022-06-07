@@ -39,7 +39,7 @@ public class RetrievesService {
     }
     
     public Retrieve getRetrieve(String retrieveID) {
-        return retrieveDAO.findById(retrieveID);
+        return retrieveDAO.findById(retrieveID).orElse(null);
     }
 
     public int count(String userId) { return retrieveDAO.count(userId); }

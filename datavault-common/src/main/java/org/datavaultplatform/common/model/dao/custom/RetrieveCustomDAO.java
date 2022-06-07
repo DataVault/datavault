@@ -3,21 +3,15 @@ package org.datavaultplatform.common.model.dao.custom;
 import java.util.List;
 import org.datavaultplatform.common.model.Retrieve;
 
-public interface RetrieveCustomDAO {
-
-    public void save(Retrieve retrieve);
+public interface RetrieveCustomDAO  extends BaseCustomDAO {
     
-    public void update(Retrieve retrieve);
-    
-    public List<Retrieve> list(String userId);
+    List<Retrieve> list(String userId);
 
-    public Retrieve findById(String Id);
+    int count(String userId);
 
-    public int count(String userId);
+    int inProgressCount(String userId);
 
-    public int inProgressCount(String userId);
+    List<Retrieve> inProgress();
 
-    public List<Retrieve> inProgress();
-
-    public int queueCount(String userId);
+    int queueCount(String userId);
 }

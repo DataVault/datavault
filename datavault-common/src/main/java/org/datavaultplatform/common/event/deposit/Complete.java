@@ -2,19 +2,20 @@ package org.datavaultplatform.common.event.deposit;
 
 import java.util.HashMap;
 import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.Lob;
 import org.datavaultplatform.common.event.Event;
 
 @Entity
 public class Complete extends Event {
 
     // Maps the model ArchiveStore Id to the generated Archive Id
-    HashMap<String, String> archiveIds = new HashMap<>();
+    @Lob
+    private HashMap<String, String> archiveIds = new HashMap<>();
 
     //public String archiveId;
     public long archiveSize;
 
-    Complete() {};
+    public Complete() {}
     public Complete(String jobId, String depositId, HashMap<String, String> archiveIds, long archiveSize) {
 
         super("Deposit completed");

@@ -9,7 +9,7 @@ public class FileUtilsTest {
 
     @Test
     public void testParseFormattedSizeToBytesWithNumber() {
-        long expectedValue = 123456789l;
+        long expectedValue = 123456789L;
         
         long valueReturn = FileUtils.parseFormattedSizeToBytes("123456789");
         
@@ -27,7 +27,7 @@ public class FileUtilsTest {
     
     @Test
     public void testParseFormattedSizeToBytesWithKiloByteStringAndNoB() {
-        long expectedValue = 500000l;
+        long expectedValue = 500000L;
         
         long valueReturn = FileUtils.parseFormattedSizeToBytes("500 KB");
         
@@ -36,7 +36,7 @@ public class FileUtilsTest {
     
     @Test
     public void testParseFormattedSizeToBytesWithKiloByteStringAndSpace() {
-        long expectedValue = 500000l;
+        long expectedValue = 500000L;
         
         long valueReturn = FileUtils.parseFormattedSizeToBytes("500 KB");
         
@@ -45,7 +45,7 @@ public class FileUtilsTest {
     
     @Test
     public void testParseFormattedSizeToBytesWithKiloByteStringAndSpaceAndNoB() {
-        long expectedValue = 500000l;
+        long expectedValue = 500000L;
         
         long valueReturn = FileUtils.parseFormattedSizeToBytes("500 K");
         
@@ -54,7 +54,7 @@ public class FileUtilsTest {
     
     @Test
     public void testParseFormattedSizeToBytesWithMegaByteString() {
-        long expectedValue = 500000000l;
+        long expectedValue = 500000000L;
         
         long valueReturn = FileUtils.parseFormattedSizeToBytes("500MB");
         
@@ -65,7 +65,7 @@ public class FileUtilsTest {
     
     @Test
     public void testParseFormattedSizeToBytesWithGigaByteString() {
-        long expectedValue = 5000000000l;
+        long expectedValue = 5000000000L;
         
         long valueReturn = FileUtils.parseFormattedSizeToBytes("5GB");
         
@@ -74,7 +74,7 @@ public class FileUtilsTest {
 
     @Test
     public void testParseFormattedSizeToBytesWithTeraByteString() {
-        long expectedValue = 5000000000000l;
+        long expectedValue = 5000000000000L;
         
         long valueReturn = FileUtils.parseFormattedSizeToBytes("5TB");
         
@@ -83,7 +83,7 @@ public class FileUtilsTest {
     
     @Test
     public void testParseFormattedSizeToBytesWithGigyByteString() {
-        long expectedValue = 5368709120l;
+        long expectedValue = 5368709120L;
         
         long valueReturn = FileUtils.parseFormattedSizeToBytes("5GiB");
         
@@ -92,7 +92,7 @@ public class FileUtilsTest {
     
     @Test
     public void testParseFormattedSizeToBytesWithLowerCaseString() {
-        long expectedValue = 500000l;
+        long expectedValue = 500000L;
         
         long valueReturn = FileUtils.parseFormattedSizeToBytes("500kb");
         
@@ -101,7 +101,7 @@ public class FileUtilsTest {
     
     @Test
     public void testParseFormattedSizeToBytesWithGigaByteFullString() {
-        long expectedValue = 5000000000l;
+        long expectedValue = 5000000000L;
         
         long valueReturn = FileUtils.parseFormattedSizeToBytes("5 Giga");
         

@@ -21,8 +21,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.authentication.BaseControllerAuthTest.MyMvcConfigurer;
+import org.datavaultplatform.broker.config.MockRabbitConfig;
 import org.datavaultplatform.broker.config.MockServicesConfig;
-import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.ClientsService;
 import org.datavaultplatform.broker.services.RolesAndPermissionsService;
@@ -42,7 +42,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerA
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
@@ -76,15 +75,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
     "broker.database.enabled=false",
     "broker.emailed.enabled=false",
     "broker.ldap.enabled=false"})
-@Import({MockServicesConfig.class, MyMvcConfigurer.class}) //spring security relies on services
+@Import({MockServicesConfig.class, MyMvcConfigurer.class, MockRabbitConfig.class}) //spring security relies on services
 @Slf4j
 @AutoConfigureMockMvc
 @TestPropertySource(properties = "logging.level.org.springframework.security=DEBUG")
 public abstract class BaseControllerAuthTest {
-
-  //one of the original controllers requires a Sender bean
-  @MockBean
-  Sender sender;
 
   public static final String USER_ID_1 = "test-user-01";
   public static final String API_KEY_1 = "api-key-01";

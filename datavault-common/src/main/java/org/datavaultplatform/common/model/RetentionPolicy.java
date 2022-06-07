@@ -19,8 +19,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.hibernate.annotations.GenericGenerator;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="RetentionPolicies")
@@ -175,8 +173,7 @@ public class RetentionPolicy {
     }
 
     public String getPolicyInfo() {
-        String retVal = "";
-        retVal = this.id + "-" + this.minRetentionPeriod;
+        String retVal = this.id + "-" + this.minRetentionPeriod;
         return retVal;
     }
 }

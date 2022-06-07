@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.test.context.DynamicPropertyRegistry;
 
-public class ScheduledTestUtils {
+public abstract class ScheduledTestUtils {
 
   static final Pattern SPEL_PATTERN = Pattern.compile("^(\\$\\{)(.*)(\\})$");
 

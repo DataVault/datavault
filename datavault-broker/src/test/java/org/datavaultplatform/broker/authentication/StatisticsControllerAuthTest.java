@@ -62,7 +62,7 @@ public class StatisticsControllerAuthTest extends BaseControllerAuthTest {
 
   @Test
   void testGetEventCount() {
-    when(controller.getEventCount(USER_ID_1)).thenReturn(1234);
+    when(controller.getEventCount(USER_ID_1)).thenReturn(1234L);
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/statistics/eventcount"),

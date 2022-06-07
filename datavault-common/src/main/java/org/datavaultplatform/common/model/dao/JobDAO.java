@@ -1,6 +1,10 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.dao.custom.JobCustomDAO;
+import org.datavaultplatform.common.model.Job;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface JobDAO extends JobCustomDAO {
+@Repository
+@Transactional
+public interface JobDAO extends BaseDAO<Job> {
 }

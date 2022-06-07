@@ -25,7 +25,7 @@ public class DataManagersService {
     }
     
     public DataManager getDataManager(String dataManagerID) {
-        return dataManagerDAO.findById(dataManagerID);
+        return dataManagerDAO.findById(dataManagerID).orElse(null);
     }
 
     public void deleteDataManager(String dataManagerID) {

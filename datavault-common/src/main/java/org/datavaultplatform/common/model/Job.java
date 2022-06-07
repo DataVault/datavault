@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -56,6 +57,7 @@ public class Job {
     private String taskClass;
     
     // State information will be supplied by the worker task at run time
+    @Lob
     private ArrayList<String> states = new ArrayList<>();
     private Integer state = null;
     
@@ -72,15 +74,16 @@ public class Job {
     @Column(columnDefinition = "TEXT")
     private String errorMessage;
     
-    public Job() {};
+    public Job() {}
+
     public Job(String taskClass) {
         this.taskClass = taskClass;
     }
     
     public String getID() { return id; }
     
-    public long getVersion() { return version; };
-    
+    public long getVersion() { return version; }
+
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }

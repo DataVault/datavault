@@ -5,17 +5,11 @@ import java.util.Set;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.RoleAssignment;
 
-public interface RoleAssignmentCustomDAO {
+public interface RoleAssignmentCustomDAO extends BaseCustomDAO {
 
     boolean roleAssignmentExists(RoleAssignment roleAssignment);
 
-    void store(RoleAssignment roleAssignment);
-
-    RoleAssignment find(Long id);
-
     Set<Permission> findUserPermissions(String userId);
-
-    List<RoleAssignment> findAll();
 
     List<RoleAssignment> findBySchoolId(String schoolId);
 
@@ -30,8 +24,4 @@ public interface RoleAssignmentCustomDAO {
     boolean hasPermission(String userId, Permission permission);
 
     boolean isAdminUser(String userId);
-
-    void update(RoleAssignment roleAssignment);
-
-    void delete(Long id);
 }

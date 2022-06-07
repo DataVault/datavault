@@ -41,7 +41,7 @@ public class ArchiveStoreService {
             @Value("${occMaxRetries:#{null}}") String occMaxRetries,
             @Value("${ociNameSpace:#{null}}") String ociNameSpace,
             @Value("${s3.bucketName:#{null}}") String ociBucketName,
-        ArchiveStoreDAO archiveStoreDAO) {
+            ArchiveStoreDAO archiveStoreDAO) {
         this.optionsDir = optionsDir;
         this.tempDir = tempDir;
         this.bucketName = bucketName;
@@ -72,7 +72,7 @@ public class ArchiveStoreService {
     }
 
     public ArchiveStore getArchiveStore(String archiveStoreID) {
-        return archiveStoreDAO.findById(archiveStoreID);
+        return archiveStoreDAO.findById(archiveStoreID).orElse(null);
     }
 
     public ArchiveStore getForRetrieval() {

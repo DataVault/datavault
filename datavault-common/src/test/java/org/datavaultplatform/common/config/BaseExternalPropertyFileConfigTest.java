@@ -81,7 +81,7 @@ public abstract class BaseExternalPropertyFileConfigTest {
    * Tell Spring about new values of the ENV variables
    */
   @DynamicPropertySource
-  static void registerPgProperties(DynamicPropertyRegistry registry) {
+  static void setupProperties(DynamicPropertyRegistry registry) {
     registry.add("DATAVAULT_HOME", () -> dvHomeDir.toString());
     registry.add("DATAVAULT_ETC", () -> etcDir.toString());
     registry.add("HOME", () -> homeDir.toString());

@@ -29,6 +29,6 @@ public class DataCreatorsService {
         if (dataCreatorDAO.findById(creatorId) == null) {
             throw new IllegalStateException("Cannot delete a role assignment that does not exist");
         }
-        this.dataCreatorDAO.delete(creatorId);
+        this.dataCreatorDAO.deleteById(creatorId);
     }
 }

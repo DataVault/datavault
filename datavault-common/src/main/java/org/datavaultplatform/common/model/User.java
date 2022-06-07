@@ -34,7 +34,7 @@ public class User {
 
     // Additional properties associated with the user
     @Lob
-    private HashMap<String,String> properties;
+    private HashMap<String,String> properties = new HashMap<>();
 
     // A user is related to a number of vaults
     @JsonIgnore

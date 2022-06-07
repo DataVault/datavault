@@ -87,13 +87,14 @@ public class Deposit {
     // A Deposit can have a number of reviews
     @JsonIgnore
     @OneToMany(targetEntity=DepositReview.class, mappedBy="deposit", fetch=FetchType.LAZY)
-    @OrderBy("timestamp")
+    @OrderBy("creationTime")
     private List<DepositReview> depositReviews;
 
 
     @ApiObjectField(description = "Status of the Deposit", allowedvalues={"NOT_STARTED", "IN_PROGRESS", "COMPLETE"})
     private Status status;
 
+    // THE ORDER OF THESE ENUM VALUES IS IMPORTANT. DO NOT CHANGE.
     public enum Status {
         NOT_STARTED,
         IN_PROGRESS,
@@ -173,8 +174,8 @@ public class Deposit {
     
     public String getID() { return id; }
 
-    public long getVersion() { return version; };
-    
+    public long getVersion() { return version; }
+
     public void setCreationTime(Date creationTime) {
         this.creationTime = creationTime;
     }

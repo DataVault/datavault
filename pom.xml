@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.6.7</version>
+    <version>2.7.0</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -29,34 +29,53 @@
     <!-- general -->
     <java.version>1.8</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <skip.git.commit>false</skip.git.commit>
     <skip.unit.tests>false</skip.unit.tests>
+    <skip.integration.tests>false</skip.integration.tests>
 
     <!-- dependency versions -->
-    <aws.java.sdk.bom.version>1.12.196</aws.java.sdk.bom.version>
-    <oci.java.sdk.bom.version>2.22.0</oci.java.sdk.bom.version>
-    <jsoup.version>1.14.2</jsoup.version>
+    <aws.java.sdk.bom.version>1.12.222</aws.java.sdk.bom.version>
+    <oci.java.sdk.bom.version>2.28.0</oci.java.sdk.bom.version>
+    <jsoup.version>1.15.1</jsoup.version>
     <vault.java.driver.version>5.1.0</vault.java.driver.version>
     <commons.io.version>2.11.0</commons.io.version>
     <jsondoc.core.version>1.2.23</jsondoc.core.version>
     <apache.directory.api.version>2.1.0</apache.directory.api.version>
     <jcraft.jsch.version>0.1.55</jcraft.jsch.version>
     <super.csv.version>2.4.0</super.csv.version>
-    <commons.lang3.version>3.12.0</commons.lang3.version>
-    <gson.version>2.9.0</gson.version>
+
+
     <testng.version>6.14.3</testng.version>
     <owasp.dependency.check.version>7.0.4</owasp.dependency.check.version>
-    <spring.cloud.version>3.1.1</spring.cloud.version>
-    <testcontainers.version>1.17.1</testcontainers.version>
-    <json.path.version>2.7.0</json.path.version>
-    <mysql.version>8.0.28</mysql.version>
+    <spring.cloud.version>3.1.2</spring.cloud.version>
+    <testcontainers.version>1.17.2</testcontainers.version>
     <bagit.version>4.9.0</bagit.version>
     <velocity.version>2.3</velocity.version>
     <oro.version>2.0.8</oro.version>
     <commons.collection4.version>4.4</commons.collection4.version>
+    <mockito.ver>4.5.1</mockito.ver>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>${mockito.ver}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-junit-jupiter</artifactId>
+        <version>${mockito.ver}</version>
+      </dependency>
+
+      <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers-bom -->
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-bom</artifactId>
+        <version>${testcontainers.version}</version>
+        <type>pom</type>
+      </dependency>
       <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
       <dependency>
         <groupId>com.amazonaws</groupId>
@@ -110,16 +129,6 @@
         <version>${super.csv.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>${commons.lang3.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.code.gson</groupId>
-        <artifactId>gson</artifactId>
-        <version>${gson.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.testng</groupId>
         <artifactId>testng</artifactId>
         <version>${testng.version}</version>
@@ -145,16 +154,17 @@
       </dependency>
 
       <dependency>
-        <groupId>com.jayway.jsonpath</groupId>
-        <artifactId>json-path</artifactId>
-        <version>${json.path.version}</version>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>mysql</artifactId>
+        <version>${testcontainers.version}</version>
         <scope>test</scope>
       </dependency>
 
       <dependency>
-        <groupId>mysql</groupId>
-        <artifactId>mysql-connector-java</artifactId>
-        <version>${mysql.version}</version>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>rabbitmq</artifactId>
+        <version>${testcontainers.version}</version>
+        <scope>test</scope>
       </dependency>
 
       <dependency>
@@ -191,20 +201,63 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.mockito</groupId>
+          <artifactId>mockito-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.mockito</groupId>
+          <artifactId>mockito-junit-jupiter</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
-
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <optional>true</optional>
     </dependency>
-
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/javax.interceptor/javax.interceptor-api -->
+    <dependency>
+      <groupId>javax.interceptor</groupId>
+      <artifactId>javax.interceptor-api</artifactId>
+      <version>1.2.2</version>
+    </dependency>
   </dependencies>
 
 
   <build>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.12.0</version>
+        </plugin>
+        <plugin>
+          <groupId>pl.project13.maven</groupId>
+          <artifactId>git-commit-id-plugin</artifactId>
+          <configuration>
+            <excludeProperties>
+              <excludeProperty>git.remote.origin.url*</excludeProperty>
+            </excludeProperties>
+          </configuration>
+        </plugin>
         <plugin>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
@@ -224,47 +277,125 @@
             </execution>
           </executions>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <configuration>
+            <skipITs>${skip.integration.tests}</skipITs>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <skipTests>${skip.unit.tests}</skipTests>
+            <excludedGroups>slow,org.datavaultplatform.test.TSMTest</excludedGroups>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.owasp</groupId>
+          <artifactId>dependency-check-maven</artifactId>
+          <version>${owasp.dependency.check.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <testNGArtifactName>none:none</testNGArtifactName>
-            </configuration>
-          </execution>
-          <execution>
-            <id>test-testng</id>
-            <phase>test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <junitArtifactName>none:none</junitArtifactName>
-            </configuration>
-          </execution>
-        </executions>
+        <artifactId>maven-failsafe-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>org.owasp</groupId>
-        <artifactId>dependency-check-maven</artifactId>
-        <version>${owasp.dependency.check.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+        <configuration>
+          <skip>${skip.git.commit}</skip>
+        </configuration>
       </plugin>
     </plugins>
   </build>
-
+  <profiles>
+    <profile>
+      <id>owasp-dependency-check</id>
+      <properties>
+        <skip.git.commit>true</skip.git.commit>
+        <skip.unit.tests>true</skip.unit.tests>
+        <skip.integration.tests>true</skip.integration.tests>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.owasp</groupId>
+            <artifactId>dependency-check-maven</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+      <dependencies>
+        <dependency>
+          <groupId>org.testng</groupId>
+          <artifactId>testng</artifactId>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>ide</id>
+      <!-- this profile adds the testng dependency so that it will be added to your IDEs classpath
+           and alow the FT test classes to compile -->
+      <!-- NOTE : this has only been tested with intellij not eclipse -->
+      <dependencies>
+        <dependency>
+          <groupId>org.testng</groupId>
+          <artifactId>testng</artifactId>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>cicd</id>
+      <activation><activeByDefault>true</activeByDefault></activation>
+      <!-- the 'cicd' profile does 2 things:
+      1) does NOT include testng dependency
+      2) excludes FT classes which use testng from tests
+      If we include testng dependency - this causes problems running other unit and integration tests
+      -->
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.8.8</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>report</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <testExcludes>
+                <testExclude>**/*FT.java</testExclude>
+              </testExcludes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

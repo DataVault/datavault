@@ -4,29 +4,23 @@ import java.util.Date;
 import java.util.List;
 import org.datavaultplatform.common.model.Deposit;
 
-public interface DepositCustomDAO {
+public interface DepositCustomDAO extends BaseCustomDAO {
 
-    public void save(Deposit deposit);
-    
-    public void update(Deposit deposit);
-    
-    public List<Deposit> list(String query, String userId, String sort, String order, int offset, int maxResult);
+    List<Deposit> list(String query, String userId, String sort, String order, int offset, int maxResult);
 
-    public Deposit findById(String Id);
+    int count(String userId, String query);
 
-    public int count(String userId, String query);
+    int queueCount(String userId);
 
-    public int queueCount(String userId);
+    int inProgressCount(String userId);
 
-    public int inProgressCount(String userId);
+    List<Deposit> inProgress();
 
-    public List<Deposit> inProgress();
+    List<Deposit> completed();
 
-    public List<Deposit> completed();
+    List<Deposit> search(String query, String sort, String order, String userId);
 
-    public List<Deposit> search(String query, String sort, String order, String userId);
+    List<Deposit> getDepositsWaitingForAudit(Date olderThanDate);
 
-    public List<Deposit> getDepositsWaitingForAudit(Date olderThanDate);
-
-    public Long size(String userId);
+    Long size(String userId);
 }

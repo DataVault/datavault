@@ -35,10 +35,10 @@ public class UsersService {
     }
     
     public User getUser(String userID) {
-        return userDAO.findById(userID);
+        return userDAO.findById(userID).orElse(null);
     }
 
-    public int count() { return userDAO.count(); }
+    public long count() { return userDAO.count(); }
 
     public void addUser(User user) {
         userDAO.save(user);
@@ -47,7 +47,7 @@ public class UsersService {
     public Boolean validateUser(String userID, String password) {
         User user;
 
-        user = userDAO.findById(userID);
+        user = userDAO.findById(userID).orElse(null);
 
         if (user == null) {
             // No match was found

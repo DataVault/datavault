@@ -9,7 +9,7 @@ import java.text.DecimalFormat;
  */
 public class FileUtils extends org.apache.commons.io.FileUtils {
     
-    public static char[] units = new char[] { 'K','M','G','T' };
+    public static final char[] units = new char[] { 'K','M','G','T' };
 
 
     /**

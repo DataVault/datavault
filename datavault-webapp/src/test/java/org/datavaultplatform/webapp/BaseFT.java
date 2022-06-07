@@ -4,6 +4,7 @@ package org.datavaultplatform.webapp;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -69,7 +70,7 @@ public class BaseFT {
                 driver = new ChromeDriver(options);
             }
         }
-        driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(1));
     }
 
     protected void takeScreenshot(String prefix) throws IOException {

@@ -6,9 +6,8 @@ import org.datavaultplatform.common.event.Event;
 @Entity
 public class CompleteCopyUpload extends Event {
 
-	CompleteCopyUpload() {
-		
-	};
+	public CompleteCopyUpload() {
+	}
 
 	public CompleteCopyUpload(String jobId, String depositId, String type, int chunkNum) {
 		super("Chunk " + chunkNum + " upload finished - (" + type + ")");

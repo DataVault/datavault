@@ -31,10 +31,10 @@ public class EventService {
     }
     
     public Event getEvent(String eventID) {
-        return eventDAO.findById(eventID);
+        return eventDAO.findById(eventID).orElse(null);
     }
 
-    public int count() { return eventDAO.count(); }
+    public long count() { return eventDAO.count(); }
 
     public List<Event> findVaultEvents(Vault vault) {
         return eventDAO.findVaultEvents(vault);

@@ -2,11 +2,9 @@ package org.datavaultplatform.common.task;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.datavaultplatform.common.model.ArchiveStore;
-import org.datavaultplatform.common.model.DepositChunk;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.event.Event;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

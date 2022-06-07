@@ -2,105 +2,30 @@ package org.datavaultplatform.common.model.dao.custom;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.model.dao.VaultDAO;
+import javax.persistence.EntityManager;
+import org.datavaultplatform.common.model.Permission;
+import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.dao.SchoolPermissionCriteriaBuilder;
 import org.datavaultplatform.common.util.DaoUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Repository;
 
-@Repository
-public class VaultCustomDAOImpl implements VaultDAO {
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(VaultCustomDAOImpl.class);
 
-    private final SessionFactory sessionFactory;
+public class VaultCustomDAOImpl extends BaseCustomDAOImpl implements VaultCustomDAO {
 
-    public VaultCustomDAOImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+    public VaultCustomDAOImpl(EntityManager em) {
+        super(em);
     }
 
-
-    @Override
-    public void save(Vault vault) {
-        Session session = this.sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-        session.persist(vault);
-        tx.commit();
-        session.close();
-    }
- 
-    @Override
-    public void update(Vault vault) {        
-        Session session = null;
-        Transaction tx = null;
-        try {
-            session = this.sessionFactory.openSession();
-            tx = session.beginTransaction();
-            session.update(vault);
-            tx.commit();
-        } catch (RuntimeException e) {
-            if (tx != null) {
-                tx.rollback();
-                System.out.println("Vault.update - ROLLBACK");
-            }
-            throw e;
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
-    }
-    
-    @Override
-    public void saveOrUpdateVault(Vault vault) {        
-        Session session = null;
-        Transaction tx = null;
-        try {
-            session = this.sessionFactory.openSession();
-            tx = session.beginTransaction();
-            session.saveOrUpdate(vault);
-            tx.commit();
-        } catch (RuntimeException e) {
-            if (tx != null) {
-                tx.rollback();
-                System.out.println("Vault.update - ROLLBACK");
-            }
-            throw e;
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
-    }
-    
-    
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<Vault> list() {
-        Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        criteria.addOrder(Order.asc("creationTime"));
-        List<Vault> vaults = criteria.list();
-        session.close();
-        return vaults;
-    }
 
     @SuppressWarnings("unchecked")
     @Override
     public List<Vault> list(String userId, String sort, String order, String offset, String maxResult) {
-        Session session = this.sessionFactory.openSession();
+        Session session = this.getCurrentSession();
         SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
         if (criteriaBuilder.hasNoAccess()) {
             return new ArrayList<>();
@@ -109,30 +34,19 @@ public class VaultCustomDAOImpl implements VaultDAO {
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
         order(sort, order, criteria);
-        if((offset != null && maxResult != null) || !maxResult.equals("0")) {
+        if((offset != null && maxResult != null) && !maxResult.equals("0")) {
         	criteria.setMaxResults(Integer.valueOf(maxResult));
         	criteria.setFirstResult(Integer.valueOf(offset));
         }
 
         List<Vault> vaults = criteria.list();
-        session.close();
         return vaults;
-    }
-    
-    @Override
-    public Vault findById(String Id) {
-        Session session = this.sessionFactory.openSession();
-        Criteria criteria = session.createCriteria(Vault.class);
-        criteria.add(Restrictions.eq("id", Id));
-        Vault vault = (Vault)criteria.uniqueResult();
-        session.close();
-        return vault;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public List<Vault> search(String userId, String query, String sort, String order, String offset, String maxResult) {
-        Session session = this.sessionFactory.openSession();
+        Session session = this.getCurrentSession();
         SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
         if (criteriaBuilder.hasNoAccess()) {
             return new ArrayList<>();
@@ -147,34 +61,35 @@ public class VaultCustomDAOImpl implements VaultDAO {
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
         order(sort, order, criteria);
-        if((offset != null && maxResult != null) || !maxResult.equals("0")) {
+        if((offset != null && maxResult != null) && !maxResult.equals("0")) {
         	criteria.setMaxResults(Integer.valueOf(maxResult));
         	criteria.setFirstResult(Integer.valueOf(offset));
         }
 
         List<Vault> vaults = criteria.list();
-        session.close();
         return vaults;
     }
 
     @Override
     public int count(String userId) {
-        Session session = this.sessionFactory.openSession();
+        Session session = this.getCurrentSession();
         SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
         if (criteriaBuilder.hasNoAccess()) {
             return 0;
         }
         Criteria criteria = criteriaBuilder.build();
-        return (int) (long) (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
+        Long count = (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
+        return count.intValue();
     }
 
     @Override
     public int getRetentionPolicyCount(int status) {
-        Session session = this.sessionFactory.openSession();
+        Session session = this.getCurrentSession();
         Criteria criteria = session.createCriteria(Vault.class);
         criteria.add(Restrictions.eq("retentionPolicyStatus", status));
         criteria.setProjection(Projections.rowCount());
-        return (int)(long)(Long)criteria.uniqueResult();
+        Long count = (Long)criteria.uniqueResult();
+        return count.intValue();
     }
 
     private void order(String sort, String order, Criteria criteria) {
@@ -213,7 +128,7 @@ public class VaultCustomDAOImpl implements VaultDAO {
 
 	@Override
 	public int getTotalNumberOfVaults(String userId) {
-		Session session = this.sessionFactory.openSession();
+		Session session = this.getCurrentSession();
         SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
         if (criteriaBuilder.hasNoAccess()) {
             return 0;
@@ -222,7 +137,6 @@ public class VaultCustomDAOImpl implements VaultDAO {
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         criteria.setProjection(Projections.rowCount());
         int totalNumberOfVaults = ((Long) criteria.uniqueResult()).intValue();
-        session.close();
         return totalNumberOfVaults;
 	}
 
@@ -231,7 +145,7 @@ public class VaultCustomDAOImpl implements VaultDAO {
 	 */
 	@Override
 	public int getTotalNumberOfVaults(String userId, String query) {
-		Session session = this.sessionFactory.openSession();
+		Session session = this.getCurrentSession();
         SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
         if (criteriaBuilder.hasNoAccess()) {
             return 0;
@@ -249,9 +163,9 @@ public class VaultCustomDAOImpl implements VaultDAO {
 
 	@Override
 	public List<Object[]> getAllProjectsSize() {
-		Session session = this.sessionFactory.openSession();
-		Query query = session.createQuery("select v.projectId, sum(v.vaultSize) from Vault v group by v.projectId");
-		return (List<Object[]>)query.list();
+		Session session = this.getCurrentSession();
+		Query<Object[]> query = session.createQuery("select v.projectId, sum(v.vaultSize) from Vault v group by v.projectId");
+		return query.list();
 	}
 
     private SchoolPermissionCriteriaBuilder createVaultCriteriaBuilder(String userId, Session session, Permission permission) {

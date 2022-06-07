@@ -52,7 +52,7 @@ public class AuditsService {
     }
     
     public Audit getAudit(String AuditID) {
-        return auditDAO.findById(AuditID);
+        return auditDAO.findById(AuditID).orElse(null);
     }
 
     public AuditChunkStatus addAuditStatus(Audit audit, DepositChunk chunk, String archiveId, String location){
@@ -94,6 +94,6 @@ public class AuditsService {
         auditChunkStatusDAO.update(auditChunkStatus);
     }
 
-    public int count() { return auditDAO.count(); }
+    public long count() { return auditDAO.count(); }
 }
 

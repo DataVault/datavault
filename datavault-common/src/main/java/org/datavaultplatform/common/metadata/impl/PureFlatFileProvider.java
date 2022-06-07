@@ -9,8 +9,6 @@ import java.util.Map;
 
 import org.datavaultplatform.common.model.Dataset;
 
-import com.amazonaws.util.CollectionUtils;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.datavaultplatform.common.metadata.Provider;
@@ -45,7 +43,7 @@ public class PureFlatFileProvider implements Provider {
     //update view to grey out non validated datasets
     
     private Map<String, String> processPersonFlatFile() throws IOException {
-    	Map<String, String> retVal = new HashMap<String, String>();
+    	Map<String, String> retVal = new HashMap<>();
     	System.out.println("flat file dir is : " + this.getFlatFileDir());
     	File personFile = new File(this.getFlatFileDir() + PureFlatFileProvider.PERSON_FILE_NAME);
     	if (personFile.exists()) {
@@ -69,7 +67,7 @@ public class PureFlatFileProvider implements Provider {
     }
     
     private Map<String, Map<String, List<String>>> processDatasetDisplayFlatFile() throws IOException {
-    	Map<String, Map<String, List<String>>> retVal = new HashMap<String, Map<String, List<String>>>();
+    	Map<String, Map<String, List<String>>> retVal = new HashMap<>();
     	System.out.println("flat file dir is : " + this.getFlatFileDir());
     	File dsDisplayFile = new File(this.getFlatFileDir() + PureFlatFileProvider.DATASET_DISPLAY_FILE_NAME);
     	if (dsDisplayFile.exists()) {
@@ -80,14 +78,14 @@ public class PureFlatFileProvider implements Provider {
 		    	    String line = displayIt.nextLine();
 		    	    String[] splitLine = line.split("\t");
 		    	    if (splitLine.length == 4) {
-		    	    	List<String> info = new ArrayList<String>();
+		    	    	List<String> info = new ArrayList<>();
 		    	    	info.add(splitLine[2]);
 		    	    	info.add(splitLine[3]);
 		    	    	//see if we have seen a ds for this user already if so use that
 		    	    	Map<String, List<String>> dsMap = retVal.get(splitLine[0]);
 		    	    	if (dsMap == null) {
 		    	    		// if not make a new hash
-		    	    		dsMap = new HashMap<String, List<String>>();
+		    	    		dsMap = new HashMap<>();
 		    	    	}
 		    	    	dsMap.put(splitLine[1], info);
 		    	    	retVal.put(splitLine[0], dsMap);
@@ -103,7 +101,7 @@ public class PureFlatFileProvider implements Provider {
     }
     
     private Map<String, Map<String, String>> processDatasetFullFlatFile() throws IOException {
-    	Map<String, Map<String, String>> retVal = new HashMap<String, Map<String,String>>();
+    	Map<String, Map<String, String>> retVal = new HashMap<>();
     	System.out.println("flat file dir is : " + this.getFlatFileDir());
         File dsFullFile  = new File(this.getFlatFileDir() + PureFlatFileProvider.DATASET_FULL_FILE_NAME);
         if (dsFullFile.exists()) {
@@ -114,7 +112,7 @@ public class PureFlatFileProvider implements Provider {
 		    	    String line = fullIt.nextLine();
 		    	    String[] splitLine = line.split("\t");
 		    	    if (splitLine.length == 4) {
-		    	    	Map<String, String> data = new HashMap<String, String>();
+		    	    	Map<String, String> data = new HashMap<>();
 		    	    	data.put(PureFlatFileProvider.TITLE, splitLine[1]);
 		    	    	data.put(PureFlatFileProvider.XML, splitLine[2]);
 						data.put(PureFlatFileProvider.CRISID, splitLine[3]);
@@ -140,7 +138,7 @@ public class PureFlatFileProvider implements Provider {
      * a deployed machine.  This is a workaround as we aren't allowed (atm) to query Pure via the api in real time.
      */
     public List<Dataset> getDatasetsForUser(String userID) {
-    	List<Dataset> retVal = new ArrayList<Dataset>();
+    	List<Dataset> retVal = new ArrayList<>();
     	System.out.println("Getting Datasets from the test pure flat file for " +userID);
     	//System.out.println("Employee ID is hardcoded to 123363 for now we need to add the LDAP service to get the real employee ID");
     	// userID is the employee id

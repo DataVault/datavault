@@ -26,6 +26,7 @@ import org.springframework.test.context.TestPropertySource;
     "broker.services.enabled=false",
     "broker.scheduled.enabled=false",
     "broker.initialise.enabled=false",
+    "broker.ldap.enabled=false",
     "broker.database.enabled=false"})
 @AddTestProperties
 @Import({MockServicesConfig.class, RabbitConfig.class}) //spring security relies on services

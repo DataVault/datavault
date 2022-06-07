@@ -70,7 +70,7 @@ public class Group {
 
     public List<Vault> getVaults() {
         if (vaults == null) {
-            return new ArrayList();
+            return new ArrayList<>();
         } else {
             return vaults;
         }

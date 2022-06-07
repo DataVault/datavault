@@ -26,7 +26,7 @@ public class ArchivesService {
     }
 
     public Archive getArchive(String archiveId) {
-        return archiveDAO.findById(archiveId);
+        return archiveDAO.findById(archiveId).orElse(null);
     }
 
     public void addArchive(Deposit deposit, ArchiveStore archiveStore, String archiveId) {
@@ -45,5 +45,11 @@ public class ArchivesService {
 
     public void updateArchive(Archive archive) {
         archiveDAO.update(archive);
+    }
+    public void saveArchive(Archive archive) {
+        archiveDAO.save(archive);
+    }
+    public Archive findById(String id) {
+        return archiveDAO.findById(id).orElse(null);
     }
 }

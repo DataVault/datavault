@@ -1,7 +1,6 @@
 package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -59,5 +58,12 @@ public class Archive {
 
     public String getArchiveId() {
         return archiveId;
+    }
+
+    public Deposit getDeposit() {
+        return this.deposit;
+    }
+    public String getId() {
+        return this.id;
     }
 }

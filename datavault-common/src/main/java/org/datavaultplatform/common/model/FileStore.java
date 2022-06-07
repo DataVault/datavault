@@ -30,7 +30,7 @@ public class FileStore {
     // Properties to use for this storage system
     // NOTE: this is not a secure mechanism for storing credentials!
     @Lob
-    private HashMap<String,String> properties;
+    private HashMap<String,String> properties = new HashMap<>();
     
     @JsonIgnore
     @ManyToOne

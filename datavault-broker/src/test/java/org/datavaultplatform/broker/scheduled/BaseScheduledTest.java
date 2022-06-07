@@ -5,11 +5,13 @@ import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.config.MockRabbitConfig;
 import org.datavaultplatform.broker.config.MockServicesConfig;
 import org.datavaultplatform.broker.test.AddTestProperties;
+import org.datavaultplatform.common.services.LDAPService;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
@@ -30,7 +32,13 @@ We create any services that are still required (by the scheduled beans ) via Moc
     "broker.controllers.enabled=false",
     "broker.services.enabled=false",
     "broker.rabbit.enabled=false",
+    "broker.ldap.enabled=false",
+    "broker.initialise.enabled=false",
+    "broker.email.enabled=false",
     "broker.database.enabled=false"})
 @Import({MockServicesConfig.class, MockRabbitConfig.class}) //cos spring security requires some services so we have to mock them
 public abstract class BaseScheduledTest {
+
+  @MockBean
+  LDAPService service;
 }

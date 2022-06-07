@@ -17,7 +17,7 @@ public class BillingService {
 
 
 	public void saveOrUpdateVault(BillingInfo billing) {
-    	billingDAO.saveOrUpdateVault(billing);
+    	billingDAO.save(billing);
     }
 
 

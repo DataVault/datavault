@@ -152,9 +152,9 @@ public class BillingInfo {
 
     public long getVersion() {
     	return version; 
-    };
-    
-    public BillingInformation convertToResponse() {
+    }
+
+	public BillingInformation convertToResponse() {
         return new BillingInformation(
                 id,
                 vault.getID(),

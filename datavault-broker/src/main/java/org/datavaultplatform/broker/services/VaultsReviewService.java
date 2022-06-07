@@ -48,7 +48,7 @@ public class VaultsReviewService {
     }
 
     public VaultReview getVaultReview(String vaultReviewID) {
-        return vaultReviewDAO.findById(vaultReviewID);
+        return vaultReviewDAO.findById(vaultReviewID).orElse(null);
     }
 
     public List<VaultReview> search(String query) {

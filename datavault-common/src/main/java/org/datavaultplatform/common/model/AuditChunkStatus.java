@@ -8,7 +8,6 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -65,9 +64,9 @@ public class AuditChunkStatus {
 
     // Additional properties might go here - e.g. format
 
-    public AuditChunkStatus() {};
+    public AuditChunkStatus() {}
 
-    public String getID() { return id; };
+    public String getID() { return id; }
 
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;

@@ -1,6 +1,5 @@
 package org.datavaultplatform.common.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -9,9 +8,6 @@ import javax.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
-
-import java.util.Date;
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "DepositChunk")
@@ -100,5 +96,9 @@ public class DepositChunk {
 
     public Deposit getDeposit() {
         return deposit;
+    }
+
+    public void setDeposit(Deposit deposit){
+        this.deposit = deposit;
     }
 }

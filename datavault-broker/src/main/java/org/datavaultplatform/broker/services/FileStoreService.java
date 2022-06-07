@@ -28,7 +28,7 @@ public class FileStoreService {
     }
     
     public FileStore getFileStore(String fileStoreID) {
-        return fileStoreDAO.findById(fileStoreID);
+        return fileStoreDAO.findById(fileStoreID).orElse(null);
     }
 
     public void deleteFileStore(String fileStoreID) {
