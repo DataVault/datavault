@@ -104,11 +104,12 @@ public class VaultCustomDAOImpl extends BaseCustomDAOImpl implements VaultCustom
                 criteria.addOrder(Order.desc("user.id"));
             }
         } else if ("groupID".equals(sort)) {
-        	criteria.createAlias("group", "g");
+            //we already have an association to Group - adding another results in error
+        	  //criteria.createAlias("group", "g");
             if (asc) {
-                criteria.addOrder(Order.asc("g.id"));
+                criteria.addOrder(Order.asc("group.id"));
             } else {
-                criteria.addOrder(Order.desc("g.id"));
+                criteria.addOrder(Order.desc("group.id"));
             }
         } else if ("crisID".equals(sort)) {
             criteria.createAlias("dataset", "d");

@@ -385,4 +385,59 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
     assertEquals(2
         , dao.queueCount("allowed"));
   }
+
+  @Test
+  void testInProgressCount() {
+    String schoolId = "lfcs-id";
+
+    createTestUser("denied", schoolId);
+    createTestUser("allowed", schoolId, Permission.CAN_VIEW_IN_PROGRESS);
+
+    Group group = new Group();
+    group.setID(schoolId);
+    group.setName("LFCS");
+    group.setEnabled(true);
+    groupDAO.save(group);
+
+    Vault vault = new Vault();
+    vault.setName("vault-1");
+    vault.setGroup(group);
+    vault.setContact("James Bond");
+    vault.setReviewDate(TestUtils.NOW);
+    vaultDAO.save(vault);
+
+    Deposit deposit = new Deposit();
+    deposit.setName("deposit-1");
+    deposit.setVault(vault);
+    deposit.setHasPersonalData(false);
+    depositDAO.save(deposit);
+
+    Retrieve ret1 = getRetrieve1();
+    ret1.setDeposit(deposit);
+    ret1.setStatus(Status.IN_PROGRESS);
+
+    Retrieve ret2 = getRetrieve2();
+    ret2.setDeposit(deposit);
+    ret2.setStatus(Status.NOT_STARTED);
+
+    Retrieve ret3 = getRetrieve3();
+    ret3.setDeposit(deposit);
+    ret3.setStatus(Status.COMPLETE);
+
+    Retrieve ret4 = getRetrieve4();
+    ret4.setDeposit(deposit);
+    ret4.setStatus(Status.NOT_STARTED);
+
+    dao.save(ret1);
+    dao.save(ret2);
+    dao.save(ret3);
+    dao.save(ret4);
+
+    assertEquals(4, count());
+
+    assertEquals(0, dao.inProgressCount("denied"));
+
+    //we want to count those 'IN PROGRESS'
+    assertEquals(1, dao.inProgressCount("allowed"));
+  }
 }

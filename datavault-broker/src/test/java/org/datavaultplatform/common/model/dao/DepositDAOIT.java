@@ -200,6 +200,9 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
 
     List<Deposit> items4 = dao.search("name3","name","asc","allowed2");
     assertEquals(1, items4.size());
+
+    List<Deposit> items5 = dao.search("name3","name","desc","allowed2");
+    assertEquals(1, items5.size());
   }
 
   @Test
@@ -460,6 +463,13 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
 
     int alllowed2Count = dao.inProgressCount("allowed2");
     assertEquals(2, alllowed2Count);
+
+
+    int denied1Count = dao.inProgressCount("denied1");
+    assertEquals(0, denied1Count);
+
+    int denied2Count = dao.inProgressCount("denied2");
+    assertEquals(0, denied2Count);
   }
 
   @Test
@@ -536,6 +546,13 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
 
     int alllowed2Count = dao.queueCount("allowed2");
     assertEquals(2, alllowed2Count);
+
+    int denied1Count = dao.queueCount("denied1");
+    assertEquals(0, denied1Count);
+
+    int denied2Count = dao.queueCount("denied2");
+    assertEquals(0, denied2Count);
+
   }
 
   @Test
@@ -618,6 +635,10 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
 
     long alllowed2Size = dao.size("allowed2");
     assertEquals(2_222_000, alllowed2Size);
+
+
+    long denied2Size = dao.size("denied2");
+    assertEquals(0, denied2Size);
   }
 
 
@@ -728,4 +749,92 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     result.setStatus(Status.IN_PROGRESS);
     return result;
   }
+
+  @Test
+  void testCountByUser() {
+
+    String schoolId1 = "lfcs-id-1";
+    String schoolId2 = "lfcs-id-2";
+
+    Group group1 = new Group();
+    group1.setID(schoolId1);
+    group1.setName("LFCS-ONE");
+    group1.setEnabled(true);
+    groupDAO.save(group1);
+
+    Group group2 = new Group();
+    group2.setID(schoolId2);
+    group2.setName("LFCS-TWO");
+    group2.setEnabled(true);
+    groupDAO.save(group2);
+
+    Vault vault1 = new Vault();
+    vault1.setContact("James Bond");
+    vault1.setGroup(group1);
+    vault1.setName("vault-one");
+    vault1.setReviewDate(NOW);
+    vaultDAO.save(vault1);
+
+    Vault vault2 = new Vault();
+    vault2.setContact("James Bond");
+    vault2.setGroup(group2);
+    vault2.setName("vault-two");
+    vault2.setReviewDate(NOW);
+    vaultDAO.save(vault2);
+
+    Deposit depositReview1 = getDeposit1();
+    depositReview1.setVault(vault1);
+    depositReview1.setName("name1");
+
+    Deposit depositReview2 = getDeposit2();
+    depositReview2.setVault(vault1);
+    depositReview2.setName("name12");
+
+    Deposit depositReview3 = getDeposit3();
+    depositReview3.setVault(vault2);
+    depositReview3.setName("name3");
+
+    Deposit depositReview4 = getDeposit4();
+    depositReview4.setVault(vault2);
+    depositReview4.setName("name34");
+
+    Deposit depositReview5 = getDeposit5();
+    depositReview5.setVault(vault2);
+    depositReview5.setName("name345");
+
+    dao.save(depositReview1);
+    dao.save(depositReview2);
+    dao.save(depositReview3);
+    dao.save(depositReview4);
+    dao.save(depositReview5);
+
+    assertEquals(5, dao.count());
+
+    createTestUser("denied1", schoolId1);
+    createTestUser("denied2", schoolId2);
+    createTestUser("allowed1", schoolId1, Permission.CAN_MANAGE_DEPOSITS);
+    createTestUser("allowed2", schoolId2, Permission.CAN_MANAGE_DEPOSITS);
+
+    int count1 = dao.count("denied1","name1");
+    assertEquals(0, count1);
+
+    int count2 = dao.count("denied2", "name3");
+    assertEquals(0, count2);
+
+    int count3a = dao.count("allowed1","name1");
+    assertEquals(2, count3a);
+
+    int count3b = dao.count("allowed1","name12");
+    assertEquals(1, count3b);
+
+    int count4a = dao.count("allowed2","name3");
+    assertEquals(3, count4a);
+
+    int count4b = dao.count("allowed2","name34");
+    assertEquals(2, count4b);
+
+    int count4c = dao.count("allowed2", "name345");
+    assertEquals(1, count4c);
+  }
+
 }

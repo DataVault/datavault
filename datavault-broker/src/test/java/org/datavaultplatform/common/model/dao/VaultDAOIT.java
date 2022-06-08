@@ -17,6 +17,7 @@ import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseReuseDatabaseTest;
 import org.datavaultplatform.broker.test.TestUtils;
+import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.User;
@@ -45,6 +46,9 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
 
   @Autowired
   GroupDAO groupDAO;
+
+  @Autowired
+  DatasetDAO datasetDAO;
 
   @Test
   void testWriteThenRead() {
@@ -104,11 +108,11 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
   void testUpdate() {
     Vault vault = getVault1();
 
-    dao.save(vault);
+    dao.saveOrUpdateVault(vault);
 
     vault.setName("updated-name");
 
-    dao.update(vault);
+    dao.saveOrUpdateVault(vault);
 
     Vault found = dao.findById(vault.getID()).get();
     assertEquals(vault.getName(), found.getName());
@@ -233,9 +237,27 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
   @Test
   void testListForUser() {
 
+    Dataset ds1 = new Dataset();
+    ds1.setID("dataset-1");
+    ds1.setName("dataset-1");
+    ds1.setCrisId("crisId1");
+    ds1.setVisible(true);
+
+    Dataset ds2 = new Dataset();
+    ds2.setID("dataset-2");
+    ds2.setName("dataset-2");
+    ds2.setCrisId("crisId2");
+    ds2.setVisible(true);
+
+    datasetDAO.save(ds1);
+    datasetDAO.save(ds2);
+
     Vault v1 = getVault1();
+    v1.setDataset(ds1);
     Vault v2 = getVault2();
+    v2.setDataset(ds2);
     Vault v3 = getVault3();
+    v3.setDataset(ds1);
 
     String schoolId = "lfcs-id";
 
@@ -327,14 +349,58 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     //from 0..3
     List<Vault> from0to3 = dao.list("allowed", "description", "desc", "0", "3");
     assertEquals(3, from0to3.size());
+
+    //for test coverage...
+
+    //user asc
+    List<Vault> sortByUserAsc = dao.list("allowed", "user", "asc", null, null);
+    assertEquals(3, sortByUserAsc.size());
+
+    //user desc
+    List<Vault> sortByUserDesc = dao.list("allowed", "user", "desc", null, null);
+    assertEquals(3, sortByUserDesc.size());
+
+    //crisID asc - must have association with Dataset
+    List<Vault> sortCrisIdAsc = dao.list("allowed", "crisID", "asc", null, null);
+    assertEquals(3, sortCrisIdAsc.size());
+
+    //crisID desc - must have association with Dataset
+    List<Vault> sortCrisIdDesc = dao.list("allowed", "crisID", "desc", null, null);
+    assertEquals(3, sortCrisIdDesc.size());
+
+    //groupID asc
+    List<Vault> sortByGroupIdAsc = dao.list("allowed", "groupID", "asc", null, null);
+    assertEquals(3, sortByGroupIdAsc.size());
+
+    //groupID desc
+    List<Vault> sortByGroupIdDesc = dao.list("allowed", "groupID", "desc", null, null);
+    assertEquals(3, sortByGroupIdDesc.size());
   }
 
   @Test
   void testSearchForUser() {
 
+    Dataset ds1 = new Dataset();
+    ds1.setID("dataset-1");
+    ds1.setName("dataset-1");
+    ds1.setCrisId("crisId1");
+    ds1.setVisible(true);
+
+    Dataset ds2 = new Dataset();
+    ds2.setID("dataset-2");
+    ds2.setName("dataset-2");
+    ds2.setCrisId("crisId2");
+    ds2.setVisible(true);
+
+    datasetDAO.save(ds1);
+    datasetDAO.save(ds2);
+
     Vault v1 = getVault1();
+    v1.setDataset(ds1);
     Vault v2 = getVault2();
+    v2.setDataset(ds2);
     Vault v3 = getVault3();
+    v3.setDataset(ds1);
 
     String schoolId = "lfcs-id";
 
@@ -438,6 +504,14 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
 
     List<Vault> from0to3likeDesc = dao.search("allowed", "desc-for-12", "description", "desc", "0", "3");
     assertEquals(2, from0to3likeDesc.size());
+
+    //for test coverage
+    assertEquals(3, dao.search("allowed", null, "user", "asc", null, null).size());
+    assertEquals(3, dao.search("allowed", null, "user", "desc", null, null).size());
+    assertEquals(3, dao.search("allowed", null, "groupID", "asc", null, null).size());
+    assertEquals(3, dao.search("allowed", null, "groupID", "desc", null, null).size());
+    assertEquals(3, dao.search("allowed", null, "crisID", "asc", null, null).size());
+    assertEquals(3, dao.search("allowed", null, "crisID", "desc", null, null).size());
   }
 
   @Test

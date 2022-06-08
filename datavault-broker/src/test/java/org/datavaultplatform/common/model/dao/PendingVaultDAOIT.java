@@ -12,7 +12,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
@@ -349,6 +351,16 @@ public class PendingVaultDAOIT extends BaseDatabaseTest {
     List<String> results11 = dao.list("allowed1", "creationTime", "desc",
         "0", "1").stream().map(PendingVault::getId).collect(Collectors.toList());
     assertEquals(Arrays.asList(pendingVault3.getId()), results11);
+
+    //ordering by userid asc - for coverage really
+    Set<String> results12 = dao.list("allowed1", "user", "asc",
+        null, null).stream().map(PendingVault::getId).collect(Collectors.toSet());
+    assertEquals(new HashSet<>(Arrays.asList(pendingVault3.getId(),pendingVault1.getId())),results12);
+
+    //ordering by userid desc - for coverage really
+    Set<String> results13 = dao.list("allowed1", "user", "desc",
+        null, null).stream().map(PendingVault::getId).collect(Collectors.toSet());
+    assertEquals(new HashSet<>(Arrays.asList(pendingVault3.getId(),pendingVault1.getId())),results13);
   }
 
 

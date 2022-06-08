@@ -212,6 +212,73 @@ public class BillingDAOIT extends BaseReuseDatabaseTest {
   }
 
   @Test
+  void testListWithParams() {
+    BillingInfo billingInfo1 = getBillingInfo1(v1);
+    billingInfo1.setContactName("contactName1");
+    billingInfo1.setProjectTitle("AAA");
+    BillingInfo billingInfo2 = getBillingInfo2(v2);
+    billingInfo2.setContactName("contactName12");
+    billingInfo2.setProjectTitle("BBB");
+    BillingInfo billingInfo3 = getBillingInfo2(v3);
+    billingInfo3.setProjectTitle("CCC");
+    billingInfo3.setContactName("contactName123");
+
+    dao.save(billingInfo1);
+    dao.save(billingInfo2);
+    dao.save(billingInfo3);
+
+    {
+      List<BillingInfo> items1 = dao.list("projectTitle","asc",null, null);
+      assertEquals(3, items1.size());
+      assertEquals(billingInfo1, items1.get(0));
+      assertEquals(billingInfo2, items1.get(1));
+      assertEquals(billingInfo3, items1.get(2));
+    }
+
+    {
+      List<BillingInfo> items2 = dao.list("projectTitle","desc",null, null);
+      assertEquals(3, items2.size());
+      assertEquals(billingInfo1, items2.get(2));
+      assertEquals(billingInfo2, items2.get(1));
+      assertEquals(billingInfo3, items2.get(0));
+    }
+
+    {
+      //by default, sort is descending
+      List<BillingInfo> items3 = dao.list("projectTitle",null,null, null);
+      assertEquals(3, items3.size());
+      assertEquals(billingInfo1, items3.get(2));
+      assertEquals(billingInfo2, items3.get(1));
+      assertEquals(billingInfo3, items3.get(0));
+    }
+
+    {
+      //this should be same as NO offset and maxResult params
+      List<BillingInfo> items4 = dao.list("projectTitle","asc","0", String.valueOf(Integer.MAX_VALUE));
+      assertEquals(3, items4.size());
+      assertEquals(billingInfo1, items4.get(0));
+      assertEquals(billingInfo2, items4.get(1));
+      assertEquals(billingInfo3, items4.get(2));
+    }
+
+    {
+      //we should skip first result
+      List<BillingInfo> items5 = dao.list("projectTitle","asc","1", String.valueOf(Integer.MAX_VALUE));
+      assertEquals(2, items5.size());
+      assertEquals(billingInfo2, items5.get(0));
+      assertEquals(billingInfo3, items5.get(1));
+    }
+
+    {
+      //we should skip first and last result
+      List<BillingInfo> items6 = dao.list("projectTitle","asc","1", "1");
+      assertEquals(1, items6.size());
+      assertEquals(billingInfo2, items6.get(0));
+    }
+  }
+
+
+  @Test
   void testCountByQuery() {
     BillingInfo billingInfo1 = getBillingInfo1(v1);
     billingInfo1.setContactName("contactName1");
