@@ -2,6 +2,7 @@ package org.datavaultplatform.common.ldap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -9,12 +10,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.datavaultplatform.common.services.LDAPService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,9 +29,9 @@ import org.testcontainers.containers.startupcheck.MinimumDurationRunningStartupC
 import org.testcontainers.junit.jupiter.Container;
 
 /*
- The LDAPService is defined in datavault-commons but we have to test it in broker because are not just testing LDAPService functionality
- but also that it's wired up/configured correctly within the datavault-broker too.
- This test class uses OpenLdap in a testcontainer with users add via an '.ldif' file.
+ The LDAPService is defined in datavault-commons but we have to test it in broker AND Webapp because are not just testing LDAPService functionality
+ but also that it's wired up/configured correctly within the datavault-broker/datavault-webapp too.
+ This test class uses OpenLdap in a testcontainer with users added via an '.ldif' file.
  */
 
 @Slf4j
@@ -182,6 +185,49 @@ public abstract class BaseLDAPServiceTest {
     assertEquals("joebloggs", info.get("uid"));
     assertEquals("joe.bloggs@test.com", info.get("mail"));
     assertEquals("Joe Bloggs", info.get("cn"));
+  }
+
+  @Nested
+  class UnknownUsers {
+
+    @Test
+    @SneakyThrows
+    void testGetLdapAttributes() {
+      assertTrue(ldapService.getLDAPAttributes("UNKNOWN").isEmpty());
+    }
+
+    @Test
+    @SneakyThrows
+    void testGetLdapUserInfo() {
+      assertTrue(ldapService.getLdapUserInfo("UNKNOWN").isEmpty());
+    }
+
+    @Test
+    @SneakyThrows
+    void testAutocompleteUID() {
+      assertTrue(ldapService.autocompleteUID("UNKNOWN").isEmpty());
+    }
+  }
+  @Nested
+  class NullInput {
+
+    @Test
+    @SneakyThrows
+    void testGetLdapAttributes() {
+      assertTrue(ldapService.getLDAPAttributes(null).isEmpty());
+    }
+
+    @Test
+    @SneakyThrows
+    void testGetLdapUserInfo() {
+      assertTrue(ldapService.getLdapUserInfo(null).isEmpty());
+    }
+
+    @Test
+    @SneakyThrows
+    void testAutocompleteUID() {
+      assertTrue(ldapService.autocompleteUID(null).isEmpty());
+    }
   }
 
 

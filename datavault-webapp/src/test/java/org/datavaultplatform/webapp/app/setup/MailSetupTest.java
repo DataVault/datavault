@@ -32,7 +32,7 @@ public class MailSetupTest {
   MessageCreator messageCreator;
 
   @Test
-  void testMailSenderConfig(){
+  void testMailSenderConfig() {
 
       assertThat(mailSender.getProtocol()).isEqualTo("smtp");
       assertThat(mailSender.getHost()).isEqualTo("smtp.gmail.com");

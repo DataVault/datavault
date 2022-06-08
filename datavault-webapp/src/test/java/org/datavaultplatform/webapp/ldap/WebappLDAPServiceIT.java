@@ -17,6 +17,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  but also that it's wired up/configured correctly within the datavault-broker too.
  This test class uses OpenLdap in a testcontainer with users add via an '.ldif' file.
  */
-public class LDAPServiceTest extends BaseLDAPServiceTest {
+public class WebappLDAPServiceIT extends BaseLDAPServiceTest {
 
 }
