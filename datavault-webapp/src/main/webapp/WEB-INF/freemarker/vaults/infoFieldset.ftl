@@ -70,7 +70,7 @@
 
         <div class="form-group required">
             <label for="reviewDate" class="control-label">
-                <strong>Review Date (tell us how long you want us to keep the data)</strong>
+                <strong>Review Date (the date before which we should not delete this data, typically ten years from now)</strong>
             </label>
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                   title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault.">
