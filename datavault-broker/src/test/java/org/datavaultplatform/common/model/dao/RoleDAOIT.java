@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +28,7 @@ import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.util.RoleUtils;
+import org.hibernate.Session;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -34,7 +36,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
 @AddTestProperties
@@ -62,6 +67,9 @@ public class RoleDAOIT extends BaseDatabaseTest {
 
   @Autowired
   RoleAssignmentDAO roleAssignmentDAO;
+
+  @Autowired
+  PermissionDAO permissionDAO;
 
   @Test
   void testWriteThenRead() {
@@ -354,6 +362,100 @@ public class RoleDAOIT extends BaseDatabaseTest {
 
       assertEquals(expectedIds2, actualIds2);
     }
+
+    /*
+      Tests that role_permissions in will be updated if they are not correct.
+      We have to run this test in a transaction otherwise we get dreaded LazyInitializationExceptions.
+      This test helps increase Code Coverage
+     */
+    @Test
+    @Transactional
+    void testStoreSpecialRoles_SomeRolePermissionsUpdated(@Autowired EntityManager em){
+
+      Session session = em.unwrap(Session.class);
+
+      assertEquals(0, dao.list().size());
+      assertNull(dao.getIsAdmin());
+      assertNull(dao.getDataOwner());
+      assertNull(dao.getDepositor());
+      assertNull(dao.getNominatedDataManager());
+      assertNull(dao.getVaultCreator());
+
+      permissionDAO.synchronisePermissions();
+      dao.storeSpecialRoles();
+      session.flush();
+
+      long roleCount = getCountOfRoles();
+      assertEquals(5, roleCount);
+
+      long permissionCount = getCountOfPermissions();
+      assertEquals(30, permissionCount);
+
+      long rolePermissionCount = getCountOfRolePermissions();
+      assertEquals(42, rolePermissionCount);
+
+      assertEquals(5, dao.list().size());
+      assertNotNull(dao.getIsAdmin());
+      assertNotNull(dao.getDataOwner());
+      assertNotNull(dao.getDepositor());
+      assertNotNull(dao.getNominatedDataManager());
+      assertNotNull(dao.getVaultCreator());
+
+      RoleModel isAdmin3 = dao.getIsAdmin();
+      RoleModel dataOwner3 = dao.getDataOwner();
+      RoleModel depositor3 = dao.getDepositor();
+      RoleModel nominatedDataManager3 = dao.getNominatedDataManager();
+      RoleModel vaultCreator3 = dao.getVaultCreator();
+
+      //we don't have to worry about 'Depositor' and 'NominatedDataManager' - they have no permissions
+      assertEquals(0, getCountOfPermissionsForRole(depositor3));
+      assertEquals(0, getCountOfPermissionsForRole(nominatedDataManager3));
+
+      //we are just concerned with 'isAmdin', 'DataOwner' and 'VaultCreator'
+      assertNotEquals(0, getCountOfPermissionsForRole(isAdmin3));
+      assertNotEquals(0, getCountOfPermissionsForRole(dataOwner3));
+      assertNotEquals(0, getCountOfPermissionsForRole(vaultCreator3));
+
+      isAdmin3.setPermissions(Collections.emptyList());
+      dataOwner3.setPermissions(Collections.emptyList());
+      vaultCreator3.setPermissions(Collections.emptyList());
+
+      dao.update(isAdmin3);
+      dao.update(dataOwner3);
+      dao.update(vaultCreator3);
+      session.flush();
+
+      //Check that the changes have been flushed through to the database
+      assertEquals(0, getCountOfPermissionsForRole(isAdmin3));
+      assertEquals(0, getCountOfPermissionsForRole(dataOwner3));
+      assertEquals(0, getCountOfPermissionsForRole(vaultCreator3));
+
+      dao.storeSpecialRoles();
+      session.flush();
+
+      //Check that the changes have been flushed through to the database
+      assertNotEquals(0, getCountOfPermissionsForRole(isAdmin3));
+      assertNotEquals(0, getCountOfPermissionsForRole(dataOwner3));
+      assertNotEquals(0, getCountOfPermissionsForRole(vaultCreator3));
+    }
+  }
+
+  private Long getCountOfPermissionsForRole(RoleModel role){
+    RowMapper<Long> longRowMapper = new SingleColumnRowMapper<>();
+    return template.queryForObject("select count(*) from `Role_permissions` XYZ where XYZ.role_id=?",
+        longRowMapper, role.getId());
+  }
+
+  private Long getCountOfRolePermissions(){
+    return template.queryForObject("select count(*) from `Role_permissions`", Long.class);
+  }
+
+  private Long getCountOfPermissions() {
+    return template.queryForObject("select count(*) from `Permissions`", Long.class);
+  }
+
+  private Long getCountOfRoles() {
+    return template.queryForObject("select count(*) from `Roles`", Long.class);
   }
 
   @Test
@@ -396,7 +498,7 @@ public class RoleDAOIT extends BaseDatabaseTest {
     cache.evict(RoleModel.class, isAdminRole1.getId());
 
     Optional<RoleModel> optRoleWithUserCount = dao.listAndPopulate().stream().
-        filter(r -> r.getAssignedUserCount() > 0).sorted(Comparator.comparing(RoleModel::getName)).findFirst();
+        filter(r -> r.getAssignedUserCount() > 0).min(Comparator.comparing(RoleModel::getName));
 
     assertTrue(optRoleWithUserCount.isPresent());
 
@@ -414,8 +516,8 @@ public class RoleDAOIT extends BaseDatabaseTest {
 
     @AfterEach
   void cleanup() {
-    //template.execute("delete from `Role_Permission`");
-    //template.execute("delete from `Permission`");
+    template.execute("delete from `Role_permissions`");
+    template.execute("delete from `Permissions`");
     template.execute("delete from `Role_assignments`");
     template.execute("delete from `Users`");
     template.execute("delete from `Roles`");

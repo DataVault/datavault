@@ -5,6 +5,7 @@ import static org.datavaultplatform.broker.test.TestUtils.ONE_WEEK_AGO;
 import static org.datavaultplatform.broker.test.TestUtils.TWO_WEEKS_AGO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.ResultSet;
@@ -252,11 +253,16 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
     depositChunk1.setArchiveDigest("chunk-1");
 
     DepositChunk depositChunk2 = new DepositChunk();
-    depositChunk1.setChunkNum(2);
-    depositChunk1.setArchiveDigest("chunk-2");
+    depositChunk2.setChunkNum(2);
+    depositChunk2.setArchiveDigest("chunk-2");
+
+    DepositChunk depositChunk3 = new DepositChunk();
+    depositChunk3.setChunkNum(3);
+    depositChunk3.setArchiveDigest("chunk-3");
 
     depositChunkDAO.save(depositChunk1);
     depositChunkDAO.save(depositChunk2);
+    depositChunkDAO.save(depositChunk3);
 
     AuditChunkStatus item1 = getAuditChunkStatus1();
     item1.setTimestamp(TestUtils.TWO_YEARS_AGO);
@@ -279,6 +285,9 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
 
     AuditChunkStatus last2 = dao.getLastChunkAuditTime(depositChunk2);
     assertEquals(item2.getID(), last2.getID());
+
+    AuditChunkStatus last3 = dao.getLastChunkAuditTime(depositChunk3);
+    assertNull(last3);
   }
 
   @Test
