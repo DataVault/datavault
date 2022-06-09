@@ -130,6 +130,8 @@
         <@sec.authorize access=viewDepositsSecurityExpression>
             <#if deposits?has_content>
             <h4><strong>Deposit and Retrieve</strong></h4>
+             <#assign addDepositsSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') ">
+            <@sec.authorize access=addDepositsSecurityExpression>
             <div class="row">
                 <div class="col-md-12">
                     <a class="btn btn-primary pull-right" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create">
@@ -137,6 +139,7 @@
                     </a>
                 </div>
             </div>
+            </@sec.authorize>
             <table class="table table-bordered">
                 <thead>
                     <tr class="tr">
@@ -199,6 +202,8 @@
                 </tbody>
             </table>
             <#else>
+            <#assign addDepositsSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') ">
+            <@sec.authorize access=addDepositsSecurityExpression>
             <div class="row">
                 <div class="col-md-12">
                     <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create">
@@ -206,6 +211,7 @@
                     </a>
                 </div>
             </div>
+            </@sec.authorize>
             </#if>
         </@sec.authorize>
 
