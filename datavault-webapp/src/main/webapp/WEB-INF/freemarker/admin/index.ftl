@@ -89,7 +89,7 @@
             </div>
         </div>
     </#if>
-    <#if canManageVaults??>
+    <#if canManagePendingVaults??>
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-info">
                 <div class="panel-heading">
