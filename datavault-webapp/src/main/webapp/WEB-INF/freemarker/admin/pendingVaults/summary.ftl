@@ -108,7 +108,7 @@
 			<#if pendingVault.confirmed?c=="true">
                 <input class="form-control" id="reviewDate" placeholder="yyyy-mm-dd" name="reviewDate"
                      value="${pendingVault.getReviewDateAsString()}"/>
-                <span id="invalid-review-date-span" style="font-size: 1.2em; font: bold; color: #f00; display: inline;"></span>
+                <span id="invalid-review-date-span" style="font-size: 1.2em; font: bold; color:  #AE0F0F; display: inline;"></span>
             <#else>
                 <#if (pendingVault.reviewDate)??>
                     ${pendingVault.reviewDate?date}
