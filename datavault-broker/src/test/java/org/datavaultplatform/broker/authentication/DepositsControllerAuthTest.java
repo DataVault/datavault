@@ -1,6 +1,7 @@
 package org.datavaultplatform.broker.authentication;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -10,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
+import java.util.Date;
 import lombok.SneakyThrows;
 import org.datavaultplatform.broker.controllers.DepositsController;
 import org.datavaultplatform.common.api.ApiError;
@@ -23,6 +25,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 public class DepositsControllerAuthTest extends BaseControllerAuthTest {
+
+  Date dateBeforeTest = new Date();
 
   @MockBean
   DepositsController controller;
@@ -176,8 +180,6 @@ public class DepositsControllerAuthTest extends BaseControllerAuthTest {
 
     Exception outer = error.getException();
     assertEquals(ex.getMessage(), outer.getMessage());
-
-    Throwable inner = outer.getCause();
     assertEquals(ex.getCause().getMessage(), outer.getCause().getMessage());
 
     verify(controller).retrieveDeposit(argUserId.getValue(), argDepositId.getValue(),
@@ -185,6 +187,10 @@ public class DepositsControllerAuthTest extends BaseControllerAuthTest {
     assertEquals(USER_ID_1, argUserId.getValue());
     assertEquals("deposit-id-1", argDepositId.getValue());
     assertEquals(AuthTestData.RETRIEVE_1.getID(), argRetrieve.getValue().getID());
+
+    Date dateOfError = error.getTimestamp();
+    assertTrue(dateOfError.after(dateBeforeTest));
+    assertTrue(dateOfError.before(new Date()));
   }
 
   static class CustomException extends RuntimeException {
