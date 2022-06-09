@@ -101,13 +101,13 @@ public abstract class BaseControllerAuthTest {
   @Autowired
   ObjectMapper mapper;
 
-  private Client clientForIp(String ipAddress) {
+  protected Client clientForIp(String ipAddress) {
     Client result = new Client();
     result.setIpAddress(ipAddress);
     return result;
   }
 
-  private MockHttpServletRequestBuilder setupAuthentication(MockHttpServletRequestBuilder builder) {
+  protected MockHttpServletRequestBuilder setupAuthentication(MockHttpServletRequestBuilder builder) {
     return builder.with(req -> {
           req.setRemoteAddr(IP_ADDRESS);
           return req;
@@ -141,7 +141,7 @@ public abstract class BaseControllerAuthTest {
 
   }
 
-  private Set<Permission> getPermissions(Permission[] permissions) {
+  protected Set<Permission> getPermissions(Permission... permissions) {
     return new HashSet<>(Arrays.asList(permissions));
   }
 

@@ -5,9 +5,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
+import lombok.SneakyThrows;
 import org.datavaultplatform.broker.controllers.DepositsController;
+import org.datavaultplatform.common.api.ApiError;
 import org.datavaultplatform.common.model.Retrieve;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -136,6 +141,62 @@ public class DepositsControllerAuthTest extends BaseControllerAuthTest {
     assertEquals(AuthTestData.RETRIEVE_1.getID(), argRetrieve.getValue().getID());
   }
 
+  /**
+   * This test does a lot of setup to allow the request to get to the mock controller,
+   * the mock controller will then throw an Exception when the 'retrieveDeposit' method is called.
+   * The test checks that the '' handles the exception, wraps it in an ApiError and return that with 500
+   */
+  @Test
+  @SneakyThrows
+  void testPostDepositRetrieveThrowsException() {
+
+    CustomException ex = new CustomException("outer-123", new CustomException("inner-234"));
+    boolean isAdminUser = false;
+    when(mClientService.getClientByApiKey(API_KEY_1)).thenReturn(clientForIp(IP_ADDRESS));
+    when(mUserService.getUser(USER_ID_1)).thenReturn(mLoginUser);
+    when(mAdminService.isAdminUser(mLoginUser)).thenReturn(isAdminUser);
+    when(mLoginUser.getID()).thenReturn(USER_ID_1);
+    when(mRolesAndPermissionService.getUserPermissions(USER_ID_1)).thenReturn(getPermissions());
+
+    when(controller.retrieveDeposit(argUserId.capture(), argDepositId.capture(),
+        argRetrieve.capture())).thenThrow(ex);
+
+    String responseContent = mvc.perform(
+            setupAuthentication(post("/deposits/{depositid}/retrieve", "deposit-id-1")
+                .content(mapper.writeValueAsString(AuthTestData.RETRIEVE_1))
+                .contentType(MediaType.APPLICATION_JSON)))
+        .andDo(print())
+        .andExpect(status().isInternalServerError())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)).andReturn()
+        .getResponse().getContentAsString();
+
+    ApiError error = mapper.readValue(responseContent, ApiError.class);
+    String message = error.getMessage();
+    assertEquals("The Broker threw an Error!", message);
+
+    Exception outer = error.getException();
+    assertEquals(ex.getMessage(), outer.getMessage());
+
+    Throwable inner = outer.getCause();
+    assertEquals(ex.getCause().getMessage(), outer.getCause().getMessage());
+
+    verify(controller).retrieveDeposit(argUserId.getValue(), argDepositId.getValue(),
+        argRetrieve.getValue());
+    assertEquals(USER_ID_1, argUserId.getValue());
+    assertEquals("deposit-id-1", argDepositId.getValue());
+    assertEquals(AuthTestData.RETRIEVE_1.getID(), argRetrieve.getValue().getID());
+  }
+
+  static class CustomException extends RuntimeException {
+
+    public CustomException(String message) {
+      super(message);
+    }
+
+    public CustomException(String message, Exception cause) {
+      super(message, cause);
+    }
+  }
 
   @AfterEach
   void securityCheck() {
