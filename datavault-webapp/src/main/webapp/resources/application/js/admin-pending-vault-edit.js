@@ -1,7 +1,10 @@
+// This is modified version of new-create-prototype.js tailored to taking account of differences
+// between the creation of a Pending Vault and the Admin Edit of a Pending Vault.
 $(document).ready(function(){
 	var current_fs, next_fs, previous_fs;
 	var opacity;
 	var confirmedTrue = ($("#confirmed").val() === 'true');
+	var isAdmin = ($("#is-admin").length > 0);
 
 	// Prevent Enter Key Submitting Form
 	$("form input").on("keypress", function(e) {
@@ -9,7 +12,7 @@ $(document).ready(function(){
 	});
 
 	var startYearsInFutureForGEDNegative = -60; // 60 years in past
-	
+
 	var todayForDatepicker = new Date();
 	todayForDatepicker.setHours(0,0,0,0);
 	var _30YearsFromToday= new Date();
@@ -31,22 +34,7 @@ $(document).ready(function(){
 	// Get db Grant End Date when page set
 	var dbGrantEndDate = $("#grantEndDate").val().trim();
 	console.log("dbGrantEndDate: ", dbGrantEndDate);
-	
-	// Ownership display
-	$("#isOwnerTrue").change(function(){
-        if($(this).is(":checked")) {
-          $('#owner-uun-span').show();
-          $("#vaultOwner").hide();
-        } 
-	 }).trigger('change');
-	    
-	 $("#isOwnerFalse").change(function(){
-        if($(this).is(":checked")) {
-          $('#owner-uun-span').hide();
-          $("#vaultOwner").show();
-        } 
-	 }).trigger('change');
-     
+
 	/*
     if billinGrantEndDate is filled in, disable granteddate on the info page and populate it with the billing value
     if billingGrantEndDate is cleared enable grantenddate on the info page and populate it with dbGrantEndDate also reset review date
@@ -54,29 +42,27 @@ $(document).ready(function(){
 	$( "#billingGrantEndDate" ).change(function() {
 		// clear any validation
 		$('#invalid-billing-grant-end-date-span').text("");
-		if (confirmedTrue === false) {
-			var dateResult = ($("#billingGrantEndDate").val().trim() === '');
+		var dateResult = ($("#billingGrantEndDate").val().trim() === '');
 
-			var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
+		var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
 
-			if (dateResult === false && grantChecked === true) {
-				// 
-				var validationMessage = validateDateString($("#billingGrantEndDate").val().trim(), "Grant End Date", startYearsInFutureForGEDNegative);
-				if (validationMessage != "") {
-					$('#invalid-billing-grant-end-date-span').text(validationMessage);
-				}
-
-				$("#grantEndDate").val($("#billingGrantEndDate").val().trim());
-				$("#grantEndDate").prop("disabled", true);
-			} else {
-				var length = calculateReviewLength();
-				var estimatedReviewDate = calculateReviewDateForToday(length);
-
-				$("#grantEndDate").prop("disabled", false);
-				// Reset to dbGrantEndDate
-				$("#grantEndDate").val(dbGrantEndDate);
-				$("#reviewDate").val(estimatedReviewDate);
+		if (dateResult === false && grantChecked === true) {
+			// 
+			var validationMessage = validateDateString($("#billingGrantEndDate").val().trim(), "Grant End Date", startYearsInFutureForGEDNegative);
+			if (validationMessage != "") {
+				$('#invalid-billing-grant-end-date-span').text(validationMessage);
 			}
+
+			$("#grantEndDate").val($("#billingGrantEndDate").val().trim());
+			$("#grantEndDate").prop("disabled", true);
+		} else {
+			var length = calculateReviewLength();
+			var estimatedReviewDate = calculateReviewDateForToday(length);
+
+			$("#grantEndDate").prop("disabled", false);
+			// Reset to dbGrantEndDate
+			$("#grantEndDate").val(dbGrantEndDate);
+			$("#reviewDate").val(estimatedReviewDate);
 		}
 	}).trigger('change');
 
@@ -93,76 +79,75 @@ $(document).ready(function(){
 		// if no retention policy picked yet ged + 3 years
 
 		// if a retention policy has been picked ged + policy length
-		if (confirmedTrue === false) {
-			var noRP = ($("#policyInfo option:selected").val() === '' || $("#policyInfo option:selected").prop("disabled"));
-			var noGED = ($("#grantEndDate").val().trim() === '');
-			var noBillingGED = ($("#billingGrantEndDate").val().trim() === '');
-			var ged = $("#grantEndDate").val().trim();
-			var gedDate = new Date(ged);
-			var gedMm = String(gedDate.getMonth() + 1).padStart(2, '0');
-			var gedDd = String(gedDate.getDate()).padStart(2, '0');
-			var billingGed = $("#billingGrantEndDate").val().trim();
-			var billingGedDate = new Date(billingGed);
-			var billingGedMm = String(billingGedDate.getMonth() + 1).padStart(2, '0');
-			var billingGedDd = String(billingGedDate.getDate()).padStart(2, '0');
-			var defaultLength = 3;
-			var policyLength = calculateReviewLength();
+		var noRP = ($("#policyInfo option:selected").val() === '' || $("#policyInfo option:selected").prop("disabled"));
+		var noGED = ($("#grantEndDate").val().trim() === '');
+		var noBillingGED = ($("#billingGrantEndDate").val().trim() === '');
+		var ged = $("#grantEndDate").val().trim();
+		var gedDate = new Date(ged);
+		var gedMm = String(gedDate.getMonth() + 1).padStart(2, '0');
+		var gedDd = String(gedDate.getDate()).padStart(2, '0');
+		var billingGed = $("#billingGrantEndDate").val().trim();
+		var billingGedDate = new Date(billingGed);
+		var billingGedMm = String(billingGedDate.getMonth() + 1).padStart(2, '0');
+		var billingGedDd = String(billingGedDate.getDate()).padStart(2, '0');
+		var defaultLength = 3;
+		var policyLength = calculateReviewLength();
 
-			var today = new Date();
-			var dd = String(today.getDate()).padStart(2, '0');
-			var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0
-			// Default Review Date (3 years from today)
-			var estimatedReviewDate = calculateReviewDateForToday(defaultLength);
-			
-			// GED in future test
-			var grantGEDInFuture = noGED  ? false : (dateDiffInDaysStartingAtMidnight(today, gedDate) > 0);
-			var billingGEDInFuture = noBillingGED ? false : (dateDiffInDaysStartingAtMidnight(today, billingGedDate) > 0);
-            
-			if (noRP === false && noGED === true && noBillingGED === true) {
-				// if we only have policy then length + current date = review date
-				estimatedReviewDate = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
-			} 
-			
-			if (noRP === false && noBillingGED === false && billingGEDInFuture === true) {
-				// if we have both then billing ged + policy length = review date
-				estimatedReviewDate = String(billingGedDate.getFullYear() + policyLength) + '-' + billingGedMm + '-' + billingGedDd;
-			} 
-			
-			if (noRP === true && noBillingGED === false && billingGEDInFuture === true) {
-				// if we only have a ged in the billing fieldset then ged + 3 = review date
-				estimatedReviewDate = String(billingGedDate.getFullYear() + defaultLength) + '-' + billingGedMm + '-' + billingGedDd;
-			} 
-			
-			if (noRP === false && noGED === false && grantGEDInFuture === true) {
-				// if we have both then ged + policy length = review date
-				estimatedReviewDate = String(gedDate.getFullYear() + policyLength) + '-' + gedMm + '-' + gedDd;
-			} 
-			
-			if (noRP === true && noGED === false && grantGEDInFuture === true) {
-				// if we only have ged then ged + 3 = review date
-				estimatedReviewDate = String(gedDate.getFullYear() + defaultLength) + '-' + gedMm + '-' + gedDd;
-			} 
-			
-			if (noRP === false && noBillingGED === false && billingGEDInFuture === false) {
-				// if we only have policy then length + current date = review date
-				estimatedReviewDate = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
-			} 
-			
-			if (noRP === false && noGED === false && grantGEDInFuture === false) {
-				// if we only have policy then length + current date = review date
-				estimatedReviewDate = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
-			}
-			
-			
+		var today = new Date();
+		var dd = String(today.getDate()).padStart(2, '0');
+		var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0
+		// Default Review Date (3 years from today)
+		var estimatedReviewDate = calculateReviewDateForToday(defaultLength);
 
-			$("#reviewDate").val(estimatedReviewDate);
+		// GED in future test
+		var grantGEDInFuture = noGED  ? false : (dateDiffInDaysStartingAtMidnight(today, gedDate) > 0);
+		var billingGEDInFuture = noBillingGED ? false : (dateDiffInDaysStartingAtMidnight(today, billingGedDate) > 0);
 
-			// Clear Error text and update message 
-			$("#invalid-review-date-span").text(""); 
-			var reviewDateUpdatedMsg = "Note the Review Date has been updated based on your selections.";
-			$("#updated-review-date-span").text(reviewDateUpdatedMsg);
+		if (noRP === false && noGED === true && noBillingGED === true) {
+			// if we only have policy then length + current date = review date
+			estimatedReviewDate = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
+		} 
 
+		if (noRP === false && noBillingGED === false && billingGEDInFuture === true) {
+			// if we have both then billing ged + policy length = review date
+			estimatedReviewDate = String(billingGedDate.getFullYear() + policyLength) + '-' + billingGedMm + '-' + billingGedDd;
+		} 
+
+		if (noRP === true && noBillingGED === false && billingGEDInFuture === true) {
+			// if we only have a ged in the billing fieldset then ged + 3 = review date
+			estimatedReviewDate = String(billingGedDate.getFullYear() + defaultLength) + '-' + billingGedMm + '-' + billingGedDd;
+		} 
+
+		if (noRP === false && noGED === false && grantGEDInFuture === true) {
+			// if we have both then ged + policy length = review date
+			estimatedReviewDate = String(gedDate.getFullYear() + policyLength) + '-' + gedMm + '-' + gedDd;
+		} 
+
+		if (noRP === true && noGED === false && grantGEDInFuture === true) {
+			// if we only have ged then ged + 3 = review date
+			estimatedReviewDate = String(gedDate.getFullYear() + defaultLength) + '-' + gedMm + '-' + gedDd;
+		} 
+
+		if (noRP === false && noBillingGED === false && billingGEDInFuture === false) {
+			// if we only have policy then length + current date = review date
+			estimatedReviewDate = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
+		} 
+
+		if (noRP === false && noGED === false && grantGEDInFuture === false) {
+			// if we only have policy then length + current date = review date
+			estimatedReviewDate = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
 		}
+
+
+
+		$("#reviewDate").val(estimatedReviewDate);
+
+		// Clear Error text and update message 
+		$("#invalid-review-date-span").text(""); 
+		var reviewDateUpdatedMsg = "Note the Review Date has been updated based on your selections.";
+		$("#updated-review-date-span").text(reviewDateUpdatedMsg);
+
+
 	}).trigger('change');
 
 	$("#reviewDate").change(function() {
@@ -174,7 +159,7 @@ $(document).ready(function(){
 
 		var reviewDateString = $("#reviewDate").val().trim();
 		console.log("reviewDateString", reviewDateString);
-		
+
 		var validationMessage = validateDateString(reviewDateString, "Review Date",  startYearsInFuture );
 
 		if(validationMessage.trim() !== '') {
@@ -189,9 +174,7 @@ $(document).ready(function(){
 
 	}).trigger('change');
 
-	$("#affirmation-check").change(function(){
-		$(this).parents("fieldset").children(".next").prop( "disabled", !$(this).is(":checked") );
-	}).trigger('change');
+
 
 	$("#vaultName, #description, #policyInfo, #groupID, #reviewDate, #grantEndDate").change(function(){
 		// if all the mandatory values in the info field set are non null or empty set the next button
@@ -209,7 +192,7 @@ $(document).ready(function(){
 		// Check that there are no validation error of grantEndDate input
 		// as it is not a required field
 		var grantEndResult = ($("#invalid-grant-end-date-span").text().trim() !== '');
-		
+
 		if (nameResult === false && descResult === false && rpResult === false &&
 				schoolResult === false  && reviewResult === false && grantEndResult === false) {
 			$(this).parents("fieldset").children(".next").prop("disabled", false);
@@ -227,60 +210,9 @@ $(document).ready(function(){
 		}
 	}).trigger('change');
 
-	$("#isOwnerTrue, #isOwnerFalse, #vaultOwner").change(function(){
-		var ownerFalseResult = $( "input[type=radio][id=isOwnerFalse]").is(":checked");
-		if(ownerFalseResult === true){
-			$('#vaultOwner').prop('disabled', false);
-		} else {
-			$('#vaultOwner').val("");
-			$('#vaultOwner').prop('disabled', true);
-		}
-
-		var uunResult = ($( "input[type=text][id=vaultOwner]").val().trim() === '');
-		var ownerTrueResult = $( "input[type=radio][id=isOwnerTrue]").is(":checked");
-
-		if (ownerFalseResult && uunResult) {
-			$(this).parents("fieldset").children(".next").prop("disabled", true);
-			$('.owner-uun-required-error-span').html("<br>You have not specified any user as the Owner of this vault. Please add an owner, or contact the Research Data Support team if you want to request this vault to be treated as legacy data ie an orphan vault.");
-			$('.owner-uun-required-error-span').show();
-
-		} else if (ownerTrueResult) {
-			// if ownerTrue and one of the other completed roles is the same uun
-			var count = 0;
-			var loggedInAS = $("#loggedInAs").val().trim()
-			$(".unique-uun-required").each(function() {
-				var uun = $(this).val().trim();
-				if (uun !== '') {
-					console.log("Checking (Role)", loggedInAS, " v ",  uun);
-					if(uun === loggedInAS) {
-						count++;
-					} else {
-						$('.owner-uun-required-error-span').html("");
-						$('.owner-uun-required-error-span').hide();
-					}
-				}
-
-				if (count > 0) {
-					console.log(loggedInAS, " Already has a role" );
-					$('.owner-uun-required-error-span').html("<br>A user may have only one vault-level user role, either Owner, NDM or Depositor. For further information please ");
-					$('.owner-uun-required-error-span').append('<a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/after/datavault/roles-and-access" target="_blank">click here</a>.');
-					$('.owner-uun-required-error-span').show();
-				} else {
-					$('.owner-uun-required-error-span').html("");
-					$('.owner-uun-required-error-span').hide();
-				}
-			});
-
-		} else {
-			$(this).parents("fieldset").children(".next").prop("disabled", false);
-			$('.owner-uun-required-error-span').html("");
-			$('.owner-uun-required-error-span').hide();
-		}
-	}).trigger('change');
 
 	// Initially, disable next on doc initialisation
 	$("input[name=\"billingType\"]").parents("fieldset").children(".next").prop( "disabled", true );
-	$('#vaultOwner').prop('disabled', true);
 
 	$("#billing-choice-na").change(function(){
 		clearBillingOptions();
@@ -495,23 +427,20 @@ $(document).ready(function(){
 		$('#submitAction').val($(this).attr('value'));
 	});
 
-	// If PV is confirmed go to last page
-	if($('#confirmed').val() === 'true') {
-		// We need to populate the summary page with data from other fieldset pages
-		populateSummaryPage();
-		// Set the Progress
-		$("#progressbar li").eq(1).addClass("active");
-		$("#progressbar li").eq(2).addClass("active");
-		$("#progressbar li").eq(3).addClass("active");
-		$("#progressbar li").eq(4).addClass("active");
 
-		// Hide the previous button on Summary page and disable Pure link checkbox
-		$('#summary-fieldset').find('.previous').hide();
-		$('#pureLink-check').prop("disabled", true);
-		// Show Summary page and hide the Affirmation page we first land on
-		$('#summary-fieldset').show();
-		$('#affirmation-fieldset').hide();
+	// We need to populate the summary page with data from 
+	// other fieldset pages at start
+	populateSummaryPage();
+	// Set the Progress to go to Billing when we first enter
+    var start = (new URL(window.location.href)).searchParams.get('start');
+	if(start == 2) {
+		$("#progressbar li").eq(1).addClass("active");
+		// Show Summary page
+		$('#summary-fieldset').hide();
+		$('#billing-fieldset').show();
 	}
+
+
 
 	function validateBillingNA() {
 		console.log("called validateBillingNAFields");
@@ -579,48 +508,47 @@ $(document).ready(function(){
 	}
 
 	function clearBillingOptions() {
-		if (confirmedTrue === false) {
-			// enable or disable the grant end date field on the info fieldset
-			var dateResult = ($("#billingGrantEndDate").val().trim() === '');
-			var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
 
-			if (dateResult === false && grantChecked === true) {
-				$("#grantEndDate").val($("#billingGrantEndDate").val());
-				$("#grantEndDate").prop("disabled", true);
-			} else {
-				var length = calculateReviewLength();
-				var estimatedReviewDate = calculateReviewDateForToday(length);
-				$("#grantEndDate").prop("disabled", false);
-				// Reset to dbGrantEndDate
-				$("#grantEndDate").val(dbGrantEndDate);
-				$("#reviewDate").val(estimatedReviewDate);
-			}
+		// enable or disable the grant end date field on the info fieldset
+		var dateResult = ($("#billingGrantEndDate").val().trim() === '');
+		var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
 
-			// clear the unused fieldsets
-			var naChecked = ($("#billing-choice-na").is(":checked"));
-			var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
-			var budgetChecked = ($("#billing-choice-budgetcode").is(":checked"));
-			var sliceChecked = ($("#billing-choice-slice").is(":checked"));
-			// if billing type is not grant clear fieldset
-			if (naChecked === true) {
-				$("#grant-billing-form input").val("");
-				$("#budget-billing-form input").val("");
-				$("#slice-form input").val("");
-			}
-			if (grantChecked === true) {
-				$("#budget-billing-form input").val("");
-				$("#slice-form input").val("");
-			}
+		if (dateResult === false && grantChecked === true) {
+			$("#grantEndDate").val($("#billingGrantEndDate").val());
+			$("#grantEndDate").prop("disabled", true);
+		} else {
+			var length = calculateReviewLength();
+			var estimatedReviewDate = calculateReviewDateForToday(length);
+			$("#grantEndDate").prop("disabled", false);
+			// Reset to dbGrantEndDate
+			$("#grantEndDate").val(dbGrantEndDate);
+			$("#reviewDate").val(estimatedReviewDate);
+		}
 
-			if (budgetChecked === true) {
-				$("#grant-billing-form input").val("");
-				$("#slice-form input").val("");
-			}
+		// clear the unused fieldsets
+		var naChecked = ($("#billing-choice-na").is(":checked"));
+		var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
+		var budgetChecked = ($("#billing-choice-budgetcode").is(":checked"));
+		var sliceChecked = ($("#billing-choice-slice").is(":checked"));
+		// if billing type is not grant clear fieldset
+		if (naChecked === true) {
+			$("#grant-billing-form input").val("");
+			$("#budget-billing-form input").val("");
+			$("#slice-form input").val("");
+		}
+		if (grantChecked === true) {
+			$("#budget-billing-form input").val("");
+			$("#slice-form input").val("");
+		}
 
-			if (sliceChecked === true) {
-				$("#grant-billing-form input").val("");
-				$("#budget-billing-form input").val("");
-			}
+		if (budgetChecked === true) {
+			$("#grant-billing-form input").val("");
+			$("#slice-form input").val("");
+		}
+
+		if (sliceChecked === true) {
+			$("#grant-billing-form input").val("");
+			$("#budget-billing-form input").val("");
 		}
 	}
 
@@ -629,8 +557,6 @@ $(document).ready(function(){
 		// Check if an element with id="summary-fieldset" currently exists,
 		// then populate the Summary page either values from form elements on previous pages
 		if ($('#summary-fieldset').length) {
-			$("#summary-affirmation-check").text($("#affirmation-check").is(":checked") ? "accepted" : "");
-
 			//  To get input tag text we need to use val() not text().
 
 			// VaultInfo
@@ -682,13 +608,7 @@ $(document).ready(function(){
 			// Vault Users
 
 			// Vault Access
-			if($('#isOwnerFalse').is(":checked"))  {
-				$("#summary-vaultOwner").text($("#vaultOwner").val());
-			} 
-			
-			if($('#isOwnerTrue').is(":checked")) {
-			  $("#summary-vaultOwner").text($('#owner-uun-span').text());
-			}
+			$("#summary-vaultOwner").text($("#vaultOwner").val());
 
 			var ndmsArray = [];
 			$("input[name^='nominatedDataManagers']").each(function() {

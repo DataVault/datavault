@@ -13,15 +13,12 @@ import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.webapp.services.RestService;
+import org.datavaultplatform.webapp.services.UserLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class AdminPendingVaultsController {
@@ -31,12 +28,16 @@ public class AdminPendingVaultsController {
 	private static final int MAX_RECORDS_PER_PAGE = 10;
 
     private RestService restService;
-
+    private UserLookupService userLookupService;
+    
     public void setRestService(RestService restService) {
         this.restService = restService;
     }
-    
-    
+
+    public void setUserLookupService(UserLookupService userLookupService) {
+        this.userLookupService = userLookupService;
+    }
+
     @RequestMapping(value = "/admin/pendingVaults", method = RequestMethod.GET)
     public String searchPendingVaults(ModelMap model,
                                @RequestParam(value = "query", defaultValue = "") String query,
@@ -57,6 +58,24 @@ public class AdminPendingVaultsController {
         model.addAttribute("confirmedVaultsTotal", confirmedRecordsTotal);
 
         return "admin/pendingVaults/index";
+    }
+    
+    // The Admin Edit PV page
+    @RequestMapping(value = "/admin/pendingVaults/edit/{vaultid}", method = RequestMethod.GET)
+    public String getPendingVault(ModelMap model, @PathVariable("vaultid") String vaultID) {
+        VaultInfo vault = restService.getPendingVault(vaultID);
+        logger.info("Passed in id: '" + vaultID);
+        model.addAttribute("vaultID", vaultID);
+
+        CreateVault cv = vault.convertToCreate();
+        model.addAttribute("vault", cv);
+        RetentionPolicy[] policies = restService.getRetentionPolicyListing();
+        model.addAttribute("policies", policies);
+
+        Group[] groups = restService.getGroups();
+        model.addAttribute("groups", groups);
+
+        return "admin/pendingVaults/edit/editPendingVault";
     }
 
     @RequestMapping(value = "/admin/pendingVaults/saved", method = RequestMethod.GET)
@@ -178,6 +197,30 @@ public class AdminPendingVaultsController {
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
         return "redirect:" + vaultUrl;
     }
+    
+	// Process the completed 'create new vault' page
+	@RequestMapping(value = "/admin/pendingVaults/edit", method = RequestMethod.POST)
+	public String editPendingVault(@ModelAttribute CreateVault vault, ModelMap model, @RequestParam String action,
+			Principal principal) {
+		// if the confirm button has been clicked save what we have if everything isn't
+		// already saved and display the summary
+		logger.info("Action is:'" + action + "'");
+		logger.info("PendingID is:'" + vault.getPendingID() + "'");
+		
+		// We use checkNewRolesUserExists() to ensure users with uuns are added to the Users table
+		// if they don't exist. We ignore result.
+		// TBD: This is not ideal, we need better error management here.
+		String pVUrl = "/admin/pendingVaults/";
+		String result = userLookupService.checkNewRolesUserExists(vault, pVUrl);
+		
+		// Save the pending vault
+		VaultInfo newVault = null;
+		newVault = restService.editPendingVault(vault);
+        
+		// Redirect back to edit page
+		String vaultUrl = "/admin/pendingVaults/edit/" + newVault.getID();
+		return "redirect:" + vaultUrl;
+	}
 
     @RequestMapping(value = "/admin/pendingVaults/{pendingVaultID}", method = RequestMethod.GET)
     public String deletePendingVault(ModelMap model, @PathVariable("pendingVaultID") String pendingVaultID) throws Exception {
