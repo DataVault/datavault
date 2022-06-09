@@ -112,7 +112,7 @@ public class AdminVaultsController {
 
         List<VaultInfo> vaults = null;
 
-        VaultsData vaultData =  restService.searchVaults(query, theSort, theOrder, 0, 0);
+        VaultsData vaultData =  restService.searchVaults(query, theSort, theOrder, 0, Integer.MAX_VALUE);
         vaults = vaultData.getData();
 
         response.setContentType("text/csv");
