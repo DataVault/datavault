@@ -1,4 +1,4 @@
-<fieldset>
+<fieldset id="billing-fieldset">
     <div class="form-card">
         <h2 class="fs-title">Billing</h2>
         Funding for this vault will be from:
@@ -114,11 +114,15 @@
     <div>
         Select one of the billing options above.
     </div>
+  
+    
     <button type="button" name="previous" class="previous action-button-previous btn btn-default" >&laquo; Previous</button>
-    <#if vault.confirmed?c=="false">
-    <button type="submit" name="save" value ="Save" class="save action-button-previous btn btn-default" >
-        <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
+    <a name="admin-pending-vault-summary" class="btn btn-primary" style="margin-bottom: 0;"
+          href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/summary/${vaultID}"><< Return Admin Pending Vault Summary</a>
+    <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-success" >
+       <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
     </button>
-    </#if>
-    <button type="button" name="next" class="next action-button btn btn-primary" disabled>Next Step &raquo;</button>
+   
+
+    <button type="button" name="next" class="next action-button btn btn-default">Next Step &raquo;</button>
 </fieldset>

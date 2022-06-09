@@ -1,29 +1,17 @@
-<fieldset>
+<fieldset id="users-fieldset">
     <div id="add-role-vault-dialog" class="form-card">
         <h2 class="fs-title text-center">Vault Users</h2> <br><br>
         <div id="autocomplete-error" class="alert alert-danger hidden error" role="alert"></div>
         <h4>Vault Access</h4>
 
-        <div class="form-group" required>
-            <label class="control-label">Are you the owner of the vault:</label>
-            <@spring.bind "vault.isOwner" />
-            <div class="radio-inline">
-                <label>
-                    <input type="radio" id="isOwnerTrue" name="${spring.status.expression}" value="true" <#if vault.isOwner??>${(vault.isOwner)?then('checked', '')}</#if>> Yes
-                </label>
-            </div>
-            <div class="radio-inline">
-                <label>
-                    <input type="radio" id="isOwnerFalse" name="${spring.status.expression}" value="false" <#if vault.isOwner??>${(!vault.isOwner)?then('checked', '')}</#if>> No
-                </label>
-            </div>
-        </div>
+      
         <div class="form-group" required>
             <label class="col-sm-4 control-label">Owner UUN: </label>
-            <span id="owner-uun-span" style="display:none"><#if loggedInAs??>${loggedInAs}</#if></span>
             <@spring.bind "vault.vaultOwner" />
-            <input id="vaultOwner" name="${spring.status.expression}" value="${spring.status.value!""}" type="text"
-                   class="autocomplete uun-required unique-uun-required owner-uun-required" placeholder=""/>
+            <input id="vaultOwner" name="${spring.status.expression}" 
+                   value="${spring.status.value!""}" type="text"
+                   class="autocomplete uun-required unique-uun-required owner-uun-required" 
+                   placeholder=""/>
             <span class="uun-required-error-span owner-uun-required-error-span"></span>
         </div>
 
@@ -199,16 +187,18 @@
             </div>
         </div>
     </div>
+  
+    
     <button type="button" name="previous" class="previous action-button-previous btn btn-default" >&laquo; Previous</button>
-    <#if vault.confirmed?c=="false">
-    <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-default" >
-        <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
+    <a name="admin-pending-vault-summary" class="btn btn-primary" style="margin-bottom: 0;"
+          href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/summary/${vaultID}"><< Return Admin Pending Vault Summary</a>
+    <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-success" >
+       <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
     </button>
-    </#if>
-    <button type="button" id="user-fields-next" name="next" class="next action-button btn btn-primary">Next Step &raquo;</button>
+   
+  
     <script>
     $(document).ready(function(){
-
         $(".autocomplete").autocomplete({
             autoFocus: true,
             appendTo: "#add-role-vault-dialog",
@@ -247,13 +237,7 @@
         function validateOwnerUUN() {
 
             if($( "input[type=text][id=vaultOwner]").val().trim() === '') {
-                // if ownerUUN and isOwner is false
-                // show error and disable next button (this is done via the validationErrorPresent function)
-                var ownerFalseResult = $( "input[type=radio][id=isOwnerFalse]").is(":checked");
-                console.log("OwnerFalseResult: ", ownerFalseResult);
-                // and vault owner is empty
-                if (ownerFalseResult === true) {
-                    console.log("OwnerFalseResult is true and input text is empty");
+               
                     $(".owner-uun-required-error-span").html("<br>You have not specified any user as the Owner of this vault. Please add an owner, or contact the Research Data Support team if you want to request this vault to be treated as legacy data ie an orphan vault.");
                     $(".owner-uun-required-error-span").show();
                 } else {
@@ -265,7 +249,6 @@
                 // This event is limited to <input> elements, <textarea> boxes and <select> elements
                 // We assign a 'change' event to errorSpan.
                 $(".owner-uun-required-error-span").change();
-            }
         }
         
         // Function that validates uun
@@ -288,20 +271,7 @@
                             // get owner if not logged in user (id vaultOwner)
 
                             var count = 0;
-                            // check if logged in owner
-                            //var ownerUun = $( "input[type=text][id=vaultOwner]").val().trim();
-                            var ownerTrueResult = $( "input[type=radio][id=isOwnerTrue]").is(":checked");
-                            if (ownerTrueResult === true) {
-                                //ownerUun = loggedInUUn;
-                                console.log("Checking (logged in Owner) ", inputText, " v ", loggedInUUn);
-                                if(loggedInUUn === inputText) {
-                                    console.log(inputText, " Already has a role" );
-                                    count++;
-                                } else {
-                                    errorSpan.html("");
-                                    errorSpan.hide();
-                                }
-                            }
+                           
 
                             // foreach uuid input get uuid if not empty string
                             // check if inputText only appears once in all role fields

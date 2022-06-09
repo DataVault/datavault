@@ -531,6 +531,11 @@ public class RestService {
         return (VaultInfo)response.getBody();
     }
     
+    public VaultInfo editPendingVault(CreateVault createVault) {
+        HttpEntity<?> response = post(brokerURL + "/admin/pendingVaults/edit", VaultInfo.class, createVault);
+        return (VaultInfo)response.getBody();
+    }
+    
     public  Boolean addVaultForPendingVault(String pendingVaultId, Date reviewDate) {
         HttpEntity<?> response = post(brokerURL + "/admin/pendingVaults/addVault/" + pendingVaultId, Boolean.class, reviewDate);
         return (Boolean)response.getBody();
