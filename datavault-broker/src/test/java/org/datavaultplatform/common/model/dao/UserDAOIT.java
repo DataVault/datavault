@@ -92,6 +92,25 @@ public class UserDAOIT extends BaseReuseDatabaseTest {
       assertEquals(1, items2.size());
       assertEquals(1, items2.stream().filter(dr -> dr.getID().equals(user2.getID())).count());
     }
+
+    {
+      List<User> items2lower = dao.search("user2".toLowerCase());
+      assertEquals(1, items2lower.size());
+      assertEquals(1, items2lower.stream().filter(dr -> dr.getID().equals(user2.getID())).count());
+    }
+
+    {
+      List<User> items2upper = dao.search("user2".toUpperCase());
+      assertEquals(1, items2upper.size());
+      assertEquals(1, items2upper.stream().filter(dr -> dr.getID().equals(user2.getID())).count());
+    }
+
+    {
+      List<User> itemsAll = dao.search(null);
+      assertEquals(2, itemsAll.size());
+      assertEquals(1, itemsAll.stream().filter(dr -> dr.getID().equals(user1.getID())).count());
+      assertEquals(1, itemsAll.stream().filter(dr -> dr.getID().equals(user2.getID())).count());
+    }
   }
 
   @Test

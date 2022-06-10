@@ -1,64 +1,71 @@
 package org.datavaultplatform.common.model.dao.custom;
 
 import java.util.List;
-
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import org.datavaultplatform.common.model.BillingInfo;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 
 public class BillingCustomDAOImpl extends BaseCustomDAOImpl implements BillingCustomDAO {
 
   public BillingCustomDAOImpl(EntityManager em) {
-      super(em);
+    super(em);
   }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<BillingInfo> list(String sort, String order, String offset, String maxResult) {
-        Session session = this.getCurrentSession();
-        Criteria criteria = session.createCriteria(BillingInfo.class);
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<BillingInfo> cr = cb.createQuery(BillingInfo.class).distinct(true);
+        Root<BillingInfo> rt = cr.from(BillingInfo.class);
 
-        if("asc".equals(order)){
-            criteria.addOrder(Order.asc(sort));
+        if ("asc".equals(order)) {
+            cr.orderBy(cb.asc(rt.get(sort)));
         } else {
-            criteria.addOrder(Order.desc(sort));
-        }
-        if((offset != null && maxResult != null) && !maxResult.equals("0")) {
-        	criteria.setMaxResults(Integer.valueOf(maxResult));
-        	criteria.setFirstResult(Integer.valueOf(offset));
+            cr.orderBy(cb.desc(rt.get(sort)));
         }
 
-        List<BillingInfo> vaults = criteria.list();
+        TypedQuery<BillingInfo> typedQuery = restrict(cr, offset, maxResult);
+
+        List<BillingInfo> vaults = typedQuery.getResultList();
         return vaults;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<BillingInfo> search(String query, String sort, String order, String offset, String maxResult) {
-        Session session = this.getCurrentSession();
-        Criteria criteria = session.createCriteria(BillingInfo.class);
-        criteria.add(Restrictions.or(
-          Restrictions.ilike("id", "%" + query + "%"),
-          Restrictions.ilike("contactName", "%" + query + "%")));
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+    public List<BillingInfo> search(String query, String sort, String order, String offset,  String maxResult) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<BillingInfo> cr = cb.createQuery(BillingInfo.class).distinct(true);
+        Root<BillingInfo> rt = cr.from(BillingInfo.class);
 
-        if(order.equals("desc")){
-            criteria.addOrder(Order.desc(sort));
+        if(query != null){
+          String queryLower = query.toLowerCase();
+          cr.where(cb.or(
+              cb.like(cb.lower(rt.get("id")), "%" + queryLower + "%"),
+              cb.like(cb.lower(rt.get("contactName")), "%" + queryLower + "%")
+          ));
+        }
+
+        if ("desc".equals(order)) {
+            cr.orderBy(cb.desc(rt.get(sort)));
         } else {
-            criteria.addOrder(Order.asc(sort));
-        }
-        if((offset != null && maxResult != null) && !maxResult.equals("0")) {
-        	criteria.setMaxResults(Integer.valueOf(maxResult));
-        	criteria.setFirstResult(Integer.valueOf(offset));
+            cr.orderBy(cb.asc(rt.get(sort)));
         }
 
-        List<BillingInfo> vaults = criteria.list();
+        TypedQuery<BillingInfo> typedQuery = restrict(cr, offset, maxResult);
+
+        List<BillingInfo> vaults = typedQuery.getResultList();
         return vaults;
+    }
+
+
+    private TypedQuery<BillingInfo> restrict(CriteriaQuery<BillingInfo> cr, String offset, String maxResult){
+      TypedQuery<BillingInfo> typedQuery = em.createQuery(cr);
+      if ((offset != null && maxResult != null) && !maxResult.equals("0")) {
+        typedQuery.setMaxResults(Integer.parseInt(maxResult));
+        typedQuery.setFirstResult(Integer.parseInt(offset));
+      }
+      return typedQuery;
     }
 
   /**
@@ -66,16 +73,21 @@ public class BillingCustomDAOImpl extends BaseCustomDAOImpl implements BillingCu
    */
   @Override
   public Long countByQuery(String query) {
-    Session session = this.getCurrentSession();
-        Criteria criteria = session.createCriteria(BillingInfo.class);
-        criteria.add(
-          Restrictions.or(
-            Restrictions.ilike("id", "%" + query + "%"),
-            Restrictions.ilike("contactName", "%" + query + "%")));
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        criteria.setProjection(Projections.rowCount());
-        Long totalNoOfRows = (Long) criteria.uniqueResult();
-        return totalNoOfRows;
-	}
+    CriteriaBuilder cb = em.getCriteriaBuilder();
+    CriteriaQuery<Long> countQuery = cb.createQuery(Long.class).distinct(true);
+    Root<BillingInfo> rt = countQuery.from(BillingInfo.class);
+
+    countQuery.select(cb.count(rt));
+    if (query != null) {
+      String queryLower = query.toLowerCase();
+      countQuery.where(cb.or(
+          cb.like(cb.lower(rt.get("id")), "%" + queryLower + "%"),
+          cb.like(cb.lower(rt.get("contactName")), "%" + queryLower + "%")
+      ));
+    }
+
+    Long count = em.createQuery(countQuery).getSingleResult();
+    return count;
+  }
 
 }

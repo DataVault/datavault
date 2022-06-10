@@ -5,7 +5,7 @@ import org.hibernate.Session;
 
 public abstract class BaseCustomDAOImpl implements BaseCustomDAO {
 
-  private final EntityManager em;
+  protected final EntityManager em;
 
   public BaseCustomDAOImpl(EntityManager em) {
     this.em = em;

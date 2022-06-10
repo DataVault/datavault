@@ -209,6 +209,38 @@ public class BillingDAOIT extends BaseReuseDatabaseTest {
       assertEquals(1, items8.size());
       assertEquals(billingInfo2, items8.get(0));
     }
+
+    {
+      List<BillingInfo> items9 = dao.search(billingInfo1.getID(),"projectTitle","desc",null, null);
+      assertEquals(1, items9.size());
+      assertEquals(billingInfo1, items9.get(0));
+    }
+
+    {
+      List<BillingInfo> items10 = dao.search(billingInfo2.getID(),"projectTitle","desc",null, null);
+      assertEquals(1, items10.size());
+      assertEquals(billingInfo2, items10.get(0));
+    }
+
+    {
+      List<BillingInfo> itemsLower = dao.search(billingInfo2.getID().toLowerCase(),"projectTitle","desc",null, null);
+      assertEquals(1, itemsLower.size());
+      assertEquals(billingInfo2, itemsLower.get(0));
+    }
+
+    {
+      List<BillingInfo> itemsUpper = dao.search(billingInfo2.getID().toUpperCase(),"projectTitle","desc",null, null);
+      assertEquals(1, itemsUpper.size());
+      assertEquals(billingInfo2, itemsUpper.get(0));
+    }
+
+    {
+      List<BillingInfo> itemsAll = dao.search(null,"projectTitle","desc",null, null);
+      assertEquals(3, itemsAll.size());
+      assertEquals(billingInfo1, itemsAll.get(2));
+      assertEquals(billingInfo2, itemsAll.get(1));
+      assertEquals(billingInfo3, itemsAll.get(0));
+    }
   }
 
   @Test
@@ -296,7 +328,7 @@ public class BillingDAOIT extends BaseReuseDatabaseTest {
     dao.save(billingInfo2);
     dao.save(billingInfo3);
 
-    assertEquals(0, dao.countByQuery(null));
+    assertEquals(3, dao.countByQuery(null));
     assertEquals(3, dao.countByQuery(""));
     assertEquals(0, dao.countByQuery("XXX"));
 
@@ -306,5 +338,15 @@ public class BillingDAOIT extends BaseReuseDatabaseTest {
     assertEquals(2, dao.countByQuery("contactName12"));
     assertEquals(billingInfo3, dao.search("contactName12","projectTitle","desc",null, null).get(0));
     assertEquals(billingInfo2, dao.search("contactName12","projectTitle","desc",null, null).get(1));
+
+    assertEquals(2, dao.countByQuery("contactName12".toLowerCase()));
+    assertEquals(2, dao.countByQuery("contactName12".toUpperCase()));
   }
+
+  @Test
+  void testCountWhenNoRowsInTable() {
+    assertEquals(0, dao.count());
+    assertEquals(0, dao.countByQuery(null));
+  }
+
 }

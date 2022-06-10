@@ -96,12 +96,28 @@ public class DepositReviewDAOIT extends BaseReuseDatabaseTest {
       assertEquals(1, items1.size());
       assertEquals(1, items1.stream().filter(dr -> dr.getId().equals(depositReview1.getId())).count());
     }
+
+    String searchKey2Upper = depositReview2.getId().split("-")[0].toUpperCase();
     {
-      String search2 = depositReview2.getId().split("-")[0];
-      List<DepositReview> items2 = dao.search(search2);
+      List<DepositReview> items2 = dao.search(searchKey2Upper);
       assertEquals(1, items2.size());
       assertEquals(1, items2.stream().filter(dr -> dr.getId().equals(depositReview2.getId())).count());
     }
+
+    {
+      String searchKey2Lower = searchKey2Upper.toLowerCase();
+      List<DepositReview> items3 = dao.search(searchKey2Lower);
+      assertEquals(1, items3.size());
+      assertEquals(1, items3.stream().filter(dr -> dr.getId().equals(depositReview2.getId())).count());
+    }
+
+    {
+      List<DepositReview> items4 = dao.search(null);
+      assertEquals(2, items4.size());
+      assertEquals(1, items4.stream().filter(dr -> dr.getId().equals(depositReview1.getId())).count());
+      assertEquals(1, items4.stream().filter(dr -> dr.getId().equals(depositReview2.getId())).count());
+    }
+
   }
 
   @Test

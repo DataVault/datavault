@@ -2,10 +2,8 @@ package org.datavaultplatform.common.model.dao;
 
 import static org.datavaultplatform.broker.test.TestUtils.NOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -140,5 +138,17 @@ public class VaultReviewDAOIT extends BaseReuseDatabaseTest {
 
     assertEquals(Stream.of(vaultReview2).map(VaultReview::getId).collect(Collectors.toList()),
         dao.search(partOfIDtwo).stream().map(VaultReview::getId).collect(Collectors.toList()));
+
+    //lowercase
+    assertEquals(Stream.of(vaultReview2).map(VaultReview::getId).collect(Collectors.toList()),
+        dao.search(partOfIDtwo.toLowerCase()).stream().map(VaultReview::getId).collect(Collectors.toList()));
+
+    //uppercase
+    assertEquals(Stream.of(vaultReview2).map(VaultReview::getId).collect(Collectors.toList()),
+        dao.search(partOfIDtwo.toUpperCase()).stream().map(VaultReview::getId).collect(Collectors.toList()));
+
+    //all items
+    assertEquals(Stream.of(vaultReview1,vaultReview2).map(VaultReview::getId).collect(Collectors.toList()),
+        dao.search(null).stream().map(VaultReview::getId).collect(Collectors.toList()));
   }
 }
