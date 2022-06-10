@@ -1,11 +1,17 @@
 package org.datavaultplatform.broker.services;
 
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.KeyPair;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import com.jcraft.jsch.*;
 
 /**
  * User: Robin Taylor
@@ -13,60 +19,62 @@ import com.jcraft.jsch.*;
  * Time: 09:54
  */
 @Service
-//TODO - DHAY change this class - it is NOT thread safe!
 public class UserKeyPairService {
 
-    // comment added at the end of public key
-    private static final String PUBKEY_COMMENT = "datavault";
-    private final String passphrase;
-    private String privateKey;
-    private String publicKey;
+  // comment added at the end of public key
+  public static final String PUBKEY_COMMENT = "datavault";
+  private final String passphrase;
 
-    @Autowired
-    public UserKeyPairService(@Value("${sftp.passphrase}") String passphrase) {
-        this.passphrase = passphrase;
+  @Autowired
+  public UserKeyPairService(@Value("${sftp.passphrase}") String passphrase) {
+    this.passphrase = passphrase;
+  }
+
+  public String getPassphrase() {
+    return passphrase;
+  }
+
+  public KeyPairInfo generateNewKeyPair() {
+
+    JSch jschClient = new JSch();
+
+    try {
+      KeyPair keyPair = KeyPair.genKeyPair(jschClient, KeyPair.RSA);
+      String privateKey = getPrivateKey(keyPair);
+      String publicKey = getPublicKey(keyPair);
+
+      return KeyPairInfo.builder()
+          .privateKey(privateKey)
+          .publicKey(publicKey)
+          .fingerPrint(keyPair.getFingerPrint())
+          .build();
+
+    } catch (JSchException e) {
+      throw new IllegalArgumentException("problem with generating ssh key pair", e);
     }
+  }
 
-    public String getPassphrase() {
-        return passphrase;
-    }
+  private String getPrivateKey(KeyPair keyPair) {
+    return convert(os -> keyPair.writePrivateKey(os, passphrase.getBytes(StandardCharsets.UTF_8)));
+  }
 
+  private String getPublicKey(KeyPair keyPair) {
+    return convert(os -> keyPair.writePublicKey(os, PUBKEY_COMMENT));
+  }
 
-    public String getPrivateKey() {
-        return privateKey;
-    }
+  public String convert(Consumer<OutputStream> consumer) {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    consumer.accept(baos);
+    return new String(baos.toByteArray(), StandardCharsets.UTF_8);
+  }
 
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
-    }
+  @Data
+  @Builder
+  public static class KeyPairInfo {
 
-    public String getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
-
-
-    public void generateNewKeyPair() {
-
-        JSch jschClient = new JSch();
-
-        try {
-            KeyPair keyPair = KeyPair.genKeyPair(jschClient, KeyPair.RSA);
-            OutputStream privKeyBaos = new ByteArrayOutputStream();
-            keyPair.writePrivateKey(privKeyBaos, passphrase.getBytes());
-
-            OutputStream pubKeyBaos = new ByteArrayOutputStream();
-            keyPair.writePublicKey(pubKeyBaos, PUBKEY_COMMENT);
-
-            setPrivateKey(privKeyBaos.toString());
-            setPublicKey(pubKeyBaos.toString());
-
-        } catch (JSchException e) {
-            throw new IllegalArgumentException("problem with generating ssh key", e);
-        }
-    }
+    private final String publicKey;
+    private final String privateKey;
+    private final String fingerPrint;
+  }
 
 }

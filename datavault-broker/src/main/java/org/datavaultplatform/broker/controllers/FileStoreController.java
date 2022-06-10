@@ -5,6 +5,7 @@ import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.broker.services.FileStoreService;
 import org.datavaultplatform.broker.services.UserKeyPairService;
+import org.datavaultplatform.broker.services.UserKeyPairService.KeyPairInfo;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.model.FileStore;
@@ -117,16 +118,15 @@ public class FileStoreController {
 
         User user = usersService.getUser(userID);
 
-        userKeyPairService.generateNewKeyPair();
+        KeyPairInfo keypair = userKeyPairService.generateNewKeyPair();
 
         byte[] encrypted = null;
         byte[] iv = Encryption.generateIV();
         try {
-            // We got to encrypt the private key before putting it int he database.
-            encrypted = Encryption.encryptSecret(userKeyPairService.getPrivateKey(), null, iv);
-        } catch (Exception e) {
-            logger.error("Error when encrypting private key: "+e);
-            e.printStackTrace();
+            // We got to encrypt the private key before putting it in the database.
+            encrypted = Encryption.encryptSecret(keypair.getPrivateKey(), null, iv);
+        } catch (Exception ex) {
+            logger.error("Error when encrypting private key: ",ex);
             return new ResponseEntity<>(store, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -135,7 +135,7 @@ public class FileStoreController {
         // Add the confidential properties.
         storeProperties.put("username", user.getID());
         storeProperties.put("password", "");
-        storeProperties.put("publicKey", userKeyPairService.getPublicKey());
+        storeProperties.put("publicKey", keypair.getPublicKey());
         storeProperties.put("privateKey", Base64.toBase64String(encrypted));
         storeProperties.put("iv", Base64.toBase64String(iv));
         storeProperties.put("passphrase", passphrase);
