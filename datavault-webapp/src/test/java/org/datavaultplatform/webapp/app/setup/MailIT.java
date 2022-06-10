@@ -24,14 +24,14 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /*
- Uses docker image mailhog/mailhob to test emails have been sent correctly.
+ Uses docker image mailhog/mailhog to test emails have been sent correctly.
  See https://github.com/mailhog/MailHog
  See https://hub.docker.com/r/mailhog/mailhog
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ProfileStandalone
 @Testcontainers(disabledWithoutDocker = true)
-public class MailTest {
+public class MailIT {
 
   public static final String MAILHOG_IMAGE_NAME = "mailhog/mailhog:v1.0.1";
 
