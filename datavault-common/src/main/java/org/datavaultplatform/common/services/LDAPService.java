@@ -176,7 +176,7 @@ public class LDAPService {
     }
 
     private HashMap<String, String> search(LdapNetworkConnection connection, String id) throws LdapException, CursorException {
-        logger.info("Search LDAP for {}", id);
+        logger.info("Search LDAP for [{}]", id);
 
         HashMap<String, String> attributes = new HashMap<>();
 
