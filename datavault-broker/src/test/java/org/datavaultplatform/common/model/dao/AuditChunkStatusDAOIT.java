@@ -8,9 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,7 +30,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
@@ -134,7 +130,7 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
 
   @BeforeEach
   void setup() {
-    //assertEquals(0, count());
+    assertEquals(0, count());
   }
 
   @AfterEach
@@ -288,6 +284,9 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
 
     AuditChunkStatus last3 = dao.getLastChunkAuditTime(depositChunk3);
     assertNull(last3);
+
+    AuditChunkStatus last4 = dao.getLastChunkAuditTime(null);
+    assertNull(last4);
   }
 
   @Test
@@ -337,14 +336,14 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
       }
     }).stream().map(AuditChunkStatus::getID).collect(Collectors.toSet()));
 
-    assertEquals(new HashSet<>(Arrays.asList(item3.getID())), dao.findBy(new HashMap<String, Object>(){
+    assertEquals(new HashSet<>(Collections.singletonList(item3.getID())), dao.findBy(new HashMap<String, Object>(){
       {
         this.put("note", "noteB");
       }
     }).stream().map(AuditChunkStatus::getID).collect(Collectors.toSet()));
 
 
-    assertEquals(new HashSet<>(Arrays.asList(item1.getID())), dao.findBy(new HashMap<String, Object>(){
+    assertEquals(new HashSet<>(Collections.singletonList(item1.getID())), dao.findBy(new HashMap<String, Object>(){
       {
         this.put("note", "noteA");
         this.put("status", Status.COMPLETE);
@@ -382,7 +381,7 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
 
     assertEquals(new HashSet<>(Arrays.asList(item1.getID(), item2.getID())), dao.findBy("note", "noteA").stream().map(AuditChunkStatus::getID).collect(Collectors.toSet()));
 
-    assertEquals(new HashSet<>(Arrays.asList(item3.getID())), dao.findBy("note", "noteB").stream().map(AuditChunkStatus::getID).collect(Collectors.toSet()));
+    assertEquals(new HashSet<>(Collections.singletonList(item3.getID())), dao.findBy("note", "noteB").stream().map(AuditChunkStatus::getID).collect(Collectors.toSet()));
   }
 
   @Test

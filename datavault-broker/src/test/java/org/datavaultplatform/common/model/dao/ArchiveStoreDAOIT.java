@@ -2,6 +2,7 @@ package org.datavaultplatform.common.model.dao;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -138,7 +139,7 @@ public class ArchiveStoreDAOIT extends BaseDatabaseTest {
   }
 
   @Test
-  void testFindForRetrieval(){
+  void testFindForRetrievalFound(){
 
     ArchiveStore archiveStore1 = getArchiveStore1();
 
@@ -154,5 +155,20 @@ public class ArchiveStoreDAOIT extends BaseDatabaseTest {
 
     ArchiveStore result = dao.findForRetrieval();
     assertEquals(archiveStore2.getID(), result.getID());
+  }
+
+  @Test
+  void testFindForRetrievalNotFound(){
+
+    ArchiveStore archiveStore1 = getArchiveStore1();
+    archiveStore1.setRetrieveEnabled(false);
+    ArchiveStore archiveStore2 = getArchiveStore2();
+    archiveStore2.setRetrieveEnabled(false);
+
+    dao.save(archiveStore1);
+    dao.save(archiveStore2);
+    assertEquals(2, count());
+
+    assertNull(dao.findForRetrieval());
   }
 }

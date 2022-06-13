@@ -2,10 +2,10 @@ package org.datavaultplatform.common.model.dao.custom;
 
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import org.datavaultplatform.common.model.DepositChunk;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
 
 public class DepositChunkCustomDAOImpl extends BaseCustomDAOImpl implements
     DepositChunkCustomDAO {
@@ -14,18 +14,18 @@ public class DepositChunkCustomDAOImpl extends BaseCustomDAOImpl implements
         super(em);
     }
 
-    @SuppressWarnings("unchecked")
     public List<DepositChunk> list(String sort) {
-        Session session = this.getCurrentSession();
-        Criteria criteria = session.createCriteria(DepositChunk.class);
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<DepositChunk> cr = cb.createQuery(DepositChunk.class).distinct(true);
+        Root<DepositChunk> rt = cr.from(DepositChunk.class);
         // See if there is a valid sort option
-        if ("id".equals(sort)) {
-            criteria.addOrder(Order.asc("id"));
+        if("id".equals(sort)) {
+            cr.orderBy(cb.asc(rt.get("id")));
         } else {
-            criteria.addOrder(Order.asc("chunkNum"));
+            cr.orderBy(cb.asc(rt.get("chunkNum")));
         }
 
-        List<DepositChunk> chunks = criteria.list();
+        List<DepositChunk> chunks = em.createQuery(cr).getResultList();
         return chunks;
     }
 }

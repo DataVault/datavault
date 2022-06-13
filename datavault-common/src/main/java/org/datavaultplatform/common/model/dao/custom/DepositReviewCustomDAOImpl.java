@@ -2,10 +2,10 @@ package org.datavaultplatform.common.model.dao.custom;
 
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import org.datavaultplatform.common.model.DepositReview;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 
 public class DepositReviewCustomDAOImpl extends BaseCustomDAOImpl implements
@@ -17,11 +17,13 @@ public class DepositReviewCustomDAOImpl extends BaseCustomDAOImpl implements
 
     @Override
     public List<DepositReview> search(String query) {
-        Session session = this.getCurrentSession();
-        Criteria criteria = session.createCriteria(DepositReview.class);
-        criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%")));
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        List<DepositReview> depositReviews = criteria.list();
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<DepositReview> cr = cb.createQuery(DepositReview.class).distinct(true);
+        Root<DepositReview> rt = cr.from(DepositReview.class);
+        if (query != null) {
+            cr.where(cb.like(cb.lower(rt.get("id")), "%" + query.toLowerCase() + "%"));
+        }
+        List<DepositReview> depositReviews = em.createQuery(cr).getResultList();
         return depositReviews;
     }
 }

@@ -2,10 +2,10 @@ package org.datavaultplatform.common.model.dao.custom;
 
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import org.datavaultplatform.common.model.VaultReview;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 
 public class VaultReviewCustomDAOImpl extends BaseCustomDAOImpl implements
@@ -17,11 +17,13 @@ public class VaultReviewCustomDAOImpl extends BaseCustomDAOImpl implements
 
     @Override
     public List<VaultReview> search(String query) {
-        Session session = this.getCurrentSession();
-        Criteria criteria = session.createCriteria(VaultReview.class);
-        criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%")));
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        List<VaultReview> vaultReviews = criteria.list();
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<VaultReview> cr = cb.createQuery(VaultReview.class).distinct(true);
+        Root<VaultReview> rt = cr.from(VaultReview.class);
+        if(query != null) {
+            cr.where(cb.like(cb.lower(rt.get("id")), "%" + query.toLowerCase() + "%"));
+        }
+        List<VaultReview> vaultReviews = em.createQuery(cr).getResultList();
         return vaultReviews;
     }
 }
