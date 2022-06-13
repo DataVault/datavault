@@ -5,10 +5,12 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
  * Time: 09:54
  */
 @Service
+@Slf4j
 public class UserKeyPairService {
 
   // comment added at the end of public key
@@ -47,11 +50,25 @@ public class UserKeyPairService {
           .privateKey(privateKey)
           .publicKey(publicKey)
           .fingerPrint(keyPair.getFingerPrint())
+          .keySize(getKeySize(keyPair))
           .build();
 
     } catch (JSchException e) {
       throw new IllegalArgumentException("problem with generating ssh key pair", e);
     }
+  }
+
+  private Integer getKeySize(KeyPair keyPair) {
+    Integer result = null;
+    try {
+      Method m = KeyPair.class.getDeclaredMethod("getKeySize");
+      m.setAccessible(true);
+      result = (Integer)m.invoke(keyPair);
+    } catch(Exception ex) {
+      //we don't need the keysize - it's just useful info
+      log.debug("problem getting key size",ex);
+    }
+    return result;
   }
 
   private String getPrivateKey(KeyPair keyPair) {
@@ -75,6 +92,7 @@ public class UserKeyPairService {
     private final String publicKey;
     private final String privateKey;
     private final String fingerPrint;
+    private final Integer keySize;
   }
 
 }
