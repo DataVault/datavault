@@ -124,31 +124,31 @@ public class VaultReviewDAOIT extends BaseReuseDatabaseTest {
     dao.save(vaultReview2);
     assertEquals(2, dao.count());
 
-    assertEquals(Stream.of(vaultReview1).map(VaultReview::getId).collect(Collectors.toList()),
-        dao.search(vaultReview1.getId()).stream().map(VaultReview::getId).collect(Collectors.toList()));
+    assertEquals(Stream.of(vaultReview1).map(VaultReview::getId).collect(Collectors.toSet()),
+        dao.search(vaultReview1.getId()).stream().map(VaultReview::getId).collect(Collectors.toSet()));
 
-    assertEquals(Stream.of(vaultReview2).map(VaultReview::getId).collect(Collectors.toList()),
-        dao.search(vaultReview2.getId()).stream().map(VaultReview::getId).collect(Collectors.toList()));
+    assertEquals(Stream.of(vaultReview2).map(VaultReview::getId).collect(Collectors.toSet()),
+        dao.search(vaultReview2.getId()).stream().map(VaultReview::getId).collect(Collectors.toSet()));
 
     String partOfIDone = vaultReview1.getId().split(",")[0];
     String partOfIDtwo = vaultReview2.getId().split(",")[0];
 
-    assertEquals(Stream.of(vaultReview1).map(VaultReview::getId).collect(Collectors.toList()),
-        dao.search(partOfIDone).stream().map(VaultReview::getId).collect(Collectors.toList()));
+    assertEquals(Stream.of(vaultReview1).map(VaultReview::getId).collect(Collectors.toSet()),
+        dao.search(partOfIDone).stream().map(VaultReview::getId).collect(Collectors.toSet()));
 
-    assertEquals(Stream.of(vaultReview2).map(VaultReview::getId).collect(Collectors.toList()),
-        dao.search(partOfIDtwo).stream().map(VaultReview::getId).collect(Collectors.toList()));
+    assertEquals(Stream.of(vaultReview2).map(VaultReview::getId).collect(Collectors.toSet()),
+        dao.search(partOfIDtwo).stream().map(VaultReview::getId).collect(Collectors.toSet()));
 
     //lowercase
-    assertEquals(Stream.of(vaultReview2).map(VaultReview::getId).collect(Collectors.toList()),
-        dao.search(partOfIDtwo.toLowerCase()).stream().map(VaultReview::getId).collect(Collectors.toList()));
+    assertEquals(Stream.of(vaultReview2).map(VaultReview::getId).collect(Collectors.toSet()),
+        dao.search(partOfIDtwo.toLowerCase()).stream().map(VaultReview::getId).collect(Collectors.toSet()));
 
     //uppercase
-    assertEquals(Stream.of(vaultReview2).map(VaultReview::getId).collect(Collectors.toList()),
-        dao.search(partOfIDtwo.toUpperCase()).stream().map(VaultReview::getId).collect(Collectors.toList()));
+    assertEquals(Stream.of(vaultReview2).map(VaultReview::getId).collect(Collectors.toSet()),
+        dao.search(partOfIDtwo.toUpperCase()).stream().map(VaultReview::getId).collect(Collectors.toSet()));
 
     //all items
-    assertEquals(Stream.of(vaultReview1,vaultReview2).map(VaultReview::getId).collect(Collectors.toList()),
-        dao.search(null).stream().map(VaultReview::getId).collect(Collectors.toList()));
+    assertEquals(Stream.of(vaultReview1,vaultReview2).map(VaultReview::getId).collect(Collectors.toSet()),
+        dao.search(null).stream().map(VaultReview::getId).collect(Collectors.toSet()));
   }
 }
