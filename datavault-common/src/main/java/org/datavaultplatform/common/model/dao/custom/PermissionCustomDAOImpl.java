@@ -1,19 +1,20 @@
 package org.datavaultplatform.common.model.dao.custom;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 
-public class PermissionCustomDAOImpl extends BaseCustomDAOImpl implements
-    PermissionCustomDAO {
+public class PermissionCustomDAOImpl extends BaseCustomDAOImpl implements PermissionCustomDAO {
 
     public PermissionCustomDAOImpl(EntityManager em) {
         super(em);
@@ -21,7 +22,6 @@ public class PermissionCustomDAOImpl extends BaseCustomDAOImpl implements
 
     @Override
     public void synchronisePermissions() {
-        Session session = this.getCurrentSession();
 
         // First, remove any permissions that are no longer found in the Permission enum from all roles...
         String commaSeparatedPermissionIds = Arrays.stream(Permission.values())
@@ -30,45 +30,65 @@ public class PermissionCustomDAOImpl extends BaseCustomDAOImpl implements
         String deleteUnknownRolePermissionsSql = "DELETE FROM Role_permissions WHERE NOT FIND_IN_SET(permission_id, '"
                 + commaSeparatedPermissionIds
                 + "');";
-        session.createSQLQuery(deleteUnknownRolePermissionsSql).executeUpdate();
+        em.createNativeQuery(deleteUnknownRolePermissionsSql).executeUpdate();
 
         // ...then remove those permissions themselves...
         String deleteUnknownPermissionsSql = "DELETE FROM Permissions WHERE NOT FIND_IN_SET(id, '"
                 + commaSeparatedPermissionIds
                 + "');";
-        session.createSQLQuery(deleteUnknownPermissionsSql).executeUpdate();
+        em.createNativeQuery(deleteUnknownPermissionsSql).executeUpdate();
 
         // ...then store default entries for anything found in the enum but not the database
-        Criteria permissionEnumEntries = session.createCriteria(PermissionModel.class);
         Set<String> permissionIds = Arrays.stream(Permission.values())
-                .map(Permission::getId)
-                .collect(Collectors.toSet());
-        permissionEnumEntries.add(Restrictions.in("id", permissionIds));
-        Set<Permission> persistedPermissions = ((List<PermissionModel>) permissionEnumEntries.list()).stream()
+            .map(Permission::getId)
+            .collect(Collectors.toSet());
+
+        Set<Permission> persistedPermissions = findPermissiondWhereIdsIn(permissionIds).stream()
                 .map(PermissionModel::getPermission)
                 .collect(Collectors.toSet());
         for (Permission p : Permission.values()) {
             if (!persistedPermissions.contains(p)) {
-                session.persist(PermissionModel.createDefault(p));
+                em.persist(PermissionModel.createDefault(p));
             }
         }
     }
 
     @Override
     public PermissionModel find(Permission permission) {
-        Session session = this.getCurrentSession();
-        Criteria criteria = session.createCriteria(PermissionModel.class);
-        criteria.add(Restrictions.eq("id", permission.name()));
-        PermissionModel permissionModel = (PermissionModel) criteria.uniqueResult();
-        return permissionModel;
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<PermissionModel> cq = cb.createQuery(PermissionModel.class).distinct(true);
+        Root<PermissionModel> root = cq.from(PermissionModel.class);
+        cq.select(root);
+        cq.where(cb.equal(root.get("id"), permission.name()));
+        try {
+            return em.createQuery(cq).getSingleResult();
+        } catch (NoResultException ex) {
+            return null;
+        }
     }
 
     @Override
     public List<PermissionModel> findByType(PermissionModel.PermissionType type) {
-        Session session = getCurrentSession();
-        Criteria criteria = session.createCriteria(PermissionModel.class);
-        criteria.add(Restrictions.eq("type", type));
-        List<PermissionModel> permissions = criteria.list();
-        return permissions;
+        return findPermissionModelsByType(em, type);
+    }
+
+    /*
+     * This code is also used by RoleCustomDAOImpl
+     */
+    protected static List<PermissionModel> findPermissionModelsByType(EntityManager em, PermissionModel.PermissionType type) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<PermissionModel> cq = cb.createQuery(PermissionModel.class).distinct(true);
+        Root<PermissionModel> root = cq.from(PermissionModel.class);
+        cq.select(root);
+        cq.where(cb.equal(root.get("type"), type));
+        return em.createQuery(cq).getResultList();
+    }
+
+    private List<PermissionModel> findPermissiondWhereIdsIn(Collection<String> ids) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<PermissionModel> cq = cb.createQuery(PermissionModel.class).distinct(true);
+        Root<PermissionModel> root = cq.from(PermissionModel.class);
+        cq.select(root).where(root.get("id").in(ids));
+        return em.createQuery(cq).getResultList();
     }
 }

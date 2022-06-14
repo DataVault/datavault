@@ -273,12 +273,7 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
     }
 
     private List<PermissionModel> getPermissionModelsByType(PermissionModel.PermissionType type){
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<PermissionModel> cq = cb.createQuery(PermissionModel.class).distinct(true);
-        Root<PermissionModel> root = cq.from(PermissionModel.class);
-        cq.select(root);
-        cq.where(cb.equal(root.get("type"), type));
-        return em.createQuery(cq).getResultList();
+        return PermissionCustomDAOImpl.findPermissionModelsByType(em, type);
     }
 
     private List<PermissionModel> getAllPermissionModels(){
