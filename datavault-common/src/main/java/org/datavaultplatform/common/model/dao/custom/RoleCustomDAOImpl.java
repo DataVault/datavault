@@ -6,38 +6,37 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
+import org.datavaultplatform.common.model.PermissionModel.PermissionType;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.common.util.RoleUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 
+@Slf4j
 public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDAO {
     public RoleCustomDAOImpl(EntityManager em) {
         super(em);
     }
     @Override
     public void storeSpecialRoles() {
-        Session session = this.getCurrentSession();
-        ensureIsAdminExists(session);
-        ensureDataOwnerExists(session);
-        ensureDepositorExists(session);
-        ensureNominatedDataManagerExists(session);
-        ensureVaultCreatorExists(session);
+        ensureIsAdminExists();
+        ensureDataOwnerExists();
+        ensureDepositorExists();
+        ensureNominatedDataManagerExists();
+        ensureVaultCreatorExists();
     }
 
-    private void ensureIsAdminExists(Session session) {
-        Criteria allPermissionsCriteria = session.createCriteria(PermissionModel.class);
-        List<PermissionModel> allPermissions = allPermissionsCriteria.list();
+    private void ensureIsAdminExists() {
+        List<PermissionModel> allPermissions = getAllPermissionModels();
 
-        Criteria isAdminCriteria = session.createCriteria(RoleModel.class);
-        isAdminCriteria.add(Restrictions.eq("name", RoleUtils.IS_ADMIN_ROLE_NAME));
-        RoleModel storedIsAdmin = (RoleModel) isAdminCriteria.uniqueResult();
+        RoleModel storedIsAdmin = getRoleModelByName(RoleUtils.IS_ADMIN_ROLE_NAME);
         if (storedIsAdmin != null) {
             Set<Permission> storedIsAdminPerms = storedIsAdmin.getPermissions().stream()
                     .map(PermissionModel::getPermission)
@@ -45,7 +44,7 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
             Set<Permission> expectedIsAdminPerms = Sets.newHashSet(Permission.values());
             if (!storedIsAdminPerms.equals(expectedIsAdminPerms)) {
                 storedIsAdmin.setPermissions(allPermissions);
-                session.update(storedIsAdmin);
+                em.merge(storedIsAdmin);
             }
         } else {
             RoleModel isAdmin = new RoleModel();
@@ -54,18 +53,14 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
             isAdmin.setDescription(RoleUtils.IS_ADMIN_ROLE_DESCRIPTION);
             isAdmin.setStatus("0");
             isAdmin.setPermissions(allPermissions);
-            session.persist(isAdmin);
+            em.persist(isAdmin);
         }
     }
 
-    private void ensureDataOwnerExists(Session session) {
-        Criteria vaultPermissionsCriteria = session.createCriteria(PermissionModel.class);
-        vaultPermissionsCriteria.add(Restrictions.eq("type", PermissionModel.PermissionType.VAULT));
-        List<PermissionModel> vaultPermissions = vaultPermissionsCriteria.list();
+    private void ensureDataOwnerExists() {
+        List<PermissionModel> vaultPermissions = getPermissionModelsByType(PermissionType.VAULT);
 
-        Criteria dataOwnerCriteria = session.createCriteria(RoleModel.class);
-        dataOwnerCriteria.add(Restrictions.eq("name", RoleUtils.DATA_OWNER_ROLE_NAME));
-        RoleModel storedDataOwner = (RoleModel) dataOwnerCriteria.uniqueResult();
+        RoleModel storedDataOwner = getRoleModelByName(RoleUtils.DATA_OWNER_ROLE_NAME);
         if (storedDataOwner != null) {
             Set<Permission> storedDataOwnerPermissions = storedDataOwner.getPermissions().stream()
                     .map(PermissionModel::getPermission)
@@ -75,7 +70,7 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
                     .collect(Collectors.toSet());
             if (!storedDataOwnerPermissions.equals(expectedDataOwnerPermissions)) {
                 storedDataOwner.setPermissions(vaultPermissions);
-                session.update(storedDataOwner);
+                em.merge(storedDataOwner);
             }
         } else {
             RoleModel dataOwner = new RoleModel();
@@ -84,28 +79,24 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
             dataOwner.setDescription(RoleUtils.DATA_OWNER_ROLE_DESCRIPTION);
             dataOwner.setPermissions(vaultPermissions);
             dataOwner.setStatus("1");
-            session.persist(dataOwner);
+            em.persist(dataOwner);
         }
     }
 
-    private void ensureVaultCreatorExists(Session session) {
-        Criteria vaultPermissionsCriteria = session.createCriteria(PermissionModel.class);
-        vaultPermissionsCriteria.add(Restrictions.eq("type", PermissionModel.PermissionType.VAULT));
-        List<PermissionModel> vaultPermissions = vaultPermissionsCriteria.list();
+    private void ensureVaultCreatorExists() {
+        List<PermissionModel> vaultPermissions = getPermissionModelsByType(PermissionModel.PermissionType.VAULT);
 
-        Criteria dataOwnerCriteria = session.createCriteria(RoleModel.class);
-        dataOwnerCriteria.add(Restrictions.eq("name", RoleUtils.VAULT_CREATOR_ROLE_NAME));
-        RoleModel storedDataOwner = (RoleModel) dataOwnerCriteria.uniqueResult();
-        if (storedDataOwner != null) {
-            Set<Permission> storedDataOwnerPermissions = storedDataOwner.getPermissions().stream()
+        RoleModel storedVaultCreator = getRoleModelByName(RoleUtils.VAULT_CREATOR_ROLE_NAME);
+        if (storedVaultCreator != null) {
+            Set<Permission> storedDataOwnerPermissions = storedVaultCreator.getPermissions().stream()
                     .map(PermissionModel::getPermission)
                     .collect(Collectors.toSet());
             Set<Permission> expectedDataOwnerPermissions = vaultPermissions.stream()
                     .map(PermissionModel::getPermission)
                     .collect(Collectors.toSet());
             if (!storedDataOwnerPermissions.equals(expectedDataOwnerPermissions)) {
-                storedDataOwner.setPermissions(vaultPermissions);
-                session.update(storedDataOwner);
+                storedVaultCreator.setPermissions(vaultPermissions);
+                em.merge(storedVaultCreator);
             }
         } else {
             RoleModel dataOwner = new RoleModel();
@@ -114,18 +105,16 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
             dataOwner.setDescription(RoleUtils.VAULT_CREATOR_ROLE_DESCRIPTION);
             dataOwner.setPermissions(vaultPermissions);
             dataOwner.setStatus("1");
-            session.persist(dataOwner);
+            em.persist(dataOwner);
         }
     }
 
-    private void ensureNominatedDataManagerExists(Session session) {
+    private void ensureNominatedDataManagerExists() {
         //Criteria vaultPermissionsCriteria = session.createCriteria(PermissionModel.class);
         //vaultPermissionsCriteria.add(Restrictions.eq("type", PermissionModel.PermissionType.VAULT));
         //List<PermissionModel> vaultPermissions = vaultPermissionsCriteria.list();
 
-        Criteria ndmCriteria = session.createCriteria(RoleModel.class);
-        ndmCriteria.add(Restrictions.eq("name", RoleUtils.NOMINATED_DATA_MANAGER_ROLE_NAME));
-        RoleModel storedNDM = (RoleModel) ndmCriteria.uniqueResult();
+        RoleModel storedNDM = getRoleModelByName(RoleUtils.NOMINATED_DATA_MANAGER_ROLE_NAME);
         if (storedNDM != null) {
             /*Set<Permission> storedNDMPermissions = storedNDM.getPermissions().stream()
                     .map(PermissionModel::getPermission)
@@ -145,18 +134,16 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
             /* todo: fix default NDM permissions */
             //ndm.setPermissions(vaultPermissions);
             ndm.setStatus("1");
-            session.persist(ndm);
+            em.persist(ndm);
         }
     }
 
-    private void ensureDepositorExists(Session session) {
+    private void ensureDepositorExists() {
         //Criteria vaultPermissionsCriteria = session.createCriteria(PermissionModel.class);
         //vaultPermissionsCriteria.add(Restrictions.eq("type", PermissionModel.PermissionType.VAULT));
         //List<PermissionModel> vaultPermissions = vaultPermissionsCriteria.list();
 
-        Criteria depCriteria = session.createCriteria(RoleModel.class);
-        depCriteria.add(Restrictions.eq("name", RoleUtils.DEPOSITOR_ROLE_NAME));
-        RoleModel storedDep = (RoleModel) depCriteria.uniqueResult();
+        RoleModel storedDep = getRoleModelByName(RoleUtils.DEPOSITOR_ROLE_NAME);
         if (storedDep != null) {
             /*Set<Permission> storedNDMPermissions = storedNDM.getPermissions().stream()
                     .map(PermissionModel::getPermission)
@@ -176,102 +163,129 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
             /* todo: fix default NDM permissions */
             //ndm.setPermissions(vaultPermissions);
             dep.setStatus("2");
-            session.persist(dep);
+            em.persist(dep);
         }
     }
-    private void populateAssignedUserCount(Session session, RoleModel role) {
-        if (role != null) {
-            Criteria assignedUserCountCriteria = session.createCriteria(RoleAssignment.class);
-            assignedUserCountCriteria.add(Restrictions.eq("role", role));
-            role.setAssignedUserCount(assignedUserCountCriteria.list().size());
+    private void populateAssignedUserCount(RoleModel role) {
+        if(role != null) {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<RoleAssignment> cq = cb.createQuery(RoleAssignment.class).distinct(true);
+            Root<RoleAssignment> root = cq.from(RoleAssignment.class);
+            cq.select(root);
+            cq.where(cb.equal(root.get("role"), role));
+            int count = em.createQuery(cq).getResultList().size();
+            role.setAssignedUserCount(count);
         }
     }
 
     @Override
     public RoleModel getIsAdmin() {
-        Session session = this.getCurrentSession();
-        Criteria criteria = session.createCriteria(RoleModel.class);
-        criteria.add(Restrictions.eq("name", RoleUtils.IS_ADMIN_ROLE_NAME));
-        RoleModel role = (RoleModel) criteria.uniqueResult();
-        populateAssignedUserCount(session, role);
+        RoleModel role = getRoleModelByName(RoleUtils.IS_ADMIN_ROLE_NAME);
+        populateAssignedUserCount(role);
         return role;
     }
 
     @Override
     public RoleModel getDataOwner() {
-        Session session = this.getCurrentSession();
-        Criteria criteria = session.createCriteria(RoleModel.class);
-        criteria.add(Restrictions.eq("name", RoleUtils.DATA_OWNER_ROLE_NAME));
-        RoleModel role = (RoleModel) criteria.uniqueResult();
-        populateAssignedUserCount(session, role);
+        RoleModel role = getRoleModelByName(RoleUtils.DATA_OWNER_ROLE_NAME);
+        populateAssignedUserCount(role);
         return role;
     }
 
     @Override
     public RoleModel getDepositor() {
-        Session session = this.getCurrentSession();
-        Criteria criteria = session.createCriteria(RoleModel.class);
-        criteria.add(Restrictions.eq("name", RoleUtils.DEPOSITOR_ROLE_NAME));
-        RoleModel role = (RoleModel) criteria.uniqueResult();
-        populateAssignedUserCount(session, role);
+        RoleModel role = getRoleModelByName(RoleUtils.DEPOSITOR_ROLE_NAME);
+        populateAssignedUserCount(role);
         return role;
     }
 
     @Override
     public RoleModel getVaultCreator() {
-        Session session = this.getCurrentSession();
-        Criteria criteria = session.createCriteria(RoleModel.class);
-        criteria.add(Restrictions.eq("name", RoleUtils.VAULT_CREATOR_ROLE_NAME));
-        RoleModel role = (RoleModel) criteria.uniqueResult();
-        populateAssignedUserCount(session, role);
+        RoleModel role = getRoleModelByName(RoleUtils.VAULT_CREATOR_ROLE_NAME);
+        populateAssignedUserCount(role);
         return role;
     }
 
     @Override
     public RoleModel getNominatedDataManager() {
-        Session session = this.getCurrentSession();
-        Criteria criteria = session.createCriteria(RoleModel.class);
-        criteria.add(Restrictions.eq("name", RoleUtils.NOMINATED_DATA_MANAGER_ROLE_NAME));
-        RoleModel role = (RoleModel) criteria.uniqueResult();
-        populateAssignedUserCount(session, role);
+        RoleModel role = getRoleModelByName(RoleUtils.NOMINATED_DATA_MANAGER_ROLE_NAME);
+        populateAssignedUserCount(role);
         return role;
     }
 
     @Override
     public List<RoleModel> listAndPopulate() {
-        Session session = this.getCurrentSession();
-        Criteria criteria = session.createCriteria(RoleModel.class);
-        List<RoleModel> roles = criteria.list();
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<RoleModel> cq = cb.createQuery(RoleModel.class).distinct(true);
+        Root<RoleModel> root = cq.from(RoleModel.class);
+        cq.select(root);
+        List<RoleModel> roles = em.createQuery(cq).getResultList();
         for (RoleModel role : roles) {
-            populateAssignedUserCount(session, role);
+            populateAssignedUserCount(role);
         }
         return roles;
     }
 
     @Override
     public Collection<RoleModel> findAll(RoleType roleType) {
-        Session session = this.getCurrentSession();
-        Criteria criteria = session.createCriteria(RoleModel.class);
-        criteria.add(Restrictions.eq("type", roleType));
-        List<RoleModel> roles = criteria.list();
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<RoleModel> cq = cb.createQuery(RoleModel.class).distinct(true);
+        Root<RoleModel> root = cq.from(RoleModel.class);
+        cq.select(root);
+        cq.where(cb.equal(root.get("type"), roleType));
+        List<RoleModel> roles = em.createQuery(cq).getResultList();
         for (RoleModel role : roles) {
-            populateAssignedUserCount(session, role);
+            populateAssignedUserCount(role);
         }
         return roles;
     }
 
     @Override
     public List<RoleModel> findAllEditableRoles() {
-        Session session = getCurrentSession();
-        Criteria criteria = session.createCriteria(RoleModel.class);
-        criteria.add(Restrictions.or(
-                Restrictions.eq("type", RoleType.SCHOOL),
-                Restrictions.eq("type", RoleType.VAULT)
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<RoleModel> cq = cb.createQuery(RoleModel.class).distinct(true);
+        Root<RoleModel> root = cq.from(RoleModel.class);
+        cq.select(root);
+        cq.where(cb.or(
+            cb.equal(root.get("type"), RoleType.SCHOOL),
+            cb.equal(root.get("type"), RoleType.VAULT)
         ));
-        List<RoleModel> roles = criteria.list();
+        List<RoleModel> roles = em.createQuery(cq).getResultList();
         for (RoleModel role : roles) {
-            populateAssignedUserCount(session, role);
+            populateAssignedUserCount(role);
         }
         return roles;
+    }
+
+    private RoleModel getRoleModelByName(String roleModelName){
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<RoleModel> cq = cb.createQuery(RoleModel.class).distinct(true);
+        Root<RoleModel> root = cq.from(RoleModel.class);
+        cq.select(root);
+        cq.where(cb.equal(root.get("name"), roleModelName));
+        RoleModel result = null;
+        try {
+            result = em.createQuery(cq).getSingleResult();
+        } catch (Exception ex) {
+            log.debug("problem getting roleModel for {}", roleModelName, ex);
+        }
+        return result;
+    }
+
+    private List<PermissionModel> getPermissionModelsByType(PermissionModel.PermissionType type){
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<PermissionModel> cq = cb.createQuery(PermissionModel.class).distinct(true);
+        Root<PermissionModel> root = cq.from(PermissionModel.class);
+        cq.select(root);
+        cq.where(cb.equal(root.get("type"), type));
+        return em.createQuery(cq).getResultList();
+    }
+
+    private List<PermissionModel> getAllPermissionModels(){
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<PermissionModel> cq = cb.createQuery(PermissionModel.class).distinct(true);
+        Root<PermissionModel> root = cq.from(PermissionModel.class);
+        cq.select(root);
+        return em.createQuery(cq).getResultList();
     }
 }
