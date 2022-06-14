@@ -22,15 +22,12 @@ import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.BasicConfigurator;
+//import org.apache.log4j.BasicConfigurator;
 import org.datavaultplatform.common.event.*;
 import org.datavaultplatform.common.event.deposit.*;
 import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
 import org.datavaultplatform.common.event.retrieve.RetrieveStart;
 import org.datavaultplatform.worker.operations.FileSplitter;
-import org.junit.After;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,12 +44,17 @@ import com.rabbitmq.client.ShutdownSignalException;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 /**
  * Integration Test for the Worker Instance
  * 
  * These tests are run with a worker instance running in a docker container
  */
+@Disabled
 public class WorkerInstanceIT {
     private static String workerInstanceResources;
     private static String testQueueServer = "localhost";
@@ -61,7 +63,7 @@ public class WorkerInstanceIT {
     private static String dockerLocalStorage;
     private static String bagId = "b6fa3676-2018-4fc5-9f0e-97cfb77a250a";
     
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
         String resourcesDir = System.getProperty("user.dir") + File.separator + "src" +
                 File.separator + "test" + File.separator + "resources";
@@ -72,7 +74,7 @@ public class WorkerInstanceIT {
                 File.separator + "docker" + File.separator + "tmp" + 
                 File.separator + "Users";
 
-        BasicConfigurator.configure();
+        //BasicConfigurator.configure();
     }
     
     @Test
@@ -469,7 +471,7 @@ public class WorkerInstanceIT {
         return message;
     }
     
-    @After
+    @AfterEach
     public void tearDown() {
         String archiveDir = ".." + File.separator + "docker" + File.separator + "tmp" +
                 File.separator + "datavault" + File.separator + "archive";
@@ -486,7 +488,7 @@ public class WorkerInstanceIT {
         File metaFolder = new File(metaFolderPath);
         metaFolder.delete();
 
-        BasicConfigurator.resetConfiguration();
+        //BasicConfigurator.resetConfiguration();
     }
 
 }

@@ -7,18 +7,18 @@ import java.io.IOException;
 import java.util.zip.CRC32;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+//import org.apache.log4j.BasicConfigurator;
 
 public class FileSplitterTest {
     private static String bigFileResources;
     private static File tempDir;
     
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
         String resourcesDir = System.getProperty("user.dir") + File.separator + "src" +
                 File.separator + "test" + File.separator + "resources";
@@ -28,7 +28,7 @@ public class FileSplitterTest {
         tempDir = new File(resourcesDir, "tmp");
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         try{
             tempDir.mkdir();
@@ -37,7 +37,7 @@ public class FileSplitterTest {
             fail(se.getMessage());
         }
 
-        BasicConfigurator.configure();
+        //BasicConfigurator.configure();
     }
     
     @Test
@@ -175,7 +175,8 @@ public class FileSplitterTest {
     }
     
     @Test
-    @Category(org.datavaultplatform.SlowTest.class)
+    @Disabled
+    //@Category(org.datavaultplatform.SlowTest.class)
     public void testSplit500MBFile() {
         System.out.println( "\nStart testSplit500MBFile");
         try{
@@ -208,7 +209,8 @@ public class FileSplitterTest {
     }
     
     @Test
-    @Category(org.datavaultplatform.SlowTest.class)
+    @Disabled
+    //@Category(org.datavaultplatform.SlowTest.class)
     public void testSplit500MBFileWithExtraBytes() {
         System.out.println( "\nStart testSplit500MBFileWithExtraBytes");
         try{
@@ -249,7 +251,8 @@ public class FileSplitterTest {
     }
     
     @Test
-    @Category(org.datavaultplatform.SlowTest.class)
+    //@Category(org.datavaultplatform.SlowTest.class)
+    @Disabled
     public void testSplitGigaBytesFile() {
         System.out.println( "\nStart testSplitGigaBytesFile");
         try{
@@ -282,7 +285,8 @@ public class FileSplitterTest {
     }
     
     @Test
-    @Category(org.datavaultplatform.SlowTest.class)
+    @Disabled
+    //@Category(org.datavaultplatform.SlowTest.class)
     public void testSplitGigaBytesFileWithExtraBytes() {
         System.out.println( "\nStart testSplitGigaBytesFileWithExtraBytes");
         try{
@@ -317,7 +321,8 @@ public class FileSplitterTest {
     }
     
     @Test
-    @Category(org.datavaultplatform.SlowTest.class)
+    @Disabled
+    //@Category(org.datavaultplatform.SlowTest.class)
     public void testSplitHugeBytesFileAndRecompose() {
         System.out.println( "\nStart testSplitHugeBytesFileAndRecompose");
         try{
@@ -373,7 +378,7 @@ public class FileSplitterTest {
         }
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         try{
             FileUtils.deleteDirectory(tempDir);
@@ -382,7 +387,7 @@ public class FileSplitterTest {
             fail(ex.getMessage());
         }
 
-        BasicConfigurator.resetConfiguration();
+        //BasicConfigurator.resetConfiguration();
     }
 
 }

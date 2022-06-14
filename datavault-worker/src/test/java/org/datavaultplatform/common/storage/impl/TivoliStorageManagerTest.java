@@ -2,11 +2,6 @@ package org.datavaultplatform.common.storage.impl;
 
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.io.Progress;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,16 +9,22 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.*;
 
+@Disabled
 public class TivoliStorageManagerTest {
 	
 	private TivoliStorageManager tsm = null;
 	private static String tsmResources;
 	//private static File testDir;
 	
-	@BeforeClass
+	@BeforeAll
 	public static void setUpClass() {
 		String resourcesDir = System.getProperty("user.dir") + File.separator + "src" +
                 File.separator + "test" + File.separator + "resources";
@@ -32,7 +33,7 @@ public class TivoliStorageManagerTest {
         //testDir = new File(resourcesDir, "tsm-output");   
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		String name = "Test";
 		Map<String,String> config = new HashMap<>();
@@ -65,7 +66,7 @@ public class TivoliStorageManagerTest {
 	}
 	
     @Test
-    @Category(org.datavaultplatform.test.TSMTest.class)
+    //@Category(org.datavaultplatform.test.TSMTest.class)
     public void testStoreValidParams() {
     		Progress progress = new Progress();
     		File working  = new File(tsmResources, "test.tar");
@@ -97,7 +98,7 @@ public class TivoliStorageManagerTest {
     }
     
     @Test
-    @Category(org.datavaultplatform.test.TSMTest.class)
+    //@Category(org.datavaultplatform.test.TSMTest.class)
     public void testStoreNonExistantFile() {
     		Progress progress = new Progress();
 		File working  = new File(tsmResources, "testx.tar");
@@ -114,7 +115,7 @@ public class TivoliStorageManagerTest {
     }
     
     @Test
-    @Category(org.datavaultplatform.test.TSMTest.class)
+    //@Category(org.datavaultplatform.test.TSMTest.class)
     public void testRetrieveValidParams() {
 	    	Progress progress = new Progress();
 		File working  = new File(tsmResources, "test.tar");
@@ -175,7 +176,7 @@ public class TivoliStorageManagerTest {
     }
     
     @Test
-    @Category(org.datavaultplatform.test.TSMTest.class)
+    //@Category(org.datavaultplatform.test.TSMTest.class)
     public void testRetrieveNonExistantFileFromNodeOne() {
     		// retrieve from TSM
      	Progress progress = new Progress();
@@ -194,7 +195,7 @@ public class TivoliStorageManagerTest {
     }
     
     @Test
-    @Category(org.datavaultplatform.test.TSMTest.class)
+    //@Category(org.datavaultplatform.test.TSMTest.class)
     public void testRetrieveNonExistantFileFromNodeTwo() {
     		// retrieve from TSM
      	Progress progress = new Progress();
@@ -212,8 +213,7 @@ public class TivoliStorageManagerTest {
     		}
     }
     
-	@After
+		@AfterEach
     public void tearDown() {
-	       
     }
 }

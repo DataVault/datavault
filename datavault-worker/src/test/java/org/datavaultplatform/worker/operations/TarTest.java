@@ -14,18 +14,18 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+//import org.apache.log4j.BasicConfigurator;
 
 public class TarTest {
     private static File packagerResourcesDir;
     private static File bigdataResourcesDir;
     private static File testDir;
     
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
         String resourcesPath = System.getProperty("user.dir") + File.separator + "src" +
                 File.separator + "test" + File.separator + "resources";
@@ -35,7 +35,7 @@ public class TarTest {
         testDir = new File(resourcesPath + File.separator + "tmp");
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         try{
             testDir.mkdir();
@@ -44,7 +44,7 @@ public class TarTest {
             fail(se.getMessage());
         }
         
-        BasicConfigurator.configure();
+        //BasicConfigurator.configure();
     }
     
     @Test
@@ -209,7 +209,7 @@ public class TarTest {
                 TimeUnit.MILLISECONDS.toMillis(endTime - startTime) + " sec");
     }
     
-    @After
+    @AfterEach
     public void tearDown() {
         try{
             FileUtils.deleteDirectory(testDir);
@@ -218,7 +218,7 @@ public class TarTest {
             fail(ex.getMessage());
         }
 
-        BasicConfigurator.resetConfiguration();
+        //BasicConfigurator.resetConfiguration();
     }
 
 }
