@@ -24,21 +24,9 @@
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
-    <!--
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-amqp</artifactId>
-    </dependency>
-    -->
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>gov.loc</groupId>
-      <artifactId>bagit</artifactId>
     </dependency>
 
     <dependency>
@@ -50,6 +38,9 @@
       <groupId>com.rabbitmq</groupId>
       <artifactId>amqp-client</artifactId>
       <version>4.8.0</version>
+      <!--
+      <version>5.14.2</version>
+      -->
     </dependency>
 
 
@@ -102,7 +93,7 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk15on</artifactId>
-      <version>1.67</version>
+      <version>1.70</version>
     </dependency>
 
     <dependency>
