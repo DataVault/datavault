@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -23,41 +22,30 @@ import org.datavaultplatform.broker.services.UserKeyPairService.KeyPairInfo;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 
+/**
+ * This test generates a key pair and checks that the keypair is valid by ...
+ * regenerating the rsa public key from the private key only and
+ * checking the regenerated public is the same as the original public key.
+ */
 @Slf4j
-public class UserKeyPairServiceIT {
+public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
 
   public static final String TEST_PASSPHRASE = "tenet";
 
   static Path TMP_DIR;
   static GenericContainer<?> linuxWithOpenSSL;
 
-  @BeforeAll
-  static void setup() {
-    try {
-      TMP_DIR = createTempDirectory("dv-tmp");
-      log.info("TMP_DIR IS {}", TMP_DIR);
-      linuxWithOpenSSL = new GenericContainer<>(
-          DockerImageName.parse("nginx"))
-          .withFileSystemBind(TMP_DIR.toAbsolutePath().toString(), "/tmp/dv5-temp");
-      linuxWithOpenSSL.start();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @AfterAll
-  static void tearDown() throws IOException {
-    linuxWithOpenSSL.stop();
-  }
-
-
+  /**
+   * Tests that the key pair is valid by
+   * regenerating public key from private key
+   */
   @Test
+  @Override
   @SneakyThrows
-  void testKeyPairGeneration() {
+  void testKeyPairIsValid() {
     UserKeyPairService service = new UserKeyPairService(TEST_PASSPHRASE);
     assertEquals(TEST_PASSPHRASE, service.getPassphrase());
     KeyPairInfo info = service.generateNewKeyPair();
@@ -117,13 +105,8 @@ public class UserKeyPairServiceIT {
   @SneakyThrows
   private String decryptPrivateKey() {
 
-    ExecResult result = linuxWithOpenSSL.execInContainer(
-        "openssl", "rsa", "-in", "/tmp/dv5-temp/rsa", "-passin", "pass:" + TEST_PASSPHRASE, "-out",
-        "/tmp/dv5-temp/rsa.decrypted");
-
-    log.info("decrypt exit code [{}]", result.getExitCode());
-    log.info("decrypt std out [{}]", result.getStdout());
-    log.info("decrypt std err [{}]", result.getStderr());
+    String command = "openssl rsa -in /tmp/dv5-temp/rsa -passin pass:" + TEST_PASSPHRASE +" -out /tmp/dv5-temp/rsa.decrypted";
+    execInContainer(linuxWithOpenSSL, "decrypr private key", command);
 
     String decryptedPrivateKey = readFromFileInTmpDirectory("rsa.decrypted");
     return decryptedPrivateKey;
@@ -148,5 +131,24 @@ public class UserKeyPairServiceIT {
   private String readFromFileInTmpDirectory(String filename) {
     File file = new File(TMP_DIR.toFile(), filename);
     return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+  }
+
+  @BeforeAll
+  static void setup() {
+    try {
+      TMP_DIR = createTempDirectory("dv-tmp");
+      log.info("TMP_DIR IS {}", TMP_DIR);
+      linuxWithOpenSSL = new GenericContainer<>(
+          DockerImageName.parse(IMAGE_NAME_NGINX))
+          .withFileSystemBind(TMP_DIR.toAbsolutePath().toString(), "/tmp/dv5-temp");
+      linuxWithOpenSSL.start();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @AfterAll
+  static void tearDown() throws IOException {
+    linuxWithOpenSSL.stop();
   }
 }

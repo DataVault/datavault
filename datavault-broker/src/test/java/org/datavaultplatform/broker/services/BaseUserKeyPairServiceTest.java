@@ -1,0 +1,59 @@
+package org.datavaultplatform.broker.services;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.util.StreamUtils;
+import org.testcontainers.containers.Container;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.images.builder.Transferable;
+
+@Slf4j
+public abstract class BaseUserKeyPairServiceTest {
+
+  // this image has 'scp' and runs a configurable ssh daemon
+  public static final String IMAGE_NAME_OPENSSH = "linuxserver/openssh-server";
+
+  // this image has 'openssl'
+  public static final String IMAGE_NAME_NGINX = "nginx";
+
+  @SneakyThrows
+  final static void execInContainer(GenericContainer container, String label, String command) {
+    execInContainer(container, label, command.split(" "));
+  }
+
+  final static void execInContainer(GenericContainer container, String label, String... commands) {
+    try {
+      Container.ExecResult result = container.execInContainer(commands);
+      if (result.getExitCode() != 0) {
+        log.info("[{}] std err   [{}]", label, result.getStderr().trim());
+        log.info("[{}] std out   [{}]", label, result.getStdout().trim());
+        log.info("[{}] exit code [{}]", label, result.getExitCode());
+        fail(String.format("exit status for [%s] was [%d] not [0]", label, result.getExitCode()));
+      }
+    } catch (Exception ex) {
+      fail(String.format("problem running command [%s]", label), ex);
+    }
+  }
+
+  final static void copyScriptToContainer(GenericContainer<?> container, String contents,
+      String path) {
+    container.copyFileToContainer(Transferable.of(contents), path);
+    execInContainer(container, "chmod for " + path, "chmod +x " + path);
+  }
+
+  final static String readFileFromContainer(GenericContainer<?> container, String path) {
+    return container.copyFileFromContainer(path, is -> StreamUtils.copyToString(is, UTF_8));
+  }
+
+  abstract void testKeyPairIsValid();
+
+  @SneakyThrows
+  final String getStringFromResource(Resource res) {
+    return StreamUtils.copyToString(res.getInputStream(), UTF_8);
+  }
+
+}
