@@ -1,19 +1,21 @@
 package org.datavaultplatform.common.model.dao.custom;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.util.RoleUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-
 
 public class RoleAssignmentCustomDAOImpl extends BaseCustomDAOImpl implements
     RoleAssignmentCustomDAO {
@@ -24,155 +26,107 @@ public class RoleAssignmentCustomDAOImpl extends BaseCustomDAOImpl implements
 
     @Override
     public boolean roleAssignmentExists(RoleAssignment roleAssignment) {
-        Session session = null;
-        try {
-            session = this.getCurrentSession();
+      CriteriaBuilder cb = em.getCriteriaBuilder();
+      CriteriaQuery<RoleAssignment> cr = cb.createQuery(RoleAssignment.class).distinct(true);
+      Root<RoleAssignment> rt = cr.from(RoleAssignment.class);
+      List<Predicate> clauses = new ArrayList<>();
+      clauses.add(cb.equal(rt.get("role"), roleAssignment.getRole()));
+      clauses.add(cb.equal(rt.get("userId"), roleAssignment.getUserId()));
+      if (roleAssignment.getSchoolId() != null) {
 
-            Criteria criteria = session.createCriteria(RoleAssignment.class);
-            criteria.add(Restrictions.eq("role", roleAssignment.getRole()));
-            criteria.add(Restrictions.eq("userId", roleAssignment.getUserId()));
-            if (roleAssignment.getSchoolId() != null) {
-
-                criteria.add(Restrictions.eq("schoolId", roleAssignment.getSchoolId()));
-            }
-            if (roleAssignment.getVaultId() != null) {
-                criteria.add(Restrictions.eq("vaultId", roleAssignment.getVaultId()));
-            }
-            if (roleAssignment.getPendingVaultId() != null) {
-                criteria.add(Restrictions.eq("pendingVaultId", roleAssignment.getPendingVaultId()));
-            }
-            return criteria.uniqueResult() != null;
-        } finally {
-        }
-
+        clauses.add(cb.equal(rt.get("schoolId"), roleAssignment.getSchoolId()));
+      }
+      if (roleAssignment.getVaultId() != null) {
+        clauses.add(cb.equal(rt.get("vaultId"), roleAssignment.getVaultId()));
+      }
+      if (roleAssignment.getPendingVaultId() != null) {
+        clauses.add(cb.equal(rt.get("pendingVaultId"), roleAssignment.getPendingVaultId()));
+      }
+      Predicate[] clauseArr = clauses.toArray(new Predicate[]{});
+      return getSingleResult(cr.where(clauseArr)) != null;
     }
 
     @Override
     public Set<Permission> findUserPermissions(String userId) {
-        Session session = null;
 
-        try {
-            session = getCurrentSession();
-            Query query = session.createQuery("SELECT DISTINCT role.permissions \n" +
-                    "FROM org.datavaultplatform.common.model.RoleAssignment ra\n" +
-                    "INNER JOIN ra.role as role\n" +
-                    "WHERE ra.userId = :userId");
-            query.setParameter("userId", userId);
+      Query query = em.createQuery("SELECT DISTINCT role.permissions \n" +
+        "FROM org.datavaultplatform.common.model.RoleAssignment ra\n" +
+        "INNER JOIN ra.role as role\n" +
+        "WHERE ra.userId = :userId");
+      query.setParameter("userId", userId);
 
-            return ((List<PermissionModel>) query.list())
-                    .stream()
-                    .map(PermissionModel::getPermission)
-                    .collect(Collectors.toSet());
-        } finally {
-        }
+      return ((List<PermissionModel>) query.getResultList())
+        .stream()
+        .map(PermissionModel::getPermission)
+        .collect(Collectors.toSet());
     }
 
     @Override
     public List<RoleAssignment> findBySchoolId(String schoolId) {
-        Session session = null;
-        try {
-            session = getCurrentSession();
-
-            List<RoleAssignment> schoolAssignments = findBy(session, "schoolId", schoolId);
-            return schoolAssignments;
-        } finally {
-        }
-
+      return findBy("schoolId", schoolId);
     }
 
-    private <T> T findObjectById(Session session, Class<T> type, String idName, Object idValue) {
-        Criteria criteria = session.createCriteria(type);
-        criteria.add(Restrictions.eq(idName, idValue));
-        return (T) criteria.uniqueResult();
+    private <T> T findObjectById(Class<T> type, String idName, Object idValue) {
+      CriteriaBuilder cb = em.getCriteriaBuilder();
+      CriteriaQuery<T> cr = cb.createQuery(type).distinct(true);
+      Root<T> rt = cr.from(type);
+      cr.where(cb.equal(rt.get(idName), idValue));
+      return getSingleResult(cr);
     }
 
-    private List<RoleAssignment> findBy(Session session, String columnName, Object columnValue) {
-        Criteria criteria = session.createCriteria(RoleAssignment.class);
-        criteria.add(Restrictions.eq(columnName, columnValue));
-        return (List<RoleAssignment>) criteria.list();
+    private List<RoleAssignment> findBy(String columnName, Object columnValue) {
+      CriteriaBuilder cb = em.getCriteriaBuilder();
+      CriteriaQuery<RoleAssignment> cr = cb.createQuery(RoleAssignment.class).distinct(true);
+      Root<RoleAssignment> rt = cr.from(RoleAssignment.class);
+      cr.where(cb.equal(rt.get(columnName), columnValue));
+      return em.createQuery(cr).getResultList();
     }
 
     @Override
     public List<RoleAssignment> findByVaultId(String vaultId) {
-        Session session = null;
-        try {
-            session = getCurrentSession();
-
-            List<RoleAssignment> vaultAssignments = findBy(session, "vaultId", vaultId);
-            return vaultAssignments;
-        } finally {
-        }
-
+      return findBy("vaultId", vaultId);
     }
 
     @Override
     public List<RoleAssignment> findByPendingVaultId(String vaultId) {
-        Session session = null;
-        try {
-            session = getCurrentSession();
-
-            List<RoleAssignment> vaultAssignments = findBy(session, "pendingVaultId", vaultId);
-            return vaultAssignments;
-        } finally {
-        }
-
+        return findBy("pendingVaultId", vaultId);
     }
 
     @Override
     public List<RoleAssignment> findByUserId(String userId) {
-        Session session = null;
-        try {
-            session = getCurrentSession();
-
-            List<RoleAssignment> schoolAssignments = findBy(session, "userId", userId);
-            return schoolAssignments;
-        } finally {
-        }
-
+        return findBy("userId", userId);
     }
 
     @Override
     public List<RoleAssignment> findByRoleId(Long roleId) {
-        Session session = null;
-        try {
-            session = getCurrentSession();
-
-            RoleModel role = findObjectById(session, RoleModel.class, "id", roleId);
-            List<RoleAssignment> assignments = findBy(session, "role", role);
-            return assignments;
-        } finally {
-        }
-
+      RoleModel role = findObjectById(RoleModel.class, "id", roleId);
+      return findBy( "role", role);
     }
 
     @Override
     public boolean hasPermission(String userId, Permission permission) {
-        Session session = null;
-        try {
-            session = getCurrentSession();
-            Criteria criteria = session.createCriteria(RoleAssignment.class, "assignment");
-            criteria.createAlias("assignment.role", "role");
-            criteria.createAlias("role.permissions", "permission");
-            criteria.add(Restrictions.eq("assignment.userId", userId));
-            criteria.add(Restrictions.eq("permission.id", permission.getId()));
-            return criteria.list().size() > 0;
-
-        } finally {
-        }
+      TypedQuery<Long> query = em.createQuery("SELECT count(*)  " +
+              "FROM org.datavaultplatform.common.model.RoleAssignment assignment " +
+              "INNER JOIN assignment.role as role " +
+              "INNER JOIN role.permissions as permission " +
+              "WHERE assignment.userId = :userId " +
+              "AND   permission.id = :permissionId",
+          Long.class);
+      query.setParameter("userId", userId);
+      query.setParameter("permissionId", permission.getId());
+      return getCount(query) > 0;
     }
 
     @Override
     public boolean isAdminUser(String userId) {
-        Session session = null;
-        try {
-            session = getCurrentSession();
-            Criteria criteria = session.createCriteria(RoleAssignment.class, "assignment");
-            criteria.createAlias("assignment.role", "role");
-            criteria.add(Restrictions.eq("assignment.userId", userId));
-            criteria.add(Restrictions.eq("role.name", RoleUtils.IS_ADMIN_ROLE_NAME));
-            return criteria.list().size() > 0;
-
-        } finally {
-        }
-    }
+      TypedQuery<Long> query = em.createQuery("SELECT count(*)  " +
+          "FROM org.datavaultplatform.common.model.RoleAssignment assignment " +
+          "INNER JOIN assignment.role as role " +
+          "WHERE assignment.userId = :userId " +
+          "AND   role.name = :roleName",
+          Long.class);
+      query.setParameter("userId", userId);
+      query.setParameter("roleName", RoleUtils.IS_ADMIN_ROLE_NAME);
+      return getCount(query) > 0;
+  }
 }
