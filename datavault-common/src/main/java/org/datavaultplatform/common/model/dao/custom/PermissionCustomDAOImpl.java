@@ -60,11 +60,7 @@ public class PermissionCustomDAOImpl extends BaseCustomDAOImpl implements Permis
         Root<PermissionModel> root = cq.from(PermissionModel.class);
         cq.select(root);
         cq.where(cb.equal(root.get("id"), permission.name()));
-        try {
-            return em.createQuery(cq).getSingleResult();
-        } catch (NoResultException ex) {
-            return null;
-        }
+        return getSingleResult(cq);
     }
 
     @Override

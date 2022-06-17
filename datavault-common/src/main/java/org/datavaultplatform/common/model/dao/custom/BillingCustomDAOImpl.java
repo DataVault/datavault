@@ -86,7 +86,7 @@ public class BillingCustomDAOImpl extends BaseCustomDAOImpl implements BillingCu
       ));
     }
 
-    Long count = em.createQuery(countQuery).getSingleResult();
+    Long count = getSingleResult(countQuery);
     return count;
   }
 

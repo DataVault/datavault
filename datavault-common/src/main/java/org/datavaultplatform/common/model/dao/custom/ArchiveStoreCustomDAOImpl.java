@@ -20,11 +20,6 @@ public class ArchiveStoreCustomDAOImpl extends BaseCustomDAOImpl implements
         CriteriaQuery<ArchiveStore> cr = cb.createQuery(ArchiveStore.class).distinct(true);
         Root<ArchiveStore> rt = cr.from(ArchiveStore.class);
         cr.where(cb.equal(rt.get("retrieveEnabled"), true));
-        try {
-            ArchiveStore store = em.createQuery(cr).getSingleResult();
-            return store;
-        } catch (NoResultException ex){
-            return null;
-        }
+        return getSingleResult(cr);
     }
 }

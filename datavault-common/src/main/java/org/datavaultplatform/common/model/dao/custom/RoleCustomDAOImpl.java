@@ -263,13 +263,7 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
         Root<RoleModel> root = cq.from(RoleModel.class);
         cq.select(root);
         cq.where(cb.equal(root.get("name"), roleModelName));
-        RoleModel result = null;
-        try {
-            result = em.createQuery(cq).getSingleResult();
-        } catch (Exception ex) {
-            log.debug("problem getting roleModel for {}", roleModelName, ex);
-        }
-        return result;
+        return getSingleResult(cq);
     }
 
     private List<PermissionModel> getPermissionModelsByType(PermissionModel.PermissionType type){

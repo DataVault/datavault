@@ -19,12 +19,7 @@ public class ClientCustomDAOImpl extends BaseCustomDAOImpl implements ClientCust
         CriteriaQuery<Client> cr = cb.createQuery(Client.class);
         Root<Client> rt = cr.from(Client.class);
         cr.where(cb.equal(rt.get("apiKey"), apiKey));
-        try {
-          Client client = em.createQuery(cr).getSingleResult();
-          return client;
-        } catch (NoResultException ex) {
-          return null;
-        }
+        return getSingleResult(cr);
     }
 
 }
