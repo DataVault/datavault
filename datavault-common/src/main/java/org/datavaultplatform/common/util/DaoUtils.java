@@ -1,5 +1,7 @@
 package org.datavaultplatform.common.util;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleType;
@@ -30,5 +32,30 @@ public class DaoUtils {
         return roleAssignments.stream()
                 .map(roleAssignment -> roleAssignment.getSchoolId() == null ? FULL_ACCESS_INDICATOR : roleAssignment.getSchoolId())
                 .collect(Collectors.toSet());
+    }
+
+    public static Set<String> getPermittedSchoolIds(EntityManager em, String userId, Permission permission) {
+        String jql =
+            "select roleAssignment from org.datavaultplatform.common.model.RoleAssignment roleAssignment " +
+                "INNER JOIN roleAssignment.role as role " +
+                "INNER JOIN role.permissions as permissions " +
+                "WHERE roleAssignment.userId = :userId " +
+                "AND   permissions.id        = :permissionId " +
+                "AND   ( " +
+                "  roleAssignment.schoolId IS NOT NULL " +
+                "  OR " +
+                "  role.type = :roleType" +
+                ")";
+
+        TypedQuery<RoleAssignment> query = em.createQuery(jql, RoleAssignment.class);
+        query.setParameter("userId", userId);
+        query.setParameter("permissionId", permission.getId());
+        query.setParameter("roleType", RoleType.ADMIN);
+
+        List<RoleAssignment> roleAssignments = query.getResultList();
+        return roleAssignments.stream()
+            .map(roleAssignment -> roleAssignment.getSchoolId() == null ? FULL_ACCESS_INDICATOR
+                : roleAssignment.getSchoolId())
+            .collect(Collectors.toSet());
     }
 }
