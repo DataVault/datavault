@@ -6,6 +6,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.datavaultplatform.common.model.Client;
+import org.datavaultplatform.common.model.Client_;
 
 public class ClientCustomDAOImpl extends BaseCustomDAOImpl implements ClientCustomDAO {
 
@@ -18,7 +19,7 @@ public class ClientCustomDAOImpl extends BaseCustomDAOImpl implements ClientCust
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Client> cr = cb.createQuery(Client.class);
         Root<Client> rt = cr.from(Client.class);
-        cr.where(cb.equal(rt.get("apiKey"), apiKey));
+        cr.where(cb.equal(rt.get(Client_.apiKey), apiKey));
         return getSingleResult(cr);
     }
 

@@ -6,6 +6,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.User_;
 
 
 public class UserCustomDAOImpl extends BaseCustomDAOImpl implements UserCustomDAO {
@@ -23,9 +24,9 @@ public class UserCustomDAOImpl extends BaseCustomDAOImpl implements UserCustomDA
         if(query != null) {
             String queryLower = query.toLowerCase();
             cr.where(cb.or(
-                cb.like(cb.lower(rt.get("id")), "%" + queryLower + "%"),
-                cb.like(cb.lower(rt.get("firstname")), "%" + queryLower + "%"),
-                cb.like(cb.lower(rt.get("lastname")), "%" + queryLower + "%")
+                cb.like(cb.lower(rt.get(User_.id)), "%" + queryLower + "%"),
+                cb.like(cb.lower(rt.get(User_.firstname)), "%" + queryLower + "%"),
+                cb.like(cb.lower(rt.get(User_.lastname)), "%" + queryLower + "%")
             ));
         }
 

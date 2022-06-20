@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.Vault_;
 import org.datavaultplatform.common.model.dao.SchoolPermissionCriteriaBuilder;
 import org.datavaultplatform.common.util.DaoUtils;
 import org.hibernate.Criteria;
@@ -54,9 +55,9 @@ public class VaultCustomDAOImpl extends BaseCustomDAOImpl implements VaultCustom
         Criteria criteria = criteriaBuilder.build();
         if( ! (query == null || query.equals("")) ) {
             criteria.add(Restrictions.or(
-                    Restrictions.ilike("id", "%" + query + "%"),
-                    Restrictions.ilike("name", "%" + query + "%"),
-                    Restrictions.ilike("description", "%" + query + "%")));
+                    Restrictions.ilike(Vault_.ID, "%" + query + "%"),
+                    Restrictions.ilike(Vault_.NAME, "%" + query + "%"),
+                    Restrictions.ilike(Vault_.DESCRIPTION, "%" + query + "%")));
         }
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
@@ -86,7 +87,7 @@ public class VaultCustomDAOImpl extends BaseCustomDAOImpl implements VaultCustom
     public int getRetentionPolicyCount(int status) {
         Session session = this.getCurrentSession();
         Criteria criteria = session.createCriteria(Vault.class);
-        criteria.add(Restrictions.eq("retentionPolicyStatus", status));
+        criteria.add(Restrictions.eq(Vault_.RETENTION_POLICY_STATUS, status));
         criteria.setProjection(Projections.rowCount());
         Long count = (Long)criteria.uniqueResult();
         return count.intValue();

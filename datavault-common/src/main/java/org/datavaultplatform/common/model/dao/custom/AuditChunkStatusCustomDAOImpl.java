@@ -9,6 +9,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.datavaultplatform.common.model.Audit;
 import org.datavaultplatform.common.model.AuditChunkStatus;
+import org.datavaultplatform.common.model.AuditChunkStatus_;
 import org.datavaultplatform.common.model.DepositChunk;
 
 public class AuditChunkStatusCustomDAOImpl extends BaseCustomDAOImpl implements
@@ -20,19 +21,19 @@ public class AuditChunkStatusCustomDAOImpl extends BaseCustomDAOImpl implements
 
     @Override
     public List<AuditChunkStatus> findByAudit(Audit audit){
-        return findBy("audit", audit);
+        return findBy(AuditChunkStatus_.AUDIT, audit);
     }
 
     @Override
     public List<AuditChunkStatus> findByDepositChunk(DepositChunk depositChunk){
-        return findBy("depositChunk", depositChunk);
+        return findBy(AuditChunkStatus_.DEPOSIT_CHUNK, depositChunk);
     }
 
     public List<AuditChunkStatus> findBy(String propertyName, Object value) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<AuditChunkStatus> cr = cb.createQuery(AuditChunkStatus.class).distinct(true);
         Root<AuditChunkStatus> rt = cr.from(AuditChunkStatus.class);
-        cr.orderBy(cb.asc(rt.get("timestamp")));
+        cr.orderBy(cb.asc(rt.get(AuditChunkStatus_.timestamp)));
         cr.where(cb.equal(rt.get(propertyName), value));
         List<AuditChunkStatus> auditChunks = em.createQuery(cr).getResultList();
         return auditChunks;
@@ -42,7 +43,7 @@ public class AuditChunkStatusCustomDAOImpl extends BaseCustomDAOImpl implements
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<AuditChunkStatus> cr = cb.createQuery(AuditChunkStatus.class).distinct(true);
         Root<AuditChunkStatus> rt = cr.from(AuditChunkStatus.class);
-        cr.orderBy(cb.asc(rt.get("timestamp")));
+        cr.orderBy(cb.asc(rt.get(AuditChunkStatus_.timestamp)));
 
         Predicate[] predicates = properties.entrySet().stream().map(me ->
             cb.equal(rt.get(me.getKey()), me.getValue())
@@ -57,8 +58,8 @@ public class AuditChunkStatusCustomDAOImpl extends BaseCustomDAOImpl implements
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<AuditChunkStatus> cr = cb.createQuery(AuditChunkStatus.class).distinct(true);
         Root<AuditChunkStatus> rt = cr.from(AuditChunkStatus.class);
-        cr.where(cb.equal(rt.get("depositChunk"), chunk));
-        cr.orderBy(cb.desc(rt.get("timestamp")));
+        cr.where(cb.equal(rt.get(AuditChunkStatus_.depositChunk), chunk));
+        cr.orderBy(cb.desc(rt.get(AuditChunkStatus_.timestamp)));
 
         List<AuditChunkStatus> auditChunks = em.createQuery(cr).getResultList();
 

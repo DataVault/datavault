@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.datavaultplatform.common.model.Group;
+import org.datavaultplatform.common.model.Group_;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.dao.SchoolPermissionCriteriaBuilder;
 import org.datavaultplatform.common.util.DaoUtils;
@@ -27,7 +28,7 @@ public class GroupCustomDAOImpl extends BaseCustomDAOImpl implements GroupCustom
             return new ArrayList<>();
         }
         Criteria criteria = criteriaBuilder.build();
-        List<Group> groups = criteria.addOrder(Order.asc("name")).list();
+        List<Group> groups = criteria.addOrder(Order.asc(Group_.NAME)).list();
         return groups;
     }
 

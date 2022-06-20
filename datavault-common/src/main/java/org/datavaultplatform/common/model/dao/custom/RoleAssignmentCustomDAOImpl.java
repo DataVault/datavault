@@ -14,7 +14,9 @@ import javax.persistence.criteria.Root;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
 import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.RoleAssignment_;
 import org.datavaultplatform.common.model.RoleModel;
+import org.datavaultplatform.common.model.RoleModel_;
 import org.datavaultplatform.common.util.RoleUtils;
 
 public class RoleAssignmentCustomDAOImpl extends BaseCustomDAOImpl implements
@@ -30,17 +32,17 @@ public class RoleAssignmentCustomDAOImpl extends BaseCustomDAOImpl implements
       CriteriaQuery<RoleAssignment> cr = cb.createQuery(RoleAssignment.class).distinct(true);
       Root<RoleAssignment> rt = cr.from(RoleAssignment.class);
       List<Predicate> clauses = new ArrayList<>();
-      clauses.add(cb.equal(rt.get("role"), roleAssignment.getRole()));
-      clauses.add(cb.equal(rt.get("userId"), roleAssignment.getUserId()));
+      clauses.add(cb.equal(rt.get(RoleAssignment_.ROLE), roleAssignment.getRole()));
+      clauses.add(cb.equal(rt.get(RoleAssignment_.USER_ID), roleAssignment.getUserId()));
       if (roleAssignment.getSchoolId() != null) {
 
-        clauses.add(cb.equal(rt.get("schoolId"), roleAssignment.getSchoolId()));
+        clauses.add(cb.equal(rt.get(RoleAssignment_.SCHOOL_ID), roleAssignment.getSchoolId()));
       }
       if (roleAssignment.getVaultId() != null) {
-        clauses.add(cb.equal(rt.get("vaultId"), roleAssignment.getVaultId()));
+        clauses.add(cb.equal(rt.get(RoleAssignment_.VAULT_ID), roleAssignment.getVaultId()));
       }
       if (roleAssignment.getPendingVaultId() != null) {
-        clauses.add(cb.equal(rt.get("pendingVaultId"), roleAssignment.getPendingVaultId()));
+        clauses.add(cb.equal(rt.get(RoleAssignment_.PENDING_VAULT_ID), roleAssignment.getPendingVaultId()));
       }
       Predicate[] clauseArr = clauses.toArray(new Predicate[]{});
       return getSingleResult(cr.where(clauseArr)) != null;
@@ -63,7 +65,7 @@ public class RoleAssignmentCustomDAOImpl extends BaseCustomDAOImpl implements
 
     @Override
     public List<RoleAssignment> findBySchoolId(String schoolId) {
-      return findBy("schoolId", schoolId);
+      return findBy(RoleAssignment_.SCHOOL_ID, schoolId);
     }
 
     private <T> T findObjectById(Class<T> type, String idName, Object idValue) {
@@ -84,23 +86,23 @@ public class RoleAssignmentCustomDAOImpl extends BaseCustomDAOImpl implements
 
     @Override
     public List<RoleAssignment> findByVaultId(String vaultId) {
-      return findBy("vaultId", vaultId);
+      return findBy(RoleAssignment_.VAULT_ID, vaultId);
     }
 
     @Override
     public List<RoleAssignment> findByPendingVaultId(String vaultId) {
-        return findBy("pendingVaultId", vaultId);
+        return findBy(RoleAssignment_.PENDING_VAULT_ID, vaultId);
     }
 
     @Override
     public List<RoleAssignment> findByUserId(String userId) {
-        return findBy("userId", userId);
+        return findBy(RoleAssignment_.USER_ID, userId);
     }
 
     @Override
     public List<RoleAssignment> findByRoleId(Long roleId) {
-      RoleModel role = findObjectById(RoleModel.class, "id", roleId);
-      return findBy( "role", role);
+      RoleModel role = findObjectById(RoleModel.class, RoleModel_.ID, roleId);
+      return findBy(RoleAssignment_.ROLE, role);
     }
 
     @Override

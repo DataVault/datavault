@@ -14,7 +14,9 @@ import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
 import org.datavaultplatform.common.model.PermissionModel.PermissionType;
 import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.RoleAssignment_;
 import org.datavaultplatform.common.model.RoleModel;
+import org.datavaultplatform.common.model.RoleModel_;
 import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.common.util.RoleUtils;
 
@@ -172,7 +174,7 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
             CriteriaQuery<RoleAssignment> cq = cb.createQuery(RoleAssignment.class).distinct(true);
             Root<RoleAssignment> root = cq.from(RoleAssignment.class);
             cq.select(root);
-            cq.where(cb.equal(root.get("role"), role));
+            cq.where(cb.equal(root.get(RoleAssignment_.role), role));
             int count = em.createQuery(cq).getResultList().size();
             role.setAssignedUserCount(count);
         }
@@ -232,7 +234,7 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
         CriteriaQuery<RoleModel> cq = cb.createQuery(RoleModel.class).distinct(true);
         Root<RoleModel> root = cq.from(RoleModel.class);
         cq.select(root);
-        cq.where(cb.equal(root.get("type"), roleType));
+        cq.where(cb.equal(root.get(RoleModel_.type), roleType));
         List<RoleModel> roles = em.createQuery(cq).getResultList();
         for (RoleModel role : roles) {
             populateAssignedUserCount(role);
@@ -247,8 +249,8 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
         Root<RoleModel> root = cq.from(RoleModel.class);
         cq.select(root);
         cq.where(cb.or(
-            cb.equal(root.get("type"), RoleType.SCHOOL),
-            cb.equal(root.get("type"), RoleType.VAULT)
+            cb.equal(root.get(RoleModel_.type), RoleType.SCHOOL),
+            cb.equal(root.get(RoleModel_.type), RoleType.VAULT)
         ));
         List<RoleModel> roles = em.createQuery(cq).getResultList();
         for (RoleModel role : roles) {
@@ -262,7 +264,7 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
         CriteriaQuery<RoleModel> cq = cb.createQuery(RoleModel.class).distinct(true);
         Root<RoleModel> root = cq.from(RoleModel.class);
         cq.select(root);
-        cq.where(cb.equal(root.get("name"), roleModelName));
+        cq.where(cb.equal(root.get(RoleModel_.name), roleModelName));
         return getSingleResult(cq);
     }
 

@@ -6,6 +6,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.datavaultplatform.common.model.DepositChunk;
+import org.datavaultplatform.common.model.DepositChunk_;
 
 public class DepositChunkCustomDAOImpl extends BaseCustomDAOImpl implements
     DepositChunkCustomDAO {
@@ -19,10 +20,10 @@ public class DepositChunkCustomDAOImpl extends BaseCustomDAOImpl implements
         CriteriaQuery<DepositChunk> cr = cb.createQuery(DepositChunk.class).distinct(true);
         Root<DepositChunk> rt = cr.from(DepositChunk.class);
         // See if there is a valid sort option
-        if("id".equals(sort)) {
-            cr.orderBy(cb.asc(rt.get("id")));
+        if(DepositChunk_.ID.equals(sort)) {
+            cr.orderBy(cb.asc(rt.get(DepositChunk_.id)));
         } else {
-            cr.orderBy(cb.asc(rt.get("chunkNum")));
+            cr.orderBy(cb.asc(rt.get(DepositChunk_.chunkNum)));
         }
 
         List<DepositChunk> chunks = em.createQuery(cr).getResultList();

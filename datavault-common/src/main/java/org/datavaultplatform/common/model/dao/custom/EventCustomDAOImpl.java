@@ -6,6 +6,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.event.Event_;
 import org.datavaultplatform.common.model.Vault;
 
 
@@ -21,10 +22,10 @@ public class EventCustomDAOImpl extends BaseCustomDAOImpl implements EventCustom
         CriteriaQuery<Event> cr = cb.createQuery(Event.class).distinct(true);
         Root<Event> rt = cr.from(Event.class);
         // See if there is a valid sort option
-        if("id".equals(sort)) {
-            cr.orderBy(cb.asc(rt.get("id")));
+        if(Event_.ID.equals(sort)) {
+            cr.orderBy(cb.asc(rt.get(Event_.ID)));
         } else {
-            cr.orderBy(cb.asc(rt.get("timestamp")));
+            cr.orderBy(cb.asc(rt.get(Event_.TIMESTAMP)));
         }
 
         List<Event> events = em.createQuery(cr).getResultList();
@@ -36,8 +37,8 @@ public class EventCustomDAOImpl extends BaseCustomDAOImpl implements EventCustom
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Event> cr = cb.createQuery(Event.class).distinct(true);
         Root<Event> rt = cr.from(Event.class);
-        cr.where(cb.equal(rt.get("vault"), vault));
-        cr.orderBy(cb.asc(rt.get("timestamp")));
+        cr.where(cb.equal(rt.get(Event_.VAULT), vault));
+        cr.orderBy(cb.asc(rt.get(Event_.TIMESTAMP)));
         List<Event> events = em.createQuery(cr).getResultList();
         return events;
     }

@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
+import org.datavaultplatform.common.model.PermissionModel_;
 
 
 public class PermissionCustomDAOImpl extends BaseCustomDAOImpl implements PermissionCustomDAO {
@@ -59,7 +59,7 @@ public class PermissionCustomDAOImpl extends BaseCustomDAOImpl implements Permis
         CriteriaQuery<PermissionModel> cq = cb.createQuery(PermissionModel.class).distinct(true);
         Root<PermissionModel> root = cq.from(PermissionModel.class);
         cq.select(root);
-        cq.where(cb.equal(root.get("id"), permission.name()));
+        cq.where(cb.equal(root.get(PermissionModel_.ID), permission.name()));
         return getSingleResult(cq);
     }
 
@@ -76,7 +76,7 @@ public class PermissionCustomDAOImpl extends BaseCustomDAOImpl implements Permis
         CriteriaQuery<PermissionModel> cq = cb.createQuery(PermissionModel.class).distinct(true);
         Root<PermissionModel> root = cq.from(PermissionModel.class);
         cq.select(root);
-        cq.where(cb.equal(root.get("type"), type));
+        cq.where(cb.equal(root.get(PermissionModel_.TYPE), type));
         return em.createQuery(cq).getResultList();
     }
 
@@ -84,7 +84,7 @@ public class PermissionCustomDAOImpl extends BaseCustomDAOImpl implements Permis
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<PermissionModel> cq = cb.createQuery(PermissionModel.class).distinct(true);
         Root<PermissionModel> root = cq.from(PermissionModel.class);
-        cq.select(root).where(root.get("id").in(ids));
+        cq.select(root).where(root.get(PermissionModel_.ID).in(ids));
         return em.createQuery(cq).getResultList();
     }
 }

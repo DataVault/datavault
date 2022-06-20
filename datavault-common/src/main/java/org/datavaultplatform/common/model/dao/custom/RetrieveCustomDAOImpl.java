@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.Retrieve;
+import org.datavaultplatform.common.model.Retrieve_;
 import org.datavaultplatform.common.model.dao.SchoolPermissionCriteriaBuilder;
 import org.datavaultplatform.common.util.DaoUtils;
 import org.hibernate.Criteria;
@@ -29,7 +30,7 @@ public class RetrieveCustomDAOImpl extends BaseCustomDAOImpl implements Retrieve
         }
         Criteria criteria = criteriaBuilder.build();
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        criteria.addOrder(Order.asc("timestamp"));
+        criteria.addOrder(Order.asc(Retrieve_.TIMESTAMP));
         List<Retrieve> retrieves = criteria.list();
         return retrieves;
     }
@@ -54,7 +55,7 @@ public class RetrieveCustomDAOImpl extends BaseCustomDAOImpl implements Retrieve
             return 0;
         }
         Criteria criteria = criteriaBuilder.build();
-        criteria.add(Restrictions.eq("status", Retrieve.Status.NOT_STARTED));
+        criteria.add(Restrictions.eq(Retrieve_.STATUS, Retrieve.Status.NOT_STARTED));
         criteria.setProjection(Projections.rowCount());
         Long count = (Long) criteria.uniqueResult();
         return count.intValue();
@@ -68,7 +69,9 @@ public class RetrieveCustomDAOImpl extends BaseCustomDAOImpl implements Retrieve
             return 0;
         }
         Criteria criteria = criteriaBuilder.build();
-        criteria.add(Restrictions.and(Restrictions.ne("status", Retrieve.Status.NOT_STARTED), Restrictions.ne("status", Retrieve.Status.COMPLETE)));
+        criteria.add(Restrictions.and(
+            Restrictions.ne(Retrieve_.STATUS, Retrieve.Status.NOT_STARTED),
+            Restrictions.ne(Retrieve_.STATUS, Retrieve.Status.COMPLETE)));
         criteria.setProjection(Projections.rowCount());
         Long count = (Long) criteria.uniqueResult();
         return count.intValue();
@@ -78,8 +81,10 @@ public class RetrieveCustomDAOImpl extends BaseCustomDAOImpl implements Retrieve
     public List<Retrieve> inProgress() {
         Session session = this.getCurrentSession();
         Criteria criteria = session.createCriteria(Retrieve.class);
-        criteria.add(Restrictions.and(Restrictions.ne("status", Retrieve.Status.NOT_STARTED), Restrictions.ne("status", Retrieve.Status.COMPLETE)));
-        criteria.addOrder(Order.asc("timestamp"));
+        criteria.add(Restrictions.and(
+            Restrictions.ne(Retrieve_.STATUS, Retrieve.Status.NOT_STARTED),
+            Restrictions.ne(Retrieve_.STATUS, Retrieve.Status.COMPLETE)));
+        criteria.addOrder(Order.asc(Retrieve_.TIMESTAMP));
         List<Retrieve> retrieves = criteria.list();
         return retrieves;
     }

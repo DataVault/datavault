@@ -7,6 +7,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.datavaultplatform.common.model.BillingInfo;
+import org.datavaultplatform.common.model.BillingInfo_;
 
 public class BillingCustomDAOImpl extends BaseCustomDAOImpl implements BillingCustomDAO {
 
@@ -41,8 +42,8 @@ public class BillingCustomDAOImpl extends BaseCustomDAOImpl implements BillingCu
         if(query != null){
           String queryLower = query.toLowerCase();
           cr.where(cb.or(
-              cb.like(cb.lower(rt.get("id")), "%" + queryLower + "%"),
-              cb.like(cb.lower(rt.get("contactName")), "%" + queryLower + "%")
+              cb.like(cb.lower(rt.get(BillingInfo_.id)), "%" + queryLower + "%"),
+              cb.like(cb.lower(rt.get(BillingInfo_.contactName)), "%" + queryLower + "%")
           ));
         }
 
@@ -81,8 +82,8 @@ public class BillingCustomDAOImpl extends BaseCustomDAOImpl implements BillingCu
     if (query != null) {
       String queryLower = query.toLowerCase();
       countQuery.where(cb.or(
-          cb.like(cb.lower(rt.get("id")), "%" + queryLower + "%"),
-          cb.like(cb.lower(rt.get("contactName")), "%" + queryLower + "%")
+          cb.like(cb.lower(rt.get(BillingInfo_.id)), "%" + queryLower + "%"),
+          cb.like(cb.lower(rt.get(BillingInfo_.contactName)), "%" + queryLower + "%")
       ));
     }
 

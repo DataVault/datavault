@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.datavaultplatform.common.model.PendingVault;
+import org.datavaultplatform.common.model.PendingVault_;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.dao.SchoolPermissionCriteriaBuilder;
 import org.datavaultplatform.common.util.DaoUtils;
@@ -53,7 +54,7 @@ public class PendingVaultCustomDAOImpl extends BaseCustomDAOImpl implements
         Criteria criteria = criteriaBuilder.build();
         if (confirmed != null && ! confirmed.equals("null") && ! confirmed.equals("")){
             Boolean conf = new Boolean(confirmed);
-            criteria.add(Restrictions.eq("confirmed", conf));
+            criteria.add(Restrictions.eq(PendingVault_.CONFIRMED, conf));
         }
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         criteria.setProjection(Projections.rowCount());

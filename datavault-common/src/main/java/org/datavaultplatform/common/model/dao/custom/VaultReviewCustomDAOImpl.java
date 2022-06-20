@@ -6,6 +6,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.datavaultplatform.common.model.VaultReview;
+import org.datavaultplatform.common.model.VaultReview_;
 
 
 public class VaultReviewCustomDAOImpl extends BaseCustomDAOImpl implements
@@ -21,7 +22,7 @@ public class VaultReviewCustomDAOImpl extends BaseCustomDAOImpl implements
         CriteriaQuery<VaultReview> cr = cb.createQuery(VaultReview.class).distinct(true);
         Root<VaultReview> rt = cr.from(VaultReview.class);
         if(query != null) {
-            cr.where(cb.like(cb.lower(rt.get("id")), "%" + query.toLowerCase() + "%"));
+            cr.where(cb.like(cb.lower(rt.get(VaultReview_.ID)), "%" + query.toLowerCase() + "%"));
         }
         List<VaultReview> vaultReviews = em.createQuery(cr).getResultList();
         return vaultReviews;
