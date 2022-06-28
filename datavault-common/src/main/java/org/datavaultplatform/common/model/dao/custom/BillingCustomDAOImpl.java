@@ -29,7 +29,7 @@ public class BillingCustomDAOImpl extends BaseCustomDAOImpl implements BillingCu
 
         TypedQuery<BillingInfo> typedQuery = restrict(cr, offset, maxResult);
 
-        List<BillingInfo> vaults = typedQuery.getResultList();
+        List<BillingInfo> vaults = getBillingInfo(typedQuery);
         return vaults;
     }
 
@@ -40,10 +40,10 @@ public class BillingCustomDAOImpl extends BaseCustomDAOImpl implements BillingCu
         Root<BillingInfo> rt = cr.from(BillingInfo.class);
 
         if(query != null){
-          String queryLower = query.toLowerCase();
+          String queryLower = getQueryLower(query);
           cr.where(cb.or(
-              cb.like(cb.lower(rt.get(BillingInfo_.id)), "%" + queryLower + "%"),
-              cb.like(cb.lower(rt.get(BillingInfo_.contactName)), "%" + queryLower + "%")
+              cb.like(cb.lower(rt.get(BillingInfo_.id)), queryLower),
+              cb.like(cb.lower(rt.get(BillingInfo_.contactName)), queryLower)
           ));
         }
 
@@ -55,13 +55,14 @@ public class BillingCustomDAOImpl extends BaseCustomDAOImpl implements BillingCu
 
         TypedQuery<BillingInfo> typedQuery = restrict(cr, offset, maxResult);
 
-        List<BillingInfo> vaults = typedQuery.getResultList();
+        List<BillingInfo> vaults = getBillingInfo(typedQuery);
         return vaults;
     }
 
 
     private TypedQuery<BillingInfo> restrict(CriteriaQuery<BillingInfo> cr, String offset, String maxResult){
       TypedQuery<BillingInfo> typedQuery = em.createQuery(cr);
+
       if ((offset != null && maxResult != null) && !maxResult.equals("0")) {
         typedQuery.setMaxResults(Integer.parseInt(maxResult));
         typedQuery.setFirstResult(Integer.parseInt(offset));
@@ -80,10 +81,10 @@ public class BillingCustomDAOImpl extends BaseCustomDAOImpl implements BillingCu
 
     countQuery.select(cb.count(rt));
     if (query != null) {
-      String queryLower = query.toLowerCase();
+      String queryLower = getQueryLower(query);
       countQuery.where(cb.or(
-          cb.like(cb.lower(rt.get(BillingInfo_.id)), "%" + queryLower + "%"),
-          cb.like(cb.lower(rt.get(BillingInfo_.contactName)), "%" + queryLower + "%")
+          cb.like(cb.lower(rt.get(BillingInfo_.id)), queryLower),
+          cb.like(cb.lower(rt.get(BillingInfo_.contactName)), queryLower)
       ));
     }
 
@@ -91,4 +92,8 @@ public class BillingCustomDAOImpl extends BaseCustomDAOImpl implements BillingCu
     return count;
   }
 
+
+  List<BillingInfo> getBillingInfo(TypedQuery<BillingInfo> typedQuery) {
+    return getResults(BillingInfo.class, typedQuery);
+  }
 }

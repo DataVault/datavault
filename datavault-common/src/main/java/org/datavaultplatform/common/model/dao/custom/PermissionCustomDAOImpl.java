@@ -77,7 +77,7 @@ public class PermissionCustomDAOImpl extends BaseCustomDAOImpl implements Permis
         Root<PermissionModel> root = cq.from(PermissionModel.class);
         cq.select(root);
         cq.where(cb.equal(root.get(PermissionModel_.TYPE), type));
-        return em.createQuery(cq).getResultList();
+        return getResults(em, cq);
     }
 
     private List<PermissionModel> findPermissiondWhereIdsIn(Collection<String> ids) {
@@ -85,6 +85,6 @@ public class PermissionCustomDAOImpl extends BaseCustomDAOImpl implements Permis
         CriteriaQuery<PermissionModel> cq = cb.createQuery(PermissionModel.class).distinct(true);
         Root<PermissionModel> root = cq.from(PermissionModel.class);
         cq.select(root).where(root.get(PermissionModel_.ID).in(ids));
-        return em.createQuery(cq).getResultList();
+        return getResults(cq);
     }
 }

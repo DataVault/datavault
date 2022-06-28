@@ -17,16 +17,16 @@ public class DepositChunkCustomDAOImpl extends BaseCustomDAOImpl implements
 
     public List<DepositChunk> list(String sort) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<DepositChunk> cr = cb.createQuery(DepositChunk.class).distinct(true);
-        Root<DepositChunk> rt = cr.from(DepositChunk.class);
+        CriteriaQuery<DepositChunk> cq = cb.createQuery(DepositChunk.class).distinct(true);
+        Root<DepositChunk> rt = cq.from(DepositChunk.class);
         // See if there is a valid sort option
         if(DepositChunk_.ID.equals(sort)) {
-            cr.orderBy(cb.asc(rt.get(DepositChunk_.id)));
+            cq.orderBy(cb.asc(rt.get(DepositChunk_.id)));
         } else {
-            cr.orderBy(cb.asc(rt.get(DepositChunk_.chunkNum)));
+            cq.orderBy(cb.asc(rt.get(DepositChunk_.chunkNum)));
         }
 
-        List<DepositChunk> chunks = em.createQuery(cr).getResultList();
+        List<DepositChunk> chunks = getResults(cq);
         return chunks;
     }
 }

@@ -35,7 +35,7 @@ public class AuditChunkStatusCustomDAOImpl extends BaseCustomDAOImpl implements
         Root<AuditChunkStatus> rt = cr.from(AuditChunkStatus.class);
         cr.orderBy(cb.asc(rt.get(AuditChunkStatus_.timestamp)));
         cr.where(cb.equal(rt.get(propertyName), value));
-        List<AuditChunkStatus> auditChunks = em.createQuery(cr).getResultList();
+        List<AuditChunkStatus> auditChunks = getResults(cr);
         return auditChunks;
     }
 
@@ -50,7 +50,7 @@ public class AuditChunkStatusCustomDAOImpl extends BaseCustomDAOImpl implements
         ).toArray(Predicate[]::new);
 
         cr.where(predicates);
-        List<AuditChunkStatus> auditChunks = em.createQuery(cr).getResultList();
+        List<AuditChunkStatus> auditChunks = getResults(cr);
         return auditChunks;
     }
 
@@ -61,7 +61,7 @@ public class AuditChunkStatusCustomDAOImpl extends BaseCustomDAOImpl implements
         cr.where(cb.equal(rt.get(AuditChunkStatus_.depositChunk), chunk));
         cr.orderBy(cb.desc(rt.get(AuditChunkStatus_.timestamp)));
 
-        List<AuditChunkStatus> auditChunks = em.createQuery(cr).getResultList();
+        List<AuditChunkStatus> auditChunks = getResults(cr);
 
         if (auditChunks.isEmpty()) {
           return null;

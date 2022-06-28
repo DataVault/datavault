@@ -81,7 +81,7 @@ public class RoleAssignmentCustomDAOImpl extends BaseCustomDAOImpl implements
       CriteriaQuery<RoleAssignment> cr = cb.createQuery(RoleAssignment.class).distinct(true);
       Root<RoleAssignment> rt = cr.from(RoleAssignment.class);
       cr.where(cb.equal(rt.get(columnName), columnValue));
-      return em.createQuery(cr).getResultList();
+      return getResults(cr);
     }
 
     @Override

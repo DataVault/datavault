@@ -19,12 +19,12 @@ public class VaultReviewCustomDAOImpl extends BaseCustomDAOImpl implements
     @Override
     public List<VaultReview> search(String query) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<VaultReview> cr = cb.createQuery(VaultReview.class).distinct(true);
-        Root<VaultReview> rt = cr.from(VaultReview.class);
+        CriteriaQuery<VaultReview> cq = cb.createQuery(VaultReview.class).distinct(true);
+        Root<VaultReview> rt = cq.from(VaultReview.class);
         if(query != null) {
-            cr.where(cb.like(cb.lower(rt.get(VaultReview_.ID)), "%" + query.toLowerCase() + "%"));
+            cq.where(cb.like(cb.lower(rt.get(VaultReview_.ID)), getQueryLower(query)));
         }
-        List<VaultReview> vaultReviews = em.createQuery(cr).getResultList();
+        List<VaultReview> vaultReviews = getResults(cq);
         return vaultReviews;
     }
 }

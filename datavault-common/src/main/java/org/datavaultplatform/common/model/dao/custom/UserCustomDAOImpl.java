@@ -18,19 +18,19 @@ public class UserCustomDAOImpl extends BaseCustomDAOImpl implements UserCustomDA
     @Override
     public List<User> search(String query) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<User> cr = cb.createQuery(User.class).distinct(true);
-        Root<User> rt = cr.from(User.class);
+        CriteriaQuery<User> cq = cb.createQuery(User.class).distinct(true);
+        Root<User> rt = cq.from(User.class);
 
         if(query != null) {
-            String queryLower = query.toLowerCase();
-            cr.where(cb.or(
-                cb.like(cb.lower(rt.get(User_.id)), "%" + queryLower + "%"),
-                cb.like(cb.lower(rt.get(User_.firstname)), "%" + queryLower + "%"),
-                cb.like(cb.lower(rt.get(User_.lastname)), "%" + queryLower + "%")
+            String queryLower = getQueryLower(query);
+            cq.where(cb.or(
+                cb.like(cb.lower(rt.get(User_.id)), queryLower),
+                cb.like(cb.lower(rt.get(User_.firstname)), queryLower),
+                cb.like(cb.lower(rt.get(User_.lastname)), queryLower)
             ));
         }
 
-        List<User> users = em.createQuery(cr).getResultList();
+        List<User> users = getResults(cq);
         return users;
     }
 }

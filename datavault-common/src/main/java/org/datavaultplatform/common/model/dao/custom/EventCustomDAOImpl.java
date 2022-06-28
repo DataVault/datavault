@@ -19,27 +19,29 @@ public class EventCustomDAOImpl extends BaseCustomDAOImpl implements EventCustom
     @Override
     public List<Event> list(String sort) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Event> cr = cb.createQuery(Event.class).distinct(true);
-        Root<Event> rt = cr.from(Event.class);
+        CriteriaQuery<Event> cq = cb.createQuery(Event.class).distinct(true);
+        Root<Event> rt = cq.from(Event.class);
         // See if there is a valid sort option
         if(Event_.ID.equals(sort)) {
-            cr.orderBy(cb.asc(rt.get(Event_.ID)));
+            cq.orderBy(cb.asc(rt.get(Event_.ID)));
         } else {
-            cr.orderBy(cb.asc(rt.get(Event_.TIMESTAMP)));
+            cq.orderBy(cb.asc(rt.get(Event_.TIMESTAMP)));
         }
 
-        List<Event> events = em.createQuery(cr).getResultList();
+        List<Event> events = getResults(cq);
         return events;
     }
 
     @Override
     public List<Event> findVaultEvents(Vault vault) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Event> cr = cb.createQuery(Event.class).distinct(true);
-        Root<Event> rt = cr.from(Event.class);
-        cr.where(cb.equal(rt.get(Event_.VAULT), vault));
-        cr.orderBy(cb.asc(rt.get(Event_.TIMESTAMP)));
-        List<Event> events = em.createQuery(cr).getResultList();
+        CriteriaQuery<Event> cq = cb.createQuery(Event.class).distinct(true);
+        Root<Event> rt = cq.from(Event.class);
+        cq.where(cb.equal(rt.get(Event_.VAULT), vault));
+        cq.orderBy(cb.asc(rt.get(Event_.TIMESTAMP)));
+
+        List<Event> events = getResults(cq);
         return events;
     }
+
 }

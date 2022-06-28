@@ -19,12 +19,12 @@ public class DepositReviewCustomDAOImpl extends BaseCustomDAOImpl implements
     @Override
     public List<DepositReview> search(String query) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<DepositReview> cr = cb.createQuery(DepositReview.class).distinct(true);
-        Root<DepositReview> rt = cr.from(DepositReview.class);
+        CriteriaQuery<DepositReview> cq = cb.createQuery(DepositReview.class).distinct(true);
+        Root<DepositReview> rt = cq.from(DepositReview.class);
         if (query != null) {
-            cr.where(cb.like(cb.lower(rt.get(DepositReview_.ID)), "%" + query.toLowerCase() + "%"));
+            cq.where(cb.like(cb.lower(rt.get(DepositReview_.ID)), getQueryLower(query)));
         }
-        List<DepositReview> depositReviews = em.createQuery(cr).getResultList();
+        List<DepositReview> depositReviews = getResults(cq);
         return depositReviews;
     }
 }
