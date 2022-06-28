@@ -5,6 +5,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -28,8 +31,44 @@ import org.datavaultplatform.common.response.EventInfo;
 @Table(name="Events")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="eventType", discriminatorType = DiscriminatorType.STRING)
+@NamedEntityGraph(name = Event.EG_EVENT, attributeNodes = {
+    @NamedAttributeNode(value = Event_.ARCHIVE, subgraph = "subArchive"),
+    @NamedAttributeNode(value = Event_.DEPOSIT, subgraph = "subDeposit"),
+    @NamedAttributeNode(value = Event_.ASSIGNEE),
+    @NamedAttributeNode(value = Event_.AUDIT),
+
+    @NamedAttributeNode(value = Event_.CHUNK, subgraph = "subChunk"),
+    @NamedAttributeNode(value = Event_.JOB, subgraph = "subJob"),
+    @NamedAttributeNode(value = Event_.ROLE),
+    @NamedAttributeNode(value = Event_.SCHOOL),
+
+    @NamedAttributeNode(value = Event_.USER),
+    @NamedAttributeNode(value = Event_.VAULT, subgraph = "subVault")
+}, subgraphs = {
+    @NamedSubgraph(name="subArchive", attributeNodes = {
+        @NamedAttributeNode(Archive_.ARCHIVE_STORE),
+        @NamedAttributeNode(Archive_.DEPOSIT)
+    }),
+    @NamedSubgraph(name="subDeposit", attributeNodes = {
+        @NamedAttributeNode(Deposit_.USER),
+        @NamedAttributeNode(Deposit_.VAULT)
+    }),
+    @NamedSubgraph(name="subJob", attributeNodes = {
+        @NamedAttributeNode(Job_.DEPOSIT)
+    }),
+    @NamedSubgraph(name="subChunk", attributeNodes = {
+        @NamedAttributeNode(DepositChunk_.DEPOSIT)
+    }),
+    @NamedSubgraph(name="subVault", attributeNodes = {
+        @NamedAttributeNode(Vault_.DATASET),
+        @NamedAttributeNode(Vault_.GROUP),
+        @NamedAttributeNode(Vault_.RETENTION_POLICY),
+        @NamedAttributeNode(Vault_.USER)
+    })
+})
 public class Event {
-    
+    public static final String EG_EVENT = "eg.Event.1";
+
     // Event Identifier
     @Id
     @GeneratedValue(generator = "uuid")

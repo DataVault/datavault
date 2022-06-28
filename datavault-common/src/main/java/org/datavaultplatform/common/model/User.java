@@ -6,12 +6,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="Users")
+@NamedEntityGraph(name=User.EG_USER)
 public class User {
     // User Identifier (not a UUID)
+    public static final String EG_USER = "eg.User.1";
     @Id
     @Column(name = "id", unique = true, length = 36)
     private String id;
@@ -116,9 +119,10 @@ public class User {
 
         return user.getID().equals(getID());
     }
-    
+
     @Override
     public int hashCode() {
-        return getID().hashCode();
+        return new HashCodeBuilder(17, 37).
+            append(id).toHashCode();
     }
 }

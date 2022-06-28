@@ -2,6 +2,8 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -10,8 +12,20 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="Retrieves")
+@NamedEntityGraph(
+    name=Retrieve.EG_RETRIEVE,
+    attributeNodes = {
+        @NamedAttributeNode(value = Retrieve_.DEPOSIT, subgraph = "subDeposit"),
+        @NamedAttributeNode(Retrieve_.USER)},
+    subgraphs = @NamedSubgraph(name="subDeposit",
+        attributeNodes = {
+        @NamedAttributeNode(Deposit_.VAULT),
+        @NamedAttributeNode(Deposit_.USER)
+    })
+)
 public class Retrieve {
 
+    public static final String EG_RETRIEVE = "eg.Retrieve.1";
     // Deposit Identifier
     @Id
     @GeneratedValue(generator = "uuid")
@@ -121,5 +135,24 @@ public class Retrieve {
 //    public List<Job> getJobs() {
 //        return jobs;
 //    }
+
+
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        Retrieve rhs = (Retrieve) obj;
+        return new EqualsBuilder()
+            .append(this.id, rhs.id).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).
+            append(id).toHashCode();
+    }
 
 }

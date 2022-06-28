@@ -2,18 +2,28 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import javax.persistence.*;
-
-import org.hibernate.annotations.GenericGenerator;
-
 import java.util.HashMap;
 import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.GenericGenerator;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="ArchiveStores")
+@NamedEntityGraph(name=ArchiveStore.EG_ARCHIVE_STORE)
 public class ArchiveStore {
+    public static final String EG_ARCHIVE_STORE = "eg.ArchiveStore.1";
 
     // Storage Identifier
     @Id
@@ -82,4 +92,23 @@ public class ArchiveStore {
     public void setRetrieveEnabled(boolean retrieveEnabled) {
         this.retrieveEnabled = retrieveEnabled;
     }
+
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        ArchiveStore rhs = (ArchiveStore) obj;
+        return new EqualsBuilder()
+            .append(this.id, rhs.id).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).
+            append(id).toHashCode();
+    }
+
 }

@@ -2,6 +2,8 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -10,7 +12,13 @@ import java.util.HashMap;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="FileStores")
+@NamedEntityGraph(
+    name=FileStore.EG_FILE_STORE,
+    attributeNodes = @NamedAttributeNode(FileStore_.USER)
+)
 public class FileStore {
+
+    public static final String EG_FILE_STORE = "eg.FileStore.1";
 
     // Storage Identifier
     @Id
@@ -69,5 +77,24 @@ public class FileStore {
     
     public void setUser(User user) {
         this.user = user;
+    }
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        FileStore rhs = (FileStore) obj;
+        return new EqualsBuilder()
+            .append(this.id, rhs.id).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        // you pick a hard-coded, randomly chosen, non-zero, odd number
+        // ideally different for each class
+        return new HashCodeBuilder(17, 37).
+            append(id).toHashCode();
     }
 }

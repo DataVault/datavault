@@ -1,9 +1,11 @@
 package org.datavaultplatform.common.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,6 +14,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
@@ -19,15 +23,11 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
-
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.hibernate.annotations.GenericGenerator;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * User: Tom Higgins
@@ -38,8 +38,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="Vaults")
+@NamedEntityGraph(
+    name = Vault.EG_VAULT,
+    attributeNodes = {
+        @NamedAttributeNode(Vault_.DATASET),
+        @NamedAttributeNode(Vault_.USER),
+        @NamedAttributeNode(Vault_.GROUP),
+        @NamedAttributeNode(Vault_.RETENTION_POLICY),
+    })
 public class Vault {
 
+    public static final String EG_VAULT = "eg.Vault.1";
     private static final long ZERO = 0L;
     // Vault Identifier
     @Id
@@ -434,6 +443,7 @@ public class Vault {
     
     @Override
     public int hashCode() {
-        return getID().hashCode();
+      return new HashCodeBuilder(17, 37).
+        append(id).toHashCode();
     }
 }

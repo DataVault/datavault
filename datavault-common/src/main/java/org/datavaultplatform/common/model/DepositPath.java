@@ -8,6 +8,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
@@ -16,7 +21,18 @@ import org.jsondoc.core.annotation.ApiObjectField;
 @ApiObject(name = "DepositPath")
 @Entity
 @Table(name="DepositPaths")
+@NamedEntityGraph(
+    name = DepositPath.EG_DEPOSIT_PATH,
+    attributeNodes =
+    @NamedAttributeNode(value = DepositPath_.DEPOSIT, subgraph = "subDeposit"),
+    subgraphs = @NamedSubgraph(name = "subDeposit", attributeNodes = {
+        @NamedAttributeNode(Deposit_.VAULT),
+        @NamedAttributeNode(Deposit_.USER)
+    })
+)
 public class DepositPath {
+
+    public static final String EG_DEPOSIT_PATH =  "eg.DepositPath.1";
 
     // Deposit Identifier
     @Id
@@ -67,5 +83,23 @@ public class DepositPath {
 
     public void setPathType(Path.PathType pathType) {
         this.pathType = pathType;
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        DepositPath rhs = (DepositPath) obj;
+        return new EqualsBuilder()
+            .append(this.id, rhs.id).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).
+            append(id).toHashCode();
     }
 }

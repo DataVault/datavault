@@ -13,7 +13,9 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="Roles")
+@NamedEntityGraph(name=RoleModel.EG_ROLE_MODEL)
 public class RoleModel {
+    public static final String EG_ROLE_MODEL = "eg.RoleModel.1";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -9,6 +9,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
@@ -18,11 +19,15 @@ import javax.persistence.TemporalType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="RetentionPolicies")
+@NamedEntityGraph(name=RetentionPolicy.EG_RETENTION_POLICY)
 public class RetentionPolicy {
+    public static final String EG_RETENTION_POLICY = "eg.RetentionPolicy.1";
     // RetentionPolicy Id
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -176,4 +181,24 @@ public class RetentionPolicy {
         String retVal = this.id + "-" + this.minRetentionPeriod;
         return retVal;
     }
+
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        RetentionPolicy rhs = (RetentionPolicy) obj;
+        return new EqualsBuilder()
+            .append(this.id, rhs.id).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).
+            append(id).toHashCode();
+    }
+
+
 }

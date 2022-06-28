@@ -2,6 +2,8 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 
@@ -12,8 +14,31 @@ import java.util.Date;
 @ApiObject(name = "DepositReview")
 @Entity
 @Table(name="DepositReviews")
+@NamedEntityGraph(
+    name=DepositReview.EG_DEPOSIT_REVIEW,
+    attributeNodes = {
+        @NamedAttributeNode(value = DepositReview_.DEPOSIT, subgraph = "subDeposit"),
+        @NamedAttributeNode(value = DepositReview_.VAULT_REVIEW, subgraph = "subVaultReview")
+    },
+    subgraphs = {
+        @NamedSubgraph(
+            name = "subDeposit",
+            attributeNodes = {
+                @NamedAttributeNode(Deposit_.USER),
+                @NamedAttributeNode(Deposit_.VAULT)
+            }
+        ),
+        @NamedSubgraph(
+            name = "subVaultReview",
+            attributeNodes = {
+                @NamedAttributeNode(VaultReview_.VAULT)
+            }
+        )
+    }
+)
 public class DepositReview  {
 
+    public static final String EG_DEPOSIT_REVIEW = "eg.DepositReview.1";
     // Deposit Identifier
     @Id
     @GeneratedValue(generator = "uuid")
@@ -118,5 +143,22 @@ public class DepositReview  {
 
     public void setDeposit(Deposit deposit) {
         this.deposit = deposit;
+    }
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        DepositReview rhs = (DepositReview) obj;
+        return new EqualsBuilder()
+            .append(this.id, rhs.id).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).
+            append(id).toHashCode();
     }
 }

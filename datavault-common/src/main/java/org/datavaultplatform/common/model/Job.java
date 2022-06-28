@@ -12,6 +12,9 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
 import javax.persistence.Table;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -19,13 +22,25 @@ import javax.persistence.OrderBy;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.datavaultplatform.common.event.Event;
 import org.hibernate.annotations.GenericGenerator;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="Jobs")
+@NamedEntityGraph(
+    name=Job.EG_JOB,
+    attributeNodes = @NamedAttributeNode(value = Job_.DEPOSIT, subgraph = "subDeposit"),
+    subgraphs = @NamedSubgraph(name="subDeposit", attributeNodes = {
+        @NamedAttributeNode(Deposit_.USER),
+        @NamedAttributeNode(Deposit_.VAULT)
+    })
+)
 public class Job {
+
+    public static final String EG_JOB = "eg.Job.1";
 
     // Job Identifier
     @Id
@@ -158,5 +173,22 @@ public class Job {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        Job rhs = (Job) obj;
+        return new EqualsBuilder()
+            .append(this.id, rhs.id).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).
+            append(id).toHashCode();
     }
 }

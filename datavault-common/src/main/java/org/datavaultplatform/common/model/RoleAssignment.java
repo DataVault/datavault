@@ -16,8 +16,11 @@ import java.util.Objects;
                 @UniqueConstraint(columnNames = { "role_id", "user_id", "pending_vault_id" })
         }
 )
+@NamedEntityGraph(name=RoleAssignment.EG_ROLE_ASSIGNMENT,
+    attributeNodes = @NamedAttributeNode(RoleAssignment_.ROLE)
+)
 public class RoleAssignment {
-
+    public static final String EG_ROLE_ASSIGNMENT = "eg.RoleAssignment.1";
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

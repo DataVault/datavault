@@ -3,17 +3,40 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.Date;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.datavaultplatform.common.response.AuditChunkStatusInfo;
 import org.hibernate.annotations.GenericGenerator;
-
-import javax.persistence.*;
-import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="AuditChunkStatus")
+@NamedEntityGraph(
+    name=AuditChunkStatus.EG_AUDIT_CHUNK_STATUS,
+    attributeNodes = {
+        @NamedAttributeNode(AuditChunkStatus_.AUDIT),
+        @NamedAttributeNode(value = AuditChunkStatus_.DEPOSIT_CHUNK, subgraph = "subDepositChunk")
+    },
+    subgraphs = @NamedSubgraph(
+        name="subDepositChunk",
+        attributeNodes = @NamedAttributeNode(DepositChunk_.DEPOSIT)
+    )
+)
 public class AuditChunkStatus {
 
+    public static final String EG_AUDIT_CHUNK_STATUS = "eg.AuditChunkStatus.1";
     // Deposit Identifier
     @Id
     @GeneratedValue(generator = "uuid")
@@ -164,4 +187,23 @@ public class AuditChunkStatus {
                 note
         );
     }
+
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        AuditChunkStatus rhs = (AuditChunkStatus) obj;
+        return new EqualsBuilder()
+            .append(this.id, rhs.id).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).
+            append(id).toHashCode();
+    }
+
 }

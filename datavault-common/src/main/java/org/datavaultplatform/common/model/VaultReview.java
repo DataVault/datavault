@@ -3,6 +3,8 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 
@@ -14,7 +16,18 @@ import java.util.List;
 @ApiObject(name = "VaultReview")
 @Entity
 @Table(name="VaultReviews")
+@NamedEntityGraph(
+    name=VaultReview.EG_VAULT_REVIEW,
+    attributeNodes = @NamedAttributeNode(value = VaultReview_.VAULT, subgraph = "subVault"),
+    subgraphs = @NamedSubgraph(name="subVault", attributeNodes = {
+        @NamedAttributeNode(Vault_.DATASET),
+        @NamedAttributeNode(Vault_.GROUP),
+        @NamedAttributeNode(Vault_.RETENTION_POLICY),
+        @NamedAttributeNode(Vault_.USER)
+    }))
 public class VaultReview {
+
+    public static final String EG_VAULT_REVIEW = "eg.VaultReview.1";
 
     // VaultReview Identifier
     @Id
@@ -124,5 +137,23 @@ public class VaultReview {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        VaultReview rhs = (VaultReview) obj;
+        return new EqualsBuilder()
+            .append(this.id, rhs.id).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).
+            append(id).toHashCode();
     }
 }

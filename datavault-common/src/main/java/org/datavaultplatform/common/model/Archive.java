@@ -2,15 +2,38 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.hibernate.annotations.GenericGenerator;
-
-import javax.persistence.*;
 import java.util.Date;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.GenericGenerator;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="Archives")
+@NamedEntityGraph(
+    name=Archive.EG_ARCHIVE,
+    attributeNodes = {
+        @NamedAttributeNode(Archive_.ARCHIVE_STORE),
+        @NamedAttributeNode(value = Archive_.DEPOSIT, subgraph = "subDeposit")
+    },
+    subgraphs = @NamedSubgraph(name="subDeposit", attributeNodes = {
+        @NamedAttributeNode(Deposit_.USER),
+        @NamedAttributeNode(Deposit_.VAULT)
+    })
+)
 public class Archive {
+    public static final String EG_ARCHIVE = "eg.Archive.1";
 
     // Archive Identifier
     @Id
@@ -65,5 +88,23 @@ public class Archive {
     }
     public String getId() {
         return this.id;
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        Archive rhs = (Archive) obj;
+        return new EqualsBuilder()
+            .append(this.id, rhs.id).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).
+            append(id).toHashCode();
     }
 }

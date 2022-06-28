@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
@@ -13,8 +15,19 @@ import org.jsondoc.core.annotation.ApiObjectField;
 @ApiObject(name = "DepositChunk")
 @Entity
 @Table(name="DepositChunks")
+@NamedEntityGraph(
+    name=DepositChunk.EG_DEPOSIT_CHUNK,
+    attributeNodes = @NamedAttributeNode(value = DepositChunk_.DEPOSIT, subgraph = "subDeposit"),
+    subgraphs = @NamedSubgraph(
+        name="subDeposit",
+        attributeNodes = {
+            @NamedAttributeNode(Deposit_.USER),
+            @NamedAttributeNode(Deposit_.VAULT)
+   })
+)
 public class DepositChunk {
 
+    public static final String EG_DEPOSIT_CHUNK = "eg.DepositChunk.1";
     // Deposit Identifier
     @Id
     @ApiObjectField(description = "Universally Unique Identifier for the Deposit Path", name="Deposit Path")
@@ -101,4 +114,23 @@ public class DepositChunk {
     public void setDeposit(Deposit deposit){
         this.deposit = deposit;
     }
+
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        DepositChunk rhs = (DepositChunk) obj;
+        return new EqualsBuilder()
+            .append(this.id, rhs.id).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).
+            append(id).toHashCode();
+    }
+
 }

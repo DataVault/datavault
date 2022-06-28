@@ -2,6 +2,8 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 
@@ -11,8 +13,20 @@ import javax.persistence.*;
 @ApiObject(name = "DataCreator")
 @Entity
 @Table(name="DataCreators")
+@NamedEntityGraph(
+    name=DataCreator.EG_DATA_CREATOR,
+    attributeNodes = @NamedAttributeNode(value = DataCreator_.VAULT, subgraph = "subVault"),
+    subgraphs = @NamedSubgraph(
+        name="subVault",
+        attributeNodes = {
+            @NamedAttributeNode(Vault_.DATASET),
+            @NamedAttributeNode(Vault_.GROUP),
+            @NamedAttributeNode(Vault_.RETENTION_POLICY),
+            @NamedAttributeNode(Vault_.USER)
+        }))
 public class DataCreator {
 
+    public static final String EG_DATA_CREATOR = "eg.DataCreator.1";
     // PDC Identifier
     @Id
     @GeneratedValue(generator = "uuid")
@@ -61,5 +75,22 @@ public class DataCreator {
 
     public Vault getVault() {
         return this.vault;
+    }
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        DataCreator rhs = (DataCreator) obj;
+        return new EqualsBuilder()
+            .append(this.id, rhs.id).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).
+            append(id).toHashCode();
     }
 }

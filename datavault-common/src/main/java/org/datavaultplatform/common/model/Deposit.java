@@ -1,5 +1,10 @@
 package org.datavaultplatform.common.model;
 
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.event.Event;
 
@@ -29,8 +34,21 @@ import org.jsondoc.core.annotation.ApiObjectField;
 @ApiObject(name = "Deposit")
 @Entity
 @Table(name="Deposits")
+@NamedEntityGraph(
+    name=Deposit.EG_DEPOSIT,
+    attributeNodes = {
+        @NamedAttributeNode(value = Deposit_.VAULT, subgraph = "subVault"),
+        @NamedAttributeNode("user")
+    },
+    subgraphs = @NamedSubgraph(name="subVault", attributeNodes = {
+        @NamedAttributeNode(Vault_.RETENTION_POLICY),
+        @NamedAttributeNode(Vault_.GROUP),
+        @NamedAttributeNode(Vault_.DATASET)
+    })
+)
 public class Deposit {
 
+    public static final String EG_DEPOSIT = "eg.Deposit.1";
     // Deposit Identifier
     @Id
     @ApiObjectField(description = "Universally Unique Identifier for the Deposit", name="Deposit")
@@ -381,4 +399,23 @@ public class Deposit {
                 depositChunks
             );
     }
+
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        Deposit rhs = (Deposit) obj;
+        return new EqualsBuilder()
+            .append(this.id, rhs.id).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).
+            append(id).toHashCode();
+    }
+
 }
