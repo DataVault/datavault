@@ -3,7 +3,6 @@ package org.datavaultplatform.webapp.app.setup;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import io.vavr.collection.Set;
 import java.lang.reflect.Field;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

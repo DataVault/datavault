@@ -109,7 +109,8 @@ public class DaoUtilsIT extends BaseReuseDatabaseTest {
     return user;
   }
 
-  <T> Set<T> setOf(T... items) {
+  @SafeVarargs
+  final <T> Set<T> setOf(T... items) {
     return new HashSet<>(Arrays.asList(items));
   }
 

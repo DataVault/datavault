@@ -55,7 +55,7 @@ public class ApiErrorHandler extends DefaultResponseErrorHandler {
     /**
      * Response extractor for {@link HttpEntity}.
      */
-    private class ResponseEntityResponseExtractor<T> implements ResponseExtractor<ResponseEntity<T>> {
+    private static class ResponseEntityResponseExtractor<T> implements ResponseExtractor<ResponseEntity<T>> {
 
         private final HttpMessageConverterExtractor<T> delegate;
 

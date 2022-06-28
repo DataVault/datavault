@@ -1,16 +1,11 @@
 package org.datavaultplatform.webapp.controllers;
 
-import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.webapp.config.MailConfig.MessageCreator;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.*;
 
 /**
  * User: Stuart Lewis

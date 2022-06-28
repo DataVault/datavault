@@ -1,7 +1,5 @@
 package org.datavaultplatform.webapp.model;
 
-import org.datavaultplatform.common.model.VaultReview;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

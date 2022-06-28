@@ -1,6 +1,5 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
-import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;

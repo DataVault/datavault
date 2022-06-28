@@ -1,7 +1,6 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;

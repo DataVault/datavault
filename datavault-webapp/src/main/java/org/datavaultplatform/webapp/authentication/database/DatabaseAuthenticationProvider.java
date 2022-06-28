@@ -1,11 +1,7 @@
 package org.datavaultplatform.webapp.authentication.database;
 
-import org.datavaultplatform.common.model.Group;
-import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.PermissionModel;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleName;
-import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.webapp.security.ScopedGrantedAuthority;
 import org.datavaultplatform.webapp.model.AdminDashboardPermissionsModel;

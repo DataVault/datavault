@@ -2,18 +2,12 @@ package org.datavaultplatform.broker.test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.initialise.InitialiseDatabase;
 import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.PermissionModel;
-import org.datavaultplatform.common.model.RoleAssignment;
-import org.datavaultplatform.common.model.RoleModel;
-import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.dao.GroupDAO;
 import org.datavaultplatform.common.model.dao.PermissionDAO;
 import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
 import org.datavaultplatform.common.model.dao.RoleDAO;

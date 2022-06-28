@@ -2,10 +2,8 @@ package org.datavaultplatform.webapp.model;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
-import org.datavaultplatform.common.model.Vault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

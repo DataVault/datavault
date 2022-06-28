@@ -3,7 +3,6 @@ package org.datavaultplatform.webapp.services;
 import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 
 import lombok.extern.slf4j.Slf4j;
-import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.*;
 import org.datavaultplatform.common.response.*;

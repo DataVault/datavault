@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.lang.reflect.Field;
 import java.util.Map;
 import lombok.SneakyThrows;
-import org.datavaultplatform.webapp.test.AddTestProperties;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

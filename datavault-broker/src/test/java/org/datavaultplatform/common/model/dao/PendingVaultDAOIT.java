@@ -4,13 +4,10 @@ import static org.datavaultplatform.broker.test.TestUtils.NOW;
 import static org.datavaultplatform.broker.test.TestUtils.ONE_WEEK_AGO;
 import static org.datavaultplatform.broker.test.TestUtils.TWO_WEEKS_AGO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -24,14 +21,12 @@ import org.datavaultplatform.broker.test.TestUtils;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.PendingVault;
 import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.Vault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
@@ -239,7 +234,7 @@ public class PendingVaultDAOIT extends BaseDatabaseTest {
             rs.getBoolean(2)
         });
 
-    queryRes1.stream().forEach(item -> {
+    queryRes1.forEach(item -> {
       System.out.printf("item %s", Arrays.toString(item));
     });
 

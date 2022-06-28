@@ -1,7 +1,5 @@
 package org.datavaultplatform.webapp.authentication.shib;
 
-import org.apache.directory.api.ldap.model.exception.LdapException;
-import org.apache.directory.ldap.client.api.LdapConnection;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.common.services.LDAPService;

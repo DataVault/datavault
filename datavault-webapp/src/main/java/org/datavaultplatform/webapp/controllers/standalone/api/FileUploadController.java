@@ -1,6 +1,5 @@
 package org.datavaultplatform.webapp.controllers.standalone.api;
 
-import javax.ws.rs.Produces;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.webapp.model.test.Person;
 import org.springframework.context.annotation.Profile;

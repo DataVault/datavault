@@ -1,7 +1,5 @@
 package org.datavaultplatform.webapp.controllers;
 
-import org.datavaultplatform.common.model.Dataset;
-import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

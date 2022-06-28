@@ -2,11 +2,7 @@ package org.datavaultplatform.webapp.security;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.PermissionModel;
-import org.datavaultplatform.common.model.RoleAssignment;
-import org.datavaultplatform.common.model.Vault;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 

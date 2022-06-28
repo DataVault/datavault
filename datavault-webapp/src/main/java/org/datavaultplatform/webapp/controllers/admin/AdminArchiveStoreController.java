@@ -1,7 +1,6 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 import org.datavaultplatform.common.model.ArchiveStore;
-import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

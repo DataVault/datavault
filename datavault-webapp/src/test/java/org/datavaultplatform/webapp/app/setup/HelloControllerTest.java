@@ -40,12 +40,12 @@ public class HelloControllerTest {
     Document doc = Jsoup.parse(result.getResponse().getContentAsString());
     Element cssElem = doc.selectFirst("link");
     String cssUrl = cssElem.attr("href");
-    log.info("css url", cssUrl);
+    log.info("css url {}", cssUrl);
     checkLink(cssUrl, "text/css;charset=UTF-8");
 
     Element jsElem = doc.selectFirst("script");
     String jsUrl = jsElem.attr("src");
-    log.info("js url", jsUrl);
+    log.info("js url {}", jsUrl);
     checkLink(jsUrl,"application/javascript;charset=UTF-8");
   }
 

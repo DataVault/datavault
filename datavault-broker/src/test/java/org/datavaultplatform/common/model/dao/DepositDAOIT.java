@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseReuseDatabaseTest;
-import org.datavaultplatform.broker.test.TestUtils;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Deposit.Status;
 import org.datavaultplatform.common.model.Group;

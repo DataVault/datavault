@@ -2,7 +2,6 @@ package org.datavaultplatform.webapp.controllers.admin;
 
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
 import org.datavaultplatform.webapp.exception.ForbiddenException;
 import org.datavaultplatform.webapp.exception.InvalidUunException;

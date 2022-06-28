@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 import javax.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -103,8 +104,7 @@ public class ProtectedPathsTest {
    * @return String[]
    */
   private String[] getRolesWithoutPrefix(String roleWithPrefix) {
-    return Collections.singleton(roleWithPrefix)
-        .stream()
+    return Stream.of(roleWithPrefix)
         .filter(Objects::nonNull)
         .map(rwp -> TestUtils.stripPrefix("ROLE_", rwp))
         .toArray(String[]::new);

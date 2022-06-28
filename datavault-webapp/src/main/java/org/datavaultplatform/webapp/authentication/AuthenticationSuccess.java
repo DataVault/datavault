@@ -1,7 +1,6 @@
 package org.datavaultplatform.webapp.authentication;
 
 import java.io.IOException;
-import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -10,7 +9,6 @@ import org.datavaultplatform.common.request.CreateClientEvent;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.webapp.services.NotifyLoginService;
-import org.datavaultplatform.webapp.services.RestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
