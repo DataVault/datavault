@@ -1,17 +1,14 @@
 package org.datavaultplatform.common.model.dao.custom;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Group_;
 import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.dao.SchoolPermissionCriteriaBuilder;
+import org.datavaultplatform.common.model.dao.SchoolPermissionQueryHelper;
 import org.datavaultplatform.common.util.DaoUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
 
 
 public class GroupCustomDAOImpl extends BaseCustomDAOImpl implements GroupCustomDAO {
@@ -22,33 +19,27 @@ public class GroupCustomDAOImpl extends BaseCustomDAOImpl implements GroupCustom
 
     @Override
     public List<Group> list(String userId) {
-        Session session = this.getCurrentSession();
-        SchoolPermissionCriteriaBuilder criteriaBuilder = createGroupCriteriaBuilder(userId, session, Permission.CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS);
-        if (criteriaBuilder.hasNoAccess()) {
+        SchoolPermissionQueryHelper<Group> helper = createGroupQueryHelper(userId, Permission.CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS);
+        if (helper.hasNoAccess()) {
             return new ArrayList<>();
         }
-        Criteria criteria = criteriaBuilder.build();
-        List<Group> groups = criteria.addOrder(Order.asc(Group_.NAME)).list();
+        helper.setOrderByHelper((cb,rt)->
+            Collections.singletonList(cb.asc(rt.get(Group_.NAME))));
+        List<Group> groups = helper.getItems();
         return groups;
     }
 
     @Override
     public int count(String userId) {
-        Session session = this.getCurrentSession();
-        SchoolPermissionCriteriaBuilder criteriaBuilder = createGroupCriteriaBuilder(userId, session, Permission.CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS);
-        if (criteriaBuilder.hasNoAccess()) {
+        SchoolPermissionQueryHelper<Group> helper = createGroupQueryHelper(userId, Permission.CAN_VIEW_SCHOOL_ROLE_ASSIGNMENTS);
+        if (helper.hasNoAccess()) {
             return 0;
         }
-        Criteria criteria = criteriaBuilder.build();
-        Long count = (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
-        return count.intValue();
+        return helper.getItemCount().intValue();
     }
 
-    private SchoolPermissionCriteriaBuilder createGroupCriteriaBuilder(String userId, Session session, Permission permission) {
-        return new SchoolPermissionCriteriaBuilder()
-                .setCriteriaType(Group.class)
-                .setCriteriaName("group")
-                .setSession(session)
-                .setSchoolIds(DaoUtils.getPermittedSchoolIds(session, userId, permission));
+    private SchoolPermissionQueryHelper<Group> createGroupQueryHelper(String userId, Permission permission) {
+        return new SchoolPermissionQueryHelper<>(em, Group.class)
+                .setSchoolIds(DaoUtils.getPermittedSchoolIds(em, userId, permission));
     }
 }

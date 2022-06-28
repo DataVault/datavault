@@ -1,161 +1,159 @@
 package org.datavaultplatform.common.model.dao.custom;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import org.datavaultplatform.common.model.PendingVault;
 import org.datavaultplatform.common.model.PendingVault_;
 import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.dao.SchoolPermissionCriteriaBuilder;
+import org.datavaultplatform.common.model.User_;
+import org.datavaultplatform.common.model.dao.SchoolPermissionQueryHelper;
 import org.datavaultplatform.common.util.DaoUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 
 public class PendingVaultCustomDAOImpl extends BaseCustomDAOImpl implements
     PendingVaultCustomDAO {
 
-    public PendingVaultCustomDAOImpl(EntityManager em) {
-        super(em);
+  public PendingVaultCustomDAOImpl(EntityManager em) {
+    super(em);
+  }
+
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<PendingVault> list(String userId, String sort, String order, String offset, String maxResult) {
+    SchoolPermissionQueryHelper helper = createPendingVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
+    if (helper.hasNoAccess()) {
+      return new ArrayList<>();
+    }
+    order(sort, order, helper);
+
+    if((offset != null && maxResult != null) && !maxResult.equals("0")) {
+      helper.setMaxResults(Integer.valueOf(maxResult));
+      helper.setFirstResult(Integer.valueOf(offset));
     }
 
+    List<PendingVault> vaults = helper.getItems();
+    return vaults;
+  }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<PendingVault> list(String userId, String sort, String order, String offset, String maxResult) {
-        Session session = this.getCurrentSession();
-        SchoolPermissionCriteriaBuilder criteriaBuilder = createPendingVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
-        if (criteriaBuilder.hasNoAccess()) {
-            return new ArrayList<>();
-        }
-        Criteria criteria = criteriaBuilder.build();
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        
-        order(sort, order, criteria);
-        
-        if((offset != null && maxResult != null) && !maxResult.equals("0")) {
-        	criteria.setMaxResults(Integer.valueOf(maxResult));
-        	criteria.setFirstResult(Integer.valueOf(offset));
-        }
-
-        List<PendingVault> vaults = criteria.list();
-        return vaults;
+  @Override
+  public int getTotalNumberOfPendingVaults(String userId, String confirmed) {
+    SchoolPermissionQueryHelper<PendingVault> helper = createPendingVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
+    if (helper.hasNoAccess()) {
+      return 0;
     }
-    
-    @Override
-	public int getTotalNumberOfPendingVaults(String userId, String confirmed) {
-		Session session = this.getCurrentSession();
-        SchoolPermissionCriteriaBuilder criteriaBuilder = createPendingVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
-        if (criteriaBuilder.hasNoAccess()) {
-            return 0;
-        }
-        Criteria criteria = criteriaBuilder.build();
-        if (confirmed != null && ! confirmed.equals("null") && ! confirmed.equals("")){
-            Boolean conf = new Boolean(confirmed);
-            criteria.add(Restrictions.eq(PendingVault_.CONFIRMED, conf));
-        }
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        criteria.setProjection(Projections.rowCount());
-        int totalNumberOfVaults = ((Long) criteria.uniqueResult()).intValue();
-        return totalNumberOfVaults;
-	}
+    helper.setPredicateHelper((cb, rt) -> {
+      List<Predicate> predicates = new ArrayList<>();
+      addConfirmed(predicates, confirmed, cb, rt);
+      return predicates;
+    });
+    int totalNumberOfVaults = helper.getItemCount().intValue();
+    return totalNumberOfVaults;
+  }
 
-	/**
-	 * Retrieve Total NUmber of rows after applying the filter
-	 */
-	@Override
-	public int getTotalNumberOfPendingVaults(String userId, String query, String confirmed) {
-		Session session = this.getCurrentSession();
-        SchoolPermissionCriteriaBuilder criteriaBuilder = createPendingVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
-        if (criteriaBuilder.hasNoAccess()) {
-            return 0;
-        }
-        Criteria criteria = criteriaBuilder.build();
-        if (query != null && !query.equals("")) {
-            criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
-        }
-        if (confirmed != null && ! confirmed.equals("null") && ! confirmed.equals("")){
-            Boolean conf = new Boolean(confirmed);
-            criteria.add(Restrictions.eq("confirmed", conf));
-        }
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        criteria.setProjection(Projections.rowCount());
-        int totalNumberOfVaults = ((Long) criteria.uniqueResult()).intValue();
-        return totalNumberOfVaults;
-	}
-    
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<PendingVault> search(String userId, String query, String sort, String order, String offset, String maxResult, String confirmed) {
-        Session session = this.getCurrentSession();
-        SchoolPermissionCriteriaBuilder criteriaBuilder = createPendingVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
-        if (criteriaBuilder.hasNoAccess()) {
-            return new ArrayList<>();
-        }
-        Criteria criteria = criteriaBuilder.build();
-        if( ! (query == null || query.equals("")) ) {
-            criteria.add(Restrictions.or(
-                    Restrictions.ilike("id", "%" + query + "%"),
-                    Restrictions.ilike("name", "%" + query + "%"),
-                    Restrictions.ilike("description", "%" + query + "%")));
-        }
+  /**
+   * Retrieve Total NUmber of rows after applying the filter
+   */
+  @Override
+  public int getTotalNumberOfPendingVaults(String userId, String query, String confirmed) {
+    SchoolPermissionQueryHelper<PendingVault> helper = createPendingVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
+    if (helper.hasNoAccess()) {
+      return 0;
+    }
+    addCommonPredicates(helper, query, confirmed);
+    int totalNumberOfVaults = helper.getItemCount().intValue();
+    return totalNumberOfVaults;
+  }
 
-        if (confirmed != null && ! confirmed.equals("null") && ! confirmed.equals("")){
-            Boolean conf = new Boolean(confirmed);
-            criteria.add(Restrictions.eq("confirmed", conf));
-        }
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<PendingVault> search(String userId, String query, String sort, String order, String offset, String maxResult, String confirmed) {
+    SchoolPermissionQueryHelper<PendingVault> helper = createPendingVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
+    if (helper.hasNoAccess()) {
+      return new ArrayList<>();
+    }
+    addCommonPredicates(helper, query, confirmed);
 
-        order(sort, order, criteria);
-        if((offset != null && maxResult != null) && !maxResult.equals("0")) {
-        	criteria.setMaxResults(Integer.valueOf(maxResult));
-        	criteria.setFirstResult(Integer.valueOf(offset));
-        }
-
-        List<PendingVault> vaults = criteria.list();
-        return vaults;
+    order(sort, order, helper);
+    if((offset != null && maxResult != null) && !maxResult.equals("0")) {
+      helper.setMaxResults(Integer.valueOf(maxResult));
+      helper.setFirstResult(Integer.valueOf(offset));
     }
 
-    @Override
-    public int count(String userId) {
-        Session session = this.getCurrentSession();
-        SchoolPermissionCriteriaBuilder criteriaBuilder = createPendingVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
-        if (criteriaBuilder.hasNoAccess()) {
-            return 0;
-        }
-        Criteria criteria = criteriaBuilder.build();
-        Long count = (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
-        return count.intValue();
+    List<PendingVault> vaults = helper.getItems();
+    return vaults;
+  }
+
+  @Override
+  public int count(String userId) {
+    SchoolPermissionQueryHelper helper = createPendingVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
+    if (helper.hasNoAccess()) {
+      return 0;
     }
-    
-    private SchoolPermissionCriteriaBuilder createPendingVaultCriteriaBuilder(String userId, Session session, Permission permission) {
-	    return new SchoolPermissionCriteriaBuilder()
-                .setCriteriaType(PendingVault.class)
-                .setCriteriaName("pendingvault")
-                .setSession(session)
-                .setTypeToSchoolAliasGenerator(criteria -> criteria.createAlias("pendingvault.group", "group"))
-                .setSchoolIds(DaoUtils.getPermittedSchoolIds(session, userId, permission));
-    }
-    
-    private void order(String sort, String order, Criteria criteria) {
-        // Default to ascending order
-        boolean asc = ("desc".equals(order))?false:true;
+    return helper.getItemCount().intValue();
+  }
+
+  private SchoolPermissionQueryHelper<PendingVault> createPendingVaultQueryHelper(String userId,
+      Permission permission) {
+    return new SchoolPermissionQueryHelper(em, PendingVault.class)
+        .setTypeToSchoolGenerator(rt -> rt.join(PendingVault_.group))
+        .setSchoolIds(DaoUtils.getPermittedSchoolIds(em, userId, permission));
+  }
+
+  private void order(String sort, String direction,
+      SchoolPermissionQueryHelper<PendingVault> helper) {
+    // Default to ascending order
+    boolean asc = "desc".equals(direction) ? false : true;
 
 //        // See if there is a valid sort option
-        if ("user".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("user.id"));
-            } else {
-                criteria.addOrder(Order.desc("user.id"));
-            }
-        } else {
-            if (asc) {
-                criteria.addOrder(Order.asc(sort));
-            } else {
-                criteria.addOrder(Order.desc(sort));
-            }
-        }
+
+    helper.setOrderByHelper((cb, rt) -> {
+      Path sortPath;
+      if ("user".equals(sort)) {
+        sortPath = rt.get(PendingVault_.user).get(User_.id);
+      } else {
+        sortPath = rt.get(sort);
+      }
+      return getSingletonOrderList(cb, asc, sortPath);
+    });
+  }
+
+  void addCommonPredicates(SchoolPermissionQueryHelper<PendingVault> helper, String query,
+      String confirmed) {
+    helper.setPredicateHelper((cb, rt) -> {
+      List<Predicate> predicates = new ArrayList<>();
+      if (!(query == null || query.equals(""))) {
+        String lowerQuery = getQueryLower(query);
+        predicates.add(
+            cb.or(
+                cb.like(cb.lower(rt.get(PendingVault_.ID)), lowerQuery),
+                cb.like(cb.lower(rt.get(PendingVault_.NAME)), lowerQuery),
+                cb.like(cb.lower(rt.get(PendingVault_.DESCRIPTION)), lowerQuery)
+            )
+        );
+      }
+
+      addConfirmed(predicates, confirmed, cb, rt);
+      return predicates;
+    });
+  }
+
+  private void addConfirmed(List<Predicate> predicates, String confirmed, CriteriaBuilder cb,
+      Root<PendingVault> rt) {
+    if (confirmed != null && !confirmed.equals("null") && !confirmed.equals("")) {
+      Boolean conf = Boolean.valueOf(confirmed);
+      predicates.add(
+          cb.equal(rt.get(PendingVault_.CONFIRMED), conf)
+      );
     }
+  }
+  private static List<Order> getSingletonOrderList(CriteriaBuilder cb, boolean asc, Path sortPath) {
+    return Collections.singletonList(asc ? cb.asc(sortPath) : cb.desc(sortPath));
+  }
 }

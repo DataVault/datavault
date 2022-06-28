@@ -1,19 +1,27 @@
 package org.datavaultplatform.common.model.dao.custom;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import org.apache.commons.lang3.StringUtils;
+import org.datavaultplatform.common.model.Dataset_;
+import org.datavaultplatform.common.model.Group_;
 import org.datavaultplatform.common.model.Permission;
+import org.datavaultplatform.common.model.User_;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.Vault_;
-import org.datavaultplatform.common.model.dao.SchoolPermissionCriteriaBuilder;
+import org.datavaultplatform.common.model.dao.SchoolPermissionQueryHelper;
 import org.datavaultplatform.common.util.DaoUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 
 
 public class VaultCustomDAOImpl extends BaseCustomDAOImpl implements VaultCustomDAO {
@@ -26,120 +34,122 @@ public class VaultCustomDAOImpl extends BaseCustomDAOImpl implements VaultCustom
     @SuppressWarnings("unchecked")
     @Override
     public List<Vault> list(String userId, String sort, String order, String offset, String maxResult) {
-        Session session = this.getCurrentSession();
-        SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
-        if (criteriaBuilder.hasNoAccess()) {
+        SchoolPermissionQueryHelper<Vault> helper = createVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
+        if (helper.hasNoAccess()) {
             return new ArrayList<>();
         }
-        Criteria criteria = criteriaBuilder.build();
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
-        order(sort, order, criteria);
-        if((offset != null && maxResult != null) && !maxResult.equals("0")) {
-        	criteria.setMaxResults(Integer.valueOf(maxResult));
-        	criteria.setFirstResult(Integer.valueOf(offset));
+        order(sort, order, helper);
+        if ((offset != null && maxResult != null) && !maxResult.equals("0")) {
+            helper.setMaxResults(Integer.valueOf(maxResult));
+            helper.setFirstResult(Integer.valueOf(offset));
         }
 
-        List<Vault> vaults = criteria.list();
-        return vaults;
+        // With mysql 5.7 - We can't mix 'order by' of non-selected columns with 'distinct' -
+        List<Vault> vaults = helper.getItems(false);
+        // we perform distinct on Java side
+        return distinctVaults(vaults);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public List<Vault> search(String userId, String query, String sort, String order, String offset, String maxResult) {
-        Session session = this.getCurrentSession();
-        SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
-        if (criteriaBuilder.hasNoAccess()) {
+        SchoolPermissionQueryHelper<Vault> helper = createVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
+        if (helper.hasNoAccess()) {
             return new ArrayList<>();
         }
-        Criteria criteria = criteriaBuilder.build();
-        if( ! (query == null || query.equals("")) ) {
-            criteria.add(Restrictions.or(
-                    Restrictions.ilike(Vault_.ID, "%" + query + "%"),
-                    Restrictions.ilike(Vault_.NAME, "%" + query + "%"),
-                    Restrictions.ilike(Vault_.DESCRIPTION, "%" + query + "%")));
-        }
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-
-        order(sort, order, criteria);
-        if((offset != null && maxResult != null) && !maxResult.equals("0")) {
-        	criteria.setMaxResults(Integer.valueOf(maxResult));
-        	criteria.setFirstResult(Integer.valueOf(offset));
+        if (StringUtils.isNotBlank(query)) {
+            String queryLower = getQueryLower(query);
+            helper.setSinglePredicateHelper((cb, rt) -> cb.or (
+                cb.like(cb.lower(rt.get(Vault_.ID)), queryLower),
+                cb.like(cb.lower(rt.get(Vault_.NAME)), queryLower),
+                cb.like(cb.lower(rt.get(Vault_.DESCRIPTION)), queryLower)
+            ));
         }
 
-        List<Vault> vaults = criteria.list();
-        return vaults;
+        order(sort, order, helper);
+        if ((offset != null && maxResult != null) && !maxResult.equals("0")) {
+            helper.setMaxResults(Integer.valueOf(maxResult));
+            helper.setFirstResult(Integer.valueOf(offset));
+        }
+
+        // With mysql 5.7 - We can't mix 'order by' of non-selected columns with 'distinct' -
+        List<Vault> vaults = helper.getItems(false);
+        // we perform distinct on Java side
+        return distinctVaults(vaults);
+    }
+
+    // With mysql 5.7 - We can't mix 'order by' of non-selected columns with 'distinct' -
+    // but we can perform distinct on the Java side
+    protected static List<Vault> distinctVaults(List<Vault> vaults) {
+        Map<String,Vault> byId = vaults.stream().collect(Collectors.toMap(
+            vt-> vt.getID(),
+            vt -> vt,
+            (x, y) -> y,
+            LinkedHashMap::new)
+        );
+        return new ArrayList(byId.values());
     }
 
     @Override
     public int count(String userId) {
-        Session session = this.getCurrentSession();
-        SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
-        if (criteriaBuilder.hasNoAccess()) {
+        SchoolPermissionQueryHelper<Vault> helper = createVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
+        if (helper.hasNoAccess()) {
             return 0;
         }
-        Criteria criteria = criteriaBuilder.build();
-        Long count = (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
-        return count.intValue();
+        return helper.getItemCount().intValue();
     }
 
     @Override
     public int getRetentionPolicyCount(int status) {
-        Session session = this.getCurrentSession();
-        Criteria criteria = session.createCriteria(Vault.class);
-        criteria.add(Restrictions.eq(Vault_.RETENTION_POLICY_STATUS, status));
-        criteria.setProjection(Projections.rowCount());
-        Long count = (Long)criteria.uniqueResult();
-        return count.intValue();
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+        Root<Vault> root = cq.from(Vault.class);
+        cq.select(cb.countDistinct(root));
+
+        Predicate[] clauseArr = {
+            cb.equal(root.get(Vault_.RETENTION_POLICY_STATUS), status)
+        };
+        cq.where(clauseArr);
+
+        return getSingleResult(cq).intValue();
     }
 
-    private void order(String sort, String order, Criteria criteria) {
+    private void order(String sort, String order, SchoolPermissionQueryHelper<Vault> helper) {
         // Default to ascending order
-        boolean asc = ("desc".equals(order))?false:true;
+        boolean asc = !"desc".equals(order);
+
 
         // See if there is a valid sort option
-        if ("user".equals(sort)) {
-            if (asc) {
-                criteria.addOrder(Order.asc("user.id"));
+        helper.setOrderByHelper((cb,rt) -> {
+            Expression sortExpr = null;
+            // See if there is a valid sort option
+            if ("user".equals(sort)) {
+                sortExpr = rt.get(Vault_.user).get(User_.id);
+            } else if ("groupID".equals(sort)) {
+                sortExpr = rt.get(Vault_.group).get(Group_.id);
+            } else if ("crisID".equals(sort)) {
+                sortExpr = rt.join(Vault_.dataset).get(Dataset_.crisId);
             } else {
-                criteria.addOrder(Order.desc("user.id"));
+                sortExpr = rt.get(sort);
             }
-        } else if ("groupID".equals(sort)) {
-            //we already have an association to Group - adding another results in error
-        	  //criteria.createAlias("group", "g");
+            javax.persistence.criteria.Order orderBy = null;
             if (asc) {
-                criteria.addOrder(Order.asc("group.id"));
+                orderBy = cb.asc(sortExpr);
             } else {
-                criteria.addOrder(Order.desc("group.id"));
+                orderBy= cb.desc(sortExpr);
             }
-        } else if ("crisID".equals(sort)) {
-            criteria.createAlias("dataset", "d");
-            if (asc) {
-                criteria.addOrder(Order.asc("d.crisId"));
-            } else {
-                criteria.addOrder(Order.desc("d.crisId"));
-            }
-        } else {
-            if (asc) {
-                criteria.addOrder(Order.asc(sort));
-            } else {
-                criteria.addOrder(Order.desc(sort));
-            }
-        }
+            return Collections.singletonList(orderBy);
+        });
     }
 
 	@Override
 	public int getTotalNumberOfVaults(String userId) {
-		Session session = this.getCurrentSession();
-        SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
-        if (criteriaBuilder.hasNoAccess()) {
-            return 0;
-        }
-        Criteria criteria = criteriaBuilder.build();
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        criteria.setProjection(Projections.rowCount());
-        int totalNumberOfVaults = ((Long) criteria.uniqueResult()).intValue();
-        return totalNumberOfVaults;
+    SchoolPermissionQueryHelper<Vault> helper = createVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
+    if (helper.hasNoAccess()) {
+        return 0;
+    }
+    return helper.getItemCount().intValue();
 	}
 
 	/**
@@ -147,35 +157,32 @@ public class VaultCustomDAOImpl extends BaseCustomDAOImpl implements VaultCustom
 	 */
 	@Override
 	public int getTotalNumberOfVaults(String userId, String query) {
-		Session session = this.getCurrentSession();
-        SchoolPermissionCriteriaBuilder criteriaBuilder = createVaultCriteriaBuilder(userId, session, Permission.CAN_MANAGE_VAULTS);
-        if (criteriaBuilder.hasNoAccess()) {
-            return 0;
-        }
-        Criteria criteria = criteriaBuilder.build();
-        if (query != null && !query.equals("")) {
-            criteria.add(Restrictions.or(Restrictions.ilike("id", "%" + query + "%"), Restrictions.ilike("name", "%" + query + "%"), Restrictions.ilike("description", "%" + query + "%")));
-        }
-        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        criteria.setProjection(Projections.rowCount());
-        int totalNumberOfVaults = ((Long) criteria.uniqueResult()).intValue();
-        session.close();
-        return totalNumberOfVaults;
-	}
+      SchoolPermissionQueryHelper<Vault> helper = createVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
+      if (helper.hasNoAccess()) {
+          return 0;
+      }
+      if (StringUtils.isNotBlank(query)) {
+          String queryLower = getQueryLower(query);
+          helper.setSinglePredicateHelper((cb, rt) ->
+              cb.or(
+                  cb.like(cb.lower(rt.get(Vault_.id)), queryLower),
+                  cb.like(cb.lower(rt.get(Vault_.name)), queryLower),
+                  cb.like(cb.lower(rt.get(Vault_.description)), queryLower)));
+      }
+      return helper.getItemCount().intValue();
+  }
 
 	@Override
 	public List<Object[]> getAllProjectsSize() {
-		Session session = this.getCurrentSession();
-		Query<Object[]> query = session.createQuery("select v.projectId, sum(v.vaultSize) from Vault v group by v.projectId");
-		return query.list();
+    Query query = em.createQuery(
+          "select v.projectId, sum(v.vaultSize) from org.datavaultplatform.common.model.Vault v group by v.projectId");
+		return query.getResultList();
 	}
 
-    private SchoolPermissionCriteriaBuilder createVaultCriteriaBuilder(String userId, Session session, Permission permission) {
-	    return new SchoolPermissionCriteriaBuilder()
-                .setCriteriaType(Vault.class)
-                .setCriteriaName("vault")
-                .setSession(session)
-                .setTypeToSchoolAliasGenerator(criteria -> criteria.createAlias("vault.group", "group"))
-                .setSchoolIds(DaoUtils.getPermittedSchoolIds(session, userId, permission));
+
+    private SchoolPermissionQueryHelper<Vault> createVaultQueryHelper(String userId, Permission permission) {
+	    return new SchoolPermissionQueryHelper<>(em, Vault.class)
+                .setTypeToSchoolGenerator(rt -> rt.join(Vault_.group))
+                .setSchoolIds(DaoUtils.getPermittedSchoolIds(em, userId, permission));
     }
 }
