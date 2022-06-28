@@ -11,4 +11,7 @@
 
     <logger name="org.testcontainers" level="INFO"/>
     <logger name="com.github.dockerjava" level="WARN"/>
+    <logger name="org.hibernate.SQL" level="DEBUG" >
+        <appender class="org.datavaultplatform.common.model.dao.SQLAppender" />
+    </logger>
 </configuration>
