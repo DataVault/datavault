@@ -317,8 +317,8 @@ public class VaultsService {
 
     public void addBillingInfo(CreateVault createVault, Vault vault) {
         BillingInfo billinginfo =  new BillingInfo();
-        billinginfo.setAmountBilled(new BigDecimal(0));
-        billinginfo.setAmountToBeBilled(new BigDecimal(0));
+        billinginfo.setAmountBilled(null);
+        billinginfo.setAmountToBeBilled(null);
         billinginfo.setVault(vault);
         String billingType = createVault.getBillingType();
 
