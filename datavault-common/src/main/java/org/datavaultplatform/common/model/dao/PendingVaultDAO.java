@@ -3,6 +3,7 @@ package org.datavaultplatform.common.model.dao;
 import java.util.List;
 import java.util.Optional;
 import org.datavaultplatform.common.model.PendingVault;
+import org.datavaultplatform.common.model.PendingVault_;
 import org.datavaultplatform.common.model.dao.custom.PendingVaultCustomDAO;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
@@ -16,7 +17,7 @@ public interface PendingVaultDAO extends BaseDAO<PendingVault>, PendingVaultCust
 
   @Override
   default List<PendingVault> list() {
-    return findAll(Sort.by(Order.asc("creationTime")));
+    return findAll(Sort.by(Order.asc(PendingVault_.CREATION_TIME)));
   }
 
   @Override

@@ -22,7 +22,6 @@ import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.util.DaoUtils;
-import org.hibernate.Session;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -257,82 +256,6 @@ public class DaoUtilsIT extends BaseReuseDatabaseTest {
         Set<String> res1 = DaoUtils.getPermittedSchoolIds(em, "XXX", p);
         assertEquals(Collections.emptySet(), res1);
       }
-    }
-  }
-
-  @Nested
-  @Transactional
-  class WithSession {
-
-    @Test
-    void testGetPermittedSchoolIdsLinkedToAdminRole() {
-
-      setupUsers();
-      setupAdminRoleAssignments();
-
-      //for each permission, there is one school for user1
-      for (Permission p : Permission.values()) {
-        Set<String> res2 = DaoUtils.getPermittedSchoolIds(getSession(em), user1.getID(), p);
-        assertEquals(setOf("SCHOOL1"), res2);
-      }
-
-      //for each permission, there are two schools for user2
-      for (Permission p : Permission.values()) {
-        Set<String> res2 = DaoUtils.getPermittedSchoolIds(getSession(em), user2.getID(), p);
-        assertEquals(setOf("SCHOOL2", "SCHOOL3"), res2);
-      }
-
-      //for each permission, there are no schools for user id 'XXX'
-      for (Permission p : Permission.values()) {
-        Set<String> res2 = DaoUtils.getPermittedSchoolIds(getSession(em), "XXX", p);
-        assertEquals(Collections.emptySet(), res2);
-      }
-
-      //for each permission, there is the special case '*' for user3
-      for (Permission p : Permission.values()) {
-        Set<String> res1 = DaoUtils.getPermittedSchoolIds(getSession(em), user3.getID(), p);
-        assertEquals(setOf("*"), res1);
-      }
-    }
-
-    @Test
-    void testGetPermittedSchoolIdsLinkedToNonAdminRole() {
-      setupUsers();
-      setupNonAdminRoleAssignments();
-
-      List<Permission> validPerms = Arrays.asList(
-          Permission.CAN_VIEW_QUEUES,
-          Permission.CAN_VIEW_EVENTS);
-
-      //for CAN_VIEW_QUEUES and CAN_VIEW_EVENTS, there is one school for user1
-      for (Permission p : Permission.values()) {
-        Set<String> res2 = DaoUtils.getPermittedSchoolIds(getSession(em), user1.getID(), p);
-        if (validPerms.contains(p)) {
-          assertEquals(setOf("SCHOOL1"), res2);
-        } else {
-          assertEquals(Collections.emptySet(), res2);
-        }
-      }
-
-      //for CAN_VIEW_QUEUES and CAN_VIEW_EVENTS, there are two schools for user2
-      for (Permission p : Permission.values()) {
-        Set<String> res2 = DaoUtils.getPermittedSchoolIds(getSession(em), user2.getID(), p);
-        if (validPerms.contains(p)) {
-          assertEquals(setOf("SCHOOL2", "SCHOOL3"), res2);
-        } else {
-          assertEquals(Collections.emptySet(), res2);
-        }
-      }
-
-      //for each permission, there are no schools for user id 'XXX'
-      for (Permission p : Permission.values()) {
-        Set<String> res2 = DaoUtils.getPermittedSchoolIds(getSession(em), "XXX", p);
-        assertEquals(Collections.emptySet(), res2);
-      }
-    }
-
-    private Session getSession(EntityManager em) {
-      return em.unwrap(Session.class);
     }
   }
 }

@@ -28,7 +28,6 @@ import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.util.RoleUtils;
-import org.hibernate.Session;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -372,8 +371,6 @@ public class RoleDAOIT extends BaseDatabaseTest {
     @Transactional
     void testStoreSpecialRoles_SomeRolePermissionsUpdated(@Autowired EntityManager em){
 
-      Session session = em.unwrap(Session.class);
-
       assertEquals(0, dao.list().size());
       assertNull(dao.getIsAdmin());
       assertNull(dao.getDataOwner());
@@ -383,7 +380,7 @@ public class RoleDAOIT extends BaseDatabaseTest {
 
       permissionDAO.synchronisePermissions();
       dao.storeSpecialRoles();
-      session.flush();
+      em.flush();
 
       long roleCount = getCountOfRoles();
       assertEquals(5, roleCount);
@@ -423,7 +420,7 @@ public class RoleDAOIT extends BaseDatabaseTest {
       dao.update(isAdmin3);
       dao.update(dataOwner3);
       dao.update(vaultCreator3);
-      session.flush();
+      em.flush();
 
       //Check that the changes have been flushed through to the database
       assertEquals(0, getCountOfPermissionsForRole(isAdmin3));
@@ -431,7 +428,7 @@ public class RoleDAOIT extends BaseDatabaseTest {
       assertEquals(0, getCountOfPermissionsForRole(vaultCreator3));
 
       dao.storeSpecialRoles();
-      session.flush();
+      em.flush();
 
       //Check that the changes have been flushed through to the database
       assertNotEquals(0, getCountOfPermissionsForRole(isAdmin3));

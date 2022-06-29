@@ -17,7 +17,6 @@ import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Group_;
@@ -38,8 +37,6 @@ public class SchoolPermissionQueryHelper<T> {
   private OrderByHelper orderByHelper;
   private PredicateHelper predicateHelper;
   private SinglePredicateHelper singlePredicateHelper;
-  private SelectionHelper<T> selectionHelper;
-
   public SchoolPermissionQueryHelper(EntityManager em, Class<T> criteriaType) {
     this.criteriaType = criteriaType;
     this.em = em;
@@ -48,7 +45,6 @@ public class SchoolPermissionQueryHelper<T> {
     this.orderByHelper = (cb,rt) -> Collections.emptyList();
     this.predicateHelper = (cb,rt) -> Collections.emptyList();
     this.singlePredicateHelper = (cb,rt) -> null;
-    this.selectionHelper = root -> root;
   }
 
   public SchoolPermissionQueryHelper setSchoolIds(Set<String> schoolIds) {
@@ -63,7 +59,7 @@ public class SchoolPermissionQueryHelper<T> {
     return this;
   }
 
-  public SchoolPermissionQueryHelper setNumericExpressionHelper (
+  public SchoolPermissionQueryHelper setNumericExpressionHelper(
       TypeToSchoolGroupJoinGenerator<T> generator) {
     this.typeToSchoolGroupGenerator = generator;
     return this;
@@ -77,7 +73,7 @@ public class SchoolPermissionQueryHelper<T> {
     List<Predicate> result = new ArrayList<>();
     if (!schoolIds.contains(DaoUtils.FULL_ACCESS_INDICATOR)) {
       Path<Group> groupPath = criteriaType == Group.class
-          ? (Root<Group>)root
+          ? (Root<Group>) root
           : typeToSchoolGroupGenerator.generateJoinToSchoolGroup(root);
       Predicate restrictOnSchoolIds = groupPath.get(Group_.id).in(schoolIds);
       result.add(restrictOnSchoolIds);
@@ -99,19 +95,24 @@ public class SchoolPermissionQueryHelper<T> {
   public List<T> getItems(boolean distinct) {
     CriteriaQuery<T> cq = cb.createQuery(this.criteriaType);
     Root<T> root = cq.from(this.criteriaType);
-    Selection<T> selection = selectionHelper.getSelection(root);
-    cq.select(selection).distinct(distinct);
+    cq.select(root).distinct(distinct);
     cq.where(this.getPredicates(root));
     cq.orderBy(this.orderByHelper.getOrders(this.cb, root));
 
+    TypedQuery<T> queryWithEG = getQueryWithFirstAndMaxRestrictions(cq);
+    debugTopLevelJoins(root);
+    return DaoUtils.addEntityGraph(em, this.criteriaType, queryWithEG).getResultList();
+  }
+
+  void debugTopLevelJoins(Root<T> root) {
     Set<Join<T, ?>> joins = root.getJoins();
-    int i=0;
+    int i = 0;
     for (Join<T, ?> join : joins) {
-      System.out.printf("JOIN [%d] on [%s]:[%s]%n",i,join.getAttribute().getName(),join.getJoinType());
+      String joinName = join.getAttribute().getName();
+      String msg = String.format("JOIN [%d] on [%s]:[%s]%n", i, joinName, join.getJoinType());
+      log.info(msg);
       i++;
     }
-    TypedQuery<T> queryWithEG = getQueryWithRestrictions(cq);
-    return DaoUtils.addEntityGraph(em, this.criteriaType, queryWithEG).getResultList();
   }
 
   public List<T> getItems() {
@@ -124,7 +125,7 @@ public class SchoolPermissionQueryHelper<T> {
     Root<T> root = cq.from(this.criteriaType);
     cq.select(cb.countDistinct(root));
     cq.where(this.getPredicates(root));
-    return getQueryWithRestrictions(cq).getSingleResult();
+    return getQueryWithFirstAndMaxRestrictions(cq).getSingleResult();
   }
 
   public Long queryForNumber(NumericExpressionHelper<T> numericExpressionHelper) {
@@ -132,10 +133,10 @@ public class SchoolPermissionQueryHelper<T> {
     Root<T> root = cq.from(this.criteriaType);
     cq.select(numericExpressionHelper.getNumericExpression(cb, root));
     cq.where(this.getPredicates(root));
-    return getQueryWithRestrictions(cq).getSingleResult();
+    return getQueryWithFirstAndMaxRestrictions(cq).getSingleResult();
   }
 
-  private <V> TypedQuery<V> getQueryWithRestrictions(CriteriaQuery<V> cq) {
+  private <V> TypedQuery<V> getQueryWithFirstAndMaxRestrictions(CriteriaQuery<V> cq) {
     TypedQuery<V> typedQuery = em.createQuery(cq);
     if (this.firstResult != null) {
       typedQuery.setFirstResult(firstResult);
@@ -163,7 +164,7 @@ public class SchoolPermissionQueryHelper<T> {
   }
 
   public void setOrderByHelper(OrderByHelper orderByHelper) {
-        this.orderByHelper = orderByHelper;
+    this.orderByHelper = orderByHelper;
   }
 
   public interface TypeToSchoolGroupJoinGenerator<U> {
@@ -181,13 +182,5 @@ public class SchoolPermissionQueryHelper<T> {
 
   public interface NumericExpressionHelper<V> {
     Expression<Long> getNumericExpression(CriteriaBuilder cb, Root<V> root);
-  }
-
-
-  public void setSelectionHelper(SelectionHelper<T> selectionHelper) {
-    this.selectionHelper = selectionHelper;
-  }
-  public interface SelectionHelper<S> {
-    Selection<S> getSelection(Root<S> root);
   }
 }

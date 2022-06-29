@@ -3,6 +3,7 @@ package org.datavaultplatform.common.model.dao;
 import java.util.List;
 import java.util.Optional;
 import org.datavaultplatform.common.model.Audit;
+import org.datavaultplatform.common.model.Audit_;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -15,7 +16,7 @@ public interface AuditDAO extends BaseDAO<Audit> {
 
   @Override
   default List<Audit> list() {
-    return findAll(Sort.by(Order.asc("timestamp")));
+    return findAll(Sort.by(Order.asc(Audit_.TIMESTAMP)));
   }
 
   @Override

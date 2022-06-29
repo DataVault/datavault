@@ -7,7 +7,6 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.util.DaoUtils;
-import org.hibernate.Session;
 
 @Slf4j
 public abstract class BaseCustomDAOImpl implements BaseCustomDAO {
@@ -18,10 +17,6 @@ public abstract class BaseCustomDAOImpl implements BaseCustomDAO {
     this.em = em;
   }
 
-  public Session getCurrentSession() {
-    return em.unwrap(Session.class);
-  }
-
   protected <T> T getSingleResult(CriteriaQuery<T> criteriaQuery) {
     try {
       return em.createQuery(criteriaQuery).getSingleResult();
@@ -30,16 +25,6 @@ public abstract class BaseCustomDAOImpl implements BaseCustomDAO {
       return null;
     }
   }
-
-  private <T> T getSingleResult(TypedQuery<T> typedQuery) {
-    try {
-      return typedQuery.getSingleResult();
-    } catch (NoResultException ex) {
-      log.debug("no result", ex);
-      return null;
-    }
-  }
-
 
   protected long getCount(TypedQuery<Long> typedQuery) {
     Long result = typedQuery.getSingleResult();

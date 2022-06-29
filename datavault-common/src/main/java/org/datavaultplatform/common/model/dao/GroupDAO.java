@@ -3,6 +3,7 @@ package org.datavaultplatform.common.model.dao;
 import java.util.List;
 import java.util.Optional;
 import org.datavaultplatform.common.model.Group;
+import org.datavaultplatform.common.model.Group_;
 import org.datavaultplatform.common.model.dao.custom.GroupCustomDAO;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
@@ -16,7 +17,7 @@ public interface GroupDAO extends BaseDAO<Group>, GroupCustomDAO {
 
   @Override
   default List<Group> list() {
-    return findAll(Sort.by(Order.asc("name")));
+    return findAll(Sort.by(Order.asc(Group_.NAME)));
   }
 
   @Override

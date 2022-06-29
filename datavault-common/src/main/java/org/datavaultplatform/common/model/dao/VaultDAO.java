@@ -3,6 +3,7 @@ package org.datavaultplatform.common.model.dao;
 import java.util.List;
 import java.util.Optional;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.Vault_;
 import org.datavaultplatform.common.model.dao.custom.VaultCustomDAO;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
@@ -16,7 +17,7 @@ public interface VaultDAO extends BaseDAO<Vault>, VaultCustomDAO {
 
   @Override
   default List<Vault> list() {
-    return findAll(Sort.by(Order.asc("creationTime")));
+    return findAll(Sort.by(Order.asc(Vault_.CREATION_TIME)));
   }
 
   default void saveOrUpdateVault(Vault vault){

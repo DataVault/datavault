@@ -3,6 +3,7 @@ package org.datavaultplatform.common.model.dao;
 import java.util.List;
 import java.util.Optional;
 import org.datavaultplatform.common.model.AuditChunkStatus;
+import org.datavaultplatform.common.model.AuditChunkStatus_;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.dao.custom.AuditChunkStatusCustomDAO;
 import org.springframework.data.domain.Sort;
@@ -17,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface AuditChunkStatusDAO extends BaseDAO<AuditChunkStatus>, AuditChunkStatusCustomDAO {
   @Override
   default List<AuditChunkStatus> list() {
-    return findAll(Sort.by(Order.asc("timestamp")));
+    return findAll(Sort.by(Order.asc(AuditChunkStatus_.TIMESTAMP)));
   }
 
   List<AuditChunkStatus> findByDepositChunkId(String depositChunkId);

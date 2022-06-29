@@ -10,6 +10,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Deposit.Status;
@@ -20,6 +21,7 @@ import org.datavaultplatform.common.model.Vault_;
 import org.datavaultplatform.common.model.dao.SchoolPermissionQueryHelper;
 import org.datavaultplatform.common.util.DaoUtils;
 
+@Slf4j
 public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCustomDAO {
 
   public DepositCustomDAOImpl(EntityManager em) {
@@ -29,15 +31,15 @@ public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCu
   @SuppressWarnings("unchecked")
   @Override
   public List<Deposit> list(String query, String userId, String sort, String sortDirection, int offset, int maxResult) {
-    System.out.println("query:"+query+", sort: "+sort+", order: "+sortDirection +", offset: "+offset+", maxResult: "+maxResult);
+    log.info("query:"+query+", sort: "+sort+", order: "+sortDirection +", offset: "+offset+", maxResult: "+maxResult);
     SchoolPermissionQueryHelper<Deposit> helper = createDepositQueryHelper(userId, Permission.CAN_MANAGE_DEPOSITS);
     if (helper.hasNoAccess()) {
       return new ArrayList<>();
     }
 
-    System.out.println("DAO.list query="+query);
+    log.info("DAO.list query="+query);
     if((query == null || "".equals(query)) == false) {
-      System.out.println("apply restrictions");
+      log.info("apply restrictions");
 
       String queryLower = getQueryLower(query);
 
@@ -56,7 +58,7 @@ public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCu
     helper.setOrderByHelper((cb, rt) -> {
       final Path sortPath;
       if (StringUtils.isBlank(sort)) {
-        sortPath = rt.get(Deposit_.CREATION_TIME);
+        sortPath = rt.get(Deposit_.creationTime);
       } else if ("userID".equals(sort)) {
         sortPath = rt.get(Deposit_.user).get(User_.id);
       } else if ("vaultID".equals(sort)) {
@@ -88,7 +90,7 @@ public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCu
     }
 
     if((query == null || "".equals(query)) == false) {
-      System.out.println("apply restrictions");
+      log.info("apply restrictions");
       String queryLower = getQueryLower(query);
       helper.setSinglePredicateHelper((cb, rt) -> cb.or(
           cb.like(cb.lower(rt.get(Deposit_.ID)), queryLower),
