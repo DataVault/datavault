@@ -30,7 +30,8 @@
 </div>
 
 
- <form id="create-vault" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/upgrade/${pendingVault.ID}" method="get" novalidate="novalidate" _lpchecked="1">
+<form id="create-vault" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/upgrade/${pendingVault.ID}" method="get" novalidate="novalidate" _lpchecked="1">
+
 <div class="row">
  <div class="col-md-12">
     <table class="table table-sm">
@@ -107,7 +108,7 @@
 			<#if pendingVault.confirmed?c=="true">
                 <input class="form-control" id="reviewDate" placeholder="yyyy-mm-dd" name="reviewDate"
                      value="${pendingVault.getReviewDateAsString()}"/>
-                <span id="invalid-review-date-span" style="font-size: 1.2em; font: bold; color: #f00; display: inline;"></span>
+                <span id="invalid-review-date-span" style="font-size: 1.2em; font: bold; color:  #AE0F0F; display: inline;"></span>
             <#else>
                 <#if (pendingVault.reviewDate)??>
                     ${pendingVault.reviewDate?date}
@@ -262,11 +263,15 @@
 <div class="row">
 <div class="col-md-12 text-center">
      <#if (pendingVault.ID)??>
-          <a name="delete-pending-vault" class="btn btn-default" 
-          href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Cancel</a>
+          <a name="return-confirmed-pending-vaults" class="btn btn-default" 
+          href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/confirmed">Cancel</a>
 
           <a name="delete-pending-vault" class="btn btn-danger" 
           href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/${pendingVault.getID()}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Delete Pending Vault</a>
+		<!-- Note: start=2 added to ensure we go the Billing page of Edit Pending Vault -->
+		<a name="edit-pending-vault" class="btn btn-primary"  style="margin-bottom: 0;"
+          href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/edit/${pendingVault.getID()}?start=2">Edit Pending Vault Metadata</a>
+		
 		<#if pendingVault.confirmed?c=="true">
          <button id="create-vault-btn" type="submit" value="submit" class="btn btn-success">
               <span class="glyphicon glyphicon-folder-close"></span>

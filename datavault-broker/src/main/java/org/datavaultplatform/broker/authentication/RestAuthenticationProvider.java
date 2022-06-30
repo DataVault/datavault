@@ -93,6 +93,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
             checkPermissions(Permission.CAN_MANAGE_DEPOSITS, grantedAuths, userPermissions);
             checkPermissions(Permission.CAN_VIEW_RETRIEVES, grantedAuths, userPermissions);
             checkPermissions(Permission.CAN_MANAGE_VAULTS, grantedAuths, userPermissions);
+            checkPermissions(Permission.CAN_MANAGE_PENDING_VAULTS, grantedAuths, userPermissions);
             checkPermissions(Permission.CAN_VIEW_EVENTS, grantedAuths, userPermissions);
             checkPermissions(Permission.CAN_MANAGE_BILLING_DETAILS, grantedAuths, userPermissions);
         }

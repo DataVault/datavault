@@ -150,7 +150,7 @@ public class PendingVaultsService {
         Boolean isOwner = createVault.getIsOwner();
         logger.debug("IsOwner is '" + isOwner + "'");
         String ownerId = userID;
-        if (isOwner != null && !isOwner) {
+        if ((isOwner != null && !isOwner) || userID == null) {
             ownerId = createVault.getVaultOwner();
         }
         logger.debug("VaultOwner is '" + ownerId + "'");

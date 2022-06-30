@@ -329,6 +329,8 @@ public class VaultsController {
 
         Group[] groups = restService.getGroups();
         model.addAttribute("groups", groups);
+        
+        model.addAttribute("loggedInAs", principal.getName());
 
         return "vaults/newCreatePrototype";
     }
@@ -351,6 +353,8 @@ public class VaultsController {
         Group[] groups = restService.getGroups();
         model.addAttribute("groups", groups);
 
+        model.addAttribute("loggedInAs", principal.getName());
+        
         return "vaults/newCreatePrototype";
     }
 
@@ -416,6 +420,7 @@ public class VaultsController {
 
                 Group[] groups = restService.getGroups();
                 model.addAttribute("groups", groups);
+               
                 return "vaults/newCreatePrototype";
             }
 

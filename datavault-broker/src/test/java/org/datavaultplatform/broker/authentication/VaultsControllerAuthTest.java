@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.authentication;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -9,13 +10,26 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Arrays;
 import org.datavaultplatform.broker.controllers.VaultsController;
+import org.datavaultplatform.common.request.CreateVault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 public class VaultsControllerAuthTest extends BaseControllerAuthTest {
+
+
+  @Captor
+  ArgumentCaptor<CreateVault> argCreateVault;
+
+  @Captor
+  ArgumentCaptor<String> argUserId;
+
+  @Captor
+  ArgumentCaptor<String> argApiKey;
 
   @MockBean
   VaultsController controller;
@@ -243,8 +257,10 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
 
   @Test
   void testPostAddPendingVault() throws Exception {
-    when(controller.addPendingVault(USER_ID_1, API_KEY_1, AuthTestData.CREATE_VAULT)).thenReturn(
-        AuthTestData.VAULT_INFO_1);
+    when(controller.addPendingVault(
+        argUserId.capture(),
+        argApiKey.capture(),
+        argCreateVault.capture())).thenReturn(AuthTestData.VAULT_INFO_1);
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         post("/pendingVaults")
@@ -252,13 +268,17 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
             .contentType(MediaType.APPLICATION_JSON),
         AuthTestData.VAULT_INFO_1);
 
-    verify(controller).addPendingVault(USER_ID_1, API_KEY_1, AuthTestData.CREATE_VAULT);
+    verify(controller).addPendingVault(USER_ID_1, API_KEY_1, argCreateVault.getValue());
+
+    assertEquals(AuthTestData.CREATE_VAULT.getName(), argCreateVault.getValue().getName());
   }
 
   @Test
   void testPostAddVault() throws Exception {
-    when(controller.addVault(USER_ID_1, API_KEY_1, AuthTestData.CREATE_VAULT)).thenReturn(
-        AuthTestData.VAULT_INFO_1);
+    when(controller.addVault(
+        argUserId.capture(),
+        argApiKey.capture(),
+        argCreateVault.capture())).thenReturn(AuthTestData.VAULT_INFO_1);
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         post("/vaults")
@@ -266,7 +286,8 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
             .contentType(MediaType.APPLICATION_JSON),
         AuthTestData.VAULT_INFO_1);
 
-    verify(controller).addVault(USER_ID_1, API_KEY_1, AuthTestData.CREATE_VAULT);
+    verify(controller).addVault(USER_ID_1, API_KEY_1, argCreateVault.getValue());
+    assertEquals(AuthTestData.CREATE_VAULT.getName(), argCreateVault.getValue().getName());
   }
 
   @Test
@@ -297,8 +318,10 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
 
   @Test
   void testPostUpdatePendingVault() throws Exception {
-    when(controller.updatePendingVault(USER_ID_1, API_KEY_1, AuthTestData.CREATE_VAULT)).thenReturn(
-        AuthTestData.VAULT_INFO_1);
+    when(controller.updatePendingVault(
+        argUserId.capture(),
+        argApiKey.capture(),
+        argCreateVault.capture())).thenReturn(AuthTestData.VAULT_INFO_1);
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         post("/pendingVaults/update")
@@ -306,8 +329,8 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
             .contentType(MediaType.APPLICATION_JSON),
         AuthTestData.VAULT_INFO_1);
 
-    verify(controller).updatePendingVault(USER_ID_1, API_KEY_1, AuthTestData.CREATE_VAULT);
-
+    verify(controller).updatePendingVault(USER_ID_1, API_KEY_1, argCreateVault.getValue());
+    assertEquals(AuthTestData.CREATE_VAULT.getName(), argCreateVault.getValue().getName());
   }
 
   @Test
@@ -351,7 +374,7 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
 
   @AfterEach
   void securityCheck() {
-    checkHasSecurityUserAndClientUserRolesOnly();
+    checkHasSecurityUserAndClientUserRoles();
   }
 
 }

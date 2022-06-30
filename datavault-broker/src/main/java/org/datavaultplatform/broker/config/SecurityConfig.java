@@ -70,7 +70,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         <security:intercept-url pattern="/admin/deposits/**" access="hasRole('ROLE_ADMIN_DEPOSITS')" />
         <security:intercept-url pattern="/admin/retrieves/**" access="hasRole('ROLE_ADMIN_RETRIEVES')" />
         <security:intercept-url pattern="/admin/vaults/**" access="hasRole('ROLE_ADMIN_VAULTS')" />
-        <security:intercept-url pattern="/admin/pendingVaults/**" access="hasRole('ROLE_ADMIN_VAULTS')" />
+        <security:intercept-url pattern="/admin/pendingVaults/**" access="hasRole('ROLE_ADMIN_PENDING_VAULTS')" />
         <security:intercept-url pattern="/admin/events/**" access="hasRole('ROLE_ADMIN_EVENTS')" />
         <security:intercept-url pattern="/admin/billing/**" access="hasRole('ROLE_ADMIN_BILLING')" />
         <security:intercept-url pattern="/admin/reviews/**" access="hasRole('ROLE_ADMIN_REVIEWS')" />
@@ -80,7 +80,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .antMatchers("/admin/deposits/**").access("hasRole('ROLE_ADMIN_DEPOSITS')")
         .antMatchers("/admin/retrieves/**").access("hasRole('ROLE_ADMIN_RETRIEVES')")
         .antMatchers("/admin/vaults/**").access("hasRole('ROLE_ADMIN_VAULTS')")
-        .antMatchers("/admin/pendingVaults/**").access("hasRole('ROLE_ADMIN_VAULTS')")
+        .antMatchers("/admin/pendingVaults/**").access("hasRole('ROLE_ADMIN_PENDING_VAULTS')")
         .antMatchers("/admin/events/**").access("hasRole('ROLE_ADMIN_EVENTS')")
         .antMatchers("/admin/billing/**").access("hasRole('ROLE_ADMIN_BILLING')")
         /* TODO : DavidHay : no controller mapped to /admin/reviews ! */

@@ -237,7 +237,7 @@ public abstract class BaseControllerAuthTest {
     checkSecurityRoles(RoleName.ROLE_USER, RoleName.ROLE_CLIENT_USER);
   }
 
-  private void checkHasSecurityUserAndClientUserRoles() {
+  protected void checkHasSecurityUserAndClientUserRoles() {
     checkHasSecurityRoles(RoleName.ROLE_USER, RoleName.ROLE_CLIENT_USER);
   }
 
@@ -263,6 +263,10 @@ public abstract class BaseControllerAuthTest {
   public void checkHasSecurityAdminVaultsRole() {
     checkHasSecurityUserAndClientUserRoles();
     checkHasSecurityRoles(RoleName.ROLE_ADMIN_VAULTS);
+  }
+  public void checkHasSecurityAdminPendingVaultsRole() {
+    checkHasSecurityUserAndClientUserRoles();
+    checkHasSecurityRoles(RoleName.ROLE_ADMIN_PENDING_VAULTS);
   }
 
   public void checkHasSecurityAdminEventsRole() {

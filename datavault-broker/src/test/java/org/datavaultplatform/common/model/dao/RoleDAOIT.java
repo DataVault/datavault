@@ -386,10 +386,10 @@ public class RoleDAOIT extends BaseDatabaseTest {
       assertEquals(5, roleCount);
 
       long permissionCount = getCountOfPermissions();
-      assertEquals(30, permissionCount);
+      assertEquals(31, permissionCount);
 
       long rolePermissionCount = getCountOfRolePermissions();
-      assertEquals(42, rolePermissionCount);
+      assertEquals(43, rolePermissionCount);
 
       assertEquals(5, dao.list().size());
       assertNotNull(dao.getIsAdmin());

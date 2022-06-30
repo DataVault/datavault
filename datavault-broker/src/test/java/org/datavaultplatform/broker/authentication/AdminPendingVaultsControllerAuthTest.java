@@ -21,10 +21,10 @@ public class AdminPendingVaultsControllerAuthTest extends BaseControllerAuthTest
     checkWorksWhenAuthenticatedFailsOtherwise(
         delete("/admin/pendingVaults/{id}", "vault-id-123"),
         null,
-        Permission.CAN_MANAGE_VAULTS);
+        Permission.CAN_MANAGE_PENDING_VAULTS);
 
     verify(controller).delete(USER_ID_1, "vault-id-123");
-    checkHasSecurityAdminVaultsRole();
+    checkHasSecurityAdminPendingVaultsRole();
   }
 
 }

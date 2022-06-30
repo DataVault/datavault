@@ -13,6 +13,7 @@ public abstract class RoleName {
   public static final String ROLE_ADMIN_ROLES = "ROLE_ADMIN_ROLES";
   public static final String ROLE_ADMIN_SCHOOLS = "ROLE_ADMIN_SCHOOLS";
   public static final String ROLE_ADMIN_VAULTS = "ROLE_ADMIN_VAULTS";
+  public static final String ROLE_ADMIN_PENDING_VAULTS = "ROLE_ADMIN_PENDING_VAULTS";
   public static final String ROLE_CLIENT_USER = "ROLE_CLIENT_USER";
   public static final String ROLE_IS_ADMIN = "ROLE_IS_ADMIN";
   public static final String ROLE_USER = "ROLE_USER";

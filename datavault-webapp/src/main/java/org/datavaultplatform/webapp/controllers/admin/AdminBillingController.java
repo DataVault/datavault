@@ -90,7 +90,7 @@ public class AdminBillingController {
 
         List<VaultInfo> vaults = null;
 
-        VaultsData vaultData =  restService.searchVaultsForBilling(query, sort, order, 0, 0);
+        VaultsData vaultData =  restService.searchVaultsForBilling(query, sort, order, 0, Integer.MAX_VALUE);
         vaults = vaultData.getData();
 
         response.setContentType("text/csv");
@@ -109,8 +109,10 @@ public class AdminBillingController {
             ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
 
             csvWriter.writeHeader(header);
-
+            logger.info("vaults.size():" + vaults.size());
+            
             for (VaultInfo aVault : vaults) {
+            	logger.info("aVault:" + aVault);
                 csvWriter.write(aVault, fieldMapping);
             }
 

@@ -163,6 +163,7 @@
 
     <bean id="adminPendingVaultsController" class="org.datavaultplatform.webapp.controllers.admin.AdminPendingVaultsController">
         <property name="restService" ref="restService" />
+        <property name="userLookupService" ref="userLookupService" />
     </bean>
 
     <bean id="adminDepositsController" class="org.datavaultplatform.webapp.controllers.admin.AdminDepositsController">

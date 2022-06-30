@@ -551,6 +551,11 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         return response.getBody();
     }
 
+    public VaultInfo editPendingVault(CreateVault createVault) {
+        HttpEntity<?> response = post(brokerURL + "/admin/pendingVaults/edit", VaultInfo.class, createVault);
+        return (VaultInfo)response.getBody();
+    }
+    
     public  Boolean addVaultForPendingVault(String pendingVaultId, Date reviewDate) {
         ResponseEntity<Boolean> response = post(brokerURL + "/admin/pendingVaults/addVault/" + pendingVaultId, Boolean.class, reviewDate);
         return response.getBody();

@@ -32,6 +32,7 @@ public enum Permission {
     // Admin permissions
     CAN_MANAGE_BILLING_DETAILS("CAN_MANAGE_BILLING_DETAILS", PermissionModel.PermissionType.ADMIN, "Manage billing details", RoleName.ROLE_ADMIN_BILLING, true),
     CAN_MANAGE_ROLES("CAN_MANAGE_ROLES", PermissionModel.PermissionType.ADMIN, "Manage roles", RoleName.ROLE_ADMIN_ROLES, true),
+    CAN_MANAGE_PENDING_VAULTS("CAN_MANAGE_PENDING_VAULTS", PermissionModel.PermissionType.ADMIN, "Administer pending vaults", RoleName.ROLE_ADMIN_PENDING_VAULTS, true),
     CAN_VIEW_EVENTS("CAN_VIEW_EVENTS", PermissionModel.PermissionType.ADMIN, "View events", RoleName.ROLE_ADMIN_EVENTS, true),
     CAN_MANAGE_RETENTION_POLICIES("CAN_MANAGE_RETENTION_POLICIES", PermissionModel.PermissionType.ADMIN, "Manage retention policies", RoleName.ROLE_ADMIN_RETENTIONPOLICIES, true),
     CAN_MANAGE_ARCHIVE_STORES("CAN_MANAGE_ARCHIVE_STORES", PermissionModel.PermissionType.ADMIN, "Manage archive stores", RoleName.ROLE_ADMIN_ARCHIVESTORES, true),

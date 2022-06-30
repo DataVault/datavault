@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -53,6 +54,10 @@ public class RoleModel {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getIdAsString() {
+        return MessageFormat.format("{0,number,#}", this.id);
     }
 
     public String getName() {

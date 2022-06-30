@@ -7,6 +7,7 @@ import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -332,11 +333,27 @@ public class CreateVault {
 
     public List<String> getNominatedDataManagers() { return this.nominatedDataManagers; }
 
-    public void setNominatedDataManagers(List<String> nominatedDataManagers) { this.nominatedDataManagers = nominatedDataManagers; }
+    public void setNominatedDataManagers(List<String> nominatedDataManagers) {
+    	// Remove all null or empty strings from input
+    	List<String> ndms = new ArrayList<String>();
+    	if(nominatedDataManagers != null) {
+    		ndms = nominatedDataManagers;
+    		ndms.removeAll(Arrays.asList("", null));
+    	}
+    	this.nominatedDataManagers = ndms;
+    }
 
     public List<String> getDepositors() { return this.depositors; }
 
-    public void setDepositors(List<String> depositors) { this.depositors = depositors; }
+    public void setDepositors(List<String> depositors) {
+    	// Remove all null or empty strings from input
+    	List<String> deps = new ArrayList<String>();
+    	if(depositors != null) {
+    		deps = depositors;
+    		deps.removeAll(Arrays.asList("", null));
+    	}
+    	this.depositors = deps;
+    }
 
     public String getContactPerson() { return this.contactPerson; }
 
@@ -375,7 +392,15 @@ public class CreateVault {
         return retVal;
     }
 
-    public void setDataCreators(List<String> dataCreators) { this.dataCreators = dataCreators; }
+    public void setDataCreators(List<String> dataCreators) {
+    	// Remove all null or empty strings from input
+    	List<String> dcs = new ArrayList<String>();
+    	if(dataCreators != null) {
+    		dcs = dataCreators;
+    		dcs.removeAll(Arrays.asList("", null));
+    	}
+    	this.dataCreators = dcs;
+   }
 
     public Boolean getIsOwner() {
         return this.isOwner;

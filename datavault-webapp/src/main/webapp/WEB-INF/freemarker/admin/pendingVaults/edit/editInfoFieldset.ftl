@@ -1,4 +1,4 @@
-<fieldset>
+<fieldset id="info-fieldset">
     <div class="form-card">
         <h2 class="fs-title">Vault Information</h2>
 
@@ -35,7 +35,7 @@
             <@spring.bind "vault.grantEndDate" />
             <input id="grantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd" name="${spring.status.expression}"
                    value="${spring.status.value!""}"/>
-             <span id="invalid-grant-end-date-span" style="font-size: 1.2em; font: bold; color:  #AE0F0F; display: inline;"></span>
+             <span id="invalid-grant-end-date-span" style="font-size: 1.2em; font: bold; color: #f00; display: inline;"></span>
         </div>
 
         <div class="alert alert-info" role="alert">
@@ -51,8 +51,8 @@
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                   title="Tell us which funder's policy we must comply with. This tells us the minimum amount of time we must keep the data. This information is important when deciding on the Review Date. If there is no funder, choose the University of Edinburgh retention policy. If there are multiple funders, choose the one with the longest minimum retention period. ">
                                                                 </span>
-            <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/planning-your-data/funder-requirements" target="_blank">
-                Read more about funder requirements
+            <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/planning-your-data/funder-requirements">
+                Read more about retention policies
             </a>
             <div class="row">
                 <div class="col-md-12">
@@ -70,7 +70,7 @@
 
         <div class="form-group required">
             <label for="reviewDate" class="control-label">
-                <strong>Review Date (the date before which we should not delete this data, typically ten years from now)</strong>
+                <strong>Review Date (tell us how long you want us to keep the data)</strong>
             </label>
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                   title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault.">
@@ -79,7 +79,7 @@
             <input class="form-control" id="reviewDate" placeholder="yyyy-mm-dd" name="${spring.status.expression}"
                    value="${spring.status.value!""}"/>
                     <span id="updated-review-date-span" style="font-size: 1.2em; font: bold; color: #006400; display: inline;"></span>
-                   <span id="invalid-review-date-span" style="font-size: 1.2em; font: bold; color:  #AE0F0F; display: inline;"></span>
+                   <span id="invalid-review-date-span" style="font-size: 1.2em; font: bold; color: #f00; display: inline;"></span>
         </div>
 
         <div class="form-group required">
@@ -145,12 +145,15 @@
             <textarea type="text" class="form-control" name="notes" id="notes" name="${spring.status.expression}" value="${spring.status.value!""}" rows="4" cols="60"><#if vault.notes??>${vault.notes?html}</#if></textarea>
         </div>
     </div>
-
+    
     <button type="button" name="previous" class="previous action-button-previous btn btn-default" >&laquo; Previous</button>
-    <#if vault.confirmed?c=="false">
-    <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-default" >
-        <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
+    <a name="admin-pending-vault-summary" class="btn btn-primary" style="margin-bottom: 0;"
+          href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/summary/${vaultID}"><< Return Admin Pending Vault Summary</a>
+    <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-success" >
+       <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
     </button>
-    </#if>
-    <button type="button" name="next" class="next action-button btn btn-primary" disabled>Next Step &raquo;</button>
-</fieldset>
+   
+
+    <button type="button" name="next" class="next action-button btn btn-default">Next Step &raquo;</button>
+    
+    </fieldset>
