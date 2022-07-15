@@ -96,4 +96,15 @@ public class SecurityTagTest {
     }
   }
 
+
+  @Test
+  @SneakyThrows
+  void checkContentType(){
+    MvcResult result = mvc.perform(
+            get(PREFIX + "/basic"))
+        .andReturn();
+    assertEquals(HttpStatus.OK.value(),result.getResponse().getStatus());
+    assertEquals("text/html;charset=UTF-8",result.getResponse().getContentType());
+  }
+
 }
