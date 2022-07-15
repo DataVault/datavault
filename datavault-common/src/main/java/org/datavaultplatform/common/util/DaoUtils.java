@@ -48,9 +48,13 @@ public abstract class DaoUtils {
     }
 
     public static <T> TypedQuery<T> addEntityGraph(EntityManager em, Class<T> clazz, TypedQuery<T> query) {
+        // if we are selecting Number(Long or Integer) - we don't want to add an Entity Graph
+        if(Number.class.isAssignableFrom(clazz)){
+            return query;
+        }
         String graphName = String.format("eg.%s.1",clazz.getSimpleName());
+        log.info(String.format("adding graph [%s] to [%s]", graphName, clazz.getSimpleName()));
         EntityGraph<T> graph = (EntityGraph<T>) em.getEntityGraph(graphName);
-        log.info(String.format("adding graph [%s] to [%s]", graph.getName(), clazz.getSimpleName()));
         return query.setHint(DaoUtils.HINT_FETCH_GRAPH, graph);
     }
 

@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface BillingDAO extends BaseDAO<BillingInfo>, BillingCustomDAO {
 
   @Override
+  @EntityGraph(BillingInfo.EG_BILLING_INFO)
   default List<BillingInfo> list() {
     return findAll();
   }

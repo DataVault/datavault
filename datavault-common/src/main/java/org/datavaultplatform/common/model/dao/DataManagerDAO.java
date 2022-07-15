@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Transactional
 public interface DataManagerDAO extends BaseDAO<DataManager> {
+
   @Override
   @EntityGraph(DataManager.EG_DATA_MANAGER)
   Optional<DataManager> findById(String id);

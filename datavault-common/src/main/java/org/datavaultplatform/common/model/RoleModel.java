@@ -1,3 +1,5 @@
+
+
 package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -9,12 +11,16 @@ import javax.persistence.*;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Objects;
+import org.hibernate.Hibernate;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="Roles")
-@NamedEntityGraph(name=RoleModel.EG_ROLE_MODEL)
+@NamedEntityGraph(name=RoleModel.EG_ROLE_MODEL, attributeNodes =
+    @NamedAttributeNode(value = RoleModel_.PERMISSIONS, subgraph = "subPermModel"),
+    subgraphs = @NamedSubgraph(name="subPermModel", attributeNodes = @NamedAttributeNode(PermissionModel_.PERMISSION))
+)
 public class RoleModel {
     public static final String EG_ROLE_MODEL = "eg.RoleModel.1";
 
@@ -120,16 +126,16 @@ public class RoleModel {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
         RoleModel roleModel = (RoleModel) o;
-        return Objects.equals(id, roleModel.id);
+        return id != null && Objects.equals(id, roleModel.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return getClass().hashCode();
     }
 
     public String getStatus() {

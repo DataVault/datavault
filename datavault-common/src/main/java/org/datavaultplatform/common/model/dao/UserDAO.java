@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Transactional
 public interface UserDAO extends BaseDAO<User>, UserCustomDAO {
+
   @Override
   @EntityGraph(User.EG_USER)
   Optional<User> findById(String id);

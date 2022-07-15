@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.config;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -30,7 +31,11 @@ public class MailConfig {
   private int mailPort;
 
   @Value("${mail.protocol:smtp}")
-  String mailProtocol;
+  private String mailProtocol;
+
+  @Value("${mail.password:XXXX}")
+  private String mailPassword;
+
 
   @Bean
   @ConfigurationProperties(prefix = "jmail")
@@ -44,6 +49,8 @@ public class MailConfig {
     result.setHost(mailHost);
     result.setPort(mailPort);
     result.setProtocol(mailProtocol);
+    result.setPassword(mailPassword);
+    result.setDefaultEncoding(StandardCharsets.UTF_8.name());
 
     result.setJavaMailProperties(javaMailProperties());
     return result;

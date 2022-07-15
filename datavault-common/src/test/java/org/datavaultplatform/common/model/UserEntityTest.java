@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class UserTest extends BaseEntityTest<User, String> {
+public class UserEntityTest extends BaseEntityTest<User, String> {
 
   @Test
   void testEntity() {

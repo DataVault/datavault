@@ -1,5 +1,7 @@
 package org.datavaultplatform.webapp.controllers.auth;
 
+import java.util.Collections;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -21,14 +23,16 @@ class ErrorController implements org.springframework.boot.web.servlet.error.Erro
 
     private static final Logger logger = LoggerFactory.getLogger(ErrorController.class);
 
-    @RequestMapping("error")
+    @RequestMapping("/error")
     public String customError(HttpServletRequest request, HttpServletResponse response, Model model) {
         // Retrieve some useful information from the request
         Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
         Throwable throwable = (Throwable) request.getAttribute("javax.servlet.error.exception");
         String exceptionMessage = getExceptionMessage(throwable, statusCode, response);
 
+        logger.error("----------");
         logger.error("An error occurred: {}", exceptionMessage, throwable);
+        extraDebug(request);
 
         if (statusCode != null && statusCode == HttpStatus.FORBIDDEN.value()) {
             return "auth/denied";
@@ -44,6 +48,15 @@ class ErrorController implements org.springframework.boot.web.servlet.error.Erro
 
         model.addAttribute("message", message);
         return "error/error";
+    }
+
+    private void extraDebug(HttpServletRequest request) {
+        Collections
+            .list(request.getAttributeNames())
+            .stream()
+            .filter(Objects::nonNull)
+            .filter(aName -> aName.startsWith("javax.servlet.error."))
+            .forEach(aName -> logger.error("error attr [{}] -> [{}]", aName, request.getAttribute(aName)));
     }
 
     private String getExceptionMessage(Throwable throwable, Integer statusCode, HttpServletResponse response) {

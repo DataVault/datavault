@@ -136,6 +136,7 @@
             </goals>
             <configuration>
               <includes>
+                <include>**/DockerImage*</include>
                 <include>**/Base*Test*</include>
                 <include>**/*.ldif</include>
               </includes>

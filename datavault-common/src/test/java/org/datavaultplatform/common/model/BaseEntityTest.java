@@ -21,10 +21,6 @@ public abstract class BaseEntityTest<T, ID> {
 
   private void checkNotSame(T o1, Object o2) {
     assertThat(o1).isNotEqualTo(o2);
-    if (o1 != null && o2 != null) {
-      // we 'could' have 2 instances that have the same hashcode but are different but not-common
-      assertThat(o1.hashCode()).isNotEqualTo(o2.hashCode());
-    }
   }
 
   @SneakyThrows

@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Transactional
 public interface JobDAO extends BaseDAO<Job> {
+
   @Override
   @EntityGraph(Job.EG_JOB)
   Optional<Job> findById(String id);

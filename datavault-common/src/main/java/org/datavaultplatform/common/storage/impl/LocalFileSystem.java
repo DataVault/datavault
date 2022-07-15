@@ -22,13 +22,15 @@ import java.util.Map;
 
 public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
 
-    private String rootPath = null;
-    
+    public static final String ROOT_PATH = "rootPath";
+    private final String rootPath;
+
+
     public LocalFileSystem(String name, Map<String,String> config) throws FileNotFoundException {
         super(name, config);
         
         // Unpack the config parameters (in an implementation-specific way)
-        rootPath = config.get("rootPath");
+        rootPath = config.get(ROOT_PATH);
         
         // Verify parameters are correct.
         File file = new File(rootPath);

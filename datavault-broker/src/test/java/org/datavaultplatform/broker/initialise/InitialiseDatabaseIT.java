@@ -42,7 +42,7 @@ public class InitialiseDatabaseIT extends BaseDatabaseTest {
   }
 
   @Test
-  void testSaveAndReadUser() {
+  void testArchiveStoresInitialise() {
     long start = System.currentTimeMillis();
     Awaitility.await().atMost(60, TimeUnit.SECONDS).until(() -> initEvent != null);
     long diff = System.currentTimeMillis() - start;

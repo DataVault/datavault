@@ -19,7 +19,7 @@ public abstract class BaseCustomDAOImpl implements BaseCustomDAO {
 
   protected <T> T getSingleResult(CriteriaQuery<T> criteriaQuery) {
     try {
-      return em.createQuery(criteriaQuery).getSingleResult();
+      return addEntityGraph(criteriaQuery.getResultType(), em.createQuery(criteriaQuery)).getSingleResult();
     } catch (NoResultException ex) {
       log.debug("no result", ex);
       return null;
@@ -28,7 +28,7 @@ public abstract class BaseCustomDAOImpl implements BaseCustomDAO {
 
   protected long getCount(TypedQuery<Long> typedQuery) {
     Long result = typedQuery.getSingleResult();
-    return result == null ? 0 : result.longValue();
+    return result == null ? 0 : result;
   }
 
   protected <V> List<V> getResults(CriteriaQuery<V> cq) {

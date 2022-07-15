@@ -6,6 +6,7 @@ import java.util.UUID;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.services.UserKeyPairService.KeyPairInfo;
+import org.datavaultplatform.common.docker.DockerImage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -78,14 +79,14 @@ public class UserKeyPairService2IT extends BaseUserKeyPairServiceTest {
   void initContainers(String publicKey) {
     ImageFromDockerfile image = new ImageFromDockerfile()
         .withDockerfileFromBuilder(builder -> builder
-            .from(IMAGE_NAME_OPENSSH)
+            .from(DockerImage.OPEN_SSH_IMAGE_NAME)
             .run("apk add expect") //we have to add 'expect' to openssh image
             .build());
 
     Network network = Network.newNetwork();
 
     //we put the publicKey into the TO container at startup - so ssh daemon will trust the private key later on
-    toContainer = new GenericContainer(IMAGE_NAME_OPENSSH)
+    toContainer = new GenericContainer(DockerImage.OPEN_SSH_IMAGE)
         .withNetwork(network)
         .withNetworkAliases(CONTAINER_NAME_TO)
         .withEnv(ENV_USER_NAME, TEST_USER)

@@ -30,6 +30,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = {
     "broker.controllers.enabled=false",
     "broker.services.enabled=false",
+    "broker.rabbit.enabled=false",
     "broker.scheduled.enabled=false",
     "broker.initialise.enabled=false",
     "broker.database.enabled=false"})

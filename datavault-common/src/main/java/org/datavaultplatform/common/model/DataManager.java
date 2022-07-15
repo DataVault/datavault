@@ -2,7 +2,7 @@ package org.datavaultplatform.common.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,8 +13,7 @@ import javax.persistence.NamedSubgraph;
 import javax.persistence.Table;
 import javax.persistence.ManyToOne;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
@@ -77,20 +76,19 @@ public class DataManager {
     }
 
     @Override
-    public boolean equals(Object obj){
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) {
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        DataManager rhs = (DataManager) obj;
-        return new EqualsBuilder()
-            .append(this.id, rhs.id).isEquals();
+        DataManager that = (DataManager) o;
+        return id != null && Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).
-            append(id).toHashCode();
+        return getClass().hashCode();
     }
 }

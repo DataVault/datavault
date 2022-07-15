@@ -28,7 +28,6 @@ import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.util.RoleUtils;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -506,15 +505,10 @@ public class RoleDAOIT extends BaseDatabaseTest {
 
   @BeforeEach
   void setup() {
-    assertEquals(0, dao.count());
-  }
-
-
-
-    @AfterEach
-  void cleanup() {
     template.execute("delete from `Role_permissions`");
     template.execute("delete from `Permissions`");
+    template.execute("delete from `GroupOwners`");
+    template.execute("delete from `Groups`");
     template.execute("delete from `Role_assignments`");
     template.execute("delete from `Users`");
     template.execute("delete from `Roles`");

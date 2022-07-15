@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Transactional
 public interface FileStoreDAO extends BaseDAO<FileStore> {
+
   @Override
   @EntityGraph(FileStore.EG_FILE_STORE)
   Optional<FileStore> findById(String id);

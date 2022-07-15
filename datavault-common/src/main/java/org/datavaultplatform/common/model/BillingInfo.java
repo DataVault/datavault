@@ -2,6 +2,7 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.math.BigDecimal;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,9 +14,8 @@ import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.datavaultplatform.common.response.BillingInformation;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 
 
@@ -184,22 +184,20 @@ public class BillingInfo {
             );
     }
 
-
 	@Override
-	public boolean equals(Object obj){
-		if (obj == null) { return false; }
-		if (obj == this) { return true; }
-		if (obj.getClass() != getClass()) {
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
 			return false;
 		}
-		BillingInfo rhs = (BillingInfo) obj;
-		return new EqualsBuilder()
-				.append(this.id, rhs.id).isEquals();
+		BillingInfo that = (BillingInfo) o;
+		return id != null && Objects.equals(id, that.id);
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37).
-				append(id).toHashCode();
+		return getClass().hashCode();
 	}
 }

@@ -17,7 +17,8 @@ import java.util.Objects;
         }
 )
 @NamedEntityGraph(name=RoleAssignment.EG_ROLE_ASSIGNMENT,
-    attributeNodes = @NamedAttributeNode(RoleAssignment_.ROLE)
+    attributeNodes = @NamedAttributeNode(value = RoleAssignment_.ROLE, subgraph = "subRole"),
+    subgraphs = @NamedSubgraph(name="subRole", attributeNodes = @NamedAttributeNode(RoleModel_.PERMISSIONS))
 )
 public class RoleAssignment {
     public static final String EG_ROLE_ASSIGNMENT = "eg.RoleAssignment.1";

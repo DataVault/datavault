@@ -3,8 +3,6 @@ package org.datavaultplatform.common.model;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.NamedSubgraph;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.event.Event;
 
@@ -26,6 +24,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.OrderBy;
 import javax.persistence.Version;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
@@ -401,21 +400,20 @@ public class Deposit {
     }
 
     @Override
-    public boolean equals(Object obj){
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) {
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        Deposit rhs = (Deposit) obj;
-        return new EqualsBuilder()
-            .append(this.id, rhs.id).isEquals();
+        Deposit deposit = (Deposit) o;
+        return id != null && Objects.equals(id, deposit.id);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).
-            append(id).toHashCode();
+        return getClass().hashCode();
     }
 
 }

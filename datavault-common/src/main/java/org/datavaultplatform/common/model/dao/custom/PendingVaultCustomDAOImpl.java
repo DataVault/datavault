@@ -27,7 +27,7 @@ public class PendingVaultCustomDAOImpl extends BaseCustomDAOImpl implements
   @SuppressWarnings("unchecked")
   @Override
   public List<PendingVault> list(String userId, String sort, String order, String offset, String maxResult) {
-    SchoolPermissionQueryHelper helper = createPendingVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
+    SchoolPermissionQueryHelper<PendingVault> helper = createPendingVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
     if (helper.hasNoAccess()) {
       return new ArrayList<>();
     }
@@ -71,7 +71,6 @@ public class PendingVaultCustomDAOImpl extends BaseCustomDAOImpl implements
     return totalNumberOfVaults;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public List<PendingVault> search(String userId, String query, String sort, String order, String offset, String maxResult, String confirmed) {
     SchoolPermissionQueryHelper<PendingVault> helper = createPendingVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
@@ -92,7 +91,7 @@ public class PendingVaultCustomDAOImpl extends BaseCustomDAOImpl implements
 
   @Override
   public int count(String userId) {
-    SchoolPermissionQueryHelper helper = createPendingVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
+    SchoolPermissionQueryHelper<PendingVault> helper = createPendingVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
     if (helper.hasNoAccess()) {
       return 0;
     }
@@ -101,7 +100,7 @@ public class PendingVaultCustomDAOImpl extends BaseCustomDAOImpl implements
 
   private SchoolPermissionQueryHelper<PendingVault> createPendingVaultQueryHelper(String userId,
       Permission permission) {
-    return new SchoolPermissionQueryHelper(em, PendingVault.class)
+    return new SchoolPermissionQueryHelper<>(em, PendingVault.class)
         .setTypeToSchoolGenerator(rt -> rt.join(PendingVault_.group))
         .setSchoolIds(DaoUtils.getPermittedSchoolIds(em, userId, permission));
   }
@@ -114,7 +113,7 @@ public class PendingVaultCustomDAOImpl extends BaseCustomDAOImpl implements
 //        // See if there is a valid sort option
 
     helper.setOrderByHelper((cb, rt) -> {
-      Path sortPath;
+      Path<?> sortPath;
       if ("user".equals(sort)) {
         sortPath = rt.get(PendingVault_.user).get(User_.id);
       } else {

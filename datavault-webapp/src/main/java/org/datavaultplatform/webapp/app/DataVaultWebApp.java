@@ -9,6 +9,7 @@ import org.datavaultplatform.webapp.config.MailConfig;
 import org.datavaultplatform.webapp.config.MvcConfig;
 import org.datavaultplatform.webapp.config.PropertiesConfig;
 import org.datavaultplatform.webapp.config.RestTemplateConfig;
+import org.datavaultplatform.webapp.config.SecurityActuatorConfig;
 import org.datavaultplatform.webapp.config.SecurityConfig;
 import org.datavaultplatform.webapp.config.WebConfig;
 import org.datavaultplatform.webapp.config.database.DatabaseProfileConfig;
@@ -30,7 +31,7 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
     "org.datavaultplatform.webapp.controllers",
     "org.datavaultplatform.webapp.services"})
 @Import({PropertiesConfig.class, WebConfig.class, MvcConfig.class, ActutatorConfig.class,
-    SecurityConfig.class, MailConfig.class, LdapConfig.class,
+    SecurityActuatorConfig.class, SecurityConfig.class, MailConfig.class, LdapConfig.class,
         StandaloneProfileConfig.class, DatabaseProfileConfig.class,
     ShibProfileConfig.class, RestTemplateConfig.class})
 @Slf4j
@@ -57,6 +58,11 @@ public class DataVaultWebApp implements CommandLineRunner {
     log.info("java.vendor [{}]",env.getProperty("java.vendor"));
     log.info("os.arch [{}]",env.getProperty("os.arch"));
     log.info("os.name [{}]",env.getProperty("os.name"));
+
+    log.info("broker.url [{}]",env.getProperty("broker.url"));
+    log.info("broker.timeout.ms [{}]",env.getProperty("broker.timeout.ms"));
+    log.info("broker.api.key [{}]",env.getProperty("broker.api.key"));
+
     log.info("spring-boot.version [{}]", SpringBootVersion.getVersion());
     log.info("active.profiles {}", (Object) env.getActiveProfiles());
     log.info("git.commit.id.abbrev [{}]", env.getProperty("git.commit.id.abbrev","-1"));

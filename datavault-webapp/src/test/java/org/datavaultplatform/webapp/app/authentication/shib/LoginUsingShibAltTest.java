@@ -93,7 +93,7 @@ public class LoginUsingShibAltTest {
     @ParameterizedTest
     @ValueSource(strings={"mappings", "beans", "logging"})
     void testNonPublicActuatorEndpoints(String endpoint){
-      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, actuatorEndpoint(endpoint).getStatusCode());
+      assertEquals(HttpStatus.UNAUTHORIZED, actuatorEndpoint(endpoint).getStatusCode());
     }
   }
 

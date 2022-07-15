@@ -17,10 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface AuditChunkStatusDAO extends BaseDAO<AuditChunkStatus>, AuditChunkStatusCustomDAO {
   @Override
+  @EntityGraph(AuditChunkStatus.EG_AUDIT_CHUNK_STATUS)
   default List<AuditChunkStatus> list() {
     return findAll(Sort.by(Order.asc(AuditChunkStatus_.TIMESTAMP)));
   }
 
+  @EntityGraph(AuditChunkStatus.EG_AUDIT_CHUNK_STATUS)
   List<AuditChunkStatus> findByDepositChunkId(String depositChunkId);
 
   @Query(value = "SELECT distinct acs FROM AuditChunkStatus acs WHERE acs.depositChunk.deposit = :deposit order by acs.timestamp asc")

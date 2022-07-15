@@ -16,6 +16,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -52,12 +53,17 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
     }
 
     private <T> ResponseEntity<T> exchange(String url, Class<T> clazz, HttpMethod method, Object payload) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return exchangeWithAuth(auth, url, clazz, method, payload);
+    }
+
+    private <T> ResponseEntity<T> exchangeWithAuth(Authentication auth, String url, Class<T> clazz, HttpMethod method, Object payload) {
 
         HttpHeaders headers = new HttpHeaders();
 
         // If we have a logged on user then pass that information.
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            headers.set(Constants.HEADER_USER_ID, SecurityContextHolder.getContext().getAuthentication().getName());
+        if (auth != null) {
+            headers.set(Constants.HEADER_USER_ID, auth.getName());
         }
 
         headers.set(HEADER_CLIENT_KEY, brokerApiKey);
@@ -90,6 +96,10 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
 
     public <T> ResponseEntity<T> put(String url, Class<T> clazz, Object payload) {
         return exchange(url, clazz, HttpMethod.PUT, payload);
+    }
+
+    public <T> ResponseEntity<T> putWithAuth(Authentication auth, String url, Class<T> clazz, Object payload) {
+        return exchangeWithAuth(auth, url, clazz, HttpMethod.PUT, payload);
     }
 
     public <T> ResponseEntity<T> post(String url, Class<T> clazz, Object payload) {
@@ -651,6 +661,11 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
 
     public String notifyLogout(CreateClientEvent clientEvent) {
         ResponseEntity<String> response = put(brokerURL + "/notify/logout", String.class, clientEvent);
+        return response.getBody();
+    }
+
+    public String notifyLogout(CreateClientEvent clientEvent, Authentication auth) {
+        ResponseEntity<String> response = putWithAuth(auth, brokerURL + "/notify/logout", String.class, clientEvent);
         return response.getBody();
     }
 

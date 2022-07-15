@@ -66,7 +66,7 @@ public class CheckForDelete implements ScheduledTask {
                 log.info("Does Vault " + vault.getName() + " have deposits to delete?");
 
                 // Get the most recent VaultReview
-                vaultReviews.sort(new VaultReviewComparator());
+                vaultReviews.sort(Comparator.comparing(VaultReview::getCreationTime));
                 VaultReview vaultReview = vaultReviews.get(0);
 
                 log.info("Does VaultReview with id " + vaultReview.getId() + " have deposits to delete?") ;

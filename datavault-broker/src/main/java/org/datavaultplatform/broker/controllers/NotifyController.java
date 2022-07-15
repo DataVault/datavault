@@ -3,6 +3,7 @@ package org.datavaultplatform.broker.controllers;
 import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.services.EventService;
 import org.datavaultplatform.broker.services.ClientsService;
 import org.datavaultplatform.broker.services.UsersService;
@@ -17,6 +18,7 @@ import org.datavaultplatform.common.model.Agent;
 
 @RestController
 @Api(name="Notify", description = "Inform the broker about an event")
+@Slf4j
 public class NotifyController {
     
     private final EventService eventService;
@@ -46,6 +48,7 @@ public class NotifyController {
                         @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
                         @RequestBody CreateClientEvent clientEvent) {
         
+        log.info("USER [{}] logged IN from Client [{}]", userID, clientKey);
         Login loginEvent = new Login(clientEvent.getRemoteAddress(), clientEvent.getUserAgent());
         loginEvent.setUser(usersService.getUser(userID));
         loginEvent.setAgentType(Agent.AgentType.WEB);
@@ -69,7 +72,9 @@ public class NotifyController {
     public String logout(@RequestHeader(HEADER_USER_ID) String userID,
                          @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
                          @RequestBody CreateClientEvent clientEvent) {
-        
+
+        log.info("USER [{}] logged OUT from Client [{}]", userID, clientKey);
+
         Logout logoutEvent = new Logout(clientEvent.getRemoteAddress());
         logoutEvent.setUser(usersService.getUser(userID));
         logoutEvent.setAgentType(Agent.AgentType.WEB);

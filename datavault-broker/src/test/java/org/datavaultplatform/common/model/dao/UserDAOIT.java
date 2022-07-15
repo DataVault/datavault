@@ -3,7 +3,9 @@ package org.datavaultplatform.common.model.dao;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
@@ -27,6 +29,10 @@ import org.springframework.test.context.TestPropertySource;
     "broker.scheduled.enabled=false"
 })
 public class UserDAOIT extends BaseReuseDatabaseTest {
+
+
+  @Autowired
+  ObjectMapper mapper;
 
   @Autowired
   UserDAO dao;
@@ -184,5 +190,20 @@ public class UserDAOIT extends BaseReuseDatabaseTest {
     user.setProperties(TestUtils.getRandomMap());
     return user;
   }
+
+  @Test
+  @SneakyThrows
+  void testJson(){
+    User user = new User();
+    user.setID("007");
+    user.setLastname("bond");
+    user.setFirstname("james");
+    user.setEmail("james.bond@test.com");
+    user.setPassword("tenet");
+
+    String json1 = mapper.writeValueAsString(user);
+    assertEquals("{\"id\":\"007\",\"firstname\":\"james\",\"lastname\":\"bond\",\"password\":\"tenet\",\"email\":\"james.bond@test.com\",\"properties\":{}}", json1);
+  }
+
 
 }

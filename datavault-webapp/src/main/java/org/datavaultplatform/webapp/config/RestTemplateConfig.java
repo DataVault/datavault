@@ -32,9 +32,13 @@ public class RestTemplateConfig {
 
   private ClientHttpRequestFactory getRequestFactory(int brokerTimeoutMs) {
     HttpComponentsClientHttpRequestFactory inner = new HttpComponentsClientHttpRequestFactory();
-    inner.setConnectTimeout(brokerTimeoutMs);
-    inner.setReadTimeout(brokerTimeoutMs);
-    inner.setConnectionRequestTimeout(brokerTimeoutMs);
+    // by using -1, we can remove the timeout - helps debug the broker!
+    if(brokerTimeoutMs > 0) {
+      inner.setConnectTimeout(brokerTimeoutMs);
+      inner.setReadTimeout(brokerTimeoutMs);
+      inner.setConnectionRequestTimeout(brokerTimeoutMs);
+    }
+    log.warn("broker.timeout.ms [{}]", brokerTimeoutMs);
     return new BufferingClientHttpRequestFactory(inner);
   }
 

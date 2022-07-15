@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,7 +24,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.Hibernate;
 import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
@@ -422,28 +423,21 @@ public class Vault {
                 billinginfo != null? billinginfo.getBillingType() : null
             );
     }
-    
-    @Override
-    public boolean equals(Object other) {
-        
-        if (this == other) return true;
-        
-        if (!(other instanceof Vault)) {
-            return false;
-        }
-        
-        final Vault vault = (Vault)other;
-        
-        if (!vault.getID().equals(getID())) {
-            return false;
-        }
-        
-        return true;
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
     }
-    
-    @Override
-    public int hashCode() {
-      return new HashCodeBuilder(17, 37).
-        append(id).toHashCode();
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+      return false;
     }
+    Vault vault = (Vault) o;
+    return id != null && Objects.equals(id, vault.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
+  }
 }

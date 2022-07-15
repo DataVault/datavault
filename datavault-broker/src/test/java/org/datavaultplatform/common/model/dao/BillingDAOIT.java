@@ -1,7 +1,9 @@
 package org.datavaultplatform.common.model.dao;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -349,4 +351,10 @@ public class BillingDAOIT extends BaseReuseDatabaseTest {
     assertEquals(0, dao.countByQuery(null));
   }
 
+  @Test
+  void testNumber() {
+      assertTrue(Number.class.isAssignableFrom(Long.class));
+      assertFalse(Number.class.isAssignableFrom(String.class));
+      assertTrue(Number.class.isAssignableFrom(Integer.class));
+  }
 }

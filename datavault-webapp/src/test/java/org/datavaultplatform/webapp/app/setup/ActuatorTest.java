@@ -2,10 +2,10 @@ package org.datavaultplatform.webapp.app.setup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.datavaultplatform.webapp.test.TestClockConfig;
@@ -31,6 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -40,6 +42,7 @@ import org.springframework.test.web.servlet.ResultActions;
 @Import(TestClockConfig.class)
 @ProfileStandalone
 @Slf4j
+@TestPropertySource(properties = "management.endpoints.web.exposure.include=*")
 public class ActuatorTest {
 
   private static final List<String> PUBLIC_ENDPOINTS = Arrays.asList("info","health","customtime");
@@ -53,6 +56,12 @@ public class ActuatorTest {
 
   @Value("#{'${management.endpoints.web.exposure.include}'.split(',')}")
   private Set<String> endpoints;
+
+  @Value("${webapp.actuator.username}")
+  private String actuatorUsername;
+
+  @Value("${webapp.actuator.password}")
+  private String actuatorPassword;
 
   @Test
   void testInfo() throws Exception {
@@ -134,10 +143,25 @@ public class ActuatorTest {
 
   @ParameterizedTest
   @MethodSource("privateEndpoints")
-  void testPrivateEndpoints(String endpoint) throws Exception {
-    mvc.perform(get(String.format("/actuator/%s",endpoint)))
-        .andExpect(status().isFound())
-        .andExpect(redirectedUrl("http://localhost/auth/login"));
+  @SneakyThrows
+  void testPrivateEndpointsDenied(String endpoint) {
+    mvc.perform(get(String.format("/actuator/%s", endpoint)))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @ParameterizedTest
+  @MethodSource("privateEndpoints")
+  @SneakyThrows
+  void testPrivateEndpointsAllowed(String endpoint) {
+    mvc.perform(get(String.format("/actuator/%s", endpoint))
+            .with(httpBasic("wactor", "wactorpass")))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void testActuatorConfig() {
+    assertEquals("wactor", actuatorUsername);
+    assertEquals("wactorpass", actuatorPassword);
   }
 
   public static List<String> publicEndpoints(){

@@ -32,6 +32,7 @@ import org.springframework.test.context.TestPropertySource;
     HibernateJpaAutoConfiguration.class })
 @TestPropertySource(properties = {
     "broker.controllers.enabled=false",
+    "broker.rabbit.enabled=false",
     "broker.services.enabled=false",
     "broker.scheduled.enabled=false",
     "broker.initialise.enabled=false",

@@ -23,7 +23,7 @@ public class CurrentTimeEndpoint {
 
   @ReadOperation
   public CurrentTime currentTime() {
-    DateFormat df = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz YYYY");
+    DateFormat df = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
     df.setTimeZone(TimeZone.getTimeZone(clock.getZone()));
     Map<String, Object> details = new LinkedHashMap<>();
     long ts = clock.millis();

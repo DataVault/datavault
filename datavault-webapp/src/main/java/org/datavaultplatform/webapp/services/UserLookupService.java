@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.services;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
@@ -15,24 +16,24 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 
 @Service
 @ConditionalOnBean(RestService.class)
+@Slf4j
 public class UserLookupService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserLookupService.class);
 
-    private LDAPService ldapService;
+    private final LDAPService ldapService;
 
-    private RestService restService;
+    private final RestService restService;
 
-    public void setLdapService(LDAPService ldapService) {
+    @Autowired
+    public UserLookupService(LDAPService ldapService, RestService restService) {
         this.ldapService = ldapService;
-    }
-
-    public void setRestService(RestService restService) {
         this.restService = restService;
     }
 
@@ -41,7 +42,7 @@ public class UserLookupService {
         try {
             result = ldapService.autocompleteUID(term);
         } catch (LdapException | CursorException | IOException ex) {
-            ex.printStackTrace();
+            log.error("failed to get UUN from {}", term, ex);
             // A fallback to known users in the Database in case LDAP is not available:
             return Arrays.stream(restService.getUsers())
                     .map(user -> String.format("%s - %s %s",

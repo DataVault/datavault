@@ -2,6 +2,7 @@ package org.datavaultplatform.broker.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.queue.EventListener;
 import org.datavaultplatform.broker.queue.Sender;
 import org.springframework.amqp.core.Queue;
@@ -13,7 +14,8 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @ConditionalOnExpression("${broker.rabbit.enabled:true}")
-@Import({Sender.class, EventListener.class})
+@Import({Sender.class, EventListener.class, RabbitLocalConfig.class})
+@Slf4j
 public class RabbitConfig {
 
   public static final String QUEUE_EVENT = "${queue.events}";

@@ -48,7 +48,7 @@
     <testng.version>6.14.3</testng.version>
     <owasp.dependency.check.version>7.0.4</owasp.dependency.check.version>
     <spring.cloud.version>3.1.2</spring.cloud.version>
-    <testcontainers.version>1.17.2</testcontainers.version>
+    <testcontainers.version>1.17.3</testcontainers.version>
     <bagit.version>4.9.0</bagit.version>
     <velocity.version>2.3</velocity.version>
     <oro.version>2.0.8</oro.version>
@@ -346,7 +346,7 @@
     <profile>
       <id>ide</id>
       <!-- this profile adds the testng dependency so that it will be added to your IDEs classpath
-           and alow the FT test classes to compile -->
+           and allow the FT test classes to compile -->
       <!-- NOTE : this has only been tested with intellij not eclipse -->
       <dependencies>
         <dependency>

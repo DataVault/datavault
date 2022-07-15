@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface AuditDAO extends BaseDAO<Audit> {
 
   @Override
+  @EntityGraph(Audit.EG_AUDIT)
   default List<Audit> list() {
     return findAll(Sort.by(Order.asc(Audit_.TIMESTAMP)));
   }

@@ -187,7 +187,7 @@ public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCu
 
   private SchoolPermissionQueryHelper<Deposit> createDepositQueryHelper(String userId,
       Permission permission) {
-    return new SchoolPermissionQueryHelper(em, Deposit.class)
+    return new SchoolPermissionQueryHelper<>(em, Deposit.class)
         .setTypeToSchoolGenerator(root -> root.join(Deposit_.vault).join(Vault_.group))
         .setSchoolIds(DaoUtils.getPermittedSchoolIds(em, userId, permission));
   }

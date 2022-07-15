@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface DatasetDAO extends BaseDAO<Dataset> {
 
   @Override
+  @EntityGraph(Dataset.EG_DATASET)
   default List<Dataset> list() {
     return findAll();
   }

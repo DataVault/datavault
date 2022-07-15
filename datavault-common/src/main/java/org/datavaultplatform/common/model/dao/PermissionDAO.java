@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Transactional
 public interface PermissionDAO extends BaseDAO<PermissionModel>, PermissionCustomDAO {
+
   @Override
   @EntityGraph(PermissionModel.EG_PERMISSION_MODEL)
   Optional<PermissionModel> findById(String id);

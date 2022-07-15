@@ -2,8 +2,12 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -14,14 +18,16 @@ import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.storage.Device;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="ArchiveStores")
 @NamedEntityGraph(name=ArchiveStore.EG_ARCHIVE_STORE)
+@Slf4j
 public class ArchiveStore {
     public static final String EG_ARCHIVE_STORE = "eg.ArchiveStore.1";
 
@@ -94,21 +100,36 @@ public class ArchiveStore {
     }
 
     @Override
-    public boolean equals(Object obj){
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) {
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        ArchiveStore rhs = (ArchiveStore) obj;
-        return new EqualsBuilder()
-            .append(this.id, rhs.id).isEquals();
+        ArchiveStore that = (ArchiveStore) o;
+        return id != null && Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).
-            append(id).toHashCode();
+        return getClass().hashCode();
+    }
+
+    /*
+    This method takes an ArchiveStore and returns the specific instance of that Archive Store
+     */
+    @JsonIgnore
+    public Device getDevice()
+        throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        Class<?> clazz = Class.forName(this.getStorageClass());
+        log.info("archiveStore class [{}]", clazz);
+        Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
+        log.info("Storage class: "+this.getStorageClass());
+        log.info("Storage properties: "+this.getProperties());
+        Object instance = constructor.newInstance(this.getStorageClass(), this.getProperties());
+        Device device = (Device)instance;
+        return device;
     }
 
 }

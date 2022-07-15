@@ -31,7 +31,6 @@ public class VaultCustomDAOImpl extends BaseCustomDAOImpl implements VaultCustom
     }
 
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<Vault> list(String userId, String sort, String order, String offset, String maxResult) {
         SchoolPermissionQueryHelper<Vault> helper = createVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
@@ -83,12 +82,12 @@ public class VaultCustomDAOImpl extends BaseCustomDAOImpl implements VaultCustom
     // but we can perform distinct on the Java side
     protected static List<Vault> distinctVaults(List<Vault> vaults) {
         Map<String,Vault> byId = vaults.stream().collect(Collectors.toMap(
-            vt-> vt.getID(),
+            Vault::getID,
             vt -> vt,
             (x, y) -> y,
             LinkedHashMap::new)
         );
-        return new ArrayList(byId.values());
+        return new ArrayList<>(byId.values());
     }
 
     @Override
@@ -122,7 +121,7 @@ public class VaultCustomDAOImpl extends BaseCustomDAOImpl implements VaultCustom
 
         // See if there is a valid sort option
         helper.setOrderByHelper((cb,rt) -> {
-            Expression sortExpr = null;
+            Expression<?> sortExpr;
             // See if there is a valid sort option
             if ("user".equals(sort)) {
                 sortExpr = rt.get(Vault_.user).get(User_.id);
@@ -133,7 +132,7 @@ public class VaultCustomDAOImpl extends BaseCustomDAOImpl implements VaultCustom
             } else {
                 sortExpr = rt.get(sort);
             }
-            javax.persistence.criteria.Order orderBy = null;
+            javax.persistence.criteria.Order orderBy;
             if (asc) {
                 orderBy = cb.asc(sortExpr);
             } else {

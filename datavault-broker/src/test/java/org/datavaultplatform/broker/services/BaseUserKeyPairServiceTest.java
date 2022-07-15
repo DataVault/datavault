@@ -10,15 +10,11 @@ import org.springframework.util.StreamUtils;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.Transferable;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Slf4j
+@Testcontainers(disabledWithoutDocker = true)
 public abstract class BaseUserKeyPairServiceTest {
-
-  // this image has 'scp' and runs a configurable ssh daemon
-  public static final String IMAGE_NAME_OPENSSH = "linuxserver/openssh-server";
-
-  // this image has 'openssl'
-  public static final String IMAGE_NAME_NGINX = "nginx";
 
   @SneakyThrows
   final static void execInContainer(GenericContainer container, String label, String command) {

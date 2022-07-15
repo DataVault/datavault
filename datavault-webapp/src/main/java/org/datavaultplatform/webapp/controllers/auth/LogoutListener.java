@@ -31,7 +31,7 @@ public class LogoutListener implements ApplicationListener<SessionDestroyedEvent
     public void onApplicationEvent(SessionDestroyedEvent event)
     {        
         List<SecurityContext> contexts = event.getSecurityContexts();
-        
+
         for (SecurityContext context : contexts)
         {
             Authentication auth = context.getAuthentication();
@@ -53,7 +53,7 @@ public class LogoutListener implements ApplicationListener<SessionDestroyedEvent
             // Log the event with the broker
             try {
                 //TODO - this method returns a string which we are ignoring
-                service.notifyLogout(clientEvent);
+                service.notifyLogout(clientEvent, auth);
             }catch (RuntimeException ex){
                 LOG.error("Error when notifying Logout to Broker!",ex);
             }

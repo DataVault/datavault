@@ -25,7 +25,7 @@ public class RetrieveCustomDAOImpl extends BaseCustomDAOImpl implements Retrieve
 
     @Override
     public List<Retrieve> list(String userId) {
-        SchoolPermissionQueryHelper helper = createRetrieveQueryHelper(userId, Permission.CAN_VIEW_RETRIEVES);
+        SchoolPermissionQueryHelper<Retrieve> helper = createRetrieveQueryHelper(userId, Permission.CAN_VIEW_RETRIEVES);
         if (helper.hasNoAccess()) {
             return new ArrayList<>();
         }
@@ -36,7 +36,7 @@ public class RetrieveCustomDAOImpl extends BaseCustomDAOImpl implements Retrieve
 
     @Override
     public int count(String userId) {
-        SchoolPermissionQueryHelper helper = createRetrieveQueryHelper(userId, Permission.CAN_VIEW_RETRIEVES);
+        SchoolPermissionQueryHelper<Retrieve> helper = createRetrieveQueryHelper(userId, Permission.CAN_VIEW_RETRIEVES);
         if (helper.hasNoAccess()) {
             return 0;
         }
@@ -45,7 +45,7 @@ public class RetrieveCustomDAOImpl extends BaseCustomDAOImpl implements Retrieve
 
     @Override
     public int queueCount(String userId) {
-        SchoolPermissionQueryHelper helper = createRetrieveQueryHelper(userId, Permission.CAN_VIEW_QUEUES);
+        SchoolPermissionQueryHelper<Retrieve> helper = createRetrieveQueryHelper(userId, Permission.CAN_VIEW_QUEUES);
         if (helper.hasNoAccess()) {
             return 0;
         }
@@ -56,7 +56,7 @@ public class RetrieveCustomDAOImpl extends BaseCustomDAOImpl implements Retrieve
 
     @Override
     public int inProgressCount(String userId) {
-        SchoolPermissionQueryHelper helper = createRetrieveQueryHelper(userId, Permission.CAN_VIEW_IN_PROGRESS);
+        SchoolPermissionQueryHelper<Retrieve> helper = createRetrieveQueryHelper(userId, Permission.CAN_VIEW_IN_PROGRESS);
         if (helper.hasNoAccess()) {
             return 0;
         }
@@ -85,7 +85,7 @@ public class RetrieveCustomDAOImpl extends BaseCustomDAOImpl implements Retrieve
         return retrieves;
     }
 
-    private SchoolPermissionQueryHelper createRetrieveQueryHelper(String userId, Permission permission) {
+    private SchoolPermissionQueryHelper<Retrieve> createRetrieveQueryHelper(String userId, Permission permission) {
         return new SchoolPermissionQueryHelper<>(em, Retrieve.class)
                 .setTypeToSchoolGenerator( rt ->
                         rt.join(Retrieve_.DEPOSIT)

@@ -61,26 +61,26 @@ public class RetentionPolicyDAOIT extends BaseReuseDatabaseTest {
 
     RetentionPolicy retentionPolicy3 = getRetentionPolicy3();
 
-    assertEquals(0, retentionPolicy1.getID());
+    assertEquals(null, retentionPolicy1.getID());
     dao.save(retentionPolicy1);
     assertTrue(retentionPolicy1.getID() > 0);
     assertEquals(1, count());
 
-    assertEquals(0, retentionPolicy2.getID());
+    assertEquals(null, retentionPolicy2.getID());
     dao.save(retentionPolicy2);
     assertTrue(retentionPolicy2.getID() > 0);
     assertEquals(2, count());
 
-    assertEquals(0, retentionPolicy3.getID());
+    assertEquals(null, retentionPolicy3.getID());
     dao.save(retentionPolicy3);
     assertTrue(retentionPolicy3.getID() > 0);
     assertEquals(3, count());
 
     List<RetentionPolicy> items = dao.list();
     assertEquals(3, items.size());
-    assertEquals(1, items.stream().filter(dr -> dr.getID() == retentionPolicy1.getID()).count());
-    assertEquals(1, items.stream().filter(dr -> dr.getID() == retentionPolicy2.getID()).count());
-    assertEquals(1, items.stream().filter(dr -> dr.getID() == retentionPolicy3.getID()).count());
+    assertEquals(1, items.stream().filter(dr -> dr.equals(retentionPolicy1)).count());
+    assertEquals(1, items.stream().filter(dr -> dr.equals(retentionPolicy2)).count());
+    assertEquals(1, items.stream().filter(dr -> dr.equals(retentionPolicy3)).count());
 
     // The RetentionPolicy should be ordered by Ascending Name
     assertEquals(

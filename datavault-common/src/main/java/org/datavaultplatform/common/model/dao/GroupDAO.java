@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface GroupDAO extends BaseDAO<Group>, GroupCustomDAO {
 
   @Override
+  @EntityGraph(Group.EG_GROUP)
   default List<Group> list() {
     return findAll(Sort.by(Order.asc(Group_.NAME)));
   }

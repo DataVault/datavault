@@ -161,6 +161,7 @@ public class PermissionDAOIT extends BaseDatabaseTest {
   @AfterEach
   void cleanup() {
     template.execute("delete from `Role_permissions`");
+    template.execute("delete from `Role_assignments`");
     template.execute("delete from `Roles`");
     template.execute("delete from `Permissions`");
     assertEquals(0, count());

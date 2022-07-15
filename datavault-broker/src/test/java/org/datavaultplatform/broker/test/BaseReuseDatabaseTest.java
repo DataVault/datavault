@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.initialise.InitialiseDatabase;
+import org.datavaultplatform.common.docker.DockerImage;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.dao.PermissionDAO;
@@ -29,7 +30,7 @@ import org.testcontainers.containers.MySQLContainer;
 public abstract class BaseReuseDatabaseTest  {
 
   // This container is once per class - not once per method. Methods can 'dirty' the database.
-  static MySQLContainer<?> mysql = new MySQLContainer<>(BaseDatabaseTest.MYSQL_IMAGE_NAME).withReuse(true);
+  static MySQLContainer<?> mysql = new MySQLContainer<>(DockerImage.MYSQL_IMAGE).withReuse(true);
   @Autowired
   InitialiseDatabase initialiseDatabase;
 
@@ -39,6 +40,7 @@ public abstract class BaseReuseDatabaseTest  {
   @BeforeAll
   public static void beforeAll() {
     mysql.start();
+    log.info("REUSEABLE MYSQL {}/{}",mysql.getContainerName(),mysql.getContainerId());
   }
 
   @Autowired

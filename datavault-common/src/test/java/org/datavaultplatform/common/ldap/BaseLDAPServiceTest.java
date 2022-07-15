@@ -14,6 +14,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.datavaultplatform.common.docker.DockerImage;
 import org.datavaultplatform.common.services.LDAPService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,8 +46,7 @@ public abstract class BaseLDAPServiceTest {
   private static final int LDAP_EXPOSED_PORT = 1389;
 
   @Container
-  private static final GenericContainer<?> LDAP_CONTAINER = new GenericContainer<>(
-      "bitnami/openldap:latest")
+  private static final GenericContainer<?> LDAP_CONTAINER = new GenericContainer<>(DockerImage.LDAP_IMAGE)
       .withEnv("LDAP_ROOT", "o=myu.ed")
       .withEnv("LDAP_ADMIN_PASSWORD", LDAP_ADMIN_PASSWORD)
       //SCHEMA - allows 'eduniRefNo' attributes - via LDIF file

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import java.util.UUID;
+import org.datavaultplatform.common.docker.DockerImage;
 import org.datavaultplatform.webapp.config.MailConfig.MessageCreator;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers(disabledWithoutDocker = true)
 public class MailIT {
 
-  public static final String MAILHOG_IMAGE_NAME = "mailhog/mailhog:v1.0.1";
 
   public static final int PORT_SMTP = 1025;
   public static final int PORT_HTTP = 8025;
@@ -51,7 +51,7 @@ public class MailIT {
   MessageCreator messageCreator;
 
   @Container
-  private static GenericContainer<?> topLevelContainer = new GenericContainer<>(MAILHOG_IMAGE_NAME)
+  private static GenericContainer<?> topLevelContainer = new GenericContainer<>(DockerImage.MAIL_IMAGE)
       .withExposedPorts(PORT_SMTP, PORT_HTTP);
 
   @DynamicPropertySource

@@ -19,11 +19,11 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.broker.services.UserKeyPairService.KeyPairInfo;
+import org.datavaultplatform.common.docker.DockerImage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.utility.DockerImageName;
 
 /**
  * This test generates a key pair and checks that the keypair is valid by ...
@@ -138,8 +138,7 @@ public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
     try {
       TMP_DIR = createTempDirectory("dv-tmp");
       log.info("TMP_DIR IS {}", TMP_DIR);
-      linuxWithOpenSSL = new GenericContainer<>(
-          DockerImageName.parse(IMAGE_NAME_NGINX))
+      linuxWithOpenSSL = new GenericContainer<>(DockerImage.NGINX_IMAGE)
           .withFileSystemBind(TMP_DIR.toAbsolutePath().toString(), "/tmp/dv5-temp");
       linuxWithOpenSSL.start();
     } catch (IOException e) {

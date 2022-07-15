@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Transactional
 public interface VaultReviewDAO extends BaseDAO<VaultReview>, VaultReviewCustomDAO {
+
   @Override
   @EntityGraph(VaultReview.EG_VAULT_REVIEW)
   Optional<VaultReview> findById(String id);

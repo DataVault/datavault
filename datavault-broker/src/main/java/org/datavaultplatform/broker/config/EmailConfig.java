@@ -38,7 +38,7 @@ public class EmailConfig {
   @Value("${mail.username}")
   private String mailUsername;
 
-  @Value("${mail.password}")
+  @Value("${mail.password:XXXX}")
   private String mailPassword;
 
   public static final String DIR_MAIL_TEMPLATES = "mail-templates";

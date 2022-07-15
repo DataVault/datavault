@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface VaultDAO extends BaseDAO<Vault>, VaultCustomDAO {
 
   @Override
+  @EntityGraph(Vault.EG_VAULT)
   default List<Vault> list() {
     return findAll(Sort.by(Order.asc(Vault_.CREATION_TIME)));
   }

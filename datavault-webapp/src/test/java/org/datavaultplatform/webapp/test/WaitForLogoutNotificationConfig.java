@@ -9,6 +9,7 @@ import org.datavaultplatform.webapp.services.NotifyLogoutService;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.security.core.Authentication;
 
 @TestConfiguration
 @Slf4j
@@ -27,12 +28,20 @@ public class WaitForLogoutNotificationConfig {
   @Bean
   @Primary
   NotifyLogoutService notifyLogoutService() {
-    return clientEvent -> {
-      logoutEvents().add(clientEvent);
-      log.info("Got Logout Notification via {}",clientEvent);
-      logoutLatch().countDown();
-      return "NOTIFY";
+    return new NotifyLogoutService() {
+
+      @Override
+      public String notifyLogout(CreateClientEvent clientEvent) {
+        logoutEvents().add(clientEvent);
+        log.info("Got Logout Notification via {}", clientEvent);
+        logoutLatch().countDown();
+        return "NOTIFY";
+      }
+
+      @Override
+      public String notifyLogout(CreateClientEvent clientEvent, Authentication auth) {
+        return notifyLogout(clientEvent);
+      }
     };
   }
-
 }

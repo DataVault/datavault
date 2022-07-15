@@ -90,13 +90,14 @@ public class ProfileShibTest {
 
     @Test
     void testShibFilterIsIncludedInSecurityFilterChainAtCorrectPosition() {
-        //Check that there is just one filter chain
-        assertThat(proxy.getFilterChains().size()).isOne();
-        SecurityFilterChain chain = proxy.getFilterChains().get(0);
+        //Check that there are TWO filter chains ('anyRequest' and '/actuator/**'
+        List<SecurityFilterChain> chains = proxy.getFilterChains();
+        assertThat(chains.size()).isEqualTo(2);
+        SecurityFilterChain anyRequestChain = chains.stream().filter(chain -> !chain.toString().contains("/actuator/**")).findFirst().get();
 
-      Optional<Integer> optIdxLogout = findFilter(chain, LogoutFilter.class);
-      Optional<Integer> optIdxSession = findFilter(chain, ConcurrentSessionFilter.class);
-      Optional<Integer> optIdxShib = findFilter(chain, ShibAuthenticationFilter.class);
+      Optional<Integer> optIdxLogout = findFilter(anyRequestChain, LogoutFilter.class);
+      Optional<Integer> optIdxSession = findFilter(anyRequestChain, ConcurrentSessionFilter.class);
+      Optional<Integer> optIdxShib = findFilter(anyRequestChain, ShibAuthenticationFilter.class);
 
       int idxLogout = optIdxLogout.get();
       int idxShib = optIdxShib.get();

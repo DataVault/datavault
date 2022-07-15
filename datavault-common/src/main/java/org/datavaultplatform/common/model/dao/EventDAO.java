@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Transactional
 public interface EventDAO extends BaseDAO<Event>, EventCustomDAO {
+
   @Override
   @EntityGraph(Event.EG_EVENT)
   Optional<Event> findById(String id);

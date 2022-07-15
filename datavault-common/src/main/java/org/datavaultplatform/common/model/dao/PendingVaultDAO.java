@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface PendingVaultDAO extends BaseDAO<PendingVault>, PendingVaultCustomDAO {
 
   @Override
+  @EntityGraph(PendingVault.EG_PENDING_VAULT)
   default List<PendingVault> list() {
     return findAll(Sort.by(Order.asc(PendingVault_.CREATION_TIME)));
   }

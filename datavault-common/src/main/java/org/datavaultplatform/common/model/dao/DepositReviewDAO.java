@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Transactional
 public interface DepositReviewDAO extends BaseDAO<DepositReview>, DepositReviewCustomDAO {
+
   @Override
   @EntityGraph(DepositReview.EG_DEPOSIT_REVIEW)
   Optional<DepositReview> findById(String id);

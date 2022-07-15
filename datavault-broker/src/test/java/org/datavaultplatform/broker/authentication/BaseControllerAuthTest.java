@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,6 +47,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -146,7 +148,7 @@ public abstract class BaseControllerAuthTest {
   }
 
   @SneakyThrows
-  private void checkSuccessWhenAuthenticated(MockHttpServletRequestBuilder builder,
+  protected void checkSuccessWhenAuthenticated(MockHttpServletRequestBuilder builder,
       Object expectedSuccessResponse, HttpStatus expectedSuccessStatus, boolean isAdminUser,
       Permission... permissions) {
 
@@ -221,10 +223,17 @@ public abstract class BaseControllerAuthTest {
     return Arrays.stream(roles).collect(Collectors.toSet());
   }
 
-  private Set<String> getActualRoles(){
-    return SECURITY_CONTEXT_TL.get().getAuthentication().getAuthorities()
-        .stream().map(
-            GrantedAuthority::getAuthority).collect(Collectors.toSet());
+  protected Set<String> getActualRoles(){
+    SecurityContext sc = SECURITY_CONTEXT_TL.get();
+    if (sc == null) {
+      return Collections.emptySet();
+    }
+    Authentication auth = sc.getAuthentication();
+    if (auth == null) {
+      return Collections.emptySet();
+    }
+    return auth.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+        .collect(Collectors.toSet());
   }
 
   public void checkHasSecurityRoles(String... roles) {

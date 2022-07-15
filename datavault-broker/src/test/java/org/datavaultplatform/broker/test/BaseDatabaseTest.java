@@ -3,6 +3,7 @@ package org.datavaultplatform.broker.test;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.datavaultplatform.common.docker.DockerImage;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
 import org.datavaultplatform.common.model.RoleAssignment;
@@ -25,7 +26,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers(disabledWithoutDocker = true)
 public abstract class BaseDatabaseTest {
 
-  public static final String MYSQL_IMAGE_NAME = "mysql:5.7";
 
   @Autowired
   UserDAO userDAO;
@@ -41,7 +41,7 @@ public abstract class BaseDatabaseTest {
 
   @Container
   // This container is once per class - not once per method. Methods can 'dirty' the database.
-  static MySQLContainer<?> mysql = new MySQLContainer<>(MYSQL_IMAGE_NAME);
+  static MySQLContainer<?> mysql = new MySQLContainer<>(DockerImage.MYSQL_IMAGE);
 
   @DynamicPropertySource
   public static void setupProperties(DynamicPropertyRegistry registry) {

@@ -34,9 +34,9 @@ public class SchoolPermissionQueryHelper<T> {
   private TypeToSchoolGroupJoinGenerator<T> typeToSchoolGroupGenerator;
   private Integer firstResult;
   private Integer maxResults;
-  private OrderByHelper orderByHelper;
-  private PredicateHelper predicateHelper;
-  private SinglePredicateHelper singlePredicateHelper;
+  private OrderByHelper<T> orderByHelper;
+  private PredicateHelper<T> predicateHelper;
+  private SinglePredicateHelper<T> singlePredicateHelper;
   public SchoolPermissionQueryHelper(EntityManager em, Class<T> criteriaType) {
     this.criteriaType = criteriaType;
     this.em = em;
@@ -47,19 +47,19 @@ public class SchoolPermissionQueryHelper<T> {
     this.singlePredicateHelper = (cb,rt) -> null;
   }
 
-  public SchoolPermissionQueryHelper setSchoolIds(Set<String> schoolIds) {
+  public SchoolPermissionQueryHelper<T> setSchoolIds(Set<String> schoolIds) {
     this.schoolIds.clear();
     this.schoolIds.addAll(schoolIds);
     return this;
   }
 
-  public SchoolPermissionQueryHelper setTypeToSchoolGenerator(
+  public SchoolPermissionQueryHelper<T> setTypeToSchoolGenerator(
       TypeToSchoolGroupJoinGenerator<T> generator) {
     this.typeToSchoolGroupGenerator = generator;
     return this;
   }
 
-  public SchoolPermissionQueryHelper setNumericExpressionHelper(
+  public SchoolPermissionQueryHelper<T> setNumericExpressionHelper(
       TypeToSchoolGroupJoinGenerator<T> generator) {
     this.typeToSchoolGroupGenerator = generator;
     return this;
@@ -155,15 +155,15 @@ public class SchoolPermissionQueryHelper<T> {
     this.firstResult = firstResult;
   }
 
-  public void setPredicateHelper(PredicateHelper predicateHelper) {
+  public void setPredicateHelper(PredicateHelper<T> predicateHelper) {
     this.predicateHelper = predicateHelper;
   }
 
-  public void setSinglePredicateHelper(SinglePredicateHelper singlePredicateHelper) {
+  public void setSinglePredicateHelper(SinglePredicateHelper<T> singlePredicateHelper) {
     this.singlePredicateHelper = singlePredicateHelper;
   }
 
-  public void setOrderByHelper(OrderByHelper orderByHelper) {
+  public void setOrderByHelper(OrderByHelper<T> orderByHelper) {
     this.orderByHelper = orderByHelper;
   }
 

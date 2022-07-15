@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.TestUtils;
+import org.datavaultplatform.common.docker.DockerImage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,7 +48,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     "spring.jpa.properties.hibernate.hbm2ddl.auto=none",
     "broker.scheduled.enabled=false",
     "broker.rabbit.enabled=false",
-    "mail.administrator=test@datavaultplatform.org"})
+    "mail.administrator=test@datavaultplatform.org",
+    "spring.sql.init.mode=never"})
 @Import(EmailService.class)
 @Slf4j
 public abstract class BaseEmailServiceTest {
@@ -56,8 +58,6 @@ public abstract class BaseEmailServiceTest {
 
   @MockBean
   DataSource datasource;
-
-  public static final String MAILHOG_IMAGE_NAME = "mailhog/mailhog:v1.0.1";
 
   public static final int PORT_SMTP = 1025;
   public static final int PORT_HTTP = 8025;
@@ -109,8 +109,8 @@ public abstract class BaseEmailServiceTest {
       + "</html>";
 
   @Container
-  private static final GenericContainer<?> MAILHOG_CONTAINER = new GenericContainer<>(MAILHOG_IMAGE_NAME)
-      .withExposedPorts(PORT_SMTP, PORT_HTTP);
+  private static final GenericContainer<?> MAILHOG_CONTAINER
+      = new GenericContainer<>(DockerImage.MAIL_IMAGE).withExposedPorts(PORT_SMTP, PORT_HTTP);
 
   public static void setupMailProperties(DynamicPropertyRegistry registry) {
     registry.add("tc.mailhog.http", () -> MAILHOG_CONTAINER.getMappedPort(PORT_HTTP));
