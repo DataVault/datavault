@@ -13,8 +13,10 @@ import org.datavaultplatform.common.model.dao.DatasetDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class ExternalMetadataService {
 
     private final String metadataURL;

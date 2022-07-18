@@ -18,4 +18,7 @@ public interface DataManagerDAO extends BaseDAO<DataManager> {
   @Override
   @EntityGraph(DataManager.EG_DATA_MANAGER)
   List<DataManager> findAll();
+
+  @EntityGraph(DataManager.EG_DATA_MANAGER)
+  List<DataManager> findByVaultId(String vaultId);
 }

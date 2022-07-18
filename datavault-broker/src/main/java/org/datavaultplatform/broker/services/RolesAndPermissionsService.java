@@ -14,8 +14,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class RolesAndPermissionsService {
     private final Logger logger = LoggerFactory.getLogger(RolesAndPermissionsService.class);
 

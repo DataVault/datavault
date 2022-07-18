@@ -4,8 +4,10 @@ import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.dao.FileStoreDAO;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class FileStoreService {
 
     private final FileStoreDAO fileStoreDAO;

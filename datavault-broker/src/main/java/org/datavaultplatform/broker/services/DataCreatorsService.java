@@ -7,8 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class DataCreatorsService {
     private final DataCreatorDAO dataCreatorDAO;
     private final Logger logger = LoggerFactory.getLogger(DataCreatorsService.class);

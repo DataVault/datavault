@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
@@ -792,8 +793,7 @@ public class VaultsController {
                                              @PathVariable("vaultid") String vaultID) throws Exception {
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
-
-        List<DataManager> dataManagersList = new ArrayList<>(vault.getDataManagers());
+        List<DataManager> dataManagersList = dataManagersService.findByVaultId(vault.getID());
         return dataManagersList;
     }
 

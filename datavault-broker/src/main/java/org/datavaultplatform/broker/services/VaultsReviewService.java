@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class VaultsReviewService {
 
     private static final Logger logger = LoggerFactory.getLogger(VaultsReviewService.class);
@@ -145,5 +147,8 @@ public class VaultsReviewService {
         return false;
     }
 
+    public List<VaultReview> findByVaultId(String vaultId) {
+        return vaultReviewDAO.findByVaultId(vaultId);
+    }
 }
 

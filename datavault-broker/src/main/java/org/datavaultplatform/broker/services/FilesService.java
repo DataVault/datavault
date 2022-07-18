@@ -8,12 +8,15 @@ import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.storage.UserStore;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 /**
  * User: Robin Taylor
  * Date: 19/03/2015
  * Time: 13:34
  */
 @Service
+@Transactional
 public class FilesService {
 
     //TODO - DHAY this does not seem thread safe

@@ -13,8 +13,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class PendingVaultsService {
 	private final Logger logger = LoggerFactory.getLogger(PendingVaultsService.class);
 	

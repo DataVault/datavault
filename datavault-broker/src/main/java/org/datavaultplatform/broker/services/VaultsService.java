@@ -14,8 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.datavaultplatform.common.email.EmailTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class VaultsService {
 
     private final Logger logger = LoggerFactory.getLogger(VaultsService.class);
@@ -158,7 +160,7 @@ public class VaultsService {
         // Get the vault
         Vault vault = vaultDAO.findById(vaultID).orElse(null);
 
-        retentionPoliciesService.setRetention(vault);
+        RetentionPoliciesService.setRetention(vault);
 
         // Check the policy
         //retentionPoliciesService.run(vault);
@@ -181,7 +183,6 @@ public class VaultsService {
         if (vault == null) {
             throw new Exception("Vault '" + vaultID + "' does not exist");
         }
-
         return vault;
     }
 

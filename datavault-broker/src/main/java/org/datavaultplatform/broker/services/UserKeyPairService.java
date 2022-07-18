@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * User: Robin Taylor
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
+@Transactional
 public class UserKeyPairService {
 
   // comment added at the end of public key

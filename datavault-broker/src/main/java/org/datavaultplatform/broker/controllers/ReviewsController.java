@@ -61,7 +61,8 @@ public class ReviewsController {
 
         List<ReviewInfo> reviewinfos = new ArrayList<>();
 
-        for (VaultReview vr : vault.getVaultReviews()) {
+        List<VaultReview> reviews = this.vaultsReviewService.findByVaultId(vault.getID());
+        for (VaultReview vr : reviews) {
 
             VaultReview vaultReview = vr;
             List <DepositReview> depositReviews = vr.getDepositReviews();

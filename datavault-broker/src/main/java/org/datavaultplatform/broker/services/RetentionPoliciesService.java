@@ -18,8 +18,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class RetentionPoliciesService {
 
     private final Logger logger = LoggerFactory.getLogger(RetentionPoliciesService.class);
@@ -199,7 +201,7 @@ public class RetentionPoliciesService {
     }
      **/
 
-    public void setRetention(Vault v) {
+    public static void setRetention(Vault v) {
 
         RetentionPolicy rp = v.getRetentionPolicy();
 

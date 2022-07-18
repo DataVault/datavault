@@ -4,8 +4,10 @@ import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.dao.GroupDAO;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class GroupsService {
 
     private final GroupDAO groupDAO;

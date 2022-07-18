@@ -46,6 +46,7 @@ import org.hibernate.annotations.GenericGenerator;
         @NamedAttributeNode(Vault_.USER),
         @NamedAttributeNode(Vault_.GROUP),
         @NamedAttributeNode(Vault_.RETENTION_POLICY),
+        @NamedAttributeNode(Vault_.DEPOSITS),
     })
 public class Vault {
 

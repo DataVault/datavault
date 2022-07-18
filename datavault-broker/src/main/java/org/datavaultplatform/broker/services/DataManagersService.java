@@ -5,8 +5,10 @@ import org.datavaultplatform.common.model.dao.DataManagerDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class DataManagersService {
 
     private final DataManagerDAO dataManagerDAO;
@@ -30,6 +32,10 @@ public class DataManagersService {
 
     public void deleteDataManager(String dataManagerID) {
         dataManagerDAO.deleteById(dataManagerID);
+    }
+
+    public List<DataManager> findByVaultId(String vaultId){
+        return dataManagerDAO.findByVaultId(vaultId);
     }
 }
 

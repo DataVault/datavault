@@ -19,4 +19,8 @@ public interface VaultReviewDAO extends BaseDAO<VaultReview>, VaultReviewCustomD
   @Override
   @EntityGraph(VaultReview.EG_VAULT_REVIEW)
   List<VaultReview> findAll();
+
+
+  @EntityGraph(VaultReview.EG_VAULT_REVIEW)
+  List<VaultReview> findByVaultId(String vaultId);
 }
