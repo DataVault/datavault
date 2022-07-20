@@ -1,4 +1,3 @@
-INSERT INTO Message (id, message, timestamp) values (UUID(), 'test-message', CURRENT_TIMESTAMP());
 
 -- there should be a unique constraint on ip address and apiKey;
 insert ignore into Clients (id, name, apiKey, ipAddress) values ('datavault-webapp', 'Datavault Webapp', 'datavault-webapp', '127.0.0.1');

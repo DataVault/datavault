@@ -185,7 +185,7 @@ public class EventDAOIT extends BaseDatabaseTest {
 
   private Complete getEvent2_CompleteEvent() {
     Complete event = new Complete();
-    event.setArchiveIds(TestUtils.getRandomMap());
+    event.setArchiveIds(TestUtils.getRandomMap(5));
     event.setMessage("event2");
     event.setTimestamp(TestUtils.THREE_YEARS_AGO);
     return event;
@@ -194,7 +194,7 @@ public class EventDAOIT extends BaseDatabaseTest {
   private ComputedEncryption getEvent3_ComputedEncryption() {
     ComputedEncryption event = new ComputedEncryption();
     event.setMessage("event3");
-    event.setTarIV(String.join(",", TestUtils.getRandomList()).getBytes(
+    event.setTarIV(String.join(",", TestUtils.getRandomList(5)).getBytes(
         StandardCharsets.UTF_8));
     event.setChunkIVs(TestUtils.getRandomMapIntegerKeyByteArrayValue());
     event.setEncChunkDigests(TestUtils.getRandomMapIntegerKey());
@@ -205,7 +205,7 @@ public class EventDAOIT extends BaseDatabaseTest {
 
   private UploadComplete getEvent4_UploadComplete() {
     UploadComplete event = new UploadComplete();
-    event.setArchiveIds(TestUtils.getRandomMap());
+    event.setArchiveIds(TestUtils.getRandomMap(5));
     event.setMessage("event4");
     event.setTimestamp(TestUtils.NOW);
     return event;

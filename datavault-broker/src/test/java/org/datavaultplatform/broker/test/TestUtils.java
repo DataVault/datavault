@@ -48,13 +48,25 @@ public abstract class TestUtils {
   }
 
   public static ArrayList<String> getRandomList() {
+    return getRandomList(100);
+  }
+
+  public static ArrayList<String> getRandomList(int size) {
     List<String> items = Stream.generate(new Random()::nextInt).map(Object::toString)
-        .limit(100).collect(Collectors.toList());
+        .limit(size).collect(Collectors.toList());
     return new ArrayList<>(items);
   }
 
   public static HashMap<String,String> getRandomMap(){
     return getRandomList().stream().collect(Collectors.toMap(
+        Function.identity(),
+        Function.identity(),
+        (k1,k2)->k1,
+        HashMap::new));
+  }
+
+  public static HashMap<String,String> getRandomMap(int size){
+    return getRandomList(size).stream().collect(Collectors.toMap(
         Function.identity(),
         Function.identity(),
         (k1,k2)->k1,

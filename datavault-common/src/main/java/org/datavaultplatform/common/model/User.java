@@ -40,6 +40,7 @@ public class User {
 
     // Additional properties associated with the user
     @Lob
+    @Column(name="properties", columnDefinition="LONGBLOB")
     private HashMap<String,String> properties = new HashMap<>();
 
     // A user is related to a number of vaults

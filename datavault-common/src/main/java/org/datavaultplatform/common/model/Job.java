@@ -73,6 +73,7 @@ public class Job {
     
     // State information will be supplied by the worker task at run time
     @Lob
+    @Column(name="states", columnDefinition="TINYBLOB")
     private ArrayList<String> states = new ArrayList<>();
     private Integer state = null;
     

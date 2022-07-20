@@ -4,7 +4,7 @@ services:
     container_name: dv-local-byodb-rabbit
     image: 3.10.5-management-alpine
     restart: always
-    container_name: dv-local-rabbit
+    container_name: dv-local-byodb-rabbit
     image: rabbitmq:3-management
     environment:
       - RABBITMQ_DEFAULT_USER=rabbit

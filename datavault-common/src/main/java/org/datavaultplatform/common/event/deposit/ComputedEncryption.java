@@ -5,6 +5,7 @@ import java.util.HashMap;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
 import javax.persistence.Column;
+import org.checkerframework.checker.units.qual.C;
 import org.datavaultplatform.common.event.Event;
 
 @Entity
@@ -15,6 +16,7 @@ public class ComputedEncryption extends Event {
     @Column(name="encChunkDigests", columnDefinition="LONGBLOB")
     private HashMap<Integer, String> encChunkDigests = new HashMap<>();
     @Lob
+    @Column(name="tarIV", columnDefinition="TINYBLOB")
     private byte[] tarIV;
     private String encTarDigest;
     private String aesMode;

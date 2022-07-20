@@ -125,7 +125,7 @@ public class JobDAOIT extends BaseReuseDatabaseTest {
   private Job getJobWitStates() {
     Job job = new Job();
     job.setTaskClass("333");
-    job.setStates(TestUtils.getRandomList());
+    job.setStates(TestUtils.getRandomList(5));
     return job;
   }
 

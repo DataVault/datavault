@@ -24,7 +24,7 @@ public class PermissionModel {
     private String id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "permission", unique = true, nullable = false, columnDefinition = "VARCHAR(255)" )
+    @Column(name = "permission", unique = true, nullable = false, columnDefinition = "TEXT" )
     private Permission permission;
 
     @Column(name = "label", nullable = false, columnDefinition = "TEXT")
