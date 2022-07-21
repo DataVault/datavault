@@ -21,6 +21,7 @@ import org.springframework.util.Assert;
 public class RabbitLocalConfig {
 
   public static final String TEMP_QUEUE_NAME = "temp-queue";
+  private static final Long TIMEOUT_MS = 5000L;
 
   @Autowired
   RabbitTemplate template;
@@ -30,28 +31,30 @@ public class RabbitLocalConfig {
 
   @Bean(TEMP_QUEUE_NAME)
   Queue tempQueue() {
-    Queue tempQueue = new Queue("", true, false, true);
+    Queue tempQueue = new Queue("", true, false, false);
     log.info("TEMP QUEUE IS {}", tempQueue);
     return tempQueue;
   }
 
   @EventListener
   void messageFromTemp(ApplicationReadyEvent event) {
+    log.info("RABBIT INIT MESSAGE : send/recv check");
     RabbitTemplate template = event.getApplicationContext().getBean(RabbitTemplate.class);
     Queue tempQueue = event.getApplicationContext().getBean(
         RabbitLocalConfig.TEMP_QUEUE_NAME, Queue.class);
+    String tempQname = tempQueue.getActualName();
     try {
       String random = UUID.randomUUID().toString();
 
       // If we send to direct exchange - the routing key is interpreted as queue name
-      template.send("", tempQueue.getActualName(), new Message(random.getBytes(StandardCharsets.UTF_8)));
-
-      Message message = template.receive(tempQueue.getActualName(), 5000L);
+      template.send("", tempQname, new Message(random.getBytes(StandardCharsets.UTF_8)));
+      log.info("INIT MESSAGE : SENT[{}]TO[{}]", random, tempQueue.getActualName());
+      Message message = template.receive(tempQname, TIMEOUT_MS);
       String recvd = message == null ? null : new String(message.getBody(), StandardCharsets.UTF_8);
-      log.info("INIT MESSAGE RECVD[{}]", recvd);
-      Assert.isTrue(random.equals(recvd), () -> "Failed to recv rabbit test message");
+      log.info("INIT MESSAGE : RECVD[{}]FROM[{}]", recvd, tempQname);
+      Assert.isTrue(random.equals(recvd), () -> String.format("INIT MESSAGE : FAILED TO RECV expected msg[%s] FROM[%s]", random, tempQname));
     } catch (RuntimeException ex) {
-      log.warn("FAILED TO RECV INIT MESSAGE WITHIN 5seconds", ex);
+      log.warn("INIT MESSAGE : FAILED TO RECV MESSAGE WITHIN [{}] ms FROM[{}]", TIMEOUT_MS, tempQname, ex);
     }
   }
 

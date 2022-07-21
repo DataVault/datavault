@@ -61,9 +61,7 @@ public class EventListener implements MessageListener {
     	EMAIL_SUBJECTS.put("admin-deposit-retrievecomplete", "Confirmation - a new DataVault retrieval is complete.");
       EMAIL_SUBJECTS.put("audit-chunk-error", "DataVault ERROR - Chunk failed checksum during audit.");
     }
-
-    private static final Logger logger = LoggerFactory.getLogger(EventListener.class);
-
+    
     @Autowired
     public EventListener(
         JobsService jobsService,
@@ -102,7 +100,7 @@ public class EventListener implements MessageListener {
     public void onMessage(Message msg) {
         
         String messageBody = new String(msg.getBody(), StandardCharsets.UTF_8);
-        logger.info("Received '" + messageBody + "'");
+        log.info("Received '" + messageBody + "'");
 
         try {
             // Decode the event
@@ -215,13 +213,13 @@ public class EventListener implements MessageListener {
                 Boolean success = false;
                 while (!success) {
                     try {
-                        logger.info("Setting Deposit Size from computedSizeEvent to: " + computedSizeEvent.getBytes());
+                        log.info("Setting Deposit Size from computedSizeEvent to: " + computedSizeEvent.getBytes());
                         deposit.setSize(computedSizeEvent.getBytes());
                         depositsService.updateDeposit(deposit);
                         success = true;
                     } catch (org.hibernate.StaleObjectStateException e) {
                         // Refresh from database and retry
-                        logger.info("Refresh from DB and retry");
+                        log.info("Refresh from DB and retry");
                         deposit = depositsService.getDeposit(concreteEvent.getDepositId());
                     }
                 }
@@ -493,7 +491,7 @@ public class EventListener implements MessageListener {
                 this.sendEmails(deposit, completeEvent, type, EmailTemplate.USER_RETRIEVE_COMPLETE, EmailTemplate.GROUP_ADMIN_RETRIEVE_COMPLETE);
             } else if (concreteEvent instanceof DeleteStart) {
                 preDeletionStatus = deposit.getStatus();
-                logger.info("Pre Deletion Status:" + preDeletionStatus);
+                log.info("Pre Deletion Status:" + preDeletionStatus);
             	deposit.setStatus(Deposit.Status.DELETE_IN_PROGRESS);
                 depositsService.updateDeposit(deposit);
                 
@@ -546,7 +544,7 @@ public class EventListener implements MessageListener {
 
                 if(auditChunkStatus.size() != 1){
                     // TODO: Make sure it never happen
-                    System.err.println("Unexpected number of running audit chunk: "+auditChunkStatus.size());
+                    log.error("Unexpected number of running audit chunk: "+auditChunkStatus.size());
                 }
                 AuditChunkStatus auditInfo = auditChunkStatus.get(0);
                 auditInfo.setCompleteTime(new Date());
@@ -580,7 +578,7 @@ public class EventListener implements MessageListener {
 
                 if(auditChunkStatus.size() != 1){
                     // TODO: Make sure it never happen
-                    System.err.println("Unexpected number of running audit chunk: "+auditChunkStatus.size());
+                    log.error("Unexpected number of running audit chunk: "+auditChunkStatus.size());
                 }
 
                 AuditChunkStatus auditInfo = auditChunkStatus.get(0);
@@ -589,14 +587,14 @@ public class EventListener implements MessageListener {
                 auditsService.updateAuditChunkStatus(auditInfo);
 
                 // At the moment just email
-                logger.info("Sending Error email to Admin");
+                log.info("Sending Error email to Admin");
                 sendAuditEmails(concreteEvent, "error", EmailTemplate.AUDIT_CHUNK_ERROR);
 
                 // TODO: try to fix chunk
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            log.error("unexpected exception", ex);
         }
     }
     
@@ -607,9 +605,9 @@ public class EventListener implements MessageListener {
         User depositUser = deposit.getUser();
         User retrieveUser = usersService.getUser(event.getUserId());
         
-        logger.info("User title key: " + "user-deposit-" + type);
+        log.info("User title key: " + "user-deposit-" + type);
         String userTitle = EventListener.EMAIL_SUBJECTS.get("user-deposit-" + type);
-        logger.info("Admin title key: " + "admin-deposit-" + type);
+        log.info("Admin title key: " + "admin-deposit-" + type);
         String adminTitle = EventListener.EMAIL_SUBJECTS.get("admin-deposit-" + type);
         
         HashMap<String, Object> model = new HashMap<>();
@@ -640,7 +638,7 @@ public class EventListener implements MessageListener {
         
         // Send email to group owners
         for (User groupAdmin : group.getOwners()) {
-        	logger.info("GroupAdmin email is " + groupAdmin.getEmail());
+        	log.info("GroupAdmin email is " + groupAdmin.getEmail());
             if (groupAdmin.getEmail() != null) {
                 emailService.sendTemplateMail(groupAdmin.getEmail(),
                         adminTitle,
@@ -650,7 +648,7 @@ public class EventListener implements MessageListener {
         }
         
         // Send email to the deposit user
-        logger.info("DepositUser email is " + depositUser.getEmail());
+        log.info("DepositUser email is " + depositUser.getEmail());
         if (depositUser.getEmail() != null) {
             emailService.sendTemplateMail(depositUser.getEmail(),
                     userTitle,
@@ -663,7 +661,7 @@ public class EventListener implements MessageListener {
 
         AuditError auditErrorEven = (AuditError) event;
 
-        logger.info("title key: " + "audit-chunk-" + type);
+        log.info("title key: " + "audit-chunk-" + type);
         String title = EventListener.EMAIL_SUBJECTS.get("audit-chunk-" + type);
 
         HashMap<String, Object> model = new HashMap<>();
@@ -675,7 +673,7 @@ public class EventListener implements MessageListener {
 
         String email = auditAdminEmail; // TODO: Who do we email
 
-        logger.info("Audit admin email is " + auditAdminEmail);
+        log.info("Audit admin email is " + auditAdminEmail);
         emailService.sendTemplateMail(email, title, template, model);
     }
     
