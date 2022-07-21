@@ -1,9 +1,15 @@
 package org.datavaultplatform.broker.config;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import java.security.Provider;
+import java.security.Security;
+import java.util.Arrays;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.common.config.BaseExternalPropertyFileConfigTest;
@@ -73,5 +79,13 @@ public class EncryptionConfigTest extends BaseExternalPropertyFileConfigTest {
     assertEquals("test-hc-vault-ssl-pem-path", Encryption.getVaultSslPEMPath());
     assertEquals("test-hc-vault-data-enc-key-name", Encryption.getVaultDataEncryptionKeyName());
     assertEquals("test-hc-vault-private-key-enc-key-name", Encryption.getVaultPrivateKeyEncryptionKeyName());
+  }
+
+  @Test
+  void testBouncyCastleProvider() {
+    Optional<Provider> optBouncyCastle = Arrays.stream(Security.getProviders())
+        .filter(prov -> prov instanceof BouncyCastleProvider)
+        .findFirst();
+    assertThat(optBouncyCastle).isPresent();
   }
 }

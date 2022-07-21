@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.initialise.InitialiseDatabase;
-import org.datavaultplatform.broker.initialise.InitialiseEncryption;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,12 +40,8 @@ public class InitialiseBeansConfigTest {
   @Autowired
   InitialiseDatabase initDatabase;
 
-  @Autowired
-  InitialiseEncryption initialiseEncryption;
-
   @Test
   void testContextLoadsWithInitialiseBeans() {
     assertNotNull(initDatabase);
-    assertNotNull(initialiseEncryption);
   }
 }
