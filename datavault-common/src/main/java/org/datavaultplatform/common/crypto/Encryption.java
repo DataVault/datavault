@@ -615,5 +615,12 @@ public class Encryption {
         Provider[] after = Security.getProviders();
         logger.info("before[{}] result[{}] after[{}]", before.length, result, after.length);
         logger.info("Added Bouncy Castle Provider.");
+        initialised = true;
+    }
+
+    private static boolean initialised = false;
+
+    public static boolean isInitialised() {
+        return initialised;
     }
 }

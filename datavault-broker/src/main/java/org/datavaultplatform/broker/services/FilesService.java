@@ -1,8 +1,7 @@
 package org.datavaultplatform.broker.services;
 
-import java.lang.reflect.Constructor;
+
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.*;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
@@ -25,10 +24,7 @@ public class FilesService {
     
     private boolean connect(FileStore fileStore) {
         try {
-            Class<?> clazz = Class.forName(fileStore.getStorageClass());
-            Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-            Object instance = constructor.newInstance(fileStore.getStorageClass(), fileStore.getProperties());
-            userStore = (UserStore)instance;
+            userStore = UserStore.fromFileStore(fileStore);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
