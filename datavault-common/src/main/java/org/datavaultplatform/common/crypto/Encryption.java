@@ -30,6 +30,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.EnumSet;
+import javax.annotation.PostConstruct;
+import java.security.Security;
+import java.security.Provider;
 
 public class Encryption {
 
@@ -599,5 +602,18 @@ public class Encryption {
                 e.printStackTrace();
             }
         }
+    }
+
+    @PostConstruct
+    public static void addBouncyCastleSecurityProvider() {
+        logger.info("Adding Bouncy Castle Provider.");
+        Provider[] before = Security.getProviders();
+        int result = Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        if (result == -1) {
+            logger.warn("BouncyCastle already added!");
+        }
+        Provider[] after = Security.getProviders();
+        logger.info("before[{}] result[{}] after[{}]", before.length, result, after.length);
+        logger.info("Added Bouncy Castle Provider.");
     }
 }

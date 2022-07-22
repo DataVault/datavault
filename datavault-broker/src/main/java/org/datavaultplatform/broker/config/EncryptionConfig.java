@@ -1,8 +1,5 @@
 package org.datavaultplatform.broker.config;
 
-import java.security.Provider;
-import java.security.Security;
-import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.springframework.beans.factory.annotation.Value;
@@ -98,16 +95,4 @@ public class EncryptionConfig {
   }
 
 
-  @PostConstruct
-  public void addBouncyCastleSecurityProvider() {
-    log.info("Adding Bouncy Castle Provider.");
-    Provider[] before = Security.getProviders();
-    int result = Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-    if (result == -1) {
-      log.warn("BouncyCastle already added!");
-    }
-    Provider[] after = Security.getProviders();
-    log.info("before[{}] result[{}] after[{}]", before.length, result, after.length);
-    log.info("Added Bouncy Castle Provider.");
-  }
 }
