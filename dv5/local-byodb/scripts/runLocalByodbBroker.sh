@@ -14,6 +14,10 @@ cd $PROJECT_ROOT
  SPRING_DATASOURCE_USERNAME=user \
  SPRING_DATASOURCE_PASSWORD=userpass \
  SPRING_DATASOURCE_URL='jdbc:mysql://localhost:3306/test?useSSL=false&serverTimezone=UTC' \
+#KEYSTORE_ENABLE=true \
+#KEYSTORE_PATH=XXX/PATH/TO/KEYSTORE.ks \
+#VAULT_PRIVATEKEYENCRYPTIONKEYNAME=XXX-KEYNAME \
+#KEYSTORE_PASSWORD=XXX-PASSWORD \
  ./mvnw spring-boot:run  \
  -Dspring-boot.run.jvmArguments="-Xdebug \
  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005" \

@@ -12,6 +12,10 @@ cd $PROJECT_ROOT
  SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION=true \
  SPRING_SQL_INIT_MODE=always \
  DATAVAULT_HOME="$PROJECT_ROOT/dv5/local/props/broker" \
+#KEYSTORE_ENABLE=true \
+#KEYSTORE_PATH=XXX/PATH/TO/KEYSTORE.ks \
+#VAULT_PRIVATEKEYENCRYPTIONKEYNAME=XXX-KEYNAME \
+#KEYSTORE_PASSWORD=XXX-PASSWORD \
  ./mvnw spring-boot:run  \
  -Dspring-boot.run.jvmArguments="-Xdebug \
  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005" \
