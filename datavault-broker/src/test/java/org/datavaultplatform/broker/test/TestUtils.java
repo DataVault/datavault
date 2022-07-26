@@ -17,7 +17,10 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.xml.bind.DatatypeConverter;
+import lombok.SneakyThrows;
 import org.junit.function.ThrowingRunnable;
+import org.springframework.util.DigestUtils;
 
 public abstract class TestUtils {
 
@@ -91,6 +94,17 @@ public abstract class TestUtils {
             (item) -> item.toString().getBytes(StandardCharsets.UTF_8),
             (k1,k2)->k1,
             HashMap::new));
+  }
+
+  @SneakyThrows
+  public static String getMD5(String data) {
+    return getMD5(data.getBytes(StandardCharsets.UTF_8));
+  }
+
+  public static  String getMD5(byte[] data) {
+    byte[] digest = DigestUtils.md5Digest(data);
+    String md5 = DatatypeConverter.printHexBinary(digest).toLowerCase();
+    return md5;
   }
 
 }

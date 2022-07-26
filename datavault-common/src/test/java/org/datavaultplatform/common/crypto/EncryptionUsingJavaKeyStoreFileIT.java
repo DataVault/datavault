@@ -53,6 +53,7 @@ public class EncryptionUsingJavaKeyStoreFileIT {
   @BeforeAll
   static void init() {
     Encryption.addBouncyCastleSecurityProvider();
+    assertTrue(Encryption.isInitialised());
   }
 
   @BeforeEach

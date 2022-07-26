@@ -1,6 +1,7 @@
 package org.datavaultplatform.common.storage.impl;
 
 import com.jcraft.jsch.*;
+import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.io.Progress;
@@ -20,6 +21,7 @@ import java.util.Vector;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class SFTPFileSystem extends Device implements UserStore {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(SFTPFileSystem.class);
@@ -217,7 +219,7 @@ public class SFTPFileSystem extends Device implements UserStore {
             return true;
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn(String.format("does not exist[%s]",path), e);
             return false;
         } finally {
             Disconnect();
