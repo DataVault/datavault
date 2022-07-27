@@ -16,7 +16,7 @@ cd $PROJECT_ROOT
 #KEYSTORE_PATH=XXX/PATH/TO/KEYSTORE.ks \
 #VAULT_PRIVATEKEYENCRYPTIONKEYNAME=XXX-KEYNAME \
 #KEYSTORE_PASSWORD=XXX-PASSWORD \
-  VALIDATE_ENCRYPTION_CONFIG=false \
+ VALIDATE_ENCRYPTION_CONFIG=false \
  ./mvnw spring-boot:run  \
  -Dspring-boot.run.jvmArguments="-Xdebug \
  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005" \
