@@ -1,6 +1,6 @@
 package org.datavaultplatform.broker.queue;
 
-import static org.datavaultplatform.broker.config.RabbitConfig.QUEUE_EVENT;
+import static org.datavaultplatform.broker.config.QueueConfig.BROKER_QUEUE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
 
@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.awaitility.Awaitility;
-import org.datavaultplatform.broker.queue.BaseRabbitTCTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -19,6 +18,7 @@ import org.springframework.amqp.core.QueueInformation;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 
@@ -31,12 +31,13 @@ public class RabbitEventListenerIT extends BaseRabbitTCTest {
   RabbitTemplate template;
 
   @Autowired
+  @Qualifier("brokerQueue")
   Queue eventQueue;
 
   @Captor
   ArgumentCaptor<Message> argEventMessage;
 
-  @Value(QUEUE_EVENT)
+  @Value(BROKER_QUEUE_NAME)
   String expectedQueueName;
 
   @Autowired

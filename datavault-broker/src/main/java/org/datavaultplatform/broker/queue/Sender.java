@@ -17,7 +17,7 @@ public class Sender {
   private final Queue dataVaultQueue;
 
   @Autowired
-  public Sender(@Qualifier("dataVaultQueue") Queue dataVaultQueue, RabbitTemplate template) {
+  public Sender(@Qualifier("workerQueue") Queue dataVaultQueue, RabbitTemplate template) {
     this.template = template;
     this.dataVaultQueue = dataVaultQueue;
   }

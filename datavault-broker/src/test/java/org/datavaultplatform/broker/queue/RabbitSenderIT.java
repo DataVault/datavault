@@ -1,11 +1,10 @@
 package org.datavaultplatform.broker.queue;
 
-import static org.datavaultplatform.broker.config.RabbitConfig.QUEUE_DATA_VAULT;
+import static org.datavaultplatform.broker.config.QueueConfig.WORKER_QUEUE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import org.datavaultplatform.broker.queue.BaseRabbitTCTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.core.Message;
@@ -15,6 +14,7 @@ import org.springframework.amqp.core.QueueInformation;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 public class RabbitSenderIT extends BaseRabbitTCTest {
@@ -29,9 +29,10 @@ public class RabbitSenderIT extends BaseRabbitTCTest {
   Sender sender;
 
   @Autowired
+  @Qualifier("workerQueue")
   Queue dataVaultQueue;
 
-  @Value(QUEUE_DATA_VAULT)
+  @Value(WORKER_QUEUE_NAME)
   String expectedQueueName;
 
   @BeforeEach
@@ -42,6 +43,7 @@ public class RabbitSenderIT extends BaseRabbitTCTest {
 
   @Test
   void testSendToWorker() {
+    assertEquals(expectedQueueName, dataVaultQueue.getActualName());
     String rand = UUID.randomUUID().toString();
     sender.send(rand);
     Message message = template.receive(dataVaultQueue.getActualName(), 2500);

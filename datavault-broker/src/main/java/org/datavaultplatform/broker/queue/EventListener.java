@@ -1,6 +1,6 @@
 package org.datavaultplatform.broker.queue;
 
-import static org.datavaultplatform.broker.config.RabbitConfig.QUEUE_EVENT;
+import static org.datavaultplatform.broker.config.QueueConfig.BROKER_QUEUE_NAME;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
@@ -17,8 +17,6 @@ import org.datavaultplatform.common.event.retrieve.*;
 import org.datavaultplatform.common.model.*;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -96,7 +94,7 @@ public class EventListener implements MessageListener {
 
 
     @Override
-    @RabbitListener(queues = QUEUE_EVENT)
+    @RabbitListener(queues = BROKER_QUEUE_NAME)
     public void onMessage(Message msg) {
         
         String messageBody = new String(msg.getBody(), StandardCharsets.UTF_8);
