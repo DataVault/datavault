@@ -2,6 +2,7 @@ package org.datavaultplatform.worker.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.crypto.Encryption;
+import org.datavaultplatform.common.crypto.EncryptionValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -97,4 +98,8 @@ public class EncryptionConfig {
     return encryption;
   }
 
+  @Bean
+  EncryptionValidator encryptionValidator() {
+    return new EncryptionValidator();
+  }
 }

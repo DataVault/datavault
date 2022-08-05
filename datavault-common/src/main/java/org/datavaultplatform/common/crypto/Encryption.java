@@ -9,6 +9,7 @@ import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.task.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -620,6 +621,7 @@ public class Encryption {
             .getPackage()
             .getImplementationVersion();
         logger.info("Added Bouncy Castle Provider [{}].", bcVersion);
+        checkKeyNamesAreNotSame();
         initialised = true;
     }
 
@@ -627,5 +629,16 @@ public class Encryption {
 
     public static boolean isInitialised() {
         return initialised;
+    }
+
+    public static void checkKeyNamesAreNotSame() {
+        String keyNameData = Encryption.getVaultDataEncryptionKeyName();
+        if (StringUtils.isNotBlank(keyNameData)) {
+            String keyNamePrivateKey = Encryption.getVaultPrivateKeyEncryptionKeyName();
+            // we are only concerned when Not Blank AND the same
+            if (keyNameData.equalsIgnoreCase(keyNamePrivateKey)) {
+                logger.warn("The two encryption key names are the same - [{}]", keyNameData);
+            }
+        }
     }
 }

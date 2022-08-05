@@ -2,6 +2,7 @@ package org.datavaultplatform.broker.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.crypto.Encryption;
+import org.datavaultplatform.common.crypto.EncryptionValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -78,21 +79,28 @@ public class EncryptionConfig {
     Encryption encryption = new Encryption();
     encryption.setEncBufferSize($01_encBufferSize);
 
-    // hashicorp vault (7)
+    // hashicorp vault (5)
     encryption.setVaultEnable($02_vaultEnable);
     encryption.setVaultAddress($03_vaultAddress);
     encryption.setVaultToken($04_vaultToken);
     encryption.setVaultKeyPath($05_vaultKeyPath);
+    encryption.setVaultSslPEMPath($08_vaultSslPEMPath);
+
+    // key names (2) - can refer to Vault or Keystore keys - NOT JUST VAULT KEYS
     encryption.setVaultDataEncryptionKeyName($06_vaultDataEncryptionKeyName);
     encryption.setVaultPrivateKeyEncryptionKeyName($07_vaultPrivateKeyEncryptionKeyName);
-    encryption.setVaultSslPEMPath($08_vaultSslPEMPath);
 
     // keystore (3)
     encryption.setKeystoreEnable($09_keystoreEnable);
     encryption.setKeystorePath($10_keystorePath);
     encryption.setKeystorePassword($11_keystorePassword);
+
     return encryption;
   }
 
+  @Bean
+  EncryptionValidator encryptionValidator() {
+    return new EncryptionValidator();
+  }
 
 }

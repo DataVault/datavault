@@ -21,8 +21,11 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.context.event.ApplicationStartingEvent;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
@@ -54,17 +57,31 @@ public class DataVaultWebApp implements CommandLineRunner {
 
   @Override
   public void run(String... args) {
-    log.info("java.version [{}]",env.getProperty("java.version"));
-    log.info("java.vendor [{}]",env.getProperty("java.vendor"));
-    log.info("os.arch [{}]",env.getProperty("os.arch"));
-    log.info("os.name [{}]",env.getProperty("os.name"));
+    log.info("java.version [{}]", env.getProperty("java.version"));
+    log.info("java.vendor [{}]", env.getProperty("java.vendor"));
+
+    log.info("os.arch [{}]", env.getProperty("os.arch"));
+    log.info("os.name [{}]", env.getProperty("os.name"));
+
+    log.info("git.commit.id.abbrev [{}]", env.getProperty("git.commit.id.abbrev", "-1"));
+
+    log.info("spring.security.debug [{}]", env.getProperty("spring.security.debug","false"));
+    log.info("spring-boot.version [{}]", SpringBootVersion.getVersion());
+    log.info("active.profiles {}", (Object) env.getActiveProfiles());
 
     log.info("broker.url [{}]",env.getProperty("broker.url"));
     log.info("broker.timeout.ms [{}]",env.getProperty("broker.timeout.ms"));
     log.info("broker.api.key [{}]",env.getProperty("broker.api.key"));
-
-    log.info("spring-boot.version [{}]", SpringBootVersion.getVersion());
-    log.info("active.profiles {}", (Object) env.getActiveProfiles());
-    log.info("git.commit.id.abbrev [{}]", env.getProperty("git.commit.id.abbrev","-1"));
   }
+
+  @EventListener
+  void onEvent(ApplicationStartingEvent event) {
+    log.info("WebApp [{}] starting", applicationName);
+  }
+
+  @EventListener
+  void onEvent(ApplicationReadyEvent event) {
+    log.info("WebApp [{}] ready", applicationName);
+  }
+
 }

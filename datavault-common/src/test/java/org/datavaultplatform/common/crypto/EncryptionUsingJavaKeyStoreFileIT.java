@@ -1,6 +1,5 @@
 package org.datavaultplatform.common.crypto;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
@@ -14,11 +13,13 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import javax.crypto.SecretKey;
 import javax.xml.bind.DatatypeConverter;
@@ -26,6 +27,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.util.DigestUtils;
@@ -43,7 +45,8 @@ public class EncryptionUsingJavaKeyStoreFileIT {
 
   //The Encryption class uses same password for keystore and key!
   private static final String KEY_PASSWORD = KEY_STORE_PASSWORD;
-  private static final String KEY_NAME = "thekeyname";
+  private static final String KEY_NAME_PRIVATE_KEYS = "keynamepks";
+  private static final String KEY_NAME_DATA = "keynamedata";
 
   @TempDir
   static File temp;
@@ -67,34 +70,28 @@ public class EncryptionUsingJavaKeyStoreFileIT {
   void testActualJCEKeyStore() {
     Encryption enc = new Encryption();
     enc.setVaultEnable(false);
-    enc.setVaultPrivateKeyEncryptionKeyName(KEY_NAME);
-
+    enc.setVaultPrivateKeyEncryptionKeyName(KEY_NAME_PRIVATE_KEYS);
+    enc.setVaultDataEncryptionKeyName(KEY_NAME_DATA);
     enc.setKeystoreEnable(true);
     enc.setKeystorePath(keyStorePath);
     enc.setKeystorePassword(KEY_STORE_PASSWORD);
+    Encryption.checkKeyNamesAreNotSame();
 
-    SecretKey keyForKeyStore = Encryption.generateSecretKey();
+
+    SecretKey keyForPrivateKeys = Encryption.generateSecretKey();
+    SecretKey keyForData = Encryption.generateSecretKey();
+
 
     assertFalse(new File(this.keyStorePath).exists());
 
     // Encryption class uses 'vaultPrivateKeyEncryptionKeyName' property as the default key name for JavaKeyStore'
-    Encryption.saveSecretKeyToKeyStore(Encryption.getVaultPrivateKeyEncryptionKeyName(), keyForKeyStore);
+    Encryption.saveSecretKeyToKeyStore(Encryption.getVaultPrivateKeyEncryptionKeyName(), keyForPrivateKeys);
+    Encryption.saveSecretKeyToKeyStore(Encryption.getVaultDataEncryptionKeyName(), keyForData);
     assertTrue(new File(this.keyStorePath).exists());
 
-    byte[] iv = Encryption.generateIV();
-
-    String plainText = UUID.randomUUID().toString();
-
-    byte[] encrypted1 = Encryption.encryptSecret(plainText, keyForKeyStore, iv);
-
-    //This method call (with null secret key param) is used in 'org.datavaultplatform.broker.controllers.FileStoreController.addFileStoreSFTP' to encrypt SSH private keys
-    byte[] encrypted2 = Encryption.encryptSecret(plainText, null, iv);
-
-    // proves that the encryption key used is the one saved with name from 'vaultPrivateKeyEncryptionKeyName'
-    assertArrayEquals(encrypted1, encrypted2);
-
-    byte[] decrypted = Encryption.decryptSecret(encrypted1, iv);
-    assertEquals(plainText, new String(decrypted, StandardCharsets.UTF_8));
+    checkEncryptDecrypt(Encryption.generateSecretKey());
+    checkEncryptDecrypt(keyForPrivateKeys);
+    checkEncryptDecrypt(keyForData);
 
     KeyStore ks = KeyStore.getInstance(KEY_STORE_TYPE_JCEKS);
     ks.load(new FileInputStream(keyStorePath), KEY_STORE_PASSWORD.toCharArray());
@@ -103,53 +100,84 @@ public class EncryptionUsingJavaKeyStoreFileIT {
     while(aliases.hasMoreElements()) {
       al.add(aliases.nextElement());
     }
-    // ooh - alias names are stored in JKS as lowercase!
-    assertIterableEquals(Collections.singleton(KEY_NAME), al);
-    SecretKey directFromKS = (SecretKey) ks.getKey(KEY_NAME, KEY_PASSWORD.toCharArray());
-    assertEquals(keyForKeyStore, directFromKS);
 
-    readKeyFromJCEKeyStore(keyStorePath, KEY_STORE_PASSWORD, KEY_NAME, KEY_PASSWORD);
+    // Alias names are stored in JKS as lowercase!
+    assertIterableEquals(Arrays.asList(KEY_NAME_PRIVATE_KEYS, KEY_NAME_DATA), al);
+    SecretKey directFromKSPrivateKeys = (SecretKey) ks.getKey(KEY_NAME_PRIVATE_KEYS, KEY_PASSWORD.toCharArray());
+    checkAES(directFromKSPrivateKeys);
+    SecretKey directFromKSData = (SecretKey) ks.getKey(KEY_NAME_DATA, KEY_PASSWORD.toCharArray());
+    checkAES(directFromKSData);
+    assertEquals(keyForPrivateKeys, directFromKSPrivateKeys);
+    assertEquals(keyForData, directFromKSData);
+
+    readKeyFromJCEKeyStore(keyStorePath, KEY_STORE_PASSWORD, KEY_PASSWORD);
    }
 
+  private void checkAES(SecretKey secretKey) {
+    assertEquals("AES", secretKey.getAlgorithm());
+  }
+
   @SneakyThrows
-  public static void readKeyFromPKCS12KeyStore(final String keyStorePath, final String keyStorePassword, final String keyNameRaw, final String keyPassword) {
-    readKeyFromKeyStore(KEY_STORE_TYPE_PKCS12, keyStorePath, keyStorePassword, keyNameRaw, keyPassword);
+  private void checkEncryptDecrypt(SecretKey... secretKeys) {
+    String plainText = UUID.randomUUID().toString();
+    byte[] iv = Encryption.generateIV();
+    Set<String> allEncrypted = new HashSet<>();
+    for(SecretKey secretKey : secretKeys) {
+      byte[] encrypted = Encryption.encryptSecret(plainText, secretKey, iv);
+      byte[] decrypted = Encryption.decryptSecret(encrypted, iv, secretKey);
+      assertEquals(plainText, toString(decrypted));
+      allEncrypted.add(toString(encrypted));
+    }
+    assertEquals(1, allEncrypted.size());
+  }
+
+  private String toString(byte[] data){
+    return new String(data, StandardCharsets.UTF_8);
+  }
+
+  @SneakyThrows
+  public static void readKeyFromPKCS12KeyStore(final String keyStorePath, final String keyStorePassword, final String keyPassword) {
+    readKeyFromKeyStore(KEY_STORE_TYPE_PKCS12, keyStorePath, keyStorePassword, keyPassword);
   }
 
    @SneakyThrows
-   public static void readKeyFromJCEKeyStore(final String keyStorePath, final String keyStorePassword, final String keyNameRaw, final String keyPassword) {
-     readKeyFromKeyStore(KEY_STORE_TYPE_JCEKS, keyStorePath, keyStorePassword, keyNameRaw, keyPassword);
+   public static void readKeyFromJCEKeyStore(final String keyStorePath, final String keyStorePassword, final String keyPassword) {
+     readKeyFromKeyStore(KEY_STORE_TYPE_JCEKS, keyStorePath, keyStorePassword, keyPassword);
    }
 
    @SneakyThrows
-   public static void readKeyFromKeyStore(final String instanceType, final String keyStorePath, final String keyStorePassword, final String keyNameRaw, final String keyPassword) {
-     final String keyName = keyNameRaw.toLowerCase();
+   public static void readKeyFromKeyStore(final String instanceType, final String keyStorePath, final String keyStorePassword, final String keyPassword) {
      KeyStore ks = KeyStore.getInstance(instanceType);
      byte[] digest = DigestUtils.md5Digest(new FileInputStream(keyStorePath));
      String md5 = DatatypeConverter.printHexBinary(digest).toLowerCase();
 
      ks.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
      Enumeration<String> aliases = ks.aliases();
-     List<String> al = new ArrayList<>();
+     List<String> keyNames = new ArrayList<>();
      while (aliases.hasMoreElements()) {
-       al.add(aliases.nextElement());
+       keyNames.add(aliases.nextElement());
      }
-     // ooh - alias names are stored in JKS as lowercase!
-     assertTrue(al.contains(keyName));
-     SecretKey directFromKS = (SecretKey) ks.getKey(keyName, keyPassword.toCharArray());
-     Instant created = toInstant(ks.getCreationDate(keyName));
-     byte[] encoded = directFromKS.getEncoded();
-     String hex = toHex(encoded);
-     log.info("Keystore Path [{}]", keyStorePath);
-     log.info("Keystore MD5 [{}]", md5);
-     log.info("Keystore Provider [{}]", ks.getProvider());
-     log.info("Keystore Type [{}]", ks.getType());
-     log.info("Secret Key Name [{}] ", keyName);
-     log.info("\tKey Created [{}]", formatInstant(created));
-     log.info("\tKey Format [{}]", directFromKS.getFormat());
-     log.info("\tKey Size [{}]bits", encoded.length * 8);
-     log.info("\tKey Algorithm [{}]", directFromKS.getAlgorithm());
-     log.info("\tKey Encoded [{}]", hex);
+     for(String keyName : keyNames) {
+       boolean isKey = ks.isKeyEntry(keyName);
+       if(!isKey){
+         continue;
+       }
+       // ooh - alias names are stored in JKS as lowercase!
+       SecretKey directFromKS = (SecretKey) ks.getKey(keyName, keyPassword.toCharArray());
+       Instant created = toInstant(ks.getCreationDate(keyName));
+       byte[] encoded = directFromKS.getEncoded();
+       String hex = toHex(encoded);
+       log.info("Keystore Path [{}]", keyStorePath);
+       log.info("Keystore MD5 [{}]", md5);
+       log.info("Keystore Provider [{}]", ks.getProvider());
+       log.info("Keystore Type [{}]", ks.getType());
+       log.info("Secret Key Name [{}] ", keyName);
+       log.info("\tKey Created [{}]", formatInstant(created));
+       log.info("\tKey Format [{}]", directFromKS.getFormat());
+       log.info("\tKey Size [{}]bits", encoded.length * 8);
+       log.info("\tKey Algorithm [{}]", directFromKS.getAlgorithm());
+       log.info("\tKey Encoded [{}]", hex);
+     }
    }
 
    public static String formatInstant(Instant timestamp) {
@@ -177,5 +205,11 @@ public class EncryptionUsingJavaKeyStoreFileIT {
 
   public static Instant toInstant(Date dateToConvert) {
     return Instant.ofEpochMilli(dateToConvert.getTime());
+  }
+
+  @Disabled
+  @Test
+  void testDebugExistingKeyStore() {
+    readKeyFromJCEKeyStore("/path/to/existing.ks","thePassword","thePassword");
   }
 }
