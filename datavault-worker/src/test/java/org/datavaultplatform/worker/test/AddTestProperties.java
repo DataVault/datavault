@@ -12,7 +12,6 @@ import org.springframework.test.context.TestPropertySource;
 @Target(ElementType.TYPE)
 @ActiveProfiles("test")
 @TestPropertySource("classpath:datavault-test.properties")
-//@TestPropertySource(properties = {"mail.password=dummy","sftp.passphrase=DUMMY"})
 public @interface AddTestProperties {
 
 }

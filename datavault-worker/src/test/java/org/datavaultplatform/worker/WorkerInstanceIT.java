@@ -39,7 +39,7 @@ import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
-import com.rabbitmq.client.QueueingConsumer;
+//import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.ShutdownSignalException;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -56,6 +56,7 @@ import org.junit.jupiter.api.Test;
  */
 @Disabled
 public class WorkerInstanceIT {
+    /*
     private static String workerInstanceResources;
     private static String testQueueServer = "localhost";
     private static String testQueueUser = "datavault";
@@ -490,5 +491,5 @@ public class WorkerInstanceIT {
 
         //BasicConfigurator.resetConfiguration();
     }
-
+  */
 }

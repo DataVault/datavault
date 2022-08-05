@@ -1,108 +1,79 @@
 package org.datavaultplatform.worker.queue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.Channel;
 
-import com.rabbitmq.client.MessageProperties;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.EventStream;
 import org.datavaultplatform.common.model.Agent;
-import org.datavaultplatform.worker.WorkerInstance;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 /**
- * A class to add Events to the event queue
+ * A Spring Bean to add Events to the event queue
  */
+@Slf4j
 public class EventSender implements EventStream {
 
-    private static final Logger logger = LoggerFactory.getLogger(EventSender.class);
-    
-    private String queueServer;
-    private String eventQueueName;
-    private String queueUser;
-    private String queuePassword;
-    
-    private int sequence = 0;
+    private final RabbitTemplate template;
+    private final String eventQueueName;
 
-    /**
-     * Setter for the queue server
-     * @param queueServer the queue server value
-     */
-    public void setQueueServer(String queueServer) {
-        this.queueServer = queueServer;
-    }
+    private final String workerName;
 
-    /**
-     * Setter for the event queue name
-     * @param eventQueueName the eventQueueName value
-     */
-    public void setEventQueueName(String eventQueueName) {
+    private final AtomicInteger sequence;
+    private final ObjectMapper mapper;
+
+    public EventSender(RabbitTemplate template, String eventQueueName, String workerName, int sequenceStart, ObjectMapper mapper) {
+        this.template = template;
         this.eventQueueName = eventQueueName;
+        this.workerName = workerName;
+        this.sequence = new AtomicInteger(sequenceStart);
+        this.mapper = mapper;
     }
 
-    /**
-     * Setter for the queue user
-     * @param queueUser the queueUser value
-     */
-    public void setQueueUser(String queueUser) {
-        this.queueUser = queueUser;
-    }
-
-    /**
-     * Setter for the queuePassword
-     * @param queuePassword the queuePassword value
-     */
-    public void setQueuePassword(String queuePassword) {
-        this.queuePassword = queuePassword;
-    }
-    
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.event.EventStream#send(org.datavaultplatform.common.event.Event)
      * 
-     * Add a sequence to the event to allow ordering where the timestamp is equal, create a connection to the queue
-     * then encode the event as json, declare the queue and publish the message.
-     * 
-     * Finally close the connection.
+     * Add a sequence to the event to allow ordering where the timestamp is equal,
+     * then encode the event as json, and publish the message to the defined queue.
      * 
      * @param event An event object
      */
     @Override
     public void send(Event event) {
-        
+
         // Add sequence for event ordering (where timestamp is equal)
-        event.setSequence(sequence);
-        sequence += 1;
-        
+        event.setSequence(sequence.getAndIncrement());
+
         // Set common event properties
         event.setAgentType(Agent.AgentType.WORKER);
-        event.setAgent(WorkerInstance.getWorkerName());
+        event.setAgent(workerName);
         
         try {
-            // TODO: should create queue once and keep open?
-            ConnectionFactory factory = new ConnectionFactory();
-            factory.setHost(queueServer);
-            factory.setUsername(queueUser);
-            factory.setPassword(queuePassword);
-
-            Connection connection = factory.newConnection();
-            Channel channel = connection.createChannel();
-
-            ObjectMapper mapper = new ObjectMapper();
             String jsonEvent = mapper.writeValueAsString(event);
-
-            channel.queueDeclare(eventQueueName, true, false, false, null);
-            channel.basicPublish("", eventQueueName, MessageProperties.PERSISTENT_TEXT_PLAIN, jsonEvent.getBytes());
-            logger.debug("Sent " + jsonEvent.length() + " bytes");
-            logger.debug("Sent message body '" + jsonEvent + "'");
-
-            channel.close();
-            connection.close();
-            
+            byte[] messageBytes = jsonEvent.getBytes(StandardCharsets.UTF_8);
+            String messageId = UUID.randomUUID().toString();
+            Message message = new Message(messageBytes, getProps(messageId));
+            template.send(this.eventQueueName, message);
+            log.debug("Sent msgId[{}]size[{}]bytes",messageBytes.length);
+            log.debug("Sent msgId[{}]message body [{}]", jsonEvent);
         } catch (Exception e) {
-            logger.error("Error sending message", e);
+            log.error("Error sending message", e);
         }
+    }
+
+    MessageProperties getProps(String messageId) {
+        MessageProperties result = new MessageProperties();
+        result.setMessageId(messageId);
+
+        // TODO this should be application/json really
+        result.setContentType(MessageProperties.CONTENT_TYPE_TEXT_PLAIN);
+
+        // we could add extra 'headers' to message if we like
+        return result;
     }
 }

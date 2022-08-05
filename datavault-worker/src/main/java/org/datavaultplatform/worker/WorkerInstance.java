@@ -34,21 +34,5 @@ public class WorkerInstance {
         Logger logger = LoggerFactory.getLogger(WorkerInstance.class);
         logger.info("Worker starting");
         
-        ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"datavault-worker.xml"});
-        
-        EventSender eventSender = context.getBean(EventSender.class);
-        Receiver receiver = context.getBean(Receiver.class);
-        
-        // Add Bouncy Castle provider if needed
-        if( receiver.isEncryptionEnabled() && receiver.getEncryptionMode() == AESMode.GCM ) {
-            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        }
-        
-        // Listen to the message queue ...
-        try {
-            receiver.receive(eventSender);
-        } catch (Exception e) {
-            logger.error("Error in receive", e);
-        }
     }
 }

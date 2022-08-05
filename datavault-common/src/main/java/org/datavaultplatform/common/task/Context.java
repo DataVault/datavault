@@ -8,22 +8,22 @@ import java.nio.file.Path;
 public class Context {
     public enum AESMode {GCM, CBC};
 
-    private Path tempDir;
-    private Path metaDir;
-    private EventStream eventStream;
-    private Boolean chunkingEnabled;
-    private Long chunkingByteSize;
-    private Boolean encryptionEnabled;
-    private AESMode encryptionMode;
-    private String vaultAddress;
-    private String vaultToken;
-    private String vaultKeyPath;
-    private String vaultKeyName;
-    private String vaultSslPEMPath;
-    private Boolean multipleValidationEnabled;
-    private int noChunkThreads;
+    private final Path tempDir;
+    private final Path metaDir;
+    private final EventStream eventStream;
+    private final Boolean chunkingEnabled;
+    private final Long chunkingByteSize;
+    private final Boolean encryptionEnabled;
+    private final AESMode encryptionMode;
+    private final String vaultAddress;
+    private final String vaultToken;
+    private final String vaultKeyPath;
+    private final String vaultKeyName;
+    private final String vaultSslPEMPath;
+    private final Boolean multipleValidationEnabled;
+    private final int noChunkThreads;
     
-    public Context() {};
+    //ublic Context() {};
     public Context(Path tempDir, Path metaDir, EventStream eventStream,
                    Boolean chunkingEnabled, Long chunkingByteSize,
                    Boolean encryptionEnabled, AESMode encryptionMode, 
@@ -51,50 +51,24 @@ public class Context {
         return tempDir;
     }
 
-    public void setTempDir(Path tempDir) {
-        this.tempDir = tempDir;
-    }
-
     public Path getMetaDir() {
         return metaDir;
-    }
-
-    public void setMetaDir(Path metaDir) {
-        this.metaDir = metaDir;
     }
 
     public EventStream getEventStream() {
         return eventStream;
     }
 
-    public void setEventStream(EventStream eventStream) {
-        this.eventStream = eventStream;
-    }
-    
     public Boolean isChunkingEnabled() {
         return chunkingEnabled;
     }
-    
-    public void setChunkingEnabled(Boolean chunkingEnabled) {
-        this.chunkingEnabled = chunkingEnabled;
-    }
-    
+
     public Long getChunkingByteSize() {
         return chunkingByteSize;
     }
-    
-    public void setChunkingByteSize(Long chunkingByteSize) {
-    	this.chunkingByteSize = chunkingByteSize;
-    }
-
-    public void setEncryptionEnabled(Boolean encryptionEnabled) { this.encryptionEnabled = encryptionEnabled; }
 
     public Boolean isEncryptionEnabled() {
         return encryptionEnabled;
-    }
-
-    public void setEncryptionMode(AESMode encryptionMode) {
-        this.encryptionMode = encryptionMode;
     }
 
     public AESMode getEncryptionMode() { return encryptionMode; }
@@ -102,56 +76,28 @@ public class Context {
     public String getVaultAddress() {
         return vaultAddress;
     }
-    
-    public void setVaultAddress(String vaultAddress) {
-        this.vaultAddress = vaultAddress;
-    }
-    
+
     public String getVaultToken() {
         return vaultToken;
     }
-    
-    public void setVaultToken(String vaultToken) {
-        this.vaultToken = vaultToken;
-    }
-    
+
     public String getVaultKeyPath() {
         return vaultKeyPath;
     }
-    
-    public void setVaultKeyPath(String vaultKeyPath) {
-        this.vaultKeyPath = vaultKeyPath;
-    }
-    
+
     public String getVaultKeyName() {
         return vaultKeyName;
     }
-    
-    public void setVaultKeyName(String vaultKeyName) {
-        this.vaultKeyName = vaultKeyName;
-    }
-    
+
     public String getVaultSslPEMPath() {
         return vaultSslPEMPath;
-    }
-    
-    public void setVaultSslPEMPath(String sslPEMPath) {
-        this.vaultSslPEMPath = sslPEMPath;
     }
 
     public Boolean isMultipleValidationEnabled() {
         return multipleValidationEnabled;
     }
 
-    public void setMultipleValidationEnabled(Boolean multipleValidationEnabled) {
-        this.multipleValidationEnabled = multipleValidationEnabled;
-    }
-
     public int getNoChunkThreads() {
         return noChunkThreads;
-    }
-
-    public void setNoChunkThreads(int noChunkThreads) {
-        this.noChunkThreads = noChunkThreads;
     }
 }

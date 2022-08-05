@@ -30,19 +30,14 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-collections4</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-amqp</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>com.rabbitmq</groupId>
-      <artifactId>amqp-client</artifactId>
-      <version>4.8.0</version>
-      <!--
-      <version>5.14.2</version>
-      -->
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
     </dependency>
-
 
     <!-- testing -->
 
@@ -112,6 +107,7 @@
       <artifactId>commons-compress</artifactId>
       <version>1.21</version>
     </dependency>
+
   </dependencies>
 
   <build>

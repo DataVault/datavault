@@ -18,4 +18,5 @@ public abstract class DockerImage {
 
   public static DockerImageName OPEN_SSH_IMAGE = parse(OPEN_SSH_IMAGE_NAME);
 
+  public static String RABBIT_IMAGE_NAME = "rabbitmq:3.10.7-management-alpine";
 }
