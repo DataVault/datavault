@@ -1,15 +1,16 @@
 #!/bin/bash
 
+# This script now uses 'java -jar' instead of 'mvnw spring-boot:run'
 java -version
 
 export PROJECT_ROOT=$(cd ../../../;pwd)
 cd $PROJECT_ROOT
+ SERVER_PORT=8888 \
+ BROKER_TIMEOUT_MS=-1 \
  SPRING_PROFILES_ACTIVE=database \
  SPRING_SECURITY_DEBUG=false \
- SERVER_PORT=8888 \
  DATAVAULT_HOME="$PROJECT_ROOT/dv5/local/props/webapp" \
- ./mvnw spring-boot:run  \
- -Dspring-boot.run.jvmArguments="-Xdebug \
- -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5050" \
- --projects datavault-webapp
+ java -Xdebug \
+ -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5050 \
+ -jar ./datavault-webapp/target/datavault-webapp.jar
 
