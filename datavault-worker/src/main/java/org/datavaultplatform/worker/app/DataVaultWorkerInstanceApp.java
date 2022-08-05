@@ -9,6 +9,7 @@ import org.datavaultplatform.worker.config.QueueConfig;
 import org.datavaultplatform.worker.config.RabbitConfig;
 import org.datavaultplatform.worker.config.ReceiverConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.datavaultplatform.worker.config.SecurityActuatorConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
@@ -18,6 +19,7 @@ import org.springframework.core.env.Environment;
 @Import({
     PropertiesConfig.class,
     ActuatorConfig.class,
+    SecurityActuatorConfig.class,
     QueueConfig.class,
     EventSenderConfig.class,
     ReceiverConfig.class,
