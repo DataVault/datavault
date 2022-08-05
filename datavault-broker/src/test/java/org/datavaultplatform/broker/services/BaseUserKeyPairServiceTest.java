@@ -45,7 +45,7 @@ public abstract class BaseUserKeyPairServiceTest {
     return container.copyFileFromContainer(path, is -> StreamUtils.copyToString(is, UTF_8));
   }
 
-  abstract void testKeyPairIsValid();
+  abstract void testKeyPair();
 
   @SneakyThrows
   final String getStringFromResource(Resource res) {

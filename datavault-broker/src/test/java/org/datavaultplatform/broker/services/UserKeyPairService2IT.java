@@ -50,7 +50,7 @@ public class UserKeyPairService2IT extends BaseUserKeyPairServiceTest {
   @Test
   @Override
   @SneakyThrows
-  void testKeyPairIsValid() {
+  void testKeyPair() {
     UserKeyPairService service = new UserKeyPairService(TEST_PASSPHRASE);
     KeyPairInfo info = service.generateNewKeyPair();
     validateKeyPair(info.getPublicKey(), info.getPrivateKey());

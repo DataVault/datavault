@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.services;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -8,31 +9,29 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.services.UserKeyPairService.KeyPairInfo;
-import org.datavaultplatform.broker.test.EmbeddedSftpServer;
 import org.datavaultplatform.broker.test.JSchLogger;
-import org.datavaultplatform.broker.test.SftpServerUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.utility.DockerImageName;
 
 /**
  * This test generates a key pair and checks that the keypair is valid by ...
- * using the private and public key with EmbeddedSftpServer to establish ssh connection via JSch
+ * using the private key with Jsch and public key with OPENSSH to establish ssh connection
  */
 @Slf4j
-public class UserKeyPairService3IT extends BaseUserKeyPairServiceTest {
+public abstract class BaseUserKeyPairServiceOpenSSHTest extends BaseUserKeyPairServiceTest {
 
   public static final String TEST_PASSPHRASE = "tenet";
   private static final String TEST_USER = "testuser";
+  private GenericContainer toContainer;
 
-  private int sftpServerPort;
-  private EmbeddedSftpServer sftpServer;
-
-  private Path tempSftpFolder;
+  private static final String ENV_USER_NAME = "USER_NAME";
+  private static final String ENV_PUBLIC_KEY = "PUBLIC_KEY";
 
   /**
    * Tests that the key pair is valid by
@@ -41,11 +40,16 @@ public class UserKeyPairService3IT extends BaseUserKeyPairServiceTest {
 
   @Test
   @Override
-  @SneakyThrows
   void testKeyPair() {
     UserKeyPairService service = new UserKeyPairService(TEST_PASSPHRASE);
-    KeyPairInfo info = service.generateNewKeyPair();
-    validateKeyPair(info.getPublicKey(), info.getPrivateKey().getBytes(StandardCharsets.UTF_8));
+    try {
+      KeyPairInfo info = service.generateNewKeyPair();
+      validateKeyPair(info.getPublicKey(), info.getPrivateKey().getBytes(StandardCharsets.UTF_8));
+      assertTrue(isSuccessExpected());
+    } catch (Exception ex) {
+      log.error("problem using ssh [{}]", getDockerImageForOpenSSH(), ex);
+      assertFalse(isSuccessExpected());
+    }
   }
 
   @Test
@@ -64,33 +68,38 @@ public class UserKeyPairService3IT extends BaseUserKeyPairServiceTest {
   @SneakyThrows
   private void validateKeyPair(String publicKey, byte[] privateKeyBytes) {
 
-    initSftpServer(publicKey);
+    initContainers(publicKey);
     JSch.setLogger(new JSchLogger());
     JSch jSch = new JSch();
-    Session session = jSch.getSession(TEST_USER, "localhost", this.sftpServerPort);
+    Session session = jSch.getSession(TEST_USER, "localhost", this.toContainer.getMappedPort(2222));
     jSch.addIdentity(TEST_USER, privateKeyBytes, null, TEST_PASSPHRASE.getBytes());
     java.util.Properties properties = new java.util.Properties();
     properties.put("StrictHostKeyChecking", "no");
     session.setConfig(properties);
-    try {
-      session.connect();
-    } catch(JSchException ex) {
-      fail("ssh error",ex);
-    }
+    session.connect();
     log.info("Connected!");
   }
 
-  @SneakyThrows
-  void initSftpServer(String publicKey) {
-    this.tempSftpFolder = Files.createTempDirectory("SFTP_TEST");
-    this.sftpServer = SftpServerUtils.getSftpServer(publicKey, this.tempSftpFolder);
-    this.sftpServerPort= sftpServer.getServer().getPort();
+  void initContainers(String publicKey) {
+    //we put the publicKey into the TO container at startup - so ssh daemon will trust the private key later on
+    toContainer = new GenericContainer(getDockerImageForOpenSSH())
+        .withEnv(ENV_USER_NAME, TEST_USER)
+        .withEnv(ENV_PUBLIC_KEY, publicKey) //this causes the public key to be added to /config/.ssh/authorized_keys
+        .withExposedPorts(2222)
+        .waitingFor(Wait.forListeningPort());
+
+
+    toContainer.start();
   }
 
   @AfterEach
   void tearDown() {
-    if(this.sftpServer != null){
-      this.sftpServer.stop();
+    if(this.toContainer != null){
+      this.toContainer.stop();
     }
   }
+
+  public abstract DockerImageName getDockerImageForOpenSSH();
+
+  public abstract boolean isSuccessExpected();
 }
