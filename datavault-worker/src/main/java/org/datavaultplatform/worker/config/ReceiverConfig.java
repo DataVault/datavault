@@ -1,6 +1,7 @@
 package org.datavaultplatform.worker.config;
 
 import java.security.Security;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.datavaultplatform.common.task.Context.AESMode;
 import org.datavaultplatform.worker.queue.EventSender;
 import org.datavaultplatform.worker.queue.Receiver;
@@ -68,7 +69,7 @@ public class ReceiverConfig {
         this.eventSender
     );
     if(result.isEncryptionEnabled() && result.getEncryptionMode() == AESMode.GCM ) {
-      Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+      Security.addProvider(new BouncyCastleProvider());
     }
     return result;
   }

@@ -76,19 +76,15 @@
     <dependency>
       <groupId>org.apache.tika</groupId>
       <artifactId>tika-core</artifactId>
-      <version>1.28.3</version>
+      <!-- cannot use latest 2.X.X -->
+      <version>1.28.4</version>
     </dependency>
 
     <dependency>
       <groupId>gov.loc</groupId>
       <artifactId>bagit</artifactId>
-      <version>5.0.3</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk15on</artifactId>
-      <version>1.70</version>
+      <!-- broker is using 4.9.0 -->
+      <version>5.2.0</version>
     </dependency>
 
     <dependency>
@@ -99,13 +95,11 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-exec</artifactId>
-      <version>1.3</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
-      <version>1.21</version>
     </dependency>
 
   </dependencies>

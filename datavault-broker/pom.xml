@@ -61,14 +61,11 @@
             <scope>test</scope>
         </dependency>
 
-
         <dependency>
             <groupId>net.sf.supercsv</groupId>
             <artifactId>super-csv</artifactId>
         </dependency>
 
-
-        <!-- MySQL -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -78,7 +75,9 @@
         <dependency>
             <groupId>gov.loc</groupId>
             <artifactId>bagit</artifactId>
-        </dependency>
+            <!-- worker is using 5.2.0 -->
+            <version>4.9.0</version>
+         </dependency>
 
         <dependency>
             <groupId>org.apache.velocity</groupId>
@@ -95,29 +94,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
          </dependency>
-
-        <!--
-        <dependency>
-            <groupId>org.jsondoc</groupId>
-            <artifactId>jsondoc-springmvc</artifactId>
-            <version>1.2.11</version>
-        </dependency>
-        -->
-
-        <!--
-        <dependency>
-            <groupId>org.jsondoc</groupId>
-            <artifactId>jsondoc-ui</artifactId>
-            <version>1.2.11</version>
-        </dependency>
-        -->
-
-        <!--
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-orm</artifactId>
-        </dependency>
-        -->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

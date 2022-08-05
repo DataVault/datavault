@@ -1,6 +1,7 @@
 package org.datavaultplatform.common.crypto;
 
 import org.apache.commons.io.FileUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 
 
@@ -40,7 +41,7 @@ public class EncryptionTest {
         bigdataResourcesDir = new File(resourcesPath + File.separator + "big_data");
         testDir = new File(resourcesPath + File.separator + "tmp");
 
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        Security.addProvider(new BouncyCastleProvider());
 
         System.out.println("\nSecurity-Provider:");
         for (Provider prov : Security.getProviders()) {

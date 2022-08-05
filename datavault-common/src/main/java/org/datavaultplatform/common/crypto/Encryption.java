@@ -8,6 +8,7 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
 import org.apache.commons.io.FileUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.datavaultplatform.common.task.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -608,13 +609,17 @@ public class Encryption {
     public static void addBouncyCastleSecurityProvider() {
         logger.info("Adding Bouncy Castle Provider.");
         Provider[] before = Security.getProviders();
-        int result = Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        int result = Security.addProvider(new BouncyCastleProvider());
         if (result == -1) {
             logger.warn("BouncyCastle already added!");
         }
         Provider[] after = Security.getProviders();
         logger.info("before[{}] result[{}] after[{}]", before.length, result, after.length);
-        logger.info("Added Bouncy Castle Provider.");
+        String bcVersion = BouncyCastleProvider
+            .class
+            .getPackage()
+            .getImplementationVersion();
+        logger.info("Added Bouncy Castle Provider [{}].", bcVersion);
         initialised = true;
     }
 
