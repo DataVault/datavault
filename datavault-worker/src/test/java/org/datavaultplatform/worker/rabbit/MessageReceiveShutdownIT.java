@@ -72,6 +72,9 @@ class MessageReceiveShutdownIT extends BaseReceiveIT {
     verify(mShutdownHandler, times(1)).handleShutdown(any(MessageInfo.class));
     verifyNoMoreInteractions(mProcessor, mShutdownHandler);
 
+    // ensure we are passed any race conditions
+    Thread.sleep(2000);
+
     // check that there are still 2 unprocessed messages
     Assertions.assertEquals(2,
         admin.getQueueInfo(this.workerQueue.getActualName()).getMessageCount());

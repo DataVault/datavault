@@ -23,6 +23,7 @@ import org.datavaultplatform.broker.config.SecurityActuatorConfig;
 import org.datavaultplatform.broker.config.SecurityConfig;
 import org.datavaultplatform.broker.config.ServiceConfig;
 import org.datavaultplatform.common.crypto.EncryptionValidator;
+import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -58,6 +59,9 @@ public class DataVaultBrokerApp implements CommandLineRunner {
 
   @Autowired
   EncryptionValidator encryptionValidator;
+
+  @Autowired
+  RabbitListenerEndpointRegistry registry;
 
   public static void main(String[] args) {
     SpringApplication.run(DataVaultBrokerApp.class, args);
@@ -109,7 +113,14 @@ public class DataVaultBrokerApp implements CommandLineRunner {
   }
 
   @EventListener
-  void onEvent(ApplicationReadyEvent event) {
-    log.info("Broker [{}] ready", applicationName);
+  void onEvent(ApplicationReadyEvent readyEvent) {
+    log.info("Broker [{}] ready [{}]", applicationName, readyEvent);
+    log.info("application ready - starting listener containers...");
+    registry.getListenerContainers().forEach(container -> {
+      if (!container.isRunning()) {
+        log.info("application ready - starting listener container [{}]", container);
+        container.start();
+      }
+    });
   }
 }

@@ -45,6 +45,7 @@ public class BaseReceiveIT extends BaseRabbitTCTest {
     props.setMessageId(UUID.randomUUID().toString());
     props.setPriority(NORMAL_PRIORITY);
     String msgBody = String.valueOf(value);
+    props.setHeader("custom", msgBody);
     Message msg = new Message(msgBody.getBytes(StandardCharsets.UTF_8), props);
     template.send(workerQueue.getActualName(), msg);
     return props.getMessageId();

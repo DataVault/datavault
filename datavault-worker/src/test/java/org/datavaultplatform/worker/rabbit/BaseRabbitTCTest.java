@@ -35,7 +35,6 @@ public abstract class BaseRabbitTCTest {
 
   @DynamicPropertySource
   static void setupProperties(DynamicPropertyRegistry registry) {
-    log.info("RABBIT HTTP URL [ {} ]", RABBIT.getHttpUrl());
     registry.add("spring.rabbitmq.host", RABBIT::getHost);
     registry.add("spring.rabbitmq.port", RABBIT::getAmqpPort);
     registry.add("spring.rabbitmq.username", RABBIT::getAdminUsername);
@@ -44,9 +43,10 @@ public abstract class BaseRabbitTCTest {
 
   @PostConstruct
   void init() {
-    log.info("rabbit username {}", this.rabbitUsername);
-    log.info("rabbit password {}", this.rabbitPassword);
-    log.info("rabbit host {}", this.rabbitHost);
-    log.info("rabbit port {}", this.rabbitPort);
+    log.info("RABBIT HTTP URL [ {} ]", RABBIT.getHttpUrl());
+    log.info("rabbit username [{}]", this.rabbitUsername);
+    log.info("rabbit password [{}]", this.rabbitPassword);
+    log.info("rabbit host [{}]", this.rabbitHost);
+    log.info("rabbit AMQP port [{}]", this.rabbitPort);
   }
 }

@@ -10,6 +10,7 @@ import org.datavaultplatform.worker.config.QueueConfig;
 import org.datavaultplatform.worker.config.RabbitConfig;
 import org.datavaultplatform.worker.config.ReceiverConfig;
 import org.datavaultplatform.worker.config.SecurityActuatorConfig;
+import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -49,6 +50,9 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
 
   @Autowired
   EncryptionValidator encryptionValidator;
+
+  @Autowired
+  RabbitListenerEndpointRegistry registry;
 
   public static void main(String[] args) {
 
@@ -91,7 +95,14 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
   }
 
   @EventListener
-  void onEvent(ApplicationReadyEvent event) {
-    log.info("Worker [{}] ready", applicationName);
+  void onEvent(ApplicationReadyEvent readyEvent) {
+    log.info("Worker [{}] ready [{}]", applicationName, readyEvent);
+    log.info("application ready - starting listener containers...");
+    registry.getListenerContainers().forEach(container -> {
+      if (!container.isRunning()) {
+        log.info("application ready - starting listener container [{}]", container);
+        container.start();
+      }
+    });
   }
 }
