@@ -113,6 +113,15 @@
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-jpa</artifactId>
+      <!-- spring-data-jpa will NOT be put into the commons jar -->
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-amqp</artifactId>
+      <!-- amqp will NOT be put into the commons jar -->
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
