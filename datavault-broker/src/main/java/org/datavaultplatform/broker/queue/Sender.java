@@ -20,8 +20,8 @@ public class Sender {
     this.workerQueueName = workerQueueName;
   }
 
-  public void send(String messageText) {
-    RabbitUtils.sendDirectToQueue(template, workerQueueName, messageText);
+  public String send(String messageText) {
+    return RabbitUtils.sendDirectToQueue(template, workerQueueName, messageText);
   }
 
 }

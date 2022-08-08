@@ -45,9 +45,10 @@ public class RabbitSenderIT extends BaseRabbitTCTest {
   void testSendToWorker() {
     assertEquals(expectedQueueName, dataVaultQueue.getActualName());
     String rand = UUID.randomUUID().toString();
-    sender.send(rand);
+    String messageId = sender.send(rand);
     Message message = template.receive(dataVaultQueue.getActualName(), 2500);
     assertEquals(rand, new String(message.getBody(), StandardCharsets.UTF_8));
+    assertEquals(messageId, message.getMessageProperties().getMessageId());
     MessageProperties props = message.getMessageProperties();
     assertEquals(expectedQueueName, props.getReceivedRoutingKey());
   }
