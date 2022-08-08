@@ -1,12 +1,10 @@
 package org.datavaultplatform.broker.queue;
 
 import lombok.extern.slf4j.Slf4j;
-
-
-import org.springframework.amqp.core.Queue;
+import org.datavaultplatform.common.config.BaseQueueConfig;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -14,16 +12,16 @@ import org.springframework.stereotype.Component;
 public class Sender {
 
   private final RabbitTemplate template;
-  private final Queue dataVaultQueue;
+  private final String workerQueueName;
 
   @Autowired
-  public Sender(@Qualifier("workerQueue") Queue dataVaultQueue, RabbitTemplate template) {
+  public Sender(@Value(BaseQueueConfig.WORKER_QUEUE_NAME) String workerQueueName, RabbitTemplate template) {
     this.template = template;
-    this.dataVaultQueue = dataVaultQueue;
+    this.workerQueueName = workerQueueName;
   }
 
   public void send(String messageText) {
-    RabbitUtils.sendDirectToQueue(template, dataVaultQueue.getActualName(), messageText);
+    RabbitUtils.sendDirectToQueue(template, workerQueueName, messageText);
   }
 
 }

@@ -32,7 +32,7 @@ public class RabbitMessageListener {
   }
 
   @SneakyThrows
-  @RabbitListener(queues = QueueConfig.WORKER_QUEUE_NAME, exclusive = true)
+  @RabbitListener(queues = QueueConfig.WORKER_QUEUE_NAME)
   void onMessage(Message message, Channel channel,
       @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) {
 

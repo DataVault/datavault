@@ -15,8 +15,8 @@ cd $PROJECT_ROOT
 #VAULT_DATAENCRYPTIONKEYNAME=XXX-KEYNAME-FOR-DATA-KEYS \
 #KEYSTORE_PASSWORD=XXX-PASSWORD \
  VALIDATE_ENCRYPTION_CONFIG=true \
- WORKER_DEFINE_QUEUE_WORKER=true \
- WORKER_DEFINE_QUEUE_BROKER=true \
+ RABBITMQ_DEFINE_QUEUE_WORKER=true \
+ RABBITMQ_DEFINE_QUEUE_BROKER=true \
  java -Xdebug \
  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5555 \
  -jar ./datavault-worker/target/datavault-worker.jar

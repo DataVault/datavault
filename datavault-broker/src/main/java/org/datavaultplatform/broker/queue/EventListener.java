@@ -94,7 +94,7 @@ public class EventListener implements MessageListener {
 
 
     @Override
-    @RabbitListener(queues = BROKER_QUEUE_NAME, exclusive = true)
+    @RabbitListener(queues = BROKER_QUEUE_NAME)
     public void onMessage(Message msg) {
         
         String messageBody = new String(msg.getBody(), StandardCharsets.UTF_8);
