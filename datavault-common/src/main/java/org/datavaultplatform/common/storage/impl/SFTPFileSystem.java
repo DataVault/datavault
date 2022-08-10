@@ -41,7 +41,11 @@ public class SFTPFileSystem extends Device implements UserStore {
     
     private Utility.SFTPMonitor monitor = null;
     private final int RETRIES = 25;
-    
+
+    static {
+        JSch.setLogger(JSchLogger.getInstance());
+    }
+
     public SFTPFileSystem(String name, Map<String,String> config) throws Exception {
         super(name, config);
 

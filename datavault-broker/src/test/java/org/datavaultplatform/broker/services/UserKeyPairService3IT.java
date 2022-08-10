@@ -14,8 +14,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.services.UserKeyPairService.KeyPairInfo;
 import org.datavaultplatform.broker.test.EmbeddedSftpServer;
-import org.datavaultplatform.broker.test.JSchLogger;
 import org.datavaultplatform.broker.test.SftpServerUtils;
+import org.datavaultplatform.common.storage.impl.JSchLogger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -65,7 +65,7 @@ public class UserKeyPairService3IT extends BaseUserKeyPairServiceTest {
   private void validateKeyPair(String publicKey, byte[] privateKeyBytes) {
 
     initSftpServer(publicKey);
-    JSch.setLogger(new JSchLogger());
+    JSch.setLogger(JSchLogger.getInstance());
     JSch jSch = new JSch();
     Session session = jSch.getSession(TEST_USER, "localhost", this.sftpServerPort);
     jSch.addIdentity(TEST_USER, privateKeyBytes, null, TEST_PASSPHRASE.getBytes());

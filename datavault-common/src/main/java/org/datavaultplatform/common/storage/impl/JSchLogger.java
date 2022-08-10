@@ -1,10 +1,18 @@
-package org.datavaultplatform.broker.test;
+package org.datavaultplatform.common.storage.impl;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class JSchLogger implements com.jcraft.jsch.Logger {
 
+  private JSchLogger(){
+
+  }
+  private static JSchLogger INSTANCE = new JSchLogger();
+
+  public static JSchLogger getInstance() {
+    return INSTANCE;
+  }
   public boolean isEnabled(int level) {
     return true;
   }

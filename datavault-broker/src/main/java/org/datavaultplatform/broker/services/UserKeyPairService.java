@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.storage.impl.JSchLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,10 @@ public class UserKeyPairService {
   // comment added at the end of public key
   public static final String PUBKEY_COMMENT = "datavault";
   private final String passphrase;
+
+  static {
+    JSch.setLogger(JSchLogger.getInstance());
+  }
 
   @Autowired
   public UserKeyPairService(@Value("${sftp.passphrase}") String passphrase) {

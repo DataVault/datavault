@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.services.UserKeyPairService.KeyPairInfo;
-import org.datavaultplatform.broker.test.JSchLogger;
+import org.datavaultplatform.common.storage.impl.JSchLogger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
@@ -69,7 +69,7 @@ public abstract class BaseUserKeyPairServiceOpenSSHTest extends BaseUserKeyPairS
   private void validateKeyPair(String publicKey, byte[] privateKeyBytes) {
 
     initContainers(publicKey);
-    JSch.setLogger(new JSchLogger());
+    JSch.setLogger(JSchLogger.getInstance());
     JSch jSch = new JSch();
     Session session = jSch.getSession(TEST_USER, "localhost", this.toContainer.getMappedPort(2222));
     jSch.addIdentity(TEST_USER, privateKeyBytes, null, TEST_PASSPHRASE.getBytes());
