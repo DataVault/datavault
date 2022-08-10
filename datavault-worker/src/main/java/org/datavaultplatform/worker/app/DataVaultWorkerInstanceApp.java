@@ -2,6 +2,7 @@ package org.datavaultplatform.worker.app;
 
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.crypto.EncryptionValidator;
+import org.datavaultplatform.common.monitor.MemoryStats;
 import org.datavaultplatform.worker.config.ActuatorConfig;
 import org.datavaultplatform.worker.config.EncryptionConfig;
 import org.datavaultplatform.worker.config.EventSenderConfig;
@@ -103,5 +104,6 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
         container.start();
       }
     });
+    log.info("{}", MemoryStats.getCurrent().toPretty());
   }
 }

@@ -3,6 +3,7 @@ package org.datavaultplatform.webapp.app;
 import static java.util.Collections.singletonList;
 
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.monitor.MemoryStats;
 import org.datavaultplatform.webapp.config.ActutatorConfig;
 import org.datavaultplatform.webapp.config.LdapConfig;
 import org.datavaultplatform.webapp.config.MailConfig;
@@ -82,6 +83,7 @@ public class DataVaultWebApp implements CommandLineRunner {
   @EventListener
   void onEvent(ApplicationReadyEvent event) {
     log.info("WebApp [{}] ready", applicationName);
+    log.info("{}", MemoryStats.getCurrent().toPretty());
   }
 
 }

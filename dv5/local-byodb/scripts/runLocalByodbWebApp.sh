@@ -10,6 +10,7 @@ cd $PROJECT_ROOT
  DATAVAULT_HOME="$PROJECT_ROOT/dv5/local-byodb/props/webapp" \
  ./mvnw spring-boot:run  \
  -Dspring-boot.run.jvmArguments="-Xdebug \
+ -Xms1024M -Xmx2024M \
  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5050" \
  --projects datavault-webapp
 

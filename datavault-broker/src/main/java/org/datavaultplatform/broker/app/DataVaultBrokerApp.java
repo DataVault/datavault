@@ -23,6 +23,7 @@ import org.datavaultplatform.broker.config.SecurityActuatorConfig;
 import org.datavaultplatform.broker.config.SecurityConfig;
 import org.datavaultplatform.broker.config.ServiceConfig;
 import org.datavaultplatform.common.crypto.EncryptionValidator;
+import org.datavaultplatform.common.monitor.MemoryStats;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -121,5 +122,6 @@ public class DataVaultBrokerApp implements CommandLineRunner {
         container.start();
       }
     });
+    log.info("{}", MemoryStats.getCurrent().toPretty());
   }
 }

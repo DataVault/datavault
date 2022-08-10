@@ -24,6 +24,7 @@ cd $PROJECT_ROOT
  RABBITMQ_DEFINE_QUEUE_WORKER=true \
  RABBITMQ_DEFINE_QUEUE_BROKER=true \
  java -Xdebug \
+ -Xms1024M -Xmx2024M \
  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 \
  -jar ./datavault-broker/target/datavault-broker.jar
 

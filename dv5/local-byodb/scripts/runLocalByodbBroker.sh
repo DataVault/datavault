@@ -26,6 +26,7 @@ cd $PROJECT_ROOT
  RABBITMQ_DEFINE_QUEUE_BROKER=true \
  ./mvnw spring-boot:run  \
  -Dspring-boot.run.jvmArguments="-Xdebug \
+ -Xms1024M -Xmx2024M \
  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005" \
  --projects datavault-broker
 
