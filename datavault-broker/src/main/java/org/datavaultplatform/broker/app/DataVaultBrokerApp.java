@@ -1,11 +1,9 @@
 package org.datavaultplatform.broker.app;
 
-import static org.datavaultplatform.broker.scheduled.ScheduledUtils.SCHEDULE_1_AUDIT_DEPOSIT_NAME;
-import static org.datavaultplatform.broker.scheduled.ScheduledUtils.SCHEDULE_2_ENCRYPTION_CHECK_NAME;
-import static org.datavaultplatform.broker.scheduled.ScheduledUtils.SCHEDULE_3_DELETE_NAME;
-import static org.datavaultplatform.broker.scheduled.ScheduledUtils.SCHEDULE_4_REVIEW_NAME;
-import static org.datavaultplatform.broker.scheduled.ScheduledUtils.SCHEDULE_5_RETENTION_CHECK_NAME;
 
+import it.burning.cron.CronExpressionDescriptor;
+import it.burning.cron.CronExpressionParser.Options;
+import java.util.Locale;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.config.ActuatorConfig;
@@ -30,6 +28,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootVersion;
+import org.springframework.boot.actuate.scheduling.ScheduledTasksEndpoint;
+import org.springframework.boot.actuate.scheduling.ScheduledTasksEndpoint.CronTaskDescription;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.event.ApplicationStartingEvent;
@@ -64,6 +64,9 @@ public class DataVaultBrokerApp implements CommandLineRunner {
   @Autowired
   RabbitListenerEndpointRegistry registry;
 
+  @Autowired
+  ScheduledTasksEndpoint scheduledTasksEndpoint;
+
   public static void main(String[] args) {
     SpringApplication.run(DataVaultBrokerApp.class, args);
   }
@@ -83,14 +86,6 @@ public class DataVaultBrokerApp implements CommandLineRunner {
     log.info("active.profiles {}", (Object) env.getActiveProfiles());
 
     log.info("validate.encryption.config [{}]", validateEncryptionConfig);
-
-    Stream.of(
-        SCHEDULE_1_AUDIT_DEPOSIT_NAME,
-        SCHEDULE_2_ENCRYPTION_CHECK_NAME,
-        SCHEDULE_3_DELETE_NAME,
-        SCHEDULE_4_REVIEW_NAME,
-        SCHEDULE_5_RETENTION_CHECK_NAME).forEach(
-        schedule -> log.info("Schedule[{}]value[{}]", schedule, env.getProperty(schedule)));
 
     Stream.of(
         "spring.jpa.hibernate.ddl-auto",
@@ -116,12 +111,30 @@ public class DataVaultBrokerApp implements CommandLineRunner {
   @EventListener
   void onEvent(ApplicationReadyEvent readyEvent) {
     log.info("Broker [{}] ready [{}]", applicationName, readyEvent);
+    showRabbitListenerContainers();
+    showScheduledTasks();
+    log.info("{}", MemoryStats.getCurrent().toPretty());
+  }
+
+  void showRabbitListenerContainers(){
     registry.getListenerContainers().forEach(container -> {
       if (!container.isRunning()) {
         log.info("application ready - starting listener container [{}]", container);
         container.start();
       }
     });
-    log.info("{}", MemoryStats.getCurrent().toPretty());
+  }
+
+  void showScheduledTasks() {
+    scheduledTasksEndpoint.scheduledTasks().getCron().forEach(td -> {
+      CronTaskDescription ctd = (CronTaskDescription)td;
+      String cronExpr = ctd.getExpression();
+      String description = CronExpressionDescriptor.getDescription(cronExpr, new Options(){{
+        setLocale(Locale.getDefault());
+        setUse24HourTimeFormat(true);
+      }});
+      String runnableDescription = ctd.getRunnable().getTarget();
+      log.info("CRON[{}][{}][{}]", runnableDescription, cronExpr, description);
+    });
   }
 }

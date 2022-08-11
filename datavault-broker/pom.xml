@@ -100,6 +100,13 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/it.burning/cron-expression-descriptor -->
+        <dependency>
+            <groupId>it.burning</groupId>
+            <artifactId>cron-expression-descriptor</artifactId>
+            <version>1.2.6</version>
+        </dependency>
+
         <!-- testing -->
 
         <dependency>
