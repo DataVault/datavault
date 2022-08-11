@@ -104,7 +104,7 @@
         <dependency>
             <groupId>it.burning</groupId>
             <artifactId>cron-expression-descriptor</artifactId>
-            <version>1.2.6</version>
+            <version>${cron.expr.desc.version}</version>
         </dependency>
 
         <!-- testing -->
