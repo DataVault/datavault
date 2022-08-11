@@ -76,6 +76,7 @@ public class ShibWebSecurityConfig extends WebSecurityConfigurerAdapter {
     <property name="authenticationDetailsSource" ref="shibWebAuthenticationDetailsSource" />
  </bean>
  */
+  @Order(2)
   @Bean
   ShibAuthenticationFilter shibFilter() throws Exception {
     ShibAuthenticationFilter filter = new ShibAuthenticationFilter();
