@@ -11,6 +11,7 @@ cd $PROJECT_ROOT
  SPRING_SECURITY_DEBUG=false \
  DATAVAULT_HOME="$PROJECT_ROOT/dv5/local/props/webapp" \
  java -Xdebug \
+ -Duser.language=en -Duser.country=GB -Duser.timezone=Europe/London \
  -Xms1024M -Xmx2024M \
  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5050 \
  -jar ./datavault-webapp/target/datavault-webapp.jar
