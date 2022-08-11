@@ -50,7 +50,7 @@ public class VaultsController {
 
     private final RestService restService;
     private final UserLookupService userLookupService;
-    private ValidateService validateService;
+    private final ValidateService validateService;
     private final ForceLogoutService logoutService;
     private final String system;
     private final String link;

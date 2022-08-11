@@ -36,7 +36,7 @@ public class AdminPendingVaultsController {
 	private static final int MAX_RECORDS_PER_PAGE = 10;
 
     private final RestService restService;
-    private UserLookupService userLookupService;
+    private final UserLookupService userLookupService;
 
     @Autowired
     public AdminPendingVaultsController(RestService restService, UserLookupService userLookupService) {

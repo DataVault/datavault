@@ -8,7 +8,7 @@ public class JSchLogger implements com.jcraft.jsch.Logger {
   private JSchLogger(){
 
   }
-  private static JSchLogger INSTANCE = new JSchLogger();
+  private static final JSchLogger INSTANCE = new JSchLogger();
 
   public static JSchLogger getInstance() {
     return INSTANCE;

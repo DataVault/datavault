@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.UUID;
 import org.datavaultplatform.common.email.EmailTemplate;
 import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.broker.services.BaseEmailServiceTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;

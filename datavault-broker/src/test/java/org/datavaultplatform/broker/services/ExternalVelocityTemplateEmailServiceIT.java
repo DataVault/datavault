@@ -19,7 +19,6 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.resource.loader.FileResourceLoader;
 import org.datavaultplatform.broker.config.EmailConfig;
 import org.datavaultplatform.common.email.EmailTemplate;
-import org.datavaultplatform.broker.services.BaseEmailServiceTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -31,7 +31,7 @@ public class ApiErrorHandler extends DefaultResponseErrorHandler {
             RestTemplate restTemplate = new RestTemplate();
 
             ResponseExtractor<ResponseEntity<ApiError>> responseExtractor =
-                    new ResponseEntityResponseExtractor(ApiError.class, restTemplate);
+                    new ResponseEntityResponseExtractor<>(ApiError.class, restTemplate);
 
             HttpEntity<ApiError> extractedData = responseExtractor.extractData(response);
 

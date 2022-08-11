@@ -27,7 +27,7 @@ public class ChunkUploadTracker implements Callable {
     public HashMap<String, String> call() throws Exception {
         logger.debug("Copying chunk: "+chunk.getName());
         ExecutorService executor = Executors.newFixedThreadPool(2);
-        List<Future<HashMap<String, String>>> futures = new ArrayList();
+        List<Future<HashMap<String, String>>> futures = new ArrayList<>();
         HashMap<String, String> archiveIds = new HashMap<>();
         for (String archiveStoreId : archiveStores.keySet() ) {
             ArchiveStore archiveStore = archiveStores.get(archiveStoreId);

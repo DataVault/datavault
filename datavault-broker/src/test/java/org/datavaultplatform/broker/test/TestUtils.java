@@ -55,9 +55,8 @@ public abstract class TestUtils {
   }
 
   public static ArrayList<String> getRandomList(int size) {
-    List<String> items = Stream.generate(new Random()::nextInt).map(Object::toString)
-        .limit(size).collect(Collectors.toList());
-    return new ArrayList<>(items);
+    return Stream.generate(new Random()::nextInt).map(Object::toString)
+        .limit(size).collect(Collectors.toCollection(ArrayList::new));
   }
 
   public static HashMap<String,String> getRandomMap(){

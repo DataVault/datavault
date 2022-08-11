@@ -293,9 +293,9 @@ public class RolesAndPermissionsService {
     }
 
     public void deleteRoleAssignment(Long roleAssignmentId) {
-        if (roleAssignmentDao.findById(roleAssignmentId) == null) {
-            throw new IllegalStateException("Cannot delete a role assignment that does not exist");
-        }
+        roleAssignmentDao.findById(roleAssignmentId).orElseThrow(() ->
+            new IllegalStateException("Cannot delete a role assignment that does not exist")
+        );
         roleAssignmentDao.deleteById(roleAssignmentId);
     }
 }

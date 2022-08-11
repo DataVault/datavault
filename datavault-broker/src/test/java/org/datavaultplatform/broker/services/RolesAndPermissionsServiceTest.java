@@ -490,7 +490,7 @@ public class RolesAndPermissionsServiceTest {
     public void deleteRoleAssignmentShouldThrowExceptionWhenRoleAssignmentDoesNotExist() {
         checkIllegalStateExcepton("Cannot delete a role assignment that does not exist", () -> {
 
-        given(mockRoleAssignmentDao.findById(1L)).willReturn(null);
+        given(mockRoleAssignmentDao.findById(1L)).willReturn(Optional.empty());
 
         // When
         underTest.deleteRoleAssignment(1L);

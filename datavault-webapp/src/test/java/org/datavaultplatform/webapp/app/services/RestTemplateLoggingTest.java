@@ -72,7 +72,7 @@ public class RestTemplateLoggingTest {
     server.verify();
 
     List<String> actualLogEvents = logBackListAppender.list.stream().map(Object::toString).collect(Collectors.toList());
-    List<String> expectedLogEvents = IOUtils.readLines(this.expectedLogEventsResource.getInputStream(), StandardCharsets.UTF_8);;
+    List<String> expectedLogEvents = IOUtils.readLines(this.expectedLogEventsResource.getInputStream(), StandardCharsets.UTF_8);
 
     assertEquals(expectedLogEvents, actualLogEvents);
   }

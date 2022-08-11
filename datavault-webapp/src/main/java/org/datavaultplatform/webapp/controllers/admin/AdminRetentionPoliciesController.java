@@ -37,7 +37,7 @@ public class AdminRetentionPoliciesController {
     }
 
     @RequestMapping(value = "/admin/retentionpolicies/delete/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity deleteRetentionPoliciesListing(ModelMap model, @PathVariable("id") String policyId) throws Exception {
+    public ResponseEntity<Void> deleteRetentionPoliciesListing(ModelMap model, @PathVariable("id") String policyId) throws Exception {
 
         // todo : Check if it is being used and if so then error.
 
