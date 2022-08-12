@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/bash
 
 export PORT_WEBAPP=8888
 export PORT_BROKER=8080

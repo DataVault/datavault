@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/bash
 
 BASEDIR=$(dirname $0)
 . $BASEDIR/setup.sh
