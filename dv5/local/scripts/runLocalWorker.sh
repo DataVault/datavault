@@ -3,7 +3,7 @@
 # This script now uses 'java -jar' instead of 'mvnw spring-boot:run'
 java -version
 
-APP_NAME=datavault-worker-1
+APP_NAME=worker-1
 
 . ./setupBaseLoggingDirectory.sh
 
@@ -25,7 +25,7 @@ LOGFILE_SETTINGS=\
 
 SETUP_ENV=\
 "SERVER_PORT=9090 \
- SPRING_APPLICATION_NAME=$APP_NAME \
+ SPRING_APPLICATION_NAME=datavault-$APP_NAME \
  SPRING_SECURITY_DEBUG=true \
  DATAVAULT_HOME="$PROJECT_ROOT/dv5/local/props/worker" \
  RABBITMQ_DEFINE_QUEUE_WORKER=true \
