@@ -1,12 +1,12 @@
 #!/bin/bash
 
+SCRIPT_DIR=`dirname $0`
+PROJECT_ROOT=$(cd $SCRIPT_DIR/../../..;pwd)
+
 # This script now uses 'java -jar' instead of 'mvnw spring-boot:run'
 java -version
 
-. ./setupBaseLoggingDirectory.sh
-
-export PROJECT_ROOT=$(cd ../../../;pwd)
-cd $PROJECT_ROOT
+. $SCRIPT_DIR/setupBaseLoggingDirectory.sh
 
 LOGFILE_SETTINGS=\
 "LOGGING_LOGBACK_ROLLINGPOLICY_MAX_FILE_SIZE=10KB \
@@ -21,10 +21,15 @@ SETUP_ENV=\
  DATAVAULT_HOME="$PROJECT_ROOT/dv5/local/props/webapp" \
  $LOGFILE_SETTINGS"
 
- eval $SETUP_ENV \
- java -Xdebug \
- -Duser.language=en -Duser.country=GB -Duser.timezone=Europe/London \
+JAVA_TOOL_OPTS=\
+"-Duser.language=en \
+ -Duser.country=GB \
+ -Duser.home=$PROJECT_ROOT \
+ -Duser.timezone=Europe/London \
+ -Xdebug \
  -Xms1024M -Xmx2024M \
- -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5050 \
- -jar ./datavault-webapp/target/datavault-webapp.jar
+ -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5050"
+
+ eval $SETUP_ENV \
+ java $JAVA_TOOL_OPTS -jar $PROJECT_ROOT/datavault-webapp/target/datavault-webapp.jar
 
