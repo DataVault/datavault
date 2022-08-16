@@ -403,6 +403,36 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 			this.description = description;
 		}
 	}
+
+	/*
+	 * The TSM Tape Driver 'dsmc' executable should be on the Java PATH
+	 */
+	public static boolean checkTSMTapeDriver() {
+		try {
+			ProcessBuilder pb = new ProcessBuilder("which", "dsmc");
+
+			logger.info("user.dir [{}]", System.getProperty("user.dir"));
+			logger.info("PB 'path' [{}]", pb.environment().get("PATH"));
+
+			Process process = pb.start();
+
+			int status = process.waitFor(5, TimeUnit.SECONDS) ? process.exitValue() : -1;
+			String pOutput = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8).trim();
+			String pError = IOUtils.toString(process.getErrorStream(), StandardCharsets.UTF_8).trim();
+			if (status == 0) {
+				// canonicalPath resolves relative paths against user.dir and removes . and ..
+				Path canonicalPath = Paths.get(new File(pOutput).getCanonicalPath());
+				logger.info("'dsmc' - is found on PATH by 'which' at [{}]", canonicalPath);
+				return true;
+			} else {
+				logger.info("'dsmc' - is NOT found on PATH by 'which' {}", pError);
+				return false;
+			}
+		} catch (Exception ex) {
+			logger.error("problem trying to detect 'dsmc'", ex);
+			return false;
+		}
+	}
 }
 
 

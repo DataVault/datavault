@@ -1,0 +1,4 @@
+#!/bin/bash
+# an executable script to test the detection of 'dsmc' Tivoli Storage Manager Tape Driver program
+# see org.datavaultplatform.common.storage.impl.TivoliStorageManager.checkTSMTapeDriver
+echo "dsmc test script"

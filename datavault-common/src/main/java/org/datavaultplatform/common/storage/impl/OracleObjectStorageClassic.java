@@ -216,8 +216,8 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		return (contName != null) ? contName : OracleObjectStorageClassic.DEFAULT_CONTAINER_NAME;
 	}*/
 
-	private AuthenticationDetailsProvider getAuthDetailsProvider() throws Exception {
-		ConfigFileReader.ConfigFile config = this.getProperties();
+	private static AuthenticationDetailsProvider getAuthDetailsProvider() throws Exception {
+		ConfigFileReader.ConfigFile config = getProperties();
 		AuthenticationDetailsProvider provider = new ConfigFileAuthenticationDetailsProvider(config);
 		if (provider == null) {
 			logger.debug("Failed to get provider");
@@ -232,7 +232,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		return provider;
 	}
 
-	private ConfigFileReader.ConfigFile getProperties() throws Exception {
+	private static ConfigFileReader.ConfigFile getProperties() throws Exception {
 		ConfigFileReader.ConfigFile retVal =
 				ConfigFileReader.parse(OracleObjectStorageClassic.CONFIG_FILE_PATH, OracleObjectStorageClassic.PROFILE);
 		if (retVal == null) {
@@ -277,6 +277,16 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		UploadManager.UploadRequest uploadDetails =
 				UploadManager.UploadRequest.builder(working).allowOverwrite(true).build(request);
 		return uploadDetails;
+	}
+
+	public static boolean checkConfig() {
+		try {
+			getAuthDetailsProvider();
+			return true;
+		} catch (Exception ex) {
+			logger.warn("Problem getting Oracle Config from[{}]", CONFIG_FILE_PATH, ex);
+			return false;
+		}
 	}
 
 }

@@ -30,13 +30,16 @@ SETUP_ENV=\
  DATAVAULT_HOME="$PROJECT_ROOT/dv5/local/props/worker" \
  RABBITMQ_DEFINE_QUEUE_WORKER=true \
  RABBITMQ_DEFINE_QUEUE_BROKER=true \
+ CHECK_TSM_TAPE_DRIVER=true \
+ CHECK_ORACLE_CLOUD_CONFIG=true \
  $LOGFILE_SETTINGS \
  $ENCRYPTION_SETTINGS"
 
 JAVA_TOOL_OPTS=\
 "-Duser.language=en \
  -Duser.country=GB \
- -Duser.home=$PROJECT_ROOT \
+ -Duser.home=$PROJECT_ROOT/dv5/user/home \
+ -Duser.dir=$PROJECT_ROOT/dv5/user/dir \
  -Duser.timezone=Europe/London \
  -Xdebug \
  -Xms1024M -Xmx2024M \

@@ -3,6 +3,8 @@ package org.datavaultplatform.worker.app;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.crypto.EncryptionValidator;
 import org.datavaultplatform.common.monitor.MemoryStats;
+import org.datavaultplatform.common.storage.impl.OracleObjectStorageClassic;
+import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
 import org.datavaultplatform.worker.config.ActuatorConfig;
 import org.datavaultplatform.worker.config.EncryptionConfig;
 import org.datavaultplatform.worker.config.EventSenderConfig;
@@ -46,6 +48,12 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
   @Value("${validate.encryption.config:false}")
   boolean validateEncryptionConfig;
 
+  @Value("${check.oracle.cloud.config:false}")
+  boolean checkOracleCloudConfig;
+
+  @Value("${check.tsm.tape.driver:false}")
+  boolean checkTSMTapeDriver;
+
   @Autowired
   Environment env;
 
@@ -87,6 +95,18 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
       encryptionValidator.validate(true, true);
     } else {
       log.info("Encryption Config NOT CHECKED");
+    }
+
+    if (checkOracleCloudConfig) {
+      OracleObjectStorageClassic.checkConfig();
+    } else {
+      log.info("Oracle Cloud Config NOT CHECKED");
+    }
+
+    if (checkTSMTapeDriver) {
+      TivoliStorageManager.checkTSMTapeDriver();
+    } else {
+      log.info("TSM Tape Driver NOT CHECKED");
     }
   }
 

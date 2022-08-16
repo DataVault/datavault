@@ -16,6 +16,8 @@ cd $PROJECT_ROOT
  VALIDATE_ENCRYPTION_CONFIG=true \
  RABBITMQ_DEFINE_QUEUE_WORKER=true \
  RABBITMQ_DEFINE_QUEUE_BROKER=true \
+ CHECK_TSM_TAPE_DRIVER=true \
+ CHECK_ORACLE_CLOUD_CONFIG=true \
  ./mvnw spring-boot:run \
  -Dspring-boot.run.jvmArguments="-Xdebug \
  -Xms1024M -Xmx2024M \
