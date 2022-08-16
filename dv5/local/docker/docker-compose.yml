@@ -1,6 +1,6 @@
 version: "3.7"
 services:
-  db:
+  localdb:
     container_name: dv-local-mysql
     image: mysql:5.7
     restart: always
@@ -21,7 +21,7 @@ services:
       # Where our data will be persisted
     volumes:
       - v-local-mysql:/var/lib/mysql
-  rabbit:
+  localrabbit:
     container_name: dv-local-rabbit
     image: rabbitmq:3.10.7-management-alpine
     restart: always
@@ -33,14 +33,14 @@ services:
       - "5672:5672"
     volumes:
       - v-local-rabbit:/var/lib/rabbitmq
-  email:
+  localemail:
     container_name: dv-local-email
     image: mailhog/mailhog:v1.0.1
     restart: always
     ports:
      - "1025:1025" #SMTP
      - "8025:8025" #HTTP
-  ldap:
+  localldap:
     container_name: dv-local-ldap
     image: bitnami/openldap:latest
     restart: always

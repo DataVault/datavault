@@ -1,8 +1,8 @@
 version: "3.7"
 services:
   rabbit:
-    container_name: dv-local-byodb-rabbit
-    image: 3.10.7-management-alpine
+    container_name: dv-byodb-rabbit
+    image: rabbitmq:3.10.7-management-alpine
     restart: always
     environment:
       - RABBITMQ_DEFAULT_USER=rabbit
@@ -13,14 +13,14 @@ services:
     volumes:
       - v-local-byodb-rabbit:/var/lib/rabbitmq
   email:
-    container_name: dv-local-byodb-email
+    container_name: dv-byodb-email
     image: mailhog/mailhog:v1.0.1
     restart: always
     ports:
      - "1025:1025" #SMTP
      - "8025:8025" #HTTP
   ldap:
-    container_name: dv-local-byodb-ldap
+    container_name: dv-byodb-ldap
     image: bitnami/openldap:latest
     restart: always
     environment:

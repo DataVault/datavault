@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   db:
-    container_name: dv-local-db-mysql
+    container_name: dv-byodb-mysql
     image: mysql:5.7
     restart: always
     environment:
@@ -20,7 +20,7 @@ services:
       - "3306"
       # Where our data will be persisted
     volumes:
-      - v-local-db-mysql:/var/lib/mysql
+      - v-local-byodb-mysql:/var/lib/mysql
       - ./backup.sql:/docker-entrypoint-initdb.d/backup.sql
 volumes:
-  v-local-db-mysql:
+  v-local-byodb-mysql:

@@ -38,7 +38,7 @@ CREATE TABLE `ArchiveStores` (
 
 LOCK TABLES `ArchiveStores` WRITE;
 /*!40000 ALTER TABLE `ArchiveStores` DISABLE KEYS */;
-INSERT INTO `ArchiveStores` VALUES ('7a69cc29-e11a-456d-9312-a5f12f516175','Cloud archive store',_binary '╛\М\0sr\0java.util.HashMap\за\ц`\я\0F\0\nloadFactorI\0	thresholdxp?@\0\0\0\0\0w\0\0\0\0\0\0t\0rootPatht\0/tmp/datavault/archivex',_binary '\0','org.datavaultplatform.common.storage.impl.OracleObjectStorageClassic'),('d79aa08c-3701-45e7-a453-849acc79e2c8','Default archive store (TSM)',_binary '╛\М\0sr\0java.util.HashMap\за\ц`\я\0F\0\nloadFactorI\0	thresholdxp?@\0\0\0\0\0w\0\0\0\0\0\0t\0rootPatht\0/tmp/datavault/archivex',_binary '','org.datavaultplatform.common.storage.impl.TivoliStorageManager');
+INSERT INTO `ArchiveStores` VALUES ('033184c7-9739-437e-ad6d-4137cce3275b','Default archive store (TSM)',0xACED0005737200116A6176612E7574696C2E486173684D61700507DAC1C31660D103000246000A6C6F6164466163746F724900097468726573686F6C6478703F4000000000000C77080000001000000001740008726F6F74506174687400162F746D702F646174617661756C742F6172636869766578,0x01,'org.datavaultplatform.common.storage.impl.TivoliStorageManager'),('2f48bb08-846f-4480-bd59-f9b131fe6586','Cloud archive store',0xACED0005737200116A6176612E7574696C2E486173684D61700507DAC1C31660D103000246000A6C6F6164466163746F724900097468726573686F6C6478703F4000000000000C77080000001000000001740008726F6F74506174687400162F746D702F646174617661756C742F6172636869766578,0x00,'org.datavaultplatform.common.storage.impl.OracleObjectStorageClassic'),('e27f7cba-2785-4a95-9110-7af5a5f2b54a','LocalFileSystem',0xACED0005737200116A6176612E7574696C2E486173684D61700507DAC1C31660D103000246000A6C6F6164466163746F724900097468726573686F6C6478703F4000000000000C77080000001000000001740008726F6F745061746874000D2F746D702F61732F6C6F63616C78,0x01,'org.datavaultplatform.common.storage.impl.LocalFileSystem');
 /*!40000 ALTER TABLE `ArchiveStores` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -426,17 +426,17 @@ CREATE TABLE `Events` (
   `sequence` int(11) NOT NULL,
   `timestamp` datetime(6) DEFAULT NULL,
   `userAgent` varchar(255) DEFAULT NULL,
-  `archiveIds` longblob,
+  `archiveIds` tinyblob,
   `archiveSize` bigint(20) DEFAULT NULL,
-  `chunksDigest` longblob,
-  `digestAlgorithm` varchar(255) DEFAULT NULL,
   `digest` varchar(255) DEFAULT NULL,
+  `digestAlgorithm` varchar(255) DEFAULT NULL,
+  `chunksDigest` longblob,
+  `bytes` bigint(20) DEFAULT NULL,
   `aesMode` varchar(255) DEFAULT NULL,
   `chunkIVs` longblob,
   `encChunkDigests` longblob,
   `encTarDigest` varchar(255) DEFAULT NULL,
-  `tarIV` longblob,
-  `bytes` bigint(20) DEFAULT NULL,
+  `tarIV` tinyblob,
   `archive_id` varchar(36) DEFAULT NULL,
   `assignee_id` varchar(36) DEFAULT NULL,
   `audit_id` varchar(36) DEFAULT NULL,
@@ -556,7 +556,7 @@ CREATE TABLE `Groups` (
 
 LOCK TABLES `Groups` WRITE;
 /*!40000 ALTER TABLE `Groups` DISABLE KEYS */;
-INSERT INTO `Groups` VALUES ('grp-lfcs',_binary '','LFCS');
+INSERT INTO `Groups` VALUES ('grp-lfcs',0x01,'LFCS');
 /*!40000 ALTER TABLE `Groups` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -575,7 +575,7 @@ CREATE TABLE `Jobs` (
   `progressMax` bigint(20) NOT NULL,
   `progressMessage` text,
   `state` int(11) DEFAULT NULL,
-  `states` longblob,
+  `states` tinyblob,
   `taskClass` text,
   `timestamp` datetime(6) DEFAULT NULL,
   `version` bigint(20) NOT NULL,
@@ -593,31 +593,6 @@ CREATE TABLE `Jobs` (
 LOCK TABLES `Jobs` WRITE;
 /*!40000 ALTER TABLE `Jobs` DISABLE KEYS */;
 /*!40000 ALTER TABLE `Jobs` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `Message`
---
-
-DROP TABLE IF EXISTS `Message`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Message` (
-  `id` varchar(36) NOT NULL,
-  `message` varchar(255) DEFAULT NULL,
-  `timestamp` datetime(6) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `Message`
---
-
-LOCK TABLES `Message` WRITE;
-/*!40000 ALTER TABLE `Message` DISABLE KEYS */;
-INSERT INTO `Message` VALUES ('7f90098a-0417-11ed-bd97-0242ac110004','test-message','2022-07-15 08:24:08.000000');
-/*!40000 ALTER TABLE `Message` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -706,10 +681,9 @@ DROP TABLE IF EXISTS `Permissions`;
 CREATE TABLE `Permissions` (
   `id` varchar(36) NOT NULL,
   `label` text NOT NULL,
-  `permission` varchar(255) NOT NULL,
+  `permission` text NOT NULL,
   `type` text NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `UK_6hocm73dsa8ufapbes72fbdel` (`permission`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -753,7 +727,7 @@ CREATE TABLE `RetentionPolicies` (
 
 LOCK TABLES `RetentionPolicies` WRITE;
 /*!40000 ALTER TABLE `RetentionPolicies` DISABLE KEYS */;
-INSERT INTO `RetentionPolicies` VALUES (1,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'N/A',5,'Multiple Sclerosis Society',37,'https://www.mssociety.org.uk/ms-resources/grant-round-applicant-guidance'),(2,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'Not stated',5,'National Centre for the Replacement, Refinement and Reduction of Animal Research',38,'http://www.nc3rs.org.uk/sites/default/files/documents/Funding/Handbook.pdf'),(3,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'N/A',5,'National Institute for Health Research',39,'https://www.nihr.ac.uk/funding-and-support/funding-for-research-studies/how-to-apply-for-funding/'),(4,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'Not stated',5,'NERC',40,'http://www.nerc.ac.uk/research/sites/data/policy/'),(5,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'N/A',5,'Paul Mellon Centre for Studies in British Art',41,'http://www.paul-mellon-centre.ac.uk/fellowships-and-grants/procedure'),(6,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'?',5,'Pet Plan Charitable Trust',42,NULL),(7,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'N/A',5,'Royal Academy of Engineering',43,'https://www.raeng.org.uk/grants-and-prizes/support-for-research'),(8,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'not stated',5,'Royal Society',44,'https://royalsociety.org/grants-schemes-awards/'),(9,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'N/A',5,'Royal Society of Chemistry',45,'http://www.rsc.org/awards-funding/funding'),(10,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'N/A',5,'Royal Society of Edinburgh',46,'https://www.rse.org.uk/funding-awards/'),(11,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'N/A',5,'Scottish Funding Council',47,'http://www.sfc.ac.uk/funding/university-funding/university-funding-research/university-research-funding.aspx'),(12,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'N/A',5,'Scottish Government',48,'http://www.gov.scot/topics/research'),(13,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'N/A',5,'Scottish Institute for Policing Research',49,'http://www.sipr.ac.uk/research/index.php'),(14,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'N/A',5,'Society for Endocrinology',50,'https://www.endocrinology.org/grants-and-awards/'),(15,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'N/A',5,'Society for Reproduction and Fertility',51,'http://srf-reproduction.org/grants-awards/grants/'),(16,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'10 years from the end of the project',5,'STFC',52,'https://www.stfc.ac.uk/funding/research-grants/data-management-plan/'),(17,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'N/A',5,'Tenovus - Scotland',53,'https://tenovus-scotland.org.uk/for-researchers/'),(18,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'N/A',5,'UK-India Eduation and Research Initiative',54,'http://www.ukieri.org/call-for-research-applications-2017-18.html'),(19,'2018-02-13',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '',NULL,'N/A',5,'University of Edinburgh (applicable to unfunded or self-funded research)',55,''),(20,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.uk.WTBasicRetentionPolicy',_binary '',NULL,'Not stated',5,'Wellcome Trust Basic',56,'https://wellcome.ac.uk/funding/managing-grant/policy-data-software-materials-management-and-sharing'),(21,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.uk.WTPHCRetentionPolicy',_binary '',NULL,'Not stated',5,'Wellcome Trust Population Health / Clinical',57,'https://wellcome.ac.uk/funding/managing-grant/policy-data-software-materials-management-and-sharing'),(22,'2018-12-03',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '','2018-12-03','N/A',5,'NHS Retention Policy',58,'https://www.hra.nhs.uk/planning-and-improving-research/policies-standards-legislation/'),(23,'2018-12-03','Policy of UoE\'s Edinburgh Imaging (part of Edinburgh Medical School)',NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',_binary '','2018-12-03','N/A',5,'Edinburgh Imaging Retention Policy',59,'');
+INSERT INTO `RetentionPolicies` VALUES (1,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'N/A',5,'Multiple Sclerosis Society',37,'https://www.mssociety.org.uk/ms-resources/grant-round-applicant-guidance'),(2,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'Not stated',5,'National Centre for the Replacement, Refinement and Reduction of Animal Research',38,'http://www.nc3rs.org.uk/sites/default/files/documents/Funding/Handbook.pdf'),(3,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'N/A',5,'National Institute for Health Research',39,'https://www.nihr.ac.uk/funding-and-support/funding-for-research-studies/how-to-apply-for-funding/'),(4,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'Not stated',5,'NERC',40,'http://www.nerc.ac.uk/research/sites/data/policy/'),(5,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'N/A',5,'Paul Mellon Centre for Studies in British Art',41,'http://www.paul-mellon-centre.ac.uk/fellowships-and-grants/procedure'),(6,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'?',5,'Pet Plan Charitable Trust',42,NULL),(7,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'N/A',5,'Royal Academy of Engineering',43,'https://www.raeng.org.uk/grants-and-prizes/support-for-research'),(8,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'not stated',5,'Royal Society',44,'https://royalsociety.org/grants-schemes-awards/'),(9,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'N/A',5,'Royal Society of Chemistry',45,'http://www.rsc.org/awards-funding/funding'),(10,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'N/A',5,'Royal Society of Edinburgh',46,'https://www.rse.org.uk/funding-awards/'),(11,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'N/A',5,'Scottish Funding Council',47,'http://www.sfc.ac.uk/funding/university-funding/university-funding-research/university-research-funding.aspx'),(12,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'N/A',5,'Scottish Government',48,'http://www.gov.scot/topics/research'),(13,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'N/A',5,'Scottish Institute for Policing Research',49,'http://www.sipr.ac.uk/research/index.php'),(14,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'N/A',5,'Society for Endocrinology',50,'https://www.endocrinology.org/grants-and-awards/'),(15,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'N/A',5,'Society for Reproduction and Fertility',51,'http://srf-reproduction.org/grants-awards/grants/'),(16,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'10 years from the end of the project',5,'STFC',52,'https://www.stfc.ac.uk/funding/research-grants/data-management-plan/'),(17,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'N/A',5,'Tenovus - Scotland',53,'https://tenovus-scotland.org.uk/for-researchers/'),(18,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'N/A',5,'UK-India Eduation and Research Initiative',54,'http://www.ukieri.org/call-for-research-applications-2017-18.html'),(19,'2018-02-13',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,NULL,'N/A',5,'University of Edinburgh (applicable to unfunded or self-funded research)',55,''),(20,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.uk.WTBasicRetentionPolicy',0x01,NULL,'Not stated',5,'Wellcome Trust Basic',56,'https://wellcome.ac.uk/funding/managing-grant/policy-data-software-materials-management-and-sharing'),(21,'2018-02-20',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.uk.WTPHCRetentionPolicy',0x01,NULL,'Not stated',5,'Wellcome Trust Population Health / Clinical',57,'https://wellcome.ac.uk/funding/managing-grant/policy-data-software-materials-management-and-sharing'),(22,'2018-12-03',NULL,NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,'2018-12-03','N/A',5,'NHS Retention Policy',58,'https://www.hra.nhs.uk/planning-and-improving-research/policies-standards-legislation/'),(23,'2018-12-03','Policy of UoE\'s Edinburgh Imaging (part of Edinburgh Medical School)',NULL,'org.datavaultplatform.common.retentionpolicy.impl.DefaultRetentionPolicy',0x01,'2018-12-03','N/A',5,'Edinburgh Imaging Retention Policy',59,'');
 /*!40000 ALTER TABLE `RetentionPolicies` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1017,4 +991,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-07-15  8:36:43
+-- Dump completed on 2022-08-16 15:33:41
