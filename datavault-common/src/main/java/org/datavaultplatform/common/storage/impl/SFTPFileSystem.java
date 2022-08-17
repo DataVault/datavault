@@ -86,13 +86,17 @@ public class SFTPFileSystem extends Device implements UserStore {
         properties.put("StrictHostKeyChecking", "no");
         session.setConfig(properties);
         for (int i = 0; i < RETRIES; i++) {
+            int attempt = i+1;
             try {
-               logger.info("Sftp connection attempt " + i);
+               logger.info("Sftp connection attempt[{}/{}]", attempt, RETRIES);
                session.connect();
                break;
             } catch(JSchException ex) {
                if (i == RETRIES - 1) {
+                   log.error("problem with Jsch attempt[{}/{}]", attempt, RETRIES, ex);
                    throw ex;
+               } else {
+                   log.warn("problem with Jsch attempt[{}/{}]", attempt, RETRIES, ex);
                }
                continue;
             }
