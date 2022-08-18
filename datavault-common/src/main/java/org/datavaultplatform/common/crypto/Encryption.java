@@ -7,6 +7,10 @@ import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Builder;
+import lombok.Data;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.apache.commons.lang3.StringUtils;
@@ -552,10 +556,9 @@ public class Encryption {
     /**
      * Allow running encryption method outside of the app.
      * @param args a string array of arguments to the main class, should be the name of the method.
-     * @throws IOException if an IOException occurs
-     * @throws InterruptedException if an InterruptedException occurs to a thread
      */
     public static void main(String [] args) {
+        addBouncyCastleSecurityProvider();
         String methodName = args[0];
 
         if(methodName.equals("generateSecretKey")){
@@ -564,45 +567,63 @@ public class Encryption {
                 key = Encryption.generateSecretKey();
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
+                System.exit(1);
             }
             String encodedKey = Base64.getEncoder().encodeToString(key.getEncoded());
             System.out.println(encodedKey);
         }
         if(methodName.equals("generateSecretKeyAndAddToJCEKS")){
-            JsonObject jsonObject = null;
-            try {
-                FileReader jsonReader = new FileReader(args[1]);
-                jsonObject = Json.parse(jsonReader).asObject();
-            } catch (Exception e){
-                e.printStackTrace();
+            String jsonFileName = args[1];
+            generateSecretKeyAndAddToJCEKS(jsonFileName);
+        }
+    }
+
+    static void generateSecretKeyAndAddToJCEKS(String keyStoreFileName) {
+        try {
+            KeyStoreInfo keyStoreInfo = extractKeyStoreInfo(keyStoreFileName);
+            generateSecretKeyAndAddToJCEKS(keyStoreInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    static KeyStoreInfo extractKeyStoreInfo(String keyStoreFileName) throws Exception {
+        try (FileReader jsonReader = new FileReader(keyStoreFileName)) {
+            JsonObject jsonObject = Json.parse(jsonReader).asObject();
+            String path = jsonObject.get("path").asString();
+            String password = jsonObject.get("password").asString();
+            JsonArray aliasesRaw = jsonObject.get("key_aliases").asArray();
+            List<String> aliases = new ArrayList<>();
+            aliasesRaw.forEach(jValue -> aliases.add(jValue.asString()));
+            return KeyStoreInfo.builder()
+                .path(path)
+                .password(password)
+                .aliases(aliases)
+                .build();
+        }
+    }
+
+    static void generateSecretKeyAndAddToJCEKS(KeyStoreInfo info) throws Exception {
+        Encryption.staticSetKeystorePath(info.getPath());
+        Encryption.staticSetKeystorePassword(info.getPassword());
+        List<String> aliases = info.getAliases();
+        SecretKey keys[] = new SecretKey[aliases.size()];
+        for(int i = 0; i < aliases.size(); i++) {
+            String alias = aliases.get(i);
+            System.out.println("Creating " + alias + " to " + Encryption.getKeystorePath());
+            keys[i] = Encryption.generateSecretKey();
+            Encryption.saveSecretKeyToKeyStore(alias, keys[i]);
+        }
+
+        for(int i = 0; i < aliases.size(); i++) {
+            String alias = aliases.get(i);
+            SecretKey returnKey = Encryption.getSecretKeyFromKeyStore(alias);
+            if (!returnKey.equals(keys[i])) {
+                System.err.println("ERROR! The " + alias + " key return by KeyStore is different!");
             }
-
-            Encryption.staticSetKeystorePath(jsonObject.get("path").asString());
-            Encryption.staticSetKeystorePassword(jsonObject.get("password").asString());
-
-            JsonArray aliases = jsonObject.get("key_aliases").asArray();
-
-            try {
-                SecretKey keys[] = new SecretKey[aliases.size()];
-                for(int i = 0; i < aliases.size(); i++) {
-                    String alias = aliases.get(i).toString();
-                    System.out.println("Creating " + alias +" to " + Encryption.getKeystorePath());
-                    keys[i] = Encryption.generateSecretKey();
-                    Encryption.saveSecretKeyToKeyStore(alias, keys[i]);
-                }
-
-                for(int i = 0; i < aliases.size(); i++) {
-                    String alias = aliases.get(i).toString();
-                    SecretKey returnKey = Encryption.getSecretKeyFromKeyStore(alias);
-                    if (!returnKey.equals(keys[i])) {
-                        System.err.println("ERROR! The " + alias + " key return by KeyStore is different!");
-                    }
-                    String encodedKey = Base64.getEncoder().encodeToString(keys[i].getEncoded());
-                    System.out.println(alias + ": " + encodedKey);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            String encodedKey = Base64.getEncoder().encodeToString(keys[i].getEncoded());
+            System.out.println(alias + ": " + encodedKey);
         }
     }
 
@@ -640,5 +661,13 @@ public class Encryption {
                 logger.warn("The two encryption key names are the same - [{}]", keyNameData);
             }
         }
+    }
+
+    @Data
+    @Builder
+    static class KeyStoreInfo {
+        final String path;
+        final String password;
+        final List<String> aliases;
     }
 }
