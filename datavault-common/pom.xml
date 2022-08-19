@@ -159,6 +159,7 @@
                 <include>**/DockerImage*</include>
                 <include>**/Base*Test*</include>
                 <include>**/*.ldif</include>
+                <include>**/SshRsaKeyUtils*</include>
               </includes>
             </configuration>
           </execution>
