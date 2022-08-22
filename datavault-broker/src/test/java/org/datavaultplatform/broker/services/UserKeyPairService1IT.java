@@ -47,7 +47,7 @@ public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
   @Override
   @SneakyThrows
   void testKeyPair() {
-    UserKeyPairService service = new UserKeyPairService(TEST_PASSPHRASE);
+    UserKeyPairService service = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
     assertEquals(TEST_PASSPHRASE, service.getPassphrase());
     KeyPairInfo info = service.generateNewKeyPair();
 
