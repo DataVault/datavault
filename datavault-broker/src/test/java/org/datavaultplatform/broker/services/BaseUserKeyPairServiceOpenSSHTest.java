@@ -41,6 +41,7 @@ public abstract class BaseUserKeyPairServiceOpenSSHTest extends BaseUserKeyPairS
   @MethodSource("provideUserKeyPairService")
   @Override
   void testKeyPair(UserKeyPairService service) {
+
     try {
       KeyPairInfo info = service.generateNewKeyPair();
       validateKeyPair(info.getPublicKey(), info.getPrivateKey().getBytes(StandardCharsets.UTF_8));
