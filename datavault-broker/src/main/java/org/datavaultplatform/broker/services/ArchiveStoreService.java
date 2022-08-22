@@ -42,7 +42,7 @@ public class ArchiveStoreService {
             @Value("${tsmMaxRetries:#{null}}") String tsmMaxRetries,
             @Value("${occMaxRetries:#{null}}") String occMaxRetries,
             @Value("${ociNameSpace:#{null}}") String ociNameSpace,
-            @Value("${s3.bucketName:#{null}}") String ociBucketName,
+            @Value("${ociBucketName:#{null}}") String ociBucketName,
             ArchiveStoreDAO archiveStoreDAO) {
         this.optionsDir = optionsDir;
         this.tempDir = tempDir;
