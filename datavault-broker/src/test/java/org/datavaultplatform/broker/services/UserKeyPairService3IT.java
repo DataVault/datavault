@@ -18,6 +18,8 @@ import org.datavaultplatform.broker.test.SftpServerUtils;
 import org.datavaultplatform.common.storage.impl.JSchLogger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * This test generates a key pair and checks that the keypair is valid by ...
@@ -37,11 +39,11 @@ public class UserKeyPairService3IT extends BaseUserKeyPairServiceTest {
    * using keypair to perform scp between testcontainers
    */
 
-  @Test
+  @ParameterizedTest
+  @MethodSource("provideUserKeyPairService")
   @Override
   @SneakyThrows
-  void testKeyPair() {
-    UserKeyPairService service = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
+  void testKeyPair(UserKeyPairService service) {
     KeyPairInfo info = service.generateNewKeyPair();
     validateKeyPair(info.getPublicKey(), info.getPrivateKey().getBytes(StandardCharsets.UTF_8));
   }

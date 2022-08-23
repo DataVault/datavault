@@ -22,7 +22,8 @@ import org.datavaultplatform.broker.services.UserKeyPairService.KeyPairInfo;
 import org.datavaultplatform.common.docker.DockerImage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.MountableFile;
 
@@ -34,8 +35,6 @@ import org.testcontainers.utility.MountableFile;
 @Slf4j
 public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
 
-  public static final String TEST_PASSPHRASE = "tenet";
-
   static Path TMP_DIR;
   static GenericContainer<?> linuxWithOpenSSL;
 
@@ -43,11 +42,11 @@ public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
    * Tests that the key pair is valid by
    * regenerating public key from private key
    */
-  @Test
+  @ParameterizedTest
+  @MethodSource("provideUserKeyPairService")
   @Override
   @SneakyThrows
-  void testKeyPair() {
-    UserKeyPairService service = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
+  void testKeyPair(UserKeyPairService service) {
     assertEquals(TEST_PASSPHRASE, service.getPassphrase());
     KeyPairInfo info = service.generateNewKeyPair();
 
@@ -80,8 +79,8 @@ public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
    * We regenerate the public key from the encrypted private key and check we get same public key.
    * This proves that the private key and public key are paired correctly.
    *
-   * @param info
-   * @throws JSchException
+   * @param info the key pair information
+   * @throws JSchException if there is a problem
    */
   private void checkPrivateAndPublicKeyPairing(KeyPairInfo info) throws JSchException {
 
@@ -95,7 +94,7 @@ public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
     //we use openssl to decrypt the encrypted private key (easier than doing it in Java)
     String decrypted = decryptPrivateKey();
 
-    // create a new keypair from the decrypted private key only (private key should contains all public key information)
+    // create a new keypair from the decrypted private key only (private key should contain all public key information)
     KeyPair keyPair1 = KeyPair.load(new JSch(), decrypted.getBytes(StandardCharsets.UTF_8), null);
 
     ByteArrayOutputStream publicStream1 = new ByteArrayOutputStream();
@@ -103,7 +102,7 @@ public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
     String publicKey1 = new String(publicStream1.toByteArray(), StandardCharsets.UTF_8);
 
     //check that the re-created public key is same as original public key
-    //this proves that the original private/public key pair are matchd
+    //this proves that the original private/public key pair are matched
     assertEquals(info.getPublicKey(), publicKey1);
   }
 
@@ -111,7 +110,7 @@ public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
   private String decryptPrivateKey() {
 
     String command = "openssl rsa -in /tmp/dv5-temp/rsa -passin pass:" + TEST_PASSPHRASE +" -out /tmp/dv5-temp/rsa.decrypted";
-    execInContainer(linuxWithOpenSSL, "decrypr private key", command);
+    execInContainer(linuxWithOpenSSL, "decrypt private key", command);
 
     File file = new File(TMP_DIR.toFile(), "rsa.decrypted");
     file.createNewFile();
@@ -152,7 +151,7 @@ public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
   }
 
   @AfterAll
-  static void tearDown() throws IOException {
+  static void tearDown() {
     linuxWithOpenSSL.stop();
   }
 }
