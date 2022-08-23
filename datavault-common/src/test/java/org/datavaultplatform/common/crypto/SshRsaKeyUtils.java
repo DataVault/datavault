@@ -1,7 +1,6 @@
 package org.datavaultplatform.common.crypto;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.InputStream;
 import java.io.Reader;
@@ -13,6 +12,7 @@ import java.nio.file.Files;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.Security;
+import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
@@ -25,6 +25,7 @@ import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
+import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.StreamUtils;
 
@@ -107,6 +108,27 @@ public class SshRsaKeyUtils {
     byte[] bytes = new byte[len];
     bb.get(bytes);
     return new BigInteger(bytes);
+  }
+
+  public static KeyPair getKeyPairFromRSAPrivateKey(RSAPrivateKey rsaPrivateKey) {
+    RSAPublicKey rsaPublicKey = getRSAPublicKey(rsaPrivateKey);
+    Assert.isTrue(rsaPublicKey.getModulus().equals(rsaPrivateKey.getModulus()),
+        () -> "private and public modulus must be the same");
+    KeyPair keyPair = new KeyPair(rsaPublicKey, rsaPrivateKey);
+    return keyPair;
+  }
+
+  @SneakyThrows
+  private static RSAPublicKey getRSAPublicKey(RSAPrivateKey rsaPrivateKey) {
+    BigInteger modulus = rsaPrivateKey.getModulus();
+    BigInteger publicExponent = getRSAPrivateCrtKey(rsaPrivateKey).getPublicExponent();
+    RSAPublicKeySpec publicSpec = new RSAPublicKeySpec(modulus, publicExponent);
+    return (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(publicSpec);
+  }
+
+  private static RSAPrivateCrtKey getRSAPrivateCrtKey(RSAPrivateKey privateKey) {
+    RSAPrivateCrtKey rsaPrivateCrtKey = (RSAPrivateCrtKey) privateKey;
+    return rsaPrivateCrtKey;
   }
 }
 
