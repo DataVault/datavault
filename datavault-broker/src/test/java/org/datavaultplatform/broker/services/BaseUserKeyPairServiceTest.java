@@ -3,6 +3,7 @@ package org.datavaultplatform.broker.services;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -18,12 +19,15 @@ public abstract class BaseUserKeyPairServiceTest {
 
   public static final String NO = "no";
   public static final String STRICT_HOST_KEY_CHECKING = "StrictHostKeyChecking";
+
+  public static final String TEST_PASSPHRASE = "tenet";
+
   @SneakyThrows
-  final static void execInContainer(GenericContainer container, String label, String command) {
+  final static void execInContainer(GenericContainer<?> container, String label, String command) {
     execInContainer(container, label, command.split(" "));
   }
 
-  final static void execInContainer(GenericContainer container, String label, String... commands) {
+  final static void execInContainer(GenericContainer<?> container, String label, String... commands) {
     try {
       Container.ExecResult result = container.execInContainer(commands);
       if (result.getExitCode() != 0) {
@@ -51,11 +55,18 @@ public abstract class BaseUserKeyPairServiceTest {
     return container.copyFileFromContainer(path, is -> StreamUtils.copyToString(is, UTF_8));
   }
 
-  abstract void testKeyPair();
+  abstract void testKeyPair(UserKeyPairService service);
 
   @SneakyThrows
   final String getStringFromResource(Resource res) {
     return StreamUtils.copyToString(res.getInputStream(), UTF_8);
+  }
+
+  static Stream<UserKeyPairService> provideUserKeyPairService() {
+    return Stream.of (
+        new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE),
+        new UserKeyPairServiceImpl(TEST_PASSPHRASE)
+    );
   }
 
 }
