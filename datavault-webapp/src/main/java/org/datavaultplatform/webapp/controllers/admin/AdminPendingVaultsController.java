@@ -12,6 +12,7 @@ import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.response.VaultsData;
+import org.datavaultplatform.webapp.services.ForceLogoutService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
 import org.slf4j.Logger;
@@ -37,14 +38,15 @@ public class AdminPendingVaultsController {
 
     private final RestService restService;
     private final UserLookupService userLookupService;
+    private final ForceLogoutService forceLogoutService;
 
     @Autowired
-    public AdminPendingVaultsController(RestService restService, UserLookupService userLookupService) {
+    public AdminPendingVaultsController(RestService restService, UserLookupService userLookupService, ForceLogoutService forceLogoutService) {
         this.restService = restService;
         this.userLookupService = userLookupService;
+        this.forceLogoutService = forceLogoutService;
     }
-    
-    
+
     @RequestMapping(value = "/admin/pendingVaults", method = RequestMethod.GET)
     public String searchPendingVaults(ModelMap model,
                                @RequestParam(value = "query", defaultValue = "") String query,
@@ -201,6 +203,7 @@ public class AdminPendingVaultsController {
         // any other new info too pure stuff billing etc.
         // then delete the pending vault
         restService.deletePendingVault(cv.getPendingID());
+        forceLogoutService.logoutVaultUsers(cv);
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
         return "redirect:" + vaultUrl;
     }
