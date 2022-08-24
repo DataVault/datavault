@@ -75,8 +75,6 @@
         <dependency>
             <groupId>gov.loc</groupId>
             <artifactId>bagit</artifactId>
-            <!-- worker is using 5.2.0 -->
-            <version>4.9.0</version>
          </dependency>
 
         <dependency>
