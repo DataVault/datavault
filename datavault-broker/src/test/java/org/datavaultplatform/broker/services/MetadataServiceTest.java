@@ -3,7 +3,7 @@ package org.datavaultplatform.broker.services;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class MetadataServiceTest {
 
   @Test
   void testGetManifestForBag01() {
-    ArrayList<FileFixity> result = service.getManifest("bag01");
+    List<FileFixity> result = service.getManifest("bag01");
     result.forEach(ff -> log.info("ff [{}]", ff));
     assertEquals(6, result.size());
 
