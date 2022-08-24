@@ -1,5 +1,8 @@
 package org.datavaultplatform.common.model;
 
+import lombok.ToString;
+
+@ToString
 public class FileFixity {
 
     private String file;
