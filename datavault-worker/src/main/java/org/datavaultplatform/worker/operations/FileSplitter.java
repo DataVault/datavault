@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class FileSplitter {
-    private static final Logger log = LoggerFactory.getLogger(Packager.class);
+    private static final Logger log = LoggerFactory.getLogger(FileSplitter.class);
     
     public static int DEFAULT_CHUNK_SIZE = 500 * 1000 * 1000; // 500MB
     
