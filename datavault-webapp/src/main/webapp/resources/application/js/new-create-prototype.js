@@ -113,47 +113,31 @@ $(document).ready(function(){
 			var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0
 			// Default Review Date (3 years from today)
 			var estimatedReviewDate = calculateReviewDateForToday(defaultLength);
-			
-			// GED in future test
-			var grantGEDInFuture = noGED  ? false : (dateDiffInDaysStartingAtMidnight(today, gedDate) > 0);
-			var billingGEDInFuture = noBillingGED ? false : (dateDiffInDaysStartingAtMidnight(today, billingGedDate) > 0);
-            
+			   
 			if (noRP === false && noGED === true && noBillingGED === true) {
 				// if we only have policy then length + current date = review date
 				estimatedReviewDate = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
 			} 
 			
-			if (noRP === false && noBillingGED === false && billingGEDInFuture === true) {
+			if (noRP === false && noBillingGED === false) {
 				// if we have both then billing ged + policy length = review date
 				estimatedReviewDate = String(billingGedDate.getFullYear() + policyLength) + '-' + billingGedMm + '-' + billingGedDd;
 			} 
 			
-			if (noRP === true && noBillingGED === false && billingGEDInFuture === true) {
+			if (noRP === true && noBillingGED === false) {
 				// if we only have a ged in the billing fieldset then ged + 3 = review date
 				estimatedReviewDate = String(billingGedDate.getFullYear() + defaultLength) + '-' + billingGedMm + '-' + billingGedDd;
 			} 
 			
-			if (noRP === false && noGED === false && grantGEDInFuture === true) {
+			if (noRP === false && noGED === false) {
 				// if we have both then ged + policy length = review date
 				estimatedReviewDate = String(gedDate.getFullYear() + policyLength) + '-' + gedMm + '-' + gedDd;
 			} 
 			
-			if (noRP === true && noGED === false && grantGEDInFuture === true) {
+			if (noRP === true && noGED === false) {
 				// if we only have ged then ged + 3 = review date
 				estimatedReviewDate = String(gedDate.getFullYear() + defaultLength) + '-' + gedMm + '-' + gedDd;
-			} 
-			
-			if (noRP === false && noBillingGED === false && billingGEDInFuture === false) {
-				// if we only have policy then length + current date = review date
-				estimatedReviewDate = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
-			} 
-			
-			if (noRP === false && noGED === false && grantGEDInFuture === false) {
-				// if we only have policy then length + current date = review date
-				estimatedReviewDate = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
-			}
-			
-			
+			} 		
 
 			$("#reviewDate").val(estimatedReviewDate);
 
