@@ -10,8 +10,10 @@ import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class PendingVaultsService {
@@ -21,9 +23,11 @@ public class PendingVaultsService {
     private GroupsService groupsService;
     private RetentionPoliciesService retentionPoliciesService;
     private UsersService usersService;
+    private EmailService emailService;
     private RolesAndPermissionsService permissionsService;
     private PendingDataCreatorsService pendingDataCreatorsService;
     private VaultsService vaultsService;
+    private String helpMail;
 
     public void setPendingVaultDAO(PendingVaultDAO pendingVaultDAO) {
         this.pendingVaultDAO = pendingVaultDAO;
@@ -36,6 +40,10 @@ public class PendingVaultsService {
     public void setRetentionPoliciesService(RetentionPoliciesService retentionPoliciesService) { this.retentionPoliciesService = retentionPoliciesService; }
 
     public void setGroupsService(GroupsService groupsService) { this.groupsService = groupsService; }
+
+    public void setEmailService(EmailService emailService) { this.emailService = emailService; }
+
+    public void setHelpMail(String helpMail) { this.helpMail = helpMail; }
 
     public void setUsersService(UsersService usersService) { this.usersService = usersService; }
 
@@ -409,5 +417,18 @@ public class PendingVaultsService {
 
     public List<PendingVault> getPendingVaults(String userId, String sort, String order, String offset, String maxResult) {
         return pendingVaultDAO.list(userId, sort, order, offset, maxResult);
+    }
+
+    public void sendNewPendingVaultEmail(PendingVault vault) {
+        // send mail to admin email which in turn sets up unidesk call
+
+        logger.info("Sending pending vault submitted email");
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("vault-name", vault.getName());
+        model.put("group-name", vault.getGroup().getName());
+        model.put("submitter-id", vault.getUser().getID());
+        LocalDate today = LocalDate.now();
+        model.put("timestamp", today);
+        this.emailService.sendTemplateMail(this.helpMail, "New Pending Vault Submitted", "group-admin-pv-submitted.vm", model);
     }
 }
