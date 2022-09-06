@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.io.File;
 import java.util.HashMap;
 import javax.crypto.SecretKey;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.broker.services.UserKeyPairServiceJSchImpl;
@@ -23,16 +22,16 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Slf4j
 @Testcontainers(disabledWithoutDocker = true)
 public class SFTPFileSystemWithPrivatePublicKeyPairIT extends BaseSFTPFileSystemIT {
-  private static final String TEST_PASSPHRASE = "tenet";
-  private static final String ENV_PUBLIC_KEY = "PUBLIC_KEY";
-  private static final String KEY_STORE_PASSWORD = "keyStorePassword";
-  private static final String SSH_KEY_NAME = "sshKeyName";
+  static final String TEST_PASSPHRASE = "tenet";
+  static final String ENV_PUBLIC_KEY = "PUBLIC_KEY";
+  static final String KEY_STORE_PASSWORD = "keyStorePassword";
+  static final String SSH_KEY_NAME = "sshKeyName";
 
   @TempDir
-  private File keyStoreTempDir;
+  File keyStoreTempDir;
 
   @Override
-  protected GenericContainer<?> getSftpTestContainer() {
+  GenericContainer<?> getSftpTestContainer() {
     return new GenericContainer<>(DockerImage.OPEN_SSH_8pt6_IMAGE_NAME)
         .withEnv(ENV_USER_NAME, TEST_USER)
         .withEnv(ENV_PUBLIC_KEY, this.keyPairInfo.getPublicKey()) //this causes the public key to be added to /config/.ssh/authorized_keys
@@ -41,7 +40,7 @@ public class SFTPFileSystemWithPrivatePublicKeyPairIT extends BaseSFTPFileSystem
   }
 
   @Override
-  protected void addAuthenticationProps(HashMap<String, String> props) throws Exception {
+  void addAuthenticationProps(HashMap<String, String> props) throws Exception {
 
     byte[] iv = Encryption.generateIV();
     byte[] encrypted = Encryption.encryptSecret(keyPairInfo.getPrivateKey(), null, iv);
@@ -52,7 +51,7 @@ public class SFTPFileSystemWithPrivatePublicKeyPairIT extends BaseSFTPFileSystem
   }
 
   @Override
-  protected void authenticationSetup()  throws Exception {
+  void authenticationSetup()  throws Exception {
 
     Encryption.addBouncyCastleSecurityProvider();
     String keyStorePath = keyStoreTempDir.toPath().resolve("test.ks").toString();

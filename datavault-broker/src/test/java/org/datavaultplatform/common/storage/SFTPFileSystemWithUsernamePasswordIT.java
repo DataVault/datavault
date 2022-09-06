@@ -14,12 +14,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers(disabledWithoutDocker = true)
 public class SFTPFileSystemWithUsernamePasswordIT extends BaseSFTPFileSystemIT {
 
-  private static final String TEST_PASSWORD = "testPassword";
-  private static final String ENV_PASSWORD = "USER_PASSWORD";
-  private static final String ENV_PASSWORD_ACCESS = "PASSWORD_ACCESS";
+  static final String TEST_PASSWORD = "testPassword";
+  static final String ENV_PASSWORD = "USER_PASSWORD";
+  static final String ENV_PASSWORD_ACCESS = "PASSWORD_ACCESS";
 
   @Override
-  protected GenericContainer<?> getSftpTestContainer() {
+  GenericContainer<?> getSftpTestContainer() {
     return new GenericContainer<>(DockerImage.OPEN_SSH_8pt6_IMAGE_NAME)
         .withEnv(ENV_USER_NAME, TEST_USER)
         .withEnv(ENV_PASSWORD, TEST_PASSWORD)
@@ -29,7 +29,7 @@ public class SFTPFileSystemWithUsernamePasswordIT extends BaseSFTPFileSystemIT {
   }
 
   @Override
-  protected void addAuthenticationProps(HashMap<String, String> props) {
+  void addAuthenticationProps(HashMap<String, String> props) {
     props.put("password", TEST_PASSWORD);
   }
 }
