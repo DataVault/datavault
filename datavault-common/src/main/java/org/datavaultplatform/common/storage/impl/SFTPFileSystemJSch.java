@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class SFTPFileSystem extends Device implements SFTPFileSystemDriver {
+public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
 
 
     public static final String STRICT_HOST_KEY_CHECKING = "StrictHostKeyChecking";
@@ -53,11 +53,11 @@ public class SFTPFileSystem extends Device implements SFTPFileSystemDriver {
         JSch.setLogger(JSchLogger.getInstance());
     }
 
-    public SFTPFileSystem(String name, Map<String,String> config) {
+    public SFTPFileSystemJSch(String name, Map<String,String> config) {
         this(name, config, Clock.systemDefaultZone());
     }
 
-    public SFTPFileSystem(String name, Map<String,String> config, Clock clock) {
+    public SFTPFileSystemJSch(String name, Map<String,String> config, Clock clock) {
         super(name, config);
         this.clock = clock;
 
