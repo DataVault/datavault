@@ -53,7 +53,7 @@ public class SFTPFileSystem extends Device implements SFTPFileSystemDriver {
         JSch.setLogger(JSchLogger.getInstance());
     }
 
-    public SFTPFileSystem(String name, Map<String,String> config) throws Exception {
+    public SFTPFileSystem(String name, Map<String,String> config) {
         this(name, config, Clock.systemDefaultZone());
     }
 
@@ -70,24 +70,23 @@ public class SFTPFileSystem extends Device implements SFTPFileSystemDriver {
         username = config.get(PropNames.USERNAME);
         password = config.get(PropNames.PASSWORD);
         log.info("casting byte[]...");
-        encPrivateKey = Base64.decode(config.get(PropNames.PRIVATE_KEY));
-        encIV = Base64.decode(config.get(PropNames.IV));
+        encPrivateKey = Base64.decode(config.getOrDefault(PropNames.PRIVATE_KEY, ""));
+        encIV = Base64.decode(config.getOrDefault(PropNames.IV, ""));
         log.info("done!");
         passphrase = config.get("passphrase");
         log.info("SFTPFileSystem created...");
     }
-    
+
     public void Connect() throws Exception {
         JSch jsch = new JSch();
         session = jsch.getSession(username, host, port);
 
-        byte[] privateKey = Encryption.decryptSecret(encPrivateKey, encIV);
-
-        log.debug("Private Key: "+new String(privateKey));
-
         if (password != null && !password.isEmpty()) {
             session.setPassword(password);
         } else {
+            byte[] privateKey = Encryption.decryptSecret(encPrivateKey, encIV);
+
+            log.debug("Private Key: "+new String(privateKey));
             jsch.addIdentity(username, privateKey, null, passphrase.getBytes());
         }
 

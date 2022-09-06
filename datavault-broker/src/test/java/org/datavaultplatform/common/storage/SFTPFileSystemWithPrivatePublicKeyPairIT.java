@@ -1,7 +1,7 @@
 package org.datavaultplatform.common.storage;
 
 import java.util.HashMap;
-import java.util.Map;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.broker.services.UserKeyPairServiceJSchImpl;
@@ -12,17 +12,16 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /*
- A test class for the SFTPFileSystem interface (implements SFTPFileSystemDriver)
- uses Public/Private KeyPair to authenticate with SFTPFileSystem
+ Tests SFTPFileSystem class against SFTP Server using private/public keypair authentication.
  */
 @Slf4j
 @Testcontainers(disabledWithoutDocker = true)
 public class SFTPFileSystemWithPrivatePublicKeyPairIT extends BaseSFTPFileSystemIT {
 
-  private static final String TEST_USER = "testuser";
   private static final String TEST_PASSPHRASE = "tenet";
   private static final String ENV_PUBLIC_KEY = "PUBLIC_KEY";
 
+  @Override
   protected void authenticationSetup() {
     Encryption.addBouncyCastleSecurityProvider();
     Encryption enc = new Encryption();
@@ -37,33 +36,23 @@ public class SFTPFileSystemWithPrivatePublicKeyPairIT extends BaseSFTPFileSystem
 
   @Override
   protected GenericContainer<?> getSftpTestContainer() {
-    GenericContainer<?> sftpServerContainer = new GenericContainer<>(DockerImage.OPEN_SSH_8pt6_IMAGE_NAME)
+    return new GenericContainer<>(DockerImage.OPEN_SSH_8pt6_IMAGE_NAME)
         .withEnv(ENV_USER_NAME, TEST_USER)
         .withEnv(ENV_PUBLIC_KEY, this.keyPairInfo.getPublicKey()) //this causes the public key to be added to /config/.ssh/authorized_keys
         .withExposedPorts(2222)
         .waitingFor(Wait.forListeningPort());
-    return sftpServerContainer;
   }
 
-  public Map<String,String> getStoreProperties()
-      throws Exception {
-    HashMap<String, String> props = new HashMap<>();
+  @Override
+  @SneakyThrows
+  protected void addExtraProps(HashMap<String, String> props) {
 
     byte[] iv = Encryption.generateIV();
     byte[] encrypted = Encryption.encryptSecret(keyPairInfo.getPrivateKey(), null, iv);
 
-    //standard sftp properties
-    props.put("username", TEST_USER);
-    props.put("rootPath", "/config"); //this is the directory ON THE SFTP SERVER - for OpenSSH containers, it's config
-    props.put("host", sftpServerContainer.getHost());
-    props.put("port", String.valueOf(sftpServerContainer.getMappedPort(2222)));
-
-    //extra properties for the sftp private key authentication
-    props.put("privateKey", Base64.toBase64String(encrypted));
     props.put("passphrase", TEST_PASSPHRASE);
     props.put("iv", Base64.toBase64String(iv));
-
-    return props;
+    props.put("privateKey", Base64.toBase64String(encrypted));
   }
 
 
