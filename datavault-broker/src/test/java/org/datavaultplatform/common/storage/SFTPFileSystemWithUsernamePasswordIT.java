@@ -29,8 +29,7 @@ public class SFTPFileSystemWithUsernamePasswordIT extends BaseSFTPFileSystemIT {
   }
 
   @Override
-  protected void addExtraProps(HashMap<String, String> props) {
+  protected void addAuthenticationProps(HashMap<String, String> props) {
     props.put("password", TEST_PASSWORD);
   }
-
 }

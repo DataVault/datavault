@@ -1,12 +1,18 @@
 package org.datavaultplatform.common.storage;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import java.io.File;
 import java.util.HashMap;
+import javax.crypto.SecretKey;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.broker.services.UserKeyPairServiceJSchImpl;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.docker.DockerImage;
+import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -17,22 +23,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Slf4j
 @Testcontainers(disabledWithoutDocker = true)
 public class SFTPFileSystemWithPrivatePublicKeyPairIT extends BaseSFTPFileSystemIT {
-
   private static final String TEST_PASSPHRASE = "tenet";
   private static final String ENV_PUBLIC_KEY = "PUBLIC_KEY";
+  private static final String KEY_STORE_PASSWORD = "keyStorePassword";
+  private static final String SSH_KEY_NAME = "sshKeyName";
 
-  @Override
-  protected void authenticationSetup() {
-    Encryption.addBouncyCastleSecurityProvider();
-    Encryption enc = new Encryption();
-    enc.setKeystoreEnable(true);
-    enc.setKeystorePath("/Users/davidhay/DEV/DV/FORK/local.ks");
-    enc.setVaultPrivateKeyEncryptionKeyName("forprivatekeys");
-    enc.setKeystorePassword("thePassword");
-
-    userKeyPairService = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
-    keyPairInfo = userKeyPairService.generateNewKeyPair();
-  }
+  @TempDir
+  private File keyStoreTempDir;
 
   @Override
   protected GenericContainer<?> getSftpTestContainer() {
@@ -44,8 +41,7 @@ public class SFTPFileSystemWithPrivatePublicKeyPairIT extends BaseSFTPFileSystem
   }
 
   @Override
-  @SneakyThrows
-  protected void addExtraProps(HashMap<String, String> props) {
+  protected void addAuthenticationProps(HashMap<String, String> props) throws Exception {
 
     byte[] iv = Encryption.generateIV();
     byte[] encrypted = Encryption.encryptSecret(keyPairInfo.getPrivateKey(), null, iv);
@@ -55,5 +51,31 @@ public class SFTPFileSystemWithPrivatePublicKeyPairIT extends BaseSFTPFileSystem
     props.put("privateKey", Base64.toBase64String(encrypted));
   }
 
+  @Override
+  protected void authenticationSetup()  throws Exception {
 
+    Encryption.addBouncyCastleSecurityProvider();
+    String keyStorePath = keyStoreTempDir.toPath().resolve("test.ks").toString();
+    log.info("TEMP KEY IS AT [{}]", keyStorePath);
+
+    Encryption enc = new Encryption();
+    enc.setVaultEnable(false);
+    enc.setVaultPrivateKeyEncryptionKeyName(SSH_KEY_NAME);
+
+    enc.setKeystoreEnable(true);
+    enc.setKeystorePath(keyStorePath);
+    enc.setKeystorePassword(KEY_STORE_PASSWORD);
+
+    SecretKey keyForKeyStore = Encryption.generateSecretKey();
+
+    assertFalse(new File(keyStorePath).exists());
+
+    // Encryption class uses 'vaultPrivateKeyEncryptionKeyName' property as the default key name for JavaKeyStore
+    Encryption.saveSecretKeyToKeyStore(Encryption.getVaultPrivateKeyEncryptionKeyName(),
+        keyForKeyStore);
+
+    assertTrue(new File(keyStorePath).exists());
+    userKeyPairService = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
+    keyPairInfo = userKeyPairService.generateNewKeyPair();
+  }
 }
