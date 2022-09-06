@@ -61,7 +61,7 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         super(name, config);
         this.clock = clock;
 
-        log.info("Construct SFTPFileSystem...");
+        log.info("Construct SFTPFileSystemJSch...");
         
         // Unpack the config parameters (in an implementation-specific way)
         host = config.get(PropNames.HOST);
@@ -74,7 +74,7 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         encIV = Base64.decode(config.getOrDefault(PropNames.IV, ""));
         log.info("done!");
         passphrase = config.get("passphrase");
-        log.info("SFTPFileSystem created...");
+        log.info("SFTPFileSystemJSch created...");
     }
 
     public void Connect() throws Exception {
