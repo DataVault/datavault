@@ -18,8 +18,6 @@ import org.datavaultplatform.broker.test.SftpServerUtils;
 import org.datavaultplatform.common.storage.impl.JSchLogger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * This test generates a key pair and checks that the keypair is valid by ...
@@ -34,16 +32,18 @@ public class UserKeyPairService3IT extends BaseUserKeyPairServiceTest {
   private int sftpServerPort;
   private EmbeddedSftpServer sftpServer;
 
+  private Path tempSftpFolder;
+
   /**
    * Tests that the key pair is valid by
    * using keypair to perform scp between testcontainers
    */
 
-  @ParameterizedTest
-  @MethodSource("provideUserKeyPairService")
+  @Test
   @Override
   @SneakyThrows
-  void testKeyPair(UserKeyPairService service) {
+  void testKeyPair() {
+    UserKeyPairService service = new UserKeyPairService(TEST_PASSPHRASE);
     KeyPairInfo info = service.generateNewKeyPair();
     validateKeyPair(info.getPublicKey(), info.getPrivateKey().getBytes(StandardCharsets.UTF_8));
   }
@@ -51,7 +51,7 @@ public class UserKeyPairService3IT extends BaseUserKeyPairServiceTest {
   @Test
   @SneakyThrows
   void testKeyPairIsInValid() {
-    UserKeyPairService service = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
+    UserKeyPairService service = new UserKeyPairService(TEST_PASSPHRASE);
     KeyPairInfo info = service.generateNewKeyPair();
     byte[] badBytes = info.getPrivateKey().getBytes(StandardCharsets.UTF_8);
     //just by changing 1 byte of private key - we should get an error
@@ -82,8 +82,8 @@ public class UserKeyPairService3IT extends BaseUserKeyPairServiceTest {
 
   @SneakyThrows
   void initSftpServer(String publicKey) {
-    Path tempSftpFolder = Files.createTempDirectory("SFTP_TEST");
-    this.sftpServer = SftpServerUtils.getSftpServer(publicKey, tempSftpFolder);
+    this.tempSftpFolder = Files.createTempDirectory("SFTP_TEST");
+    this.sftpServer = SftpServerUtils.getSftpServer(publicKey, this.tempSftpFolder);
     this.sftpServerPort= sftpServer.getServer().getPort();
   }
 
