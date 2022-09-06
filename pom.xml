@@ -60,6 +60,7 @@
     <commons.compress.version>1.21</commons.compress.version>
     <javax.interceptor.version>1.2.2</javax.interceptor.version>
     <cron.expr.desc.version>1.2.6</cron.expr.desc.version>
+    <sshd.sftp.version>2.9.0</sshd.sftp.version>
   </properties>
 
   <dependencyManagement>
@@ -216,7 +217,12 @@
         <version>${commons.collections4.version}</version>
       </dependency>
 
-
+      <!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-sftp -->
+      <dependency>
+        <groupId>org.apache.sshd</groupId>
+        <artifactId>sshd-sftp</artifactId>
+        <version>${sshd.sftp.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

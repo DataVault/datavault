@@ -149,9 +149,7 @@
 
         <dependency>
             <groupId>org.apache.sshd</groupId>
-            <artifactId>sshd-core</artifactId>
-            <!-- anything above 2.0.0 does NOT compile with test EmbeddedSftpServer -->
-            <version>1.7.0</version>
+            <artifactId>sshd-sftp</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

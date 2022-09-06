@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.ArrayUtils;
+
 
 public class CertificateUtils {
   private static final int VALUE_LENGTH = 4;
