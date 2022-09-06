@@ -38,12 +38,7 @@ import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseDatabaseTest;
-<<<<<<< HEAD
-import org.datavaultplatform.broker.test.EmbeddedSftpServer;
-import org.datavaultplatform.broker.test.SftpServerUtils;
 import org.datavaultplatform.common.PropNames;
-=======
->>>>>>> 21718919 (dv5 RSS408-221 - replacement of EmbeddedSftpServer in FileStoreControllerIT with testcontainer ( linuxserver/openssh-server ))
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.docker.DockerImage;
 import org.datavaultplatform.common.io.Progress;
@@ -69,7 +64,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -218,7 +212,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     log.info("public key [{}]", publicKey);
 
     this.sftpServer = setupAndStartSFTP(publicKey);
-    int sftpServerPort = this.sftpServer.getMappedPort(2222)
+    int sftpServerPort = this.sftpServer.getMappedPort(2222);
 
     changeSFTPFileSystemPort(sftp, sftpServerPort);
 

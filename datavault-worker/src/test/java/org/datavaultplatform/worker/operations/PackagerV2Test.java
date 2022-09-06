@@ -1,22 +1,33 @@
 package org.datavaultplatform.worker.operations;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.bagish.Checksummer;
 import org.datavaultplatform.common.bagish.ManifestWriter;
 import org.datavaultplatform.common.bagish.SupportedAlgorithm;
 import org.datavaultplatform.common.io.FileUtils;
+import org.datavaultplatform.common.process.ProcessUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
+@Slf4j
 public class PackagerV2Test {
 
   @TempDir
@@ -371,6 +382,74 @@ public class PackagerV2Test {
       assertEquals("BagIt-Version: 0.97", bagitLines.get(0));
       assertEquals("Tag-File-Character-Encoding: UTF-8", bagitLines.get(1));
 
+    }
+
+    @Nested
+    class PackagerV2AsProcess {
+
+      File dataDir;
+      File file1;
+      File file2;
+      File file3;
+
+      File bagit;
+      File manifest;
+
+      @BeforeEach
+      void setup() {
+        dataDir = new File(tempDir, PackagerV2.DATA_DIR_NAME);
+        dataDir.mkdir();
+        file1 = new File(dataDir, "one.txt");
+        file2 = new File(dataDir, "two.txt");
+        file3 = new File(dataDir, "three.txt");
+        bagit = new File(tempDir, "bagit.txt");
+        manifest = new File(tempDir, "manifest-md5.txt");
+        writeContents(file1, "one 1");
+        writeContents(file2, "two 2");
+        writeContents(file3, "three 3");
+
+        assertFalse(bagit.exists());
+        assertFalse(manifest.exists());
+      }
+
+      @Test
+      @SneakyThrows
+      void testPackagerV2AsProcessSuccess() {
+        ProcessBuilder builder = ProcessUtils.exec(PackagerV2.class, Collections.emptyList(), Collections.singletonList(tempDir.getCanonicalPath()));
+        Process p  = builder.start();
+        int status = p.waitFor();
+        String output = IOUtils.readLines(p.getInputStream(), StandardCharsets.UTF_8).stream().collect(
+            Collectors.joining());
+        String error = IOUtils.readLines(p.getErrorStream(), StandardCharsets.UTF_8).stream().collect(
+            Collectors.joining());
+        assertEquals(0, status);
+        assertTrue(bagit.exists());
+        assertTrue(manifest.exists());
+        assertTrue(StringUtils.isBlank(error));
+        assertTrue(output.contains("added manifest file"));
+        assertTrue(output.contains("added bagit file"));
+      }
+
+      @Test
+      @SneakyThrows
+      void testPackagerV2AsProcessFail() {
+        ProcessBuilder builder = ProcessUtils.exec(PackagerV2.class, Collections.emptyList(), Collections.singletonList(dataDir.getCanonicalPath()));
+        Process p  = builder.start();
+        int status = p.waitFor();
+        String output = IOUtils.readLines(p.getInputStream(), StandardCharsets.UTF_8).stream().collect(
+            Collectors.joining());
+        String error = IOUtils.readLines(p.getErrorStream(), StandardCharsets.UTF_8).stream().collect(
+            Collectors.joining());
+        assertNotEquals(0, status);
+        assertFalse(bagit.exists());
+        assertFalse(manifest.exists());
+        assertFalse(StringUtils.isBlank(error));
+        assertFalse(output.contains("added manifest file"));
+        assertFalse(output.contains("added bagit file"));
+
+        String message = String.format("java.lang.IllegalArgumentException: The directory [%s/data] does not exist", dataDir.getCanonicalPath());
+        assertTrue(error.contains(message));
+      }
     }
   }
 }

@@ -24,6 +24,7 @@ public class ManifestWriter extends SimpleFileVisitor<Path> implements AutoClose
     private final Path manifestFilePath;
 
     private final Path manifestParentPath;
+    private final File manifest;
 
     public ManifestWriter(File bagDir, Checksummer checkSummer) throws IOException {
         FileUtils.checkDirectoryExists(bagDir);
@@ -31,7 +32,7 @@ public class ManifestWriter extends SimpleFileVisitor<Path> implements AutoClose
         bagPathLength = bagDir.toPath().toString().length();
 
         // todo: change so that 'md5' is a variable representing the checksum type.
-        File manifest = new File(bagDir, MANIFEST_FILE_NAME);
+        manifest = new File(bagDir, MANIFEST_FILE_NAME);
         FileUtils.checkFileExists(manifest, true);
         this.manifestFilePath = manifest.toPath();
         this.manifestParentPath = manifestFilePath.getParent();
@@ -39,6 +40,10 @@ public class ManifestWriter extends SimpleFileVisitor<Path> implements AutoClose
         bw = new BufferedWriter(new FileWriter(manifest));
 
         this.checkSummer = checkSummer;
+    }
+
+    public File getManifest() {
+        return manifest;
     }
 
     public ManifestWriter(File bagDir) throws IOException {
