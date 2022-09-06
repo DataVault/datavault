@@ -10,8 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.session.ClientSession;
+import org.apache.sshd.common.channel.ChannelListener;
+import org.apache.sshd.common.session.Session;
+import org.apache.sshd.common.session.SessionListener;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.apache.sshd.sftp.client.SftpClient.CloseableHandle;
+import org.apache.sshd.sftp.client.SftpClientFactory;
 import org.apache.sshd.sftp.client.SftpErrorDataHandler;
 import org.apache.sshd.sftp.client.SftpVersionSelector;
 import org.apache.sshd.sftp.client.impl.DefaultSftpClient;
@@ -32,10 +36,13 @@ public class SFTPConnection implements AutoCloseable {
   @SneakyThrows
   public SFTPConnection(SFTPConnectionInfo info) {
     clock = info.getClock();
+    SftpClientFactory factory = SftpClientFactory.instance();
     client = SshClient.setUpDefaultClient();
     client.start();
+
     session = client.connect(info.getUsername(), info.getHost(), info.getPort())
         .verify(DEFAULT_TIMEOUT_SECONDS, TimeUnit.SECONDS).getSession();
+
     if (StringUtils.isNotBlank(info.getPassword())) {
       session.addPasswordIdentity(info.getPassword());
     } else {
