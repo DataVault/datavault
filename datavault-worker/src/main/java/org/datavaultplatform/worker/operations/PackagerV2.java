@@ -45,14 +45,18 @@ public class PackagerV2 {
      */
     public void createBag(File bagDir) throws Exception {
         FileUtils.checkDirectoryExists(bagDir);
-        addBagitFile(bagDir);
+
+        File manifest = createManifest(bagDir);
+
+        // create the 'bagit file' ONLY if everything else has been successful
+        File bagit = addBagitFile(bagDir);
         // todo : add a bag-info.txt file?
 
-        createManifest(bagDir);
-
+        log.info("added manifest file[{}]", manifest.getCanonicalPath());
+        log.info("added bagit file[{}]", bagit.getCanonicalPath());
     }
 
-    private void addBagitFile(File bagDir) throws IOException {
+    private File addBagitFile(File bagDir) throws IOException {
         File bagit = new File(bagDir, BAGIT_FILE_NAME);
         bagit.createNewFile();
 
@@ -62,9 +66,10 @@ public class PackagerV2 {
           bw.write("Tag-File-Character-Encoding: UTF-8");
           bw.newLine();
         }
+        return bagit;
     }
 
-    private void createManifest(File bagDir) throws IOException {
+    private File createManifest(File bagDir) throws IOException {
         // Pass the bagDir to the ManifestWriter
         File dataDir = new File(bagDir, DATA_DIR_NAME);
         FileUtils.checkDirectoryExists(dataDir);
@@ -72,6 +77,7 @@ public class PackagerV2 {
         try(ManifestWriter mf = new ManifestWriter(bagDir, checkSummer)) {
           // Start walking at the subdirectory <bagDir>/data
           Files.walkFileTree(dataDir.toPath(), mf);
+          return mf.getManifest();
         }
       }
 
