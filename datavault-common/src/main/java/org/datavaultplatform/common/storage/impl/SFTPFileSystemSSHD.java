@@ -34,10 +34,20 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
 
   private final SFTPConnectionInfo connectionInfo;
 
+  /**
+   * This constructor will be used in production code
+   * @param name
+   * @param config
+   */
   public SFTPFileSystemSSHD(String name, Map<String, String> config) {
     this(name, config, Clock.systemDefaultZone());
   }
 
+  /**
+   * This constructor will be used for testing where we can pass in a fixed clock
+   * @param name
+   * @param config
+   */
   public SFTPFileSystemSSHD(String name, Map<String, String> config, Clock clock) {
     super(name, config);
     this.connectionInfo = SFTPConnectionInfo.getConnectionInfo(config, clock);

@@ -41,6 +41,8 @@ import org.apache.sshd.sftp.client.SftpClient.CloseableHandle;
 import org.apache.sshd.sftp.client.SftpClient.DirEntry;
 import org.apache.sshd.sftp.common.SftpConstants;
 import org.apache.sshd.sftp.common.SftpException;
+import org.datavaultplatform.common.io.InputStreamAdapter;
+import org.datavaultplatform.common.io.OutputStreamAdapter;
 import org.datavaultplatform.common.io.Progress;
 import org.springframework.util.Assert;
 
@@ -90,6 +92,31 @@ public class UtilitySSHD {
         public SFTPMonitorSSD(Progress progressTracker, Clock clock) {
             this.progressTracker = progressTracker;
             this.clock = clock;
+        }
+        public OutputStream monitorOutputStream(OutputStream os){
+                return new OutputStreamAdapter(os){
+                  @Override
+                  public void write(byte[] data, int start, int len) throws IOException {
+                      super.write(data, start, len);
+                      if(len > 0) {
+                        progressTracker.byteCount += len;
+                        progressTracker.timestamp = clock.millis();
+                      }
+                  }
+                };
+        }
+        public InputStream monitorInputStream(InputStream is) {
+            return new InputStreamAdapter(is){
+                @Override
+                public int read(byte[] data, int start, int len) throws IOException {
+                    int read = super.read(data, start, len);
+                    if(read > 0) {
+                        progressTracker.byteCount += read;
+                        progressTracker.timestamp = clock.millis();
+                    }
+                    return read;
+                }
+            };
         }
     }
     
@@ -156,7 +183,7 @@ public class UtilitySSHD {
         final long remoteFileSize = attrs.getSize();
 
         try (FileOutputStream fos = new FileOutputStream(localFile)) {
-            try (InputStream inputStream = sftpClient.read(remoteFilePath.toString(), BUFFER_SIZE)) {
+            try (InputStream inputStream = monitor.monitorInputStream(sftpClient.read(remoteFilePath.toString(), BUFFER_SIZE))) {
                 long copied = transfer(inputStream, fos);
                 if (remoteFileSize != copied) {
                     log.error("expected to recv [{}] bytes but recvd [{}]bytes", remoteFileSize, copied);
@@ -244,7 +271,7 @@ public class UtilitySSHD {
         final Path destinationDirOnSftpServer = fullPathToDestinationFileOnSftpServer.getParent();
         Assert.isTrue(existsOnSftpServer(sftpClient,destinationDirOnSftpServer), () -> "The directory " + destinationDirOnSftpServer + " does not exist");
         
-        try (OutputStream os = sftpClient.write(fullPathToDestinationFileOnSftpServer.toString(), BUFFER_SIZE)) {
+        try (OutputStream os = monitor.monitorOutputStream(sftpClient.write(fullPathToDestinationFileOnSftpServer.toString(), BUFFER_SIZE))) {
             try (FileInputStream fis = new FileInputStream(fromFileOnLocal)) {
                 long copied = transfer(fis, os);
                 if (fromFileOnLocal.length() != copied) {
