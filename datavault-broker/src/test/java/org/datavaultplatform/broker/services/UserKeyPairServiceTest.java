@@ -28,7 +28,7 @@ public class UserKeyPairServiceTest {
 
   static final String PLAIN_TEXT = "This is a test plain text message.";
   private static final String PASSPHRASE = "tenet";
-  final UserKeyPairService service = new UserKeyPairService(PASSPHRASE);
+  final UserKeyPairService service = new UserKeyPairServiceJSchImpl(PASSPHRASE);
   KeyPair keyPair;
 
   @SneakyThrows

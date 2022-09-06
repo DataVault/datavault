@@ -3,7 +3,6 @@ package org.datavaultplatform.broker.services;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -41,7 +40,7 @@ public abstract class BaseUserKeyPairServiceOpenSSHTest extends BaseUserKeyPairS
   @Test
   @Override
   void testKeyPair() {
-    UserKeyPairService service = new UserKeyPairService(TEST_PASSPHRASE);
+    UserKeyPairService service = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
     try {
       KeyPairInfo info = service.generateNewKeyPair();
       validateKeyPair(info.getPublicKey(), info.getPrivateKey().getBytes(StandardCharsets.UTF_8));
@@ -55,7 +54,7 @@ public abstract class BaseUserKeyPairServiceOpenSSHTest extends BaseUserKeyPairS
   @Test
   @SneakyThrows
   void testKeyPairIsInValid() {
-    UserKeyPairService service = new UserKeyPairService(TEST_PASSPHRASE);
+    UserKeyPairService service = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
     KeyPairInfo info = service.generateNewKeyPair();
     byte[] badBytes = info.getPrivateKey().getBytes(StandardCharsets.UTF_8);
     //just by changing 1 byte of private key - we should get an error
