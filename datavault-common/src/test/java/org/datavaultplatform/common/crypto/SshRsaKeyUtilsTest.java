@@ -13,8 +13,10 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
 import java.util.UUID;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -27,11 +29,15 @@ import org.springframework.core.io.ClassPathResource;
  * All datavault SSH public keys, for SFTP, generated before 19thAugust2022, should be of this format.
  *
  */
+@Slf4j
 public class SshRsaKeyUtilsTest {
 
-  @Test
+  private String testPublicKey;
+  private String testPrivateKey;
+
+  @BeforeEach
   @SneakyThrows
-  void testParseKeyFiles() {
+  void setup() {
     ClassPathResource privateKeyResource = new ClassPathResource("example-ssh-keys/encodedPrivateKey.txt");
     File privateKeyFile = privateKeyResource.getFile();
 
@@ -41,22 +47,27 @@ public class SshRsaKeyUtilsTest {
     String rawPrivateKey = FileUtils.readFileToString(privateKeyFile, StandardCharsets.UTF_8);
     String rawPublicKey = FileUtils.readFileToString(publicKeyFile, StandardCharsets.UTF_8);
 
-    String publicKey = decode(rawPublicKey);
-    System.out.println(publicKey);
-    String privateKey = decode(rawPrivateKey);
-    System.out.println(privateKey);
+    testPublicKey = decode(rawPublicKey);
+    log.info("public key[{}]", testPublicKey);
+    testPrivateKey = decode(rawPrivateKey);
+    log.info("private key[{}]", testPrivateKey);
+  }
 
-    Assertions.assertTrue(privateKey.startsWith("-----BEGIN RSA PRIVATE KEY-----"));
-    Assertions.assertTrue(privateKey.contains("Proc-Type: 4,ENCRYPTED"));
-    Assertions.assertTrue(privateKey.contains("DEK-Info: DES-EDE3-CBC,"));
-    Assertions.assertTrue(privateKey.endsWith("-----END RSA PRIVATE KEY-----"));
+  @Test
+  @SneakyThrows
+  void testParseKeyFiles() {
 
-    Assertions.assertTrue(publicKey.startsWith("ssh-rsa AAAA"));
-    Assertions.assertTrue(publicKey.endsWith("== datavault"));
+    Assertions.assertTrue(testPrivateKey.startsWith("-----BEGIN RSA PRIVATE KEY-----"));
+    Assertions.assertTrue(testPrivateKey.contains("Proc-Type: 4,ENCRYPTED"));
+    Assertions.assertTrue(testPrivateKey.contains("DEK-Info: DES-EDE3-CBC,"));
+    Assertions.assertTrue(testPrivateKey.endsWith("-----END RSA PRIVATE KEY-----"));
+
+    Assertions.assertTrue(testPublicKey.startsWith("ssh-rsa AAAA"));
+    Assertions.assertTrue(testPublicKey.endsWith("== datavault"));
 
 
-    RSAPrivateKey rsaPrivateKey = SshRsaKeyUtils.readPrivateKey(privateKey, "tenet");
-    RSAPublicKey rsaPublicKey = SshRsaKeyUtils.readPublicKey(publicKey);
+    RSAPrivateKey rsaPrivateKey = SshRsaKeyUtils.readPrivateKey(testPrivateKey, "tenet");
+    RSAPublicKey rsaPublicKey = SshRsaKeyUtils.readPublicKey(testPublicKey);
     BigInteger expectedModulus = new BigInteger(
         "145819497446504665407052454873049578702605434271985535289477974800824103967370144831619755390946889058701098955910318621017852918758875105210827549183463503443000501645102031182177258964161879484467749566840583633960627631427812469962241441974819543825063777374868339736348045780148884786447901424407496204987");
     Assertions.assertEquals(expectedModulus, rsaPrivateKey.getModulus());
@@ -101,5 +112,32 @@ public class SshRsaKeyUtilsTest {
     RSAPrivateKey privateKey = (RSAPrivateKey) kp.getPrivate();
     RSAPublicKey publicKey2 = (RSAPublicKey) SshRsaKeyUtils.getKeyPairFromRSAPrivateKey(privateKey).getPublic();
     assertEquals(publicKey1, publicKey2);
+  }
+
+  @Test
+  @SneakyThrows
+  void convertPublicKeyPairToStringAndBack() {
+    KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
+
+    KeyPair keyPair1 = gen.generateKeyPair();
+    RSAPublicKey publicKey1 = (RSAPublicKey)keyPair1.getPublic();
+    RSAPrivateKey privateKey1 = (RSAPrivateKey)keyPair1.getPrivate();
+
+    String publicKeyString = SshRsaKeyUtils.encodePublicKey(publicKey1, "comment");
+    String privateKeyString  = SshRsaKeyUtils.encodePrivateKey(privateKey1, "password");
+
+    RSAPrivateKey privateKey2 = SshRsaKeyUtils.readPrivateKey(privateKeyString, "password");
+    RSAPublicKey publicKey2 = SshRsaKeyUtils.readPublicKey(publicKeyString);
+
+    assertEquals(publicKey1, publicKey2);
+    assertEquals(privateKey1, privateKey2);
+  }
+
+  @Test
+  @SneakyThrows
+  void testFingerPrint() {
+    String expected = "fa:d5:b3:5f:a7:2c:bb:ea:cb:da:dd:bd:d7:6a:57:29";
+    String fingerPrint = SshRsaKeyUtils.calculateFingerprint(testPublicKey);
+    assertEquals(expected, fingerPrint);
   }
 }
