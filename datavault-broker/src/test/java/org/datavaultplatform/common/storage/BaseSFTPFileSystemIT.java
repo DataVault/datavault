@@ -16,6 +16,8 @@ import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.services.UserKeyPairService;
@@ -35,32 +37,42 @@ import org.testcontainers.containers.GenericContainer;
 @Slf4j
 public abstract class BaseSFTPFileSystemIT {
 
-  protected static final String ENV_USER_NAME = "USER_NAME";
-  protected static final String TEST_USER = "testuser";
+  static final String ENV_USER_NAME = "USER_NAME";
+  static final String TEST_USER = "testuser";
 
-  public static final String FROM_DV_FILE_NAME = "fromDV.txt";
-  public static final String TO_DV_FILE_NAME = "toDV.txt";
-  public static final String DV_SFTP_TEMP_DIR_PREFIX = "dvSftpTempDir";
+  static final String FROM_DV_FILE_NAME = "fromDV.txt";
+  static final String TO_DV_FILE_NAME = "toDV.txt";
+  static final String DV_SFTP_TEMP_DIR_PREFIX = "dvSftpTempDir";
+  static final String FROM_DV_DIR_NAME = "fromDir";
+  static final String FROM_DV_DIR_FILE_A = "fromDVfileA.txt";
+  static final String FROM_DV_DIR_FILE_B = "fromDVfileB.txt";
+  static final String FROM_DV_DIR_FILE_C = "fromDVfileC.txt";
+  static final String TO_DV_DIR_NAME = "toDir";
+  static final String TEST_FILE_CONTENTS = "hello Test File!";
+  static final String TEST_FILE_A_CONTENTS = "aaa-XXXX-AA";
+  static final String TEST_FILE_B_CONTENTS = "bbb-XXXX-BBBB";
+  static final String TEST_FILE_C_CONTENTS = "ccc-XXXX-CCCCCC";
 
-  protected GenericContainer<?> sftpServerContainer;
-
-  private static final String TEST_FILE_CONTENTS = "hello Test File!";
-
-  public static final Clock TEST_CLOCK = Clock.fixed(Instant.parse("2022-03-26T09:44:33.22Z"),
+  static final Clock TEST_CLOCK = Clock.fixed(Instant.parse("2022-03-26T09:44:33.22Z"),
       ZoneId.of("Europe/London"));
-
-  public static final long EXPECTED_SPACE_AVAILABLE_ON_SFTP_SERVER = 100_000;
-
+  static final long EXPECTED_SPACE_AVAILABLE_ON_SFTP_SERVER = 100_000;
+  static final String SFTP_ROOT_DIR = "/config";
+  GenericContainer<?> sftpServerContainer;
   UserKeyPairService userKeyPairService;
-
   File tempFileDir;
   File fromDvFile;
   File toDvFile;
 
-  public static final String SFTP_ROOT_DIR = "/config";
-
-  protected SFTPFileSystemDriver sftpDriver;
-  protected KeyPairInfo keyPairInfo;
+  SFTPFileSystemDriver sftpDriver;
+  KeyPairInfo keyPairInfo;
+  File fromDvDir;
+  File fromDvDirFileA;
+  File fromDvDirFileB;
+  File fromDvDirFileC;
+  File toDvDirFileA;
+  File toDvDirFileB;
+  File toDvDirFileC;
+  File toDvDir;
 
   @BeforeEach
   @SneakyThrows
@@ -70,7 +82,25 @@ public abstract class BaseSFTPFileSystemIT {
     fromDvFile = new File(tempFileDir, FROM_DV_FILE_NAME);
     toDvFile = new File(tempFileDir, TO_DV_FILE_NAME);
 
+    fromDvDir = new File(tempFileDir, FROM_DV_DIR_NAME);
+    fromDvDir.mkdirs();
+
+    toDvDir = new File(tempFileDir, TO_DV_DIR_NAME);
+    toDvDir.mkdirs();
+
+    fromDvDirFileA = new File(fromDvDir, FROM_DV_DIR_FILE_A);
+    fromDvDirFileB = new File(fromDvDir, FROM_DV_DIR_FILE_B);
+    fromDvDirFileC = new File(fromDvDir, FROM_DV_DIR_FILE_C);
+
+    toDvDirFileA = new File(toDvDir, FROM_DV_DIR_FILE_A);
+    toDvDirFileB = new File(toDvDir, FROM_DV_DIR_FILE_B);
+    toDvDirFileC = new File(toDvDir, FROM_DV_DIR_FILE_C);
+
     writeToFile(fromDvFile, TEST_FILE_CONTENTS);
+
+    writeToFile(fromDvDirFileA, TEST_FILE_A_CONTENTS);
+    writeToFile(fromDvDirFileB, TEST_FILE_B_CONTENTS);
+    writeToFile(fromDvDirFileC, TEST_FILE_C_CONTENTS);
 
     authenticationSetup();
 
@@ -78,7 +108,6 @@ public abstract class BaseSFTPFileSystemIT {
     this.sftpServerContainer.start();
     sftpDriver = getSftpFileSystem();
   }
-
 
   @Test
   @SneakyThrows
@@ -129,10 +158,72 @@ public abstract class BaseSFTPFileSystemIT {
     assertThrows(NullPointerException.class, () -> sftpDriver.getName(null));
   }
 
+  @Test
+  @SneakyThrows
+  public void testSftpDriverSingleDirectoryStoreAndRetrieve() {
+    log.info("sftpDriver {}", sftpDriver);
+
+    String pathOnRemote = sftpDriver.store(".", fromDvDir, new Progress());
+
+    Path tsPath = Paths.get(SFTP_ROOT_DIR).relativize(Paths.get(pathOnRemote));
+    String retrievePath = tsPath.resolve(fromDvDir.toPath().getFileName()).toString();
+    log.info("retrievePath[{}]", retrievePath);
+
+    // check files are on SFTP server
+    Map<String, FileInfo> fileMap = sftpDriver.list(retrievePath).stream().collect(
+        Collectors.toMap(FileInfo::getName, Function.identity()));
+
+    assertEquals(3, fileMap.size());
+
+    FileInfo fileInfoA = fileMap.get(FROM_DV_DIR_FILE_A);
+    assertEquals(FROM_DV_DIR_FILE_A, fileInfoA.getName());
+    assertEquals(Paths.get(retrievePath).resolve(FROM_DV_DIR_FILE_A).toString(),
+        fileInfoA.getKey());
+    assertEquals(false, fileInfoA.getIsDirectory());
+    assertEquals("", fileInfoA.getAbsolutePath());
+
+    FileInfo fileInfoB = fileMap.get(FROM_DV_DIR_FILE_B);
+    assertEquals(FROM_DV_DIR_FILE_B, fileInfoB.getName());
+    assertEquals(Paths.get(retrievePath).resolve(FROM_DV_DIR_FILE_B).toString(),
+        fileInfoB.getKey());
+    assertEquals(false, fileInfoB.getIsDirectory());
+    assertEquals("", fileInfoB.getAbsolutePath());
+
+    FileInfo fileInfoC = fileMap.get(FROM_DV_DIR_FILE_C);
+    assertEquals(FROM_DV_DIR_FILE_C, fileInfoC.getName());
+    assertEquals(Paths.get(retrievePath).resolve(FROM_DV_DIR_FILE_C).toString(),
+        fileInfoC.getKey());
+    assertEquals(false, fileInfoC.getIsDirectory());
+    assertEquals("", fileInfoC.getAbsolutePath());
+
+    assertEquals(0, Files.list(toDvDir.toPath()).count());
+    sftpDriver.retrieve(retrievePath, toDvDir, new Progress());
+
+    // We can check we have got 3 files back from SFTP Server
+    assertEquals(3, Files.list(toDvDir.toPath()).count());
+
+    assertEquals(TEST_FILE_A_CONTENTS, readFile(toDvDirFileA));
+    assertEquals(TEST_FILE_B_CONTENTS, readFile(toDvDirFileB));
+    assertEquals(TEST_FILE_C_CONTENTS, readFile(toDvDirFileC));
+
+    long fileSizeA = sftpDriver.getSize(fileInfoA.getKey());
+    assertEquals(this.fromDvDirFileA.length(), fileSizeA);
+    assertEquals(FROM_DV_DIR_FILE_A, sftpDriver.getName(fileInfoA.getKey()));
+
+    long fileSizeB = sftpDriver.getSize(fileInfoB.getKey());
+    assertEquals(this.fromDvDirFileB.length(), fileSizeB);
+    assertEquals(FROM_DV_DIR_FILE_B, sftpDriver.getName(fileInfoB.getKey()));
+
+    long fileSizeC = sftpDriver.getSize(fileInfoC.getKey());
+    assertEquals(this.fromDvDirFileC.length(), fileSizeC);
+    assertEquals(FROM_DV_DIR_FILE_C, sftpDriver.getName(fileInfoC.getKey()));
+  }
+
   @SneakyThrows
   private String readFile(File file) {
     return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
   }
+
   @SneakyThrows
   private void writeToFile(File file, String contents) {
     Files.write(file.toPath(), contents.getBytes(StandardCharsets.UTF_8));
@@ -165,9 +256,9 @@ public abstract class BaseSFTPFileSystemIT {
     return props;
   }
 
-  protected abstract GenericContainer<?> getSftpTestContainer();
+  abstract GenericContainer<?> getSftpTestContainer();
 
-  protected abstract void addAuthenticationProps(HashMap<String, String> props) throws Exception;
+  abstract void addAuthenticationProps(HashMap<String, String> props) throws Exception;
 
-  protected void authenticationSetup() throws Exception {}
+  void authenticationSetup() throws Exception {}
 }
