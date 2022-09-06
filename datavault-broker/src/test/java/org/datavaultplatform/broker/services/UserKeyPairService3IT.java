@@ -18,6 +18,8 @@ import org.datavaultplatform.broker.test.SftpServerUtils;
 import org.datavaultplatform.common.storage.impl.JSchLogger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * This test generates a key pair and checks that the keypair is valid by ...
@@ -32,18 +34,16 @@ public class UserKeyPairService3IT extends BaseUserKeyPairServiceTest {
   private int sftpServerPort;
   private EmbeddedSftpServer sftpServer;
 
-  private Path tempSftpFolder;
-
   /**
    * Tests that the key pair is valid by
    * using keypair to perform scp between testcontainers
    */
 
-  @Test
+  @ParameterizedTest
+  @MethodSource("provideUserKeyPairService")
   @Override
   @SneakyThrows
-  void testKeyPair() {
-    UserKeyPairService service = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
+  void testKeyPair(UserKeyPairService service) {
     KeyPairInfo info = service.generateNewKeyPair();
     validateKeyPair(info.getPublicKey(), info.getPrivateKey().getBytes(StandardCharsets.UTF_8));
   }
@@ -82,8 +82,8 @@ public class UserKeyPairService3IT extends BaseUserKeyPairServiceTest {
 
   @SneakyThrows
   void initSftpServer(String publicKey) {
-    this.tempSftpFolder = Files.createTempDirectory("SFTP_TEST");
-    this.sftpServer = SftpServerUtils.getSftpServer(publicKey, this.tempSftpFolder);
+    Path tempSftpFolder = Files.createTempDirectory("SFTP_TEST");
+    this.sftpServer = SftpServerUtils.getSftpServer(publicKey, tempSftpFolder);
     this.sftpServerPort= sftpServer.getServer().getPort();
   }
 
