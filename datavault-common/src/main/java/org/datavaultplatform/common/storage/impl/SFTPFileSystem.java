@@ -337,7 +337,7 @@ public class SFTPFileSystem extends Device implements SFTPFileSystemDriver {
                 path = path + "/";
             }
             
-            monitor = new Utility.SFTPMonitor(progress);
+            monitor = new Utility.SFTPMonitor(progress, clock);
             
             Utility.getDir(channelSftp, path, working, attrs, monitor);
             
@@ -379,7 +379,7 @@ public class SFTPFileSystem extends Device implements SFTPFileSystemDriver {
                 channelSftp.cd(dirName);
             }
             
-            monitor = new Utility.SFTPMonitor(progress);
+            monitor = new Utility.SFTPMonitor(progress, clock);
 
             Utility.send(channelSftp, working, monitor);
 
