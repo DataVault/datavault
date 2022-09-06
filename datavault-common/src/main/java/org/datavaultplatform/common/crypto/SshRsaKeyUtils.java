@@ -40,26 +40,26 @@ public class SshRsaKeyUtils {
   }
 
   @SneakyThrows
-  public static RSAPrivateKey readPrivateKey(File privateKeyFile, String keyPassword) {
-    return readPrivateKey(new FileReader(privateKeyFile), keyPassword);
+  public static RSAPrivateKey readPrivateKey(File privateKeyFile, String keyPassphrase) {
+    return readPrivateKey(new FileReader(privateKeyFile), keyPassphrase);
   }
 
   @SneakyThrows
-  public static RSAPrivateKey readPrivateKey(String privateKey, String keyPassword) {
-    return readPrivateKey(new StringReader(privateKey), keyPassword);
+  public static RSAPrivateKey readPrivateKey(String privateKey, String keyPassphrase) {
+    return readPrivateKey(new StringReader(privateKey), keyPassphrase);
   }
 
   @SneakyThrows
-  public static RSAPrivateKey readPrivateKey(Reader privateKeyReader, String keyPassword) {
+  public static RSAPrivateKey readPrivateKey(Reader privateKeyReader, String keyPassphrase) {
     PEMParser pemParser = new PEMParser(privateKeyReader);
     Object object = pemParser.readObject();
     final PEMKeyPair pemKeyPair;
     if (object instanceof PEMEncryptedKeyPair) {
-      PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build(keyPassword.toCharArray());
-      log.info("Encrypted key - will use provided password");
+      PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build(keyPassphrase.toCharArray());
+      log.info("Encrypted key - will use provided passphrase]");
       pemKeyPair = ((PEMEncryptedKeyPair) object).decryptKeyPair(decProv);
     } else {
-      log.info("Unencrypted key - no password needed");
+      log.info("Unencrypted key - no passphrase needed");
       pemKeyPair = (PEMKeyPair) object;
     }
     JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
@@ -114,6 +114,7 @@ public class SshRsaKeyUtils {
     RSAPublicKey rsaPublicKey = getRSAPublicKey(rsaPrivateKey);
     Assert.isTrue(rsaPublicKey.getModulus().equals(rsaPrivateKey.getModulus()),
         () -> "private and public modulus must be the same");
+    log.info("RSA MODULUS {}", rsaPublicKey.getModulus().toString(16));
     KeyPair keyPair = new KeyPair(rsaPublicKey, rsaPrivateKey);
     return keyPair;
   }
