@@ -1,9 +1,9 @@
 package org.datavaultplatform.common.storage;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.security.interfaces.RSAPublicKey;
@@ -22,13 +22,17 @@ import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnJava;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnJava.Range;
+import org.springframework.boot.system.JavaVersion;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Slf4j
+@ConditionalOnJava(value=JavaVersion.NINE, range=Range.EQUAL_OR_NEWER)
 @Testcontainers(disabledWithoutDocker = true)
-public class SFTPFileSystemSSHDPublicPrivateKeyPairIT extends BaseSFTPFileSystemIT {
+public class SFTPFileSystemSSHDPrivatePublicKeyPairIT extends BaseSFTPFileSystemIT {
 
   static final String TEST_PASSPHRASE = "tenet";
   static final String ENV_PUBLIC_KEY = "PUBLIC_KEY";
@@ -38,7 +42,8 @@ public class SFTPFileSystemSSHDPublicPrivateKeyPairIT extends BaseSFTPFileSystem
   @TempDir
   File keyStoreTempDir;
 
-  protected SFTPFileSystemDriver getSftpFileSystem() {
+  @Override
+  public SFTPFileSystemDriver getSftpFileSystemDriver() {
     Map<String, String> props = getStoreProperties();
     return new SFTPFileSystemSSHD("mina-sshd", props, TEST_CLOCK);
   }

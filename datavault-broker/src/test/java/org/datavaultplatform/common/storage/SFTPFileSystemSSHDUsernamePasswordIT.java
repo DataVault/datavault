@@ -16,7 +16,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers(disabledWithoutDocker = true)
 public class SFTPFileSystemSSHDUsernamePasswordIT extends BaseSFTPFileSystemIT {
 
-  protected SFTPFileSystemDriver getSftpFileSystem() {
+  @Override
+  public SFTPFileSystemDriver getSftpFileSystemDriver() {
     Map<String, String> props = getStoreProperties();
     return new SFTPFileSystemSSHD("mina-sshd", props, TEST_CLOCK);
   }

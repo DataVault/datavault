@@ -1,5 +1,6 @@
 package org.datavaultplatform.worker.operations;
 
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.UpdateProgress;
@@ -17,7 +18,7 @@ public class ProgressTracker implements Runnable {
     private boolean active = true;
     private long lastByteCount = 0;
     private final long expectedBytes;
-    
+
     private final Progress progress;
     private final String jobId;
     private final String depositId;
@@ -53,17 +54,17 @@ public class ProgressTracker implements Runnable {
      */
     void reportProgress() {
         
-        long dirCount = progress.dirCount;
-        long fileCount = progress.fileCount;
-        long byteCount = progress.byteCount;
-        long eventTime = progress.timestamp;
-        long startTime = progress.startTime;
+        long dirCount = progress.getDirCount();
+        long fileCount = progress.getFileCount();
+        long byteCount = progress.getByteCount();
+        long eventTime = progress.getTimestamp();
+        long startTime = progress.getStartTime();
         
         if (byteCount != lastByteCount) {
             
             // Calculate the transfer rate and the estimate time remaining
-            long msElapsed = (eventTime - startTime);
-            double secondsElapsed = (double)msElapsed / 1000.0;
+            long msElapsed = eventTime - startTime;
+            long secondsElapsed = TimeUnit.MILLISECONDS.toSeconds(msElapsed);
             long bytesPerSec = 0;
             if (secondsElapsed > 0) {
                 bytesPerSec = (long)((double)byteCount / secondsElapsed);
@@ -91,7 +92,7 @@ public class ProgressTracker implements Runnable {
     @Override
     public void run() {
         
-        progress.startTime = System.currentTimeMillis();
+        progress.setStartTime(System.currentTimeMillis());
         
         try {
             while(active) {

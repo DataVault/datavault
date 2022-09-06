@@ -27,26 +27,25 @@ import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.impl.ssh.UtilitySSHD;
-import org.datavaultplatform.common.storage.impl.ssh.UtilitySSHD.SFTPMonitorSSD;
+import org.datavaultplatform.common.storage.impl.ssh.UtilitySSHD.SFTPMonitorSSHD;
 
+/**
+ * An implementation of SFTPFileSystemDriver to use Apache sshd's sftp-client library.
+ */
 @Slf4j
 public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
 
   private final SFTPConnectionInfo connectionInfo;
 
-  /**
+  /*
    * This constructor will be used in production code
-   * @param name
-   * @param config
    */
   public SFTPFileSystemSSHD(String name, Map<String, String> config) {
     this(name, config, Clock.systemDefaultZone());
   }
 
-  /**
+  /*
    * This constructor will be used for testing where we can pass in a fixed clock
-   * @param name
-   * @param config
    */
   public SFTPFileSystemSSHD(String name, Map<String, String> config, Clock clock) {
     super(name, config);
@@ -63,7 +62,6 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
       //TODO - don't know how deep this should go 1 level or all the way down - need to test the other one with nested directories
       for (SftpClient.DirEntry entry : con.sftpClient.readDir(fullPath)) {
 
-        //TODO ?? need to check this ??
         if (entry.getFilename().equals(".") ||
             entry.getFilename().equals("..")) {
           continue;
@@ -76,10 +74,6 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
             entry.getFilename(),
             entry.getAttributes().isDirectory());
         files.add(info);
-
-        // Other useful properties:
-        // entry.getAttrs().getSize()
-        // entry.getAttrs().isDir()
       }
     }
     return files;
@@ -169,7 +163,7 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
   }
 
   @Override
-  public void retrieve(String remoteRelativePath, File localStorageDir, Progress progress) throws Exception {
+  public void retrieve(String remoteRelativePath, File localFileOrDir, Progress progress) throws Exception {
     try (SFTPConnection con = getConnection()) {
       // Strip any leading separators (we want a path relative to the current dir)
       while (remoteRelativePath.startsWith(PATH_SEPARATOR)) {
@@ -178,9 +172,9 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
 
       String remoteFullPath = getFullPath(remoteRelativePath);
 
-      SFTPMonitorSSD monitor = new SFTPMonitorSSD(progress, connectionInfo.getClock());
+      SFTPMonitorSSHD monitor = new SFTPMonitorSSHD(progress, connectionInfo.getClock());
 
-      UtilitySSHD.getDir(con.sftpClient, Paths.get(remoteFullPath), localStorageDir, monitor);
+      UtilitySSHD.getDir(con.sftpClient, Paths.get(remoteFullPath), localFileOrDir, monitor);
     }
   }
 
@@ -213,7 +207,7 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
         UtilitySSHD.createDir(con.sftpClient, sftpDestDirPath);
       }
 
-      SFTPMonitorSSD monitor = new SFTPMonitorSSD(progress, connectionInfo.getClock());
+      SFTPMonitorSSHD monitor = new SFTPMonitorSSHD(progress, connectionInfo.getClock());
 
       UtilitySSHD.send(con.sftpClient, localFileOrDirectory, sftpDestDirPath, monitor);
 

@@ -178,7 +178,7 @@ public class Retrieve extends Task {
     }
 
     private void doRetrieve(Context context, Device userFs, File tarFile, Progress progress) throws Exception{
-        logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+        logger.info("Copied: " + progress.getDirCount() + " directories, " + progress.getFileCount() + " files, " + progress.getByteCount() + " bytes");
         
         logger.info("Validating data ...");
         eventSender.send(new UpdateProgress(this.jobID, this.depositId).withNextState(2)
@@ -221,7 +221,7 @@ public class Retrieve extends Task {
             trackerThread.join();
         }
         
-        logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+        logger.info("Copied: " + progress.getDirCount() + " directories, " + progress.getFileCount() + " files, " + progress.getByteCount() + " bytes");
         
         // Cleanup
         logger.info("Cleaning up ...");
