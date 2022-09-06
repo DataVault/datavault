@@ -19,6 +19,7 @@ import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.storage.impl.S3Cloud;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystem;
+import org.datavaultplatform.common.storage.impl.SFTPFileSystemJSch;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -44,14 +45,14 @@ public class UserStoreTest {
     UserStore result = UserStore.fromFileStore(fs);
     assertTrue(result instanceof SFTPFileSystem);
     SFTPFileSystem sftp = (SFTPFileSystem) result;
-
-    Field f1Password = SFTPFileSystem.class.getDeclaredField("password");
-    Field f2Passphrase = SFTPFileSystem.class.getDeclaredField("passphrase");
-    Field f3PrivateKey = SFTPFileSystem.class.getDeclaredField("encPrivateKey");
-    Field f4EncIV = SFTPFileSystem.class.getDeclaredField("encIV");
-    Field f5Host = SFTPFileSystem.class.getDeclaredField("host");
-    Field f6Port = SFTPFileSystem.class.getDeclaredField("port");
-    Field f7RootPath = SFTPFileSystem.class.getDeclaredField("rootPath");
+    Class<SFTPFileSystemJSch> clazz = SFTPFileSystemJSch.class;
+    Field f1Password = clazz.getDeclaredField("password");
+    Field f2Passphrase = clazz.getDeclaredField("passphrase");
+    Field f3PrivateKey = clazz.getDeclaredField("encPrivateKey");
+    Field f4EncIV = clazz.getDeclaredField("encIV");
+    Field f5Host = clazz.getDeclaredField("host");
+    Field f6Port = clazz.getDeclaredField("port");
+    Field f7RootPath = clazz.getDeclaredField("rootPath");
 
     f1Password.setAccessible(true);
     f2Passphrase.setAccessible(true);

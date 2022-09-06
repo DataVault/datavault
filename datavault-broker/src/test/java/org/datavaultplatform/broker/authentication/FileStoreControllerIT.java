@@ -53,6 +53,7 @@ import org.datavaultplatform.common.model.dao.FileStoreDAO;
 import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystem;
+import org.datavaultplatform.common.storage.impl.SFTPFileSystemJSch;
 import org.datavaultplatform.common.util.Constants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -256,7 +257,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   @SneakyThrows
   private void changeSFTPFileSystemPort(SFTPFileSystem sftp, int sftpServerPort) {
     // Tweak the SFTPFileSystem to change the port to point to embedded sftp server
-    Field fPort = SFTPFileSystem.class.getDeclaredField("port");
+    Field fPort = SFTPFileSystemJSch.class.getDeclaredField("port");
     fPort.setAccessible(true);
     log.info("sftpServerPort {}", sftpServerPort);
     fPort.set(sftp, sftpServerPort);
