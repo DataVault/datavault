@@ -1,9 +1,13 @@
 package org.datavaultplatform.common.crypto;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
@@ -85,4 +89,17 @@ public class SshRsaKeyUtilsTest {
     Assertions.assertEquals(plainText1, plainText2);
   }
 
+
+  @Test
+  @SneakyThrows
+  void testPrivateKeyFromPublicKey() {
+    KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+    generator.initialize(1024);
+    KeyPair kp = generator.generateKeyPair();
+
+    RSAPublicKey publicKey1 = (RSAPublicKey) kp.getPublic();
+    RSAPrivateKey privateKey = (RSAPrivateKey) kp.getPrivate();
+    RSAPublicKey publicKey2 = (RSAPublicKey) SshRsaKeyUtils.getKeyPairFromRSAPrivateKey(privateKey).getPublic();
+    assertEquals(publicKey1, publicKey2);
+  }
 }
