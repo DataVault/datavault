@@ -309,7 +309,7 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
             // TODO: is this working correctly with different fragment sizes?
             // TODO: how widely supported is this extension?
             SftpStatVFS statVFS = channelSftp.statVFS(rootPath);
-            return statVFS.getAvailForNonRoot() * 1024; // bytes
+            return statVFS.getAvailForNonRoot() * statVFS.getBlockSize(); // bytes
             
         } catch (Exception e) {
             log.error("unexpected exception", e);

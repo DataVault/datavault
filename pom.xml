@@ -61,6 +61,7 @@
     <javax.interceptor.version>1.2.2</javax.interceptor.version>
     <cron.expr.desc.version>1.2.6</cron.expr.desc.version>
     <sshd.sftp.version>2.9.0</sshd.sftp.version>
+    <eddsa.version>0.3.0</eddsa.version>
   </properties>
 
   <dependencyManagement>
@@ -77,7 +78,17 @@
       </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
+        <artifactId>bcpg-jdk18on</artifactId>
+        <version>${bouncy.castle.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
         <artifactId>bcpkix-jdk18on</artifactId>
+        <version>${bouncy.castle.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk18on</artifactId>
         <version>${bouncy.castle.version}</version>
       </dependency>
       <dependency>
@@ -223,13 +234,26 @@
         <artifactId>sshd-sftp</artifactId>
         <version>${sshd.sftp.version}</version>
       </dependency>
+      <dependency>
+        <groupId>net.i2p.crypto</groupId>
+        <artifactId>eddsa</artifactId>
+        <version>${eddsa.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
   <dependencies>
     <dependency>
       <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpg-jdk18on</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk18on</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
