@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Comparator;
@@ -26,6 +27,8 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -35,10 +38,14 @@ import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseDatabaseTest;
+<<<<<<< HEAD
 import org.datavaultplatform.broker.test.EmbeddedSftpServer;
 import org.datavaultplatform.broker.test.SftpServerUtils;
 import org.datavaultplatform.common.PropNames;
+=======
+>>>>>>> 21718919 (dv5 RSS408-221 - replacement of EmbeddedSftpServer in FileStoreControllerIT with testcontainer ( linuxserver/openssh-server ))
 import org.datavaultplatform.common.crypto.Encryption;
+import org.datavaultplatform.common.docker.DockerImage;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
@@ -63,14 +70,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-/**
- * This integration test - checks a lot of things...
- * 1) SFTPFileSystem - an implementation of UserStore.
- * 2) org.datavaultplatform.broker.controllers.FileStoreController.getFileStoresSFTP
- * 3) org.datavaultplatform.common.storage.UserStore#fromFileStore(org.datavaultplatform.common.model.FileStore)
- * For test sftp server, it uses EmbeddedSftpServer instead of testcontainer/openssh because testcontainer/openssh:8.8 didn't work
- * (now we know that it would work with 8.6 - 8.8 has 'rsa-ssh key-signing' removed);
- */
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.utility.DockerImageName;
+
 @SpringBootTest(classes = DataVaultBrokerApp.class)
 @AddTestProperties
 @Slf4j
@@ -82,6 +85,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc
 public class FileStoreControllerIT extends BaseDatabaseTest {
 
+  private static final String TEST_USER = "admin1";
+  private static final String ENV_USER_NAME = "USER_NAME";
+  private static final String ENV_PUBLIC_KEY = "PUBLIC_KEY";
   private static final String KEY_STORE_PASSWORD = "thePassword";
   private static final String KEY_NAME = "thekeyname";
   final ObjectMapper mapper = new ObjectMapper();
@@ -89,11 +95,10 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   final String CONTENTS_FILE_2 = UUID.randomUUID().toString();
   final String CONTENTS_FILE_3 = UUID.randomUUID().toString();
   final String CONTENTS_FILE_4 = UUID.randomUUID().toString();
-  final String ROOT_PATH = "tmp/sftp/root";
-  final String PATH_DIR_1 = ROOT_PATH + "/AAA";
+  final String PATH_DIR_1 = "FILES/AAA";
   final String PATH_FILE_1 = PATH_DIR_1 + "/file1.txt";
   final String PATH_FILE_2 = PATH_DIR_1 + "/file2.txt";
-  final String PATH_DIR_2 = ROOT_PATH + "/BBB";
+  final String PATH_DIR_2 = "FILES/BBB";
   final String PATH_FILE_3 = PATH_DIR_2 + "/file3.txt";
   final String PATH_FILE_4 = PATH_DIR_2 + "/file4.txt";
   @Value("${sftp.passphrase}")
@@ -101,14 +106,14 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   @MockBean
   Sender sender;
   @TempDir
-  File temp;
+  File tempFromSftp;
   @Autowired
   MockMvc mvc;
   @Autowired
   FileStoreDAO fileStoreDAO;
   String keyStorePath;
   private Path tempSftpFolder;
-  private EmbeddedSftpServer sftpServer;
+  private GenericContainer<?> sftpServer;
 
   @MockBean
   Function<String,String> mPortAdjuster;
@@ -122,7 +127,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   @BeforeEach
   @SneakyThrows
   void setup() {
-    keyStorePath = temp.toPath().resolve("test.ks").toString();
+    keyStorePath = tempFromSftp.toPath().resolve("test.ks").toString();
     log.info("TEMP KEY IS AT [{}]", keyStorePath);
     Encryption enc = new Encryption();
     enc.setVaultEnable(false);
@@ -161,13 +166,14 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     log.info("{}",mapper.writeValueAsString(filestore));
 
     //posts to org.datavaultplatform.broker.controllers.FileStoreController.getFileStoresSFTP
+
     MvcResult result = mvc.perform(post("/filestores/sftp")
             .with(req -> {
               req.setRemoteAddr("127.0.0.1");
               return req;
             })
             .header(Constants.HEADER_CLIENT_KEY, "datavault-webapp")
-            .header(Constants.HEADER_USER_ID, "admin1")
+            .header(Constants.HEADER_USER_ID,   TEST_USER)
             .contentType(MediaType.APPLICATION_JSON)
             .content(mapper.writeValueAsString(filestore)))
         .andDo(print())
@@ -185,7 +191,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
         "port", "host", "rootPath", "publicKey", "iv", "username");
     assertEquals(fileStoreId, fsFromDb.getID());
 
-    assertEquals("admin1", fsFromDb.getUser().getID());
+    assertEquals(TEST_USER, fsFromDb.getUser().getID());
 
     assertEquals(StorageConstants.SFTP_FILE_SYSTEM,
         fsFromDb.getStorageClass());
@@ -194,7 +200,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     assertEquals(new HashSet<>(
         Arrays.asList("username", "password", "publicKey", "privateKey", "iv", "passphrase", "host",
             "port", "rootPath")), storedProps.keySet());
-    assertEquals("admin1", storedProps.get("username"));
+    assertEquals(TEST_USER, storedProps.get("username"));
     assertEquals("", storedProps.get("password"));
     assertEquals("localhost", storedProps.get("host"));
     assertEquals("9999", storedProps.get("port"));
@@ -208,9 +214,10 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     assertTrue(us instanceof SFTPFileSystem);
     SFTPFileSystem sftp = (SFTPFileSystem) us;
     String publicKey = storedProps.get("publicKey");
+    log.info("public key [{}]", publicKey);
 
-    sftpServer = setupSFTP(publicKey);
-    int sftpServerPort = sftpServer.getServer().getPort();
+    this.sftpServer = setupAndStartSFTP(publicKey);
+    int sftpServerPort = this.sftpServer.getMappedPort(2222)
 
     changeSFTPFileSystemPort(sftp, sftpServerPort);
 
@@ -228,6 +235,10 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     SftpFileStoreInfo info = items.stream().filter(i -> i.getId().equals(fileStoreId)).findFirst()
         .get();
     assertTrue(info.isCanConnect());
+  }
+
+  private Path stripFirst(Path path){
+    return path.subpath(1, path.getNameCount());
   }
 
   void checkFileStores(FileStore fsResponse, FileStore fsFromDb, String... props) {
@@ -252,67 +263,76 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   }
 
   @SneakyThrows
-  private EmbeddedSftpServer setupSFTP(String publicKey) {
+  private GenericContainer<?> setupAndStartSFTP(String publicKey) {
+
     this.tempSftpFolder = Files.createTempDirectory("SFTP_TEST");
-
-    EmbeddedSftpServer sftpServer = SftpServerUtils.getSftpServer(publicKey, tempSftpFolder);
-
     copyToSFTPServer(tempSftpFolder.resolve(PATH_FILE_1), CONTENTS_FILE_1);
     copyToSFTPServer(tempSftpFolder.resolve(PATH_FILE_2), CONTENTS_FILE_2);
     copyToSFTPServer(tempSftpFolder.resolve(PATH_FILE_3), CONTENTS_FILE_3);
     copyToSFTPServer(tempSftpFolder.resolve(PATH_FILE_4), CONTENTS_FILE_4);
+
+    GenericContainer<?> sftpServer = new GenericContainer<>(DockerImageName.parse(DockerImage.OPEN_SSH_8pt6_IMAGE_NAME))
+        .withEnv(ENV_USER_NAME, TEST_USER)
+        .withEnv(ENV_PUBLIC_KEY, publicKey) //this causes the public key to be added to /config/.ssh/authorized_keys
+        .withExposedPorts(2222)
+        .withFileSystemBind(tempSftpFolder.toString(), "/tmp")
+        .waitingFor(Wait.forListeningPort());
+
+    sftpServer.start();
 
     return sftpServer;
   }
 
   void checkSFTP(SFTPFileSystem sftp) throws Exception {
 
-    List<FileInfo> items = sftp.list(".").stream().sorted(Comparator.comparing(FileInfo::getName))
+    List<FileInfo> items = sftp.list("FILES").stream().sorted(Comparator.comparing(FileInfo::getName))
         .collect(
             Collectors.toList());
 
     FileInfo aaa = items.get(0);
     assertEquals("AAA", aaa.getName());
-    assertEquals("./AAA", aaa.getKey());
+    assertEquals("FILES/AAA", aaa.getKey());
     assertTrue(aaa.getIsDirectory());
 
     FileInfo bbb = items.get(1);
     assertEquals("BBB", bbb.getName());
-    assertEquals("./BBB", bbb.getKey());
+    assertEquals("FILES/BBB", bbb.getKey());
     assertTrue(bbb.getIsDirectory());
 
     //check files exist
-    assertTrue(sftp.exists("AAA/file1.txt"));
-    assertTrue(sftp.exists("AAA/file2.txt"));
-    assertTrue(sftp.exists("BBB/file3.txt"));
-    assertTrue(sftp.exists("BBB/file4.txt"));
+    assertTrue(sftp.exists("FILES/AAA/file1.txt"));
+    assertTrue(sftp.exists("FILES/AAA/file2.txt"));
+    assertTrue(sftp.exists("FILES/BBB/file3.txt"));
+    assertTrue(sftp.exists("FILES/BBB/file4.txt"));
 
     //check files do NOT exist
-    assertFalse(sftp.exists("BBB/file1.txt"));
-    assertFalse(sftp.exists("BBB/file2.txt"));
-    assertFalse(sftp.exists("AAA/file3.txt"));
-    assertFalse(sftp.exists("AAA/file4.txt"));
+    assertFalse(sftp.exists("FILES/BBB/file1.txt"));
+    assertFalse(sftp.exists("FILES/BBB/file2.txt"));
+    assertFalse(sftp.exists("FILES/AAA/file3.txt"));
+    assertFalse(sftp.exists("FILES/AAA/file4.txt"));
 
     //TEST READING FILES FROM SFTP
-    sftp.retrieve("AAA/file1.txt", temp, new Progress());
-    sftp.retrieve("AAA/file2.txt", temp, new Progress());
-    sftp.retrieve("BBB/file3.txt", temp, new Progress());
-    sftp.retrieve("BBB/file4.txt", temp, new Progress());
-    checkFromSFTP(temp, "file1.txt", CONTENTS_FILE_1);
-    checkFromSFTP(temp, "file2.txt", CONTENTS_FILE_2);
-    checkFromSFTP(temp, "file3.txt", CONTENTS_FILE_3);
-    checkFromSFTP(temp, "file4.txt", CONTENTS_FILE_4);
+    sftp.retrieve("FILES/AAA/file1.txt", tempFromSftp, new Progress());
+    sftp.retrieve("FILES/AAA/file2.txt", tempFromSftp, new Progress());
+    sftp.retrieve("FILES/BBB/file3.txt", tempFromSftp, new Progress());
+    sftp.retrieve("FILES/BBB/file4.txt", tempFromSftp, new Progress());
+
+    checkFromSFTP(tempFromSftp, "file1.txt", CONTENTS_FILE_1);
+    checkFromSFTP(tempFromSftp, "file2.txt", CONTENTS_FILE_2);
+    checkFromSFTP(tempFromSftp, "file3.txt", CONTENTS_FILE_3);
+    checkFromSFTP(tempFromSftp, "file4.txt", CONTENTS_FILE_4);
 
     //TEST WRITING FILE TO SFTP
-    File tempFile = new File(this.temp, "writeTest.txt");
+    File tempFile = new File(this.tempFromSftp, "writeTest.txt");
     String randomContents = UUID.randomUUID().toString();
     writeToFile(tempFile, randomContents);
-    String storedPath = sftp.store("AAA", tempFile, new Progress());
+    String storedPath = sftp.store("FILES/AAA", tempFile, new Progress());
     //this file should now be stored on sftp file system
-    File onSftp = this.tempSftpFolder.resolve(storedPath.substring(1)).resolve("writeTest.txt")
-        .toFile();
-    String contentsfromSftp = readFromFile(onSftp);
-    assertEquals(randomContents, contentsfromSftp);
+
+    File onSftp = this.tempSftpFolder.resolve(stripFirst(Paths.get(storedPath.substring(1))).resolve("writeTest.txt")).toFile();
+    assertTrue(onSftp.exists());
+    assertTrue(onSftp.canRead());
+    assertEquals(randomContents, readFromFile(onSftp));
   }
 
   @SneakyThrows
@@ -331,6 +351,11 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     try (FileWriter fw = new FileWriter(file)) {
       fw.write(contents);
     }
+  }
+
+  //@Test
+  void testStrip(){
+    log.info("[{}]",stripFirst(Paths.get("/a/b/c")));
   }
 
   @SneakyThrows
@@ -358,8 +383,8 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
 
   @AfterEach
   void tearDown() {
-    if (this.sftpServer != null) {
-      sftpServer.stop();
+    if(this.sftpServer != null){
+      this.sftpServer.stop();
     }
   }
 }
