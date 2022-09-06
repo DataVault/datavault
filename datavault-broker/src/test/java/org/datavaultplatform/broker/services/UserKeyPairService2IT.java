@@ -8,7 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.services.UserKeyPairService.KeyPairInfo;
 import org.datavaultplatform.common.docker.DockerImage;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.testcontainers.containers.GenericContainer;
@@ -38,8 +39,8 @@ public class UserKeyPairService2IT extends BaseUserKeyPairServiceTest {
   private static final String CONTAINER_NAME_FROM = "testfrom";
   private static final String CONTAINER_NAME_TO = "testto";
 
-  Resource runScpUsingExpect = new ClassPathResource("runScpUsingExpect.exp");
-  Resource runScp = new ClassPathResource("runScp.sh");
+  final Resource runScpUsingExpect = new ClassPathResource("runScpUsingExpect.exp");
+  final Resource runScp = new ClassPathResource("runScp.sh");
   GenericContainer<?> fromContainer;
   GenericContainer<?> toContainer;
 
@@ -47,11 +48,11 @@ public class UserKeyPairService2IT extends BaseUserKeyPairServiceTest {
    * Tests that the key pair is valid by
    * using keypair to perform scp between testcontainers
    */
-  @Test
+  @ParameterizedTest
+  @MethodSource("provideUserKeyPairService")
   @Override
   @SneakyThrows
-  void testKeyPair() {
-    UserKeyPairService service = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
+  void testKeyPair(UserKeyPairService service) {
     KeyPairInfo info = service.generateNewKeyPair();
     validateKeyPair(info.getPublicKey(), info.getPrivateKey());
   }
@@ -66,7 +67,7 @@ public class UserKeyPairService2IT extends BaseUserKeyPairServiceTest {
 
     execInContainer(fromContainer, "scp using privateKey", PATH_FROM_EXPECT);
 
-    //if the secure copy(scp) 'from container'->'to contaner' worked
+    //if the secure copy(scp) 'from container'->'to container' worked
     // - we should have a file to read off 'from container'
     String copiedContents = readFileFromContainer(toContainer, PATH_TO_RANDOM_FILE);
 
@@ -86,7 +87,7 @@ public class UserKeyPairService2IT extends BaseUserKeyPairServiceTest {
     Network network = Network.newNetwork();
 
     //we put the publicKey into the TO container at startup - so ssh daemon will trust the private key later on
-    toContainer = new GenericContainer(DockerImage.OPEN_SSH_IMAGE)
+    toContainer = new GenericContainer<>(DockerImage.OPEN_SSH_IMAGE)
         .withNetwork(network)
         .withNetworkAliases(CONTAINER_NAME_TO)
         .withEnv(ENV_USER_NAME, TEST_USER)
@@ -94,7 +95,7 @@ public class UserKeyPairService2IT extends BaseUserKeyPairServiceTest {
         .withExposedPorts(2222)
         .waitingFor(Wait.forListeningPort());
 
-    fromContainer = new GenericContainer(image)
+    fromContainer = new GenericContainer<>(image)
         .withNetwork(network)
         .withNetworkAliases(CONTAINER_NAME_FROM)
         .dependsOn(toContainer);

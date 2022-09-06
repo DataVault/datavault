@@ -13,7 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.services.UserKeyPairService.KeyPairInfo;
 import org.datavaultplatform.common.storage.impl.JSchLogger;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
@@ -25,9 +26,8 @@ import org.testcontainers.utility.DockerImageName;
 @Slf4j
 public abstract class BaseUserKeyPairServiceOpenSSHTest extends BaseUserKeyPairServiceTest {
 
-  public static final String TEST_PASSPHRASE = "tenet";
   private static final String TEST_USER = "testuser";
-  private GenericContainer toContainer;
+  private GenericContainer<?> toContainer;
 
   private static final String ENV_USER_NAME = "USER_NAME";
   private static final String ENV_PUBLIC_KEY = "PUBLIC_KEY";
@@ -37,10 +37,10 @@ public abstract class BaseUserKeyPairServiceOpenSSHTest extends BaseUserKeyPairS
    * using keypair to perform scp between testcontainers
    */
 
-  @Test
+  @ParameterizedTest
+  @MethodSource("provideUserKeyPairService")
   @Override
-  void testKeyPair() {
-    UserKeyPairService service = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
+  void testKeyPair(UserKeyPairService service) {
     try {
       KeyPairInfo info = service.generateNewKeyPair();
       validateKeyPair(info.getPublicKey(), info.getPrivateKey().getBytes(StandardCharsets.UTF_8));
@@ -51,10 +51,9 @@ public abstract class BaseUserKeyPairServiceOpenSSHTest extends BaseUserKeyPairS
     }
   }
 
-  @Test
-  @SneakyThrows
-  void testKeyPairIsInValid() {
-    UserKeyPairService service = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
+  @ParameterizedTest
+  @MethodSource("provideUserKeyPairService")
+  void testKeyPairIsInValid(UserKeyPairService service) {
     KeyPairInfo info = service.generateNewKeyPair();
     byte[] badBytes = info.getPrivateKey().getBytes(StandardCharsets.UTF_8);
     //just by changing 1 byte of private key - we should get an error
@@ -81,7 +80,7 @@ public abstract class BaseUserKeyPairServiceOpenSSHTest extends BaseUserKeyPairS
 
   void initContainers(String publicKey) {
     //we put the publicKey into the TO container at startup - so ssh daemon will trust the private key later on
-    toContainer = new GenericContainer(getDockerImageForOpenSSH())
+    toContainer = new GenericContainer<>(getDockerImageForOpenSSH())
         .withEnv(ENV_USER_NAME, TEST_USER)
         .withEnv(ENV_PUBLIC_KEY, publicKey) //this causes the public key to be added to /config/.ssh/authorized_keys
         .withExposedPorts(2222)
