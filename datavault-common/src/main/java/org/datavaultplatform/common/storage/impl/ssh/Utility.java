@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.time.Clock;
 import org.datavaultplatform.common.io.Progress;
 
 public class Utility {
@@ -72,9 +73,11 @@ public class Utility {
     public static class SFTPMonitor implements SftpProgressMonitor {
         
         private final Progress progressTracker;
-        
-        public SFTPMonitor(Progress progressTracker) {
+        private final Clock clock;
+
+        public SFTPMonitor(Progress progressTracker, Clock clock) {
             this.progressTracker = progressTracker;
+            this.clock = clock;
         }
         
         @Override
@@ -87,7 +90,7 @@ public class Utility {
             
             // Inform the generic progress tracker
             progressTracker.byteCount += len;
-            progressTracker.timestamp = System.currentTimeMillis();
+            progressTracker.timestamp = clock.millis();
             
             return true;
         }
