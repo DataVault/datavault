@@ -43,7 +43,7 @@ public class UserKeyPairService3IT extends BaseUserKeyPairServiceTest {
   @Override
   @SneakyThrows
   void testKeyPair() {
-    UserKeyPairService service = new UserKeyPairService(TEST_PASSPHRASE);
+    UserKeyPairService service = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
     KeyPairInfo info = service.generateNewKeyPair();
     validateKeyPair(info.getPublicKey(), info.getPrivateKey().getBytes(StandardCharsets.UTF_8));
   }
@@ -51,7 +51,7 @@ public class UserKeyPairService3IT extends BaseUserKeyPairServiceTest {
   @Test
   @SneakyThrows
   void testKeyPairIsInValid() {
-    UserKeyPairService service = new UserKeyPairService(TEST_PASSPHRASE);
+    UserKeyPairService service = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
     KeyPairInfo info = service.generateNewKeyPair();
     byte[] badBytes = info.getPrivateKey().getBytes(StandardCharsets.UTF_8);
     //just by changing 1 byte of private key - we should get an error
