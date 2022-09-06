@@ -63,6 +63,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * This integration test - checks a lot of things...
+ * 1) SFTPFileSystem - an implementation of UserStore.
+ * 2) org.datavaultplatform.broker.controllers.FileStoreController.getFileStoresSFTP
+ * 3) org.datavaultplatform.common.storage.UserStore#fromFileStore(org.datavaultplatform.common.model.FileStore)
+ * For test sftp server, it uses EmbeddedSftpServer instead of testcontainer/openssh because testcontainer/openssh:8.8 didn't work
+ * (now we know that it would work with 8.6 - 8.8 has 'rsa-ssh key-signing' removed);
+ */
 @SpringBootTest(classes = DataVaultBrokerApp.class)
 @AddTestProperties
 @Slf4j
@@ -152,6 +160,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
 
     log.info("{}",mapper.writeValueAsString(filestore));
 
+    //posts to org.datavaultplatform.broker.controllers.FileStoreController.getFileStoresSFTP
     MvcResult result = mvc.perform(post("/filestores/sftp")
             .with(req -> {
               req.setRemoteAddr("127.0.0.1");
