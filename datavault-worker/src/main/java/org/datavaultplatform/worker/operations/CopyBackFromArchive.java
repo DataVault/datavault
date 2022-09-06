@@ -25,6 +25,6 @@ public class CopyBackFromArchive {
         } else {
             ((Device)archiveStore).retrieve(archiveId, tarFile, progress, location);
         }
-        logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+        logger.info("Copied: " + progress.getDirCount() + " directories, " + progress.getFileCount() + " files, " + progress.getByteCount() + " bytes");
     }
 }

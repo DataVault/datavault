@@ -1,8 +1,10 @@
 package org.datavaultplatform.common.storage;
 
 import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.docker.DockerImage;
+import org.datavaultplatform.common.storage.impl.SFTPFileSystem;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -17,6 +19,12 @@ public class SFTPFileSystemWithUsernamePasswordIT extends BaseSFTPFileSystemIT {
   static final String TEST_PASSWORD = "testPassword";
   static final String ENV_PASSWORD = "USER_PASSWORD";
   static final String ENV_PASSWORD_ACCESS = "PASSWORD_ACCESS";
+
+  @Override
+  public SFTPFileSystemDriver getSftpFileSystemDriver() {
+    Map<String, String> props = getStoreProperties();
+    return new SFTPFileSystem("sftp-jsch", props, TEST_CLOCK);
+  }
 
   @Override
   GenericContainer<?> getSftpTestContainer() {

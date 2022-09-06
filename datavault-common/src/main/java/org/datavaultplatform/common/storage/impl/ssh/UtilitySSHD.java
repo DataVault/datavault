@@ -1,26 +1,4 @@
-/*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- */
-
-//  Adapted from org.apache.tools.ant.taskdefs.optional.ssh
-
 package org.datavaultplatform.common.storage.impl.ssh;
-
-
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -84,37 +62,77 @@ public class UtilitySSHD {
         return bytes;
     }
     
-    public static class SFTPMonitorSSD {
+    public static class SFTPMonitorSSHD {
         
         private final Progress progressTracker;
         private final Clock clock;
 
-        public SFTPMonitorSSD(Progress progressTracker, Clock clock) {
+        public SFTPMonitorSSHD(Progress progressTracker, Clock clock) {
             this.progressTracker = progressTracker;
             this.clock = clock;
         }
         public OutputStream monitorOutputStream(OutputStream os){
-                return new OutputStreamAdapter(os){
+
+                return new OutputStreamAdapter(os) {
+
+                  private void incBytesWritten(int bytesWritten) {
+                    progressTracker.incByteCount(bytesWritten);
+                    progressTracker.setTimestamp(clock.millis());
+                  }
+
                   @Override
                   public void write(byte[] data, int start, int len) throws IOException {
                       super.write(data, start, len);
-                      if(len > 0) {
-                        progressTracker.byteCount += len;
-                        progressTracker.timestamp = clock.millis();
-                      }
+                      incBytesWritten(len);
+                  }
+                  @Override
+                  public void write(byte[] data) throws IOException {
+                    super.write(data);
+                    incBytesWritten(data.length);
+                  }
+                  @Override
+                  public void write(int data) throws IOException {
+                    super.write(data);
+                    incBytesWritten(1);
+                  }
+                  @Override
+                  public void close() throws IOException {
+                      super.close();
+                      progressTracker.setTimestamp(clock.millis());
                   }
                 };
         }
         public InputStream monitorInputStream(InputStream is) {
-            return new InputStreamAdapter(is){
+            return new InputStreamAdapter(is) {
+
+                private int incBytesRead(int bytesRead) {
+                    if(bytesRead > -1) {
+                        progressTracker.incByteCount(bytesRead);
+                        progressTracker.setTimestamp(clock.millis());
+                    }
+                    return bytesRead;
+                }
+
                 @Override
                 public int read(byte[] data, int start, int len) throws IOException {
-                    int read = super.read(data, start, len);
-                    if(read > 0) {
-                        progressTracker.byteCount += read;
-                        progressTracker.timestamp = clock.millis();
+                    return incBytesRead(super.read(data, start, len));
+                }
+                @Override
+                public int read(byte[] target) throws IOException {
+                    return incBytesRead(super.read(target));
+                }
+                @Override
+                public int read() throws IOException {
+                    int data = super.read();
+                    if( data > -1 ) {
+                        incBytesRead(1);
                     }
-                    return read;
+                    return data;
+                }
+                @Override
+                public void close() throws IOException {
+                    super.close();
+                    progressTracker.setTimestamp(clock.millis());
                 }
             };
         }
@@ -123,7 +141,7 @@ public class UtilitySSHD {
     public static void getDir(final SftpClient sftpClient,
                                final Path remoteDirOrFile,
                                final File localStorageDir,
-                               SFTPMonitorSSD monitor) throws IOException, SftpException {
+                               SFTPMonitorSSHD monitor) throws IOException {
 
         Attributes remoteAttrs = sftpClient.stat(remoteDirOrFile.toString());
 
@@ -161,7 +179,7 @@ public class UtilitySSHD {
     private static void getFile(final SftpClient sftpClient,
                                 final Path remoteFilePath,
                                 File localFileOrDirectory,
-                                SFTPMonitorSSD monitor) throws IOException, SftpException {
+                                SFTPMonitorSSHD monitor) throws IOException {
 
         if (!localFileOrDirectory.exists()) {
             if (localFileOrDirectory.isDirectory()) {
@@ -200,15 +218,17 @@ public class UtilitySSHD {
     public static void send(final SftpClient sftpClient,
         final File localFileOrDirectoryToSend,
         final Path sftpDestDirPath,
-        SFTPMonitorSSD monitor)
-        throws IOException, SftpException {
+        SFTPMonitorSSHD monitor)
+        throws IOException {
 
         Assert.isTrue(existsOnSftpServer(sftpClient, sftpDestDirPath), () -> "sftpDestDirPath does not exist: " + sftpDestDirPath);
 
         if (localFileOrDirectoryToSend.isDirectory()) {
+            //noinspection UnnecessaryLocalVariable
             File localDirectory = localFileOrDirectoryToSend;
             sendDirectory(sftpClient, localDirectory, sftpDestDirPath, monitor);
         } else {
+            //noinspection UnnecessaryLocalVariable
             File localFile = localFileOrDirectoryToSend;
             Path fullPathToFileOnSftpServer = sftpDestDirPath.resolve(localFile.getName());
             transferToSftpServer(sftpClient, localFile, fullPathToFileOnSftpServer, monitor);
@@ -218,8 +238,8 @@ public class UtilitySSHD {
     public static void sendDirectory(final SftpClient sftpClient,
                                      final File localDir,
                                      final Path sftpDestDirPath,
-        SFTPMonitorSSD monitor)
-        throws IOException, SftpException {
+        SFTPMonitorSSHD monitor)
+        throws IOException {
 
         Assert.isTrue(UtilitySSHD.existsOnSftpServer(sftpClient, sftpDestDirPath), () -> "sftpDestDirPath does not exist: " + sftpDestDirPath);
 
@@ -231,6 +251,7 @@ public class UtilitySSHD {
             File localPathFile = localPathEntry.toFile();
             
             if (localPathFile.isDirectory()) {
+                //noinspection UnnecessaryLocalVariable
                 File localPathDir = localPathFile;
                 Path nestedSftpDestDirPath = sftpDestDirPath.resolve(localPathDir.getName());
                 sendDirectoryToRemote(sftpClient, localPathDir, nestedSftpDestDirPath, monitor);
@@ -245,8 +266,8 @@ public class UtilitySSHD {
     private static void sendDirectoryToRemote(final SftpClient sftpClient,
                                               final File localDirPath,
                                               final Path sftpDestDirPath,
-                                              final SFTPMonitorSSD monitor)
-        throws IOException, SftpException {
+                                              final SFTPMonitorSSHD monitor)
+        throws IOException {
 
         try {
             sftpClient.stat(sftpDestDirPath.toString());
@@ -265,8 +286,8 @@ public class UtilitySSHD {
     private static void transferToSftpServer(final SftpClient sftpClient,
                                          final File fromFileOnLocal,
                                          final Path fullPathToDestinationFileOnSftpServer,
-                                         SFTPMonitorSSD monitor)
-        throws IOException, SftpException {
+                                         SFTPMonitorSSHD monitor)
+        throws IOException {
 
         final Path destinationDirOnSftpServer = fullPathToDestinationFileOnSftpServer.getParent();
         Assert.isTrue(existsOnSftpServer(sftpClient,destinationDirOnSftpServer), () -> "The directory " + destinationDirOnSftpServer + " does not exist");

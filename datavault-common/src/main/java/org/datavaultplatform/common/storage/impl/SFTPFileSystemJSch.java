@@ -23,7 +23,9 @@ import java.util.Vector;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-@Slf4j
+/**
+ * An implementation of SFTPFileSystemDriver to use JCraft's Jsch ssh/sftp library.
+ */@Slf4j
 public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
 
 

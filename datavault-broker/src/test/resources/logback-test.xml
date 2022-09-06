@@ -9,7 +9,7 @@
         <appender-ref ref="STDOUT"/>
     </root>
 
-    <logger name="org.apache.sshd" level="TRACE"/>
+    <logger name="org.apache.sshd" level="INFO"/>
     <logger name="org.testcontainers" level="INFO"/>
     <logger name="com.github.dockerjava" level="WARN"/>
     <logger name="org.hibernate.SQL" level="DEBUG" >

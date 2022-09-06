@@ -1,17 +1,22 @@
 package org.datavaultplatform.common.storage;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.broker.services.UserKeyPairServiceJSchImpl;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.docker.DockerImage;
+import org.datavaultplatform.common.storage.impl.SFTPFileSystem;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnJava;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnJava.Range;
+import org.springframework.boot.system.JavaVersion;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -21,6 +26,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @Slf4j
 @Testcontainers(disabledWithoutDocker = true)
+@ConditionalOnJava(value= JavaVersion.NINE, range= Range.EQUAL_OR_NEWER)
 public class SFTPFileSystemWithPrivatePublicKeyPairIT extends BaseSFTPFileSystemIT {
   static final String TEST_PASSPHRASE = "tenet";
   static final String ENV_PUBLIC_KEY = "PUBLIC_KEY";
@@ -29,6 +35,12 @@ public class SFTPFileSystemWithPrivatePublicKeyPairIT extends BaseSFTPFileSystem
 
   @TempDir
   File keyStoreTempDir;
+
+  @Override
+  public SFTPFileSystemDriver getSftpFileSystemDriver() {
+    Map<String, String> props = getStoreProperties();
+    return new SFTPFileSystem("sftp-jsch", props, TEST_CLOCK);
+  }
 
   @Override
   GenericContainer<?> getSftpTestContainer() {

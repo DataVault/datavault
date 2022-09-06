@@ -89,15 +89,15 @@ public class Utility {
         public boolean count(final long len) {
             
             // Inform the generic progress tracker
-            progressTracker.byteCount += len;
-            progressTracker.timestamp = clock.millis();
+            progressTracker.incByteCount(len);
+            progressTracker.setTimestamp(clock.millis());
             
             return true;
         }
         
         @Override
         public void end() {
-        
+            progressTracker.setTimestamp(clock.millis());
         }
     }
     

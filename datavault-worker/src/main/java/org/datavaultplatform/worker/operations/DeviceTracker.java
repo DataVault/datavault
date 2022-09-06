@@ -67,7 +67,8 @@ public class DeviceTracker implements Callable<HashMap<String, String>> {
             trackerThread.join();
         }
 
-        log.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+
+        log.info("Copied: " + progress.getDirCount() + " directories, " + progress.getFileCount() + " files, " + progress.getByteCount() + " bytes");
         // wait for all 3 to finish
 
         if (this.optChunkNumber.isPresent() && archiveIds.get(this.archiveStoreId) == null) {
