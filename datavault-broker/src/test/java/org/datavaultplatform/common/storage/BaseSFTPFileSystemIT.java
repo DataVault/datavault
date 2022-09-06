@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.SneakyThrows;
@@ -29,12 +30,13 @@ import org.testcontainers.containers.GenericContainer;
 
 /*
  A Base test class for testing SFTPFileSystem (implements SFTPFileSystemDriver)
- SFTP Server Authentication configuration left to sub-classes.
+ SFTP Server Authentication configuration left to the subclasses.
  */
 @Slf4j
 public abstract class BaseSFTPFileSystemIT {
 
   protected static final String ENV_USER_NAME = "USER_NAME";
+  protected static final String TEST_USER = "testuser";
 
   public static final String FROM_DV_FILE_NAME = "fromDV.txt";
   public static final String TO_DV_FILE_NAME = "toDV.txt";
@@ -42,7 +44,7 @@ public abstract class BaseSFTPFileSystemIT {
 
   protected GenericContainer<?> sftpServerContainer;
 
-  private static String TEST_FILE_CONTENTS = "hello Test File!";
+  private static final String TEST_FILE_CONTENTS = "hello Test File!";
 
   public static final Clock TEST_CLOCK = Clock.fixed(Instant.parse("2022-03-26T09:44:33.22Z"),
       ZoneId.of("Europe/London"));
@@ -79,12 +81,11 @@ public abstract class BaseSFTPFileSystemIT {
     sftpDriver = getSftpFileSystem();
   }
 
-  protected abstract void authenticationSetup();
 
   @Test
   @SneakyThrows
   public void testSftpDriverSingleFileStoreAndRetrieve() {
-    log.info("sfptDriver {}", sftpDriver);
+    log.info("sftpDriver {}", sftpDriver);
 
     String pathOnRemote = sftpDriver.store(".", fromDvFile, new Progress());
     log.info("pathOnRemote[{}]", pathOnRemote);
@@ -127,9 +128,7 @@ public abstract class BaseSFTPFileSystemIT {
     assertTrue(sftpDriver.valid(singleFile.getKey() + ".txt"));
 
 
-    assertThrows(NullPointerException.class, () -> {
-      sftpDriver.getName(null);
-    });
+    assertThrows(NullPointerException.class, () -> sftpDriver.getName(null));
   }
 
   @SneakyThrows
@@ -147,13 +146,31 @@ public abstract class BaseSFTPFileSystemIT {
     this.tempFileDir.deleteOnExit();
   }
 
-  protected final SFTPFileSystem getSftpFileSystem() throws Exception {
+  protected final SFTPFileSystem getSftpFileSystem() {
     Map<String, String> props = getStoreProperties();
-    SFTPFileSystem jschSftp = new SFTPFileSystem("sftp-jsch", props, TEST_CLOCK);
-    return jschSftp;
+    return new SFTPFileSystem("sftp-jsch", props, TEST_CLOCK);
   }
 
-  protected abstract Map<String, String> getStoreProperties() throws Exception;
+  private Map<String,String> getStoreProperties() {
+    HashMap<String, String> props = new HashMap<>();
+
+    //standard sftp properties
+    props.put("username", TEST_USER);
+    props.put("rootPath",
+        "/config"); //this is the directory ON THE SFTP SERVER - for OpenSSH containers, it's config
+    props.put("host", sftpServerContainer.getHost());
+    props.put("port", String.valueOf(sftpServerContainer.getMappedPort(2222)));
+
+    addExtraProps(props);
+
+    return props;
+  }
+
+  protected void authenticationSetup() {
+  }
+
+  protected abstract void addExtraProps(HashMap<String, String> props);
+
 
   protected abstract GenericContainer<?> getSftpTestContainer();
 }
