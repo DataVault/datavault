@@ -1,6 +1,9 @@
 package org.datavaultplatform.common.storage.impl;
 
 import com.jcraft.jsch.*;
+import java.io.InputStream;
+import java.nio.file.Paths;
+import java.time.Clock;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.common.PropNames;
@@ -8,11 +11,10 @@ import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.Device;
-import org.datavaultplatform.common.storage.UserStore;
+import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.impl.ssh.Utility;
 
 import java.io.File;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,10 +24,17 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class SFTPFileSystem extends Device implements UserStore {
+public class SFTPFileSystem extends Device implements SFTPFileSystemDriver {
+
 
     public static final String STRICT_HOST_KEY_CHECKING = "StrictHostKeyChecking";
     public static final String NO = "no";
+
+    private static final String PATH_SEPARATOR = "/";
+    private static final int RETRIES = 25;
+
+    private final Clock clock;
+
     private final String host;
     private final String rootPath;
     private final String username;
@@ -33,21 +42,24 @@ public class SFTPFileSystem extends Device implements UserStore {
     private final byte[] encPrivateKey;
     private final byte[] encIV;
     private final String passphrase;
-    
+
+    private final int port;
+
     private Session session = null;
     private ChannelSftp channelSftp = null;
-    private final int port;
-    private final String PATH_SEPARATOR = "/";
-    
     private Utility.SFTPMonitor monitor = null;
-    private final int RETRIES = 25;
 
     static {
         JSch.setLogger(JSchLogger.getInstance());
     }
 
-    public SFTPFileSystem(String name, Map<String,String> config) {
+    public SFTPFileSystem(String name, Map<String,String> config) throws Exception {
+        this(name, config, Clock.systemDefaultZone());
+    }
+
+    public SFTPFileSystem(String name, Map<String,String> config, Clock clock) {
         super(name, config);
+        this.clock = clock;
 
         log.info("Construct SFTPFileSystem...");
         
@@ -58,7 +70,7 @@ public class SFTPFileSystem extends Device implements UserStore {
         username = config.get(PropNames.USERNAME);
         password = config.get(PropNames.PASSWORD);
         log.info("casting byte[]...");
-        encPrivateKey = Base64.decode(config.get("privateKey"));
+        encPrivateKey = Base64.decode(config.get(PropNames.PRIVATE_KEY));
         encIV = Base64.decode(config.get(PropNames.IV));
         log.info("done!");
         passphrase = config.get("passphrase");
@@ -179,7 +191,7 @@ public class SFTPFileSystem extends Device implements UserStore {
             Connect();
             
             Vector<ChannelSftp.LsEntry> filelist = channelSftp.ls(rootPath + PATH_SEPARATOR + path);
-            
+
             for (int i = 0; i < filelist.size(); i++) {
                 ChannelSftp.LsEntry entry = filelist.get(i);
                 
@@ -224,7 +236,7 @@ public class SFTPFileSystem extends Device implements UserStore {
         try {
             Connect();
             
-            SftpATTRS attrs = channelSftp.stat(rootPath + PATH_SEPARATOR + path);
+            channelSftp.stat(rootPath + PATH_SEPARATOR + path);
             return true;
             
         } catch (Exception e) {
@@ -349,12 +361,12 @@ public class SFTPFileSystem extends Device implements UserStore {
         try {
             Connect();
 
-            path = channelSftp.pwd() + "/" + path;
+            path = Paths.get(channelSftp.pwd()).resolve(path).normalize().toString();
             channelSftp.cd(path);
 
             // Create timestamped folder to avoid overwriting files
             TimeUnit.SECONDS.sleep(2);
-            String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+            String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date(clock.millis()));
             String timestampDirName = "dv_" + timeStamp;
             path = path + PATH_SEPARATOR + timestampDirName;
 
