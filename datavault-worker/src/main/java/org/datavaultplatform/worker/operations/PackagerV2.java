@@ -134,4 +134,27 @@ public class PackagerV2 {
       String lineAndNewLine = String.format("%s  %s%s%s%n", hash, metadataDirName, File.separator, metadataFileName);
       org.apache.commons.io.FileUtils.writeStringToFile(tagManifest, lineAndNewLine, StandardCharsets.UTF_8, true);
     }
+
+  /**
+   * Execute packager as a command-line process.
+   * @param args Expects a string directory argument.
+   */
+  public static void main(String[] args) {
+    int status = -1;
+    if (args.length == 1) {
+      try {
+        File dir = new File(args[0]);
+        System.out.printf("Attempting to create bag files for directory [%s]%n", dir);
+        PackagerV2 packagerV2 = new PackagerV2();
+        packagerV2.createBag(dir);
+        status = 0;
+      } catch (Exception ex) {
+        ex.printStackTrace(System.err);
+      }
+    } else {
+      System.out.println("Packager expects a single directory argument");
+    }
+
+    System.exit(status);
+  }
 }
