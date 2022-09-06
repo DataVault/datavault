@@ -14,6 +14,11 @@ public abstract class DockerImage {
   // https://hub.docker.com/r/mailhog/mailhog/tags
   public static DockerImageName MAIL_IMAGE = parse("mailhog/mailhog:v1.0.1");
 
+
+  // https://hub.docker.com/_/nginx?tab=tags
+  // the nginx image has 'openssl' - which we use to extract 'public key' from 'private key'
+  public static DockerImageName NGINX_IMAGE = parse("nginx:1:23:1");
+
   // https://hub.docker.com/_/rabbitmq?tab=tags
   public static final String RABBIT_IMAGE_NAME = "rabbitmq:3.10.7-management-alpine";
 
