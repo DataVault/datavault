@@ -65,7 +65,7 @@ public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
         info.getPrivateKey(), TEST_PASSPHRASE);
 
     RSAPublicKey rsaPublicKey = (RSAPublicKey) SshRsaKeyUtils.getKeyPairFromRSAPrivateKey(rsaPrivateKey).getPublic();
-    String publicKey1 = UserKeyPairServiceImpl.encodePublicKey(rsaPublicKey, UserKeyPairService.PUBKEY_COMMENT);
+    String publicKey1 = SshRsaKeyUtils.encodePublicKey(rsaPublicKey, UserKeyPairService.PUBKEY_COMMENT);
 
     //check that the re-created public key is same as original public key
     //this proves that the original private/public key pair are matched
