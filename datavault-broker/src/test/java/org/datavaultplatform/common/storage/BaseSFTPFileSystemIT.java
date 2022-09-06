@@ -72,9 +72,7 @@ public abstract class BaseSFTPFileSystemIT {
 
     writeToFile(fromDvFile, TEST_FILE_CONTENTS);
 
-
     authenticationSetup();
-
 
     this.sftpServerContainer = getSftpTestContainer();
     this.sftpServerContainer.start();
@@ -151,6 +149,7 @@ public abstract class BaseSFTPFileSystemIT {
     return new SFTPFileSystem("sftp-jsch", props, TEST_CLOCK);
   }
 
+  @SneakyThrows
   private Map<String,String> getStoreProperties() {
     HashMap<String, String> props = new HashMap<>();
 
@@ -161,16 +160,14 @@ public abstract class BaseSFTPFileSystemIT {
     props.put("host", sftpServerContainer.getHost());
     props.put("port", String.valueOf(sftpServerContainer.getMappedPort(2222)));
 
-    addExtraProps(props);
+    addAuthenticationProps(props);
 
     return props;
   }
 
-  protected void authenticationSetup() {
-  }
-
-  protected abstract void addExtraProps(HashMap<String, String> props);
-
-
   protected abstract GenericContainer<?> getSftpTestContainer();
+
+  protected abstract void addAuthenticationProps(HashMap<String, String> props) throws Exception;
+
+  protected void authenticationSetup() throws Exception {}
 }
