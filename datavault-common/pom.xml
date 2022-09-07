@@ -173,6 +173,7 @@
               <includes>
                 <include>**/DisabledInsideDocker*</include>
                 <include>**/DockerUtils*</include>
+                <include>**/ProcessUtils*</include>
                 <include>**/DockerImage*</include>
                 <include>**/Base*Test*</include>
                 <include>**/*.ldif</include>
