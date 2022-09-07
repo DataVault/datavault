@@ -85,6 +85,9 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   private static final String ENV_PUBLIC_KEY = "PUBLIC_KEY";
   private static final String KEY_STORE_PASSWORD = "thePassword";
   private static final String KEY_NAME = "thekeyname";
+
+  private static final String BASE_SFTP_DIR = "/tmp/sftp/root";
+
   final ObjectMapper mapper = new ObjectMapper();
   final String CONTENTS_FILE_1 = UUID.randomUUID().toString();
   final String CONTENTS_FILE_2 = UUID.randomUUID().toString();
@@ -155,7 +158,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     HashMap<String, String> props = new HashMap<>();
     props.put(PropNames.HOST, "localhost");
     props.put(PropNames.PORT, "9999"); //we will replace 9999 later
-    props.put(PropNames.ROOT_PATH, "/tmp/sftp/root");
+    props.put(PropNames.ROOT_PATH, BASE_SFTP_DIR);
     filestore.setProperties(props);
 
     log.info("{}",mapper.writeValueAsString(filestore));
@@ -232,10 +235,6 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     assertTrue(info.isCanConnect());
   }
 
-  private Path stripFirst(Path path){
-    return path.subpath(1, path.getNameCount());
-  }
-
   void checkFileStores(FileStore fsResponse, FileStore fsFromDb, String... props) {
     assertEquals(fsResponse.getID(), fsFromDb.getID());
     assertEquals(fsResponse.getLabel(), fsFromDb.getLabel());
@@ -270,7 +269,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
         .withEnv(ENV_USER_NAME, TEST_USER)
         .withEnv(ENV_PUBLIC_KEY, publicKey) //this causes the public key to be added to /config/.ssh/authorized_keys
         .withExposedPorts(2222)
-        .withFileSystemBind(tempSftpFolder.toString(), "/tmp")
+        .withFileSystemBind(tempSftpFolder.toString(), BASE_SFTP_DIR)
         .waitingFor(Wait.forListeningPort());
 
     sftpServer.start();
@@ -324,7 +323,9 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     String storedPath = sftp.store("FILES/AAA", tempFile, new Progress());
     //this file should now be stored on sftp file system
 
-    File onSftp = this.tempSftpFolder.resolve(stripFirst(Paths.get(storedPath.substring(1))).resolve("writeTest.txt")).toFile();
+    Path relStoredPath = Paths.get(BASE_SFTP_DIR).relativize(Paths.get(storedPath));
+    File onSftp = this.tempSftpFolder.resolve(relStoredPath).resolve("writeTest.txt").toFile();
+
     assertTrue(onSftp.exists());
     assertTrue(onSftp.canRead());
     assertEquals(randomContents, readFromFile(onSftp));
@@ -346,11 +347,6 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     try (FileWriter fw = new FileWriter(file)) {
       fw.write(contents);
     }
-  }
-
-  //@Test
-  void testStrip(){
-    log.info("[{}]",stripFirst(Paths.get("/a/b/c")));
   }
 
   @SneakyThrows

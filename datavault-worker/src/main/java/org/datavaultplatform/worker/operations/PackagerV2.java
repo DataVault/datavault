@@ -156,6 +156,7 @@ public class PackagerV2 {
         status = 0;
       } catch (Exception ex) {
         log.error("Unexpected Exception", ex);
+        ex.printStackTrace(System.err);
       }
     } else {
       log.info("Packager expects a single directory argument");
