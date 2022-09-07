@@ -65,7 +65,7 @@ public class SFTPFileSystem extends Device implements UserStore {
         System.out.println("SFTPFileSystem created...");
     }
     
-    private void Connect() throws Exception {
+    public void Connect() throws Exception {
         JSch jsch = new JSch();
         session = jsch.getSession(username, host, port);
 

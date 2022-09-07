@@ -23,11 +23,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.datavaultplatform.broker.actuator.SftpFileStoreEndpoint;
+import org.datavaultplatform.broker.actuator.SftpFileStoreInfo;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.test.AddTestProperties;
@@ -46,6 +49,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -55,7 +59,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
 @AddTestProperties
@@ -95,6 +99,12 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   String keyStorePath;
   private Path tempSftpFolder;
   private EmbeddedSftpServer sftpServer;
+
+  @MockBean
+  Function<String,String> mPortAdjuster;
+
+  @Autowired
+  SftpFileStoreEndpoint sftpFileStoreEndpoint;
 
   /*
     Creates and configures a Java Key Store specifically for this test run.
@@ -137,6 +147,8 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     props.put("port", "9999"); //we will replace 9999 later
     props.put("rootPath", "/tmp/sftp/root");
     filestore.setProperties(props);
+
+    log.info("{}",mapper.writeValueAsString(filestore));
 
     MvcResult result = mvc.perform(post("/filestores/sftp")
             .with(req -> {
@@ -192,6 +204,19 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     changeSFTPFileSystemPort(sftp, sftpServerPort);
 
     checkSFTP(sftp);
+
+    checkSftpFileStoreEndpoint(fileStoreId, sftpServerPort);
+  }
+
+  @SneakyThrows
+  private void checkSftpFileStoreEndpoint(String fileStoreId, int actualPort) {
+
+    Mockito.when(mPortAdjuster.apply("9999")).thenReturn(String.valueOf(actualPort));
+
+    List<SftpFileStoreInfo> items = this.sftpFileStoreEndpoint.getSftpFileStoresInfo();
+    SftpFileStoreInfo info = items.stream().filter(i -> i.getId().equals(fileStoreId)).findFirst()
+        .get();
+    assertTrue(info.isCanConnect());
   }
 
   void checkFileStores(FileStore fsResponse, FileStore fsFromDb, String... props) {

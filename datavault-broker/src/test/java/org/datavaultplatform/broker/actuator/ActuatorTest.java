@@ -1,26 +1,39 @@
 package org.datavaultplatform.broker.actuator;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collections;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.queue.Sender;
+import org.datavaultplatform.broker.services.FileStoreService;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseDatabaseTest;
+import org.datavaultplatform.broker.test.TestClockConfig;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
+@Import(TestClockConfig.class)
 @AddTestProperties
 @Slf4j
 @TestPropertySource(properties = {
@@ -40,6 +53,17 @@ public class ActuatorTest extends BaseDatabaseTest {
   @MockBean
   Sender sender;
 
+  @Autowired
+  ObjectMapper mapper;
+
+  @MockBean
+  FileStoreService mFileStoreService;
+
+  @Test
+  void setup() {
+    when(mFileStoreService.getFileStores()).thenReturn(Collections.emptyList());
+  }
+
   @Test
   @SneakyThrows
   void testActuatorPublicAccess() {
@@ -56,7 +80,7 @@ public class ActuatorTest extends BaseDatabaseTest {
   @Test
   @SneakyThrows
   void testActuatorAuthorized() {
-    Stream.of("/actuator", "/actuator/", "/actuator/env")
+    Stream.of("/actuator", "/actuator/", "/actuator/env", "/actuator/customtime", "/actuator/sftpfilestores")
         .forEach(url -> checkAuthorized(url, "bactor", "bactorpass"));
   }
 
@@ -75,4 +99,22 @@ public class ActuatorTest extends BaseDatabaseTest {
   void checkPublic(String url) {
     mvc.perform(get(url)).andDo(print()).andExpect(status().isOk());
   }
+
+  @Test
+  void testCurrentTime() throws Exception {
+    MvcResult mvcResult = mvc.perform(
+            get("/actuator/customtime")
+                .with(httpBasic("bactor", "bactorpass")))
+        .andExpect(content().contentTypeCompatibleWith("application/vnd.spring-boot.actuator.v3+json"))
+        .andExpect(jsonPath("$.current-time").exists())
+        .andReturn();
+
+    String json = mvcResult.getResponse().getContentAsString();
+    Map<String,String> infoMap = mapper.createParser(json).readValueAs(Map.class);
+
+    assertTrue(infoMap.containsKey("current-time"));
+    String ct = infoMap.get("current-time");
+    Assertions.assertEquals("Tue Mar 29 14:15:16 BST 2022",ct);
+  }
+
 }

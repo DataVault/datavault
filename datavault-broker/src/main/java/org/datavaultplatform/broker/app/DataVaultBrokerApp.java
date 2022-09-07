@@ -3,9 +3,12 @@ package org.datavaultplatform.broker.app;
 
 import it.burning.cron.CronExpressionDescriptor;
 import it.burning.cron.CronExpressionParser.Options;
+import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.broker.actuator.SftpFileStoreEndpoint;
+import org.datavaultplatform.broker.actuator.SftpFileStoreInfo;
 import org.datavaultplatform.broker.config.ActuatorConfig;
 import org.datavaultplatform.broker.config.ControllerConfig;
 import org.datavaultplatform.broker.config.DatabaseConfig;
@@ -67,6 +70,9 @@ public class DataVaultBrokerApp implements CommandLineRunner {
   @Autowired
   ScheduledTasksEndpoint scheduledTasksEndpoint;
 
+  @Autowired
+  SftpFileStoreEndpoint sftpFileStoreEndpoint;
+
   public static void main(String[] args) {
     SpringApplication.run(DataVaultBrokerApp.class, args);
   }
@@ -113,7 +119,20 @@ public class DataVaultBrokerApp implements CommandLineRunner {
     log.info("Broker [{}] ready [{}]", applicationName, readyEvent);
     showRabbitListenerContainers();
     showScheduledTasks();
+    showSftpConnectionInfo();
     log.info("{}", MemoryStats.getCurrent().toPretty());
+  }
+
+  private void showSftpConnectionInfo() {
+    log.info("START SFTP CONNECTION INFO");
+    List<SftpFileStoreInfo> infos = this.sftpFileStoreEndpoint.getSftpFileStoresInfo();
+    int total = infos.size();
+    log.info("There are [{}] SFTP connections.", total);
+    for (int i = 0; i < total; i++) {
+      SftpFileStoreInfo info = infos.get(i);
+      log.info("SFTP[{}/{}] {}", i+1, total, info);
+    }
+    log.info("END SFTP CONNECTION INFO");
   }
 
   void showRabbitListenerContainers(){
