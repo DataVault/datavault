@@ -99,6 +99,6 @@ public class ManifestWriter extends SimpleFileVisitor<Path> implements AutoClose
         if (bw != null) {
             bw.flush();
         }
-        IOUtils.close(bw);
+        IOUtils.closeQuietly(bw);
     }
 }
