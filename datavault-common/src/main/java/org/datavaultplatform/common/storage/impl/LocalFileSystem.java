@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.storage.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.io.FileCopy;
 import org.datavaultplatform.common.io.Progress;
@@ -19,7 +20,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.springframework.util.Assert;
 
+@Slf4j
 public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
 
     public static final String ROOT_PATH = "rootPath";
@@ -31,14 +34,17 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
         
         // Unpack the config parameters (in an implementation-specific way)
         rootPath = config.get(ROOT_PATH);
-        
+        Assert.isTrue(rootPath != null, () -> "rootPath cannot be null");
         // Verify parameters are correct.
         File file = new File(rootPath);
         if (!file.exists()) {
             throw new FileNotFoundException(rootPath);
         }
+        Assert.isTrue(file.isDirectory(), () -> String.format("rootPath is not a directory[%s]", rootPath));
+        Assert.isTrue(file.canRead(), () -> String.format("rootPath is not readable[%s]", rootPath));
+        Assert.isTrue(file.canWrite(), () -> String.format("rootPath is not writable[%s]", rootPath));
     }
-    
+
     @Override
     public List<FileInfo> list(String path) {
         
@@ -46,7 +52,7 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
         Path completePath = getAbsolutePath(path);
 
         if (completePath == null) {
-            throw new IllegalArgumentException("Path invalid");
+            throw new IllegalArgumentException("Path invalid [" + path + "]");
         }
 
         ArrayList<FileInfo> files = new ArrayList<>();
@@ -69,7 +75,7 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
             }
 
         } catch (IOException e) {
-            System.out.println(e.toString());
+            log.warn("Error listing files in path [" + path + "]", e);
         }
 
         return files;

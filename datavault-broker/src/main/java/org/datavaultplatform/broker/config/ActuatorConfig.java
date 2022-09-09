@@ -3,7 +3,9 @@ package org.datavaultplatform.broker.config;
 import java.time.Clock;
 import java.util.function.Function;
 import org.datavaultplatform.broker.actuator.CurrentTimeEndpoint;
+import org.datavaultplatform.broker.actuator.LocalFileStoreEndpoint;
 import org.datavaultplatform.broker.actuator.SftpFileStoreEndpoint;
+import org.datavaultplatform.broker.services.ArchiveStoreService;
 import org.datavaultplatform.broker.services.FileStoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootVersion;
@@ -35,6 +37,11 @@ public class ActuatorConfig {
   @Bean
   public SftpFileStoreEndpoint sftpFileStoreEndpoint(@Autowired  FileStoreService fileStoreService, Function<String,String> portAdjuster) {
     return new SftpFileStoreEndpoint(fileStoreService, portAdjuster);
+  }
+
+  @Bean
+  public LocalFileStoreEndpoint localFileStoreEndpoint(@Autowired ArchiveStoreService archiveStoreService) {
+    return new LocalFileStoreEndpoint(archiveStoreService);
   }
 
 }

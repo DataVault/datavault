@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.broker.actuator.LocalFileStoreEndpoint;
+import org.datavaultplatform.broker.actuator.LocalFileStoreInfo;
 import org.datavaultplatform.broker.actuator.SftpFileStoreEndpoint;
 import org.datavaultplatform.broker.actuator.SftpFileStoreInfo;
 import org.datavaultplatform.broker.config.ActuatorConfig;
@@ -73,6 +75,9 @@ public class DataVaultBrokerApp implements CommandLineRunner {
   @Autowired
   SftpFileStoreEndpoint sftpFileStoreEndpoint;
 
+  @Autowired
+  LocalFileStoreEndpoint localFileStoreEndpoint;
+
   public static void main(String[] args) {
     SpringApplication.run(DataVaultBrokerApp.class, args);
   }
@@ -120,7 +125,20 @@ public class DataVaultBrokerApp implements CommandLineRunner {
     showRabbitListenerContainers();
     showScheduledTasks();
     showSftpConnectionInfo();
+    showLocalFileStoreInfo();
     log.info("{}", MemoryStats.getCurrent().toPretty());
+  }
+
+  private void showLocalFileStoreInfo() {
+    log.info("START LOCAL FILE STORE INFO");
+    List<LocalFileStoreInfo> infos = this.localFileStoreEndpoint.getLocalFileStoresInfo();
+    int total = infos.size();
+    log.info("There are [{}] LocalFileStores.", total);
+    for (int i = 0; i < total; i++) {
+      LocalFileStoreInfo info = infos.get(i);
+      log.info("LocalFileStore[{}/{}] {}", i+1, total, info);
+    }
+    log.info("END LOCAL FILE STORE INFO");
   }
 
   private void showSftpConnectionInfo() {

@@ -86,6 +86,9 @@ public abstract class BaseEmailServiceTest {
   @MockBean
   RolesAndPermissionsService rolesAndPermissionsService;
 
+  @MockBean
+  ArchiveStoreService mArchiveStoreService;
+
   @Autowired
   EmailService emailService;
 

@@ -80,7 +80,8 @@ public class ActuatorTest extends BaseDatabaseTest {
   @Test
   @SneakyThrows
   void testActuatorAuthorized() {
-    Stream.of("/actuator", "/actuator/", "/actuator/env", "/actuator/customtime", "/actuator/sftpfilestores")
+    Stream.of("/actuator", "/actuator/", "/actuator/env", "/actuator/customtime",
+            "/actuator/sftpfilestores", "/actuator/localfilestores")
         .forEach(url -> checkAuthorized(url, "bactor", "bactorpass"));
   }
 

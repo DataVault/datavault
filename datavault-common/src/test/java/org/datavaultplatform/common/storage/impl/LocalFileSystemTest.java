@@ -2,21 +2,27 @@ package org.datavaultplatform.common.storage.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.common.io.Files;
+
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.io.FileUtils;
 import org.datavaultplatform.common.io.Progress;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -70,7 +76,7 @@ public class LocalFileSystemTest {
     //assertEquals(1, pRetrieve.fileCount);
     checkProgressFinishedBeforeNow(pRetrieve);
 
-    List<String> lines = Files.readLines(targetFile, StandardCharsets.UTF_8);
+    List<String> lines = FileUtils.readLines(targetFile, StandardCharsets.UTF_8);
     assertEquals(3, lines.size());
     assertEquals("one", lines.get(0));
     assertEquals("two", lines.get(1));
@@ -81,4 +87,68 @@ public class LocalFileSystemTest {
     long diff = Instant.now().minus(progress.timestamp, ChronoUnit.MILLIS).toEpochMilli();
     assertTrue(diff >= 0);
   }
+
+  @Nested
+  class RootPathValidityChecks {
+
+    @Test
+    void testRootPathIsNull() {
+      IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+          () -> new LocalFileSystem(null, new HashMap<>()));
+      assertEquals("rootPath cannot be null", ex.getMessage());
+    }
+
+    @Test
+    void testRootPathDoesNotExist() {
+      HashMap<String, String> map = new HashMap<>();
+      map.put(LocalFileSystem.ROOT_PATH, "/doesNotExist");
+      FileNotFoundException ex = assertThrows(FileNotFoundException.class,
+          () -> new LocalFileSystem(null, map));
+      assertEquals("/doesNotExist", ex.getMessage());
+    }
+
+    @Test
+    @SneakyThrows
+    void testRootPathNonADirectory() {
+      File newFile  = Files.createTempFile("test", "txt").toFile();
+      newFile.deleteOnExit();
+      try(FileWriter fw = new FileWriter(newFile)){
+        fw.write("test");
+      }
+      HashMap<String, String> map = new HashMap<>();
+      map.put(LocalFileSystem.ROOT_PATH, newFile.getAbsolutePath());
+      IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+          () -> new LocalFileSystem(null, map));
+      assertEquals(String.format("rootPath is not a directory[%s]",newFile), ex.getMessage());
+    }
+
+    @Test
+    @SneakyThrows
+    void testRootPathNotReadable() {
+      File newDir  = Files.createTempDirectory("test").toFile();
+      newDir.setReadable(false);
+      newDir.deleteOnExit();
+
+      HashMap<String, String> map = new HashMap<>();
+      map.put(LocalFileSystem.ROOT_PATH, newDir.getAbsolutePath());
+      IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+          () -> new LocalFileSystem(null, map));
+      assertEquals(String.format("rootPath is not readable[%s]", newDir), ex.getMessage());
+    }
+
+    @Test
+    @SneakyThrows
+    void testRootPathNotWritable() {
+      File newDir  = Files.createTempDirectory("test").toFile();
+      newDir.setWritable(false);
+      newDir.deleteOnExit();
+
+      HashMap<String, String> map = new HashMap<>();
+      map.put(LocalFileSystem.ROOT_PATH, newDir.getAbsolutePath());
+      IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+          () -> new LocalFileSystem(null, map));
+      assertEquals(String.format("rootPath is not writable[%s]", newDir), ex.getMessage());
+    }
+  }
+
 }
