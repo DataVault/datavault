@@ -47,26 +47,26 @@ public class Deposit extends Task {
         this.setupRestartHashes();
     }
     private EventSender eventSender;
-    HashMap<String, UserStore> userStores;
+    private HashMap<String, UserStore> userStores;
 
     // todo: I'm sure these two maps could be combined in some way.
 
     // Maps the model ArchiveStore Id to the storage equivalent
-    HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
+    private HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
 
     // Maps the model ArchiveStore Id to the generated Archive Id
-    HashMap<String, String> archiveIds = new HashMap<>();
+    private HashMap<String, String> archiveIds = new HashMap<>();
 
-    String depositId;
-    String bagID;
-    String userID;
+    private String depositId;
+    private String bagID;
+    private String userID;
 
-    PackagerV2 packagerV2 = new PackagerV2();
+    private final PackagerV2 packagerV2 = new PackagerV2();
     
     // Chunking attributes
-    File[] chunkFiles;
-    String[] chunksHash;
-    String[] encChunksHash;
+    private File[] chunkFiles;
+    private String[] chunksHash;
+    private String[] encChunksHash;
 
     private void setupRestartHashes() {
         Deposit.RESTART_FROM_BEGINNNING.add("org.datavaultplatform.common.event.deposit.Start");
@@ -283,22 +283,17 @@ public class Deposit extends Task {
     private void copyToArchiveStorage(File tarFile, int chunkNumber) throws Exception {
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
-        List<Future<HashMap<String, String>>> futures = new ArrayList();
+        List<Future<HashMap<String, String>>> futures = new ArrayList<>();
         for (String archiveStoreId : archiveStores.keySet() ) {
             logger.debug("ArchiveStoreId: " + archiveStoreId);
             ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
-            // add thread to executor
+            // add task to executor
             // add future to futures list
-            DeviceTracker dt = new DeviceTracker();
-            dt.setArchiveStore(archiveStore);
-            dt.setArchiveStoreId(archiveStoreId);
-            dt.setChunkNumber(chunkNumber);
-            dt.setDepositId(depositId);
-            dt.setJobID(jobID);
-            dt.setEventSender(eventSender);
-            dt.setTarFile(tarFile);
-            dt.setUserID(userID);
-            logger.debug("Creating device thread:" + archiveStore.getClass());
+            DeviceTracker dt = new DeviceTracker(archiveStore, archiveStoreId,
+                chunkNumber, depositId,
+                jobID, eventSender,
+                tarFile, userID);
+            logger.debug("Creating device task:" + archiveStore.getClass());
             Future<HashMap<String, String>> dtFuture = executor.submit(dt);
             futures.add(dtFuture);
         }
@@ -462,32 +457,26 @@ public class Deposit extends Task {
         }
         logger.debug("Number of threads: " + noOfThreads);
         ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
-        List<Future<HashMap<String, String>>> futures = new ArrayList();
+        List<Future<Object>> futures = new ArrayList<>();
         for (int i = 0; i < chunkFiles.length; i++) {
             int chunkNumber = i + 1;
             // if less that max threads started start new one
             File chunkFile = chunkFiles[i];
             //String chunkHash = chunksHash[i];
 
-            ChunkDownloadTracker cdt = new ChunkDownloadTracker();
-            cdt.setArchiveId(archiveId);
-            cdt.setArchiveStore(archiveStore);
-            cdt.setChunkFile(chunkFile);
-            //cdt.setChunkHash(chunkHash);
-            cdt.setContext(context);
-            cdt.setChunkNumber(chunkNumber);
-            cdt.setDoVerification(doVerification);
-            cdt.setEncChunksHash(encChunksHash);
-            cdt.setIvs(ivs);
-            cdt.setLocation(location);
-            cdt.setMultipleCopies(multipleCopies);
+            ChunkDownloadTracker cdt = new ChunkDownloadTracker(
+                archiveId, archiveStore,
+                chunkFile, context,
+                chunkNumber, doVerification,
+                encChunksHash, ivs,
+                location, multipleCopies);
             logger.debug("Creating chunk download task:" + chunkNumber);
-            Future<HashMap<String, String>> dtFuture = executor.submit(cdt);
+            Future<Object> dtFuture = executor.submit(cdt);
             futures.add(dtFuture);
         }
         executor.shutdown();
 
-        for (Future<HashMap<String, String>> future : futures) {
+        for (Future<Object> future : futures) {
             try {
                 future.get();
             } catch (ExecutionException ee) {
@@ -748,13 +737,11 @@ public class Deposit extends Task {
 
         logger.debug("Number of threads:" + noOfThreads);
         ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
-        List<Future<ChecksumHelper>> futures = new ArrayList();
+        List<Future<ChecksumHelper>> futures = new ArrayList<>();
         for (int i = 0; i < chunkFiles.length; i++){
             int chunkNumber = i + 1;
             File chunk = chunkFiles[i];
-            ChecksumTracker ct = new ChecksumTracker();
-            ct.setChunk(chunk);
-            ct.setChunkNumber(chunkNumber);
+            ChecksumTracker ct = new ChecksumTracker(chunk, chunkNumber);
 
             logger.debug("Creating chunk checksum task:" + chunkNumber);
             Future<ChecksumHelper> ctFuture = executor.submit(ct);
@@ -819,24 +806,21 @@ public class Deposit extends Task {
 
         logger.debug("Number of threads:" + noOfThreads);
         ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
-        List<Future<EncryptionHelper>> futures = new ArrayList();
+        List<Future<EncryptionChunkHelper>> futures = new ArrayList<>();
         for (int i = 0; i < chunkFiles.length; i++){
             int chunkNumber = i + 1;
-            EncryptionTracker et = new EncryptionTracker();
-            et.setChunkNumber(chunkNumber);
-            et.setChunk(chunkFiles[i]);
-            et.setContext(context);
-            logger.debug("Creating chunk encryption chunk:" + chunkNumber);
-            Future<EncryptionHelper> etFuture = executor.submit(et);
+            EncryptionTracker et = new EncryptionTracker(chunkNumber, chunkFiles[i], context);
+            logger.debug("Creating chunk encryption task:" + chunkNumber);
+            Future<EncryptionChunkHelper> etFuture = executor.submit(et);
             futures.add(etFuture);
         }
         executor.shutdown();
 
-        for (Future<EncryptionHelper> future : futures) {
+        for (Future<EncryptionChunkHelper> future : futures) {
             try {
-                EncryptionHelper result = future.get();
+                EncryptionChunkHelper result = future.get();
                 int chunkNumber = result.getChunkNumber();
-                int i = result.getChunkNumber() - 1;
+                int i = chunkNumber - 1;
                 encChunksHash[i] = result.getEncTarHash();
                 encChunksDigests.put(chunkNumber, encChunksHash[i]);
                 chunksIVs.put(chunkNumber, result.getIv());
@@ -878,22 +862,21 @@ public class Deposit extends Task {
 //	}
 	
 	private EncryptionHelper encryptFullTar(Context context, File tarFile) throws Exception {
-		EncryptionHelper retVal = new EncryptionHelper();
-		byte[] iv = Encryption.encryptFile(context, tarFile);
-        String encTarHash = Verify.getDigest(tarFile);
 
-        logger.info("Encrypted Tar file: " + tarFile.length() + " bytes");
-        logger.info("Encrypted tar checksum: " + encTarHash);
+      byte[] iv = Encryption.encryptFile(context, tarFile);
+      String encTarHash = Verify.getDigest(tarFile);
 
-        eventSender.send(new ComputedEncryption(jobID, depositId,null,
-                iv, context.getEncryptionMode().toString(),
-                encTarHash, null, null, null)
-                    .withUserId(userID));
-        retVal.setIv(iv);
-        retVal.setEncTarHash(encTarHash);
-        return retVal;
-	}
-	
+      logger.info("Encrypted Tar file: " + tarFile.length() + " bytes");
+      logger.info("Encrypted tar checksum: " + encTarHash);
+
+      eventSender.send(new ComputedEncryption(jobID, depositId, null,
+          iv, context.getEncryptionMode().toString(),
+          encTarHash, null, null, null)
+          .withUserId(userID));
+      EncryptionHelper retVal = new EncryptionHelper(iv, encTarHash);
+      return retVal;
+  }
+
 	private void uploadToStorage(Context context, File tarFile) throws Exception {
         logger.debug("Uploading to storage.");
 
@@ -904,44 +887,39 @@ public class Deposit extends Task {
             }
             logger.debug("Number of threads:" + noOfThreads);
             ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
-            List<Future<HashMap<String, String>>> futures = new ArrayList();
+            List<Future<HashMap<String, String>>> futures = new ArrayList<>();
 
     		// kick of 10 (maybe more) threads at a time?  each thread would kick off 3 threads of their own
         for (int i = 0; i < chunkFiles.length; i++) {
-                int chunkNumber = i + 1;
-                File chunk = chunkFiles[i];
-                // kick of 10 (maybe more) threads at a time?  each thread would kick off 3 threads of their own
-                ChunkUploadTracker cut = new ChunkUploadTracker();
-                cut.setChunkNumber(chunkNumber);
-                cut.setChunk(chunk);
-                cut.setArchiveStores(this.archiveStores);
-                cut.setDepositId(this.depositId);
-                cut.setEventSender(this.eventSender);
-                cut.setJobID(this.jobID);
-                cut.setTarFile(tarFile);
-                cut.setUserID(this.userID);
-                logger.debug("Creating chunk upload task:" + chunkNumber);
-                Future<HashMap<String, String>> dtFuture = executor.submit(cut);
-                futures.add(dtFuture);
-            }
-            executor.shutdown();
+            int chunkNumber = i + 1;
+            File chunk = chunkFiles[i];
+            // kick of 10 (maybe more) tasks at a time?  each task would kick off 3 tasks of their own
+            ChunkUploadTracker cut = new ChunkUploadTracker(chunkNumber, chunk,
+                archiveStores, depositId,
+                eventSender, jobID,
+                tarFile, userID);
+            logger.debug("Creating chunk upload task:" + chunkNumber);
+            Future<HashMap<String, String>> dtFuture = executor.submit(cut);
+            futures.add(dtFuture);
+        }
+        executor.shutdown();
 
-            for (Future<HashMap<String, String>> future : futures) {
-                try {
-                    HashMap<String, String> result = future.get();
-                    logger.debug("returned archiveIds: " + result);
-                    archiveIds.putAll(result);
-                    logger.debug("archiveIds: " + archiveIds);
-                } catch (ExecutionException ee) {
-                    Throwable cause = ee.getCause();
-                    if (cause instanceof Exception) {
-                        logger.info("Chunk upload failed. " + cause.getMessage());
-                        throw (Exception) cause;
-                    }
+        for (Future<HashMap<String, String>> future : futures) {
+            try {
+                HashMap<String, String> result = future.get();
+                logger.debug("returned archiveIds: " + result);
+                archiveIds.putAll(result);
+                logger.debug("archiveIds: " + archiveIds);
+            } catch (ExecutionException ee) {
+                Throwable cause = ee.getCause();
+                if (cause instanceof Exception) {
+                    logger.info("Chunk upload failed. " + cause.getMessage());
+                    throw (Exception) cause;
                 }
             }
+        }
 
-            logger.debug("final archiveIds: " + archiveIds);
+        logger.debug("final archiveIds: " + archiveIds);
 		} else {
 			copyToArchiveStorage(tarFile);
 		}

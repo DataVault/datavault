@@ -2,8 +2,7 @@ package org.datavaultplatform.worker.operations;
 
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.storage.ArchiveStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -11,36 +10,43 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.*;
 
-public class ChunkUploadTracker implements Callable {
+@Slf4j
+public class ChunkUploadTracker implements Callable<HashMap<String, String>> {
 
-    private File chunk;
-    private int chunkNumber;
-    private HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
-    private String depositId;
-    private String jobID;
-    private EventSender eventSender;
-    private File tarFile;
-    private String userID;
-    private static final Logger logger = LoggerFactory.getLogger(ChunkUploadTracker.class);
+    private final File chunk;
+    private final int chunkNumber;
+    private final HashMap<String, ArchiveStore> archiveStores;
+    private final String depositId;
+    private final String jobID;
+    private final EventSender eventSender;
+    private final File tarFile;
+    private final String userID;
+
+    public ChunkUploadTracker(int chunkNumber, File chunk, HashMap<String, ArchiveStore> archiveStores, String depositId, EventSender eventSender, String jobID, File tarFile,
+        String userID) {
+        this.chunkNumber = chunkNumber;
+        this.chunk = chunk;
+        this.archiveStores = archiveStores;
+        this.depositId = depositId;
+        this.eventSender = eventSender;
+        this.jobID = jobID;
+        this.tarFile = tarFile;
+        this.userID = userID;
+    }
 
     @Override
     public HashMap<String, String> call() throws Exception {
-        logger.debug("Copying chunk: "+chunk.getName());
+        log.debug("Copying chunk: "+chunk.getName());
         ExecutorService executor = Executors.newFixedThreadPool(2);
         List<Future<HashMap<String, String>>> futures = new ArrayList<>();
         HashMap<String, String> archiveIds = new HashMap<>();
         for (String archiveStoreId : archiveStores.keySet() ) {
             ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
-            DeviceTracker dt = new DeviceTracker();
-            dt.setArchiveStore(archiveStore);
-            dt.setArchiveStoreId(archiveStoreId);
-            dt.setChunkNumber(chunkNumber);
-            dt.setDepositId(depositId);
-            dt.setJobID(jobID);
-            dt.setEventSender(eventSender);
-            dt.setTarFile(chunk);
-            dt.setUserID(userID);
-            logger.debug("Creating device thread:" + archiveStore.getClass());
+            DeviceTracker dt = new DeviceTracker(archiveStore, archiveStoreId,
+                chunkNumber, depositId,
+                jobID, eventSender,
+                chunk, userID);
+            log.debug("Creating device task:" + archiveStore.getClass());
             Future<HashMap<String, String>> dtFuture = executor.submit(dt);
             futures.add(dtFuture);
         }
@@ -53,12 +59,12 @@ public class ChunkUploadTracker implements Callable {
             } catch (ExecutionException ee) {
                 Throwable cause = ee.getCause();
                 if (cause instanceof Exception) {
-                    logger.info("Device upload failed. " + cause.getMessage());
+                    log.info("Device upload failed. " + cause.getMessage());
                     throw (Exception) cause;
                 }
             }
         }
-        logger.debug("Chunk upload thread completed: " + this.chunkNumber);
+        log.debug("Chunk upload task completed: " + this.chunkNumber);
         return archiveIds;
     }
 
@@ -66,63 +72,33 @@ public class ChunkUploadTracker implements Callable {
         return this.chunk;
     }
 
-    public void setChunk(File chunk) {
-        this.chunk = chunk;
-    }
 
     public int getChunkNumber() {
         return this.chunkNumber;
-    }
-
-    public void setChunkNumber(int chunkNumber) {
-        this.chunkNumber = chunkNumber;
     }
 
     public HashMap<String, ArchiveStore> getArchiveStores() {
         return this.archiveStores;
     }
 
-    public void setArchiveStores(HashMap<String, ArchiveStore> archiveStores) {
-        this.archiveStores = archiveStores;
-    }
-
     public String getDepositId() {
         return this.depositId;
-    }
-
-    public void setDepositId(String depositId) {
-        this.depositId = depositId;
     }
 
     public String getJobID() {
         return this.jobID;
     }
 
-    public void setJobID(String jobID) {
-        this.jobID = jobID;
-    }
 
     public EventSender getEventSender() {
         return this.eventSender;
-    }
-
-    public void setEventSender(EventSender eventSender) {
-        this.eventSender = eventSender;
     }
 
     public File getTarFile() {
         return this.tarFile;
     }
 
-    public void setTarFile(File tarFile) {
-        this.tarFile = tarFile;
-    }
-
     public String getUserID() {
         return userID;
-    }
-
-    public void setUserID(String userID) {
-        this.userID = userID;
     }
 }

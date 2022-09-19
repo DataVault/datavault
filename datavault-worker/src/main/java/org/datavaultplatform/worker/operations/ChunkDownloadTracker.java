@@ -4,28 +4,44 @@ import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-public class ChunkDownloadTracker implements Callable {
+@Slf4j
+public class ChunkDownloadTracker implements Callable<Object> {
 
-    private File chunkFile;
-    private String chunkHash;
-    private Context context;
-    private String archiveId;
-    private Boolean multipleCopies;
-    private String location;
-    private ArchiveStore archiveStore;
-    private int chunkNumber;
-    private Boolean doVerification;
-    private Map<Integer, byte[]> ivs;
-    private  String[] encChunksHash;
-    private static final Logger logger = LoggerFactory.getLogger(ChunkDownloadTracker.class);
+
+    private final File chunkFile;
+    private final Context context;
+    private final String archiveId;
+    private final Boolean multipleCopies;
+    private final String location;
+    private final ArchiveStore archiveStore;
+    private final int chunkNumber;
+    private final Boolean doVerification;
+    private final Map<Integer, byte[]> ivs;
+    private final String[] encChunksHash;
+
+    public ChunkDownloadTracker(String archiveId, ArchiveStore archiveStore,
+        File chunkFile, Context context,
+        int chunkNumber, Boolean doVerification,
+        String[] encChunksHash, Map<Integer, byte[]> ivs,
+        String location, Boolean multipleCopies ) {
+        this.chunkFile = chunkFile;
+        this.context = context;
+        this.archiveId = archiveId;
+        this.multipleCopies = multipleCopies;
+        this.location = location;
+        this.archiveStore = archiveStore;
+        this.chunkNumber = chunkNumber;
+        this.doVerification = doVerification;
+        this.ivs = ivs;
+        this.encChunksHash = encChunksHash;
+    }
 
     @Override
     public Object call() throws Exception {
@@ -34,9 +50,9 @@ public class ChunkDownloadTracker implements Callable {
         //String chunkHash = chunksHash[i];
         // Delete the existing temporary file
         chunkFile.delete();
-        String archiveChunkId = archiveId+FileSplitter.CHUNK_SEPARATOR+(chunkNumber);
+        String archiveChunkId = archiveId+FileSplitter.CHUNK_SEPARATOR+chunkNumber;
         // Copy file back from the archive storage
-        logger.debug("archiveChunkId: "+archiveChunkId);
+        log.debug("archiveChunkId: "+archiveChunkId);
         if (multipleCopies && location != null) {
             CopyBackFromArchive.copyBackFromArchive(archiveStore, archiveChunkId, chunkFile, location);
         } else {
@@ -52,24 +68,24 @@ public class ChunkDownloadTracker implements Callable {
                 String encChunkHash = encChunksHash[chunkNumber-1];
 
                 // Check hash of encrypted file
-                logger.debug("Verifying encrypted chunk file: "+chunkFile.getAbsolutePath());
+                log.debug("Verifying encrypted chunk file: "+chunkFile.getAbsolutePath());
                 verifyChunkFile(context.getTempDir(), chunkFile, encChunkHash);
             }
         }
 
         //logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
         //verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
-        logger.debug("Chunk download thread completed: " + chunkNumber);
+        log.debug("Chunk download task completed: " + chunkNumber);
         return null;
     }
 
     private void verifyChunkFile(Path tempPath, File chunkFile, String origChunkHash) throws Exception {
 
         if (origChunkHash != null) {
-            logger.info("Get Digest from: " + chunkFile.getAbsolutePath());
+            log.info("Get Digest from: " + chunkFile.getAbsolutePath());
             // Compare the SHA hash
             String chunkHash = Verify.getDigest(chunkFile);
-            logger.info("Checksum: " + chunkHash);
+            log.info("Checksum: " + chunkHash);
             if (!chunkHash.equals(origChunkHash)) {
                 throw new Exception("checksum failed: " + chunkHash + " != " + origChunkHash);
             }
@@ -80,87 +96,40 @@ public class ChunkDownloadTracker implements Callable {
         return chunkFile;
     }
 
-    public void setChunkFile(File chunkFile) {
-        this.chunkFile = chunkFile;
-    }
-
-    public String getChunkHash() {
-        return chunkHash;
-    }
-
-    public void setChunkHash(String chunkHash) {
-        this.chunkHash = chunkHash;
-    }
-
     public Context getContext() {
         return context;
-    }
-
-    public void setContext(Context context) {
-        this.context = context;
     }
 
     public String getArchiveId() {
         return archiveId;
     }
 
-    public void setArchiveId(String archiveId) {
-        this.archiveId = archiveId;
-    }
-
     public Boolean getMultipleCopies() {
         return multipleCopies;
-    }
-
-    public void setMultipleCopies(Boolean multipleCopies) {
-        this.multipleCopies = multipleCopies;
     }
 
     public String getLocation() {
         return location;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
     public ArchiveStore getArchiveStore() {
         return archiveStore;
-    }
-
-    public void setArchiveStore(ArchiveStore archiveStore) {
-        this.archiveStore = archiveStore;
     }
 
     public int getChunkNumber() {
         return chunkNumber;
     }
 
-    public void setChunkNumber(int chunkNumber) {
-        this.chunkNumber = chunkNumber;
-    }
-
     public Boolean getDoVerification() {
         return doVerification;
-    }
-
-    public void setDoVerification(Boolean doVerification) {
-        this.doVerification = doVerification;
     }
 
     public Map<Integer, byte[]> getIvs() {
         return ivs;
     }
 
-    public void setIvs(Map<Integer, byte[]> ivs) {
-        this.ivs = ivs;
-    }
-
     public String[] getEncChunksHash() {
         return encChunksHash;
     }
 
-    public void setEncChunksHash(String[] encChunksHash) {
-        this.encChunksHash = encChunksHash;
-    }
 }
