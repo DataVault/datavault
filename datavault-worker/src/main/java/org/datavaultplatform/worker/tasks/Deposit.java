@@ -14,6 +14,7 @@ import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.worker.utils.Utils;
 import org.datavaultplatform.worker.operations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +23,6 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.*;
 
 /**
@@ -304,11 +301,7 @@ public class Deposit extends Task {
                 HashMap<String, String> result = future.get();
                 archiveIds.putAll(result);
             } catch (ExecutionException ee) {
-                Throwable cause = ee.getCause();
-                if (cause instanceof Exception) {
-                    logger.info("Device upload failed. " + cause.getMessage());
-                    throw (Exception) cause;
-                }
+                Utils.handleExecutionException(ee, "Device upload failed.");
             }
         }
 
@@ -480,11 +473,7 @@ public class Deposit extends Task {
             try {
                 future.get();
             } catch (ExecutionException ee) {
-                Throwable cause = ee.getCause();
-                if (cause instanceof Exception) {
-                    logger.info("Chunk download failed. " + cause.getMessage());
-                    throw (Exception) cause;
-                }
+                Utils.handleExecutionException(ee, "Chunk download failed.");
             }
         }
 
@@ -776,11 +765,7 @@ public class Deposit extends Task {
                 logger.info("Checksum algorithm: " + tarHashAlgorithm);
                 logger.info("Checksum: " + chunksHash[i]);
             } catch (ExecutionException ee) {
-                Throwable cause = ee.getCause();
-                if (cause instanceof Exception) {
-                    logger.info("Chunk encryption failed. " + cause.getMessage());
-                    throw (Exception) cause;
-                }
+                Utils.handleExecutionException(ee, "Chunk encryption failed.");
             }
         }
         
@@ -826,11 +811,7 @@ public class Deposit extends Task {
                 chunksIVs.put(chunkNumber, result.getIv());
 
             } catch (ExecutionException ee) {
-                Throwable cause = ee.getCause();
-                if (cause instanceof Exception) {
-                    logger.info("Chunk encryption failed. " + cause.getMessage());
-                    throw (Exception) cause;
-                }
+                Utils.handleExecutionException(ee, "Chunk encryption failed.");
             }
         }
 
@@ -911,11 +892,7 @@ public class Deposit extends Task {
                 archiveIds.putAll(result);
                 logger.debug("archiveIds: " + archiveIds);
             } catch (ExecutionException ee) {
-                Throwable cause = ee.getCause();
-                if (cause instanceof Exception) {
-                    logger.info("Chunk upload failed. " + cause.getMessage());
-                    throw (Exception) cause;
-                }
+                Utils.handleExecutionException(ee, "Chunk upload failed.");
             }
         }
 

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.*;
+import org.datavaultplatform.worker.utils.Utils;
 
 @Slf4j
 public class ChunkUploadTracker implements Callable<HashMap<String, String>> {
@@ -57,11 +58,7 @@ public class ChunkUploadTracker implements Callable<HashMap<String, String>> {
                 HashMap<String, String> result = future.get();
                 archiveIds.putAll(result);
             } catch (ExecutionException ee) {
-                Throwable cause = ee.getCause();
-                if (cause instanceof Exception) {
-                    log.info("Device upload failed. " + cause.getMessage());
-                    throw (Exception) cause;
-                }
+                Utils.handleExecutionException(ee, "Device upload failed.");
             }
         }
         log.debug("Chunk upload task completed: " + this.chunkNumber);
