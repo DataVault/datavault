@@ -3,7 +3,7 @@ package org.datavaultplatform.worker.tasks;
 public class EncryptionHelper {
 	private byte[] iv;
 	private String encTarHash;
-	private int chunkCount;
+	private int chunkNumber;
 	
 	public byte[] getIv() {
 		return this.iv;
@@ -19,11 +19,11 @@ public class EncryptionHelper {
 		this.encTarHash = encTarHash;
 	}
 
-	public int getChunkCount() {
-		return this.chunkCount;
+	public int getChunkNumber() {
+		return this.chunkNumber;
 	}
 
-	public void setChunkCount(int chunkCount) {
-		this.chunkCount = chunkCount;
+	public void setChunkNumber(int chunkNumber) {
+		this.chunkNumber = chunkNumber;
 	}
 }

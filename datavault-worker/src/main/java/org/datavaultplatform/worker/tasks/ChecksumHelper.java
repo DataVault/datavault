@@ -4,7 +4,7 @@ import java.io.File;
 public class ChecksumHelper {
 
     private String chunkHash;
-    private int chunkCount;
+    private int chunkNumber;
     private File chunk;
 
     public String getChunkHash() {
@@ -15,12 +15,12 @@ public class ChecksumHelper {
         this.chunkHash = chunkHash;
     }
 
-    public int getChunkCount() {
-        return chunkCount;
+    public int getChunkNumber() {
+        return chunkNumber;
     }
 
-    public void setChunkCount(int chunkCount) {
-        this.chunkCount = chunkCount;
+    public void setChunkNumber(int chunkNumber) {
+        this.chunkNumber = chunkNumber;
     }
 
     public File getChunk() {

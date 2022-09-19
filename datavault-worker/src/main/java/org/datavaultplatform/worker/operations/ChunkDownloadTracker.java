@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -22,7 +21,7 @@ public class ChunkDownloadTracker implements Callable {
     private Boolean multipleCopies;
     private String location;
     private ArchiveStore archiveStore;
-    private int count;
+    private int chunkNumber;
     private Boolean doVerification;
     private Map<Integer, byte[]> ivs;
     private  String[] encChunksHash;
@@ -34,10 +33,8 @@ public class ChunkDownloadTracker implements Callable {
         //File chunkFile = chunkFiles[i];
         //String chunkHash = chunksHash[i];
         // Delete the existing temporary file
-        int chunkNum = count;
-        chunkNum++;
         chunkFile.delete();
-        String archiveChunkId = archiveId+FileSplitter.CHUNK_SEPARATOR+(chunkNum);
+        String archiveChunkId = archiveId+FileSplitter.CHUNK_SEPARATOR+(chunkNumber);
         // Copy file back from the archive storage
         logger.debug("archiveChunkId: "+archiveChunkId);
         if (multipleCopies && location != null) {
@@ -50,9 +47,9 @@ public class ChunkDownloadTracker implements Callable {
         if(ivs != null) {
 
             if(doVerification) {
-                Encryption.decryptFile(context, chunkFile, ivs.get(chunkNum));
+                Encryption.decryptFile(context, chunkFile, ivs.get(chunkNumber));
             } else {
-                String encChunkHash = encChunksHash[count];
+                String encChunkHash = encChunksHash[chunkNumber-1];
 
                 // Check hash of encrypted file
                 logger.debug("Verifying encrypted chunk file: "+chunkFile.getAbsolutePath());
@@ -62,7 +59,7 @@ public class ChunkDownloadTracker implements Callable {
 
         //logger.debug("Verifying chunk file: "+chunkFile.getAbsolutePath());
         //verifyChunkFile(context.getTempDir(), chunkFile, chunkHash);
-        logger.debug("Chunk download thread completed: " + chunkNum);
+        logger.debug("Chunk download thread completed: " + chunkNumber);
         return null;
     }
 
@@ -135,12 +132,12 @@ public class ChunkDownloadTracker implements Callable {
         this.archiveStore = archiveStore;
     }
 
-    public int getCount() {
-        return count;
+    public int getChunkNumber() {
+        return chunkNumber;
     }
 
-    public void setCount(int count) {
-        this.count = count;
+    public void setChunkNumber(int chunkNumber) {
+        this.chunkNumber = chunkNumber;
     }
 
     public Boolean getDoVerification() {

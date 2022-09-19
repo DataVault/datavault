@@ -18,8 +18,8 @@ public class DeviceTracker implements Callable {
     private String jobID;
     private String depositId;
     private File tarFile;
-    private EventSender eventStream;
-    private int chunkCount = 0;
+    private EventSender eventSender;
+    private int chunkNumber = 0;
     private String archiveStoreId;
     private ArchiveStore archiveStore;
     private String userID;
@@ -30,23 +30,23 @@ public class DeviceTracker implements Callable {
         HashMap<String, String> archiveIds = new HashMap<>();
         // Progress tracking (threaded)
         Progress progress = new Progress();
-        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.tarFile.length(), this.eventStream);
+        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.tarFile.length(), this.eventSender);
         Thread trackerThread = new Thread(tracker);
         trackerThread.start();
         String depId = this.depositId;
-        if (this.chunkCount > 0) {
-            depId = depId + "." + this.chunkCount;
+        if (this.chunkNumber > 0) {
+            depId = depId + "." + this.chunkNumber;
         }
         String archiveId;
         // kick off new thread for each device ( we may already have kicked off x threads for chunks)
         try {
-            this.eventStream.send(new StartCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name, this.chunkCount ).withUserId(this.userID));
+            this.eventSender.send(new StartCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name, this.chunkNumber).withUserId(this.userID));
             if (((Device)this.archiveStore).hasDepositIdStorageKey()) {
                 archiveId = ((Device) this.archiveStore).store(depId, this.tarFile, progress);
             } else {
                 archiveId = ((Device) this.archiveStore).store("/", this.tarFile, progress);
             }
-            this.eventStream.send(new CompleteCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name, this.chunkCount ).withUserId(this.userID));
+            this.eventSender.send(new CompleteCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name, this.chunkNumber).withUserId(this.userID));
         } finally {
             // Stop the tracking thread
             tracker.stop();
@@ -56,7 +56,7 @@ public class DeviceTracker implements Callable {
         logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
         // wait for all 3 to finish
 
-        if (this.chunkCount > 0 && archiveIds.get(this.archiveStoreId) == null) {
+        if (this.chunkNumber > 0 && archiveIds.get(this.archiveStoreId) == null) {
             logger.info("ArchiveId is: " + archiveId);
             String separator = FileSplitter.CHUNK_SEPARATOR;
             logger.info("Separator is: " + separator);
@@ -66,7 +66,7 @@ public class DeviceTracker implements Callable {
             logger.debug("Add to archiveIds: key: "+this.archiveStoreId+" ,value:"+archiveId);
             archiveIds.put(archiveStoreId, archiveId);
             logger.debug("archiveIds: "+archiveIds);
-        } else if(this.chunkCount == 0) {
+        } else if(this.chunkNumber == 0) {
             archiveIds.put(archiveStoreId, archiveId);
         }
         logger.debug("Device thread completed: " + archiveId);
@@ -97,20 +97,20 @@ public class DeviceTracker implements Callable {
         this.tarFile = tarFile;
     }
 
-    public EventSender getEventStream() {
-        return this.eventStream;
+    public EventSender getEventSender() {
+        return this.eventSender;
     }
 
-    public void setEventStream(EventSender eventStream) {
-        this.eventStream = eventStream;
+    public void setEventSender(EventSender eventSender) {
+        this.eventSender = eventSender;
     }
 
-    public int getChunkCount() {
-        return this.chunkCount;
+    public int getChunkNumber() {
+        return this.chunkNumber;
     }
 
-    public void setChunkCount(int chunkCount) {
-        this.chunkCount = chunkCount;
+    public void setChunkNumber(int chunkNumber) {
+        this.chunkNumber = chunkNumber;
     }
 
     public String getArchiveStoreId() {

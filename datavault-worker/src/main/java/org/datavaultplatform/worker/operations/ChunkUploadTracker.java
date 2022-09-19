@@ -14,11 +14,11 @@ import java.util.concurrent.*;
 public class ChunkUploadTracker implements Callable {
 
     private File chunk;
-    private int chunkCount;
+    private int chunkNumber;
     private HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
     private String depositId;
     private String jobID;
-    private EventSender eventStream;
+    private EventSender eventSender;
     private File tarFile;
     private String userID;
     private static final Logger logger = LoggerFactory.getLogger(ChunkUploadTracker.class);
@@ -34,10 +34,10 @@ public class ChunkUploadTracker implements Callable {
             DeviceTracker dt = new DeviceTracker();
             dt.setArchiveStore(archiveStore);
             dt.setArchiveStoreId(archiveStoreId);
-            dt.setChunkCount(chunkCount);
+            dt.setChunkNumber(chunkNumber);
             dt.setDepositId(depositId);
             dt.setJobID(jobID);
-            dt.setEventStream(eventStream);
+            dt.setEventSender(eventSender);
             dt.setTarFile(chunk);
             dt.setUserID(userID);
             logger.debug("Creating device thread:" + archiveStore.getClass());
@@ -58,7 +58,7 @@ public class ChunkUploadTracker implements Callable {
                 }
             }
         }
-        logger.debug("Chunk upload thread completed: " + this.chunkCount);
+        logger.debug("Chunk upload thread completed: " + this.chunkNumber);
         return archiveIds;
     }
 
@@ -70,12 +70,12 @@ public class ChunkUploadTracker implements Callable {
         this.chunk = chunk;
     }
 
-    public int getChunkCount() {
-        return this.chunkCount;
+    public int getChunkNumber() {
+        return this.chunkNumber;
     }
 
-    public void setChunkCount(int chunkCount) {
-        this.chunkCount = chunkCount;
+    public void setChunkNumber(int chunkNumber) {
+        this.chunkNumber = chunkNumber;
     }
 
     public HashMap<String, ArchiveStore> getArchiveStores() {
@@ -102,12 +102,12 @@ public class ChunkUploadTracker implements Callable {
         this.jobID = jobID;
     }
 
-    public EventSender getEventStream() {
-        return this.eventStream;
+    public EventSender getEventSender() {
+        return this.eventSender;
     }
 
-    public void setEventStream(EventSender eventStream) {
-        this.eventStream = eventStream;
+    public void setEventSender(EventSender eventSender) {
+        this.eventSender = eventSender;
     }
 
     public File getTarFile() {

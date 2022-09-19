@@ -11,14 +11,14 @@ import java.util.concurrent.Callable;
 public class ChecksumTracker implements Callable {
 
     private File chunk;
-    private int chunkCount;
+    private int chunkNumber;
     private static final Logger logger = LoggerFactory.getLogger(ChecksumTracker.class);
 
     @Override
     public ChecksumHelper call() throws Exception {
 
         ChecksumHelper retVal = new ChecksumHelper();
-        retVal.setChunkCount(this.chunkCount);
+        retVal.setChunkNumber(this.chunkNumber);
         retVal.setChunkHash(Verify.getDigest(this.chunk));
         retVal.setChunk(this.chunk);
         return retVal;
@@ -40,11 +40,11 @@ public class ChecksumTracker implements Callable {
         this.chunk = chunk;
     }
 
-    public int getChunkCount() {
-        return this.chunkCount;
+    public int getChunkNumber() {
+        return this.chunkNumber;
     }
 
-    public void setChunkCount(int chunkCount) {
-        this.chunkCount = chunkCount;
+    public void setChunkNumber(int chunkNumber) {
+        this.chunkNumber = chunkNumber;
     }
 }

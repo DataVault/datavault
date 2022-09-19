@@ -13,7 +13,7 @@ import java.util.concurrent.Callable;
 public class EncryptionTracker implements Callable {
 
     private File chunk;
-    private int chunkCount;
+    private int chunkNumber;
     private Context context;
     private static final Logger logger = LoggerFactory.getLogger(EncryptionTracker.class);
 
@@ -26,13 +26,13 @@ public class EncryptionTracker implements Callable {
 
         String encChunksHash = Verify.getDigest(this.chunk);
 
-        logger.info("Chunk file " + this.chunkCount + ": " + this.chunk.length() + " bytes");
+        logger.info("Chunk file " + this.chunkNumber + ": " + this.chunk.length() + " bytes");
         logger.info("Encrypted chunk checksum: " + encChunksHash);
         EncryptionHelper retVal = new EncryptionHelper();
         retVal.setIv(chunkIV);
         retVal.setEncTarHash(encChunksHash);
-        retVal.setChunkCount(this.chunkCount);
-        logger.debug("Chunk encryption thread completed: " + this.chunkCount);
+        retVal.setChunkNumber(this.chunkNumber);
+        logger.debug("Chunk encryption task completed: " + this.chunkNumber);
         return retVal;
     }
 
@@ -44,12 +44,12 @@ public class EncryptionTracker implements Callable {
         this.chunk = chunk;
     }
 
-    public int getChunkCount() {
-        return this.chunkCount;
+    public int getChunkNumber() {
+        return this.chunkNumber;
     }
 
-    public void setChunkCount(int chunkCount) {
-        this.chunkCount = chunkCount;
+    public void setChunkNumber(int chunkNumber) {
+        this.chunkNumber = chunkNumber;
     }
 
     public Context getContext() {
