@@ -8,8 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
-import org.datavaultplatform.worker.queue.EventSender;
 import org.datavaultplatform.worker.test.AddTestProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class ActuatorTest {
   MockMvc mvc;
 
   @MockBean
-  EventSender sender;
+  RecordingEventSender eventSender;
 
   @Test
   @SneakyThrows

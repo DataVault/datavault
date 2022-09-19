@@ -1,6 +1,6 @@
 package org.datavaultplatform.common.task;
 
-import org.datavaultplatform.common.event.EventStream;
+import org.datavaultplatform.common.event.EventSender;
 import java.nio.file.Path;
 
 // Some common properties needed for all jobs
@@ -10,7 +10,7 @@ public class Context {
 
     private final Path tempDir;
     private final Path metaDir;
-    private final EventStream eventStream;
+    private final EventSender eventSender;
     private final Boolean chunkingEnabled;
     private final Long chunkingByteSize;
     private final Boolean encryptionEnabled;
@@ -24,7 +24,7 @@ public class Context {
     private final int noChunkThreads;
     
     //ublic Context() {};
-    public Context(Path tempDir, Path metaDir, EventStream eventStream,
+    public Context(Path tempDir, Path metaDir, EventSender eventSender,
                    Boolean chunkingEnabled, Long chunkingByteSize,
                    Boolean encryptionEnabled, AESMode encryptionMode, 
                    String vaultAddress, String vaultToken,
@@ -33,7 +33,7 @@ public class Context {
                     ,int noChunkThreads) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
-        this.eventStream = eventStream;
+        this.eventSender = eventSender;
         this.chunkingEnabled = chunkingEnabled;
         this.chunkingByteSize = chunkingByteSize;
         this.encryptionEnabled = encryptionEnabled;
@@ -55,8 +55,8 @@ public class Context {
         return metaDir;
     }
 
-    public EventStream getEventStream() {
-        return eventStream;
+    public EventSender getEventSender() {
+        return eventSender;
     }
 
     public Boolean isChunkingEnabled() {

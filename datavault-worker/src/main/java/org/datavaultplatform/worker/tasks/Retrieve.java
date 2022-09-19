@@ -3,6 +3,7 @@ package org.datavaultplatform.worker.tasks;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.event.Error;
+import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.InitStates;
 import org.datavaultplatform.common.event.UpdateProgress;
 import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
@@ -17,7 +18,6 @@ import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.worker.operations.FileSplitter;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 import org.datavaultplatform.worker.operations.Tar;
-import org.datavaultplatform.worker.queue.EventSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,7 @@ public class Retrieve extends Task {
     private String depositId = null;
     private String bagID = null;
     private long archiveSize = 0;
-    private EventSender eventStream = null;
+    private EventSender eventSender = null;
     
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
@@ -61,7 +61,7 @@ public class Retrieve extends Task {
     @Override
     public void performAction(Context context) {
         
-        this.eventStream = (EventSender)context.getEventStream();
+        this.eventSender = context.getEventSender();
         logger.info("Retrieve job - performAction()");
         Map<String, String> properties = getProperties();
         this.depositId = properties.get("depositId");
@@ -79,14 +79,14 @@ public class Retrieve extends Task {
         this.encTarDigest = this.getEncTarDigest();
 
         if (this.isRedeliver()) {
-            eventStream.send(new Error(this.jobID, this.depositId, "Retrieve stopped: the message had been redelivered, please investigate")
+            eventSender.send(new Error(this.jobID, this.depositId, "Retrieve stopped: the message had been redelivered, please investigate")
                 .withUserId(this.userID));
             return;
         }
         
         this.initStates();
         
-        eventStream.send(new RetrieveStart(this.jobID, this.depositId, this.retrieveId)
+        eventSender.send(new RetrieveStart(this.jobID, this.depositId, this.retrieveId)
             .withUserId(this.userID)
             .withNextState(0));
         
@@ -106,7 +106,7 @@ public class Retrieve extends Task {
             Path tarPath = context.getTempDir().resolve(tarFileName);
             File tarFile = tarPath.toFile();
             
-            eventStream.send(new UpdateProgress(this.jobID, this.depositId, 0, this.archiveSize, "Starting transfer ...")
+            eventSender.send(new UpdateProgress(this.jobID, this.depositId, 0, this.archiveSize, "Starting transfer ...")
                 .withUserId(this.userID)
                 .withNextState(1));
             
@@ -119,7 +119,7 @@ public class Retrieve extends Task {
         } catch (Exception e) {
             String msg = "Data retrieve failed: " + e.getMessage();
             logger.error(msg, e);
-            eventStream.send(new Error(jobID, depositId, msg)
+            eventSender.send(new Error(jobID, depositId, msg)
                 .withUserId(userID));
             throw new RuntimeException(e);
         }
@@ -194,7 +194,7 @@ public class Retrieve extends Task {
         logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
         
         logger.info("Validating data ...");
-        eventStream.send(new UpdateProgress(this.jobID, this.depositId).withNextState(2)
+        eventSender.send(new UpdateProgress(this.jobID, this.depositId).withNextState(2)
             .withUserId(this.userID));
         
         String tarHash = Verify.getDigest(tarFile);
@@ -222,13 +222,13 @@ public class Retrieve extends Task {
 
         // Copy the extracted files to the target retrieve area
         logger.info("Copying to user directory ...");
-        eventStream.send(new UpdateProgress(this.jobID, this.depositId, 0, bagDirSize, "Starting transfer ...")
+        eventSender.send(new UpdateProgress(this.jobID, this.depositId, 0, bagDirSize, "Starting transfer ...")
             .withUserId(this.userID)
             .withNextState(3));
         
         // Progress tracking (threaded)
         progress = new Progress();
-        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, bagDirSize, this.eventStream);
+        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, bagDirSize, this.eventSender);
         Thread trackerThread = new Thread(tracker);
         trackerThread.start();
 
@@ -253,7 +253,7 @@ public class Retrieve extends Task {
 
 
         logger.info("Data retrieve complete: " + this.retrievePath);
-        eventStream.send(new RetrieveComplete(this.jobID, this.depositId, this.retrieveId).withNextState(4)
+        eventSender.send(new RetrieveComplete(this.jobID, this.depositId, this.retrieveId).withNextState(4)
             .withUserId(this.userID));
     }
     
@@ -264,7 +264,7 @@ public class Retrieve extends Task {
         states.add("Validating data");         // 2
         states.add("Transferring files");      // 3
         states.add("Data retrieve complete");  // 4
-        eventStream.send(new InitStates(this.jobID, this.depositId, states)
+        eventSender.send(new InitStates(this.jobID, this.depositId, states)
             .withUserId(userID));		
 	}
     
@@ -287,7 +287,7 @@ public class Retrieve extends Task {
             } catch (Exception e) {
                 String msg = "Deposit failed: could not access user filesystem";
                 logger.error(msg, e);
-                eventStream.send(new Error(this.jobID, this.depositId, msg)
+                eventSender.send(new Error(this.jobID, this.depositId, msg)
                     .withUserId(this.userID));
                 throw new RuntimeException(e);
             }
@@ -310,7 +310,7 @@ public class Retrieve extends Task {
         } catch (Exception e) {
             String msg = "Retrieve failed: could not access archive filesystem";
             logger.error(msg, e);
-            eventStream.send(new Error(this.jobID, this.depositId, msg)
+            eventSender.send(new Error(this.jobID, this.depositId, msg)
                 .withUserId(userID));
 
             throw new RuntimeException(e);
@@ -323,7 +323,7 @@ public class Retrieve extends Task {
     	UserStore userStore = ((UserStore)userFs);
         if (!userStore.exists(retrievePath) || !userStore.isDirectory(retrievePath)) {
             // Target path must exist and be a directory
-            logger.info("Target directory not found!");
+            logger.info("Target directory not found or is not a directory ! [{}]", retrievePath);
         }
         
         // Check that there's enough free space ...
@@ -331,13 +331,13 @@ public class Retrieve extends Task {
             long freespace = userFs.getUsableSpace();
             logger.info("Free space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
             if (freespace < archiveSize) {
-                eventStream.send(new Error(this.jobID, this.depositId, "Not enough free space to retrieve data!")
+                eventSender.send(new Error(this.jobID, this.depositId, "Not enough free space to retrieve data!")
                     .withUserId(this.userID));
                 return;
             }
         } catch (Exception e) {
             logger.info("Unable to determine free space");
-            eventStream.send(new Error(jobID, depositId, "Unable to determine free space")
+            eventSender.send(new Error(jobID, depositId, "Unable to determine free space")
                 .withUserId(this.userID));
 
             throw new RuntimeException(e);
@@ -347,7 +347,7 @@ public class Retrieve extends Task {
     private void multipleCopies(Context context, String tarFileName, File tarFile, Device archiveFs, Device userFs) throws Exception {
     	logger.info("Device has multiple copies");
         Progress progress = new Progress();
-        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventStream);
+        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventSender);
         Thread trackerThread = new Thread(tracker);
         trackerThread.start();
 
@@ -395,7 +395,7 @@ public class Retrieve extends Task {
     	logger.info("Single copy device");
         // Progress tracking (threaded)
         Progress progress = new Progress();
-        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventStream);
+        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventSender);
         Thread trackerThread = new Thread(tracker);
         trackerThread.start();
         

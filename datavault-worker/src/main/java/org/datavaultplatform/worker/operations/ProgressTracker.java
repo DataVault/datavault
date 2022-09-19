@@ -1,9 +1,9 @@
 package org.datavaultplatform.worker.operations;
 
 import org.apache.commons.io.FileUtils;
+import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.UpdateProgress;
 import org.datavaultplatform.common.io.Progress;
-import org.datavaultplatform.worker.queue.EventSender;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

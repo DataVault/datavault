@@ -2,8 +2,8 @@ package org.datavaultplatform.worker.config;
 
 import java.security.Security;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.common.task.Context.AESMode;
-import org.datavaultplatform.worker.queue.EventSender;
 import org.datavaultplatform.worker.queue.Receiver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,7 +38,7 @@ public class ReceiverConfig {
   private int noChunkThreads;
 
   @Autowired
-  EventSender eventSender;
+  RecordingEventSender eventSender;
   /*
       <bean id="receiver" class="org.datavaultplatform.worker.queue.Receiver">
         <property name="tempDir" value="${tempDir}"/>

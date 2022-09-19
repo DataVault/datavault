@@ -12,8 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.datavaultplatform.common.config.BaseExternalPropertyFileConfigTest;
 import org.datavaultplatform.common.crypto.Encryption;
+import org.datavaultplatform.common.event.EventSender;
+import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
-import org.datavaultplatform.worker.queue.EventSender;
 import org.datavaultplatform.worker.test.AddTestProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public class EncryptionConfigTest extends BaseExternalPropertyFileConfigTest {
 
   @MockBean
   //we have to mock this because it depends on Rabbit which we've not configured
-  EventSender mEventSender;
+  RecordingEventSender mEventSender;
 
   @Test
   void checkCommonProperties() {

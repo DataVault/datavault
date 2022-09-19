@@ -2,9 +2,10 @@ package org.datavaultplatform.worker.queue;
 
 import java.nio.file.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.event.EventStream;
+import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.common.io.FileUtils;
 
 import org.datavaultplatform.common.task.Task;
@@ -32,7 +33,7 @@ public class Receiver implements MessageProcessor {
     private final Boolean multipleValidationEnabled;
     private final int noChunkThreads;
 
-    private EventStream eventStream;
+    private RecordingEventSender eventSender;
 
     public Receiver(
         String tempDir,
@@ -47,7 +48,7 @@ public class Receiver implements MessageProcessor {
         boolean multipleValidationEnabled,
         int noChunkThreads,
 
-        EventSender eventSender) {
+        RecordingEventSender eventSender) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.chunkingEnabled = chunkingEnabled;
@@ -58,11 +59,23 @@ public class Receiver implements MessageProcessor {
 
         this.multipleValidationEnabled = multipleValidationEnabled;
         this.noChunkThreads = noChunkThreads;
-        this.eventStream = eventSender;
+        this.eventSender = eventSender;
     }
 
     @Override
     public boolean processMessage(MessageInfo messageInfo) {
+        try {
+            eventSender.clear();
+            return processMessageInternal(messageInfo);
+        } finally {
+            List<Event> events = eventSender.getEvents();
+            if (logger.isTraceEnabled()) {
+                logger.trace("events send by worker: {}", events);
+            }
+        }
+    }
+
+    private boolean processMessageInternal(MessageInfo messageInfo) {
             long start = System.currentTimeMillis();
             String message = messageInfo.getValue();
 
@@ -101,7 +114,7 @@ public class Receiver implements MessageProcessor {
                 String vaultSslPEMPath = null;
 
                 Context context = new Context(
-                        tempDirPath, metaDirPath, eventStream,
+                        tempDirPath, metaDirPath, eventSender,
                         chunkingEnabled, chunkingByteSize,
                         encryptionEnabled, encryptionMode, 
                         vaultAddress, vaultToken, 

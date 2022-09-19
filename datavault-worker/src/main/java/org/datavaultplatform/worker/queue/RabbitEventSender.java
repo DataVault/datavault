@@ -7,7 +7,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.event.EventStream;
+import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.model.Agent;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
@@ -17,7 +17,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * A Spring Bean to add Events to the event queue
  */
 @Slf4j
-public class EventSender implements EventStream {
+public class RabbitEventSender implements EventSender {
 
     private final RabbitTemplate template;
     private final String eventQueueName;
@@ -27,7 +27,7 @@ public class EventSender implements EventStream {
     private final AtomicInteger sequence;
     private final ObjectMapper mapper;
 
-    public EventSender(RabbitTemplate template, String eventQueueName, String workerName, int sequenceStart, ObjectMapper mapper) {
+    public RabbitEventSender(RabbitTemplate template, String eventQueueName, String workerName, int sequenceStart, ObjectMapper mapper) {
         this.template = template;
         this.eventQueueName = eventQueueName;
         this.workerName = workerName;
@@ -36,7 +36,7 @@ public class EventSender implements EventStream {
     }
 
     /* (non-Javadoc)
-     * @see org.datavaultplatform.common.event.EventStream#send(org.datavaultplatform.common.event.Event)
+     * @see org.datavaultplatform.common.event.EventSenderm#send(org.datavaultplatform.common.event.Event)
      * 
      * Add a sequence to the event to allow ordering where the timestamp is equal,
      * then encode the event as json, and publish the message to the defined queue.
@@ -59,8 +59,8 @@ public class EventSender implements EventStream {
             String messageId = UUID.randomUUID().toString();
             Message message = new Message(messageBytes, getProps(messageId));
             template.send(this.eventQueueName, message);
-            log.debug("Sent msgId[{}]size[{}]bytes",messageBytes.length);
-            log.debug("Sent msgId[{}]message body [{}]", jsonEvent);
+            log.debug("Sent msgId[{}]size[{}]bytes", messageId, messageBytes.length);
+            log.debug("Sent msgId[{}]message body [{}]", messageId, jsonEvent);
         } catch (Exception e) {
             log.error("Error sending message", e);
         }

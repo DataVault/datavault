@@ -1,6 +1,6 @@
 package org.datavaultplatform.common.event;
 
-public interface EventStream {
+public interface EventSender {
     
     void send(Event event);
     
