@@ -5,6 +5,7 @@ import java.util.UUID;
 import javax.crypto.SecretKey;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -29,12 +30,31 @@ public class EncryptionValidator {
     if (Encryption.getVaultEnable()) {
       log.info("Encryption Vault [{}]", Encryption.getVaultAddress());
     }
-    if (validatePrivateKeysKey) {
-      validateEncryptionConfig(LABEL_KEY_FOR_PRIVATE_KEYS, null);
-      validateEncryptionConfig(LABEL_KEY_FOR_PRIVATE_KEYS, Encryption.getVaultPrivateKeyEncryptionKeyName());
-    }
+    validateKeyNames(validateDataKey, validatePrivateKeysKey);
     if (validateDataKey) {
       validateEncryptionConfig(LABEL_KEY_FOR_DATA, Encryption.getVaultDataEncryptionKeyName());
+    }
+    if (validatePrivateKeysKey) {
+      validateEncryptionConfig(LABEL_KEY_FOR_PRIVATE_KEYS, Encryption.getVaultPrivateKeyEncryptionKeyName());
+      validateEncryptionConfig(LABEL_KEY_FOR_PRIVATE_KEYS, null);
+    }
+  }
+
+  private void validateKeyNames(boolean validateDataKey, boolean validatePrivateKeysKey) {
+    if (validateDataKey) {
+      Assert.isTrue(StringUtils.isNotBlank(Encryption.getVaultDataEncryptionKeyName()),
+          () -> "property [vault.dataEncryptionKeyName] is not set");
+    }
+    if (validatePrivateKeysKey) {
+      Assert.isTrue(StringUtils.isNotBlank(Encryption.getVaultPrivateKeyEncryptionKeyName()),
+          () -> "property [vault.privateKeyEncryptionKeyName] is not set");
+    }
+    if (validatePrivateKeysKey && validatePrivateKeysKey) {
+      Assert.isTrue(!Encryption.getVaultDataEncryptionKeyName().equals(
+          Encryption.getVaultPrivateKeyEncryptionKeyName()), () ->
+          String.format(
+              "The properties [vault.dataEncryptionKeyName] and [vault.privateKeyEncryptionKeyName] cannot have the same value [%s]",
+              Encryption.getVaultDataEncryptionKeyName()));
     }
   }
 
