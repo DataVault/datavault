@@ -126,13 +126,13 @@ public class DepositsService {
         Deposit deposit = getDeposit(depositID);
         
         if (deposit == null) {
-            throw new Exception("Invalid Deposit ID");
+            throw new Exception("Invalid Deposit ID:" + depositID);
         }
         
         Vault vault = deposit.getVault();
         
         if (vault == null) {
-            throw new Exception("Vault does not exist");
+            throw new Exception("Vault does not exist for Deposit ID:" + depositID);
         }
         
         return deposit;

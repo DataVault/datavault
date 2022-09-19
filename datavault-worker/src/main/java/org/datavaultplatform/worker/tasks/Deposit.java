@@ -40,8 +40,8 @@ public class Deposit extends Task {
     private static final Set<String> RESTART_FROM_UPLOAD = new HashSet<>();
     private static final Set<String> RESTART_FROM_VALIDATION = new HashSet<>();
     private static final Set<String> RESTART_FROM_COMPLETE = new HashSet<>();
-    {
-        this.setupRestartHashes();
+    static {
+        setupRestartHashes();
     }
     private EventSender eventSender;
     private HashMap<String, UserStore> userStores;
@@ -65,39 +65,39 @@ public class Deposit extends Task {
     private String[] chunksHash;
     private String[] encChunksHash;
 
-    private void setupRestartHashes() {
-        Deposit.RESTART_FROM_BEGINNNING.add("org.datavaultplatform.common.event.deposit.Start");
+    private static void setupRestartHashes() {
+        RESTART_FROM_BEGINNNING.add("org.datavaultplatform.common.event.deposit.Start");
 
-        Deposit.RESTART_FROM_TRANSFER.addAll(RESTART_FROM_BEGINNNING);
-        Deposit.RESTART_FROM_TRANSFER.add("org.datavaultplatform.common.event.deposit.ComputedSize");
+        RESTART_FROM_TRANSFER.addAll(RESTART_FROM_BEGINNNING);
+        RESTART_FROM_TRANSFER.add("org.datavaultplatform.common.event.deposit.ComputedSize");
 
-        Deposit.RESTART_FROM_PACKAGING.addAll(RESTART_FROM_TRANSFER);
-        Deposit.RESTART_FROM_PACKAGING.add("org.datavaultplatform.common.event.deposit.TransferComplete");
+        RESTART_FROM_PACKAGING.addAll(RESTART_FROM_TRANSFER);
+        RESTART_FROM_PACKAGING.add("org.datavaultplatform.common.event.deposit.TransferComplete");
 
-        Deposit.RESTART_FROM_TAR_CHECKSUM.addAll(RESTART_FROM_PACKAGING);
-        Deposit.RESTART_FROM_TAR_CHECKSUM.add("org.datavaultplatform.common.event.deposit.PackageComplete");
+        RESTART_FROM_TAR_CHECKSUM.addAll(RESTART_FROM_PACKAGING);
+        RESTART_FROM_TAR_CHECKSUM.add("org.datavaultplatform.common.event.deposit.PackageComplete");
 
-        Deposit.RESTART_FROM_CHUNKING.addAll(RESTART_FROM_TAR_CHECKSUM);
-        Deposit.RESTART_FROM_CHUNKING.add("org.datavaultplatform.common.event.deposit.ComputedDigest");
+        RESTART_FROM_CHUNKING.addAll(RESTART_FROM_TAR_CHECKSUM);
+        RESTART_FROM_CHUNKING.add("org.datavaultplatform.common.event.deposit.ComputedDigest");
 
-        Deposit.RESTART_FROM_ENC_CHECKSUM.addAll(RESTART_FROM_CHUNKING);
-        Deposit.RESTART_FROM_ENC_CHECKSUM.add("org.datavaultplatform.common.event.deposit.ComputedChunks");
+        RESTART_FROM_ENC_CHECKSUM.addAll(RESTART_FROM_CHUNKING);
+        RESTART_FROM_ENC_CHECKSUM.add("org.datavaultplatform.common.event.deposit.ComputedChunks");
 
 
-        Deposit.RESTART_FROM_UPLOAD.addAll(RESTART_FROM_ENC_CHECKSUM);
-        Deposit.RESTART_FROM_UPLOAD.add("org.datavaultplatform.common.event.deposit.ComputedEncryption");
-        Deposit.RESTART_FROM_UPLOAD.add("org.datavaultplatform.common.event.deposit.StartCopyUpload");
-        Deposit.RESTART_FROM_UPLOAD.add("org.datavaultplatform.common.event.deposit.CompleteCopyUpload");
+        RESTART_FROM_UPLOAD.addAll(RESTART_FROM_ENC_CHECKSUM);
+        RESTART_FROM_UPLOAD.add("org.datavaultplatform.common.event.deposit.ComputedEncryption");
+        RESTART_FROM_UPLOAD.add("org.datavaultplatform.common.event.deposit.StartCopyUpload");
+        RESTART_FROM_UPLOAD.add("org.datavaultplatform.common.event.deposit.CompleteCopyUpload");
 
-        Deposit.RESTART_FROM_VALIDATION.addAll(RESTART_FROM_UPLOAD);
-        Deposit.RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.UploadComplete");
-        Deposit.RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.StartChunkValidation");
-        Deposit.RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.CompleteChunkValidation");
-        Deposit.RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.StartTarValidation");
-        Deposit.RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.CompleteTarValidation");
+        RESTART_FROM_VALIDATION.addAll(RESTART_FROM_UPLOAD);
+        RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.UploadComplete");
+        RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.StartChunkValidation");
+        RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.CompleteChunkValidation");
+        RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.StartTarValidation");
+        RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.CompleteTarValidation");
 
-        Deposit.RESTART_FROM_COMPLETE.addAll(RESTART_FROM_VALIDATION);
-        Deposit.RESTART_FROM_COMPLETE.add("org.datavaultplatform.common.event.deposit.ValidationComplete");
+        RESTART_FROM_COMPLETE.addAll(RESTART_FROM_VALIDATION);
+        RESTART_FROM_COMPLETE.add("org.datavaultplatform.common.event.deposit.ValidationComplete");
     }
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
@@ -143,7 +143,7 @@ public class Deposit extends Task {
             PackageHelper packageHelper = this.packageStep(context, properties, lastEventClass, bagDir);
             File tarFile = packageHelper.getTarFile();
             String tarHash = packageHelper.getTarHash();
-            byte iv[] = packageHelper.getIv();
+            byte[] iv = packageHelper.getIv();
             String encTarHash = packageHelper.getEncTarHash();
             Map<Integer, byte[]> chunksIVs = packageHelper.getChunksIVs();
             Long archiveSize = packageHelper.getArchiveSize();
@@ -171,7 +171,7 @@ public class Deposit extends Task {
                 logger.debug("Last event is: " + lastEventClass + " skipping validation");
             }
 
-            logger.info("Deposit complete");
+            logger.info("Deposit ID [{}] complete", depositId);
 
             logger.debug("The jobID: " + jobID);
             logger.debug("The depositId: " + depositId);
@@ -220,7 +220,7 @@ public class Deposit extends Task {
         try {
             // Ask the driver to copy files to our working directory
             logger.debug("CopyFromUserStorage filePath:" + filePath);
-            logger.debug("CopyFromUserStorage filePath:" + outputFile.toPath().toString());
+            logger.debug("CopyFromUserStorage outputFile:" + outputFile.getAbsolutePath());
             ((Device)userStore).retrieve(filePath, outputFile, progress);
         } finally {
             // Stop the tracking thread
@@ -609,7 +609,7 @@ public class Deposit extends Task {
 //	}
 	
 	private HashMap<String, UserStore> setupUserFileStores() {
-		userStores = new HashMap<String, UserStore>();
+		userStores = new HashMap<>();
         
         for (String storageID : userFileStoreClasses.keySet()) {
             
@@ -717,10 +717,10 @@ public class Deposit extends Task {
 		logger.info("Chunking tar file ...");
         chunkFiles = FileSplitter.spliteFile(tarFile, context.getChunkingByteSize());
         chunksHash = new String[chunkFiles.length];
-        chunksDigest = new HashMap<Integer, String>();
+        chunksDigest = new HashMap<>();
 
         int noOfThreads = context.getNoChunkThreads();
-        if (noOfThreads != 0 && noOfThreads < 0 ) {
+        if (noOfThreads < 0 ) {
             noOfThreads = 25;
         }
 
@@ -862,15 +862,15 @@ public class Deposit extends Task {
         logger.debug("Uploading to storage.");
 
 		if ( context.isChunkingEnabled() ) {
-            int noOfThreads = context.getNoChunkThreads();
-            if (noOfThreads != 0 && noOfThreads < 0 ) {
-                noOfThreads = 25;
-            }
-            logger.debug("Number of threads:" + noOfThreads);
-            ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
-            List<Future<HashMap<String, String>>> futures = new ArrayList<>();
+        int noOfThreads = context.getNoChunkThreads();
+        if (noOfThreads < 0 ) {
+            noOfThreads = 25;
+        }
+        logger.debug("Number of threads:" + noOfThreads);
+        ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
+        List<Future<HashMap<String, String>>> futures = new ArrayList<>();
 
-    		// kick of 10 (maybe more) threads at a time?  each thread would kick off 3 threads of their own
+    		// kick of 10 (maybe more) tasks at a time?  each task would kick off 3 tasks of their own
         for (int i = 0; i < chunkFiles.length; i++) {
             int chunkNumber = i + 1;
             File chunk = chunkFiles[i];
@@ -908,21 +908,21 @@ public class Deposit extends Task {
 	
 	private void verifyArchive(Context context, File tarFile, String tarHash, byte[] iv, Map<Integer, byte[]> chunksIVs, String encTarHash) throws Exception {
 		if( context.isChunkingEnabled() ) {
-            verifyArchive(context, chunkFiles, chunksHash, tarFile, tarHash, chunksIVs, encChunksHash);
-        } else {
-            verifyArchive(context, tarFile, tarHash, iv, encTarHash);
-        }
-        eventSender.send(new ValidationComplete(jobID, depositId).withUserId(userID));
+        verifyArchive(context, chunkFiles, chunksHash, tarFile, tarHash, chunksIVs, encChunksHash);
+    } else {
+        verifyArchive(context, tarFile, tarHash, iv, encTarHash);
+    }
+    eventSender.send(new ValidationComplete(jobID, depositId).withUserId(userID));
 
 	}
 	
 	private void InitialLogging(Context context) {
-		logger.info("Deposit job - performAction()");
-        logger.info("chunking: "+context.isChunkingEnabled());
-        logger.info("chunks byte size: "+context.getChunkingByteSize());
-        logger.info("encryption: "+context.isEncryptionEnabled());
-        logger.info("encryption mode: "+context.getEncryptionMode());
-        logger.info("validate multiple: " + context.isMultipleValidationEnabled());
+    logger.info("Deposit job - performAction()");
+    logger.info("chunking: "+context.isChunkingEnabled());
+    logger.info("chunks byte size: "+context.getChunkingByteSize());
+    logger.info("encryption: "+context.isEncryptionEnabled());
+    logger.info("encryption mode: "+context.getEncryptionMode());
+    logger.info("validate multiple: " + context.isMultipleValidationEnabled());
 	}
 	
 	private void initStates() {
@@ -981,8 +981,8 @@ public class Deposit extends Task {
         return retVal;
     }
 
-    private PackageHelper packageStep(Context context, Map<String, String> properties, String lastEventClass, File bagDir
-        )  throws Exception {
+    private PackageHelper packageStep(Context context, Map<String, String> properties,
+        String lastEventClass, File bagDir)  throws Exception {
         PackageHelper retVal = new PackageHelper();
 
         if (lastEventClass == null || RESTART_FROM_PACKAGING.contains(lastEventClass) || RESTART_FROM_TAR_CHECKSUM.contains(lastEventClass)
@@ -1054,8 +1054,10 @@ public class Deposit extends Task {
         if ((lastEventClass == null || RESTART_FROM_ENC_CHECKSUM.contains(lastEventClass)) && context.isEncryptionEnabled()) {
             logger.info("Encrypting file(s)...");
             if (context.isChunkingEnabled()) {
+                logger.info("Encrypting [{}] chunk files ", chunksDigest.size());
                 retVal.setChunksIVs(this.encryptChunks(context, chunksDigest, tarHashAlgorithm));
             } else {
+                logger.info("Encrypting single non-chunk file [{}]", retVal.getTarFile());
                 EncryptionHelper helper = this.encryptFullTar(context, retVal.getTarFile());
                 retVal.setIv(helper.getIv());
                 retVal.setEncTarHash(helper.getEncTarHash());
@@ -1072,8 +1074,8 @@ public class Deposit extends Task {
     // we need to fill in some blanks for the later steps to be
     // able to complete
      **********************************************************/
-    private PackageHelper skipPackageStep(Context context, String lastEventClass, int numOfChunks, String archiveDigest,
-                                          PackageHelper retVal)  {
+    private PackageHelper skipPackageStep(Context context, String lastEventClass, int numOfChunks,
+        String archiveDigest, PackageHelper retVal)  {
         logger.debug("Last event is: " + lastEventClass + " skipping packaging");
         retVal = this.skipChunking(numOfChunks, context, retVal);
         retVal.setChunksIVs(this.chunksIVs);

@@ -60,7 +60,7 @@ public class Packager {
     /**
      * A bag is invalid if a defined exception is thrown in the isValid method
      * of BagVerifier.
-     * @param bag A bagit bag object.
+     * @param dir A bagit dir
      * @return True if bag is valid.
      * @throws Exception if anything unexpected happens
      */

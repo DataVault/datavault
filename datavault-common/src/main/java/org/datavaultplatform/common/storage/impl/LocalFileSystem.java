@@ -38,6 +38,7 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
         // Verify parameters are correct.
         File file = new File(rootPath);
         if (!file.exists()) {
+            log.error("LocalFileSystem: rootPath does not exist: {}", rootPath);
             throw new FileNotFoundException(rootPath);
         }
         Assert.isTrue(file.isDirectory(), () -> String.format("rootPath is not a directory[%s]", rootPath));
