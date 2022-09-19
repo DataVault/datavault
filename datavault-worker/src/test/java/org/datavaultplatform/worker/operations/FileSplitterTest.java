@@ -2,6 +2,8 @@ package org.datavaultplatform.worker.operations;
 
 import static org.junit.Assert.*;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.util.zip.CRC32;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 //import org.apache.log4j.BasicConfigurator;
 
 public class FileSplitterTest {
@@ -30,6 +33,9 @@ public class FileSplitterTest {
 
     @BeforeEach
     public void setUp() {
+        Logger restClientLogger = (Logger) LoggerFactory.getLogger(FileSplitter.class);
+        restClientLogger.setLevel(Level.DEBUG);
+
         try{
             tempDir.mkdir();
         }
@@ -91,13 +97,9 @@ public class FileSplitterTest {
                 chunk.delete();
             }
             recomposedFile.delete();
-        }
-        catch(SecurityException se) {
+        } catch(Exception se) {
             se.printStackTrace();
             fail(se.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
     }
     
@@ -164,13 +166,9 @@ public class FileSplitterTest {
                 chunk.delete();
             }
             recomposedFile.delete();
-        }
-        catch(SecurityException se) {
+        } catch(Exception se) {
             se.printStackTrace();
             fail(se.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
     }
     
@@ -198,13 +196,9 @@ public class FileSplitterTest {
                 assertEquals(bytesPerChunk, chunk.length());
                 chunk.delete();
             }
-        }
-        catch(SecurityException se) {
+        } catch(Exception se) {
             se.printStackTrace();
             fail(se.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
     }
     
@@ -240,13 +234,9 @@ public class FileSplitterTest {
                 }
                 chunk.delete();
             }
-        }
-        catch(SecurityException se) {
+        } catch(Exception se) {
             se.printStackTrace();
             fail(se.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
     }
     
@@ -274,13 +264,9 @@ public class FileSplitterTest {
                 assertEquals(bytesPerChunk, chunk.length());
                 chunk.delete();
             }
-        }
-        catch(SecurityException se) {
+        } catch(Exception se) {
             se.printStackTrace();
             fail(se.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
     }
     
@@ -310,13 +296,9 @@ public class FileSplitterTest {
             chunks[0].delete();
             assertEquals(lastBytesChunk, chunks[1].length());
             chunks[1].delete();
-        }
-        catch(SecurityException se) {
+        } catch(Exception se) {
             se.printStackTrace();
             fail(se.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
     }
     
@@ -368,13 +350,9 @@ public class FileSplitterTest {
             }
 
             assertEquals(csumInputFile, csumOutputFile);
-        }
-        catch(SecurityException se) {
+        } catch(Exception se) {
             se.printStackTrace();
             fail(se.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
     }
 
