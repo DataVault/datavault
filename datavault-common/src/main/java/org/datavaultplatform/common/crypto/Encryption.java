@@ -12,6 +12,7 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.task.Context;
@@ -198,7 +199,7 @@ public class Encryption {
 
     /**
      * Perform crypto using a 1024 Bytes buffer.
-     * Depending on the Cipher provided will performe encrytion or Decryption.
+     * Depending on the Cipher provided will perform Encryption or Decryption.
      *
      * @param inputFile
      * @param outputFile
@@ -206,17 +207,15 @@ public class Encryption {
      * @throws Exception
      */
     public static void doByteBufferFileCrypto(File inputFile, File outputFile, Cipher cipher) throws Exception {
-        byte[] plainBuf = new byte[encBufferSize];
-        try (InputStream in = Files.newInputStream(inputFile.toPath());
-                OutputStream out = Files.newOutputStream(outputFile.toPath())) {
-            int nread;
-            while ((nread = in.read(plainBuf)) > 0) {
-                byte[] encBuf = cipher.update(plainBuf, 0, nread);
-                out.write(encBuf);
-            }
-            byte[] encBuf = cipher.doFinal();
-            out.write(encBuf);
+
+        try (InputStream is = new FileInputStream(inputFile);
+            OutputStream os = new CipherOutputStream(new BufferedOutputStream(new FileOutputStream(outputFile)), cipher)) {
+            logger.info("starting crypto copy from [{}] to [{}] ", inputFile, outputFile);
+            IOUtils.copy(is, os);
+            logger.info("finished crypto from [{}] to [{}] ", inputFile, outputFile);
         }
+        logger.info("Converted input[{}/{}]ouput[{}/{}]", inputFile, inputFile.length(),
+            outputFile, outputFile.length());
     }
 
     @Deprecated
