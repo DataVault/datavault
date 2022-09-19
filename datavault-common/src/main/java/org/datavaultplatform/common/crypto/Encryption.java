@@ -102,7 +102,7 @@ public class Encryption {
     }
 
     /**
-     * Generate a Initialisation Vector using default size (i.e. Encryption.IV_SIZE)
+     * Generate an Initialisation Vector using default size (i.e. Encryption.IV_SIZE)
      *
      * @return Initialisation Vector
      */
@@ -111,7 +111,7 @@ public class Encryption {
     }
 
     /**
-     * Generate a Initialisation Vector
+     * Generate an Initialisation Vector
      *
      * @param size in bytes for the iv
      * @return Initialisation Vector
@@ -132,7 +132,7 @@ public class Encryption {
     }
 
     /**
-     * Initialise a AES-GCM Cipher with Bouncy Castle Provider
+     * Initialise an AES-GCM Cipher with Bouncy Castle Provider
      *
      * GCM is a very fast but arguably complex combination of CTR mode and GHASH,
      * a MAC over the Galois field with 2^128 elements.
@@ -141,7 +141,7 @@ public class Encryption {
      *
      * @param opmode -
      * @param aesKey - secret key
-     * @param iv - Initailisation Vector
+     * @param iv - Initialisation Vector
      * @param aadData - additional authenticated data (optional)
      * @return
      */
@@ -151,7 +151,7 @@ public class Encryption {
         // Initialize GCM Parameters
         GCMParameterSpec gcmParamSpec = new GCMParameterSpec(TAG_BIT_LENGTH, iv);
 
-        // Transformation specifies algortihm, mode of operation and padding
+        // Transformation specifies algorithm, mode of operation and padding
         c = Cipher.getInstance(GCM_ALGO_TRANSFORMATION_STRING, "BC");
 
         c.init(opmode, aesKey, gcmParamSpec, new SecureRandom());
@@ -169,7 +169,7 @@ public class Encryption {
     }
 
     /**
-     * Initialise a AES-CBC Cipher
+     * Initialise an AES-CBC Cipher
      *
      * CBC has an IV and thus needs randomness every time a message is encrypted,
      * changing a part of the message requires re-encrypting everything after the change,
@@ -188,7 +188,7 @@ public class Encryption {
         // Initialize Parameters
         IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
 
-        // Transformation specifies algortihm, mode of operation and padding
+        // Transformation specifies algorithm, mode of operation and padding
         c = Cipher.getInstance(CBC_ALGO_TRANSFORMATION_STRING);
 
         c.init(opmode, aesKey, ivParameterSpec);
