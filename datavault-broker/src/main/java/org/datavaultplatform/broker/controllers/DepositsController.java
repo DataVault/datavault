@@ -54,6 +54,8 @@ public class DepositsController {
     private final String ociNameSpace;
     private final String ociBucketName;
 
+    private final ObjectMapper mapper;
+
     private static final Logger logger = LoggerFactory.getLogger(DepositsController.class);
 
     @Autowired
@@ -72,7 +74,8 @@ public class DepositsController {
         @Value("${tsmMaxRetries:#{null}}") String tsmMaxRetries,
         @Value("${occMaxRetries:#{null}}") String occMaxRetries,
         @Value("${ociNameSpace:#{null}}") String ociNameSpace,
-        @Value("${ociBucketName:#{null}}") String ociBucketName) {
+        @Value("${ociBucketName:#{null}}") String ociBucketName,
+        ObjectMapper mapper) {
         this.vaultsService = vaultsService;
         this.depositsService = depositsService;
         this.retrievesService = retrievesService;
@@ -95,6 +98,7 @@ public class DepositsController {
         this.occMaxRetries = occMaxRetries;
         this.ociNameSpace = ociNameSpace;
         this.ociBucketName = ociBucketName;
+        this.mapper = mapper;
     }
 
 
@@ -119,7 +123,7 @@ public class DepositsController {
 
         deposit.setName(createDeposit.getName());
         deposit.setDescription(createDeposit.getDescription());
-        if (createDeposit.getHasPersonalData().equalsIgnoreCase("yes")) {
+        if ("yes".equalsIgnoreCase(createDeposit.getHasPersonalData())) {
             deposit.setHasPersonalData(true);
         } else {
             deposit.setHasPersonalData(false);
@@ -335,8 +339,7 @@ public class DepositsController {
                     chunksDigest,
                     tarIVs, chunksIVs,
                     encTarDigest, encChunksDigests, null);
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
+            String jsonRetrieve = this.mapper.writeValueAsString(retrieveTask);
             sender.send(jsonRetrieve);
         } catch (Exception e) {
             e.printStackTrace();
@@ -515,9 +518,6 @@ public class DepositsController {
         Job job = new Job("org.datavaultplatform.worker.tasks.Deposit");
         jobsService.addJob(deposit, job);
 
-        // Ask the worker to process the deposit
-        ObjectMapper mapper = new ObjectMapper();
-
         HashMap<String, String> depositProperties = new HashMap<>();
         depositProperties.put("depositId", deposit.getID());
         depositProperties.put("bagId", deposit.getBagId());
@@ -533,8 +533,8 @@ public class DepositsController {
         // Deposit and Vault metadata
         // TODO: at the moment we're just serialising the objects to JSON.
         // In future we'll need a more formal schema/representation (e.g. RDF or JSON-LD).
-        depositProperties.put("depositMetadata", mapper.writeValueAsString(deposit));
-        depositProperties.put("vaultMetadata", mapper.writeValueAsString(vault));
+        depositProperties.put("depositMetadata", this.mapper.writeValueAsString(deposit));
+        depositProperties.put("vaultMetadata", this.mapper.writeValueAsString(vault));
 
         // External metadata is text from an external system - e.g. XML or JSON
         //depositProperties.put("externalMetadata", externalMetadata);
@@ -593,7 +593,7 @@ public class DepositsController {
         if (archiveIDs != null) {
             depositTask.setRestartArchiveIds(archiveIDs);
         }
-        String jsonDeposit = mapper.writeValueAsString(depositTask);
+        String jsonDeposit = this.mapper.writeValueAsString(depositTask);
         sender.send(jsonDeposit);
 
         return job;
