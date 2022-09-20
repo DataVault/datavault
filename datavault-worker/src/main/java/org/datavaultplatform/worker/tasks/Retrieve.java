@@ -169,7 +169,7 @@ public class Retrieve extends Task {
             String archivedChunkFileHash = this.chunksDigest.get(chunkNum);
             
             // TODO: Should we check algorithm each time or assume main tar file algorithm is the same
-            // We might also want to move algorythm check before this loop
+            // We might also want to move algorithm check before this loop
             String chunkFileHash = Verify.getDigest(chunkFile);
             
             logger.info("Chunk Checksum algorithm: " + this.archiveDigestAlgorithm);
@@ -233,7 +233,7 @@ public class Retrieve extends Task {
         trackerThread.start();
 
         try {
-            ArrayList<File> contents = new ArrayList<File>(Arrays.asList(payloadDir.listFiles()));
+            ArrayList<File> contents = new ArrayList<>(Arrays.asList(payloadDir.listFiles()));
             for(File content: contents){
                 userFs.store(this.retrievePath, content, progress);
             }
@@ -333,7 +333,6 @@ public class Retrieve extends Task {
             if (freespace < archiveSize) {
                 eventSender.send(new Error(this.jobID, this.depositId, "Not enough free space to retrieve data!")
                     .withUserId(this.userID));
-                return;
             }
         } catch (Exception e) {
             logger.info("Unable to determine free space");

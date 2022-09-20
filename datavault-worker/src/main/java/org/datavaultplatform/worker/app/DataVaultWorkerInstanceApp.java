@@ -111,12 +111,12 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
   }
 
   @EventListener
-  void onEvent(ApplicationStartingEvent event) {
+  public void onEvent(ApplicationStartingEvent event) {
     log.info("Worker [{}] starting", applicationName);
   }
 
   @EventListener
-  void onEvent(ApplicationReadyEvent readyEvent) {
+  public void onEvent(ApplicationReadyEvent readyEvent) {
     log.info("Worker [{}] ready [{}]", applicationName, readyEvent);
     registry.getListenerContainers().forEach(container -> {
       if (!container.isRunning()) {

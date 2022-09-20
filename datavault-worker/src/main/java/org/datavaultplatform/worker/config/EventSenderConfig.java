@@ -1,7 +1,6 @@
 package org.datavaultplatform.worker.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.worker.queue.RabbitEventSender;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

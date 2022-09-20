@@ -33,7 +33,7 @@ public class Receiver implements MessageProcessor {
     private final Boolean multipleValidationEnabled;
     private final int noChunkThreads;
 
-    private RecordingEventSender eventSender;
+    private final RecordingEventSender eventSender;
 
     public Receiver(
         String tempDir,

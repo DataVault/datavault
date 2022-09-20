@@ -45,7 +45,7 @@ public class ChunkDownloadTracker implements Callable<Object> {
 
     @Override
     public Object call() throws Exception {
-        // if less that max threads started start new one
+        // if less that max threads started, start new one
         //File chunkFile = chunkFiles[i];
         //String chunkHash = chunksHash[i];
         // Delete the existing temporary file

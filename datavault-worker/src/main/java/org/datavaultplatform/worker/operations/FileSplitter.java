@@ -18,12 +18,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FileSplitter {
 
-    public static int DEFAULT_CHUNK_SIZE = 500 * 1000 * 1000; // 500MB
+    public static final int DEFAULT_CHUNK_SIZE = 500 * 1000 * 1000; // 500MB
 
-    public static int BUFFER_SIZE = 8 * 1024; // 8KB
+    public static final int BUFFER_SIZE = 8 * 1024; // 8KB
 
 
-    public static String CHUNK_SEPARATOR = "."; // 8KB
+    public static final String CHUNK_SEPARATOR = "."; // 8KB
     
     /**
      * Will chunk the input file using default chunk size.
@@ -109,7 +109,7 @@ public class FileSplitter {
                     long fileSize = inputFile.length();
 
                     log.debug("Add chunk file: "+inputFile.getName());
-                    log.debug("Buffersize: " + BUFFER_SIZE);
+                    log.debug("Buffer Size: " + BUFFER_SIZE);
 
                     multipleReadWrites(fileSize, raf, bw);
                 }

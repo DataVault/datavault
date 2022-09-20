@@ -24,7 +24,7 @@ import org.datavaultplatform.worker.operations.ProgressTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Delete extends Task{
+public class Delete extends Task {
 
 	private static final Logger logger = LoggerFactory.getLogger(Delete.class);
     private String archiveId = null;
@@ -36,8 +36,8 @@ public class Delete extends Task{
     private String bagID = null;
     private long archiveSize = 0;
     private EventSender eventSender = null;
-    // Maps the model ArchiveStore Id to the storage equivalent
-    HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
+    // Maps the model ArchiveStore ID to the storage equivalent
+    private final HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
     
     @Override
     public void performAction(Context context) {

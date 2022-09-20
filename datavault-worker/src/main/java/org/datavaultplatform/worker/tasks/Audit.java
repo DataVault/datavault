@@ -89,7 +89,7 @@ public class Audit extends Task {
         }
     }
 
-    private void multipleCopies(Context context, Device archiveFs) throws Exception {
+    private void multipleCopies(Context context, Device archiveFs) {
         logger.info("Device has multiple copies");
 
         List<String> locations = archiveFs.getLocations();
@@ -114,7 +114,7 @@ public class Audit extends Task {
         for(int i = 0; i < depositChunkToAudit.size(); i++) {
             String chunkId = depositChunkToAudit.get(i).get("id");
             String tarFileName = depositChunkToAudit.get(i).get("bagId") + ".tar";
-            int chunkNum = Integer.valueOf(depositChunkToAudit.get(i).get("chunkNum"));
+            int chunkNum = Integer.parseInt(depositChunkToAudit.get(i).get("chunkNum"));
 
             Path chunkPath = context.getTempDir().resolve(tarFileName + FileSplitter.CHUNK_SEPARATOR + chunkNum);
             File chunkFile = chunkPath.toFile();
@@ -157,7 +157,7 @@ public class Audit extends Task {
                 String archivedChunkFileHash = this.chunksDigest.get(i);
 
                 // TODO: Should we check algorithm each time or assume main tar file algorithm is the same
-                // We might also want to move algorythm check before this loop
+                // We might also want to move algorithm check before this loop
                 String chunkFileHash = Verify.getDigest(chunkFile);
 
                 logger.info("Checksum: " + chunkFileHash);

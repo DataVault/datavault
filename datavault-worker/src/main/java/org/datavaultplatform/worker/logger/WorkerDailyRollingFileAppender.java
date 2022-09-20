@@ -1,10 +1,9 @@
 package org.datavaultplatform.worker.logger;
 
 //import org.apache.log4j.DailyRollingFileAppender;
-import org.datavaultplatform.worker.WorkerInstance;
 
 /**
- *Log4j Appeneder
+ *Log4j Appender
  */
 public class WorkerDailyRollingFileAppender
     //extends DailyRollingFileAppender

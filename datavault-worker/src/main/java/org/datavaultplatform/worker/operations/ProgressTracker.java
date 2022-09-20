@@ -18,10 +18,10 @@ public class ProgressTracker implements Runnable {
     private long lastByteCount = 0;
     private long expectedBytes = 0;
     
-    Progress progress;
-    String jobId;
-    String depositId;
-    EventSender eventSender;
+    final Progress progress;
+    final String jobId;
+    final String depositId;
+    final EventSender eventSender;
     
     private static final Logger logger = LoggerFactory.getLogger(ProgressTracker.class);
     
@@ -61,7 +61,7 @@ public class ProgressTracker implements Runnable {
         
         if (byteCount != lastByteCount) {
             
-            // Calcuate the transfer rate and the estimate time remaining
+            // Calculate the transfer rate and the estimate time remaining
             long msElapsed = (eventTime - startTime);
             double secondsElapsed = (double)msElapsed / 1000.0;
             long bytesPerSec = 0;

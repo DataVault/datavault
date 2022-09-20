@@ -22,7 +22,7 @@ public class Identifier {
     /**
      * Identify the type of the passed in file
      * @param file The file we want to identify
-     * @return The MediaType or null if an exception occured
+     * @return The MediaType or null if an exception occurred
      */
     public static String detectFile(File file) {
         try {

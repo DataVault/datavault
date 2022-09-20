@@ -31,7 +31,7 @@ import java.util.concurrent.*;
 public class Deposit extends Task {
 
     private static final Logger logger = LoggerFactory.getLogger(Deposit.class);
-    private static final Set<String> RESTART_FROM_BEGINNNING = new HashSet<>();
+    private static final Set<String> RESTART_FROM_BEGINNING = new HashSet<>();
     private static final Set<String> RESTART_FROM_TRANSFER = new HashSet<>();
     private static final Set<String> RESTART_FROM_PACKAGING = new HashSet<>();
     private static final Set<String> RESTART_FROM_TAR_CHECKSUM = new HashSet<>();
@@ -48,11 +48,11 @@ public class Deposit extends Task {
 
     // todo: I'm sure these two maps could be combined in some way.
 
-    // Maps the model ArchiveStore Id to the storage equivalent
-    private HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
+    // Maps the model ArchiveStore ID to the storage equivalent
+    private final HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
 
-    // Maps the model ArchiveStore Id to the generated Archive Id
-    private HashMap<String, String> archiveIds = new HashMap<>();
+    // Maps the model ArchiveStore ID to the generated Archive ID
+    private final HashMap<String, String> archiveIds = new HashMap<>();
 
     private String depositId;
     private String bagID;
@@ -66,9 +66,9 @@ public class Deposit extends Task {
     private String[] encChunksHash;
 
     private static void setupRestartHashes() {
-        RESTART_FROM_BEGINNNING.add("org.datavaultplatform.common.event.deposit.Start");
+        RESTART_FROM_BEGINNING.add("org.datavaultplatform.common.event.deposit.Start");
 
-        RESTART_FROM_TRANSFER.addAll(RESTART_FROM_BEGINNNING);
+        RESTART_FROM_TRANSFER.addAll(RESTART_FROM_BEGINNING);
         RESTART_FROM_TRANSFER.add("org.datavaultplatform.common.event.deposit.ComputedSize");
 
         RESTART_FROM_PACKAGING.addAll(RESTART_FROM_TRANSFER);
@@ -234,9 +234,8 @@ public class Deposit extends Task {
      * @param userID
      * @param uploadPath
      * @return
-     * @throws Exception
      */
-    private long getUserUploadsSize(Path tempPath, String userID, String uploadPath) throws Exception {
+    private long getUserUploadsSize(Path tempPath, String userID, String uploadPath) {
         // TODO: this is a bit of a hack to escape the per-worker temp directory
         File uploadDir = tempPath.getParent().resolve("uploads").resolve(userID).resolve(uploadPath).toFile();
         if (uploadDir.exists()) {
@@ -333,7 +332,7 @@ public class Deposit extends Task {
             if (((Device)archiveStore).hasMultipleCopies()) {
                 boolean firstArchiveStore = true;
                 for (String loc : ((Device)archiveStore).getLocations()) {
-                    if (firstArchiveStore || context.isMultipleValidationEnabled() == true) {
+                    if (firstArchiveStore || context.isMultipleValidationEnabled()) {
                         this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, loc, true, ivs, null, encChunksHash, firstArchiveStore);
                     }
                     firstArchiveStore = false;
@@ -453,7 +452,7 @@ public class Deposit extends Task {
         List<Future<Object>> futures = new ArrayList<>();
         for (int i = 0; i < chunkFiles.length; i++) {
             int chunkNumber = i + 1;
-            // if less that max threads started start new one
+            // if less that max threads started, start new one
             File chunkFile = chunkFiles[i];
             //String chunkHash = chunksHash[i];
 
@@ -648,7 +647,7 @@ public class Deposit extends Task {
 	}
 	
 	private void copySelectedUserDataToBagDir(Path bagDataPath) {
-		 Long depositIndex = 0L;
+		 long depositIndex = 0L;
 	        
 	        for (String filePath: fileStorePaths) {
 	        
@@ -663,10 +662,10 @@ public class Deposit extends Task {
 
 	            // Retrieve the data straight into the Bag data directory.
 	            Path depositPath = bagDataPath;
-	            // If there are multiple deposits then create a sub-directory for each one
+	            // If there are multiple deposits then create a subdirectory for each one
 	            if (fileStorePaths.size() > 1) {
 	                depositIndex += 1;
-	                depositPath = bagDataPath.resolve(depositIndex.toString());
+	                depositPath = bagDataPath.resolve(Long.toString(depositIndex));
 	                depositPath.toFile().mkdir();
 	            }
 	            
@@ -959,7 +958,7 @@ public class Deposit extends Task {
 
             // Create a new directory based on the broker-generated UUID
             Path bagPath = context.getTempDir().resolve(bagID);
-            logger.debug("The is the bagPath " + bagPath.toString());
+            logger.debug("The is the bagPath " + bagPath);
             retVal = new DepositTransferHelper(bagPath.resolve("data"), this.createDir(bagPath));
             logger.debug("The is the bagDataPath " + retVal.getBagDataPath().toString());
 
@@ -969,8 +968,8 @@ public class Deposit extends Task {
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping initial File copy");
             Path bagPath = context.getTempDir().resolve(bagID);
-            logger.debug("Setting bag path to: " + bagPath.toString());
-            logger.debug("Setting bag data path to: " + bagPath.resolve("data").toString());
+            logger.debug("Setting bag path to: " + bagPath);
+            logger.debug("Setting bag data path to: " + bagPath.resolve("data"));
             retVal = new DepositTransferHelper(bagPath.resolve("data"), bagPath.toFile());
 
             // depending on how far the previous attempt got this dir
@@ -1109,7 +1108,7 @@ public class Deposit extends Task {
             int chunkNumber = i + 1;
             String chunkFileName = bagID + ".tar." + chunkNumber;
             Path chunkPath = context.getTempDir().resolve(chunkFileName);
-            logger.debug("Mocked chunk file path: " + chunkPath.toAbsolutePath().toString());
+            logger.debug("Mocked chunk file path: " + chunkPath.toAbsolutePath());
             this.chunkFiles[i] = chunkPath.toFile();
         }
 

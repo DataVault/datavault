@@ -115,7 +115,7 @@ public class PackagerV2 {
      * Add a metadata file to the bag metadata directory
      * Also adds tag information to the tag manifest
      * @param tagManifest The tag manifest file
-     * @param metadataDirPath The path to the meta data dir
+     * @param metadataDirPath The path to the metadata dir
      * @param metadataFileName The metadata file name
      * @param metadata The meta data
      * @param alg The algorithm applied to the bag

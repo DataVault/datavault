@@ -38,7 +38,6 @@ public class RabbitMessageListener {
 
     Assert.notNull(message, () -> "The message cannot be null");
     Assert.notNull(channel, () -> "The channel cannot be null");
-    Assert.notNull(deliveryTag, () -> "The deliveryTag cannot be null");
 
     long deliveryTag2 = message.getMessageProperties().getDeliveryTag();
     Assert.isTrue(deliveryTag == deliveryTag2, () -> "problems with tags");

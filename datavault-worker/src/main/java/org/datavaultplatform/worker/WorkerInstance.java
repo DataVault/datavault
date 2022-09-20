@@ -1,16 +1,10 @@
 package org.datavaultplatform.worker;
 
-import java.security.Security;
-
-import org.datavaultplatform.common.task.Context.AESMode;
-import org.datavaultplatform.worker.queue.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
- * A Worker class which listens to the messge queue and process messages as they arrive.
+ * A Worker class which listens to the message queue and process messages as they arrive.
  */
 public class WorkerInstance {
 
