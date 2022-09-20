@@ -952,7 +952,7 @@ public class Deposit extends Task {
 	}
 
 	private DepositTransferHelper initialTransferStep(Context context, String lastEventClass) {
-        DepositTransferHelper retVal = new DepositTransferHelper();
+        final DepositTransferHelper retVal;
         if (lastEventClass == null || RESTART_FROM_TRANSFER.contains(lastEventClass)) {
             logger.info("bagID: " + bagID);
             this.calculateTotalDepositSize(context);
@@ -960,9 +960,9 @@ public class Deposit extends Task {
             // Create a new directory based on the broker-generated UUID
             Path bagPath = context.getTempDir().resolve(bagID);
             logger.debug("The is the bagPath " + bagPath.toString());
-            retVal.setBagDataPath(bagPath.resolve("data"));
+            retVal = new DepositTransferHelper(bagPath.resolve("data"), this.createDir(bagPath));
             logger.debug("The is the bagDataPath " + retVal.getBagDataPath().toString());
-            retVal.setBagDir(this.createDir(bagPath));
+
             this.createDir(retVal.getBagDataPath());
 
             this.copySelectedUserDataToBagDir(retVal.getBagDataPath());
@@ -971,8 +971,8 @@ public class Deposit extends Task {
             Path bagPath = context.getTempDir().resolve(bagID);
             logger.debug("Setting bag path to: " + bagPath.toString());
             logger.debug("Setting bag data path to: " + bagPath.resolve("data").toString());
-            retVal.setBagDataPath(bagPath.resolve("data"));
-            retVal.setBagDir(bagPath.toFile());
+            retVal = new DepositTransferHelper(bagPath.resolve("data"), bagPath.toFile());
+
             // depending on how far the previous attempt got this dir
             // may have been deleted
             this.createDir(retVal.getBagDataPath());

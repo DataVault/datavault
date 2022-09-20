@@ -4,23 +4,20 @@ import java.io.File;
 import java.nio.file.Path;
 
 public class DepositTransferHelper {
-    private Path bagDataPath;
-    private File bagDir;
+    private final Path bagDataPath;
+    private final File bagDir;
 
+    public DepositTransferHelper(Path bagDataPath, File bagDir) {
+        this.bagDataPath = bagDataPath;
+        this.bagDir = bagDir;
+    }
 
     public Path getBagDataPath() {
         return bagDataPath;
-    }
-
-    public void setBagDataPath(Path bagDataPath) {
-        this.bagDataPath = bagDataPath;
     }
 
     public File getBagDir() {
         return bagDir;
     }
 
-    public void setBagDir(File bagDir) {
-        this.bagDir = bagDir;
-    }
 }
