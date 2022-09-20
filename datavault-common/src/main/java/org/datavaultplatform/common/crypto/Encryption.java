@@ -16,6 +16,7 @@ import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.Context.AESMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -338,29 +339,36 @@ public class Encryption {
         return vault;
     }
 
+    public static byte[] encryptFile(Context context, File file)  throws Exception {
+        return encryptFile(context.getEncryptionMode(), file);
+    }
     /**
      * Perform encryption on file
      *
+     * @param aesMode - the aes encryption mode
      * @param file - file to be encrypted
      * @return generated IV
      * @throws Exception
      */
-    public static byte[] encryptFile(Context context, File file)  throws Exception {
-        return doCrypto(context, file, Cipher.ENCRYPT_MODE, null);
+    public static byte[] encryptFile(AESMode aesMode, File file)  throws Exception {
+        return doCrypto(aesMode, file, Cipher.ENCRYPT_MODE, null);
     }
 
+    public static void decryptFile(Context context, File file, byte[] iv)  throws Exception {
+        decryptFile(context.getEncryptionMode(), file, iv);
+    }
     /**
      * Perform decryption on file
-     *
+     * @param aesMode - the aes encryption mode
      * @param file - encrypted file
      * @param iv - Initialisation Vector used for the encryption
      * @throws Exception
      */
-    public static void decryptFile(Context context, File file, byte[] iv)  throws Exception {
-        doCrypto(context, file, Cipher.DECRYPT_MODE, iv);
+    public static void decryptFile(AESMode aesMode, File file, byte[] iv)  throws Exception {
+        doCrypto(aesMode, file, Cipher.DECRYPT_MODE, iv);
     }
 
-    private static byte[] doCrypto(Context context, File file, int encryptMode, byte[] iv) throws Exception {
+    private static byte[] doCrypto(AESMode aesMode, File file, int encryptMode, byte[] iv) throws Exception {
 
         if(encryptMode == Cipher.ENCRYPT_MODE) {
             // Generating IV
@@ -368,7 +376,7 @@ public class Encryption {
         }
 
         final Cipher cipher;
-        switch (context.getEncryptionMode()) {
+        switch (aesMode) {
             case CBC:
                 cipher = Encryption.initCBCCipher(getVaultDataEncryptionKeyName(), encryptMode, iv); break;
             case GCM:

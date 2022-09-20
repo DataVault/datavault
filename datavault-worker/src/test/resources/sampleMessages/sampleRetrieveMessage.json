@@ -1,0 +1,38 @@
+{
+  "taskClass" : "org.datavaultplatform.worker.tasks.Retrieve",
+  "properties" : {
+    "archiveDigestAlgorithm" : "SHA-1",
+
+    "bagId" : "17092022-182153",
+    "numOfChunks" : "1",
+    "retrievePath" : "some-path-to-file",
+    "archiveSize" : "10240",
+    "archiveDigest" : "50372E7E4B601EB0AB48614FE58156D243A77997",
+    "archiveId" : "17092022-182153.tar"
+  },
+  "chunkFilesDigest" : {
+    "1" : "50372E7E4B601EB0AB48614FE58156D243A77997"
+  },
+  "chunksIVs": {
+    "1": "xnkQy441YJ85ncD91FkwuBSmPzS+UR35Ilb6Tp9X5ICl4ijA3vhH74Bs1l+VvbDzp2JZViUwLIemu/Tv7H9fQsZy5LQkrz39pw2q7ZF9SQxdEl5rnzVBILhqrYngYaIM"
+  },
+  "encChunksDigest": {
+    "1": "354E50B904E679401A615B00A53303333B74118A"
+  },
+  "archiveFileStores" : [ {
+    "id" : "ARCHIVE-STORE-DST-ID",
+    "storageClass" : "org.datavaultplatform.common.storage.impl.LocalFileSystem",
+    "retrieveEnabled" : true,
+    "properties" : {
+      "rootPath" : "/BASE/dest"
+    }
+  } ],
+  "userFileStoreProperties" : {
+    "FILE-STORE-SRC-ID" : {
+      "rootPath" : "/BASE/retrieve"
+    }
+  },
+  "userFileStoreClasses" : {
+    "FILE-STORE-SRC-ID" : "org.datavaultplatform.common.storage.impl.LocalFileSystem"
+  }
+}
