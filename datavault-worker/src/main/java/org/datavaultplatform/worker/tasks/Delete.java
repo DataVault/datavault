@@ -1,7 +1,6 @@
 package org.datavaultplatform.worker.tasks;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +18,7 @@ import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.operations.FileSplitter;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 import org.slf4j.Logger;
@@ -110,13 +110,12 @@ public class Delete extends Task {
     	// Connect to the archive storage(s). Look out! There are two classes called archiveStore.
     	for (org.datavaultplatform.common.model.ArchiveStore archiveFileStore : archiveFileStores ) {
     		try {
-    			Class<?> clazz = Class.forName(archiveFileStore.getStorageClass());
-	            Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-	            Object instance = constructor.newInstance(archiveFileStore.getStorageClass(), archiveFileStore.getProperties());
-	
-	            archiveStores.put(archiveFileStore.getID(), (ArchiveStore)instance);
-	
-    		} catch (Exception e) {
+          ArchiveStore archiveStore = StorageClassUtils.createStorage(
+              archiveFileStore.getStorageClass(),
+              archiveFileStore.getProperties(),
+              ArchiveStore.class);
+          archiveStores.put(archiveFileStore.getID(), archiveStore);
+        } catch (Exception e) {
     			String msg = "Deposit failed: could not access archive filesystem : " + archiveFileStore.getStorageClass();
 	            logger.error(msg, e);
 	            eventSender.send(new Error(this.jobID, this.depositId, msg).withUserId(this.userID));

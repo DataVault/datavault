@@ -15,6 +15,7 @@ import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.operations.FileSplitter;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 import org.datavaultplatform.worker.operations.Tar;
@@ -22,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -278,10 +278,7 @@ public class Retrieve extends Task {
             
             // Connect to the first user storage device (we only expect one for a retrieval)
             try {
-                Class<?> clazz = Class.forName(storageClass);
-                Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-                Object instance = constructor.newInstance(storageClass, storageProperties);                
-                userFs = (Device)instance;
+                userFs = StorageClassUtils.createStorage(storageClass, storageProperties, Device.class);
                 logger.info("Connected to user store: " + storageID + ", class: " + storageClass);
                 break;
             } catch (Exception e) {
@@ -297,16 +294,16 @@ public class Retrieve extends Task {
     }
     
     private Device setupArchiveFileStores() {
-    	Device archiveFs = null;
     	// We get passed a list because it is a parameter common to deposits and retrieves, but for retrieve there should only be one.
         ArchiveStore archiveFileStore = archiveFileStores.get(0);
 
         // Connect to the archive storage
         try {
-            Class<?> clazz = Class.forName(archiveFileStore.getStorageClass());
-            Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-            Object instance = constructor.newInstance(archiveFileStore.getStorageClass(), archiveFileStore.getProperties());
-            archiveFs = (Device)instance;
+            Device archiveFs = StorageClassUtils.createStorage(
+                archiveFileStore.getStorageClass(),
+                archiveFileStore.getProperties(),
+                Device.class);
+            return archiveFs;
         } catch (Exception e) {
             String msg = "Retrieve failed: could not access archive filesystem";
             logger.error(msg, e);
@@ -315,8 +312,6 @@ public class Retrieve extends Task {
 
             throw new RuntimeException(e);
         }
-        
-        return archiveFs;
     }
     
     private void checkUserStoreFreeSpace(Device userFs) throws Exception {

@@ -2,11 +2,10 @@ package org.datavaultplatform.common.storage;
 
 // Interface for user facing storage systems
 
-import java.lang.reflect.Constructor;
 import java.util.List;
-import java.util.Map;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
+import org.datavaultplatform.common.util.StorageClassUtils;
 
 
 public interface UserStore {
@@ -31,18 +30,11 @@ public interface UserStore {
     // Check if the passed path is a directory/container
     boolean isDirectory(String path) throws Exception;
 
-    static UserStore fromFileStore(FileStore fileStore) throws Exception {
-        Class<?> clazz = Class.forName(fileStore.getStorageClass());
-
-        if (!UserStore.class.isAssignableFrom(clazz)) {
-            throw new IllegalArgumentException(
-                String.format("The class [%s] does not implement [%s]", clazz.getName(),
-                    UserStore.class.getName()));
-        }
-        Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-        Object instance = constructor.newInstance(fileStore.getStorageClass(),
-            fileStore.getProperties());
-        UserStore userStore = (UserStore) instance;
+    static UserStore fromFileStore(FileStore fileStore) {
+        UserStore userStore = StorageClassUtils.createStorage(
+            fileStore.getStorageClass(),
+            fileStore.getProperties(),
+            UserStore.class);
         return userStore;
     }
 }

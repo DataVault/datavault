@@ -142,7 +142,7 @@ public class UserStoreTest {
         UserStore.fromFileStore(getFileStore(String.class));
       });
       assertEquals(
-          "The class [java.lang.String] does not implement [org.datavaultplatform.common.storage.UserStore]",
+          "The class [java.lang.String] does not inherit from [org.datavaultplatform.common.storage.UserStore]",
           ex.getMessage());
     }
 
@@ -153,11 +153,11 @@ public class UserStoreTest {
         UserStore.fromFileStore(getFileStore(S3Cloud.class));
       });
       assertEquals(
-          "The class [org.datavaultplatform.common.storage.impl.S3Cloud] does not implement [org.datavaultplatform.common.storage.UserStore]",
+          "The class [org.datavaultplatform.common.storage.impl.S3Cloud] does not inherit from [org.datavaultplatform.common.storage.UserStore]",
           ex.getMessage());
     }
 
-    private FileStore getFileStore(Class clazz) {
+    private FileStore getFileStore(Class<?> clazz) {
       HashMap<String, String> props = new HashMap<>();
       FileStore fs = new FileStore();
       fs.setProperties(props);

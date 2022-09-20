@@ -10,13 +10,13 @@ import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.operations.FileSplitter;
 import org.datavaultplatform.common.event.EventSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -190,19 +190,13 @@ public class Audit extends Task {
 	}
     
     private Device setupArchiveFileStores() {
-    	Device archiveFs = null;
     	// We get passed a list because it is a parameter common to deposits and retrieves, but for retrieve there should only be one.
         ArchiveStore archiveFileStore = archiveFileStores.get(0);
 
         // Connect to the archive storage
         try {
-            Class<?> clazz = Class.forName(archiveFileStore.getStorageClass());
-            System.out.println(clazz.toString());
-            Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-            System.out.println("Storage class: "+archiveFileStore.getStorageClass());
-            System.out.println("Storage properties: "+archiveFileStore.getProperties());
-            Object instance = constructor.newInstance(archiveFileStore.getStorageClass(), archiveFileStore.getProperties());
-            archiveFs = (Device)instance;
+            Device archiveFs = StorageClassUtils.createStorage(archiveFileStore.getStorageClass(), archiveFileStore.getProperties(), Device.class);
+            return archiveFs;
         } catch (Exception e) {
             String msg = "Retrieve failed: could not access archive filesystem";
             logger.error(msg, e);
@@ -210,8 +204,6 @@ public class Audit extends Task {
 
             throw new RuntimeException(e);
         }
-        
-        return archiveFs;
     }
 
 }

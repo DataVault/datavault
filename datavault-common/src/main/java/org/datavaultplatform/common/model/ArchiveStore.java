@@ -2,11 +2,8 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,6 +17,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.storage.Device;
+import org.datavaultplatform.common.util.StorageClassUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -121,15 +119,9 @@ public class ArchiveStore {
     This method takes an ArchiveStore and returns the specific instance of that Archive Store
      */
     @JsonIgnore
-    public Device getDevice()
-        throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        Class<?> clazz = Class.forName(this.getStorageClass());
-        log.info("archiveStore class [{}]", clazz);
-        Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-        log.info("Storage class: "+this.getStorageClass());
-        log.info("Storage properties: "+this.getProperties());
-        Object instance = constructor.newInstance(this.getStorageClass(), this.getProperties());
-        Device device = (Device)instance;
+    public Device getDevice() {
+
+        Device device = StorageClassUtils.createStorage(getStorageClass(), getProperties(), Device.class);
         return device;
     }
 
