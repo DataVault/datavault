@@ -367,25 +367,26 @@ public class Encryption {
             iv = Encryption.generateIV(Encryption.IV_SIZE);
         }
 
-        Cipher cipher;
+        final Cipher cipher;
         switch (context.getEncryptionMode()) {
-            case GCM:
-                cipher = Encryption.initGCMCipher(getVaultDataEncryptionKeyName(), encryptMode, iv); break;
             case CBC:
                 cipher = Encryption.initCBCCipher(getVaultDataEncryptionKeyName(), encryptMode, iv); break;
+            case GCM:
             default:
                 cipher = Encryption.initGCMCipher(getVaultDataEncryptionKeyName(), encryptMode, iv); break;
         }
 
-        File tempEncryptedFile = new File(file.getAbsoluteFile() + ".encrypted");
+        File tempFile = new File(file.getAbsoluteFile() + ".temp");
+        String action = encryptMode == Cipher.ENCRYPT_MODE ? "encrypting" : "decrypting";
+        logger.info("{} chunk: [{}][{}]bytes", action, file.getName(), file.length());
+        Encryption.doByteBufferFileCrypto(file, tempFile, cipher);
 
-        logger.debug("Encrypting/Decrypting chunk: " + file.getName());
-        Encryption.doByteBufferFileCrypto(file, tempEncryptedFile, cipher);
+        logger.info("Action[{}]Before[{}/{}]After[{}/{}]", action, file, file.length(), tempFile, tempFile.length());
 
         // todo : move this out of here and do it for all chunks after the encryption stage in order to allow the
         // todo : whole step to be restarted in a future ideal world.
         FileUtils.deleteQuietly(file);
-        FileUtils.moveFile(tempEncryptedFile, file);
+        FileUtils.moveFile(tempFile, file);
 
         return iv;
     }
