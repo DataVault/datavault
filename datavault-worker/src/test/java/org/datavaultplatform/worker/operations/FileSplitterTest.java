@@ -63,7 +63,7 @@ public class FileSplitterTest {
             
             long start = System.currentTimeMillis();
             
-            File[] chunks = FileSplitter.spliteFile(inputFile, bytesPerChunk, tempDir);
+            File[] chunks = FileSplitter.splitFile(inputFile, bytesPerChunk, tempDir);
             
             long elapsedTimeMillis = System.currentTimeMillis()-start;
             float elapsedTimeSec = elapsedTimeMillis/1000F;
@@ -122,7 +122,7 @@ public class FileSplitterTest {
             
             long start = System.currentTimeMillis();
             
-            File[] chunks = FileSplitter.spliteFile(inputFile, bytesPerChunk, tempDir);
+            File[] chunks = FileSplitter.splitFile(inputFile, bytesPerChunk, tempDir);
             
             long elapsedTimeMillis = System.currentTimeMillis()-start;
             float elapsedTimeSec = elapsedTimeMillis/1000F;
@@ -184,7 +184,7 @@ public class FileSplitterTest {
             
             long start = System.currentTimeMillis();
             
-            File[] chunks = FileSplitter.spliteFile(inputFile, bytesPerChunk, tempDir);
+            File[] chunks = FileSplitter.splitFile(inputFile, bytesPerChunk, tempDir);
             
             long elapsedTimeMillis = System.currentTimeMillis()-start;
             float elapsedTimeSec = elapsedTimeMillis/1000F;
@@ -214,7 +214,7 @@ public class FileSplitterTest {
             
             long start = System.currentTimeMillis();
             
-            File[] chunks = FileSplitter.spliteFile(inputFile, bytesPerChunk, tempDir);
+            File[] chunks = FileSplitter.splitFile(inputFile, bytesPerChunk, tempDir);
             
             long elapsedTimeMillis = System.currentTimeMillis()-start;
             float elapsedTimeSec = elapsedTimeMillis/1000F;
@@ -252,7 +252,7 @@ public class FileSplitterTest {
             
             long start = System.currentTimeMillis();
             
-            File[] chunks = FileSplitter.spliteFile(inputFile, bytesPerChunk, tempDir);
+            File[] chunks = FileSplitter.splitFile(inputFile, bytesPerChunk, tempDir);
             
             long elapsedTimeMillis = System.currentTimeMillis()-start;
             float elapsedTimeSec = elapsedTimeMillis/1000F;
@@ -282,7 +282,7 @@ public class FileSplitterTest {
             
             long start = System.currentTimeMillis();
             
-            File[] chunks = FileSplitter.spliteFile(inputFile, bytesPerChunk, tempDir);
+            File[] chunks = FileSplitter.splitFile(inputFile, bytesPerChunk, tempDir);
             
             long elapsedTimeMillis = System.currentTimeMillis()-start;
             float elapsedTimeSec = elapsedTimeMillis/1000F;
@@ -321,7 +321,7 @@ public class FileSplitterTest {
             
             long start = System.currentTimeMillis();
             
-            File[] chunks = FileSplitter.spliteFile(inputFile, bytesPerChunk, tempDir);
+            File[] chunks = FileSplitter.splitFile(inputFile, bytesPerChunk, tempDir);
             
             long elapsedTimeMillis = System.currentTimeMillis()-start;
             float elapsedTimeSec = elapsedTimeMillis/1000F;

@@ -713,7 +713,7 @@ public class Deposit extends Task {
 	
 	private HashMap<Integer, String> createChunks(File tarFile, Context context, HashMap<Integer, String> chunksDigest, String tarHashAlgorithm) throws Exception {
 		logger.info("Chunking tar file ...");
-        chunkFiles = FileSplitter.spliteFile(tarFile, context.getChunkingByteSize());
+        chunkFiles = FileSplitter.splitFile(tarFile, context.getChunkingByteSize());
         chunksHash = new String[chunkFiles.length];
         chunksDigest = new HashMap<>();
 

@@ -32,9 +32,9 @@ public class FileSplitter {
      * @return
      * @throws Exception
      */
-    public static File[] spliteFile(File inputFile) throws Exception {
+    public static File[] splitFile(File inputFile) throws Exception {
         
-        return spliteFile(inputFile, DEFAULT_CHUNK_SIZE, inputFile.getParentFile());
+        return splitFile(inputFile, DEFAULT_CHUNK_SIZE, inputFile.getParentFile());
     }
     
     /**
@@ -45,9 +45,9 @@ public class FileSplitter {
      * @return
      * @throws Exception
      */
-    public static File[] spliteFile(File inputFile, long bytesPerChunk) throws Exception {
+    public static File[] splitFile(File inputFile, long bytesPerChunk) throws Exception {
         
-        return spliteFile(inputFile, bytesPerChunk, inputFile.getParentFile());
+        return splitFile(inputFile, bytesPerChunk, inputFile.getParentFile());
     }
     
     /**
@@ -58,7 +58,7 @@ public class FileSplitter {
      * @return each chunk file into an Array
      * @throws Exception if there is a problem
      */
-    public static File[] spliteFile(File inputFile, long bytesPerChunk, File outputDir) throws Exception {
+    public static File[] splitFile(File inputFile, long bytesPerChunk, File outputDir) throws Exception {
         try (RandomAccessFile raf = new RandomAccessFile(inputFile, "r")) {
             long sourceSize = raf.length();
             int numSplits = (int) (sourceSize/bytesPerChunk);
