@@ -269,14 +269,14 @@ public class Deposit extends Task {
      * @throws Exception
      */
     private void copyToArchiveStorage(File tarFile) throws Exception {
-        copyToArchiveStorage(tarFile, 0);
+        copyToArchiveStorage(tarFile, Optional.empty());
     }
     
     /**
      * @param tarFile
      * @throws Exception
      */
-    private void copyToArchiveStorage(File tarFile, int chunkNumber) throws Exception {
+    private void copyToArchiveStorage(File tarFile, Optional<Integer> optChunkNumber) throws Exception {
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
         List<Future<HashMap<String, String>>> futures = new ArrayList<>();
@@ -286,7 +286,7 @@ public class Deposit extends Task {
             // add task to executor
             // add future to futures list
             DeviceTracker dt = new DeviceTracker(archiveStore, archiveStoreId,
-                chunkNumber, depositId,
+                optChunkNumber, depositId,
                 jobID, eventSender,
                 tarFile, userID);
             logger.debug("Creating device task:" + archiveStore.getClass());

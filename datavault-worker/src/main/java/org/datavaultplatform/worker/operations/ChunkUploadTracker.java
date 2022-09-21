@@ -1,5 +1,6 @@
 package org.datavaultplatform.worker.operations;
 
+import java.util.Optional;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +45,7 @@ public class ChunkUploadTracker implements Callable<HashMap<String, String>> {
         for (String archiveStoreId : archiveStores.keySet() ) {
             ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
             DeviceTracker dt = new DeviceTracker(archiveStore, archiveStoreId,
-                chunkNumber, depositId,
+                Optional.of(chunkNumber), depositId,
                 jobID, eventSender,
                 chunk, userID);
             log.debug("Creating device task:" + archiveStore.getClass());

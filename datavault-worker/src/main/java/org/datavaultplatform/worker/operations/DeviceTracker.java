@@ -1,5 +1,6 @@
 package org.datavaultplatform.worker.operations;
 
+import java.util.Optional;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.deposit.CompleteCopyUpload;
 import org.datavaultplatform.common.event.deposit.StartCopyUpload;
@@ -19,18 +20,18 @@ public class DeviceTracker implements Callable<HashMap<String, String>> {
     private final String depositId;
     private final File tarFile;
     private final EventSender eventSender;
-    private final int chunkNumber;
+    private final Optional<Integer> optChunkNumber;
     private final String archiveStoreId;
     private final ArchiveStore archiveStore;
     private final String userID;
 
     public DeviceTracker(ArchiveStore archiveStore, String archiveStoreId,
-        int chunkNumber, String depositId,
+        Optional<Integer> optChunkNumber, String depositId,
         String jobID, EventSender eventSender,
         File tarFile, String userID) {
         this.archiveStore = archiveStore;
         this.archiveStoreId = archiveStoreId;
-        this.chunkNumber = chunkNumber;
+        this.optChunkNumber = optChunkNumber;
         this.depositId = depositId;
         this.jobID = jobID;
         this.eventSender = eventSender;
@@ -46,20 +47,22 @@ public class DeviceTracker implements Callable<HashMap<String, String>> {
         ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.tarFile.length(), this.eventSender);
         Thread trackerThread = new Thread(tracker);
         trackerThread.start();
-        String depId = this.depositId;
-        if (this.chunkNumber > 0) {
-            depId = depId + "." + this.chunkNumber;
+        final String depId;
+        if (optChunkNumber.isPresent()) {
+            depId = this.depositId + "." + optChunkNumber.get();
+        } else {
+            depId = this.depositId;
         }
         String archiveId;
         // kick off new task for each device ( we may already have kicked off x threads for chunks)
         try {
-            this.eventSender.send(new StartCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name, this.chunkNumber).withUserId(this.userID));
+            this.eventSender.send(new StartCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name, this.optChunkNumber).withUserId(this.userID));
             if (((Device)this.archiveStore).hasDepositIdStorageKey()) {
                 archiveId = ((Device) this.archiveStore).store(depId, this.tarFile, progress);
             } else {
                 archiveId = ((Device) this.archiveStore).store("/", this.tarFile, progress);
             }
-            this.eventSender.send(new CompleteCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name, this.chunkNumber).withUserId(this.userID));
+            this.eventSender.send(new CompleteCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name, this.optChunkNumber).withUserId(this.userID));
         } finally {
             // Stop the tracking thread
             tracker.stop();
@@ -69,7 +72,7 @@ public class DeviceTracker implements Callable<HashMap<String, String>> {
         log.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
         // wait for all 3 to finish
 
-        if (this.chunkNumber > 0 && archiveIds.get(this.archiveStoreId) == null) {
+        if (this.optChunkNumber.isPresent() && archiveIds.get(this.archiveStoreId) == null) {
             log.info("ArchiveId is: " + archiveId);
             String separator = FileSplitter.CHUNK_SEPARATOR;
             log.info("Separator is: " + separator);
@@ -79,7 +82,7 @@ public class DeviceTracker implements Callable<HashMap<String, String>> {
             log.debug("Add to archiveIds: key: "+this.archiveStoreId+" ,value:"+archiveId);
             archiveIds.put(archiveStoreId, archiveId);
             log.debug("archiveIds: "+archiveIds);
-        } else if(this.chunkNumber == 0) {
+        } else if(this.optChunkNumber.isPresent() == false) {
             archiveIds.put(archiveStoreId, archiveId);
         }
         log.debug("DeviceTracker task completed: " + archiveId);
@@ -100,10 +103,6 @@ public class DeviceTracker implements Callable<HashMap<String, String>> {
 
     public EventSender getEventSender() {
         return this.eventSender;
-    }
-
-    public int getChunkNumber() {
-        return this.chunkNumber;
     }
 
     public String getArchiveStoreId() {

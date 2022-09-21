@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.event.deposit;
 
+import java.util.Optional;
 import javax.persistence.Entity;
 import org.datavaultplatform.common.event.Event;
 
@@ -9,8 +10,8 @@ public class StartCopyUpload extends Event {
 	public StartCopyUpload() {
 	}
 
-	public StartCopyUpload(String jobId, String depositId, String type, int chunkNum) {
-		super("Chunk " + chunkNum + " upload started - (" + type + ")");
+	public StartCopyUpload(String jobId, String depositId, String type, Optional<Integer> optChunkNumber) {
+		super("Chunk " + optChunkNumber + " upload started - (" + type + ")");
 		this.eventClass = StartCopyUpload.class.getCanonicalName();
 		this.depositId = depositId;
 		this.jobId = jobId;
