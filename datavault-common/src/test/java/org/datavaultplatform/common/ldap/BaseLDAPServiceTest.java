@@ -59,7 +59,7 @@ public abstract class BaseLDAPServiceTest {
       .withExposedPorts(LDAP_EXPOSED_PORT)
       .withStartupCheckStrategy(
           //Gotta allow time for openldap to initialise
-          new MinimumDurationRunningStartupCheckStrategy(Duration.ofSeconds(2))
+          new MinimumDurationRunningStartupCheckStrategy(Duration.ofSeconds(5))
       );
 
 
