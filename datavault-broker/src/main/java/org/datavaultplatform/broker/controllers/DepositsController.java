@@ -10,6 +10,7 @@ import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.EventInfo;
+import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.task.Task;
 import org.jsondoc.core.annotation.Api;
 import org.slf4j.Logger;
@@ -533,8 +534,12 @@ public class DepositsController {
         // Deposit and Vault metadata
         // TODO: at the moment we're just serialising the objects to JSON.
         // In future we'll need a more formal schema/representation (e.g. RDF or JSON-LD).
-        depositProperties.put("depositMetadata", this.mapper.writeValueAsString(deposit));
-        depositProperties.put("vaultMetadata", this.mapper.writeValueAsString(vault));
+
+        DepositInfo depositInfo = deposit.convertToResponse();
+        depositProperties.put("depositMetadata", this.mapper.writeValueAsString(depositInfo));
+
+        VaultInfo vaultInfo = vault.convertToResponse();
+        depositProperties.put("vaultMetadata", this.mapper.writeValueAsString(vaultInfo));
 
         // External metadata is text from an external system - e.g. XML or JSON
         //depositProperties.put("externalMetadata", externalMetadata);

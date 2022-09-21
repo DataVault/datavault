@@ -23,6 +23,8 @@ import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.request.CreateDeposit;
+import org.datavaultplatform.common.response.DepositInfo;
+import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -84,6 +86,8 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
     when(sender.send(argMessage.capture())).thenReturn("MESSAGE_ID");
 
     Vault mockVault = mock(Vault.class);
+    VaultInfo mockVaultInfo = mock(VaultInfo.class);
+    when(mockVault.convertToResponse()).thenReturn(mockVaultInfo);
     when(mockVault.getID()).thenReturn("vault-123");
 
     when(usersService.getUser("user123")).thenReturn(mockUser);
@@ -106,9 +110,9 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
 
     doAnswer(invocationOnMock -> {
       Object arg = invocationOnMock.getArguments()[0];
-      if (arg == mockVault) {
+      if (arg instanceof VaultInfo) {
         return "\"VAULT\":\"META-DATA\"";
-      } else if (arg instanceof Deposit) {
+      } else if (arg instanceof DepositInfo) {
         return "\"DEPOSIT\":\"META-DATA\"";
       } else {
         return invocationOnMock.callRealMethod();
