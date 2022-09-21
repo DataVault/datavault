@@ -9,6 +9,7 @@ import java.io.RandomAccessFile;
 
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Assert;
 
 /**
  * Set of methods to split a file into several chunks
@@ -88,7 +89,7 @@ public class FileSplitter {
                         if (remainingBytes > BUFFER_SIZE){
                             multipleReadWrites(remainingBytes, raf, bw);
                         }else {
-                            readWriteNumBytes(raf, bw, remainingBytes);
+                            readWriteNumBytes(raf, bw, (int) remainingBytes);
                         }
                     } else {
                         multipleReadWrites(bytesPerChunk, raf, bw);
@@ -119,8 +120,8 @@ public class FileSplitter {
     }
 
     private static void multipleReadWrites(long size, RandomAccessFile raf, OutputStream os) throws IOException {
-        long numReads = size /BUFFER_SIZE;
-        long numRemainingRead = size % BUFFER_SIZE;
+        long numReads = size / BUFFER_SIZE;
+        int numRemainingRead = (int) size % BUFFER_SIZE;
         for(int i=0; i<numReads; i++) {
             readWriteNumBytes(raf, os, BUFFER_SIZE);
         }
@@ -129,8 +130,9 @@ public class FileSplitter {
         }
     }
 
-    static void readWriteNumBytes(RandomAccessFile raf, OutputStream os, long numBytes) throws IOException {
-        byte[] buf = new byte[(int) numBytes];
+    static void readWriteNumBytes(RandomAccessFile raf, OutputStream os, int numBytes) throws IOException {
+        Assert.isTrue(numBytes <= BUFFER_SIZE, () -> "numBytes cannot be greater than BUFFER_SIZE");
+        byte[] buf = new byte[numBytes];
         raf.readFully(buf);
         os.write(buf);
     }
