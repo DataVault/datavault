@@ -23,7 +23,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Files;
-import sun.misc.IOUtils;
+import org.apache.commons.io.IOUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class EncryptSmallFileTest extends BaseTempKeyStoreTest {
@@ -82,7 +82,7 @@ public class EncryptSmallFileTest extends BaseTempKeyStoreTest {
   @SneakyThrows
   private byte[] getContents(File file) {
     try(FileInputStream fis = new FileInputStream(file)) {
-      return IOUtils.readAllBytes(fis);
+      return IOUtils.toByteArray(fis);
     }
   }
 
