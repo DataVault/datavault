@@ -6,7 +6,7 @@ import static org.testcontainers.utility.DockerImageName.parse;
 public abstract class DockerImage {
 
   // https://hub.docker.com/r/bitnami/openldap/tags
-  public static DockerImageName LDAP_IMAGE = parse("bitnami/openldap:2.6.3");
+  public static DockerImageName LDAP_IMAGE = parse("bitnami/openldap@sha256:23ebcaa52331a6521f2e512b971943a3a8b99d15459d59105d6a0eeb31220c86");
 
   // https://hub.docker.com/_/mysql?tab=tags
   public static DockerImageName MYSQL_IMAGE = parse("mysql:5.7.39");
