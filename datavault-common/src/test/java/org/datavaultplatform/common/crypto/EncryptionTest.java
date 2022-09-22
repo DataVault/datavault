@@ -1,5 +1,7 @@
 package org.datavaultplatform.common.crypto;
 
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
@@ -26,6 +28,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EncryptionTest {
@@ -540,4 +543,13 @@ public class EncryptionTest {
         System.out.println("End testHugeFileCBCCriptoWithAAD");
     }
 
+    @Test
+    void testAttemptToEncryptWithNullKey() throws Exception {
+        String data = "hello";
+        InvalidKeyException ex = assertThrows(InvalidKeyException.class, () -> {
+            Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, null,
+                data.getBytes(StandardCharsets.UTF_8), null);
+        });
+        assertEquals("Key for algorithm null not suitable for symmetric enryption.", ex.getMessage());
+    }
 }

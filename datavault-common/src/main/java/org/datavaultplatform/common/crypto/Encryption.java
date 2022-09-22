@@ -41,6 +41,7 @@ import java.util.EnumSet;
 import javax.annotation.PostConstruct;
 import java.security.Security;
 import java.security.Provider;
+import org.springframework.util.Assert;
 
 public class Encryption {
 
@@ -456,6 +457,8 @@ public class Encryption {
         }
         SecretKey secretKey = (SecretKey) ks.getKey(alias, Encryption.getKeystorePassword().toCharArray());
 
+        Assert.isTrue(secretKey != null, () -> String.format("No key found in keystore[%s] for KeyName[%s]", Encryption.getKeystorePath(), alias));
+        logger.info("found non-null SecretKey for key-alias [{}]", alias);
         return secretKey;
     }
 
