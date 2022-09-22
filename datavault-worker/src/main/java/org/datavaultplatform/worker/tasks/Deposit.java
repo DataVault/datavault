@@ -989,9 +989,11 @@ public class Deposit extends Task {
 
         logger.info("We have successfully created the Tar, so lets delete the Bag to save space");
         FileUtils.deleteDirectory(bagDir);
-        HashMap<Integer, String> chunksDigest = null;
+        HashMap<Integer, String> chunksDigest = new HashMap<>();
         if ((lastEventClass == null || RESTART_FROM_CHUNKING.contains(lastEventClass)) && context.isChunkingEnabled()) {
-            chunksDigest = this.createChunks(packageHelper.getTarFile(), context, tarHashAlgorithm);
+            Map<Integer, String> chunksDigestData = this.createChunks(
+                packageHelper.getTarFile(), context, tarHashAlgorithm);
+            chunksDigest.putAll(chunksDigestData);
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping chunking");
             int numOfChunks =  0;
