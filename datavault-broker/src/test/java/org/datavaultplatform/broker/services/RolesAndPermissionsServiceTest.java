@@ -23,7 +23,7 @@ import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.common.model.dao.PermissionDAO;
 import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
 import org.datavaultplatform.common.model.dao.RoleDAO;
-import org.junit.function.ThrowingRunnable;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -49,8 +49,8 @@ public class RolesAndPermissionsServiceTest {
     @InjectMocks
     private RolesAndPermissionsService underTest;
 
-    void checkIllegalStateExcepton(String message, ThrowingRunnable runnable){
-        TestUtils.checkException(IllegalStateException.class, message, runnable);
+    void checkIllegalStateExcepton(String message, Executable executable){
+        TestUtils.checkException(IllegalStateException.class, message, executable);
     }
 
     void verifyNoMoreMockInteractions() {

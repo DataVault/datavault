@@ -21,7 +21,7 @@ public class VaultsReviewService {
 
     // The number of months before review date at which people should be notified.
     // This could be moved into datavault.properties if they keep on changing their minds about the value.
-    private int x = -6;
+    private final int x = -6;
 
     private final VaultReviewDAO vaultReviewDAO;
 

@@ -132,8 +132,8 @@ public class EncryptionValidator {
       Encryption.decryptFile(AESMode.GCM, temp, iv);
       byte[] decrypted = FileUtils.readFileToByteArray(temp);
 
-      Assert.isTrue(!Arrays.areEqual(original, encrypted));
-      Assert.isTrue( Arrays.areEqual(original, decrypted));
+      Assert.isTrue(!Arrays.areEqual(original, encrypted), () -> "original and encrypted should be un-equal");
+      Assert.isTrue( Arrays.areEqual(original, decrypted), () -> "original and decrypted should be equal");
 
       log.info("SUCCESS : Encrypt/Decrypt of temp file.");
     } catch (Exception ex) {

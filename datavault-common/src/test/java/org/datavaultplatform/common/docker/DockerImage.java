@@ -6,7 +6,7 @@ import static org.testcontainers.utility.DockerImageName.parse;
 public abstract class DockerImage {
 
   // https://hub.docker.com/r/bitnami/openldap/tags
-  public static DockerImageName LDAP_IMAGE = parse("bitnami/openldap@sha256:23ebcaa52331a6521f2e512b971943a3a8b99d15459d59105d6a0eeb31220c86");
+  public static final DockerImageName LDAP_IMAGE = parse("bitnami/openldap@sha256:23ebcaa52331a6521f2e512b971943a3a8b99d15459d59105d6a0eeb31220c86");
 
   // https://hub.docker.com/_/mysql?tab=tags
   public static DockerImageName MYSQL_IMAGE = parse("mysql:5.7.39");
@@ -26,8 +26,8 @@ public abstract class DockerImage {
   public static String OPEN_SSH_8pt6_IMAGE_NAME = "linuxserver/openssh-server:version-8.6_p1-r3";
 
   //8.8 is when they removed sha-1 signature of ssh-rsa keys - causing problems with JSch
-  public static String OPEN_SSH_8pt8_IMAGE_NAME = "linuxserver/openssh-server:version-8.8_p1-r1";
+  public static final String OPEN_SSH_8pt8_IMAGE_NAME = "linuxserver/openssh-server:version-8.8_p1-r1";
 
-  public static String OPEN_SSH_IMAGE_NAME = OPEN_SSH_8pt8_IMAGE_NAME;
+  public static final String OPEN_SSH_IMAGE_NAME = OPEN_SSH_8pt8_IMAGE_NAME;
   public static DockerImageName OPEN_SSH_IMAGE = parse(OPEN_SSH_IMAGE_NAME);
 }

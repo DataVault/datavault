@@ -23,7 +23,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterClass;
 
 public class BaseFT {
-    private static String screenShotFolderPath = "target/surefire-reports/errorScreenshots";
+    private static final String screenShotFolderPath = "target/surefire-reports/errorScreenshots";
     protected String host;
     protected WebDriver driver;
 

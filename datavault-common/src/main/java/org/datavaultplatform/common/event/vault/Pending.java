@@ -7,7 +7,8 @@ import javax.persistence.Entity;
 @Entity
 public class Pending extends Event {
 
-    public Pending() {};
+    public Pending() {}
+
     public Pending(String vaultId) {
         super("Created pending vault");
         this.eventClass = Pending.class.getCanonicalName();

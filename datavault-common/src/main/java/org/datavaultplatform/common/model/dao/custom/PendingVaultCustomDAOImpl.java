@@ -24,7 +24,6 @@ public class PendingVaultCustomDAOImpl extends BaseCustomDAOImpl implements
   }
 
 
-  @SuppressWarnings("unchecked")
   @Override
   public List<PendingVault> list(String userId, String sort, String order, String offset, String maxResult) {
     SchoolPermissionQueryHelper<PendingVault> helper = createPendingVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);
@@ -152,7 +151,7 @@ public class PendingVaultCustomDAOImpl extends BaseCustomDAOImpl implements
       );
     }
   }
-  private static List<Order> getSingletonOrderList(CriteriaBuilder cb, boolean asc, Path sortPath) {
+  private static List<Order> getSingletonOrderList(CriteriaBuilder cb, boolean asc, Path<?> sortPath) {
     return Collections.singletonList(asc ? cb.asc(sortPath) : cb.desc(sortPath));
   }
 }

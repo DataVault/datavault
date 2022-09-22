@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.metadata.impl;
 
+import java.nio.charset.StandardCharsets;
 import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.metadata.Provider;
 
@@ -62,7 +63,8 @@ public class PureProvider implements Provider {
             conn.setRequestProperty("Authorization", basicAuth);
         }
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(),
+            StandardCharsets.UTF_8));
         String inputLine;
        
         StringBuilder sb = new StringBuilder();
@@ -78,12 +80,13 @@ public class PureProvider implements Provider {
     static class PureNamespaceContent implements NamespaceContext {
         @Override
         public String getNamespaceURI(String prefix) {
-            if (prefix.equals("dataset")) {
-                return "http://atira.dk/schemas/pure4/wsdl/template/dataset/stable";
-            } else if (prefix.equals("core")) {
-                return "http://atira.dk/schemas/pure4/model/core/stable";
-            } else if (prefix.equals("stab")) {
-                return "http://atira.dk/schemas/pure4/model/template/dataset/stable";
+            switch (prefix) {
+                case "dataset":
+                    return "http://atira.dk/schemas/pure4/wsdl/template/dataset/stable";
+                case "core":
+                    return "http://atira.dk/schemas/pure4/model/core/stable";
+                case "stab":
+                    return "http://atira.dk/schemas/pure4/model/template/dataset/stable";
             }
             return XMLConstants.NULL_NS_URI;
         }
@@ -92,7 +95,7 @@ public class PureProvider implements Provider {
             throw new UnsupportedOperationException();
         }
         @Override
-        public Iterator getPrefixes(String namespaceURI) {
+        public Iterator<String> getPrefixes(String namespaceURI) {
             throw new UnsupportedOperationException();
         }
     }
@@ -122,7 +125,7 @@ public class PureProvider implements Provider {
                 Dataset dataset = new Dataset();
                 
                 // Get the uuid of this dataset
-                Node content = (Node)contents.item(i);
+                Node content = contents.item(i);
                 dataset.setID(content.getAttributes().getNamedItem("uuid").getTextContent());
                 
                 // Get the title of this dataset

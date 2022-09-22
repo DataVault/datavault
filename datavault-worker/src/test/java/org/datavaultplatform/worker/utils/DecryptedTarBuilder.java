@@ -243,7 +243,7 @@ public class DecryptedTarBuilder {
     chunks.forEach((chunkNumber, info) -> {
       String actualDecryptedChecksum = info.getDecryptedChecksum();
       ChunkData cd = params.getChunkData().get(chunkNumber);
-      Assert.isTrue(cd != null);
+      Assert.isTrue(cd != null, String.format("The ChunkData for [%d] should NOT be null", chunkNumber));
       String expectedDecryptedChecksum = cd.getDecryptedChecksum();
       checkActualAgainstExpected(chunkNumber, actualDecryptedChecksum, expectedDecryptedChecksum);
     });

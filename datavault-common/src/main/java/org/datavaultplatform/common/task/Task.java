@@ -38,7 +38,8 @@ public class Task {
 
     private boolean isRedeliver;
 
-    public Task() {};
+    public Task() {}
+
     public Task(Job job,
                 Map<String, String> properties,
                 List<ArchiveStore> archiveFileStores,

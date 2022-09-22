@@ -48,11 +48,9 @@ public class DeviceTracker implements Callable<HashMap<String, String>> {
         Thread trackerThread = new Thread(tracker);
         trackerThread.start();
         final String depId;
-        if (optChunkNumber.isPresent()) {
-            depId = this.depositId + "." + optChunkNumber.get();
-        } else {
-            depId = this.depositId;
-        }
+        depId = optChunkNumber
+            .map(chunkNum -> this.depositId + "." + chunkNum)
+            .orElse(this.depositId);
         String archiveId;
         // kick off new task for each device ( we may already have kicked off x threads for chunks)
         try {
@@ -82,7 +80,7 @@ public class DeviceTracker implements Callable<HashMap<String, String>> {
             log.debug("Add to archiveIds: key: "+this.archiveStoreId+" ,value:"+archiveId);
             archiveIds.put(archiveStoreId, archiveId);
             log.debug("archiveIds: "+archiveIds);
-        } else if(this.optChunkNumber.isPresent() == false) {
+        } else if(!this.optChunkNumber.isPresent()) {
             archiveIds.put(archiveStoreId, archiveId);
         }
         log.debug("DeviceTracker task completed: " + archiveId);

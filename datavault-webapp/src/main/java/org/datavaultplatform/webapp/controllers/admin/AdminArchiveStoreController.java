@@ -65,10 +65,7 @@ public class AdminArchiveStoreController {
                                      @RequestParam(value="retrieve",required=false) String retrieve) throws Exception {
         String storageClass = "org.datavaultplatform.common.storage.impl." + type;
 
-        boolean retrieveEnabled = false;
-        if(retrieve != null && retrieve.equals("on")){
-            retrieveEnabled = true;
-        }
+        boolean retrieveEnabled = "on".equals(retrieve);
 
         HashMap<String,String> storeProperties = buildStoreProperties(properties);
 

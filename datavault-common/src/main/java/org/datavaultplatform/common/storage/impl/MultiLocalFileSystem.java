@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class MultiLocalFileSystem extends Device implements ArchiveStore {
 
-    private String rootPath = null;
+    private final String rootPath;
 
     public MultiLocalFileSystem(String name, Map<String,String> config) throws FileNotFoundException {
         super(name, config);
@@ -28,7 +28,7 @@ public class MultiLocalFileSystem extends Device implements ArchiveStore {
 
         String[] locationsArray = rootPath.split(",");
 
-        locations = new ArrayList<String>();
+        locations = new ArrayList<>();
 
         for(String location : locationsArray){
             // Verify parameters are correct.
@@ -41,10 +41,9 @@ public class MultiLocalFileSystem extends Device implements ArchiveStore {
     }
 
     @Override
-    public long getUsableSpace() throws Exception {
+    public long getUsableSpace() {
         long usageSpace = 0;
-        for(int i = 0; i < locations.size(); i++) {
-            String location = locations.get(i);
+        for (String location : locations) {
             File file = new File(location);
             usageSpace += file.getUsableSpace();
         }
@@ -52,7 +51,7 @@ public class MultiLocalFileSystem extends Device implements ArchiveStore {
     }
 
     @Override
-    public void retrieve(String path, File working, Progress progress) throws Exception {
+    public void retrieve(String path, File working, Progress progress) {
         throw new UnsupportedOperationException();
     }
 
@@ -136,12 +135,8 @@ public class MultiLocalFileSystem extends Device implements ArchiveStore {
             Path base = Paths.get(location);
             Path canonicalBase = Paths.get(base.toFile().getCanonicalPath());
             Path canonicalPath = Paths.get(path.toFile().getCanonicalPath());
-            
-            if (canonicalPath.startsWith(canonicalBase)) {
-                return true;
-            } else {
-                return false;
-            }
+
+            return canonicalPath.startsWith(canonicalBase);
         }
         catch (Exception e) {
             e.printStackTrace();

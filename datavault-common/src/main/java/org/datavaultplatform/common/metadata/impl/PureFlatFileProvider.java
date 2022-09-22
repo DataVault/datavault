@@ -47,21 +47,15 @@ public class PureFlatFileProvider implements Provider {
     	System.out.println("flat file dir is : " + this.getFlatFileDir());
     	File personFile = new File(this.getFlatFileDir() + PureFlatFileProvider.PERSON_FILE_NAME);
     	if (personFile.exists()) {
-	    	LineIterator personIt = null;
-			try {
-				 personIt = FileUtils.lineIterator(personFile, "UTF-8");
-				while ( personIt.hasNext()) {
-		    	    String line =  personIt.nextLine();
-		    	    String[] splitLine = line.split("\t");
-		    	    if (splitLine.length == 2) {
-		    	    	retVal.put(splitLine[1], splitLine[0]);
-		    	    }
+				try (LineIterator personIt = FileUtils.lineIterator(personFile, "UTF-8")) {
+					while (personIt.hasNext()) {
+						String line = personIt.nextLine();
+						String[] splitLine = line.split("\t");
+						if (splitLine.length == 2) {
+							retVal.put(splitLine[1], splitLine[0]);
+						}
+					}
 				}
-			} catch (IOException e) {
-				throw e;
-			} finally {
-				 personIt.close();
-	    	}
     	}
 		return retVal;
     }
@@ -71,59 +65,49 @@ public class PureFlatFileProvider implements Provider {
     	System.out.println("flat file dir is : " + this.getFlatFileDir());
     	File dsDisplayFile = new File(this.getFlatFileDir() + PureFlatFileProvider.DATASET_DISPLAY_FILE_NAME);
     	if (dsDisplayFile.exists()) {
-	    	LineIterator displayIt = null;
-			try {
-				displayIt = FileUtils.lineIterator(dsDisplayFile, "UTF-8");
-				while (displayIt.hasNext()) {
-		    	    String line = displayIt.nextLine();
-		    	    String[] splitLine = line.split("\t");
-		    	    if (splitLine.length == 4) {
-		    	    	List<String> info = new ArrayList<>();
-		    	    	info.add(splitLine[2]);
-		    	    	info.add(splitLine[3]);
-		    	    	//see if we have seen a ds for this user already if so use that
-		    	    	Map<String, List<String>> dsMap = retVal.get(splitLine[0]);
-		    	    	if (dsMap == null) {
-		    	    		// if not make a new hash
-		    	    		dsMap = new HashMap<>();
-		    	    	}
-		    	    	dsMap.put(splitLine[1], info);
-		    	    	retVal.put(splitLine[0], dsMap);
-		    	    }
+				try (LineIterator displayIt = FileUtils.lineIterator(dsDisplayFile, "UTF-8")) {
+					while (displayIt.hasNext()) {
+						String line = displayIt.nextLine();
+						String[] splitLine = line.split("\t");
+						if (splitLine.length == 4) {
+							List<String> info = new ArrayList<>();
+							info.add(splitLine[2]);
+							info.add(splitLine[3]);
+							//see if we have seen a ds for this user already if so use that
+							Map<String, List<String>> dsMap = retVal.get(splitLine[0]);
+							if (dsMap == null) {
+								// if not make a new hash
+								dsMap = new HashMap<>();
+							}
+							dsMap.put(splitLine[1], info);
+							retVal.put(splitLine[0], dsMap);
+						}
+					}
 				}
-			} catch (IOException e) {
-				throw e;
-			} finally {
-				displayIt.close();
-	    	}
     	}
 		return retVal;
     }
     
-    private Map<String, Map<String, String>> processDatasetFullFlatFile() throws IOException {
+    private Map<String, Map<String, String>> processDatasetFullFlatFile() {
     	Map<String, Map<String, String>> retVal = new HashMap<>();
     	System.out.println("flat file dir is : " + this.getFlatFileDir());
         File dsFullFile  = new File(this.getFlatFileDir() + PureFlatFileProvider.DATASET_FULL_FILE_NAME);
         if (dsFullFile.exists()) {
-	        LineIterator fullIt = null;
-			try {
-				fullIt = FileUtils.lineIterator(dsFullFile, "UTF-8");
-				while (fullIt.hasNext()) {
-		    	    String line = fullIt.nextLine();
-		    	    String[] splitLine = line.split("\t");
-		    	    if (splitLine.length == 4) {
-		    	    	Map<String, String> data = new HashMap<>();
-		    	    	data.put(PureFlatFileProvider.TITLE, splitLine[1]);
-		    	    	data.put(PureFlatFileProvider.XML, splitLine[2]);
-						data.put(PureFlatFileProvider.CRISID, splitLine[3]);
-		    	    	retVal.put(splitLine[0], data);
-		    	    }
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				fullIt.close();
-	    	}
+					try (LineIterator fullIt = FileUtils.lineIterator(dsFullFile, "UTF-8")) {
+						while (fullIt.hasNext()) {
+							String line = fullIt.nextLine();
+							String[] splitLine = line.split("\t");
+							if (splitLine.length == 4) {
+								Map<String, String> data = new HashMap<>();
+								data.put(PureFlatFileProvider.TITLE, splitLine[1]);
+								data.put(PureFlatFileProvider.XML, splitLine[2]);
+								data.put(PureFlatFileProvider.CRISID, splitLine[3]);
+								retVal.put(splitLine[0], data);
+							}
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
         }
 		return retVal;
     }
@@ -164,7 +148,7 @@ public class PureFlatFileProvider implements Provider {
 					    		ds.setID(dsUUID);
 					    		String status = info.get(1);
 					    		ds.setName(info.get(0) + " (" + status + ")");
-					    		Boolean visible = true;
+					    		boolean visible = true;
 					    		if (! status.equals(PureFlatFileProvider.PURE_VALIDATED)) {
 					    			visible = false;
 					    		}

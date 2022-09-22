@@ -28,7 +28,6 @@ public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCu
     super(em);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public List<Deposit> list(String query, String userId, String sort, String sortDirection, int offset, int maxResult) {
     log.info("query:"+query+", sort: "+sort+", order: "+sortDirection +", offset: "+offset+", maxResult: "+maxResult);
@@ -56,7 +55,7 @@ public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCu
     // Sort by creation time by default
 
     helper.setOrderByHelper((cb, rt) -> {
-      final Path sortPath;
+      final Path<?> sortPath;
       if (StringUtils.isBlank(sort)) {
         sortPath = rt.get(Deposit_.creationTime);
       } else if ("userID".equals(sort)) {
@@ -162,7 +161,7 @@ public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCu
     );
 
     helper.setOrderByHelper((cb, rt) -> {
-      Path sortPath = rt.get(sort);
+      Path<?> sortPath = rt.get(sort);
       final Order order;
       if("asc".equals(sortDirection)) {
         order = cb.asc(sortPath);

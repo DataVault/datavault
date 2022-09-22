@@ -22,7 +22,7 @@ import org.mockito.Mockito;
 
 public class CheckSummerTest {
 
-  public static String TEST_CONTENTS = "test file contents";
+  public static final String TEST_CONTENTS = "test file contents";
 
   @TempDir
   File tempDir;

@@ -16,9 +16,9 @@ import org.springframework.core.io.Resource;
 @Slf4j
 class IdentifierTest {
 
-  Resource jpeg = new ClassPathResource("packager/banjo.jpg");
+  final Resource jpeg = new ClassPathResource("packager/banjo.jpg");
 
-  Resource pdf = new ClassPathResource("packager/item.pdf");
+  final Resource pdf = new ClassPathResource("packager/item.pdf");
 
   @Test
   @SneakyThrows

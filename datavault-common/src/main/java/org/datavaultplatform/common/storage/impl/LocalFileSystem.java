@@ -96,7 +96,7 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
     }
     
     @Override
-    public long getSize(String path) throws Exception {
+    public long getSize(String path) {
         Path absolutePath = getAbsolutePath(path);
         File file = absolutePath.toFile();
         
@@ -108,7 +108,7 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
     }
 
     @Override
-    public boolean isDirectory(String path) throws Exception {
+    public boolean isDirectory(String path) {
         Path absolutePath = getAbsolutePath(path);
         File file = absolutePath.toFile();
         return file.isDirectory();
@@ -122,7 +122,7 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
     }
     
     @Override
-    public long getUsableSpace() throws Exception {
+    public long getUsableSpace() {
         File file = new File(rootPath);
         return file.getUsableSpace();
     }
@@ -201,12 +201,8 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
             Path base = Paths.get(rootPath);
             Path canonicalBase = Paths.get(base.toFile().getCanonicalPath());
             Path canonicalPath = Paths.get(path.toFile().getCanonicalPath());
-            
-            if (canonicalPath.startsWith(canonicalBase)) {
-                return true;
-            } else {
-                return false;
-            }
+
+            return canonicalPath.startsWith(canonicalBase);
         }
         catch (Exception e) {
             e.printStackTrace();

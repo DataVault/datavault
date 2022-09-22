@@ -33,8 +33,7 @@ public class Delete extends Task {
     private int numOfChunks = 0;
     
     private String depositId = null;
-    private String bagID = null;
-    private long archiveSize = 0;
+  private long archiveSize = 0;
     private EventSender eventSender = null;
     // Maps the model ArchiveStore ID to the storage equivalent
     private final HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
@@ -46,7 +45,7 @@ public class Delete extends Task {
         logger.info("Delete job - performAction()");
         Map<String, String> properties = getProperties();
         this.depositId = properties.get("depositId");
-        this.bagID = properties.get("bagId");
+      String bagID = properties.get("bagId");
         this.userID = properties.get("userId");
         this.numOfChunks = Integer.parseInt(properties.get("numOfChunks"));
         this.archiveSize = Long.parseLong(properties.get("archiveSize"));
@@ -59,13 +58,13 @@ public class Delete extends Task {
         
         this.initStates();
         
-        logger.info("bagID: " + this.bagID);
+        logger.info("bagID: " + bagID);
         
         //userStores = this.setupUserFileStores();
         this.setupArchiveFileStores();
         
         try {
-        	String tarFileName = this.bagID + ".tar";
+        	String tarFileName = bagID + ".tar";
         	Path tarPath = context.getTempDir().resolve(tarFileName);
             File tarFile = tarPath.toFile();
             eventSender.send(new DeleteStart(this.jobID, this.depositId).withNextState(0)

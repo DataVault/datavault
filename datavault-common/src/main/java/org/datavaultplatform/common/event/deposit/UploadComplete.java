@@ -16,7 +16,7 @@ public class UploadComplete extends Event {
     HashMap<String, String> archiveIds = new HashMap<>();
 
     public UploadComplete() {
-    };
+    }
 
     public UploadComplete(String jobId, String depositId, HashMap<String, String> archiveIds) {
         super("Upload completed");

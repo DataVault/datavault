@@ -61,6 +61,7 @@ public class BaseReceiveIT extends BaseRabbitTCTest {
     return props.getMessageId();
   }
 
+  @SuppressWarnings("Convert2Lambda")
   @BeforeEach
   void checkQueues() {
     Assertions.assertEquals("datavault", this.workerQueue.getActualName());
@@ -75,9 +76,9 @@ public class BaseReceiveIT extends BaseRabbitTCTest {
         @Override
         public void onComplete(boolean success, long deliveryTag, Throwable cause) {
           if (success) {
-            log.info("ack successful [%d]", deliveryTag);
+            log.info("ack successful : tag[{}]", deliveryTag);
           } else {
-            log.warn("ack failed [%d]", deliveryTag, cause);
+            log.warn("ack failed : tag[{}]", deliveryTag, cause);
           }
         }
       });

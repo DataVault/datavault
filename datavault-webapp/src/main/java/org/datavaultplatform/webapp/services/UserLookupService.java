@@ -41,7 +41,7 @@ public class UserLookupService {
         List<String> result;
         try {
             result = ldapService.autocompleteUID(term);
-        } catch (LdapException | CursorException | IOException ex) {
+        } catch (LdapException | CursorException ex) {
             log.error("failed to get UUN from {}", term, ex);
             // A fallback to known users in the Database in case LDAP is not available:
             return Arrays.stream(restService.getUsers())
@@ -62,7 +62,7 @@ public class UserLookupService {
             HashMap<String, String> attributes;
             try {
                 attributes = ldapService.getLdapUserInfo(uun);
-            } catch (LdapException | CursorException | IOException e) {
+            } catch (LdapException | CursorException e) {
                 throw new InvalidUunException(uun, e);
             }
             if (attributes.size() < 1){

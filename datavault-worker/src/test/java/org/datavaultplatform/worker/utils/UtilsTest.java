@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -74,7 +75,7 @@ public class UtilsTest {
 
     File temp = Files.createTempFile("test", ".txt").toFile();
     try(FileOutputStream fos = new FileOutputStream(temp)){
-      IOUtils.write("this is a test", fos);
+      IOUtils.write("this is a test", fos, StandardCharsets.UTF_8);
     }
 
     String expectedHash1 = "fa26be19de6bff93f70bc2308434e4a440bbad02";

@@ -64,7 +64,9 @@ class ErrorController implements org.springframework.boot.web.servlet.error.Erro
             StringWriter reason = new StringWriter();
             throwable.printStackTrace(new PrintWriter(reason));
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            if (reason != null) return reason.toString();
+            if (reason != null) {
+                return reason.toString();
+            }
         }
         if(statusCode == null){
             statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();

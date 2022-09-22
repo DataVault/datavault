@@ -1,6 +1,5 @@
 package org.datavaultplatform.common.services;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -30,9 +29,7 @@ import org.springframework.util.Assert;
  * User: Robin Taylor
  * Date: 09/03/2015
  * Time: 11:33
- */
-
-/**
+ * 
  * Without Builder, it's easy to get the constructor parameters in the wrong order.
  */
 public class LDAPService {
@@ -212,7 +209,7 @@ public class LDAPService {
         return attributes;
     }
 
-    public  List<String> autocompleteUID(String term) throws LdapException, CursorException, IOException {
+    public  List<String> autocompleteUID(String term) throws LdapException, CursorException {
         logger.info("Search UUN containing {}", term);
         LdapNetworkConnection connection = getConnection();
         EntryCursor cursor = null;
@@ -250,7 +247,7 @@ public class LDAPService {
         }
     }
 
-    public  HashMap<String, String> getLdapUserInfo(String uid) throws LdapException, CursorException, IOException {
+    public  HashMap<String, String> getLdapUserInfo(String uid) throws LdapException, CursorException {
         logger.info("Search info for UUN: [{}]", uid);
 
         LdapNetworkConnection connection = getConnection();

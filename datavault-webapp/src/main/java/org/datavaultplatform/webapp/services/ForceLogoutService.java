@@ -54,7 +54,7 @@ public class ForceLogoutService {
 
     public void logoutVaultUsers(CreateVault cv) {
         logger.warn("Forcing a logout for all users assigned to vault {}", cv.getName());
-        Set<String> usersWithRole = new HashSet();
+        Set<String> usersWithRole = new HashSet<>();
         if (cv.getVaultOwner() != null && ! cv.getVaultOwner().isEmpty()) {
             usersWithRole.add(cv.getVaultOwner());
         }

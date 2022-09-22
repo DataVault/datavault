@@ -44,7 +44,6 @@ public class Retrieve extends Task {
     private String retrievePath = null;
     private String retrieveId = null;
     private String depositId = null;
-    private String bagID = null;
     private long archiveSize = 0;
     private EventSender eventSender = null;
     
@@ -67,7 +66,7 @@ public class Retrieve extends Task {
         Map<String, String> properties = getProperties();
         this.depositId = properties.get("depositId");
         this.retrieveId = properties.get("retrieveId");
-        this.bagID = properties.get("bagId");
+        String bagID = properties.get("bagId");
         this.retrievePath = properties.get("retrievePath");
         this.archiveId = properties.get("archiveId");
         this.userID = properties.get("userId");
@@ -91,7 +90,7 @@ public class Retrieve extends Task {
             .withUserId(this.userID)
             .withNextState(0));
         
-        logger.info("bagID: " + this.bagID);
+        logger.info("bagID: " + bagID);
         logger.info("retrievePath: " + this.retrievePath);
         
         Device userFs = this.setupUserFileStores();
@@ -101,7 +100,7 @@ public class Retrieve extends Task {
         	this.checkUserStoreFreeSpace(userFs);
 
             // Retrieve the archived data
-            String tarFileName = this.bagID + ".tar";
+            String tarFileName = bagID + ".tar";
             
             // Copy the tar file from the archive to the temporary area
             Path tarPath = context.getTempDir().resolve(tarFileName);

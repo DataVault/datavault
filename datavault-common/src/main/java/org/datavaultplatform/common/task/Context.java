@@ -6,7 +6,7 @@ import java.nio.file.Path;
 // Some common properties needed for all jobs
 
 public class Context {
-    public enum AESMode {GCM, CBC};
+    public enum AESMode {GCM, CBC}
 
     private final Path tempDir;
     private final Path metaDir;

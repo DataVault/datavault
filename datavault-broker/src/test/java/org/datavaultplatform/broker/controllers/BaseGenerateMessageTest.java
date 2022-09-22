@@ -39,16 +39,16 @@ public abstract class BaseGenerateMessageTest {
   private static final String ARCHIVE_STORE_DEST_ID = "ARCHIVE-STORE-DST-ID";
   private static final String ARCHIVE_STORE_DEST_LABEL = "ARCHIVE-STORE-DST-LABEL";
 
-  String bucketName = "BUCKET_NAME";
-  String region = "Region";
-  String awsAccessKey = "AWS_ACCESS_KEY";
-  String awsSecretKey = "AWS_SECRET_KEY";
-  String tsmRetryTime = "TSM_RETRY_TIME";
-  String occRetryTime = "OCI_RETRY_TIME";
-  String tsmMaxRetries = "TSM_MAX_RETRIES";
-  String occMaxRetries = "OCI-MAX-RETRIES";
-  String ociNameSpace = "OCI-NAMESPACE";
-  String ociBucketName = "OCI-BUCKET-NAME";
+  final String bucketName = "BUCKET_NAME";
+  final String region = "Region";
+  final String awsAccessKey = "AWS_ACCESS_KEY";
+  final String awsSecretKey = "AWS_SECRET_KEY";
+  final String tsmRetryTime = "TSM_RETRY_TIME";
+  final String occRetryTime = "OCI_RETRY_TIME";
+  final String tsmMaxRetries = "TSM_MAX_RETRIES";
+  final String occMaxRetries = "OCI-MAX-RETRIES";
+  final String ociNameSpace = "OCI-NAMESPACE";
+  final String ociBucketName = "OCI-BUCKET-NAME";
 
   @Mock
   VaultsService vaultsService;
@@ -64,7 +64,7 @@ public abstract class BaseGenerateMessageTest {
   MetadataService metadataService;
   @Mock
   ExternalMetadataService externalMetadataService;
-  FilesService filesService = new FilesService();
+  final FilesService filesService = new FilesService();
   @Mock
   UsersService usersService;
   @Mock
@@ -80,11 +80,11 @@ public abstract class BaseGenerateMessageTest {
   @TempDir
   File baseDir;
 
-  File tempDir = new File(baseDir, "temp");
-  File destDir = new File(baseDir, "dest");
+  final File tempDir = new File(baseDir, "temp");
+  final File destDir = new File(baseDir, "dest");
 
   @Spy
-  ObjectMapper mapper = new ObjectMapper();
+  final ObjectMapper mapper = new ObjectMapper();
 
   @BeforeEach
   void setup() {

@@ -1,7 +1,7 @@
 package org.datavaultplatform.broker.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -12,14 +12,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.bind.DatatypeConverter;
 import lombok.SneakyThrows;
-import org.junit.function.ThrowingRunnable;
+import org.junit.jupiter.api.function.Executable;
 import org.springframework.util.DigestUtils;
 
 public abstract class TestUtils {
@@ -41,8 +40,8 @@ public abstract class TestUtils {
     return new Date(result.toInstant(ZoneOffset.UTC).toEpochMilli());
   }
 
-  public static <T extends Exception> void checkException(Class<T> exceptionClass, String message, ThrowingRunnable runnable) {
-    T ex = assertThrows(exceptionClass, runnable);
+  public static <T extends Exception> void checkException(Class<T> exceptionClass, String message, Executable executable) {
+    T ex = assertThrows(exceptionClass, executable);
     assertEquals(message, ex.getMessage());
   }
 

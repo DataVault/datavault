@@ -179,7 +179,8 @@ public class Event {
     @Transient
     public String roleId;
     
-    public Event() {};
+    public Event() {}
+
     public Event(String message) {
         this.eventClass = Event.class.getCanonicalName();
         this.message = message;

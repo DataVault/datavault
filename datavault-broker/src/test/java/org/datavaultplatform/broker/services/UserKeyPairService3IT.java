@@ -32,8 +32,6 @@ public class UserKeyPairService3IT extends BaseUserKeyPairServiceTest {
   private int sftpServerPort;
   private EmbeddedSftpServer sftpServer;
 
-  private Path tempSftpFolder;
-
   /**
    * Tests that the key pair is valid by
    * using keypair to perform scp between testcontainers
@@ -82,8 +80,8 @@ public class UserKeyPairService3IT extends BaseUserKeyPairServiceTest {
 
   @SneakyThrows
   void initSftpServer(String publicKey) {
-    this.tempSftpFolder = Files.createTempDirectory("SFTP_TEST");
-    this.sftpServer = SftpServerUtils.getSftpServer(publicKey, this.tempSftpFolder);
+    Path tempSftpFolder = Files.createTempDirectory("SFTP_TEST");
+    this.sftpServer = SftpServerUtils.getSftpServer(publicKey, tempSftpFolder);
     this.sftpServerPort= sftpServer.getServer().getPort();
   }
 

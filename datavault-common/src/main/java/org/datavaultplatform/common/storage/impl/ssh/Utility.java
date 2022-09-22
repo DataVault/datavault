@@ -33,10 +33,11 @@ import org.datavaultplatform.common.io.Progress;
 
 public class Utility {
 
+    @SuppressWarnings("OctalInteger")
     private static final int DEFAULT_DIR_MODE = 0755;
     
     public static long calculateSize(final ChannelSftp channel,
-                                     String remoteFile) throws IOException, SftpException {
+                                     String remoteFile) throws SftpException {
         
         long bytes = 0;        
         String pwd = remoteFile;
@@ -49,10 +50,10 @@ public class Utility {
         
         channel.cd(pwd);
         
-        final java.util.Vector files = channel.ls(remoteFile);
+        final java.util.Vector<ChannelSftp.LsEntry> files = channel.ls(remoteFile);
         final int size = files.size();
         for (int i = 0; i < size; i++) {
-            final ChannelSftp.LsEntry le = (ChannelSftp.LsEntry) files.elementAt(i);
+            final ChannelSftp.LsEntry le = files.elementAt(i);
             final String name = le.getFilename();
             if (le.getAttrs().isDir()) {
                 if (name.equals(".") || name.equals("..")) {
@@ -101,7 +102,7 @@ public class Utility {
                                String remoteFile,
                                final File localFile,
                                final SftpATTRS attrs,
-                               SFTPMonitor monitor) throws IOException, SftpException {
+                               SFTPMonitor monitor) throws SftpException {
 
         String pwd = remoteFile;
 
@@ -119,10 +120,10 @@ public class Utility {
             }
         }
         
-        final java.util.Vector files = channel.ls(remoteFile);
+        final java.util.Vector<ChannelSftp.LsEntry> files = channel.ls(remoteFile);
         final int size = files.size();
         for (int i = 0; i < size; i++) {
-            final ChannelSftp.LsEntry le = (ChannelSftp.LsEntry) files.elementAt(i);
+            final ChannelSftp.LsEntry le = files.elementAt(i);
             final String name = le.getFilename();
             if (le.getAttrs().isDir()) {
                 if (name.equals(".") || name.equals("..")) {
@@ -143,7 +144,7 @@ public class Utility {
     private static void getFile(final ChannelSftp channel,
                                 final ChannelSftp.LsEntry le,
                                 File localFile,
-                                SFTPMonitor monitor) throws IOException, SftpException {
+                                SFTPMonitor monitor) throws SftpException {
         final String remoteFile = le.getFilename();
         if (!localFile.exists()) {
             final String path = localFile.getAbsolutePath();
@@ -177,16 +178,17 @@ public class Utility {
                                      SFTPMonitor monitor)
         throws IOException, SftpException {
         
-        DirectoryStream<Path> stream = Files.newDirectoryStream(current);
-        
-        for (Path entry : stream) {
-            
-            File entryFile = entry.toFile();
-            
-            if (entryFile.isDirectory()) {
-                sendDirectoryToRemote(channel, entry, monitor);
-            } else {
-                sendFileToRemote(channel, entryFile, null, monitor);
+        try(DirectoryStream<Path> stream = Files.newDirectoryStream(current)) {
+
+            for (Path entry : stream) {
+
+                File entryFile = entry.toFile();
+
+                if (entryFile.isDirectory()) {
+                    sendDirectoryToRemote(channel, entry, monitor);
+                } else {
+                    sendFileToRemote(channel, entryFile, null, monitor);
+                }
             }
         }
     }
@@ -226,7 +228,7 @@ public class Utility {
                                          final File localFile,
                                          String remotePath,
                                          SFTPMonitor monitor)
-        throws IOException, SftpException {
+        throws SftpException {
         
         if (remotePath == null) {
             remotePath = localFile.getName();

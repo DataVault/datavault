@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
+import java.util.Collections;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,7 @@ public class Packager {
     public static Bag createBag(File dir) throws Exception {        
         return BagCreator.bagInPlace(
                 dir.toPath(),
-                Arrays.asList(StandardSupportedAlgorithms.MD5),  
+            Collections.singletonList(StandardSupportedAlgorithms.MD5),
                 true); // include hidden files
     }
     
@@ -67,21 +68,16 @@ public class Packager {
     public static boolean validateBag(File dir) throws Exception {
         boolean isValid = false;
         Bag bag = new BagReader().read(dir.toPath());
-        
-        BagVerifier bv = new BagVerifier();
-        try {
+
+        try (BagVerifier bv = new BagVerifier()) {
             bv.isValid(bag, false);
             isValid = true;
-        }
-        catch(IOException | CorruptChecksumException | InvalidBagitFileFormatException |
-                VerificationException | InterruptedException | MaliciousPathException |
-                MissingPayloadManifestException | MissingPayloadDirectoryException |
-                FileNotInPayloadDirectoryException | MissingBagitFileException |
-                UnsupportedAlgorithmException ex){
-           log.warn("Bag " + bag.getRootDir() + " is invalid: " + ex.getMessage());
-        }
-        finally {
-            bv.close();
+        } catch (IOException | CorruptChecksumException | InvalidBagitFileFormatException |
+                 VerificationException | InterruptedException | MaliciousPathException |
+                 MissingPayloadManifestException | MissingPayloadDirectoryException |
+                 FileNotInPayloadDirectoryException | MissingBagitFileException |
+                 UnsupportedAlgorithmException ex) {
+            log.warn("Bag " + bag.getRootDir() + " is invalid: " + ex.getMessage());
         }
         
         return isValid;
@@ -102,7 +98,7 @@ public class Packager {
                                       String fileTypeMetadata,
                                       String externalMetadata) {
         
-        boolean result = false;
+        boolean result;
         
         try {
             Path bagPath = bagDir.toPath();
@@ -126,7 +122,7 @@ public class Packager {
             result = true;
             
         } catch (IOException e) {
-            System.out.println(e.toString());
+            log.error("unexpected exception", e);
             result = false;
         }
         
@@ -149,7 +145,7 @@ public class Packager {
         File metadataFile = metadataDirPath.resolve(metadataFileName).toFile();
         FileUtils.writeStringToFile(metadataFile, metadata, StandardCharsets.UTF_8);
         String hash = computeFileHash(metadataFile, alg);
-        FileUtils.writeStringToFile(tagManifest, hash + "  " + metadataDirName + "/" + metadataFileName + "\r\n", true);
+        FileUtils.writeStringToFile(tagManifest, hash + "  " + metadataDirName + "/" + metadataFileName + "\r\n", StandardCharsets.UTF_8, true);
         
         return true;
     }
@@ -169,7 +165,7 @@ public class Packager {
         if (alg == StandardSupportedAlgorithms.MD5) {
             hash = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
         } else if (alg == StandardSupportedAlgorithms.SHA1) {
-            hash = org.apache.commons.codec.digest.DigestUtils.shaHex(fis);
+            hash = org.apache.commons.codec.digest.DigestUtils.sha1Hex(fis);
         } else if (alg == StandardSupportedAlgorithms.SHA256) {
             hash = org.apache.commons.codec.digest.DigestUtils.sha256Hex(fis);
         } else if (alg == StandardSupportedAlgorithms.SHA512) {
@@ -190,7 +186,7 @@ public class Packager {
         
         // TODO: could we use the built-in "holey" bag methods instead?
         
-        boolean result = false;
+        boolean result;
         Path bagPath = bagDir.toPath();
         
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(bagPath)) {
@@ -229,7 +225,7 @@ public class Packager {
             result = true;
             
         } catch (IOException e) {
-            System.out.println(e.toString());
+            log.error("unexpected exception", e);
             result = false;
         }
         

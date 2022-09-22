@@ -42,7 +42,7 @@ public class AmazonGlacier extends Device implements ArchiveStore {
     private final AmazonSNSClient snsClient;
     private final ArchiveTransferManager transferManager;
     
-    public AmazonGlacier(String name, Map<String,String> config) throws Exception  {
+    public AmazonGlacier(String name, Map<String,String> config) {
         super(name, config);
         
         // Unpack the config parameters (in an implementation-specific way)
@@ -149,12 +149,12 @@ public class AmazonGlacier extends Device implements ArchiveStore {
     }
     
     @Override
-    public long getUsableSpace() throws Exception {
+    public long getUsableSpace() {
         throw new UnsupportedOperationException("Not supported.");
     }
     
     @Override
-    public void retrieve(String path, File working, Progress progress) throws Exception {
+    public void retrieve(String path, File working, Progress progress) {
         
         ProgressListener listener = initProgressListener(progress, true);
         
@@ -162,7 +162,7 @@ public class AmazonGlacier extends Device implements ArchiveStore {
     }
 
     @Override
-    public String store(String path, File working, Progress progress) throws Exception {
+    public String store(String path, File working, Progress progress) {
         
         ProgressListener listener = initProgressListener(progress, false);
         

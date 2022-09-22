@@ -58,9 +58,9 @@ public class DepositEvents {
     retrieve.setIsRedeliver(false);
     Map<String, String> userFileStoreClasses = new HashMap<>();
 
-    Map<String,String> propsInner = new HashMap();
+    Map<String,String> propsInner = new HashMap<>();
     propsInner.put("rootPath", retrieveBaseDir.getCanonicalPath());
-    Map<String, Map<String, String>> propsOuter = new HashMap();
+    Map<String, Map<String, String>> propsOuter = new HashMap<>();
     propsOuter.put(FILE_STORE_SRC_ID, propsInner);
     retrieve.setUserFileStoreProperties(propsOuter);
     userFileStoreClasses.put(FILE_STORE_SRC_ID, "org.datavaultplatform.common.storage.impl.LocalFileSystem");
@@ -76,16 +76,17 @@ public class DepositEvents {
     ArchiveStore result = deposit.getArchiveFileStores().stream()
         .filter(ArchiveStore::isRetrieveEnabled)
         .findFirst()
-        .get();
+        .orElse(null);
     return result;
   }
 
+  @SuppressWarnings("unchecked")
   private <T> T findEvent(Class<T> clazz) {
     return events.stream()
         .filter(e -> clazz.isAssignableFrom(e.getClass()))
         .map(e -> (T) e)
         .findFirst()
-        .get();
+        .orElse(null);
   }
 
 

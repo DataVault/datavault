@@ -102,7 +102,7 @@ public class Receiver implements MessageProcessor {
             String message = messageInfo.getValue();
 
             // Decode and begin the job ...
-            Path tempDirPath = null;
+            Path tempDirPath;
             try {
                 ObjectMapper mapper = new ObjectMapper();
 
@@ -129,7 +129,7 @@ public class Receiver implements MessageProcessor {
                     logger.debug("Normal using default temp dir");
                     tempDirPath = Paths.get(tempDir, WorkerInstance.getWorkerName());
                 }
-                logger.debug("The temp dir:" + tempDirPath.toString());
+                logger.debug("The temp dir:" + tempDirPath);
                 tempDirPath.toFile().mkdir();
                 
                 Path metaDirPath = Paths.get(metaDir);

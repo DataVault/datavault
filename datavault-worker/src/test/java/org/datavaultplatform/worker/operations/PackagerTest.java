@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -124,8 +125,8 @@ public class PackagerTest {
         File test3file = null;
         File secondChildDir =  new File(parentDir, CHILD_DIR_WITH_SPACE);
         secondChildDir.mkdir();
-        File test4file = null;
-        File test5file = null;
+        File test4file;
+        File test5file;
         
         try{
             test1file = new File(packagerResources, TEST_FILE1);
@@ -158,7 +159,7 @@ public class PackagerTest {
 
             // #1 check files in manifest 
             List<String> lines = FileUtils.readLines(
-                    new File(parentDir.getAbsolutePath() + File.separator + "manifest-md5.txt"));
+                    new File(parentDir.getAbsolutePath() + File.separator + "manifest-md5.txt"), StandardCharsets.UTF_8);
             assertTrue(lines.contains(this.getChecksum(test1file) + "  data" +
                     File.separator + TEST_FILE1));
             assertTrue(lines.contains(this.getChecksum(test2file) + "  data" +
@@ -219,13 +220,13 @@ public class PackagerTest {
                 
                 // check contents of metadata files
                 File df = new File(dir + File.separator + Packager.metadataDirName, Packager.depositMetaFileName);
-                assertEquals(DEPOSIT_META, FileUtils.readFileToString(df));
+                assertEquals(DEPOSIT_META, FileUtils.readFileToString(df, StandardCharsets.UTF_8));
                 File vf = new File(dir + File.separator + Packager.metadataDirName, Packager.vaultMetaFileName);
-                assertEquals(VAULT_META, FileUtils.readFileToString(vf));
+                assertEquals(VAULT_META, FileUtils.readFileToString(vf, StandardCharsets.UTF_8));
                 File ff = new File(dir + File.separator + Packager.metadataDirName, Packager.fileTypeMetaFileName);
-                assertEquals(FT_META, FileUtils.readFileToString(ff));
+                assertEquals(FT_META, FileUtils.readFileToString(ff, StandardCharsets.UTF_8));
                 File ef = new File(dir + File.separator + Packager.metadataDirName, Packager.externalMetaFileName);
-                assertEquals(EXT_META, FileUtils.readFileToString(ef));
+                assertEquals(EXT_META, FileUtils.readFileToString(ef, StandardCharsets.UTF_8));
                 
                 // validate checksum is tagmanifest  
                 List<String> lines = FileUtils.readLines(

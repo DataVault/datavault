@@ -68,15 +68,15 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
 
         headers.set(HEADER_CLIENT_KEY, brokerApiKey);
 
-        HttpEntity entity;
+        HttpEntity<Object> entity;
         if (method == HttpMethod.GET) {
-            entity = new HttpEntity(headers);
+            entity = new HttpEntity<>(headers);
         } else if (method == HttpMethod.PUT) {
-            entity = new HttpEntity(payload, headers);
+            entity = new HttpEntity<>(payload, headers);
         } else if (method == HttpMethod.POST) {
-            entity = new HttpEntity(payload, headers);
+            entity = new HttpEntity<>(payload, headers);
         } else if (method == HttpMethod.DELETE) {
-            entity = new HttpEntity(headers);
+            entity = new HttpEntity<>(headers);
         } else {
             throw new IllegalArgumentException("REST method not implemented!");
         }

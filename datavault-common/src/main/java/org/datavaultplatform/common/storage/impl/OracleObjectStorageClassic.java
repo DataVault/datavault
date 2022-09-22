@@ -32,20 +32,20 @@ To be clean despite being named OracleObjecStorageClassic it uses OCI not OCC
 public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	
 	private static final Logger logger = LoggerFactory.getLogger(OracleObjectStorageClassic.class);
-	private static String DEFAULT_CONTAINER_NAME = "datavault-container-edina";
-	public Verify.Method verificationMethod = Verify.Method.CLOUD;
+	private static final String DEFAULT_CONTAINER_NAME = "datavault-container-edina";
+	public final Verify.Method verificationMethod = Verify.Method.CLOUD;
 	private ObjectStorage client = null;
 	private static final String CONFIG_FILE_PATH = System.getProperty("user.home") + "/.oci/config";
 	private static final String PROFILE = "DEFAULT";
-	private static int defaultRetryTime = 30;
-	private static int defaultMaxRetries = 48; // 24 hours if retry time is 30 minutes
+	private static final int defaultRetryTime = 30;
+	private static final int defaultMaxRetries = 48; // 24 hours if retry time is 30 minutes
 	private static int retryTime = OracleObjectStorageClassic.defaultRetryTime;
 	private static int maxRetries = OracleObjectStorageClassic.defaultMaxRetries;
-	private static String restoredKey = "Restored";
+	private static final String restoredKey = "Restored";
 	private static String nameSpaceName = "testNameSpace";
 	private static String bucketName = "testBucketName";
 
-	public OracleObjectStorageClassic(String name, Map<String, String> config) throws Exception {
+	public OracleObjectStorageClassic(String name, Map<String, String> config) {
 		super(name, config);
 		super.depositIdStorageKey = true;
 		String retryKey = "occRetryTime";
@@ -85,7 +85,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
     }
 
 	@Override
-	public long getUsableSpace() throws Exception {
+	public long getUsableSpace() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -118,7 +118,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 			try {
 				// create new client / manager each time so we can update the config
 				// while in the holding pattern
-				this.client = new ObjectStorageClient(this.getAuthDetailsProvider());
+				this.client = new ObjectStorageClient(getAuthDetailsProvider());
 				// ask for the object to be restored
 				this.client.restoreObjects(restoreObjectsRequest);
 
@@ -163,7 +163,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 				// create new client / manager each time so we can update the config
 				// while in the holding pattern
 
-				UploadManager uploadManager = this.constructUploadManager(this.getAuthDetailsProvider());
+				UploadManager uploadManager = this.constructUploadManager(getAuthDetailsProvider());
 
 				UploadManager.UploadRequest uploadDetails = this.constructUploadRequest(depositId, working);
 				UploadManager.UploadResponse response = uploadManager.upload(uploadDetails);
@@ -182,7 +182,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	}
 	
 	@Override
-	public void delete(String path, File working, Progress progress) throws Exception {
+	public void delete(String path, File working, Progress progress) {
 		/*try {
 			this.manager = FileTransferManager.getDefaultFileTransferManager(this.getTransferAuth());
 			manager.deleteObject(this.getContainerName(), path);
@@ -196,7 +196,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		}*/
 
 		try {
-			this.client = new ObjectStorageClient(this.getAuthDetailsProvider());
+			this.client = new ObjectStorageClient(getAuthDetailsProvider());
 			DeleteObjectRequest request =
 					DeleteObjectRequest.builder()
 							.bucketName(OracleObjectStorageClassic.bucketName)

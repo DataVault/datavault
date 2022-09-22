@@ -1,24 +1,18 @@
 package org.datavaultplatform.worker.operations;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-//import org.apache.log4j.BasicConfigurator;
 
 public class TarTest {
     private static File packagerResourcesDir;

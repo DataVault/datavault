@@ -15,10 +15,10 @@ public class CreateClientEventTest {
   static final String USER_AGENT = "Chrome";
   static final String SESSION_ID = "12345";
   static final String SERIALIZED_EVENT = "{\"remoteAddress\":\"1.2.3.4\",\"userAgent\":\"Chrome\"}";
-  static String SERIALIZED_EVENT_WITH_SESSION_ID = "{\"remoteAddress\":\"1.2.3.4\",\"userAgent\":\"Chrome\",\"sessionId\":\"IGNORE\"}";
+  static final String SERIALIZED_EVENT_WITH_SESSION_ID = "{\"remoteAddress\":\"1.2.3.4\",\"userAgent\":\"Chrome\",\"sessionId\":\"IGNORE\"}";
   static final CreateClientEvent EVENT = new CreateClientEvent(ADDRESS, USER_AGENT);
 
-  ObjectMapper mapper = new ObjectMapper();
+  final ObjectMapper mapper = new ObjectMapper();
 
   @Nested
   class SerializationTests {

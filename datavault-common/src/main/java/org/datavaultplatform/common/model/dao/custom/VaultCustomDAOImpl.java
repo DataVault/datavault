@@ -50,7 +50,6 @@ public class VaultCustomDAOImpl extends BaseCustomDAOImpl implements VaultCustom
         return distinctVaults(vaults);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<Vault> search(String userId, String query, String sort, String order, String offset, String maxResult) {
         SchoolPermissionQueryHelper<Vault> helper = createVaultQueryHelper(userId, Permission.CAN_MANAGE_VAULTS);

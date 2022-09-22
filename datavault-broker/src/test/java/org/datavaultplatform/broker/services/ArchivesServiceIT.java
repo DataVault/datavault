@@ -35,7 +35,7 @@ public class ArchivesServiceIT extends BaseReuseDatabaseTest {
   @Autowired
   JdbcTemplate template;
 
-  Date now = new Date();
+  final Date now = new Date();
 
   @Test
   void testWriteThenRead() {

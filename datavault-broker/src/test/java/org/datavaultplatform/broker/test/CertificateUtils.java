@@ -12,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
@@ -43,7 +44,7 @@ public class CertificateUtils {
     byte[] prefix = new byte[INITIAL_PREFIX.length];
 
     try {
-      if (INITIAL_PREFIX.length != is.read(prefix) || !ArrayUtils.isEquals(INITIAL_PREFIX, prefix)) {
+      if (INITIAL_PREFIX.length != is.read(prefix) || !Objects.deepEquals(INITIAL_PREFIX, prefix)) {
         throw new InvalidKeyException("Initial [ssh-rsa] key prefix missed.");
       }
 

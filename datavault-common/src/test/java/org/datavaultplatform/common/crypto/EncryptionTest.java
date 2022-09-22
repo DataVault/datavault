@@ -129,7 +129,7 @@ public class EncryptionTest {
             fail("Exception happened while generating key " + e);
         }
 
-        byte iv[] = new byte[96];
+        byte[] iv = new byte[96];
         SecureRandom secRandom = new SecureRandom();
         secRandom.nextBytes(iv); // SecureRandom initialized using self-seeding
 
@@ -184,7 +184,7 @@ public class EncryptionTest {
         }
 
         // Generating IV
-        byte iv[] = Encryption.generateIV(Encryption.IV_SIZE);
+        byte[] iv = Encryption.generateIV(Encryption.IV_SIZE);
 
         Cipher cIn = null;
         try {
@@ -276,7 +276,7 @@ public class EncryptionTest {
         }
 
         // Generating IV
-        byte iv[] = Encryption.generateIV(Encryption.IV_SIZE);
+        byte[] iv = Encryption.generateIV(Encryption.IV_SIZE);
 
         // Any random data can be used as tag. Some common examples could be domain name
         byte[] aadData = "bd67a172c130822d6c306e02b1d9544f".getBytes();
@@ -372,7 +372,7 @@ public class EncryptionTest {
         }
 
         // Generating IV
-        byte iv[] = Encryption.generateIV(Encryption.IV_SIZE);
+        byte[] iv = Encryption.generateIV(Encryption.IV_SIZE);
 
         // Any random data can be used as tag. Some common examples could be domain name
         byte[] aadData = "bd67a172c130822d6c306e02b1d9544f".getBytes();
@@ -468,7 +468,7 @@ public class EncryptionTest {
         }
 
         // Generating IV
-        byte iv[] = Encryption.generateIV(Encryption.IV_CBC_SIZE);
+        byte[] iv = Encryption.generateIV(Encryption.IV_CBC_SIZE);
 
         Cipher cIn = null;
         try {
@@ -547,7 +547,7 @@ public class EncryptionTest {
     }
 
     @Test
-    void testAttemptToEncryptWithNullKey() throws Exception {
+    void testAttemptToEncryptWithNullKey() {
         String data = "hello";
         InvalidKeyException ex = assertThrows(InvalidKeyException.class, () -> {
             Encryption.initGCMCipher(Cipher.ENCRYPT_MODE, null,

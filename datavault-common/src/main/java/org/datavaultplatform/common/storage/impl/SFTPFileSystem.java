@@ -26,13 +26,13 @@ public class SFTPFileSystem extends Device implements UserStore {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(SFTPFileSystem.class);
 
-    private String host = null;
-    private String rootPath = null;
-    private String username = null;
-    private String password = null;
-    private byte[] encPrivateKey = null;
-    private byte[] encIV = null;
-    private String passphrase = null;
+    private final String host;
+    private final String rootPath;
+    private final String username;
+    private final String password;
+    private final byte[] encPrivateKey;
+    private final byte[] encIV;
+    private final String passphrase;
     
     private Session session = null;
     private ChannelSftp channelSftp = null;
@@ -46,7 +46,7 @@ public class SFTPFileSystem extends Device implements UserStore {
         JSch.setLogger(JSchLogger.getInstance());
     }
 
-    public SFTPFileSystem(String name, Map<String,String> config) throws Exception {
+    public SFTPFileSystem(String name, Map<String,String> config) {
         super(name, config);
 
         System.out.println("Construct SFTPFileSystem...");
@@ -98,7 +98,6 @@ public class SFTPFileSystem extends Device implements UserStore {
                } else {
                    log.warn("problem with Jsch attempt[{}/{}]", attempt, RETRIES, ex);
                }
-               continue;
             }
         }
         
@@ -138,18 +137,20 @@ public class SFTPFileSystem extends Device implements UserStore {
             
             byte[] tmp = new byte[1024];
             StringBuilder response = new StringBuilder();
-            
+
             while(true) {
-                while(in.available() > 0) {
-                int i = in.read(tmp, 0, 1024);
-                if (i < 0) {
-                    break;
+                while (in.available() > 0) {
+                    int i = in.read(tmp, 0, 1024);
+                    if (i < 0) {
+                        break;
+                    }
+                    response.append(new String(tmp, 0, i));
                 }
-                response.append(new String(tmp, 0, i));
-            }
-        
-            if (channelExec.isClosed()) {
-                if (in.available() > 0) continue; 
+
+                if (channelExec.isClosed()) {
+                    if (in.available() > 0) {
+                        continue;
+                    }
                     System.out.println("exit-status: " + channelExec.getExitStatus());
                     break;
                 }
@@ -177,10 +178,10 @@ public class SFTPFileSystem extends Device implements UserStore {
         try {
             Connect();
             
-            Vector filelist = channelSftp.ls(rootPath + PATH_SEPARATOR + path);
+            Vector<ChannelSftp.LsEntry> filelist = channelSftp.ls(rootPath + PATH_SEPARATOR + path);
             
             for (int i = 0; i < filelist.size(); i++) {
-                ChannelSftp.LsEntry entry = (ChannelSftp.LsEntry)filelist.get(i);
+                ChannelSftp.LsEntry entry = filelist.get(i);
                 
                 if (entry.getFilename().equals(".") ||
                         entry.getFilename().equals("..")) {

@@ -10,8 +10,8 @@ public class Verify {
     
     private static final String algorithm = "SHA-1";
     
-    public enum Method {LOCAL_ONLY, COPY_BACK, CLOUD};
-    
+    public enum Method {LOCAL_ONLY, COPY_BACK, CLOUD}
+
     public static String getDigest(File file) throws Exception {
 
         MessageDigest sha1 = MessageDigest.getInstance(algorithm);

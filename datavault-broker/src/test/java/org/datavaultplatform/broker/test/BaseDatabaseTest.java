@@ -41,7 +41,7 @@ public abstract class BaseDatabaseTest {
 
   @Container
   // This container is once per class - not once per method. Methods can 'dirty' the database.
-  static MySQLContainer<?> mysql = new MySQLContainer<>(DockerImage.MYSQL_IMAGE);
+  static final MySQLContainer<?> mysql = new MySQLContainer<>(DockerImage.MYSQL_IMAGE);
 
   @DynamicPropertySource
   public static void setupProperties(DynamicPropertyRegistry registry) {

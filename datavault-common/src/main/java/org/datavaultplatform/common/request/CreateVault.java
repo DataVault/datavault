@@ -335,7 +335,7 @@ public class CreateVault {
 
     public void setNominatedDataManagers(List<String> nominatedDataManagers) {
     	// Remove all null or empty strings from input
-    	List<String> ndms = new ArrayList<String>();
+    	List<String> ndms = new ArrayList<>();
     	if(nominatedDataManagers != null) {
     		ndms = nominatedDataManagers;
     		ndms.removeAll(Arrays.asList("", null));
@@ -347,7 +347,7 @@ public class CreateVault {
 
     public void setDepositors(List<String> depositors) {
     	// Remove all null or empty strings from input
-    	List<String> deps = new ArrayList<String>();
+    	List<String> deps = new ArrayList<>();
     	if(depositors != null) {
     		deps = depositors;
     		deps.removeAll(Arrays.asList("", null));
@@ -394,7 +394,7 @@ public class CreateVault {
 
     public void setDataCreators(List<String> dataCreators) {
     	// Remove all null or empty strings from input
-    	List<String> dcs = new ArrayList<String>();
+    	List<String> dcs = new ArrayList<>();
     	if(dataCreators != null) {
     		dcs = dataCreators;
     		dcs.removeAll(Arrays.asList("", null));

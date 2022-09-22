@@ -1,6 +1,6 @@
 package org.datavaultplatform.worker.utils;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
@@ -24,7 +24,7 @@ public class DecryptedTarBuilderTest {
   @TempDir
   File tempDir;
 
-  private ObjectMapper mapper = new ObjectMapper();
+  private final ObjectMapper mapper = new ObjectMapper();
 
   @Test
   @SneakyThrows

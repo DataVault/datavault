@@ -94,7 +94,7 @@ public class UserKeyPairService2IT extends BaseUserKeyPairServiceTest {
         .withExposedPorts(2222)
         .waitingFor(Wait.forListeningPort());
 
-    fromContainer = new GenericContainer(image)
+    fromContainer = new GenericContainer<>(image)
         .withNetwork(network)
         .withNetworkAliases(CONTAINER_NAME_FROM)
         .dependsOn(toContainer);

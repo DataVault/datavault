@@ -16,12 +16,12 @@ public class ProgressTracker implements Runnable {
     private static final int SLEEP_INTERVAL_MS = 250;
     private boolean active = true;
     private long lastByteCount = 0;
-    private long expectedBytes = 0;
+    private final long expectedBytes;
     
-    final Progress progress;
-    final String jobId;
-    final String depositId;
-    final EventSender eventSender;
+    private final Progress progress;
+    private final String jobId;
+    private final String depositId;
+    private final EventSender eventSender;
     
     private static final Logger logger = LoggerFactory.getLogger(ProgressTracker.class);
     

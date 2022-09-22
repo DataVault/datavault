@@ -16,7 +16,7 @@ import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 @Slf4j
 public abstract class DaoUtils {
 
-    public static String HINT_FETCH_GRAPH = EntityGraphType.FETCH.getKey();
+    public static final String HINT_FETCH_GRAPH = EntityGraphType.FETCH.getKey();
 
     public static final String FULL_ACCESS_INDICATOR = "*";
 

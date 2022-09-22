@@ -190,7 +190,7 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
     Files.copy(this.largeFile.getFile().toPath(), sourceFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
     assertTrue(sourceFile.exists() && sourceFile.isFile());
-    assertTrue(sourceFile.length() == 50_000_000);
+    assertEquals(50_000_000, sourceFile.length());
   }
 
   @SneakyThrows

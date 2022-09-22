@@ -29,7 +29,7 @@ import java.util.List;
 public class PendingVault {
 
     public static final String EG_PENDING_VAULT = "eg.PendingVault.1";
-    private static String DEFAULT_PENDING_VAULT_NAME = "*** UNNAMED VAULT ***";
+    private static final String DEFAULT_PENDING_VAULT_NAME = "*** UNNAMED VAULT ***";
     public enum Estimate {
         UNDER_100GB,
         UNDER_10TB,

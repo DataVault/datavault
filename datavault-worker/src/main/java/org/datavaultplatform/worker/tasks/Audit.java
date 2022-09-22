@@ -27,7 +27,6 @@ public class Audit extends Task {
     
     private static final Logger logger = LoggerFactory.getLogger(Audit.class);
     private String[] archiveIds = null;
-    private String userID = null;
     private String auditId = null;
     private Map<Integer, String> chunksDigest = null;
     private Map<Integer, String> encChunksDigest = null;
@@ -48,7 +47,7 @@ public class Audit extends Task {
         this.eventSender = context.getEventSender();
         logger.info("Retrieve job - performAction()");
         Map<String, String> properties = getProperties();
-        this.userID = properties.get("userId");
+        String userID = properties.get("userId");
         this.auditId = properties.get("auditId");
         this.chunksDigest = this.getChunkFilesDigest();
         this.encChunksDigest = this.getEncChunksDigest();
@@ -74,7 +73,7 @@ public class Audit extends Task {
         try {
             eventSender.send(new UpdateProgress(this.jobID, null, 0,
                     this.depositChunkToAudit.size(), "Starting auditing ...")
-                    .withUserId(this.userID));
+                    .withUserId(userID));
 
             if (archiveFs.hasMultipleCopies()) {
                 this.multipleCopies(context, archiveFs);
@@ -93,10 +92,8 @@ public class Audit extends Task {
         logger.info("Device has multiple copies");
 
         List<String> locations = archiveFs.getLocations();
-        Iterator<String> locationsIt = locations.iterator();
 
-        while (locationsIt.hasNext()) {
-            String location = locationsIt.next();
+        for (String location : locations) {
             logger.info("Current " + location);
             try {
                 logger.info("Attempting audit on archive from " + location);

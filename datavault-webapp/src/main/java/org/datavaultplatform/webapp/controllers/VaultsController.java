@@ -148,8 +148,8 @@ public class VaultsController {
     @RequestMapping(value = "/vaults", method = RequestMethod.GET)
     public String getVaultsListing(ModelMap model, Principal principal) {
         logger.debug("Getting the current vaults");
-        VaultInfo currentVaults[] = restService.getVaultsListing();
-        VaultInfo pendingVaults[] = restService.getPendingVaultsListing();
+        VaultInfo[] currentVaults = restService.getVaultsListing();
+        VaultInfo[] pendingVaults = restService.getPendingVaultsListing();
         //VaultInfo pendingVaults[] = null;
         // go to vault list or vault create if no current / pending vaults
         if ((currentVaults != null && currentVaults.length > 0)

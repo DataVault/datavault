@@ -211,7 +211,7 @@ public abstract class BaseControllerAuthTest {
     }
   }
 
-  public static ThreadLocal<SecurityContext> SECURITY_CONTEXT_TL = new ThreadLocal<>();
+  public static final ThreadLocal<SecurityContext> SECURITY_CONTEXT_TL = new ThreadLocal<>();
 
   public void checkSecurityRoles(String... roles) {
     Set<String> expectedRoles = getExpectedRoles(roles);

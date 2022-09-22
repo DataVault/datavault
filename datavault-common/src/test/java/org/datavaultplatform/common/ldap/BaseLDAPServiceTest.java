@@ -103,7 +103,7 @@ public abstract class BaseLDAPServiceTest {
   }
 
   @Test
-  void testAutoCompleteBasedOnSurname() throws CursorException, IOException, LdapException {
+  void testAutoCompleteBasedOnSurname() throws CursorException, LdapException {
     log.info("OPENLDAP PORT [{}]", LDAP_CONTAINER.getMappedPort(LDAP_EXPOSED_PORT));
     log.info("OPENLDAP USERNAME [{}]", ldapDN);
     log.info("OPENLDAP PASSWORD [{}]", ldapPassword);
@@ -113,34 +113,34 @@ public abstract class BaseLDAPServiceTest {
   }
 
   @Test
-  void testAutoCompleteBasedOnFirstName() throws CursorException, IOException, LdapException {
+  void testAutoCompleteBasedOnFirstName() throws CursorException, LdapException {
     List<String> info = ldapService.autocompleteUID("Basildon");
     assertEquals(Collections.singletonList("bbond - Basildon Bond"), info);
   }
 
   @Test
-  void testAutoCompleteBasedOnUID() throws CursorException, IOException, LdapException {
+  void testAutoCompleteBasedOnUID() throws CursorException, LdapException {
     List<String> info = ldapService.autocompleteUID("jamesbond");
     assertEquals(Collections.singletonList("jamesbond - James Bond"), info);
   }
 
 
   @Test
-  void testAutoCompleteBasedOnPartialUID() throws CursorException, IOException, LdapException {
+  void testAutoCompleteBasedOnPartialUID() throws CursorException, LdapException {
     List<String> info = ldapService.autocompleteUID("jamesbo");
-    assertEquals(Arrays.asList("jamesbond - James Bond"), info);
+    assertEquals(Collections.singletonList("jamesbond - James Bond"), info);
   }
 
   @Test
   void testAutoCompleteBasedOnPartialSurname()
-      throws CursorException, IOException, LdapException {
+      throws CursorException, LdapException {
     List<String> info = ldapService.autocompleteUID("Blog");
     assertEquals(Collections.singletonList("joebloggs - Joe Bloggs"), info);
   }
 
 
   @Test
-  void testUserInfoJamesBond() throws CursorException, IOException, LdapException {
+  void testUserInfoJamesBond() throws CursorException, LdapException {
     HashMap<String, String> info = ldapService.getLdapUserInfo("jamesbond");
     assertEquals(4, info.size());
     assertEquals("jamesbond", info.get("uid"));
@@ -150,7 +150,7 @@ public abstract class BaseLDAPServiceTest {
   }
 
   @Test
-  void testUserInfoBasildonBond() throws CursorException, IOException, LdapException {
+  void testUserInfoBasildonBond() throws CursorException, LdapException {
     HashMap<String, String> info = ldapService.getLdapUserInfo("bbond");
     assertEquals(4, info.size());
     assertEquals("bbond", info.get("uid"));
@@ -160,7 +160,7 @@ public abstract class BaseLDAPServiceTest {
   }
 
   @Test
-  void testUserInfoJoeBloggs() throws CursorException, IOException, LdapException {
+  void testUserInfoJoeBloggs() throws CursorException, LdapException {
     HashMap<String, String> info = ldapService.getLdapUserInfo("joebloggs");
     assertEquals(4, info.size());
     assertEquals("joebloggs", info.get("uid"));
@@ -170,7 +170,7 @@ public abstract class BaseLDAPServiceTest {
   }
 
   @Test
-  void testLDAPAttributesJamesBond() throws CursorException, IOException, LdapException {
+  void testLDAPAttributesJamesBond() throws CursorException, LdapException {
     HashMap<String, String> info = ldapService.getLDAPAttributes("jamesbond");
     assertEquals(3, info.size());
     assertEquals("jamesbond", info.get("uid"));
@@ -179,7 +179,7 @@ public abstract class BaseLDAPServiceTest {
   }
 
   @Test
-  void testLDAPAttributesJoeBloggs() throws CursorException, IOException, LdapException {
+  void testLDAPAttributesJoeBloggs() throws CursorException, LdapException {
     HashMap<String, String> info = ldapService.getLDAPAttributes("joebloggs");
     Assertions.assertEquals(3, info.size());
     assertEquals("joebloggs", info.get("uid"));

@@ -124,11 +124,7 @@ public class DepositsController {
 
         deposit.setName(createDeposit.getName());
         deposit.setDescription(createDeposit.getDescription());
-        if ("yes".equalsIgnoreCase(createDeposit.getHasPersonalData())) {
-            deposit.setHasPersonalData(true);
-        } else {
-            deposit.setHasPersonalData(false);
-        }
+        deposit.setHasPersonalData("yes".equalsIgnoreCase(createDeposit.getHasPersonalData()));
         deposit.setPersonalDataStatement(createDeposit.getPersonalDataStatement());
         deposit.setDepositPaths(new ArrayList<>());
 
@@ -216,7 +212,6 @@ public class DepositsController {
         return deposit.getJobs();
     }
 
-    //TODO - from DavidHay - the name of this method seems wrong for a POST method
     @PostMapping( "/deposits/{depositid}/retrieve")
     public Boolean retrieveDeposit(@RequestHeader(HEADER_USER_ID) String userID,
                                   @PathVariable("depositid") String depositID,

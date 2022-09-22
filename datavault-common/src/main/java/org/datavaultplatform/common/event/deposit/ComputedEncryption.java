@@ -5,7 +5,6 @@ import java.util.HashMap;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
 import javax.persistence.Column;
-import org.checkerframework.checker.units.qual.C;
 import org.datavaultplatform.common.event.Event;
 
 @Entity

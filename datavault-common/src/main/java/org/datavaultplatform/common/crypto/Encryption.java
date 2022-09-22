@@ -63,20 +63,20 @@ public class Encryption {
 
     private static final Logger logger = LoggerFactory.getLogger(Encryption.class);
 
-    public static int BUFFER_SIZE = 50 * 1024; // 50KB
-    public static int SMALL_BUFFER_SIZE = 1024; // 1KB
-    public static int AES_BLOCK_SIZE = 16; // 16 Bytes
+    public static final int BUFFER_SIZE = 50 * 1024; // 50KB
+    public static final int SMALL_BUFFER_SIZE = 1024; // 1KB
+    public static final int AES_BLOCK_SIZE = 16; // 16 Bytes
+    public static final int AES_KEY_SIZE = 256;
+    public static final int IV_SIZE = 96;
+    public static final int IV_CBC_SIZE = 16;
+    public static final int TAG_BIT_LENGTH = 128;
+    public static final String GCM_ALGO_TRANSFORMATION_STRING = "AES/GCM/NoPadding";
+    public static final String CBC_ALGO_TRANSFORMATION_STRING = "AES/CBC/PKCS5Padding";
+    public static final String CTR_ALGO_TRANSFORMATION_STRING = "AES/CTR/PKCS5Padding";
+    public static final String CCM_ALGO_TRANSFORMATION_STRING = "AES/CCM/NoPadding";
+    private static final String KEYSTORE_TYPE = "JCEKS";
 
     private static int encBufferSize = SMALL_BUFFER_SIZE;
-
-    public static int AES_KEY_SIZE = 256;
-    public static int IV_SIZE = 96;
-    public static int IV_CBC_SIZE = 16;
-    public static int TAG_BIT_LENGTH = 128;
-    public static String GCM_ALGO_TRANSFORMATION_STRING = "AES/GCM/NoPadding";
-    public static String CBC_ALGO_TRANSFORMATION_STRING = "AES/CBC/PKCS5Padding";
-    public static String CTR_ALGO_TRANSFORMATION_STRING = "AES/CTR/PKCS5Padding";
-    public static String CCM_ALGO_TRANSFORMATION_STRING = "AES/CCM/NoPadding";
 
     private static boolean vaultEnable;
     private static String vaultAddress;
@@ -86,7 +86,6 @@ public class Encryption {
     private static String vaultPrivateKeyEncryptionKeyName;
     private static String vaultSslPEMPath;
 
-    private static final String KEYSTORE_TYPE = "JCEKS";
     private static boolean keystoreEnable;
     private static String keystorePath;
     private static String keystorePassword;
