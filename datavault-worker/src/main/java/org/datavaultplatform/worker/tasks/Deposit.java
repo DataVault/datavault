@@ -934,7 +934,7 @@ public class Deposit extends Task {
 
     private PackageHelper packageStep(Context context, Map<String, String> properties,
         String lastEventClass, File bagDir)  throws Exception {
-        PackageHelper retVal = new PackageHelper();
+        final PackageHelper retVal = new PackageHelper();
 
         if (lastEventClass == null || RESTART_FROM_PACKAGING.contains(lastEventClass) || RESTART_FROM_TAR_CHECKSUM.contains(lastEventClass)
             || RESTART_FROM_CHUNKING.contains(lastEventClass) || RESTART_FROM_ENC_CHECKSUM.contains(lastEventClass)) {
@@ -998,7 +998,7 @@ public class Deposit extends Task {
             if (properties.get("numOfChunks") != null) {
                 numOfChunks = Integer.parseInt(properties.get("numOfChunks"));
             }
-            this.skipChunking(numOfChunks, context, packageHelper);
+            this.skipChunking(numOfChunks, context);
         }
 
         // Encryption
@@ -1026,7 +1026,7 @@ public class Deposit extends Task {
     private void skipPackageStep(Context context, String lastEventClass, int numOfChunks,
         String archiveDigest, PackageHelper packageHelper)  {
         logger.debug("Last event is: " + lastEventClass + " skipping packaging");
-        this.skipChunking(numOfChunks, context, packageHelper);
+        this.skipChunking(numOfChunks, context);
         packageHelper.setChunksIVs(this.chunksIVs);
         this.skipActualPackaging(context, packageHelper);
         this.skipTarChecksum(archiveDigest, packageHelper);
@@ -1048,7 +1048,7 @@ public class Deposit extends Task {
 
     }
 
-    private void skipChunking(int numOfChunks, Context context, PackageHelper retVal) {
+    private void skipChunking(int numOfChunks, Context context) {
 
         this.chunkFiles = new File[numOfChunks];
         for (int i = 0; i < numOfChunks; i++) {
