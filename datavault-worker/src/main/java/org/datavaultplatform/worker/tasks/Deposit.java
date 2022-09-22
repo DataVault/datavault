@@ -938,7 +938,7 @@ public class Deposit extends Task {
 
         if (lastEventClass == null || RESTART_FROM_PACKAGING.contains(lastEventClass) || RESTART_FROM_TAR_CHECKSUM.contains(lastEventClass)
             || RESTART_FROM_CHUNKING.contains(lastEventClass) || RESTART_FROM_ENC_CHECKSUM.contains(lastEventClass)) {
-            retVal = this.doPackageStep(context, properties, bagDir, retVal, lastEventClass);
+            this.doPackageStep(context, properties, bagDir, retVal, lastEventClass);
 
         } else {
             int numOfChunks =  0;
@@ -949,13 +949,13 @@ public class Deposit extends Task {
             if (properties.get("archiveDigest") != null) {
                 archiveDigest = properties.get("archiveDigest");
             }
-            retVal = this.skipPackageStep(context, lastEventClass, numOfChunks, archiveDigest, retVal);
+            this.skipPackageStep(context, lastEventClass, numOfChunks, archiveDigest, retVal);
         }
 
         return retVal;
     }
 
-    private PackageHelper doPackageStep(Context context, Map<String, String> properties, File bagDir, PackageHelper retVal, String lastEventClass)  throws Exception {
+    private void doPackageStep(Context context, Map<String, String> properties, File bagDir, PackageHelper retVal, String lastEventClass)  throws Exception {
         String tarHashAlgorithm = Verify.getAlgorithm();
         if (lastEventClass == null || RESTART_FROM_PACKAGING.contains(lastEventClass)) {
             logger.info("Creating bag ...");
@@ -1016,8 +1016,6 @@ public class Deposit extends Task {
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping enc checksum");
         }
-
-        return retVal;
     }
 
     /**********************************************************
@@ -1025,35 +1023,32 @@ public class Deposit extends Task {
     // we need to fill in some blanks for the later steps to be
     // able to complete
      **********************************************************/
-    private PackageHelper skipPackageStep(Context context, String lastEventClass, int numOfChunks,
+    private void skipPackageStep(Context context, String lastEventClass, int numOfChunks,
         String archiveDigest, PackageHelper retVal)  {
         logger.debug("Last event is: " + lastEventClass + " skipping packaging");
-        retVal = this.skipChunking(numOfChunks, context, retVal);
+        this.skipChunking(numOfChunks, context, retVal);
         retVal.setChunksIVs(this.chunksIVs);
-        retVal = this.skipActualPackaging(context, retVal);
-        retVal = this.skipTarChecksum(archiveDigest, retVal);
+        this.skipActualPackaging(context, retVal);
+        this.skipTarChecksum(archiveDigest, retVal);
 
-        return retVal;
     }
 
-    private PackageHelper skipActualPackaging(Context context, PackageHelper retVal) {
+    private void skipActualPackaging(Context context, PackageHelper retVal) {
 
         String tarFileName = bagID + ".tar";
         Path tarPath = context.getTempDir().resolve(tarFileName);
         retVal.setTarFile(tarPath.toFile());
 
-        return retVal;
     }
 
-    private PackageHelper skipTarChecksum(String archiveDigest, PackageHelper retVal) {
+    private void skipTarChecksum(String archiveDigest, PackageHelper retVal) {
 
         retVal.setTarHash(archiveDigest);
         retVal.setArchiveSize(retVal.getTarFile().length());
 
-        return retVal;
     }
 
-    private PackageHelper skipChunking(int numOfChunks, Context context, PackageHelper retVal) {
+    private void skipChunking(int numOfChunks, Context context, PackageHelper retVal) {
 
         this.chunkFiles = new File[numOfChunks];
         for (int i = 0; i < numOfChunks; i++) {
@@ -1064,6 +1059,5 @@ public class Deposit extends Task {
             this.chunkFiles[i] = chunkPath.toFile();
         }
 
-        return retVal;
     }
 }
