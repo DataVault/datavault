@@ -955,7 +955,7 @@ public class Deposit extends Task {
         return retVal;
     }
 
-    private void doPackageStep(Context context, Map<String, String> properties, File bagDir, PackageHelper retVal, String lastEventClass)  throws Exception {
+    private void doPackageStep(Context context, Map<String, String> properties, File bagDir, PackageHelper packageHelper, String lastEventClass)  throws Exception {
         String tarHashAlgorithm = Verify.getAlgorithm();
         if (lastEventClass == null || RESTART_FROM_PACKAGING.contains(lastEventClass)) {
             logger.info("Creating bag ...");
@@ -963,42 +963,42 @@ public class Deposit extends Task {
             // Tar the bag directory
             logger.info("Creating tar file ...");
 
-            retVal.setTarFile(this.createTar(context, bagDir));
-            logger.info("Tar file: " + retVal.getArchiveSize() + " bytes");
-            logger.info("Tar file location: " + retVal.getTarFile().getAbsolutePath());
+            packageHelper.setTarFile(this.createTar(context, bagDir));
+            logger.info("Tar file: " + packageHelper.getArchiveSize() + " bytes");
+            logger.info("Tar file location: " + packageHelper.getTarFile().getAbsolutePath());
 
             eventSender.send(new PackageComplete(jobID, depositId)
                     .withUserId(userID)
                     .withNextState(3));
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping actual packaging");
-            this.skipActualPackaging(context, retVal);
+            this.skipActualPackaging(context, packageHelper);
         }
 
         if (lastEventClass == null || RESTART_FROM_TAR_CHECKSUM.contains(lastEventClass)) {
-            retVal.setTarHash(Verify.getDigest(retVal.getTarFile()));
-            retVal.setArchiveSize(retVal.getTarFile().length());
+            packageHelper.setTarHash(Verify.getDigest(packageHelper.getTarFile()));
+            packageHelper.setArchiveSize(packageHelper.getTarFile().length());
             logger.info("Checksum algorithm: " + tarHashAlgorithm);
-            logger.info("Checksum: " + retVal.getTarHash());
-            eventSender.send(new ComputedDigest(jobID, depositId, retVal.getTarHash(), tarHashAlgorithm)
+            logger.info("Checksum: " + packageHelper.getTarHash());
+            eventSender.send(new ComputedDigest(jobID, depositId, packageHelper.getTarHash(), tarHashAlgorithm)
                     .withUserId(userID));
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping tar checksum");
-            this.skipTarChecksum(properties.get("archiveDigest"), retVal);
+            this.skipTarChecksum(properties.get("archiveDigest"), packageHelper);
         }
 
         logger.info("We have successfully created the Tar, so lets delete the Bag to save space");
         FileUtils.deleteDirectory(bagDir);
         HashMap<Integer, String> chunksDigest = null;
         if ((lastEventClass == null || RESTART_FROM_CHUNKING.contains(lastEventClass)) && context.isChunkingEnabled()) {
-            chunksDigest = this.createChunks(retVal.getTarFile(), context, tarHashAlgorithm);
+            chunksDigest = this.createChunks(packageHelper.getTarFile(), context, tarHashAlgorithm);
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping chunking");
             int numOfChunks =  0;
             if (properties.get("numOfChunks") != null) {
                 numOfChunks = Integer.parseInt(properties.get("numOfChunks"));
             }
-            this.skipChunking(numOfChunks, context, retVal);
+            this.skipChunking(numOfChunks, context, packageHelper);
         }
 
         // Encryption
@@ -1006,12 +1006,12 @@ public class Deposit extends Task {
             logger.info("Encrypting file(s)...");
             if (context.isChunkingEnabled()) {
                 logger.info("Encrypting [{}] chunk files ", chunksDigest.size());
-                retVal.setChunksIVs(this.encryptChunks(context, chunksDigest, tarHashAlgorithm));
+                packageHelper.setChunksIVs(this.encryptChunks(context, chunksDigest, tarHashAlgorithm));
             } else {
-                logger.info("Encrypting single non-chunk file [{}]", retVal.getTarFile());
-                EncryptionHelper helper = this.encryptFullTar(context, retVal.getTarFile());
-                retVal.setIv(helper.getIv());
-                retVal.setEncTarHash(helper.getEncTarHash());
+                logger.info("Encrypting single non-chunk file [{}]", packageHelper.getTarFile());
+                EncryptionHelper helper = this.encryptFullTar(context, packageHelper.getTarFile());
+                packageHelper.setIv(helper.getIv());
+                packageHelper.setEncTarHash(helper.getEncTarHash());
             }
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping enc checksum");
@@ -1024,27 +1024,27 @@ public class Deposit extends Task {
     // able to complete
      **********************************************************/
     private void skipPackageStep(Context context, String lastEventClass, int numOfChunks,
-        String archiveDigest, PackageHelper retVal)  {
+        String archiveDigest, PackageHelper packageHelper)  {
         logger.debug("Last event is: " + lastEventClass + " skipping packaging");
-        this.skipChunking(numOfChunks, context, retVal);
-        retVal.setChunksIVs(this.chunksIVs);
-        this.skipActualPackaging(context, retVal);
-        this.skipTarChecksum(archiveDigest, retVal);
+        this.skipChunking(numOfChunks, context, packageHelper);
+        packageHelper.setChunksIVs(this.chunksIVs);
+        this.skipActualPackaging(context, packageHelper);
+        this.skipTarChecksum(archiveDigest, packageHelper);
 
     }
 
-    private void skipActualPackaging(Context context, PackageHelper retVal) {
+    private void skipActualPackaging(Context context, PackageHelper packageHelper) {
 
         String tarFileName = bagID + ".tar";
         Path tarPath = context.getTempDir().resolve(tarFileName);
-        retVal.setTarFile(tarPath.toFile());
+        packageHelper.setTarFile(tarPath.toFile());
 
     }
 
-    private void skipTarChecksum(String archiveDigest, PackageHelper retVal) {
+    private void skipTarChecksum(String archiveDigest, PackageHelper packageHelper) {
 
-        retVal.setTarHash(archiveDigest);
-        retVal.setArchiveSize(retVal.getTarFile().length());
+        packageHelper.setTarHash(archiveDigest);
+        packageHelper.setArchiveSize(packageHelper.getTarFile().length());
 
     }
 
