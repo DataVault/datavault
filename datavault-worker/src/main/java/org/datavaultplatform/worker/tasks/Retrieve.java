@@ -1,12 +1,5 @@
 package org.datavaultplatform.worker.tasks;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.event.Error;
@@ -26,8 +19,13 @@ import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.operations.FileSplitter;
 import org.datavaultplatform.worker.operations.ProgressTracker;
 import org.datavaultplatform.worker.operations.Tar;
+import org.datavaultplatform.worker.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.util.*;
 
 /**
  * A class that extends Task which is used to handle Retrievals from the vault
@@ -157,18 +155,8 @@ public class Retrieve extends Task {
                 String archivedEncChunkFileHash = this.encChunksDigest.get(chunkNum);
                 
                 // Check encrypted file checksum
-                String encChunkFileHash = Verify.getDigest(chunkFile);
-                
-                logger.info("Encrypted chunk Checksum algorithm: " + this.archiveDigestAlgorithm);
-                logger.info("Encrypted Checksum: " + encChunkFileHash);
-
-                if (!encChunkFileHash.equals(archivedEncChunkFileHash)) {
-                    throwChecksumError(encChunkFileHash, archivedEncChunkFileHash,
-                        chunkFile, "1:recompose:[enc-chunk(" + chunkNum + ")]"
-                    );
-                }
-
-                Encryption.decryptFile(context, chunkFile, chunkIV);
+                Utils.checkFileHash("ret-enc-chunk", chunkFile, archivedEncChunkFileHash);
+                Encryption.decryptFile(context, chunkFile, this.getChunksIVs().get(chunkNum));
             }
             
             // Check file
@@ -176,15 +164,8 @@ public class Retrieve extends Task {
             
             // TODO: Should we check algorithm each time or assume main tar file algorithm is the same
             // We might also want to move algorithm check before this loop
-            String chunkFileHash = Verify.getDigest(chunkFile);
-            
-            logger.info("Chunk Checksum algorithm: " + this.archiveDigestAlgorithm);
-            logger.info("Checksum: " + chunkFileHash);
-            
-            if (!chunkFileHash.equals(archivedChunkFileHash)) {
-                throwChecksumError(chunkFileHash, archivedChunkFileHash,
-                    chunkFile, "2:recompose:[chunk(" + chunkNum + ")]");
-            }
+
+            Utils.checkFileHash("ret-chunk", chunkFile, archivedChunkFileHash);
         }
 
         logger.info("Recomposing tar file from chunk(s)");
@@ -203,15 +184,7 @@ public class Retrieve extends Task {
         logger.info("Validating data ...");
         eventSender.send(new UpdateProgress(this.jobID, this.depositId).withNextState(2)
             .withUserId(this.userID));
-        
-        String tarHash = Verify.getDigest(tarFile);
-        logger.info("Checksum algorithm: " + this.archiveDigestAlgorithm);
-        logger.info("Checksum: " + tarHash);
-
-        if (!tarHash.equals(archiveDigest)) {
-            throwChecksumError(tarHash, archiveDigest, tarFile, "3:[tar]");
-        }
-        
+        Utils.checkFileHash("ret-tar", tarFile, archiveDigest);
         // Decompress to the temporary directory
         File bagDir = Tar.unTar(tarFile, context.getTempDir());
         long bagDirSize = FileUtils.sizeOfDirectory(bagDir);
@@ -416,15 +389,7 @@ public class Retrieve extends Task {
 
                 if (this.getTarIV() != null) {
                     // Decrypt tar file
-                    String encTarFileHash = Verify.getDigest(tarFile);
-                    
-                    logger.info("Encrypted tar Checksum algorithm: " + this.archiveDigestAlgorithm);
-                    logger.info("Encrypted tar Checksum: " + encTarFileHash);
-
-                    if (!encTarFileHash.equals(encTarDigest)) {
-                        throwChecksumError(encTarFileHash, encTarDigest,
-                            tarFile, "4:[enc-tar-no-chunking]");
-                    }
+                    Utils.checkFileHash("ret-single-tar", tarFile, this.encTarDigest);
 
                     Encryption.decryptFile(context, tarFile, this.getTarIV());
                 }

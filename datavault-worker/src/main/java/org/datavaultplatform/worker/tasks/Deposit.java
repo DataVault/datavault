@@ -16,6 +16,7 @@ import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.operations.*;
+import org.datavaultplatform.worker.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -400,11 +401,7 @@ public class Deposit extends Task {
                     CopyBackFromArchive.copyBackFromArchive(archiveStore, archiveId, tarFile);
 
                     // check encrypted tar
-                    String encTarFileHash = Verify.getDigest(tarFile);
-                    logger.info("Checksum: " + encTarFileHash);
-                    if (!encTarHash.equals(encTarFileHash)) {
-                        throw new Exception("checksum failed: (enc-tar)" + encTarFileHash + " != " + encTarFileHash);
-                    }
+                    Utils.checkFileHash("enc-tar", tarFile, encTarHash);
 
                     // Decryption
                     if(iv != null) {
@@ -475,16 +472,7 @@ public class Deposit extends Task {
      */
     private void verifyTarFile(Path tempPath, File tarFile, String origTarHash) throws Exception {
 
-        if (origTarHash != null) {
-            logger.info("Get Digest from: " + tarFile.getAbsolutePath());
-            // Compare the SHA hash
-            String tarHash = Verify.getDigest(tarFile);
-            logger.info("Checksum: " + tarHash);
-            if (!tarHash.equals(origTarHash)) {
-                throw new Exception("checksum failed: (tar)" + tarHash + " != " + origTarHash);
-            }
-        }
-        
+        Utils.checkFileHash("tar", tarFile, origTarHash);
         // Decompress to the temporary directory
         //File bagDir = Tar.unTar(tarFile, tempPath);
         

@@ -2,7 +2,6 @@ package org.datavaultplatform.worker.operations;
 
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.storage.ArchiveStore;
-import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,6 +9,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import org.datavaultplatform.worker.utils.Utils;
 
 @Slf4j
 public class ChunkDownloadTracker implements Callable<Object> {
@@ -80,16 +80,7 @@ public class ChunkDownloadTracker implements Callable<Object> {
     }
 
     private void verifyChunkFile(Path tempPath, File chunkFile, String origChunkHash) throws Exception {
-
-        if (origChunkHash != null) {
-            log.info("Get Digest from: " + chunkFile.getAbsolutePath());
-            // Compare the SHA hash
-            String chunkHash = Verify.getDigest(chunkFile);
-            log.info("Checksum: " + chunkHash);
-            if (!chunkHash.equals(origChunkHash)) {
-                throw new Exception("checksum failed: (chunk) " + chunkHash + " != " + origChunkHash);
-            }
-        }
+        Utils.checkFileHash("chunk-file", chunkFile, origChunkHash);
     }
 
     public File getChunkFile() {
