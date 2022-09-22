@@ -40,18 +40,19 @@ public class EncryptionValidator {
     }
   }
 
-  private void validateKeyNames(boolean validateDataKey, boolean validatePrivateKeysKey) {
+  protected void validateKeyNames(boolean validateDataKey, boolean validatePrivateKeysKey) {
+    String keyNameData = Encryption.getVaultDataEncryptionKeyName();
+    String keyNamePrivateKey = Encryption.getVaultPrivateKeyEncryptionKeyName();
     if (validateDataKey) {
-      Assert.isTrue(StringUtils.isNotBlank(Encryption.getVaultDataEncryptionKeyName()),
+      Assert.isTrue(StringUtils.isNotBlank(keyNameData),
           () -> "property [vault.dataEncryptionKeyName] is not set");
     }
     if (validatePrivateKeysKey) {
-      Assert.isTrue(StringUtils.isNotBlank(Encryption.getVaultPrivateKeyEncryptionKeyName()),
+      Assert.isTrue(StringUtils.isNotBlank(keyNamePrivateKey),
           () -> "property [vault.privateKeyEncryptionKeyName] is not set");
     }
-    if (validatePrivateKeysKey && validatePrivateKeysKey) {
-      Assert.isTrue(!Encryption.getVaultDataEncryptionKeyName().equals(
-          Encryption.getVaultPrivateKeyEncryptionKeyName()), () ->
+    if (validateDataKey && validatePrivateKeysKey) {
+      Assert.isTrue(!keyNameData.equals(keyNamePrivateKey), () ->
           String.format(
               "The properties [vault.dataEncryptionKeyName] and [vault.privateKeyEncryptionKeyName] cannot have the same value [%s]",
               Encryption.getVaultDataEncryptionKeyName()));
