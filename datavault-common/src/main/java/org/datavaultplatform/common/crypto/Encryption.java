@@ -90,14 +90,12 @@ public class Encryption {
     }
 
     public static SecretKey generateSecretKey(int key_size) throws NoSuchAlgorithmException {
-        SecretKey aesKey = null;
-
         // Specifying algorithm key will be used for
         KeyGenerator keygen = KeyGenerator.getInstance("AES");
         // Specifying Key size to be used, Note: This would need JCE Unlimited
         // Strength to be installed explicitly
         keygen.init(key_size);
-        aesKey = keygen.generateKey();
+        SecretKey aesKey = keygen.generateKey();
 
         return aesKey;
     }
@@ -147,13 +145,12 @@ public class Encryption {
      * @return
      */
     public static Cipher initGCMCipher(int opmode, SecretKey aesKey, byte[] iv, byte[] aadData) throws Exception {
-        Cipher c = null;
 
         // Initialize GCM Parameters
         GCMParameterSpec gcmParamSpec = new GCMParameterSpec(TAG_BIT_LENGTH, iv);
 
         // Transformation specifies algorithm, mode of operation and padding
-        c = Cipher.getInstance(GCM_ALGO_TRANSFORMATION_STRING, "BC");
+        Cipher c = Cipher.getInstance(GCM_ALGO_TRANSFORMATION_STRING, "BC");
 
         c.init(opmode, aesKey, gcmParamSpec, new SecureRandom());
 
@@ -184,13 +181,12 @@ public class Encryption {
      * @return
      */
     public static Cipher initCBCCipher(int opmode, SecretKey aesKey, byte[] iv) throws Exception {
-        Cipher c = null;
 
         // Initialize Parameters
         IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
 
         // Transformation specifies algorithm, mode of operation and padding
-        c = Cipher.getInstance(CBC_ALGO_TRANSFORMATION_STRING);
+        Cipher c = Cipher.getInstance(CBC_ALGO_TRANSFORMATION_STRING);
 
         c.init(opmode, aesKey, ivParameterSpec);
 
