@@ -1,9 +1,9 @@
 package org.datavaultplatform.common.crypto;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import lombok.SneakyThrows;
@@ -99,5 +99,23 @@ public class EncryptionValidatorTest extends BaseTempKeyStoreTest{
 
     assertTrue(new File(keyStorePath).exists());
     validator.validate(true,true);
+  }
+
+  @Test
+  @SneakyThrows
+  void testWithActualKeyStoreWithMissingDataKey() {
+    assertTrue(new File(keyStorePath).exists());
+
+    Encryption enc = new Encryption();
+    enc.setVaultDataEncryptionKeyName("missingDataKey");
+
+    assertEquals("missingDataKey", Encryption.getVaultDataEncryptionKeyName());
+    IllegalStateException ex = assertThrows(IllegalStateException.class,
+        EncryptionValidator::encryptThenDecryptTempFile);
+    Throwable cause = ex.getCause();
+    assertEquals(IllegalArgumentException.class, cause.getClass());
+    assertEquals(
+        String.format("No key found in keystore[%s] for KeyName[%s]", keyStorePath, "missingDataKey"),
+        cause.getMessage());
   }
 }

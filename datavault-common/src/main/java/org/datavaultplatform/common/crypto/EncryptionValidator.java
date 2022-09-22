@@ -1,11 +1,17 @@
 package org.datavaultplatform.common.crypto;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.UUID;
 import javax.crypto.SecretKey;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.util.Arrays;
+import org.datavaultplatform.common.task.Context.AESMode;
 import org.springframework.util.Assert;
 
 /**
@@ -33,6 +39,8 @@ public class EncryptionValidator {
     validateKeyNames(validateDataKey, validatePrivateKeysKey);
     if (validateDataKey) {
       validateEncryptionConfig(LABEL_KEY_FOR_DATA, Encryption.getVaultDataEncryptionKeyName());
+
+      encryptThenDecryptTempFile();
     }
     if (validatePrivateKeysKey) {
       validateEncryptionConfig(LABEL_KEY_FOR_PRIVATE_KEYS, Encryption.getVaultPrivateKeyEncryptionKeyName());
@@ -78,6 +86,33 @@ public class EncryptionValidator {
       return new String(decrypted, StandardCharsets.UTF_8);
     } catch (Exception ex) {
       throw new IllegalStateException(String.format("Encryption Config is NOT VALID for label[%s]keyName[%s]", label, keyName) , ex);
+    }
+  }
+
+  @SneakyThrows
+  public static void encryptThenDecryptTempFile() {
+    File temp = Files.createTempFile("dv", ".tmp").toFile();
+    try {
+      String plainText = UUID.randomUUID().toString();
+      byte[] original = plainText.getBytes(StandardCharsets.UTF_8);
+
+      try(FileWriter fw = new FileWriter(temp)){
+        fw.write(plainText);
+      }
+
+      byte[] iv = Encryption.encryptFile(AESMode.GCM, temp);
+      byte[] encrypted = FileUtils.readFileToByteArray(temp);
+
+      Encryption.decryptFile(AESMode.GCM, temp, iv);
+      byte[] decrypted = FileUtils.readFileToByteArray(temp);
+
+      Assert.isTrue(!Arrays.areEqual(original, encrypted));
+      Assert.isTrue( Arrays.areEqual(original, decrypted));
+
+    } catch (Exception ex) {
+      throw new IllegalStateException("Problem testing file encryption/decryption", ex);
+    } finally {
+      temp.delete();
     }
   }
 
