@@ -55,7 +55,7 @@ public class EncryptionValidator {
       Assert.isTrue(!keyNameData.equals(keyNamePrivateKey), () ->
           String.format(
               "The properties [vault.dataEncryptionKeyName] and [vault.privateKeyEncryptionKeyName] cannot have the same value [%s]",
-              Encryption.getVaultDataEncryptionKeyName()));
+              keyNameData));
     }
   }
 
