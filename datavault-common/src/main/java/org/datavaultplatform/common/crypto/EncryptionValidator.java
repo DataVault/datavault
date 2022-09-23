@@ -109,6 +109,7 @@ public class EncryptionValidator {
       Assert.isTrue(!Arrays.areEqual(original, encrypted));
       Assert.isTrue( Arrays.areEqual(original, decrypted));
 
+      log.info("SUCCESS : Encrypt/Decrypt of temp file.");
     } catch (Exception ex) {
       throw new IllegalStateException("Problem testing file encryption/decryption", ex);
     } finally {
