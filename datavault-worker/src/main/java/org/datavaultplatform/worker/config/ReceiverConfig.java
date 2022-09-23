@@ -1,6 +1,9 @@
 package org.datavaultplatform.worker.config;
 
+import java.io.File;
 import java.security.Security;
+import javax.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.common.task.Context.AESMode;
@@ -9,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.Assert;
 
 @Configuration
+@Slf4j
 public class ReceiverConfig {
 
   @Value("${tempDir}")
@@ -36,6 +41,9 @@ public class ReceiverConfig {
 
   @Value("${chunk.threads:20}")
   private int noChunkThreads;
+
+  @Value("${validate.worker.dirs:false}")
+  private boolean validateWorkerDirs;
 
   @Autowired
   RecordingEventSender eventSender;
@@ -73,4 +81,28 @@ public class ReceiverConfig {
     }
     return result;
   }
+
+  @PostConstruct
+  void init() {
+    checkFileExistsAndIsDirectory("tempDir", tempDir);
+    checkFileExistsAndIsDirectory("metaDir", metaDir);
+  }
+
+  void checkFileExistsAndIsDirectory(String dirLabel, String dirValue) {
+    if (!validateWorkerDirs) {
+      log.warn("[{}] : [{}] : NOT VALIDATED", dirLabel, dirValue);
+      return;
+    }
+    File file = new File(dirValue);
+    Assert.isTrue(file.exists(),
+        () -> String.format("The [%s] file [%s] does not exist", dirLabel, dirValue));
+    Assert.isTrue(file.isDirectory(),
+        () -> String.format("The [%s] file [%s] is not a directory", dirLabel, dirValue));
+    Assert.isTrue(file.canRead(),
+        () -> String.format("The [%s] directory [%s] is not readable", dirLabel, dirValue));
+    Assert.isTrue(file.canWrite(),
+        () -> String.format("The [%s] directory [%s] is not writable", dirLabel, dirValue));
+    log.warn("[{}] : [{}] : is Valid", dirLabel, dirValue);
+  }
+
 }
