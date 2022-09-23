@@ -12,7 +12,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.7.3</version>
+    <version>2.7.5</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -35,27 +35,26 @@
     <skip.integration.tests>false</skip.integration.tests>
 
     <!-- dependency versions -->
-    <aws.java.sdk.bom.version>1.12.276</aws.java.sdk.bom.version>
-    <oci.java.sdk.bom.version>2.38.0</oci.java.sdk.bom.version>
-    <jsoup.version>1.15.2</jsoup.version>
+    <aws.java.sdk.bom.version>1.12.324</aws.java.sdk.bom.version>
+    <oci.java.sdk.bom.version>2.46.0</oci.java.sdk.bom.version>
+    <testcontainers.version>1.17.5</testcontainers.version>
+    <spring.cloud.version>3.1.4</spring.cloud.version>
+    <mockito.version>4.8.1</mockito.version>
+    <owasp.dependency.check.version>7.3.0</owasp.dependency.check.version>
+    <apache.directory.api.version>2.1.2</apache.directory.api.version>
+    <bouncy.castle.version>1.72</bouncy.castle.version>
+
+    <jsoup.version>1.15.3</jsoup.version>
     <vault.java.driver.version>5.1.0</vault.java.driver.version>
     <commons.io.version>2.11.0</commons.io.version>
     <jsondoc.core.version>1.2.23</jsondoc.core.version>
-    <apache.directory.api.version>2.1.0</apache.directory.api.version>
-    <jcraft.jsch.version>0.1.55</jcraft.jsch.version>
     <super.csv.version>2.4.0</super.csv.version>
+    <jcraft.jsch.version>0.1.55</jcraft.jsch.version>
     <bagit.version>5.2.0</bagit.version>
-
-
     <testng.version>6.14.3</testng.version>
-    <owasp.dependency.check.version>7.1.1</owasp.dependency.check.version>
-    <spring.cloud.version>3.1.3</spring.cloud.version>
-    <testcontainers.version>1.17.4</testcontainers.version>
     <velocity.version>2.3</velocity.version>
     <oro.version>2.0.8</oro.version>
     <commons.collections4.version>4.4</commons.collections4.version>
-    <mockito.version>4.6.1</mockito.version>
-    <bouncy.castle.version>1.71</bouncy.castle.version>
     <commons.exec.version>1.3</commons.exec.version>
     <commons.compress.version>1.21</commons.compress.version>
     <javax.interceptor.version>1.2.2</javax.interceptor.version>
