@@ -83,6 +83,11 @@ public class Receiver implements MessageProcessor {
             Path tempDirPath = null;
             try {
                 ObjectMapper mapper = new ObjectMapper();
+
+                String json = mapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(mapper.readTree(message));
+                logger.info("messageId[{}] json[{}]", messageInfo.getId(), json);
+
                 Task commonTask = mapper.readValue(message, Task.class);
                 
                 Class<?> clazz = Class.forName(commonTask.getTaskClass());
