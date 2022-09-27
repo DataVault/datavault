@@ -3,7 +3,9 @@ package org.datavaultplatform.common.storage;
 import java.io.*;
 import java.security.*;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class Verify {
     
     private static final String algorithm = "SHA-1";
@@ -23,7 +25,9 @@ public class Verify {
                 len = is.read(buffer);
             }
             
-            return new HexBinaryAdapter().marshal(sha1.digest());
+            String digest =  new HexBinaryAdapter().marshal(sha1.digest());
+            log.info("File[{}]Digest[{}]", file, digest);
+            return digest;
         }
     }
     

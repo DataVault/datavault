@@ -53,6 +53,7 @@ public class Checksummer {
             log.trace("Error computing checksum for [{}]", file, ex);
             throw ex;
         }
+        log.info("File[{}]Checksum[{}]", file, hash);
         return hash;
     }
 }

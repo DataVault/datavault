@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.datavaultplatform.common.storage.Verify;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -97,6 +98,15 @@ public class CheckSummerTest {
       assertEquals("oops", io.getMessage());
     }
 
+  }
+
+  @Test
+  void testChecksummerAgainstVerify() throws Exception {
+    File testFile = writetoTempFile(TEST_CONTENTS);
+    String digest1 = Verify.getDigest(testFile);
+    Checksummer summer = new Checksummer();
+    String digest2 = summer.computeFileHash(testFile, SupportedAlgorithm.SHA1).toUpperCase();
+    assertEquals(digest1, digest2);
   }
 
 }

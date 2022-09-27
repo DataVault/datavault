@@ -26,6 +26,8 @@ public class ApiErrorHandler extends DefaultResponseErrorHandler {
             throw new ForbiddenException();
         }
 
+        logger.error("UNEXPECTED ERROR [{}/{}]", response.getStatusCode(), response.getBody());
+
         if(statusCode == HttpStatus.INTERNAL_SERVER_ERROR){
 
             RestTemplate restTemplate = new RestTemplate();
