@@ -56,6 +56,8 @@
         <property name="usersService" ref="usersService" />
         <property name="rolesAndPermissionsService" ref="rolesAndPermissionsService" />
         <property name="pendingDataCreatorsService" ref="pendingDataCreatorsService" />
+        <property name="emailService" ref="emailService" />
+        <property name="helpMail" value="${help.mail}"/>
     </bean>
 
     <bean id="pendingDataCreatorsService" class="org.datavaultplatform.broker.services.PendingDataCreatorsService">
