@@ -415,8 +415,8 @@ public class Deposit extends Task {
                     // check encrypted tar
                     String encTarFileHash = Verify.getDigest(tarFile);
                     logger.info("Checksum: " + encTarFileHash);
-                    if (!encTarFileHash.equals(encTarFileHash)) {
-                        throw new Exception("checksum failed: " + encTarFileHash + " != " + encTarFileHash);
+                    if (!encTarHash.equals(encTarFileHash)) {
+                        throw new Exception("checksum failed: (enc-tar)" + encTarFileHash + " != " + encTarFileHash);
                     }
 
                     // Decryption
@@ -504,7 +504,7 @@ public class Deposit extends Task {
             String tarHash = Verify.getDigest(tarFile);
             logger.info("Checksum: " + tarHash);
             if (!tarHash.equals(origTarHash)) {
-                throw new Exception("checksum failed: " + tarHash + " != " + origTarHash);
+                throw new Exception("checksum failed: (tar)" + tarHash + " != " + origTarHash);
             }
         }
         

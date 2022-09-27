@@ -87,7 +87,7 @@ public class ChunkDownloadTracker implements Callable<Object> {
             String chunkHash = Verify.getDigest(chunkFile);
             log.info("Checksum: " + chunkHash);
             if (!chunkHash.equals(origChunkHash)) {
-                throw new Exception("checksum failed: " + chunkHash + " != " + origChunkHash);
+                throw new Exception("checksum failed: (chunk) " + chunkHash + " != " + origChunkHash);
             }
         }
     }

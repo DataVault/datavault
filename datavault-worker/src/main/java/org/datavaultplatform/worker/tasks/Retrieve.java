@@ -159,7 +159,7 @@ public class Retrieve extends Task {
                 logger.info("Encrypted Checksum: " + encChunkFileHash);
                 
                 if (!encChunkFileHash.equals(archivedEncChunkFileHash)) {
-                    throw new Exception("checksum failed: " + encChunkFileHash + " != " + archivedEncChunkFileHash);
+                    throw new Exception("checksum failed: [enc-chunk]" + encChunkFileHash + " != " + archivedEncChunkFileHash);
                 }
                 
                 Encryption.decryptFile(context, chunkFile, this.getChunksIVs().get(chunkNum));
@@ -176,7 +176,7 @@ public class Retrieve extends Task {
             logger.info("Checksum: " + chunkFileHash);
             
             if (!chunkFileHash.equals(archivedChunkFileHash)) {
-                throw new Exception("checksum failed: " + chunkFileHash + " != " + archivedChunkFileHash);
+                throw new Exception("checksum failed: [chunk]" + chunkFileHash + " != " + archivedChunkFileHash);
             }
         }
 
@@ -203,7 +203,7 @@ public class Retrieve extends Task {
         
         if (!tarHash.equals(this.archiveDigest)) {
         		logger.info("Checksum failed: " + tarHash + " != " + this.archiveDigest);
-            throw new Exception("checksum failed: " + tarHash + " != " + this.archiveDigest);
+            throw new Exception("checksum failed: [tar]" + tarHash + " != " + this.archiveDigest);
         }
         
         // Decompress to the temporary directory
@@ -416,7 +416,7 @@ public class Retrieve extends Task {
                     logger.info("Encrypted tar Checksum: " + encTarFileHash);
                     
                     if (!encTarFileHash.equals(this.encTarDigest)) {
-                        throw new Exception("checksum failed: " + encTarFileHash + " != " + this.encTarDigest);
+                        throw new Exception("checksum failed: [enc-tar] " + encTarFileHash + " != " + this.encTarDigest);
                     }
                     
                     Encryption.decryptFile(context, tarFile, this.getTarIV());
