@@ -6,24 +6,25 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
 import com.rabbitmq.client.Channel;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Base64;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import javax.crypto.SecretKey;
 import lombok.SneakyThrows;
@@ -31,21 +32,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.awaitility.Awaitility;
-import org.datavaultplatform.common.bagish.Checksummer;
-import org.datavaultplatform.common.bagish.SupportedAlgorithm;
 import org.datavaultplatform.common.config.BaseQueueConfig;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.deposit.Complete;
 import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.event.deposit.ComputedEncryption;
-import org.datavaultplatform.common.event.deposit.UploadComplete;
 import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
 import org.datavaultplatform.common.io.FileUtils;
+import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context.AESMode;
 import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
 import org.datavaultplatform.worker.rabbit.BaseRabbitTCTest;
 import org.datavaultplatform.worker.test.AddTestProperties;
+import org.datavaultplatform.worker.utils.DepositEvents;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.core.AmqpAdmin;
@@ -65,24 +65,14 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(classes = DataVaultWorkerInstanceApp.class)
 @AddTestProperties
 @DirtiesContext
 @Slf4j
+@TestPropertySource(properties = "chunking.size=20MB")
 public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
-
-  public static final String RETRIEVE_PATH_1_BAGIT_ID = "$.properties.bagId";
-  public static final String RETRIEVE_PATH_2_NUM_CHUNKS = "$.properties.numOfChunks";
-  public static final String RETRIEVE_PATH_3_RETRIEVE_PATH = "$.properties.retrievePath";
-  public static final String RETRIEVE_PATH_4_ARCHIVE_SIZE = "$.properties.archiveSize";
-  public static final String RETRIEVE_PATH_5_ARCHIVE_DIGEST = "$.properties.archiveDigest";
-  public static final String RETRIEVE_PATH_6_ARCHIVE_ID = "$.properties.archiveId";
-  public static final String RETRIEVE_PATH_7_CHUNK_FILES_DIGEST_1 = "$.chunkFilesDigest['1']";
-  public static final String RETRIEVE_PATH_8_CHUNKS_IV_1 = "$.chunksIVs['1']";
-  public static final String RETRIEVE_PATH_9_ENC_CHUNKS_DIGEST_1 = "$.encChunksDigest['1']";
-  public static final String RETRIEVE_PATH_10_ARCHIVE_STORE_ROOT_PATH = "$.archiveFileStores[0].properties.rootPath";
-  public static final String RETRIEVE_PATH_11_RETRIEVE_ROOT_PATH = "$.userFileStoreProperties.FILE-STORE-SRC-ID.rootPath";
 
   static final String KEY_NAME_FOR_SSH = "key-name-for-ssh";
   static final String KEY_NAME_FOR_DATA = "key-name-for-data";
@@ -103,8 +93,7 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
   }
 
   final Resource depositMessage = new ClassPathResource("sampleMessages/sampleDepositMessage.json");
-  final Resource retrieveMessage = new ClassPathResource(
-      "sampleMessages/sampleRetrieveMessage.json");
+
   final List<Event> events = new ArrayList<>();
   @Autowired
   protected AmqpAdmin rabbitAdmin;
@@ -124,6 +113,9 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
   File retrieveDir;
   @Autowired
   ObjectMapper mapper;
+
+  @Value("classpath:big_data/50MB_file")
+  Resource largeFile;
 
   @SneakyThrows
   static Set<Path> getPathsWithinTarFile(File tarFile) {
@@ -194,11 +186,11 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
     assertTrue(sourceFileDir.mkdir());
     assertTrue(sourceFileDir.exists() && sourceFileDir.isDirectory());
 
-    File sourceFile = new File(sourceFileDir, "src-file-1.txt");
-    try (FileWriter fw = new FileWriter(sourceFile)) {
-      fw.write("This is a test file");
-    }
+    File sourceFile = new File(sourceFileDir, "src-file-1");
+    Files.copy(this.largeFile.getFile().toPath(), sourceFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
     assertTrue(sourceFile.exists() && sourceFile.isFile());
+    assertTrue(sourceFile.length() == 50_000_000);
   }
 
   @SneakyThrows
@@ -226,8 +218,6 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
     Encryption.saveSecretKeyToKeyStore(Encryption.getVaultDataEncryptionKeyName(),
         keyForData);
     assertTrue(new File(keyStorePath).exists());
-
-    assertTrue(new File(keyStorePath).exists());
   }
 
   void purgeQueues() {
@@ -242,28 +232,37 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
   void testDepositThenRetrieve() {
     assertEquals(0, destDir.listFiles().length);
     String depositMessage = getSampleDepositMessage();
-    log.info("depositMessage {}", getSampleDepositMessage());
+    Deposit deposit = new ObjectMapper().readValue(depositMessage, Deposit.class);
+    log.info("depositMessage {}", depositMessage);
     sendNormalMessage(depositMessage);
-    Awaitility.await()
-        .atMost(10, TimeUnit.MINUTES)
-        .pollInterval(10, TimeUnit.SECONDS)
-        .until(() -> events.size() == 17L);
+    waitUntil(this::foundComplete);
 
-    String bagId = checkDepositWorkedOkay(depositMessage);
+    DepositEvents depositEvents = new DepositEvents(deposit, this.events);
 
-    buildAndSendRetrieveMessage(bagId);
+   checkDepositWorkedOkay(depositMessage, depositEvents);
+
+    buildAndSendRetrieveMessage(depositEvents);
     checkRetrieve();
+
+  }
+
+  void waitUntil(Callable<Boolean> test){
+    Awaitility.await().atMost(5, TimeUnit.MINUTES)
+        .pollInterval(Duration.ofSeconds(15))
+        .until(test);
   }
 
   @SneakyThrows
   private void checkRetrieve() {
     log.info("FIN {}", retrieveDir.getCanonicalPath());
-    Awaitility.await().atMost(5, TimeUnit.MINUTES).pollInterval(Duration.ofSeconds(10))
-        .until(this::foundRetrieveComplete);
+    waitUntil(this::foundRetrieveComplete);
     log.info("FIN {}", retrieveDir.getCanonicalPath());
-    File file = new File("/tmp/TEST/retrieve/ret-folder/src-path-1/src-file-1.txt");
-    String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
-    assertEquals("This is a test file", content);
+    File retrieved = new File("/tmp/TEST/retrieve/ret-folder/src-path-1/src-file-1");
+
+    String digestOriginal = Verify.getDigest(this.largeFile.getFile());
+    String digestRetrieved = Verify.getDigest(retrieved);
+
+    assertEquals(digestOriginal, digestRetrieved);
   }
 
   boolean foundRetrieveComplete() {
@@ -271,34 +270,75 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
         .anyMatch(e -> e.getClass().equals(RetrieveComplete.class));
   }
 
+  boolean foundComplete() {
+    return events.stream()
+        .anyMatch(e -> e.getClass().equals(Complete.class));
+  }
+
   @SneakyThrows
-  private String checkDepositWorkedOkay(String depositMessage) {
+  private void checkDepositWorkedOkay(String depositMessage, DepositEvents depositEvents) {
     Deposit deposit = mapper.readValue(depositMessage, Deposit.class);
     String bagId = deposit.getProperties().get("bagId");
 
     log.info("BROKER MSG COUNT {}", events.size());
     File[] destFiles = destDir.listFiles();
-    assertEquals(1, destFiles.length);
+    assertEquals(3, destFiles.length);
+
+    Arrays.sort(destFiles, Comparator.comparing(File::getName));
+
     File expectedEncChunk1 = destDir.toPath().resolve(bagId + ".tar.1").toFile();
     assertEquals(expectedEncChunk1, destFiles[0]);
+    File expectedEncChunk2 = destDir.toPath().resolve(bagId + ".tar.2").toFile();
+    assertEquals(expectedEncChunk2, destFiles[1]);
+    File expectedEncChunk3 = destDir.toPath().resolve(bagId + ".tar.3").toFile();
+    assertEquals(expectedEncChunk3, destFiles[2]);
 
-    ComputedEncryption computedEncryption = getComputedEncryption();
+    ComputedEncryption computedEncryption = depositEvents.getComputedEncryption();
 
-    String encHash = computedEncryption.getEncChunkDigests().get(1);
-    assertEquals(encHash, getSha1Hash(expectedEncChunk1));
+    String encHash1 = computedEncryption.getEncChunkDigests().get(1);
+    assertEquals(encHash1, getSha1Hash(expectedEncChunk1));
+
+    String encHash2 = computedEncryption.getEncChunkDigests().get(2);
+    assertEquals(encHash2, getSha1Hash(expectedEncChunk2));
+
+    String encHash3 = computedEncryption.getEncChunkDigests().get(3);
+    assertEquals(encHash3, getSha1Hash(expectedEncChunk3));
+
 
     AESMode aesMode = AESMode.valueOf(computedEncryption.getAesMode());
     assertEquals(AESMode.GCM, aesMode);
 
-    byte[] iv = computedEncryption.getChunkIVs().get(1);
+    byte[] iv1 = computedEncryption.getChunkIVs().get(1);
+    byte[] iv2 = computedEncryption.getChunkIVs().get(2);
+    byte[] iv3 = computedEncryption.getChunkIVs().get(3);
 
-    File decryptedTarFile = Files.createTempFile("decrypted", ".plain").toFile();
-    FileUtils.copyFile(expectedEncChunk1, decryptedTarFile);
-    Encryption.decryptFile(aesMode, decryptedTarFile, iv);
-    assertTrue(decryptedTarFile.length() > 0);
-    assertTrue(decryptedTarFile.length() != expectedEncChunk1.length());
+    File decryptedChunkFile1 = Files.createTempFile("decryptedChunk", ".plain").toFile();
+    FileUtils.copyFile(expectedEncChunk1, decryptedChunkFile1);
+    Encryption.decryptFile(aesMode, decryptedChunkFile1, iv1);
+    assertTrue(decryptedChunkFile1.length() > 0);
+    assertTrue(decryptedChunkFile1.length() != expectedEncChunk1.length());
 
-    ComputedDigest computedDigest = getComputedDigest();
+    File decryptedChunkFile2 = Files.createTempFile("decryptedChunk", ".plain").toFile();
+    FileUtils.copyFile(expectedEncChunk2, decryptedChunkFile2);
+    Encryption.decryptFile(aesMode, decryptedChunkFile2, iv2);
+    assertTrue(decryptedChunkFile2.length() > 0);
+    assertTrue(decryptedChunkFile2.length() != expectedEncChunk2.length());
+
+    File decryptedChunkFile3 = Files.createTempFile("decryptedChunk", ".plain").toFile();
+    FileUtils.copyFile(expectedEncChunk3, decryptedChunkFile3);
+    Encryption.decryptFile(aesMode, decryptedChunkFile3, iv3);
+    assertTrue(decryptedChunkFile3.length() > 0);
+    assertTrue(decryptedChunkFile3.length() != expectedEncChunk3.length());
+
+    ComputedDigest computedDigest = depositEvents.getComputedDigest();
+
+    File decryptedTarFile = Files.createTempFile("decryptedTar", ".plain").toFile();
+
+    try(FileOutputStream fos = new FileOutputStream(decryptedTarFile)){
+      Files.copy(decryptedChunkFile1.toPath(), fos);
+      Files.copy(decryptedChunkFile2.toPath(), fos);
+      Files.copy(decryptedChunkFile3.toPath(), fos);
+    }
 
     Set<Path> tarEntryPaths = getPathsWithinTarFile(decryptedTarFile);
 
@@ -308,7 +348,7 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
         base.resolve("manifest-md5.txt"),
         base.resolve("tagmanifest-md5.txt"),
 
-        base.resolve("data/src-path-1/src-file-1.txt"),
+        base.resolve("data/src-path-1/src-file-1"),
 
         base.resolve("metadata/filetype.json"),
         base.resolve("metadata/vault.json"),
@@ -316,82 +356,12 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
         base.resolve("metadata/deposit.json"));
 
     assertEquals(computedDigest.getDigest(), getSha1Hash(decryptedTarFile));
-
-    return bagId;
-  }
-
-  private ComputedEncryption getComputedEncryption() {
-    return findEvent(ComputedEncryption.class);
-  }
-
-  private UploadComplete getUploadComplete() {
-    return findEvent(UploadComplete.class);
-  }
-
-  private Complete getComplete() {
-    return findEvent(Complete.class);
-  }
-
-  private ComputedDigest getComputedDigest() {
-    return findEvent(ComputedDigest.class);
-  }
-
-  private <T> T findEvent(Class<T> clazz) {
-    return events.stream()
-        .filter(e -> clazz.isAssignableFrom(e.getClass()))
-        .map(e -> (T) e)
-        .findFirst()
-        .get();
   }
 
   @SneakyThrows
-  private void buildAndSendRetrieveMessage(String bagId) {
-    String temp1 = FileUtils.readFileToString(this.retrieveMessage.getFile(),
-        StandardCharsets.UTF_8);
-
-    RetrieveInfo info = getRetrieveInfo(bagId);
-    DocumentContext ctx = JsonPath.parse(temp1);
-
-    ctx.set(RETRIEVE_PATH_1_BAGIT_ID, info.bagitId);
-    ctx.set(RETRIEVE_PATH_2_NUM_CHUNKS, String.valueOf(info.numChunks));
-    ctx.set(RETRIEVE_PATH_3_RETRIEVE_PATH, info.retrievePath);
-    ctx.set(RETRIEVE_PATH_4_ARCHIVE_SIZE, String.valueOf(info.archiveSize));
-    ctx.set(RETRIEVE_PATH_5_ARCHIVE_DIGEST, info.archiveDigest);
-    ctx.set(RETRIEVE_PATH_6_ARCHIVE_ID, info.archiveId);
-    ctx.set(RETRIEVE_PATH_7_CHUNK_FILES_DIGEST_1, info.chunk1digest);
-    ctx.set(RETRIEVE_PATH_8_CHUNKS_IV_1, info.chunk1iv);
-    ctx.set(RETRIEVE_PATH_9_ENC_CHUNKS_DIGEST_1, info.chunk1encDigest);
-    ctx.set(RETRIEVE_PATH_10_ARCHIVE_STORE_ROOT_PATH, info.rootPathArchiveStore);
-    ctx.set(RETRIEVE_PATH_11_RETRIEVE_ROOT_PATH, info.rootPathRetrieve);
-
-    String retrieveMessage = ctx.jsonString();
-    sendNormalMessage(retrieveMessage);
-  }
-
-  @SneakyThrows
-  private RetrieveInfo getRetrieveInfo(String bagId) {
-    RetrieveInfo info = new RetrieveInfo();
-    info.bagitId = bagId;
-
-    ComputedEncryption computedEncryption = getComputedEncryption();
-    info.numChunks = computedEncryption.getChunkIVs().size();
-
-    info.retrievePath = this.retrieveDir.getName();
-
-    info.archiveSize = getComplete().getArchiveSize();
-
-    info.archiveDigest = getComputedDigest().getDigest();
-
-    info.archiveId = getUploadComplete().getArchiveIds().get("ARCHIVE-STORE-DST-ID");
-
-    info.chunk1iv = base64Encode(computedEncryption.getChunkIVs().get(1));
-    info.chunk1digest = computedEncryption.getChunksDigest().get(1);
-    info.chunk1encDigest = computedEncryption.getEncChunkDigests().get(1);
-
-    info.rootPathArchiveStore = this.destDir.getCanonicalPath();
-    info.rootPathRetrieve = this.retrieveBaseDir.getCanonicalPath();
-
-    return info;
+  private void buildAndSendRetrieveMessage(DepositEvents depositEvents) {
+    String retrieveMessage2 = depositEvents.generateRetrieveMessage(this.retrieveBaseDir, this.retrieveDir.getName());
+    sendNormalMessage(retrieveMessage2);
   }
 
   @SneakyThrows
@@ -423,30 +393,8 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
   }
 
   private String getSha1Hash(File file) throws Exception {
-    return new Checksummer()
-        .computeFileHash(file, SupportedAlgorithm.SHA1)
-        .toUpperCase();
+    return Verify.getDigest(file);
   }
 
-  private String base64Encode(byte[] data) {
-    return Base64.getEncoder().encodeToString(data);
-  }
 
-  static class RetrieveInfo {
-
-    String bagitId;
-    int numChunks;
-
-    long archiveSize;
-    String archiveDigest;
-    String archiveId;
-
-    String chunk1digest;
-    String chunk1encDigest;
-    String chunk1iv;
-
-    String rootPathArchiveStore;
-    String rootPathRetrieve;
-    String retrievePath;
-  }
 }

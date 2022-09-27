@@ -1,8 +1,11 @@
 package org.datavaultplatform.worker.queue;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import java.io.File;
 import java.nio.file.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.RecordingEventSender;
@@ -14,6 +17,8 @@ import org.datavaultplatform.common.task.Context.AESMode;
 import org.datavaultplatform.worker.WorkerInstance;
 import org.datavaultplatform.worker.rabbit.MessageInfo;
 import org.datavaultplatform.worker.rabbit.MessageProcessor;
+import org.datavaultplatform.worker.tasks.Deposit;
+import org.datavaultplatform.worker.utils.DepositEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,9 +74,30 @@ public class Receiver implements MessageProcessor {
             return processMessageInternal(messageInfo);
         } finally {
             List<Event> events = eventSender.getEvents();
+
+            getDespositEvents(messageInfo, events).ifPresent( de -> {
+                String retrieveMessage = de.generateRetrieveMessage(new File("/tmp/retrieve"), "retDir");
+                logger.info("retrieve message for deposit {}", retrieveMessage);
+            });
+
             if (logger.isTraceEnabled()) {
                 logger.trace("events send by worker: {}", events);
             }
+        }
+    }
+
+    private Optional<DepositEvents> getDespositEvents(MessageInfo messageInfo, List<Event> events) {
+        try {
+            String message = messageInfo.getValue();
+            Task task = new ObjectMapper().readValue(message, Task.class);
+            if ("org.datavaultplatform.worker.tasks.Deposit".equals(task.getTaskClass())) {
+                Deposit deposit = new ObjectMapper().readValue(message, Deposit.class);
+                return Optional.of(new DepositEvents(deposit, events));
+            } else {
+                return Optional.empty();
+            }
+        } catch(JsonProcessingException ex) {
+            return Optional.empty();
         }
     }
 
