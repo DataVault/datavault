@@ -18,6 +18,7 @@ cd $PROJECT_ROOT
  RABBITMQ_DEFINE_QUEUE_BROKER=true \
  CHECK_TSM_TAPE_DRIVER=true \
  CHECK_ORACLE_CLOUD_CONFIG=true \
+ CHUNKING_SIZE=20MB \
  VALIDATE_WORKER_DIRS=true \
  ./mvnw spring-boot:run \
  -Dspring-boot.run.jvmArguments="-Xdebug \

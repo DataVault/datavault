@@ -54,6 +54,9 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
   @Value("${check.tsm.tape.driver:false}")
   boolean checkTSMTapeDriver;
 
+  @Value("${chunking.size}")
+  String chunkingSize;
+
   @Autowired
   Environment env;
 
@@ -90,6 +93,7 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
     log.info("active.profiles {}", (Object) env.getActiveProfiles());
 
     log.info("validate.encryption.config [{}]", validateEncryptionConfig);
+    log.info("chunking.size [{}]", chunkingSize);
 
     if (validateEncryptionConfig) {
       encryptionValidator.validate(true, true);
