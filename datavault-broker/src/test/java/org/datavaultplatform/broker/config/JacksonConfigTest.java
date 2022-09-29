@@ -51,7 +51,7 @@ public class JacksonConfigTest {
 
   @Test
   void testJacksonHasHibernate5ModuleRegistered() {
-    mapper.getRegisteredModuleIds().forEach(id -> System.out.println(id.getClass()));
+    mapper.getRegisteredModuleIds().forEach(System.out::println);
     log.info("moduleIds {}", mapper.getRegisteredModuleIds());
     assertTrue(mapper.getRegisteredModuleIds().contains(Hibernate5Module.class.getName()));
   }
