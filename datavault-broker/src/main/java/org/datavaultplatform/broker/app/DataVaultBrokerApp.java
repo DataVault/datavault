@@ -18,6 +18,7 @@ import org.datavaultplatform.broker.config.EmailConfig;
 import org.datavaultplatform.broker.config.EmailLocalConfig;
 import org.datavaultplatform.broker.config.EncryptionConfig;
 import org.datavaultplatform.broker.config.InitialiseConfig;
+import org.datavaultplatform.broker.config.JacksonConfig;
 import org.datavaultplatform.broker.config.LdapConfig;
 import org.datavaultplatform.broker.config.PropertiesConfig;
 import org.datavaultplatform.broker.config.RabbitConfig;
@@ -44,7 +45,7 @@ import org.springframework.core.env.Environment;
 
 @SpringBootApplication
 @Import({
-    PropertiesConfig.class, EncryptionConfig.class, ActuatorConfig.class,
+    JacksonConfig.class, PropertiesConfig.class, EncryptionConfig.class, ActuatorConfig.class,
     ScheduleConfig.class, InitialiseConfig.class,
     SecurityActuatorConfig.class, SecurityConfig.class, ControllerConfig.class,
     ServiceConfig.class,  DatabaseConfig.class,
