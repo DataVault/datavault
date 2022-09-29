@@ -2,24 +2,29 @@ package org.datavaultplatform.worker.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+
 import java.io.File;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.deposit.Complete;
 import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.event.deposit.ComputedEncryption;
 import org.datavaultplatform.common.event.deposit.UploadComplete;
+import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.worker.tasks.Deposit;
 import org.datavaultplatform.worker.tasks.Retrieve;
 
+@Slf4j
 public class DepositEvents {
 
   public static final String FILE_STORE_SRC_ID = "FILE-STORE-SRC-ID";
+  public static final String ARCHIVE_ID = "archiveId";
   final List<Event> events;
   final Deposit deposit;
 
@@ -42,11 +47,11 @@ public class DepositEvents {
     topLevelProps.put("retrievePath", retrievePath);
     topLevelProps.put("archiveSize", String.valueOf(info.archiveSize));
     topLevelProps.put("archiveDigest", info.archiveDigest);
-    topLevelProps.put("archiveId", info.archiveId);
+    topLevelProps.put(ARCHIVE_ID, info.archiveId);
 
     retrieve.setProperties(topLevelProps);
 
-    retrieve.setArchiveFileStores(deposit.getArchiveFileStores());
+    retrieve.setArchiveFileStores(Collections.singletonList(getArchiveStoreForRetrieve()));
     retrieve.setChunkFilesDigest(info.chunkDigests);
     retrieve.setEncChunksDigest(info.chunkEncDigests);
     retrieve.setChunksIVs(info.chunkIVsAsBytes);
@@ -64,6 +69,14 @@ public class DepositEvents {
     ObjectMapper mapper = new ObjectMapper();
     mapper.setSerializationInclusion(Include.NON_NULL);
     String result = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(retrieve);
+    return result;
+  }
+
+  public ArchiveStore getArchiveStoreForRetrieve() {
+    ArchiveStore result = deposit.getArchiveFileStores().stream()
+        .filter(ArchiveStore::isRetrieveEnabled)
+        .findFirst()
+        .get();
     return result;
   }
 
@@ -107,7 +120,7 @@ public class DepositEvents {
 
     info.archiveDigest = getComputedDigest().getDigest();
 
-    info.archiveId = getUploadComplete().getArchiveIds().get("ARCHIVE-STORE-DST-ID");
+    info.archiveId = getUploadComplete().getArchiveIds().get(getArchiveStoreForRetrieve().getID());
 
     info.chunkIVs = new HashMap<>();
     info.chunkIVsAsBytes = new HashMap<>();
@@ -131,7 +144,7 @@ public class DepositEvents {
     }
 
     //info.rootPathArchiveStore = this.destDir.getCanonicalPath();
-    info.rootPathArchiveStore = deposit.getArchiveFileStores().get(0).getProperties().get("rootPath");
+    info.rootPathArchiveStore = getArchiveStoreForRetrieve().getProperties().get("rootPath");
     //info.rootPathRetrieve = this.retrieveBaseDir.getCanonicalPath();
     info.rootPathRetrieve = retrieveBaseDir.getCanonicalPath();
 
