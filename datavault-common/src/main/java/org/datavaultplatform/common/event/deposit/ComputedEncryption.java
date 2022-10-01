@@ -9,7 +9,7 @@ import org.checkerframework.checker.units.qual.C;
 import org.datavaultplatform.common.event.Event;
 
 @Entity
-public class ComputedEncryption extends Event {
+public class ComputedEncryption extends Event implements ChunksDigestEvent {
     
     @Column(name="chunkIVs", columnDefinition="LONGBLOB")
     private HashMap<Integer, byte[]> chunkIVs = new HashMap<>();

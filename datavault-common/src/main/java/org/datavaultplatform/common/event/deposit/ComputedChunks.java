@@ -7,7 +7,7 @@ import javax.persistence.Column;
 import org.datavaultplatform.common.event.Event;
 
 @Entity
-public class ComputedChunks extends Event {
+public class ComputedChunks extends Event implements ChunksDigestEvent {
     
     @Column(name="chunksDigest", columnDefinition="LONGBLOB")
     public HashMap<Integer, String> chunksDigest = new HashMap<>();
