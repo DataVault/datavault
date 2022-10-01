@@ -1,12 +1,9 @@
 package org.datavaultplatform.common.model.dao;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Optional;
 import java.util.Random;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -14,9 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseDatabaseTest;
-import org.datavaultplatform.broker.test.BaseReuseDatabaseTest;
-import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.event.deposit.Complete;
 import org.datavaultplatform.common.event.deposit.ComputedEncryption;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +21,7 @@ import org.springframework.test.context.TestPropertySource;
 @AddTestProperties
 @Slf4j
 @TestPropertySource(properties = {
-    "broker.email.enabled=false",
+    "broker.email.enabled=true",
     "broker.controllers.enabled=false",
     "broker.rabbit.enabled=false",
     "broker.scheduled.enabled=false"

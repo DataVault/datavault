@@ -75,7 +75,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
     "broker.services.enabled=false",
     "broker.rabbit.enabled=false",
     "broker.database.enabled=false",
-    "broker.emailed.enabled=false",
+    "broker.email.enabled=true",
     "broker.ldap.enabled=false"})
 @Import({MockServicesConfig.class, MyMvcConfigurer.class, MockRabbitConfig.class}) //spring security relies on services
 @Slf4j

@@ -37,7 +37,7 @@ import org.springframework.test.web.servlet.MvcResult;
 @AddTestProperties
 @Slf4j
 @TestPropertySource(properties = {
-    "broker.email.enabled=false",
+    "broker.email.enabled=true",
     "broker.controllers.enabled=true",
     "broker.initialise.enabled=true",
     "broker.rabbit.enabled=false",

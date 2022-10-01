@@ -21,7 +21,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 @Configuration
 @Slf4j
-@ConditionalOnExpression("${broker.emailed.enabled:true}")
+@ConditionalOnExpression("${broker.email.enabled:true}")
 public class EmailConfig {
 
   public static final String EXTERNAL_EMAIL_TEMPLATE_DIR = "external.email.template.dir";

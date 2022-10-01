@@ -43,7 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AddTestProperties
 @Slf4j
 @TestPropertySource(properties = {
-    "broker.email.enabled=false",
+    "broker.email.enabled=true",
     "broker.controllers.enabled=false",
     "broker.rabbit.enabled=false",
     "broker.initialise.enabled=false",

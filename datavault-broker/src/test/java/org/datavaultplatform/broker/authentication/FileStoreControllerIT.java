@@ -65,7 +65,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AddTestProperties
 @Slf4j
 @TestPropertySource(properties = {
-    "broker.email.enabled=false",
+    "broker.email.enabled=true",
     "broker.rabbit.enabled=false",
     "broker.scheduled.enabled=false"
 })

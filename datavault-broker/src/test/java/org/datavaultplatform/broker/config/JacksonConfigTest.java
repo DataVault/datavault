@@ -35,7 +35,7 @@ import org.springframework.test.web.servlet.MockMvc;
     "broker.services.enabled=false",
     "broker.rabbit.enabled=false",
     "broker.database.enabled=false",
-    "broker.emailed.enabled=false",
+    "broker.email.enabled=true",
     "broker.ldap.enabled=false"})
 @Import({MockServicesConfig.class, MockRabbitConfig.class}) //spring security relies on services
 @Slf4j
