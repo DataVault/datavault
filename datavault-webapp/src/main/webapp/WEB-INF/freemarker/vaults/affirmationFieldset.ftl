@@ -16,7 +16,7 @@
             <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/after/datavault/cost" target="_blank">Cost</a> page).
         </p>
         <p>
-            I understand that any data I and my team deposit in this vault belongs to the University of Edinburgh,
+            I understand that any data I and my team deposit in this vault becomes the responsibility of the University of Edinburgh,
             and I will only be able to retrieve the data as long as I have an active University of Edinburgh login.
         </p>
         <div class="checkbox">
