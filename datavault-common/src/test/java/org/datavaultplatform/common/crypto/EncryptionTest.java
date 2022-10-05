@@ -2,6 +2,7 @@ package org.datavaultplatform.common.crypto;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
+import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
@@ -551,5 +552,16 @@ public class EncryptionTest {
                 data.getBytes(StandardCharsets.UTF_8), null);
         });
         assertEquals("Key for algorithm null not suitable for symmetric enryption.", ex.getMessage());
+    }
+
+    @Test
+    @SneakyThrows
+    void testSecretKeyDigest() {
+        SecretKey key = Encryption.generateSecretKey();
+        String digest = Encryption.getKeyDigest(key);
+        String pattern = "([a-z0-9]{5}-){7}[a-z0-9]{5}";
+        System.out.printf("[%s]%n", digest);
+        boolean digestMatchesPattern = digest.matches(pattern);
+        assertTrue(digestMatchesPattern);
     }
 }

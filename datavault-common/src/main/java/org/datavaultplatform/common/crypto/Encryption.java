@@ -43,6 +43,12 @@ import java.security.Security;
 import java.security.Provider;
 import org.springframework.util.Assert;
 
+import java.nio.charset.StandardCharsets;
+import com.google.common.base.Splitter;
+import java.util.stream.Collectors;
+import lombok.SneakyThrows;
+import org.apache.commons.codec.digest.DigestUtils;
+
 public class Encryption {
 
     private static final Logger logger = LoggerFactory.getLogger(Encryption.class);
@@ -676,5 +682,45 @@ public class Encryption {
         final String path;
         final String password;
         final List<String> aliases;
+    }
+
+    public static void logKeyDigests() {
+        if (keystoreEnable || vaultEnable) {
+            String digestData       = getDigestForDataEncryptionKey();
+            String digestPrivateKey = getDigestForPrivateKeyEncryptionKey();
+
+            logger.info("DigestFor:Data      :EncryptionKey[{}]", digestData);
+            logger.info("DigestFor:PrivateKey:EncryptionKey[{}]", digestPrivateKey);
+        } else {
+            logger.warn("no vault or keystore enabled");
+        }
+    }
+
+    @SneakyThrows
+    public static String getDigestForDataEncryptionKey() {
+        SecretKey key = getSecretKey(getVaultDataEncryptionKeyName());
+        return  getKeyDigest(key);
+    }
+
+    @SneakyThrows
+    public static String getDigestForPrivateKeyEncryptionKey() {
+        SecretKey key = getSecretKey(getVaultPrivateKeyEncryptionKeyName());
+        return  getKeyDigest(key);
+    }
+
+
+    /*
+     * An example KeyDigest would be formatted :  'f102a-f6b16-174d6-03b32-eb9aa-b9e20-a4db2-98410'
+     * This digest is only meant for information purposes. To allow humans a way of checking
+     * which keys are actually being used.
+     * For extra security - we only use "part" of the sha512 digest.
+     */
+    public static String getKeyDigest(SecretKey key) {
+        String encoded =  new String(java.util.Base64.getEncoder().encode(key.getEncoded()), StandardCharsets.UTF_8);
+        String digest = DigestUtils.sha512Hex(encoded).substring(0,40);
+        String readableDigest = Splitter.fixedLength(5)
+            .splitToStream(digest)
+            .collect(Collectors.joining("-"));
+        return readableDigest;
     }
 }

@@ -46,6 +46,7 @@ public class EncryptionValidator {
       validateEncryptionConfig(LABEL_KEY_FOR_PRIVATE_KEYS, Encryption.getVaultPrivateKeyEncryptionKeyName());
       validateEncryptionConfig(LABEL_KEY_FOR_PRIVATE_KEYS, null);
     }
+    Encryption.logKeyDigests();
   }
 
   protected void validateKeyNames(boolean validateDataKey, boolean validatePrivateKeysKey) {
