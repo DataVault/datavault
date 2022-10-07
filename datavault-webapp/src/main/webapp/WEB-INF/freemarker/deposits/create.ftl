@@ -27,16 +27,29 @@
 
     /* In progress item */
     .progress-item {opacity:0.5;}
+    
+    .modal-body.center {
+        margin-left: auto;
+        margin-right: auto;
+     }
+     
+    .modal-content .max-height {
+       max-height: 10vh;
+    }
+    
+    .modal-content .inline-center {
+       text-align: center;
+    }
 </style>
 
 <div class="modal fade" id="add-from-storage" tabindex="-1" role="dialog" aria-labelledby="addFromStorage" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header max-height">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></button>
                 <h4 class="modal-title" id="addFromStorage">Add files from storage</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body center">
                 <form id="add-from-storage-form">
                     <div class="form-group">
                         <label class="control-label">Select file or folder:</label>
@@ -46,7 +59,7 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer max-height inline-center">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                 <button type="button" id="add-from-storage-btn" form="add-from-storage" class="btn btn-primary btn-ok">Add</button>
             </div>
@@ -422,6 +435,17 @@
         $('[data-toggle="tooltip"]').tooltip({
             'placement': 'top'
         });
+        
+        var modalContentMinWidth = 350;
+        var modalContentMinHeight = modalContentMinWidth*0.7;
+        // Make "Add files from storage" modal resizable and draggable
+        $('.modal-content').resizable({
+			alsoResize: ".modal-dialog",
+			minWidth: modalContentMinWidth,
+			minWidth: modalContentMinHeight 
+		});
+
+		$('.modal-dialog').draggable();
     });
 
     function readablizeBytes(bytes) {
