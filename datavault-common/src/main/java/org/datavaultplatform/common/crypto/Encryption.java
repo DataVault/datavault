@@ -8,6 +8,7 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;
@@ -218,7 +219,7 @@ public class Encryption {
             IOUtils.copy(is, os);
             logger.info("finished crypto from [{}] to [{}] ", inputFile, outputFile);
         }
-        logger.info("Converted input[{}/{}]ouput[{}/{}]", inputFile, inputFile.length(),
+        logger.info("Converted input[{}/{}]output[{}/{}]", inputFile, inputFile.length(),
             outputFile, outputFile.length());
     }
 
@@ -371,11 +372,28 @@ public class Encryption {
         doCrypto(aesMode, file, Cipher.DECRYPT_MODE, iv);
     }
 
+    public static String getDigestForIv(byte[] iv) {
+        StringBuffer digest = new StringBuffer();
+        digest.append(iv.length);
+        digest.append("-");
+
+        // We use md5 here because it's short. We don't need a secure hash
+        String md5 = Splitter.fixedLength(5)
+            .splitToStream(DigestUtils.md5Hex(iv))
+            .collect(Collectors.joining("-"));
+
+        digest.append(md5);
+        return digest.toString();
+    }
+
     private static byte[] doCrypto(AESMode aesMode, File file, int encryptMode, byte[] iv) throws Exception {
 
         if(encryptMode == Cipher.ENCRYPT_MODE) {
             // Generating IV
             iv = Encryption.generateIV(Encryption.IV_SIZE);
+        } else {
+            String ivDigest = getDigestForIv(iv);
+            logger.info("Decrypting [{}] using iv-byte[] with digest [{}]", file, ivDigest);
         }
 
         final Cipher cipher;

@@ -2,6 +2,7 @@ package org.datavaultplatform.common.crypto;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
+import java.util.Arrays;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -563,5 +565,25 @@ public class EncryptionTest {
         System.out.printf("[%s]%n", digest);
         boolean digestMatchesPattern = digest.matches(pattern);
         assertTrue(digestMatchesPattern);
+    }
+
+    @Test
+    void testDigestForIv() {
+        byte[] iv1 = new byte[]{-2, -32, 73, 70, 22, -116, 8, -10, 31, 61, -120, 14, -97, 110, 32, 38, 17, 4, 93, 127, 44, -78, -55, -59, 81, 57, 119, -16, -79, -3, 79, -94, -48, 66, -29, -5, 34, 13, -5, -37, 117, 97, 48, -75, -8, 74, 40, 56, -84, 76, -87, 81, 101, -63, -45, 43, -2, -128, -57, -95, -109, 2, 43, -105, -48, 0, -43, -93, -15, 52, 9, 72, -56, 79, -99, 77, 32, 121, -106, -70, -14, 125, 23, 76, -2, -101, -13, 110, 23, -128, 67, 71, -32, -73, 109, -89};
+
+        String digest1 = Encryption.getDigestForIv(iv1);
+        System.out.printf("IV1 %s%n", Arrays.toString(iv1));
+        System.out.printf("IV1 %s%n",digest1);
+        assertEquals("96-fae42-d5895-23d6d-d1861-496c9-32fb4-5d", digest1);
+
+        byte[] iv2 = Arrays.copyOf(iv1, iv1.length);
+        assertArrayEquals(iv1, iv2);
+        iv2[0]=-1; //just 1 bit different
+
+        String digest2 = Encryption.getDigestForIv(iv2);
+        assertEquals("96-9312d-522ce-651cd-3e954-f1959-86817-d7", digest2);
+
+        System.out.printf("IV2 %s%n",Arrays.toString(iv2));
+        System.out.printf("IV2 %s%n",digest2);
     }
 }
