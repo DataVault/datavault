@@ -57,12 +57,12 @@ $(document).ready(function(){
 			$("#grantEndDate").prop("disabled", true);
 		} else {
 			var length = calculateReviewLength();
-			var estimatedReviewDate = calculateReviewDateForToday(length);
+			var estimatedReviewDateAsISOString = calculateReviewDateForTodayAsISOString(length);
 
 			$("#grantEndDate").prop("disabled", false);
 			// Reset to dbGrantEndDate
 			$("#grantEndDate").val(dbGrantEndDate);
-			$("#reviewDate").val(estimatedReviewDate);
+			$("#reviewDate").val(estimatedReviewDateAsISOString);
 		}
 	}).trigger('change');
 
@@ -97,50 +97,48 @@ $(document).ready(function(){
 		var dd = String(today.getDate()).padStart(2, '0');
 		var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0
 		// Default Review Date (3 years from today)
-		var estimatedReviewDate = calculateReviewDateForToday(defaultLength);
-
+	        var estimatedReviewDateAsISOString = calculateReviewDateForTodayAsISOString(defaultLength);
+			
 		// GED in future test
 		var grantGEDInFuture = noGED  ? false : (dateDiffInDaysStartingAtMidnight(today, gedDate) > 0);
 		var billingGEDInFuture = noBillingGED ? false : (dateDiffInDaysStartingAtMidnight(today, billingGedDate) > 0);
 
 		if (noRP === false && noGED === true && noBillingGED === true) {
 			// if we only have policy then length + current date = review date
-			estimatedReviewDate = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
+			estimatedReviewDateAsISOString = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
 		} 
 
 		if (noRP === false && noBillingGED === false && billingGEDInFuture === true) {
 			// if we have both then billing ged + policy length = review date
-			estimatedReviewDate = String(billingGedDate.getFullYear() + policyLength) + '-' + billingGedMm + '-' + billingGedDd;
+			estimatedReviewDateAsISOString = String(billingGedDate.getFullYear() + policyLength) + '-' + billingGedMm + '-' + billingGedDd;
 		} 
 
 		if (noRP === true && noBillingGED === false && billingGEDInFuture === true) {
 			// if we only have a ged in the billing fieldset then ged + 3 = review date
-			estimatedReviewDate = String(billingGedDate.getFullYear() + defaultLength) + '-' + billingGedMm + '-' + billingGedDd;
+			estimatedReviewDateAsISOString = String(billingGedDate.getFullYear() + defaultLength) + '-' + billingGedMm + '-' + billingGedDd;
 		} 
 
 		if (noRP === false && noGED === false && grantGEDInFuture === true) {
 			// if we have both then ged + policy length = review date
-			estimatedReviewDate = String(gedDate.getFullYear() + policyLength) + '-' + gedMm + '-' + gedDd;
+			estimatedReviewDateAsISOString = String(gedDate.getFullYear() + policyLength) + '-' + gedMm + '-' + gedDd;
 		} 
 
 		if (noRP === true && noGED === false && grantGEDInFuture === true) {
 			// if we only have ged then ged + 3 = review date
-			estimatedReviewDate = String(gedDate.getFullYear() + defaultLength) + '-' + gedMm + '-' + gedDd;
+			estimatedReviewDateAsISOString = String(gedDate.getFullYear() + defaultLength) + '-' + gedMm + '-' + gedDd;
 		} 
 
 		if (noRP === false && noBillingGED === false && billingGEDInFuture === false) {
-			// if we only have policy then length + current date = review date
-			estimatedReviewDate = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
+			estimatedReviewDateAsISOString = String(billingGedDate.getFullYear() + policyLength) + '-' + billingGedMm + '-' + billingGedDd;
 		} 
-
+		
 		if (noRP === false && noGED === false && grantGEDInFuture === false) {
-			// if we only have policy then length + current date = review date
-			estimatedReviewDate = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
+			estimatedReviewDateAsISOString = String(gedDate.getFullYear() + policyLength) + '-' + gedMm + '-' + gedDd;
 		}
+		
 
-
-
-		$("#reviewDate").val(estimatedReviewDate);
+		estimatedReviewDateAsISOString = validateOrChangeReviewDateISOString(estimatedReviewDateAsISOString);
+	    $("#reviewDate").val(estimatedReviewDateAsISOString);
 
 		// Clear Error text and update message 
 		$("#invalid-review-date-span").text(""); 
@@ -518,11 +516,11 @@ $(document).ready(function(){
 			$("#grantEndDate").prop("disabled", true);
 		} else {
 			var length = calculateReviewLength();
-			var estimatedReviewDate = calculateReviewDateForToday(length);
+			var estimatedReviewDateAsISOString = calculateReviewDateForTodayAsISOString(length);
 			$("#grantEndDate").prop("disabled", false);
 			// Reset to dbGrantEndDate
 			$("#grantEndDate").val(dbGrantEndDate);
-			$("#reviewDate").val(estimatedReviewDate);
+			$("#reviewDate").val(estimatedReviewDateAsISOString);
 		}
 
 		// clear the unused fieldsets
@@ -652,7 +650,7 @@ $(document).ready(function(){
 
 	}
 
-	function calculateReviewDateForToday(length) {
+	function calculateReviewDateForTodayAsISOString(length) {
 		var today = new Date();
 		var dd = String(today.getDate()).padStart(2,'0');
 		var mm = String(today.getMonth() + 1).padStart(2,'0'); // January is 0
@@ -676,6 +674,20 @@ $(document).ready(function(){
 		}
 
 		return length;
+	}
+	
+	function validateOrChangeReviewDateISOString(reviewDateToCheckISOString) {
+		console.log("validateOrChangeReviewDate - reviewDateToCheckISOString: ", reviewDateToCheckISOString);
+		var reviewDateToCheckObject = new Date(reviewDateToCheckISOString);
+		var today = new Date();
+		var diffInYears = dateDiffInYears(today, reviewDateToCheckObject);
+		// Default Review Date 3 years from today.
+		var defaultLength = 3;
+		if(diffInYears < defaultLength) {
+			return calculateReviewDateForTodayAsISOString(defaultLength);
+		} else {
+			return reviewDateToCheckISOString;
+		}
 	}
 });
 
