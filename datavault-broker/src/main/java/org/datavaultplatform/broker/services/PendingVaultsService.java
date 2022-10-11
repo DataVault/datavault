@@ -7,11 +7,14 @@ import org.datavaultplatform.common.request.CreateVault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,12 +31,15 @@ public class PendingVaultsService {
     private final PendingDataCreatorsService pendingDataCreatorsService;
 
     private final VaultsService vaultsService;
+    private final EmailService emailService;
+    private final String helpMail;
 
     @Autowired
     public PendingVaultsService(PendingVaultDAO pendingVaultDAO, GroupsService groupsService,
         RetentionPoliciesService retentionPoliciesService, UsersService usersService,
         RolesAndPermissionsService permissionsService,
-        PendingDataCreatorsService pendingDataCreatorsService, VaultsService vaultsService) {
+        PendingDataCreatorsService pendingDataCreatorsService, VaultsService vaultsService,
+        EmailService emailService, @Value("${help.mail}") String helpMail) {
         this.pendingVaultDAO = pendingVaultDAO;
         this.groupsService = groupsService;
         this.retentionPoliciesService = retentionPoliciesService;
@@ -41,9 +47,9 @@ public class PendingVaultsService {
         this.permissionsService = permissionsService;
         this.pendingDataCreatorsService = pendingDataCreatorsService;
         this.vaultsService = vaultsService;
+        this.emailService = emailService;
+        this.helpMail = helpMail;
     }
-
-
     public void addOrUpdatePendingVault(PendingVault vault) {
         Date d = new Date();
         vault.setCreationTime(d);
@@ -407,5 +413,18 @@ public class PendingVaultsService {
 
     public List<PendingVault> getPendingVaults(String userId, String sort, String order, String offset, String maxResult) {
         return pendingVaultDAO.list(userId, sort, order, offset, maxResult);
+    }
+
+    public void sendNewPendingVaultEmail(PendingVault vault) {
+        // send mail to admin email which in turn sets up unidesk call
+
+        logger.info("Sending pending vault submitted email");
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("vault-name", vault.getName());
+        model.put("group-name", vault.getGroup().getName());
+        model.put("submitter-id", vault.getUser().getID());
+        LocalDate today = LocalDate.now();
+        model.put("timestamp", today);
+        this.emailService.sendTemplateMail(this.helpMail, "New Pending Vault Submitted", "group-admin-pv-submitted.vm", model);
     }
 }

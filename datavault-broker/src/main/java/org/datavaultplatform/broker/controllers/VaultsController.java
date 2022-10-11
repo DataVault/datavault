@@ -584,6 +584,8 @@ public class VaultsController {
 
         pendingVaultsService.addCreator(createVault, userID, vault.getId());
 
+        pendingVaultsService.sendNewPendingVaultEmail(vault);
+
         // Check the retention policy of the newly created vault
         //try {
         //    vaultsService.checkRetentionPolicy(vault.getId());
