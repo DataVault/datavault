@@ -8,7 +8,6 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;
@@ -373,7 +372,7 @@ public class Encryption {
     }
 
     public static String getDigestForIv(byte[] iv) {
-        StringBuffer digest = new StringBuffer();
+        StringBuilder digest = new StringBuilder();
         digest.append(iv.length);
         digest.append("-");
 
@@ -408,7 +407,12 @@ public class Encryption {
         File tempFile = new File(file.getAbsoluteFile() + ".temp");
         String action = encryptMode == Cipher.ENCRYPT_MODE ? "encrypting" : "decrypting";
         logger.info("{} chunk: [{}][{}]bytes", action, file.getName(), file.length());
-        Encryption.doByteBufferFileCrypto(file, tempFile, cipher);
+        try {
+            Encryption.doByteBufferFileCrypto(file, tempFile, cipher);
+        } catch (Exception ex) {
+            String msg = "Error while " + action + " file: " + file.getName();
+            throw new CryptoException(msg, ex);
+        }
 
         logger.info("Action[{}]Before[{}/{}]After[{}/{}]", action, file, file.length(), tempFile, tempFile.length());
 
