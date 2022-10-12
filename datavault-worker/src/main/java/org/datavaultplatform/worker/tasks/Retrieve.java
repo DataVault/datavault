@@ -1,5 +1,12 @@
 package org.datavaultplatform.worker.tasks;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.event.Error;
@@ -21,10 +28,6 @@ import org.datavaultplatform.worker.operations.ProgressTracker;
 import org.datavaultplatform.worker.operations.Tar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.util.*;
 
 /**
  * A class that extends Task which is used to handle Retrievals from the vault
@@ -148,8 +151,9 @@ public class Retrieve extends Task {
                 archiveFs.retrieve(chunkArchiveId, chunkFile, progress, location);
             }
             chunks[chunkNum-1] = chunkFile;
-            
-            if( this.getChunksIVs().get(chunkNum) != null ) {
+
+            byte[] chunkIV = this.getChunksIVs().get(chunkNum);
+            if( chunkIV != null ) {
                 String archivedEncChunkFileHash = this.encChunksDigest.get(chunkNum);
                 
                 // Check encrypted file checksum
@@ -157,12 +161,14 @@ public class Retrieve extends Task {
                 
                 logger.info("Encrypted chunk Checksum algorithm: " + this.archiveDigestAlgorithm);
                 logger.info("Encrypted Checksum: " + encChunkFileHash);
-                
+
                 if (!encChunkFileHash.equals(archivedEncChunkFileHash)) {
-                    throw new Exception("checksum failed: [enc-chunk]" + encChunkFileHash + " != " + archivedEncChunkFileHash);
+                    throwChecksumError(encChunkFileHash, archivedEncChunkFileHash,
+                        chunkFile, "1:recompose:[enc-chunk(" + chunkNum + ")]"
+                    );
                 }
-                
-                Encryption.decryptFile(context, chunkFile, this.getChunksIVs().get(chunkNum));
+
+                Encryption.decryptFile(context, chunkFile, chunkIV);
             }
             
             // Check file
@@ -176,7 +182,8 @@ public class Retrieve extends Task {
             logger.info("Checksum: " + chunkFileHash);
             
             if (!chunkFileHash.equals(archivedChunkFileHash)) {
-                throw new Exception("checksum failed: [chunk]" + chunkFileHash + " != " + archivedChunkFileHash);
+                throwChecksumError(chunkFileHash, archivedChunkFileHash,
+                    chunkFile, "2:recompose:[chunk(" + chunkNum + ")]");
             }
         }
 
@@ -189,7 +196,7 @@ public class Retrieve extends Task {
             chunk.delete();
         }
     }
-    
+
     private void doRetrieve(Context context, Device userFs, File tarFile, Progress progress) throws Exception{
         logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
         
@@ -200,10 +207,9 @@ public class Retrieve extends Task {
         String tarHash = Verify.getDigest(tarFile);
         logger.info("Checksum algorithm: " + this.archiveDigestAlgorithm);
         logger.info("Checksum: " + tarHash);
-        
-        if (!tarHash.equals(this.archiveDigest)) {
-        		logger.info("Checksum failed: " + tarHash + " != " + this.archiveDigest);
-            throw new Exception("checksum failed: [tar]" + tarHash + " != " + this.archiveDigest);
+
+        if (!tarHash.equals(archiveDigest)) {
+            throwChecksumError(tarHash, archiveDigest, tarFile, "3:[tar]");
         }
         
         // Decompress to the temporary directory
@@ -414,11 +420,12 @@ public class Retrieve extends Task {
                     
                     logger.info("Encrypted tar Checksum algorithm: " + this.archiveDigestAlgorithm);
                     logger.info("Encrypted tar Checksum: " + encTarFileHash);
-                    
-                    if (!encTarFileHash.equals(this.encTarDigest)) {
-                        throw new Exception("checksum failed: [enc-tar] " + encTarFileHash + " != " + this.encTarDigest);
+
+                    if (!encTarFileHash.equals(encTarDigest)) {
+                        throwChecksumError(encTarFileHash, encTarDigest,
+                            tarFile, "4:[enc-tar-no-chunking]");
                     }
-                    
+
                     Encryption.decryptFile(context, tarFile, this.getTarIV());
                 }
             }
@@ -429,5 +436,18 @@ public class Retrieve extends Task {
         }
 
         this.doRetrieve(context, userFs, tarFile, progress);
+    }
+
+    protected static void throwChecksumError(
+        String actualCheckSum, String expectedCheckSum,
+        File problemFile, String context) throws Exception {
+        String msg = String.join(":",
+            "Checksum failed",
+            context,
+            "(actual)" + actualCheckSum + " != (expected)" + expectedCheckSum,
+            problemFile.getCanonicalPath()
+        );
+        logger.error(msg);
+        throw new Exception(msg);
     }
 }
