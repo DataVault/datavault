@@ -80,6 +80,21 @@ public class DecryptedTarBuilder {
 
     setupEncryption(params);
 
+    Encryption.logKeyDigests();
+
+    if (StringUtils.isNotBlank(params.getDataKeyDigest())) {
+      if(Encryption.getDigestForDataEncryptionKey().equals(params.getDataKeyDigest())){
+        log.info("CONFIRMED:DataKeyDigest[{}]", params.getDataKeyDigest());
+      } else {
+        throw new IllegalArgumentException(String.format(
+            "There is a problem with the DataKeyDigest expected[%s] actual[%s]",
+            params.getDataKeyDigest(),
+            Encryption.getDigestForDataEncryptionKey()));
+      }
+    } else {
+      log.info("DataKeyDigest[{}]Not Checked", Encryption.getDigestForDataEncryptionKey());
+    }
+
     TreeMap<Integer, ChunkFileInfo> chunks = getChunkFiles(chunksDir)
         .stream()
         .collect(Collectors.toMap(
@@ -110,12 +125,30 @@ public class DecryptedTarBuilder {
 
     //add the iv data to the ChunkFileInfo
     chunks.forEach((chunkNum, chunkInfo) -> {
-      String iv = params.getChunkData().get(chunkNum).getIv();
+
+      ChunkData chunkData = params.getChunkData().get(chunkNum);
+      String iv = chunkData.getIv();
       if (StringUtils.isBlank(iv)) {
         throw new IllegalArgumentException(
             String.format("The chunk[%d] has a blank or missing iv", chunkNum));
       }
       chunkInfo.setIv(iv);
+
+      if (StringUtils.isNotBlank(chunkData.getIvDigest())) {
+        String actualIvDigest = Encryption.getDigestForIv(chunkInfo.getIVbytes());
+        if (actualIvDigest.equals(chunkData.getIvDigest())) {
+          log.info("CONFIRMED:chunk[{}]:IVDigest[{}}]", chunkNum, actualIvDigest);
+        } else {
+          throw new IllegalArgumentException(String.format(
+              "There is a problem with the IVDigest for Chunk[%d] : expected[%s] actual[%s]",
+              chunkNum,
+              chunkData.getIvDigest(),
+              actualIvDigest)
+          );
+        }
+      } else {
+        log.info("chunk[{}] - No IVDigest to check.", chunkNum);
+      }
     });
 
     //copy the encrypted chunks in prep for decryption

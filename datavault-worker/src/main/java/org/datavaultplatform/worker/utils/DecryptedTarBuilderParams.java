@@ -2,7 +2,6 @@ package org.datavaultplatform.worker.utils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.MapSerializer;
 import com.fasterxml.jackson.databind.ser.std.NumberSerializers.IntegerSerializer;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -20,6 +19,7 @@ public class DecryptedTarBuilderParams {
   private String keystorePath;
   private String keystorePassword;
   private String dataKeyName;
+  private String dataKeyDigest;
 
   @JsonSerialize(keyUsing = IntegerSerializer.class)
   private Map<Integer,ChunkData> chunkData;
@@ -32,6 +32,7 @@ public class DecryptedTarBuilderParams {
   @JsonIgnoreProperties(ignoreUnknown = true)
   static class ChunkData {
     private String iv;
+    private String ivDigest;
     private String encryptedChecksum;
     private String decryptedChecksum;
   }

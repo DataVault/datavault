@@ -678,6 +678,7 @@ public class Encryption {
             .getImplementationVersion();
         logger.info("Added Bouncy Castle Provider [{}].", bcVersion);
         checkKeyNamesAreNotSame();
+        logKeyDigests();
         initialised = true;
     }
 
@@ -720,17 +721,26 @@ public class Encryption {
 
     @SneakyThrows
     public static String getDigestForDataEncryptionKey() {
-        SecretKey key = getSecretKey(getVaultDataEncryptionKeyName());
-        return  getKeyDigest(key);
+        return getDigestForKeyName(getVaultDataEncryptionKeyName());
     }
 
     @SneakyThrows
     public static String getDigestForPrivateKeyEncryptionKey() {
-        SecretKey key = getSecretKey(getVaultPrivateKeyEncryptionKeyName());
-        return  getKeyDigest(key);
+        return getDigestForKeyName(getVaultPrivateKeyEncryptionKeyName());
     }
 
-
+    private static String getDigestForKeyName(String name){
+        if (name == null) {
+            return null;
+        }
+        try {
+            SecretKey key = getSecretKey(name);
+            return getKeyDigest(key);
+        } catch(Exception ex) {
+            logger.warn("Problem getting digest for key name [{}]message[{}]", name, ex.getMessage());
+            return null;
+        }
+    }
     /*
      * An example KeyDigest would be formatted :  'f102a-f6b16-174d6-03b32-eb9aa-b9e20-a4db2-98410'
      * This digest is only meant for information purposes. To allow humans a way of checking
