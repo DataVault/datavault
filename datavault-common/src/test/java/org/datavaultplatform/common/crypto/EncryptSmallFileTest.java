@@ -15,13 +15,14 @@ import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.datavaultplatform.common.bagish.Checksummer;
 import org.datavaultplatform.common.bagish.SupportedAlgorithm;
+import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Context.AESMode;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -32,27 +33,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 public class EncryptSmallFileTest extends BaseTempKeyStoreTest {
 
   @TempDir
   File tempDir;
 
-  File origFile;
-  File testFile;
-
-  @BeforeEach
-  @SneakyThrows
-  void setup() {
-    origFile = new File(tempDir, "orig.txt");
-    FileUtils.writeStringToFile(origFile, "Hello World", StandardCharsets.UTF_8);
-    testFile = new File(tempDir, "test.txt");
-  }
-
-
-
   @Test
   @SneakyThrows
   void testSmallFileEncryptAndDecrypt() {
+
+    File origFile = new File(tempDir, "orig.txt");
+    FileUtils.writeStringToFile(origFile, "Hello World", StandardCharsets.UTF_8);
+    File testFile = new File(tempDir, "test.txt");
 
     assertTrue(new File(keyStorePath).exists());
     Context mContext = Mockito.mock(Context.class);
@@ -148,11 +141,83 @@ public class EncryptSmallFileTest extends BaseTempKeyStoreTest {
     assertTrue(doesNewEncryptionWorkWithSmallFileOfGivenSize(base + 1025));
   }
 
+  @Test
+  @SneakyThrows
+  void testEmptyFileEncryptAndDecrypt() {
+
+    File origFile = File.createTempFile("orig", ".txt");
+    File testFile = File.createTempFile("test", ".txt");
+
+    assertTrue(new File(keyStorePath).exists());
+    Context mContext = Mockito.mock(Context.class);
+    when(mContext.getEncryptionMode()).thenReturn(AESMode.GCM);
+
+    assertEquals(0, origFile.length());
+    assertEquals(0, testFile.length());
+
+    assertTrue(origFile.exists());
+    assertTrue(testFile.exists());
+
+    checkSameFile(origFile, testFile);
+
+    //ENCRYPT
+    byte[] iv = Encryption.encryptFile(mContext, testFile);
+    assertEquals(96, iv.length);
+
+    log.info("after encrypt test file size [{}]", testFile.length());
+
+    checkNotSameFile(origFile, testFile);
+
+    assertEquals(0, origFile.length());
+    assertEquals(16, testFile.length());
+
+    assertFalse(doFilesHaveSameHash(origFile, testFile));
+
+    //DECRYPT
+    Encryption.decryptFile(mContext, testFile, iv);
+
+    assertEquals(0, testFile.length());
+    checkSameFile(origFile, testFile);
+
+    assertTrue(doFilesHaveSameHash(origFile, testFile));
+
+    verify(mContext, times(2)).getEncryptionMode();
+    verifyNoMoreInteractions(mContext);
+  }
+
   @SneakyThrows
   static boolean doFilesHaveSameHash(File f1, File f2) {
-    Checksummer summer = new Checksummer();
-    String hash1 = summer.computeFileHash(f1, SupportedAlgorithm.MD5);
-    String hash2 = summer.computeFileHash(f2, SupportedAlgorithm.MD5);
+    String hash1 = Verify.getDigest(f1);
+    String hash2 = Verify.getDigest(f2);
     return hash1.equals(hash2);
+  }
+
+  public static String split(String value, int num) {
+    char[] chars = value.toCharArray();
+    StringBuilder sb = new StringBuilder();
+    int count = 0;
+    for (int i = 0; i < chars.length; i++) {
+      char c = chars[i];
+      sb.append(c);
+      count++;
+      if (count == num && i < chars.length - 1) {
+        sb.append("-");
+        count = 0;
+      }
+    }
+    return sb.toString();
+  }
+
+  @Test
+  void testSplit() {
+    assertEquals("", split("", 5));
+    assertEquals("1", split("1", 5));
+    assertEquals("12", split("12", 5));
+    assertEquals("123", split("123", 5));
+    assertEquals("1234", split("1234", 5));
+    assertEquals("12345", split("12345", 5));
+    assertEquals("12345-6", split("123456", 5));
+    assertEquals("12345-67890", split("1234567890", 5));
+    assertEquals("12345-67890-12", split("123456789012", 5));
   }
 }
