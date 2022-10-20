@@ -97,8 +97,8 @@ $(document).ready(function(){
 		var dd = String(today.getDate()).padStart(2, '0');
 		var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0
 		// Default Review Date (3 years from today)
-	        var estimatedReviewDateAsISOString = calculateReviewDateForTodayAsISOString(defaultLength);
-			
+
+		var estimatedReviewDateAsISOString = calculateReviewDateForTodayAsISOString(defaultLength);
 		// GED in future test
 		var grantGEDInFuture = noGED  ? false : (dateDiffInDaysStartingAtMidnight(today, gedDate) > 0);
 		var billingGEDInFuture = noBillingGED ? false : (dateDiffInDaysStartingAtMidnight(today, billingGedDate) > 0);
@@ -108,22 +108,22 @@ $(document).ready(function(){
 			estimatedReviewDateAsISOString = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
 		} 
 
-		if (noRP === false && noBillingGED === false && billingGEDInFuture === true) {
+		if (noRP === false && noBillingGED === false) {
 			// if we have both then billing ged + policy length = review date
 			estimatedReviewDateAsISOString = String(billingGedDate.getFullYear() + policyLength) + '-' + billingGedMm + '-' + billingGedDd;
 		} 
 
-		if (noRP === true && noBillingGED === false && billingGEDInFuture === true) {
+		if (noRP === true && noBillingGED === false) {
 			// if we only have a ged in the billing fieldset then ged + 3 = review date
 			estimatedReviewDateAsISOString = String(billingGedDate.getFullYear() + defaultLength) + '-' + billingGedMm + '-' + billingGedDd;
 		} 
 
-		if (noRP === false && noGED === false && grantGEDInFuture === true) {
+		if (noRP === false && noGED === false) {
 			// if we have both then ged + policy length = review date
 			estimatedReviewDateAsISOString = String(gedDate.getFullYear() + policyLength) + '-' + gedMm + '-' + gedDd;
 		} 
 
-		if (noRP === true && noGED === false && grantGEDInFuture === true) {
+		if (noRP === true && noGED === false) {
 			// if we only have ged then ged + 3 = review date
 			estimatedReviewDateAsISOString = String(gedDate.getFullYear() + defaultLength) + '-' + gedMm + '-' + gedDd;
 		} 

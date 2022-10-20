@@ -128,7 +128,7 @@ public class AdminController {
     public void setSender(Sender sender) {
         this.sender = sender;
     }
-
+    
     @RequestMapping(value = "/admin/deposits/count", method = RequestMethod.GET)
     public Integer getDepositsAll(@RequestHeader(value = "X-UserID", required = true) String userID,
                                   @RequestParam(value = "query", required = false)
