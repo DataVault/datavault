@@ -1,39 +1,39 @@
 package org.datavaultplatform.common.crypto;
 
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.util.Arrays;
-import lombok.SneakyThrows;
-import org.apache.commons.io.FileUtils;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Base64;
-
-
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.GCMParameterSpec;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.security.NoSuchAlgorithmException;
-import java.security.Provider;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.util.concurrent.TimeUnit;
-import java.util.zip.CRC32;
-import org.datavaultplatform.test.SlowTest;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+import java.util.zip.CRC32;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Base64;
+import org.datavaultplatform.test.SlowTest;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+@Slf4j
 public class EncryptionTest {
 
     private static File bigdataResourcesDir;
@@ -561,7 +561,7 @@ public class EncryptionTest {
     void testSecretKeyDigest() {
         SecretKey key = Encryption.generateSecretKey();
         String digest = Encryption.getKeyDigest(key);
-        String pattern = "([a-z0-9]{5}-){7}[a-z0-9]{5}";
+        String pattern = "([A-Z0-9]{5}-){7}[A-Z0-9]{5}";
         System.out.printf("[%s]%n", digest);
         boolean digestMatchesPattern = digest.matches(pattern);
         assertTrue(digestMatchesPattern);

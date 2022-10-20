@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.File;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.utils.NullableConverter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -34,7 +35,7 @@ public class EncryptionValidatorTest extends BaseTempKeyStoreTest{
 
     log.info("keyNameForDataEncryption is [{}]", keyNameForDataEncryption);
     IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-        () -> validator.validate(true, false));
+        () -> validator.validate(true, false, null));
 
     assertEquals("property [vault.dataEncryptionKeyName] is not set", ex.getMessage());
   }
@@ -49,7 +50,7 @@ public class EncryptionValidatorTest extends BaseTempKeyStoreTest{
     enc.setVaultPrivateKeyEncryptionKeyName(keyNameForPrivateKeyEncryption);
     log.info("keyNameForPrivateKeyEncryption is [{}]", keyNameForPrivateKeyEncryption);
     IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-        () -> validator.validate(false, true));
+        () -> validator.validate(false, true, null));
 
     assertEquals("property [vault.privateKeyEncryptionKeyName] is not set", ex.getMessage());
   }
@@ -97,8 +98,42 @@ public class EncryptionValidatorTest extends BaseTempKeyStoreTest{
   @SneakyThrows
   void testWithActualKeyStore() {
 
-    assertTrue(new File(keyStorePath).exists());
-    validator.validate(true,true);
+    File ksFile = new File(keyStorePath);
+    String sha1 = Verify.getDigest(ksFile);
+    assertTrue(ksFile.exists());
+    validator.validate(true,true, sha1);
+  }
+  @Test
+  @SneakyThrows
+  void testWithActualKeyStoreButInvalidSha1() {
+
+    File ksFile = new File(keyStorePath);
+    assertTrue(ksFile.exists());
+    String actualSha1 = Verify.getDigest(ksFile);
+    IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> validator.validate(true,true, "invalid-sha1"));
+    assertEquals(String.format("KeyStore ["+ksFile+"]: actual SHA1["+actualSha1+"] does match expected SHA1[invalid-sha1]"), ex.getMessage());
+  }
+  @Test
+  @SneakyThrows
+  void testWithActualButUnreadableKeyStore() {
+
+    File ksFile = new File(keyStorePath);
+    assertTrue(ksFile.exists());
+
+    ksFile.setReadable(false);
+
+    IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> validator.validate(true,true, "invalid-sha1"));
+    assertEquals("KeyStore file is not readable: " + ksFile, ex.getMessage());
+  }
+
+  @Test
+  @SneakyThrows
+  void testWithNonExistentKeyStore() {
+
+    Encryption enc = new Encryption();
+    enc.setKeystorePath("/tmp/does-not-exist.ks");
+    IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> validator.validate(true,true, "invalid-sha1"));
+    assertEquals("KeyStore file does not exist: /tmp/does-not-exist.ks", ex.getMessage());
   }
 
   @Test

@@ -7,8 +7,18 @@ import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
+import java.math.BigInteger;
+import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFileAttributes;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import lombok.Builder;
 import lombok.Data;
 import org.apache.commons.io.FileUtils;
@@ -43,7 +53,6 @@ import java.security.Security;
 import java.security.Provider;
 import org.springframework.util.Assert;
 
-import java.nio.charset.StandardCharsets;
 import com.google.common.base.Splitter;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
@@ -392,7 +401,8 @@ public class Encryption {
             iv = Encryption.generateIV(Encryption.IV_SIZE);
         } else {
             String ivDigest = getDigestForIv(iv);
-            logger.info("Decrypting [{}] using iv-byte[] with digest [{}]", file, ivDigest);
+            String base64iv = Base64.getEncoder().encodeToString(iv);
+            logger.info("Decrypting [{}] using iv-byte[] with digest [{}]/bas64[{}]", file, ivDigest, base64iv);
         }
 
         final Cipher cipher;
@@ -408,7 +418,13 @@ public class Encryption {
         String action = encryptMode == Cipher.ENCRYPT_MODE ? "encrypting" : "decrypting";
         logger.info("{} chunk: [{}][{}]bytes", action, file.getName(), file.length());
         try {
+            long before = file.length();
             Encryption.doByteBufferFileCrypto(file, tempFile, cipher);
+            long expected = encryptMode == Cipher.ENCRYPT_MODE ? before + 16 : before - 16;
+            long actual = tempFile.length();
+            if (actual != expected) {
+                logger.warn("Problem:{}:[{}]expected[{}]got[{}]", action, file, expected, actual);
+            }
         } catch (Exception ex) {
             String msg = "Error while " + action + " file: " + file.getName();
             throw new CryptoException(msg, ex);
@@ -483,7 +499,14 @@ public class Encryption {
         try (FileInputStream fis = new FileInputStream(Encryption.getKeystorePath())) {
             ks.load(fis, Encryption.getKeystorePassword().toCharArray());
         }
-        SecretKey secretKey = (SecretKey) ks.getKey(alias, Encryption.getKeystorePassword().toCharArray());
+        final SecretKey secretKey;
+
+        if (alias == null) {
+            secretKey = null;
+        } else {
+            secretKey = (SecretKey) ks.getKey(alias,
+                Encryption.getKeystorePassword().toCharArray());
+        }
 
         Assert.isTrue(secretKey != null, () -> String.format("No key found in keystore[%s] for KeyName[%s]", Encryption.getKeystorePath(), alias));
         logger.info("found non-null SecretKey for key-alias [{}]", alias);
@@ -569,11 +592,47 @@ public class Encryption {
     }
 
     public void setKeystorePath(String path) {
-        keystorePath = path;
+        staticSetKeystorePath(path);
     }
 
     public static void staticSetKeystorePath(String path) {
         keystorePath = path;
+        if (keystorePath == null) {
+            logger.warn("KeyStore path is null.");
+            return;
+        }
+        try {
+            File file = new File(keystorePath);
+            if (!file.exists()) {
+                logger.warn("KeyStore[{}] does not exist.", keystorePath);
+                return;
+            }
+            if (!file.canRead()) {
+                logger.warn("KeyStore[{}] is not readable.", keystorePath);
+                return;
+            }
+            try (FileInputStream fis = new FileInputStream(file)) {
+                String sha1 = DigestUtils.sha1Hex(fis).toLowerCase();
+                PosixFileAttributeView view = Files.getFileAttributeView(file.toPath(), PosixFileAttributeView.class);
+                PosixFileAttributes attrs = view.readAttributes();
+
+                long size = attrs.size();
+                logger.info("KeyStore[{}] size[{}].", file.getCanonicalPath(), size);
+
+                FileTime creationTime = attrs.creationTime();
+                FileTime lastModifiedTime = attrs.lastModifiedTime();
+                FileTime lastAccessTime = attrs.lastAccessTime();
+
+                logger.info("KeyStore[{}] creationTime    [{}]", file.getCanonicalPath(), creationTime);
+                logger.info("KeyStore[{}] lastModifiedTime[{}]", file.getCanonicalPath(), lastModifiedTime);
+                logger.info("KeyStore[{}] lastAccessTime  [{}]", file.getCanonicalPath(), lastAccessTime);
+
+                logger.info("KeyStore[{}] SHA-1[{}]", file.getCanonicalPath(), sha1);
+            }
+        } catch (Exception ex) {
+            String msg = String.format("Problem getting SHA-1 digest of [%s].", keystorePath);
+            logger.error(msg, ex);
+        }
     }
 
     public static String getKeystorePassword() {
@@ -708,15 +767,19 @@ public class Encryption {
     }
 
     public static void logKeyDigests() {
-        if (keystoreEnable || vaultEnable) {
-            String digestData       = getDigestForDataEncryptionKey();
-            String digestPrivateKey = getDigestForPrivateKeyEncryptionKey();
-
-            logger.info("DigestFor:Data      :EncryptionKey[{}]", digestData);
-            logger.info("DigestFor:PrivateKey:EncryptionKey[{}]", digestPrivateKey);
-        } else {
+        if (!keystoreEnable && !vaultEnable) {
             logger.warn("no vault or keystore enabled");
+            return;
         }
+        String nameData = Encryption.getVaultDataEncryptionKeyName();
+        String digestData = getDigestForDataEncryptionKey();
+        logger.info("key[Data]name[{}]digest[{}]", nameData, digestData);
+
+        String nameSSH  = Encryption.getVaultPrivateKeyEncryptionKeyName();
+        String digestSSH  = getDigestForSSHEncryptionKey();
+        logger.info("key[SSH ]name[{}]digest[{}]", nameSSH, digestSSH);
+
+        logKeyStoreCreationDates();
     }
 
     @SneakyThrows
@@ -725,7 +788,7 @@ public class Encryption {
     }
 
     @SneakyThrows
-    public static String getDigestForPrivateKeyEncryptionKey() {
+    public static String getDigestForSSHEncryptionKey() {
         return getDigestForKeyName(getVaultPrivateKeyEncryptionKeyName());
     }
 
@@ -742,17 +805,73 @@ public class Encryption {
         }
     }
     /*
-     * An example KeyDigest would be formatted :  'f102a-f6b16-174d6-03b32-eb9aa-b9e20-a4db2-98410'
+     * An example KeyDigest would be formatted :  'BLAH BLAH'
      * This digest is only meant for information purposes. To allow humans a way of checking
      * which keys are actually being used.
-     * For extra security - we only use "part" of the sha512 digest.
+     * For extra security - we only use "part" of the base16 value of the key for the digest.
      */
     public static String getKeyDigest(SecretKey key) {
-        String encoded =  new String(java.util.Base64.getEncoder().encode(key.getEncoded()), StandardCharsets.UTF_8);
-        String digest = DigestUtils.sha512Hex(encoded).substring(0,40);
+        String encoded =  new BigInteger(1, key.getEncoded()).toString(16).toUpperCase();
+        String digest = encoded.substring(0,40);
         String readableDigest = Splitter.fixedLength(5)
             .splitToStream(digest)
             .collect(Collectors.joining("-"));
         return readableDigest;
+    }
+
+    @SneakyThrows
+    private static KeyStore loadKeyStore() {
+        KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
+        try (FileInputStream fis = new FileInputStream(Encryption.getKeystorePath())) {
+            ks.load(fis, Encryption.getKeystorePassword().toCharArray());
+        } catch ( FileNotFoundException fnfe ) {
+            ks.load(null, Encryption.getKeystorePassword().toCharArray());
+        }
+        return ks;
+    }
+
+    private static void updateMapWithCreationDate(String keyName, KeyStore ks, Map<String,Date> keyNameToDateMap){
+        try {
+            if (keyName != null && ks.containsAlias(keyName)) {
+                Date date = ks.getCreationDate(keyName);
+                logger.info("Encryption Alias[{}]CreationDate[{}]", keyName,
+                    date);
+                keyNameToDateMap.put(keyName, date);
+            } else {
+                logger.warn("No Key for [{}]", keyName);
+            }
+        } catch (Exception ex) {
+            logger.warn("Unable to get Creation Date for key [{}]", keyName, ex);
+        }
+    }
+
+    @SneakyThrows
+    private static Set<String> getAliases(KeyStore ks){
+        Set<String> result = new TreeSet<>();
+        Enumeration<String> eAliases = ks.aliases();
+        while(eAliases.hasMoreElements()){
+            String alias  = eAliases.nextElement();
+            result.add(alias);
+        }
+        return result;
+    }
+
+    @SneakyThrows
+    private static void logKeyStoreCreationDates() {
+        if(!keystoreEnable){
+            return;
+        }
+        Map<String, Date> result = new HashMap<>();
+        String keyStorePath = getKeystorePath();
+        try {
+            logger.info("Loading keystore from [{}]...", keyStorePath);
+            KeyStore ks = loadKeyStore();
+
+            getAliases(ks).forEach(alias -> {
+                updateMapWithCreationDate(alias, ks, result);
+            });
+        } catch (Exception e) {
+            logger.warn("ProblemLoadingKeyStoreFile[{}]", getKeystorePath());
+        }
     }
 }

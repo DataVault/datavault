@@ -61,6 +61,8 @@ public class DataVaultBrokerApp implements CommandLineRunner {
   @Value("${spring.application.name}")
   String applicationName;
 
+  @Value("${keystore.sha1:null}")
+  String keyStoreSha1;
   @Autowired
   Environment env;
 
@@ -109,7 +111,7 @@ public class DataVaultBrokerApp implements CommandLineRunner {
         propName -> log.info("propName[{}]propValue[{}]", propName, env.getProperty(propName)));
 
     if (validateEncryptionConfig) {
-      encryptionValidator.validate(false, true);
+      encryptionValidator.validate(false, true, this.keyStoreSha1);
     } else {
       log.info("Encryption Config NOT CHECKED");
     }

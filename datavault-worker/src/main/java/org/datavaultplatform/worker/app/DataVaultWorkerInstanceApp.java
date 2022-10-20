@@ -57,6 +57,9 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
   @Value("${chunking.size}")
   String chunkingSize;
 
+  @Value("${keystore.sha1:null}")
+  String keyStoreSha1;
+
   @Autowired
   Environment env;
 
@@ -96,7 +99,7 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
     log.info("chunking.size [{}]", chunkingSize);
 
     if (validateEncryptionConfig) {
-      encryptionValidator.validate(true, true);
+      encryptionValidator.validate(true, true, keyStoreSha1);
     } else {
       log.info("Encryption Config NOT CHECKED");
     }
