@@ -8,6 +8,7 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
@@ -132,7 +133,7 @@ public class Encryption {
      * @return Initialisation Vector
      */
     public static byte[] generateIV(int size) {
-        byte iv[] = new byte[size];
+        byte[] iv = new byte[size];
         SecureRandom secRandom = new SecureRandom();
         secRandom.nextBytes(iv); // SecureRandom initialized using self-seeding
         return iv;
@@ -297,7 +298,8 @@ public class Encryption {
 //        String encodedKey = vault.logical().read(context.getVaultKeyPath()).getData().get(context.getVaultKeyName());
 
         final String jsonString = new String(
-                vault.logical().read(getVaultKeyPath()).getRestResponse().getBody(), "UTF-8");
+                vault.logical().read(getVaultKeyPath()).getRestResponse().getBody(),
+            StandardCharsets.UTF_8);
 
 //        logger.debug("jsonString: " + jsonString);
 
@@ -702,7 +704,7 @@ public class Encryption {
         Encryption.staticSetKeystorePath(info.getPath());
         Encryption.staticSetKeystorePassword(info.getPassword());
         List<String> aliases = info.getAliases();
-        SecretKey keys[] = new SecretKey[aliases.size()];
+        SecretKey[] keys = new SecretKey[aliases.size()];
         for(int i = 0; i < aliases.size(); i++) {
             String alias = aliases.get(i);
             System.out.println("Creating " + alias + " to " + Encryption.getKeystorePath());
@@ -805,7 +807,7 @@ public class Encryption {
         }
     }
     /*
-     * An example KeyDigest would be formatted :  'BLAH BLAH'
+     * An example KeyDigest would be formatted :  '10A94-34EDB-45662-CD92F-BEB02-29CCC-09145-0122F'
      * This digest is only meant for information purposes. To allow humans a way of checking
      * which keys are actually being used.
      * For extra security - we only use "part" of the base16 value of the key for the digest.
