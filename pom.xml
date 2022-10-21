@@ -43,6 +43,7 @@
     <owasp.dependency.check.version>7.3.0</owasp.dependency.check.version>
     <apache.directory.api.version>2.1.2</apache.directory.api.version>
     <bouncy.castle.version>1.72</bouncy.castle.version>
+    <commons.text.version>1.10.0</commons.text.version>
 
     <jsoup.version>1.15.3</jsoup.version>
     <vault.java.driver.version>5.1.0</vault.java.driver.version>
@@ -63,6 +64,11 @@
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-text</artifactId>
+        <version>${commons.text.version}</version>
+      </dependency>
       <dependency>
         <groupId>gov.loc</groupId>
         <artifactId>bagit</artifactId>
