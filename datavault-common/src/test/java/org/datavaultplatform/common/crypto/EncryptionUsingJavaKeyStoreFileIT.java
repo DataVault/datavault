@@ -188,21 +188,6 @@ public class EncryptionUsingJavaKeyStoreFileIT {
      return formatter.format(timestamp);
    }
 
-   public static String toHex(byte[] encoded){
-     StringBuilder encodedHex = new StringBuilder("0x");
-     for(int i=0;i<encoded.length;i++){
-       encodedHex.append(byteToHex(encoded[i]));
-     }
-     return encodedHex.toString();
-   }
-
-  public static String byteToHex(byte num) {
-    char[] hexDigits = new char[2];
-    hexDigits[0] = Character.forDigit((num >> 4) & 0xF, 16);
-    hexDigits[1] = Character.forDigit((num & 0xF), 16);
-    return new String(hexDigits).toUpperCase();
-  }
-
   public static Instant toInstant(Date dateToConvert) {
     return Instant.ofEpochMilli(dateToConvert.getTime());
   }
@@ -211,5 +196,24 @@ public class EncryptionUsingJavaKeyStoreFileIT {
   @Test
   void testDebugExistingKeyStore() {
     readKeyFromJCEKeyStore("/path/to/existing.ks","thePassword","thePassword");
+  }
+
+
+  public static String toHex(byte[] encoded){
+    return "0x" + DatatypeConverter.printHexBinary(encoded).toUpperCase();
+  }
+
+  @Test
+  void testToHex() {
+    byte[] orig = {-27, 56, -121, -4, -21, 2, -84, -90, -52, -12, 117, 30, 49, 41, -81, -69, -31,
+        111, -124, 42, -20, -69, 117, -118, 17, 123, -55, -84, 11, -126, -28, 99, 33, 3, 27, 67,
+        -91, 49, -71, 16, 117, 36, -6, -80, 76, 118, 39, -101, -58, 53, 112, -4, 42, 121, 29, 48,
+        -42, -24, 11, 110, -117, -18, -70, -13, -12, -28, 22, -56, 98, 72, -58, -58, -49, 118, 35,
+        83, 19, 16, 56, 19, 12, 53, 123, -103, -115, 7, -36, 58, -110, -74, -75, 120, 1, 91, -77,
+        -59};
+    String hex = toHex(orig);
+    assertEquals(
+        "0xE53887FCEB02ACA6CCF4751E3129AFBBE16F842AECBB758A117BC9AC0B82E46321031B43A531B9107524FAB04C76279BC63570FC2A791D30D6E80B6E8BEEBAF3F4E416C86248C6C6CF762353131038130C357B998D07DC3A92B6B578015BB3C5",
+        hex);
   }
 }
