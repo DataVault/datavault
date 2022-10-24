@@ -17,6 +17,8 @@ import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.event.deposit.ComputedEncryption;
 import org.datavaultplatform.common.event.deposit.UploadComplete;
 import org.datavaultplatform.common.model.ArchiveStore;
+import org.datavaultplatform.common.storage.Verify;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.worker.tasks.Deposit;
 import org.datavaultplatform.worker.tasks.Retrieve;
 
@@ -24,7 +26,6 @@ import org.datavaultplatform.worker.tasks.Retrieve;
 public class DepositEvents {
 
   public static final String FILE_STORE_SRC_ID = "FILE-STORE-SRC-ID";
-  public static final String ARCHIVE_ID = "archiveId";
   final List<Event> events;
   final Deposit deposit;
 
@@ -41,13 +42,13 @@ public class DepositEvents {
     Retrieve retrieve = new Retrieve();
     retrieve.setTaskClass("org.datavaultplatform.worker.tasks.Retrieve");
     Map<String, String> topLevelProps = new HashMap<>();
-    topLevelProps.put("archiveDigestAlgorithm", "SHA-1");
-    topLevelProps.put("bagId", info.bagitId);
-    topLevelProps.put("numOfChunks", String.valueOf(info.numChunks));
-    topLevelProps.put("retrievePath", retrievePath);
-    topLevelProps.put("archiveSize", String.valueOf(info.archiveSize));
-    topLevelProps.put("archiveDigest", info.archiveDigest);
-    topLevelProps.put(ARCHIVE_ID, info.archiveId);
+    topLevelProps.put(PropNames.ARCHIVE_DIGEST_ALGORITHM, Verify.SHA_1_ALGORITHM);
+    topLevelProps.put(PropNames.BAG_ID, info.bagitId);
+    topLevelProps.put(PropNames.NUM_OF_CHUNKS, String.valueOf(info.numChunks));
+    topLevelProps.put(PropNames.RETRIEVE_PATH, retrievePath);
+    topLevelProps.put(PropNames.ARCHIVE_SIZE, String.valueOf(info.archiveSize));
+    topLevelProps.put(PropNames.ARCHIVE_DIGEST, info.archiveDigest);
+    topLevelProps.put(PropNames.ARCHIVE_ID, info.archiveId);
 
     retrieve.setProperties(topLevelProps);
 
@@ -59,7 +60,7 @@ public class DepositEvents {
     Map<String, String> userFileStoreClasses = new HashMap<>();
 
     Map<String,String> propsInner = new HashMap<>();
-    propsInner.put("rootPath", retrieveBaseDir.getCanonicalPath());
+    propsInner.put(PropNames.ROOT_PATH, retrieveBaseDir.getCanonicalPath());
     Map<String, Map<String, String>> propsOuter = new HashMap<>();
     propsOuter.put(FILE_STORE_SRC_ID, propsInner);
     retrieve.setUserFileStoreProperties(propsOuter);
@@ -109,7 +110,7 @@ public class DepositEvents {
   @SneakyThrows
   public RetrieveInfo getRetrieveInfo(File retrieveBaseDir, String retrievePath) {
     RetrieveInfo info = new RetrieveInfo();
-    info.bagitId = deposit.getProperties().get("bagId");
+    info.bagitId = deposit.getProperties().get(PropNames.BAG_ID);
 
     ComputedEncryption computedEncryption = getComputedEncryption();
     info.numChunks = computedEncryption.getChunkIVs().size();
@@ -145,7 +146,7 @@ public class DepositEvents {
     }
 
     //info.rootPathArchiveStore = this.destDir.getCanonicalPath();
-    info.rootPathArchiveStore = getArchiveStoreForRetrieve().getProperties().get("rootPath");
+    info.rootPathArchiveStore = getArchiveStoreForRetrieve().getProperties().get(PropNames.ROOT_PATH);
     //info.rootPathRetrieve = this.retrieveBaseDir.getCanonicalPath();
     info.rootPathRetrieve = retrieveBaseDir.getCanonicalPath();
 

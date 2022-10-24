@@ -14,6 +14,7 @@ import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 @Endpoint(id="customtime")
 public class CurrentTimeEndpoint {
 
+  public static final String CURRENT_TIME = "current-time";
   private final Clock clock;
 
   @Autowired
@@ -27,7 +28,7 @@ public class CurrentTimeEndpoint {
     df.setTimeZone(TimeZone.getTimeZone(clock.getZone()));
     Map<String, Object> details = new LinkedHashMap<>();
     long ts = clock.millis();
-    details.put("current-time", df.format(new Date(ts)));
+    details.put(CURRENT_TIME, df.format(new Date(ts)));
     CurrentTime health = new CurrentTime(details);
     return health;
   }

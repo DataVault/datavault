@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import lombok.SneakyThrows;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
@@ -28,13 +29,13 @@ public class UserStoreTest {
   @SneakyThrows
   void testSFTPFileSystemFromFileStore() {
     HashMap<String, String> props = new HashMap<>();
-    props.put("password", "password-value");
-    props.put("passphrase", "passphrase-value");
-    props.put("privateKey", toBase64("private-key-value"));
-    props.put("iv", toBase64("iv-value"));
-    props.put("host", "host-value");
-    props.put("port", "2112");
-    props.put("rootPath", "/root/path");
+    props.put(PropNames.PASSWORD, "password-value");
+    props.put(PropNames.PASSPHRASE, "passphrase-value");
+    props.put(PropNames.PRIVATE_KEY, toBase64("private-key-value"));
+    props.put(PropNames.IV, toBase64("iv-value"));
+    props.put(PropNames.HOST, "host-value");
+    props.put(PropNames.PORT, "2112");
+    props.put(PropNames.ROOT_PATH, "/root/path");
 
     FileStore fs = new FileStore();
     fs.setProperties(props);
@@ -92,7 +93,7 @@ public class UserStoreTest {
 
     // rootPath must be a directory that exists - that's why we use @TempDir
     String rootPath = tempDir.getAbsolutePath();
-    props.put("rootPath", rootPath);
+    props.put(PropNames.ROOT_PATH, rootPath);
 
     writeFile(tempDir, "temp1.txt", "temp1-content");
     writeFile(tempDir, "temp2.txt", "temp2-content");

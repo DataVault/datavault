@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.services;
 
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.Audit;
 import org.datavaultplatform.common.model.AuditChunkStatus;
 import org.datavaultplatform.common.model.DepositChunk;
@@ -75,11 +76,13 @@ public class AuditsService {
 
     public List<AuditChunkStatus> getRunningAuditChunkStatus(Audit audit, DepositChunk chunk, String archiveId, String location){
         HashMap<String, Object> properties = new HashMap<>();
-        properties.put("audit", audit);
-        properties.put("depositChunk", chunk);
-        properties.put("archiveId", archiveId);
-        if(location != null) properties.put("location", location);
-        properties.put("status", AuditChunkStatus.Status.IN_PROGRESS);
+        properties.put(PropNames.AUDIT, audit);
+        properties.put(PropNames.DEPOSIT_CHUNK, chunk);
+        properties.put(PropNames.ARCHIVE_ID, archiveId);
+        if (location != null) {
+            properties.put(PropNames.LOCATION, location);
+        }
+        properties.put(PropNames.STATUS, AuditChunkStatus.Status.IN_PROGRESS);
         List<AuditChunkStatus> chunkStatusList = this.auditChunkStatusDAO.findBy(properties);
 
         return chunkStatusList;
@@ -87,7 +90,7 @@ public class AuditsService {
 
     public List<AuditChunkStatus> getAuditChunkStatusFromAudit(Audit audit){
         HashMap<String, Object> properties = new HashMap<>();
-        properties.put("audit", audit);
+        properties.put(PropNames.AUDIT, audit);
         List<AuditChunkStatus> chunkStatusList = this.auditChunkStatusDAO.findBy(properties);
 
         return chunkStatusList;

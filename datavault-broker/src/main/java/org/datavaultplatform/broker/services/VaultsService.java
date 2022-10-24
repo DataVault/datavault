@@ -1,6 +1,5 @@
 package org.datavaultplatform.broker.services;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
@@ -19,6 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class VaultsService {
+
+    public static final String EMAIL_HOME_PAGE = "home-page";
+    public static final String EMAIL_HELP_PAGE = "help-page";
+    public static final String EMAIL_VAULT_NAME = "vault-name";
+    public static final String EMAIL_GROUP_NAME = "group-name";
+    public static final String EMAIL_VAULT_ID = "vault-id";
+    public static final String EMAIL_VAULT_REVIEW_DATE = "vault-review-date";
+    public static final String EMAIL_ROLE_NAME = "role-name";
 
     private final Logger logger = LoggerFactory.getLogger(VaultsService.class);
     private final VaultDAO vaultDAO;
@@ -111,13 +118,13 @@ public class VaultsService {
 
     private void sendEmail(Vault vault, String email, String subject, String role, String template, String homePage, String helpPage) {
         HashMap<String, Object> model = new HashMap<>();
-        model.put("home-page", homePage);
-        model.put("help-page", helpPage);
-        model.put("vault-name", vault.getName());
-        model.put("group-name", vault.getGroup().getName());
-        model.put("vault-id", vault.getID());
-        model.put("vault-review-date", vault.getReviewDate());
-        model.put("role-name", role);
+        model.put(EMAIL_HOME_PAGE, homePage);
+        model.put(EMAIL_HELP_PAGE, helpPage);
+        model.put(EMAIL_VAULT_NAME, vault.getName());
+        model.put(EMAIL_GROUP_NAME, vault.getGroup().getName());
+        model.put(EMAIL_VAULT_ID, vault.getID());
+        model.put(EMAIL_VAULT_REVIEW_DATE, vault.getReviewDate());
+        model.put(EMAIL_ROLE_NAME, role);
         emailService.sendTemplateMail(email, subject, template, model);
     }
 

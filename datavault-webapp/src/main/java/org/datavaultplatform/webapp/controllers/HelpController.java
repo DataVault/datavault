@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @ConditionalOnBean(RestService.class)
 public class HelpController {
 
+    public static final String SYSTEM = "system";
+    public static final String LINK = "link";
     private final String system;
     private final String link;
 
@@ -31,8 +33,8 @@ public class HelpController {
     @RequestMapping(value = "/help", method = RequestMethod.GET)
     public String help(ModelMap model) {
 
-        model.put("system", system);
-        model.put("link", link);
+        model.put(SYSTEM, system);
+        model.put(LINK, link);
 
         return "help/index";
     }

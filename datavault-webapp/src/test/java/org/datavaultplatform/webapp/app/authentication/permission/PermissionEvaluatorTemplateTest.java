@@ -145,10 +145,12 @@ class PermissionEvaluatorTemplateTest {
   @RequestMapping("/test/info")
   static class InfoController {
 
+    public static final String TARGET_ID = "targetId";
+
     @GetMapping("/template/{targetId}")
     String getInfoSecureOne(@PathVariable String targetId, ModelMap model) {
-      model.put("targetId",targetId);
-      return "test/securityTagHasPermission";
+      model.put(TARGET_ID,targetId);
+      return "test/securityTagHasPermission"  ;
     }
   }
 }

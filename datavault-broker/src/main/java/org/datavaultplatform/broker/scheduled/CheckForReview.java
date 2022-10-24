@@ -20,6 +20,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class CheckForReview implements ScheduledTask {
 
+    public static final String EMAIL_VAULT_NAME = "vault-name";
+    public static final String EMAIL_VAULT_ID = "vault-id";
+    public static final String EMAIL_VAULT_REVIEW_DATE = "vault-review-date";
+    public static final String EMAIL_RETENTION_POLICY_EXPIRY_DATE = "retention-policy-expiry-date";
+    public static final String EMAIL_GROUP_NAME = "group-name";
+    public static final String EMAIL_HOME_PAGE = "home-page";
+    public static final String EMAIL_HELP_PAGE = "help-page";
+    public static final String EMAIL_HELP_MAIL = "help-mail";
+    public static final String EMAIL_VAULT_REVIEW_LINK = "vault-review-link";
+
     private static final Logger log = LoggerFactory.getLogger(CheckForReview.class);
 
     private final VaultsService vaultsService;
@@ -80,15 +90,15 @@ public class CheckForReview implements ScheduledTask {
                 // Now bash on with the emailing.
 
                 HashMap<String, Object> model = new HashMap<>();
-                model.put("vault-name", vault.getName());
-                model.put("vault-id", vault.getID());
-                model.put("vault-review-date", dateToString(vault.getReviewDate()));
-                model.put("retention-policy-expiry-date", dateToString(vault.getRetentionPolicyExpiry()));
-                model.put("group-name", vault.getGroup().getName());
-                model.put("home-page", homeUrl);
-                model.put("help-page", helpUrl);
-                model.put("help-mail", helpMail);
-                model.put("vault-review-link", homeUrl+ "/admin/vaults/" + vault.getID() + "/reviews");
+                model.put(EMAIL_VAULT_NAME, vault.getName());
+                model.put(EMAIL_VAULT_ID, vault.getID());
+                model.put(EMAIL_VAULT_REVIEW_DATE, dateToString(vault.getReviewDate()));
+                model.put(EMAIL_RETENTION_POLICY_EXPIRY_DATE, dateToString(vault.getRetentionPolicyExpiry()));
+                model.put(EMAIL_GROUP_NAME, vault.getGroup().getName());
+                model.put(EMAIL_HOME_PAGE, homeUrl);
+                model.put(EMAIL_HELP_PAGE, helpUrl);
+                model.put(EMAIL_HELP_MAIL, helpMail);
+                model.put(EMAIL_VAULT_REVIEW_LINK, homeUrl+ "/admin/vaults/" + vault.getID() + "/reviews");
 
                 // Email the support team
                 emailService.sendTemplateMail(helpMail, "DataVault Vault needing reviewed", EmailTemplate.REVIEW_DUE_SUPPORT, model);

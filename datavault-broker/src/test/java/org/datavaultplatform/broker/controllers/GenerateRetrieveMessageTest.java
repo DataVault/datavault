@@ -21,6 +21,7 @@ import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.model.Retrieve.Status;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -87,7 +88,7 @@ public class GenerateRetrieveMessageTest extends BaseGenerateMessageTest {
     chunk1.setChunkNum(1);
     chunk1.setEncIV(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16});
     chunk1.setEcnArchiveDigest("enc-chunk-1-digest");
-    chunk1.setArchiveDigestAlgorithm("SHA-1");
+    chunk1.setArchiveDigestAlgorithm(Verify.SHA_1_ALGORITHM);
     deposit.setDepositChunks(Arrays.asList(chunk1));
 
     Archive archive = new Archive();

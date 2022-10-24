@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.InitStates;
@@ -44,11 +45,11 @@ public class Delete extends Task {
         this.eventSender = context.getEventSender();
         logger.info("Delete job - performAction()");
         Map<String, String> properties = getProperties();
-        this.depositId = properties.get("depositId");
-        String bagID = properties.get("bagId");
-        this.userID = properties.get("userId");
-        this.numOfChunks = Integer.parseInt(properties.get("numOfChunks"));
-        this.archiveSize = Long.parseLong(properties.get("archiveSize"));
+        this.depositId = properties.get(PropNames.DEPOSIT_ID);
+        String bagID = properties.get(PropNames.BAG_ID);
+        this.userID = properties.get(PropNames.USER_ID);
+        this.numOfChunks = Integer.parseInt(properties.get(PropNames.NUM_OF_CHUNKS));
+        this.archiveSize = Long.parseLong(properties.get(PropNames.ARCHIVE_SIZE));
 
         if (this.isRedeliver()) {
             eventSender.send(new Error(this.jobID, this.depositId, "Delete stopped: the message had been redelivered, please investigate")

@@ -49,6 +49,7 @@ import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.storage.Verify;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
@@ -377,7 +378,7 @@ public class EventListenerIT extends BaseDatabaseTest {
     assertEquals(1, chunks.size());
     DepositChunk chunk1 = chunks.get(0);
     assertEquals(1, chunk1.getChunkNum());
-    assertEquals("SHA-1", chunk1.getArchiveDigestAlgorithm());
+    assertEquals(Verify.SHA_1_ALGORITHM, chunk1.getArchiveDigestAlgorithm());
     assertEquals("B22E00301E28767BD5E96019762B36CB2F395351", chunk1.getArchiveDigest());
     assertEquals("29D1965B60BF026B8BE2403DC43DE77B85D4CFCB", chunk1.getEcnArchiveDigest());
     assertEquals("AVBSQsBmzvRrBAJny6KVUmO9b3zXWDDJaaivbo/R2IlpYC1XKHIQhPwOINg42Vfth+vGICrerw47MIGIYdf5cLe43ZZqDIg6Vi6VFUe0OuaWIVIYaVZ1j7HYDXE6Arvp",

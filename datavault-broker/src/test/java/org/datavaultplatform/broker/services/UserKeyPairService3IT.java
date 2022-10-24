@@ -68,7 +68,7 @@ public class UserKeyPairService3IT extends BaseUserKeyPairServiceTest {
     Session session = jSch.getSession(TEST_USER, "localhost", this.sftpServerPort);
     jSch.addIdentity(TEST_USER, privateKeyBytes, null, TEST_PASSPHRASE.getBytes());
     java.util.Properties properties = new java.util.Properties();
-    properties.put("StrictHostKeyChecking", "no");
+    properties.put(STRICT_HOST_KEY_CHECKING, NO);
     session.setConfig(properties);
     try {
       session.connect();

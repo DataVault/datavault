@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.services;
 
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.dao.ArchiveStoreDAO;
 
@@ -95,16 +96,16 @@ public class ArchiveStoreService {
                 if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.TivoliStorageManager")) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
                     if (this.optionsDir != null && ! this.optionsDir.equals("")) {
-                        asProps.put("optionsDir", this.optionsDir);
+                        asProps.put(PropNames.OPTIONS_DIR, this.optionsDir);
                     }
                     if (this.tempDir != null && ! this.tempDir.equals("")) {
-                        asProps.put("tempDir", this.tempDir);
+                        asProps.put(PropNames.TEMP_DIR, this.tempDir);
                     }
                     if (this.tsmRetryTime != null && ! this.tsmRetryTime.equals("")) {
-                        asProps.put("tsmRetryTime", this.tsmRetryTime);
+                        asProps.put(PropNames.TSM_RETRY_TIME, this.tsmRetryTime);
                     }
                     if (this.tsmMaxRetries != null && ! this.tsmMaxRetries.equals("")) {
-                        asProps.put("tsmMaxRetries", this.tsmMaxRetries);
+                        asProps.put(PropNames.TSM_MAX_RETRIES, this.tsmMaxRetries);
                     }
                     archiveStore.setProperties(asProps);
                 }
@@ -112,16 +113,16 @@ public class ArchiveStoreService {
                 if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.OracleObjectStorageClassic")) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
                     if (this.occRetryTime != null && ! this.occRetryTime.equals("")) {
-                        asProps.put("occRetryTime", this.occRetryTime);
+                        asProps.put(PropNames.OCC_RETRY_TIME, this.occRetryTime);
                     }
                     if (this.occMaxRetries != null && ! this.occMaxRetries.equals("")) {
-                        asProps.put("occMaxRetries", this.occMaxRetries);
+                        asProps.put(PropNames.OCC_MAX_RETRIES, this.occMaxRetries);
                     }
                     if (this.ociBucketName != null && ! this.ociBucketName.equals("")) {
-                        asProps.put("ociBucketName", this.ociBucketName);
+                        asProps.put(PropNames.OCI_BUCKET_NAME, this.ociBucketName);
                     }
                     if (this.ociNameSpace != null && ! this.ociNameSpace.equals("")) {
-                        asProps.put("ociNameSpace", this.ociNameSpace);
+                        asProps.put(PropNames.OCI_NAME_SPACE, this.ociNameSpace);
                     }
                     archiveStore.setProperties(asProps);
                 }
@@ -129,16 +130,16 @@ public class ArchiveStoreService {
                 if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.S3Cloud")) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
                     if (this.bucketName != null && ! this.bucketName.equals("")) {
-                        asProps.put("s3.bucketName", this.bucketName);
+                        asProps.put(PropNames.AWS_S3_BUCKET_NAME, this.bucketName);
                     }
                     if (this.region != null && ! this.region.equals("")) {
-                        asProps.put("s3.region", this.region);
+                        asProps.put(PropNames.AWS_S3_REGION, this.region);
                     }
                     if (this.awsAccessKey != null && ! this.awsAccessKey.equals("")) {
-                        asProps.put("s3.awsAccessKey", this.awsAccessKey);
+                        asProps.put(PropNames.AWS_ACCESS_KEY, this.awsAccessKey);
                     }
                     if (this.awsSecretKey != null && ! this.awsSecretKey.equals("")) {
-                        asProps.put("s3.awsSecretKey", this.awsSecretKey);
+                        asProps.put(PropNames.AWS_SECRET_KEY, this.awsSecretKey);
                     }
 
                     archiveStore.setProperties(asProps);

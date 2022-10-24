@@ -3,6 +3,7 @@ package org.datavaultplatform.common.storage.impl;
 import com.jcraft.jsch.*;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.FileInfo;
@@ -23,6 +24,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SFTPFileSystem extends Device implements UserStore {
 
+    public static final String STRICT_HOST_KEY_CHECKING = "StrictHostKeyChecking";
+    public static final String NO = "no";
     private final String host;
     private final String rootPath;
     private final String username;
@@ -49,14 +52,14 @@ public class SFTPFileSystem extends Device implements UserStore {
         log.info("Construct SFTPFileSystem...");
         
         // Unpack the config parameters (in an implementation-specific way)
-        host = config.get("host");
-        port = Integer.parseInt(config.get("port"));
-        rootPath = config.get("rootPath");
-        username = config.get("username");
-        password = config.get("password");
+        host = config.get(PropNames.HOST);
+        port = Integer.parseInt(config.get(PropNames.PORT));
+        rootPath = config.get(PropNames.ROOT_PATH);
+        username = config.get(PropNames.USERNAME);
+        password = config.get(PropNames.PASSWORD);
         log.info("casting byte[]...");
         encPrivateKey = Base64.decode(config.get("privateKey"));
-        encIV = Base64.decode(config.get("iv"));
+        encIV = Base64.decode(config.get(PropNames.IV));
         log.info("done!");
         passphrase = config.get("passphrase");
         log.info("SFTPFileSystem created...");
@@ -80,7 +83,7 @@ public class SFTPFileSystem extends Device implements UserStore {
         //jsch.setKnownHosts(".../.ssh/known_hosts");
 
         java.util.Properties properties = new java.util.Properties();
-        properties.put("StrictHostKeyChecking", "no");
+        properties.put(STRICT_HOST_KEY_CHECKING, NO);
         session.setConfig(properties);
         for (int i = 0; i < RETRIES; i++) {
             int attempt = i+1;

@@ -19,6 +19,7 @@ import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseReuseDatabaseTest;
 import org.datavaultplatform.broker.test.TestUtils;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.Audit;
 import org.datavaultplatform.common.model.AuditChunkStatus;
 import org.datavaultplatform.common.model.AuditChunkStatus.Status;
@@ -313,20 +314,20 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
 
     assertEquals(item1.getID(), dao.findBy(new HashMap<String, Object>(){
       {
-        this.put("status", Status.COMPLETE);
+        this.put(PropNames.STATUS, Status.COMPLETE);
       }
     }).get(0).getID());
 
     assertEquals(item2.getID(), dao.findBy(new HashMap<String, Object>(){
       {
-        this.put("status", Status.ERROR);
+        this.put(PropNames.STATUS, Status.ERROR);
       }
     }).get(0).getID());
 
 
     assertEquals(item3.getID(), dao.findBy(new HashMap<String, Object>(){
       {
-        this.put("status", Status.IN_PROGRESS);
+        this.put(PropNames.STATUS, Status.IN_PROGRESS);
       }
     }).get(0).getID());
 
@@ -346,7 +347,7 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
     assertEquals(new HashSet<>(Collections.singletonList(item1.getID())), dao.findBy(new HashMap<String, Object>(){
       {
         this.put("note", "noteA");
-        this.put("status", Status.COMPLETE);
+        this.put(PropNames.STATUS, Status.COMPLETE);
       }
     }).stream().map(AuditChunkStatus::getID).collect(Collectors.toSet()));
   }
@@ -373,11 +374,11 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
 
     assertEquals(3, dao.findAll().size());
 
-    assertEquals(item1.getID(), dao.findBy("status", Status.COMPLETE).get(0).getID());
+    assertEquals(item1.getID(), dao.findBy(PropNames.STATUS, Status.COMPLETE).get(0).getID());
 
-    assertEquals(item2.getID(), dao.findBy("status", Status.ERROR).get(0).getID());
+    assertEquals(item2.getID(), dao.findBy(PropNames.STATUS, Status.ERROR).get(0).getID());
 
-    assertEquals(item3.getID(), dao.findBy("status", Status.IN_PROGRESS).get(0).getID());
+    assertEquals(item3.getID(), dao.findBy(PropNames.STATUS, Status.IN_PROGRESS).get(0).getID());
 
     assertEquals(new HashSet<>(Arrays.asList(item1.getID(), item2.getID())), dao.findBy("note", "noteA").stream().map(AuditChunkStatus::getID).collect(Collectors.toSet()));
 

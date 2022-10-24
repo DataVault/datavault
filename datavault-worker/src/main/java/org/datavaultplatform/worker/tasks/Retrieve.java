@@ -1,6 +1,7 @@
 package org.datavaultplatform.worker.tasks;
 
 import org.apache.commons.io.FileUtils;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.EventSender;
@@ -22,7 +23,6 @@ import org.datavaultplatform.worker.operations.Tar;
 import org.datavaultplatform.worker.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
@@ -64,16 +64,16 @@ public class Retrieve extends Task {
         this.eventSender = context.getEventSender();
         logger.info("Retrieve job - performAction()");
         Map<String, String> properties = getProperties();
-        this.depositId = properties.get("depositId");
-        this.retrieveId = properties.get("retrieveId");
-        String bagID = properties.get("bagId");
-        this.retrievePath = properties.get("retrievePath");
-        this.archiveId = properties.get("archiveId");
-        this.userID = properties.get("userId");
-        this.archiveDigest = properties.get("archiveDigest");
-        this.archiveDigestAlgorithm = properties.get("archiveDigestAlgorithm");
-        this.numOfChunks = Integer.parseInt(properties.get("numOfChunks"));
-        this.archiveSize = Long.parseLong(properties.get("archiveSize"));
+        this.depositId = properties.get(PropNames.DEPOSIT_ID);
+        this.retrieveId = properties.get(PropNames.RETRIEVE_ID);
+        String bagID = properties.get(PropNames.BAG_ID);
+        this.retrievePath = properties.get(PropNames.RETRIEVE_PATH);
+        this.archiveId = properties.get(PropNames.ARCHIVE_ID);
+        this.userID = properties.get(PropNames.USER_ID);
+        this.archiveDigest = properties.get(PropNames.ARCHIVE_DIGEST);
+        this.archiveDigestAlgorithm = properties.get(PropNames.ARCHIVE_DIGEST_ALGORITHM);
+        this.numOfChunks = Integer.parseInt(properties.get(PropNames.NUM_OF_CHUNKS));
+        this.archiveSize = Long.parseLong(properties.get(PropNames.ARCHIVE_SIZE));
         this.chunksDigest = this.getChunkFilesDigest();
         this.encChunksDigest = this.getEncChunksDigest();
         this.encTarDigest = this.getEncTarDigest();

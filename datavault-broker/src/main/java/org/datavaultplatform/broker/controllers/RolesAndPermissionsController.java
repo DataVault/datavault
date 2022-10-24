@@ -27,6 +27,14 @@ import java.util.List;
 @Api(name="Permissions", description = "Interact with DataVault Roles and Permissions")
 public class RolesAndPermissionsController {
 
+    public static final String EMAIL_ROLE = "role";
+    public static final String EMAIL_HOMEPAGE = "homepage" ;
+    public static final String EMAIL_HELP_PAGE = "helppage";
+    public static final String EMAIL_ASSIGNEE = "assignee";
+    public static final String EMAIL_VAULT = "vault";
+    public static final String EMAIL_OWNER = "owner";
+    public static final String EMAIL_TARGET = "target";
+    public static final String EMAIL_SCHOOL = "school";
     private final EventService eventService;
     private final EmailService emailService;
     private final VaultsService vaultsService;
@@ -374,25 +382,25 @@ public class RolesAndPermissionsController {
     private void sendEmails(String template, RoleAssignment roleAssignment, String userId) {
 
         HashMap<String, Object> model = new HashMap<>();
-        model.put("role", roleAssignment.getRole().getName());
-        model.put("homepage", this.homePage);
-        model.put("helppage", this.helpPage);
+        model.put(EMAIL_ROLE, roleAssignment.getRole().getName());
+        model.put(EMAIL_HOMEPAGE, this.homePage);
+        model.put(EMAIL_HELP_PAGE, this.helpPage);
         User assignee = this.usersService.getUser(userId);
-        model.put("assignee", assignee.getFirstname() + " " + assignee.getLastname());
+        model.put(EMAIL_ASSIGNEE, assignee.getFirstname() + " " + assignee.getLastname());
         if(roleAssignment.getVaultId() != null) {
             Vault vault = vaultsService.getVault(roleAssignment.getVaultId());
-            model.put("vault", vault.getName());
+            model.put(EMAIL_VAULT, vault.getName());
             User vaultOwner = rolesAndPermissionsService.getVaultOwner(vault.getID());
             if(vaultOwner != null) {
-                model.put("owner", vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+                model.put(EMAIL_OWNER, vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
             } else {
-                model.put("owner", "None");
+                model.put(EMAIL_OWNER, "None");
             }
-            model.put("target", "vault");
+            model.put(EMAIL_TARGET, "vault");
         }
         if(roleAssignment.getSchoolId() != null) {
-            model.put("school", groupsService.getGroup(roleAssignment.getSchoolId()).getName());
-            model.put("target", "school");
+            model.put(EMAIL_SCHOOL, groupsService.getGroup(roleAssignment.getSchoolId()).getName());
+            model.put(EMAIL_TARGET, "school");
         }
 
         // Send email to the deposit user

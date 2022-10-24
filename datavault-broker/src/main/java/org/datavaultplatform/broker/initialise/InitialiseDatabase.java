@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.config.ConfigUtils;
 import org.datavaultplatform.broker.services.ArchiveStoreService;
 import org.datavaultplatform.broker.services.RolesAndPermissionsService;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.slf4j.Logger;
@@ -77,7 +78,7 @@ public class InitialiseDatabase {
         List<ArchiveStore> initStores = new ArrayList<>();
         if (archiveStores.isEmpty()) {
             HashMap<String,String> storeProperties = new HashMap<>();
-            storeProperties.put("rootPath", archiveDir);
+            storeProperties.put(PropNames.ROOT_PATH, archiveDir);
             ArchiveStore tsm = new ArchiveStore(
                 "org.datavaultplatform.common.storage.impl.TivoliStorageManager", storeProperties, "Default archive store (TSM)", true);
             //ArchiveStore s3 = new ArchiveStore("org.datavaultplatform.common.storage.impl.S3Cloud", storeProperties, "Cloud archive store", false);

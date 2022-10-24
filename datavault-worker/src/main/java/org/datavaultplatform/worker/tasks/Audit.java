@@ -11,6 +11,7 @@ import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.util.StorageClassUtils;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.worker.operations.FileSplitter;
 import org.datavaultplatform.common.event.EventSender;
 import org.slf4j.Logger;
@@ -47,8 +48,8 @@ public class Audit extends Task {
         this.eventSender = context.getEventSender();
         logger.info("Retrieve job - performAction()");
         Map<String, String> properties = getProperties();
-        String userID = properties.get("userId");
-        this.auditId = properties.get("auditId");
+        String userID = properties.get(PropNames.USER_ID);
+        this.auditId = properties.get(PropNames.AUDIT_ID);
         this.chunksDigest = this.getChunkFilesDigest();
         this.encChunksDigest = this.getEncChunksDigest();
 

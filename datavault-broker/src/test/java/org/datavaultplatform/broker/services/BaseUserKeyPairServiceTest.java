@@ -16,6 +16,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers(disabledWithoutDocker = true)
 public abstract class BaseUserKeyPairServiceTest {
 
+  public static final String NO = "no";
+  public static final String STRICT_HOST_KEY_CHECKING = "StrictHostKeyChecking";
   @SneakyThrows
   final static void execInContainer(GenericContainer container, String label, String command) {
     execInContainer(container, label, command.split(" "));

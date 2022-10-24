@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.controllers;
 
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
@@ -64,7 +65,7 @@ public class FileStoreController {
         // In theory we could allow the user to define the path, however that would allow them access to anything that the
         // Datavault app can read. So for now we will just use the configured default value.
         //storeProperties.put("rootPath", path);
-        storeProperties.put("rootPath", activeDir);
+        storeProperties.put(PropNames.ROOT_PATH, activeDir);
         FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Filesystem (local)");
         restService.addFileStore(store);
     }
@@ -77,9 +78,9 @@ public class FileStoreController {
 
         // Generate a partially complete Filestore
         HashMap<String,String> storeProperties = new HashMap<>();
-        storeProperties.put("host", hostname);
-        storeProperties.put("port", port);
-        storeProperties.put("rootPath", path);
+        storeProperties.put(PropNames.HOST, hostname);
+        storeProperties.put(PropNames.PORT, port);
+        storeProperties.put(PropNames.ROOT_PATH, path);
 
         FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.SFTPFileSystem", storeProperties, path);
         restService.addFileStoreSFTP(store);

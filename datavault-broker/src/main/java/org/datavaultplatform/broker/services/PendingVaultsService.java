@@ -21,7 +21,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class PendingVaultsService {
-	private final Logger logger = LoggerFactory.getLogger(PendingVaultsService.class);
+
+    public static final String EMAIL_VAULT_NAME = "vault-name";
+    public static final String EMAIL_GROUP_NAME = "group-name";
+    public static final String EMAIL_SUBMITTER_ID = "submitter-id";
+    public static final String EMAIL_TIMESTAMP = "timestamp";
+
+	  private final Logger logger = LoggerFactory.getLogger(PendingVaultsService.class);
 	
     private final PendingVaultDAO pendingVaultDAO;
     private final GroupsService groupsService;
@@ -420,11 +426,11 @@ public class PendingVaultsService {
 
         logger.info("Sending pending vault submitted email");
         HashMap<String, Object> model = new HashMap<>();
-        model.put("vault-name", vault.getName());
-        model.put("group-name", vault.getGroup().getName());
-        model.put("submitter-id", vault.getUser().getID());
+        model.put(EMAIL_VAULT_NAME, vault.getName());
+        model.put(EMAIL_GROUP_NAME, vault.getGroup().getName());
+        model.put(EMAIL_SUBMITTER_ID, vault.getUser().getID());
         LocalDate today = LocalDate.now();
-        model.put("timestamp", today);
+        model.put(EMAIL_TIMESTAMP, today);
         this.emailService.sendTemplateMail(this.helpMail, "New Pending Vault Submitted", "group-admin-pv-submitted.vm", model);
     }
 }

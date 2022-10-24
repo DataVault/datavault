@@ -8,13 +8,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Verify {
     
-    private static final String algorithm = "SHA-1";
+    public static final String SHA_1_ALGORITHM = "SHA-1";
     
     public enum Method {LOCAL_ONLY, COPY_BACK, CLOUD}
 
     public static String getDigest(File file) throws Exception {
 
-        MessageDigest sha1 = MessageDigest.getInstance(algorithm);
+        MessageDigest sha1 = MessageDigest.getInstance(SHA_1_ALGORITHM);
         
         try (InputStream is = new FileInputStream(file)) {
             byte[] buffer = new byte[8192];
@@ -32,7 +32,7 @@ public class Verify {
     }
     
     public static String getAlgorithm() {
-        return algorithm;
+        return SHA_1_ALGORITHM;
     }
 
 }

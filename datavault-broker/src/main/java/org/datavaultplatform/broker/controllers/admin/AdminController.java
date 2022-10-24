@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Event;
 
 import org.datavaultplatform.common.model.*;
@@ -351,11 +352,11 @@ public class AdminController {
         // Ask the worker to process the data delete
         try {
             HashMap<String, String> deleteProperties = new HashMap<>();
-            deleteProperties.put("depositId", deposit.getID());
-            deleteProperties.put("bagId", deposit.getBagId());
-            deleteProperties.put("archiveSize", Long.toString(deposit.getArchiveSize()));
-            deleteProperties.put("userId", user.getID());
-            deleteProperties.put("numOfChunks", Integer.toString(deposit.getNumOfChunks()));
+            deleteProperties.put(PropNames.DEPOSIT_ID, deposit.getID());
+            deleteProperties.put(PropNames.BAG_ID, deposit.getBagId());
+            deleteProperties.put(PropNames.ARCHIVE_SIZE, Long.toString(deposit.getArchiveSize()));
+            deleteProperties.put(PropNames.USER_ID, user.getID());
+            deleteProperties.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));
             for (Archive archive : deposit.getArchives()) {
                 deleteProperties.put(archive.getArchiveStore().getID(), archive.getArchiveId());
             }
@@ -389,10 +390,10 @@ public class AdminController {
                 if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.TivoliStorageManager")) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
                     if (this.optionsDir != null && ! this.optionsDir.equals("")) {
-                        asProps.put("optionsDir", this.optionsDir);
+                        asProps.put(PropNames.OPTIONS_DIR, this.optionsDir);
                     }
                     if (this.tempDir != null && ! this.tempDir.equals("")) {
-                        asProps.put("tempDir", this.tempDir);
+                        asProps.put(PropNames.TEMP_DIR, this.tempDir);
                     }
                     archiveStore.setProperties(asProps);
                 }
@@ -400,16 +401,16 @@ public class AdminController {
                 if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.S3Cloud")) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
                     if (this.bucketName != null && ! this.bucketName.equals("")) {
-                        asProps.put("s3.bucketName", this.bucketName);
+                        asProps.put(PropNames.AWS_S3_BUCKET_NAME, this.bucketName);
                     }
                     if (this.region != null && ! this.region.equals("")) {
-                        asProps.put("s3.region", this.region);
+                        asProps.put(PropNames.AWS_S3_REGION, this.region);
                     }
                     if (this.awsAccessKey != null && ! this.awsAccessKey.equals("")) {
-                        asProps.put("s3.awsAccessKey", this.awsAccessKey);
+                        asProps.put(PropNames.AWS_ACCESS_KEY, this.awsAccessKey);
                     }
                     if (this.awsSecretKey != null && ! this.awsSecretKey.equals("")) {
-                        asProps.put("s3.awsSecretKey", this.awsSecretKey);
+                        asProps.put(PropNames.AWS_SECRET_KEY, this.awsSecretKey);
                     }
 
                     //if (this.authDir != null && ! this.authDir.equals("")) {

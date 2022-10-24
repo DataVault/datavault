@@ -3,6 +3,7 @@ package org.datavaultplatform.broker.scheduled;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.task.Task;
 import org.slf4j.Logger;
@@ -135,12 +136,12 @@ public class CheckForDelete implements ScheduledTask {
         // Ask the worker to process the data delete
 
         HashMap<String, String> deleteProperties = new HashMap<>();
-        deleteProperties.put("depositId", deposit.getID());
-        deleteProperties.put("bagId", deposit.getBagId());
-        deleteProperties.put("archiveSize", Long.toString(deposit.getArchiveSize()));
+        deleteProperties.put(PropNames.DEPOSIT_ID, deposit.getID());
+        deleteProperties.put(PropNames.BAG_ID, deposit.getBagId());
+        deleteProperties.put(PropNames.ARCHIVE_SIZE, Long.toString(deposit.getArchiveSize()));
         // We have no record of who requested the delete, is that acceptable?
-        deleteProperties.put("userId", null);
-        deleteProperties.put("numOfChunks", Integer.toString(deposit.getNumOfChunks()));
+        deleteProperties.put(PropNames.USER_ID, null);
+        deleteProperties.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));
         for (Archive archive : deposit.getArchives()) {
             deleteProperties.put(archive.getArchiveStore().getID(), archive.getArchiveId());
         }

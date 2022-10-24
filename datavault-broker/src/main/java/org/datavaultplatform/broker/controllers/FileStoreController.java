@@ -7,6 +7,7 @@ import org.datavaultplatform.broker.services.FileStoreService;
 import org.datavaultplatform.broker.services.UserKeyPairService;
 import org.datavaultplatform.broker.services.UserKeyPairService.KeyPairInfo;
 import org.datavaultplatform.broker.services.UsersService;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.User;
@@ -133,21 +134,21 @@ public class FileStoreController {
         HashMap<String, String> storeProperties = store.getProperties();
 
         // Add the confidential properties.
-        storeProperties.put("username", user.getID());
-        storeProperties.put("password", "");
-        storeProperties.put("publicKey", keypair.getPublicKey());
-        storeProperties.put("privateKey", Base64.toBase64String(encrypted));
-        storeProperties.put("iv", Base64.toBase64String(iv));
-        storeProperties.put("passphrase", passphrase);
+        storeProperties.put(PropNames.USERNAME, user.getID());
+        storeProperties.put(PropNames.PASSWORD, "");
+        storeProperties.put(PropNames.PUBLIC_KEY, keypair.getPublicKey());
+        storeProperties.put(PropNames.PRIVATE_KEY, Base64.toBase64String(encrypted));
+        storeProperties.put(PropNames.IV, Base64.toBase64String(iv));
+        storeProperties.put(PropNames.PASSPHRASE, passphrase);
 
         store.setUser(user);
         fileStoreService.addFileStore(store);
 
         // Remove sensitive information that should only be held server side.
         storeProperties = store.getProperties();
-        storeProperties.remove("password");
-        storeProperties.remove("privateKey");
-        storeProperties.remove("passphrase");
+        storeProperties.remove(PropNames.PASSWORD);
+        storeProperties.remove(PropNames.PRIVATE_KEY);
+        storeProperties.remove(PropNames.PASSPHRASE);
         store.setProperties(storeProperties);
 
         return new ResponseEntity<>(store, HttpStatus.CREATED);
@@ -177,9 +178,9 @@ public class FileStoreController {
 
         // Remove sensitive information that should only be held server side.
         HashMap<String,String> storeProperties = store.getProperties();
-        storeProperties.remove("password");
-        storeProperties.remove("privateKey");
-        storeProperties.remove("passphrase");
+        storeProperties.remove(PropNames.PASSWORD);
+        storeProperties.remove(PropNames.PRIVATE_KEY);
+        storeProperties.remove(PropNames.PASSPHRASE);
         store.setProperties(storeProperties);
 
         return new ResponseEntity<>(store, HttpStatus.OK);

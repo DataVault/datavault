@@ -15,6 +15,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.datavaultplatform.broker.services.FileStoreService;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystem;
@@ -50,15 +51,15 @@ public class SftpFileStoreEndpoint {
 
     String originalPort = fileStore.getProperties().get("port");
     String portToUse = portAdjuster.apply(originalPort);
-    fileStore.getProperties().put("port", portToUse);
+    fileStore.getProperties().put(PropNames.PORT, portToUse);
 
     SftpFileStoreInfo info = new SftpFileStoreInfo();
     info.setId(fileStore.getID());
     info.setLabel(fileStore.getLabel());
-    info.setUsername(fileStore.getProperties().get("username"));
-    info.setHost(fileStore.getProperties().get("host"));
-    info.setPort(fileStore.getProperties().get("port"));
-    info.setRootPath(fileStore.getProperties().get("rootPath"));
+    info.setUsername(fileStore.getProperties().get(PropNames.USERNAME));
+    info.setHost(fileStore.getProperties().get(PropNames.HOST));
+    info.setPort(fileStore.getProperties().get(PropNames.PORT));
+    info.setRootPath(fileStore.getProperties().get(PropNames.ROOT_PATH));
 
     long start = System.currentTimeMillis();
     Future<Boolean> future = EXECUTOR.submit(() -> {

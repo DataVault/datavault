@@ -1,6 +1,7 @@
 package org.datavaultplatform.worker.tasks;
 
 import org.apache.commons.io.FileUtils;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.EventSender;
@@ -106,9 +107,9 @@ public class Deposit extends Task {
         this.InitialLogging(context);
         eventSender = context.getEventSender();
         Map<String, String> properties = getProperties();
-        depositId = properties.get("depositId");
-        bagID = properties.get("bagId");
-        userID = properties.get("userId");
+        depositId = properties.get(PropNames.DEPOSIT_ID);
+        bagID = properties.get(PropNames.BAG_ID);
+        userID = properties.get(PropNames.USER_ID);
 
         String lastEventClass = (this.getLastEvent() != null) ? this.getLastEvent().getEventClass() : null;
         if (lastEventClass != null) {
@@ -929,12 +930,12 @@ public class Deposit extends Task {
 
         } else {
             int numOfChunks =  0;
-            if (properties.get("numOfChunks") != null) {
-                numOfChunks = Integer.parseInt(properties.get("numOfChunks"));
+            if (properties.get(PropNames.NUM_OF_CHUNKS) != null) {
+                numOfChunks = Integer.parseInt(properties.get(PropNames.NUM_OF_CHUNKS));
             }
             String archiveDigest = null;
-            if (properties.get("archiveDigest") != null) {
-                archiveDigest = properties.get("archiveDigest");
+            if (properties.get(PropNames.ARCHIVE_DIGEST) != null) {
+                archiveDigest = properties.get(PropNames.ARCHIVE_DIGEST);
             }
             this.skipPackageStep(context, lastEventClass, numOfChunks, archiveDigest, retVal);
         }
@@ -946,7 +947,10 @@ public class Deposit extends Task {
         String tarHashAlgorithm = Verify.getAlgorithm();
         if (lastEventClass == null || RESTART_FROM_PACKAGING.contains(lastEventClass)) {
             logger.info("Creating bag ...");
-            this.createBag(bagDir, properties.get("depositMetadata"), properties.get("vaultMetadata"), properties.get("externalMetadata"));
+            this.createBag(bagDir,
+                properties.get(PropNames.DEPOSIT_METADATA),
+                properties.get(PropNames.VAULT_METADATA),
+                properties.get(PropNames.EXTERNAL_METADATA));
             // Tar the bag directory
             logger.info("Creating tar file ...");
 
@@ -971,7 +975,7 @@ public class Deposit extends Task {
                     .withUserId(userID));
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping tar checksum");
-            this.skipTarChecksum(properties.get("archiveDigest"), packageHelper);
+            this.skipTarChecksum(properties.get(PropNames.ARCHIVE_DIGEST), packageHelper);
         }
 
         logger.info("We have successfully created the Tar, so lets delete the Bag to save space");
@@ -984,8 +988,8 @@ public class Deposit extends Task {
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping chunking");
             int numOfChunks =  0;
-            if (properties.get("numOfChunks") != null) {
-                numOfChunks = Integer.parseInt(properties.get("numOfChunks"));
+            if (properties.get(PropNames.NUM_OF_CHUNKS) != null) {
+                numOfChunks = Integer.parseInt(properties.get(PropNames.NUM_OF_CHUNKS));
             }
             this.skipChunking(numOfChunks, context);
         }

@@ -47,6 +47,8 @@ import java.util.stream.Collectors;
 public class VaultsController {
 
     private static final Logger logger = LoggerFactory.getLogger(VaultsController.class);
+    public static final String SYSTEM = "system";
+    public static final String LINK = "link";
 
     private final RestService restService;
     private final UserLookupService userLookupService;
@@ -170,8 +172,8 @@ public class VaultsController {
             Group[] groups = restService.getGroups();
             model.addAttribute("groups", groups);
 
-            model.put("system", system);
-            model.put("link", link);
+            model.put(SYSTEM, system);
+            model.put(LINK, link);
 
             model.addAttribute("welcome", welcome);
 

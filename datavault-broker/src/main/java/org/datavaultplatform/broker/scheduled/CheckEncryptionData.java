@@ -22,6 +22,23 @@ import org.bouncycastle.util.encoders.Base64;
 @Component
 public class CheckEncryptionData implements ScheduledTask {
 
+    public static final String EMAIL_GROUP_NAME = "group-name";
+    public static final String EMAIL_DEPOSIT_NAME = "deposit-name";
+    public static final String EMAIL_DEPOSIT_ID = "deposit-id";
+    public static final String EMAIL_VAULT_NAME = "vault-name";
+    public static final String EMAIL_VAULT_ID = "vault-id";
+    public static final String EMAIL_VAULT_RETENTION_EXPIRY = "vault-retention-expiry";
+    public static final String EMAIL_VAULT_REVIEW_DATE = "vault-review-date";
+    public static final String EMAIL_USER_ID = "user-id";
+    public static final String EMAIL_USER_FIRST_NAME= "user-firstname";
+    public static final String EMAIL_USER_LAST_NAME = "user-lastname";
+    public static final String EMAIL_SIZE_BYTES = "size-bytes";
+    public static final String EMAIL_TIMESTAMP = "timestamp";
+    public static final String EMAIL_HAS_PERSONAL_DATA = "hasPersonalData";
+    public static final String EMAIL_CHUNK_ID = "chunk-id";
+    public static final String EMAIL_CHUNK_IV = "chunk-iv";
+    public static final String EMAIL_ENC_CHUNK_DIGEST = "enc-chunk-digest";
+
     private final DepositsService depositsService;
     private final EmailService emailService;
 
@@ -102,22 +119,22 @@ public class CheckEncryptionData implements ScheduledTask {
         User depositUser = deposit.getUser();
 
         HashMap<String, Object> model = new HashMap<>();
-        model.put("group-name", group.getName());
-        model.put("deposit-name", deposit.getName());
-        model.put("deposit-id", deposit.getID());
-        model.put("vault-name", vault.getName());
-        model.put("vault-id", vault.getID());
+        model.put(EMAIL_GROUP_NAME, group.getName());
+        model.put(EMAIL_DEPOSIT_NAME, deposit.getName());
+        model.put(EMAIL_DEPOSIT_ID, deposit.getID());
+        model.put(EMAIL_VAULT_NAME, vault.getName());
+        model.put(EMAIL_VAULT_ID, vault.getID());
 //        model.put("vault-retention-expiry", vault.getRetentionPolicyExpiry());
-        model.put("vault-review-date", vault.getReviewDate());
-        model.put("user-id", depositUser.getID());
-        model.put("user-firstname", depositUser.getFirstname());
-        model.put("user-lastname", depositUser.getLastname());
-        model.put("size-bytes", deposit.getArchiveSize());
-        model.put("timestamp", event.getTimestamp());
-        model.put("hasPersonalData", deposit.getHasPersonalData());
-        model.put("chunk-id", ChunkID);
-        model.put("chunk-iv", chunkIV);
-        model.put("enc-chunk-digest", encChunkDigest);
+        model.put(EMAIL_VAULT_REVIEW_DATE, vault.getReviewDate());
+        model.put(EMAIL_USER_ID, depositUser.getID());
+        model.put(EMAIL_USER_FIRST_NAME, depositUser.getFirstname());
+        model.put(EMAIL_USER_LAST_NAME, depositUser.getLastname());
+        model.put(EMAIL_SIZE_BYTES, deposit.getArchiveSize());
+        model.put(EMAIL_TIMESTAMP, event.getTimestamp());
+        model.put(EMAIL_HAS_PERSONAL_DATA, deposit.getHasPersonalData());
+        model.put(EMAIL_CHUNK_ID, ChunkID);
+        model.put(EMAIL_CHUNK_IV, chunkIV);
+        model.put(EMAIL_ENC_CHUNK_DIGEST, encChunkDigest);
 
         // Send email to group owners
         for (User groupAdmin : group.getOwners()) {

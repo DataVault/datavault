@@ -13,6 +13,7 @@ public abstract class BaseQueueConfig {
 
   public static final String WORKER_QUEUE_NAME = "${queue.name}";
   public static final String BROKER_QUEUE_NAME = "${queue.events}";
+  public static final String X_MAX_PRIORITY = "x-max-priority";
 
   //will create Q if it does not exist
   @Bean
@@ -20,7 +21,7 @@ public abstract class BaseQueueConfig {
   public Queue workerQueue(@Value(WORKER_QUEUE_NAME) String workerQueueName) {
     // Allow for priority messages so that a shutdown message can be prioritised if required.
     Map<String, Object> args = new HashMap<>();
-    args.put("x-max-priority", 2);
+    args.put(X_MAX_PRIORITY, 2);
     return new Queue(workerQueueName, true, false, false, args);
   }
 

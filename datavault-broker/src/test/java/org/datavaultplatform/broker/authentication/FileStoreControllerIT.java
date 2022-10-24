@@ -37,6 +37,7 @@ import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseDatabaseTest;
 import org.datavaultplatform.broker.test.EmbeddedSftpServer;
 import org.datavaultplatform.broker.test.SftpServerUtils;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.FileInfo;
@@ -143,9 +144,9 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     filestore.setLabel("label-one");
     filestore.setStorageClass("org.datavaultplatform.common.storage.impl.SFTPFileSystem");
     HashMap<String, String> props = new HashMap<>();
-    props.put("host", "localhost");
-    props.put("port", "9999"); //we will replace 9999 later
-    props.put("rootPath", "/tmp/sftp/root");
+    props.put(PropNames.HOST, "localhost");
+    props.put(PropNames.PORT, "9999"); //we will replace 9999 later
+    props.put(PropNames.ROOT_PATH, "/tmp/sftp/root");
     filestore.setProperties(props);
 
     log.info("{}",mapper.writeValueAsString(filestore));

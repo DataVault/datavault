@@ -43,8 +43,12 @@ public class VaultsController {
     private static final String ROLE_DATA_OWNER = "Data Owner";
     private static final String ROLE_DEPOSITOR = "Depositor";
     private static final String ROLE_NDM = "Nominated Data Manager";
-    
-    
+    public static final String EMAIL_HOMEPAGE = "homepage";
+    public static final String EMAIL_HELPPAGE = "helppage";
+    public static final String EMAIL_VAULT = "vault";
+    public static final String EMAIL_PREVIOUS_OWNER = "previousowner";
+    public static final String EMAIL_ASSIGNEE = "assignee";
+    public static final String EMAIL_NEW_OWNER = "newowner";
 
     private final EmailService emailService;
     private final VaultsService vaultsService;
@@ -890,18 +894,18 @@ public class VaultsController {
         User newOwner = this.usersService.getUser(newOwnerId);
 
         HashMap<String, Object> model = new HashMap<>();
-        model.put("homepage", this.homePage);
-        model.put("helppage", this.helpPage);
-        model.put("vault", vault.getName());
-        model.put("assignee", user.getFirstname() + " " + user.getLastname());
+        model.put(EMAIL_HOMEPAGE, this.homePage);
+        model.put(EMAIL_HELPPAGE, this.helpPage);
+        model.put(EMAIL_VAULT, vault.getName());
+        model.put(EMAIL_ASSIGNEE, user.getFirstname() + " " + user.getLastname());
         if (previousOwner != null) {
-            model.put("previousowner", previousOwner.getFirstname() + " " + previousOwner.getLastname());
+            model.put(EMAIL_PREVIOUS_OWNER, previousOwner.getFirstname() + " " + previousOwner.getLastname());
         } else {
-            model.put("previousowner", VaultsController.ORPHANED_ID);
+            model.put(EMAIL_PREVIOUS_OWNER, VaultsController.ORPHANED_ID);
         }
 
         if(newOwner != null) {
-            model.put("newowner", newOwner.getFirstname() + " " + newOwner.getLastname());
+            model.put(EMAIL_NEW_OWNER, newOwner.getFirstname() + " " + newOwner.getLastname());
 
             emailService.sendTemplateMailToUser(newOwner, "Datavault - Role Assignment", template, model);
         }

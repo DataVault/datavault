@@ -5,6 +5,7 @@ import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateDeposit;
@@ -290,16 +291,16 @@ public class DepositsController {
         // Ask the worker to process the data retrieve
         try {
             HashMap<String, String> retrieveProperties = new HashMap<>();
-            retrieveProperties.put("depositId", deposit.getID());
-            retrieveProperties.put("retrieveId", retrieve.getID());
-            retrieveProperties.put("bagId", deposit.getBagId());
-            retrieveProperties.put("retrievePath", retrievePath); // No longer the absolute path
-            retrieveProperties.put("archiveId", archiveID);
-            retrieveProperties.put("archiveSize", Long.toString(deposit.getArchiveSize()));
-            retrieveProperties.put("userId", user.getID());
-            retrieveProperties.put("archiveDigest", deposit.getArchiveDigest());
-            retrieveProperties.put("archiveDigestAlgorithm", deposit.getArchiveDigestAlgorithm());
-            retrieveProperties.put("numOfChunks", Integer.toString(deposit.getNumOfChunks()));
+            retrieveProperties.put(PropNames.DEPOSIT_ID, deposit.getID());
+            retrieveProperties.put(PropNames.RETRIEVE_ID, retrieve.getID());
+            retrieveProperties.put(PropNames.BAG_ID, deposit.getBagId());
+            retrieveProperties.put(PropNames.RETRIEVE_PATH, retrievePath); // No longer the absolute path
+            retrieveProperties.put(PropNames.ARCHIVE_ID, archiveID);
+            retrieveProperties.put(PropNames.ARCHIVE_SIZE, Long.toString(deposit.getArchiveSize()));
+            retrieveProperties.put(PropNames.USER_ID, user.getID());
+            retrieveProperties.put(PropNames.ARCHIVE_DIGEST, deposit.getArchiveDigest());
+            retrieveProperties.put(PropNames.ARCHIVE_DIGEST_ALGORITHM, deposit.getArchiveDigestAlgorithm());
+            retrieveProperties.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));
             
             // Add a single entry for the user file storage
             Map<String, String> userFileStoreClasses = new HashMap<>();
@@ -353,16 +354,16 @@ public class DepositsController {
 		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.TivoliStorageManager")) {
 		        	HashMap<String, String> asProps = archiveStore.getProperties();
 		        	if (this.optionsDir != null && ! this.optionsDir.equals("")) {
-		        		asProps.put("optionsDir", this.optionsDir);
+		        		asProps.put(PropNames.OPTIONS_DIR, this.optionsDir);
 		        	}
 		        	if (this.tempDir != null && ! this.tempDir.equals("")) {
-		        		asProps.put("tempDir", this.tempDir);
+		        		asProps.put(PropNames.TEMP_DIR, this.tempDir);
 		        	}
 		        	if (this.tsmRetryTime != null && ! this.tsmRetryTime.equals("")) {
-		        	    asProps.put("tsmRetryTime", this.tsmRetryTime);
+		        	    asProps.put(PropNames.TSM_RETRY_TIME, this.tsmRetryTime);
                     }
                     if (this.tsmMaxRetries != null && ! this.tsmMaxRetries.equals("")) {
-                        asProps.put("tsmMaxRetries", this.tsmMaxRetries);
+                        asProps.put(PropNames.TSM_MAX_RETRIES, this.tsmMaxRetries);
                     }
 		        	archiveStore.setProperties(asProps);
 		        }
@@ -370,16 +371,16 @@ public class DepositsController {
 		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.OracleObjectStorageClassic")) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
                     if (this.occRetryTime != null && ! this.occRetryTime.equals("")) {
-                        asProps.put("occRetryTime", this.occRetryTime);
+                        asProps.put(PropNames.OCC_RETRY_TIME, this.occRetryTime);
                     }
                     if (this.occMaxRetries != null && ! this.occMaxRetries.equals("")) {
-                        asProps.put("occMaxRetries", this.occMaxRetries);
+                        asProps.put(PropNames.OCC_MAX_RETRIES, this.occMaxRetries);
                     }
                     if (this.ociBucketName != null && ! this.ociBucketName.equals("")) {
-                        asProps.put("ociBucketName", this.ociBucketName);
+                        asProps.put(PropNames.OCI_BUCKET_NAME, this.ociBucketName);
                     }
                     if (this.ociNameSpace != null && ! this.ociNameSpace.equals("")) {
-                        asProps.put("ociNameSpace", this.ociNameSpace);
+                        asProps.put(PropNames.OCI_NAME_SPACE, this.ociNameSpace);
                     }
                     archiveStore.setProperties(asProps);
                 }
@@ -387,16 +388,16 @@ public class DepositsController {
 		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.S3Cloud")) {
 		        	HashMap<String, String> asProps = archiveStore.getProperties();
 		        	if (this.bucketName != null && ! this.bucketName.equals("")) {
-		        		asProps.put("s3.bucketName", this.bucketName);
+		        		asProps.put(PropNames.AWS_S3_BUCKET_NAME, this.bucketName);
 		        	}
 		        	if (this.region != null && ! this.region.equals("")) {
-		        		asProps.put("s3.region", this.region);
+		        		asProps.put(PropNames.AWS_S3_REGION, this.region);
 		        	}
 		        	if (this.awsAccessKey != null && ! this.awsAccessKey.equals("")) {
-		        		asProps.put("s3.awsAccessKey", this.awsAccessKey);
+		        		asProps.put(PropNames.AWS_ACCESS_KEY, this.awsAccessKey);
 		        	}
 		        	if (this.awsSecretKey != null && ! this.awsSecretKey.equals("")) {
-		        		asProps.put("s3.awsSecretKey", this.awsSecretKey);
+		        		asProps.put(PropNames.AWS_SECRET_KEY, this.awsSecretKey);
 		        	}
 
 		        	//if (this.authDir != null && ! this.authDir.equals("")) {
@@ -515,15 +516,15 @@ public class DepositsController {
         jobsService.addJob(deposit, job);
 
         HashMap<String, String> depositProperties = new HashMap<>();
-        depositProperties.put("depositId", deposit.getID());
-        depositProperties.put("bagId", deposit.getBagId());
-        depositProperties.put("userId", user.getID());
+        depositProperties.put(PropNames.DEPOSIT_ID, deposit.getID());
+        depositProperties.put(PropNames.BAG_ID, deposit.getBagId());
+        depositProperties.put(PropNames.USER_ID, user.getID());
         if (deposit.getNumOfChunks() != 0) {
             logger.debug("Restart num of chunks: " + deposit.getNumOfChunks());
-            depositProperties.put("numOfChunks", Integer.toString(deposit.getNumOfChunks()));
+            depositProperties.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));
         }
         if (deposit.getArchiveDigest() != null) {
-            depositProperties.put("archiveDigest", deposit.getArchiveDigest());
+            depositProperties.put(PropNames.ARCHIVE_DIGEST, deposit.getArchiveDigest());
         }
 
         // Deposit and Vault metadata
@@ -531,10 +532,10 @@ public class DepositsController {
         // In future we'll need a more formal schema/representation (e.g. RDF or JSON-LD).
 
         DepositInfo depositInfo = deposit.convertToResponse();
-        depositProperties.put("depositMetadata", this.mapper.writeValueAsString(depositInfo));
+        depositProperties.put(PropNames.DEPOSIT_METADATA, this.mapper.writeValueAsString(depositInfo));
 
         VaultInfo vaultInfo = vault.convertToResponse();
-        depositProperties.put("vaultMetadata", this.mapper.writeValueAsString(vaultInfo));
+        depositProperties.put(PropNames.VAULT_METADATA, this.mapper.writeValueAsString(vaultInfo));
 
         // External metadata is text from an external system - e.g. XML or JSON
         //depositProperties.put("externalMetadata", externalMetadata);
