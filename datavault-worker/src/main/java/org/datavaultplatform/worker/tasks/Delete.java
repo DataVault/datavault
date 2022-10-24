@@ -45,7 +45,7 @@ public class Delete extends Task {
         logger.info("Delete job - performAction()");
         Map<String, String> properties = getProperties();
         this.depositId = properties.get("depositId");
-      String bagID = properties.get("bagId");
+        String bagID = properties.get("bagId");
         this.userID = properties.get("userId");
         this.numOfChunks = Integer.parseInt(properties.get("numOfChunks"));
         this.archiveSize = Long.parseLong(properties.get("archiveSize"));

@@ -74,7 +74,7 @@ public class EncryptionTest {
         try {
             secretKey = Encryption.generateSecretKey();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
             fail("Exception happened while generating secret key " + e);
         }
 
@@ -83,7 +83,7 @@ public class EncryptionTest {
         try {
             encrypted = Encryption.encryptSecret(secret, secretKey, iv);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
             fail("Exception happened while encrypting " + e);
         }
 
@@ -96,7 +96,7 @@ public class EncryptionTest {
         try {
             result = Encryption.decryptSecret(Base64.decode(encryptedTxt), Base64.decode(ivTxt), secretKey);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
             fail("Exception happened while decrypting " + e);
         }
 
@@ -117,7 +117,7 @@ public class EncryptionTest {
             keygen.init(256);
             aesKey = keygen.generateKey();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
             fail("Exception happened while generating key " + e);
         }
 
@@ -125,7 +125,7 @@ public class EncryptionTest {
         try {
             cipher = Cipher.getInstance("AES/GCM/NoPadding", "BC");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
             fail("Exception happened while generating key " + e);
         }
 
@@ -138,7 +138,7 @@ public class EncryptionTest {
         try {
             cipher.init(Cipher.ENCRYPT_MODE, aesKey, spec);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
             fail("Exception happened while initializing Cipher " + e);
         }
 
@@ -146,7 +146,7 @@ public class EncryptionTest {
         try {
             cipherText = cipher.doFinal(input);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
             fail("Exception happened while encrypting " + e);
         }
         System.out.println("encrypted: "+new String(cipherText));
@@ -154,7 +154,7 @@ public class EncryptionTest {
         try {
             cipher.init(Cipher.DECRYPT_MODE, aesKey, spec);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
             fail("Exception happened while initializing Cipher " + e);
         }
 
@@ -162,7 +162,7 @@ public class EncryptionTest {
         try {
             plainText = cipher.doFinal(cipherText);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
             fail("Exception happened while decrypting " + e);
         }
         System.out.println("decrypted: "+new String(plainText));

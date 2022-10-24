@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.Dataset;
 
 import org.apache.commons.io.FileUtils;
@@ -15,6 +16,7 @@ import org.datavaultplatform.common.metadata.Provider;
 
 // This mock metadata provider is for testing purposes only
 
+@Slf4j
 public class PureFlatFileProvider implements Provider {
 
     List<Dataset> datasets = new ArrayList<>();
@@ -32,7 +34,7 @@ public class PureFlatFileProvider implements Provider {
     }
     
     public void setFlatFileDir(String flatFileDir) {
-    	System.out.println("Setting flat file dir to : " + flatFileDir);
+    	log.info("Setting flat file dir to : " + flatFileDir);
     	this.flatFileDir = flatFileDir;
     }
     
@@ -44,7 +46,7 @@ public class PureFlatFileProvider implements Provider {
     
     private Map<String, String> processPersonFlatFile() throws IOException {
     	Map<String, String> retVal = new HashMap<>();
-    	System.out.println("flat file dir is : " + this.getFlatFileDir());
+    	log.info("flat file dir is : " + this.getFlatFileDir());
     	File personFile = new File(this.getFlatFileDir() + PureFlatFileProvider.PERSON_FILE_NAME);
     	if (personFile.exists()) {
 				try (LineIterator personIt = FileUtils.lineIterator(personFile, "UTF-8")) {
@@ -62,7 +64,7 @@ public class PureFlatFileProvider implements Provider {
     
     private Map<String, Map<String, List<String>>> processDatasetDisplayFlatFile() throws IOException {
     	Map<String, Map<String, List<String>>> retVal = new HashMap<>();
-    	System.out.println("flat file dir is : " + this.getFlatFileDir());
+    	log.info("flat file dir is : " + this.getFlatFileDir());
     	File dsDisplayFile = new File(this.getFlatFileDir() + PureFlatFileProvider.DATASET_DISPLAY_FILE_NAME);
     	if (dsDisplayFile.exists()) {
 				try (LineIterator displayIt = FileUtils.lineIterator(dsDisplayFile, "UTF-8")) {
@@ -88,9 +90,9 @@ public class PureFlatFileProvider implements Provider {
 		return retVal;
     }
     
-    private Map<String, Map<String, String>> processDatasetFullFlatFile() {
+    private Map<String, Map<String, String>> processDatasetFullFlatFile() throws IOException {
     	Map<String, Map<String, String>> retVal = new HashMap<>();
-    	System.out.println("flat file dir is : " + this.getFlatFileDir());
+    	log.info("flat file dir is : " + this.getFlatFileDir());
         File dsFullFile  = new File(this.getFlatFileDir() + PureFlatFileProvider.DATASET_FULL_FILE_NAME);
         if (dsFullFile.exists()) {
 					try (LineIterator fullIt = FileUtils.lineIterator(dsFullFile, "UTF-8")) {
@@ -106,7 +108,7 @@ public class PureFlatFileProvider implements Provider {
 							}
 						}
 					} catch (IOException e) {
-						e.printStackTrace();
+						log.error("unexpected exception",e);
 					}
         }
 		return retVal;
@@ -123,8 +125,8 @@ public class PureFlatFileProvider implements Provider {
      */
     public List<Dataset> getDatasetsForUser(String userID) {
     	List<Dataset> retVal = new ArrayList<>();
-    	System.out.println("Getting Datasets from the test pure flat file for " +userID);
-    	//System.out.println("Employee ID is hardcoded to 123363 for now we need to add the LDAP service to get the real employee ID");
+    	log.info("Getting Datasets from the test pure flat file for " +userID);
+    	//logger.info("Employee ID is hardcoded to 123363 for now we need to add the LDAP service to get the real employee ID");
     	// userID is the employee id
     	if (userID != null) {
 	        Map<String, String> personHash;
@@ -160,7 +162,7 @@ public class PureFlatFileProvider implements Provider {
 		    	}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("unexpected exception",e);
 			}
     	}
         return retVal;
@@ -186,7 +188,7 @@ public class PureFlatFileProvider implements Provider {
 				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+						log.error("unexpected exception",e);
 			}
     	}
         return retVal;
@@ -195,7 +197,7 @@ public class PureFlatFileProvider implements Provider {
     @Override
     public Map<String, String> getPureProjectIds(){
     	Map<String, String> projectIds = new HashMap<>();
-    	System.out.println("flat file dir is : " + this.getFlatFileDir());
+    	log.info("flat file dir is : " + this.getFlatFileDir());
         File projectIdsFullFile  = new File(this.getFlatFileDir() + PureFlatFileProvider.PURE_PROJECT_IDS_FILE_NAME);
         if (projectIdsFullFile.exists()) {
 			try (LineIterator fullIt = FileUtils.lineIterator(projectIdsFullFile, "UTF-8")) {
@@ -207,7 +209,7 @@ public class PureFlatFileProvider implements Provider {
 		    	    }
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.error("unexpected exception",e);
 			}
         }
     	

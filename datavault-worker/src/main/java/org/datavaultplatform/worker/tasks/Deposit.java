@@ -591,7 +591,6 @@ public class Deposit extends Task {
             } catch (Exception e) {
                 String msg = "Deposit failed: could not access user filesystem";
                 logger.error(msg, e);
-                e.printStackTrace();
                 eventSender.send(new Error(jobID, depositId, msg)
                     .withUserId(userID));
 

@@ -160,7 +160,7 @@ public class Utility {
             localFile = new File(localFile, remoteFile);
         }
         
-        // System.out.println("Receiving: " + remoteFile + " : " + le.getAttrs().getSize());
+        // logger.info("Receiving: " + remoteFile + " : " + le.getAttrs().getSize());
         channel.get(remoteFile, localFile.getAbsolutePath(), monitor);
         
         /*

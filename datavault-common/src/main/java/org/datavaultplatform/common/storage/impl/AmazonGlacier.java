@@ -9,6 +9,7 @@ import com.amazonaws.services.glacier.AmazonGlacierClient;
 import com.amazonaws.services.glacier.transfer.ArchiveTransferManager;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sqs.AmazonSQSClient;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
@@ -21,6 +22,7 @@ import java.util.Map;
 // http://docs.aws.amazon.com/amazonglacier/latest/dev/using-aws-sdk-for-java.html
 // http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/glacier/AmazonGlacierClient.html
 
+@Slf4j
 public class AmazonGlacier extends Device implements ArchiveStore {
     
     // Amazon Glacier has retrieval costs so a full copy-back is undesirable.
@@ -52,7 +54,7 @@ public class AmazonGlacier extends Device implements ArchiveStore {
         secretKey = config.get("secretKey");
         
         // Connect
-        System.out.println("Connecting to " + awsRegion);
+        log.info("Connecting to " + awsRegion);
         
         credentials = new BasicAWSCredentials(accessKey, secretKey);
 
@@ -69,11 +71,11 @@ public class AmazonGlacier extends Device implements ArchiveStore {
         
         // Verify parameters are correct.
         /*
-        System.out.println("Available glacier vaults:");
+        logger.info("Available glacier vaults:");
         ListVaultsRequest listVaultsRequest = new ListVaultsRequest();
         ListVaultsResult listVaultsResult = glacierClient.listVaults(listVaultsRequest);
         for (DescribeVaultOutput vault : listVaultsResult.getVaultList()) {
-            System.out.println(vault.getVaultName());
+            logger.info(vault.getVaultName());
         }
         */
     }
@@ -96,7 +98,7 @@ public class AmazonGlacier extends Device implements ArchiveStore {
                 if (pe.getEventType() == ProgressEventType.HTTP_REQUEST_STARTED_EVENT) {
 
                     // The network transfer has started
-                    System.out.println("\tAmazon Glacier: HTTP_REQUEST_STARTED_EVENT");
+                    log.info("\tAmazon Glacier: HTTP_REQUEST_STARTED_EVENT");
                     httpRequestInProgress = true;
                     
                     // If this was the first request then reset the timer (data is now flowing)
@@ -109,7 +111,7 @@ public class AmazonGlacier extends Device implements ArchiveStore {
                 } else if (pe.getEventType() == ProgressEventType.HTTP_REQUEST_COMPLETED_EVENT) {
                     
                     // The current network request has stopped
-                    System.out.println("\tAmazon Glacier: HTTP_REQUEST_COMPLETED_EVENT");
+                    log.info("\tAmazon Glacier: HTTP_REQUEST_COMPLETED_EVENT");
                     httpRequestInProgress = false;
                     
                 } else if (pe.getEventType() == ProgressEventType.REQUEST_BYTE_TRANSFER_EVENT) {
@@ -133,14 +135,14 @@ public class AmazonGlacier extends Device implements ArchiveStore {
                 }
                 
                 /*
-                System.out.println("Event: " + pe.getEventType());
-                System.out.println("Byte Count: " + pe.getEventType().isByteCountEvent());
-                System.out.println("Event Bytes Transferred: " + pe.getBytesTransferred());
-                System.out.println("Event Bytes: " + pe.getBytes());
-                System.out.println("Request Bytes So Far: " + requestByteCount);
-                System.out.println("Response Bytes So Far: " + responseByteCount);
-                System.out.println("Transferred Bytes: " + progress.byteCount);
-                System.out.println("");
+                logger.info("Event: " + pe.getEventType());
+                logger.info("Byte Count: " + pe.getEventType().isByteCountEvent());
+                logger.info("Event Bytes Transferred: " + pe.getBytesTransferred());
+                logger.info("Event Bytes: " + pe.getBytes());
+                logger.info("Request Bytes So Far: " + requestByteCount);
+                logger.info("Response Bytes So Far: " + responseByteCount);
+                logger.info("Transferred Bytes: " + progress.byteCount);
+                logger.info("");
                 */
             }
         };

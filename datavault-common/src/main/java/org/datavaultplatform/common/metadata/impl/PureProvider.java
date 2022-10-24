@@ -1,6 +1,7 @@
 package org.datavaultplatform.common.metadata.impl;
 
 import java.nio.charset.StandardCharsets;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.metadata.Provider;
 
@@ -13,6 +14,7 @@ import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import org.w3c.dom.*;
 
+@Slf4j
 public class PureProvider implements Provider {
     
     private final String endpoint;
@@ -29,7 +31,7 @@ public class PureProvider implements Provider {
             String response = query(endpoint + "?rendering=xml_long&associatedPersonEmployeeIds.value=" + userID);
             return parse(response);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
         }
         
         return null;
@@ -46,7 +48,7 @@ public class PureProvider implements Provider {
                 return d;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
         }
         
         return null;
@@ -137,7 +139,7 @@ public class PureProvider implements Provider {
                 datasets.add(dataset);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
         }
         
         return datasets;

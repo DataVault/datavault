@@ -43,7 +43,7 @@ public class DepositsController {
     private final AdminService adminService;
     private final Sender sender;
     private String optionsDir;
-	private final String tempDir;
+	  private final String tempDir;
     private final String bucketName;
     private final String region;
     private final String awsAccessKey;
@@ -144,9 +144,9 @@ public class DepositsController {
 
         archiveStores = this.addArchiveSpecificOptions(archiveStores);
 
-        System.out.println("Deposit File Path: ");
+        logger.info("Deposit File Path: ");
         for (DepositPath dPath : deposit.getDepositPaths()){
-            System.out.println("\t- " + dPath.getFilePath());
+            logger.info("\t- " + dPath.getFilePath());
         }
 
         // Add the deposit object
@@ -338,7 +338,7 @@ public class DepositsController {
             String jsonRetrieve = this.mapper.writeValueAsString(retrieveTask);
             sender.send(jsonRetrieve);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("unexpected exception", e);
         }
 
         // Check the retention policy of the newly created vault
@@ -423,7 +423,7 @@ public class DepositsController {
         }
 
         List<FileStore> userStores = user.getFileStores();
-        System.out.println("There is " + userStores.size() + "user stores.");
+        logger.info("There is " + userStores.size() + "user stores.");
 
         ArrayList<String> paths = new ArrayList<>();
         for(DepositPath dPath : deposit.getDepositPaths()){
@@ -431,7 +431,7 @@ public class DepositsController {
                 paths.add(dPath.getFilePath());
             }
         }
-        System.out.println("There is " + paths.size() + " deposit path");
+        logger.info("There is " + paths.size() + " deposit path");
         if (paths.isEmpty()) {
             throw new Exception("There are no file paths for restarted deposit - Exiting");
         }
@@ -492,13 +492,13 @@ public class DepositsController {
                         userFileStoreProperties.put(storageID, userStore.getProperties());
 
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        logger.error("unexpected exception", e);
                         throw (e);
                     }
                 }
 
                 if (lastEvent == null) {
-                    System.out.println("Add deposit path: " + path);
+                    logger.info("Add deposit path: " + path);
                     DepositPath depositPath = new DepositPath(deposit, path, Path.PathType.FILESTORE);
                     deposit.getDepositPaths().add(depositPath);
                     logger.debug("Prior to creating the jobs we have the following depositPaths:");

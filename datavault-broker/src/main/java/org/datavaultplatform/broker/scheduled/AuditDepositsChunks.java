@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.ArchiveStoreService;
 import org.datavaultplatform.broker.services.AuditsService;
@@ -23,6 +24,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class AuditDepositsChunks implements ScheduledTask {
 
     private final ArchiveStoreService archiveStoreService;
@@ -99,12 +101,12 @@ public class AuditDepositsChunks implements ScheduledTask {
     @Scheduled(cron = ScheduledUtils.SCHEDULE_1_AUDIT_DEPOSIT)
     public void execute() {
         Date now = new Date();
-        System.out.println("Start Audit Job "+ now);
+        log.info("Start Audit Job "+ now);
 
         // TODO: Make sure this is not a Deposit that is still running
         List<DepositChunk> chunks = depositsService.getChunksForAudit();
 
-        System.out.println("auditing "+chunks.size()+" chunks");
+        log.info("auditing "+chunks.size()+" chunks");
 
         if(chunks.size() > 0) {
             // Fetch the ArchiveStore that is flagged for retrieval. We store it in a list as the Task parameters require a list.
@@ -182,12 +184,12 @@ public class AuditDepositsChunks implements ScheduledTask {
                 String jsonAudit = mapper.writeValueAsString(auditTask);
                 sender.send(jsonAudit);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("unexpected exception", e);
             }
 
-            System.out.println("Audit Job Started...");
+            log.info("Audit Job Started...");
         } else {
-            System.out.println("No chunk to audit...");
+            log.info("No chunk to audit...");
         }
     }
 

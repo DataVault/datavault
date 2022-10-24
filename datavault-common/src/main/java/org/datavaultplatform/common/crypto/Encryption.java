@@ -325,8 +325,8 @@ public class Encryption {
                 .address(getVaultAddress())
                 .token(getVaultToken());
 
-        System.out.println("Vault PEM path: '"+getVaultSslPEMPath()+"'");
-        System.out.println("context.getVaultSslPEMPath().trim().equals(\"\"): "+getVaultSslPEMPath().equals(""));
+        logger.info("Vault PEM path: '"+getVaultSslPEMPath()+"'");
+        logger.info("context.getVaultSslPEMPath().trim().equals(\"\"): "+getVaultSslPEMPath().equals(""));
 
         if(getVaultSslPEMPath().trim().equals("")) {
             logger.debug("Won't use SSL Certificate.");
@@ -661,11 +661,11 @@ public class Encryption {
             try {
                 key = Encryption.generateSecretKey();
             } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
+                logger.error("unexpected exception",e);
                 System.exit(1);
             }
             String encodedKey = Base64.getEncoder().encodeToString(key.getEncoded());
-            System.out.println(encodedKey);
+            logger.info(encodedKey);
         }
         if(methodName.equals("generateSecretKeyAndAddToJCEKS")){
             String jsonFileName = args[1];
@@ -706,7 +706,7 @@ public class Encryption {
         SecretKey[] keys = new SecretKey[aliases.size()];
         for(int i = 0; i < aliases.size(); i++) {
             String alias = aliases.get(i);
-            System.out.println("Creating " + alias + " to " + Encryption.getKeystorePath());
+            logger.info("Creating " + alias + " to " + Encryption.getKeystorePath());
             keys[i] = Encryption.generateSecretKey();
             Encryption.saveSecretKeyToKeyStore(alias, keys[i]);
         }
@@ -718,7 +718,7 @@ public class Encryption {
                 System.err.println("ERROR! The " + alias + " key return by KeyStore is different!");
             }
             String encodedKey = Base64.getEncoder().encodeToString(keys[i].getEncoded());
-            System.out.println(alias + ": " + encodedKey);
+            logger.info(alias + ": " + encodedKey);
         }
     }
 

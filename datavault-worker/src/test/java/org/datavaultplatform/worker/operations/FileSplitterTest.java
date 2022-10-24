@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.zip.CRC32;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,8 +16,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
-//import org.apache.log4j.BasicConfigurator;
 
+@Slf4j
 public class FileSplitterTest {
     private static String bigFileResources;
     private static File tempDir;
@@ -36,20 +37,17 @@ public class FileSplitterTest {
         Logger restClientLogger = (Logger) LoggerFactory.getLogger(FileSplitter.class);
         restClientLogger.setLevel(Level.DEBUG);
 
-        try{
+        try {
             tempDir.mkdir();
-        }
-        catch(SecurityException se) {
+        } catch(SecurityException se) {
             fail(se.getMessage());
         }
-
-        //BasicConfigurator.configure();
     }
     
     @Test
     public void testSplit50MBFile() {
         System.out.println( "\nStart testSplit50MBFile");
-        try{
+        try {
             File inputFile = new File(bigFileResources, "50MB_file");
             
             long csumInputFile = 0;
@@ -98,7 +96,7 @@ public class FileSplitterTest {
             }
             recomposedFile.delete();
         } catch(Exception se) {
-            se.printStackTrace();
+            log.error("Unexpected Exception", se);
             fail(se.getMessage());
         }
     }
@@ -108,7 +106,7 @@ public class FileSplitterTest {
     @Test
     public void testSplit50MBFileWithExtraBytes() {
         System.out.println( "\nStart testSplit50MBFileWithExtraBytes");
-        try{
+        try {
             File inputFile = new File(bigFileResources, "50MB_file");
             
             long csumInputFile = 0;
@@ -167,7 +165,7 @@ public class FileSplitterTest {
             }
             recomposedFile.delete();
         } catch(Exception se) {
-            se.printStackTrace();
+            log.error("unexpected exception", se);
             fail(se.getMessage());
         }
     }
@@ -197,7 +195,7 @@ public class FileSplitterTest {
                 chunk.delete();
             }
         } catch(Exception se) {
-            se.printStackTrace();
+            log.error("unexpected exception", se);
             fail(se.getMessage());
         }
     }
@@ -207,7 +205,7 @@ public class FileSplitterTest {
     //@Category(org.datavaultplatform.SlowTest.class)
     public void testSplit500MBFileWithExtraBytes() {
         System.out.println( "\nStart testSplit500MBFileWithExtraBytes");
-        try{
+        try {
             File inputFile = new File(bigFileResources, "500MB_file");
             
             long bytesPerChunk = 150 * 1000 * 1000; // 150MB
@@ -235,7 +233,7 @@ public class FileSplitterTest {
                 chunk.delete();
             }
         } catch(Exception se) {
-            se.printStackTrace();
+            log.error("unexpected exception", se);
             fail(se.getMessage());
         }
     }
@@ -265,7 +263,7 @@ public class FileSplitterTest {
                 chunk.delete();
             }
         } catch(Exception se) {
-            se.printStackTrace();
+            log.error("unexpected exception", se);
             fail(se.getMessage());
         }
     }
@@ -275,7 +273,7 @@ public class FileSplitterTest {
     //@Category(org.datavaultplatform.SlowTest.class)
     public void testSplitGigaBytesFileWithExtraBytes() {
         System.out.println( "\nStart testSplitGigaBytesFileWithExtraBytes");
-        try{
+        try {
             File inputFile = new File(bigFileResources, "1.5GB_file");
             
             long bytesPerChunk = 1000 * 1000 * 1000; // 1GB
@@ -297,7 +295,7 @@ public class FileSplitterTest {
             assertEquals(lastBytesChunk, chunks[1].length());
             chunks[1].delete();
         } catch(Exception se) {
-            se.printStackTrace();
+            log.error("unexpected exception", se);
             fail(se.getMessage());
         }
     }
@@ -351,21 +349,18 @@ public class FileSplitterTest {
 
             assertEquals(csumInputFile, csumOutputFile);
         } catch(Exception se) {
-            se.printStackTrace();
+            log.error("unexpected exception", se);
             fail(se.getMessage());
         }
     }
 
     @AfterEach
     public void tearDown() {
-        try{
+        try {
             FileUtils.deleteDirectory(tempDir);
-        }
-        catch(IOException ex){
+        } catch(IOException ex){
             fail(ex.getMessage());
         }
-
-        //BasicConfigurator.resetConfiguration();
     }
 
 }

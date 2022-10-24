@@ -31,14 +31,11 @@ public class TarTest {
 
     @BeforeEach
     public void setUp() {
-        try{
+        try {
             testDir.mkdir();
-        }
-        catch(SecurityException se) {
+        } catch(SecurityException se) {
             fail(se.getMessage());
         }
-        
-        //BasicConfigurator.configure();
     }
     
     @Test
@@ -205,14 +202,11 @@ public class TarTest {
     
     @AfterEach
     public void tearDown() {
-        try{
+        try {
             FileUtils.deleteDirectory(testDir);
-        }
-        catch(IOException ex){
+        } catch(IOException ex) {
             fail(ex.getMessage());
         }
-
-        //BasicConfigurator.resetConfiguration();
     }
 
 }

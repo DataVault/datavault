@@ -2,6 +2,7 @@ package org.datavaultplatform.broker.controllers;
 
 import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.FilesService;
@@ -32,6 +33,7 @@ import java.util.List;
 
 
 @RestController
+@Slf4j
 public class FilesController {
     
     private final FilesService filesService;
@@ -158,15 +160,15 @@ public class FilesController {
 
         Long size = 0L;
         for (String filePath : filePaths) {
-            System.out.println("Full filePath: " + filePath);
+            log.info("Full filePath: " + filePath);
             filePath = filePath.replaceFirst("/storage/", "");
             // remove first slashes
             filePath = filePath.replaceFirst("^\\/+", "");
-            System.out.println("Full filePath cleaned: " + filePath);
+            log.info("Full filePath cleaned: " + filePath);
             String storageID = filePath.substring(0,filePath.indexOf("/"));
-            System.out.println("storageID: " + storageID);
+            log.info("storageID: " + storageID);
             filePath = filePath.substring(filePath.indexOf("/"));
-            System.out.println("filePath: " + filePath);
+            log.info("filePath: " + filePath);
 
             FileStore store = null;
             List<FileStore> userStores = user.getFileStores();
@@ -181,19 +183,19 @@ public class FilesController {
                 throw new Exception("Storage device '" + storageID + "' not found!");
             }
 
-            System.out.println("size: " + size);
+            log.info("size: " + size);
 
             Long fileSize = filesService.getFilesize(filePath, store);
 
             size += fileSize;
         }
 
-        System.out.println("Total size: " + size);
+        log.info("Total size: " + size);
         Long max = (this.adminService.isAdminUser(user)) ? this.maxAdminDepositByteSize : this.maxDepositByteSize;
         DepositSize retVal = new DepositSize();
         retVal.setMax(max);
 
-        System.out.println("Max (broker) is:" + max);
+        log.info("Max (broker) is:" + max);
         if (size <= max) {
             retVal.setResult(Boolean.TRUE);
         } else {
@@ -210,7 +212,7 @@ public class FilesController {
         
         User user = usersService.getUser(userID);
         
-        System.out.println("Broker postFileChunk for " + user.getID() + " - " + filename);
+        log.info("Broker postFileChunk for " + user.getID() + " - " + filename);
         
         String relativePath = new String(Base64.decodeBase64(request.getParameter("relativePath").getBytes()));
         Long chunkNumber = Long.parseLong(request.getParameter("chunkNumber"));
@@ -218,10 +220,10 @@ public class FilesController {
         Long chunkSize = Long.parseLong(request.getParameter("chunkSize"));
         Long totalSize = Long.parseLong(request.getParameter("totalSize"));
         
-        System.out.println("fileUploadHandle =" + fileUploadHandle);
+        log.info("fileUploadHandle =" + fileUploadHandle);
         
         /*
-        System.out.println("Broker postFileChunk:" +
+        log.info("Broker postFileChunk:" +
                 " relativePath=" + relativePath +
                 " chunkNumber=" + chunkNumber +
                 " totalChunks=" + totalChunks +
@@ -235,7 +237,7 @@ public class FilesController {
         File uploadDir = uploadDirPath.toFile();
         
         if (!uploadDir.exists()) {
-            System.out.println("Creating uploadDir: " + uploadDir.getPath());
+            log.info("Creating uploadDir: " + uploadDir.getPath());
             Boolean success = uploadDir.mkdir();
             if (!success && !uploadDir.exists()) {
                 throw new Exception("Unable to create uploadDir");
@@ -246,7 +248,7 @@ public class FilesController {
         Path userUploadDirPath = uploadDirPath.resolve(userID);
         File userUploadDir = userUploadDirPath.toFile();
         if (!userUploadDir.exists()) {
-            System.out.println("Creating userUploadDir: " + userUploadDir.getPath());
+            log.info("Creating userUploadDir: " + userUploadDir.getPath());
             Boolean success = userUploadDir.mkdir();
             if (!success && !userUploadDir.exists()) {
                 throw new Exception("Unable to create userUploadDir");
@@ -257,7 +259,7 @@ public class FilesController {
         Path handleUploadDirPath = userUploadDirPath.resolve(fileUploadHandle);
         File handleUploadDir = handleUploadDirPath.toFile();
         if (!handleUploadDir.exists()) {
-            System.out.println("Creating handleUploadDir: " + handleUploadDir.getPath());
+            log.info("Creating handleUploadDir: " + handleUploadDir.getPath());
             Boolean success = handleUploadDir.mkdir();
             if (!success && !handleUploadDir.exists()) {
                 throw new Exception("Unable to create handleUploadDir");

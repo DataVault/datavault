@@ -1,5 +1,6 @@
 package org.datavaultplatform.worker;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecuteResultHandler;
 import org.apache.commons.exec.DefaultExecutor;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
  * We output a warning if an instance of a Workers fails to respond which then appears to trigger the exiting of the entire
  * WorkerManager
  */
+@Slf4j
 public class WorkerManager {
 
     private String numberOfWorkers;
@@ -119,7 +121,7 @@ public class WorkerManager {
             for (DefaultExecuteResultHandler resultHandler : resultHandlers) {
                 if (resultHandler.hasResult()) {
                     // todo : what should I usefully do in this event?
-                    System.out.println("A handler has failed with exit value " + resultHandler.getExitValue());
+                    log.info("A handler has failed with exit value " + resultHandler.getExitValue());
                     return;
                 }
             }

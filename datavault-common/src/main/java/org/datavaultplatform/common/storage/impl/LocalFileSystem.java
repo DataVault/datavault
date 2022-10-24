@@ -187,7 +187,7 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
                 return null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
             return null;
         }
     }
@@ -205,7 +205,7 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
             return canonicalPath.startsWith(canonicalBase);
         }
         catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
             return false;
         }
     }

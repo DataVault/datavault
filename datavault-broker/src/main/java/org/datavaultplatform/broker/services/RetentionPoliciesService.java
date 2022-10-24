@@ -124,12 +124,12 @@ public class RetentionPoliciesService {
         }
     }
 
-    private Date stringToDate(String string) {
+    private Date stringToDate(String value) {
         Date date = null;
         try {
-            date = new SimpleDateFormat("yyyy-MM-dd").parse(string);
+            date = new SimpleDateFormat("yyyy-MM-dd").parse(value);
         } catch (ParseException e) {
-            e.printStackTrace();
+            logger.error("unexpected exception",e);
         }
 
         return date;

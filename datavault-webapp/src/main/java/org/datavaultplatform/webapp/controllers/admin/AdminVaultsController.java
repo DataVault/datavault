@@ -141,8 +141,7 @@ public class AdminVaultsController {
             csvWriter.close();
 
         } catch (Exception e){
-            logger.error("IOException: "+e);
-            e.printStackTrace();
+            logger.error("Unexpected Exception", e);
         }
     }
 

@@ -3,6 +3,7 @@ package org.datavaultplatform.broker.services;
 
 import java.util.List;
 import java.util.concurrent.*;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.storage.UserStore;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
+@Slf4j
 public class FilesService {
 
     //TODO - DHAY this does not seem thread safe
@@ -27,7 +29,7 @@ public class FilesService {
             userStore = UserStore.fromFileStore(fileStore);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
             return false;
         }
     }
@@ -43,7 +45,7 @@ public class FilesService {
     private class FileSizeTask implements Runnable {
 
         public Long result = null;
-        private String filePath = null;
+        private final String filePath;
         
         public FileSizeTask(String filePath) {
             this.filePath = filePath;
@@ -54,6 +56,7 @@ public class FilesService {
             try {
                 result = userStore.getSize(filePath);
             } catch (Exception e) {
+                log.warn("problem getting file size", e);
                 result = null;
             }
         }
@@ -72,7 +75,7 @@ public class FilesService {
                 return null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception", e);
             return null;
         }
     }

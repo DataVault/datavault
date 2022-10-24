@@ -43,7 +43,7 @@ public class DropboxFileSystem extends Device implements UserStore {
         dbxClient = new DbxClient(dbxConfig, accessToken);
         
         // Verify parameters are correct.
-        System.out.println("Connected to Dropbox account: " + dbxClient.getAccountInfo().displayName);*/
+        logger.info("Connected to Dropbox account: " + dbxClient.getAccountInfo().displayName);*/
     }
     
     @Override
@@ -66,7 +66,7 @@ public class DropboxFileSystem extends Device implements UserStore {
                 files.add(info);
             }
         } catch (DbxException e) {
-            System.out.println(e.toString());
+            logger.info(e.toString());
         }*/
 
         return files;

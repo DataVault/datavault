@@ -49,11 +49,10 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
 
         boolean isUserValid = false;
-        try{
+        try {
             isUserValid = restService.isValid(new ValidateUser(name, password));
-        }catch(Exception e){
-            System.err.println("Error when trying to check if user is valid with Broker!");
-            e.printStackTrace();
+        } catch(Exception e) {
+            logger.error("Error when trying to check if user is valid with Broker!",e);
         }
 
         if (!isUserValid) {
@@ -76,8 +75,7 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
                 grantedAuths.add(new SimpleGrantedAuthority(RoleName.ROLE_IS_ADMIN));
             }
         } catch(Exception e){
-            System.err.println("Error when trying to check if user is admin with Broker!");
-            e.printStackTrace();
+            logger.error("Error when trying to check if user is admin with Broker!",e);
         }
 
         Collection<GrantedAuthority> adminAuthorities = getAdminAuthorities(authentication);

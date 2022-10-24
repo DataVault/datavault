@@ -64,7 +64,7 @@ public class Audit extends Task {
         
         this.initStates();
 
-        System.out.println("Audit id: "+this.auditId);
+        logger.info("Audit id: "+this.auditId);
         eventSender.send(new AuditStart(this.jobID, this.auditId)
             .withNextState(0));
 
@@ -100,7 +100,7 @@ public class Audit extends Task {
                 this.doAudit(context, archiveFs, false, location);
                 logger.info("Completed audit on archive from " + location);
             } catch (Exception e) {
-                logger.info("Current " + location + " has a problem trying next location");
+                logger.info("Current " + location + " has a problem trying next location", e);
             }
         }
     }
@@ -117,15 +117,15 @@ public class Audit extends Task {
             File chunkFile = chunkPath.toFile();
             String chunkArchiveId = this.archiveIds[i]+FileSplitter.CHUNK_SEPARATOR+chunkNum;
 
-            System.out.println("Sending ChunkAuditStarted event...");
+            logger.info("Sending ChunkAuditStarted event...");
             eventSender.send(new ChunkAuditStarted(this.jobID, this.auditId, chunkId, chunkArchiveId, location));
 
             try {
                 if (singleCopy) {
-                    System.out.println("Retrieving singleCopy: " + chunkFile.getAbsolutePath());
+                    logger.info("Retrieving singleCopy: " + chunkFile.getAbsolutePath());
                     archiveFs.retrieve(chunkArchiveId, chunkFile, null);
                 } else {
-                    System.out.println("Retrieving: " + chunkFile.getAbsolutePath());
+                    logger.info("Retrieving: " + chunkFile.getAbsolutePath());
                     archiveFs.retrieve(chunkArchiveId, chunkFile, null, location);
                 }
 

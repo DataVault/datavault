@@ -149,10 +149,10 @@ public class PackagerV2 {
         packagerV2.createBag(dir);
         status = 0;
       } catch (Exception ex) {
-        ex.printStackTrace(System.err);
+        log.error("Unexpected Exception", ex);
       }
     } else {
-      System.out.println("Packager expects a single directory argument");
+      log.info("Packager expects a single directory argument");
     }
 
     System.exit(status);

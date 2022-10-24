@@ -674,8 +674,7 @@ public class VaultsController {
         try {
             vaultsService.checkRetentionPolicy(vault.getID());
         } catch (Exception e) {
-            logger.error("Fail to check retention policy: "+e);
-            e.printStackTrace();
+            logger.error("Fail to check retention policy: ",e);
             throw e;
         }
         return vault.convertToResponse();

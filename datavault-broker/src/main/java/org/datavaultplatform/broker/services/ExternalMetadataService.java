@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.metadata.Provider;
 import org.datavaultplatform.common.metadata.impl.MockProvider;
 import org.datavaultplatform.common.metadata.impl.PureFlatFileProvider;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@Slf4j
 public class ExternalMetadataService {
 
     private final String metadataURL;
@@ -57,23 +59,23 @@ public class ExternalMetadataService {
   }
 
     public List<Dataset> getDatasets(String userID) {
-    	System.out.println("Getting Datasets for UUN " + userID);
+    	log.info("Getting Datasets for UUN " + userID);
     	if (this.metadataProvider instanceof PureFlatFileProvider) {
     		User user = this.usersService.getUser(userID);
     		if (user != null) {
-    			System.out.println("User surname " + user.getLastname());
+    			log.info("User surname " + user.getLastname());
 	    		Map<String, String> props = user.getProperties();
-	    		System.out.println("Setting default employee id for testing:123363");
+	    		log.info("Setting default employee id for testing:123363");
     			String employeeId = "123363";
 
     			if (props != null) {
-    				System.out.println("Props is not null");
+    				log.info("Props is not null");
     				for (String key : props.keySet()) {
-    					System.out.println("key is :'" + "'" + key + " value is :'" + props.get(key) + "'");
+    					log.info("key is :'" + "'" + key + " value is :'" + props.get(key) + "'");
     				}
     			}
 	    		if (props != null  && props.get(ExternalMetadataService.EDUNIREFNO) != null) {
-	    			System.out.println("Getting employeeId from properties");
+	    			log.info("Getting employeeId from properties");
 		    		employeeId = props.get(ExternalMetadataService.EDUNIREFNO);
 	    		}
 	    		return metadataProvider.getDatasetsForUser(employeeId);

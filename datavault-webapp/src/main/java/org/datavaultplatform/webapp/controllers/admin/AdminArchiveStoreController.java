@@ -120,7 +120,7 @@ public class AdminArchiveStoreController {
             if(line.contains("=")){
                 String prop[] = line.split("=");
                 if(prop.length == 2) {
-                    System.out.println(prop[0].trim()+" = "+prop[1].trim());
+                    logger.info(prop[0].trim()+" = "+prop[1].trim());
                     storeProperties.put(prop[0].trim(), prop[1].trim());
                 }else{
                     System.err.println("line #"+lineCount+" has wrong syntax: "+line);

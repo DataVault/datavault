@@ -247,15 +247,15 @@ public class Packager {
                     }
                 }
                 catch(Exception ex) {
-                    ex.printStackTrace();
+                    log.error("Unexpected Exception", ex);
                 }
             }
             else {
-                System.out.println("Packager expects a directory as an argument");
+                log.info("Packager expects a directory as an argument");
             }
         }
         else {
-            System.out.println("Packager expects a single directory argument");
+            log.info("Packager expects a single directory argument");
         }
         
         System.exit(status); 

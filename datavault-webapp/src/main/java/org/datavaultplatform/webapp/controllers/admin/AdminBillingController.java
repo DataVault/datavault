@@ -119,8 +119,7 @@ public class AdminBillingController {
             csvWriter.close();
 
         } catch (Exception e){
-            logger.error("IOException: "+e);
-            e.printStackTrace();
+            logger.error("Unexpected Exception",e);
         }
     }
     
@@ -158,7 +157,7 @@ public class AdminBillingController {
     public String updateBillingDetails(ModelMap model,           
             @ModelAttribute("billingDetails") BillingInformation billingDetails         
             ) throws Exception {
-    	 System.out.println("-----------getBudgetCode---------"+billingDetails.getBudgetCode());
+    	 logger.info("-----------getBudgetCode---------"+billingDetails.getBudgetCode());
     	restService.updateBillingInfo(billingDetails.getVaultID(),billingDetails);
     	//return "admin/billing/billingDetails";
         return this.getBillingInfoPage(billingDetails.getBillingType());

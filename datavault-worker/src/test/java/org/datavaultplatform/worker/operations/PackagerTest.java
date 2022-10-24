@@ -16,9 +16,9 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
-//import org.apache.log4j.BasicConfigurator;
 
 import gov.loc.repository.bagit.domain.Bag;
 import gov.loc.repository.bagit.domain.Manifest;
@@ -27,6 +27,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@Slf4j
 public class PackagerTest {
     private static String packagerResources;
     private static File testDir;
@@ -42,14 +43,11 @@ public class PackagerTest {
 
     @BeforeEach
     public void setUp() {
-        try{
+        try {
             testDir.mkdir();
-        }
-        catch(SecurityException se) {
+        } catch(SecurityException se) {
             fail(se.getMessage());
         }
-
-        //BasicConfigurator.configure();
     }
 
     @Test
@@ -67,12 +65,11 @@ public class PackagerTest {
         File dir =  new File(testDir, "createbag");
         dir.mkdir();
 
-        try{
+        try {
             FileUtils.copyFileToDirectory(
                     new File(packagerResources, TEST_FILE),
                     dir);
-        }
-        catch(IOException ex){
+        } catch(IOException ex) {
             fail(ex.getMessage());
         }
         
@@ -96,9 +93,8 @@ public class PackagerTest {
             fis.close();
             Manifest manifest= bag.getPayLoadManifests().iterator().next();
             assertEquals(md5, manifest.getFileToChecksumMap().get(testFile.toPath()));
-        }
-        catch(Exception ex) {
-            ex.printStackTrace();
+        } catch(Exception ex) {
+            log.error("unexpected exception", ex);
             fail(ex.getMessage());
         }
     }
@@ -128,7 +124,7 @@ public class PackagerTest {
         File test4file;
         File test5file;
         
-        try{
+        try {
             test1file = new File(packagerResources, TEST_FILE1);
             FileUtils.copyFileToDirectory(
                     new File(packagerResources, TEST_FILE1),
@@ -147,13 +143,12 @@ public class PackagerTest {
             Path link = Paths.get(parentDir.getAbsolutePath() + File.separator + TEST_FILE2);
             Path relativeSrc = link.getParent().relativize(source); 
             Files.createSymbolicLink(link, relativeSrc);
-        }
-        catch(IOException ex){
-            ex.printStackTrace();
+        } catch(IOException ex) {
+            log.error("unexpected exception", ex);
             fail(ex.getMessage());
         }
         
-        try{
+        try {
             Packager.createBag(parentDir);
             assertTrue(Packager.validateBag(parentDir));
 
@@ -185,9 +180,8 @@ public class PackagerTest {
             assertTrue(new File(childDirWithSpace, TEST_FILE_WITH_US).exists());
             assertTrue(new File(childDirWithSpace, TEST_FILE_WITH_HY).exists());
             Files.delete(simLink.toPath());
-        }        
-        catch(Exception ex){
-            ex.printStackTrace();
+        } catch(Exception ex) {
+            log.error("unexpected exception", ex);
             fail(ex.getMessage());
         }
     } 
@@ -198,17 +192,16 @@ public class PackagerTest {
         File dir =  new File(testDir, "addmetadata");
         dir.mkdir();
 
-        try{
+        try {
             FileUtils.copyFileToDirectory(
                     new File(packagerResources, TEST_FILE),
                     dir);
-        }
-        catch(IOException ex){
+        } catch(IOException ex) {
             fail(ex.getMessage());
         }
         
         try {
-            if(Packager.createBag(dir) != null){                
+            if (Packager.createBag(dir) != null) {                
                 // the contents of the metadata files are of no
                 // interest for the purposes of this test
                 final String DEPOSIT_META = "jings";
@@ -239,13 +232,11 @@ public class PackagerTest {
                         File.separator + Packager.fileTypeMetaFileName));
                 assertTrue(lines.contains(DigestUtils.md5Hex(EXT_META) + "  metadata" +
                         File.separator + Packager.externalMetaFileName));
-            }
-            else{
+            } else {
                 fail("Bag creation failed");
             }
-        }
-        catch(Exception ex) {
-            ex.printStackTrace();
+        } catch(Exception ex) {
+            log.error("unexpected exception", ex);
             fail(ex.getMessage());
         }
 
@@ -257,70 +248,64 @@ public class PackagerTest {
         File dir =  new File(testDir, "extractmetadata");
         dir.mkdir();
 
-        try{
+        try {
             FileUtils.copyFileToDirectory(
                     new File(packagerResources, TEST_FILE),
                     dir);
-        }
-        catch(IOException ex){
+        } catch(IOException ex) {
             fail(ex.getMessage());
         }
         
         try {
             File metaDir =  new File(testDir, "tmp");
-            if(Packager.createBag(dir) != null && Packager.extractMetadata(dir, metaDir)){
+            if (Packager.createBag(dir) != null && Packager.extractMetadata(dir, metaDir)) {
                 // check metadata files are in new directory
                 assertTrue(new File(metaDir, "tagmanifest-md5.txt").exists());
                 assertTrue(new File(metaDir, "bag-info.txt").exists());
                 assertTrue(new File(metaDir, "manifest-md5.txt").exists());
                 assertTrue(new File(metaDir, "bagit.txt").exists());
-            }
-            else{
+            } else {
                 fail("Problem extracting to metadata"); 
             }
-        }
-        catch(Exception ex) {
-            ex.printStackTrace();
+        } catch(Exception ex) {
+            log.error("unexpected exception", ex);
             fail(ex.getMessage());
         }
-
     }
+    
     @Test
     public void testInvalidFilenames() {
         final String TEST_FILE = "col:n.tiff";
         File dir =  new File(testDir, "invalidfilenames");
         dir.mkdir();
 
-        try{
+        try {
             FileUtils.copyFileToDirectory(
                     new File(packagerResources, TEST_FILE),
                     dir);
-        }
-        catch(IOException ex){
+        } catch(IOException ex) {
             fail(ex.getMessage());
         }
         
         try {
-            if(Packager.createBag(dir) != null){
+            if (Packager.createBag(dir) != null) {
                 // TODO: this should fail
                 //fail(TEST_FILE + " is not a valid filename");
             } 
-        }
-        catch(Exception ex) {
-            ex.printStackTrace();
+        } catch(Exception ex) {
+            log.error("unexpected exception", ex);
             fail(ex.getMessage());
         }
     }
     
     // get the mdf checksum of a file
-    private String getChecksum(File f){
+    private String getChecksum(File f) {
         String cksum = null;
-        try{
+        try {
             FileInputStream fis = new FileInputStream(f);
             cksum = DigestUtils.md5Hex(fis);
             fis.close();
-        }
-        catch(IOException ex){
+        } catch(IOException ex) {
             fail(ex.getMessage());
         }
         
@@ -329,13 +314,10 @@ public class PackagerTest {
     
     @AfterEach
     public void tearDown() {
-        try{
+        try {
             FileUtils.deleteDirectory(testDir);
-        }
-        catch(IOException ex){
+        } catch(IOException ex) {
             fail(ex.getMessage());
         }
-
-        //BasicConfigurator.resetConfiguration();
     }
 }
