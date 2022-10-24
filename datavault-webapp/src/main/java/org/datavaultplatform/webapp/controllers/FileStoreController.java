@@ -2,6 +2,7 @@ package org.datavaultplatform.webapp.controllers;
 
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.FileStore;
+import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,7 @@ public class FileStoreController {
         // Datavault app can read. So for now we will just use the configured default value.
         //storeProperties.put("rootPath", path);
         storeProperties.put(PropNames.ROOT_PATH, activeDir);
-        FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Filesystem (local)");
+        FileStore store = new FileStore(StorageConstants.LOCAL_FILE_SYSTEM, storeProperties, "Filesystem (local)");
         restService.addFileStore(store);
     }
 
@@ -82,7 +83,7 @@ public class FileStoreController {
         storeProperties.put(PropNames.PORT, port);
         storeProperties.put(PropNames.ROOT_PATH, path);
 
-        FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.SFTPFileSystem", storeProperties, path);
+        FileStore store = new FileStore(StorageConstants.SFTP_FILE_SYSTEM, storeProperties, path);
         restService.addFileStoreSFTP(store);
     }
 

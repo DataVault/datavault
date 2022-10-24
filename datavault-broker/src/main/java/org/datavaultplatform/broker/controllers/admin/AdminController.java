@@ -17,6 +17,7 @@ import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.*;
 
+import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.task.Task;
 import org.jsondoc.core.annotation.Api;
 import org.jsondoc.core.annotation.ApiHeader;
@@ -387,7 +388,7 @@ public class AdminController {
     private List<ArchiveStore> addArchiveSpecificOptions(List<ArchiveStore> archiveStores) {
         if (archiveStores != null && ! archiveStores.isEmpty()) {
             for (ArchiveStore archiveStore : archiveStores) {
-                if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.TivoliStorageManager")) {
+                if (archiveStore.isTivoliStorageManager()) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
                     if (this.optionsDir != null && ! this.optionsDir.equals("")) {
                         asProps.put(PropNames.OPTIONS_DIR, this.optionsDir);
@@ -398,7 +399,7 @@ public class AdminController {
                     archiveStore.setProperties(asProps);
                 }
 
-                if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.S3Cloud")) {
+                if (archiveStore.isAmazonS3()) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
                     if (this.bucketName != null && ! this.bucketName.equals("")) {
                         asProps.put(PropNames.AWS_S3_BUCKET_NAME, this.bucketName);

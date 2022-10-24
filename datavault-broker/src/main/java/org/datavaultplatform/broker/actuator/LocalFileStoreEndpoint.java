@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.datavaultplatform.broker.services.ArchiveStoreService;
 import org.datavaultplatform.common.model.ArchiveStore;
+import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
@@ -26,7 +27,7 @@ public class LocalFileStoreEndpoint {
   @ReadOperation
   public List<LocalFileStoreInfo> getLocalFileStoresInfo() {
     return archiveStoreService.getArchiveStores().stream()
-        .filter(fs -> "org.datavaultplatform.common.storage.impl.LocalFileSystem".equals(fs.getStorageClass()))
+        .filter(ArchiveStore::isLocalFileSystem)
         .map(this::getLocalFileStoreInfo)
         .collect(Collectors.toList());
   }

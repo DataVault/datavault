@@ -17,6 +17,7 @@ import org.datavaultplatform.common.event.deposit.ComputedDigest;
 import org.datavaultplatform.common.event.deposit.ComputedEncryption;
 import org.datavaultplatform.common.event.deposit.UploadComplete;
 import org.datavaultplatform.common.model.ArchiveStore;
+import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.worker.tasks.Deposit;
@@ -64,7 +65,7 @@ public class DepositEvents {
     Map<String, Map<String, String>> propsOuter = new HashMap<>();
     propsOuter.put(FILE_STORE_SRC_ID, propsInner);
     retrieve.setUserFileStoreProperties(propsOuter);
-    userFileStoreClasses.put(FILE_STORE_SRC_ID, "org.datavaultplatform.common.storage.impl.LocalFileSystem");
+    userFileStoreClasses.put(FILE_STORE_SRC_ID, StorageConstants.LOCAL_FILE_SYSTEM);
     retrieve.setUserFileStoreClasses(userFileStoreClasses);
 
     ObjectMapper mapper = new ObjectMapper();

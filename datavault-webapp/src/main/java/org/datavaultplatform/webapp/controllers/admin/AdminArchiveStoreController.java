@@ -1,6 +1,8 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
+import java.util.Optional;
 import org.datavaultplatform.common.model.ArchiveStore;
+import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +47,7 @@ public class AdminArchiveStoreController {
         List<ArchiveStore> stores = new ArrayList<>();
 
         for (ArchiveStore archiveStore : archiveStores) {
-//            if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.LocalFileSystem")) throws Exception {
+//            if (archiveStore.isLocalFileSystem()) throws Exception {
 //                localStores.add(archiveStore);
 //            }
             stores.add(archiveStore);
@@ -63,7 +65,10 @@ public class AdminArchiveStoreController {
                                      @RequestParam(value="label") String label,
                                      @RequestParam(value="type") String type,
                                      @RequestParam(value="retrieve",required=false) String retrieve) throws Exception {
-        String storageClass = "org.datavaultplatform.common.storage.impl." + type;
+
+        String storageClass = StorageConstants.getStorageClass(type).orElseThrow (
+            () -> new IllegalArgumentException(String.format("The type[%s] is not valid", type))
+        );
 
         boolean retrieveEnabled = "on".equals(retrieve);
 

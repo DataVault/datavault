@@ -12,6 +12,8 @@ import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.EventInfo;
 import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.storage.StorageConstants;
+import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
 import org.datavaultplatform.common.task.Task;
 import org.jsondoc.core.annotation.Api;
 import org.slf4j.Logger;
@@ -351,7 +353,7 @@ public class DepositsController {
     private List<ArchiveStore> addArchiveSpecificOptions(List<ArchiveStore> archiveStores) {
     	if (archiveStores != null && ! archiveStores.isEmpty()) {
 	    	for (ArchiveStore archiveStore : archiveStores) {
-		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.TivoliStorageManager")) {
+		        if (archiveStore.isTivoliStorageManager()) {
 		        	HashMap<String, String> asProps = archiveStore.getProperties();
 		        	if (this.optionsDir != null && ! this.optionsDir.equals("")) {
 		        		asProps.put(PropNames.OPTIONS_DIR, this.optionsDir);
@@ -368,7 +370,7 @@ public class DepositsController {
 		        	archiveStore.setProperties(asProps);
 		        }
 
-		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.OracleObjectStorageClassic")) {
+		        if (archiveStore.isOracle()) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
                     if (this.occRetryTime != null && ! this.occRetryTime.equals("")) {
                         asProps.put(PropNames.OCC_RETRY_TIME, this.occRetryTime);
@@ -385,7 +387,7 @@ public class DepositsController {
                     archiveStore.setProperties(asProps);
                 }
 
-		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.S3Cloud")) {
+		        if (archiveStore.isAmazonS3()) {
 		        	HashMap<String, String> asProps = archiveStore.getProperties();
 		        	if (this.bucketName != null && ! this.bucketName.equals("")) {
 		        		asProps.put(PropNames.AWS_S3_BUCKET_NAME, this.bucketName);

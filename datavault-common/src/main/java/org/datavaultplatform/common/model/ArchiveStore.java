@@ -26,7 +26,7 @@ import org.hibernate.annotations.GenericGenerator;
 @Table(name="ArchiveStores")
 @NamedEntityGraph(name=ArchiveStore.EG_ARCHIVE_STORE)
 @Slf4j
-public class ArchiveStore {
+public class ArchiveStore implements DataStore {
     public static final String EG_ARCHIVE_STORE = "eg.ArchiveStore.1";
 
     // Storage Identifier

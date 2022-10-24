@@ -29,7 +29,7 @@ import org.hibernate.annotations.GenericGenerator;
         })
     }
 )
-public class FileStore {
+public class FileStore implements DataStore {
 
     public static final String EG_FILE_STORE = "eg.FileStore.1";
 

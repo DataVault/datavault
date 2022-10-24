@@ -11,6 +11,7 @@ import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.storage.StorageConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,7 +103,7 @@ public class FileStoreController {
         List<FileStore> localStores = new ArrayList<>();
 
         for (FileStore userStore : userStores) {
-            if (userStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.LocalFileSystem")) {
+            if (userStore.isLocalFileSystem()) {
                 localStores.add(userStore);
                 logger.info("Adding entry to list of local filestores" + userStore);
             }
@@ -162,7 +163,7 @@ public class FileStoreController {
         List<FileStore> localStores = new ArrayList<>();
 
         for (FileStore userStore : userStores) {
-            if (userStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.SFTPFileSystem")) {
+            if (userStore.isSFTPFileSystem()) {
                 localStores.add(userStore);
             }
         }

@@ -17,6 +17,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.datavaultplatform.broker.services.FileStoreService;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.FileStore;
+import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public class SftpFileStoreEndpoint {
   @ReadOperation
   public List<SftpFileStoreInfo> getSftpFileStoresInfo() {
     return fileStoreService.getFileStores().stream()
-        .filter(fs -> fs.getStorageClass().equals("org.datavaultplatform.common.storage.impl.SFTPFileSystem"))
+        .filter(FileStore::isSFTPFileSystem)
         .map(this::getFileStoreInfo)
         .collect(Collectors.toList());
   }

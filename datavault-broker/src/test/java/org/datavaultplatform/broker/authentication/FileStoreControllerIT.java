@@ -43,6 +43,7 @@ import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.dao.FileStoreDAO;
+import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystem;
 import org.datavaultplatform.common.util.Constants;
@@ -142,7 +143,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     assertTrue(Encryption.isInitialised());
     FileStore filestore = new FileStore();
     filestore.setLabel("label-one");
-    filestore.setStorageClass("org.datavaultplatform.common.storage.impl.SFTPFileSystem");
+    filestore.setStorageClass(StorageConstants.SFTP_FILE_SYSTEM);
     HashMap<String, String> props = new HashMap<>();
     props.put(PropNames.HOST, "localhost");
     props.put(PropNames.PORT, "9999"); //we will replace 9999 later
@@ -177,7 +178,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
 
     assertEquals("admin1", fsFromDb.getUser().getID());
 
-    assertEquals("org.datavaultplatform.common.storage.impl.SFTPFileSystem",
+    assertEquals(StorageConstants.SFTP_FILE_SYSTEM,
         fsFromDb.getStorageClass());
     assertEquals("label-one", fsFromDb.getLabel());
     HashMap<String, String> storedProps = fsFromDb.getProperties();

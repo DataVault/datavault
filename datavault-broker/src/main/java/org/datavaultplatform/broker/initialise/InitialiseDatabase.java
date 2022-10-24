@@ -12,6 +12,7 @@ import org.datavaultplatform.broker.services.ArchiveStoreService;
 import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.ArchiveStore;
+import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +33,6 @@ import org.springframework.util.Assert;
 @Slf4j
 //TODO - DHAY this class *might* be redundant - if we use flyway/liquibase to manage db
 public class InitialiseDatabase {
-
-    public static final String CLASSNAME_TSM = "org.datavaultplatform.common.storage.impl.TivoliStorageManager";
-    public static final String CLASSNAME_ORACLE = "org.datavaultplatform.common.storage.impl.OracleObjectStorageClassic";
-    public static final String CLASSNAME_LOCAL = "org.datavaultplatform.common.storage.impl.LocalFileSystem";
 
     private static final Logger logger = LoggerFactory.getLogger(InitialiseDatabase.class);
     public static final String ARCHIVE_STORE_LOCAL_ROOT_PATH = "archive.store.local.root.path";
@@ -79,14 +76,9 @@ public class InitialiseDatabase {
         if (archiveStores.isEmpty()) {
             HashMap<String,String> storeProperties = new HashMap<>();
             storeProperties.put(PropNames.ROOT_PATH, archiveDir);
-            ArchiveStore tsm = new ArchiveStore(
-                "org.datavaultplatform.common.storage.impl.TivoliStorageManager", storeProperties, "Default archive store (TSM)", true);
-            //ArchiveStore s3 = new ArchiveStore("org.datavaultplatform.common.storage.impl.S3Cloud", storeProperties, "Cloud archive store", false);
-            ArchiveStore oracle = new ArchiveStore("org.datavaultplatform.common.storage.impl.OracleObjectStorageClassic", storeProperties, "Cloud archive store", false);
-            //ArchiveStore lsf = new ArchiveStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Default archive store (Local)", true);
+            ArchiveStore tsm    = new ArchiveStore(StorageConstants.TIVOLI_STORAGE_MANAGER, storeProperties, "Default archive store (TSM)", true);
+            ArchiveStore oracle = new ArchiveStore(StorageConstants.CLOUD_ORACLE, storeProperties, "Cloud archive store", false);
             archiveStoreService.addArchiveStore(tsm);
-            //archiveStoreService.addArchiveStore(s3);
-            //archiveStoreService.addArchiveStore(local);
             archiveStoreService.addArchiveStore(oracle);
             initStores.add(tsm);
             initStores.add(oracle);
@@ -103,8 +95,8 @@ public class InitialiseDatabase {
         }
         boolean hasLocal = archiveStores
             .stream()
-            .filter(as -> CLASSNAME_LOCAL.equals(as.getStorageClass())).
-            findFirst()
+            .filter(ArchiveStore::isLocalFileSystem)
+            .findFirst()
             .isPresent();
         if (hasLocal) {
             return;
@@ -113,7 +105,7 @@ public class InitialiseDatabase {
         Path rootPath = getLocalArchiveStoreRootPath();
         String rootPathValue = rootPath.toAbsolutePath().toString();
         storeProperties.put(LocalFileSystem.ROOT_PATH, rootPathValue);
-        ArchiveStore local = new ArchiveStore(CLASSNAME_LOCAL, storeProperties,
+        ArchiveStore local = new ArchiveStore(StorageConstants.LOCAL_FILE_SYSTEM, storeProperties,
             "LocalFileSystem", true);
         archiveStoreService.addArchiveStore(local);
         initStores.add(local);

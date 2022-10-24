@@ -81,8 +81,9 @@ public class InitialiseDatabaseLocalFileSystemIT extends BaseDatabaseTest {
         .collect(Collectors.toSet());
     assertTrue(storageClassNames.contains(LocalFileSystem.class.getName()));
     ArchiveStore local = savedStores.stream()
-        .filter(as -> as.getStorageClass().equals(LocalFileSystem.class.getName()))
-        .findFirst().get();
+        .filter(ArchiveStore::isLocalFileSystem)
+        .findFirst()
+        .get();
     assertEquals(local.getProperties().get(LocalFileSystem.ROOT_PATH), localFsDirectory);
     assertTrue(local.isRetrieveEnabled());
 
