@@ -52,11 +52,13 @@ public class DepositEvents {
     topLevelProps.put(PropNames.ARCHIVE_ID, info.archiveId);
 
     retrieve.setProperties(topLevelProps);
-
+    retrieve.setTarIV(info.tarIV);
     retrieve.setArchiveFileStores(Collections.singletonList(getArchiveStoreForRetrieve()));
+    //CHUNKS
     retrieve.setChunkFilesDigest(info.chunkDigests);
     retrieve.setEncChunksDigest(info.chunkEncDigests);
     retrieve.setChunksIVs(info.chunkIVsAsBytes);
+
     retrieve.setIsRedeliver(false);
     Map<String, String> userFileStoreClasses = new HashMap<>();
 
@@ -114,7 +116,8 @@ public class DepositEvents {
     info.bagitId = deposit.getProperties().get(PropNames.BAG_ID);
 
     ComputedEncryption computedEncryption = getComputedEncryption();
-    info.numChunks = computedEncryption.getChunkIVs().size();
+    HashMap<Integer, byte[]> chunkIVs = computedEncryption.getChunkIVs();
+    info.numChunks = chunkIVs == null ? 0  : chunkIVs.size();
 
     //info.retrievePath = this.retrieveDir.getName();
     info.retrievePath = retrievePath;
@@ -130,6 +133,9 @@ public class DepositEvents {
     info.chunkDigests = new HashMap<>();
     info.chunkEncDigests = new HashMap<>();
 
+    if (info.numChunks == 0) {
+      info.tarIV = computedEncryption.getTarIV();
+    }
     for (int i = 0; i < info.numChunks; i++) {
       int chunkNumber = i + 1;
 
@@ -173,6 +179,8 @@ public class DepositEvents {
     public String rootPathArchiveStore;
     public String rootPathRetrieve;
     public String retrievePath;
+
+    public byte[] tarIV;
   }
 
   private static String base64Encode(byte[] data) {

@@ -10,7 +10,6 @@ import com.rabbitmq.client.Channel;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,8 +19,11 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -42,9 +44,7 @@ import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
 import org.datavaultplatform.common.io.FileUtils;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context.AESMode;
-import org.datavaultplatform.worker.app.DataVaultWorkerInstanceApp;
 import org.datavaultplatform.worker.rabbit.BaseRabbitTCTest;
-import org.datavaultplatform.worker.test.AddTestProperties;
 import org.datavaultplatform.worker.utils.DepositEvents;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,39 +58,18 @@ import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.TestPropertySource;
 
-@SpringBootTest(classes = DataVaultWorkerInstanceApp.class)
-@AddTestProperties
-@DirtiesContext
 @Slf4j
-@TestPropertySource(properties = "chunking.size=20MB")
-public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
+public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest {
 
   static final String KEY_NAME_FOR_SSH = "key-name-for-ssh";
   static final String KEY_NAME_FOR_DATA = "key-name-for-data";
   static final String KEY_STORE_PASSWORD = "testPassword";
-  static final File baseTemp;
-
-  static {
-    try {
-      Path dir = Paths.get("/tmp/TEST");
-      if (Files.exists(dir)) {
-        assertTrue(Files.isDirectory(dir));
-        FileUtils.deleteDirectory(dir.toFile());
-      }
-      baseTemp = Files.createDirectory(dir).toFile();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
 
   final Resource depositMessage = new ClassPathResource("sampleMessages/sampleDepositMessage.json");
 
@@ -117,6 +96,12 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
   @Value("classpath:big_data/50MB_file")
   Resource largeFile;
 
+  @Value("${chunking.enabled:false}")
+  private boolean chunkingEnabled;
+
+  @Value("${chunking.size:0}")
+  private String chunkingByteSize;
+
   @SneakyThrows
   static Set<Path> getPathsWithinTarFile(File tarFile) {
     Set<Path> paths = new HashSet<>();
@@ -135,6 +120,7 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
   @DynamicPropertySource
   @SneakyThrows
   static void setupProperties(DynamicPropertyRegistry registry) {
+    File baseTemp = Files.createTempDirectory("test").toFile();
     File tempDir = new File(baseTemp, "temp");
     assertTrue(tempDir.mkdir());
 
@@ -160,18 +146,23 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
   @BeforeEach
   @SneakyThrows
   void setup() {
+    checkChunkingProps(this.chunkingEnabled, this.chunkingByteSize);
     purgeQueues();
     setupKeystore();
     setupDirectoriesAndFiles();
   }
 
+  abstract void checkChunkingProps(boolean chunkingEnabled, String chunkingByteSize);
+
   @SneakyThrows
   private void setupDirectoriesAndFiles() {
-    sourceDir = baseTemp.toPath().resolve("source").toFile();
+    Path baseTemp = Paths.get(this.tempDir);
+
+    sourceDir = baseTemp.resolve("source").toFile();
     assertTrue(sourceDir.mkdir());
-    destDir = baseTemp.toPath().resolve("dest").toFile();
+    destDir = baseTemp.resolve("dest").toFile();
     assertTrue(destDir.mkdir());
-    retrieveBaseDir = baseTemp.toPath().resolve("retrieve").toFile();
+    retrieveBaseDir = baseTemp.resolve("retrieve").toFile();
     assertTrue(retrieveBaseDir.mkdir());
     retrieveDir = retrieveBaseDir.toPath().resolve("ret-folder").toFile();
     assertTrue(retrieveDir.mkdir());
@@ -195,9 +186,10 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
 
   @SneakyThrows
   void setupKeystore() {
+    Path baseTemp = Paths.get(this.tempDir);
     Encryption.addBouncyCastleSecurityProvider();
-    keyStorePath = baseTemp.toPath().resolve("test.ks").toFile().getCanonicalPath();
-    log.info("BASE TEMP IS AT [{}]", baseTemp.getCanonicalPath());
+    keyStorePath = baseTemp.resolve("test.ks").toFile().getCanonicalPath();
+    log.info("BASE TEMP IS AT [{}]", baseTemp.toFile().getCanonicalPath());
     log.info("TEMP KEY  IS AT [{}]", keyStorePath);
     Encryption enc = new Encryption();
     enc.setVaultEnable(false);
@@ -239,14 +231,14 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
 
     DepositEvents depositEvents = new DepositEvents(deposit, this.events);
 
-   checkDepositWorkedOkay(depositMessage, depositEvents);
+    checkDepositWorkedOkay(depositMessage, depositEvents);
 
     buildAndSendRetrieveMessage(depositEvents);
     checkRetrieve();
 
   }
 
-  void waitUntil(Callable<Boolean> test){
+  void waitUntil(Callable<Boolean> test) {
     Awaitility.await().atMost(5, TimeUnit.MINUTES)
         .pollInterval(Duration.ofSeconds(15))
         .until(test);
@@ -257,7 +249,7 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
     log.info("FIN {}", retrieveDir.getCanonicalPath());
     waitUntil(this::foundRetrieveComplete);
     log.info("FIN {}", retrieveDir.getCanonicalPath());
-    File retrieved = new File("/tmp/TEST/retrieve/ret-folder/src-path-1/src-file-1");
+    File retrieved = new File(this.retrieveDir + "/src-path-1/src-file-1");
 
     String digestOriginal = Verify.getDigest(this.largeFile.getFile());
     String digestRetrieved = Verify.getDigest(retrieved);
@@ -275,6 +267,8 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
         .anyMatch(e -> e.getClass().equals(Complete.class));
   }
 
+  abstract Optional<Integer> getExpectedNumberChunks();
+
   @SneakyThrows
   private void checkDepositWorkedOkay(String depositMessage, DepositEvents depositEvents) {
     Deposit deposit = mapper.readValue(depositMessage, Deposit.class);
@@ -282,62 +276,72 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
 
     log.info("BROKER MSG COUNT {}", events.size());
     File[] destFiles = destDir.listFiles();
-    assertEquals(3, destFiles.length);
+
+    int expectedNumFiles = getExpectedNumberChunks().isPresent() ? getExpectedNumberChunks().get() : 1;
+    assertEquals(expectedNumFiles, destFiles.length);
 
     Arrays.sort(destFiles, Comparator.comparing(File::getName));
 
-    File expectedEncChunk1 = destDir.toPath().resolve(bagId + ".tar.1").toFile();
-    assertEquals(expectedEncChunk1, destFiles[0]);
-    File expectedEncChunk2 = destDir.toPath().resolve(bagId + ".tar.2").toFile();
-    assertEquals(expectedEncChunk2, destFiles[1]);
-    File expectedEncChunk3 = destDir.toPath().resolve(bagId + ".tar.3").toFile();
-    assertEquals(expectedEncChunk3, destFiles[2]);
+    final Map<Integer,File> chunkNumToEncChunk = new HashMap<>();
 
-    ComputedEncryption computedEncryption = depositEvents.getComputedEncryption();
-
-    String encHash1 = computedEncryption.getEncChunkDigests().get(1);
-    assertEquals(encHash1, getSha1Hash(expectedEncChunk1));
-
-    String encHash2 = computedEncryption.getEncChunkDigests().get(2);
-    assertEquals(encHash2, getSha1Hash(expectedEncChunk2));
-
-    String encHash3 = computedEncryption.getEncChunkDigests().get(3);
-    assertEquals(encHash3, getSha1Hash(expectedEncChunk3));
-
-
+    final ComputedEncryption computedEncryption = depositEvents.getComputedEncryption();
     AESMode aesMode = AESMode.valueOf(computedEncryption.getAesMode());
     assertEquals(AESMode.GCM, aesMode);
+    final ComputedDigest computedDigest = depositEvents.getComputedDigest();
 
-    byte[] iv1 = computedEncryption.getChunkIVs().get(1);
-    byte[] iv2 = computedEncryption.getChunkIVs().get(2);
-    byte[] iv3 = computedEncryption.getChunkIVs().get(3);
+    final File decryptedTarFile;
 
-    File decryptedChunkFile1 = Files.createTempFile("decryptedChunk", ".plain").toFile();
-    FileUtils.copyFile(expectedEncChunk1, decryptedChunkFile1);
-    Encryption.decryptFile(aesMode, decryptedChunkFile1, iv1);
-    assertTrue(decryptedChunkFile1.length() > 0);
-    assertTrue(decryptedChunkFile1.length() != expectedEncChunk1.length());
+    if (getExpectedNumberChunks().isPresent()) {
 
-    File decryptedChunkFile2 = Files.createTempFile("decryptedChunk", ".plain").toFile();
-    FileUtils.copyFile(expectedEncChunk2, decryptedChunkFile2);
-    Encryption.decryptFile(aesMode, decryptedChunkFile2, iv2);
-    assertTrue(decryptedChunkFile2.length() > 0);
-    assertTrue(decryptedChunkFile2.length() != expectedEncChunk2.length());
+      int expectedNumberChunks = getExpectedNumberChunks().get();
 
-    File decryptedChunkFile3 = Files.createTempFile("decryptedChunk", ".plain").toFile();
-    FileUtils.copyFile(expectedEncChunk3, decryptedChunkFile3);
-    Encryption.decryptFile(aesMode, decryptedChunkFile3, iv3);
-    assertTrue(decryptedChunkFile3.length() > 0);
-    assertTrue(decryptedChunkFile3.length() != expectedEncChunk3.length());
+      for (int chunkNum = 1; chunkNum <= expectedNumberChunks; chunkNum++) {
+        File expectedEncChunk = destDir.toPath().resolve(bagId + ".tar." + chunkNum).toFile();
+        assertEquals(expectedEncChunk, destFiles[chunkNum - 1]);
+        chunkNumToEncChunk.put(chunkNum, expectedEncChunk);
+      }
 
-    ComputedDigest computedDigest = depositEvents.getComputedDigest();
+      for (int chunkNum = 1; chunkNum <= expectedNumberChunks; chunkNum++) {
+        File expectedEncChunk = chunkNumToEncChunk.get(chunkNum);
+        String encHash = computedEncryption.getEncChunkDigests().get(chunkNum);
+        assertEquals(encHash, getSha1Hash(expectedEncChunk));
+      }
 
-    File decryptedTarFile = Files.createTempFile("decryptedTar", ".plain").toFile();
+      Map<Integer, File> chunkNumToDecryptedChunk = new HashMap<>();
+      for (int chunkNum = 1; chunkNum <= expectedNumberChunks; chunkNum++) {
+        File expectedEncChunk = chunkNumToEncChunk.get(chunkNum);
+        byte[] iv = computedEncryption.getChunkIVs().get(chunkNum);
+        File decryptedChunkFile = Files.createTempFile("decryptedChunk", ".plain").toFile();
+        chunkNumToDecryptedChunk.put(chunkNum, decryptedChunkFile);
+        FileUtils.copyFile(expectedEncChunk, decryptedChunkFile);
+        Encryption.decryptFile(aesMode, decryptedChunkFile, iv);
+        assertTrue(decryptedChunkFile.length() > 0);
+        assertTrue(decryptedChunkFile.length() != expectedEncChunk.length());
+      }
 
-    try(FileOutputStream fos = new FileOutputStream(decryptedTarFile)){
-      Files.copy(decryptedChunkFile1.toPath(), fos);
-      Files.copy(decryptedChunkFile2.toPath(), fos);
-      Files.copy(decryptedChunkFile3.toPath(), fos);
+      decryptedTarFile = Files.createTempFile("decryptedTar", ".plain").toFile();
+
+      try (FileOutputStream fos = new FileOutputStream(decryptedTarFile)) {
+        for (int chunkNum = 1; chunkNum <= expectedNumberChunks; chunkNum++) {
+          File decryptedChunkFile = chunkNumToDecryptedChunk.get(chunkNum);
+          Files.copy(decryptedChunkFile.toPath(), fos);
+        }
+      }
+
+    } else {
+      File expectedEncTar = destDir.toPath().resolve(bagId + ".tar").toFile();
+      assertEquals(expectedEncTar, destFiles[0]);
+
+      String encTarHash = computedEncryption.getEncTarDigest();
+      assertEquals(encTarHash, getSha1Hash(expectedEncTar));
+
+      decryptedTarFile = Files.createTempFile("decryptedTar", ".plain").toFile();
+
+      byte[] iv = computedEncryption.getTarIV();
+      FileUtils.copyFile(destFiles[0], decryptedTarFile);
+      Encryption.decryptFile(aesMode, decryptedTarFile, iv);
+      assertTrue(decryptedTarFile.length() > 0);
+      assertTrue(decryptedTarFile.length() != expectedEncTar.length());
     }
 
     Set<Path> tarEntryPaths = getPathsWithinTarFile(decryptedTarFile);
@@ -392,9 +396,8 @@ public class PerformDepositThenRetrieveIT extends BaseRabbitTCTest {
     return mapper.readValue(message, eventClass);
   }
 
-  private String getSha1Hash(File file) throws Exception {
+  @SneakyThrows
+  private String getSha1Hash(File file) {
     return Verify.getDigest(file);
   }
-
-
 }

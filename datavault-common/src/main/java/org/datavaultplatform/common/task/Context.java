@@ -11,19 +11,18 @@ public class Context {
     private final Path tempDir;
     private final Path metaDir;
     private final EventSender eventSender;
-    private final Boolean chunkingEnabled;
-    private final Long chunkingByteSize;
-    private final Boolean encryptionEnabled;
+    private final boolean chunkingEnabled;
+    private final long chunkingByteSize;
+    private final boolean encryptionEnabled;
     private final AESMode encryptionMode;
     private final String vaultAddress;
     private final String vaultToken;
     private final String vaultKeyPath;
     private final String vaultKeyName;
     private final String vaultSslPEMPath;
-    private final Boolean multipleValidationEnabled;
+    private final boolean multipleValidationEnabled;
     private final int noChunkThreads;
-    
-    //ublic Context() {};
+
     public Context(Path tempDir, Path metaDir, EventSender eventSender,
                    Boolean chunkingEnabled, Long chunkingByteSize,
                    Boolean encryptionEnabled, AESMode encryptionMode, 

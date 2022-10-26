@@ -30,10 +30,10 @@ public class Receiver implements MessageProcessor {
     private final String tempDir;
     private final String metaDir;
     private final boolean chunkingEnabled;
-    private final Long chunkingByteSize;
+    private final long chunkingByteSize;
     private final boolean encryptionEnabled;
     private final AESMode  encryptionMode;
-    private final Boolean multipleValidationEnabled;
+    private final boolean multipleValidationEnabled;
     private final int noChunkThreads;
 
     private final RecordingEventSender eventSender;
@@ -113,7 +113,7 @@ public class Receiver implements MessageProcessor {
                 Task commonTask = mapper.readValue(message, Task.class);
                 
                 Class<?> clazz = Class.forName(commonTask.getTaskClass());
-                Task concreteTask = (Task)(mapper.readValue(message, clazz));
+                Task concreteTask = (Task) mapper.readValue(message, clazz);
 
                 // Is the message a redelivery?
                 if (messageInfo.getIsRedeliver()) {
