@@ -1,6 +1,6 @@
 # Created by David Hay 31Oct2022
 #
-# used 'eclipse-temurin:8' as base java8 image because it has addgroup/adduser/gpasswd
+# used 'eclipse-temurin:8u345-b01-jdk' as base java8 image because it has addgroup/adduser/gpasswd
 #
 # added User[jenkins] and Groups[jenkins,docker]
 # added User[jenkins] to Group[docker]
