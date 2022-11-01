@@ -3,6 +3,9 @@ package org.datavaultplatform.common.util;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+/*
+ * @see DisabledInsideDocker
+ */
 public class DockerUtils {
 
   public static boolean isRunningInsideDocker() {
