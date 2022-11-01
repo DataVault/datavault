@@ -3,8 +3,9 @@ package org.datavaultplatform.common.util;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-/*
+/**
  * @see DisabledInsideDocker
+ * @author David Hay
  */
 public class DockerUtils {
 
