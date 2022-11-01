@@ -28,7 +28,7 @@ pipeline {
         stage('Integration Tests') {
             steps {
                 echo 'Integration Tests..'
-                sh './mvnw integration-test -Dskip.unit.tests'
+                sh './mvnw integration-test -Dskip.unit.tests -Dmaven.main.skip'
             }
         }
         stage('Install') {
