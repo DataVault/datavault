@@ -78,7 +78,7 @@ public class RestTemplateTimeoutTest {
       long diff = System.currentTimeMillis() - start;
       log.info("diff is {}",diff);
       assertTrue(diff > 2_000);
-      assertTrue(diff < 2_200);
+      assertTrue(diff < 2_300);
       String expectedErrorPrefix = String.format("I/O error on GET request for \"http://localhost:%d/auth/info/hello\": Read timed out; nested exception is java.net.SocketTimeoutException: Read timed out",serverPort);
       assertThat(ex.getMessage()).startsWith(expectedErrorPrefix);
   }

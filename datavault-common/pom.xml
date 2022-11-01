@@ -163,6 +163,8 @@
             </goals>
             <configuration>
               <includes>
+                <include>**/DisabledInsideDocker*</include>
+                <include>**/DockerUtils*</include>
                 <include>**/DockerImage*</include>
                 <include>**/Base*Test*</include>
                 <include>**/*.ldif</include>

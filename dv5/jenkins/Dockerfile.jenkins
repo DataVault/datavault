@@ -1,0 +1,28 @@
+# Created by David Hay 31Oct2022
+#
+# used 'eclipse-temurin:8' as base java8 image because it has addgroup/adduser/gpasswd
+#
+# added User[jenkins] and Groups[jenkins,docker]
+# added User[jenkins] to Group[docker]
+# all the User/Group stuff is to ensure that -
+# the jenkins user within this container can access /var/run/docker.sock
+#
+# added tools jq, curl and ping to help with testing and diagnostics
+#
+FROM eclipse-temurin:8
+USER root
+#
+# install tools
+#
+RUN apt update
+RUN apt install -y jq
+RUN apt install -y curl
+RUN apt install -y iputils-ping
+#
+# tweak users and groups to ensure 'jenkins' user can access docker socket (/var/run/docker.sock)
+#
+RUN addgroup docker --gid 992
+RUN addgroup jenkins --gid 991
+RUN adduser --disabled-password --gecos "Jenkins User" -u 995 --gid 991 jenkins
+RUN gpasswd --add jenkins docker
+USER jenkins

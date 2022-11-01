@@ -24,6 +24,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.MountableFile;
 
 /**
  * This test generates a key pair and checks that the keypair is valid by ...
@@ -85,8 +86,12 @@ public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
   private void checkPrivateAndPublicKeyPairing(KeyPairInfo info) throws JSchException {
 
     //first write the two keys to files within the nginx container which has openssl
-    writeToFileInTmpDirectory("rsa", info.getPrivateKey());
+    File tempRSA = writeToFileInTmpDirectory("rsa", info.getPrivateKey());
 
+    linuxWithOpenSSL.copyFileToContainer( MountableFile.forHostPath(tempRSA.getAbsolutePath()), "/tmp/dv5-temp/rsa");
+
+    execInContainer(linuxWithOpenSSL, "ls rsa", "ls -l /tmp/dv5-temp/rsa");
+    execInContainer(linuxWithOpenSSL, "cat rsa", "cat /tmp/dv5-temp/rsa");
     //we use openssl to decrypt the encrypted private key (easier than doing it in Java)
     String decrypted = decryptPrivateKey();
 
@@ -108,7 +113,12 @@ public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
     String command = "openssl rsa -in /tmp/dv5-temp/rsa -passin pass:" + TEST_PASSPHRASE +" -out /tmp/dv5-temp/rsa.decrypted";
     execInContainer(linuxWithOpenSSL, "decrypr private key", command);
 
-    String decryptedPrivateKey = readFromFileInTmpDirectory("rsa.decrypted");
+    File file = new File(TMP_DIR.toFile(), "rsa.decrypted");
+    file.createNewFile();
+
+    linuxWithOpenSSL.copyFileFromContainer("/tmp/dv5-temp/rsa.decrypted", file.getAbsolutePath());
+    String decryptedPrivateKey = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+
     return decryptedPrivateKey;
   }
 
@@ -120,17 +130,12 @@ public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
   }
 
   @SneakyThrows
-  private void writeToFileInTmpDirectory(String filename, String contents) {
+  private File writeToFileInTmpDirectory(String filename, String contents) {
     File file = new File(TMP_DIR.toFile(), filename);
     try (FileWriter fw = new FileWriter(file)) {
       fw.write(contents);
     }
-  }
-
-  @SneakyThrows
-  private String readFromFileInTmpDirectory(String filename) {
-    File file = new File(TMP_DIR.toFile(), filename);
-    return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+    return file;
   }
 
   @BeforeAll
@@ -138,9 +143,9 @@ public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
     try {
       TMP_DIR = createTempDirectory("dv-tmp");
       log.info("TMP_DIR IS {}", TMP_DIR);
-      linuxWithOpenSSL = new GenericContainer<>(DockerImage.NGINX_IMAGE)
-          .withFileSystemBind(TMP_DIR.toAbsolutePath().toString(), "/tmp/dv5-temp");
+      linuxWithOpenSSL = new GenericContainer<>(DockerImage.NGINX_IMAGE);
       linuxWithOpenSSL.start();
+      execInContainer(linuxWithOpenSSL, "mk temp dir", "mkdir -p /tmp/dv5-temp");
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

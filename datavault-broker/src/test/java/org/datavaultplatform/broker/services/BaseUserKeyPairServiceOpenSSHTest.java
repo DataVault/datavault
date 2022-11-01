@@ -71,7 +71,7 @@ public abstract class BaseUserKeyPairServiceOpenSSHTest extends BaseUserKeyPairS
     initContainers(publicKey);
     JSch.setLogger(JSchLogger.getInstance());
     JSch jSch = new JSch();
-    Session session = jSch.getSession(TEST_USER, "localhost", this.toContainer.getMappedPort(2222));
+    Session session = jSch.getSession(TEST_USER, this.toContainer.getHost(), this.toContainer.getMappedPort(2222));
     jSch.addIdentity(TEST_USER, privateKeyBytes, null, TEST_PASSPHRASE.getBytes());
     java.util.Properties properties = new java.util.Properties();
     properties.put(STRICT_HOST_KEY_CHECKING, NO);

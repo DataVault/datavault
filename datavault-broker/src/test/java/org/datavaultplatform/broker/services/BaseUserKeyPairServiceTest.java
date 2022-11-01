@@ -31,6 +31,10 @@ public abstract class BaseUserKeyPairServiceTest {
         log.info("[{}] std out   [{}]", label, result.getStdout().trim());
         log.info("[{}] exit code [{}]", label, result.getExitCode());
         fail(String.format("exit status for [%s] was [%d] not [0]", label, result.getExitCode()));
+      } else {
+        log.info("[{}] std err   [{}]", label, result.getStderr().trim());
+        log.info("[{}] std out   [{}]", label, result.getStdout().trim());
+        log.info("[{}] exit code [{}]", label, result.getExitCode());
       }
     } catch (Exception ex) {
       fail(String.format("problem running command [%s]", label), ex);

@@ -1,0 +1,47 @@
+pipeline {
+    agent {
+      dockerfile {
+        dir 'dv5/jenkins'
+        filename 'Dockerfile.jenkins'
+        args  '--group-add=docker -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/jenkins/.m2:/home/jenkins/.m2 -e JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8'
+      }
+    }
+    stages {
+        stage('Test Docker Socket') {
+            steps {
+                echo 'Testing Docker Socket'
+                sh 'curl --silent -XGET --unix-socket /var/run/docker.sock http://localhost/info | jq'
+            }
+        }
+        stage('Compile') {
+            steps {
+                echo 'Compiling..'
+                sh './mvnw clean compile'
+            }
+        }
+        stage('Unit Tests') {
+            steps {
+                echo 'Unit Tests..'
+                sh './mvnw test'
+            }
+        }
+        stage('Integration Tests') {
+            steps {
+                echo 'Integration Tests..'
+                sh './mvnw integration-test -Dskip.unit.tests'
+            }
+        }
+        stage('Install') {
+            steps {
+                echo 'installing locally'
+                sh './mvnw install -Dskip.unit.tests -Dskip.integration.tests -Dmaven.main.skip'
+            }
+        }
+    }
+    post {
+        success {
+            echo "BUILD SUCCESS : Recording Artifacts.."
+            archiveArtifacts artifacts: 'datavault-webapp/target/datavault-webapp.jar, datavault-worker/target/datavault-worker.jar, datavault-broker/target/datavault-broker.jar', fingerprint: true
+        }
+    }
+}
