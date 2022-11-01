@@ -1,4 +1,5 @@
 # Created by David Hay 31Oct2022
+# Used to create custom docker image for Jenkins docker builds
 #
 # used 'eclipse-temurin:8u345-b01-jdk' as base java8 image because it has addgroup/adduser/gpasswd
 #
