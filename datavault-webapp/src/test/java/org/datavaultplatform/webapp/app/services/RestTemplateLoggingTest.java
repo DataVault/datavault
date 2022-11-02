@@ -5,23 +5,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.datavaultplatform.common.util.DisabledInsideDocker;
 import org.datavaultplatform.webapp.config.logging.LoggingInterceptor;
 import org.datavaultplatform.webapp.test.ProfileDatabase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.WireMockRestServiceServer;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -41,7 +41,7 @@ import org.springframework.web.client.RestTemplate;
 @ProfileDatabase
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 @TestPropertySource(properties = "logging.level.org.datavaultplatform.webapp.config.logging=DEBUG")
-@DisabledInsideDocker
+//@DisabledInsideDocker
 public class RestTemplateLoggingTest {
 
   @Autowired
@@ -51,10 +51,10 @@ public class RestTemplateLoggingTest {
 
   MockRestServiceServer server;
 
-  @Value("${classpath:/logs/expectedLogEvents.txt}")
-  ClassPathResource expectedLogEventsResource;
+  Resource expectedLogEventsResource = new ClassPathResource("logs/expectedLogEvents.txt");
 
   @BeforeEach
+  @SneakyThrows
   void setup() {
     server = WireMockRestServiceServer.with(this.restTemplate) //
         .baseUrl("https://example.org") //
@@ -65,6 +65,8 @@ public class RestTemplateLoggingTest {
     logBackListAppender.start();
     getLoggingInterceptorLogbackLogger().addAppender(logBackListAppender);
 
+    File f = expectedLogEventsResource.getFile();
+    assertTrue(f.getName().endsWith("txt"));
   }
 
   @Test
@@ -81,7 +83,6 @@ public class RestTemplateLoggingTest {
 
     List<String> actualLogEvents = logBackListAppender.list.stream().map(Object::toString).collect(Collectors.toList());
     List<String> expectedLogEvents = IOUtils.readLines(this.expectedLogEventsResource.getInputStream(), StandardCharsets.UTF_8);
-
     assertTrue(actualLogEvents.containsAll(expectedLogEvents));
   }
 
@@ -92,7 +93,9 @@ public class RestTemplateLoggingTest {
   }
 
   private ch.qos.logback.classic.Logger getLoggingInterceptorLogbackLogger() {
-    return (ch.qos.logback.classic.Logger) LoggingInterceptor.LOGGER;
+    ch.qos.logback.classic.Logger result = (ch.qos.logback.classic.Logger) LoggingInterceptor.LOGGER;
+    assertTrue(result.isDebugEnabled());
+    return result;
   }
 
 }
