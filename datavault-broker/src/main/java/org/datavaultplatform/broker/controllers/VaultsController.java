@@ -588,16 +588,10 @@ public class VaultsController {
 
         pendingVaultsService.addCreator(createVault, userID, vault.getId());
 
-        pendingVaultsService.sendNewPendingVaultEmail(vault);
+        if (createVault.getConfirmed()) {
+            pendingVaultsService.sendNewPendingVaultEmail(vault);
+        }
 
-        // Check the retention policy of the newly created vault
-        //try {
-        //    vaultsService.checkRetentionPolicy(vault.getId());
-        //} catch (Exception e) {
-        //    logger.error("Fail to check retention policy: "+e);
-        //    e.printStackTrace();
-        //    throw e;
-        //}
         return vault.convertToResponse();
     }
 
