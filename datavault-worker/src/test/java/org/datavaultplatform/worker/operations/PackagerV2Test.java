@@ -30,6 +30,7 @@ import org.mockito.Mockito;
 @Slf4j
 public class PackagerV2Test {
 
+  public static final String JAVA_TOOL_OPTIONS = "JAVA_TOOL_OPTIONS";
   @TempDir
   File tempDir;
 
@@ -416,6 +417,7 @@ public class PackagerV2Test {
       @SneakyThrows
       void testPackagerV2AsProcessSuccess() {
         ProcessBuilder builder = ProcessUtils.exec(PackagerV2.class, Collections.emptyList(), Collections.singletonList(tempDir.getCanonicalPath()));
+        builder.environment().remove(JAVA_TOOL_OPTIONS);
         Process p  = builder.start();
         int status = p.waitFor();
         String output = IOUtils.readLines(p.getInputStream(), StandardCharsets.UTF_8).stream().collect(
@@ -436,6 +438,7 @@ public class PackagerV2Test {
       @SneakyThrows
       void testPackagerV2AsProcessFail() {
         ProcessBuilder builder = ProcessUtils.exec(PackagerV2.class, Collections.emptyList(), Collections.singletonList(dataDir.getCanonicalPath()));
+        builder.environment().remove(JAVA_TOOL_OPTIONS);
         Process p  = builder.start();
         int status = p.waitFor();
         String output = IOUtils.readLines(p.getInputStream(), StandardCharsets.UTF_8).stream().collect(
