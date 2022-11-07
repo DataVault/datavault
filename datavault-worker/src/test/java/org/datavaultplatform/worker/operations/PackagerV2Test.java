@@ -422,6 +422,8 @@ public class PackagerV2Test {
             Collectors.joining());
         String error = IOUtils.readLines(p.getErrorStream(), StandardCharsets.UTF_8).stream().collect(
             Collectors.joining());
+        log.info("output[{}]", output);
+        log.info("error[{}]", error);
         assertEquals(0, status);
         assertTrue(bagit.exists());
         assertTrue(manifest.exists());
@@ -440,6 +442,8 @@ public class PackagerV2Test {
             Collectors.joining());
         String error = IOUtils.readLines(p.getErrorStream(), StandardCharsets.UTF_8).stream().collect(
             Collectors.joining());
+        log.info("output[{}]", output);
+        log.info("error[{}]", error);
         assertNotEquals(0, status);
         assertFalse(bagit.exists());
         assertFalse(manifest.exists());
