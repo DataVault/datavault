@@ -9,7 +9,6 @@ import java.io.File;
 import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.crypto.SecretKey;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +16,7 @@ import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.broker.services.UserKeyPairServiceJSchImpl;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.crypto.SshRsaKeyUtils;
-import org.datavaultplatform.common.docker.DockerImage;
 import org.datavaultplatform.common.model.FileInfo;
-import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnJava;
@@ -30,9 +27,9 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Slf4j
-@ConditionalOnJava(value=JavaVersion.NINE, range=Range.EQUAL_OR_NEWER)
+@ConditionalOnJava(value=JavaVersion.EIGHT, range=Range.EQUAL_OR_NEWER)
 @Testcontainers(disabledWithoutDocker = true)
-public class SFTPFileSystemSSHDPrivatePublicKeyPairIT extends BaseSFTPFileSystemIT {
+public abstract class BaseSFTPFileSystemPrivatePublicKeyPairIT extends BaseSFTPFileSystemIT {
 
   static final String TEST_PASSPHRASE = "tenet";
   static final String ENV_PUBLIC_KEY = "PUBLIC_KEY";
@@ -42,15 +39,11 @@ public class SFTPFileSystemSSHDPrivatePublicKeyPairIT extends BaseSFTPFileSystem
   @TempDir
   File keyStoreTempDir;
 
-  @Override
-  public SFTPFileSystemDriver getSftpFileSystemDriver() {
-    Map<String, String> props = getStoreProperties();
-    return new SFTPFileSystemSSHD("mina-sshd", props, TEST_CLOCK);
-  }
+  public abstract String getDockerImageName();
 
   @Override
   GenericContainer<?> getSftpTestContainer() {
-    return new GenericContainer<>(DockerImage.OPEN_SSH_8pt6_IMAGE_NAME)
+    return new GenericContainer<>(getDockerImageName())
         .withEnv(ENV_USER_NAME, TEST_USER)
         .withEnv(ENV_PUBLIC_KEY, this.keyPairInfo.getPublicKey()) //this causes the public key to be added to /config/.ssh/authorized_keys
         .withExposedPorts(2222)

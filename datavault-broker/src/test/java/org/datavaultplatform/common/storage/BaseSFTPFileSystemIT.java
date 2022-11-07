@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
@@ -53,7 +52,7 @@ import org.testcontainers.containers.GenericContainer;
  SFTP Server Authentication configuration left to the subclasses.
  */
 @Slf4j
-@TestPropertySource(properties = "org.apache.sshd=INFO")
+@TestPropertySource(properties = "logging.level.org.apache.sshd=INFO")
 public abstract class BaseSFTPFileSystemIT {
 
   static final String ENV_USER_NAME = "USER_NAME";
@@ -249,7 +248,6 @@ public abstract class BaseSFTPFileSystemIT {
     ProgressEventListener sendListener = sendEvents::add;
     Progress pSend = new Progress(sendListener);
     File largeFileSend = createLargeFile(tempFileDir, fileSize);
-    long start = System.nanoTime();
     String pathOnRemote = time(label, "store", () -> sftpDriver.store(".", largeFileSend, pSend));
     Path tsPath = Paths.get(SFTP_ROOT_DIR).relativize(Paths.get(pathOnRemote));
 

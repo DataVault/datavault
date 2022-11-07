@@ -45,7 +45,7 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
   }
 
   /*
-   * This constructor will be used for testing where we can pass in a fixed clock
+   * This constructor will be used for testing where we can pass in a 'fixed' clock
    */
   public SFTPFileSystemSSHD(String name, Map<String, String> config, Clock clock) {
     super(name, config);

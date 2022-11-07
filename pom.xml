@@ -60,7 +60,7 @@
     <commons.compress.version>1.21</commons.compress.version>
     <javax.interceptor.version>1.2.2</javax.interceptor.version>
     <cron.expr.desc.version>1.2.6</cron.expr.desc.version>
-    <sshd.sftp.version>2.9.0</sshd.sftp.version>
+    <sshd.sftp.version>2.9.1</sshd.sftp.version>
     <eddsa.version>0.3.0</eddsa.version>
   </properties>
 

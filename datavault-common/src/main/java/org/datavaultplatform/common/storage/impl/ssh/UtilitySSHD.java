@@ -27,8 +27,10 @@ import org.springframework.util.Assert;
 @Slf4j
 public class UtilitySSHD {
 
-    public static final int BUFFER_SIZE = 1024  * 8;
+    public static final int BUFFER_SIZE = 1024  * 64;
+    @SuppressWarnings("OctalInteger")
     private static final int DEFAULT_DIR_MODE = 0755;
+    @SuppressWarnings("OctalInteger")
     public static final int FILE_PERMISSION_MASK = 0777;
 
     public static long calculateSize(final SftpClient sftpClient,
@@ -90,6 +92,10 @@ public class UtilitySSHD {
                     super.write(data);
                     incBytesWritten(data.length);
                   }
+
+                  /*
+                  * Note : this is for writing a SINGLE byte
+                  */
                   @Override
                   public void write(int data) throws IOException {
                     super.write(data);
@@ -121,6 +127,11 @@ public class UtilitySSHD {
                 public int read(byte[] target) throws IOException {
                     return incBytesRead(super.read(target));
                 }
+
+                /*
+                The other 'read' methods return the number of bytes read, this method
+                return the single byte of data that's been read.
+                 */
                 @Override
                 public int read() throws IOException {
                     int data = super.read();
@@ -200,9 +211,9 @@ public class UtilitySSHD {
         Assert.isTrue(attrs.isRegularFile(), String.format("Remote file [%s] is not a regular file", remoteFilePath));
         final long remoteFileSize = attrs.getSize();
 
-        try (FileOutputStream fos = new FileOutputStream(localFile)) {
+        try (OutputStream os = Files.newOutputStream(localFile.toPath())) {
             try (InputStream inputStream = monitor.monitorInputStream(sftpClient.read(remoteFilePath.toString(), BUFFER_SIZE))) {
-                long copied = transfer(inputStream, fos);
+                long copied = transfer(inputStream, os);
                 if (remoteFileSize != copied) {
                     log.error("expected to recv [{}] bytes but recvd [{}]bytes", remoteFileSize, copied);
                 }
@@ -212,7 +223,8 @@ public class UtilitySSHD {
 
     @SneakyThrows
     private static long transfer(InputStream inputStream, OutputStream outputStream) {
-        return IOUtils.copyLarge(inputStream, outputStream);
+        byte[] buffer = new byte[BUFFER_SIZE];
+        return IOUtils.copyLarge(inputStream, outputStream, buffer);
     }
 
     public static void send(final SftpClient sftpClient,
@@ -244,20 +256,23 @@ public class UtilitySSHD {
         Assert.isTrue(UtilitySSHD.existsOnSftpServer(sftpClient, sftpDestDirPath), () -> "sftpDestDirPath does not exist: " + sftpDestDirPath);
 
         Path localDirPath = localDir.toPath();
-        DirectoryStream<Path> stream = Files.newDirectoryStream(localDirPath);
-        
-        for (Path localPathEntry : stream) {
+        try(DirectoryStream<Path> stream = Files.newDirectoryStream(localDirPath)) {
 
-            File localPathFile = localPathEntry.toFile();
-            
-            if (localPathFile.isDirectory()) {
-                //noinspection UnnecessaryLocalVariable
-                File localPathDir = localPathFile;
-                Path nestedSftpDestDirPath = sftpDestDirPath.resolve(localPathDir.getName());
-                sendDirectoryToRemote(sftpClient, localPathDir, nestedSftpDestDirPath, monitor);
-            } else {
-                Path fullPathToDestinationFileOnSftpServer = sftpDestDirPath.resolve(localPathFile.getName());
-                transferToSftpServer(sftpClient, localPathFile, fullPathToDestinationFileOnSftpServer, monitor);
+            for (Path localPathEntry : stream) {
+
+                File localPathFile = localPathEntry.toFile();
+
+                if (localPathFile.isDirectory()) {
+                    //noinspection UnnecessaryLocalVariable
+                    File localPathDir = localPathFile;
+                    Path nestedSftpDestDirPath = sftpDestDirPath.resolve(localPathDir.getName());
+                    sendDirectoryToRemote(sftpClient, localPathDir, nestedSftpDestDirPath, monitor);
+                } else {
+                    Path fullPathToDestinationFileOnSftpServer = sftpDestDirPath.resolve(
+                        localPathFile.getName());
+                    transferToSftpServer(sftpClient, localPathFile,
+                        fullPathToDestinationFileOnSftpServer, monitor);
+                }
             }
         }
     }
@@ -293,8 +308,8 @@ public class UtilitySSHD {
         Assert.isTrue(existsOnSftpServer(sftpClient,destinationDirOnSftpServer), () -> "The directory " + destinationDirOnSftpServer + " does not exist");
         
         try (OutputStream os = monitor.monitorOutputStream(sftpClient.write(fullPathToDestinationFileOnSftpServer.toString(), BUFFER_SIZE))) {
-            try (FileInputStream fis = new FileInputStream(fromFileOnLocal)) {
-                long copied = transfer(fis, os);
+            try (InputStream is = Files.newInputStream(fromFileOnLocal.toPath())) {
+                long copied = transfer(is, os);
                 if (fromFileOnLocal.length() != copied) {
                     log.error("expected to send [{}] bytes but sent [{}]bytes",
                         fromFileOnLocal.length(),
