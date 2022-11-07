@@ -9,6 +9,7 @@ import java.util.Map;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.crypto.SshRsaKeyUtils;
 
@@ -80,19 +81,19 @@ public class SFTPConnectionInfo {
   }
 
   public static SFTPConnectionInfo getConnectionInfo(Map<String, String> config, Clock clock) {
-    String rootPath = config.get("rootPath");
-    String username = config.get("username");
-    String host = config.get("host");
-    int port = Integer.parseInt(config.get("port"));
-    String password = config.get("password");
-    String privateKey = config.get("privateKey");
-    String iv = config.get("iv");
-    String passphrase = config.get("passphrase");
+    String rootPath = config.get(PropNames.ROOT_PATH);
+    String username = config.get(PropNames.USERNAME);
+    String host = config.get(PropNames.HOST);
+    int port = Integer.parseInt(config.get(PropNames.PORT));
+    String password = config.get(PropNames.PASSWORD);
+    String privateKey = config.get(PropNames.PRIVATE_KEY);
+    String iv = config.get(PropNames.IV);
+    String passphrase = config.get(PropNames.PASSPHRASE);
     final KeyPair keyPair;
-    if(privateKey != null && iv != null && passphrase != null){
+    if (privateKey != null && iv != null && passphrase != null) {
       keyPair = getKeyPair(Base64.decode(privateKey),
-          Base64.decode(iv),passphrase);
-    }else{
+          Base64.decode(iv), passphrase);
+    } else {
       keyPair = null;
     }
     return new SFTPConnectionInfo(rootPath, username, host, port, keyPair, password, clock);
