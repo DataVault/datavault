@@ -96,16 +96,18 @@ public abstract class BaseSFTPFileSystemIT {
     Progress p1 = new Progress();
     String pathOnRemote = sftpDriver.store(".", fromDvFile, p1);
 
-    assertEquals(fromDvFile.length(), p1.getByteCount());
-    assertEquals(TEST_CLOCK.millis(), p1.getTimestamp());
+    if(sftpDriver.isMonitoring()) {
+      assertEquals(fromDvFile.length(), p1.getByteCount());
+      assertEquals(TEST_CLOCK.millis(), p1.getTimestamp());
 
-    assertEquals(0, p1.getDirCount());
+      assertEquals(0, p1.getDirCount());
 
-    // TODO - seems like the  p1.fileCount should be 1.
-    assertEquals(0, p1.getFileCount());
+      // TODO - seems like the  p1.fileCount should be 1.
+      assertEquals(0, p1.getFileCount());
 
-    // TODO - seems like the p1.startTime has not been set
-    assertEquals(0, p1.getStartTime());
+      // TODO - seems like the p1.startTime has not been set
+      assertEquals(0, p1.getStartTime());
+    }
 
     log.info("pathOnRemote[{}]", pathOnRemote);
     assertEquals("/config/dv_20220326094433", pathOnRemote);
@@ -169,16 +171,18 @@ public abstract class BaseSFTPFileSystemIT {
     Progress p1 = new Progress();
     String pathOnRemote = sftpDriver.store(".", fromDvFile, p1);
 
-    assertEquals(fromDvFile.length(), p1.getByteCount());
-    assertEquals(TEST_CLOCK.millis(), p1.getTimestamp());
+    if(sftpDriver.isMonitoring()) {
+      assertEquals(fromDvFile.length(), p1.getByteCount());
+      assertEquals(TEST_CLOCK.millis(), p1.getTimestamp());
 
-    assertEquals(0, p1.getDirCount());
+      assertEquals(0, p1.getDirCount());
 
-    // TODO - seems like the  p1.fileCount should be 1.
-    assertEquals(0, p1.getFileCount());
+      // TODO - seems like the  p1.fileCount should be 1.
+      assertEquals(0, p1.getFileCount());
 
-    // TODO - seems like the p1.startTime has not been set
-    assertEquals(0, p1.getStartTime());
+      // TODO - seems like the p1.startTime has not been set
+      assertEquals(0, p1.getStartTime());
+    }
 
     log.info("pathOnRemote[{}]", pathOnRemote);
     assertEquals("/config/dv_20220326094433", pathOnRemote);
@@ -231,7 +235,7 @@ public abstract class BaseSFTPFileSystemIT {
   @ParameterizedTest
   @CsvSource({
       "10K , 10_000",
-      "5MB , 5_000_000",
+      "5MB , 5_000_000"
   })
   @SneakyThrows
   void testTransferLargeFiles(String label, long fileSize) {
@@ -262,20 +266,22 @@ public abstract class BaseSFTPFileSystemIT {
       return null;
     });
 
-    assertEquals(largeFileSend.length(), largeFileRecv.length());
-    assertEquals(getMD5(largeFileSend), getMD5(largeFileRecv));
+    if(sftpDriver.isMonitoring()) {
+      assertEquals(largeFileSend.length(), largeFileRecv.length());
+      assertEquals(getMD5(largeFileSend), getMD5(largeFileRecv));
 
-    long sendByteIncEvents = getNumberOfEvents(sendEvents, ProgressEventType.BYTE_COUNT_INC);
-    long recvByteIncEvents = getNumberOfEvents(recvEvents, ProgressEventType.BYTE_COUNT_INC);
+      long sendByteIncEvents = getNumberOfEvents(sendEvents, ProgressEventType.BYTE_COUNT_INC);
+      long recvByteIncEvents = getNumberOfEvents(recvEvents, ProgressEventType.BYTE_COUNT_INC);
 
-    assertTrue(sendByteIncEvents > 0);
-    assertTrue(recvByteIncEvents > 0);
+      assertTrue(sendByteIncEvents > 0);
+      assertTrue(recvByteIncEvents > 0);
 
-    if (this.sftpDriver instanceof SFTPFileSystemSSHD) {
-      assertEquals(sendByteIncEvents, recvByteIncEvents);
-      long numParts = (long) Math.ceil((double) fileSize / (double) UtilitySSHD.BUFFER_SIZE);
-      assertEquals(numParts, sendByteIncEvents);
-      assertEquals(numParts, recvByteIncEvents);
+      if (this.sftpDriver instanceof SFTPFileSystemSSHD) {
+        assertEquals(sendByteIncEvents, recvByteIncEvents);
+        long numParts = (long) Math.ceil((double) fileSize / (double) UtilitySSHD.BUFFER_SIZE);
+        assertEquals(numParts, sendByteIncEvents);
+        assertEquals(numParts, recvByteIncEvents);
+      }
     }
   }
 
@@ -295,7 +301,7 @@ public abstract class BaseSFTPFileSystemIT {
 
   @SneakyThrows
   private String getMD5(File file) {
-    try (InputStream is = new FileInputStream(file)) {
+    try (InputStream is = Files.newInputStream(file.toPath())) {
       return DigestUtils.md5Hex(is);
     }
   }
@@ -348,18 +354,20 @@ public abstract class BaseSFTPFileSystemIT {
 
     Progress p1 = new Progress();
     String pathOnRemote = sftpDriver.store(".", fromDvDir, p1);
-    assertEquals(fromDvDirFileA.length() + fromDvDirFileB.length() + fromDvDirFileC.length(),
-        p1.getByteCount());
-    assertEquals(TEST_CLOCK.millis(), p1.getTimestamp());
+    if(sftpDriver.isMonitoring()) {
+      assertEquals(fromDvDirFileA.length() + fromDvDirFileB.length() + fromDvDirFileC.length(),
+          p1.getByteCount());
+      assertEquals(TEST_CLOCK.millis(), p1.getTimestamp());
 
-    //TODO - seems like the  p1.dirCount should be 1.
-    assertEquals(0, p1.getDirCount());
+      //TODO - seems like the  p1.dirCount should be 1.
+      assertEquals(0, p1.getDirCount());
 
-    //TODO - seems like the  p1.fileCount should be 3.
-    assertEquals(0, p1.getFileCount());
+      //TODO - seems like the  p1.fileCount should be 3.
+      assertEquals(0, p1.getFileCount());
 
-    //TODO - seems like the p1.startTime has not been set
-    assertEquals(0, p1.getStartTime());
+      //TODO - seems like the p1.startTime has not been set
+      assertEquals(0, p1.getStartTime());
+    }
 
     Path tsPath = Paths.get(SFTP_ROOT_DIR).relativize(Paths.get(pathOnRemote));
     Path retrievePath = tsPath.resolve(fromDvDir.toPath().getFileName());

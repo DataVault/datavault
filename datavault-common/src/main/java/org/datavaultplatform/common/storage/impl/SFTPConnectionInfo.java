@@ -8,6 +8,7 @@ import java.time.Clock;
 import java.util.Map;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
@@ -18,8 +19,6 @@ public class SFTPConnectionInfo {
 
   public static final String PATH_SEPARATOR = "/";
 
-  public static final int RETRIES = 25;
-
   private final String host;
   private final int port;
   private final String rootPath;
@@ -28,9 +27,10 @@ public class SFTPConnectionInfo {
   private final Clock clock;
   private final KeyPair keyPair;
   private final String password;
+  private final boolean monitoring;
 
   public SFTPConnectionInfo(String rootPath, String username, String host, int port,
-      KeyPair keyPair, String password, Clock clock) {
+      KeyPair keyPair, String password, Clock clock, boolean monitoring) {
     this.rootPath = rootPath;
     this.host = host;
     this.port = port;
@@ -38,6 +38,7 @@ public class SFTPConnectionInfo {
     this.keyPair = keyPair;
     this.password = password;
     this.clock = clock;
+    this.monitoring = monitoring;
   }
 
   public String getHost() {
@@ -96,7 +97,27 @@ public class SFTPConnectionInfo {
     } else {
       keyPair = null;
     }
-    return new SFTPConnectionInfo(rootPath, username, host, port, keyPair, password, clock);
+    boolean monitoring = extractBoolean(config.get(PropNames.MONITOR_SFTP));
+    return new SFTPConnectionInfo(
+        rootPath, username, host,
+        port, keyPair, password,
+        clock, monitoring);
+  }
+
+  protected static boolean extractBoolean(String value) {
+    boolean defaultValue = true;
+    if (StringUtils.isBlank(value)) {
+      return defaultValue;
+    }
+    try {
+      return Boolean.parseBoolean(value);
+    } catch (RuntimeException ex) {
+      return defaultValue;
+    }
+  }
+
+  public boolean getMonitoring() {
+    return monitoring;
   }
 }
 

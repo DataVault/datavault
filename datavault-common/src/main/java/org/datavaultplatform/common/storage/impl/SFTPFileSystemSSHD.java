@@ -35,7 +35,9 @@ import org.datavaultplatform.common.storage.impl.ssh.UtilitySSHD.SFTPMonitorSSHD
 @Slf4j
 public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
 
+
   private final SFTPConnectionInfo connectionInfo;
+  private boolean monitoring;
 
   /*
    * This constructor will be used in production code
@@ -50,6 +52,7 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
   public SFTPFileSystemSSHD(String name, Map<String, String> config, Clock clock) {
     super(name, config);
     this.connectionInfo = SFTPConnectionInfo.getConnectionInfo(config, clock);
+    this.monitoring = connectionInfo.getMonitoring();
   }
 
   @Override
@@ -172,7 +175,7 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
 
       String remoteFullPath = getFullPath(remoteRelativePath);
 
-      SFTPMonitorSSHD monitor = new SFTPMonitorSSHD(progress, connectionInfo.getClock());
+      SFTPMonitorSSHD monitor = new SFTPMonitorSSHD(progress, connectionInfo.getClock(), this.isMonitoring());
 
       UtilitySSHD.getDir(con.sftpClient, Paths.get(remoteFullPath), localFileOrDir, monitor);
     }
@@ -207,13 +210,31 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
         UtilitySSHD.createDir(con.sftpClient, sftpDestDirPath);
       }
 
-      SFTPMonitorSSHD monitor = new SFTPMonitorSSHD(progress, connectionInfo.getClock());
+      SFTPMonitorSSHD monitor = new SFTPMonitorSSHD(progress, connectionInfo.getClock(), this.isMonitoring());
 
       UtilitySSHD.send(con.sftpClient, localFileOrDirectory, sftpDestDirPath, monitor);
 
       return tsDirPath.toString();
     }
   }
+
+  /**
+   *
+   * @return
+   */
+  @Override
+  public boolean isMonitoring() {
+    return this.monitoring;
+  }
+
+  /**
+   * this method supports testing monitoring-on vs monitoring-off
+   * @param value
+   */
+  public void setMonitoring(boolean value) {
+    this.monitoring = value;
+  }
+
   @SneakyThrows
   private String getFullPath(String relativePath){
     String fullPath = Paths.get(connectionInfo.getRootPath())
