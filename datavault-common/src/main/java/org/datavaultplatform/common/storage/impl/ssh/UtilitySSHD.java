@@ -1,8 +1,6 @@
 package org.datavaultplatform.common.storage.impl.ssh;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -69,11 +67,22 @@ public class UtilitySSHD {
         private final Progress progressTracker;
         private final Clock clock;
 
-        public SFTPMonitorSSHD(Progress progressTracker, Clock clock) {
+        private final boolean monitor;
+
+        public SFTPMonitorSSHD(Progress progressTracker, Clock clock, boolean monitor) {
             this.progressTracker = progressTracker;
             this.clock = clock;
+            this.monitor = monitor;
         }
-        public OutputStream monitorOutputStream(OutputStream os){
+        public OutputStream monitorOutputStream(OutputStream os) {
+            if (monitor) {
+                return wrapOutputStream(os);
+            } else {
+                return os;
+            }
+        }
+
+        public OutputStream wrapOutputStream(OutputStream os){
 
                 return new OutputStreamAdapter(os) {
 
@@ -109,6 +118,13 @@ public class UtilitySSHD {
                 };
         }
         public InputStream monitorInputStream(InputStream is) {
+            if (monitor) {
+                return wrapInputStream(is);
+            } else {
+                return is;
+            }
+        }
+        public InputStream wrapInputStream(InputStream is){
             return new InputStreamAdapter(is) {
 
                 private int incBytesRead(int bytesRead) {
@@ -160,8 +176,9 @@ public class UtilitySSHD {
         if (remoteAttrs.isDirectory()) {
             if (!localStorageDir.exists()) {
                 localStorageDir.mkdirs();
+            } else {
+                localStorageDir.isDirectory();
             }
-            //TODO : could also check that localFile is directory if it exists
         }
 
         Path remoteDir = remoteAttrs.isDirectory() ? remoteDirOrFile : remoteDirOrFile.getParent();
@@ -343,7 +360,8 @@ public class UtilitySSHD {
        attrs.setPermissions(DEFAULT_DIR_MODE);
        sftpClient.setStat(sftpServerPath.toString(), attrs);
        Attributes actual = sftpClient.stat(sftpServerPath.toString());
-       log.info("permissions [{}]", actual.getPermissions());
+       boolean isDir = actual.isDirectory();
+       log.info("permissions[{}]isDir[{}]path[{}]", Integer.toOctalString(actual.getPermissions()), isDir, sftpServerPath);
        int filePerms = actual.getPermissions() & FILE_PERMISSION_MASK;
        Assert.isTrue(filePerms == DEFAULT_DIR_MODE, () -> "The permissions on the path " + sftpServerPath + "[" + filePerms + "] are not " + DEFAULT_DIR_MODE);
     }

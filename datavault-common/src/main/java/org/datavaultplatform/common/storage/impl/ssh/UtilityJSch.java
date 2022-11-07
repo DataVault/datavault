@@ -32,7 +32,7 @@ import java.nio.file.Files;
 import java.time.Clock;
 import org.datavaultplatform.common.io.Progress;
 
-public class Utility {
+public class UtilityJSch {
 
     @SuppressWarnings("OctalInteger")
     private static final int DEFAULT_DIR_MODE = 0755;
@@ -51,7 +51,7 @@ public class Utility {
         
         channel.cd(pwd);
         
-        final java.util.Vector<ChannelSftp.LsEntry> files = channel.ls(remoteFile);
+        @SuppressWarnings("unchecked") final java.util.Vector<ChannelSftp.LsEntry> files = channel.ls(remoteFile);
         final int size = files.size();
         for (int i = 0; i < size; i++) {
             final ChannelSftp.LsEntry le = files.elementAt(i);
@@ -122,7 +122,8 @@ public class Utility {
                 localFile.mkdirs();
             }
         }
-        
+
+        //noinspection unchecked
         final java.util.Vector<ChannelSftp.LsEntry> files = channel.ls(remoteFile);
         final int size = files.size();
         for (int i = 0; i < size; i++) {

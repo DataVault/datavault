@@ -12,7 +12,7 @@ import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
-import org.datavaultplatform.common.storage.impl.ssh.Utility;
+import org.datavaultplatform.common.storage.impl.ssh.UtilityJSch;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -49,7 +49,7 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
 
     private Session session = null;
     private ChannelSftp channelSftp = null;
-    private Utility.SFTPMonitor monitor = null;
+    private UtilityJSch.SFTPMonitor monitor = null;
 
     static {
         JSch.setLogger(JSchLogger.getInstance());
@@ -191,7 +191,7 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         try {
             Connect();
             
-            Vector<ChannelSftp.LsEntry> filelist = channelSftp.ls(rootPath + PATH_SEPARATOR + path);
+            @SuppressWarnings("unchecked") Vector<ChannelSftp.LsEntry> filelist = channelSftp.ls(rootPath + PATH_SEPARATOR + path);
 
             for (int i = 0; i < filelist.size(); i++) {
                 ChannelSftp.LsEntry entry = filelist.get(i);
@@ -262,7 +262,7 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
                     path = path + "/";
                 }
                 
-                return Utility.calculateSize(channelSftp, path);
+                return UtilityJSch.calculateSize(channelSftp, path);
                 
             } else {
                 return attrs.getSize();
@@ -339,9 +339,9 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
                 path = path + "/";
             }
             
-            monitor = new Utility.SFTPMonitor(progress, clock);
+            monitor = new UtilityJSch.SFTPMonitor(progress, clock);
             
-            Utility.getDir(channelSftp, path, working, attrs, monitor);
+            UtilityJSch.getDir(channelSftp, path, working, attrs, monitor);
             
         } catch (Exception e) {
             log.error("unexpected exception", e);
@@ -381,9 +381,9 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
                 channelSftp.cd(dirName);
             }
             
-            monitor = new Utility.SFTPMonitor(progress, clock);
+            monitor = new UtilityJSch.SFTPMonitor(progress, clock);
 
-            Utility.send(channelSftp, working, monitor);
+            UtilityJSch.send(channelSftp, working, monitor);
 
         } catch (Exception e) {
             log.error("unexpected exception", e);
@@ -393,5 +393,14 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         }
         
         return path;
+    }
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public boolean isMonitoring() {
+        return true;
     }
 }
