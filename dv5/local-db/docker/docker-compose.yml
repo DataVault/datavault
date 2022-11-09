@@ -1,26 +1,27 @@
 version: "3.7"
 services:
   db:
-    container_name: dv-byodb-mysql
-    image: mysql:5.7
+    container_name: dv-byodb-mariadb
+    image: mariadb:10.9.3
     restart: always
     environment:
-      MYSQL_DATABASE: "test" #same name of db in 'backup.sql'
+      MARIADB_DATABASE: "test" #same name of db in 'backup.sql'
       # So you don't have to use root, but you can if you like
-      MYSQL_USER: "user"
+      MARIADB_USER: "user"
       # You can use whatever password you like
-      MYSQL_PASSWORD: "userpass"
+      MARIADB_PASSWORD: "userpass"
       # Password for root access
-      MYSQL_ROOT_PASSWORD: "rootpass"
+      MARIADB_ROOT_PASSWORD: "rootpass"
     ports:
-      # <Port exposed> : < MySQL Port running inside container>
+      # <Port exposed> : < MariaDB Port running inside container>
       - "3306:3306"
     expose:
       # Opens port 3306 on the container
       - "3306"
       # Where our data will be persisted
     volumes:
-      - v-local-byodb-mysql:/var/lib/mysql
+      # mariadb still uses /var/lib/mysql
+      - v-local-byodb-mariadb:/var/lib/mysql
       - ./backup.sql:/docker-entrypoint-initdb.d/backup.sql
 volumes:
-  v-local-byodb-mysql:
+  v-local-byodb-mariadb:

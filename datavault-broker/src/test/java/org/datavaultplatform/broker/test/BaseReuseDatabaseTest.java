@@ -22,7 +22,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.EnabledIf;
-import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.containers.MariaDBContainer;
 
 @Slf4j
 @DirtiesContext
@@ -30,7 +30,8 @@ import org.testcontainers.containers.MySQLContainer;
 public abstract class BaseReuseDatabaseTest  {
 
   // This container is once per class - not once per method. Methods can 'dirty' the database.
-  static final MySQLContainer<?> mysql = new MySQLContainer<>(DockerImage.MYSQL_IMAGE).withReuse(true);
+
+  static MariaDBContainer mariadb = new MariaDBContainer<>(DockerImage.MARIADB_IMAGE).withReuse(true);
   @Autowired
   InitialiseDatabase initialiseDatabase;
 
@@ -39,8 +40,8 @@ public abstract class BaseReuseDatabaseTest  {
 
   @BeforeAll
   public static void beforeAll() {
-    mysql.start();
-    log.info("REUSEABLE MYSQL {}/{}",mysql.getContainerName(),mysql.getContainerId());
+    mariadb.start();
+    log.info("REUSEABLE MYSQL {}/{}", mariadb.getContainerName(), mariadb.getContainerId());
   }
 
   @Autowired
@@ -106,9 +107,9 @@ public abstract class BaseReuseDatabaseTest  {
 
   @DynamicPropertySource
   static void setupProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.datasource.username", mysql::getUsername);
-    registry.add("spring.datasource.password", mysql::getPassword);
-    registry.add("spring.datasource.url", mysql::getJdbcUrl);
+    registry.add("spring.datasource.username", mariadb::getUsername);
+    registry.add("spring.datasource.password", mariadb::getPassword);
+    registry.add("spring.datasource.url", mariadb::getJdbcUrl);
   }
 
   protected User createTestUser(String userId, String schoolId, Permission... permissions) {

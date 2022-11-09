@@ -8,8 +8,8 @@ public abstract class DockerImage {
   // https://hub.docker.com/r/bitnami/openldap/tags
   public static final DockerImageName LDAP_IMAGE = parse("bitnami/openldap@sha256:23ebcaa52331a6521f2e512b971943a3a8b99d15459d59105d6a0eeb31220c86");
 
-  // https://hub.docker.com/_/mysql?tab=tags
-  public static final DockerImageName MYSQL_IMAGE = parse("mysql:5.7.39");
+  // https://hub.docker.com/_/mariadb/tags
+  public static DockerImageName MARIADB_IMAGE = parse("mariadb:10.9.4");
 
   // https://hub.docker.com/r/mailhog/mailhog/tags
   public static final DockerImageName MAIL_IMAGE = parse("mailhog/mailhog:v1.0.1");
