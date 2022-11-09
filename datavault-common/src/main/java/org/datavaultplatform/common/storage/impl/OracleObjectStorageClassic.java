@@ -31,7 +31,7 @@ To be clean despite being named OracleObjecStorageClassic it uses OCI not OCC
  */
 public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 	
-	private static final Logger logger = LoggerFactory.getLogger(OracleObjectStorageClassic.class);
+	public static final Logger LOGGER = LoggerFactory.getLogger(OracleObjectStorageClassic.class);
 	private static final String DEFAULT_CONTAINER_NAME = "datavault-container-edina";
 	public final Verify.Method verificationMethod = Verify.Method.CLOUD;
 	private ObjectStorage client = null;
@@ -69,12 +69,12 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		}
 
 		if (config.containsKey(nameSpace)){
-			logger.debug("Got namespace config " + config.get(nameSpace));
+			LOGGER.debug("Got namespace config " + config.get(nameSpace));
 			OracleObjectStorageClassic.nameSpaceName = config.get(nameSpace);
 		}
 
 		if (config.containsKey(bucketName)){
-			logger.debug("Got bucketName config" + config.get(bucketName));
+			LOGGER.debug("Got bucketName config" + config.get(bucketName));
 			OracleObjectStorageClassic.bucketName = config.get(bucketName);
 		}
 	}
@@ -132,7 +132,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 						throw new Exception("Restore failed");
 					}
 					HeadObjectResponse getHeadObjectResponse = this.client.headObject(headObjectRequest);
-					logger.debug("Object status is: " + getHeadObjectResponse.getArchivalState());
+					LOGGER.debug("Object status is: " + getHeadObjectResponse.getArchivalState());
 					if (getHeadObjectResponse.getArchivalState().equals(OracleObjectStorageClassic.restoredKey)) {
 						break;
 					}
@@ -142,10 +142,10 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 				// once restored get it
 				GetObjectResponse getObjectResponse = client.getObject(getObjectRequest);
 				FileUtils.copyInputStreamToFile(getObjectResponse.getInputStream(), working);
-				logger.info("Oracle response:" + getObjectResponse.toString());
+				LOGGER.info("Oracle response:" + getObjectResponse.toString());
 				break;
 			} catch (Exception e) {
-				logger.error("Retrieve failed. " + "Retrying in " + OracleObjectStorageClassic.retryTime + " mins " + e.getMessage());
+				LOGGER.error("Retrieve failed. " + "Retrying in " + OracleObjectStorageClassic.retryTime + " mins " + e.getMessage());
 				if (r == (OracleObjectStorageClassic.maxRetries - 1)) {
 					throw e;
 				}
@@ -167,10 +167,10 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 
 				UploadManager.UploadRequest uploadDetails = this.constructUploadRequest(depositId, working);
 				UploadManager.UploadResponse response = uploadManager.upload(uploadDetails);
-				logger.info("Oracle response:" + response.toString());
+				LOGGER.info("Oracle response:" + response.toString());
 				break;
 			} catch (Exception e) {
-				logger.error("Upload failed. " + "Retrying in " + OracleObjectStorageClassic.retryTime + " mins " + e.getMessage());
+				LOGGER.error("Upload failed. " + "Retrying in " + OracleObjectStorageClassic.retryTime + " mins " + e.getMessage());
 				if (r == (OracleObjectStorageClassic.maxRetries - 1)) {
 					throw e;
 				}
@@ -204,9 +204,9 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 							.objectName(path)
 							.build();
 			this.client.deleteObject(request);
-            logger.info("Delete Successful from Oracle Cloud Storage");
+            LOGGER.info("Delete Successful from Oracle Cloud Storage");
 		} catch (Exception e) {
-			logger.error("Object does not exists in Oracle Cloud Storage " + e.getMessage());
+			LOGGER.error("Object does not exists in Oracle Cloud Storage " + e.getMessage());
 		}
 	}
 
@@ -220,7 +220,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		ConfigFileReader.ConfigFile config = getProperties();
 		AuthenticationDetailsProvider provider = new ConfigFileAuthenticationDetailsProvider(config);
 		if (provider == null) {
-			logger.debug("Failed to get provider");
+			LOGGER.debug("Failed to get provider");
 			throw new Exception("Failed to get provider");
 		}
 		//logger.debug("TenantId '" + provider.getTenantId() + "'");
@@ -236,7 +236,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 		ConfigFileReader.ConfigFile retVal =
 				ConfigFileReader.parse(OracleObjectStorageClassic.CONFIG_FILE_PATH, OracleObjectStorageClassic.PROFILE);
 		if (retVal == null) {
-			logger.debug("Problem getting the Oracle config");
+			LOGGER.debug("Problem getting the Oracle config");
 			throw new Exception("Oracle Config is null");
 		}
 		
@@ -284,7 +284,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 			getAuthDetailsProvider();
 			return true;
 		} catch (Exception ex) {
-			logger.warn("Problem getting Oracle Config from[{}]", CONFIG_FILE_PATH, ex);
+			LOGGER.warn("Problem getting Oracle Config from[{}]", CONFIG_FILE_PATH, ex);
 			return false;
 		}
 	}
