@@ -31,6 +31,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.time.Clock;
 import org.datavaultplatform.common.io.Progress;
+import org.springframework.util.Assert;
 
 public class UtilityJSch {
 
@@ -120,6 +121,9 @@ public class UtilityJSch {
         if (attrs.isDir()) {
             if (!localFile.exists()) {
                 localFile.mkdirs();
+            } else {
+                // you cannot pull remote directory back to a non-directory
+                Assert.isTrue(localFile.isDirectory(), String.format("You cannot retrieve remote directory [%s] back to a non-directory[%s]", pwd, localFile));
             }
         }
 

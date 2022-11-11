@@ -13,17 +13,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.apache.sshd.sftp.client.SftpClient.Attributes;
-import org.apache.sshd.sftp.client.SftpClient.CloseableHandle;
 import org.apache.sshd.sftp.client.SftpClient.DirEntry;
 import org.apache.sshd.sftp.common.SftpConstants;
 import org.apache.sshd.sftp.common.SftpException;
 import org.datavaultplatform.common.io.InputStreamAdapter;
 import org.datavaultplatform.common.io.OutputStreamAdapter;
 import org.datavaultplatform.common.io.Progress;
+import org.datavaultplatform.common.storage.impl.SFTPConnection;
 import org.springframework.util.Assert;
 
 @Slf4j
-public class UtilitySSHD {
+public abstract class UtilitySSHD {
 
     public static final int BUFFER_SIZE = 1024  * 64;
     @SuppressWarnings("OctalInteger")
@@ -31,10 +31,9 @@ public class UtilitySSHD {
     @SuppressWarnings("OctalInteger")
     public static final int FILE_PERMISSION_MASK = 0777;
 
-    public static long calculateSize(final SftpClient sftpClient,
+    public static long calculateSize(final SFTPConnection con,
                                      String remoteFile) throws IOException {
-        
-        long bytes = 0;        
+        long bytes = 0;
         String pwd = remoteFile;
         
         if (remoteFile.lastIndexOf('/') != -1) {
@@ -43,22 +42,21 @@ public class UtilitySSHD {
             }
         }
 
-        CloseableHandle channel = sftpClient.open(pwd);
+        String fullPath = con.getFullPath(pwd);
 
-        for (DirEntry entry : sftpClient.listDir(channel)) {
-            final String name = entry.getFilename();
+        for (SftpClient.DirEntry entry : con.sftpClient.readDir(fullPath)) {
+
+            if (entry.getFilename().equals(".") ||
+                entry.getFilename().equals("..")) {
+                continue;
+            }
+
             if (entry.getAttributes().isDirectory()) {
-                if (name.equals(".") || name.equals("..")) {
-                    continue;
-                }
-                bytes += calculateSize(sftpClient, channel.getPath() + "/" + name + "/");
+                bytes += calculateSize(con, fullPath + "/" + entry.getFilename());
             } else {
                 bytes += entry.getAttributes().getSize();
             }
         }
-
-        sftpClient.close(channel);
-
         return bytes;
     }
     
@@ -67,22 +65,24 @@ public class UtilitySSHD {
         private final Progress progressTracker;
         private final Clock clock;
 
-        private final boolean monitor;
+        private final boolean monitoring;
 
-        public SFTPMonitorSSHD(Progress progressTracker, Clock clock, boolean monitor) {
+        public SFTPMonitorSSHD(Progress progressTracker, Clock clock, boolean monitoring) {
+            Assert.isTrue(clock != null, "The clock cannot be null");
+            Assert.isTrue(progressTracker != null, "The proressTracker cannot be null");
             this.progressTracker = progressTracker;
             this.clock = clock;
-            this.monitor = monitor;
+            this.monitoring = monitoring;
         }
         public OutputStream monitorOutputStream(OutputStream os) {
-            if (monitor) {
+            if (monitoring) {
                 return wrapOutputStream(os);
             } else {
                 return os;
             }
         }
 
-        public OutputStream wrapOutputStream(OutputStream os){
+        private OutputStream wrapOutputStream(OutputStream os){
 
                 return new OutputStreamAdapter(os) {
 
@@ -118,13 +118,13 @@ public class UtilitySSHD {
                 };
         }
         public InputStream monitorInputStream(InputStream is) {
-            if (monitor) {
+            if (monitoring) {
                 return wrapInputStream(is);
             } else {
                 return is;
             }
         }
-        public InputStream wrapInputStream(InputStream is){
+        private InputStream wrapInputStream(InputStream is){
             return new InputStreamAdapter(is) {
 
                 private int incBytesRead(int bytesRead) {
@@ -163,6 +163,14 @@ public class UtilitySSHD {
                 }
             };
         }
+
+        public boolean isMonitoring() {
+            return monitoring;
+        }
+
+        public Progress getProgress() {
+            return progressTracker;
+        }
     }
     
     public static void getDir(final SftpClient sftpClient,
@@ -177,7 +185,8 @@ public class UtilitySSHD {
             if (!localStorageDir.exists()) {
                 localStorageDir.mkdirs();
             } else {
-                localStorageDir.isDirectory();
+                // you cannot pull remote directory back to a non-directory
+                Assert.isTrue(localStorageDir.isDirectory(), String.format("You cannot retrieve remote directory [%s] back to a non-directory[%s]", remoteDirOrFile, localStorageDir));
             }
         }
 
@@ -301,17 +310,9 @@ public class UtilitySSHD {
                                               final SFTPMonitorSSHD monitor)
         throws IOException {
 
-        try {
-            sftpClient.stat(sftpDestDirPath.toString());
-        } catch (final SftpException ex) {
-            if (ex.getStatus() == SftpConstants.SSH_FX_NO_SUCH_FILE) {
-                // dir does not exist.
-                createDir(sftpClient, sftpDestDirPath);
-            } else {
-                throw ex;
-            }
+        if (!existsOnSftpServer(sftpClient, sftpDestDirPath)) {
+            createDir(sftpClient, sftpDestDirPath);
         }
-
         sendDirectory(sftpClient, localDirPath, sftpDestDirPath, monitor);
     }
 
@@ -342,14 +343,21 @@ public class UtilitySSHD {
         try {
             sftpClient.stat(sftpPath.toString());
             return true;
-        } catch (SftpException e) {
-            return false;
+        } catch (SftpException ex) {
+            if (ex.getStatus() == SftpConstants.SSH_FX_NO_SUCH_FILE) {
+                return false;
+            } else {
+                throw ex;
+            }
         }
     }
 
     @SneakyThrows
     public static void createDir(SftpClient sftpClient, Path sftpPath) {
-        sftpClient.mkdir(sftpPath.toString());
+        if(!existsOnSftpServer(sftpClient, sftpPath)){
+            String path = sftpPath.normalize().toString();
+            sftpClient.mkdir(path);
+        }
         setPermissionAttributes(sftpClient, sftpPath);
     }
 

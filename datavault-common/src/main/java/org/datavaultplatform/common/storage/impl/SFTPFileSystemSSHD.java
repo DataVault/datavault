@@ -6,13 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.time.Clock;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.sshd.sftp.client.SftpClient;
@@ -60,7 +57,7 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
   public List<FileInfo> list(String path) {
     List<FileInfo> files = new ArrayList<>();
     try (SFTPConnection con = getConnection()) {
-      String fullPath = getFullPath(path);
+      String fullPath = con.getFullPath(path);
 
       //TODO - don't know how deep this should go 1 level or all the way down - need to test the other one with nested directories
       for (SftpClient.DirEntry entry : con.sftpClient.readDir(fullPath)) {
@@ -94,7 +91,7 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
   @Override
   public boolean exists(String path) {
     try (SFTPConnection con = getConnection()) {
-      String fullPath = getFullPath(path);
+      String fullPath = con.getFullPath(path);
       try {
         con.sftpClient.lstat(fullPath);
         return true;
@@ -108,7 +105,7 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
 
   public long getSize(String path) throws Exception {
     try (SFTPConnection con = getConnection()) {
-      String fullPath = getFullPath(path);
+      String fullPath = con.getFullPath(path);
       try {
         Attributes attrs = con.sftpClient.lstat(fullPath);
         if (attrs.isDirectory()) {
@@ -117,7 +114,7 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
             path = path + "/";
           }
 
-          return UtilitySSHD.calculateSize(con.sftpClient, path);
+          return UtilitySSHD.calculateSize(con, path);
         } else {
           return attrs.getSize();
         }
@@ -130,7 +127,7 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
   @Override
   public boolean isDirectory(String path) throws Exception {
     try (SFTPConnection con = getConnection()) {
-      String fullPath = getFullPath(path);
+      String fullPath = con.getFullPath(path);
       try {
         Attributes attrs = con.sftpClient.lstat(fullPath);
         return attrs.isDirectory();
@@ -173,7 +170,7 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
         remoteRelativePath = remoteRelativePath.replaceFirst(PATH_SEPARATOR, "");
       }
 
-      String remoteFullPath = getFullPath(remoteRelativePath);
+      String remoteFullPath = getConnection().getFullPath(remoteRelativePath);
 
       SFTPMonitorSSHD monitor = new SFTPMonitorSSHD(progress, connectionInfo.getClock(), this.isMonitoring());
 
@@ -189,13 +186,10 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
         path = path.replaceFirst(PATH_SEPARATOR, "");
       }
 
-      final Path basePath = Paths.get(getFullPath(path));
+      final Path basePath = Paths.get(con.getFullPath(path));
 
-      // We are sleeping to ensure we don't get duplicate timestamp folders - assumes single thread - TODO ensure this
-      TimeUnit.SECONDS.sleep(2);
       // Create timestamped folder to avoid overwriting files
-      String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date(connectionInfo.getClock().millis()));
-      String timestampDirName = "dv_" + timeStamp;
+      String timestampDirName = SftpUtils.getTimestampedDirectoryName(connectionInfo.getClock());
       Path tsDirPath = basePath.resolve(timestampDirName);
 
       UtilitySSHD.createDir(con.sftpClient, tsDirPath);
@@ -218,28 +212,14 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
     }
   }
 
-  /**
-   *
-   * @return
-   */
   @Override
   public boolean isMonitoring() {
     return this.monitoring;
   }
 
-  /**
-   * this method supports testing monitoring-on vs monitoring-off
-   * @param value
-   */
   public void setMonitoring(boolean value) {
     this.monitoring = value;
   }
 
-  @SneakyThrows
-  private String getFullPath(String relativePath){
-    String fullPath = Paths.get(connectionInfo.getRootPath())
-        .resolve(relativePath).toFile()
-        .getCanonicalPath();
-    return fullPath;
-  }
+
 }

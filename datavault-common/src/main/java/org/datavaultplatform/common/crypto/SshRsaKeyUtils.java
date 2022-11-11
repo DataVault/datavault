@@ -125,7 +125,9 @@ public class SshRsaKeyUtils {
     RSAPublicKey rsaPublicKey = getRSAPublicKey(rsaPrivateKey);
     Assert.isTrue(rsaPublicKey.getModulus().equals(rsaPrivateKey.getModulus()),
         () -> "private and public modulus must be the same");
-    log.info("RSA MODULUS {}", rsaPublicKey.getModulus().toString(16));
+    if(log.isTraceEnabled()) {
+      log.trace("RSA MODULUS {}", rsaPublicKey.getModulus().toString(16));
+    }
     KeyPair keyPair = new KeyPair(rsaPublicKey, rsaPrivateKey);
     return keyPair;
   }
