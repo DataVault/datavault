@@ -4,6 +4,7 @@ import com.jcraft.jsch.*;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.time.Clock;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.common.PropNames;
@@ -15,13 +16,10 @@ import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.impl.ssh.UtilityJSch;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 /**
  * An implementation of SFTPFileSystemDriver to use JCraft's Jsch ssh/sftp library.
@@ -366,18 +364,16 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
             channelSftp.cd(path);
 
             // Create timestamped folder to avoid overwriting files
-            TimeUnit.SECONDS.sleep(2);
-            String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date(clock.millis()));
-            String timestampDirName = "dv_" + timeStamp;
+            String timestampDirName = SftpUtils.getTimestampedDirectoryName(clock);
             path = path + PATH_SEPARATOR + timestampDirName;
 
-            channelSftp.mkdir(timestampDirName);
+            mkdir(channelSftp, timestampDirName);
             channelSftp.cd(timestampDirName);
             
             if (working.isDirectory()) {
                 // Create top-level directory
                 String dirName = working.getName();
-                channelSftp.mkdir(dirName);
+                mkdir(channelSftp, dirName);
                 channelSftp.cd(dirName);
             }
             
@@ -395,12 +391,20 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         return path;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public boolean isMonitoring() {
         return true;
+    }
+
+    @SneakyThrows
+    private void mkdir(ChannelSftp channelSftp, String dirName) {
+        try {
+            SftpATTRS stat = channelSftp.stat(dirName);
+            if (!stat.isDir()) {
+                throw new RuntimeException(String.format("[%s] exists but is not a directory", dirName));
+            }
+        } catch (SftpException ex) {
+            channelSftp.mkdir(dirName);
+        }
     }
 }

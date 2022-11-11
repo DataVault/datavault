@@ -1,12 +1,12 @@
 package org.datavaultplatform.common.storage;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
@@ -17,6 +17,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,33 +28,28 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
-import org.datavaultplatform.broker.services.UserKeyPairService;
-import org.datavaultplatform.broker.services.UserKeyPairService.KeyPairInfo;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.io.ProgressEvent;
 import org.datavaultplatform.common.io.ProgressEventListener;
 import org.datavaultplatform.common.io.ProgressEventType;
 import org.datavaultplatform.common.model.FileInfo;
-
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
 import org.datavaultplatform.common.storage.impl.ssh.UtilitySSHD;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.test.context.TestPropertySource;
+import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-/*
- A Base test class for testing classes that implement SFTPFileSystemDriver
- SFTP Server Authentication configuration left to the subclasses.
- */
 @Slf4j
-@TestPropertySource(properties = "logging.level.org.apache.sshd=INFO")
+@Testcontainers
 public abstract class BaseSFTPFileSystemIT {
+
+  static final int SFTP_SERVER_PORT = 2222;
 
   static final String ENV_USER_NAME = "USER_NAME";
   static final String TEST_USER = "testuser";
@@ -64,18 +60,99 @@ public abstract class BaseSFTPFileSystemIT {
   static final String TEMP_PREFIX = "dvSftpTempDir";
   static final long EXPECTED_SPACE_AVAILABLE_ON_SFTP_SERVER = 100_000;
   private static final int FREE_SPACE_FACTOR = 10;
-  GenericContainer<?> sftpServerContainer;
-  UserKeyPairService userKeyPairService;
-  SFTPFileSystemDriver sftpDriver;
-  KeyPairInfo keyPairInfo;
 
-  @BeforeEach
+  public abstract GenericContainer<?> getContainer();
+
+  public abstract SFTPFileSystemDriver getSftpDriver();
+
+  public abstract void addAuthenticationProps(Map<String,String> props);
+
+  public final int getSftpServerPort() {
+    return getContainer().getMappedPort(SFTP_SERVER_PORT);
+  }
+
+  public final String getSftpServerHost() {
+    return getContainer().getHost();
+  }
+
+  private void logContainerId(String label) {
+    log.info("for [{}] containerId[{}]", label, getContainer().getContainerId());
+  }
+
   @SneakyThrows
-  void setup() {
-    authenticationSetup();
-    this.sftpServerContainer = getSftpTestContainer();
-    this.sftpServerContainer.start();
-    sftpDriver = getSftpFileSystemDriver();
+  protected Map<String, String> getStoreProperties() {
+    HashMap<String, String> props = new HashMap<>();
+
+    //standard sftp properties
+    props.put(PropNames.USERNAME, TEST_USER);
+    props.put(PropNames.ROOT_PATH, SFTP_ROOT_DIR); //this is the directory ON THE SFTP SERVER - for ALL OpenSSH containers, it's config
+    props.put(PropNames.HOST, getSftpServerHost());
+    props.put(PropNames.PORT, String.valueOf(getSftpServerPort()));
+
+    addAuthenticationProps(props);
+
+    return props;
+  }
+
+  /* TESTS BELOW HERE */
+
+  @Test
+  public void listDot1() {
+    SFTPFileSystemDriver driver = getSftpDriver();
+    List<FileInfo> items = getSftpDriver().list(".");
+    log.info("items 1 {}", items);
+    logContainerId("ONE");
+  }
+
+  @Test
+  public void listDot2() {
+    List<FileInfo> items = getSftpDriver().list(".");
+    log.info("items 2 {}", items);
+    logContainerId("TWO");
+  }
+
+
+  @Test
+  @SneakyThrows
+  void testFileSize() {
+    long size = getSftpDriver().getSize("sshd.pid");
+    assertEquals(4, size);
+  }
+
+  @Test
+  @SneakyThrows
+  void testExists() {
+    assertTrue(getSftpDriver().exists("sshd.pid"));
+    assertFalse(getSftpDriver().exists("sshd.pid.nope"));
+  }
+
+  @Test
+  @SneakyThrows
+  void testValid() {
+    assertTrue(getSftpDriver().valid("sshd.pid"));
+    assertTrue(getSftpDriver().valid("sshd.pid.nope"));
+  }
+
+  @Test
+  @SneakyThrows
+  void testIsDir() {
+    assertFalse(getSftpDriver().isDirectory("sshd.pid"));
+    assertTrue(getSftpDriver().valid("."));
+    assertTrue(getSftpDriver().valid(".."));
+  }
+
+  @Test
+  @SneakyThrows
+  void testGetName() {
+    assertEquals("sshd.pid", getSftpDriver().getName("sshd.pid"));
+    assertEquals(".", getSftpDriver().getName("."));
+    assertEquals("..", getSftpDriver().getName(".."));
+  }
+
+  @Test
+  @SneakyThrows
+  void testUsableSpace() {
+    assertThat(getSftpDriver().getUsableSpace()).isGreaterThan(58_000_000_000L);
   }
 
   @Test
@@ -91,12 +168,12 @@ public abstract class BaseSFTPFileSystemIT {
     File toDvFile = new File(tempFileDir, TO_DV_FILE_NAME);
     writeToFile(fromDvFile, TEST_FILE_CONTENTS);
 
-    log.info("sftpDriver {}", sftpDriver);
+    log.info("sftpDriver {}", getSftpDriver());
 
     Progress p1 = new Progress();
-    String pathOnRemote = sftpDriver.store(".", fromDvFile, p1);
+    String pathOnRemote = getSftpDriver().store(".", fromDvFile, p1);
 
-    if(sftpDriver.isMonitoring()) {
+    if(getSftpDriver().isMonitoring()) {
       assertEquals(fromDvFile.length(), p1.getByteCount());
       assertEquals(TEST_CLOCK.millis(), p1.getTimestamp());
 
@@ -115,12 +192,12 @@ public abstract class BaseSFTPFileSystemIT {
     Path tsPath = Paths.get(SFTP_ROOT_DIR).relativize(Paths.get(pathOnRemote));
     String retrievePath = tsPath.resolve(fromDvFile.toPath().getFileName()).toString();
     log.info("retrievePath[{}]", retrievePath);
-    sftpDriver.retrieve(retrievePath, toDvFile, new Progress());
+    getSftpDriver().retrieve(retrievePath, toDvFile, new Progress());
     String contents = readFile(toDvFile);
 
     assertEquals(contents, TEST_FILE_CONTENTS);
 
-    List<FileInfo> result1 = sftpDriver.list(tsPath.toString());
+    List<FileInfo> result1 = getSftpDriver().list(tsPath.toString());
     result1.forEach(System.out::println);
     assertEquals(1, result1.size());
     FileInfo singleFile = result1.get(0);
@@ -129,32 +206,40 @@ public abstract class BaseSFTPFileSystemIT {
     assertEquals(FROM_DV_FILE_NAME, singleFile.getName());
     assertEquals(tsPath.resolve(FROM_DV_FILE_NAME).toString(), singleFile.getKey());
 
-    long fileSize = sftpDriver.getSize(singleFile.getKey());
+    long fileSize = getSftpDriver().getSize(singleFile.getKey());
     assertEquals(fromDvFile.length(), fileSize);
 
-    assertTrue(sftpDriver.exists(singleFile.getKey()));
-    assertFalse(sftpDriver.exists(singleFile.getKey() + ".txt"));
+    assertTrue(getSftpDriver().exists(singleFile.getKey()));
+    assertFalse(getSftpDriver().exists(singleFile.getKey() + ".txt"));
 
-    assertTrue(sftpDriver.isDirectory(tsPath.toString()));
-    assertFalse(sftpDriver.isDirectory(singleFile.getKey()));
+    assertTrue(getSftpDriver().isDirectory(tsPath.toString()));
+    assertFalse(getSftpDriver().isDirectory(singleFile.getKey()));
 
-    long actualSpaceAvailable = sftpDriver.getUsableSpace();
+    long actualSpaceAvailable = getSftpDriver().getUsableSpace();
     assertTrue(actualSpaceAvailable > EXPECTED_SPACE_AVAILABLE_ON_SFTP_SERVER);
 
-    assertEquals(FROM_DV_FILE_NAME, sftpDriver.getName(singleFile.getKey()));
-    assertEquals(FROM_DV_FILE_NAME, sftpDriver.getName(FROM_DV_FILE_NAME));
+    assertEquals(FROM_DV_FILE_NAME, getSftpDriver().getName(singleFile.getKey()));
+    assertEquals(FROM_DV_FILE_NAME, getSftpDriver().getName(FROM_DV_FILE_NAME));
 
     /* isValid always returns true :-( */
-    assertTrue(sftpDriver.valid(singleFile.getKey()));
-    assertTrue(sftpDriver.valid(singleFile.getKey() + ".txt"));
+    assertTrue(getSftpDriver().valid(singleFile.getKey()));
+    assertTrue(getSftpDriver().valid(singleFile.getKey() + ".txt"));
 
-    assertThrows(NullPointerException.class, () -> sftpDriver.getName(null));
+    assertThrows(NullPointerException.class, () -> getSftpDriver().getName(null));
   }
 
   @ParameterizedTest
   @ValueSource(strings = {"", "a single line", "two\nlines"})
+
   @SneakyThrows
   public void testSftpDriverSingleFileStoreAndRetrieveToDirectory(String fileContents) {
+    Arrays.asList("/",".","./","/.","/./","","//").forEach(storePath -> {
+      checkSftpDriverSingleFileStoreAndRetrieveToDirectory(fileContents, storePath);
+    });
+  }
+
+  @SneakyThrows
+  void checkSftpDriverSingleFileStoreAndRetrieveToDirectory(String fileContents, String storePath) {
     final String FROM_DV_FILE_NAME = "fromDV.txt";
 
     File tempFileDir = Files.createTempDirectory(TEMP_PREFIX).toFile();
@@ -166,12 +251,12 @@ public abstract class BaseSFTPFileSystemIT {
     File toDirectory = new File(tempFileDir, "toDirectory");
     assertTrue(toDirectory.mkdir());
 
-    log.info("sftpDriver {}", sftpDriver);
+    log.info("sftpDriver {}", getSftpDriver());
 
     Progress p1 = new Progress();
-    String pathOnRemote = sftpDriver.store(".", fromDvFile, p1);
+    String pathOnRemote = getSftpDriver().store(storePath, fromDvFile, p1);
 
-    if(sftpDriver.isMonitoring()) {
+    if(getSftpDriver().isMonitoring()) {
       assertEquals(fromDvFile.length(), p1.getByteCount());
       assertEquals(TEST_CLOCK.millis(), p1.getTimestamp());
 
@@ -190,7 +275,7 @@ public abstract class BaseSFTPFileSystemIT {
     Path tsPath = Paths.get(SFTP_ROOT_DIR).relativize(Paths.get(pathOnRemote));
     String retrievePath = tsPath.resolve(fromDvFile.toPath().getFileName()).toString();
     log.info("retrievePath[{}]", retrievePath);
-    sftpDriver.retrieve(retrievePath, toDirectory, new Progress());
+    getSftpDriver().retrieve(retrievePath, toDirectory, new Progress());
     List<File> files = Files.list(toDirectory.toPath())
         .map(Path::toFile)
         .collect(Collectors.toList());
@@ -201,7 +286,7 @@ public abstract class BaseSFTPFileSystemIT {
 
     assertEquals(contents, fileContents);
 
-    List<FileInfo> result1 = sftpDriver.list(tsPath.toString());
+    List<FileInfo> result1 = getSftpDriver().list(tsPath.toString());
     result1.forEach(System.out::println);
     assertEquals(1, result1.size());
     FileInfo singleFile = result1.get(0);
@@ -210,26 +295,35 @@ public abstract class BaseSFTPFileSystemIT {
     assertEquals(FROM_DV_FILE_NAME, singleFile.getName());
     assertEquals(tsPath.resolve(FROM_DV_FILE_NAME).toString(), singleFile.getKey());
 
-    long fileSize = sftpDriver.getSize(singleFile.getKey());
+    long fileSize = getSftpDriver().getSize(singleFile.getKey());
     assertEquals(fromDvFile.length(), fileSize);
 
-    assertTrue(sftpDriver.exists(singleFile.getKey()));
-    assertFalse(sftpDriver.exists(singleFile.getKey() + ".txt"));
+    assertTrue(getSftpDriver().exists(singleFile.getKey()));
+    assertFalse(getSftpDriver().exists(singleFile.getKey() + ".txt"));
 
-    assertTrue(sftpDriver.isDirectory(tsPath.toString()));
-    assertFalse(sftpDriver.isDirectory(singleFile.getKey()));
+    assertTrue(getSftpDriver().isDirectory(tsPath.toString()));
+    assertFalse(getSftpDriver().isDirectory(singleFile.getKey()));
 
-    long actualSpaceAvailable = sftpDriver.getUsableSpace();
+    long actualSpaceAvailable = getSftpDriver().getUsableSpace();
     assertTrue(actualSpaceAvailable > EXPECTED_SPACE_AVAILABLE_ON_SFTP_SERVER);
 
-    assertEquals(FROM_DV_FILE_NAME, sftpDriver.getName(singleFile.getKey()));
-    assertEquals(FROM_DV_FILE_NAME, sftpDriver.getName(FROM_DV_FILE_NAME));
+    assertEquals(FROM_DV_FILE_NAME, getSftpDriver().getName(singleFile.getKey()));
+    assertEquals(FROM_DV_FILE_NAME, getSftpDriver().getName(FROM_DV_FILE_NAME));
 
     /* isValid always returns true :-( */
-    assertTrue(sftpDriver.valid(singleFile.getKey()));
-    assertTrue(sftpDriver.valid(singleFile.getKey() + ".txt"));
+    assertTrue(getSftpDriver().valid(singleFile.getKey()));
+    assertTrue(getSftpDriver().valid(singleFile.getKey() + ".txt"));
 
-    assertThrows(NullPointerException.class, () -> sftpDriver.getName(null));
+    assertThrows(NullPointerException.class, () -> getSftpDriver().getName(null));
+
+    //retrieve a Single File to a Directory that does not exist
+    File doesNotExistDir = new File(tempFileDir, "doesNotExist");
+    assertFalse(doesNotExistDir.exists());
+    getSftpDriver().retrieve(tsPath.toString(), doesNotExistDir, new Progress());
+    assertTrue(doesNotExistDir.exists());
+    assertTrue(doesNotExistDir.isDirectory());
+
+    assertEquals(fileContents.length(), getSftpDriver().getSize(tsPath.toString()));
   }
 
   @ParameterizedTest
@@ -252,21 +346,24 @@ public abstract class BaseSFTPFileSystemIT {
     ProgressEventListener sendListener = sendEvents::add;
     Progress pSend = new Progress(sendListener);
     File largeFileSend = createLargeFile(tempFileDir, fileSize);
-    String pathOnRemote = time(label, "store", () -> sftpDriver.store(".", largeFileSend, pSend));
+    String pathOnRemote = time(label, "store", () -> getSftpDriver().store(".", largeFileSend, pSend));
     Path tsPath = Paths.get(SFTP_ROOT_DIR).relativize(Paths.get(pathOnRemote));
 
     String largeFileRemotePath = tsPath.resolve(largeFileSend.getName()).toString();
     File largeFileRecv = new File(tempFileDir, "recvFile");
+    if (largeFileRecv.exists()) {
+      largeFileRecv.delete();
+    }
     List<ProgressEvent> recvEvents = new ArrayList<>();
     ProgressEventListener recvListener = recvEvents::add;
     Progress pRecv = new Progress(recvListener);
 
     time(label, "retrieve", () -> {
-      sftpDriver.retrieve(largeFileRemotePath, largeFileRecv, pRecv);
+      getSftpDriver().retrieve(largeFileRemotePath, largeFileRecv, pRecv);
       return null;
     });
 
-    if(sftpDriver.isMonitoring()) {
+    if(getSftpDriver().isMonitoring()) {
       assertEquals(largeFileSend.length(), largeFileRecv.length());
       assertEquals(getMD5(largeFileSend), getMD5(largeFileRecv));
 
@@ -276,11 +373,11 @@ public abstract class BaseSFTPFileSystemIT {
       assertTrue(sendByteIncEvents > 0);
       assertTrue(recvByteIncEvents > 0);
 
-      if (this.sftpDriver instanceof SFTPFileSystemSSHD) {
+      if (getSftpDriver() instanceof SFTPFileSystemSSHD) {
         assertEquals(sendByteIncEvents, recvByteIncEvents);
         long numParts = (long) Math.ceil((double) fileSize / (double) UtilitySSHD.BUFFER_SIZE);
-        assertEquals(numParts, sendByteIncEvents);
-        assertEquals(numParts, recvByteIncEvents);
+        assertTrue(sendByteIncEvents >= numParts);
+        assertTrue(recvByteIncEvents >= numParts);
       }
     }
   }
@@ -350,11 +447,11 @@ public abstract class BaseSFTPFileSystemIT {
     writeToFile(fromDvDirFileB, TEST_FILE_B_CONTENTS);
     writeToFile(fromDvDirFileC, TEST_FILE_C_CONTENTS);
 
-    log.info("sftpDriver {}", sftpDriver);
+    log.info("sftpDriver {}", getSftpDriver());
 
     Progress p1 = new Progress();
-    String pathOnRemote = sftpDriver.store(".", fromDvDir, p1);
-    if(sftpDriver.isMonitoring()) {
+    String pathOnRemote = getSftpDriver().store(".", fromDvDir, p1);
+    if(getSftpDriver().isMonitoring()) {
       assertEquals(fromDvDirFileA.length() + fromDvDirFileB.length() + fromDvDirFileC.length(),
           p1.getByteCount());
       assertEquals(TEST_CLOCK.millis(), p1.getTimestamp());
@@ -375,7 +472,7 @@ public abstract class BaseSFTPFileSystemIT {
     String retrievePathAsString = retrievePath.toString();
 
     // check files are on SFTP server
-    Map<String, FileInfo> fileMap = sftpDriver.list(retrievePathAsString).stream().collect(
+    Map<String, FileInfo> fileMap = getSftpDriver().list(retrievePathAsString).stream().collect(
         Collectors.toMap(FileInfo::getName, Function.identity()));
 
     assertEquals(3, fileMap.size());
@@ -402,7 +499,7 @@ public abstract class BaseSFTPFileSystemIT {
     assertEquals("", fileInfoC.getAbsolutePath());
 
     assertEquals(0, Files.list(toDvDir.toPath()).count());
-    sftpDriver.retrieve(retrievePathAsString, toDvDir, new Progress());
+    getSftpDriver().retrieve(retrievePathAsString, toDvDir, new Progress());
 
     // We can check we have got 3 files back from SFTP Server
     assertEquals(3, Files.list(toDvDir.toPath()).count());
@@ -411,17 +508,35 @@ public abstract class BaseSFTPFileSystemIT {
     assertEquals(TEST_FILE_B_CONTENTS, readFile(toDvDirFileB));
     assertEquals(TEST_FILE_C_CONTENTS, readFile(toDvDirFileC));
 
-    long fileSizeA = sftpDriver.getSize(fileInfoA.getKey());
+    long fileSizeA = getSftpDriver().getSize(fileInfoA.getKey());
     assertEquals(fromDvDirFileA.length(), fileSizeA);
-    assertEquals(FROM_DV_DIR_FILE_A, sftpDriver.getName(fileInfoA.getKey()));
+    assertEquals(FROM_DV_DIR_FILE_A, getSftpDriver().getName(fileInfoA.getKey()));
 
-    long fileSizeB = sftpDriver.getSize(fileInfoB.getKey());
+    long fileSizeB = getSftpDriver().getSize(fileInfoB.getKey());
     assertEquals(fromDvDirFileB.length(), fileSizeB);
-    assertEquals(FROM_DV_DIR_FILE_B, sftpDriver.getName(fileInfoB.getKey()));
+    assertEquals(FROM_DV_DIR_FILE_B, getSftpDriver().getName(fileInfoB.getKey()));
 
-    long fileSizeC = sftpDriver.getSize(fileInfoC.getKey());
+    long fileSizeC = getSftpDriver().getSize(fileInfoC.getKey());
     assertEquals(fromDvDirFileC.length(), fileSizeC);
-    assertEquals(FROM_DV_DIR_FILE_C, sftpDriver.getName(fileInfoC.getKey()));
+    assertEquals(FROM_DV_DIR_FILE_C, getSftpDriver().getName(fileInfoC.getKey()));
+
+    //Check that we cannot retrieve a directory back to a file
+    File singleFile = Files.createFile(tempFileDir.toPath().resolve("file.txt")).toFile();
+    IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+      getSftpDriver().retrieve(retrievePathAsString, singleFile, new Progress());
+    });
+    assertEquals(String.format("You cannot retrieve remote directory [/config/%s] back to a non-directory[%s]",retrievePathAsString,
+        singleFile.getAbsolutePath()), ex.getMessage());
+
+    //retrieve a Single Dir to a Single Dir that does not exist
+    File doesNotExistDir = new File(tempFileDir, "doesNotExist");
+    assertFalse(doesNotExistDir.exists());
+    getSftpDriver().retrieve(retrievePathAsString, doesNotExistDir, new Progress());
+    List<FileInfo> items = getSftpDriver().list(retrievePathAsString);
+    assertTrue(doesNotExistDir.exists());
+    assertTrue(doesNotExistDir.isDirectory());
+
+    assertEquals((TEST_FILE_A_CONTENTS + TEST_FILE_B_CONTENTS + TEST_FILE_C_CONTENTS).length(), getSftpDriver().getSize(retrievePathAsString));
   }
 
   @SneakyThrows
@@ -435,32 +550,28 @@ public abstract class BaseSFTPFileSystemIT {
   }
 
   @AfterEach
-  public void tearDown() {
-    this.sftpServerContainer.stop();
+  @SneakyThrows
+  void cleanup() {
+    executeCommand("pwd");
+    executeCommand("ls -l /config");
+    executeCommand("/bin/bash","-c","if [ -d config/dv_20220326094433 ]; then rm -rf config/dv_20220326094433; fi");
   }
-
-  public abstract SFTPFileSystemDriver getSftpFileSystemDriver();
 
   @SneakyThrows
-  protected Map<String, String> getStoreProperties() {
-    HashMap<String, String> props = new HashMap<>();
-
-    //standard sftp properties
-    props.put("username", TEST_USER);
-    props.put("rootPath",
-        "/config"); //this is the directory ON THE SFTP SERVER - for OpenSSH containers, it's config
-    props.put("host", sftpServerContainer.getHost());
-    props.put("port", String.valueOf(sftpServerContainer.getMappedPort(2222)));
-
-    addAuthenticationProps(props);
-
-    return props;
+  private void executeCommand(String command) {
+    String[] args = command.split("\\s");
+    executeCommand(args);
   }
 
-  abstract GenericContainer<?> getSftpTestContainer();
-
-  abstract void addAuthenticationProps(HashMap<String, String> props) throws Exception;
-
-  void authenticationSetup() throws Exception {
+  @SneakyThrows
+  private void executeCommand(String... commands){
+    log.info("COMMANDS {}", Arrays.toString(commands));
+    String command = String.join(" ", commands);
+    log.info("COMMAND {}", command);
+    log.info("container4[{}}]", getContainer().getEnvMap().get("TC_NAME"));
+    ExecResult result = getContainer().execInContainer(commands);
+    log.info("exitcode[{}][{}]", command,result.getExitCode());
+    log.info("stderr[{}][{}]", command,result.getStderr());
+    log.info("stdout[{}][{}]", command,result.getStdout());
   }
 }

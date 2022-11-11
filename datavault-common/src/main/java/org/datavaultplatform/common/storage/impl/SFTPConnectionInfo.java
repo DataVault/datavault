@@ -76,8 +76,12 @@ public class SFTPConnectionInfo {
     RSAPrivateKey privateKey = SshRsaKeyUtils.readPrivateKey(
         new String(passPhraseProtectedPrivateKey, StandardCharsets.UTF_8), keyPassphrase);
     KeyPair result = SshRsaKeyUtils.getKeyPairFromRSAPrivateKey(privateKey);
-    log.info("AFTER PUBLIC  KEY MODULUS [{}]", ((RSAPublicKey)result.getPublic()).getModulus().toString(16));
-    log.info("AFTER PRIVATE KEY MODULUS [{}]", ((RSAPrivateKey)result.getPrivate()).getModulus().toString(16));
+    if(log.isTraceEnabled()) {
+      log.trace("AFTER PUBLIC  KEY MODULUS [{}]",
+          ((RSAPublicKey) result.getPublic()).getModulus().toString(16));
+      log.trace("AFTER PRIVATE KEY MODULUS [{}]",
+          ((RSAPrivateKey) result.getPrivate()).getModulus().toString(16));
+    }
     return result;
   }
 
@@ -119,5 +123,7 @@ public class SFTPConnectionInfo {
   public boolean getMonitoring() {
     return monitoring;
   }
+
+
 }
 

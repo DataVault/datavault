@@ -1,34 +1,30 @@
 package org.datavaultplatform.common.storage;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.security.interfaces.RSAPublicKey;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 import javax.crypto.SecretKey;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
+import org.datavaultplatform.broker.services.UserKeyPairService;
+import org.datavaultplatform.broker.services.UserKeyPairService.KeyPairInfo;
 import org.datavaultplatform.broker.services.UserKeyPairServiceJSchImpl;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.crypto.SshRsaKeyUtils;
-import org.datavaultplatform.common.model.FileInfo;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnJava;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnJava.Range;
-import org.springframework.boot.system.JavaVersion;
+import org.datavaultplatform.common.docker.DockerImage;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Slf4j
-@ConditionalOnJava(value=JavaVersion.EIGHT, range=Range.EQUAL_OR_NEWER)
-@Testcontainers(disabledWithoutDocker = true)
+@Testcontainers
 public abstract class BaseSFTPFileSystemPrivatePublicKeyPairIT extends BaseSFTPFileSystemIT {
 
   static final String TEST_PASSPHRASE = "tenet";
@@ -36,87 +32,50 @@ public abstract class BaseSFTPFileSystemPrivatePublicKeyPairIT extends BaseSFTPF
   static final String KEY_STORE_PASSWORD = "keyStorePassword";
   static final String SSH_KEY_NAME = "sshKeyName";
 
-  @TempDir
-  File keyStoreTempDir;
+  static File keyStoreTempDir;
+  static KeyPairInfo keyPairInfo;
 
-  public abstract String getDockerImageName();
 
-  @Override
-  GenericContainer<?> getSftpTestContainer() {
-    return new GenericContainer<>(getDockerImageName())
+
+  static GenericContainer<?> initialiseContainer(String tcName) {
+
+    try {
+      keyStoreTempDir = Files.createTempDirectory("tmpKeyStoreDir").toFile();
+    }catch(IOException ex){
+      throw new RuntimeException(ex);
+    }
+
+    keyPairInfo = generateKeyPair();
+
+    return new GenericContainer<>(DockerImage.OPEN_SSH_8pt6_IMAGE_NAME)
+        .withEnv("TC_NAME", tcName)
         .withEnv(ENV_USER_NAME, TEST_USER)
-        .withEnv(ENV_PUBLIC_KEY, this.keyPairInfo.getPublicKey()) //this causes the public key to be added to /config/.ssh/authorized_keys
-        .withExposedPorts(2222)
+        .withEnv(ENV_PUBLIC_KEY,
+            keyPairInfo.getPublicKey()) //this causes the public key to be added to /config/.ssh/authorized_keys
+        .withExposedPorts(SFTP_SERVER_PORT)
         .waitingFor(Wait.forListeningPort());
   }
 
-  @Override
+
   @SneakyThrows
-  void addAuthenticationProps(HashMap<String, String> props) {
+  @Override
+  public void addAuthenticationProps(Map<String, String> props) {
     byte[] iv = Encryption.generateIV();
     byte[] encrypted = Encryption.encryptSecret(keyPairInfo.getPrivateKey(), null, iv);
 
-    props.put("passphrase", TEST_PASSPHRASE);
-    props.put("iv", Base64.toBase64String(iv));
-    props.put("privateKey", Base64.toBase64String(encrypted));
+    props.put(PropNames.PASSPHRASE, TEST_PASSPHRASE);
+    props.put(PropNames.IV, Base64.toBase64String(iv));
+    props.put(PropNames.PRIVATE_KEY, Base64.toBase64String(encrypted));
 
     RSAPublicKey publicKey = SshRsaKeyUtils.readPublicKey(
         keyPairInfo.getPublicKey());
-    log.info("ORIG PUBLIC KEY MODULUS [{}]", publicKey.getModulus().toString(16));
+    if(log.isTraceEnabled()) {
+      log.trace("ORIG PUBLIC KEY MODULUS [{}]", publicKey.getModulus().toString(16));
+    }
   }
 
-
-  @Test
-  void testList() {
-    List<FileInfo> items = this.sftpDriver.list(".");
-    items.forEach(System.out::println);
-  }
-
-  @Test
   @SneakyThrows
-  void testFileSize() {
-    long size = this.sftpDriver.getSize("sshd.pid");
-    assertEquals(4, size);
-  }
-
-  @Test
-  @SneakyThrows
-  void testExists() {
-    assertTrue(this.sftpDriver.exists("sshd.pid"));
-    assertFalse(this.sftpDriver.exists("sshd.pid.nope"));
-  }
-
-  @Test
-  @SneakyThrows
-  void testValid() {
-    assertTrue(this.sftpDriver.valid("sshd.pid"));
-    assertTrue(this.sftpDriver.valid("sshd.pid.nope"));
-  }
-
-  @Test
-  @SneakyThrows
-  void testIsDir() {
-    assertFalse(this.sftpDriver.isDirectory("sshd.pid"));
-    assertTrue(this.sftpDriver.valid("."));
-    assertTrue(this.sftpDriver.valid(".."));
-  }
-
-  @Test
-  @SneakyThrows
-  void testGetName() {
-    assertEquals("sshd.pid", this.sftpDriver.getName("sshd.pid"));
-    assertEquals(".", this.sftpDriver.getName("."));
-    assertEquals("..", this.sftpDriver.getName(".."));
-  }
-
-  @Test
-  @SneakyThrows
-  void testUsableSpace() {
-    assertThat(this.sftpDriver.getUsableSpace()).isGreaterThan(58_000_000_000L);
-  }
-
-  @Override
-  void authenticationSetup()  throws Exception {
+  private static KeyPairInfo generateKeyPair() {
 
     Encryption.addBouncyCastleSecurityProvider();
     String keyStorePath = keyStoreTempDir.toPath().resolve("test.ks").toString();
@@ -139,8 +98,7 @@ public abstract class BaseSFTPFileSystemPrivatePublicKeyPairIT extends BaseSFTPF
         keyForKeyStore);
 
     assertTrue(new File(keyStorePath).exists());
-    userKeyPairService = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
-    keyPairInfo = userKeyPairService.generateNewKeyPair();
+    UserKeyPairService userKeyPairService = new UserKeyPairServiceJSchImpl(TEST_PASSPHRASE);
+    return userKeyPairService.generateNewKeyPair();
   }
-
 }

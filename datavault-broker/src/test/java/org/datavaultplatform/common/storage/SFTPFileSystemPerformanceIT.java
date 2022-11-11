@@ -31,8 +31,9 @@ import org.testcontainers.containers.wait.strategy.Wait;
  *  1) JSch,
  *  2) SSHD without monitoring
  *  3) SSHD with monitoring
- *
- * The test will fail if either of the SSHD tests takes more than 10% longer than JSch
+ * <p>
+ * The test will fail if either of the SSHD tests takes more than 20% longer than JSch
+ * </p>
  */
 @Slf4j
 public class SFTPFileSystemPerformanceIT {
@@ -47,7 +48,7 @@ public class SFTPFileSystemPerformanceIT {
   static final int TEST_SFTP_SERVER_PORT = 2222;
   static final int TEST_ITERATIONS = 5;
 
-  static final double PERFORMANCE_THRESHOLD = 1.1;
+  static final double PERFORMANCE_THRESHOLD = 1.2;
   public static final int SIZE_50MB = 50_000_000;
 
   GenericContainer<?> sftpServerContainer;

@@ -1,24 +1,37 @@
 package org.datavaultplatform.common.storage;
 
 import java.util.Map;
-import org.datavaultplatform.common.docker.DockerImage;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 /*
- Tests SFTPFileSystem class against SFTP Server using private/public keypair authentication.
- Uses SSHD.
+  The actual sftp-server-container instance is test class specific.
+  The same sftp-server-container instance will be used for all test methods.
+
+  The initialisation of the sftp-server-container is done in 1 of 2 base classes.
+  The common sftp test methods are in the base class BaseSftpIT
  */
+@Testcontainers
 public class SFTPFileSystemPrivatePublicKeyPairSSHDIT extends BaseSFTPFileSystemPrivatePublicKeyPairIT {
 
-  @Override
-  public String getDockerImageName() {
-    return DockerImage.OPEN_SSH_9pt0_IMAGE_NAME;
+  @Container
+  static final GenericContainer<?> container;
+
+  static {
+    container = initialiseContainer("SftpPrivatePublicSSHDIT");
   }
 
   @Override
-  public SFTPFileSystemDriver getSftpFileSystemDriver() {
+  public SFTPFileSystemDriver getSftpDriver() {
     Map<String, String> props = getStoreProperties();
     return new SFTPFileSystemSSHD("mina-sshd", props, TEST_CLOCK);
+  }
+
+  @Override
+  public GenericContainer<?> getContainer() {
+    return container;
   }
 
 }
