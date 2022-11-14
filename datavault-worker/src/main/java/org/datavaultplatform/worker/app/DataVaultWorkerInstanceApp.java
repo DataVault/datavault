@@ -59,7 +59,7 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
   @Value("${chunking.size}")
   String chunkingSize;
 
-  @Value("${keystore.sha1:null}")
+  @Value("${keystore.sha1:}")
   String keyStoreSha1;
 
   @Autowired

@@ -113,6 +113,17 @@ public class EncryptionValidatorTest extends BaseTempKeyStoreTest{
     IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> validator.validate(true,true, "invalid-sha1"));
     assertEquals(String.format("KeyStore ["+ksFile+"]: actual SHA1["+actualSha1+"] does match expected SHA1[invalid-sha1]"), ex.getMessage());
   }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"", "    ", "\t", "\n"})
+  @NullSource
+  @SneakyThrows
+  void testWithActualKeyStoreButBlankSha1(String blank) {
+    File ksFile = new File(keyStorePath);
+    assertTrue(ksFile.exists());
+    validator.validate(true,true, blank);
+  }
+
   @Test
   @SneakyThrows
   void testWithActualButUnreadableKeyStore() {

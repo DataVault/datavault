@@ -63,7 +63,7 @@ public class DataVaultBrokerApp implements CommandLineRunner {
   @Value("${spring.application.name}")
   String applicationName;
 
-  @Value("${keystore.sha1:null}")
+  @Value("${keystore.sha1:}")
   String keyStoreSha1;
   @Autowired
   Environment env;
