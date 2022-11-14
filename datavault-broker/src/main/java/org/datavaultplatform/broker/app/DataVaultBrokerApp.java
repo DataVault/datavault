@@ -37,6 +37,8 @@ import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.actuate.scheduling.ScheduledTasksEndpoint;
 import org.springframework.boot.actuate.scheduling.ScheduledTasksEndpoint.CronTaskDescription;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.event.ApplicationStartingEvent;
 import org.springframework.context.annotation.Import;
@@ -82,7 +84,9 @@ public class DataVaultBrokerApp implements CommandLineRunner {
   LocalFileStoreEndpoint localFileStoreEndpoint;
 
   public static void main(String[] args) {
-    SpringApplication.run(DataVaultBrokerApp.class, args);
+    SpringApplicationBuilder app = new SpringApplicationBuilder(DataVaultBrokerApp.class);
+    app.build().addListeners(new ApplicationPidFileWriter("./bin/dv-broker-shutdown.pid"));
+    app.run(args);
   }
 
   @Override

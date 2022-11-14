@@ -22,6 +22,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.event.ApplicationStartingEvent;
 import org.springframework.context.annotation.ComponentScan;
@@ -53,7 +55,9 @@ public class DataVaultWebApp implements CommandLineRunner {
   }
 
   public static void main(String[] args) {
-    SpringApplication.run(DataVaultWebApp.class, args);
+    SpringApplicationBuilder app = new SpringApplicationBuilder(DataVaultWebApp.class);
+    app.build().addListeners(new ApplicationPidFileWriter("./bin/dv-webapp-shutdown.pid"));
+    app.run(args);
   }
 
   @Override

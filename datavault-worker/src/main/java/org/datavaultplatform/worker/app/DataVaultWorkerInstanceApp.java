@@ -20,6 +20,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.event.ApplicationStartingEvent;
 import org.springframework.context.annotation.Import;
@@ -78,7 +80,9 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
     }
     System.setProperty("datavault-home", System.getenv(DATAVAULT_HOME));
 
-    SpringApplication.run(DataVaultWorkerInstanceApp.class, args);
+    SpringApplicationBuilder app = new SpringApplicationBuilder(DataVaultWorkerInstanceApp.class);
+    app.build().addListeners(new ApplicationPidFileWriter("./bin/dv-worker-shutdown.pid"));
+    app.run(args);
   }
 
   @Override
