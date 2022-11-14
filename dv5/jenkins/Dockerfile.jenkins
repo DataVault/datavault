@@ -11,6 +11,9 @@
 # added tools jq, curl and ping to help with testing and diagnostics
 #
 FROM eclipse-temurin:8
+ARG JENKINS_UID
+ARG JENKINS_GID
+ARG DOCKER_GID
 USER root
 #
 # install tools
@@ -22,8 +25,8 @@ RUN apt install -y iputils-ping
 #
 # tweak users and groups to ensure 'jenkins' user can access docker socket (/var/run/docker.sock)
 #
-RUN addgroup docker --gid 992
-RUN addgroup jenkins --gid 991
-RUN adduser --disabled-password --gecos "Jenkins User" -u 995 --gid 991 jenkins
+RUN addgroup docker --gid $DOCKER_GID
+RUN addgroup jenkins --gid $JENKINS_GID
+RUN adduser --disabled-password --gecos "Jenkins User" -u $JENKINS_UID --gid $JENKINS_GID jenkins
 RUN gpasswd --add jenkins docker
 USER jenkins
