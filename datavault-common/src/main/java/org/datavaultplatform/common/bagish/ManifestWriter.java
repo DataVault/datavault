@@ -1,49 +1,62 @@
 package org.datavaultplatform.common.bagish;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.datavaultplatform.common.io.FileUtils;
 
-import static java.nio.file.FileVisitResult.*;
+import static java.nio.file.FileVisitResult.CONTINUE;
 
-public class ManifestWriter extends SimpleFileVisitor<Path> {
+@Slf4j
+public class ManifestWriter extends SimpleFileVisitor<Path> implements AutoCloseable {
 
-    private static final Logger logger = LoggerFactory.getLogger(ManifestWriter.class);
+    public static final String MANIFEST_FILE_NAME = "manifest-md5.txt";
+    private final BufferedWriter bw;
+    private final int bagPathLength;
+    private final Checksummer checkSummer;
+    private final Path manifestFilePath;
 
-    private FileWriter fw;
-    private BufferedWriter bw;
-    private int bagPathLength;
-    private Checksummer checkSummer;
+    private final Path manifestParentPath;
 
+    public ManifestWriter(File bagDir, Checksummer checkSummer) throws IOException {
+        FileUtils.checkDirectoryExists(bagDir);
 
-
-    public ManifestWriter(File bagDir) throws IOException {
         bagPathLength = bagDir.toPath().toString().length();
 
         // todo: change so that 'md5' is a variable representing the checksum type.
-        File manifest = new File(bagDir, "manifest-md5.txt");
-        manifest.createNewFile();
+        File manifest = new File(bagDir, MANIFEST_FILE_NAME);
+        FileUtils.checkFileExists(manifest, true);
+        this.manifestFilePath = manifest.toPath();
+        this.manifestParentPath = manifestFilePath.getParent();
 
-        fw = new FileWriter(manifest);
-        bw = new BufferedWriter(fw);
+        bw = new BufferedWriter(new FileWriter(manifest));
 
-        checkSummer = new Checksummer();
+        this.checkSummer = checkSummer;
+    }
 
+    public ManifestWriter(File bagDir) throws IOException {
+        this(bagDir, new Checksummer());
     }
 
     @Override
-    public FileVisitResult visitFile(Path file, BasicFileAttributes attr) throws IOException {
-        String hash;
+    public FileVisitResult preVisitDirectory(Path dirPath, BasicFileAttributes attr) throws IOException {
+        if (manifestParentPath.equals(dirPath)) {
+            throw new IOException(
+                String.format("The manifest file [%s] is within a manifest data directory [%s]",
+                    manifestFilePath, dirPath));
+        }
+        return super.preVisitDirectory(dirPath, attr);
+    }
+
+    @Override
+    public FileVisitResult visitFile(Path filePath, BasicFileAttributes attr) throws IOException {
 
         /*
            So the following code was cribbed from the Oracle Java docs, but it didn't work as I had expected.
@@ -59,15 +72,15 @@ public class ManifestWriter extends SimpleFileVisitor<Path> {
             //logger.info("Regular file: " + file.toString());
 
             try {
-                hash = checkSummer.computeFileHash(file.toFile(), SupportedAlgorithm.MD5);
+                String hash = checkSummer.computeFileHash(filePath.toFile(), SupportedAlgorithm.MD5);
+                // We don't want the full path, so strip off all the path in front of 'data'
+                bw.write(hash + "  " + filePath.toString().substring(bagPathLength + 1));
+                bw.newLine();
             } catch (Exception e) {
                 // Just rethrowing as an IOException so as to not break the Interface contract.
                 throw new IOException(e);
             }
 
-            // We don't want the full path, so strip off all the path in front of 'data'
-            bw.write(hash + "  " + file.toString().substring(bagPathLength + 1));
-            bw.newLine();
 
         } else {
             //logger.info("Other: " + file.toString());
@@ -76,10 +89,11 @@ public class ManifestWriter extends SimpleFileVisitor<Path> {
         return CONTINUE;
     }
 
+    @Override
     public void close() throws IOException {
-        bw.close();
+        if (bw != null) {
+            bw.flush();
+        }
+        IOUtils.close(bw);
     }
-
-
-
 }

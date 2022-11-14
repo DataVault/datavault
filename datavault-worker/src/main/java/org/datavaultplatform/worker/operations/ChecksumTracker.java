@@ -2,25 +2,27 @@ package org.datavaultplatform.worker.operations;
 
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.worker.tasks.ChecksumHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.util.concurrent.Callable;
 
-public class ChecksumTracker implements Callable {
+@Slf4j
+public class ChecksumTracker implements Callable<ChecksumHelper> {
 
-    private File chunk;
-    private int chunkCount;
-    private static final Logger logger = LoggerFactory.getLogger(ChecksumTracker.class);
+    private final File chunk;
+    private final int chunkNumber;
+
+    public ChecksumTracker(File chunk, int chunkNumber) {
+        this.chunk = chunk;
+        this.chunkNumber = chunkNumber;
+    }
 
     @Override
     public ChecksumHelper call() throws Exception {
 
-        ChecksumHelper retVal = new ChecksumHelper();
-        retVal.setChunkCount(this.chunkCount);
-        retVal.setChunkHash(Verify.getDigest(this.chunk));
-        retVal.setChunk(this.chunk);
+        String hash = Verify.getDigest(this.chunk);
+        ChecksumHelper retVal = new ChecksumHelper(this.chunkNumber, hash, chunk);
         return retVal;
 
 //        long chunkSize = this.chunk.length();
@@ -36,15 +38,7 @@ public class ChecksumTracker implements Callable {
         return this.chunk;
     }
 
-    public void setChunk(File chunk) {
-        this.chunk = chunk;
-    }
-
-    public int getChunkCount() {
-        return this.chunkCount;
-    }
-
-    public void setChunkCount(int chunkCount) {
-        this.chunkCount = chunkCount;
+    public int getChunkNumber() {
+        return this.chunkNumber;
     }
 }

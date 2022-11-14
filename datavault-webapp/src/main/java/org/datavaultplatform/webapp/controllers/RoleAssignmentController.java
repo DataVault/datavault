@@ -4,7 +4,6 @@ import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.RoleType;
 import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
 import org.datavaultplatform.webapp.exception.InvalidUunException;
 import org.datavaultplatform.webapp.services.ForceLogoutService;
@@ -12,6 +11,7 @@ import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,20 +19,19 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.view.RedirectView;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @Controller
+@ConditionalOnBean(RestService.class)
 public class RoleAssignmentController {
 
     private final RestService rest;
 
     private final ForceLogoutService forceLogoutService;
 
-    private UserLookupService userLookupService;
+    private final UserLookupService userLookupService;
 
     @Autowired
     public RoleAssignmentController(RestService rest, ForceLogoutService forceLogoutService, UserLookupService userLookupService) {

@@ -2,11 +2,13 @@ package org.datavaultplatform.common.request;
 
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "CreateDeposit")
+@Data
 public class CreateDeposit {
     
     @ApiObjectField(description = "Name to briefly describe the purpose or contents of this deposit")

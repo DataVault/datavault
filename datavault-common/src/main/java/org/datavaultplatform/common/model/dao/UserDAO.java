@@ -1,19 +1,22 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
+import java.util.Optional;
 import org.datavaultplatform.common.model.User;
- 
-public interface UserDAO {
+import org.datavaultplatform.common.model.dao.custom.UserCustomDAO;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-    public void save(User user);
-    
-    public void update(User user);
-    
-    public List<User> list();
+@Repository
+@Transactional
+public interface UserDAO extends BaseDAO<User>, UserCustomDAO {
 
-    public User findById(String Id);
+  @Override
+  @EntityGraph(User.EG_USER)
+  Optional<User> findById(String id);
 
-    public List<User> search(String query);
-
-    public int count();
+  @Override
+  @EntityGraph(User.EG_USER)
+  List<User> findAll();
 }

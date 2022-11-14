@@ -1,28 +1,24 @@
 package org.datavaultplatform.common.storage.impl;
 
-import org.apache.commons.io.FileUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.io.FileCopy;
 import org.datavaultplatform.common.io.Progress;
-import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
-import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class MultiLocalFileSystem extends Device implements ArchiveStore {
 
-    private String rootPath = null;
+    private final String rootPath;
 
     public MultiLocalFileSystem(String name, Map<String,String> config) throws FileNotFoundException {
         super(name, config);
@@ -34,7 +30,7 @@ public class MultiLocalFileSystem extends Device implements ArchiveStore {
 
         String[] locationsArray = rootPath.split(",");
 
-        locations = new ArrayList<String>();
+        locations = new ArrayList<>();
 
         for(String location : locationsArray){
             // Verify parameters are correct.
@@ -47,10 +43,9 @@ public class MultiLocalFileSystem extends Device implements ArchiveStore {
     }
 
     @Override
-    public long getUsableSpace() throws Exception {
+    public long getUsableSpace() {
         long usageSpace = 0;
-        for(int i = 0; i < locations.size(); i++) {
-            String location = locations.get(i);
+        for (String location : locations) {
             File file = new File(location);
             usageSpace += file.getUsableSpace();
         }
@@ -58,7 +53,7 @@ public class MultiLocalFileSystem extends Device implements ArchiveStore {
     }
 
     @Override
-    public void retrieve(String path, File working, Progress progress) throws Exception {
+    public void retrieve(String path, File working, Progress progress) {
         throw new UnsupportedOperationException();
     }
 
@@ -77,11 +72,11 @@ public class MultiLocalFileSystem extends Device implements ArchiveStore {
 
     @Override
     public String store(String path, File working, Progress progress) throws Exception {
-        System.out.println("Storing: "+working.toString());
-        System.out.println("Nb of location: "+locations.size());
+        log.info("Storing: "+working.toString());
+        log.info("Nb of location: "+locations.size());
         for(int i = 0; i < locations.size(); i++){
             String location = locations.get(i);
-            System.out.println("location: "+location);
+            log.info("location: "+location);
             Path absolutePath = getAbsolutePath(path, location);
             File retrieveFile = absolutePath.resolve(working.getName()).toFile();
 
@@ -128,7 +123,7 @@ public class MultiLocalFileSystem extends Device implements ArchiveStore {
                 return null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
             return null;
         }
     }
@@ -142,15 +137,11 @@ public class MultiLocalFileSystem extends Device implements ArchiveStore {
             Path base = Paths.get(location);
             Path canonicalBase = Paths.get(base.toFile().getCanonicalPath());
             Path canonicalPath = Paths.get(path.toFile().getCanonicalPath());
-            
-            if (canonicalPath.startsWith(canonicalBase)) {
-                return true;
-            } else {
-                return false;
-            }
+
+            return canonicalPath.startsWith(canonicalBase);
         }
         catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
             return false;
         }
     }

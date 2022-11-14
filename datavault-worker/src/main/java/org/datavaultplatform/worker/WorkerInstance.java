@@ -1,16 +1,10 @@
 package org.datavaultplatform.worker;
 
-import java.security.Security;
-
-import org.datavaultplatform.common.task.Context.AESMode;
-import org.datavaultplatform.worker.queue.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
- * A Worker class which listens to the messge queue and process messages as they arrive.
+ * A Worker class which listens to the message queue and process messages as they arrive.
  */
 public class WorkerInstance {
 
@@ -34,21 +28,5 @@ public class WorkerInstance {
         Logger logger = LoggerFactory.getLogger(WorkerInstance.class);
         logger.info("Worker starting");
         
-        ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"datavault-worker.xml"});
-        
-        EventSender eventSender = context.getBean(EventSender.class);
-        Receiver receiver = context.getBean(Receiver.class);
-        
-        // Add Bouncy Castle provider if needed
-        if( receiver.isEncryptionEnabled() && receiver.getEncryptionMode() == AESMode.GCM ) {
-            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        }
-        
-        // Listen to the message queue ...
-        try {
-            receiver.receive(eventSender);
-        } catch (Exception e) {
-            logger.error("Error in receive", e);
-        }
     }
 }

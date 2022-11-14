@@ -1,10 +1,14 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
+import java.util.Optional;
 import org.datavaultplatform.common.model.ArchiveStore;
-import org.datavaultplatform.common.model.FileStore;
+import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -19,18 +23,18 @@ import java.util.List;
  * Time: 11:00
  */
 @Controller
+@ConditionalOnBean(RestService.class)
 public class AdminArchiveStoreController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminArchiveStoreController.class);
 
-    private RestService restService;
-    private String archiveDir;
+    private final RestService restService;
+    private final String archiveDir;
 
-    public void setRestService(RestService restService) throws Exception {
+    @Autowired
+    public AdminArchiveStoreController(
+        RestService restService, @Value("${archiveDir}") String archiveDir) {
         this.restService = restService;
-    }
-
-    public void setArchiveDir(String archiveDir) throws Exception {
         this.archiveDir = archiveDir;
     }
 
@@ -43,7 +47,7 @@ public class AdminArchiveStoreController {
         List<ArchiveStore> stores = new ArrayList<>();
 
         for (ArchiveStore archiveStore : archiveStores) {
-//            if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.LocalFileSystem")) throws Exception {
+//            if (archiveStore.isLocalFileSystem()) throws Exception {
 //                localStores.add(archiveStore);
 //            }
             stores.add(archiveStore);
@@ -61,12 +65,12 @@ public class AdminArchiveStoreController {
                                      @RequestParam(value="label") String label,
                                      @RequestParam(value="type") String type,
                                      @RequestParam(value="retrieve",required=false) String retrieve) throws Exception {
-        String storageClass = "org.datavaultplatform.common.storage.impl." + type;
 
-        boolean retrieveEnabled = false;
-        if(retrieve != null && retrieve.equals("on")){
-            retrieveEnabled = true;
-        }
+        String storageClass = StorageConstants.getStorageClass(type).orElseThrow (
+            () -> new IllegalArgumentException(String.format("The type[%s] is not valid", type))
+        );
+
+        boolean retrieveEnabled = "on".equals(retrieve);
 
         HashMap<String,String> storeProperties = buildStoreProperties(properties);
 
@@ -121,7 +125,7 @@ public class AdminArchiveStoreController {
             if(line.contains("=")){
                 String prop[] = line.split("=");
                 if(prop.length == 2) {
-                    System.out.println(prop[0].trim()+" = "+prop[1].trim());
+                    logger.info(prop[0].trim()+" = "+prop[1].trim());
                     storeProperties.put(prop[0].trim(), prop[1].trim());
                 }else{
                     System.err.println("line #"+lineCount+" has wrong syntax: "+line);

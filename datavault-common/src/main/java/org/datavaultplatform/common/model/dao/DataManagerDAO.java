@@ -1,15 +1,24 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
+import java.util.Optional;
 import org.datavaultplatform.common.model.DataManager;
- 
-public interface DataManagerDAO {
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-    public void save(DataManager dataManager);
-    
-    public List<DataManager> list();
+@Repository
+@Transactional
+public interface DataManagerDAO extends BaseDAO<DataManager> {
 
-    public DataManager findById(String Id);
+  @Override
+  @EntityGraph(DataManager.EG_DATA_MANAGER)
+  Optional<DataManager> findById(String id);
 
-    public void deleteById(String Id);
+  @Override
+  @EntityGraph(DataManager.EG_DATA_MANAGER)
+  List<DataManager> findAll();
+
+  @EntityGraph(DataManager.EG_DATA_MANAGER)
+  List<DataManager> findByVaultId(String vaultId);
 }

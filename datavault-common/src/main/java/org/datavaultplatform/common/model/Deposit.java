@@ -1,5 +1,8 @@
 package org.datavaultplatform.common.model;
 
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.event.Event;
 
@@ -21,6 +24,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.OrderBy;
 import javax.persistence.Version;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
@@ -29,8 +33,21 @@ import org.jsondoc.core.annotation.ApiObjectField;
 @ApiObject(name = "Deposit")
 @Entity
 @Table(name="Deposits")
+@NamedEntityGraph(
+    name=Deposit.EG_DEPOSIT,
+    attributeNodes = {
+        @NamedAttributeNode(value = Deposit_.VAULT, subgraph = "subVault"),
+        @NamedAttributeNode("user")
+    },
+    subgraphs = @NamedSubgraph(name="subVault", attributeNodes = {
+        @NamedAttributeNode(Vault_.RETENTION_POLICY),
+        @NamedAttributeNode(Vault_.GROUP),
+        @NamedAttributeNode(Vault_.DATASET)
+    })
+)
 public class Deposit {
 
+    public static final String EG_DEPOSIT = "eg.Deposit.1";
     // Deposit Identifier
     @Id
     @ApiObjectField(description = "Universally Unique Identifier for the Deposit", name="Deposit")
@@ -87,13 +104,14 @@ public class Deposit {
     // A Deposit can have a number of reviews
     @JsonIgnore
     @OneToMany(targetEntity=DepositReview.class, mappedBy="deposit", fetch=FetchType.LAZY)
-    @OrderBy("timestamp")
+    @OrderBy("creationTime")
     private List<DepositReview> depositReviews;
 
 
     @ApiObjectField(description = "Status of the Deposit", allowedvalues={"NOT_STARTED", "IN_PROGRESS", "COMPLETE"})
     private Status status;
 
+    // THE ORDER OF THESE ENUM VALUES IS IMPORTANT. DO NOT CHANGE.
     public enum Status {
         NOT_STARTED,
         IN_PROGRESS,
@@ -173,8 +191,8 @@ public class Deposit {
     
     public String getID() { return id; }
 
-    public long getVersion() { return version; };
-    
+    public long getVersion() { return version; }
+
     public void setCreationTime(Date creationTime) {
         this.creationTime = creationTime;
     }
@@ -380,4 +398,22 @@ public class Deposit {
                 depositChunks
             );
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+            return false;
+        }
+        Deposit deposit = (Deposit) o;
+        return id != null && Objects.equals(id, deposit.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
 }

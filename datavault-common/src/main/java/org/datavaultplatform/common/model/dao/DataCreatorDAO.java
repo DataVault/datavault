@@ -1,15 +1,23 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.DataCreator;
-
 import java.util.List;
+import java.util.Optional;
+import org.datavaultplatform.common.model.DataCreator;
+import org.datavaultplatform.common.model.dao.custom.DataCreatorCustomDAO;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface DataCreatorDAO {
-    void save(List<DataCreator> dataCreators);
+@Repository
+@Transactional
+public interface DataCreatorDAO
+    extends BaseDAO<DataCreator>, DataCreatorCustomDAO {
 
-    DataCreator findById(String Id);
+  @Override
+  @EntityGraph(DataCreator.EG_DATA_CREATOR)
+  Optional<DataCreator> findById(String id);
 
-    void update(DataCreator dataCreator);
-
-    void delete(String id);
+  @Override
+  @EntityGraph(DataCreator.EG_DATA_CREATOR)
+  List<DataCreator> findAll();
 }

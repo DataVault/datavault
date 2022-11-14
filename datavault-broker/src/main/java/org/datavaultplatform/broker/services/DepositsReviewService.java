@@ -7,18 +7,23 @@ import org.datavaultplatform.common.model.VaultReview;
 import org.datavaultplatform.common.model.dao.DepositReviewDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
+@Transactional
 public class DepositsReviewService {
 
     private static final Logger logger = LoggerFactory.getLogger(DepositsReviewService.class);
 
-    private DepositReviewDAO depositReviewDAO;
+    private final DepositReviewDAO depositReviewDAO;
 
-    public void setDepositReviewDAO(DepositReviewDAO depositReviewDAO) {
+    @Autowired
+    public DepositsReviewService(DepositReviewDAO depositReviewDAO) {
         this.depositReviewDAO = depositReviewDAO;
     }
 
@@ -49,7 +54,7 @@ public class DepositsReviewService {
     }
 
     public DepositReview getDepositReview(String depositReviewID) {
-        return depositReviewDAO.findById(depositReviewID);
+        return depositReviewDAO.findById(depositReviewID).orElse(null);
     }
 
     public List<DepositReview> search(String query) {
@@ -62,7 +67,7 @@ public class DepositsReviewService {
     
 
 
-    public int count() { return depositReviewDAO.count(); }
+    public long count() { return depositReviewDAO.count(); }
 
 
 

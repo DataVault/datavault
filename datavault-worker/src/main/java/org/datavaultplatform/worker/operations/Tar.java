@@ -7,10 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.file.Path;
 
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.CipherOutputStream;
-
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -29,16 +25,12 @@ public class Tar {
      * @throws Exception if anything unexpected happens
      */
     public static boolean createTar(File dir, File output) throws Exception {
-
-        FileOutputStream fos = new FileOutputStream(output);
-        BufferedOutputStream bos = new BufferedOutputStream(fos);
-        TarArchiveOutputStream tar = new TarArchiveOutputStream(bos);
-        tar.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
-        tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
-        addFileToTar(tar, dir, "");
-        tar.finish();
-        tar.close();
-        
+        try (TarArchiveOutputStream tar = new TarArchiveOutputStream(
+            new BufferedOutputStream(new FileOutputStream(output)))) {
+            tar.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
+            tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
+            addFileToTar(tar, dir, "");
+        }
         return true;
     }
     
@@ -55,14 +47,14 @@ public class Tar {
         tar.putArchiveEntry(tarEntry);
 
         if (f.isFile()) {
-            FileInputStream in = new FileInputStream(f);
-            IOUtils.copy(in, tar);
-            in.close();
+            try( FileInputStream in = new FileInputStream(f)) {
+                IOUtils.copy(in, tar);
+            }
             tar.closeArchiveEntry();
         } else {
             tar.closeArchiveEntry();
             File[] children = f.listFiles();
-            if (children != null){
+            if (children != null) {
                 for (File child : children) {
                     addFileToTar(tar, child, entryName + "/");
                 }
@@ -79,37 +71,33 @@ public class Tar {
      */
     public static File unTar(File input, Path outputDir) throws Exception {
 
-        FileInputStream fis = new FileInputStream(input);
-        BufferedInputStream bis = new BufferedInputStream(fis);
-        TarArchiveInputStream tar = new TarArchiveInputStream(fis);
-        
         File topDir = null;
-        
-        TarArchiveEntry entry;
-        while ((entry = tar.getNextTarEntry()) != null) {
-            
-            Path path = outputDir.resolve(entry.getName());
-            File entryFile = path.toFile();
-            
-            if (entry.isDirectory()) {
-                // Create a directory
-                entryFile.mkdir();
-                
-                if (topDir == null) {
-                    topDir = entryFile;
+
+        try (TarArchiveInputStream tar = new TarArchiveInputStream(
+            new BufferedInputStream(new FileInputStream(input)))) {
+
+            TarArchiveEntry entry;
+            while ((entry = tar.getNextTarEntry()) != null) {
+
+                Path path = outputDir.resolve(entry.getName());
+                File entryFile = path.toFile();
+
+                if (entry.isDirectory()) {
+                    // Create a directory
+                    entryFile.mkdir();
+
+                    if (topDir == null) {
+                        topDir = entryFile;
+                    }
+                } else {
+                    // Extract a single file
+                    try (FileOutputStream fos = new FileOutputStream(entryFile)) {
+                        IOUtils.copyLarge(tar, fos, 0, entry.getSize());
+                    }
                 }
-            } else {
-                // Extract a single file
-                FileOutputStream fos = new FileOutputStream(entryFile);
-                IOUtils.copyLarge(tar, fos, 0, entry.getSize());
-                fos.close();
             }
         }
 
-        tar.close();
-        bis.close();
-        fis.close();
-        
         return topDir;
     }
     

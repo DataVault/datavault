@@ -1,14 +1,18 @@
 package org.datavaultplatform.common.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
@@ -17,7 +21,18 @@ import org.jsondoc.core.annotation.ApiObjectField;
 @ApiObject(name = "DepositPath")
 @Entity
 @Table(name="DepositPaths")
+@NamedEntityGraph(
+    name = DepositPath.EG_DEPOSIT_PATH,
+    attributeNodes =
+    @NamedAttributeNode(value = DepositPath_.DEPOSIT, subgraph = "subDeposit"),
+    subgraphs = @NamedSubgraph(name = "subDeposit", attributeNodes = {
+        @NamedAttributeNode(Deposit_.VAULT),
+        @NamedAttributeNode(Deposit_.USER)
+    })
+)
 public class DepositPath {
+
+    public static final String EG_DEPOSIT_PATH =  "eg.DepositPath.1";
 
     // Deposit Identifier
     @Id
@@ -68,5 +83,22 @@ public class DepositPath {
 
     public void setPathType(Path.PathType pathType) {
         this.pathType = pathType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+            return false;
+        }
+        DepositPath that = (DepositPath) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

@@ -1,16 +1,18 @@
 package org.datavaultplatform.broker.controllers;
 
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.FilesService;
-import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.io.FileUtils;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
-import org.datavaultplatform.common.model.RoleModel;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.response.DepositSize;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -31,41 +33,31 @@ import java.util.List;
 
 
 @RestController
+@Slf4j
 public class FilesController {
     
-    private FilesService filesService;
-    private UsersService usersService;
-    private AdminService adminService;
-    private String tempDir;
-    private Long maxDepositByteSize;
-    private Long maxAdminDepositByteSize;
+    private final FilesService filesService;
+    private final UsersService usersService;
+    private final AdminService adminService;
+    private final String tempDir;
+    private final Long maxDepositByteSize;
+    private final Long maxAdminDepositByteSize;
 
-    public void setFilesService(FilesService filesService) {
+    public FilesController(FilesService filesService, UsersService usersService,
+        AdminService adminService,
+        @Value("${tempDir}") String tempDir,
+        @Value("${max.deposit.size}") String maxDepositByteSize,
+        @Value("${max.admin.deposit.size}") String maxAdminDepositByteSize) {
         this.filesService = filesService;
-    }
-    
-    public void setUsersService(UsersService usersService) { this.usersService = usersService; }
-
-    public void setAdminService(AdminService adminService) {
+        this.usersService = usersService;
         this.adminService = adminService;
-    }
-
-    public void setTempDir(String tempDir) {
         this.tempDir = tempDir;
+        this.maxDepositByteSize = FileUtils.parseFormattedSizeToBytes(maxDepositByteSize);
+        this.maxAdminDepositByteSize = FileUtils.parseFormattedSizeToBytes(maxAdminDepositByteSize);
     }
 
-    public void setMaxDepositByteSize(String maxDepositByteSize) {
-        long bytes = FileUtils.parseFormattedSizeToBytes(maxDepositByteSize);
-        this.maxDepositByteSize = bytes;
-    }
-
-    public void setMaxAdminDepositByteSize(String maxAdminDepositByteSize) {
-        long bytes = FileUtils.parseFormattedSizeToBytes(maxAdminDepositByteSize);
-        this.maxAdminDepositByteSize = bytes;
-    }
-    
-    @RequestMapping("/files")
-    public List<FileInfo> getStorageListing(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/files")
+    public List<FileInfo> getStorageListing(@RequestHeader(HEADER_USER_ID) String userID,
                                             HttpServletRequest request) {
         
         User user = usersService.getUser(userID);
@@ -84,8 +76,8 @@ public class FilesController {
         return files;
     }
     
-    @RequestMapping("/files/{storageid}/**")
-    public List<FileInfo> getFilesListing(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/files/{storageid}/**")
+    public List<FileInfo> getFilesListing(@RequestHeader(HEADER_USER_ID) String userID,
                                           HttpServletRequest request,
                                           @PathVariable("storageid") String storageID) throws Exception {
         
@@ -127,8 +119,8 @@ public class FilesController {
         return files;
     }
     
-    @RequestMapping("/filesize/{storageid}/**")
-    public String getFilesize(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/filesize/{storageid}/**")
+    public String getFilesize(@RequestHeader(HEADER_USER_ID) String userID,
                                       HttpServletRequest request,
                                       @PathVariable("storageid") String storageID) throws Exception {
         
@@ -159,8 +151,8 @@ public class FilesController {
         }
     }
 
-    @RequestMapping("/checkdepositsize")
-    public DepositSize checkDepositSize(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/checkdepositsize")
+    public DepositSize checkDepositSize(@RequestHeader(HEADER_USER_ID) String userID,
                               HttpServletRequest request) throws Exception {
 
         User user = usersService.getUser(userID);
@@ -168,15 +160,15 @@ public class FilesController {
 
         Long size = 0L;
         for (String filePath : filePaths) {
-            System.out.println("Full filePath: " + filePath);
+            log.info("Full filePath: " + filePath);
             filePath = filePath.replaceFirst("/storage/", "");
             // remove first slashes
             filePath = filePath.replaceFirst("^\\/+", "");
-            System.out.println("Full filePath cleaned: " + filePath);
+            log.info("Full filePath cleaned: " + filePath);
             String storageID = filePath.substring(0,filePath.indexOf("/"));
-            System.out.println("storageID: " + storageID);
+            log.info("storageID: " + storageID);
             filePath = filePath.substring(filePath.indexOf("/"));
-            System.out.println("filePath: " + filePath);
+            log.info("filePath: " + filePath);
 
             FileStore store = null;
             List<FileStore> userStores = user.getFileStores();
@@ -191,19 +183,19 @@ public class FilesController {
                 throw new Exception("Storage device '" + storageID + "' not found!");
             }
 
-            System.out.println("size: " + size);
+            log.info("size: " + size);
 
             Long fileSize = filesService.getFilesize(filePath, store);
 
             size += fileSize;
         }
 
-        System.out.println("Total size: " + size);
+        log.info("Total size: " + size);
         Long max = (this.adminService.isAdminUser(user)) ? this.maxAdminDepositByteSize : this.maxDepositByteSize;
         DepositSize retVal = new DepositSize();
         retVal.setMax(max);
 
-        System.out.println("Max (broker) is:" + max);
+        log.info("Max (broker) is:" + max);
         if (size <= max) {
             retVal.setResult(Boolean.TRUE);
         } else {
@@ -212,15 +204,15 @@ public class FilesController {
         return retVal;
     }
     
-    @RequestMapping(value="/upload/{fileUploadHandle}/{filename:.+}", method = RequestMethod.POST)
-    public String postFileChunk(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @PostMapping(value="/upload/{fileUploadHandle}/{filename:.+}")
+    public String postFileChunk(@RequestHeader(HEADER_USER_ID) String userID,
                                 HttpServletRequest request,
                                 @PathVariable("fileUploadHandle") String fileUploadHandle,
                                 @PathVariable("filename") String filename) throws Exception {
         
         User user = usersService.getUser(userID);
         
-        System.out.println("Broker postFileChunk for " + user.getID() + " - " + filename);
+        log.info("Broker postFileChunk for " + user.getID() + " - " + filename);
         
         String relativePath = new String(Base64.decodeBase64(request.getParameter("relativePath").getBytes()));
         Long chunkNumber = Long.parseLong(request.getParameter("chunkNumber"));
@@ -228,10 +220,10 @@ public class FilesController {
         Long chunkSize = Long.parseLong(request.getParameter("chunkSize"));
         Long totalSize = Long.parseLong(request.getParameter("totalSize"));
         
-        System.out.println("fileUploadHandle =" + fileUploadHandle);
+        log.info("fileUploadHandle =" + fileUploadHandle);
         
         /*
-        System.out.println("Broker postFileChunk:" +
+        log.info("Broker postFileChunk:" +
                 " relativePath=" + relativePath +
                 " chunkNumber=" + chunkNumber +
                 " totalChunks=" + totalChunks +
@@ -245,7 +237,7 @@ public class FilesController {
         File uploadDir = uploadDirPath.toFile();
         
         if (!uploadDir.exists()) {
-            System.out.println("Creating uploadDir: " + uploadDir.getPath());
+            log.info("Creating uploadDir: " + uploadDir.getPath());
             Boolean success = uploadDir.mkdir();
             if (!success && !uploadDir.exists()) {
                 throw new Exception("Unable to create uploadDir");
@@ -256,7 +248,7 @@ public class FilesController {
         Path userUploadDirPath = uploadDirPath.resolve(userID);
         File userUploadDir = userUploadDirPath.toFile();
         if (!userUploadDir.exists()) {
-            System.out.println("Creating userUploadDir: " + userUploadDir.getPath());
+            log.info("Creating userUploadDir: " + userUploadDir.getPath());
             Boolean success = userUploadDir.mkdir();
             if (!success && !userUploadDir.exists()) {
                 throw new Exception("Unable to create userUploadDir");
@@ -267,7 +259,7 @@ public class FilesController {
         Path handleUploadDirPath = userUploadDirPath.resolve(fileUploadHandle);
         File handleUploadDir = handleUploadDirPath.toFile();
         if (!handleUploadDir.exists()) {
-            System.out.println("Creating handleUploadDir: " + handleUploadDir.getPath());
+            log.info("Creating handleUploadDir: " + handleUploadDir.getPath());
             Boolean success = handleUploadDir.mkdir();
             if (!success && !handleUploadDir.exists()) {
                 throw new Exception("Unable to create handleUploadDir");

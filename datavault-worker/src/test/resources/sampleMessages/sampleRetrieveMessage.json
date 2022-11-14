@@ -1,0 +1,46 @@
+{
+  "taskClass" : "org.datavaultplatform.worker.tasks.Retrieve",
+  "properties" : {
+    "archiveDigestAlgorithm" : "SHA-1",
+    "bagId" : "27092022-175853",
+    "numOfChunks" : "3",
+    "retrievePath" : "retDir",
+    "archiveSize" : "50010112",
+    "archiveDigest" : "B32854FA767B73A0F5C78664780080BA56E7B234",
+    "archiveId" : "27092022-175853.tar"
+  },
+  "archiveFileStores" : [ {
+    "id" : "ARCHIVE-STORE-DST-ID",
+    "storageClass" : "org.datavaultplatform.common.storage.impl.LocalFileSystem",
+    "label" : "ARCHIVE-STORE-DST-LABEL",
+    "retrieveEnabled" : true,
+    "properties" : {
+      "rootPath" : "/tmp/dv/dest"
+    }
+  } ],
+  "userFileStoreProperties" : {
+    "FILE-STORE-SRC-ID" : {
+      "rootPath" : "/private/tmp/retrieve"
+    }
+  },
+  "userFileStoreClasses" : {
+    "FILE-STORE-SRC-ID" : "org.datavaultplatform.common.storage.impl.LocalFileSystem"
+  },
+  "chunkFilesDigest" : {
+    "1" : "56980D140D6EF2AA2A029F9608EAF373A762E673",
+    "2" : "DD5D932B4F95504DE8F4212B310C743A43CC3136",
+    "3" : "BB61FF312A2ADE5DCF2906F08D0E32DADEFB91FD"
+  },
+  "chunksIVs" : {
+    "1" : "ym/5HwmeXU/CtCSZrB3PhNzuwJgJD8ye2Pz5X1eFwSW782HiwcIO0k5/F3FsOhiByKJPSk9bisesHYBGS9glgQJMayfWoZTjyvYbKLLxRyzb4T/f+kbjr5AB3AbtK699",
+    "2" : "JeRUi4hpPP6z2o4EPewBvBWHd6SrCnGP5HS16qBJUb0ezSFpfozQhdRbiyzTqPspL2E+qhmLclBFRic9Ny/q5TnK9zTlCKjHVzsPd5dMGdh/Jux+Q2gHcGp0Oh/gf8XA",
+    "3" : "rk0eKkQl7NRVYZ5EcA+BQ9i4ug1kSlkrUVMFRf9HkGjjhlQ5ByepW4qDglKYfzXti1P8Ts2Fa0UukXgt2ahzUEzHDWk7C7yybHEG7mDjA3P6ZsLVhZyi2XDZFYJd1Aka"
+  },
+  "encChunksDigest" : {
+    "1" : "8F61FDFDA82204EF2F048C30188A56650BB7DCA3",
+    "2" : "EC0AA4A9D9F28D6FCB369D136625881B3A218041",
+    "3" : "97E0B6F28462842577742912111F23A5EFF39BEE"
+  },
+  "restartArchiveIds" : { },
+  "redeliver" : false
+}

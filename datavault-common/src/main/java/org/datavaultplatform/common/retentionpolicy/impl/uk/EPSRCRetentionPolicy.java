@@ -33,7 +33,7 @@ public class EPSRCRetentionPolicy implements RetentionPolicy {
         Date check;
 
         // Get all the retrieve events
-        ArrayList<Retrieve> retrieves = new ArrayList();
+        ArrayList<Retrieve> retrieves = new ArrayList<>();
         for (Deposit d : v.getDeposits()) {
             retrieves.addAll(d.getRetrieves());
         }

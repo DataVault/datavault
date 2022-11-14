@@ -6,12 +6,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
+import org.hibernate.Hibernate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="Users")
+@NamedEntityGraph(name=User.EG_USER, attributeNodes = {
+    @NamedAttributeNode(User_.FILE_STORES)
+})
 public class User {
     // User Identifier (not a UUID)
+    public static final String EG_USER = "eg.User.1";
     @Id
     @Column(name = "id", unique = true, length = 36)
     private String id;
@@ -34,7 +40,8 @@ public class User {
 
     // Additional properties associated with the user
     @Lob
-    private HashMap<String,String> properties;
+    @Column(name="properties", columnDefinition="LONGBLOB")
+    private HashMap<String,String> properties = new HashMap<>();
 
     // A user is related to a number of vaults
     @JsonIgnore
@@ -102,23 +109,21 @@ public class User {
     public List<FileStore> getFileStores() {
         return fileStores;
     }
-    
+
     @Override
-    public boolean equals(Object other) {
-        
-        if (this == other) return true;
-        
-        if (!(other instanceof User)) {
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        
-        final User user = (User)other;
-
-        return user.getID().equals(getID());
+        User user = (User) o;
+        return id != null && Objects.equals(id, user.id);
     }
-    
+
     @Override
     public int hashCode() {
-        return getID().hashCode();
+        return getClass().hashCode();
     }
 }

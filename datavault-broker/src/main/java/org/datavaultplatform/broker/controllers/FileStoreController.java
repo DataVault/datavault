@@ -1,14 +1,21 @@
 package org.datavaultplatform.broker.controllers;
 
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
 import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.broker.services.FileStoreService;
 import org.datavaultplatform.broker.services.UserKeyPairService;
+import org.datavaultplatform.broker.services.UserKeyPairService.KeyPairInfo;
 import org.datavaultplatform.broker.services.UsersService;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.storage.StorageConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,45 +29,33 @@ public class FileStoreController {
 
     private static final Logger logger = LoggerFactory.getLogger(FileStoreController.class);
 
-    private UsersService usersService;
-    private FileStoreService fileStoreService;
-    private UserKeyPairService userKeyPairService;
-    private String host;
-    private String port;
-    private String rootPath;
-    private String passphrase;
-    
-    public void setFileStoreService(FileStoreService fileStoreService) {
-        this.fileStoreService = fileStoreService;
-    }
-    
-    public void setUsersService(UsersService usersService) {
+    private final UsersService usersService;
+    private final FileStoreService fileStoreService;
+    private final UserKeyPairService userKeyPairService;
+    private final String host;
+    private final String port;
+    private final String rootPath;
+    private final String passphrase;
+
+    @Autowired
+    public FileStoreController(UsersService usersService, FileStoreService fileStoreService,
+        UserKeyPairService userKeyPairService,
+        @Value("${sftp.host}") String host,
+        @Value("${sftp.port}") String port,
+        @Value("${sftp.rootPath}") String rootPath,
+        @Value("${sftp.passphrase}") String passphrase) {
         this.usersService = usersService;
-    }
-
-    public void setUserKeyPairService(UserKeyPairService userKeyPairService) {
+        this.fileStoreService = fileStoreService;
         this.userKeyPairService = userKeyPairService;
-    }
-
-    public void setHost(String host) {
         this.host = host;
-    }
-
-    public void setPort(String port) {
         this.port = port;
-    }
-
-    public void setRootPath(String rootPath) {
         this.rootPath = rootPath;
-    }
-
-    public void setPassphrase(String passphrase) {
         this.passphrase = passphrase;
     }
 
 
-    @RequestMapping(value = "/filestores", method = RequestMethod.GET)
-    public ResponseEntity<List<FileStore>> getFileStores(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    @GetMapping("/filestores")
+    public ResponseEntity<List<FileStore>> getFileStores(@RequestHeader(HEADER_USER_ID) String userID) {
         User user = usersService.getUser(userID);
         
         List<FileStore> userStores = user.getFileStores();
@@ -74,9 +69,9 @@ public class FileStoreController {
 
 
 
-    @RequestMapping(value = "/filestores", method = RequestMethod.POST)
-    public ResponseEntity<FileStore> addFileStore(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                  @RequestBody FileStore store) throws Exception {
+    @PostMapping("/filestores")
+    public ResponseEntity<FileStore> addFileStore(@RequestHeader(HEADER_USER_ID) String userID,
+                                  @RequestBody FileStore store) {
 
         User user = usersService.getUser(userID);
         store.setUser(user);
@@ -84,31 +79,31 @@ public class FileStoreController {
         return new ResponseEntity<>(store, HttpStatus.CREATED);
     }
 
-    @RequestMapping(value = "/filestores/{filestoreid}", method = RequestMethod.GET)
-    public ResponseEntity<FileStore> getFileStore(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/filestores/{filestoreid}")
+    public ResponseEntity<FileStore> getFileStore(@RequestHeader(HEADER_USER_ID) String userID,
                                @PathVariable("filestoreid") String filestoreid) {
 
         FileStore store = fileStoreService.getFileStore(filestoreid);
         return new ResponseEntity<>(store, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "filestores/{filestoreid}", method = RequestMethod.DELETE)
-    public ResponseEntity<Object>  deleteFileStore(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @DeleteMapping("/filestores/{filestoreid}")
+    public ResponseEntity<Void>  deleteFileStore(@RequestHeader(HEADER_USER_ID) String userID,
                                                @PathVariable("filestoreid") String filestoreid) {
 
         fileStoreService.deleteFileStore(filestoreid);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @RequestMapping(value = "/filestores/local", method = RequestMethod.GET)
-    public ResponseEntity<List<FileStore>> getFileStoresLocal(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    @GetMapping("/filestores/local")
+    public ResponseEntity<List<FileStore>> getFileStoresLocal(@RequestHeader(HEADER_USER_ID) String userID) {
         User user = usersService.getUser(userID);
 
         List<FileStore> userStores = user.getFileStores();
         List<FileStore> localStores = new ArrayList<>();
 
         for (FileStore userStore : userStores) {
-            if (userStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.LocalFileSystem")) {
+            if (userStore.isLocalFileSystem()) {
                 localStores.add(userStore);
                 logger.info("Adding entry to list of local filestores" + userStore);
             }
@@ -119,57 +114,56 @@ public class FileStoreController {
 
 
 
-    @RequestMapping(value = "/filestores/sftp", method = RequestMethod.POST)
-    public ResponseEntity<FileStore> addFileStoreSFTP(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @PostMapping("/filestores/sftp")
+    public ResponseEntity<FileStore> addFileStoreSFTP(@RequestHeader(HEADER_USER_ID) String userID,
                                       @RequestBody FileStore store) {
 
         User user = usersService.getUser(userID);
 
-        userKeyPairService.generateNewKeyPair();
+        KeyPairInfo keypair = userKeyPairService.generateNewKeyPair();
 
         byte[] encrypted = null;
         byte[] iv = Encryption.generateIV();
         try {
-            // We got to encrypt the private key before putting it int he database.
-            encrypted = Encryption.encryptSecret(userKeyPairService.getPrivateKey(), null, iv);
-        } catch (Exception e) {
-            logger.error("Error when encrypting private key: "+e);
-            e.printStackTrace();
+            // We got to encrypt the private key before putting it in the database.
+            encrypted = Encryption.encryptSecret(keypair.getPrivateKey(), null, iv);
+        } catch (Exception ex) {
+            logger.error("Error when encrypting private key: ",ex);
             return new ResponseEntity<>(store, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         HashMap<String, String> storeProperties = store.getProperties();
 
         // Add the confidential properties.
-        storeProperties.put("username", user.getID());
-        storeProperties.put("password", "");
-        storeProperties.put("publicKey", userKeyPairService.getPublicKey());
-        storeProperties.put("privateKey", Base64.toBase64String(encrypted));
-        storeProperties.put("iv", Base64.toBase64String(iv));
-        storeProperties.put("passphrase", passphrase);
+        storeProperties.put(PropNames.USERNAME, user.getID());
+        storeProperties.put(PropNames.PASSWORD, "");
+        storeProperties.put(PropNames.PUBLIC_KEY, keypair.getPublicKey());
+        storeProperties.put(PropNames.PRIVATE_KEY, Base64.toBase64String(encrypted));
+        storeProperties.put(PropNames.IV, Base64.toBase64String(iv));
+        storeProperties.put(PropNames.PASSPHRASE, passphrase);
 
         store.setUser(user);
         fileStoreService.addFileStore(store);
 
         // Remove sensitive information that should only be held server side.
         storeProperties = store.getProperties();
-        storeProperties.remove("password");
-        storeProperties.remove("privateKey");
-        storeProperties.remove("passphrase");
+        storeProperties.remove(PropNames.PASSWORD);
+        storeProperties.remove(PropNames.PRIVATE_KEY);
+        storeProperties.remove(PropNames.PASSPHRASE);
         store.setProperties(storeProperties);
 
         return new ResponseEntity<>(store, HttpStatus.CREATED);
     }
 
-    @RequestMapping(value = "/filestores/sftp", method = RequestMethod.GET)
-    public ResponseEntity<List<FileStore>> getFileStoresSFTP(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    @GetMapping("/filestores/sftp")
+    public ResponseEntity<List<FileStore>> getFileStoresSFTP(@RequestHeader(HEADER_USER_ID) String userID) {
         User user = usersService.getUser(userID);
 
         List<FileStore> userStores = user.getFileStores();
         List<FileStore> localStores = new ArrayList<>();
 
         for (FileStore userStore : userStores) {
-            if (userStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.SFTPFileSystem")) {
+            if (userStore.isSFTPFileSystem()) {
                 localStores.add(userStore);
             }
         }
@@ -177,17 +171,17 @@ public class FileStoreController {
         return new ResponseEntity<>(localStores, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/filestores/sftp/{filestoreid}", method = RequestMethod.GET)
-    public ResponseEntity<FileStore> getFilestoreSFTP(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/filestores/sftp/{filestoreid}")
+    public ResponseEntity<FileStore> getFilestoreSFTP(@RequestHeader(HEADER_USER_ID) String userID,
                                    @PathVariable("filestoreid") String filestoreid) {
 
         FileStore store = fileStoreService.getFileStore(filestoreid);
 
         // Remove sensitive information that should only be held server side.
         HashMap<String,String> storeProperties = store.getProperties();
-        storeProperties.remove("password");
-        storeProperties.remove("privateKey");
-        storeProperties.remove("passphrase");
+        storeProperties.remove(PropNames.PASSWORD);
+        storeProperties.remove(PropNames.PRIVATE_KEY);
+        storeProperties.remove(PropNames.PASSPHRASE);
         store.setProperties(storeProperties);
 
         return new ResponseEntity<>(store, HttpStatus.OK);

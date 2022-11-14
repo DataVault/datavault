@@ -1,0 +1,12 @@
+[DEBUG] REQ:START
+[DEBUG] REQ:uri     [https://example.org/resource]
+[DEBUG] REQ:method  [GET]
+[DEBUG] REQ:headers [Accept:"text/plain, application/json, application/cbor, application/*+json, */*", Content-Length:"0"]
+[DEBUG] REQ:body    []
+[DEBUG] REQ:END
+[DEBUG] RES:START
+[DEBUG] RES:statusCode [200 OK]
+[DEBUG] RES:statusText [OK]
+[DEBUG] RES:headers    [Content-Type:"text/plain"]
+[DEBUG] RES:body       [Hello World]
+[DEBUG] RES:END

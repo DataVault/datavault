@@ -3,31 +3,26 @@ import java.io.File;
 
 public class ChecksumHelper {
 
-    private String chunkHash;
-    private int chunkCount;
-    private File chunk;
+    private final String chunkHash;
+    private final int chunkNumber;
+    private final File chunk;
+
+    public ChecksumHelper(int chunkNumber, String chunkHash, File chunk) {
+        this.chunkNumber = chunkNumber;
+        this.chunk = chunk;
+        this.chunkHash = chunkHash;
+    }
 
     public String getChunkHash() {
         return chunkHash;
     }
 
-    public void setChunkHash(String chunkHash) {
-        this.chunkHash = chunkHash;
-    }
-
-    public int getChunkCount() {
-        return chunkCount;
-    }
-
-    public void setChunkCount(int chunkCount) {
-        this.chunkCount = chunkCount;
+    public int getChunkNumber() {
+        return chunkNumber;
     }
 
     public File getChunk() {
         return this.chunk;
     }
 
-    public void setChunk(File chunk) {
-        this.chunk = chunk;
-    }
 }

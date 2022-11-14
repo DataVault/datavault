@@ -5,23 +5,28 @@ import org.datavaultplatform.common.model.VaultReview;
 import org.datavaultplatform.common.model.dao.VaultReviewDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
+@Transactional
 public class VaultsReviewService {
 
     private static final Logger logger = LoggerFactory.getLogger(VaultsReviewService.class);
 
     // The number of months before review date at which people should be notified.
     // This could be moved into datavault.properties if they keep on changing their minds about the value.
-    private int x = -6;
+    private final int x = -6;
 
-    private VaultReviewDAO vaultReviewDAO;
+    private final VaultReviewDAO vaultReviewDAO;
 
-    public void setVaultReviewDAO(VaultReviewDAO vaultReviewDAO) {
+    @Autowired
+    public VaultsReviewService(VaultReviewDAO vaultReviewDAO) {
         this.vaultReviewDAO = vaultReviewDAO;
     }
 
@@ -45,7 +50,7 @@ public class VaultsReviewService {
     }
 
     public VaultReview getVaultReview(String vaultReviewID) {
-        return vaultReviewDAO.findById(vaultReviewID);
+        return vaultReviewDAO.findById(vaultReviewID).orElse(null);
     }
 
     public List<VaultReview> search(String query) {
@@ -142,5 +147,8 @@ public class VaultsReviewService {
         return false;
     }
 
+    public List<VaultReview> findByVaultId(String vaultId) {
+        return vaultReviewDAO.findByVaultId(vaultId);
+    }
 }
 

@@ -2,11 +2,13 @@ package org.datavaultplatform.common.request;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "TransferVault")
+@Data
 public class TransferVault {
 
     @ApiObjectField(description = "The reason for the vault transfer", required = true)

@@ -1,6 +1,5 @@
 package org.datavaultplatform.broker.scheduled;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.services.LDAPService;
@@ -13,67 +12,61 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import org.datavaultplatform.common.email.EmailTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-public class CheckForReview {
+@Component
+public class CheckForReview implements ScheduledTask {
+
+    public static final String EMAIL_VAULT_NAME = "vault-name";
+    public static final String EMAIL_VAULT_ID = "vault-id";
+    public static final String EMAIL_VAULT_REVIEW_DATE = "vault-review-date";
+    public static final String EMAIL_RETENTION_POLICY_EXPIRY_DATE = "retention-policy-expiry-date";
+    public static final String EMAIL_GROUP_NAME = "group-name";
+    public static final String EMAIL_HOME_PAGE = "home-page";
+    public static final String EMAIL_HELP_PAGE = "help-page";
+    public static final String EMAIL_HELP_MAIL = "help-mail";
+    public static final String EMAIL_VAULT_REVIEW_LINK = "vault-review-link";
 
     private static final Logger log = LoggerFactory.getLogger(CheckForReview.class);
 
-    private VaultsService vaultsService;
-    private VaultsReviewService vaultsReviewService;
-    private DepositsReviewService depositsReviewService;
-    private LDAPService LDAPService;
-    private EmailService emailService;
-    private RolesAndPermissionsService rolesAndPermissionsService;
-    private UsersService usersService;
+    private final VaultsService vaultsService;
+    private final VaultsReviewService vaultsReviewService;
+    private final DepositsReviewService depositsReviewService;
+    private final LDAPService LDAPService;
+    private final EmailService emailService;
+    private final RolesAndPermissionsService rolesAndPermissionsService;
+    private final UsersService usersService;
 
-    private String homeUrl;
-    private String helpUrl;
-    private String helpMail;
+    private final String homeUrl;
+    private final String helpUrl;
+    private final String helpMail;
 
-    public void setVaultsService(VaultsService vaultsService) {
+    @Autowired
+    public CheckForReview(VaultsService vaultsService, VaultsReviewService vaultsReviewService,
+        DepositsReviewService depositsReviewService,
+        org.datavaultplatform.common.services.LDAPService ldapService, EmailService emailService,
+        RolesAndPermissionsService rolesAndPermissionsService, UsersService usersService,
+        @Value("${home.page}") String homeUrl,
+        @Value("${help.page}") String helpUrl,
+        @Value("${help.mail}") String helpMail) {
         this.vaultsService = vaultsService;
-    }
-
-    public void setVaultsReviewService(VaultsReviewService vaultsReviewService) {
         this.vaultsReviewService = vaultsReviewService;
-    }
-
-    public void setDepositsReviewService(DepositsReviewService depositsReviewService) {
         this.depositsReviewService = depositsReviewService;
-    }
-
-    public void setLDAPService(LDAPService LDAPService) {
-        this.LDAPService = LDAPService;
-    }
-
-    public void setEmailService(EmailService emailService) {
+        LDAPService = ldapService;
         this.emailService = emailService;
-    }
-
-    public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
         this.rolesAndPermissionsService = rolesAndPermissionsService;
-    }
-
-    public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
-    }
-
-    public void setHomeUrl(String homeUrl) {
         this.homeUrl = homeUrl;
-    }
-
-    public void setHelpUrl(String helpUrl) {
         this.helpUrl = helpUrl;
-    }
-
-    public void setHelpMail(String helpMail) {
         this.helpMail = helpMail;
     }
 
 
-    @Scheduled(cron = "${review.schedule}")
-    public void checkAll() throws Exception {
+    @Scheduled(cron = ScheduledUtils.SCHEDULE_4_REVIEW)
+    public void execute() throws Exception {
 
         Date start = new Date();
         log.info("Initiating check of Vaults for review at " + start);
@@ -96,19 +89,19 @@ public class CheckForReview {
 
                 // Now bash on with the emailing.
 
-                HashMap<String, Object> model = new HashMap<String, Object>();
-                model.put("vault-name", vault.getName());
-                model.put("vault-id", vault.getID());
-                model.put("vault-review-date", dateToString(vault.getReviewDate()));
-                model.put("retention-policy-expiry-date", dateToString(vault.getRetentionPolicyExpiry()));
-                model.put("group-name", vault.getGroup().getName());
-                model.put("home-page", homeUrl);
-                model.put("help-page", helpUrl);
-                model.put("help-mail", helpMail);
-                model.put("vault-review-link", homeUrl+ "/admin/vaults/" + vault.getID() + "/reviews");
+                HashMap<String, Object> model = new HashMap<>();
+                model.put(EMAIL_VAULT_NAME, vault.getName());
+                model.put(EMAIL_VAULT_ID, vault.getID());
+                model.put(EMAIL_VAULT_REVIEW_DATE, dateToString(vault.getReviewDate()));
+                model.put(EMAIL_RETENTION_POLICY_EXPIRY_DATE, dateToString(vault.getRetentionPolicyExpiry()));
+                model.put(EMAIL_GROUP_NAME, vault.getGroup().getName());
+                model.put(EMAIL_HOME_PAGE, homeUrl);
+                model.put(EMAIL_HELP_PAGE, helpUrl);
+                model.put(EMAIL_HELP_MAIL, helpMail);
+                model.put(EMAIL_VAULT_REVIEW_LINK, homeUrl+ "/admin/vaults/" + vault.getID() + "/reviews");
 
                 // Email the support team
-                emailService.sendTemplateMail(helpMail, "DataVault Vault needing reviewed", "review-due-support.vm", model);
+                emailService.sendTemplateMail(helpMail, "DataVault Vault needing reviewed", EmailTemplate.REVIEW_DUE_SUPPORT, model);
                 
                 /*
                 The following code is really old school and should be replaced with Streams and Lambdas,
@@ -125,7 +118,7 @@ public class CheckForReview {
                         User user = usersService.getUser(roleAssignment.getUserId());
                         if (!LDAPService.getLDAPAttributes(user.getID()).isEmpty()) {
                             // User still appears to be at the Uni
-                            emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching (action required) ", "review-due-owner.vm", model);
+                            emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching (action required) ", EmailTemplate.REVIEW_DUE_OWNER, model);
                             ownerFound = true;
                         }
                     }
@@ -139,7 +132,7 @@ public class CheckForReview {
                             User user = usersService.getUser(roleAssignment.getUserId());
                             if (!LDAPService.getLDAPAttributes(user.getID()).isEmpty()) {
                                 // User still appears to be at the Uni
-                                emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching ", "review-due-data-manager.vm", model);
+                                emailService.sendTemplateMail(user.getEmail(), "[Edinburgh DataVault] Your vault’s review date is approaching ", EmailTemplate.REVIEW_DUE_DATA_MANAGER, model);
                             }
                         }
                     }

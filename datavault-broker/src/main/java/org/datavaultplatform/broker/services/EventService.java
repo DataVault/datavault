@@ -3,13 +3,23 @@ package org.datavaultplatform.broker.services;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.model.dao.EventDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
+@Transactional
 public class EventService {
 
-    private EventDAO eventDAO;
-    
+    private final EventDAO eventDAO;
+
+    @Autowired
+    public EventService(EventDAO eventDAO) {
+        this.eventDAO = eventDAO;
+    }
+
     public List<Event> getEvents() {
         return eventDAO.list();
     }
@@ -23,14 +33,10 @@ public class EventService {
     }
     
     public Event getEvent(String eventID) {
-        return eventDAO.findById(eventID);
+        return eventDAO.findById(eventID).orElse(null);
     }
-    
-    public void setEventDAO(EventDAO eventDAO) {
-        this.eventDAO = eventDAO;
-    }
-    
-    public int count() { return eventDAO.count(); }
+
+    public long count() { return eventDAO.count(); }
 
     public List<Event> findVaultEvents(Vault vault) {
         return eventDAO.findVaultEvents(vault);

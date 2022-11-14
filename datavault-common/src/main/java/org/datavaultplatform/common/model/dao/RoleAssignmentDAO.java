@@ -1,38 +1,23 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.RoleAssignment;
-
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
+import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.dao.custom.RoleAssignmentCustomDAO;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface RoleAssignmentDAO {
+@Repository
+@Transactional
+public interface RoleAssignmentDAO
+    extends AbstractDAO<RoleAssignment,Long>, RoleAssignmentCustomDAO {
 
-    boolean roleAssignmentExists(RoleAssignment roleAssignment);
+  @Override
+  @EntityGraph(RoleAssignment.EG_ROLE_ASSIGNMENT)
+  Optional<RoleAssignment> findById(Long id);
 
-    void store(RoleAssignment roleAssignment);
-
-    RoleAssignment find(Long id);
-
-    Set<Permission> findUserPermissions(String userId);
-
-    List<RoleAssignment> findAll();
-
-    List<RoleAssignment> findBySchoolId(String schoolId);
-
-    List<RoleAssignment> findByVaultId(String vaultId);
-
-    List<RoleAssignment> findByPendingVaultId(String vaultId);
-
-    List<RoleAssignment> findByUserId(String userId);
-
-    List<RoleAssignment> findByRoleId(Long roleId);
-
-    boolean hasPermission(String userId, Permission permission);
-
-    boolean isAdminUser(String userId);
-
-    void update(RoleAssignment roleAssignment);
-
-    void delete(Long id);
+  @Override
+  @EntityGraph(RoleAssignment.EG_ROLE_ASSIGNMENT)
+  List<RoleAssignment> findAll();
 }

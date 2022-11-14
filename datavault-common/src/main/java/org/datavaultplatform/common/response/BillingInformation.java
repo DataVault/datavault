@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
 
+import lombok.Data;
 import org.datavaultplatform.common.model.PendingVault;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
@@ -12,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "BillingInfo")
+@Data
 public class BillingInformation {
     
     @ApiObjectField(description = "The unique identifier for this vault")

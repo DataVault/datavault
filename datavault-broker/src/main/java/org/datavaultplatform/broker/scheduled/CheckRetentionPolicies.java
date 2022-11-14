@@ -5,6 +5,7 @@ import org.datavaultplatform.common.model.Vault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
@@ -13,18 +14,19 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by stuartlewis on 01/06/2016.
  */
-public class CheckRetentionPolicies {
+@Component
+public class CheckRetentionPolicies implements ScheduledTask {
 
-    private VaultsService vaultsService;
-
-    public void setVaultsService(VaultsService vaultsService) {
-        this.vaultsService = vaultsService;
-    }
+    private final VaultsService vaultsService;
 
     private static final Logger log = LoggerFactory.getLogger(CheckRetentionPolicies.class);
 
-    @Scheduled(cron = "${cron.expression}")
-    public void checkAll() throws Exception {
+    public CheckRetentionPolicies(VaultsService vaultsService) {
+        this.vaultsService = vaultsService;
+    }
+
+    @Scheduled(cron = ScheduledUtils.SCHEDULE_5_RETENTION_CHECK)
+    public void execute() {
         // Start the check
         Date start = new Date();
         log.info("Initiating check of retention policies at " + start);

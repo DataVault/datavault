@@ -8,7 +8,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * User: Robin Taylor
@@ -21,7 +20,7 @@ public class RestAuthenticationSuccessHandler implements AuthenticationSuccessHa
     private static final Logger logger = LoggerFactory.getLogger(RestAuthenticationSuccessHandler.class);
 
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
-            throws IOException, ServletException {
+            throws ServletException {
 
         logger.debug("Authentication success!");
     }

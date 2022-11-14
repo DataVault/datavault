@@ -1,0 +1,10 @@
+{
+  "file1": "filetype1",
+  "file2": "filetype2",
+
+  "item1.pdf" : "application/pdf",
+  "item3.pdf" : "application/x-pdf",
+
+  "item4.pdf" : "application/pdf",
+  "item6.pdf" : "application/x-pdf"
+}

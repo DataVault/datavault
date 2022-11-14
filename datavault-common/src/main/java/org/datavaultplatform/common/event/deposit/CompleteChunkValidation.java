@@ -5,9 +5,8 @@ import org.datavaultplatform.common.event.Event;
 
 @Entity
 public class CompleteChunkValidation extends Event {
-    CompleteChunkValidation() {
-
-    };
+    public CompleteChunkValidation() {
+    }
 
     public CompleteChunkValidation(String jobId, String depositId, String type, int chunkNum) {
         super("Chunk " + chunkNum + " validation finished - (" + type + ")");

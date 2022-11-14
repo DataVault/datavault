@@ -9,12 +9,25 @@ import org.jsondoc.core.annotation.ApiObject;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import org.hibernate.Hibernate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "VaultReview")
 @Entity
 @Table(name="VaultReviews")
+@NamedEntityGraph(
+    name=VaultReview.EG_VAULT_REVIEW,
+    attributeNodes = @NamedAttributeNode(value = VaultReview_.VAULT, subgraph = "subVault"),
+    subgraphs = @NamedSubgraph(name="subVault", attributeNodes = {
+        @NamedAttributeNode(Vault_.DATASET),
+        @NamedAttributeNode(Vault_.GROUP),
+        @NamedAttributeNode(Vault_.RETENTION_POLICY),
+        @NamedAttributeNode(Vault_.USER)
+    }))
 public class VaultReview {
+
+    public static final String EG_VAULT_REVIEW = "eg.VaultReview.1";
 
     // VaultReview Identifier
     @Id
@@ -124,5 +137,22 @@ public class VaultReview {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+            return false;
+        }
+        VaultReview that = (VaultReview) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

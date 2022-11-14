@@ -1,18 +1,22 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.PermissionModel;
-
-import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import org.datavaultplatform.common.model.PermissionModel;
+import org.datavaultplatform.common.model.dao.custom.PermissionCustomDAO;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface PermissionDAO {
+@Repository
+@Transactional
+public interface PermissionDAO extends BaseDAO<PermissionModel>, PermissionCustomDAO {
 
-    void synchronisePermissions();
+  @Override
+  @EntityGraph(PermissionModel.EG_PERMISSION_MODEL)
+  Optional<PermissionModel> findById(String id);
 
-    PermissionModel find(Permission permission);
-
-    Collection<PermissionModel> findAll();
-
-    List<PermissionModel> findByType(PermissionModel.PermissionType type);
+  @Override
+  @EntityGraph(PermissionModel.EG_PERMISSION_MODEL)
+  List<PermissionModel> findAll();
 }

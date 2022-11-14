@@ -1,17 +1,21 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
+import java.util.Optional;
 import org.datavaultplatform.common.model.Job;
- 
-public interface JobDAO {
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-    public void save(Job job);
-    
-    public void update(Job job);
-    
-    public List<Job> list();
+@Repository
+@Transactional
+public interface JobDAO extends BaseDAO<Job> {
 
-    public Job findById(String Id);
+  @Override
+  @EntityGraph(Job.EG_JOB)
+  Optional<Job> findById(String id);
 
-    public int count();
+  @Override
+  @EntityGraph(Job.EG_JOB)
+  List<Job> findAll();
 }

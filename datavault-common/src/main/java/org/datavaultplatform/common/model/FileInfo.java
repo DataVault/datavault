@@ -1,8 +1,10 @@
 package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.ToString;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@ToString
 public class FileInfo {
 
     private String key;

@@ -1,9 +1,9 @@
 package org.datavaultplatform.worker.operations;
 
 import org.apache.commons.io.FileUtils;
+import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.UpdateProgress;
 import org.datavaultplatform.common.io.Progress;
-import org.datavaultplatform.worker.queue.EventSender;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,12 +16,12 @@ public class ProgressTracker implements Runnable {
     private static final int SLEEP_INTERVAL_MS = 250;
     private boolean active = true;
     private long lastByteCount = 0;
-    private long expectedBytes = 0;
+    private final long expectedBytes;
     
-    Progress progress;
-    String jobId;
-    String depositId;
-    EventSender eventSender;
+    private final Progress progress;
+    private final String jobId;
+    private final String depositId;
+    private final EventSender eventSender;
     
     private static final Logger logger = LoggerFactory.getLogger(ProgressTracker.class);
     
@@ -61,7 +61,7 @@ public class ProgressTracker implements Runnable {
         
         if (byteCount != lastByteCount) {
             
-            // Calcuate the transfer rate and the estimate time remaining
+            // Calculate the transfer rate and the estimate time remaining
             long msElapsed = (eventTime - startTime);
             double secondsElapsed = (double)msElapsed / 1000.0;
             long bytesPerSec = 0;

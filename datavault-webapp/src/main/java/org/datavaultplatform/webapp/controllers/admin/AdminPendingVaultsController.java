@@ -17,31 +17,33 @@ import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.services.UserLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Controller
+@ConditionalOnBean(RestService.class)
 public class AdminPendingVaultsController {
 
 	private static final Logger logger = LoggerFactory.getLogger(AdminPendingVaultsController.class);
 
 	private static final int MAX_RECORDS_PER_PAGE = 10;
 
-    private RestService restService;
-    private UserLookupService userLookupService;
+    private final RestService restService;
+    private final UserLookupService userLookupService;
+    private final ForceLogoutService forceLogoutService;
 
-    private ForceLogoutService forceLogoutService;
-    
-    public void setRestService(RestService restService) {
+    @Autowired
+    public AdminPendingVaultsController(RestService restService, UserLookupService userLookupService, ForceLogoutService forceLogoutService) {
         this.restService = restService;
-    }
-
-    public void setUserLookupService(UserLookupService userLookupService) {
         this.userLookupService = userLookupService;
-    }
-
-    public void setForceLogoutService(ForceLogoutService forceLogoutService) {
         this.forceLogoutService = forceLogoutService;
     }
 
@@ -203,7 +205,6 @@ public class AdminPendingVaultsController {
         restService.deletePendingVault(cv.getPendingID());
         forceLogoutService.logoutVaultUsers(cv);
         String vaultUrl = "/vaults/" + newVault.getID() + "/";
-
         return "redirect:" + vaultUrl;
     }
     

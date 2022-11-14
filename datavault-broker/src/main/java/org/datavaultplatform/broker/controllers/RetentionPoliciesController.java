@@ -1,15 +1,13 @@
 package org.datavaultplatform.broker.controllers;
 
+import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
 import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.RetentionPoliciesService;
 import org.datavaultplatform.common.model.RetentionPolicy;
-import org.datavaultplatform.common.model.User;
-import org.datavaultplatform.common.request.CreateRetentionPolicy;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -21,20 +19,18 @@ import java.util.List;
 @RestController
 public class RetentionPoliciesController {
     
-    private RetentionPoliciesService retentionPoliciesService;
-    private AdminService adminService;
-    
-    public void setRetentionPoliciesService(RetentionPoliciesService retentionPoliciesService) {
-        this.retentionPoliciesService = retentionPoliciesService;
-    }
+    private final RetentionPoliciesService retentionPoliciesService;
+    private final AdminService adminService;
 
-    public void setAdminService(AdminService adminService) {
+    public RetentionPoliciesController(RetentionPoliciesService retentionPoliciesService,
+        AdminService adminService) {
+        this.retentionPoliciesService = retentionPoliciesService;
         this.adminService = adminService;
     }
 
-    @RequestMapping(value = "/retentionpolicies", method = RequestMethod.GET)
-    public List<RetentionPolicy> getPolicies(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                             @RequestHeader(value = "X-Client-Key", required = true) String clientKey) {
+    @GetMapping("/retentionpolicies")
+    public List<RetentionPolicy> getPolicies(@RequestHeader(HEADER_USER_ID) String userID,
+                                             @RequestHeader(HEADER_CLIENT_KEY) String clientKey) {
         return retentionPoliciesService.getRetentionPolicies();
     }
 

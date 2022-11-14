@@ -1,267 +1,122 @@
 package org.datavaultplatform.worker.queue;
 
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.QueueingConsumer;
-import java.io.IOException;
-import java.nio.file.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeoutException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.common.io.FileUtils;
-
-import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Context.AESMode;
+import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.worker.WorkerInstance;
+import org.datavaultplatform.worker.rabbit.MessageInfo;
+import org.datavaultplatform.worker.rabbit.MessageProcessor;
+import org.datavaultplatform.worker.tasks.Deposit;
+import org.datavaultplatform.worker.utils.DepositEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * A class to review messages from the message queue then process them.
  */
-public class Receiver {
+public class Receiver implements MessageProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(Receiver.class);
 
-    private String queueServer;
-    private String queueName;
-    private String queueUser;
-    private String queuePassword;
-    private String tempDir;
-    private String metaDir;
-    private Boolean chunkingEnabled;
-    private Long chunkingByteSize;
-    private Boolean encryptionEnabled;
-    private String vaultAddress;
-    private String vaultToken;
-    private String vaultKeyPath;
-    private String vaultKeyName;
-    private String vaultSslPEMPath;
-    AESMode encryptionMode = AESMode.GCM;
-    private Boolean multipleValidationEnabled;
-    private int noChunkThreads;
+    private final String tempDir;
+    private final String metaDir;
+    private final boolean chunkingEnabled;
+    private final long chunkingByteSize;
+    private final boolean encryptionEnabled;
+    private final AESMode  encryptionMode;
+    private final boolean multipleValidationEnabled;
+    private final int noChunkThreads;
 
-    /**
-     * Set the queue server
-     * @param queueServer the queueServer value
-     */
-    public void setQueueServer(String queueServer) {
-        this.queueServer = queueServer;
-    }
+    private final RecordingEventSender eventSender;
 
-    /**
-     * Set the queue name
-     * @param queueName the queueName value
-     */
-    public void setQueueName(String queueName) {
-        this.queueName = queueName;
-    }
+    public Receiver(
+        String tempDir,
+        String metaDir,
 
-    /**
-     * Set the queue user
-     * @param queueUser the queueUser value
-     */
-    public void setQueueUser(String queueUser) {
-        this.queueUser = queueUser;
-    }
+        boolean chunkingEnabled,
+        String chunkingByteSize,
 
-    /**
-     * Set the queue password
-     * @param queuePassword the queuePassword value
-     */
-    public void setQueuePassword(String queuePassword) {
-        this.queuePassword = queuePassword;
-    }
+        boolean encryptionEnabled,
+        String encryptionMode,
 
-    /**
-     * Set the temp dir
-     * @param tempDir the tempDir value
-     */
-    public void setTempDir(String tempDir) {
+        boolean multipleValidationEnabled,
+        int noChunkThreads,
+
+        RecordingEventSender eventSender) {
         this.tempDir = tempDir;
-    }
-    
-    /**
-     * Set the meta dir
-     * @param metaDir the metaDir value
-     */
-    public void setMetaDir(String metaDir) {
         this.metaDir = metaDir;
-    }
-
-    /**
-     * Define if archived tar file is chunked
-     * @param chunkingEnabled true or false
-     */
-    public void setChunkingEnabled(Boolean chunkingEnabled) {
         this.chunkingEnabled = chunkingEnabled;
-    }
+        this.chunkingByteSize = FileUtils.parseFormattedSizeToBytes(chunkingByteSize);
 
-    /**
-     * Define the size of each chunks
-     * @param chunkingByteSize true or false
-     */
-    public void setChunkingByteSize(String chunkingByteSize) {
-        long bytes = FileUtils.parseFormattedSizeToBytes(chunkingByteSize);
-        this.chunkingByteSize = bytes;
-    }
-
-    /**
-     * Define if should perform encryption before archiving
-     * @param encryptionEnabled true or false
-     */
-    public void setEncryptionEnabled(Boolean encryptionEnabled) {
         this.encryptionEnabled = encryptionEnabled;
-    }
+        this.encryptionMode = AESMode.valueOf(encryptionMode);
 
-    /**
-     * Define the AES mode for the encryption
-     * @param encryptionMode true or false
-     */
-    public void setEncryptionMode(String encryptionMode) { this.encryptionMode = AESMode.valueOf(encryptionMode); }
-    
-    /**
-     * @return Encryiption mode
-     */
-    public AESMode getEncryptionMode() { return encryptionMode; }
-    
-    /**
-     * @return true if encryption is enabled, false otherwise
-     */
-    public Boolean isEncryptionEnabled() { return encryptionEnabled; }
-    
-    /**
-     * @return HarshiCorp Vault server address
-     */
-    public String getVaultAddress() {
-        return vaultAddress;
-    }
-    
-    /**
-     * Define HarshiCorp Vault server address
-     */
-    public void setVaultAddress(String vaultAddress) {
-        this.vaultAddress = vaultAddress;
-    }
-    
-    /**
-     * @return HarshiCorp Vault Token ID
-     */
-    public String getVaultToken() {
-        return vaultToken;
-    }
-    
-    /**
-     * Define HarshiCorp Vault Token ID
-     */
-    public void setVaultToken(String vaultToken) {
-        this.vaultToken = vaultToken;
-    }
-    
-    public String getVaultKeyPath() {
-        return vaultKeyPath;
-    }
-
-    public void setVaultKeyPath(String vaultKeyPath) {
-        this.vaultKeyPath = vaultKeyPath;
-    }
-
-    public String getVaultKeyName() {
-        return vaultKeyName;
-    }
-
-    public void setVaultKeyName(String vaultKeyName) {
-        this.vaultKeyName = vaultKeyName;
-    }
-
-    public String getVaultSslPEMPath() {
-        return vaultSslPEMPath;
-    }
-
-    public void setVaultSslPEMPath(String sslPEMPath) {
-        this.vaultSslPEMPath = sslPEMPath;
-    }
-
-    public Boolean isMultipleValidationEnabled() {
-        return this.multipleValidationEnabled;
-    }
-
-    public void setMultipleValidationEnabled(Boolean multipleValidationEnabled) {
         this.multipleValidationEnabled = multipleValidationEnabled;
-    }
-
-    public int getNoChunkThreads() { return this.noChunkThreads; }
-
-    public void setNoChunkThreads(int noChunkThreads) {
         this.noChunkThreads = noChunkThreads;
+        this.eventSender = eventSender;
     }
 
-    /**
-     * Setup a connection to the queue then wait for messages to arrive.  When we recieve a message delivery
-     * work out the type of task, check if it is a redelivery then complete the task.
-     * 
-     * To complete the task we set up a tmp dir then perform the tasks action (I'm not sure this is actually 
-     * implemented atm afaics perform action is empty and insn't overridden)
-     * 
-     * Once the task is complete we clean up and acknowledge the message
-     * 
-     * @param events an EventSender object
-     * @throws IOException if an IOException occurs
-     * @throws InterruptedException if an InterruptedException occurs to a thread
-     * @throws TimeoutException if a thread times out
-     */
-    public void receive(EventSender events) throws IOException, InterruptedException, TimeoutException {
+    @Override
+    public boolean processMessage(MessageInfo messageInfo) {
+        try {
+            eventSender.clear();
+            return processMessageInternal(messageInfo);
+        } finally {
+            List<Event> events = eventSender.getEvents();
 
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(queueServer);
-        factory.setUsername(queueUser);
-        factory.setPassword(queuePassword);
-        
-        Connection connection = factory.newConnection();
-        Channel channel = connection.createChannel();
+            generateRetrieveMessageForDeposit(messageInfo, events, new File("/tmp/retrieve"), "retDir");
 
-        // Allow for priority messages so that a shutdown message can be prioritised if required.
-        Map<String, Object> args = new HashMap<String, Object>();
-        args.put("x-max-priority", 2);
-        
-        channel.queueDeclare(queueName, true, false, false, args);
-        logger.info("Waiting for messages");
-        
-        QueueingConsumer consumer = new QueueingConsumer(channel);
-
-        channel.basicQos(1);
-        channel.basicConsume(queueName, false, consumer);
-
-        while (true) {
-            QueueingConsumer.Delivery delivery = consumer.nextDelivery();
-            String message = new String(delivery.getBody());
-            
-            // Note that the message body might contain keys/credentials
-            logger.info("Received " + message.length() + " bytes");
-            logger.info("Received message body '" + message + "'");
-
-            if (message.compareToIgnoreCase("shutdown") == 0) {
-                channel.basicQos(0);
-                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-                logger.info("Shutdown message received, exiting");
-                System.exit(0);
+            if (logger.isTraceEnabled()) {
+                logger.trace("events send by worker: {}", events);
             }
+        }
+    }
+
+    private void generateRetrieveMessageForDeposit(MessageInfo messageInfo, List<Event> events, File retrieveBaseDir, String retrievePath ) {
+        try {
+            String message = messageInfo.getValue();
+            Task task = new ObjectMapper().readValue(message, Task.class);
+            if (!"org.datavaultplatform.worker.tasks.Deposit".equals(task.getTaskClass())) {
+                return;
+            }
+            Deposit deposit = new ObjectMapper().readValue(message, Deposit.class);
+            DepositEvents de = new DepositEvents(deposit, events);
+            String retrieveMessage = de.generateRetrieveMessage(retrieveBaseDir, retrievePath);
+            logger.info("retrieveMessageForDeposit {}", retrieveMessage);
+        } catch(Exception ex) {
+            logger.warn("Failed to generate retrieveMessageForDeposit", ex);
+        }
+    }
+
+    private boolean processMessageInternal(MessageInfo messageInfo) {
+            long start = System.currentTimeMillis();
+            String message = messageInfo.getValue();
 
             // Decode and begin the job ...
-            Path tempDirPath = null;
+            Path tempDirPath;
             try {
                 ObjectMapper mapper = new ObjectMapper();
+
+                String json = mapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(mapper.readTree(message));
+                logger.info("messageId[{}] json[{}]", messageInfo.getId(), json);
+
                 Task commonTask = mapper.readValue(message, Task.class);
                 
                 Class<?> clazz = Class.forName(commonTask.getTaskClass());
-                Task concreteTask = (Task)(mapper.readValue(message, clazz));
+                Task concreteTask = (Task) mapper.readValue(message, clazz);
 
                 // Is the message a redelivery?
-                if (delivery.getEnvelope().isRedeliver()) {
+                if (messageInfo.getIsRedeliver()) {
                     concreteTask.setIsRedeliver(true);
                 }
 
@@ -274,13 +129,19 @@ public class Receiver {
                     logger.debug("Normal using default temp dir");
                     tempDirPath = Paths.get(tempDir, WorkerInstance.getWorkerName());
                 }
-                logger.debug("The temp dir:" + tempDirPath.toString());
+                logger.debug("The temp dir:" + tempDirPath);
                 tempDirPath.toFile().mkdir();
                 
                 Path metaDirPath = Paths.get(metaDir);
-                
+
+                String vaultAddress = null;
+                String vaultToken = null;
+                String vaultKeyName = null;
+                String vaultKeyPath = null;
+                String vaultSslPEMPath = null;
+
                 Context context = new Context(
-                        tempDirPath, metaDirPath, events,
+                        tempDirPath, metaDirPath, eventSender,
                         chunkingEnabled, chunkingByteSize,
                         encryptionEnabled, encryptionMode, 
                         vaultAddress, vaultToken, 
@@ -290,11 +151,21 @@ public class Receiver {
 
                 // Clean up the temporary directory (if success if failure we need it for retries)
                 FileUtils.deleteDirectory(tempDirPath.toFile());
-            } catch (Exception e) {
-                logger.error("Error decoding message", e);
+            } catch (Exception ex) {
+                logger.error("Error processing message[{}]", messageInfo, ex);
+            } finally {
+                long diff = System.currentTimeMillis() - start;
+                logger.info("Finished Processing message[{}]. Took [{}]secs",
+                    messageInfo, TimeUnit.MILLISECONDS.toSeconds(diff));
             }
 
-            channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+            return false;
         }
+
+    public boolean isEncryptionEnabled() {
+        return encryptionEnabled;
+    }
+    public AESMode getEncryptionMode() {
+        return this.encryptionMode;
     }
 }

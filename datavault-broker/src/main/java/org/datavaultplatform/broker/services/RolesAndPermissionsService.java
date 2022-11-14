@@ -4,46 +4,41 @@ import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.PermissionDAO;
 import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
 import org.datavaultplatform.common.model.dao.RoleDAO;
-import org.datavaultplatform.common.model.dao.UserDAO;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
-public class RolesAndPermissionsService implements ApplicationListener<ContextRefreshedEvent> {
+@Service
+@Transactional
+public class RolesAndPermissionsService {
     private final Logger logger = LoggerFactory.getLogger(RolesAndPermissionsService.class);
 
-    private RoleDAO roleDao;
+    private final RoleDAO roleDao;
 
-    private PermissionDAO permissionDao;
+    private final PermissionDAO permissionDao;
 
-    private RoleAssignmentDAO roleAssignmentDao;
+    private final RoleAssignmentDAO roleAssignmentDao;
 
-    private UsersService usersService;
+    private final UsersService usersService;
 
-    public void setRoleDao(RoleDAO roleDao) {
+    @Autowired
+    public RolesAndPermissionsService(RoleDAO roleDao, PermissionDAO permissionDao,
+        RoleAssignmentDAO roleAssignmentDao, UsersService usersService) {
         this.roleDao = roleDao;
-    }
-
-    public void setPermissionDao(PermissionDAO permissionDao) {
         this.permissionDao = permissionDao;
-    }
-
-    public void setUsersService(UsersService usersService) { this.usersService = usersService; }
-
-    public void setRoleAssignmentDao(RoleAssignmentDAO roleAssignmentDao) {
         this.roleAssignmentDao = roleAssignmentDao;
+        this.usersService = usersService;
     }
 
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+    public void initialiseRolesAndPermissions() {
         permissionDao.synchronisePermissions();
         roleDao.storeSpecialRoles();
     }
@@ -56,12 +51,12 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
             throw new IllegalStateException("Cannot create a role with reserved role name: " + role.getName());
         }
         validateRolePermissions(role);
-        roleDao.store(role);
+        roleDao.save(role);
         return role;
     }
 
     private boolean roleExists(Long roleId) {
-        return roleId != null && roleDao.find(roleId) != null;
+        return roleId != null && roleDao.findById(roleId).isPresent();
     }
 
     private void validateRolePermissions(RoleModel role) {
@@ -78,7 +73,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
     public RoleAssignment createRoleAssignment(RoleAssignment roleAssignment) {
         validateRoleAssignment(roleAssignment);
         logger.debug("Got past the rolesandpermissionsservice validation");
-        roleAssignmentDao.store(roleAssignment);
+        roleAssignmentDao.save(roleAssignment);
         return roleAssignment;
     }
 
@@ -110,7 +105,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
     }
 
     public RoleModel getRole(long id) {
-        return roleDao.find(id);
+        return roleDao.findById(id).orElse(null);
     }
 
     public RoleModel getIsAdmin() {
@@ -150,7 +145,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
     }
 
     public RoleAssignment getRoleAssignment(long id) {
-        return roleAssignmentDao.find(id);
+        return roleAssignmentDao.findById(id).orElse(null);
     }
 
     public List<RoleAssignment> getRoleAssignmentsForSchool(String schoolId) {
@@ -279,7 +274,7 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
     }
 
     public RoleAssignment updateRoleAssignment(RoleAssignment roleAssignment) {
-        RoleAssignment original = roleAssignmentDao.find(roleAssignment.getId());
+        RoleAssignment original = roleAssignmentDao.findById(roleAssignment.getId()).orElse(null);
         if (original == null) {
             throw new IllegalStateException("Cannot update a role assignment that does not exist");
         }
@@ -294,13 +289,13 @@ public class RolesAndPermissionsService implements ApplicationListener<ContextRe
         if (!roleExists(roleId)) {
             throw new IllegalStateException("Cannot delete a role that does not exist");
         }
-        roleDao.delete(roleId);
+        roleDao.deleteById(roleId);
     }
 
     public void deleteRoleAssignment(Long roleAssignmentId) {
-        if (roleAssignmentDao.find(roleAssignmentId) == null) {
-            throw new IllegalStateException("Cannot delete a role assignment that does not exist");
-        }
-        roleAssignmentDao.delete(roleAssignmentId);
+        roleAssignmentDao.findById(roleAssignmentId).orElseThrow(() ->
+            new IllegalStateException("Cannot delete a role assignment that does not exist")
+        );
+        roleAssignmentDao.deleteById(roleAssignmentId);
     }
 }

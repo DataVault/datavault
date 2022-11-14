@@ -1,3 +1,4 @@
+<!-- TODO redundant - leaving here for comparison -->
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://java.sun.com/xml/ns/javaee"
          xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"

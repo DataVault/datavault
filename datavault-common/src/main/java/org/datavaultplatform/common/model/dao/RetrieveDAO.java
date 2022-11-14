@@ -1,24 +1,23 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.Retrieve;
-
 import java.util.List;
+import java.util.Optional;
+import org.datavaultplatform.common.model.Retrieve;
+import org.datavaultplatform.common.model.dao.custom.RetrieveCustomDAO;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface RetrieveDAO {
+@Repository
+@Transactional
+public interface RetrieveDAO extends BaseDAO<Retrieve>, RetrieveCustomDAO {
 
-    public void save(Retrieve retrieve);
-    
-    public void update(Retrieve retrieve);
-    
-    public List<Retrieve> list(String userId);
+  @Override
+  @EntityGraph(Retrieve.EG_RETRIEVE)
+  Optional<Retrieve> findById(String id);
 
-    public Retrieve findById(String Id);
+  @Override
+  @EntityGraph(Retrieve.EG_RETRIEVE)
+  List<Retrieve> findAll();
 
-    public int count(String userId);
-
-    public int inProgressCount(String userId);
-
-    public List<Retrieve> inProgress();
-
-    public int queueCount(String userId);
 }

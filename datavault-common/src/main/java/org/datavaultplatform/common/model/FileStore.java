@@ -2,15 +2,36 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.hibernate.annotations.GenericGenerator;
-
-import javax.persistence.*;
 import java.util.HashMap;
+import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
+import javax.persistence.Table;
+import org.hibernate.Hibernate;
+import org.hibernate.annotations.GenericGenerator;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="FileStores")
-public class FileStore {
+@NamedEntityGraph(
+    name = FileStore.EG_FILE_STORE,
+    attributeNodes = @NamedAttributeNode(value = FileStore_.USER, subgraph = "subUser"),
+    subgraphs = {
+        @NamedSubgraph(name = "subUser", attributeNodes = {
+            @NamedAttributeNode(value = User_.FILE_STORES)
+        })
+    }
+)
+public class FileStore implements DataStore {
+
+    public static final String EG_FILE_STORE = "eg.FileStore.1";
 
     // Storage Identifier
     @Id
@@ -30,7 +51,8 @@ public class FileStore {
     // Properties to use for this storage system
     // NOTE: this is not a secure mechanism for storing credentials!
     @Lob
-    private HashMap<String,String> properties;
+    @Column(name="properties", columnDefinition="LONGBLOB")
+    private HashMap<String,String> properties = new HashMap<>();
     
     @JsonIgnore
     @ManyToOne
@@ -69,5 +91,21 @@ public class FileStore {
     
     public void setUser(User user) {
         this.user = user;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+            return false;
+        }
+        FileStore fileStore = (FileStore) o;
+        return id != null && Objects.equals(id, fileStore.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

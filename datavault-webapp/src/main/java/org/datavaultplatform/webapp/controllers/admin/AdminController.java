@@ -5,6 +5,7 @@ import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.webapp.model.AdminDashboardPermissionsModel;
 import org.datavaultplatform.webapp.services.PermissionsService;
 import org.datavaultplatform.webapp.services.RestService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -12,17 +13,16 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 
 @Controller
+@ConditionalOnBean(RestService.class)
 public class AdminController {
 
-    private RestService restService;
+    private final RestService restService;
 
-    private PermissionsService permissionsService;
+    private final PermissionsService permissionsService;
 
-    public void setRestService(RestService restService) {
+    public AdminController(RestService restService,
+        PermissionsService permissionsService) {
         this.restService = restService;
-    }
-
-    public void setPermissionsService(PermissionsService permissionsService) {
         this.permissionsService = permissionsService;
     }
 

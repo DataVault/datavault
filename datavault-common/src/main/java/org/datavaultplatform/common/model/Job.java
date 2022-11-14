@@ -6,11 +6,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
 import javax.persistence.Table;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -19,12 +24,23 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 import org.datavaultplatform.common.event.Event;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="Jobs")
+@NamedEntityGraph(
+    name=Job.EG_JOB,
+    attributeNodes = @NamedAttributeNode(value = Job_.DEPOSIT, subgraph = "subDeposit"),
+    subgraphs = @NamedSubgraph(name="subDeposit", attributeNodes = {
+        @NamedAttributeNode(Deposit_.USER),
+        @NamedAttributeNode(Deposit_.VAULT)
+    })
+)
 public class Job {
+
+    public static final String EG_JOB = "eg.Job.1";
 
     // Job Identifier
     @Id
@@ -56,6 +72,8 @@ public class Job {
     private String taskClass;
     
     // State information will be supplied by the worker task at run time
+    @Lob
+    @Column(name="states", columnDefinition="TINYBLOB")
     private ArrayList<String> states = new ArrayList<>();
     private Integer state = null;
     
@@ -72,15 +90,16 @@ public class Job {
     @Column(columnDefinition = "TEXT")
     private String errorMessage;
     
-    public Job() {};
+    public Job() {}
+
     public Job(String taskClass) {
         this.taskClass = taskClass;
     }
     
     public String getID() { return id; }
     
-    public long getVersion() { return version; };
-    
+    public long getVersion() { return version; }
+
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
@@ -155,5 +174,21 @@ public class Job {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+            return false;
+        }
+        Job job = (Job) o;
+        return id != null && Objects.equals(id, job.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

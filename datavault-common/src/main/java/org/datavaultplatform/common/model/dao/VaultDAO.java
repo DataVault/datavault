@@ -1,32 +1,39 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
-
+import java.util.Optional;
 import org.datavaultplatform.common.model.Vault;
- 
-public interface VaultDAO {
+import org.datavaultplatform.common.model.Vault_;
+import org.datavaultplatform.common.model.dao.custom.VaultCustomDAO;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-    public void save(Vault vault);
-    
-    public void update(Vault vault);
-    
-    public void saveOrUpdateVault(Vault vault);
+@Repository
+@Transactional
+public interface VaultDAO extends BaseDAO<Vault>, VaultCustomDAO {
 
-    public List<Vault> list();
+  @Override
+  @EntityGraph(Vault.EG_VAULT)
+  default List<Vault> list() {
+    return findAll(Sort.by(Order.asc(Vault_.CREATION_TIME)));
+  }
 
-    public List<Vault> list(String userId, String sort, String order, String offset, String maxResult);
+  default void saveOrUpdateVault(Vault vault){
+    save(vault);
+  }
 
-    public Vault findById(String Id);
+  @Override
+  @EntityGraph(Vault.EG_VAULT)
+  List<Vault> findAll();
 
-    public List<Vault> search(String userId, String query, String sort, String order, String offset, String maxResult);
+  @Override
+  @EntityGraph(Vault.EG_VAULT)
+  List<Vault> findAll(Sort sort);
 
-    public int count(String userId);
-
-    public int getRetentionPolicyCount(int status);
-
-	public int getTotalNumberOfVaults(String userId);
-
-	public int getTotalNumberOfVaults(String userId, String query);
-	
-	public List<Object[]> getAllProjectsSize();
+  @Override
+  @EntityGraph(Vault.EG_VAULT)
+  Optional<Vault> findById(String id);
 }

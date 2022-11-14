@@ -1,14 +1,15 @@
 package org.datavaultplatform.worker.tasks;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Error;
+import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.InitStates;
 import org.datavaultplatform.common.event.UpdateProgress;
 import org.datavaultplatform.common.event.delete.DeleteComplete;
@@ -18,13 +19,13 @@ import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.operations.FileSplitter;
 import org.datavaultplatform.worker.operations.ProgressTracker;
-import org.datavaultplatform.worker.queue.EventSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Delete extends Task{
+public class Delete extends Task {
 
 	private static final Logger logger = LoggerFactory.getLogger(Delete.class);
     private String archiveId = null;
@@ -33,45 +34,44 @@ public class Delete extends Task{
     private int numOfChunks = 0;
     
     private String depositId = null;
-    private String bagID = null;
-    private long archiveSize = 0;
-    private EventSender eventStream = null;
-    // Maps the model ArchiveStore Id to the storage equivalent
-    HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
+  private long archiveSize = 0;
+    private EventSender eventSender = null;
+    // Maps the model ArchiveStore ID to the storage equivalent
+    private final HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
     
     @Override
     public void performAction(Context context) {
         
-        this.eventStream = (EventSender)context.getEventStream();
+        this.eventSender = context.getEventSender();
         logger.info("Delete job - performAction()");
         Map<String, String> properties = getProperties();
-        this.depositId = properties.get("depositId");
-        this.bagID = properties.get("bagId");
-        this.userID = properties.get("userId");
-        this.numOfChunks = Integer.parseInt(properties.get("numOfChunks"));
-        this.archiveSize = Long.parseLong(properties.get("archiveSize"));
+        this.depositId = properties.get(PropNames.DEPOSIT_ID);
+        String bagID = properties.get(PropNames.BAG_ID);
+        this.userID = properties.get(PropNames.USER_ID);
+        this.numOfChunks = Integer.parseInt(properties.get(PropNames.NUM_OF_CHUNKS));
+        this.archiveSize = Long.parseLong(properties.get(PropNames.ARCHIVE_SIZE));
 
         if (this.isRedeliver()) {
-            eventStream.send(new Error(this.jobID, this.depositId, "Delete stopped: the message had been redelivered, please investigate")
+            eventSender.send(new Error(this.jobID, this.depositId, "Delete stopped: the message had been redelivered, please investigate")
                 .withUserId(this.userID));
             return;
         }
         
         this.initStates();
         
-        logger.info("bagID: " + this.bagID);
+        logger.info("bagID: " + bagID);
         
         //userStores = this.setupUserFileStores();
         this.setupArchiveFileStores();
         
         try {
-        	String tarFileName = this.bagID + ".tar";
+        	String tarFileName = bagID + ".tar";
         	Path tarPath = context.getTempDir().resolve(tarFileName);
             File tarFile = tarPath.toFile();
-            eventStream.send(new DeleteStart(this.jobID, this.depositId).withNextState(0)
+            eventSender.send(new DeleteStart(this.jobID, this.depositId).withNextState(0)
                     .withUserId(this.userID));
             
-            eventStream.send(new UpdateProgress(this.jobID, this.depositId, 0, this.archiveSize, "Deposit delete started ...")
+            eventSender.send(new UpdateProgress(this.jobID, this.depositId, 0, this.archiveSize, "Deposit delete started ...")
                     .withUserId(this.userID));
             for (String archiveStoreId : archiveStores.keySet() ) {
                 ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
@@ -85,13 +85,13 @@ public class Delete extends Task{
                 }
             }
             
-            eventStream.send(new DeleteComplete(this.jobID, this.depositId).withNextState(1)
+            eventSender.send(new DeleteComplete(this.jobID, this.depositId).withNextState(1)
                     .withUserId(this.userID));
             
         } catch (Exception e) {
             String msg = "Deposit delete failed: " + e.getMessage();
             logger.error(msg, e);
-            eventStream.send(new Error(jobID, depositId, msg)
+            eventSender.send(new Error(jobID, depositId, msg)
                 .withUserId(userID));
             throw new RuntimeException(e);
         }
@@ -101,7 +101,7 @@ public class Delete extends Task{
     	ArrayList<String> states = new ArrayList<>();
         states.add("Deleting from archive"); // 0
         states.add("Delete complete");  // 1
-        eventStream.send(new InitStates(this.jobID, this.depositId, states)
+        eventSender.send(new InitStates(this.jobID, this.depositId, states)
             .withUserId(userID));		
 	}
     
@@ -110,16 +110,15 @@ public class Delete extends Task{
     	// Connect to the archive storage(s). Look out! There are two classes called archiveStore.
     	for (org.datavaultplatform.common.model.ArchiveStore archiveFileStore : archiveFileStores ) {
     		try {
-    			Class<?> clazz = Class.forName(archiveFileStore.getStorageClass());
-	            Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-	            Object instance = constructor.newInstance(archiveFileStore.getStorageClass(), archiveFileStore.getProperties());
-	
-	            archiveStores.put(archiveFileStore.getID(), (ArchiveStore)instance);
-	
-    		} catch (Exception e) {
+          ArchiveStore archiveStore = StorageClassUtils.createStorage(
+              archiveFileStore.getStorageClass(),
+              archiveFileStore.getProperties(),
+              ArchiveStore.class);
+          archiveStores.put(archiveFileStore.getID(), archiveStore);
+        } catch (Exception e) {
     			String msg = "Deposit failed: could not access archive filesystem : " + archiveFileStore.getStorageClass();
 	            logger.error(msg, e);
-	            eventStream.send(new Error(this.jobID, this.depositId, msg).withUserId(this.userID));
+	            eventSender.send(new Error(this.jobID, this.depositId, msg).withUserId(this.userID));
 	            throw new RuntimeException(e);
 	        }
     	}
@@ -128,7 +127,7 @@ public class Delete extends Task{
     private void deleteMultipleCopiesFromArchiveStorage(Context context, Device archiveFs, String tarFileName, File tarFile) throws Exception {
 
         Progress progress = new Progress();
-        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventStream);
+        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventSender);
         Thread trackerThread = new Thread(tracker);
         trackerThread.start();
         logger.info("deleteMultipleCopiesFromArchiveStorage for deposit : {}",this.depositId);
@@ -160,7 +159,7 @@ public class Delete extends Task{
     
     private void deleteFromArchiveStorage(Context context, Device archiveFs, String tarFileName, File tarFile) throws Exception {
             Progress progress = new Progress();
-            ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventStream);
+            ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventSender);
             Thread trackerThread = new Thread(tracker);
             trackerThread.start();
 

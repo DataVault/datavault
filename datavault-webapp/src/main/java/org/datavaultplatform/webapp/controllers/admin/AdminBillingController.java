@@ -1,7 +1,6 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -13,6 +12,8 @@ import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -27,6 +28,7 @@ import org.supercsv.prefs.CsvPreference;
 
 
 @Controller
+@ConditionalOnBean(RestService.class)
 public class AdminBillingController {
 
 
@@ -34,9 +36,10 @@ public class AdminBillingController {
 
 	private static final int MAX_RECORDS_PER_PAGE = 10;
 
-    private RestService restService;
+    private final RestService restService;
 
-    public void setRestService(RestService restService) {
+    @Autowired
+    public AdminBillingController(RestService restService) {
         this.restService = restService;
     }
 
@@ -97,9 +100,9 @@ public class AdminBillingController {
         String headerValue = "attachment; filename=\"billing.csv\"";
         response.setHeader(headerKey, headerValue);
 
-        String[] header = { "Vault name","Vault Size","Project Id","Project Size","Amount To Be Billed","Amount Billed", "User Name", "Review Date","Creation Time" };
+        String[] header = { "Vault name", "Vault Size","Project Id","Project Size","Amount To Be Billed","Amount Billed", "User Name", "Review Date","Creation Time" };
 
-        String[] fieldMapping = { "name","sizeStr","projectId","projectSize","amountToBeBilled","amountBilled",  "userName","reviewDate", "CreationTime" };
+        String[] fieldMapping = { "name",  "sizeStr","projectId","projectSize","amountToBeBilled","amountBilled",  "userName","reviewDate", "CreationTime" };
 
         try {
             // uses the Super CSV API to generate CSV data from the model data
@@ -116,8 +119,7 @@ public class AdminBillingController {
             csvWriter.close();
 
         } catch (Exception e){
-            logger.error("IOException: "+e);
-            e.printStackTrace();
+            logger.error("Unexpected Exception",e);
         }
     }
     
@@ -155,7 +157,7 @@ public class AdminBillingController {
     public String updateBillingDetails(ModelMap model,           
             @ModelAttribute("billingDetails") BillingInformation billingDetails         
             ) throws Exception {
-    	 System.out.println("-----------getBudgetCode---------"+billingDetails.getBudgetCode());
+    	 logger.info("-----------getBudgetCode---------"+billingDetails.getBudgetCode());
     	restService.updateBillingInfo(billingDetails.getVaultID(),billingDetails);
     	//return "admin/billing/billingDetails";
         return this.getBillingInfoPage(billingDetails.getBillingType());

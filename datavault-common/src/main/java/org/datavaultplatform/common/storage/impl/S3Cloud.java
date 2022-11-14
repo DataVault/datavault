@@ -25,12 +25,12 @@ import java.util.Map;
 public class S3Cloud extends Device implements ArchiveStore {
 
 	private static final Logger logger = LoggerFactory.getLogger(S3Cloud.class);
-	private static String defaultBucketName = "datavault-test-bucket-edina";
+	private static final String defaultBucketName = "datavault-test-bucket-edina";
 	// Regions.EU_WEST_1 returns EU_WEST_1 even if you lower case _ is still wrong
-	private static String defaultRegionName = "eu-west-1";
-	public Verify.Method verificationMethod = Verify.Method.CLOUD;
-	private TransferManager transferManager;
-	private String bucketName;
+	private static final String defaultRegionName = "eu-west-1";
+	public final Verify.Method verificationMethod = Verify.Method.CLOUD;
+	private final TransferManager transferManager;
+	private final String bucketName;
 
 	public S3Cloud(String name, Map<String, String> config) {
 		super(name, config);
@@ -65,7 +65,7 @@ public class S3Cloud extends Device implements ArchiveStore {
     }
 
 	@Override
-	public long getUsableSpace() throws Exception {
+	public long getUsableSpace() {
 		throw new UnsupportedOperationException();
 	}
 	

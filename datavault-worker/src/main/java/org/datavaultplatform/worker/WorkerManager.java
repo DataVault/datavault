@@ -1,5 +1,6 @@
 package org.datavaultplatform.worker;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecuteResultHandler;
 import org.apache.commons.exec.DefaultExecutor;
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * This class handles the start up and monitoring of the required number of Worker instances.  The number of instances
+ * This class handles the start-up and monitoring of the required number of Worker instances.  The number of instances
  * comes from the datavault.properties file (I think).
  * 
  * Each started Worker instance is killed if the Worker Manager fails.
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
  * We output a warning if an instance of a Workers fails to respond which then appears to trigger the exiting of the entire
  * WorkerManager
  */
+@Slf4j
 public class WorkerManager {
 
     private String numberOfWorkers;
@@ -71,9 +73,8 @@ public class WorkerManager {
      * Start the required number of Worker instances
      * @return A list of DefaultExecuteResultHandler objects (one for each instance)
      * @throws IOException if an IOException occurs
-     * @throws InterruptedException if an InterruptedException occurs to a thread
      */
-    private List<DefaultExecuteResultHandler> startWorkers() throws IOException, InterruptedException {
+    private List<DefaultExecuteResultHandler> startWorkers() throws IOException {
         List<DefaultExecuteResultHandler> resultHandlers = new ArrayList<>();
         int i = 0;
         while (i < Integer.parseInt(numberOfWorkers)) {
@@ -89,9 +90,8 @@ public class WorkerManager {
      * manager is killed.
      * @return The instances DefaultExecuteResultHandler object
      * @throws IOException if an IOException occurs
-     * @throws InterruptedException if an InterruptedException occurs to a thread
      */
-    private DefaultExecuteResultHandler startWorker() throws IOException, InterruptedException {
+    private DefaultExecuteResultHandler startWorker() throws IOException {
         CommandLine cmdLine = new CommandLine("java");
         cmdLine.addArgument("-cp");
         cmdLine.addArgument("datavault-worker-1.0-SNAPSHOT-jar:./*");
@@ -111,18 +111,17 @@ public class WorkerManager {
 
     /**
      * Iterate over each result handler and check if any have stopped.  If none have sleep then repeat.
-     * If one has stopped output a message to system out (I've just noticed this goes to system.out and not a log
+     * If one has stopped output a message to system out (I've just noticed this goes to 'System.out' and not a log)
      * then exit the method (which in turn appears to exit the whole app).
      * @param resultHandlers A list of DefaultExecuteResultHandler objects one for each Worker instance
-     * @throws IOException if an IOException occurs
      * @throws InterruptedException if an InterruptedException occurs to a thread
      */
-    private void checkResultHandlers(List<DefaultExecuteResultHandler> resultHandlers) throws IOException, InterruptedException {
+    private void checkResultHandlers(List<DefaultExecuteResultHandler> resultHandlers) throws InterruptedException {
         while (true) {
             for (DefaultExecuteResultHandler resultHandler : resultHandlers) {
                 if (resultHandler.hasResult()) {
                     // todo : what should I usefully do in this event?
-                    System.out.println("A handler has failed with exit value " + resultHandler.getExitValue());
+                    log.info("A handler has failed with exit value " + resultHandler.getExitValue());
                     return;
                 }
             }

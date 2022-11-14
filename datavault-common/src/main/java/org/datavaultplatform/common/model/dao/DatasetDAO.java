@@ -1,15 +1,28 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
+import java.util.Optional;
 import org.datavaultplatform.common.model.Dataset;
- 
-public interface DatasetDAO {
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-    public void save(Dataset dataset);
-    
-    public void update(Dataset dataset);
-    
-    public List<Dataset> list();
+@Repository
+@Transactional
+public interface DatasetDAO extends BaseDAO<Dataset> {
 
-    public Dataset findById(String Id);
+  @Override
+  @EntityGraph(Dataset.EG_DATASET)
+  default List<Dataset> list() {
+    return findAll();
+  }
+
+  @Override
+  @EntityGraph(Dataset.EG_DATASET)
+  Optional<Dataset> findById(String id);
+
+  @Override
+  @EntityGraph(Dataset.EG_DATASET)
+  List<Dataset> findAll();
+
 }

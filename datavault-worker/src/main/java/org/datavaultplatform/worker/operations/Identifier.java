@@ -6,40 +6,39 @@ import java.util.HashMap;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.mime.MediaType;
 
 /**
- * A set of methods to indentify file / directory types
+ * A set of methods to identify file / directory types
  */
+@Slf4j
 public class Identifier {
     
     /**
      * Identify the type of the passed in file
      * @param file The file we want to identify
-     * @return The MediaType or null if an exception occured
+     * @return The MediaType or null if an exception occurred
      */
     public static String detectFile(File file) {
-        InputStream is = null;
         try {
             TikaConfig tika = new TikaConfig();
             Metadata metadata = new Metadata();
-            metadata.set(Metadata.RESOURCE_NAME_KEY, file.toString());
-            is = TikaInputStream.get(file);
-            MediaType mediaType = tika.getDetector().detect(is, metadata);
-            return mediaType.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            if (is != null) {
-                try { is.close(); } catch (Exception e) {}
+            metadata.set(TikaCoreProperties.RESOURCE_NAME_KEY, file.toString());
+            try (InputStream is = TikaInputStream.get(file.toPath())) {
+                MediaType mediaType = tika.getDetector().detect(is, metadata);
+                return mediaType.toString();
             }
+        } catch (Exception e) {
+            log.error("unexpected exception", e);
+            return null;
         }
     }
-    
+
     /**
      * Identify the types of the files in a passed in directory, the method calls itself if the top level dir contains other dirs.
      * @param basePath The base dir path
@@ -48,10 +47,7 @@ public class Identifier {
      */
     private static void detectDirectory(Path basePath, Path path, HashMap<String, String> result) {
         
-        DirectoryStream<Path> stream = null;
-        
-        try {
-            stream = Files.newDirectoryStream(path);
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)){
 
             for (Path entry : stream) {
                 
@@ -67,11 +63,7 @@ public class Identifier {
             }
             
         } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (stream != null) {
-                try { stream.close(); } catch (Exception e) {}
-            }
+            log.error("unexpected exception", e);
         }
     }
     

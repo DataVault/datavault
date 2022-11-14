@@ -1,13 +1,17 @@
 package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+import java.util.Objects;
 import javax.persistence.*;
+import org.hibernate.Hibernate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="Permissions")
+@NamedEntityGraph(name=PermissionModel.EG_PERMISSION_MODEL)
 public class PermissionModel {
+
+    public static final String EG_PERMISSION_MODEL = "eg.PermissionModel.1";
 
     public enum PermissionType {
         SCHOOL,
@@ -20,7 +24,7 @@ public class PermissionModel {
     private String id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "permission", unique = true, nullable = false, columnDefinition = "TEXT")
+    @Column(name = "permission", unique = true, nullable = false, columnDefinition = "TEXT" )
     private Permission permission;
 
     @Column(name = "label", nullable = false, columnDefinition = "TEXT")
@@ -96,5 +100,21 @@ public class PermissionModel {
             default:
                 return false;
         }
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+            return false;
+        }
+        PermissionModel that = (PermissionModel) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

@@ -1,7 +1,6 @@
 package org.datavaultplatform.common.event.deposit;
 
 import javax.persistence.Entity;
-import javax.persistence.Table;
 import org.datavaultplatform.common.event.Event;
 
 @Entity
@@ -10,7 +9,8 @@ public class ComputedDigest extends Event {
     public String digest;
     public String digestAlgorithm;
     
-    ComputedDigest() {};
+    public ComputedDigest() {
+    }
     public ComputedDigest(String jobId, String depositId, String digest, String digestAlgorithm) {
         super(digestAlgorithm + ": " + digest);
         this.eventClass = ComputedDigest.class.getCanonicalName();

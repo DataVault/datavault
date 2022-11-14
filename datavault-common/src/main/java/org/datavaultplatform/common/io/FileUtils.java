@@ -1,7 +1,10 @@
 package org.datavaultplatform.common.io;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import org.springframework.util.Assert;
 
 /**
  * This Class is an extension of {@link org.apache.commons.io.FileUtils} to add some util features required for the
@@ -9,7 +12,7 @@ import java.text.DecimalFormat;
  */
 public class FileUtils extends org.apache.commons.io.FileUtils {
     
-    public static char[] units = new char[] { 'K','M','G','T' };
+    public static final char[] units = new char[] { 'K','M','G','T' };
 
 
     /**
@@ -61,4 +64,45 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
         df.setRoundingMode(RoundingMode.HALF_EVEN);
         return df.format(gibibytes) + " GB";
     }
+
+
+    public static void checkFileExists(File file, boolean createIfMissing) throws IOException {
+        Assert.isTrue(file != null, () -> "The file cannot be null");
+        if (file.exists() == false) {
+            if (!createIfMissing) {
+                throw new IllegalArgumentException(String.format("The file [%s] does not exist", file));
+            }
+            file.createNewFile();
+        }
+        Assert.isTrue(file.isFile(),
+            () -> String.format("[%s] is not a file", file));
+
+        Assert.isTrue(file.canRead(),
+            () -> String.format("The file [%s] is not readable", file));
+        Assert.isTrue(file.canWrite(),
+            () -> String.format("The file [%s] is not writable", file));
+
+    }
+
+    public static void checkDirectoryExists(File dir) {
+        checkDirectoryExists(dir, false);
+    }
+
+    public static void checkDirectoryExists(File dir, boolean createIfMissing) {
+        Assert.isTrue(dir != null, () -> "The directory cannot be null");
+        if (dir.exists() == false) {
+            if (!createIfMissing) {
+                throw new IllegalArgumentException(String.format("The directory [%s] does not exist", dir));
+            }
+            Assert.isTrue(dir.mkdir(), () -> String.format("Failed to create directory [%s]", dir));
+        }
+        Assert.isTrue(dir.isDirectory(),
+            () -> String.format("[%s] is not a directory", dir));
+
+        Assert.isTrue(dir.canRead(),
+            () -> String.format("The directory [%s] is not readable", dir));
+        Assert.isTrue(dir.canWrite(),
+            () -> String.format("The directory [%s] is not writable", dir));
+    }
+
 }

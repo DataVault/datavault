@@ -6,7 +6,8 @@ import org.datavaultplatform.common.event.Event;
 @Entity
 public class PackageComplete extends Event {
     
-    PackageComplete() {};
+    public PackageComplete() {
+    }
     public PackageComplete(String jobId, String depositId) {
         super("Packaging completed");
         this.eventClass = PackageComplete.class.getCanonicalName();

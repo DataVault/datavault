@@ -1,13 +1,14 @@
 package org.datavaultplatform.broker.services;
 
 
-import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.PendingVaultDAO;
 import org.datavaultplatform.common.request.CreateVault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -15,42 +16,46 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
+@Transactional
 public class PendingVaultsService {
-	private final Logger logger = LoggerFactory.getLogger(PendingVaultsService.class);
+
+    public static final String EMAIL_VAULT_NAME = "vault-name";
+    public static final String EMAIL_GROUP_NAME = "group-name";
+    public static final String EMAIL_SUBMITTER_ID = "submitter-id";
+    public static final String EMAIL_TIMESTAMP = "timestamp";
+
+	  private final Logger logger = LoggerFactory.getLogger(PendingVaultsService.class);
 	
-    private PendingVaultDAO pendingVaultDAO;
-    private GroupsService groupsService;
-    private RetentionPoliciesService retentionPoliciesService;
-    private UsersService usersService;
-    private EmailService emailService;
-    private RolesAndPermissionsService permissionsService;
-    private PendingDataCreatorsService pendingDataCreatorsService;
-    private VaultsService vaultsService;
-    private String helpMail;
+    private final PendingVaultDAO pendingVaultDAO;
+    private final GroupsService groupsService;
+    private final RetentionPoliciesService retentionPoliciesService;
+    private final UsersService usersService;
+    private final RolesAndPermissionsService permissionsService;
+    private final PendingDataCreatorsService pendingDataCreatorsService;
 
-    public void setPendingVaultDAO(PendingVaultDAO pendingVaultDAO) {
+    private final VaultsService vaultsService;
+    private final EmailService emailService;
+    private final String helpMail;
+
+    @Autowired
+    public PendingVaultsService(PendingVaultDAO pendingVaultDAO, GroupsService groupsService,
+        RetentionPoliciesService retentionPoliciesService, UsersService usersService,
+        RolesAndPermissionsService permissionsService,
+        PendingDataCreatorsService pendingDataCreatorsService, VaultsService vaultsService,
+        EmailService emailService, @Value("${help.mail}") String helpMail) {
         this.pendingVaultDAO = pendingVaultDAO;
-    }
-    
-    public void setVaultsService(VaultsService vaultsService) {
+        this.groupsService = groupsService;
+        this.retentionPoliciesService = retentionPoliciesService;
+        this.usersService = usersService;
+        this.permissionsService = permissionsService;
+        this.pendingDataCreatorsService = pendingDataCreatorsService;
         this.vaultsService = vaultsService;
+        this.emailService = emailService;
+        this.helpMail = helpMail;
     }
-
-    public void setRetentionPoliciesService(RetentionPoliciesService retentionPoliciesService) { this.retentionPoliciesService = retentionPoliciesService; }
-
-    public void setGroupsService(GroupsService groupsService) { this.groupsService = groupsService; }
-
-    public void setEmailService(EmailService emailService) { this.emailService = emailService; }
-
-    public void setHelpMail(String helpMail) { this.helpMail = helpMail; }
-
-    public void setUsersService(UsersService usersService) { this.usersService = usersService; }
-
-    public void setRolesAndPermissionsService(RolesAndPermissionsService permissionsService) { this.permissionsService = permissionsService; }
-
-    public void setPendingDataCreatorsService(PendingDataCreatorsService pendingDataCreatorsService) { this.pendingDataCreatorsService = pendingDataCreatorsService; }
-
     public void addOrUpdatePendingVault(PendingVault vault) {
         Date d = new Date();
         vault.setCreationTime(d);
@@ -82,7 +87,7 @@ public class PendingVaultsService {
         pendingVaultDAO.deleteById(id);
     }
     public PendingVault getPendingVault(String vaultID) {
-        return pendingVaultDAO.findById(vaultID);
+        return pendingVaultDAO.findById(vaultID).orElse(null);
     }
     
     public int getTotalNumberOfPendingVaults(String userId, String confirmed) {
@@ -143,7 +148,7 @@ public class PendingVaultsService {
         List<String> depositors = createVault.getDepositors();
         if (depositors != null) {
             for (String dep: depositors) {
-                if (dep != null && !dep.isEmpty()) {
+                if (dep != null && ! dep.isEmpty()) {
                     RoleAssignment ra = new RoleAssignment();
                     ra.setPendingVaultId(pendingVaultId);
                     ra.setRole(permissionsService.getDepositor());
@@ -199,7 +204,7 @@ public class PendingVaultsService {
         List<String> dcs = createVault.getDataCreators();
         if (dcs != null) {
             logger.debug("Data creator list is :'" + dcs + "'");
-            List<PendingDataCreator> creators = new ArrayList();
+            List<PendingDataCreator> creators = new ArrayList<>();
             for (String creator : dcs) {
                 if (creator != null && !creator.isEmpty()) {
                     PendingDataCreator dc = new PendingDataCreator();
@@ -226,7 +231,7 @@ public class PendingVaultsService {
 
         String pendingId = createVault.getPendingID();
         logger.debug("Pending ID is: '" + pendingId + "'");
-        if (pendingId != null && !pendingId.isEmpty()) {
+        if (pendingId != null && ! pendingId.isEmpty()) {
             // this vault has previously been saved mid completion
             vault.setId(pendingId);
         }
@@ -352,16 +357,13 @@ public class PendingVaultsService {
             }
         }
 
-        // this the creator of the pending vault not necessarily 
-        // the prospective owner.
+        // this the creator of the pending vault not necessarily the prospective owner
         User user = usersService.getUser(userID);
         if (user == null) {
-        	logger.error("User '" + userID + "' does not exist");
-        	throw new Exception("User '" + userID + "' does not exist");
+            logger.error("User '" + userID + "' does not exist");
+            throw new Exception("User '" + userID + "' does not exist");
         }
         vault.setUser(user);
-        
-        
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         String grantEndDate = (createVault.getBillingGrantEndDate() != null &&
                 !createVault.getBillingGrantEndDate().isEmpty()) ? createVault.getBillingGrantEndDate() : createVault.getGrantEndDate();
@@ -424,11 +426,11 @@ public class PendingVaultsService {
 
         logger.info("Sending pending vault submitted email");
         HashMap<String, Object> model = new HashMap<>();
-        model.put("vault-name", vault.getName());
-        model.put("group-name", vault.getGroup().getName());
-        model.put("submitter-id", vault.getUser().getID());
+        model.put(EMAIL_VAULT_NAME, vault.getName());
+        model.put(EMAIL_GROUP_NAME, vault.getGroup().getName());
+        model.put(EMAIL_SUBMITTER_ID, vault.getUser().getID());
         LocalDate today = LocalDate.now();
-        model.put("timestamp", today);
+        model.put(EMAIL_TIMESTAMP, today);
         this.emailService.sendTemplateMail(this.helpMail, "New Pending Vault Submitted", "group-admin-pv-submitted.vm", model);
     }
 }

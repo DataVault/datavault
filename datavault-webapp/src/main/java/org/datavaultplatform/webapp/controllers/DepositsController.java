@@ -1,20 +1,18 @@
 package org.datavaultplatform.webapp.controllers;
 
 
-import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Retrieve;
 import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.webapp.services.RestService;
-import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.DefaultResponseErrorHandler;
 
-import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -24,11 +22,13 @@ import java.util.UUID;
  */
 
 @Controller
+@ConditionalOnBean(RestService.class)
 public class DepositsController {
 
-    private RestService restService;
+    private final RestService restService;
 
-    public void setRestService(RestService restService) {
+    @Autowired
+    public DepositsController(RestService restService) {
         this.restService = restService;
     }
 

@@ -2,13 +2,20 @@ package org.datavaultplatform.broker.services;
 
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.dao.FileStoreDAO;
-
+import org.springframework.stereotype.Service;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
+@Transactional
 public class FileStoreService {
 
-    private FileStoreDAO fileStoreDAO;
-    
+    private final FileStoreDAO fileStoreDAO;
+
+    public FileStoreService(FileStoreDAO fileStoreDAO) {
+        this.fileStoreDAO = fileStoreDAO;
+    }
+
     public List<FileStore> getFileStores() {
         return fileStoreDAO.list();
     }
@@ -23,15 +30,11 @@ public class FileStoreService {
     }
     
     public FileStore getFileStore(String fileStoreID) {
-        return fileStoreDAO.findById(fileStoreID);
+        return fileStoreDAO.findById(fileStoreID).orElse(null);
     }
 
     public void deleteFileStore(String fileStoreID) {
         fileStoreDAO.deleteById(fileStoreID);
-    }
-    
-    public void setFileStoreDAO(FileStoreDAO fileStoreDAO) {
-        this.fileStoreDAO = fileStoreDAO;
     }
 }
 

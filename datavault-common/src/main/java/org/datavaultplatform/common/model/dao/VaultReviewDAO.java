@@ -1,20 +1,26 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.VaultReview;
-
 import java.util.List;
+import java.util.Optional;
+import org.datavaultplatform.common.model.VaultReview;
+import org.datavaultplatform.common.model.dao.custom.VaultReviewCustomDAO;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface VaultReviewDAO {
+@Repository
+@Transactional
+public interface VaultReviewDAO extends BaseDAO<VaultReview>, VaultReviewCustomDAO {
 
-    public void save(VaultReview vaultReview);
-    
-    public void update(VaultReview vaultReview);
-    
-    public List<VaultReview> list();
+  @Override
+  @EntityGraph(VaultReview.EG_VAULT_REVIEW)
+  Optional<VaultReview> findById(String id);
 
-    public VaultReview findById(String Id);
+  @Override
+  @EntityGraph(VaultReview.EG_VAULT_REVIEW)
+  List<VaultReview> findAll();
 
-    public List<VaultReview> search(String query);
 
-    public int count();
+  @EntityGraph(VaultReview.EG_VAULT_REVIEW)
+  List<VaultReview> findByVaultId(String vaultId);
 }

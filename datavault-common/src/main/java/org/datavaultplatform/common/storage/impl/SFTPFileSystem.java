@@ -1,14 +1,15 @@
 package org.datavaultplatform.common.storage.impl;
 
 import com.jcraft.jsch.*;
+import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.impl.ssh.Utility;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
@@ -20,52 +21,57 @@ import java.util.Vector;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class SFTPFileSystem extends Device implements UserStore {
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(SFTPFileSystem.class);
-
-    private String host = null;
-    private String rootPath = null;
-    private String username = null;
-    private String password = null;
-    private byte[] encPrivateKey = null;
-    private byte[] encIV = null;
-    private String passphrase = null;
+    public static final String STRICT_HOST_KEY_CHECKING = "StrictHostKeyChecking";
+    public static final String NO = "no";
+    private final String host;
+    private final String rootPath;
+    private final String username;
+    private final String password;
+    private final byte[] encPrivateKey;
+    private final byte[] encIV;
+    private final String passphrase;
     
     private Session session = null;
     private ChannelSftp channelSftp = null;
-    private int port;
+    private final int port;
     private final String PATH_SEPARATOR = "/";
     
     private Utility.SFTPMonitor monitor = null;
     private final int RETRIES = 25;
-    
-    public SFTPFileSystem(String name, Map<String,String> config) throws Exception {
+
+    static {
+        JSch.setLogger(JSchLogger.getInstance());
+    }
+
+    public SFTPFileSystem(String name, Map<String,String> config) {
         super(name, config);
 
-        System.out.println("Construct SFTPFileSystem...");
+        log.info("Construct SFTPFileSystem...");
         
         // Unpack the config parameters (in an implementation-specific way)
-        host = config.get("host");
-        port = Integer.parseInt(config.get("port"));
-        rootPath = config.get("rootPath");
-        username = config.get("username");
-        password = config.get("password");
-        System.out.println("casting byte[]...");
+        host = config.get(PropNames.HOST);
+        port = Integer.parseInt(config.get(PropNames.PORT));
+        rootPath = config.get(PropNames.ROOT_PATH);
+        username = config.get(PropNames.USERNAME);
+        password = config.get(PropNames.PASSWORD);
+        log.info("casting byte[]...");
         encPrivateKey = Base64.decode(config.get("privateKey"));
-        encIV = Base64.decode(config.get("iv"));
-        System.out.println("done!");
+        encIV = Base64.decode(config.get(PropNames.IV));
+        log.info("done!");
         passphrase = config.get("passphrase");
-        System.out.println("SFTPFileSystem created...");
+        log.info("SFTPFileSystem created...");
     }
     
-    private void Connect() throws Exception {
+    public void Connect() throws Exception {
         JSch jsch = new JSch();
         session = jsch.getSession(username, host, port);
 
         byte[] privateKey = Encryption.decryptSecret(encPrivateKey, encIV);
 
-        logger.debug("Private Key: "+new String(privateKey));
+        log.debug("Private Key: "+new String(privateKey));
 
         if (password != null && !password.isEmpty()) {
             session.setPassword(password);
@@ -77,18 +83,21 @@ public class SFTPFileSystem extends Device implements UserStore {
         //jsch.setKnownHosts(".../.ssh/known_hosts");
 
         java.util.Properties properties = new java.util.Properties();
-        properties.put("StrictHostKeyChecking", "no");
+        properties.put(STRICT_HOST_KEY_CHECKING, NO);
         session.setConfig(properties);
         for (int i = 0; i < RETRIES; i++) {
+            int attempt = i+1;
             try {
-               logger.info("Sftp connection attempt " + i);
+               log.info("Sftp connection attempt[{}/{}]", attempt, RETRIES);
                session.connect();
                break;
             } catch(JSchException ex) {
                if (i == RETRIES - 1) {
+                   log.error("problem with Jsch attempt[{}/{}]", attempt, RETRIES, ex);
                    throw ex;
+               } else {
+                   log.warn("problem with Jsch attempt[{}/{}]", attempt, RETRIES, ex);
                }
-               continue;
             }
         }
         
@@ -128,28 +137,30 @@ public class SFTPFileSystem extends Device implements UserStore {
             
             byte[] tmp = new byte[1024];
             StringBuilder response = new StringBuilder();
-            
+
             while(true) {
-                while(in.available() > 0) {
-                int i = in.read(tmp, 0, 1024);
-                if (i < 0) {
-                    break;
+                while (in.available() > 0) {
+                    int i = in.read(tmp, 0, 1024);
+                    if (i < 0) {
+                        break;
+                    }
+                    response.append(new String(tmp, 0, i));
                 }
-                response.append(new String(tmp, 0, i));
-            }
-        
-            if (channelExec.isClosed()) {
-                if (in.available() > 0) continue; 
-                    System.out.println("exit-status: " + channelExec.getExitStatus());
+
+                if (channelExec.isClosed()) {
+                    if (in.available() > 0) {
+                        continue;
+                    }
+                    log.info("exit-status: " + channelExec.getExitStatus());
                     break;
                 }
             }
             
-            System.out.println("response: " + response);
+            log.info("response: " + response);
             return response.toString();
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception", e);
             throw e;
         } finally {
             if (channelExec != null) {
@@ -167,10 +178,10 @@ public class SFTPFileSystem extends Device implements UserStore {
         try {
             Connect();
             
-            Vector filelist = channelSftp.ls(rootPath + PATH_SEPARATOR + path);
+            Vector<ChannelSftp.LsEntry> filelist = channelSftp.ls(rootPath + PATH_SEPARATOR + path);
             
             for (int i = 0; i < filelist.size(); i++) {
-                ChannelSftp.LsEntry entry = (ChannelSftp.LsEntry)filelist.get(i);
+                ChannelSftp.LsEntry entry = filelist.get(i);
                 
                 if (entry.getFilename().equals(".") ||
                         entry.getFilename().equals("..")) {
@@ -191,7 +202,7 @@ public class SFTPFileSystem extends Device implements UserStore {
             }
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception", e);
         } finally {
             Disconnect();
         }
@@ -217,7 +228,7 @@ public class SFTPFileSystem extends Device implements UserStore {
             return true;
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn(String.format("does not exist[%s]",path), e);
             return false;
         } finally {
             Disconnect();
@@ -245,7 +256,7 @@ public class SFTPFileSystem extends Device implements UserStore {
             }
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception", e);
             throw e;
         } finally {
             Disconnect();
@@ -261,7 +272,7 @@ public class SFTPFileSystem extends Device implements UserStore {
             return attrs.isDir();
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception", e);
             throw e;
         } finally {
             Disconnect();
@@ -290,7 +301,7 @@ public class SFTPFileSystem extends Device implements UserStore {
             return statVFS.getAvailForNonRoot() * 1024; // bytes
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception", e);
             throw e;
         } finally {
             Disconnect();
@@ -320,7 +331,7 @@ public class SFTPFileSystem extends Device implements UserStore {
             Utility.getDir(channelSftp, path, working, attrs, monitor);
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception", e);
             throw e;
         } finally {
             Disconnect();
@@ -362,7 +373,7 @@ public class SFTPFileSystem extends Device implements UserStore {
             Utility.send(channelSftp, working, monitor);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception", e);
             throw e;
         } finally {
             Disconnect();

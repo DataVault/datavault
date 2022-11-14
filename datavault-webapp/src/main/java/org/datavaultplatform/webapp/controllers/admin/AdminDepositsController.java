@@ -1,14 +1,10 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.DepositsData;
-import org.datavaultplatform.common.response.VaultInfo;
-import org.datavaultplatform.common.response.VaultsData;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.DepositChunk;
 import org.datavaultplatform.common.response.AuditChunkStatusInfo;
@@ -16,13 +12,10 @@ import org.datavaultplatform.common.response.AuditInfo;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.prefs.CsvPreference;
@@ -35,17 +28,19 @@ import java.util.*;
  * Date: 27/09/2015
  */
 
+@ConditionalOnBean(RestService.class)
 @Controller
 public class AdminDepositsController {
 
-    private RestService restService;
+    private final RestService restService;
     private static final int DEFAULT_RECORDS_PER_PAGE = 10;
 
-    public void setRestService(RestService restService) {
-        this.restService = restService;
-    }
     private static final Logger logger = LoggerFactory.getLogger(AdminDepositsController.class);
 
+    @Autowired
+    public AdminDepositsController(RestService restService) {
+        this.restService = restService;
+    }
 
     @RequestMapping(value = "/admin/deposits", method = RequestMethod.GET)
     public String getDepositsListing(ModelMap model,
@@ -126,8 +121,7 @@ public class AdminDepositsController {
             csvWriter.close();
 
         } catch (Exception e){
-            logger.error("IOException: "+e);
-            e.printStackTrace();
+            logger.error("Unexpected Exception",e);
         }
     }
 
@@ -172,27 +166,27 @@ public class AdminDepositsController {
         model.addAttribute("sort", sort);
 
         for(AuditInfo audit : audits){
-//            System.out.println("Deposit Map size: "+deposits.size());
-//            System.out.println("Audit: "+audit.getId());
+//            logger.info("Deposit Map size: "+deposits.size());
+//            logger.info("Audit: "+audit.getId());
             List<AuditChunkStatusInfo> auditChunks = audit.getAuditChunks();
 
             for(AuditChunkStatusInfo auditChunk : auditChunks){
-//                System.out.println("Audit Chunk: "+auditChunk.getID());
+//                logger.info("Audit Chunk: "+auditChunk.getID());
                 Deposit deposit = auditChunk.getDeposit();
-//                System.out.println("Deposit: "+deposit.getID());
+//                logger.info("Deposit: "+deposit.getID());
                 Map<String, Object> mapDeposit = new HashMap<>();
                 Optional<Map<String, Object>> result = deposits.stream()
                         .filter(m -> ((Deposit)m.get("deposit")).getID().equals(deposit.getID()))
                         .findAny();
                 if(result.isPresent()){
-//                    System.out.println("Deposit already in map");
+//                    logger.info("Deposit already in map");
                     mapDeposit = result.get();
                 }else{
-//                    System.out.println("Create new deposit for map");
+//                    logger.info("Create new deposit for map");
                     mapDeposit.put("deposit", deposit);
                     List<Map<String, Object>> chunkInfoList = new ArrayList<>();
                     for(DepositChunk depositChunk : deposit.getDepositChunks()){
-//                        System.out.println("\t add deposit chunk: "+depositChunk.getID());
+//                        logger.info("\t add deposit chunk: "+depositChunk.getID());
                         Map<String, Object> chunkInfo = new HashMap<>();
                         chunkInfo.put("deposit_chunk", depositChunk);
                         chunkInfoList.add(chunkInfo);
@@ -208,7 +202,7 @@ public class AdminDepositsController {
                     deposits.add(mapDeposit);
                 }
                 List<Map<String, Object>> chunkInfoList = (List<Map<String, Object>>)mapDeposit.get("chunks_info");
-//                System.out.println("chunkInfoList size: "+chunkInfoList.size());
+//                logger.info("chunkInfoList size: "+chunkInfoList.size());
                 result = chunkInfoList.stream()
                         .filter(m -> ((DepositChunk)m.get("deposit_chunk")).getID()
                                 .equals(auditChunk.getDepositChunk().getID()))
@@ -233,7 +227,7 @@ public class AdminDepositsController {
             }
         }
 
-        System.out.println("Deposits list size: "+deposits.size());
+        logger.info("Deposits list size: "+deposits.size());
 
         model.addAttribute("deposits", deposits);
 

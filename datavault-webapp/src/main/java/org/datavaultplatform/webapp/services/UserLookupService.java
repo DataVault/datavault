@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.services;
 
-import org.apache.commons.lang.RandomStringUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.datavaultplatform.common.model.User;
@@ -15,20 +16,24 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.stereotype.Service;
 
+@Service
+@ConditionalOnBean(RestService.class)
+@Slf4j
 public class UserLookupService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserLookupService.class);
 
-    private LDAPService ldapService;
+    private final LDAPService ldapService;
 
-    private RestService restService;
+    private final RestService restService;
 
-    public void setLdapService(LDAPService ldapService) {
+    @Autowired
+    public UserLookupService(LDAPService ldapService, RestService restService) {
         this.ldapService = ldapService;
-    }
-
-    public void setRestService(RestService restService) {
         this.restService = restService;
     }
 
@@ -36,8 +41,8 @@ public class UserLookupService {
         List<String> result;
         try {
             result = ldapService.autocompleteUID(term);
-        } catch (LdapException | CursorException | IOException ex) {
-            ex.printStackTrace();
+        } catch (LdapException | CursorException ex) {
+            log.error("failed to get UUN from {}", term, ex);
             // A fallback to known users in the Database in case LDAP is not available:
             return Arrays.stream(restService.getUsers())
                     .map(user -> String.format("%s - %s %s",
@@ -57,7 +62,7 @@ public class UserLookupService {
             HashMap<String, String> attributes;
             try {
                 attributes = ldapService.getLdapUserInfo(uun);
-            } catch (LdapException | CursorException | IOException e) {
+            } catch (LdapException | CursorException e) {
                 throw new InvalidUunException(uun, e);
             }
             if (attributes.size() < 1){
@@ -99,7 +104,9 @@ public class UserLookupService {
             }
             
         } catch (Exception e) {
-        	
+        	if(logger.isDebugEnabled()){
+                logger.error("isUUN {}", uun, e);
+            }
         }
     	
     	return exists;

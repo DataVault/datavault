@@ -3,27 +3,28 @@ package org.datavaultplatform.common.event.deposit;
 import java.util.HashMap;
 
 import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.Lob;
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
 import org.datavaultplatform.common.event.Event;
 
 @Entity
-public class ComputedEncryption extends Event {
+public class ComputedEncryption extends Event implements ChunksDigestEvent {
     
     @Column(name="chunkIVs", columnDefinition="LONGBLOB")
-    public HashMap<Integer, byte[]> chunkIVs;
+    private HashMap<Integer, byte[]> chunkIVs = new HashMap<>();
     @Column(name="encChunkDigests", columnDefinition="LONGBLOB")
-    public HashMap<Integer, String> encChunkDigests;
-    public byte[] tarIV;
+    private HashMap<Integer, String> encChunkDigests = new HashMap<>();
+    @Lob
+    @Column(name="tarIV", columnDefinition="TINYBLOB")
+    private byte[] tarIV;
     private String encTarDigest;
     private String aesMode;
     @Column(name="chunksDigest", columnDefinition="LONGBLOB")
-    public HashMap<Integer, String> chunksDigest;
-    public String digestAlgorithm;
+    private HashMap<Integer, String> chunksDigest = new HashMap<>();
+    private String digestAlgorithm;
     
-    ComputedEncryption() {};
+    public ComputedEncryption() {
+    }
     public ComputedEncryption(
             String jobId,
             String depositId,

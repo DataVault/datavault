@@ -1,24 +1,32 @@
 package org.datavaultplatform.common.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+import java.util.Objects;
 import javax.persistence.*;
 
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
-
-import java.util.Date;
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "DepositChunk")
 @Entity
 @Table(name="DepositChunks")
+@NamedEntityGraph(
+    name=DepositChunk.EG_DEPOSIT_CHUNK,
+    attributeNodes = @NamedAttributeNode(value = DepositChunk_.DEPOSIT, subgraph = "subDeposit"),
+    subgraphs = @NamedSubgraph(
+        name="subDeposit",
+        attributeNodes = {
+            @NamedAttributeNode(Deposit_.USER),
+            @NamedAttributeNode(Deposit_.VAULT)
+   })
+)
 public class DepositChunk {
 
+    public static final String EG_DEPOSIT_CHUNK = "eg.DepositChunk.1";
     // Deposit Identifier
     @Id
     @ApiObjectField(description = "Universally Unique Identifier for the Deposit Path", name="Deposit Path")
@@ -101,4 +109,26 @@ public class DepositChunk {
     public Deposit getDeposit() {
         return deposit;
     }
+
+    public void setDeposit(Deposit deposit){
+        this.deposit = deposit;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+            return false;
+        }
+        DepositChunk chunk = (DepositChunk) o;
+        return id != null && Objects.equals(id, chunk.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
 }

@@ -1,0 +1,67 @@
+<html>
+<body>
+<p>
+    The contents of the following vault in the University of Edinburgh DataVault are due to be deleted on the review
+    date, see below. As a Nominated Data Manager we’re notifying you that this vault is up for review. If you wish to
+    extend the time that the dataset in this vault is to be kept, please contact the Research Data Support
+    team ${help-mail} . Do not reply to this email.
+</p>
+
+<ul>
+    <li>Vault name: ${vault-name}</li>
+    <li>School: ${group-name}</li>
+    <li>Vault ID:  ${vault-id}</li>
+    <li>Review date (deadline for review): ${vault-review-date}</li>
+    <li>Research funders Retention Policy expiry date: ${retention-policy-expiry-date}<br/>
+        "(Date before which data should not be deleted, according to the funder retention policy, taking into account
+        any extensions caused by retrievals for external users, if applicable. The expiry date is calculated by adding
+        the minimum number of years to the grant end date. Data may be deleted sooner for overriding reason such as data
+        protection, or if the funder counts the retention period as starting from the data creation date. )" 
+    </li>
+</ul>
+
+<p>
+    Further details and access to the data are available at <a href=${home-page}>${home-page}</a> (use your University
+    login and password).
+</p>
+<p>
+    If you are in a position to confirm that the data can and should be deleted on the review date ${vault-review-date},
+    please email the Research Data Support team to let us know that, at ${help-mail}.
+</p>
+<p>
+    If on the other hand you wish to notify us that some or all of the deposits must be kept beyond the review date,
+    please email the Research Data Support team with the following details:
+    <ul>
+        <li>Which deposits must be kept and which can be deleted;</li>
+        <li>The length of time of the extension / the new review date;</li>
+        <li>How you intend to pay the cost of the extension (from a budget code or from an active grant)</li>
+    </ul>
+</p>
+<p>
+    If you require assistance with the review decision, please request a meeting to discuss this with a member of the
+    Research Data Support team
+</p>
+<p>
+    If we do not hear from you and are unable to reach you for a decision before the review date, we will seek a
+    decision from your Head of School regarding the review of this vault
+</p>
+<p>
+    Further information about the service is available at <a href=${help-page}>${help-page}</a>.
+</p>
+<p>
+    Thank you for using the DataVault and the Research Data Service.
+</p>
+<p>
+    On behalf of the Research Data Support Team
+</p>
+<p>
+    Library and University Collections
+</p>
+<p>
+    <a href="https://www.ed.ac.uk/information-services/research-support/research-data-service/contact">https://www.ed.ac.uk/information-services/research-support/research-data-service/contact</a>
+</p>
+
+</body>
+
+</html>
+

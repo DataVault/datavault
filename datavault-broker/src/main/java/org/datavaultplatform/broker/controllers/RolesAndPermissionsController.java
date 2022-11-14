@@ -1,5 +1,9 @@
 package org.datavaultplatform.broker.controllers;
 
+import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
+import org.datavaultplatform.common.email.EmailTemplate;
 import org.datavaultplatform.broker.services.*;
 import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
 import org.datavaultplatform.common.event.roles.DeleteRoleAssignment;
@@ -9,6 +13,8 @@ import org.jsondoc.core.annotation.Api;
 import org.jsondoc.core.annotation.ApiMethod;
 import org.jsondoc.core.annotation.ApiPathParam;
 import org.jsondoc.core.pojo.ApiVerb;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,39 +27,40 @@ import java.util.List;
 @Api(name="Permissions", description = "Interact with DataVault Roles and Permissions")
 public class RolesAndPermissionsController {
 
-    private EventService eventService;
-    private EmailService emailService;
-    private VaultsService vaultsService;
-    private GroupsService groupsService;
-    private UsersService usersService;
-    private String homePage;
-    private String helpPage;
+    public static final String EMAIL_ROLE = "role";
+    public static final String EMAIL_HOMEPAGE = "homepage" ;
+    public static final String EMAIL_HELP_PAGE = "helppage";
+    public static final String EMAIL_ASSIGNEE = "assignee";
+    public static final String EMAIL_VAULT = "vault";
+    public static final String EMAIL_OWNER = "owner";
+    public static final String EMAIL_TARGET = "target";
+    public static final String EMAIL_SCHOOL = "school";
+    private final EventService eventService;
+    private final EmailService emailService;
+    private final VaultsService vaultsService;
+    private final GroupsService groupsService;
+    private final UsersService usersService;
+    private final String homePage;
+    private final String helpPage;
 
-    private RolesAndPermissionsService rolesAndPermissionsService;
-    private ClientsService clientsService;
+    private final RolesAndPermissionsService rolesAndPermissionsService;
+    private final ClientsService clientsService;
 
-    public void setClientsService(ClientsService clientsService) { this.clientsService = clientsService; }
-
-    public void setEventService(EventService eventService) { this.eventService = eventService; }
-
-    public void setEmailService(EmailService emailService) { this.emailService = emailService; }
-
-    public void setVaultsService(VaultsService vaultsService) { this.vaultsService = vaultsService; }
-
-    public void setGroupsService(GroupsService groupsService) { this.groupsService = groupsService; }
-
-    public void setUsersService(UsersService usersService) { this.usersService = usersService; }
-
-    public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
-        this.rolesAndPermissionsService = rolesAndPermissionsService;
-    }
-
-    public void setHomePage(String homePage) {
+    @Autowired
+    public RolesAndPermissionsController(EventService eventService, EmailService emailService,
+        VaultsService vaultsService, GroupsService groupsService, UsersService usersService,
+        @Value("${home.page}") String homePage,
+        @Value("${help.roles}") String helpPage, RolesAndPermissionsService rolesAndPermissionsService,
+        ClientsService clientsService) {
+        this.eventService = eventService;
+        this.emailService = emailService;
+        this.vaultsService = vaultsService;
+        this.groupsService = groupsService;
+        this.usersService = usersService;
         this.homePage = homePage;
-    }
-
-    public void setHelpPage(String helpPage) {
         this.helpPage = helpPage;
+        this.rolesAndPermissionsService = rolesAndPermissionsService;
+        this.clientsService = clientsService;
     }
 
     @ApiMethod(
@@ -78,10 +85,10 @@ public class RolesAndPermissionsController {
             responsestatuscode = "200 - OK"
     )
     @PostMapping("/roleAssignment")
-    public RoleAssignment createRoleAssignment(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                               @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
-                                               @RequestBody RoleAssignment roleAssignment) throws Exception {
-        sendEmails("new-role-assignment.vm", roleAssignment, userID);
+    public RoleAssignment createRoleAssignment(@RequestHeader(HEADER_USER_ID) String userID,
+                                               @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
+                                               @RequestBody RoleAssignment roleAssignment) {
+        sendEmails(EmailTemplate.NEW_ROLE_ASSIGNMENT, roleAssignment, userID);
 
         RoleAssignment assignment = rolesAndPermissionsService.createRoleAssignment(roleAssignment);
 
@@ -96,7 +103,7 @@ public class RolesAndPermissionsController {
         roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
         roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         roleAssignmentEvent.setAssignee(usersService.getUser(roleAssignment.getUserId()));
-        roleAssignmentEvent.setRole(roleAssignment.getRole());;
+        roleAssignmentEvent.setRole(roleAssignment.getRole());
 
         eventService.addEvent(roleAssignmentEvent);
 
@@ -296,10 +303,10 @@ public class RolesAndPermissionsController {
             responsestatuscode = "200 - OK"
     )
     @PutMapping("/roleAssignment")
-    public RoleAssignment updateRoleAssignment(@RequestHeader(value = "X-UserID", required = true) String userID,
-                                               @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
-                                                     @RequestBody RoleAssignment roleAssignment) throws Exception {
-        sendEmails("update-role-assignment.vm", roleAssignment, userID);
+    public RoleAssignment updateRoleAssignment(@RequestHeader(HEADER_USER_ID) String userID,
+                                               @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
+                                                     @RequestBody RoleAssignment roleAssignment) {
+        sendEmails(EmailTemplate.UPDATE_ROLE_ASSIGNMENT, roleAssignment, userID);
 
         UpdateRoleAssignment roleAssignmentEvent = new UpdateRoleAssignment(roleAssignment, userID);
 
@@ -313,7 +320,7 @@ public class RolesAndPermissionsController {
         roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
         roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         roleAssignmentEvent.setAssignee(usersService.getUser(roleAssignment.getUserId()));
-        roleAssignmentEvent.setRole(roleAssignment.getRole());;
+        roleAssignmentEvent.setRole(roleAssignment.getRole());
 
         eventService.addEvent(roleAssignmentEvent);
 
@@ -329,7 +336,7 @@ public class RolesAndPermissionsController {
             responsestatuscode = "200 - OK"
     )
     @DeleteMapping("/role/{roleId}")
-    public ResponseEntity deleteRole(@PathVariable("roleId") @ApiPathParam(name = "Role ID", description = "The ID of the role to delete") Long roleId) {
+    public ResponseEntity<Void> deleteRole(@PathVariable("roleId") @ApiPathParam(name = "Role ID", description = "The ID of the role to delete") Long roleId) {
         rolesAndPermissionsService.deleteRole(roleId);
         return ResponseEntity.ok().build();
     }
@@ -343,11 +350,10 @@ public class RolesAndPermissionsController {
             responsestatuscode = "200 - OK"
     )
     @DeleteMapping("/roleAssignment/{roleAssignmentId}")
-    public ResponseEntity deleteRoleAssignment(
-            @RequestHeader(value = "X-UserID", required = true) String userID,
-            @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
-            @PathVariable("roleAssignmentId") @ApiPathParam(name = "Role ID", description = "The ID of the role assignment to delete") Long roleAssignmentId)
-            throws Exception {
+    public ResponseEntity<Void> deleteRoleAssignment(
+            @RequestHeader(HEADER_USER_ID) String userID,
+            @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
+            @PathVariable("roleAssignmentId") @ApiPathParam(name = "Role ID", description = "The ID of the role assignment to delete") Long roleAssignmentId) {
 
         RoleAssignment assignment = rolesAndPermissionsService.getRoleAssignment(roleAssignmentId);
 
@@ -365,7 +371,7 @@ public class RolesAndPermissionsController {
         roleAssignmentEvent.setAgentType(Agent.AgentType.BROKER);
         roleAssignmentEvent.setAgent(clientsService.getClientByApiKey(clientKey).getName());
         roleAssignmentEvent.setAssignee(usersService.getUser(assignment.getUserId()));
-        roleAssignmentEvent.setRole(assignment.getRole());;
+        roleAssignmentEvent.setRole(assignment.getRole());
 
         eventService.addEvent(roleAssignmentEvent);
 
@@ -373,28 +379,28 @@ public class RolesAndPermissionsController {
         return ResponseEntity.ok().build();
     }
 
-    private void sendEmails(String template, RoleAssignment roleAssignment, String userId) throws Exception {
+    private void sendEmails(String template, RoleAssignment roleAssignment, String userId) {
 
-        HashMap<String, Object> model = new HashMap<String, Object>();
-        model.put("role", roleAssignment.getRole().getName());
-        model.put("homepage", this.homePage);
-        model.put("helppage", this.helpPage);
+        HashMap<String, Object> model = new HashMap<>();
+        model.put(EMAIL_ROLE, roleAssignment.getRole().getName());
+        model.put(EMAIL_HOMEPAGE, this.homePage);
+        model.put(EMAIL_HELP_PAGE, this.helpPage);
         User assignee = this.usersService.getUser(userId);
-        model.put("assignee", assignee.getFirstname() + " " + assignee.getLastname());
+        model.put(EMAIL_ASSIGNEE, assignee.getFirstname() + " " + assignee.getLastname());
         if(roleAssignment.getVaultId() != null) {
             Vault vault = vaultsService.getVault(roleAssignment.getVaultId());
-            model.put("vault", vault.getName());
+            model.put(EMAIL_VAULT, vault.getName());
             User vaultOwner = rolesAndPermissionsService.getVaultOwner(vault.getID());
             if(vaultOwner != null) {
-                model.put("owner", vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+                model.put(EMAIL_OWNER, vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
             } else {
-                model.put("owner", "None");
+                model.put(EMAIL_OWNER, "None");
             }
-            model.put("target", "vault");
+            model.put(EMAIL_TARGET, "vault");
         }
         if(roleAssignment.getSchoolId() != null) {
-            model.put("school", groupsService.getGroup(roleAssignment.getSchoolId()).getName());
-            model.put("target", "school");
+            model.put(EMAIL_SCHOOL, groupsService.getGroup(roleAssignment.getSchoolId()).getName());
+            model.put(EMAIL_TARGET, "school");
         }
 
         // Send email to the deposit user

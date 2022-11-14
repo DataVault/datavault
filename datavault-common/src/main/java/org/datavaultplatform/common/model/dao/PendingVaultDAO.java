@@ -1,28 +1,36 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
-
+import java.util.Optional;
 import org.datavaultplatform.common.model.PendingVault;
-import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.PendingVault_;
+import org.datavaultplatform.common.model.dao.custom.PendingVaultCustomDAO;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface PendingVaultDAO {
-    public void save(PendingVault pendingVault);
+@Repository
+@Transactional
+public interface PendingVaultDAO extends BaseDAO<PendingVault>, PendingVaultCustomDAO {
 
-    public PendingVault findById(String Id);
+  @Override
+  @EntityGraph(PendingVault.EG_PENDING_VAULT)
+  default List<PendingVault> list() {
+    return findAll(Sort.by(Order.asc(PendingVault_.CREATION_TIME)));
+  }
 
-    public void update(PendingVault vault);
-    
-    public List<PendingVault> list();
+  @Override
+  @EntityGraph(PendingVault.EG_PENDING_VAULT)
+  Optional<PendingVault> findById(String id);
 
-    public List<PendingVault> list(String userId, String sort, String order, String offset, String maxResult);
+  @Override
+  @EntityGraph(PendingVault.EG_PENDING_VAULT)
+  List<PendingVault> findAll();
 
-    public List<PendingVault> search(String userId, String query, String sort, String order, String offset, String maxResult, String confirmed);
+  @Override
+  @EntityGraph(PendingVault.EG_PENDING_VAULT)
+  List<PendingVault> findAll(Sort sort);
 
-    public int count(String userId);
-    
-    public int getTotalNumberOfPendingVaults(String userId, String confirmed);
-
-	public int getTotalNumberOfPendingVaults(String userId, String query, String confirmed);
-
-    public void deleteById(String Id);
 }

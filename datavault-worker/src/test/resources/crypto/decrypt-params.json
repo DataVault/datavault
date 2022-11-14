@@ -1,0 +1,22 @@
+﻿{
+  "chunksDir": "/Users/davidhay/DEV/DV/ENCRYPTED_CHUNKS_PROBLEM",
+  "tarDir": "/Users/davidhay/DEV/DV/ENCRYPTED_CHUNKS_PROBLEM",
+  "keystorePath": "/Users/davidhay/DEV/DV/ENCRYPTED_CHUNKS_PROBLEM/regeneratedKeyStore.ks",
+  "keystorePassword": "veryStrongPassword",
+  "dataKeyName": "data-encryption-key",
+  "chunkData": {
+    "1": {
+      "iv": "Fk+M7VFL4A+myB5OSozH+V5mTJrpshtYKpNzOozR2kG+3Avg5T0aNC6D5bvS333rsWCb4mbpUxd81mMv9czdkYHovmsyRLAzvFMTuNa6vzT1fP2L2DZqsGxNQj8+Di3G",
+      "ivDigest": "96-d56b7-1babd-8ffbc-8758e-6f3bb-a9f45-f7",
+      "encryptedChecksum": "7DE97823D7794E040FFF5B661ACC9F5208AC42F2",
+      "decryptedChecksum": "9AEF16EE52D9D7D5DF50D0F1D719766EA95C7389"
+    },
+    "2": {
+      "iv": "5hhaFUtSEf5D1w19vUN3XU3xNRnTdTiMLmdDVO510gQVpr6lRlCQrezrDwZHMpNJalyU43n3+q+5hBL+00NNJq8HfI3Kw3TuM9aKbvw0/gWrWgwZ3hmODjcKo0lMMCpf",
+      "ivDigest": "96-e9fb3-66790-dfc96-5eec6-2b865-d730b-da",
+      "encryptedChecksum": "F4A3E7945EBF77A59442B2275D2A77592C443206",
+      "decryptedChecksum": "C3B023C3DA3C3948EE6E6C93033F3E6F02662D79"
+    }
+  },
+  "tarChecksum": "49CB7BFED3EF31104FD9CB8390D533616D15993B"
+}

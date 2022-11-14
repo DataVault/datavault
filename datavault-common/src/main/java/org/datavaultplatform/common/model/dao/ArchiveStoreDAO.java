@@ -1,20 +1,21 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
+import java.util.Optional;
 import org.datavaultplatform.common.model.ArchiveStore;
- 
-public interface ArchiveStoreDAO {
+import org.datavaultplatform.common.model.dao.custom.ArchiveStoreCustomDAO;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-    public void save(ArchiveStore archiveStore);
-    
-    public void update(ArchiveStore archiveStore);
-    
-    public List<ArchiveStore> list();
+@Repository
+@Transactional
+public interface ArchiveStoreDAO extends BaseDAO<ArchiveStore>, ArchiveStoreCustomDAO {
+  @Override
+  @EntityGraph(ArchiveStore.EG_ARCHIVE_STORE)
+  List<ArchiveStore> findAll();
 
-    public ArchiveStore findById(String Id);
-
-    public ArchiveStore findForRetrieval();
-
-    public void deleteById(String Id);
-    
+  @Override
+  @EntityGraph(ArchiveStore.EG_ARCHIVE_STORE)
+  Optional<ArchiveStore> findById(String id);
 }

@@ -1,22 +1,36 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.Group;
-
 import java.util.List;
+import java.util.Optional;
+import org.datavaultplatform.common.model.Group;
+import org.datavaultplatform.common.model.Group_;
+import org.datavaultplatform.common.model.dao.custom.GroupCustomDAO;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface GroupDAO {
+@Repository
+@Transactional
+public interface GroupDAO extends BaseDAO<Group>, GroupCustomDAO {
 
-    public void save(Group group);
-    
-    public void update(Group group);
+  @Override
+  @EntityGraph(Group.EG_GROUP)
+  default List<Group> list() {
+    return findAll(Sort.by(Order.asc(Group_.NAME)));
+  }
 
-    public void delete(Group group);
+  @Override
+  @EntityGraph(Group.EG_GROUP)
+  Optional<Group> findById(String id);
 
-    public List<Group> list();
+  @Override
+  @EntityGraph(Group.EG_GROUP)
+  List<Group> findAll();
 
-    public List<Group> list(String userId);
+  @Override
+  @EntityGraph(Group.EG_GROUP)
+  List<Group> findAll(Sort sort);
 
-    public Group findById(String Id);
-
-    public int count(String userId);
 }

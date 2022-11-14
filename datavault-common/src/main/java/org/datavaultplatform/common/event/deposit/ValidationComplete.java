@@ -5,9 +5,8 @@ import org.datavaultplatform.common.event.Event;
 
 @Entity
 public class ValidationComplete extends Event {
-    ValidationComplete() {
-
-    };
+    public ValidationComplete() {
+    }
 
     public ValidationComplete(String jobId, String depositId) {
         super("Validation completed");

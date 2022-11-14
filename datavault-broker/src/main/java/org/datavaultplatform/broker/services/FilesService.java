@@ -1,32 +1,35 @@
 package org.datavaultplatform.broker.services;
 
-import java.lang.reflect.Constructor;
+
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.*;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.storage.UserStore;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * User: Robin Taylor
  * Date: 19/03/2015
  * Time: 13:34
  */
+@Service
+@Transactional
+@Slf4j
 public class FilesService {
 
+    //TODO - DHAY this does not seem thread safe
     private UserStore userStore;
     private final long TIMEOUT_SECONDS = 40;
     
     private boolean connect(FileStore fileStore) {
         try {
-            Class<?> clazz = Class.forName(fileStore.getStorageClass());
-            Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-            Object instance = constructor.newInstance(fileStore.getStorageClass(), fileStore.getProperties());
-            userStore = (UserStore)instance;
+            userStore = UserStore.fromFileStore(fileStore);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
             return false;
         }
     }
@@ -42,7 +45,7 @@ public class FilesService {
     private class FileSizeTask implements Runnable {
 
         public Long result = null;
-        private String filePath = null;
+        private final String filePath;
         
         public FileSizeTask(String filePath) {
             this.filePath = filePath;
@@ -53,6 +56,7 @@ public class FilesService {
             try {
                 result = userStore.getSize(filePath);
             } catch (Exception e) {
+                log.warn("problem getting file size", e);
                 result = null;
             }
         }
@@ -71,7 +75,7 @@ public class FilesService {
                 return null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception", e);
             return null;
         }
     }

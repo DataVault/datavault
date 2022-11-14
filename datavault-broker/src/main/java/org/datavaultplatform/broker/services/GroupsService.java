@@ -2,12 +2,19 @@ package org.datavaultplatform.broker.services;
 
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.dao.GroupDAO;
-
+import org.springframework.stereotype.Service;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
+@Transactional
 public class GroupsService {
 
-    private GroupDAO groupDAO;
+    private final GroupDAO groupDAO;
+
+    public GroupsService(GroupDAO groupDAO) {
+        this.groupDAO = groupDAO;
+    }
 
     public List<Group> getGroups() {
         return groupDAO.list();
@@ -34,11 +41,7 @@ public class GroupsService {
     }
 
     public Group getGroup(String groupID) {
-        return groupDAO.findById(groupID);
-    }
-
-    public void setGroupDAO(GroupDAO groupDAO) {
-        this.groupDAO = groupDAO;
+        return groupDAO.findById(groupID).orElse(null);
     }
 
     public int count(String userId) { return groupDAO.count(userId); }

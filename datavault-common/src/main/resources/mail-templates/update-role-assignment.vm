@@ -1,0 +1,17 @@
+<html>
+	<body>
+		
+		<p>Your user role on the following ${target} has been updated by ${assignee}:</p>
+		<ul>
+			#if( ${target} == 'vault')
+				<li>Vault Title: ${vault}</li>
+				<li>Vault Owner: ${owner}</li>
+			#elseif( $target == 'school' )
+				<li>School: ${school}</li>
+			#end
+			<li>New Role: ${role}</li>
+		</ul>
+		<p>You can login to the DataVault <a href=${homepage}>here</a></p>
+		<p>You can find out more about DataVault roles <a href=${helppage}>here</a></p>
+	</body>
+</html>

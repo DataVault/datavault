@@ -1,28 +1,39 @@
 package org.datavaultplatform.common.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.math.BigDecimal;
-
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
-
 import org.datavaultplatform.common.response.BillingInformation;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="BillingInfo")
+@NamedEntityGraph(name=BillingInfo.EG_BILLING_INFO,
+		attributeNodes = @NamedAttributeNode(value = BillingInfo_.VAULT, subgraph = "subVault"),
+		subgraphs = @NamedSubgraph(name="subVault", attributeNodes = {
+				@NamedAttributeNode(Vault_.DATASET),
+				@NamedAttributeNode(Vault_.GROUP),
+				@NamedAttributeNode(Vault_.RETENTION_POLICY),
+				@NamedAttributeNode(Vault_.USER)
+		})
+)
 public class BillingInfo {
 
-     
+		public static final String EG_BILLING_INFO = "eg.BillingInfo.1";
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
@@ -152,9 +163,9 @@ public class BillingInfo {
 
     public long getVersion() {
     	return version; 
-    };
-    
-    public BillingInformation convertToResponse() {
+    }
+
+	public BillingInformation convertToResponse() {
         return new BillingInformation(
                 id,
                 vault.getID(),
@@ -172,28 +183,21 @@ public class BillingInfo {
 				billingType
             );
     }
-     
-    
-    @Override
-    public boolean equals(Object other) {
-        
-        if (this == other) return true;
-        
-        if (!(other instanceof BillingInfo)) {
-            return false;
-        }
-        
-        final BillingInfo vault = (BillingInfo)other;
-        
-        if (!vault.getID().equals(getID())) {
-            return false;
-        }
-        
-        return true;
-    }
-    
-    @Override
-    public int hashCode() {
-        return getID().hashCode();
-    }
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+			return false;
+		}
+		BillingInfo that = (BillingInfo) o;
+		return id != null && Objects.equals(id, that.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
 }

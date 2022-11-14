@@ -1,9 +1,14 @@
 package org.datavaultplatform.webapp.controllers;
 
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.FileStore;
+import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -16,33 +21,27 @@ import java.util.HashMap;
  * Time: 11:00
  */
 @Controller
+@ConditionalOnBean(RestService.class)
 public class FileStoreController {
 
     private static final Logger logger = LoggerFactory.getLogger(FileStoreController.class);
 
-    private RestService restService;
-    private String activeDir;
-    private String sftpHost;
-    private String sftpPort;
-    private String sftpRootPath;
+    private final RestService restService;
+    private final String activeDir;
+    private final String sftpHost;
+    private final String sftpPort;
+    private final String sftpRootPath;
 
-    public void setRestService(RestService restService) {
+    @Autowired
+    public FileStoreController(RestService restService,
+        @Value("${activeDir}") String activeDir,
+        @Value("${sftp.host}") String sftpHost,
+        @Value("${sftp.port}") String sftpPort,
+        @Value("${sftp.rootPath}") String sftpRootPath) {
         this.restService = restService;
-    }
-
-    public void setActiveDir(String activeDir) {
         this.activeDir = activeDir;
-    }
-
-    public void setSftpHost(String sftpHost) {
         this.sftpHost = sftpHost;
-    }
-
-    public void setSftpPort(String sftpPort) {
         this.sftpPort = sftpPort;
-    }
-
-    public void setSftpRootPath(String sftpRootPath) {
         this.sftpRootPath = sftpRootPath;
     }
 
@@ -67,8 +66,8 @@ public class FileStoreController {
         // In theory we could allow the user to define the path, however that would allow them access to anything that the
         // Datavault app can read. So for now we will just use the configured default value.
         //storeProperties.put("rootPath", path);
-        storeProperties.put("rootPath", activeDir);
-        FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.LocalFileSystem", storeProperties, "Filesystem (local)");
+        storeProperties.put(PropNames.ROOT_PATH, activeDir);
+        FileStore store = new FileStore(StorageConstants.LOCAL_FILE_SYSTEM, storeProperties, "Filesystem (local)");
         restService.addFileStore(store);
     }
 
@@ -80,11 +79,11 @@ public class FileStoreController {
 
         // Generate a partially complete Filestore
         HashMap<String,String> storeProperties = new HashMap<>();
-        storeProperties.put("host", hostname);
-        storeProperties.put("port", port);
-        storeProperties.put("rootPath", path);
+        storeProperties.put(PropNames.HOST, hostname);
+        storeProperties.put(PropNames.PORT, port);
+        storeProperties.put(PropNames.ROOT_PATH, path);
 
-        FileStore store = new FileStore("org.datavaultplatform.common.storage.impl.SFTPFileSystem", storeProperties, path);
+        FileStore store = new FileStore(StorageConstants.SFTP_FILE_SYSTEM, storeProperties, path);
         restService.addFileStoreSFTP(store);
     }
 

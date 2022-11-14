@@ -1,6 +1,8 @@
 package org.datavaultplatform.common.event.deposit;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 import org.datavaultplatform.common.event.Event;
 
 import java.util.HashMap;
@@ -9,11 +11,12 @@ import java.util.HashMap;
 public class UploadComplete extends Event {
 
     // Maps the model ArchiveStore Id to the generated Archive Id
+    @Lob
+    @Column(name="archiveIds", columnDefinition="TINYBLOB")
     HashMap<String, String> archiveIds = new HashMap<>();
 
-    UploadComplete() {
-
-    };
+    public UploadComplete() {
+    }
 
     public UploadComplete(String jobId, String depositId, HashMap<String, String> archiveIds) {
         super("Upload completed");

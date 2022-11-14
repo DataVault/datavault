@@ -2,13 +2,14 @@ package org.datavaultplatform.common.model;
 
 import java.util.Date;
 import java.util.List;
-
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
@@ -18,18 +19,19 @@ import javax.persistence.TemporalType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.Hibernate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="RetentionPolicies")
+@NamedEntityGraph(name=RetentionPolicy.EG_RETENTION_POLICY)
 public class RetentionPolicy {
+    public static final String EG_RETENTION_POLICY = "eg.RetentionPolicy.1";
     // RetentionPolicy Id
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true, length = 36)
-    private int id;
+    private Integer id;
 
     // Name of the policy
     @Column(name = "name", nullable = false, columnDefinition = "TEXT")
@@ -99,9 +101,9 @@ public class RetentionPolicy {
         this.name = name;
     }
 
-    public int getID() { return id; }
+    public Integer getID() { return id; }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -175,8 +177,26 @@ public class RetentionPolicy {
     }
 
     public String getPolicyInfo() {
-        String retVal = "";
-        retVal = this.id + "-" + this.minRetentionPeriod;
+        String retVal = this.id + "-" + this.minRetentionPeriod;
         return retVal;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+            return false;
+        }
+        RetentionPolicy that = (RetentionPolicy) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+
 }

@@ -1,22 +1,36 @@
 package org.datavaultplatform.common.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.datavaultplatform.common.response.VaultInfo;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
+import javax.persistence.Table;
+import javax.persistence.Version;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
-
-import javax.persistence.*;
-import java.util.Date;
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "PendingDataCreator")
 @Entity
 @Table(name="PendingDataCreators")
+@NamedEntityGraph(name = PendingDataCreator.EG_PENDING_DATA_CREATOR, attributeNodes =
+@NamedAttributeNode(value = PendingDataCreator_.PENDING_VAULT, subgraph = "subPV"),
+    subgraphs = @NamedSubgraph(name = "subPV", attributeNodes = {
+        @NamedAttributeNode(PendingVault_.GROUP),
+        @NamedAttributeNode(PendingVault_.RETENTION_POLICY),
+        @NamedAttributeNode(PendingVault_.USER)
+    }))
 public class PendingDataCreator {
-    private static final long ZERO = 0l;
+
+    public static final String EG_PENDING_DATA_CREATOR = "eg.PendingDataCreator.1";
 
     // PDC Identifier
     @Id
@@ -66,5 +80,22 @@ public class PendingDataCreator {
 
     public PendingVault getPendingVault() {
         return this.pendingVault;
+    }
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        PendingDataCreator rhs = (PendingDataCreator) obj;
+        return new EqualsBuilder()
+            .append(this.id, rhs.id).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).
+            append(id).toHashCode();
     }
 }

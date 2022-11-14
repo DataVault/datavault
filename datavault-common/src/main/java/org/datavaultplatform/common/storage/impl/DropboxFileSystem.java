@@ -33,7 +33,7 @@ public class DropboxFileSystem extends Device implements UserStore {
     
     private String accessToken = null;*/
     
-    public DropboxFileSystem(String name, Map<String,String> config) throws IOException  {
+    public DropboxFileSystem(String name, Map<String,String> config) {
         super(name, config);
         
         /*// Unpack the config parameters (in an implementation-specific way)
@@ -43,7 +43,7 @@ public class DropboxFileSystem extends Device implements UserStore {
         dbxClient = new DbxClient(dbxConfig, accessToken);
         
         // Verify parameters are correct.
-        System.out.println("Connected to Dropbox account: " + dbxClient.getAccountInfo().displayName);*/
+        logger.info("Connected to Dropbox account: " + dbxClient.getAccountInfo().displayName);*/
     }
     
     @Override
@@ -66,7 +66,7 @@ public class DropboxFileSystem extends Device implements UserStore {
                 files.add(info);
             }
         } catch (DbxException e) {
-            System.out.println(e.toString());
+            logger.info(e.toString());
         }*/
 
         return files;
@@ -79,7 +79,7 @@ public class DropboxFileSystem extends Device implements UserStore {
     }
 
     @Override
-    public boolean exists(String path) throws Exception {
+    public boolean exists(String path) {
 
         /*if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
@@ -94,7 +94,7 @@ public class DropboxFileSystem extends Device implements UserStore {
     }
     
     @Override
-    public long getSize(String path) throws Exception {
+    public long getSize(String path) {
 
         /*if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
@@ -124,7 +124,7 @@ public class DropboxFileSystem extends Device implements UserStore {
         //}
     }
     
-    public void get(Progress progress, String path, File localFile) throws Exception {
+    public void get(Progress progress, String path, File localFile) {
 
         /*if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
@@ -157,7 +157,7 @@ public class DropboxFileSystem extends Device implements UserStore {
         }*/
     }
     
-    private void getFile(Progress progress, String path, File localFile) throws Exception {
+    private void getFile(Progress progress, String path, File localFile) {
         
         /*FileOutputStream fos = new FileOutputStream(localFile);
         DbxClient.Downloader downloader = dbxClient.startGetFile(path, null);
@@ -183,7 +183,7 @@ public class DropboxFileSystem extends Device implements UserStore {
         progress.fileCount += 1;*/
     }
     
-    public void put(Progress progress, String path, Path basePath, Path localPath) throws Exception {
+    public void put(Progress progress, String path, Path basePath, Path localPath) {
         
         /*DirectoryStream<Path> stream = Files.newDirectoryStream(localPath);
         
@@ -210,7 +210,7 @@ public class DropboxFileSystem extends Device implements UserStore {
         }*/
     }
     
-    private void putFile(Progress progress, String path, File localFile) throws Exception {
+    private void putFile(Progress progress, String path, File localFile) {
         
         /*FileInputStream fis = new FileInputStream(localFile);
         DbxClient.Uploader uploader = dbxClient.startUploadFile(path, DbxWriteMode.add(), localFile.length());
@@ -239,7 +239,7 @@ public class DropboxFileSystem extends Device implements UserStore {
     }
     
     @Override
-    public boolean isDirectory(String path) throws Exception {
+    public boolean isDirectory(String path) {
         
         /*if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
@@ -258,7 +258,7 @@ public class DropboxFileSystem extends Device implements UserStore {
     }
     
     @Override
-    public String getName(String path) throws Exception {
+    public String getName(String path) {
         
         /*if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
@@ -274,7 +274,7 @@ public class DropboxFileSystem extends Device implements UserStore {
     }
     
     @Override
-    public long getUsableSpace() throws Exception {
+    public long getUsableSpace() {
         
         /*DbxAccountInfo dbxAccountInfo = dbxClient.getAccountInfo();
         DbxAccountInfo.Quota quota = dbxAccountInfo.quota;
@@ -299,7 +299,7 @@ public class DropboxFileSystem extends Device implements UserStore {
     }
 
     @Override
-    public void retrieve(String path, File working, Progress progress) throws Exception {
+    public void retrieve(String path, File working, Progress progress) {
 
         /*if (!path.startsWith(PATH_SEPARATOR)) {
             path = PATH_SEPARATOR + path;
@@ -309,7 +309,7 @@ public class DropboxFileSystem extends Device implements UserStore {
     }
 
     @Override
-    public String store(String path, File working, Progress progress) throws Exception {
+    public String store(String path, File working, Progress progress) {
 
         /*// TODO: cleanup path handling - Dropbox paths MUST start with a "/"
         

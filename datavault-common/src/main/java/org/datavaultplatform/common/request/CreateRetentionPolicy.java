@@ -1,17 +1,13 @@
 package org.datavaultplatform.common.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.datavaultplatform.common.model.RetentionPolicy;
+import lombok.Data;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "CreateRetentionPolicy")
+@Data
 public class CreateRetentionPolicy {
 
     @ApiObjectField(description = "Uh... the id")

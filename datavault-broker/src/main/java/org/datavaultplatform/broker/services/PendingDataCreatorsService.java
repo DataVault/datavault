@@ -4,14 +4,19 @@ import org.datavaultplatform.common.model.PendingDataCreator;
 import org.datavaultplatform.common.model.dao.PendingDataCreatorDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
+@Transactional
 public class PendingDataCreatorsService {
-    private PendingDataCreatorDAO pendingDataCreatorDAO;
+    private final PendingDataCreatorDAO pendingDataCreatorDAO;
     private final Logger logger = LoggerFactory.getLogger(PendingDataCreatorsService.class);
 
-    public void setPendingDataCreatorDAO(PendingDataCreatorDAO pendingDataCreatorDAO) {
+    @Autowired
+    public PendingDataCreatorsService(PendingDataCreatorDAO pendingDataCreatorDAO) {
         this.pendingDataCreatorDAO = pendingDataCreatorDAO;
     }
 
@@ -23,9 +28,9 @@ public class PendingDataCreatorsService {
     }
 
     public void deletePendingDataCreator(String creatorId) {
-        if (pendingDataCreatorDAO.findById(creatorId) == null) {
-            throw new IllegalStateException("Cannot delete a role assignment that does not exist");
-        }
-        this.pendingDataCreatorDAO.delete(creatorId);
+        pendingDataCreatorDAO.findById(creatorId).orElseThrow(() ->
+            new IllegalStateException("Cannot delete a role assignment that does not exist")
+        );
+        this.pendingDataCreatorDAO.deleteById(creatorId);
     }
 }

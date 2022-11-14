@@ -1,0 +1,8 @@
+2b6a7ab00a7330fb5aa824c5079ede7d  bag-info.txt
+aef8e4e805227ac85db7545f9e50d196  manifest-md5.txt
+668bb4c139f42979783490a385e1693d  manifest-sha1.txt
+eaa2c609ff6371712f623f5531945b44  bagit.txt
+e70190b7391fa466e2e3aef6e11044b5  metadata/deposit.json
+5927c948679f45c16a431e407b62bc82  metadata/vault.json
+e8b60bcf90dcfc55a248d45955d38656  metadata/filetype.json
+96baeeb4e8a8271f9a62752f1f0dc747  metadata/external.txt

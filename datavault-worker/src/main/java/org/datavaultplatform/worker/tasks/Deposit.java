@@ -1,8 +1,10 @@
 package org.datavaultplatform.worker.tasks;
 
 import org.apache.commons.io.FileUtils;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.event.Error;
+import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.InitStates;
 import org.datavaultplatform.common.event.UpdateProgress;
 import org.datavaultplatform.common.event.deposit.*;
@@ -13,20 +15,15 @@ import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.operations.*;
-import org.datavaultplatform.worker.queue.EventSender;
+import org.datavaultplatform.worker.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.*;
 
 /**
  * A class that extends Task which is used to handle Deposits to the vault
@@ -34,7 +31,7 @@ import java.util.concurrent.*;
 public class Deposit extends Task {
 
     private static final Logger logger = LoggerFactory.getLogger(Deposit.class);
-    private static final Set<String> RESTART_FROM_BEGINNNING = new HashSet<>();
+    private static final Set<String> RESTART_FROM_BEGINNING = new HashSet<>();
     private static final Set<String> RESTART_FROM_TRANSFER = new HashSet<>();
     private static final Set<String> RESTART_FROM_PACKAGING = new HashSet<>();
     private static final Set<String> RESTART_FROM_TAR_CHECKSUM = new HashSet<>();
@@ -43,90 +40,90 @@ public class Deposit extends Task {
     private static final Set<String> RESTART_FROM_UPLOAD = new HashSet<>();
     private static final Set<String> RESTART_FROM_VALIDATION = new HashSet<>();
     private static final Set<String> RESTART_FROM_COMPLETE = new HashSet<>();
-    {
-        this.setupRestartHashes();
+    static {
+        setupRestartHashes();
     }
-    EventSender eventStream;
-    HashMap<String, UserStore> userStores;
+    private EventSender eventSender;
+    private HashMap<String, UserStore> userStores;
 
     // todo: I'm sure these two maps could be combined in some way.
 
-    // Maps the model ArchiveStore Id to the storage equivelant
-    HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
+    // Maps the model ArchiveStore ID to the storage equivalent
+    private final HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
 
-    // Maps the model ArchiveStore Id to the generated Archive Id
-    HashMap<String, String> archiveIds = new HashMap<>();
+    // Maps the model ArchiveStore ID to the generated Archive ID
+    private final HashMap<String, String> archiveIds = new HashMap<>();
 
-    String depositId;
-    String bagID;
-    String userID;
+    private String depositId;
+    private String bagID;
+    private String userID;
 
-    PackagerV2 packagerV2 = new PackagerV2();
+    private final PackagerV2 packagerV2 = new PackagerV2();
     
     // Chunking attributes
-    File[] chunkFiles;
-    String[] chunksHash;
-    String[] encChunksHash;
+    private File[] chunkFiles;
+    private String[] chunksHash;
+    private String[] encChunksHash;
 
-    private void setupRestartHashes() {
-        Deposit.RESTART_FROM_BEGINNNING.add("org.datavaultplatform.common.event.deposit.Start");
+    private static void setupRestartHashes() {
+        RESTART_FROM_BEGINNING.add("org.datavaultplatform.common.event.deposit.Start");
 
-        Deposit.RESTART_FROM_TRANSFER.addAll(RESTART_FROM_BEGINNNING);
-        Deposit.RESTART_FROM_TRANSFER.add("org.datavaultplatform.common.event.deposit.ComputedSize");
+        RESTART_FROM_TRANSFER.addAll(RESTART_FROM_BEGINNING);
+        RESTART_FROM_TRANSFER.add("org.datavaultplatform.common.event.deposit.ComputedSize");
 
-        Deposit.RESTART_FROM_PACKAGING.addAll(RESTART_FROM_TRANSFER);
-        Deposit.RESTART_FROM_PACKAGING.add("org.datavaultplatform.common.event.deposit.TransferComplete");
+        RESTART_FROM_PACKAGING.addAll(RESTART_FROM_TRANSFER);
+        RESTART_FROM_PACKAGING.add("org.datavaultplatform.common.event.deposit.TransferComplete");
 
-        Deposit.RESTART_FROM_TAR_CHECKSUM.addAll(RESTART_FROM_PACKAGING);
-        Deposit.RESTART_FROM_TAR_CHECKSUM.add("org.datavaultplatform.common.event.deposit.PackageComplete");
+        RESTART_FROM_TAR_CHECKSUM.addAll(RESTART_FROM_PACKAGING);
+        RESTART_FROM_TAR_CHECKSUM.add("org.datavaultplatform.common.event.deposit.PackageComplete");
 
-        Deposit.RESTART_FROM_CHUNKING.addAll(RESTART_FROM_TAR_CHECKSUM);
-        Deposit.RESTART_FROM_CHUNKING.add("org.datavaultplatform.common.event.deposit.ComputedDigest");
+        RESTART_FROM_CHUNKING.addAll(RESTART_FROM_TAR_CHECKSUM);
+        RESTART_FROM_CHUNKING.add("org.datavaultplatform.common.event.deposit.ComputedDigest");
 
-        Deposit.RESTART_FROM_ENC_CHECKSUM.addAll(RESTART_FROM_CHUNKING);
-        Deposit.RESTART_FROM_ENC_CHECKSUM.add("org.datavaultplatform.common.event.deposit.ComputedChunks");
+        RESTART_FROM_ENC_CHECKSUM.addAll(RESTART_FROM_CHUNKING);
+        RESTART_FROM_ENC_CHECKSUM.add("org.datavaultplatform.common.event.deposit.ComputedChunks");
 
 
-        Deposit.RESTART_FROM_UPLOAD.addAll(RESTART_FROM_ENC_CHECKSUM);
-        Deposit.RESTART_FROM_UPLOAD.add("org.datavaultplatform.common.event.deposit.ComputedEncryption");
-        Deposit.RESTART_FROM_UPLOAD.add("org.datavaultplatform.common.event.deposit.StartCopyUpload");
-        Deposit.RESTART_FROM_UPLOAD.add("org.datavaultplatform.common.event.deposit.CompleteCopyUpload");
+        RESTART_FROM_UPLOAD.addAll(RESTART_FROM_ENC_CHECKSUM);
+        RESTART_FROM_UPLOAD.add("org.datavaultplatform.common.event.deposit.ComputedEncryption");
+        RESTART_FROM_UPLOAD.add("org.datavaultplatform.common.event.deposit.StartCopyUpload");
+        RESTART_FROM_UPLOAD.add("org.datavaultplatform.common.event.deposit.CompleteCopyUpload");
 
-        Deposit.RESTART_FROM_VALIDATION.addAll(RESTART_FROM_UPLOAD);
-        Deposit.RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.UploadComplete");
-        Deposit.RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.StartChunkValidation");
-        Deposit.RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.CompleteChunkValidation");
-        Deposit.RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.StartTarValidation");
-        Deposit.RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.CompleteTarValidation");
+        RESTART_FROM_VALIDATION.addAll(RESTART_FROM_UPLOAD);
+        RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.UploadComplete");
+        RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.StartChunkValidation");
+        RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.CompleteChunkValidation");
+        RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.StartTarValidation");
+        RESTART_FROM_VALIDATION.add("org.datavaultplatform.common.event.deposit.CompleteTarValidation");
 
-        Deposit.RESTART_FROM_COMPLETE.addAll(RESTART_FROM_VALIDATION);
-        Deposit.RESTART_FROM_COMPLETE.add("org.datavaultplatform.common.event.deposit.ValidationComplete");
+        RESTART_FROM_COMPLETE.addAll(RESTART_FROM_VALIDATION);
+        RESTART_FROM_COMPLETE.add("org.datavaultplatform.common.event.deposit.ValidationComplete");
     }
     /* (non-Javadoc)
      * @see org.datavaultplatform.common.task.Task#performAction(org.datavaultplatform.common.task.Context)
      */
     @Override
     public void performAction(Context context) {
-    	this.InitialLogging(context);
-        eventStream = (EventSender)context.getEventStream();
+        this.InitialLogging(context);
+        eventSender = context.getEventSender();
         Map<String, String> properties = getProperties();
-        depositId = properties.get("depositId");
-        bagID = properties.get("bagId");
-        userID = properties.get("userId");
+        depositId = properties.get(PropNames.DEPOSIT_ID);
+        bagID = properties.get(PropNames.BAG_ID);
+        userID = properties.get(PropNames.USER_ID);
 
         String lastEventClass = (this.getLastEvent() != null) ? this.getLastEvent().getEventClass() : null;
         if (lastEventClass != null) {
             logger.debug("The last event was: " + lastEventClass);
         }
         if (this.isRedeliver()) {
-            eventStream.send(new Error(jobID, depositId, "Deposit stopped: the message had been redelivered, please investigate")
+            eventSender.send(new Error(jobID, depositId, "Deposit stopped: the message had been redelivered, please investigate")
                 .withUserId(userID));
             return;
         }
         
         this.initStates();
         
-        eventStream.send(new Start(jobID, depositId)
+        eventSender.send(new Start(jobID, depositId)
             .withUserId(userID)
             .withNextState(0));
 
@@ -146,7 +143,7 @@ public class Deposit extends Task {
             PackageHelper packageHelper = this.packageStep(context, properties, lastEventClass, bagDir);
             File tarFile = packageHelper.getTarFile();
             String tarHash = packageHelper.getTarHash();
-            byte iv[] = packageHelper.getIv();
+            byte[] iv = packageHelper.getIv();
             String encTarHash = packageHelper.getEncTarHash();
             Map<Integer, byte[]> chunksIVs = packageHelper.getChunksIVs();
             Long archiveSize = packageHelper.getArchiveSize();
@@ -174,18 +171,18 @@ public class Deposit extends Task {
                 logger.debug("Last event is: " + lastEventClass + " skipping validation");
             }
 
-            logger.info("Deposit complete");
+            logger.info("Deposit ID [{}] complete", depositId);
 
             logger.debug("The jobID: " + jobID);
             logger.debug("The depositId: " + depositId);
             logger.debug("The archiveIds:" + archiveIds);
-            eventStream.send(new Complete(jobID, depositId, archiveIds, archiveSize)
+            eventSender.send(new Complete(jobID, depositId, archiveIds, archiveSize)
                 .withUserId(userID)
                 .withNextState(5));
         } catch (Exception e) {
             String msg = "Deposit failed: " + e.getMessage();
             logger.error(msg, e);
-            eventStream.send(new Error(jobID, depositId, msg)
+            eventSender.send(new Error(jobID, depositId, msg)
                 .withUserId(userID));
 
             throw new RuntimeException(e);
@@ -209,21 +206,21 @@ public class Deposit extends Task {
         long expectedBytes = userStore.getSize(filePath);
         
         // Display progress bar
-        eventStream.send(new UpdateProgress(jobID, depositId, 0, expectedBytes, "Starting transfer ...")
+        eventSender.send(new UpdateProgress(jobID, depositId, 0, expectedBytes, "Starting transfer ...")
             .withUserId(userID));
         
         logger.info("Size: " + expectedBytes + " bytes (" +  FileUtils.byteCountToDisplaySize(expectedBytes) + ")");
         
         // Progress tracking (threaded)
         Progress progress = new Progress();
-        ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, expectedBytes, eventStream);
+        ProgressTracker tracker = new ProgressTracker(progress, jobID, depositId, expectedBytes, eventSender);
         Thread trackerThread = new Thread(tracker);
         trackerThread.start();
-        
+
         try {
             // Ask the driver to copy files to our working directory
             logger.debug("CopyFromUserStorage filePath:" + filePath);
-            logger.debug("CopyFromUserStorage filePath:" + outputFile.toPath().toString());
+            logger.debug("CopyFromUserStorage outputFile:" + outputFile.getAbsolutePath());
             ((Device)userStore).retrieve(filePath, outputFile, progress);
         } finally {
             // Stop the tracking thread
@@ -237,9 +234,8 @@ public class Deposit extends Task {
      * @param userID
      * @param uploadPath
      * @return
-     * @throws Exception
      */
-    private long getUserUploadsSize(Path tempPath, String userID, String uploadPath) throws Exception {
+    private long getUserUploadsSize(Path tempPath, String userID, String uploadPath) {
         // TODO: this is a bit of a hack to escape the per-worker temp directory
         File uploadDir = tempPath.getParent().resolve("uploads").resolve(userID).resolve(uploadPath).toFile();
         if (uploadDir.exists()) {
@@ -273,50 +269,30 @@ public class Deposit extends Task {
      * @throws Exception
      */
     private void copyToArchiveStorage(File tarFile) throws Exception {
-        copyToArchiveStorage(tarFile, 0);
+        copyToArchiveStorage(tarFile, Optional.empty());
     }
     
     /**
      * @param tarFile
      * @throws Exception
      */
-    private void copyToArchiveStorage(File tarFile, int chunkCount) throws Exception {
+    private void copyToArchiveStorage(File tarFile, Optional<Integer> optChunkNumber) throws Exception {
 
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-        List<Future<HashMap<String, String>>> futures = new ArrayList();
+        TaskExecutor<HashMap<String,String>> executor = new TaskExecutor<>(2, "Device upload failed.");
         for (String archiveStoreId : archiveStores.keySet() ) {
             logger.debug("ArchiveStoreId: " + archiveStoreId);
             ArchiveStore archiveStore = archiveStores.get(archiveStoreId);
-            // add thread to executor
+            // add task to executor
             // add future to futures list
-            DeviceTracker dt = new DeviceTracker();
-            dt.setArchiveStore(archiveStore);
-            dt.setArchiveStoreId(archiveStoreId);
-            dt.setChunkCount(chunkCount);
-            dt.setDepositId(depositId);
-            dt.setJobID(jobID);
-            dt.setEventStream(eventStream);
-            dt.setTarFile(tarFile);
-            dt.setUserID(userID);
-            logger.debug("Creating device thread:" + archiveStore.getClass());
-            Future<HashMap<String, String>> dtFuture = executor.submit(dt);
-            futures.add(dtFuture);
-        }
-        executor.shutdown();
-
-        for (Future<HashMap<String, String>> future : futures) {
-            try {
-                HashMap<String, String> result = future.get();
-                archiveIds.putAll(result);
-            } catch (ExecutionException ee) {
-                Throwable cause = ee.getCause();
-                if (cause instanceof Exception) {
-                    logger.info("Device upload failed. " + cause.getMessage());
-                    throw (Exception) cause;
-                }
-            }
+            DeviceTracker dt = new DeviceTracker(archiveStore, archiveStoreId,
+                optChunkNumber, depositId,
+                jobID, eventSender,
+                tarFile, userID);
+            logger.debug("Creating device task:" + archiveStore.getClass());
+            executor.add(dt);
         }
 
+        executor.execute(archiveIds::putAll);
         // foreach future
         // check for exception
         // append archiveIds from future to global archiveIds
@@ -345,7 +321,7 @@ public class Deposit extends Task {
             if (((Device)archiveStore).hasMultipleCopies()) {
                 boolean firstArchiveStore = true;
                 for (String loc : ((Device)archiveStore).getLocations()) {
-                    if (firstArchiveStore || context.isMultipleValidationEnabled() == true) {
+                    if (firstArchiveStore || context.isMultipleValidationEnabled()) {
                         this.doArchive(context, chunkFiles, chunksHash, tarFile, tarHash, archiveStore, archiveId, loc, true, ivs, null, encChunksHash, firstArchiveStore);
                     }
                     firstArchiveStore = false;
@@ -426,11 +402,7 @@ public class Deposit extends Task {
                     CopyBackFromArchive.copyBackFromArchive(archiveStore, archiveId, tarFile);
 
                     // check encrypted tar
-                    String encTarFileHash = Verify.getDigest(tarFile);
-                    logger.info("Checksum: " + encTarFileHash);
-                    if (!encTarFileHash.equals(encTarFileHash)) {
-                        throw new Exception("checksum failed: " + encTarFileHash + " != " + encTarFileHash);
-                    }
+                    Utils.checkFileHash("enc-tar", tarFile, encTarHash);
 
                     // Decryption
                     if(iv != null) {
@@ -457,46 +429,27 @@ public class Deposit extends Task {
             String encTarHash, String[] encChunksHash, boolean doVerification) throws Exception {
 
         int noOfThreads = context.getNoChunkThreads();
-        if (noOfThreads != 0 && noOfThreads < 0 ) {
+        if (noOfThreads < 0 ) {
             noOfThreads = 25;
         }
         logger.debug("Number of threads: " + noOfThreads);
-        ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
-        List<Future<HashMap<String, String>>> futures = new ArrayList();
+        TaskExecutor<Object> executor = new TaskExecutor<>(noOfThreads, "Chunk download failed.");
         for (int i = 0; i < chunkFiles.length; i++) {
-            // if less that max threads started start new one
+            int chunkNumber = i + 1;
+            // if less that max threads started, start new one
             File chunkFile = chunkFiles[i];
             //String chunkHash = chunksHash[i];
 
-            ChunkDownloadTracker cdt = new ChunkDownloadTracker();
-            cdt.setArchiveId(archiveId);
-            cdt.setArchiveStore(archiveStore);
-            cdt.setChunkFile(chunkFile);
-            //cdt.setChunkHash(chunkHash);
-            cdt.setContext(context);
-            cdt.setCount(i);
-            cdt.setDoVerification(doVerification);
-            cdt.setEncChunksHash(encChunksHash);
-            cdt.setIvs(ivs);
-            cdt.setLocation(location);
-            cdt.setMultipleCopies(multipleCopies);
-            logger.debug("Creating chunk download thread:" + i);
-            Future<HashMap<String, String>> dtFuture = executor.submit(cdt);
-            futures.add(dtFuture);
+            ChunkDownloadTracker cdt = new ChunkDownloadTracker(
+                archiveId, archiveStore,
+                chunkFile, context,
+                chunkNumber, doVerification,
+                encChunksHash, ivs,
+                location, multipleCopies);
+            logger.debug("Creating chunk download task:" + chunkNumber);
+            executor.add(cdt);
         }
-        executor.shutdown();
-
-        for (Future<HashMap<String, String>> future : futures) {
-            try {
-                future.get();
-            } catch (ExecutionException ee) {
-                Throwable cause = ee.getCause();
-                if (cause instanceof Exception) {
-                    logger.info("Chunk download failed. " + cause.getMessage());
-                    throw (Exception) cause;
-                }
-            }
-        }
+        executor.execute(result -> {});
 
 
         if(doVerification) {
@@ -520,16 +473,7 @@ public class Deposit extends Task {
      */
     private void verifyTarFile(Path tempPath, File tarFile, String origTarHash) throws Exception {
 
-        if (origTarHash != null) {
-            logger.info("Get Digest from: " + tarFile.getAbsolutePath());
-            // Compare the SHA hash
-            String tarHash = Verify.getDigest(tarFile);
-            logger.info("Checksum: " + tarHash);
-            if (!tarHash.equals(origTarHash)) {
-                throw new Exception("checksum failed: " + tarHash + " != " + origTarHash);
-            }
-        }
-        
+        Utils.checkFileHash("tar", tarFile, origTarHash);
         // Decompress to the temporary directory
         //File bagDir = Tar.unTar(tarFile, tempPath);
         
@@ -550,16 +494,16 @@ public class Deposit extends Task {
     	// Connect to the archive storage(s). Look out! There are two classes called archiveStore.
     	for (org.datavaultplatform.common.model.ArchiveStore archiveFileStore : archiveFileStores ) {
     		try {
-    			Class<?> clazz = Class.forName(archiveFileStore.getStorageClass());
-	            Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-	            Object instance = constructor.newInstance(archiveFileStore.getStorageClass(), archiveFileStore.getProperties());
-	
-	            archiveStores.put(archiveFileStore.getID(), (ArchiveStore)instance);
-	
-    		} catch (Exception e) {
+            ArchiveStore archiveStore = StorageClassUtils.createStorage(
+                archiveFileStore.getStorageClass(),
+                archiveFileStore.getProperties(),
+                ArchiveStore.class);
+            archiveStores.put(archiveFileStore.getID(), archiveStore);
+
+        } catch (Exception e) {
     			String msg = "Deposit failed: could not access archive filesystem : " + archiveFileStore.getStorageClass();
 	            logger.error(msg, e);
-	            eventStream.send(new Error(jobID, depositId, msg).withUserId(userID));
+	            eventSender.send(new Error(jobID, depositId, msg).withUserId(userID));
 	            throw new RuntimeException(e);
 	        }
     	}
@@ -581,7 +525,7 @@ public class Deposit extends Task {
                     //if (fileSize == 0) {
                     //    String msg = "Deposit failed: file size is 0";
                     //    logger.error(msg);
-                    //    eventStream.send(new Error(jobID, depositId, msg).withUserId(userID));
+                    //    eventSender.send(new Error(jobID, depositId, msg).withUserId(userID));
                     //    throw new RuntimeException(new Exception(msg));
                     //}
                     depositTotalSize += fileSize;
@@ -589,7 +533,7 @@ public class Deposit extends Task {
                 } catch (Exception e) {
                     String msg = "Deposit failed: could not access user filesystem";
                     logger.error(msg, e);
-                    eventStream.send(new Error(jobID, depositId, msg).withUserId(userID));
+                    eventSender.send(new Error(jobID, depositId, msg).withUserId(userID));
                     throw new RuntimeException(e);
                 }
 
@@ -598,13 +542,13 @@ public class Deposit extends Task {
 //		depositTotalSize += this.calculateUserUploads(depositTotalSize, context);
 
             // Store the calculated deposit size
-            eventStream.send(new ComputedSize(jobID, depositId, depositTotalSize)
+            eventSender.send(new ComputedSize(jobID, depositId, depositTotalSize)
                     .withUserId(userID));
         } else {
             String msg = "Deposit failed: could not access local user filesystem";
             Exception e = new Exception(msg);
             logger.error(msg);
-            eventStream.send(new Error(jobID, depositId, msg).withUserId(userID));
+            eventSender.send(new Error(jobID, depositId, msg).withUserId(userID));
             throw new RuntimeException(e);
         }
 	}
@@ -622,7 +566,7 @@ public class Deposit extends Task {
 //        } catch (Exception e) {
 //            String msg = "Deposit failed: could not access user uploads";
 //            logger.error(msg, e);
-//            eventStream.send(new Error(jobID, depositId, msg).withUserId(userID));
+//            eventSender.send(new Error(jobID, depositId, msg).withUserId(userID));
 //            throw new RuntimeException(e);
 //        }
 //
@@ -630,7 +574,7 @@ public class Deposit extends Task {
 //	}
 	
 	private HashMap<String, UserStore> setupUserFileStores() {
-		userStores = new HashMap<String, UserStore>();
+		userStores = new HashMap<>();
         
         for (String storageID : userFileStoreClasses.keySet()) {
             
@@ -639,18 +583,16 @@ public class Deposit extends Task {
             
             // Connect to the user storage devices
             try {
-                Class<?> clazz = Class.forName(storageClass);
-                Constructor<?> constructor = clazz.getConstructor(String.class, Map.class);
-                Object instance = constructor.newInstance(storageClass, storageProperties);                
-                Device userFs = (Device)instance;
-                UserStore userStore = (UserStore)userFs;
+                UserStore userStore = StorageClassUtils.createStorage(
+                    storageClass,
+                    storageProperties,
+                    UserStore.class);
                 userStores.put(storageID, userStore);
                 logger.info("Connected to user store: " + storageID + ", class: " + storageClass);
             } catch (Exception e) {
                 String msg = "Deposit failed: could not access user filesystem";
                 logger.error(msg, e);
-                e.printStackTrace();
-                eventStream.send(new Error(jobID, depositId, msg)
+                eventSender.send(new Error(jobID, depositId, msg)
                     .withUserId(userID));
 
                 //System.exit(1);
@@ -669,7 +611,7 @@ public class Deposit extends Task {
 	}
 	
 	private void copySelectedUserDataToBagDir(Path bagDataPath) {
-		 Long depositIndex = 0L;
+		 long depositIndex = 0L;
 	        
 	        for (String filePath: fileStorePaths) {
 	        
@@ -684,10 +626,10 @@ public class Deposit extends Task {
 
 	            // Retrieve the data straight into the Bag data directory.
 	            Path depositPath = bagDataPath;
-	            // If there are multiple deposits then create a sub-directory for each one
+	            // If there are multiple deposits then create a subdirectory for each one
 	            if (fileStorePaths.size() > 1) {
 	                depositIndex += 1;
-	                depositPath = bagDataPath.resolve(depositIndex.toString());
+	                depositPath = bagDataPath.resolve(Long.toString(depositIndex));
 	                depositPath.toFile().mkdir();
 	            }
 	            
@@ -695,7 +637,7 @@ public class Deposit extends Task {
 	                if (userStore.exists(storagePath)) {
 
 	                    // Copy the target file to the bag directory
-	                    eventStream.send(new UpdateProgress(jobID, depositId)
+	                    eventSender.send(new UpdateProgress(jobID, depositId)
 	                        .withUserId(userID)
 	                        .withNextState(1));
 
@@ -704,13 +646,13 @@ public class Deposit extends Task {
 	                    
 	                } else {
 	                    logger.error("File does not exist.");
-	                    eventStream.send(new Error(jobID, depositId, "Deposit failed: file not found")
+	                    eventSender.send(new Error(jobID, depositId, "Deposit failed: file not found")
 	                        .withUserId(userID));
 	                }
 	            } catch (Exception e) {
 	                String msg = "Deposit failed: " + e.getMessage();
 	                logger.error(msg, e);
-	                eventStream.send(new Error(jobID, depositId, msg)
+	                eventSender.send(new Error(jobID, depositId, msg)
 	                    .withUserId(userID));
 	                throw new RuntimeException(e);
 	            }
@@ -734,29 +676,26 @@ public class Deposit extends Task {
         return tarFile;
 	}
 	
-	private HashMap<Integer, String> createChunks(File tarFile, Context context, HashMap<Integer, String> chunksDigest, String tarHashAlgorithm) throws Exception {
-		logger.info("Chunking tar file ...");
-        chunkFiles = FileSplitter.spliteFile(tarFile, context.getChunkingByteSize());
-        chunksHash = new String[chunkFiles.length];
-        chunksDigest = new HashMap<Integer, String>();
+	private HashMap<Integer, String> createChunks(File tarFile, Context context, String tarHashAlgorithm) throws Exception {
+      logger.info("Chunking tar file ...");
+      chunkFiles = FileSplitter.splitFile(tarFile, context.getChunkingByteSize());
+      chunksHash = new String[chunkFiles.length];
+      HashMap<Integer, String> chunksDigest = new HashMap<>();
 
-        int noOfThreads = context.getNoChunkThreads();
-        if (noOfThreads != 0 && noOfThreads < 0 ) {
+      int noOfThreads = context.getNoChunkThreads();
+        if (noOfThreads < 0 ) {
             noOfThreads = 25;
         }
 
         logger.debug("Number of threads:" + noOfThreads);
-        ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
-        List<Future<ChecksumHelper>> futures = new ArrayList();
+        TaskExecutor<ChecksumHelper> executor = new TaskExecutor<>(noOfThreads,"Chunk encryption failed.");
         for (int i = 0; i < chunkFiles.length; i++){
+            int chunkNumber = i + 1;
             File chunk = chunkFiles[i];
-            ChecksumTracker ct = new ChecksumTracker();
-            ct.setChunk(chunk);
-            ct.setChunkCount(i);
+            ChecksumTracker ct = new ChecksumTracker(chunk, chunkNumber);
 
-            logger.debug("Creating chunk checksum thread:" + i);
-            Future<ChecksumHelper> ctFuture = executor.submit(ct);
-            futures.add(ctFuture);
+            logger.debug("Creating chunk checksum task:" + chunkNumber);
+            executor.add(ct);
 
 //            chunksHash[i] = Verify.getDigest(chunk);
 //
@@ -771,31 +710,22 @@ public class Deposit extends Task {
 //            //}
 //            chunksDigest.put(i+1, chunksHash[i]);
         }
-        executor.shutdown();
 
-        for (Future<ChecksumHelper> future : futures) {
-            try {
-                ChecksumHelper result = future.get();
-                int i = result.getChunkCount();
-                chunksHash[i] = result.getChunkHash();
-                chunksDigest.put(i + 1, chunksHash[i]);
-                File chunk = result.getChunk();
-                long chunkSize = chunk.length();
-                logger.info("Chunk file " + i + ": " + chunkSize + " bytes");
-                logger.info("Chunk file location: " + chunk.getAbsolutePath());
-                logger.info("Checksum algorithm: " + tarHashAlgorithm);
-                logger.info("Checksum: " + chunksHash[i]);
-            } catch (ExecutionException ee) {
-                Throwable cause = ee.getCause();
-                if (cause instanceof Exception) {
-                    logger.info("Chunk encryption failed. " + cause.getMessage());
-                    throw (Exception) cause;
-                }
-            }
-        }
-        
+      executor.execute( result -> {
+            int chunkNumber = result.getChunkNumber();
+            int i = chunkNumber - 1;
+            chunksHash[i] = result.getChunkHash();
+            chunksDigest.put(chunkNumber, chunksHash[i]);
+            File chunk = result.getChunk();
+            long chunkSize = chunk.length();
+            logger.info("Chunk file " + chunkNumber + ": " + chunkSize + " bytes");
+            logger.info("Chunk file location: " + chunk.getAbsolutePath());
+            logger.info("Checksum algorithm: " + tarHashAlgorithm);
+            logger.info("Checksum: " + chunksHash[i]);
+        });
+
         if(!context.isEncryptionEnabled()) {
-            eventStream.send(new ComputedChunks(jobID, depositId, chunksDigest, tarHashAlgorithm)
+            eventSender.send(new ComputedChunks(jobID, depositId, chunksDigest, tarHashAlgorithm)
                     .withUserId(userID));
         }
         
@@ -805,49 +735,36 @@ public class Deposit extends Task {
 	}
 	
 	private HashMap<Integer, byte[]> encryptChunks(Context context, HashMap<Integer, String> chunksDigest, String tarHashAlgorithm) throws Exception {
-		HashMap<Integer, String> encChunksDigests = new HashMap<Integer, String>();
-		HashMap<Integer, byte[]> chunksIVs = new HashMap<Integer, byte[]>();
+		HashMap<Integer, String> encChunksDigests = new HashMap<>();
+		HashMap<Integer, byte[]> chunksIVs = new HashMap<>();
         encChunksHash = new String[chunkFiles.length];
 
         int noOfThreads = context.getNoChunkThreads();
-        if (noOfThreads != 0 && noOfThreads < 0 ) {
+        if (noOfThreads < 0 ) {
             noOfThreads = 25;
         }
 
         logger.debug("Number of threads:" + noOfThreads);
-        ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
-        List<Future<EncryptionHelper>> futures = new ArrayList();
+
+        TaskExecutor<EncryptionChunkHelper> executor = new TaskExecutor<>(noOfThreads, "Chunk encryption failed.");
         for (int i = 0; i < chunkFiles.length; i++){
-            EncryptionTracker et = new EncryptionTracker();
-            et.setChunkCount(i);
-            et.setChunk(chunkFiles[i]);
-            et.setContext(context);
-            logger.debug("Creating chunk encryption thread:" + i);
-            Future<EncryptionHelper> etFuture = executor.submit(et);
-            futures.add(etFuture);
+            int chunkNumber = i + 1;
+            EncryptionTracker et = new EncryptionTracker(chunkNumber, chunkFiles[i], context);
+            logger.debug("Creating chunk encryption task:" + chunkNumber);
+            executor.add(et);
         }
-        executor.shutdown();
 
-        for (Future<EncryptionHelper> future : futures) {
-            try {
-                EncryptionHelper result = future.get();
-                int i = result.getChunkCount();
-                encChunksHash[i] = result.getEncTarHash();
-                encChunksDigests.put(i+1, encChunksHash[i]);
-                chunksIVs.put(i+1, result.getIv());
-
-            } catch (ExecutionException ee) {
-                Throwable cause = ee.getCause();
-                if (cause instanceof Exception) {
-                    logger.info("Chunk encryption failed. " + cause.getMessage());
-                    throw (Exception) cause;
-                }
-            }
-        }
+        executor.execute(result -> {
+            int chunkNumber = result.getChunkNumber();
+            int i = chunkNumber - 1;
+            encChunksHash[i] = result.getEncTarHash();
+            encChunksDigests.put(chunkNumber, encChunksHash[i]);
+            chunksIVs.put(chunkNumber, result.getIv());
+        });
 
         
         logger.info(chunkFiles.length + " chunk files encrypted.");
-        eventStream.send(new ComputedEncryption(jobID, depositId, chunksIVs, null, 
+        eventSender.send(new ComputedEncryption(jobID, depositId, chunksIVs, null, 
                 context.getEncryptionMode().toString(), null, encChunksDigests,
                 chunksDigest, tarHashAlgorithm)
                     .withUserId(userID));
@@ -865,7 +782,7 @@ public class Deposit extends Task {
 //            logger.info("Encrypted Tar file: " + tarFile.length() + " bytes");
 //            logger.info("Encrypted tar checksum: " + encTarHash);
 //            
-//            eventStream.send(new ComputedEncryption(jobID, depositId,null,
+//            eventSender.send(new ComputedEncryption(jobID, depositId,null,
 //                    iv, context.getEncryptionMode().toString(),
 //                    encTarHash, null, null, null)
 //                        .withUserId(userID));
@@ -873,95 +790,78 @@ public class Deposit extends Task {
 //	}
 	
 	private EncryptionHelper encryptFullTar(Context context, File tarFile) throws Exception {
-		EncryptionHelper retVal = new EncryptionHelper();
-		byte[] iv = Encryption.encryptFile(context, tarFile);
-        String encTarHash = Verify.getDigest(tarFile);
-        
-        logger.info("Encrypted Tar file: " + tarFile.length() + " bytes");
-        logger.info("Encrypted tar checksum: " + encTarHash);
-        
-        eventStream.send(new ComputedEncryption(jobID, depositId,null,
-                iv, context.getEncryptionMode().toString(),
-                encTarHash, null, null, null)
-                    .withUserId(userID));	
-        retVal.setIv(iv);
-        retVal.setEncTarHash(encTarHash);
-        return retVal;
-	}
-	
+
+      byte[] iv = Encryption.encryptFile(context, tarFile);
+      String encTarHash = Verify.getDigest(tarFile);
+
+      logger.info("Encrypted Tar file: " + tarFile.length() + " bytes");
+      logger.info("Encrypted tar checksum: " + encTarHash);
+
+      eventSender.send(new ComputedEncryption(jobID, depositId, null,
+          iv, context.getEncryptionMode().toString(),
+          encTarHash, null, null, null)
+          .withUserId(userID));
+      EncryptionHelper retVal = new EncryptionHelper(iv, encTarHash);
+      return retVal;
+  }
+
 	private void uploadToStorage(Context context, File tarFile) throws Exception {
         logger.debug("Uploading to storage.");
 
 		if ( context.isChunkingEnabled() ) {
-            int noOfThreads = context.getNoChunkThreads();
-            if (noOfThreads != 0 && noOfThreads < 0 ) {
-                noOfThreads = 25;
-            }
-            logger.debug("Number of threads:" + noOfThreads);
-            ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
-            List<Future<HashMap<String, String>>> futures = new ArrayList();
-    		int chunkCount = 0;
-    		// kick of 10 (maybe more) threads at a time?  each thread would kick off 3 threads of their own
-    		for (File chunk : chunkFiles){
-                // kick of 10 (maybe more) threads at a time?  each thread would kick off 3 threads of their own
-                chunkCount++;
-                ChunkUploadTracker cut = new ChunkUploadTracker();
-                cut.setChunkCount(chunkCount);
-                cut.setChunk(chunk);
-                cut.setArchiveStores(this.archiveStores);
-                cut.setDepositId(this.depositId);
-                cut.setEventStream(this.eventStream);
-                cut.setJobID(this.jobID);
-                cut.setTarFile(tarFile);
-                cut.setUserID(this.userID);
-                logger.debug("Creating chunk upload thread:" + chunkCount);
-                Future<HashMap<String, String>> dtFuture = executor.submit(cut);
-                futures.add(dtFuture);
-            }
-            executor.shutdown();
+        int noOfThreads = context.getNoChunkThreads();
+        if (noOfThreads < 0 ) {
+            noOfThreads = 25;
+        }
+        logger.debug("Number of threads:" + noOfThreads);
+        TaskExecutor<HashMap<String, String>> executor = new TaskExecutor<>(noOfThreads, "Chunk upload failed.");
 
-            for (Future<HashMap<String, String>> future : futures) {
-                try {
-                    HashMap<String, String> result = future.get();
-                    logger.debug("returned archiveIds: " + result);
-                    archiveIds.putAll(result);
-                    logger.debug("archiveIds: "+archiveIds);
-                } catch (ExecutionException ee) {
-                    Throwable cause = ee.getCause();
-                    if (cause instanceof Exception) {
-                        logger.info("Chunk upload failed. " + cause.getMessage());
-                        throw (Exception) cause;
-                    }
-                }
-            }
+    		// kick of 10 (maybe more) tasks at a time?  each task would kick off 3 tasks of their own
+        for (int i = 0; i < chunkFiles.length; i++) {
+            int chunkNumber = i + 1;
+            File chunk = chunkFiles[i];
+            // kick of 10 (maybe more) tasks at a time?  each task would kick off 3 tasks of their own
+            ChunkUploadTracker cut = new ChunkUploadTracker(chunkNumber, chunk,
+                archiveStores, depositId,
+                eventSender, jobID,
+                tarFile, userID);
+            logger.debug("Creating chunk upload task:" + chunkNumber);
+            executor.add(cut);
+        }
 
-            logger.debug("final archiveIds: "+archiveIds);
+        executor.execute(result -> {
+            logger.debug("returned archiveIds: " + result);
+            archiveIds.putAll(result);
+            logger.debug("archiveIds: " + archiveIds);
+        });
+
+        logger.debug("final archiveIds: " + archiveIds);
 		} else {
 			copyToArchiveStorage(tarFile);
 		}
-        eventStream.send(new UploadComplete(jobID, depositId, archiveIds).withUserId(userID));
-		eventStream.send(new UpdateProgress(jobID, depositId)
+    eventSender.send(new UploadComplete(jobID, depositId, archiveIds).withUserId(userID));
+		eventSender.send(new UpdateProgress(jobID, depositId)
         .withUserId(userID)
         .withNextState(4));
 	}
 	
 	private void verifyArchive(Context context, File tarFile, String tarHash, byte[] iv, Map<Integer, byte[]> chunksIVs, String encTarHash) throws Exception {
 		if( context.isChunkingEnabled() ) {
-            verifyArchive(context, chunkFiles, chunksHash, tarFile, tarHash, chunksIVs, encChunksHash);
-        } else {
-            verifyArchive(context, tarFile, tarHash, iv, encTarHash);
-        }
-        eventStream.send(new ValidationComplete(jobID, depositId).withUserId(userID));
+        verifyArchive(context, chunkFiles, chunksHash, tarFile, tarHash, chunksIVs, encChunksHash);
+    } else {
+        verifyArchive(context, tarFile, tarHash, iv, encTarHash);
+    }
+    eventSender.send(new ValidationComplete(jobID, depositId).withUserId(userID));
 
 	}
 	
 	private void InitialLogging(Context context) {
-		logger.info("Deposit job - performAction()");
-        logger.info("chunking: "+context.isChunkingEnabled());
-        logger.info("chunks byte size: "+context.getChunkingByteSize());
-        logger.info("encryption: "+context.isEncryptionEnabled());
-        logger.info("encryption mode: "+context.getEncryptionMode());
-        logger.info("validate multiple: " + context.isMultipleValidationEnabled());
+    logger.info("Deposit job - performAction()");
+    logger.info("chunking: "+context.isChunkingEnabled());
+    logger.info("chunks byte size: "+context.getChunkingByteSize());
+    logger.info("encryption: "+context.isEncryptionEnabled());
+    logger.info("encryption mode: "+context.getEncryptionMode());
+    logger.info("validate multiple: " + context.isMultipleValidationEnabled());
 	}
 	
 	private void initStates() {
@@ -972,7 +872,7 @@ public class Deposit extends Task {
 	      states.add("Storing in archive");   // 3
 	      states.add("Verifying");            // 4
 	      states.add("Complete");             // 5
-	      eventStream.send(new InitStates(jobID, depositId, states)
+	      eventSender.send(new InitStates(jobID, depositId, states)
 	          .withUserId(userID));		
 	}
 	
@@ -985,33 +885,33 @@ public class Deposit extends Task {
         }
         
         // Bag the directory in-place
-        eventStream.send(new TransferComplete(jobID, depositId)
+        eventSender.send(new TransferComplete(jobID, depositId)
             .withUserId(userID)
             .withNextState(2));
 	}
 
 	private DepositTransferHelper initialTransferStep(Context context, String lastEventClass) {
-        DepositTransferHelper retVal = new DepositTransferHelper();
+        final DepositTransferHelper retVal;
         if (lastEventClass == null || RESTART_FROM_TRANSFER.contains(lastEventClass)) {
             logger.info("bagID: " + bagID);
             this.calculateTotalDepositSize(context);
 
             // Create a new directory based on the broker-generated UUID
             Path bagPath = context.getTempDir().resolve(bagID);
-            logger.debug("The is the bagPath " + bagPath.toString());
-            retVal.setBagDataPath(bagPath.resolve("data"));
+            logger.debug("The is the bagPath " + bagPath);
+            retVal = new DepositTransferHelper(bagPath.resolve("data"), this.createDir(bagPath));
             logger.debug("The is the bagDataPath " + retVal.getBagDataPath().toString());
-            retVal.setBagDir(this.createDir(bagPath));
+
             this.createDir(retVal.getBagDataPath());
 
             this.copySelectedUserDataToBagDir(retVal.getBagDataPath());
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping initial File copy");
             Path bagPath = context.getTempDir().resolve(bagID);
-            logger.debug("Setting bag path to: " + bagPath.toString());
-            logger.debug("Setting bag data path to: " + bagPath.resolve("data").toString());
-            retVal.setBagDataPath(bagPath.resolve("data"));
-            retVal.setBagDir(bagPath.toFile());
+            logger.debug("Setting bag path to: " + bagPath);
+            logger.debug("Setting bag data path to: " + bagPath.resolve("data"));
+            retVal = new DepositTransferHelper(bagPath.resolve("data"), bagPath.toFile());
+
             // depending on how far the previous attempt got this dir
             // may have been deleted
             this.createDir(retVal.getBagDataPath());
@@ -1020,90 +920,95 @@ public class Deposit extends Task {
         return retVal;
     }
 
-    private PackageHelper packageStep(Context context, Map<String, String> properties, String lastEventClass, File bagDir
-        )  throws Exception {
-        PackageHelper retVal = new PackageHelper();
+    private PackageHelper packageStep(Context context, Map<String, String> properties,
+        String lastEventClass, File bagDir)  throws Exception {
+        final PackageHelper retVal = new PackageHelper();
 
         if (lastEventClass == null || RESTART_FROM_PACKAGING.contains(lastEventClass) || RESTART_FROM_TAR_CHECKSUM.contains(lastEventClass)
             || RESTART_FROM_CHUNKING.contains(lastEventClass) || RESTART_FROM_ENC_CHECKSUM.contains(lastEventClass)) {
-            retVal = this.doPackageStep(context, properties, bagDir, retVal, lastEventClass);
+            this.doPackageStep(context, properties, bagDir, retVal, lastEventClass);
 
         } else {
             int numOfChunks =  0;
-            if (properties.get("numOfChunks") != null) {
-                numOfChunks = Integer.parseInt(properties.get("numOfChunks"));
+            if (properties.get(PropNames.NUM_OF_CHUNKS) != null) {
+                numOfChunks = Integer.parseInt(properties.get(PropNames.NUM_OF_CHUNKS));
             }
             String archiveDigest = null;
-            if (properties.get("archiveDigest") != null) {
-                archiveDigest = properties.get("archiveDigest");
+            if (properties.get(PropNames.ARCHIVE_DIGEST) != null) {
+                archiveDigest = properties.get(PropNames.ARCHIVE_DIGEST);
             }
-            retVal = this.skipPackageStep(context, lastEventClass, numOfChunks, archiveDigest, retVal);
+            this.skipPackageStep(context, lastEventClass, numOfChunks, archiveDigest, retVal);
         }
 
         return retVal;
     }
 
-    private PackageHelper doPackageStep(Context context, Map<String, String> properties, File bagDir, PackageHelper retVal, String lastEventClass)  throws Exception {
+    private void doPackageStep(Context context, Map<String, String> properties, File bagDir, PackageHelper packageHelper, String lastEventClass)  throws Exception {
         String tarHashAlgorithm = Verify.getAlgorithm();
         if (lastEventClass == null || RESTART_FROM_PACKAGING.contains(lastEventClass)) {
             logger.info("Creating bag ...");
-            this.createBag(bagDir, properties.get("depositMetadata"), properties.get("vaultMetadata"), properties.get("externalMetadata"));
+            this.createBag(bagDir,
+                properties.get(PropNames.DEPOSIT_METADATA),
+                properties.get(PropNames.VAULT_METADATA),
+                properties.get(PropNames.EXTERNAL_METADATA));
             // Tar the bag directory
             logger.info("Creating tar file ...");
 
-            retVal.setTarFile(this.createTar(context, bagDir));
-            logger.info("Tar file: " + retVal.getArchiveSize() + " bytes");
-            logger.info("Tar file location: " + retVal.getTarFile().getAbsolutePath());
+            packageHelper.setTarFile(this.createTar(context, bagDir));
+            logger.info("Tar file: " + packageHelper.getArchiveSize() + " bytes");
+            logger.info("Tar file location: " + packageHelper.getTarFile().getAbsolutePath());
 
-            eventStream.send(new PackageComplete(jobID, depositId)
+            eventSender.send(new PackageComplete(jobID, depositId)
                     .withUserId(userID)
                     .withNextState(3));
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping actual packaging");
-            this.skipActualPackaging(context, retVal);
+            this.skipActualPackaging(context, packageHelper);
         }
 
         if (lastEventClass == null || RESTART_FROM_TAR_CHECKSUM.contains(lastEventClass)) {
-            retVal.setTarHash(Verify.getDigest(retVal.getTarFile()));
-            retVal.setArchiveSize(retVal.getTarFile().length());
+            packageHelper.setTarHash(Verify.getDigest(packageHelper.getTarFile()));
+            packageHelper.setArchiveSize(packageHelper.getTarFile().length());
             logger.info("Checksum algorithm: " + tarHashAlgorithm);
-            logger.info("Checksum: " + retVal.getTarHash());
-            eventStream.send(new ComputedDigest(jobID, depositId, retVal.getTarHash(), tarHashAlgorithm)
+            logger.info("Checksum: " + packageHelper.getTarHash());
+            eventSender.send(new ComputedDigest(jobID, depositId, packageHelper.getTarHash(), tarHashAlgorithm)
                     .withUserId(userID));
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping tar checksum");
-            this.skipTarChecksum(properties.get("archiveDigest"), retVal);
+            this.skipTarChecksum(properties.get(PropNames.ARCHIVE_DIGEST), packageHelper);
         }
 
         logger.info("We have successfully created the Tar, so lets delete the Bag to save space");
         FileUtils.deleteDirectory(bagDir);
-        HashMap<Integer, String> chunksDigest = null;
+        HashMap<Integer, String> chunksDigest = new HashMap<>();
         if ((lastEventClass == null || RESTART_FROM_CHUNKING.contains(lastEventClass)) && context.isChunkingEnabled()) {
-            chunksDigest = this.createChunks(retVal.getTarFile(), context, chunksDigest, tarHashAlgorithm);
+            Map<Integer, String> chunksDigestData = this.createChunks(
+                packageHelper.getTarFile(), context, tarHashAlgorithm);
+            chunksDigest.putAll(chunksDigestData);
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping chunking");
             int numOfChunks =  0;
-            if (properties.get("numOfChunks") != null) {
-                numOfChunks = Integer.parseInt(properties.get("numOfChunks"));
+            if (properties.get(PropNames.NUM_OF_CHUNKS) != null) {
+                numOfChunks = Integer.parseInt(properties.get(PropNames.NUM_OF_CHUNKS));
             }
-            this.skipChunking(numOfChunks, context, retVal);
+            this.skipChunking(numOfChunks, context);
         }
 
         // Encryption
         if ((lastEventClass == null || RESTART_FROM_ENC_CHECKSUM.contains(lastEventClass)) && context.isEncryptionEnabled()) {
             logger.info("Encrypting file(s)...");
             if (context.isChunkingEnabled()) {
-                retVal.setChunksIVs(this.encryptChunks(context, chunksDigest, tarHashAlgorithm));
+                logger.info("Encrypting [{}] chunk files ", chunksDigest.size());
+                packageHelper.setChunksIVs(this.encryptChunks(context, chunksDigest, tarHashAlgorithm));
             } else {
-                EncryptionHelper helper = this.encryptFullTar(context, retVal.getTarFile());
-                retVal.setIv(helper.getIv());
-                retVal.setEncTarHash(helper.getEncTarHash());
+                logger.info("Encrypting single non-chunk file [{}]", packageHelper.getTarFile());
+                EncryptionHelper helper = this.encryptFullTar(context, packageHelper.getTarFile());
+                packageHelper.setIv(helper.getIv());
+                packageHelper.setEncTarHash(helper.getEncTarHash());
             }
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping enc checksum");
         }
-
-        return retVal;
     }
 
     /**********************************************************
@@ -1111,44 +1016,41 @@ public class Deposit extends Task {
     // we need to fill in some blanks for the later steps to be
     // able to complete
      **********************************************************/
-    private PackageHelper skipPackageStep(Context context, String lastEventClass, int numOfChunks, String archiveDigest,
-                                          PackageHelper retVal)  {
+    private void skipPackageStep(Context context, String lastEventClass, int numOfChunks,
+        String archiveDigest, PackageHelper packageHelper)  {
         logger.debug("Last event is: " + lastEventClass + " skipping packaging");
-        retVal = this.skipChunking(numOfChunks, context, retVal);
-        retVal.setChunksIVs(this.chunksIVs);
-        retVal = this.skipActualPackaging(context, retVal);
-        retVal = this.skipTarChecksum(archiveDigest, retVal);
+        this.skipChunking(numOfChunks, context);
+        packageHelper.setChunksIVs(this.chunksIVs);
+        this.skipActualPackaging(context, packageHelper);
+        this.skipTarChecksum(archiveDigest, packageHelper);
 
-        return retVal;
     }
 
-    private PackageHelper skipActualPackaging(Context context, PackageHelper retVal) {
+    private void skipActualPackaging(Context context, PackageHelper packageHelper) {
 
         String tarFileName = bagID + ".tar";
         Path tarPath = context.getTempDir().resolve(tarFileName);
-        retVal.setTarFile(tarPath.toFile());
+        packageHelper.setTarFile(tarPath.toFile());
 
-        return retVal;
     }
 
-    private PackageHelper skipTarChecksum(String archiveDigest, PackageHelper retVal) {
+    private void skipTarChecksum(String archiveDigest, PackageHelper packageHelper) {
 
-        retVal.setTarHash(archiveDigest);
-        retVal.setArchiveSize(retVal.getTarFile().length());
+        packageHelper.setTarHash(archiveDigest);
+        packageHelper.setArchiveSize(packageHelper.getTarFile().length());
 
-        return retVal;
     }
 
-    private PackageHelper skipChunking(int numOfChunks, Context context, PackageHelper retVal) {
+    private void skipChunking(int numOfChunks, Context context) {
 
         this.chunkFiles = new File[numOfChunks];
         for (int i = 0; i < numOfChunks; i++) {
-            String chunkFileName = bagID + ".tar." + (i + 1);
+            int chunkNumber = i + 1;
+            String chunkFileName = bagID + ".tar." + chunkNumber;
             Path chunkPath = context.getTempDir().resolve(chunkFileName);
-            logger.debug("Mocked chunk file path: " + chunkPath.toAbsolutePath().toString());
+            logger.debug("Mocked chunk file path: " + chunkPath.toAbsolutePath());
             this.chunkFiles[i] = chunkPath.toFile();
         }
 
-        return retVal;
     }
 }

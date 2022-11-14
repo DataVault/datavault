@@ -1,75 +1,89 @@
 package org.datavaultplatform.worker.operations;
 
+import java.util.Optional;
+import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.deposit.CompleteCopyUpload;
 import org.datavaultplatform.common.event.deposit.StartCopyUpload;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
-import org.datavaultplatform.worker.queue.EventSender;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
-public class DeviceTracker implements Callable {
+@Slf4j
+public class DeviceTracker implements Callable<HashMap<String, String>> {
 
-    private String jobID;
-    private String depositId;
-    private File tarFile;
-    private EventSender eventStream;
-    private int chunkCount = 0;
-    private String archiveStoreId;
-    private ArchiveStore archiveStore;
-    private String userID;
-    private static final Logger logger = LoggerFactory.getLogger(DeviceTracker.class);
+    private final String jobID;
+    private final String depositId;
+    private final File tarFile;
+    private final EventSender eventSender;
+    private final Optional<Integer> optChunkNumber;
+    private final String archiveStoreId;
+    private final ArchiveStore archiveStore;
+    private final String userID;
+
+    public DeviceTracker(ArchiveStore archiveStore, String archiveStoreId,
+        Optional<Integer> optChunkNumber, String depositId,
+        String jobID, EventSender eventSender,
+        File tarFile, String userID) {
+        this.archiveStore = archiveStore;
+        this.archiveStoreId = archiveStoreId;
+        this.optChunkNumber = optChunkNumber;
+        this.depositId = depositId;
+        this.jobID = jobID;
+        this.eventSender = eventSender;
+        this.tarFile = tarFile;
+        this.userID = userID;
+    }
 
     @Override
     public HashMap<String, String> call() throws Exception {
         HashMap<String, String> archiveIds = new HashMap<>();
         // Progress tracking (threaded)
         Progress progress = new Progress();
-        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.tarFile.length(), this.eventStream);
+        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.tarFile.length(), this.eventSender);
         Thread trackerThread = new Thread(tracker);
         trackerThread.start();
-        String depId = this.depositId;
-        if (this.chunkCount > 0) {
-            depId = depId + "." + this.chunkCount;
-        }
+        final String depId;
+        depId = optChunkNumber
+            .map(chunkNum -> this.depositId + "." + chunkNum)
+            .orElse(this.depositId);
         String archiveId;
-        // kick off new thread for each device ( we may already have kicked off x threads for chunks)
+        // kick off new task for each device ( we may already have kicked off x threads for chunks)
         try {
-            this.eventStream.send(new StartCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name, this.chunkCount ).withUserId(this.userID));
+            this.eventSender.send(new StartCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name, this.optChunkNumber).withUserId(this.userID));
             if (((Device)this.archiveStore).hasDepositIdStorageKey()) {
                 archiveId = ((Device) this.archiveStore).store(depId, this.tarFile, progress);
             } else {
                 archiveId = ((Device) this.archiveStore).store("/", this.tarFile, progress);
             }
-            this.eventStream.send(new CompleteCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name, this.chunkCount ).withUserId(this.userID));
+            this.eventSender.send(new CompleteCopyUpload(this.jobID, this.depositId, ((Device) this.archiveStore).name, this.optChunkNumber).withUserId(this.userID));
         } finally {
             // Stop the tracking thread
             tracker.stop();
             trackerThread.join();
         }
 
-        logger.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
+        log.info("Copied: " + progress.dirCount + " directories, " + progress.fileCount + " files, " + progress.byteCount + " bytes");
         // wait for all 3 to finish
 
-        if (this.chunkCount > 0 && archiveIds.get(this.archiveStoreId) == null) {
-            logger.info("ArchiveId is: " + archiveId);
+        if (this.optChunkNumber.isPresent() && archiveIds.get(this.archiveStoreId) == null) {
+            log.info("ArchiveId is: " + archiveId);
             String separator = FileSplitter.CHUNK_SEPARATOR;
-            logger.info("Separator is: " + separator);
+            log.info("Separator is: " + separator);
             int beginIndex = archiveId.lastIndexOf(separator);
-            logger.info("BeginIndex is: " + beginIndex);
+            log.info("BeginIndex is: " + beginIndex);
             archiveId = archiveId.substring(0, beginIndex);
-            logger.debug("Add to archiveIds: key: "+this.archiveStoreId+" ,value:"+archiveId);
+            log.debug("Add to archiveIds: key: "+this.archiveStoreId+" ,value:"+archiveId);
             archiveIds.put(archiveStoreId, archiveId);
-            logger.debug("archiveIds: "+archiveIds);
-        } else if(this.chunkCount == 0) {
+            log.debug("archiveIds: "+archiveIds);
+        } else if(!this.optChunkNumber.isPresent()) {
             archiveIds.put(archiveStoreId, archiveId);
         }
-        logger.debug("Device thread completed: " + archiveId);
+        log.debug("DeviceTracker task completed: " + archiveId);
         return archiveIds;
     }
 
@@ -77,63 +91,28 @@ public class DeviceTracker implements Callable {
         return this.jobID;
     }
 
-    public void setJobID(String jobID) {
-        this.jobID = jobID;
-    }
-
     public String getDepositId() {
         return this.depositId;
-    }
-
-    public void setDepositId(String depositId) {
-        this.depositId = depositId;
     }
 
     public File getTarFile() {
         return this.tarFile;
     }
 
-    public void setTarFile(File tarFile) {
-        this.tarFile = tarFile;
-    }
-
-    public EventSender getEventStream() {
-        return this.eventStream;
-    }
-
-    public void setEventStream(EventSender eventStream) {
-        this.eventStream = eventStream;
-    }
-
-    public int getChunkCount() {
-        return this.chunkCount;
-    }
-
-    public void setChunkCount(int chunkCount) {
-        this.chunkCount = chunkCount;
+    public EventSender getEventSender() {
+        return this.eventSender;
     }
 
     public String getArchiveStoreId() {
         return this.archiveStoreId;
     }
 
-    public void setArchiveStoreId(String archiveStoreId) {
-        this.archiveStoreId = archiveStoreId;
-    }
-
     public ArchiveStore getArchiveStore() {
         return this.archiveStore;
-    }
-
-    public void setArchiveStore(ArchiveStore archiveStore) {
-        this.archiveStore = archiveStore;
     }
 
     public String getUserID() {
         return this.userID;
     }
 
-    public void setUserID(String userID) {
-        this.userID = userID;
-    }
 }

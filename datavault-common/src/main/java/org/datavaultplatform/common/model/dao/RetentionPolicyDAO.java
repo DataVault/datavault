@@ -1,17 +1,33 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
+import java.util.Optional;
 import org.datavaultplatform.common.model.RetentionPolicy;
+import org.datavaultplatform.common.model.RetentionPolicy_;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface RetentionPolicyDAO {
+@Repository
+@Transactional
+public interface RetentionPolicyDAO extends AbstractDAO<RetentionPolicy,Integer> {
 
-    public void save(RetentionPolicy retentionPolicy);
-    
-    public void update(RetentionPolicy retentionPolicy);
-    
-    public List<RetentionPolicy> list();
+  @Override
+  default List<RetentionPolicy> list() {
+    return findAll(Sort.by(Order.asc(RetentionPolicy_.NAME)));
+  }
 
-    public RetentionPolicy findById(String Id);
+  @Override
+  @EntityGraph(RetentionPolicy.EG_RETENTION_POLICY)
+  Optional<RetentionPolicy> findById(Integer id);
 
-    public void delete(String id);
+  @Override
+  @EntityGraph(RetentionPolicy.EG_RETENTION_POLICY)
+  List<RetentionPolicy> findAll();
+
+  @Override
+  @EntityGraph(RetentionPolicy.EG_RETENTION_POLICY)
+  List<RetentionPolicy> findAll(Sort sort);
 }

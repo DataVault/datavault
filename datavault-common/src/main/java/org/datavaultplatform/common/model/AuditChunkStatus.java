@@ -3,18 +3,40 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.datavaultplatform.common.response.AuditChunkStatusInfo;
-import org.hibernate.annotations.GenericGenerator;
-
-import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
+import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import org.datavaultplatform.common.response.AuditChunkStatusInfo;
+import org.hibernate.Hibernate;
+import org.hibernate.annotations.GenericGenerator;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="AuditChunkStatus")
+@NamedEntityGraph(
+    name=AuditChunkStatus.EG_AUDIT_CHUNK_STATUS,
+    attributeNodes = {
+        @NamedAttributeNode(AuditChunkStatus_.AUDIT),
+        @NamedAttributeNode(value = AuditChunkStatus_.DEPOSIT_CHUNK, subgraph = "subDepositChunk")
+    },
+    subgraphs = @NamedSubgraph(
+        name="subDepositChunk",
+        attributeNodes = @NamedAttributeNode(DepositChunk_.DEPOSIT)
+    )
+)
 public class AuditChunkStatus {
 
+    public static final String EG_AUDIT_CHUNK_STATUS = "eg.AuditChunkStatus.1";
     // Deposit Identifier
     @Id
     @GeneratedValue(generator = "uuid")
@@ -65,9 +87,9 @@ public class AuditChunkStatus {
 
     // Additional properties might go here - e.g. format
 
-    public AuditChunkStatus() {};
+    public AuditChunkStatus() {}
 
-    public String getID() { return id; };
+    public String getID() { return id; }
 
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
@@ -165,4 +187,22 @@ public class AuditChunkStatus {
                 note
         );
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+            return false;
+        }
+        AuditChunkStatus that = (AuditChunkStatus) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
 }

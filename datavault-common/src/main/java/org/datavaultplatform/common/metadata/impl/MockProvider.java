@@ -12,8 +12,8 @@ import org.datavaultplatform.common.metadata.Provider;
 
 public class MockProvider implements Provider {
 
-    List<Dataset> datasets = new ArrayList<>();
-    Map<String, String> projectIds = new HashMap<>();
+    final List<Dataset> datasets = new ArrayList<>();
+    final Map<String, String> projectIds = new HashMap<>();
     
     public MockProvider() {
         for (int i = 1; i < 6; i++) {

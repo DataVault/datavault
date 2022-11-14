@@ -1,0 +1,32 @@
+# Created by David Hay 31Oct2022
+# Used to create custom docker image for Jenkins docker builds
+#
+# used 'eclipse-temurin:8u345-b01-jdk' as base java8 image because it has addgroup/adduser/gpasswd
+#
+# added User[jenkins] and Groups[jenkins,docker]
+# added User[jenkins] to Group[docker]
+# all the User/Group stuff is to ensure that -
+# the jenkins user within this container can access /var/run/docker.sock
+#
+# added tools jq, curl and ping to help with testing and diagnostics
+#
+FROM eclipse-temurin:8
+ARG JENKINS_UID
+ARG JENKINS_GID
+ARG DOCKER_GID
+USER root
+#
+# install tools
+#
+RUN apt update
+RUN apt install -y jq
+RUN apt install -y curl
+RUN apt install -y iputils-ping
+#
+# tweak users and groups to ensure 'jenkins' user can access docker socket (/var/run/docker.sock)
+#
+RUN addgroup docker --gid $DOCKER_GID
+RUN addgroup jenkins --gid $JENKINS_GID
+RUN adduser --disabled-password --gecos "Jenkins User" -u $JENKINS_UID --gid $JENKINS_GID jenkins
+RUN gpasswd --add jenkins docker
+USER jenkins

@@ -7,8 +7,27 @@ import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import lombok.Builder;
+import lombok.Data;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.task.Context;
+import org.datavaultplatform.common.task.Context.AESMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,25 +49,34 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.EnumSet;
+import javax.annotation.PostConstruct;
+import java.security.Security;
+import java.security.Provider;
+import org.springframework.util.Assert;
+
+import com.google.common.base.Splitter;
+import java.util.stream.Collectors;
+import lombok.SneakyThrows;
+import org.apache.commons.codec.digest.DigestUtils;
 
 public class Encryption {
 
     private static final Logger logger = LoggerFactory.getLogger(Encryption.class);
 
-    public static int BUFFER_SIZE = 50 * 1024; // 50KB
-    public static int SMALL_BUFFER_SIZE = 1024; // 1KB
-    public static int AES_BLOCK_SIZE = 16; // 16 Bytes
+    public static final int BUFFER_SIZE = 50 * 1024; // 50KB
+    public static final int SMALL_BUFFER_SIZE = 1024; // 1KB
+    public static final int AES_BLOCK_SIZE = 16; // 16 Bytes
+    public static final int AES_KEY_SIZE = 256;
+    public static final int IV_SIZE = 96;
+    public static final int IV_CBC_SIZE = 16;
+    public static final int TAG_BIT_LENGTH = 128;
+    public static final String GCM_ALGO_TRANSFORMATION_STRING = "AES/GCM/NoPadding";
+    public static final String CBC_ALGO_TRANSFORMATION_STRING = "AES/CBC/PKCS5Padding";
+    public static final String CTR_ALGO_TRANSFORMATION_STRING = "AES/CTR/PKCS5Padding";
+    public static final String CCM_ALGO_TRANSFORMATION_STRING = "AES/CCM/NoPadding";
+    private static final String KEYSTORE_TYPE = "JCEKS";
 
     private static int encBufferSize = SMALL_BUFFER_SIZE;
-
-    public static int AES_KEY_SIZE = 256;
-    public static int IV_SIZE = 96;
-    public static int IV_CBC_SIZE = 16;
-    public static int TAG_BIT_LENGTH = 128;
-    public static String GCM_ALGO_TRANSFORMATION_STRING = "AES/GCM/NoPadding";
-    public static String CBC_ALGO_TRANSFORMATION_STRING = "AES/CBC/PKCS5Padding";
-    public static String CTR_ALGO_TRANSFORMATION_STRING = "AES/CTR/PKCS5Padding";
-    public static String CCM_ALGO_TRANSFORMATION_STRING = "AES/CCM/NoPadding";
 
     private static boolean vaultEnable;
     private static String vaultAddress;
@@ -58,7 +86,6 @@ public class Encryption {
     private static String vaultPrivateKeyEncryptionKeyName;
     private static String vaultSslPEMPath;
 
-    private static final String KEYSTORE_TYPE = "JCEKS";
     private static boolean keystoreEnable;
     private static String keystorePath;
     private static String keystorePassword;
@@ -79,20 +106,18 @@ public class Encryption {
     }
 
     public static SecretKey generateSecretKey(int key_size) throws NoSuchAlgorithmException {
-        SecretKey aesKey = null;
-
         // Specifying algorithm key will be used for
         KeyGenerator keygen = KeyGenerator.getInstance("AES");
         // Specifying Key size to be used, Note: This would need JCE Unlimited
         // Strength to be installed explicitly
         keygen.init(key_size);
-        aesKey = keygen.generateKey();
+        SecretKey aesKey = keygen.generateKey();
 
         return aesKey;
     }
 
     /**
-     * Generate a Initialisation Vector using default size (i.e. Encryption.IV_SIZE)
+     * Generate an Initialisation Vector using default size (i.e. Encryption.IV_SIZE)
      *
      * @return Initialisation Vector
      */
@@ -101,13 +126,13 @@ public class Encryption {
     }
 
     /**
-     * Generate a Initialisation Vector
+     * Generate an Initialisation Vector
      *
      * @param size in bytes for the iv
      * @return Initialisation Vector
      */
     public static byte[] generateIV(int size) {
-        byte iv[] = new byte[size];
+        byte[] iv = new byte[size];
         SecureRandom secRandom = new SecureRandom();
         secRandom.nextBytes(iv); // SecureRandom initialized using self-seeding
         return iv;
@@ -122,7 +147,7 @@ public class Encryption {
     }
 
     /**
-     * Initialise a AES-GCM Cipher with Bouncy Castle Provider
+     * Initialise an AES-GCM Cipher with Bouncy Castle Provider
      *
      * GCM is a very fast but arguably complex combination of CTR mode and GHASH,
      * a MAC over the Galois field with 2^128 elements.
@@ -131,18 +156,17 @@ public class Encryption {
      *
      * @param opmode -
      * @param aesKey - secret key
-     * @param iv - Initailisation Vector
+     * @param iv - Initialisation Vector
      * @param aadData - additional authenticated data (optional)
      * @return
      */
     public static Cipher initGCMCipher(int opmode, SecretKey aesKey, byte[] iv, byte[] aadData) throws Exception {
-        Cipher c = null;
 
         // Initialize GCM Parameters
         GCMParameterSpec gcmParamSpec = new GCMParameterSpec(TAG_BIT_LENGTH, iv);
 
-        // Transformation specifies algortihm, mode of operation and padding
-        c = Cipher.getInstance(GCM_ALGO_TRANSFORMATION_STRING, "BC");
+        // Transformation specifies algorithm, mode of operation and padding
+        Cipher c = Cipher.getInstance(GCM_ALGO_TRANSFORMATION_STRING, "BC");
 
         c.init(opmode, aesKey, gcmParamSpec, new SecureRandom());
 
@@ -159,7 +183,7 @@ public class Encryption {
     }
 
     /**
-     * Initialise a AES-CBC Cipher
+     * Initialise an AES-CBC Cipher
      *
      * CBC has an IV and thus needs randomness every time a message is encrypted,
      * changing a part of the message requires re-encrypting everything after the change,
@@ -173,13 +197,12 @@ public class Encryption {
      * @return
      */
     public static Cipher initCBCCipher(int opmode, SecretKey aesKey, byte[] iv) throws Exception {
-        Cipher c = null;
 
         // Initialize Parameters
         IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
 
-        // Transformation specifies algortihm, mode of operation and padding
-        c = Cipher.getInstance(CBC_ALGO_TRANSFORMATION_STRING);
+        // Transformation specifies algorithm, mode of operation and padding
+        Cipher c = Cipher.getInstance(CBC_ALGO_TRANSFORMATION_STRING);
 
         c.init(opmode, aesKey, ivParameterSpec);
 
@@ -189,7 +212,7 @@ public class Encryption {
 
     /**
      * Perform crypto using a 1024 Bytes buffer.
-     * Depending on the Cipher provided will performe encrytion or Decryption.
+     * Depending on the Cipher provided will perform Encryption or Decryption.
      *
      * @param inputFile
      * @param outputFile
@@ -197,17 +220,15 @@ public class Encryption {
      * @throws Exception
      */
     public static void doByteBufferFileCrypto(File inputFile, File outputFile, Cipher cipher) throws Exception {
-        byte[] plainBuf = new byte[encBufferSize];
-        try (InputStream in = Files.newInputStream(inputFile.toPath());
-                OutputStream out = Files.newOutputStream(outputFile.toPath())) {
-            int nread;
-            while ((nread = in.read(plainBuf)) > 0) {
-                byte[] encBuf = cipher.update(plainBuf, 0, nread);
-                out.write(encBuf);
-            }
-            byte[] encBuf = cipher.doFinal();
-            out.write(encBuf);
+
+        try (InputStream is = new FileInputStream(inputFile);
+            OutputStream os = new CipherOutputStream(new BufferedOutputStream(new FileOutputStream(outputFile)), cipher)) {
+            logger.info("starting crypto copy from [{}] to [{}] ", inputFile, outputFile);
+            IOUtils.copy(is, os);
+            logger.info("finished crypto from [{}] to [{}] ", inputFile, outputFile);
         }
+        logger.info("Converted input[{}/{}]output[{}/{}]", inputFile, inputFile.length(),
+            outputFile, outputFile.length());
     }
 
     @Deprecated
@@ -276,7 +297,8 @@ public class Encryption {
 //        String encodedKey = vault.logical().read(context.getVaultKeyPath()).getData().get(context.getVaultKeyName());
 
         final String jsonString = new String(
-                vault.logical().read(getVaultKeyPath()).getRestResponse().getBody(), "UTF-8");
+                vault.logical().read(getVaultKeyPath()).getRestResponse().getBody(),
+            StandardCharsets.UTF_8);
 
 //        logger.debug("jsonString: " + jsonString);
 
@@ -303,8 +325,8 @@ public class Encryption {
                 .address(getVaultAddress())
                 .token(getVaultToken());
 
-        System.out.println("Vault PEM path: '"+getVaultSslPEMPath()+"'");
-        System.out.println("context.getVaultSslPEMPath().trim().equals(\"\"): "+getVaultSslPEMPath().equals(""));
+        logger.info("Vault PEM path: '"+getVaultSslPEMPath()+"'");
+        logger.info("context.getVaultSslPEMPath().trim().equals(\"\"): "+getVaultSslPEMPath().equals(""));
 
         if(getVaultSslPEMPath().trim().equals("")) {
             logger.debug("Won't use SSL Certificate.");
@@ -330,54 +352,91 @@ public class Encryption {
         return vault;
     }
 
+    public static byte[] encryptFile(Context context, File file)  throws Exception {
+        return encryptFile(context.getEncryptionMode(), file);
+    }
     /**
      * Perform encryption on file
      *
+     * @param aesMode - the aes encryption mode
      * @param file - file to be encrypted
      * @return generated IV
      * @throws Exception
      */
-    public static byte[] encryptFile(Context context, File file)  throws Exception {
-        return doCrypto(context, file, Cipher.ENCRYPT_MODE, null);
+    public static byte[] encryptFile(AESMode aesMode, File file)  throws Exception {
+        return doCrypto(aesMode, file, Cipher.ENCRYPT_MODE, null);
     }
 
+    public static void decryptFile(Context context, File file, byte[] iv)  throws Exception {
+        decryptFile(context.getEncryptionMode(), file, iv);
+    }
     /**
      * Perform decryption on file
-     *
+     * @param aesMode - the aes encryption mode
      * @param file - encrypted file
      * @param iv - Initialisation Vector used for the encryption
      * @throws Exception
      */
-    public static void decryptFile(Context context, File file, byte[] iv)  throws Exception {
-        doCrypto(context, file, Cipher.DECRYPT_MODE, iv);
+    public static void decryptFile(AESMode aesMode, File file, byte[] iv)  throws Exception {
+        doCrypto(aesMode, file, Cipher.DECRYPT_MODE, iv);
     }
 
-    private static byte[] doCrypto(Context context, File file, int encryptMode, byte[] iv) throws Exception {
+    public static String getDigestForIv(byte[] iv) {
+        StringBuilder digest = new StringBuilder();
+        digest.append(iv.length);
+        digest.append("-");
+
+        // We use md5 here because it's short. We don't need a secure hash
+        String md5 = Splitter.fixedLength(5)
+            .splitToStream(DigestUtils.md5Hex(iv))
+            .collect(Collectors.joining("-"));
+
+        digest.append(md5);
+        return digest.toString();
+    }
+
+    private static byte[] doCrypto(AESMode aesMode, File file, int encryptMode, byte[] iv) throws Exception {
 
         if(encryptMode == Cipher.ENCRYPT_MODE) {
             // Generating IV
             iv = Encryption.generateIV(Encryption.IV_SIZE);
+        } else {
+            String ivDigest = getDigestForIv(iv);
+            String base64iv = Base64.getEncoder().encodeToString(iv);
+            logger.info("Decrypting [{}] using iv-byte[] with digest [{}]/bas64[{}]", file, ivDigest, base64iv);
         }
 
-        Cipher cipher;
-        switch (context.getEncryptionMode()) {
-            case GCM:
-                cipher = Encryption.initGCMCipher(getVaultDataEncryptionKeyName(), encryptMode, iv); break;
+        final Cipher cipher;
+        switch (aesMode) {
             case CBC:
                 cipher = Encryption.initCBCCipher(getVaultDataEncryptionKeyName(), encryptMode, iv); break;
+            case GCM:
             default:
                 cipher = Encryption.initGCMCipher(getVaultDataEncryptionKeyName(), encryptMode, iv); break;
         }
 
-        File tempEncryptedFile = new File(file.getAbsoluteFile() + ".encrypted");
+        File tempFile = new File(file.getAbsoluteFile() + ".temp");
+        String action = encryptMode == Cipher.ENCRYPT_MODE ? "encrypting" : "decrypting";
+        logger.info("{} chunk: [{}][{}]bytes", action, file.getName(), file.length());
+        try {
+            long before = file.length();
+            Encryption.doByteBufferFileCrypto(file, tempFile, cipher);
+            long expected = encryptMode == Cipher.ENCRYPT_MODE ? before + 16 : before - 16;
+            long actual = tempFile.length();
+            if (actual != expected) {
+                logger.warn("Problem:{}:[{}]expected[{}]got[{}]", action, file, expected, actual);
+            }
+        } catch (Exception ex) {
+            String msg = "Error while " + action + " file: " + file.getName();
+            throw new CryptoException(msg, ex);
+        }
 
-        logger.debug("Encrypting/Decrypting chunk: " + file.getName());
-        Encryption.doByteBufferFileCrypto(file, tempEncryptedFile, cipher);
+        logger.info("Action[{}]Before[{}/{}]After[{}/{}]", action, file, file.length(), tempFile, tempFile.length());
 
         // todo : move this out of here and do it for all chunks after the encryption stage in order to allow the
         // todo : whole step to be restarted in a future ideal world.
         FileUtils.deleteQuietly(file);
-        FileUtils.moveFile(tempEncryptedFile, file);
+        FileUtils.moveFile(tempFile, file);
 
         return iv;
     }
@@ -441,8 +500,17 @@ public class Encryption {
         try (FileInputStream fis = new FileInputStream(Encryption.getKeystorePath())) {
             ks.load(fis, Encryption.getKeystorePassword().toCharArray());
         }
-        SecretKey secretKey = (SecretKey) ks.getKey(alias, Encryption.getKeystorePassword().toCharArray());
+        final SecretKey secretKey;
 
+        if (alias == null) {
+            secretKey = null;
+        } else {
+            secretKey = (SecretKey) ks.getKey(alias,
+                Encryption.getKeystorePassword().toCharArray());
+        }
+
+        Assert.isTrue(secretKey != null, () -> String.format("No key found in keystore[%s] for KeyName[%s]", Encryption.getKeystorePath(), alias));
+        logger.info("found non-null SecretKey for key-alias [{}]", alias);
         return secretKey;
     }
 
@@ -525,11 +593,47 @@ public class Encryption {
     }
 
     public void setKeystorePath(String path) {
-        keystorePath = path;
+        staticSetKeystorePath(path);
     }
 
     public static void staticSetKeystorePath(String path) {
         keystorePath = path;
+        if (keystorePath == null) {
+            logger.warn("KeyStore path is null.");
+            return;
+        }
+        try {
+            File file = new File(keystorePath);
+            if (!file.exists()) {
+                logger.warn("KeyStore[{}] does not exist.", keystorePath);
+                return;
+            }
+            if (!file.canRead()) {
+                logger.warn("KeyStore[{}] is not readable.", keystorePath);
+                return;
+            }
+            try (FileInputStream fis = new FileInputStream(file)) {
+                String sha1 = DigestUtils.sha1Hex(fis).toLowerCase();
+                PosixFileAttributeView view = Files.getFileAttributeView(file.toPath(), PosixFileAttributeView.class);
+                PosixFileAttributes attrs = view.readAttributes();
+
+                long size = attrs.size();
+                logger.info("KeyStore[{}] size[{}].", file.getCanonicalPath(), size);
+
+                FileTime creationTime = attrs.creationTime();
+                FileTime lastModifiedTime = attrs.lastModifiedTime();
+                FileTime lastAccessTime = attrs.lastAccessTime();
+
+                logger.info("KeyStore[{}] creationTime    [{}]", file.getCanonicalPath(), creationTime);
+                logger.info("KeyStore[{}] lastModifiedTime[{}]", file.getCanonicalPath(), lastModifiedTime);
+                logger.info("KeyStore[{}] lastAccessTime  [{}]", file.getCanonicalPath(), lastAccessTime);
+
+                logger.info("KeyStore[{}] SHA-1[{}]", file.getCanonicalPath(), sha1);
+            }
+        } catch (Exception ex) {
+            String msg = String.format("Problem getting SHA-1 digest of [%s].", keystorePath);
+            logger.error(msg, ex);
+        }
     }
 
     public static String getKeystorePassword() {
@@ -547,10 +651,9 @@ public class Encryption {
     /**
      * Allow running encryption method outside of the app.
      * @param args a string array of arguments to the main class, should be the name of the method.
-     * @throws IOException if an IOException occurs
-     * @throws InterruptedException if an InterruptedException occurs to a thread
      */
     public static void main(String [] args) {
+        addBouncyCastleSecurityProvider();
         String methodName = args[0];
 
         if(methodName.equals("generateSecretKey")){
@@ -558,46 +661,218 @@ public class Encryption {
             try {
                 key = Encryption.generateSecretKey();
             } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
+                logger.error("unexpected exception",e);
+                System.exit(1);
             }
             String encodedKey = Base64.getEncoder().encodeToString(key.getEncoded());
-            System.out.println(encodedKey);
+            logger.info(encodedKey);
         }
         if(methodName.equals("generateSecretKeyAndAddToJCEKS")){
-            JsonObject jsonObject = null;
-            try {
-                FileReader jsonReader = new FileReader(args[1]);
-                jsonObject = Json.parse(jsonReader).asObject();
-            } catch (Exception e){
-                e.printStackTrace();
+            String jsonFileName = args[1];
+            generateSecretKeyAndAddToJCEKS(jsonFileName);
+        }
+    }
+
+    static void generateSecretKeyAndAddToJCEKS(String keyStoreFileName) {
+        try {
+            KeyStoreInfo keyStoreInfo = extractKeyStoreInfo(keyStoreFileName);
+            generateSecretKeyAndAddToJCEKS(keyStoreInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    static KeyStoreInfo extractKeyStoreInfo(String keyStoreFileName) throws Exception {
+        try (FileReader jsonReader = new FileReader(keyStoreFileName)) {
+            JsonObject jsonObject = Json.parse(jsonReader).asObject();
+            String path = jsonObject.get("path").asString();
+            String password = jsonObject.get("password").asString();
+            JsonArray aliasesRaw = jsonObject.get("key_aliases").asArray();
+            List<String> aliases = new ArrayList<>();
+            aliasesRaw.forEach(jValue -> aliases.add(jValue.asString()));
+            return KeyStoreInfo.builder()
+                .path(path)
+                .password(password)
+                .aliases(aliases)
+                .build();
+        }
+    }
+
+    static void generateSecretKeyAndAddToJCEKS(KeyStoreInfo info) throws Exception {
+        Encryption.staticSetKeystorePath(info.getPath());
+        Encryption.staticSetKeystorePassword(info.getPassword());
+        List<String> aliases = info.getAliases();
+        SecretKey[] keys = new SecretKey[aliases.size()];
+        for(int i = 0; i < aliases.size(); i++) {
+            String alias = aliases.get(i);
+            logger.info("Creating " + alias + " to " + Encryption.getKeystorePath());
+            keys[i] = Encryption.generateSecretKey();
+            Encryption.saveSecretKeyToKeyStore(alias, keys[i]);
+        }
+
+        for(int i = 0; i < aliases.size(); i++) {
+            String alias = aliases.get(i);
+            SecretKey returnKey = Encryption.getSecretKeyFromKeyStore(alias);
+            if (!returnKey.equals(keys[i])) {
+                System.err.println("ERROR! The " + alias + " key return by KeyStore is different!");
             }
+            String encodedKey = Base64.getEncoder().encodeToString(keys[i].getEncoded());
+            logger.info(alias + ": " + encodedKey);
+        }
+    }
 
-            Encryption.staticSetKeystorePath(jsonObject.get("path").asString());
-            Encryption.staticSetKeystorePassword(jsonObject.get("password").asString());
+    @PostConstruct
+    public static void addBouncyCastleSecurityProvider() {
+        logger.info("Adding Bouncy Castle Provider.");
+        Provider[] before = Security.getProviders();
+        int result = Security.addProvider(new BouncyCastleProvider());
+        if (result == -1) {
+            logger.warn("BouncyCastle already added!");
+        }
+        Provider[] after = Security.getProviders();
+        logger.info("before[{}] result[{}] after[{}]", before.length, result, after.length);
+        String bcVersion = BouncyCastleProvider
+            .class
+            .getPackage()
+            .getImplementationVersion();
+        logger.info("Added Bouncy Castle Provider [{}].", bcVersion);
+        checkKeyNamesAreNotSame();
+        logKeyDigests();
+        initialised = true;
+    }
 
-            JsonArray aliases = jsonObject.get("key_aliases").asArray();
+    private static boolean initialised = false;
 
-            try {
-                SecretKey keys[] = new SecretKey[aliases.size()];
-                for(int i = 0; i < aliases.size(); i++) {
-                    String alias = aliases.get(i).toString();
-                    System.out.println("Creating " + alias +" to " + Encryption.getKeystorePath());
-                    keys[i] = Encryption.generateSecretKey();
-                    Encryption.saveSecretKeyToKeyStore(alias, keys[i]);
-                }
+    public static boolean isInitialised() {
+        return initialised;
+    }
 
-                for(int i = 0; i < aliases.size(); i++) {
-                    String alias = aliases.get(i).toString();
-                    SecretKey returnKey = Encryption.getSecretKeyFromKeyStore(alias);
-                    if (!returnKey.equals(keys[i])) {
-                        System.err.println("ERROR! The " + alias + " key return by KeyStore is different!");
-                    }
-                    String encodedKey = Base64.getEncoder().encodeToString(keys[i].getEncoded());
-                    System.out.println(alias + ": " + encodedKey);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+    public static void checkKeyNamesAreNotSame() {
+        String keyNameData = Encryption.getVaultDataEncryptionKeyName();
+        if (StringUtils.isNotBlank(keyNameData)) {
+            String keyNamePrivateKey = Encryption.getVaultPrivateKeyEncryptionKeyName();
+            // we are only concerned when Not Blank AND the same
+            if (keyNameData.equalsIgnoreCase(keyNamePrivateKey)) {
+                logger.warn("The two encryption key names are the same - [{}]", keyNameData);
             }
+        }
+    }
+
+    @Data
+    @Builder
+    static class KeyStoreInfo {
+        final String path;
+        final String password;
+        final List<String> aliases;
+    }
+
+    public static void logKeyDigests() {
+        if (!keystoreEnable && !vaultEnable) {
+            logger.warn("no vault or keystore enabled");
+            return;
+        }
+        String nameData = Encryption.getVaultDataEncryptionKeyName();
+        String digestData = getDigestForDataEncryptionKey();
+        logger.info("key[Data]name[{}]digest[{}]", nameData, digestData);
+
+        String nameSSH  = Encryption.getVaultPrivateKeyEncryptionKeyName();
+        String digestSSH  = getDigestForSSHEncryptionKey();
+        logger.info("key[SSH ]name[{}]digest[{}]", nameSSH, digestSSH);
+
+        logKeyStoreCreationDates();
+    }
+
+    @SneakyThrows
+    public static String getDigestForDataEncryptionKey() {
+        return getDigestForKeyName(getVaultDataEncryptionKeyName());
+    }
+
+    @SneakyThrows
+    public static String getDigestForSSHEncryptionKey() {
+        return getDigestForKeyName(getVaultPrivateKeyEncryptionKeyName());
+    }
+
+    private static String getDigestForKeyName(String name){
+        if (name == null) {
+            return null;
+        }
+        try {
+            SecretKey key = getSecretKey(name);
+            return getKeyDigest(key);
+        } catch(Exception ex) {
+            logger.warn("Problem getting digest for key name [{}]message[{}]", name, ex.getMessage());
+            return null;
+        }
+    }
+    /*
+     * An example KeyDigest would be formatted :  '10A94-34EDB-45662-CD92F-BEB02-29CCC-09145-0122F'
+     * This digest is only meant for information purposes. To allow humans a way of checking
+     * which keys are actually being used.
+     * For extra security - we only use "part" of the base16 value of the key for the digest.
+     */
+    public static String getKeyDigest(SecretKey key) {
+        String encoded =  new BigInteger(1, key.getEncoded()).toString(16).toUpperCase();
+        String digest = encoded.substring(0,40);
+        String readableDigest = Splitter.fixedLength(5)
+            .splitToStream(digest)
+            .collect(Collectors.joining("-"));
+        return readableDigest;
+    }
+
+    @SneakyThrows
+    private static KeyStore loadKeyStore() {
+        KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
+        try (FileInputStream fis = new FileInputStream(Encryption.getKeystorePath())) {
+            ks.load(fis, Encryption.getKeystorePassword().toCharArray());
+        } catch ( FileNotFoundException fnfe ) {
+            ks.load(null, Encryption.getKeystorePassword().toCharArray());
+        }
+        return ks;
+    }
+
+    private static void updateMapWithCreationDate(String keyName, KeyStore ks, Map<String,Date> keyNameToDateMap){
+        try {
+            if (keyName != null && ks.containsAlias(keyName)) {
+                Date date = ks.getCreationDate(keyName);
+                logger.info("Encryption Alias[{}]CreationDate[{}]", keyName,
+                    date);
+                keyNameToDateMap.put(keyName, date);
+            } else {
+                logger.warn("No Key for [{}]", keyName);
+            }
+        } catch (Exception ex) {
+            logger.warn("Unable to get Creation Date for key [{}]", keyName, ex);
+        }
+    }
+
+    @SneakyThrows
+    private static Set<String> getAliases(KeyStore ks){
+        Set<String> result = new TreeSet<>();
+        Enumeration<String> eAliases = ks.aliases();
+        while(eAliases.hasMoreElements()){
+            String alias  = eAliases.nextElement();
+            result.add(alias);
+        }
+        return result;
+    }
+
+    @SneakyThrows
+    private static void logKeyStoreCreationDates() {
+        if(!keystoreEnable){
+            return;
+        }
+        Map<String, Date> result = new HashMap<>();
+        String keyStorePath = getKeystorePath();
+        try {
+            logger.info("Loading keystore from [{}]...", keyStorePath);
+            KeyStore ks = loadKeyStore();
+
+            getAliases(ks).forEach(alias -> {
+                updateMapWithCreationDate(alias, ks, result);
+            });
+        } catch (Exception e) {
+            logger.warn("ProblemLoadingKeyStoreFile[{}]", getKeystorePath());
         }
     }
 }

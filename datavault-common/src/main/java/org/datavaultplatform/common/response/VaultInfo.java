@@ -622,7 +622,7 @@ public class VaultInfo {
         // if vault owner is null set isowner to true
         // if vault owner is the same as the logged in user set isowner to true
         // if vault owner is different ot hte logged in user set to false
-        Boolean isOwner = true;
+        boolean isOwner = true;
         if (this.getOwnerId() != null && ! this.getOwnerId().equals(this.getUserID())) {
             isOwner = false;
         }

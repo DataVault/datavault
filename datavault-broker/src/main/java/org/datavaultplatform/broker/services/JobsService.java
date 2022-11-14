@@ -3,14 +3,22 @@ package org.datavaultplatform.broker.services;
 import org.datavaultplatform.common.model.Job;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.dao.JobDAO;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
+@Transactional
 public class JobsService {
 
-    private JobDAO jobDAO;
-    
+    private final JobDAO jobDAO;
+
+    public JobsService(JobDAO jobDAO) {
+        this.jobDAO = jobDAO;
+    }
+
     public List<Job> getJobs() {
         return jobDAO.list();
     }
@@ -30,13 +38,9 @@ public class JobsService {
     }
     
     public Job getJob(String jobID) {
-        return jobDAO.findById(jobID);
-    }
-    
-    public void setJobDAO(JobDAO jobDAO) {
-        this.jobDAO = jobDAO;
+        return jobDAO.findById(jobID).orElse(null);
     }
 
-    public int count() { return jobDAO.count(); }
+    public long count() { return jobDAO.count(); }
 }
 

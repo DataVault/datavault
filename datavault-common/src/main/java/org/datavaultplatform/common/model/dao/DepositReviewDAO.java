@@ -1,20 +1,22 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.DepositReview;
-
 import java.util.List;
+import java.util.Optional;
+import org.datavaultplatform.common.model.DepositReview;
+import org.datavaultplatform.common.model.dao.custom.DepositReviewCustomDAO;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface DepositReviewDAO {
+@Repository
+@Transactional
+public interface DepositReviewDAO extends BaseDAO<DepositReview>, DepositReviewCustomDAO {
 
-    public void save(DepositReview depositReview);
-    
-    public void update(DepositReview depositReview);
-    
-    public List<DepositReview> list();
+  @Override
+  @EntityGraph(DepositReview.EG_DEPOSIT_REVIEW)
+  Optional<DepositReview> findById(String id);
 
-    public DepositReview findById(String Id);
-
-    public List<DepositReview> search(String query);
-
-    public int count();
+  @Override
+  @EntityGraph(DepositReview.EG_DEPOSIT_REVIEW)
+  List<DepositReview> findAll();
 }

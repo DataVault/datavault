@@ -3,20 +3,18 @@ package org.datavaultplatform.common.event.deposit;
 import java.util.HashMap;
 
 import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
 import org.datavaultplatform.common.event.Event;
 
 @Entity
-public class ComputedChunks extends Event {
+public class ComputedChunks extends Event implements ChunksDigestEvent {
     
     @Column(name="chunksDigest", columnDefinition="LONGBLOB")
-    public HashMap<Integer, String> chunksDigest;
+    public HashMap<Integer, String> chunksDigest = new HashMap<>();
     public String digestAlgorithm;
     
-    ComputedChunks() {};
+    public ComputedChunks() {
+    }
     public ComputedChunks(
             String jobId,
             String depositId,

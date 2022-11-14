@@ -1,7 +1,6 @@
 package org.datavaultplatform.common.event;
 
 import javax.persistence.Entity;
-import javax.persistence.Table;
 
 import static org.datavaultplatform.common.event.Error.Type.*;
 
@@ -10,7 +9,7 @@ import static org.datavaultplatform.common.event.Error.Type.*;
 @Entity
 public class Error extends Event {
 
-    public enum Type {DEPOSIT, AUDIT;}
+    public enum Type {DEPOSIT, AUDIT}
 
     public Error() { }
 

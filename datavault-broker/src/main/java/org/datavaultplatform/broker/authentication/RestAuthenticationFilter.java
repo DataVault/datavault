@@ -1,5 +1,11 @@
 package org.datavaultplatform.broker.authentication;
 
+
+
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
+import java.lang.reflect.Field;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -16,6 +22,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
  * User: Robin Taylor
@@ -32,12 +39,19 @@ public class RestAuthenticationFilter extends AbstractAuthenticationProcessingFi
     private static final Logger logger = LoggerFactory.getLogger(RestAuthenticationFilter.class);
 
     // Can be overridden in Spring config
-    private String principalRequestHeader = "X-UserID";
+    private String principalRequestHeader = HEADER_USER_ID;
 
 
-    public RestAuthenticationFilter() {
-        // Doesn't matter what goes in here as it should be overridden in the Spring config
-        super("/dummy");
+    public RestAuthenticationFilter(RequestMatcher matcher) {
+        super(matcher);
+    }
+
+    @SneakyThrows
+    public RequestMatcher getRequestMatcher() {
+        Field f = AbstractAuthenticationProcessingFilter.class.getDeclaredField("requiresAuthenticationRequestMatcher");
+        f.setAccessible(true);
+        RequestMatcher result = (RequestMatcher)f.get(this);
+        return result;
     }
 
 
@@ -94,7 +108,7 @@ public class RestAuthenticationFilter extends AbstractAuthenticationProcessingFi
     }
 
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-            throws AuthenticationException, IOException, ServletException {
+            throws AuthenticationException, ServletException {
 
         Object principal = getPreAuthenticatedPrincipal(request);
         Object credentials = getPreAuthenticatedCredentials(request);

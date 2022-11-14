@@ -1,5 +1,7 @@
 package org.datavaultplatform.common.metadata.impl;
 
+import java.nio.charset.StandardCharsets;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.metadata.Provider;
 
@@ -12,9 +14,10 @@ import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import org.w3c.dom.*;
 
+@Slf4j
 public class PureProvider implements Provider {
     
-    private String endpoint;
+    private final String endpoint;
     
     // A metadata provider for the Pure REST API (datasets)
     
@@ -28,7 +31,7 @@ public class PureProvider implements Provider {
             String response = query(endpoint + "?rendering=xml_long&associatedPersonEmployeeIds.value=" + userID);
             return parse(response);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
         }
         
         return null;
@@ -45,7 +48,7 @@ public class PureProvider implements Provider {
                 return d;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
         }
         
         return null;
@@ -62,7 +65,8 @@ public class PureProvider implements Provider {
             conn.setRequestProperty("Authorization", basicAuth);
         }
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(),
+            StandardCharsets.UTF_8));
         String inputLine;
        
         StringBuilder sb = new StringBuilder();
@@ -78,12 +82,13 @@ public class PureProvider implements Provider {
     static class PureNamespaceContent implements NamespaceContext {
         @Override
         public String getNamespaceURI(String prefix) {
-            if (prefix.equals("dataset")) {
-                return "http://atira.dk/schemas/pure4/wsdl/template/dataset/stable";
-            } else if (prefix.equals("core")) {
-                return "http://atira.dk/schemas/pure4/model/core/stable";
-            } else if (prefix.equals("stab")) {
-                return "http://atira.dk/schemas/pure4/model/template/dataset/stable";
+            switch (prefix) {
+                case "dataset":
+                    return "http://atira.dk/schemas/pure4/wsdl/template/dataset/stable";
+                case "core":
+                    return "http://atira.dk/schemas/pure4/model/core/stable";
+                case "stab":
+                    return "http://atira.dk/schemas/pure4/model/template/dataset/stable";
             }
             return XMLConstants.NULL_NS_URI;
         }
@@ -92,7 +97,7 @@ public class PureProvider implements Provider {
             throw new UnsupportedOperationException();
         }
         @Override
-        public Iterator getPrefixes(String namespaceURI) {
+        public Iterator<String> getPrefixes(String namespaceURI) {
             throw new UnsupportedOperationException();
         }
     }
@@ -122,7 +127,7 @@ public class PureProvider implements Provider {
                 Dataset dataset = new Dataset();
                 
                 // Get the uuid of this dataset
-                Node content = (Node)contents.item(i);
+                Node content = contents.item(i);
                 dataset.setID(content.getAttributes().getNamedItem("uuid").getTextContent());
                 
                 // Get the title of this dataset
@@ -134,7 +139,7 @@ public class PureProvider implements Provider {
                 datasets.add(dataset);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unexpected exception",e);
         }
         
         return datasets;

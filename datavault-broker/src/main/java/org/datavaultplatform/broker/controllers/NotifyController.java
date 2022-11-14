@@ -1,38 +1,38 @@
 package org.datavaultplatform.broker.controllers;
 
+import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.services.EventService;
 import org.datavaultplatform.broker.services.ClientsService;
 import org.datavaultplatform.broker.services.UsersService;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.datavaultplatform.common.request.CreateClientEvent;
 import org.datavaultplatform.common.event.client.*;
 import org.datavaultplatform.common.model.Agent;
-import org.datavaultplatform.common.model.Client;
-import org.datavaultplatform.common.model.User;
 
 @RestController
 @Api(name="Notify", description = "Inform the broker about an event")
+@Slf4j
 public class NotifyController {
     
-    private EventService eventService;
-    private ClientsService clientsService;
-    private UsersService usersService;
-    
-    public void setEventService(EventService eventService) {
-        this.eventService = eventService;
-    }
+    private final EventService eventService;
+    private final ClientsService clientsService;
+    private final UsersService usersService;
 
-    public void setClientsService(ClientsService clientsService) {
+    @Autowired
+    public NotifyController(EventService eventService, ClientsService clientsService,
+        UsersService usersService) {
+        this.eventService = eventService;
         this.clientsService = clientsService;
-    }
-    
-    public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
     }
-    
+
     @ApiMethod(
             path = "/notify/login}",
             verb = ApiVerb.PUT,
@@ -41,13 +41,14 @@ public class NotifyController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
     })
-    @RequestMapping(value = "/notify/login", method = RequestMethod.PUT)
-    public String login(@RequestHeader(value = "X-UserID", required = true) String userID,
-                        @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
-                        @RequestBody CreateClientEvent clientEvent) throws Exception {
+    @PutMapping("/notify/login")
+    public String login(@RequestHeader(HEADER_USER_ID) String userID,
+                        @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
+                        @RequestBody CreateClientEvent clientEvent) {
         
+        log.info("USER [{}] logged IN from Client [{}]", userID, clientKey);
         Login loginEvent = new Login(clientEvent.getRemoteAddress(), clientEvent.getUserAgent());
         loginEvent.setUser(usersService.getUser(userID));
         loginEvent.setAgentType(Agent.AgentType.WEB);
@@ -65,13 +66,15 @@ public class NotifyController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
     })
-    @RequestMapping(value = "/notify/logout", method = RequestMethod.PUT)
-    public String logout(@RequestHeader(value = "X-UserID", required = true) String userID,
-                         @RequestHeader(value = "X-Client-Key", required = true) String clientKey,
-                         @RequestBody CreateClientEvent clientEvent) throws Exception {
-        
+    @PutMapping("/notify/logout")
+    public String logout(@RequestHeader(HEADER_USER_ID) String userID,
+                         @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
+                         @RequestBody CreateClientEvent clientEvent) {
+
+        log.info("USER [{}] logged OUT from Client [{}]", userID, clientKey);
+
         Logout logoutEvent = new Logout(clientEvent.getRemoteAddress());
         logoutEvent.setUser(usersService.getUser(userID));
         logoutEvent.setAgentType(Agent.AgentType.WEB);

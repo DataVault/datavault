@@ -2,18 +2,32 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import javax.persistence.*;
-
-import org.hibernate.annotations.GenericGenerator;
-
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
+import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.storage.Device;
+import org.datavaultplatform.common.util.StorageClassUtils;
+import org.hibernate.Hibernate;
+import org.hibernate.annotations.GenericGenerator;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="ArchiveStores")
-public class ArchiveStore {
+@NamedEntityGraph(name=ArchiveStore.EG_ARCHIVE_STORE)
+@Slf4j
+public class ArchiveStore implements DataStore {
+    public static final String EG_ARCHIVE_STORE = "eg.ArchiveStore.1";
 
     // Storage Identifier
     @Id
@@ -43,7 +57,8 @@ public class ArchiveStore {
     // Properties to use for this storage system
     // NOTE: this is not a secure mechanism for storing credentials!
     @Lob
-    private HashMap<String,String> properties;
+    @Column(name="properties", columnDefinition="LONGBLOB")
+    private HashMap<String,String> properties = new HashMap<>();
     
     public ArchiveStore() {}
     public ArchiveStore(String storageClass, HashMap<String,String> properties, String label, boolean retrieveEnabled) {
@@ -82,4 +97,32 @@ public class ArchiveStore {
     public void setRetrieveEnabled(boolean retrieveEnabled) {
         this.retrieveEnabled = retrieveEnabled;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+            return false;
+        }
+        ArchiveStore that = (ArchiveStore) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+    /*
+    This method takes an ArchiveStore and returns the specific instance of that Archive Store
+     */
+    @JsonIgnore
+    public Device getDevice() {
+
+        Device device = StorageClassUtils.createStorage(getStorageClass(), getProperties(), Device.class);
+        return device;
+    }
+
 }

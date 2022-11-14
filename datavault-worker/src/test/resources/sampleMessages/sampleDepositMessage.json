@@ -1,0 +1,40 @@
+{
+  "taskClass" : "org.datavaultplatform.worker.tasks.Deposit",
+  "jobID" : null,
+  "properties" : {
+    "bagId" : "bf73a7f5-42d1-4c3f-864a-a171af8373d4",
+    "vaultMetadata" : "\"VAULT\":\"META-DATA\"",
+    "depositId" : "deposit-id-123",
+    "depositMetadata" : "\"DEPOSIT\":\"META-DATA\"",
+    "userId" : "used-id-one"
+  },
+  "fileStorePaths" : [ "FILE-STORE-SRC-ID/src-path-1" ],
+  "fileUploadPaths" : [ "src-file-upload-handle" ],
+  "archiveFileStores" : [ {
+    "id" : "ARCHIVE-STORE-DST-ID",
+    "storageClass" : "org.datavaultplatform.common.storage.impl.LocalFileSystem",
+    "label" : "ARCHIVE-STORE-DST-LABEL",
+    "retrieveEnabled" : true,
+    "properties" : {
+      "rootPath" : "/tmp/dv/dest"
+    }
+  } ],
+  "userFileStoreProperties" : {
+    "FILE-STORE-SRC-ID" : {
+      "rootPath" : "/tmp/dv/src"
+    }
+  },
+  "userFileStoreClasses" : {
+    "FILE-STORE-SRC-ID" : "org.datavaultplatform.common.storage.impl.LocalFileSystem"
+  },
+  "chunkFilesDigest" : null,
+  "tarIV" : null,
+  "chunksIVs" : null,
+  "encTarDigest" : null,
+  "encChunksDigest" : null,
+  "lastEvent" : null,
+  "chunksToAudit" : null,
+  "archiveIds" : null,
+  "restartArchiveIds" : { },
+  "redeliver" : false
+}

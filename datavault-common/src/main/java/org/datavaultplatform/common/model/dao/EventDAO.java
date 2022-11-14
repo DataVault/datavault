@@ -1,21 +1,22 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
+import java.util.Optional;
 import org.datavaultplatform.common.event.Event;
-import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.dao.custom.EventCustomDAO;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface EventDAO {
-    
-    public void save(Event event);
-    
-    public List<Event> list();
-    
-    public List<Event> list(String sort);
+@Repository
+@Transactional
+public interface EventDAO extends BaseDAO<Event>, EventCustomDAO {
 
-    public Event findById(String Id);
+  @Override
+  @EntityGraph(Event.EG_EVENT)
+  Optional<Event> findById(String id);
 
-    public List<Event> findVaultEvents(Vault vault);
-    
-    public int count();
-    
+  @Override
+  @EntityGraph(Event.EG_EVENT)
+  List<Event> findAll();
 }

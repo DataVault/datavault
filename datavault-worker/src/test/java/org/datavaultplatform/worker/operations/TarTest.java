@@ -1,31 +1,25 @@
 package org.datavaultplatform.worker.operations;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class TarTest {
     private static File packagerResourcesDir;
     private static File bigdataResourcesDir;
     private static File testDir;
     
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
         String resourcesPath = System.getProperty("user.dir") + File.separator + "src" +
                 File.separator + "test" + File.separator + "resources";
@@ -35,16 +29,13 @@ public class TarTest {
         testDir = new File(resourcesPath + File.separator + "tmp");
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        try{
+        try {
             testDir.mkdir();
-        }
-        catch(SecurityException se) {
+        } catch(SecurityException se) {
             fail(se.getMessage());
         }
-        
-        BasicConfigurator.configure();
     }
     
     @Test
@@ -209,16 +200,13 @@ public class TarTest {
                 TimeUnit.MILLISECONDS.toMillis(endTime - startTime) + " sec");
     }
     
-    @After
+    @AfterEach
     public void tearDown() {
-        try{
+        try {
             FileUtils.deleteDirectory(testDir);
-        }
-        catch(IOException ex){
+        } catch(IOException ex) {
             fail(ex.getMessage());
         }
-
-        BasicConfigurator.resetConfiguration();
     }
 
 }

@@ -1,0 +1,25 @@
+{
+  "chunksDir": "<chunks-dir>",
+  "tarDir": "<tar-output-dir>",
+  "keystorePath": "/path/to/jce.ks",
+  "keystorePassword": "<password>",
+  "dataKeyName": "<data-key-name>",
+  "chunkData": {
+    "1": {
+      "iv": "S/LKxvBFGDvv53m47s7XCGscrBWY5JLdQrhgkJARoM/Cbg10TsgVvNPvhlm2s1tHgR1fXF44VbU430sfr5DC8N8IxNydb1HI20kcmkm+1WRqjn1P624o0rTlJmFZ/lCk",
+      "encryptedChecksum": "754072B38BF455C56B0D5188DB440E1D977F85A7",
+      "decryptedChecksum": "30F508F3CA1EDAF2B9B7DFAFE08F72139ED1F7B2"
+    },
+    "2": {
+      "iv": "e2sWJckFVh0NH9FUywpmna9M33EaqRqXNdl4EFbAJc1WDpRyjnBBzJdih5hz+P7u4lxc4nOJJpJytZMPCehkCu0zG0aGgfwCZ3n41wuboFKRwtYK/KJI1D3ZMbtJJWMq",
+      "encryptedChecksum": "127F8D92F0F02F9675F1B26FDBEA14620993861E",
+      "decryptedChecksum": "DD5D932B4F95504DE8F4212B310C743A43CC3137"
+    },
+    "3": {
+      "iv": "0UHUGwuEFU9VKHvVUQKEm/hIOle7/QlIu8Ipx41cuRNH/6d5rrmmeawiiqqtaERxdmAxmJA1hAncsH29OXrX2L+YXwrbMz5FolQUhv8iVvvaMAdbwfOu/TSv+4Mvbz+z",
+      "encryptedChecksum": "87749E3A8E0D4DACEF4D87A6F58E7BE7ED597559",
+      "decryptedChecksum": "C1421413BA9C562E87782F5D6EF7FCD7478D67B4"
+    }
+  },
+  "tarChecksum": "ACC05BDB3200E3CD9B8BE56B1164F4205A2EE4D6"
+}

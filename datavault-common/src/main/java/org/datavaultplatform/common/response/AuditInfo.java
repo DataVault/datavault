@@ -3,7 +3,6 @@ package org.datavaultplatform.common.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.datavaultplatform.common.model.Audit;
-import org.datavaultplatform.common.model.DepositChunk;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 

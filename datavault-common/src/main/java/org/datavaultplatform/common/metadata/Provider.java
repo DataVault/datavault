@@ -11,8 +11,8 @@ external metadata record can be linked to a deposit.
 */
 
 public interface Provider {
-    public List<Dataset> getDatasetsForUser(String userID);
-    public Dataset getDataset(String id);
-	public Map<String, String> getPureProjectIds();
-	public String getPureProjectId(String datasetId);
+    List<Dataset> getDatasetsForUser(String userID);
+    Dataset getDataset(String id);
+	Map<String, String> getPureProjectIds();
+	String getPureProjectId(String datasetId);
 }

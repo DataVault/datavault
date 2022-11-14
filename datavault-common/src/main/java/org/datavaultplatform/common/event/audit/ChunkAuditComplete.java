@@ -7,7 +7,8 @@ import javax.persistence.Entity;
 @Entity
 public class ChunkAuditComplete extends Event {
 
-    public ChunkAuditComplete(){};
+    public ChunkAuditComplete(){}
+
     public ChunkAuditComplete(String jobId, String auditId, String chunkId, String archiveId, String location) {
         super(jobId, auditId, chunkId, archiveId, location, "Chunk Audit Complete: "+chunkId);
         this.chunkId = chunkId;

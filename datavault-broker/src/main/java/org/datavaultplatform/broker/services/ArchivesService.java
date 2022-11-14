@@ -7,13 +7,19 @@ import org.datavaultplatform.common.model.dao.ArchiveDAO;
 
 import java.util.Date;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
+@Service
+@Transactional
 public class ArchivesService {
 
-    private ArchiveDAO archiveDAO;
+    private final ArchiveDAO archiveDAO;
 
-    public void setArchiveDAO(ArchiveDAO archiveDAO) {
+    @Autowired
+    public ArchivesService(ArchiveDAO archiveDAO) {
         this.archiveDAO = archiveDAO;
     }
 
@@ -22,7 +28,7 @@ public class ArchivesService {
     }
 
     public Archive getArchive(String archiveId) {
-        return archiveDAO.findById(archiveId);
+        return archiveDAO.findById(archiveId).orElse(null);
     }
 
     public void addArchive(Deposit deposit, ArchiveStore archiveStore, String archiveId) {
@@ -41,5 +47,11 @@ public class ArchivesService {
 
     public void updateArchive(Archive archive) {
         archiveDAO.update(archive);
+    }
+    public void saveArchive(Archive archive) {
+        archiveDAO.save(archive);
+    }
+    public Archive findById(String id) {
+        return archiveDAO.findById(id).orElse(null);
     }
 }

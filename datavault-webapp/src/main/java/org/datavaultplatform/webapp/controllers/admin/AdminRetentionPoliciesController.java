@@ -1,10 +1,10 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
-import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -16,13 +16,15 @@ import org.springframework.web.bind.annotation.*;
  */
 
 @Controller
+@ConditionalOnBean(RestService.class)
 public class AdminRetentionPoliciesController {
 
     private final Logger logger = LoggerFactory.getLogger(AdminRetentionPoliciesController.class);
 
-    private RestService restService;
+    private final RestService restService;
 
-    public void setRestService(RestService restService) {
+    public AdminRetentionPoliciesController(
+        RestService restService) {
         this.restService = restService;
     }
 
@@ -35,7 +37,7 @@ public class AdminRetentionPoliciesController {
     }
 
     @RequestMapping(value = "/admin/retentionpolicies/delete/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity deleteRetentionPoliciesListing(ModelMap model, @PathVariable("id") String policyId) throws Exception {
+    public ResponseEntity<Void> deleteRetentionPoliciesListing(ModelMap model, @PathVariable("id") String policyId) throws Exception {
 
         // todo : Check if it is being used and if so then error.
 

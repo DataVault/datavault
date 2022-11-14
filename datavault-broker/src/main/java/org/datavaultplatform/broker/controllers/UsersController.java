@@ -1,11 +1,15 @@
 package org.datavaultplatform.broker.controllers;
 
+import static org.datavaultplatform.common.util.Constants.HEADER_CLIENT_KEY;
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
 import org.datavaultplatform.broker.services.AdminService;
 import org.datavaultplatform.broker.services.UsersService;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiVerb;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,15 +19,13 @@ import java.util.List;
 @Api(name="Users", description = "Interact with DataVault Users")
 public class UsersController {
 
-    private AdminService adminService;
+    private final AdminService adminService;
     
-    private UsersService usersService;
+    private final UsersService usersService;
 
-    public void setAdminService(AdminService adminService) {
+    @Autowired
+    public UsersController(AdminService adminService, UsersService usersService) {
         this.adminService = adminService;
-    }
-
-    public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
     }
 
@@ -35,10 +37,10 @@ public class UsersController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID")
+            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID")
     })
-    @RequestMapping(value = "/users", method = RequestMethod.GET)
-    public List<User> getUsers(@RequestHeader(value = "X-UserID", required = true) String userID) {
+    @GetMapping( "/users")
+    public List<User> getUsers(@RequestHeader(HEADER_USER_ID) String userID) {
         return usersService.getUsers();
     }
 
@@ -50,10 +52,10 @@ public class UsersController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
-            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
+            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID"),
+            @ApiHeader(name=HEADER_CLIENT_KEY, description="DataVault API Client Key")
     })
-    @RequestMapping(value = "/users", method = RequestMethod.POST)
+    @PostMapping("/users")
     public User addUser(@RequestBody User user) {
         usersService.addUser(user);
         return user;
@@ -67,25 +69,25 @@ public class UsersController {
             responsestatuscode = "200 - OK"
     )
     @ApiHeaders(headers={
-            @ApiHeader(name="X-UserID", description="DataVault Broker User ID"),
-            @ApiHeader(name="X-Client-Key", description="DataVault API Client Key")
+            @ApiHeader(name=HEADER_USER_ID, description="DataVault Broker User ID"),
+            @ApiHeader(name=HEADER_CLIENT_KEY, description="DataVault API Client Key")
     })
-    @RequestMapping(value = "/users/{userid}", method = RequestMethod.GET)
+    @GetMapping("/users/{userid}")
     public User getUser(@PathVariable("userid") @ApiPathParam(name = "User ID", description = "The User ID to retrieve") String queryUserID) {
         return usersService.getUser(queryUserID);
     }
 
-    @RequestMapping(value = "/auth/users/exists", method = RequestMethod.POST)
+    @PostMapping("/auth/users/exists")
     public Boolean exists(@RequestBody ValidateUser validateUser) {
         return usersService.getUser(validateUser.getUserid()) != null;
     }
 
-    @RequestMapping(value = "/auth/users/isvalid", method = RequestMethod.POST)
+    @PostMapping("/auth/users/isvalid")
     public Boolean validateUser(@RequestBody ValidateUser validateUser) {
         return usersService.validateUser(validateUser.getUserid(), validateUser.getPassword());
     }
 
-    @RequestMapping(value = "/auth/users/isadmin", method = RequestMethod.POST)
+    @PostMapping("/auth/users/isadmin")
     public Boolean isAdmin(@RequestBody ValidateUser validateUser) {
         return adminService.isAdminUser(validateUser.getUserid());
     }

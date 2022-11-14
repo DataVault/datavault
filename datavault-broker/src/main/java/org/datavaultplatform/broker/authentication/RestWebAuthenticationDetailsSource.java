@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.authentication;
 
+import org.datavaultplatform.common.util.Constants;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
@@ -14,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 public class RestWebAuthenticationDetailsSource extends WebAuthenticationDetailsSource {
 
     // Can be overridden in Spring config
-    private String clientKeyRequestHeader = "X-Client-Key";
+    private String clientKeyRequestHeader = Constants.HEADER_CLIENT_KEY;
 
     public String getClientKeyRequestHeader() {
         return clientKeyRequestHeader;

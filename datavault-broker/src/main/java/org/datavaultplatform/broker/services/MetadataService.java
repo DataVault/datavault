@@ -1,106 +1,111 @@
 package org.datavaultplatform.broker.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
-
-import java.io.IOException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.loc.repository.bagit.domain.Bag;
+import gov.loc.repository.bagit.domain.Manifest;
+import gov.loc.repository.bagit.reader.BagReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import gov.loc.repository.bagit.BagFactory;
-import gov.loc.repository.bagit.Bag;
-import gov.loc.repository.bagit.Bag.BagPartFactory;
-import gov.loc.repository.bagit.Manifest;
-import gov.loc.repository.bagit.ManifestReader;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.FileFixity;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
+@Transactional
+@Slf4j
 public class MetadataService {
 
-    private String metaDir;
-    
-    public void setMetaDir(String metaDir) {
+    private static final TypeReference<HashMap<String, String>> TYPE_REF =
+        new TypeReference<HashMap<String, String>>() {};
+
+    private final String metaDir;
+
+    public MetadataService(@Value("${metaDir}") String metaDir) {
         this.metaDir = metaDir;
     }
-    
-    private HashMap<String, String> getFileTypes(Path bag) {
-       
+
+    private Map<String, String> getFileTypes(Path bagPath) {
         try {
-            HashMap<String, String> fileTypes;
-            File fileTypeMetaFile = bag.resolve("metadata").resolve("filetype.json").toFile();
-            ObjectMapper mapper = new ObjectMapper();
-            TypeReference<HashMap<String,String>> typeRef = new TypeReference<HashMap<String,String>>() {};
-            fileTypes = mapper.readValue(fileTypeMetaFile, typeRef);
-            
+
+            File fileTypeMetaFile = bagPath
+                .resolve("metadata")
+                .resolve("filetype.json")
+                .toFile();
+
+            Map<String, String> fileTypes = new ObjectMapper().readValue(fileTypeMetaFile, TYPE_REF);
+
             return fileTypes;
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+
+        } catch (Exception ex) {
+            log.error("problem finding file types in bag [{}]", bagPath, ex);
+            return Collections.EMPTY_MAP;
         }
     }
-    
-    public ArrayList<FileFixity> getManifest(String bagId) throws IOException {
-        
-        ArrayList<FileFixity> files = new ArrayList<>();
-        
+
+    public List<FileFixity> getManifest(String bagId) {
+        List<FileFixity> files;
         try {
             Path metaBagPath = Paths.get(metaDir, bagId);
-            
+
             // Get the file type metadata
-            HashMap<String, String> fileTypes = getFileTypes(metaBagPath);
-            
-            BagFactory factory = new BagFactory();
-            Bag bag = factory.createBag(metaBagPath.toFile());
-            bag.loadFromFiles();
+            Map<String, String> fileTypes = getFileTypes(metaBagPath);
 
-            BagPartFactory partFactory = factory.getBagPartFactory();
+            BagReader reader = new BagReader();
+            Bag bag = reader.read(metaBagPath);
 
-            List<Manifest> manifests = bag.getPayloadManifests();
+            Set<Manifest> manifests = bag.getPayLoadManifests();
 
-            for (Manifest manifest : manifests) {
-
-                String fixityAlgorithm = manifest.getAlgorithm().bagItAlgorithm;
-                
-                Path manifestPath = metaBagPath.resolve(manifest.getFilepath());
-                File manifestFile = manifestPath.toFile();
-                FileInputStream stream = new FileInputStream(manifestFile);
-
-                // TODO: Can we specify this as StandardCharsets.UTF_8 ?
-                ManifestReader reader = partFactory.createManifestReader(stream, "utf-8");
-
-                while (reader.hasNext()) {
-                    ManifestReader.FilenameFixity file = reader.next();
-                    
-                    String filePath = file.getFilename();
-                    String bagDataPrefix = "data/";
-                    if (filePath.startsWith(bagDataPrefix)) {
-                        filePath = filePath.replaceFirst(bagDataPrefix, "");
-                    }
-                    
-                    String fileType = "";
-                    if (fileTypes.containsKey(filePath)) {
-                        fileType = fileTypes.get(filePath);
-                    }
-                    
-                    files.add(new FileFixity(filePath,
-                                             file.getFixityValue(),
-                                             fixityAlgorithm,
-                                             fileType));
-                }
-                reader.close();
-            }
-        } catch (Exception e) {
-            // TODO: how should we handle "missing data" here?
-            e.printStackTrace();
+            files = manifests.stream()
+                .flatMap(manifest -> getFileFixityForManifest(manifest, fileTypes).stream())
+                .collect(Collectors.toCollection(ArrayList::new));
+        } catch (Exception ex) {
+            log.error("problem getting manifest for [{}]", bagId, ex);
+            files = Collections.EMPTY_LIST;
         }
-        
         return files;
     }
-}
 
+    private List<FileFixity> getFileFixityForManifest(Manifest manifest,
+        Map<String, String> fileTypes) {
+        List<FileFixity> result = new ArrayList<>();
+
+        manifest.getFileToChecksumMap().forEach((filePath, checksum) -> {
+            FileFixity fileFixity = getFileFixity(manifest, fileTypes, filePath, checksum);
+            result.add(fileFixity);
+        });
+
+        return result;
+    }
+
+    private FileFixity getFileFixity(Manifest manifest, Map<String, String> fileTypes, Path filePath,
+        String checksum) {
+
+        String fileName = filePath.getFileName().toString();
+
+        String bagDataPrefix = "data/";
+        if (fileName.startsWith(bagDataPrefix)) {
+            fileName = fileName.replaceFirst(bagDataPrefix, "");
+        }
+
+        String fileType = fileTypes.getOrDefault(fileName, "");
+
+        FileFixity fileFixity = new FileFixity(
+            fileName,
+            checksum,
+            manifest.getAlgorithm().getBagitName(),
+            fileType);
+
+        return fileFixity;
+    }
+}

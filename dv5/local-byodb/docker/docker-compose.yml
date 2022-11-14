@@ -1,0 +1,40 @@
+version: "3.7"
+services:
+  rabbit:
+    container_name: dv-byodb-rabbit
+    image: rabbitmq:3.10.7-management-alpine
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbit
+      - RABBITMQ_DEFAULT_PASS=twin2port
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - v-local-byodb-rabbit:/var/lib/rabbitmq
+  email:
+    container_name: dv-byodb-email
+    image: mailhog/mailhog:v1.0.1
+    restart: always
+    ports:
+     - "1025:1025" #SMTP
+     - "8025:8025" #HTTP
+  ldap:
+    container_name: dv-byodb-ldap
+    image: bitnami/openldap:latest
+    restart: always
+    environment:
+      LDAP_ROOT: "o=myu.ed"
+      LDAP_PASSWORD: "test-password"
+      LDAP_CUSTOM_LDIF_DIR: "/custom"
+    ports:
+      - "1389:1389"
+    expose:
+      - "1389"
+    volumes:
+      # Where our ldif files are stored
+      - $LOCAL_LDAP_DIR/custom:/custom
+      - $LOCAL_LDAP_DIR/schema:/schema
+
+volumes:
+  v-local-byodb-rabbit:

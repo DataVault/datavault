@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.io.FileUtils;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.response.DepositSize;
@@ -7,17 +8,22 @@ import org.datavaultplatform.webapp.model.FancytreeNode;
 import org.datavaultplatform.webapp.services.RestService;
 import java.util.ArrayList;
 import javax.servlet.http.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.*;
 import org.apache.commons.codec.binary.Base64;
 
 @Controller
+@ConditionalOnBean(RestService.class)
+@Slf4j
 public class FilesController {
 
-    private RestService restService;
-    
-    public void setRestService(RestService restService) {
+    private final RestService restService;
+
+    @Autowired
+    public FilesController(RestService restService) {
         this.restService = restService;
     }
 
@@ -88,13 +94,13 @@ public class FilesController {
         String[] filePaths = request.getParameterValues("filepath[]");
 
         for(String filePath : filePaths){
-            System.out.println("filePaths: " + filePath);
+            log.info("filePaths: " + filePath);
         }
 
         DepositSize result = restService.checkDepositSize(filePaths);
         Boolean success = result.getResult();
         String max = FileUtils.getGibibyteSizeStr(result.getMax());
-        System.out.println("Max deposit (web): " + max);
+        log.info("Max deposit (web): " + max);
         return "{ \"success\":\"" + success + "\", \"max\":\"" + max + "\"}";
     }
     
@@ -111,7 +117,7 @@ public class FilesController {
         String fileUploadHandle = request.getParameter("fileUploadHandle");
         
         /*
-        System.out.println("webapp fileupload:" +
+        logger.info("webapp fileupload:" +
                 " flowChunkNumber=" + flowChunkNumber +
                 " flowTotalChunks=" + flowTotalChunks +
                 " flowChunkSize=" + flowChunkSize +

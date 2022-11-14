@@ -1,17 +1,25 @@
 package org.datavaultplatform.broker.controllers;
 
+import static org.datavaultplatform.common.util.Constants.HEADER_USER_ID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.*;
+import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.response.DepositInfo;
 import org.datavaultplatform.common.response.EventInfo;
+import org.datavaultplatform.common.response.VaultInfo;
+import org.datavaultplatform.common.storage.StorageConstants;
+import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
 import org.datavaultplatform.common.task.Task;
 import org.jsondoc.core.annotation.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,122 +34,81 @@ import java.util.Map;
 @Api(name="Deposits", description = "Interact with DataVault Deposits")
 public class DepositsController {
 
-    private VaultsService vaultsService;
-    private DepositsService depositsService;
-    private RetrievesService retrievesService;
-    private MetadataService metadataService;
-    private ExternalMetadataService externalMetadataService;
-    private FilesService filesService;
-    private UsersService usersService;
-    private ArchiveStoreService archiveStoreService;
-    private JobsService jobsService;
-    private AdminService adminService;
-    private Sender sender;
+    private final VaultsService vaultsService;
+    private final DepositsService depositsService;
+    private final RetrievesService retrievesService;
+    private final MetadataService metadataService;
+    private final ExternalMetadataService externalMetadataService;
+    private final FilesService filesService;
+    private final UsersService usersService;
+    private final ArchiveStoreService archiveStoreService;
+    private final JobsService jobsService;
+    private final AdminService adminService;
+    private final Sender sender;
     private String optionsDir;
-	private String tempDir;
-    private String bucketName;
-    private String region;
-    private String awsAccessKey;
-    private String awsSecretKey;
-    private String tsmRetryTime;
-    private String occRetryTime;
-    private String tsmMaxRetries;
-    private String occMaxRetries;
-    private String ociNameSpace;
-    private String ociBucketName;
+	  private final String tempDir;
+    private final String bucketName;
+    private final String region;
+    private final String awsAccessKey;
+    private final String awsSecretKey;
+    private final String tsmRetryTime;
+    private final String occRetryTime;
+    private final String tsmMaxRetries;
+    private final String occMaxRetries;
+    private final String ociNameSpace;
+    private final String ociBucketName;
+
+    private final ObjectMapper mapper;
 
     private static final Logger logger = LoggerFactory.getLogger(DepositsController.class);
-    
-    public void setVaultsService(VaultsService vaultsService) {
+
+    @Autowired
+    public DepositsController(VaultsService vaultsService, DepositsService depositsService,
+        RetrievesService retrievesService, MetadataService metadataService,
+        ExternalMetadataService externalMetadataService, FilesService filesService,
+        UsersService usersService, ArchiveStoreService archiveStoreService, JobsService jobsService,
+        AdminService adminService, Sender sender,
+        @Value("${tempDir:#{null}}") String tempDir,
+        @Value("${s3.bucketName:#{null}}") String bucketName,
+        @Value("${s3.region:#{null}}") String region,
+        @Value("${s3.awsAccessKey:#{null}}") String awsAccessKey,
+        @Value("${s3.awsSecretKey:#{null}}") String awsSecretKey,
+        @Value("${tsmRetryTime:#{null}}") String tsmRetryTime,
+        @Value("${occRetryTime:#{null}}") String occRetryTime,
+        @Value("${tsmMaxRetries:#{null}}") String tsmMaxRetries,
+        @Value("${occMaxRetries:#{null}}") String occMaxRetries,
+        @Value("${ociNameSpace:#{null}}") String ociNameSpace,
+        @Value("${ociBucketName:#{null}}") String ociBucketName,
+        ObjectMapper mapper) {
         this.vaultsService = vaultsService;
-    }
-
-    public void setDepositsService(DepositsService depositsService) {
         this.depositsService = depositsService;
-    }
-
-    public void setRetrievesService(RetrievesService retrievesService) {
         this.retrievesService = retrievesService;
-    }
-
-    public void setMetadataService(MetadataService metadataService) {
         this.metadataService = metadataService;
-    }
-    
-    public void setExternalMetadataService(ExternalMetadataService externalMetadataService) {
         this.externalMetadataService = externalMetadataService;
-    }
-
-    public void setFilesService(FilesService filesService) {
         this.filesService = filesService;
-    }
-
-    public void setArchiveStoreService(ArchiveStoreService archiveStoreService) {
-        this.archiveStoreService = archiveStoreService;
-    }
-
-    public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
-    }
-
-    public void setJobsService(JobsService jobsService) {
+        this.archiveStoreService = archiveStoreService;
         this.jobsService = jobsService;
-    }
-
-    public void setAdminService(AdminService adminService) {
         this.adminService = adminService;
-    }
-
-    public void setSender(Sender sender) {
         this.sender = sender;
-    }
-    
-    public void setTempDir(String tempDir) {
-		this.tempDir = tempDir;
-	}
-    
-    public void setOptionsDir(String optionsDir) {
-    	this.optionsDir = optionsDir;
-    }
-    
-    public void setBucketName(String bucketName) {
-    	this.bucketName = bucketName;
-    }
-
-    public void setRegion(String region) {
-    	this.region = region;
-    }
-
-    public void setAwsAccessKey(String awsAccessKey) {
-    	this.awsAccessKey = awsAccessKey;
-    }
-
-    public void setAwsSecretKey(String awsSecretKey) {
-    	this.awsSecretKey = awsSecretKey;
-    }
-
-    public void setTsmRetryTime(String tsmRetryTime) {
+        this.tempDir = tempDir;
+        this.bucketName = bucketName;
+        this.region = region;
+        this.awsAccessKey = awsAccessKey;
+        this.awsSecretKey = awsSecretKey;
         this.tsmRetryTime = tsmRetryTime;
-    }
-
-    public void setOccRetryTime(String occRetryTime) {
         this.occRetryTime = occRetryTime;
-    }
-
-    public void setTsmMaxRetries(String tsmMaxRetries) {
         this.tsmMaxRetries = tsmMaxRetries;
-    }
-
-    public void setOccMaxRetries(String occMaxRetries) {
         this.occMaxRetries = occMaxRetries;
+        this.ociNameSpace = ociNameSpace;
+        this.ociBucketName = ociBucketName;
+        this.mapper = mapper;
     }
 
-    public void setOciNameSpace(String ociNameSpace) { this.ociNameSpace = ociNameSpace; }
 
-    public void setOciBucketName(String ociBucketName) { this.ociBucketName = ociBucketName; }
 
-    @RequestMapping(value = "/deposits/{depositid}", method = RequestMethod.GET)
-    public DepositInfo getDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/deposits/{depositid}")
+    public DepositInfo getDeposit(@RequestHeader(HEADER_USER_ID) String userID,
                                   @PathVariable("depositid") String depositID) throws Exception {
 
         User user = usersService.getUser(userID);
@@ -149,8 +116,8 @@ public class DepositsController {
         return depositsService.getUserDeposit(user, depositID).convertToResponse();
     }
 
-    @RequestMapping(value = "/deposits", method = RequestMethod.POST)
-    public ResponseEntity<Object> addDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @PostMapping("/deposits")
+    public ResponseEntity<DepositInfo> addDeposit(@RequestHeader(HEADER_USER_ID) String userID,
                                              @RequestBody CreateDeposit createDeposit) throws Exception {
 
         Deposit deposit = new Deposit();
@@ -160,11 +127,7 @@ public class DepositsController {
 
         deposit.setName(createDeposit.getName());
         deposit.setDescription(createDeposit.getDescription());
-        if (createDeposit.getHasPersonalData().toLowerCase().equals("yes")) {
-            deposit.setHasPersonalData(true);
-        } else {
-            deposit.setHasPersonalData(false);
-        }
+        deposit.setHasPersonalData("yes".equalsIgnoreCase(createDeposit.getHasPersonalData()));
         deposit.setPersonalDataStatement(createDeposit.getPersonalDataStatement());
         deposit.setDepositPaths(new ArrayList<>());
 
@@ -184,9 +147,9 @@ public class DepositsController {
 
         archiveStores = this.addArchiveSpecificOptions(archiveStores);
 
-        System.out.println("Deposit File Path: ");
+        logger.info("Deposit File Path: ");
         for (DepositPath dPath : deposit.getDepositPaths()){
-            System.out.println("\t- " + dPath.getFilePath());
+            logger.info("\t- " + dPath.getFilePath());
         }
 
         // Add the deposit object
@@ -200,8 +163,8 @@ public class DepositsController {
         return new ResponseEntity<>(deposit.convertToResponse(), HttpStatus.OK);
     }
     
-    @RequestMapping(value = "/deposits/{depositid}/manifest", method = RequestMethod.GET)
-    public List<FileFixity> getDepositManifest(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/deposits/{depositid}/manifest")
+    public List<FileFixity> getDepositManifest(@RequestHeader(HEADER_USER_ID) String userID,
                                                @PathVariable("depositid") String depositID) throws Exception {
 
         User user = usersService.getUser(userID);
@@ -216,8 +179,8 @@ public class DepositsController {
         return manifest;
     }
 
-    @RequestMapping(value = "/deposits/{depositid}/events", method = RequestMethod.GET)
-    public List<EventInfo> getDepositEvents(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/deposits/{depositid}/events")
+    public List<EventInfo> getDepositEvents(@RequestHeader(HEADER_USER_ID) String userID,
                                             @PathVariable("depositid") String depositID) throws Exception {
 
         User user = usersService.getUser(userID);
@@ -232,8 +195,8 @@ public class DepositsController {
         return events;
     }
 
-    @RequestMapping(value = "/deposits/{depositid}/retrieves", method = RequestMethod.GET)
-    public List<Retrieve> getDepositRetrieves(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/deposits/{depositid}/retrieves")
+    public List<Retrieve> getDepositRetrieves(@RequestHeader(HEADER_USER_ID) String userID,
                                             @PathVariable("depositid") String depositID) throws Exception {
 
         User user = usersService.getUser(userID);
@@ -242,8 +205,8 @@ public class DepositsController {
         return deposit.getRetrieves();
     }
 
-    @RequestMapping(value = "/deposits/{depositid}/jobs", method = RequestMethod.GET)
-    public List<Job> getDepositJobs(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @GetMapping("/deposits/{depositid}/jobs")
+    public List<Job> getDepositJobs(@RequestHeader(HEADER_USER_ID) String userID,
                                     @PathVariable("depositid") String depositID) throws Exception {
 
         User user = usersService.getUser(userID);
@@ -252,8 +215,8 @@ public class DepositsController {
         return deposit.getJobs();
     }
 
-    @RequestMapping(value = "/deposits/{depositid}/retrieve", method = RequestMethod.POST)
-    public Boolean retrieveDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @PostMapping( "/deposits/{depositid}/retrieve")
+    public Boolean retrieveDeposit(@RequestHeader(HEADER_USER_ID) String userID,
                                   @PathVariable("depositid") String depositID,
                                   @RequestBody Retrieve retrieve) throws Exception {
         User user = usersService.getUser(userID);
@@ -330,16 +293,16 @@ public class DepositsController {
         // Ask the worker to process the data retrieve
         try {
             HashMap<String, String> retrieveProperties = new HashMap<>();
-            retrieveProperties.put("depositId", deposit.getID());
-            retrieveProperties.put("retrieveId", retrieve.getID());
-            retrieveProperties.put("bagId", deposit.getBagId());
-            retrieveProperties.put("retrievePath", retrievePath); // No longer the absolute path
-            retrieveProperties.put("archiveId", archiveID);
-            retrieveProperties.put("archiveSize", Long.toString(deposit.getArchiveSize()));
-            retrieveProperties.put("userId", user.getID());
-            retrieveProperties.put("archiveDigest", deposit.getArchiveDigest());
-            retrieveProperties.put("archiveDigestAlgorithm", deposit.getArchiveDigestAlgorithm());
-            retrieveProperties.put("numOfChunks", Integer.toString(deposit.getNumOfChunks()));
+            retrieveProperties.put(PropNames.DEPOSIT_ID, deposit.getID());
+            retrieveProperties.put(PropNames.RETRIEVE_ID, retrieve.getID());
+            retrieveProperties.put(PropNames.BAG_ID, deposit.getBagId());
+            retrieveProperties.put(PropNames.RETRIEVE_PATH, retrievePath); // No longer the absolute path
+            retrieveProperties.put(PropNames.ARCHIVE_ID, archiveID);
+            retrieveProperties.put(PropNames.ARCHIVE_SIZE, Long.toString(deposit.getArchiveSize()));
+            retrieveProperties.put(PropNames.USER_ID, user.getID());
+            retrieveProperties.put(PropNames.ARCHIVE_DIGEST, deposit.getArchiveDigest());
+            retrieveProperties.put(PropNames.ARCHIVE_DIGEST_ALGORITHM, deposit.getArchiveDigestAlgorithm());
+            retrieveProperties.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));
             
             // Add a single entry for the user file storage
             Map<String, String> userFileStoreClasses = new HashMap<>();
@@ -375,11 +338,10 @@ public class DepositsController {
                     chunksDigest,
                     tarIVs, chunksIVs,
                     encTarDigest, encChunksDigests, null);
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonRetrieve = mapper.writeValueAsString(retrieveTask);
+            String jsonRetrieve = this.mapper.writeValueAsString(retrieveTask);
             sender.send(jsonRetrieve);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("unexpected exception", e);
         }
 
         // Check the retention policy of the newly created vault
@@ -391,53 +353,53 @@ public class DepositsController {
     private List<ArchiveStore> addArchiveSpecificOptions(List<ArchiveStore> archiveStores) {
     	if (archiveStores != null && ! archiveStores.isEmpty()) {
 	    	for (ArchiveStore archiveStore : archiveStores) {
-		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.TivoliStorageManager")) {
+		        if (archiveStore.isTivoliStorageManager()) {
 		        	HashMap<String, String> asProps = archiveStore.getProperties();
 		        	if (this.optionsDir != null && ! this.optionsDir.equals("")) {
-		        		asProps.put("optionsDir", this.optionsDir);
+		        		asProps.put(PropNames.OPTIONS_DIR, this.optionsDir);
 		        	}
 		        	if (this.tempDir != null && ! this.tempDir.equals("")) {
-		        		asProps.put("tempDir", this.tempDir);
+		        		asProps.put(PropNames.TEMP_DIR, this.tempDir);
 		        	}
 		        	if (this.tsmRetryTime != null && ! this.tsmRetryTime.equals("")) {
-		        	    asProps.put("tsmRetryTime", this.tsmRetryTime);
+		        	    asProps.put(PropNames.TSM_RETRY_TIME, this.tsmRetryTime);
                     }
                     if (this.tsmMaxRetries != null && ! this.tsmMaxRetries.equals("")) {
-                        asProps.put("tsmMaxRetries", this.tsmMaxRetries);
+                        asProps.put(PropNames.TSM_MAX_RETRIES, this.tsmMaxRetries);
                     }
 		        	archiveStore.setProperties(asProps);
 		        }
 
-		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.OracleObjectStorageClassic")) {
+		        if (archiveStore.isOracle()) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
                     if (this.occRetryTime != null && ! this.occRetryTime.equals("")) {
-                        asProps.put("occRetryTime", this.occRetryTime);
+                        asProps.put(PropNames.OCC_RETRY_TIME, this.occRetryTime);
                     }
                     if (this.occMaxRetries != null && ! this.occMaxRetries.equals("")) {
-                        asProps.put("occMaxRetries", this.occMaxRetries);
+                        asProps.put(PropNames.OCC_MAX_RETRIES, this.occMaxRetries);
                     }
                     if (this.ociBucketName != null && ! this.ociBucketName.equals("")) {
-                        asProps.put("ociBucketName", this.ociBucketName);
+                        asProps.put(PropNames.OCI_BUCKET_NAME, this.ociBucketName);
                     }
                     if (this.ociNameSpace != null && ! this.ociNameSpace.equals("")) {
-                        asProps.put("ociNameSpace", this.ociNameSpace);
+                        asProps.put(PropNames.OCI_NAME_SPACE, this.ociNameSpace);
                     }
                     archiveStore.setProperties(asProps);
                 }
 
-		        if (archiveStore.getStorageClass().equals("org.datavaultplatform.common.storage.impl.S3Cloud")) {
+		        if (archiveStore.isAmazonS3()) {
 		        	HashMap<String, String> asProps = archiveStore.getProperties();
 		        	if (this.bucketName != null && ! this.bucketName.equals("")) {
-		        		asProps.put("s3.bucketName", this.bucketName);
+		        		asProps.put(PropNames.AWS_S3_BUCKET_NAME, this.bucketName);
 		        	}
 		        	if (this.region != null && ! this.region.equals("")) {
-		        		asProps.put("s3.region", this.region);
+		        		asProps.put(PropNames.AWS_S3_REGION, this.region);
 		        	}
 		        	if (this.awsAccessKey != null && ! this.awsAccessKey.equals("")) {
-		        		asProps.put("s3.awsAccessKey", this.awsAccessKey);
+		        		asProps.put(PropNames.AWS_ACCESS_KEY, this.awsAccessKey);
 		        	}
 		        	if (this.awsSecretKey != null && ! this.awsSecretKey.equals("")) {
-		        		asProps.put("s3.awsSecretKey", this.awsSecretKey);
+		        		asProps.put(PropNames.AWS_SECRET_KEY, this.awsSecretKey);
 		        	}
 
 		        	//if (this.authDir != null && ! this.authDir.equals("")) {
@@ -451,8 +413,8 @@ public class DepositsController {
     	return archiveStores;
     }
 
-    @RequestMapping(value = "/deposits/{depositid}/restart", method = RequestMethod.POST)
-    public Deposit restartDeposit(@RequestHeader(value = "X-UserID", required = true) String userID,
+    @PostMapping("/deposits/{depositid}/restart")
+    public Deposit restartDeposit(@RequestHeader(HEADER_USER_ID) String userID,
                                    @PathVariable("depositid") String depositID) throws Exception{
 
         User user = adminService.ensureAdminUser(userID);
@@ -464,7 +426,7 @@ public class DepositsController {
         }
 
         List<FileStore> userStores = user.getFileStores();
-        System.out.println("There is " + userStores.size() + "user stores.");
+        logger.info("There is " + userStores.size() + "user stores.");
 
         ArrayList<String> paths = new ArrayList<>();
         for(DepositPath dPath : deposit.getDepositPaths()){
@@ -472,7 +434,7 @@ public class DepositsController {
                 paths.add(dPath.getFilePath());
             }
         }
-        System.out.println("There is " + paths.size() + " deposit path");
+        logger.info("There is " + paths.size() + " deposit path");
         if (paths.isEmpty()) {
             throw new Exception("There are no file paths for restarted deposit - Exiting");
         }
@@ -533,13 +495,13 @@ public class DepositsController {
                         userFileStoreProperties.put(storageID, userStore.getProperties());
 
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        logger.error("unexpected exception", e);
                         throw (e);
                     }
                 }
 
                 if (lastEvent == null) {
-                    System.out.println("Add deposit path: " + path);
+                    logger.info("Add deposit path: " + path);
                     DepositPath depositPath = new DepositPath(deposit, path, Path.PathType.FILESTORE);
                     deposit.getDepositPaths().add(depositPath);
                     logger.debug("Prior to creating the jobs we have the following depositPaths:");
@@ -555,26 +517,27 @@ public class DepositsController {
         Job job = new Job("org.datavaultplatform.worker.tasks.Deposit");
         jobsService.addJob(deposit, job);
 
-        // Ask the worker to process the deposit
-        ObjectMapper mapper = new ObjectMapper();
-
         HashMap<String, String> depositProperties = new HashMap<>();
-        depositProperties.put("depositId", deposit.getID());
-        depositProperties.put("bagId", deposit.getBagId());
-        depositProperties.put("userId", user.getID());
+        depositProperties.put(PropNames.DEPOSIT_ID, deposit.getID());
+        depositProperties.put(PropNames.BAG_ID, deposit.getBagId());
+        depositProperties.put(PropNames.USER_ID, user.getID());
         if (deposit.getNumOfChunks() != 0) {
-            logger.debug("Restart num of chunks: " + Integer.toString(deposit.getNumOfChunks()));
-            depositProperties.put("numOfChunks", Integer.toString(deposit.getNumOfChunks()));
+            logger.debug("Restart num of chunks: " + deposit.getNumOfChunks());
+            depositProperties.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));
         }
         if (deposit.getArchiveDigest() != null) {
-            depositProperties.put("archiveDigest", deposit.getArchiveDigest());
+            depositProperties.put(PropNames.ARCHIVE_DIGEST, deposit.getArchiveDigest());
         }
 
         // Deposit and Vault metadata
         // TODO: at the moment we're just serialising the objects to JSON.
         // In future we'll need a more formal schema/representation (e.g. RDF or JSON-LD).
-        depositProperties.put("depositMetadata", mapper.writeValueAsString(deposit));
-        depositProperties.put("vaultMetadata", mapper.writeValueAsString(vault));
+
+        DepositInfo depositInfo = deposit.convertToResponse();
+        depositProperties.put(PropNames.DEPOSIT_METADATA, this.mapper.writeValueAsString(depositInfo));
+
+        VaultInfo vaultInfo = vault.convertToResponse();
+        depositProperties.put(PropNames.VAULT_METADATA, this.mapper.writeValueAsString(vaultInfo));
 
         // External metadata is text from an external system - e.g. XML or JSON
         //depositProperties.put("externalMetadata", externalMetadata);
@@ -633,7 +596,7 @@ public class DepositsController {
         if (archiveIDs != null) {
             depositTask.setRestartArchiveIds(archiveIDs);
         }
-        String jsonDeposit = mapper.writeValueAsString(depositTask);
+        String jsonDeposit = this.mapper.writeValueAsString(depositTask);
         sender.send(jsonDeposit);
 
         return job;

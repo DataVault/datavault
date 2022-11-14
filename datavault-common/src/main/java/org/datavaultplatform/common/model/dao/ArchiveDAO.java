@@ -1,18 +1,22 @@
 package org.datavaultplatform.common.model.dao;
 
 
-import org.datavaultplatform.common.model.Archive;
-
 import java.util.List;
+import java.util.Optional;
+import org.datavaultplatform.common.model.Archive;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface ArchiveDAO {
+@Repository
+@Transactional
+public interface ArchiveDAO extends BaseDAO<Archive> {
 
-    public void save(Archive archive);
+  @Override
+  @EntityGraph(Archive.EG_ARCHIVE)
+  List<Archive> findAll();
 
-    public void update(Archive archive);
-
-    public List<Archive> list();
-
-    public Archive findById(String Id);
-
+  @Override
+  @EntityGraph(Archive.EG_ARCHIVE)
+  Optional<Archive> findById(String id);
 }

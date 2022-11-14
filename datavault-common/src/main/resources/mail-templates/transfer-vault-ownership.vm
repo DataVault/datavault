@@ -1,0 +1,12 @@
+<html>
+<body>
+
+<p>You have been given ownership of a vault in the Edinburgh DataVault by ${assignee}:</p>
+<ul>
+    <li>Vault Title: ${vault}</li>
+    <li>Previous Vault Owner: ${previousowner}</li>
+</ul>
+<p>You can login to the DataVault <a href=${homepage}>here</a></p>
+<p>You can find out more about DataVault roles <a href=${helppage}>here</a></p>
+</body>
+</html>

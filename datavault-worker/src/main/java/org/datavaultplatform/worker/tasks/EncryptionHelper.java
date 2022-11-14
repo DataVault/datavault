@@ -1,29 +1,18 @@
 package org.datavaultplatform.worker.tasks;
 
 public class EncryptionHelper {
-	private byte[] iv;
-	private String encTarHash;
-	private int chunkCount;
-	
-	public byte[] getIv() {
-		return this.iv;
-	}
-	public void setIv(byte[] iv) {
+	private final byte[] iv;
+	private final String encTarHash;
+
+	public EncryptionHelper(byte[] iv, String encTarHash) {
 		this.iv = iv;
-	}
-	
-	public String getEncTarHash() {
-		return this.encTarHash;
-	}
-	public void setEncTarHash(String encTarHash) {
 		this.encTarHash = encTarHash;
 	}
 
-	public int getChunkCount() {
-		return this.chunkCount;
+	public byte[] getIv() {
+		return this.iv;
 	}
-
-	public void setChunkCount(int chunkCount) {
-		this.chunkCount = chunkCount;
+	public String getEncTarHash() {
+		return this.encTarHash;
 	}
 }

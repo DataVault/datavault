@@ -1,17 +1,34 @@
 package org.datavaultplatform.common.model.dao;
 
-import org.datavaultplatform.common.model.Audit;
-
 import java.util.List;
+import java.util.Optional;
+import org.datavaultplatform.common.model.Audit;
+import org.datavaultplatform.common.model.Audit_;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface AuditDAO {
-    void save(Audit audit);
+@Repository
+@Transactional
+public interface AuditDAO extends BaseDAO<Audit> {
 
-    void update(Audit audit);
+  @Override
+  @EntityGraph(Audit.EG_AUDIT)
+  default List<Audit> list() {
+    return findAll(Sort.by(Order.asc(Audit_.TIMESTAMP)));
+  }
 
-    List<Audit> list();
+  @Override
+  @EntityGraph(Audit.EG_AUDIT)
+  Optional<Audit> findById(String id);
 
-    Audit findById(String Id);
+  @Override
+  @EntityGraph(Audit.EG_AUDIT)
+  List<Audit> findAll();
 
-    int count();
+  @Override
+  @EntityGraph(Audit.EG_AUDIT)
+  List<Audit> findAll(Sort sort);
 }

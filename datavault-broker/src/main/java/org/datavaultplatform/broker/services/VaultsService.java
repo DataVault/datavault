@@ -1,62 +1,67 @@
 package org.datavaultplatform.broker.services;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 import org.datavaultplatform.common.event.roles.CreateRoleAssignment;
 import org.datavaultplatform.common.event.vault.Create;
 import org.datavaultplatform.common.model.*;
+
 import org.datavaultplatform.common.model.dao.VaultDAO;
 import org.datavaultplatform.common.request.CreateVault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.datavaultplatform.common.email.EmailTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
+@Transactional
 public class VaultsService {
 
+    public static final String EMAIL_HOME_PAGE = "home-page";
+    public static final String EMAIL_HELP_PAGE = "help-page";
+    public static final String EMAIL_VAULT_NAME = "vault-name";
+    public static final String EMAIL_GROUP_NAME = "group-name";
+    public static final String EMAIL_VAULT_ID = "vault-id";
+    public static final String EMAIL_VAULT_REVIEW_DATE = "vault-review-date";
+    public static final String EMAIL_ROLE_NAME = "role-name";
+
     private final Logger logger = LoggerFactory.getLogger(VaultsService.class);
-    private VaultDAO vaultDAO;
+    private final VaultDAO vaultDAO;
 
-    private RolesAndPermissionsService rolesAndPermissionsService;
+    private final RolesAndPermissionsService rolesAndPermissionsService;
 
-    private RetentionPoliciesService retentionPoliciesService;
+    private final RetentionPoliciesService retentionPoliciesService;
 
-    private DataCreatorsService dataCreatorsService;
+    private final DataCreatorsService dataCreatorsService;
 
-    private BillingService billingService;
-    private UsersService usersService;
-    private EventService eventService;
-    private ClientsService clientsService;
-    private EmailService emailService;
+    private final BillingService billingService;
+    private final UsersService usersService;
+    private final EventService eventService;
+    private final ClientsService clientsService;
+    private final EmailService emailService;
 
-    public void setEmailService(EmailService emailService) { this.emailService = emailService; }
-
-    public void setUsersService(UsersService usersService) {
-        this.usersService = usersService;
-    }
-
-    public void setEventService(EventService eventService) {
-        this.eventService = eventService;
-    }
-
-    public void setClientsService(ClientsService clientsService) {
-        this.clientsService = clientsService;
-    }
-
-    public void setRolesAndPermissionsService(RolesAndPermissionsService rolesAndPermissionsService) {
+    @Autowired
+    public VaultsService(VaultDAO vaultDAO, RolesAndPermissionsService rolesAndPermissionsService,
+        RetentionPoliciesService retentionPoliciesService, DataCreatorsService dataCreatorsService,
+        BillingService billingService, UsersService usersService, EventService eventService,
+        ClientsService clientsService, EmailService emailService) {
+        this.vaultDAO = vaultDAO;
         this.rolesAndPermissionsService = rolesAndPermissionsService;
+        this.retentionPoliciesService = retentionPoliciesService;
+        this.dataCreatorsService = dataCreatorsService;
+        this.billingService = billingService;
+        this.usersService = usersService;
+        this.eventService = eventService;
+        this.clientsService = clientsService;
+        this.emailService = emailService;
     }
+
 
     public RetentionPoliciesService getRetentionPoliciesService() {
         return retentionPoliciesService;
     }
-
-    public void setRetentionPoliciesService(RetentionPoliciesService retentionPoliciesService) {
-        this.retentionPoliciesService = retentionPoliciesService;
-    }
-
-    public void setDataCreatorsService(DataCreatorsService dataCreatorsService) { this.dataCreatorsService = dataCreatorsService; }
-
-    public void setBillingService(BillingService billingService) { this.billingService = billingService; }
 
     public List<Vault> getVaults() {
         return vaultDAO.list();
@@ -96,30 +101,30 @@ public class VaultsService {
     public void sendVaultOwnerEmail(Vault vault, String homePage, String helpPage, User user) {
         // send mail to owner
         this.sendEmail(vault, user.getEmail(), "A new vault you own has been created", "Owner",
-                "user-vault-create.vm", homePage, helpPage);
+                EmailTemplate.USER_VAULT_CREATE, homePage, helpPage);
     }
 
     public void sendVaultDepositorsEmail(Vault vault, String homePage, String helpPage, User user) {
         // send mail to depositor
         this.sendEmail(vault, user.getEmail(), "A new vault you have a role on has been created", "Depositor",
-                "user-vault-create.vm", homePage, helpPage);
+                EmailTemplate.USER_VAULT_CREATE, homePage, helpPage);
     }
 
     public void sendVaultNDMsEmail(Vault vault, String homePage, String helpPage, User user) {
         // send mail to ndm
         this.sendEmail(vault, user.getEmail(), "A new vault you have a role on has been created", "Nominated Data Manager",
-                "user-vault-create.vm", homePage, helpPage);
+                EmailTemplate.USER_VAULT_CREATE, homePage, helpPage);
     }
 
     private void sendEmail(Vault vault, String email, String subject, String role, String template, String homePage, String helpPage) {
-        HashMap<String, Object> model = new HashMap<String, Object>();
-        model.put("home-page", homePage);
-        model.put("help-page", helpPage);
-        model.put("vault-name", vault.getName());
-        model.put("group-name", vault.getGroup().getName());
-        model.put("vault-id", vault.getID());
-        model.put("vault-review-date", vault.getReviewDate());
-        model.put("role-name", role);
+        HashMap<String, Object> model = new HashMap<>();
+        model.put(EMAIL_HOME_PAGE, homePage);
+        model.put(EMAIL_HELP_PAGE, helpPage);
+        model.put(EMAIL_VAULT_NAME, vault.getName());
+        model.put(EMAIL_GROUP_NAME, vault.getGroup().getName());
+        model.put(EMAIL_VAULT_ID, vault.getID());
+        model.put(EMAIL_VAULT_REVIEW_DATE, vault.getReviewDate());
+        model.put(EMAIL_ROLE_NAME, role);
         emailService.sendTemplateMail(email, subject, template, model);
     }
 
@@ -143,11 +148,7 @@ public class VaultsService {
     }
 
     public Vault getVault(String vaultID) {
-        return vaultDAO.findById(vaultID);
-    }
-
-    public void setVaultDAO(VaultDAO vaultDAO) {
-        this.vaultDAO = vaultDAO;
+        return vaultDAO.findById(vaultID).orElse(null);
     }
 
     public List<Vault> search(String userId, String query, String sort, String order, String offset, String maxResult) {
@@ -162,11 +163,11 @@ public class VaultsService {
         return vaultDAO.getRetentionPolicyCount(status);
     }
 
-    public Vault checkRetentionPolicy(String vaultID) throws Exception {
+    public Vault checkRetentionPolicy(String vaultID) {
         // Get the vault
-        Vault vault = vaultDAO.findById(vaultID);
+        Vault vault = vaultDAO.findById(vaultID).orElse(null);
 
-        retentionPoliciesService.setRetention(vault);
+        RetentionPoliciesService.setRetention(vault);
 
         // Check the policy
         //retentionPoliciesService.run(vault);
@@ -189,7 +190,6 @@ public class VaultsService {
         if (vault == null) {
             throw new Exception("Vault '" + vaultID + "' does not exist");
         }
-
         return vault;
     }
 
@@ -276,7 +276,7 @@ public class VaultsService {
         List<String> dcs = createVault.getDataCreators();
         if (dcs != null) {
             logger.debug("Data creator list is :'" + dcs + "'");
-            List<DataCreator> creators = new ArrayList();
+            List<DataCreator> creators = new ArrayList<>();
             for (String creator : dcs) {
                 if (creator != null && !creator.isEmpty()) {
                     DataCreator dc = new DataCreator();

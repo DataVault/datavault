@@ -5,9 +5,8 @@ import org.datavaultplatform.common.event.Event;
 
 @Entity
 public class StartTarValidation extends Event {
-    StartTarValidation() {
-
-    };
+    public StartTarValidation() {
+    }
 
     public StartTarValidation(String jobId, String depositId) {
         super("Tar validation started");

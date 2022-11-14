@@ -1,9 +1,12 @@
 package org.datavaultplatform.common.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
+import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,23 +15,20 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 import javax.persistence.Version;
-
+import org.hibernate.Hibernate;
 import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.hibernate.annotations.GenericGenerator;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * User: Tom Higgins
@@ -39,9 +39,19 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="Vaults")
+@NamedEntityGraph(
+    name = Vault.EG_VAULT,
+    attributeNodes = {
+        @NamedAttributeNode(Vault_.DATASET),
+        @NamedAttributeNode(Vault_.USER),
+        @NamedAttributeNode(Vault_.GROUP),
+        @NamedAttributeNode(Vault_.RETENTION_POLICY),
+        @NamedAttributeNode(Vault_.DEPOSITS),
+    })
 public class Vault {
 
-	private static final long ZERO = 0l;
+    public static final String EG_VAULT = "eg.Vault.1";
+    private static final long ZERO = 0L;
     // Vault Identifier
     @Id
     @GeneratedValue(generator = "uuid")
@@ -135,7 +145,7 @@ public class Vault {
     
  // The raw content from the metadata provider e.g. XML
     @Lob
-    @Column(name = "snapshot", nullable = true)
+    @Column(name = "snapshot", nullable = true, columnDefinition = "LONGTEXT")
     private String snapshot;
 
     @JsonIgnore
@@ -168,9 +178,9 @@ public class Vault {
 
     public String getID() { return id; }
 
-    public long getVersion() { return version; };
-    
-    public void setCreationTime(Date creationTime) {
+    public long getVersion() { return version; }
+
+  public void setCreationTime(Date creationTime) {
         this.creationTime = creationTime;
     }
 
@@ -213,7 +223,7 @@ public class Vault {
     public long getSize() { return vaultSize; }
     
     public List<Deposit> getDeposits() {
-        if (deposits == null) return new ArrayList<Deposit>();
+        if (deposits == null) return new ArrayList<>();
         return deposits;
     }
 
@@ -222,7 +232,7 @@ public class Vault {
     }
 
     public List<VaultReview> getVaultReviews() {
-        if (vaultReviews == null) return new ArrayList<VaultReview>();
+        if (vaultReviews == null) return new ArrayList<>();
         return vaultReviews;
     }
 
@@ -231,7 +241,7 @@ public class Vault {
     }
 
     public List<DataManager> getDataManagers() {
-        if (dataManagers == null) return new ArrayList<DataManager>();
+        if (dataManagers == null) return new ArrayList<>();
         return dataManagers;
     }
 
@@ -414,27 +424,21 @@ public class Vault {
                 billinginfo != null? billinginfo.getBillingType() : null
             );
     }
-    
-    @Override
-    public boolean equals(Object other) {
-        
-        if (this == other) return true;
-        
-        if (!(other instanceof Vault)) {
-            return false;
-        }
-        
-        final Vault vault = (Vault)other;
-        
-        if (!vault.getID().equals(getID())) {
-            return false;
-        }
-        
-        return true;
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
     }
-    
-    @Override
-    public int hashCode() {
-        return getID().hashCode();
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+      return false;
     }
+    Vault vault = (Vault) o;
+    return id != null && Objects.equals(id, vault.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
+  }
 }

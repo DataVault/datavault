@@ -1,66 +1,81 @@
 package org.datavaultplatform.broker.services;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.metadata.Provider;
 import org.datavaultplatform.common.metadata.impl.MockProvider;
 import org.datavaultplatform.common.metadata.impl.PureFlatFileProvider;
 import org.datavaultplatform.common.model.Dataset;
 import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.dao.DatasetDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
+@Transactional
+@Slf4j
 public class ExternalMetadataService {
 
-    private String metadataURL;
-    private String flatFileLocation;
-    private Provider metadataProvider;
-    private DatasetDAO datasetDAO;
-    private UsersService usersService;
+    private final String metadataURL;
+    private final String flatFileLocation;
+    private final Provider metadataProvider;
+    private final DatasetDAO datasetDAO;
+    private final UsersService usersService;
     public static final String EDUNIREFNO = "edunirefno";
 
-    public void setUsersService(UsersService usersService) {
-		this.usersService = usersService;
-	}
-    
-    public void setFlatFileLocation(String flatFileLocation) {
-    	System.out.println("Setting flat file location to : " + flatFileLocation);
-		this.flatFileLocation = flatFileLocation;
-	}
-    
-    public void setMetadataURL(String metadataURL) {
-        this.metadataURL = metadataURL;
-        
-        if (metadataURL.equals("")) {
-            this.metadataProvider = new MockProvider();
-        } else {
-        	Provider prov = new PureFlatFileProvider();
-        	((PureFlatFileProvider) prov).setFlatFileDir(this.flatFileLocation);
-        	this.metadataProvider = prov;
-            //this.metadataProvider = new PureProvider(metadataURL);
-        }
+
+    /*
+     <bean id="externalMetadataService" class="org.datavaultplatform.broker.services.ExternalMetadataService">
+    	  <property name="flatFileLocation" value="${flatfile.location:/tmp/}" />
+        <property name="metadataURL" value="${metadata.url}" />
+        <property name="datasetDAO" ref="datasetDAO" />
+        <property name="usersService" ref="usersService" />
+    </bean>
+     */
+  @Autowired
+  public ExternalMetadataService(
+      @Value("${metadata.url}") String metadataURL,
+      @Value("${flatfile.location:/tmp/}") String flatFileLocation,
+      DatasetDAO datasetDAO,
+      UsersService usersService) {
+    this.metadataURL = metadataURL;
+    this.flatFileLocation = flatFileLocation;
+    this.datasetDAO = datasetDAO;
+    this.usersService = usersService;
+
+    if (metadataURL.equals("")) {
+      this.metadataProvider = new MockProvider();
+    } else {
+      Provider prov = new PureFlatFileProvider();
+      ((PureFlatFileProvider) prov).setFlatFileDir(this.flatFileLocation);
+      this.metadataProvider = prov;
+      //this.metadataProvider = new PureProvider(metadataURL);
     }
-    
+  }
+
     public List<Dataset> getDatasets(String userID) {
-    	System.out.println("Getting Datasets for UUN " + userID);
+    	log.info("Getting Datasets for UUN " + userID);
     	if (this.metadataProvider instanceof PureFlatFileProvider) {
     		User user = this.usersService.getUser(userID);
     		if (user != null) {
-    			System.out.println("User surname " + user.getLastname());
+    			log.info("User surname " + user.getLastname());
 	    		Map<String, String> props = user.getProperties();
-	    		System.out.println("Setting default employee id for testing:123363");
+	    		log.info("Setting default employee id for testing:123363");
     			String employeeId = "123363";
 
     			if (props != null) {
-    				System.out.println("Props is not null");
+    				log.info("Props is not null");
     				for (String key : props.keySet()) {
-    					System.out.println("key is :'" + "'" + key + " value is :'" + props.get(key) + "'");
+    					log.info("key is :'" + "'" + key + " value is :'" + props.get(key) + "'");
     				}
     			}
 	    		if (props != null  && props.get(ExternalMetadataService.EDUNIREFNO) != null) {
-	    			System.out.println("Getting employeeId from properties");
+	    			log.info("Getting employeeId from properties");
 		    		employeeId = props.get(ExternalMetadataService.EDUNIREFNO);
 	    		}
 	    		return metadataProvider.getDatasetsForUser(employeeId);
@@ -69,7 +84,7 @@ public class ExternalMetadataService {
     		return metadataProvider.getDatasetsForUser(userID);
     	}
     	
-    	return new ArrayList<Dataset>();
+    	return new ArrayList<>();
     }
     
     public Dataset getDataset(String id) {
@@ -119,10 +134,7 @@ public class ExternalMetadataService {
     }
     
     public Dataset getCachedDataset(String id) {
-        return datasetDAO.findById(id);
+        return datasetDAO.findById(id).orElse(null);
     }
     
-    public void setDatasetDAO(DatasetDAO datasetDAO) {
-        this.datasetDAO = datasetDAO;
-    }
 }

@@ -1,5 +1,14 @@
 package org.datavaultplatform.common.services;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.cursor.EntryCursor;
 import org.apache.directory.api.ldap.model.entry.Attribute;
@@ -11,188 +20,278 @@ import org.apache.directory.api.ldap.model.message.SearchRequestImpl;
 import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.apache.directory.api.ldap.model.name.Dn;
 import org.apache.directory.ldap.client.api.EntryCursorImpl;
-import org.apache.directory.ldap.client.api.LdapConnection;
 import org.apache.directory.ldap.client.api.LdapNetworkConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import org.springframework.util.Assert;
 
 /**
  * User: Robin Taylor
  * Date: 09/03/2015
  * Time: 11:33
+ * 
+ * Without Builder, it's easy to get the constructor parameters in the wrong order.
  */
-
 public class LDAPService {
 
     private static final Logger logger = LoggerFactory.getLogger(LDAPService.class);
 
-    private LdapConnection connection;
 
-    private String host;
-    private String port;
-    private String useSsl;
-    private String dn;
-    private String password;
-    private String searchContext;
-    private String searchFilter;
-    private String attrs;
+    private final String host;
+    private final int port;
+    private final boolean useSsl;
+    private final String dn;
+    private final String password;
+    private final String searchContext;
+    private final String searchFilter;
+    private final Set<String> attrs = new HashSet<>();
 
-    public void setHost(String host) {
+    private LDAPService(String host, Integer port, Boolean useSsl, String dn,
+        String password, String searchContext, String searchFilter, Set<String> attrs) {
+
+        //1 HOST
+        Assert.notNull(host, () -> "host must not be null");
+
+        //2 PORT
+        Assert.notNull(port, () -> "port must not be null");
+        Assert.isTrue(port > 0, () -> "port must be > 0");
+
+        //3 UseSSL
+        Assert.notNull(useSsl, () -> "useSsl must not be null");
+
+        //4 DN
+        Assert.notNull(dn, () -> "dn must not be null");
+
+        //5 PASSWORD
+        Assert.notNull(password, () -> "password must not be null");
+
+        //6 SEARCH CONTEXT
+        Assert.notNull(searchContext, () -> "searchContext must not be null");
+
+        //7 SEARCH FILTER
+        Assert.notNull(searchFilter, () -> "searchFilter must not be null");
+
+        //8 ATTRS
+        Assert.notNull(attrs, () -> "attrs must not be null");
+
         this.host = host;
-    }
-
-    public void setPort(String port) {
         this.port = port;
-    }
-
-    public void setUseSsl(String useSsl) {
         this.useSsl = useSsl;
-    }
-
-    public void setDn(String dn) {
         this.dn = dn;
-    }
-
-    public void setPassword(String password) {
         this.password = password;
-    }
-
-    public void setSearchContext(String searchContext) {
         this.searchContext = searchContext;
-    }
-
-    public void setSearchFilter(String searchFilter) {
         this.searchFilter = searchFilter;
+        this.attrs.addAll(attrs);
+
     }
 
-    public void setAttrs(String attrs) {
-        this.attrs = attrs;
+    public static LDAPServiceBuilder builder(){
+        return new LDAPServiceBuilder();
     }
 
-    public void getConnection() throws LdapException, CursorException {
-        connection = new LdapNetworkConnection(host, Integer.parseInt(port), Boolean.parseBoolean(useSsl));
+    public static class LDAPServiceBuilder {
+
+        private static final String ALL_LDAP_ATTRIBUTES = "*";
+        private  String host;
+        private  Integer port;
+        private  Boolean useSsl;
+        private  String dn;
+        private  String password;
+        private  String searchContext;
+        private  String searchFilter;
+        private  final Set<String> attrs = new HashSet<>();
+
+        private LDAPServiceBuilder() {
+        }
+
+        public LDAPServiceBuilder host(String host){
+            this.host = host;
+            return this;
+        }
+        public LDAPServiceBuilder port(int port){
+            this.port = port;
+            return this;
+        }
+        public LDAPServiceBuilder useSSL(boolean useSSL){
+            this.useSsl = useSSL;
+            return this;
+        }
+        public LDAPServiceBuilder dn(String dn){
+            this.dn = dn;
+            return this;
+        }
+        public LDAPServiceBuilder password(String password){
+            this.password = password;
+            return this;
+        }
+        public LDAPServiceBuilder searchContext(String searchContext){
+            this.searchContext = searchContext;
+            return this;
+        }
+        public LDAPServiceBuilder searchFilter(String searchFilter){
+            this.searchFilter = searchFilter;
+            return this;
+        }
+        public LDAPServiceBuilder attrs(List<String> attrs){
+            this.attrs.clear();
+            this.attrs.addAll(attrs);
+            return this;
+        }
+        private static Set<String> getCleanAttrs(Set<String> attrs){
+            Set<String> cleanAttrs = new HashSet<>();
+            if(attrs == null){
+                return cleanAttrs;
+            }
+            //We don't want any blank attributes
+            Set<String> nonBlank = attrs.stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
+            if(nonBlank.isEmpty()){
+                // If not attributes are specified, we'll get them all
+                cleanAttrs.add(ALL_LDAP_ATTRIBUTES);
+            }else{
+                cleanAttrs.addAll(nonBlank);
+            }
+            return cleanAttrs;
+        }
+        public LDAPService build() {
+            return new LDAPService(host, port, useSsl,  dn,
+                password,  searchContext,  searchFilter,  getCleanAttrs(attrs));
+        }
+    }
+
+    private LdapNetworkConnection getConnection() throws LdapException {
+        LdapNetworkConnection connection = new LdapNetworkConnection(host, port, useSsl);
         connection.setTimeOut(0);
         connection.bind(dn, password);
+        if(connection.isConnected() == false){
+            throw new LdapException("failed to connect");
+        }
+        return connection;
     }
 
-    public void closeConnection() throws LdapException {
-        connection.unBind();
+    private  void closeConnection(LdapNetworkConnection connection) {
+        IOUtils.closeQuietly(connection);
     }
 
-    public HashMap<String, String> search(String id) throws LdapException, CursorException, IOException {
-        logger.info("Search LDAP for " + id);
-
-        HashMap<String, String> attributes = new HashMap<String, String>();
-
-        logger.info("Attributes to retrieve: " + attrs);
-        EntryCursor cursor = connection.search(searchContext, "(" + searchFilter + "="  + id + ")", SearchScope.ONELEVEL, attrs);
-        // We appear to loop round a set of LDAP entries, in fact we only expect to have found one match.
-        while (cursor.next()) {
-        	logger.info("In cursor loop");
-            Entry entry = cursor.get();
-            logger.info("The entry object as a string:" + entry.toString());
-
-            // Now store all the returned attributes in a HashMap
-            for (Attribute attribute : entry.getAttributes()) {
-            	logger.info("Adding attribute:" + id + " with value " +  attribute.getString());
-                attributes.put(attribute.getId(), attribute.getString());
-            }
-        }
-
-        cursor.close();
-
-        logger.info("LDAP attributes are " + attributes.toString());
-        return attributes;
-    }
-
-    public List<String> autocompleteUID(String term) throws LdapException, CursorException, IOException {
-        logger.info("Search UUN containning " + term);
-
-        getConnection();
-
-        if ( searchContext == null )
-        {
-            throw new IllegalArgumentException( "The base Dn cannot be null" );
-        }
-       
-        // Create a new SearchRequest object
-        SearchRequest searchRequest = createSearchRequest(
-                "(|(uid=*"  + term + "*)(cn=*"+ term + "*))",
-                5,
-                "uid", "cn");
-        EntryCursor cursor = new EntryCursorImpl( connection.search(searchRequest) );
-
-        List<String> entries = new ArrayList<>();
-
-        // We appear to loop round a set of LDAP entries, in fact we only expect to have found one match.
-        while (cursor.next()) {
-            logger.info("In cursor loop");
-            Entry entry = cursor.get();
-            logger.info("The entry object as a string:" + entry.toString());
-
-            String entryString = entry.get("uid").getString() + " - " + entry.get("cn").getString();
-
-            entries.add(entryString);
-        }
-
-        cursor.close();
-        closeConnection();
-
-        logger.info("LDAP found " + entries.size() + " results.");
-        return entries;
-    }
-
-    public HashMap<String, String> getLdapUserInfo(String uid) throws LdapException, CursorException, IOException {
-        logger.info("Search info for UUN: " + uid);
-
-        getConnection();
-
-        if ( searchContext == null )
-        {
-            throw new IllegalArgumentException( "The base Dn cannot be null" );
-        }
-        System.out.println("----------------------Search info for UUN:------------ " + uid);
-      
-        SearchRequest searchRequest = createSearchRequest(
-                "(uid="  + uid + ")" ,
-                1,
-                "uid", "cn", "mail", "eduniRefNo");
-    
-        // We don't want this to take too long as it might, default is 30s
-        connection.setTimeOut(5000);
-        EntryCursor cursor = new EntryCursorImpl( connection.search(searchRequest) );
-        connection.setTimeOut(0);
+    private HashMap<String, String> search(LdapNetworkConnection connection, String id) throws LdapException, CursorException {
+        logger.info("Search LDAP for [{}]", id);
 
         HashMap<String, String> attributes = new HashMap<>();
 
-        // We appear to loop round a set of LDAP entries, in fact we only expect to have found one match.
-        while (cursor.next()) {
-            logger.info("In cursor loop");
-            Entry entry = cursor.get();
-            logger.info("The entry object as a string:" + entry.toString());
+        logger.info("Attributes to retrieve: {}", attrs);
+        EntryCursor cursor = null;
+        try {
+            cursor = connection.search(searchContext,
+                "(" + searchFilter + "=" + id + ")", SearchScope.ONELEVEL, attrs.toArray(new String[]{}));
+            // We appear to loop round a set of LDAP entries, in fact we only expect to have found one match.
+            while (cursor.next()) {
+                logger.info("In cursor loop");
+                Entry entry = cursor.get();
+                if(entry == null){
+                    continue;
+                }
+                logger.info("The entry object as a string:[{}]", entry);
 
-            // Now store all the returned attributes in a HashMap
-            for (Attribute attribute : entry.getAttributes()) {
-                attributes.put(attribute.getId(), attribute.getString());
+                // Now store all the returned attributes in a HashMap
+                for (Attribute attribute : entry.getAttributes()) {
+                    if(attribute == null){
+                        continue;
+                    }
+                    logger.info("Adding attribute:[{}]  with value[{}]", id, attribute.getString());
+                    attributes.put(attribute.getId(), attribute.getString());
+                }
             }
+        } catch (RuntimeException ex) {
+            logger.error("problem with ldap search for [{}]", id, ex);
+        } finally {
+            IOUtils.closeQuietly(cursor);
         }
-
-        cursor.close();
-        closeConnection();
-
-        logger.info("LDAP attributes are " + attributes.toString());
+        logger.info("LDAP attributes are [{}]", attributes);
         return attributes;
     }
 
+    public  List<String> autocompleteUID(String term) throws LdapException, CursorException {
+        logger.info("Search UUN containing {}", term);
+        LdapNetworkConnection connection = getConnection();
+        EntryCursor cursor = null;
+        try {
+            if (searchContext == null) {
+                throw new IllegalArgumentException("The base Dn cannot be null");
+            }
+
+            // Create a new SearchRequest object
+            SearchRequest searchRequest = createSearchRequest(
+                "(|(uid=*" + term + "*)(cn=*" + term + "*))",
+                5,
+                "uid", "cn");
+            cursor = new EntryCursorImpl(connection.search(searchRequest));
+
+            List<String> entries = new ArrayList<>();
+
+            // We appear to loop round a set of LDAP entries, in fact we only expect to have found one match.
+            while (cursor.next()) {
+                logger.info("In cursor loop");
+                Entry entry = cursor.get();
+                logger.info("The entry object as a string:[{}]",entry.toString());
+
+                String entryString =
+                    entry.get("uid").getString() + " - " + entry.get("cn").getString();
+
+                entries.add(entryString);
+            }
+            logger.info("LDAP found [{}] results.", entries.size());
+            //sort by alphabetical order - more consistent for testing
+            return entries.stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
+        } finally {
+            IOUtils.closeQuietly(cursor);
+            closeConnection(connection);
+        }
+    }
+
+    public  HashMap<String, String> getLdapUserInfo(String uid) throws LdapException, CursorException {
+        logger.info("Search info for UUN: [{}]", uid);
+
+        LdapNetworkConnection connection = getConnection();
+
+        if (searchContext == null) {
+            throw new IllegalArgumentException("The base Dn cannot be null");
+        }
+        logger.info("----------------------Search info for UUN:------------ [{}]", uid);
+
+        EntryCursor cursor = null;
+        try {
+
+            SearchRequest searchRequest = createSearchRequest(
+                "(uid=" + uid + ")",
+                1,
+                "uid", "cn", "mail", "eduniRefNo");
+
+            // We don't want this to take too long as it might, default is 30s
+            connection.setTimeOut(5000);
+            cursor = new EntryCursorImpl(connection.search(searchRequest));
+
+            HashMap<String, String> attributes = new HashMap<>();
+
+            // We appear to loop round a set of LDAP entries, in fact we only expect to have found one match.
+            while (cursor.next()) {
+                logger.info("In cursor loop");
+                Entry entry = cursor.get();
+                logger.info("The entry object as a string: [{}]", entry.toString());
+
+                // Now store all the returned attributes in a HashMap
+                for (Attribute attribute : entry.getAttributes()) {
+                    attributes.put(attribute.getId(), attribute.getString());
+                }
+            }
+            logger.info("LDAP attributes are [{}]", attributes);
+            return attributes;
+        } finally {
+            IOUtils.closeQuietly(cursor);
+        }
+    }
+
     private SearchRequest createSearchRequest(String filter, int sizeLimit, String... attributes) throws LdapException{
-        if ( searchContext == null )
-        {
-            throw new IllegalArgumentException( "The base Dn cannot be null" );
+        if (searchContext == null) {
+            throw new IllegalArgumentException("The base Dn cannot be null");
         }
 
         // Create a new SearchRequest object
@@ -208,24 +307,19 @@ public class LDAPService {
         return searchRequest;
     }
 
-    public HashMap<String, String> getLDAPAttributes(String name) throws LdapException, IOException, CursorException {
-        HashMap<String, String> attributes;
-
+    public  HashMap<String, String> getLDAPAttributes(String name) throws LdapException, CursorException {
+        LdapNetworkConnection connection = null;
         try {
-            getConnection();
-            attributes = search(name);
-
-        } catch (Exception e) {
-            throw e;
-
+            connection = getConnection();
+            HashMap<String, String> attributes = search(connection, name);
+            logger.info("after search [{}]", attributes);
+            return attributes;
+        } catch (LdapException | CursorException ex) {
+            logger.error("problem searching for[{}]", name, ex);
+            throw ex;
         } finally {
-            try {
-                closeConnection();
-            } catch (LdapException e) {
-                throw e;
-            }
+            closeConnection(connection);
         }
-
-        return attributes;
     }
+
 }

@@ -224,9 +224,9 @@ public class FileCopy {
             output = fos.getChannel();
             long size = input.size();
             long pos = 0;
-            long count = 0;
+            long count;
             while (pos < size) {
-                count = size - pos > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : size - pos;
+                count = Math.min(size - pos, FILE_COPY_BUFFER_SIZE);
                 long copied = output.transferFrom(input, pos, count);
                 pos += copied;
 //                if ( pos > (size / 2)) {
@@ -479,7 +479,7 @@ public class FileCopy {
         if (destDir.getCanonicalPath().startsWith(srcDir.getCanonicalPath())) {
             File[] srcFiles = filter == null ? srcDir.listFiles() : srcDir.listFiles(filter);
             if (srcFiles != null && srcFiles.length > 0) {
-                exclusionList = new ArrayList<String>(srcFiles.length);
+                exclusionList = new ArrayList<>(srcFiles.length);
                 for (File srcFile : srcFiles) {
                     File copiedFile = new File(destDir, srcFile.getName());
                     exclusionList.add(copiedFile.getCanonicalPath());

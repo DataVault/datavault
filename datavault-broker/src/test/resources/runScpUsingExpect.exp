@@ -1,0 +1,12 @@
+#!/usr/bin/expect -f
+## This script is meant to be run in a testcontainer.
+## It is used to test ssh keypair using scp.
+## We need to run the '/tmp/scp.sh' script with expect because it prompts for a passphrase.
+## The XXXX gets replaced by the actual passphrase during the test.
+## See org.datavaultplatform.broker.services.UserKeyPairService2IT
+set timeout -1
+spawn /tmp/scp.sh
+match_max 100000
+expect "Enter passphrase for key '/tmp/test_rsa': "
+send -- "XXXX\r"
+expect eof

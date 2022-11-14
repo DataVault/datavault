@@ -11,11 +11,11 @@ import java.util.Map;
 public abstract class Device {
     
     // Some public information about a device or storage system
-    public String name;
+    public final String name;
     
     
     // Some private configuration properties
-    protected Map<String,String> config;
+    protected final Map<String,String> config;
     protected Boolean multipleCopies = false;
     protected List<String> locations = null;
     protected Boolean depositIdStorageKey = false;

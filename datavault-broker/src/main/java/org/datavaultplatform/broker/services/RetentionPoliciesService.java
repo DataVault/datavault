@@ -1,6 +1,5 @@
 package org.datavaultplatform.broker.services;
 
-import org.datavaultplatform.broker.controllers.admin.AdminRetentionPoliciesController;
 import org.datavaultplatform.common.model.Deposit;
 import org.datavaultplatform.common.model.RetentionPolicy;
 import org.datavaultplatform.common.model.Retrieve;
@@ -10,7 +9,8 @@ import org.datavaultplatform.common.request.CreateRetentionPolicy;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,13 +18,21 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
+@Transactional
 public class RetentionPoliciesService {
 
     private final Logger logger = LoggerFactory.getLogger(RetentionPoliciesService.class);
 
-    private RetentionPolicyDAO retentionPolicyDAO;
-    
+    private final RetentionPolicyDAO retentionPolicyDAO;
+
+    @Autowired
+    public RetentionPoliciesService(RetentionPolicyDAO retentionPolicyDAO) {
+        this.retentionPolicyDAO = retentionPolicyDAO;
+    }
+
     public List<RetentionPolicy> getRetentionPolicies() {
         return retentionPolicyDAO.list();
     }
@@ -38,15 +46,11 @@ public class RetentionPoliciesService {
     }
     
     public RetentionPolicy getPolicy(String policyID) {
-        return retentionPolicyDAO.findById(policyID);
-    }
-    
-    public void setRetentionPolicyDAO(RetentionPolicyDAO retentionPolicyDAO) {
-        this.retentionPolicyDAO = retentionPolicyDAO;
+        return retentionPolicyDAO.findById(Integer.parseInt(policyID)).orElse(null);
     }
 
     public void delete(String policyID) {
-        retentionPolicyDAO.delete(policyID);
+        retentionPolicyDAO.deleteById(Integer.parseInt(policyID));
     }
 
     public RetentionPolicy buildRetentionPolicy(CreateRetentionPolicy createRetentionPolicy) {
@@ -120,12 +124,12 @@ public class RetentionPoliciesService {
         }
     }
 
-    private Date stringToDate(String string) {
+    private Date stringToDate(String value) {
         Date date = null;
         try {
-            date = new SimpleDateFormat("yyyy-MM-dd").parse(string);
+            date = new SimpleDateFormat("yyyy-MM-dd").parse(value);
         } catch (ParseException e) {
-            e.printStackTrace();
+            logger.error("unexpected exception",e);
         }
 
         return date;
@@ -197,7 +201,7 @@ public class RetentionPoliciesService {
     }
      **/
 
-    public void setRetention(Vault v) {
+    public static void setRetention(Vault v) {
 
         RetentionPolicy rp = v.getRetentionPolicy();
 
@@ -211,7 +215,7 @@ public class RetentionPoliciesService {
                 // At the time of writing this means its EPSRC
 
                 // Get all the retrieve events
-                ArrayList<Retrieve> retrieves = new ArrayList();
+                ArrayList<Retrieve> retrieves = new ArrayList<>();
                 for (Deposit d : v.getDeposits()) {
                     retrieves.addAll(d.getRetrieves());
                 }

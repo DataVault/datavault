@@ -3,8 +3,10 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.apache.commons.lang.StringUtils;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.response.VaultInfo;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 
@@ -17,11 +19,17 @@ import java.util.List;
 @ApiObject(name = "PendingVault")
 @Entity
 @Table(name="PendingVaults")
+@NamedEntityGraph(name=PendingVault.EG_PENDING_VAULT, attributeNodes =
+    {
+        @NamedAttributeNode(PendingVault_.GROUP),
+        @NamedAttributeNode(PendingVault_.USER),
+        @NamedAttributeNode(PendingVault_.RETENTION_POLICY),
+        @NamedAttributeNode(PendingVault_.DATA_CREATORS),
+    })
 public class PendingVault {
-    private static final long ZERO = 0l;
-    
-    private static String DEFAULT_PENDING_VAULT_NAME = "*** UNNAMED VAULT ***";
 
+    public static final String EG_PENDING_VAULT = "eg.PendingVault.1";
+    private static final String DEFAULT_PENDING_VAULT_NAME = "*** UNNAMED VAULT ***";
     public enum Estimate {
         UNDER_100GB,
         UNDER_10TB,
@@ -136,7 +144,7 @@ public class PendingVault {
 
     @JsonIgnore
     @OneToMany(targetEntity=PendingDataCreator.class, mappedBy="pendingVault", orphanRemoval = true, cascade = CascadeType.PERSIST, fetch=FetchType.LAZY)
-    private List<PendingDataCreator> dataCreators;
+    private final List<PendingDataCreator> dataCreators = new ArrayList<>();
 
     @Column(name = "confirmed", nullable = false)
     private Boolean confirmed = false;
@@ -301,7 +309,10 @@ public class PendingVault {
     }
 
     public void setDataCreator(List<PendingDataCreator> dataCreators) {
-        this.dataCreators = dataCreators;
+        synchronized (this.dataCreators) {
+            this.dataCreators.clear();
+            this.dataCreators.addAll(dataCreators);
+        }
     }
 
     public User getOwner() {
@@ -416,5 +427,21 @@ public class PendingVault {
         retVal.setConfirmed(this.confirmed);
 
         return retVal;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+            return false;
+        }
+        PendingVault that = (PendingVault) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

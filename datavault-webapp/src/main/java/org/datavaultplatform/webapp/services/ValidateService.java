@@ -1,17 +1,17 @@
 package org.datavaultplatform.webapp.services;
 
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.request.CreateVault;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.access.method.P;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import org.springframework.stereotype.Service;
 
+@Service
+@Slf4j
 public class ValidateService {
-    private static final Logger logger = LoggerFactory.getLogger(ValidateService.class);
 
     public List<String> validate(CreateVault vault, String userID) {
         List<String> retVal = new ArrayList<>();
@@ -180,9 +180,9 @@ public class ValidateService {
         ownerList.add(owner);
         List<String> ndms = vault.getNominatedDataManagers();
         List<String> deps = vault.getDepositors();
-        boolean match1 = ndms.stream().filter(x -> x!="").anyMatch(deps::contains);
-        boolean match2 = ndms.stream().filter(x -> x!="").anyMatch(ownerList::contains);
-        boolean match3 = deps.stream().filter(x -> x!="").anyMatch(ownerList::contains);
+        boolean match1 = ndms.stream().filter(x -> !Objects.equals(x, "")).anyMatch(deps::contains);
+        boolean match2 = ndms.stream().filter(x -> !Objects.equals(x, "")).anyMatch(ownerList::contains);
+        boolean match3 = deps.stream().filter(x -> !Objects.equals(x, "")).anyMatch(ownerList::contains);
 
         if (match1) {
             retVal.add("A user cannot have the role of both a NDM and a depositor");

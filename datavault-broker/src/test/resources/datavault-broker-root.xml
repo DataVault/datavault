@@ -221,11 +221,11 @@
 
     <!-- Data Access Objects -->
     
-    <bean id="vaultDAO" class="org.datavaultplatform.common.model.dao.VaultDAOImpl">
+    <bean id="vaultDAO" class="org.datavaultplatform.common.model.repo.custom.VaultCustomDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="depositDAO" class="org.datavaultplatform.common.model.dao.DepositDAOImpl">
+    <bean id="depositDAO" class="org.datavaultplatform.common.model.repo.DepositDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
@@ -245,15 +245,15 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="userDAO" class="org.datavaultplatform.common.model.dao.UserDAOImpl">
+    <bean id="userDAO" class="org.datavaultplatform.common.model.repo.UserDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="roleDAO" class="org.datavaultplatform.common.model.dao.RoleDAOImpl">
+    <bean id="roleDAO" class="org.datavaultplatform.common.model.repo.RoleDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="roleAssignmentDAO" class="org.datavaultplatform.common.model.dao.RoleAssignmentDaoImpl">
+    <bean id="roleAssignmentDAO" class="org.datavaultplatform.common.model.repo.RoleAssignmentDaoImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
@@ -261,7 +261,7 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="groupDAO" class="org.datavaultplatform.common.model.dao.GroupDAOImpl">
+    <bean id="groupDAO" class="org.datavaultplatform.common.model.repo.custom.GroupCustomDAOImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 

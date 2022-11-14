@@ -1,17 +1,21 @@
 package org.datavaultplatform.common.model.dao;
 
 import java.util.List;
+import java.util.Optional;
 import org.datavaultplatform.common.model.FileStore;
- 
-public interface FileStoreDAO {
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-    public void save(FileStore fileStore);
-    
-    public void update(FileStore fileStore);
-    
-    public List<FileStore> list();
+@Repository
+@Transactional
+public interface FileStoreDAO extends BaseDAO<FileStore> {
 
-    public FileStore findById(String Id);
+  @Override
+  @EntityGraph(FileStore.EG_FILE_STORE)
+  Optional<FileStore> findById(String id);
 
-    public void deleteById(String Id);
+  @Override
+  @EntityGraph(FileStore.EG_FILE_STORE)
+  List<FileStore> findAll();
 }

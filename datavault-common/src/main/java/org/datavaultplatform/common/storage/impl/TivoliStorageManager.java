@@ -18,7 +18,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class TivoliStorageManager extends Device implements ArchiveStore {
 
@@ -28,13 +27,13 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     public static String TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
     public static String TEMP_PATH_PREFIX = "/tmp/datavault/temp/";
 
-    public Verify.Method verificationMethod = Verify.Method.COPY_BACK;
-    private static int defaultRetryTime = 30;
-	private static int defaultMaxRetries = 48; // 24 hours if retry time is 30 minutes
+    public final Verify.Method verificationMethod = Verify.Method.COPY_BACK;
+    private static final int defaultRetryTime = 30;
+		private static final int defaultMaxRetries = 48; // 24 hours if retry time is 30 minutes
     private static int retryTime = TivoliStorageManager.defaultRetryTime;
     private static int maxRetries = TivoliStorageManager.defaultMaxRetries;
 
-    public TivoliStorageManager(String name, Map<String,String> config) throws Exception  {
+    public TivoliStorageManager(String name, Map<String,String> config) {
         super(name, config);
         String optionsKey = "optionsDir";
     	String tempKey = "tempDir";
@@ -63,7 +62,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 				TivoliStorageManager.maxRetries = TivoliStorageManager.defaultMaxRetries;
 			}
 		}
-        locations = new ArrayList<String>();
+        locations = new ArrayList<>();
         locations.add(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
         locations.add(TivoliStorageManager.TSM_SERVER_NODE2_OPT);
         super.multipleCopies = true;
@@ -100,7 +99,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     }
     
     @Override
-    public void retrieve(String path, File working, Progress progress) throws Exception {
+    public void retrieve(String path, File working, Progress progress) {
     		throw new UnsupportedOperationException();
     }
     
@@ -177,8 +176,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 		loc2.setProgress(progress);
 		loc2.setDescription(depositId);
 
-		Future<Void> loc1Future = executor.submit(loc1);
-		Future<Void> loc2Future = executor.submit(loc2);
+		Future<Object> loc1Future = executor.submit(loc1);
+		Future<Object> loc2Future = executor.submit(loc2);
 		executor.shutdown();
 		try {
 			loc1Future.get();
@@ -306,7 +305,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 //		}
 //	}
 
-	protected static class TSMTracker implements Callable {
+	protected static class TSMTracker implements Callable<Object> {
 
     	private String location;
     	private File working;
@@ -402,6 +401,36 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 
 		public void setDescription(String description) {
 			this.description = description;
+		}
+	}
+
+	/*
+	 * The TSM Tape Driver 'dsmc' executable should be on the Java PATH
+	 */
+	public static boolean checkTSMTapeDriver() {
+		try {
+			ProcessBuilder pb = new ProcessBuilder("which", "dsmc");
+
+			logger.info("user.dir [{}]", System.getProperty("user.dir"));
+			logger.info("PB 'path' [{}]", pb.environment().get("PATH"));
+
+			Process process = pb.start();
+
+			int status = process.waitFor(5, TimeUnit.SECONDS) ? process.exitValue() : -1;
+			String pOutput = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8).trim();
+			String pError = IOUtils.toString(process.getErrorStream(), StandardCharsets.UTF_8).trim();
+			if (status == 0) {
+				// canonicalPath resolves relative paths against user.dir and removes . and ..
+				Path canonicalPath = Paths.get(new File(pOutput).getCanonicalPath());
+				logger.info("'dsmc' - is found on PATH by 'which' at [{}]", canonicalPath);
+				return true;
+			} else {
+				logger.info("'dsmc' - is NOT found on PATH by 'which' {}", pError);
+				return false;
+			}
+		} catch (Exception ex) {
+			logger.error("problem trying to detect 'dsmc'", ex);
+			return false;
 		}
 	}
 }

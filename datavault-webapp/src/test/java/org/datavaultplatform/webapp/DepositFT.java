@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp;
 
 import org.testng.Assert;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import org.datavaultplatform.webapp.page.DepositPage;
@@ -8,6 +9,7 @@ import org.datavaultplatform.webapp.page.FirstRunPage;
 import org.datavaultplatform.webapp.page.LoginPage;
 import org.datavaultplatform.webapp.page.VaultsPage;
 
+@Ignore
 public class DepositFT extends BaseFT {
     @Test
     public void testFirstRun() throws Exception {

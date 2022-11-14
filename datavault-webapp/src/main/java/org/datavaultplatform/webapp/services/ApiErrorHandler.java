@@ -26,18 +26,22 @@ public class ApiErrorHandler extends DefaultResponseErrorHandler {
             throw new ForbiddenException();
         }
 
+        logger.error("UNEXPECTED ERROR [{}/{}]", response.getStatusCode(), response.getBody());
+
         if(statusCode == HttpStatus.INTERNAL_SERVER_ERROR){
 
             RestTemplate restTemplate = new RestTemplate();
 
             ResponseExtractor<ResponseEntity<ApiError>> responseExtractor =
-                    new ResponseEntityResponseExtractor(ApiError.class, restTemplate);
+                    new ResponseEntityResponseExtractor<>(ApiError.class, restTemplate);
 
             HttpEntity<ApiError> extractedData = responseExtractor.extractData(response);
 
-            System.err.println("There has been an error while calling the broker Api, here is the stackTrace of the broker:");
+            logger.error("api error [{}]", extractedData.getBody());
+
+            logger.error("There has been an error while calling the broker Api, here is the stackTrace of the broker:");
             Exception ex = extractedData.getBody().getException();
-            ex.printStackTrace();
+            logger.error("There has been an error while calling the broker Api:", ex);
 
             throw new ServerException("There has been an error while calling the broker Api:", ex);
         }
@@ -53,7 +57,7 @@ public class ApiErrorHandler extends DefaultResponseErrorHandler {
     /**
      * Response extractor for {@link HttpEntity}.
      */
-    private class ResponseEntityResponseExtractor<T> implements ResponseExtractor<ResponseEntity<T>> {
+    private static class ResponseEntityResponseExtractor<T> implements ResponseExtractor<ResponseEntity<T>> {
 
         private final HttpMessageConverterExtractor<T> delegate;
 

@@ -1,7 +1,7 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
 import com.google.common.collect.MoreCollectors;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.util.RoleUtils;
 import org.datavaultplatform.webapp.exception.EntityNotFoundException;
@@ -10,6 +10,8 @@ import org.datavaultplatform.webapp.services.ForceLogoutService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +19,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-import org.testng.collections.Sets;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -27,19 +28,19 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Controller
+@ConditionalOnBean(RestService.class)
 public class AdminRolesController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminRolesController.class);
 
-    private RestService restService;
+    private final RestService restService;
 
-    private ForceLogoutService forceLogoutService;
+    private final ForceLogoutService forceLogoutService;
 
-    public void setRestService(RestService restService) {
+    @Autowired
+    public AdminRolesController(RestService restService,
+        ForceLogoutService forceLogoutService) {
         this.restService = restService;
-    }
-
-    public void setForceLogoutService(ForceLogoutService forceLogoutService) {
         this.forceLogoutService = forceLogoutService;
     }
 
@@ -152,7 +153,7 @@ public class AdminRolesController {
         if (permIds == null) {
             return new ArrayList<>();
         }
-        Set<String> permissionIds = Sets.newHashSet(Arrays.asList(permIds));
+        Set<String> permissionIds = new HashSet<>(Arrays.asList(permIds));
         return getPermissionsByType(type).stream()
                 .filter(permission -> permissionIds.contains(permission.getId()))
                 .collect(Collectors.toList());

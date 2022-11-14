@@ -1,33 +1,38 @@
 package org.datavaultplatform.broker.services;
 
-import org.datavaultplatform.common.model.*;
-import org.datavaultplatform.common.model.dao.PermissionDAO;
-import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
-import org.datavaultplatform.common.model.dao.RoleDAO;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import org.datavaultplatform.broker.test.TestUtils;
+import org.datavaultplatform.common.model.Group;
+import org.datavaultplatform.common.model.Permission;
+import org.datavaultplatform.common.model.PermissionModel;
+import org.datavaultplatform.common.model.PermissionModel.PermissionType;
+import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.RoleModel;
+import org.datavaultplatform.common.model.RoleType;
+import org.datavaultplatform.common.model.dao.PermissionDAO;
+import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
+import org.datavaultplatform.common.model.dao.RoleDAO;
+import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RolesAndPermissionsServiceTest {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private RoleDAO mockRoleDao;
@@ -38,14 +43,18 @@ public class RolesAndPermissionsServiceTest {
     @Mock
     private RoleAssignmentDAO mockRoleAssignmentDao;
 
+    @Mock
+    private UsersService mockUsersService;
+
+    @InjectMocks
     private RolesAndPermissionsService underTest;
 
-    @Before
-    public void setup() {
-        underTest = new RolesAndPermissionsService();
-        underTest.setPermissionDao(mockPermissionDao);
-        underTest.setRoleDao(mockRoleDao);
-        underTest.setRoleAssignmentDao(mockRoleAssignmentDao);
+    void checkIllegalStateExcepton(String message, Executable executable){
+        TestUtils.checkException(IllegalStateException.class, message, executable);
+    }
+
+    void verifyNoMoreMockInteractions() {
+        verifyNoMoreInteractions(mockRoleAssignmentDao, mockPermissionDao, mockPermissionDao, mockUsersService);
     }
 
     @Test
@@ -58,18 +67,17 @@ public class RolesAndPermissionsServiceTest {
         underTest.createRole(toCreate);
 
         // Then
-        verify(mockRoleDao).store(toCreate);
+        verify(mockRoleDao).save(toCreate);
     }
 
     @Test
     public void createRoleShouldThrowExceptionWhenRoleIdAlreadyExists() {
         // Given
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Cannot create a role that already exists");
+        checkIllegalStateExcepton("Cannot create a role that already exists", () -> {
 
         RoleModel originalRole = aRole(RoleType.SCHOOL);
         originalRole.setId(123L);
-        given(mockRoleDao.find(123L)).willReturn(originalRole);
+        given(mockRoleDao.findById(123L)).willReturn(Optional.of(originalRole));
 
         RoleModel toCreate = aRole(RoleType.SCHOOL);
         toCreate.setId(123L);
@@ -78,13 +86,12 @@ public class RolesAndPermissionsServiceTest {
         underTest.createRole(toCreate);
 
         // Then throws IllegalStateException
+        });
     }
 
     @Test
     public void createRoleShouldThrowExceptionWhenSchoolPermissionIsAppliedToVaultRole() {
-        // Given
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Unable to apply permission with type SCHOOL to role of type VAULT");
+        checkIllegalStateExcepton("Unable to apply permission with type SCHOOL to role of type VAULT", () -> {
 
         RoleModel toCreate = aRole(RoleType.VAULT);
         toCreate.addPermission(aPermission(Permission.CAN_VIEW_RETRIEVES, PermissionModel.PermissionType.SCHOOL));
@@ -93,13 +100,13 @@ public class RolesAndPermissionsServiceTest {
         underTest.createRole(toCreate);
 
         // Then throws IllegalStateException
+        });
     }
 
     @Test
     public void createRoleShouldThrowExceptionWhenVaultPermissionIsAppliedToSchoolRole() {
         // Given
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Unable to apply permission with type VAULT to role of type SCHOOL");
+        checkIllegalStateExcepton("Unable to apply permission with type VAULT to role of type SCHOOL", () -> {
 
         RoleModel toCreate = aRole(RoleType.SCHOOL);
         toCreate.addPermission(aPermission(Permission.VIEW_VAULT_ROLES, PermissionModel.PermissionType.VAULT));
@@ -108,6 +115,7 @@ public class RolesAndPermissionsServiceTest {
         underTest.createRole(toCreate);
 
         // Then throws IllegalStateException
+        });
     }
 
     @Test
@@ -121,7 +129,7 @@ public class RolesAndPermissionsServiceTest {
         underTest.createRoleAssignment(toCreate);
 
         // Then
-        verify(mockRoleAssignmentDao).store(toCreate);
+        verify(mockRoleAssignmentDao).save(toCreate);
     }
 
     @Test
@@ -135,14 +143,13 @@ public class RolesAndPermissionsServiceTest {
         underTest.createRoleAssignment(toCreate);
 
         // Then
-        verify(mockRoleAssignmentDao).store(toCreate);
+        verify(mockRoleAssignmentDao).save(toCreate);
     }
 
     @Test
     public void createRoleAssignmentShouldThrowExceptionWhenNoUserIsPresent() {
         // Given
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Cannot create role assignment without user");
+        checkIllegalStateExcepton("Cannot create role assignment without user", () -> {
 
         RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.SCHOOL));
         toCreate.setUserId(null);
@@ -152,13 +159,13 @@ public class RolesAndPermissionsServiceTest {
         underTest.createRoleAssignment(toCreate);
 
         // Then throws IllegalStateException
+        });
     }
 
     @Test
     public void createRoleAssignmentShouldThrowExceptionWhenNoRoleIsPresent() {
         // Given
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Cannot create role assignment without role");
+        checkIllegalStateExcepton("Cannot create role assignment without role", () -> {
 
         RoleAssignment toCreate = aRoleAssignment(null);
 
@@ -166,28 +173,26 @@ public class RolesAndPermissionsServiceTest {
         underTest.createRoleAssignment(toCreate);
 
         // Then throws IllegalStateException
+        });
     }
 
     @Test
     public void createRoleAssignmentShouldThrowExceptionWhenSchoolRoleAssignmentHasNoSchool() {
         // Given
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Cannot create school role assignment without a school");
+        checkIllegalStateExcepton("Cannot create school role assignment without a school", () -> {
 
         RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.SCHOOL));
         toCreate.setSchoolId(null);
 
         // When
         underTest.createRoleAssignment(toCreate);
-
-        // Then throws IllegalStateException
+        });
     }
 
     @Test
     public void createRoleAssignmentShouldThrowExceptionWhenVaultRoleAssignmentHasNoVault() {
         // Given
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Cannot create vault role assignment without a vault");
+        checkIllegalStateExcepton("Cannot create vault role assignment without a vault", () -> {
 
         RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.VAULT));
         toCreate.setVaultId(null);
@@ -196,13 +201,13 @@ public class RolesAndPermissionsServiceTest {
         underTest.createRoleAssignment(toCreate);
 
         // Then throws IllegalStateException
+        });
     }
 
     @Test
     public void createRoleAssignmentShouldhrowExceptionWhenRoleAssignmentAlreadyExists() {
         // Given
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Role assignment already exists");
+        checkIllegalStateExcepton("Role assignment already exists", () -> {
 
         RoleAssignment toCreate = aRoleAssignment(aRole(RoleType.SCHOOL));
         toCreate.setSchoolId("school1");
@@ -212,6 +217,7 @@ public class RolesAndPermissionsServiceTest {
         underTest.createRoleAssignment(toCreate);
 
         // Then throws IllegalStateException
+        });
     }
 
     @Test
@@ -221,23 +227,19 @@ public class RolesAndPermissionsServiceTest {
         PermissionModel school2 = aPermission(Permission.CAN_VIEW_IN_PROGRESS, PermissionModel.PermissionType.SCHOOL);
         PermissionModel school3 = aPermission(Permission.CAN_VIEW_QUEUES, PermissionModel.PermissionType.SCHOOL);
 
-        List<PermissionModel> allPermissions = Arrays.asList(
+        List<PermissionModel> permissionModels = Arrays.asList(
                 school1,
                 school2,
-                school3,
-                aPermission(Permission.VIEW_VAULT_ROLES, PermissionModel.PermissionType.VAULT),
-                aPermission(Permission.CAN_MANAGE_ROLES, PermissionModel.PermissionType.ADMIN),
-                aPermission(Permission.CAN_MANAGE_BILLING_DETAILS, PermissionModel.PermissionType.ADMIN),
-                aPermission(Permission.CAN_VIEW_EVENTS, PermissionModel.PermissionType.ADMIN));
+                school3);
 
-        given(mockPermissionDao.findAll()).willReturn(allPermissions);
-
+        given(mockPermissionDao.findByType(PermissionType.SCHOOL)).willReturn(permissionModels);
         // When
         Collection<PermissionModel> actual = underTest.getSchoolPermissions();
 
         // Then
-        List<PermissionModel> expected = Arrays.asList(school1, school2, school3);
-        assertEquals(expected, actual);
+        assertEquals(permissionModels, actual);
+        verify(mockPermissionDao).findByType(PermissionType.SCHOOL);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -248,24 +250,19 @@ public class RolesAndPermissionsServiceTest {
         PermissionModel vault3 = aPermission(Permission.VIEW_VAULT_ROLES, PermissionModel.PermissionType.VAULT);
 
         List<PermissionModel> allPermissions = Arrays.asList(
-                aPermission(Permission.CAN_VIEW_VAULTS_SIZE, PermissionModel.PermissionType.SCHOOL),
-                aPermission(Permission.CAN_VIEW_IN_PROGRESS, PermissionModel.PermissionType.SCHOOL),
-                aPermission(Permission.CAN_VIEW_QUEUES, PermissionModel.PermissionType.SCHOOL),
                 vault1,
                 vault2,
-                vault3,
-                aPermission(Permission.CAN_MANAGE_BILLING_DETAILS, PermissionModel.PermissionType.ADMIN),
-                aPermission(Permission.CAN_MANAGE_ROLES, PermissionModel.PermissionType.ADMIN),
-                aPermission(Permission.CAN_MANAGE_RETENTION_POLICIES, PermissionModel.PermissionType.ADMIN));
+                vault3);
 
-        given(mockPermissionDao.findAll()).willReturn(allPermissions);
+        given(mockPermissionDao.findByType(PermissionType.VAULT)).willReturn(allPermissions);
 
         // When
         Collection<PermissionModel> actual = underTest.getVaultPermissions();
 
         // Then
-        List<PermissionModel> expected = Arrays.asList(vault1, vault2, vault3);
-        assertEquals(expected, actual);
+        assertEquals(allPermissions, actual);
+        verify(mockPermissionDao).findByType(PermissionType.VAULT);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -275,14 +272,16 @@ public class RolesAndPermissionsServiceTest {
         RoleModel vaultRole = aRole(RoleType.VAULT);
         RoleModel adminRole = aRole(RoleType.ADMIN);
 
-        given(mockRoleDao.findAll()).willReturn(Arrays.asList(schoolRole, vaultRole, adminRole));
+        given(mockRoleDao.findAllEditableRoles()).willReturn(Arrays.asList(schoolRole, vaultRole, adminRole));
 
         // When
         List<RoleModel> actual = underTest.getEditableRoles();
 
         // Then
-        List<RoleModel> expected = Arrays.asList(schoolRole, vaultRole);
+        List<RoleModel> expected = Arrays.asList(schoolRole, vaultRole, adminRole);
         assertEquals(expected, actual);
+        verify(mockRoleDao).findAllEditableRoles();
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -290,7 +289,7 @@ public class RolesAndPermissionsServiceTest {
         // Given
         RoleModel originalRole = aRole(RoleType.SCHOOL);
         originalRole.setId(123L);
-        given(mockRoleDao.find(123L)).willReturn(originalRole);
+        given(mockRoleDao.findById(123L)).willReturn(Optional.of(originalRole));
 
         RoleModel toUpdate = aRole(RoleType.SCHOOL);
         toUpdate.setId(123L);
@@ -306,8 +305,7 @@ public class RolesAndPermissionsServiceTest {
     @Test
     public void updateRoleShouldThrowExceptionWhenRoleDoesNotHaveAnId() {
         // Given
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Cannot update a role that does not exist");
+        checkIllegalStateExcepton("Cannot update a role that does not exist", () -> {
 
         RoleModel toUpdate = aRole(RoleType.SCHOOL);
         toUpdate.setId(null);
@@ -317,15 +315,15 @@ public class RolesAndPermissionsServiceTest {
         underTest.updateRole(toUpdate);
 
         // Then throws IllegalStateException
+        });
     }
 
     @Test
     public void updateRoleShouldThrowExceptionWhenRoleDoesNotExist() {
         // Given
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Cannot update a role that does not exist");
+        checkIllegalStateExcepton("Cannot update a role that does not exist", () -> {
 
-        given(mockRoleDao.find(123L)).willReturn(null);
+        given(mockRoleDao.findById(123L)).willReturn(Optional.empty());
 
         RoleModel toUpdate = aRole(RoleType.SCHOOL);
         toUpdate.setId(123L);
@@ -336,17 +334,17 @@ public class RolesAndPermissionsServiceTest {
 
         // Then
         verify(mockRoleDao).update(toUpdate);
+        });
     }
 
     @Test
     public void updateRoleShouldThrowExceptionWhenUnsupportedPermissionTypeIsPresent() {
         // Given
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Unable to apply permission with type VAULT to role of type SCHOOL");
+        checkIllegalStateExcepton("Unable to apply permission with type VAULT to role of type SCHOOL", () -> {
 
         RoleModel originalRole = aRole(RoleType.SCHOOL);
         originalRole.setId(123L);
-        given(mockRoleDao.find(123L)).willReturn(originalRole);
+        given(mockRoleDao.findById(123L)).willReturn(Optional.of(originalRole));
 
         RoleModel toUpdate = aRole(RoleType.SCHOOL);
         toUpdate.setId(123L);
@@ -356,42 +354,47 @@ public class RolesAndPermissionsServiceTest {
         underTest.updateRole(toUpdate);
 
         // Then throws IllegalStateException
+        });
     }
 
     @Test
     public void updateRoleAssignmentShouldPersistAnUpdate() {
         // Given
         Group school = new Group();
-        String schoolId = "school1";
+        String schoolId1 = "school1";
+        String schoolId2 = "school2";
 
         RoleModel originalRole = aRole(RoleType.SCHOOL);
-        originalRole.setName("Role 1");
         RoleAssignment original = aRoleAssignment(originalRole);
-        original.setSchoolId(schoolId);
+        original.setSchoolId(schoolId1);
         original.setId(1L);
 
-        given(mockRoleAssignmentDao.find(1L)).willReturn(original);
+        given(mockRoleAssignmentDao.findById(1L)).willReturn(Optional.of(original));
 
         RoleModel newRole = aRole(RoleType.SCHOOL);
-        newRole.setName("Role 2");
+
         RoleAssignment updatedRoleAssignment = aRoleAssignment(newRole);
-        updatedRoleAssignment.setSchoolId(schoolId);
+        updatedRoleAssignment.setSchoolId(schoolId2);
         updatedRoleAssignment.setId(1L);
+
+        given(mockRoleAssignmentDao.roleAssignmentExists(updatedRoleAssignment)).willReturn(false);
 
         // When
         underTest.updateRoleAssignment(updatedRoleAssignment);
 
         // Then
+        verify(mockRoleAssignmentDao).findById(1L);
         verify(mockRoleAssignmentDao).update(updatedRoleAssignment);
+        verify(mockRoleAssignmentDao).roleAssignmentExists(updatedRoleAssignment);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
     public void updateRoleAssignmentShouldThrowExceptionWhenOriginalRoleDoesNotExist() {
         // Given
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Cannot update a role assignment that does not exist");
+        checkIllegalStateExcepton("Cannot update a role assignment that does not exist", () -> {
 
-        given(mockRoleAssignmentDao.find(1L)).willReturn(null);
+        given(mockRoleAssignmentDao.findById(1L)).willReturn(Optional.empty());
 
         RoleAssignment updatedRoleAssignment = aRoleAssignment(aRole(RoleType.SCHOOL));
         updatedRoleAssignment.setSchoolId("school1");
@@ -401,6 +404,7 @@ public class RolesAndPermissionsServiceTest {
         underTest.updateRoleAssignment(updatedRoleAssignment);
 
         // Then throws IllegalStateException
+        });
     }
 
     @Test
@@ -410,7 +414,7 @@ public class RolesAndPermissionsServiceTest {
         roleAssignment.setSchoolId("school1");
         roleAssignment.setId(1L);
 
-        given(mockRoleAssignmentDao.find(1L)).willReturn(roleAssignment);
+        given(mockRoleAssignmentDao.findById(1L)).willReturn(Optional.of(roleAssignment));
 
         // When
         underTest.updateRoleAssignment(roleAssignment);
@@ -422,13 +426,12 @@ public class RolesAndPermissionsServiceTest {
     @Test
     public void updateRoleAssignmentShouldThrowExceptionIfUpdatedStateIsInvalid() {
         // Given
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Cannot create role assignment without user");
+        checkIllegalStateExcepton("Cannot create role assignment without user", () -> {
 
         RoleAssignment original = aRoleAssignment(aRole(RoleType.SCHOOL));
         original.setSchoolId("school1");
         original.setId(1L);
-        given(mockRoleAssignmentDao.find(1L)).willReturn(original);
+        given(mockRoleAssignmentDao.findById(1L)).willReturn(Optional.of(original));
 
         RoleAssignment update = aRoleAssignment(null);
         update.setUserId(null);
@@ -438,6 +441,7 @@ public class RolesAndPermissionsServiceTest {
         underTest.updateRoleAssignment(update);
 
         // Then throws IllegalStateException
+        });
     }
 
     @Test
@@ -445,27 +449,26 @@ public class RolesAndPermissionsServiceTest {
         // Given
         RoleModel originalRole = aRole(RoleType.SCHOOL);
         originalRole.setId(123L);
-        given(mockRoleDao.find(123L)).willReturn(originalRole);
+        given(mockRoleDao.findById(123L)).willReturn(Optional.of(originalRole));
 
         // When
         underTest.deleteRole(123L);
 
         // Then
-        verify(mockRoleDao).delete(123L);
+        verify(mockRoleDao).deleteById(123L);
     }
 
     @Test
     public void deleteRoleShouldThrowExceptionWhenRoleDoesNotExist() {
-        // Given
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Cannot delete a role that does not exist");
+        checkIllegalStateExcepton("Cannot delete a role that does not exist", () -> {
 
-        given(mockRoleDao.find(123L)).willReturn(null);
+        given(mockRoleDao.findById(123L)).willReturn(Optional.empty());
 
         // When
         underTest.deleteRole(123L);
 
         // Then throws IllegalStateException
+        });
     }
 
     @Test
@@ -474,27 +477,26 @@ public class RolesAndPermissionsServiceTest {
         RoleAssignment original = aRoleAssignment(aRole(RoleType.ADMIN));
         original.setId(1L);
 
-        given(mockRoleAssignmentDao.find(1L)).willReturn(original);
+        given(mockRoleAssignmentDao.findById(1L)).willReturn(Optional.of(original));
 
         // When
         underTest.deleteRoleAssignment(1L);
 
         // Then
-        verify(mockRoleAssignmentDao).delete(1L);
+        verify(mockRoleAssignmentDao).deleteById(1L);
     }
 
     @Test
     public void deleteRoleAssignmentShouldThrowExceptionWhenRoleAssignmentDoesNotExist() {
-        // Given
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Cannot delete a role assignment that does not exist");
+        checkIllegalStateExcepton("Cannot delete a role assignment that does not exist", () -> {
 
-        given(mockRoleAssignmentDao.find(1L)).willReturn(null);
+        given(mockRoleAssignmentDao.findById(1L)).willReturn(Optional.empty());
 
         // When
         underTest.deleteRoleAssignment(1L);
 
         // Then throws IllegalStateException
+        });
     }
 
     private RoleModel aRole(RoleType roleType) {

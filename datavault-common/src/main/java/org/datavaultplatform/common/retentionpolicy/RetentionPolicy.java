@@ -9,10 +9,10 @@ public interface RetentionPolicy {
     /**
      * Execute the policy on a Vault
      */
-    public int run(Vault v);
+    int run(Vault v);
 
     /**
      * Get the current review date of the policy
      */
-    public Date getReviewDate(Vault v);
+    Date getReviewDate(Vault v);
 }

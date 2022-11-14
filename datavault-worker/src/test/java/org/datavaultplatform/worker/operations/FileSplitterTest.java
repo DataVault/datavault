@@ -1,24 +1,28 @@
 package org.datavaultplatform.worker.operations;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.util.zip.CRC32;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class FileSplitterTest {
     private static String bigFileResources;
     private static File tempDir;
     
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
         String resourcesDir = System.getProperty("user.dir") + File.separator + "src" +
                 File.separator + "test" + File.separator + "resources";
@@ -28,22 +32,22 @@ public class FileSplitterTest {
         tempDir = new File(resourcesDir, "tmp");
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        try{
+        Logger restClientLogger = (Logger) LoggerFactory.getLogger(FileSplitter.class);
+        restClientLogger.setLevel(Level.DEBUG);
+
+        try {
             tempDir.mkdir();
-        }
-        catch(SecurityException se) {
+        } catch(SecurityException se) {
             fail(se.getMessage());
         }
-
-        BasicConfigurator.configure();
     }
     
     @Test
     public void testSplit50MBFile() {
         System.out.println( "\nStart testSplit50MBFile");
-        try{
+        try {
             File inputFile = new File(bigFileResources, "50MB_file");
             
             long csumInputFile = 0;
@@ -57,7 +61,7 @@ public class FileSplitterTest {
             
             long start = System.currentTimeMillis();
             
-            File[] chunks = FileSplitter.spliteFile(inputFile, bytesPerChunk, tempDir);
+            File[] chunks = FileSplitter.splitFile(inputFile, bytesPerChunk, tempDir);
             
             long elapsedTimeMillis = System.currentTimeMillis()-start;
             float elapsedTimeSec = elapsedTimeMillis/1000F;
@@ -91,13 +95,9 @@ public class FileSplitterTest {
                 chunk.delete();
             }
             recomposedFile.delete();
-        }
-        catch(SecurityException se) {
-            se.printStackTrace();
+        } catch(Exception se) {
+            log.error("Unexpected Exception", se);
             fail(se.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
     }
     
@@ -106,7 +106,7 @@ public class FileSplitterTest {
     @Test
     public void testSplit50MBFileWithExtraBytes() {
         System.out.println( "\nStart testSplit50MBFileWithExtraBytes");
-        try{
+        try {
             File inputFile = new File(bigFileResources, "50MB_file");
             
             long csumInputFile = 0;
@@ -120,7 +120,7 @@ public class FileSplitterTest {
             
             long start = System.currentTimeMillis();
             
-            File[] chunks = FileSplitter.spliteFile(inputFile, bytesPerChunk, tempDir);
+            File[] chunks = FileSplitter.splitFile(inputFile, bytesPerChunk, tempDir);
             
             long elapsedTimeMillis = System.currentTimeMillis()-start;
             float elapsedTimeSec = elapsedTimeMillis/1000F;
@@ -164,18 +164,15 @@ public class FileSplitterTest {
                 chunk.delete();
             }
             recomposedFile.delete();
-        }
-        catch(SecurityException se) {
-            se.printStackTrace();
+        } catch(Exception se) {
+            log.error("unexpected exception", se);
             fail(se.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
     }
     
     @Test
-    @Category(org.datavaultplatform.SlowTest.class)
+    @Disabled
+    //@Category(org.datavaultplatform.SlowTest.class)
     public void testSplit500MBFile() {
         System.out.println( "\nStart testSplit500MBFile");
         try{
@@ -185,7 +182,7 @@ public class FileSplitterTest {
             
             long start = System.currentTimeMillis();
             
-            File[] chunks = FileSplitter.spliteFile(inputFile, bytesPerChunk, tempDir);
+            File[] chunks = FileSplitter.splitFile(inputFile, bytesPerChunk, tempDir);
             
             long elapsedTimeMillis = System.currentTimeMillis()-start;
             float elapsedTimeSec = elapsedTimeMillis/1000F;
@@ -197,28 +194,25 @@ public class FileSplitterTest {
                 assertEquals(bytesPerChunk, chunk.length());
                 chunk.delete();
             }
-        }
-        catch(SecurityException se) {
-            se.printStackTrace();
+        } catch(Exception se) {
+            log.error("unexpected exception", se);
             fail(se.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
     }
     
     @Test
-    @Category(org.datavaultplatform.SlowTest.class)
+    @Disabled
+    //@Category(org.datavaultplatform.SlowTest.class)
     public void testSplit500MBFileWithExtraBytes() {
         System.out.println( "\nStart testSplit500MBFileWithExtraBytes");
-        try{
+        try {
             File inputFile = new File(bigFileResources, "500MB_file");
             
             long bytesPerChunk = 150 * 1000 * 1000; // 150MB
             
             long start = System.currentTimeMillis();
             
-            File[] chunks = FileSplitter.spliteFile(inputFile, bytesPerChunk, tempDir);
+            File[] chunks = FileSplitter.splitFile(inputFile, bytesPerChunk, tempDir);
             
             long elapsedTimeMillis = System.currentTimeMillis()-start;
             float elapsedTimeSec = elapsedTimeMillis/1000F;
@@ -238,18 +232,15 @@ public class FileSplitterTest {
                 }
                 chunk.delete();
             }
-        }
-        catch(SecurityException se) {
-            se.printStackTrace();
+        } catch(Exception se) {
+            log.error("unexpected exception", se);
             fail(se.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
     }
     
     @Test
-    @Category(org.datavaultplatform.SlowTest.class)
+    //@Category(org.datavaultplatform.SlowTest.class)
+    @Disabled
     public void testSplitGigaBytesFile() {
         System.out.println( "\nStart testSplitGigaBytesFile");
         try{
@@ -259,7 +250,7 @@ public class FileSplitterTest {
             
             long start = System.currentTimeMillis();
             
-            File[] chunks = FileSplitter.spliteFile(inputFile, bytesPerChunk, tempDir);
+            File[] chunks = FileSplitter.splitFile(inputFile, bytesPerChunk, tempDir);
             
             long elapsedTimeMillis = System.currentTimeMillis()-start;
             float elapsedTimeSec = elapsedTimeMillis/1000F;
@@ -271,28 +262,25 @@ public class FileSplitterTest {
                 assertEquals(bytesPerChunk, chunk.length());
                 chunk.delete();
             }
-        }
-        catch(SecurityException se) {
-            se.printStackTrace();
+        } catch(Exception se) {
+            log.error("unexpected exception", se);
             fail(se.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
     }
     
     @Test
-    @Category(org.datavaultplatform.SlowTest.class)
+    @Disabled
+    //@Category(org.datavaultplatform.SlowTest.class)
     public void testSplitGigaBytesFileWithExtraBytes() {
         System.out.println( "\nStart testSplitGigaBytesFileWithExtraBytes");
-        try{
+        try {
             File inputFile = new File(bigFileResources, "1.5GB_file");
             
             long bytesPerChunk = 1000 * 1000 * 1000; // 1GB
             
             long start = System.currentTimeMillis();
             
-            File[] chunks = FileSplitter.spliteFile(inputFile, bytesPerChunk, tempDir);
+            File[] chunks = FileSplitter.splitFile(inputFile, bytesPerChunk, tempDir);
             
             long elapsedTimeMillis = System.currentTimeMillis()-start;
             float elapsedTimeSec = elapsedTimeMillis/1000F;
@@ -306,18 +294,15 @@ public class FileSplitterTest {
             chunks[0].delete();
             assertEquals(lastBytesChunk, chunks[1].length());
             chunks[1].delete();
-        }
-        catch(SecurityException se) {
-            se.printStackTrace();
+        } catch(Exception se) {
+            log.error("unexpected exception", se);
             fail(se.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
     }
     
     @Test
-    @Category(org.datavaultplatform.SlowTest.class)
+    @Disabled
+    //@Category(org.datavaultplatform.SlowTest.class)
     public void testSplitHugeBytesFileAndRecompose() {
         System.out.println( "\nStart testSplitHugeBytesFileAndRecompose");
         try{
@@ -334,7 +319,7 @@ public class FileSplitterTest {
             
             long start = System.currentTimeMillis();
             
-            File[] chunks = FileSplitter.spliteFile(inputFile, bytesPerChunk, tempDir);
+            File[] chunks = FileSplitter.splitFile(inputFile, bytesPerChunk, tempDir);
             
             long elapsedTimeMillis = System.currentTimeMillis()-start;
             float elapsedTimeSec = elapsedTimeMillis/1000F;
@@ -363,26 +348,19 @@ public class FileSplitterTest {
             }
 
             assertEquals(csumInputFile, csumOutputFile);
-        }
-        catch(SecurityException se) {
-            se.printStackTrace();
+        } catch(Exception se) {
+            log.error("unexpected exception", se);
             fail(se.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
-        try{
+        try {
             FileUtils.deleteDirectory(tempDir);
-        }
-        catch(IOException ex){
+        } catch(IOException ex){
             fail(ex.getMessage());
         }
-
-        BasicConfigurator.resetConfiguration();
     }
 
 }

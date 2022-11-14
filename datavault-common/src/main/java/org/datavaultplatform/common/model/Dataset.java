@@ -2,13 +2,17 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.Objects;
 import javax.persistence.*;
+import org.hibernate.Hibernate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="Datasets")
+@NamedEntityGraph(name=Dataset.EG_DATASET)
 public class Dataset {
-    
+
+    public static final String EG_DATASET = "eg.Dataset.1";
     @Id
     @Column(name = "id", unique = true, length = 180)
     private String id;
@@ -19,8 +23,8 @@ public class Dataset {
     // The raw content from the metadata provider e.g. XML
     @JsonIgnore
     @Transient
-    @Lob
 
+    //@Lob - COMMENTED OUT BY DAVIDHAY - no column mapping reqd if TRANSIENT
     private String content;
     
     @Transient
@@ -69,5 +73,21 @@ public class Dataset {
 
     public void setCrisId(String crisId) {
         this.crisId = crisId;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+            return false;
+        }
+        Dataset dataset = (Dataset) o;
+        return id != null && Objects.equals(id, dataset.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

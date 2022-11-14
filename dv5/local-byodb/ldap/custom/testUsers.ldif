@@ -1,0 +1,61 @@
+version: 1
+
+dn: o=myu.ed
+objectclass: top
+objectclass: Organization
+o: myu.ed
+
+dn: ou=people, o=myu.ed
+objectclass: top
+objectclass: organizationalUnit
+ou: people
+
+dn: uid=jamesbond, ou=people, o=myu.ed
+objectclass: top
+objectclass: inetOrgPerson
+objectclass: eduniPerson
+cn: James Bond
+sn: Bond
+mail: james.bond@test.com
+givenName: James
+uid: jamesbond
+eduniRefNo: v1jbond1
+#password for 'jamesbond' is 'jbond007'
+userpassword: {MD5}SeUYrNJKW/y4Uc8zHgXitg==
+
+dn: uid=bbond, ou=people, o=myu.ed
+objectclass: top
+objectclass: inetOrgPerson
+objectclass: eduniPerson
+cn: Basildon Bond
+sn: Bond
+mail: basildon.bond@test.com
+givenName: Basildon
+uid: bbond
+eduniRefNo: v1bbond2
+#password for 'bbond' is 'basilbrush'
+userpassword: {MD5}8wqnpmLHKLdAfFSua/0n0Q==
+
+dn: uid=joebloggs, ou=people, o=myu.ed
+objectclass: top
+objectclass: inetOrgPerson
+objectclass: eduniPerson
+cn: Joe Bloggs
+sn: Bloggs
+mail: joe.bloggs@test.com
+givenName: Joe
+uid: joebloggs
+eduniRefNo: v1jbloggs3
+#password for 'joebloggs' is 'blogger'
+userpassword: {MD5}8wqnpmLHKLdAfFSua/0n0Q==
+
+dn: uid=uun, ou=people, o=myu.ed
+objectclass: top
+objectclass: inetOrgPerson
+cn: SearchUser
+sn: User
+mail: search.user@test.com
+givenName: Search
+uid: uun
+#password for 'uun' is 'hello123'
+userpassword: {MD5}8wqnpmLHKLdAfFSua/0n0Q==
