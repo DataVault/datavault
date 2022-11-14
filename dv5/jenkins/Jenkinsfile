@@ -40,6 +40,9 @@ pipeline {
         }
     }
     post {
+        always {
+          junit allowEmptyResults:true, testResults: '**/surefire-reports/*.xml'
+        }
         success {
             echo "BUILD SUCCESS : Recording Artifacts.."
             archiveArtifacts artifacts: 'datavault-webapp/target/datavault-webapp.jar, datavault-worker/target/datavault-worker.jar, datavault-broker/target/datavault-broker.jar', fingerprint: true
