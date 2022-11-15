@@ -15,6 +15,7 @@ import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.operations.*;
 import org.datavaultplatform.worker.utils.Utils;
@@ -127,8 +128,9 @@ public class Deposit extends Task {
             .withUserId(userID)
             .withNextState(0));
 
-        userStores = this.setupUserFileStores();
-        this.setupArchiveFileStores();
+        StorageClassNameResolver resolver = context.getStorageClassNameResolver();
+        userStores = this.setupUserFileStores(resolver);
+        this.setupArchiveFileStores(resolver);
         DepositTransferHelper uploadHelper = this.initialTransferStep(context,lastEventClass);
         Path bagDataPath = uploadHelper.getBagDataPath();
         File bagDir = uploadHelper.getBagDir();
@@ -490,14 +492,15 @@ public class Deposit extends Task {
         tarFile.delete();
     }
     
-    private void setupArchiveFileStores() {
+    private void setupArchiveFileStores(StorageClassNameResolver resolver) {
     	// Connect to the archive storage(s). Look out! There are two classes called archiveStore.
     	for (org.datavaultplatform.common.model.ArchiveStore archiveFileStore : archiveFileStores ) {
     		try {
             ArchiveStore archiveStore = StorageClassUtils.createStorage(
                 archiveFileStore.getStorageClass(),
                 archiveFileStore.getProperties(),
-                ArchiveStore.class);
+                ArchiveStore.class,
+                resolver);
             archiveStores.put(archiveFileStore.getID(), archiveStore);
 
         } catch (Exception e) {
@@ -573,7 +576,7 @@ public class Deposit extends Task {
 //        return depositSize;
 //	}
 	
-	private HashMap<String, UserStore> setupUserFileStores() {
+	private HashMap<String, UserStore> setupUserFileStores(StorageClassNameResolver resolver) {
 		userStores = new HashMap<>();
         
         for (String storageID : userFileStoreClasses.keySet()) {
@@ -586,7 +589,8 @@ public class Deposit extends Task {
                 UserStore userStore = StorageClassUtils.createStorage(
                     storageClass,
                     storageProperties,
-                    UserStore.class);
+                    UserStore.class,
+                    resolver);
                 userStores.put(storageID, userStore);
                 logger.info("Connected to user store: " + storageID + ", class: " + storageClass);
             } catch (Exception e) {

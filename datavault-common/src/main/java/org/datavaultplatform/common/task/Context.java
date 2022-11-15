@@ -2,6 +2,7 @@ package org.datavaultplatform.common.task;
 
 import org.datavaultplatform.common.event.EventSender;
 import java.nio.file.Path;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
 
 // Some common properties needed for all jobs
 
@@ -23,13 +24,15 @@ public class Context {
     private final boolean multipleValidationEnabled;
     private final int noChunkThreads;
 
+    private final StorageClassNameResolver classNameResolver;
+
     public Context(Path tempDir, Path metaDir, EventSender eventSender,
                    Boolean chunkingEnabled, Long chunkingByteSize,
                    Boolean encryptionEnabled, AESMode encryptionMode, 
                    String vaultAddress, String vaultToken,
                    String vaultKeyPath, String vaultKeyName,
                    String vaultSslPEMPath, Boolean multipleValidationEnabled
-                    ,int noChunkThreads) {
+                    ,int noChunkThreads, StorageClassNameResolver classNameResolver) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.eventSender = eventSender;
@@ -44,6 +47,7 @@ public class Context {
         this.vaultSslPEMPath = vaultSslPEMPath;
         this.multipleValidationEnabled = multipleValidationEnabled;
         this.noChunkThreads = noChunkThreads;
+        this.classNameResolver = classNameResolver;
     }
 
     public Path getTempDir() {
@@ -99,4 +103,6 @@ public class Context {
     public int getNoChunkThreads() {
         return noChunkThreads;
     }
+
+    public StorageClassNameResolver getStorageClassNameResolver(){ return this.classNameResolver; }
 }

@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.storage.UserStore;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,13 +22,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class FilesService {
 
+    private final StorageClassNameResolver resolver;
+
+    public FilesService(StorageClassNameResolver resolver) {
+        this.resolver = resolver;
+    }
+
     //TODO - DHAY this does not seem thread safe
     private UserStore userStore;
     private final long TIMEOUT_SECONDS = 40;
     
     private boolean connect(FileStore fileStore) {
         try {
-            userStore = UserStore.fromFileStore(fileStore);
+            userStore = UserStore.fromFileStore(fileStore, resolver);
             return true;
         } catch (Exception e) {
             log.error("unexpected exception",e);

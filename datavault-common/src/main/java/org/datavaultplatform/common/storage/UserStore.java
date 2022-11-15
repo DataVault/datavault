@@ -5,6 +5,7 @@ package org.datavaultplatform.common.storage;
 import java.util.List;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
 
 
@@ -30,11 +31,12 @@ public interface UserStore {
     // Check if the passed path is a directory/container
     boolean isDirectory(String path) throws Exception;
 
-    static UserStore fromFileStore(FileStore fileStore) {
+    static UserStore fromFileStore(FileStore fileStore, StorageClassNameResolver resolver) {
         UserStore userStore = StorageClassUtils.createStorage(
             fileStore.getStorageClass(),
             fileStore.getProperties(),
-            UserStore.class);
+            UserStore.class,
+            resolver);
         return userStore;
     }
 }

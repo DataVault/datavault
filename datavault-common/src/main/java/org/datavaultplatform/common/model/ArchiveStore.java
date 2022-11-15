@@ -17,6 +17,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.storage.Device;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
@@ -119,9 +120,8 @@ public class ArchiveStore implements DataStore {
     This method takes an ArchiveStore and returns the specific instance of that Archive Store
      */
     @JsonIgnore
-    public Device getDevice() {
-
-        Device device = StorageClassUtils.createStorage(getStorageClass(), getProperties(), Device.class);
+    public Device getDevice(StorageClassNameResolver resolver) {
+        Device device = StorageClassUtils.createStorage(getStorageClass(), getProperties(), Device.class, resolver);
         return device;
     }
 

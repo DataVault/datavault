@@ -20,6 +20,7 @@ import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystem;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
@@ -34,10 +35,14 @@ public class SftpFileStoreEndpoint {
 
   private final Function<String,String> portAdjuster;
 
+  private final StorageClassNameResolver resolver;
+
   @Autowired
-  public SftpFileStoreEndpoint(FileStoreService fileStoreService, Function<String,String> portAdjuster) {
+  public SftpFileStoreEndpoint(FileStoreService fileStoreService, Function<String,String> portAdjuster,
+      StorageClassNameResolver resolver) {
     this.fileStoreService = fileStoreService;
     this.portAdjuster = portAdjuster;
+    this.resolver = resolver;
   }
 
   @ReadOperation
@@ -65,7 +70,7 @@ public class SftpFileStoreEndpoint {
     long start = System.currentTimeMillis();
     Future<Boolean> future = EXECUTOR.submit(() -> {
       try {
-        UserStore us = UserStore.fromFileStore(fileStore);
+        UserStore us = UserStore.fromFileStore(fileStore, resolver);
         SFTPFileSystem sftp = (SFTPFileSystem) us;
         sftp.Connect();
         long diff = System.currentTimeMillis() - start;

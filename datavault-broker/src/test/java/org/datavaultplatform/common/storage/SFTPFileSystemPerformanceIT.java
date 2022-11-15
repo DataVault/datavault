@@ -38,7 +38,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * </p>
  */
 @Slf4j
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 public class SFTPFileSystemPerformanceIT {
 
   static final String TEST_PASSWORD = "testPassword";

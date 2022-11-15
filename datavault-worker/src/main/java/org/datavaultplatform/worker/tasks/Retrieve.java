@@ -16,6 +16,7 @@ import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.operations.FileSplitter;
 import org.datavaultplatform.worker.operations.ProgressTracker;
@@ -92,9 +93,10 @@ public class Retrieve extends Task {
         
         logger.info("bagID: " + bagID);
         logger.info("retrievePath: " + this.retrievePath);
-        
-        Device userFs = this.setupUserFileStores();
-        Device archiveFs = this.setupArchiveFileStores();
+
+        StorageClassNameResolver resolver = context.getStorageClassNameResolver();
+        Device userFs = this.setupUserFileStores(resolver);
+        Device archiveFs = this.setupArchiveFileStores(resolver);
         
         try {
         	this.checkUserStoreFreeSpace(userFs);
@@ -246,7 +248,7 @@ public class Retrieve extends Task {
             .withUserId(userID));		
 	}
     
-    private Device setupUserFileStores() {
+    private Device setupUserFileStores(StorageClassNameResolver resolver) {
         Device userFs = null;
         
         for (String storageID : userFileStoreClasses.keySet()) {
@@ -256,7 +258,7 @@ public class Retrieve extends Task {
             
             // Connect to the first user storage device (we only expect one for a retrieval)
             try {
-                userFs = StorageClassUtils.createStorage(storageClass, storageProperties, Device.class);
+                userFs = StorageClassUtils.createStorage(storageClass, storageProperties, Device.class, resolver);
                 logger.info("Connected to user store: " + storageID + ", class: " + storageClass);
                 break;
             } catch (Exception e) {
@@ -271,7 +273,7 @@ public class Retrieve extends Task {
         return userFs;
     }
     
-    private Device setupArchiveFileStores() {
+    private Device setupArchiveFileStores(StorageClassNameResolver resolver) {
     	// We get passed a list because it is a parameter common to deposits and retrieves, but for retrieve there should only be one.
         ArchiveStore archiveFileStore = archiveFileStores.get(0);
 
@@ -280,7 +282,8 @@ public class Retrieve extends Task {
             Device archiveFs = StorageClassUtils.createStorage(
                 archiveFileStore.getStorageClass(),
                 archiveFileStore.getProperties(),
-                Device.class);
+                Device.class,
+                resolver);
             return archiveFs;
         } catch (Exception e) {
             String msg = "Retrieve failed: could not access archive filesystem";
