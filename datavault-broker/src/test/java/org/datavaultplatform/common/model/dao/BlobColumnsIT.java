@@ -34,9 +34,9 @@ public class BlobColumnsIT extends BaseDatabaseTest {
   @PersistenceContext
   EntityManager em;
 
-  Random rand = new Random();
+  final Random rand = new Random();
 
-  char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+  final char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 
   @Test
   void testComputedEnctryptionTarIVTinyBlobColOkayAt255() {

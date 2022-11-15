@@ -1,7 +1,7 @@
 package org.datavaultplatform.broker.scheduled;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.datavaultplatform.broker.test.ScheduledTestUtils.setAllCronExression;
+import static org.datavaultplatform.broker.test.ScheduledTestUtils.setAllCronExpression;
 import static org.mockito.Mockito.doAnswer;
 
 import java.time.Duration;
@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.datavaultplatform.broker.scheduled.BaseScheduledTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -23,29 +22,29 @@ By waiting 12 seconds - each of the 5 scheduled tasks should be invoked twice.
  */
 public class ScheduledTasksIT extends BaseScheduledTest {
 
-  public static String EVERY_FIVE_SECONDS = "*/5 * * * * *";
+  public static final String EVERY_FIVE_SECONDS = "*/5 * * * * *";
 
   @SpyBean
   AuditDepositsChunks task1AuditDepositChunks;
-  List<Instant> timestamps1 = new ArrayList<>();
+  final List<Instant> timestamps1 = new ArrayList<>();
 
   @SpyBean
   CheckEncryptionData task2CheckEncryptionData;
-  List<Instant>timestamps2 = new ArrayList<>();
+  final List<Instant>timestamps2 = new ArrayList<>();
 
   @SpyBean
   CheckForDelete task3CheckForDelete;
-  List<Instant> timestamps3 = new ArrayList<>();
+  final List<Instant> timestamps3 = new ArrayList<>();
 
   @SpyBean
   CheckForReview task4CheckForReview;
-  List<Instant> timestamps4  = new ArrayList<>();
+  final List<Instant> timestamps4  = new ArrayList<>();
 
   @SpyBean
   CheckRetentionPolicies task5CheckRetentionPolicies;
-  List<Instant> timestamps5 = new ArrayList<>();
+  final List<Instant> timestamps5 = new ArrayList<>();
 
-  List<List<Instant>> allTimestamps = Arrays.asList(timestamps1, timestamps2, timestamps3, timestamps4, timestamps5);
+  final List<List<Instant>> allTimestamps = Arrays.asList(timestamps1, timestamps2, timestamps3, timestamps4, timestamps5);
 
 
   @Test
@@ -80,7 +79,7 @@ public class ScheduledTasksIT extends BaseScheduledTest {
 
   @DynamicPropertySource
   static void setupProperties(DynamicPropertyRegistry registry) {
-    setAllCronExression(registry, EVERY_FIVE_SECONDS);
+    setAllCronExpression(registry, EVERY_FIVE_SECONDS);
   }
 
 

@@ -27,10 +27,10 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 @ProfileStandalone
 public class FreemarkerConfigTest {
 
-  Field fPrefix = UrlBasedViewResolver.class.getDeclaredField("prefix");
-  Field fSuffix = UrlBasedViewResolver.class.getDeclaredField("suffix");
-  Field fContentType = UrlBasedViewResolver.class.getDeclaredField("contentType");
-  Field fPreferFileSystemAccess = FreeMarkerConfigurationFactory.class.getDeclaredField("preferFileSystemAccess");
+  final Field fPrefix = UrlBasedViewResolver.class.getDeclaredField("prefix");
+  final Field fSuffix = UrlBasedViewResolver.class.getDeclaredField("suffix");
+  final Field fContentType = UrlBasedViewResolver.class.getDeclaredField("contentType");
+  final Field fPreferFileSystemAccess = FreeMarkerConfigurationFactory.class.getDeclaredField("preferFileSystemAccess");
 
   @Autowired
   private FreeMarkerConfigurer freeMarkerConfigurer;

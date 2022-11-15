@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @ProfileStandalone
 public class SecurityTagTest {
 
-  private static String PREFIX = "/test/security/tag";
+  private static final String PREFIX = "/test/security/tag";
 
   @Autowired
   MockMvc mvc;

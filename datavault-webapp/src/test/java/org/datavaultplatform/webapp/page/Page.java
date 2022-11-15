@@ -7,7 +7,7 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 public abstract class Page {
-    protected WebDriver driver;
+    protected final WebDriver driver;
 
     public Page(WebDriver driver) {
         this.driver = driver;

@@ -51,8 +51,8 @@ public class ExternalMetadataService {
     if (metadataURL.equals("")) {
       this.metadataProvider = new MockProvider();
     } else {
-      Provider prov = new PureFlatFileProvider();
-      ((PureFlatFileProvider) prov).setFlatFileDir(this.flatFileLocation);
+      PureFlatFileProvider prov = new PureFlatFileProvider();
+      prov.setFlatFileDir(this.flatFileLocation);
       this.metadataProvider = prov;
       //this.metadataProvider = new PureProvider(metadataURL);
     }

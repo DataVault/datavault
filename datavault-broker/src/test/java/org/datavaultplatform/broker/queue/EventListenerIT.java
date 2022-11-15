@@ -104,7 +104,7 @@ public class EventListenerIT extends BaseDatabaseTest {
 
   @MockBean
   RabbitListenerEndpointRegistry registry;
-  private String userId = "user123";
+  private final String userId = "user123";
   private String bagId = "bag123";
   private String vaultId;
   private String jobId;

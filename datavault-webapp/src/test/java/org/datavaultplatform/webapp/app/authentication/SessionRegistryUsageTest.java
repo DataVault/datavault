@@ -48,9 +48,9 @@ public class SessionRegistryUsageTest {
   @MockBean
   NotifyLoginService mNotifyLoginService;
 
-  String username = "user";
+  final String username = "user";
 
-  String password = "password";
+  final String password = "password";
 
   @Autowired
   SessionRegistry sessionRegistry;
