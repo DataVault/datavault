@@ -25,7 +25,6 @@ import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.PropNames;
@@ -41,12 +40,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.Logger;
 import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Slf4j
-@Testcontainers
 public abstract class BaseSFTPFileSystemIT {
 
   static final int SFTP_SERVER_PORT = 2222;
@@ -76,7 +73,7 @@ public abstract class BaseSFTPFileSystemIT {
   }
 
   private void logContainerId(String label) {
-    log.info("for [{}] containerId[{}]", label, getContainer().getContainerId());
+    getLog().info("for [{}] containerId[{}]", label, getContainer().getContainerId());
   }
 
   @SneakyThrows
@@ -100,14 +97,14 @@ public abstract class BaseSFTPFileSystemIT {
   public void listDot1() {
     SFTPFileSystemDriver driver = getSftpDriver();
     List<FileInfo> items = getSftpDriver().list(".");
-    log.info("items 1 {}", items);
+    getLog().info("items 1 {}", items);
     logContainerId("ONE");
   }
 
   @Test
   public void listDot2() {
     List<FileInfo> items = getSftpDriver().list(".");
-    log.info("items 2 {}", items);
+    getLog().info("items 2 {}", items);
     logContainerId("TWO");
   }
 
@@ -168,7 +165,7 @@ public abstract class BaseSFTPFileSystemIT {
     File toDvFile = new File(tempFileDir, TO_DV_FILE_NAME);
     writeToFile(fromDvFile, TEST_FILE_CONTENTS);
 
-    log.info("sftpDriver {}", getSftpDriver());
+    getLog().info("sftpDriver {}", getSftpDriver());
 
     Progress p1 = new Progress();
     String pathOnRemote = getSftpDriver().store(".", fromDvFile, p1);
@@ -186,12 +183,12 @@ public abstract class BaseSFTPFileSystemIT {
       assertEquals(0, p1.getStartTime());
     }
 
-    log.info("pathOnRemote[{}]", pathOnRemote);
+    getLog().info("pathOnRemote[{}]", pathOnRemote);
     assertEquals("/config/dv_20220326094433", pathOnRemote);
 
     Path tsPath = Paths.get(SFTP_ROOT_DIR).relativize(Paths.get(pathOnRemote));
     String retrievePath = tsPath.resolve(fromDvFile.toPath().getFileName()).toString();
-    log.info("retrievePath[{}]", retrievePath);
+    getLog().info("retrievePath[{}]", retrievePath);
     getSftpDriver().retrieve(retrievePath, toDvFile, new Progress());
     String contents = readFile(toDvFile);
 
@@ -230,16 +227,9 @@ public abstract class BaseSFTPFileSystemIT {
 
   @ParameterizedTest
   @ValueSource(strings = {"", "a single line", "two\nlines"})
-
   @SneakyThrows
   public void testSftpDriverSingleFileStoreAndRetrieveToDirectory(String fileContents) {
-    Arrays.asList("/",".","./","/.","/./","","//").forEach(storePath -> {
-      checkSftpDriverSingleFileStoreAndRetrieveToDirectory(fileContents, storePath);
-    });
-  }
 
-  @SneakyThrows
-  void checkSftpDriverSingleFileStoreAndRetrieveToDirectory(String fileContents, String storePath) {
     final String FROM_DV_FILE_NAME = "fromDV.txt";
 
     File tempFileDir = Files.createTempDirectory(TEMP_PREFIX).toFile();
@@ -251,10 +241,10 @@ public abstract class BaseSFTPFileSystemIT {
     File toDirectory = new File(tempFileDir, "toDirectory");
     assertTrue(toDirectory.mkdir());
 
-    log.info("sftpDriver {}", getSftpDriver());
+    getLog().info("sftpDriver {}", getSftpDriver());
 
     Progress p1 = new Progress();
-    String pathOnRemote = getSftpDriver().store(storePath, fromDvFile, p1);
+    String pathOnRemote = getSftpDriver().store(".", fromDvFile, p1);
 
     if(getSftpDriver().isMonitoring()) {
       assertEquals(fromDvFile.length(), p1.getByteCount());
@@ -269,12 +259,12 @@ public abstract class BaseSFTPFileSystemIT {
       assertEquals(0, p1.getStartTime());
     }
 
-    log.info("pathOnRemote[{}]", pathOnRemote);
+    getLog().info("pathOnRemote[{}]", pathOnRemote);
     assertEquals("/config/dv_20220326094433", pathOnRemote);
 
     Path tsPath = Paths.get(SFTP_ROOT_DIR).relativize(Paths.get(pathOnRemote));
     String retrievePath = tsPath.resolve(fromDvFile.toPath().getFileName()).toString();
-    log.info("retrievePath[{}]", retrievePath);
+    getLog().info("retrievePath[{}]", retrievePath);
     getSftpDriver().retrieve(retrievePath, toDirectory, new Progress());
     List<File> files = Files.list(toDirectory.toPath())
         .map(Path::toFile)
@@ -338,7 +328,7 @@ public abstract class BaseSFTPFileSystemIT {
     tempFileDir.deleteOnExit();
     long freeSpace = tempFileDir.getFreeSpace();
     if (freeSpace < fileSize * FREE_SPACE_FACTOR) {
-      log.warn("Skipping test of [{}/{}], we don't have [{}]bytes free, just [{}]bytes free", label,
+      getLog().warn("Skipping test of [{}/{}], we don't have [{}]bytes free, just [{}]bytes free", label,
           fileSize, fileSize * 10, freeSpace);
       return;
     }
@@ -388,7 +378,7 @@ public abstract class BaseSFTPFileSystemIT {
     try {
       return callable.call();
     } finally {
-      log.info("time for [{}/{}] took [{}]ms", action, label, System.currentTimeMillis() - start);
+      getLog().info("time for [{}/{}] took [{}]ms", action, label, System.currentTimeMillis() - start);
     }
   }
 
@@ -447,7 +437,7 @@ public abstract class BaseSFTPFileSystemIT {
     writeToFile(fromDvDirFileB, TEST_FILE_B_CONTENTS);
     writeToFile(fromDvDirFileC, TEST_FILE_C_CONTENTS);
 
-    log.info("sftpDriver {}", getSftpDriver());
+    getLog().info("sftpDriver {}", getSftpDriver());
 
     Progress p1 = new Progress();
     String pathOnRemote = getSftpDriver().store(".", fromDvDir, p1);
@@ -468,7 +458,7 @@ public abstract class BaseSFTPFileSystemIT {
 
     Path tsPath = Paths.get(SFTP_ROOT_DIR).relativize(Paths.get(pathOnRemote));
     Path retrievePath = tsPath.resolve(fromDvDir.toPath().getFileName());
-    log.info("retrievePath[{}]", retrievePath);
+    getLog().info("retrievePath[{}]", retrievePath);
     String retrievePathAsString = retrievePath.toString();
 
     // check files are on SFTP server
@@ -565,13 +555,15 @@ public abstract class BaseSFTPFileSystemIT {
 
   @SneakyThrows
   private void executeCommand(String... commands){
-    log.info("COMMANDS {}", Arrays.toString(commands));
+    getLog().info("COMMANDS {}", Arrays.toString(commands));
     String command = String.join(" ", commands);
-    log.info("COMMAND {}", command);
-    log.info("container4[{}}]", getContainer().getEnvMap().get("TC_NAME"));
+    getLog().info("COMMAND {}", command);
+    getLog().info("container4[{}}]", getContainer().getEnvMap().get("TC_NAME"));
     ExecResult result = getContainer().execInContainer(commands);
-    log.info("exitcode[{}][{}]", command,result.getExitCode());
-    log.info("stderr[{}][{}]", command,result.getStderr());
-    log.info("stdout[{}][{}]", command,result.getStdout());
+    getLog().info("exitcode[{}][{}]", command,result.getExitCode());
+    getLog().info("stderr[{}][{}]", command,result.getStderr());
+    getLog().info("stdout[{}][{}]", command,result.getStdout());
   }
+  
+  abstract Logger getLog();
 }
