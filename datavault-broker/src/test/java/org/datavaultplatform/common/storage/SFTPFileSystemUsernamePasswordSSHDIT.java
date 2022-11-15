@@ -15,7 +15,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
   The initialisation of the sftp-server-container is done in 1 of 2 base classes.
   The common sftp test methods are in the base class BaseSftpIT
  */
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @Slf4j
 public class SFTPFileSystemUsernamePasswordSSHDIT extends BaseSFTPFileSystemUsernamePasswordIT {
 

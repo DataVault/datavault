@@ -7,6 +7,7 @@ import org.datavaultplatform.broker.actuator.LocalFileStoreEndpoint;
 import org.datavaultplatform.broker.actuator.SftpFileStoreEndpoint;
 import org.datavaultplatform.broker.services.ArchiveStoreService;
 import org.datavaultplatform.broker.services.FileStoreService;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.actuate.info.InfoContributor;
@@ -35,8 +36,8 @@ public class ActuatorConfig {
   }
 
   @Bean
-  public SftpFileStoreEndpoint sftpFileStoreEndpoint(@Autowired  FileStoreService fileStoreService, Function<String,String> portAdjuster) {
-    return new SftpFileStoreEndpoint(fileStoreService, portAdjuster);
+  public SftpFileStoreEndpoint sftpFileStoreEndpoint(@Autowired  FileStoreService fileStoreService, Function<String,String> portAdjuster, StorageClassNameResolver resolver) {
+    return new SftpFileStoreEndpoint(fileStoreService, portAdjuster, resolver);
   }
 
   @Bean

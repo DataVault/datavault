@@ -17,6 +17,7 @@ import org.datavaultplatform.broker.test.BaseDatabaseTest;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -87,7 +88,7 @@ public class InitialiseDatabaseLocalFileSystemIT extends BaseDatabaseTest {
     assertEquals(local.getProperties().get(LocalFileSystem.ROOT_PATH), localFsDirectory);
     assertTrue(local.isRetrieveEnabled());
 
-    Device device = local.getDevice();
+    Device device = local.getDevice(new StorageClassNameResolver(true));
     assertThat(device).isInstanceOf(LocalFileSystem.class);
     assertTrue(device instanceof LocalFileSystem);
   }

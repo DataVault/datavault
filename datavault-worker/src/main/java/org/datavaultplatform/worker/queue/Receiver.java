@@ -12,6 +12,7 @@ import org.datavaultplatform.common.io.FileUtils;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Context.AESMode;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.worker.WorkerInstance;
 import org.datavaultplatform.worker.rabbit.MessageInfo;
 import org.datavaultplatform.worker.rabbit.MessageProcessor;
@@ -38,6 +39,8 @@ public class Receiver implements MessageProcessor {
 
     private final RecordingEventSender eventSender;
 
+    private final StorageClassNameResolver storageClassNameResolver;
+
     public Receiver(
         String tempDir,
         String metaDir,
@@ -51,7 +54,8 @@ public class Receiver implements MessageProcessor {
         boolean multipleValidationEnabled,
         int noChunkThreads,
 
-        RecordingEventSender eventSender) {
+        RecordingEventSender eventSender,
+        StorageClassNameResolver storageClassNameResolver) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.chunkingEnabled = chunkingEnabled;
@@ -63,6 +67,7 @@ public class Receiver implements MessageProcessor {
         this.multipleValidationEnabled = multipleValidationEnabled;
         this.noChunkThreads = noChunkThreads;
         this.eventSender = eventSender;
+        this.storageClassNameResolver = storageClassNameResolver;
     }
 
     @Override
@@ -146,7 +151,8 @@ public class Receiver implements MessageProcessor {
                         encryptionEnabled, encryptionMode, 
                         vaultAddress, vaultToken, 
                         vaultKeyPath, vaultKeyName, vaultSslPEMPath,
-                        this.multipleValidationEnabled, this.noChunkThreads);
+                        this.multipleValidationEnabled, this.noChunkThreads,
+                        this.storageClassNameResolver);
                 concreteTask.performAction(context);
 
                 // Clean up the temporary directory (if success if failure we need it for retries)

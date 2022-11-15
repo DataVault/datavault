@@ -20,11 +20,14 @@ import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.storage.impl.S3Cloud;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystem;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemJSch;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 public class UserStoreTest {
+
+  StorageClassNameResolver resolver = StorageClassNameResolver.FIXED_JSCH;
 
   @Test
   @SneakyThrows
@@ -42,7 +45,7 @@ public class UserStoreTest {
     fs.setProperties(props);
     fs.setStorageClass(SFTPFileSystem.class.getName());
 
-    UserStore result = UserStore.fromFileStore(fs);
+    UserStore result = UserStore.fromFileStore(fs, resolver);
     assertTrue(result instanceof SFTPFileSystem);
     SFTPFileSystem sftp = (SFTPFileSystem) result;
     Class<SFTPFileSystemJSch> clazz = SFTPFileSystemJSch.class;
@@ -103,7 +106,7 @@ public class UserStoreTest {
     fs.setProperties(props);
     fs.setStorageClass(LocalFileSystem.class.getName());
 
-    UserStore result = UserStore.fromFileStore(fs);
+    UserStore result = UserStore.fromFileStore(fs, resolver);
     assertTrue(result instanceof LocalFileSystem);
     LocalFileSystem local = (LocalFileSystem) result;
     Field f1RootPath = LocalFileSystem.class.getDeclaredField("rootPath");
@@ -141,7 +144,7 @@ public class UserStoreTest {
     @SneakyThrows
     void testStringIsInvalidStorageClass() {
       IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
-        UserStore.fromFileStore(getFileStore(String.class));
+        UserStore.fromFileStore(getFileStore(String.class), resolver);
       });
       assertEquals(
           "The class [java.lang.String] does not inherit from [org.datavaultplatform.common.storage.UserStore]",
@@ -152,7 +155,7 @@ public class UserStoreTest {
     @SneakyThrows
     void testS3CloudIsInvalidStorageClass() {
       IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
-        UserStore.fromFileStore(getFileStore(S3Cloud.class));
+        UserStore.fromFileStore(getFileStore(S3Cloud.class), StorageClassNameResolver.FIXED_JSCH);
       });
       assertEquals(
           "The class [org.datavaultplatform.common.storage.impl.S3Cloud] does not inherit from [org.datavaultplatform.common.storage.UserStore]",

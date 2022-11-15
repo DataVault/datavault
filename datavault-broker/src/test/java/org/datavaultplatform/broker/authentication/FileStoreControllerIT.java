@@ -50,6 +50,7 @@ import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystem;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemJSch;
 import org.datavaultplatform.common.util.Constants;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -112,6 +113,8 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   String keyStorePath;
   private Path tempSftpFolder;
   private GenericContainer<?> sftpServer;
+
+  private final StorageClassNameResolver resolver = new StorageClassNameResolver(true);
 
   @MockBean
   Function<String,String> mPortAdjuster;
@@ -208,7 +211,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     assertTrue(isBase64(storedProps.get("iv")));
     log.info("properties {}", storedProps);
 
-    UserStore us = UserStore.fromFileStore(fsFromDb);
+    UserStore us = UserStore.fromFileStore(fsFromDb, resolver);
     assertTrue(us instanceof SFTPFileSystem);
     SFTPFileSystem sftp = (SFTPFileSystem) us;
     String publicKey = storedProps.get("publicKey");
@@ -248,7 +251,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   }
 
   @SneakyThrows
-  private void changeSFTPFileSystemPort(SFTPFileSystem sftp, int sftpServerPort) {
+  private void changeSFTPFileSystemPort(SFTPFileSystemJSch sftp, int sftpServerPort) {
     // Tweak the SFTPFileSystem to change the port to point to embedded sftp server
     Field fPort = SFTPFileSystemJSch.class.getDeclaredField("port");
     fPort.setAccessible(true);
