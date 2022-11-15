@@ -1,7 +1,9 @@
 package org.datavaultplatform.common.storage;
 
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemJSch;
+import org.slf4j.Logger;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -14,14 +16,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
   The common sftp test methods are in the base class BaseSftpIT
  */
 @Testcontainers
+@Slf4j
 public class SFTPFileSystemPrivatePublicKeyPairJSchIT extends BaseSFTPFileSystemPrivatePublicKeyPairIT {
 
   @Container
-  static final GenericContainer<?> container;
-
-  static {
-    container = initialiseContainer("SftpPrivatePublicJSchDIT");
-  }
+  static final GenericContainer<?> container = initialiseContainer("SftpPrivatePublicJSchDIT");
 
   @Override
   public SFTPFileSystemDriver getSftpDriver() {
@@ -34,4 +33,8 @@ public class SFTPFileSystemPrivatePublicKeyPairJSchIT extends BaseSFTPFileSystem
     return container;
   }
 
+  @Override
+  Logger getLog() {
+    return log;
+  }
 }

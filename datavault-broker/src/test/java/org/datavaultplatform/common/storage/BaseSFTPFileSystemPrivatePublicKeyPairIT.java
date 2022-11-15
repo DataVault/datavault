@@ -21,10 +21,8 @@ import org.datavaultplatform.common.crypto.SshRsaKeyUtils;
 import org.datavaultplatform.common.docker.DockerImage;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Slf4j
-@Testcontainers
 public abstract class BaseSFTPFileSystemPrivatePublicKeyPairIT extends BaseSFTPFileSystemIT {
 
   static final String TEST_PASSPHRASE = "tenet";
@@ -69,8 +67,8 @@ public abstract class BaseSFTPFileSystemPrivatePublicKeyPairIT extends BaseSFTPF
 
     RSAPublicKey publicKey = SshRsaKeyUtils.readPublicKey(
         keyPairInfo.getPublicKey());
-    if(log.isTraceEnabled()) {
-      log.trace("ORIG PUBLIC KEY MODULUS [{}]", publicKey.getModulus().toString(16));
+    if(getLog().isTraceEnabled()) {
+      getLog().trace("ORIG PUBLIC KEY MODULUS [{}]", publicKey.getModulus().toString(16));
     }
   }
 

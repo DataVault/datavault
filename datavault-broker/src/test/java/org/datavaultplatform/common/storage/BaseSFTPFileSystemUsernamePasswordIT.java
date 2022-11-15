@@ -2,15 +2,11 @@ package org.datavaultplatform.common.storage;
 
 import java.util.Map;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.docker.DockerImage;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Slf4j
-@Testcontainers
 public abstract class BaseSFTPFileSystemUsernamePasswordIT extends BaseSFTPFileSystemIT {
 
   static final String TEST_PASSWORD = "testPassword";
