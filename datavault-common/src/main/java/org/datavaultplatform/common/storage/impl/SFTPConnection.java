@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sshd.client.SshClient;
+import org.apache.sshd.client.config.hosts.HostConfigEntryResolver;
+import org.apache.sshd.client.keyverifier.AcceptAllServerKeyVerifier;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.common.session.SessionContext;
 import org.apache.sshd.sftp.client.SftpClient;
@@ -38,6 +40,13 @@ public class SFTPConnection implements AutoCloseable {
       clock = info.getClock();
       rootPath = info.getRootPath();
       client = SshClient.setUpDefaultClient();
+
+      // accept All SFTP Server keys - same as sftp option StrictHostKeyChecking=no
+      client.setServerKeyVerifier(AcceptAllServerKeyVerifier.INSTANCE);
+
+      // ignore any ssh config files on the local disk
+      client.setHostConfigEntryResolver(HostConfigEntryResolver.EMPTY);
+
       client.start();
 
       session = client.connect(info.getUsername(), info.getHost(), info.getPort())
