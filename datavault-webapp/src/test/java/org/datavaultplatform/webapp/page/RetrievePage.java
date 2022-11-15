@@ -5,7 +5,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 public class RetrievePage extends Page {
-    private String depositName;
+    private final String depositName;
 
     public RetrievePage(WebDriver driver, String depositName) {
         super(driver);

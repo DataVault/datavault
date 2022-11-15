@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
 
 public class ScopedGrantedAuthority implements GrantedAuthority {
 
-    private final Class type;
+    private final Class<?> type;
     private final Serializable id;
     private final Collection<Permission> permissions;
 
-    public ScopedGrantedAuthority(Class type, String id, Collection<Permission> permissions) {
+    public ScopedGrantedAuthority(Class<?> type, String id, Collection<Permission> permissions) {
         this.type = type;
         this.id = id;
         this.permissions = permissions;
@@ -34,7 +34,7 @@ public class ScopedGrantedAuthority implements GrantedAuthority {
         return id;
     }
 
-    public Class getType() {
+    public Class<?> getType() {
         return type;
     }
 

@@ -88,7 +88,7 @@ public class AdminBillingController {
                                @RequestParam(value = "order", required = false, defaultValue = "desc") String order)
             throws Exception {
 
-        List<VaultInfo> vaults = null;
+        List<VaultInfo> vaults;
 
         VaultsData vaultData =  restService.searchVaultsForBilling(query, sort, order, 0, Integer.MAX_VALUE);
         vaults = vaultData.getData();

@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class LogoutListener implements ApplicationListener<SessionDestroyedEvent> {
 
-    Logger LOG = LoggerFactory.getLogger(LogoutListener.class);
+    final Logger LOG = LoggerFactory.getLogger(LogoutListener.class);
 
     private final NotifyLogoutService service;
 

@@ -26,7 +26,7 @@ public class EmailServiceIT extends BaseEmailServiceTest {
     put("location", "location-005");
   }};
 
-  String EXPECTED_EMAIL_MSG_BODY = "<html>\n"
+  static final String EXPECTED_EMAIL_MSG_BODY = "<html>\n"
       + "\t<body>\n"
       + "\t\t\n"
       + "\t\t<p>The attempted audit of the following chunk failed:</p>\n"

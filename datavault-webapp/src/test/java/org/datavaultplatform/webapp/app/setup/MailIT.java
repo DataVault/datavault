@@ -51,7 +51,7 @@ public class MailIT {
   MessageCreator messageCreator;
 
   @Container
-  private static GenericContainer<?> topLevelContainer = new GenericContainer<>(DockerImage.MAIL_IMAGE)
+  private static final GenericContainer<?> topLevelContainer = new GenericContainer<>(DockerImage.MAIL_IMAGE)
       .withExposedPorts(PORT_SMTP, PORT_HTTP);
 
   @DynamicPropertySource

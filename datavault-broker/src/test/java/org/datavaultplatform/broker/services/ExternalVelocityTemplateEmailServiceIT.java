@@ -48,7 +48,7 @@ public class ExternalVelocityTemplateEmailServiceIT extends BaseEmailServiceTest
       + "<li>location: ${location}</li>"
       + "</ul>"
       + "</body></html>";
-  String EXPECTED_EMAIL_MSG_BODY = "<html><body><p>EXTERNAL TEST TEMPLATE</p><ul><li>Audit ID: ext-aud-id-001</li><li>Date of failed operation: ext-timestamp-002</li><li>Chunk ID: ext-chunk-id-003</li><li>Archive ID: ext-archive-id-004</li><li>location: ext-location-005</li></ul></body></html>";
+  static final String EXPECTED_EMAIL_MSG_BODY = "<html><body><p>EXTERNAL TEST TEMPLATE</p><ul><li>Audit ID: ext-aud-id-001</li><li>Date of failed operation: ext-timestamp-002</li><li>Chunk ID: ext-chunk-id-003</li><li>Archive ID: ext-archive-id-004</li><li>location: ext-location-005</li></ul></body></html>";
 
 
   @DynamicPropertySource

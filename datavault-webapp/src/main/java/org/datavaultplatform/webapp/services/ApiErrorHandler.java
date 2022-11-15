@@ -63,7 +63,8 @@ public class ApiErrorHandler extends DefaultResponseErrorHandler {
 
         public ResponseEntityResponseExtractor(Type responseType, RestTemplate restTemplate) {
             if (responseType != null && Void.class != responseType) {
-                this.delegate = new HttpMessageConverterExtractor<T>(responseType, restTemplate.getMessageConverters());
+                this.delegate = new HttpMessageConverterExtractor<>(responseType,
+                    restTemplate.getMessageConverters());
             }
             else {
                 this.delegate = null;
@@ -74,10 +75,10 @@ public class ApiErrorHandler extends DefaultResponseErrorHandler {
         public ResponseEntity<T> extractData(ClientHttpResponse response) throws IOException {
             if (this.delegate != null) {
                 T body = this.delegate.extractData(response);
-                return new ResponseEntity<T>(body, response.getHeaders(), response.getStatusCode());
+                return new ResponseEntity<>(body, response.getHeaders(), response.getStatusCode());
             }
             else {
-                return new ResponseEntity<T>(response.getHeaders(), response.getStatusCode());
+                return new ResponseEntity<>(response.getHeaders(), response.getStatusCode());
             }
         }
     }

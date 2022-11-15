@@ -30,7 +30,7 @@ import org.testcontainers.containers.MySQLContainer;
 public abstract class BaseReuseDatabaseTest  {
 
   // This container is once per class - not once per method. Methods can 'dirty' the database.
-  static MySQLContainer<?> mysql = new MySQLContainer<>(DockerImage.MYSQL_IMAGE).withReuse(true);
+  static final MySQLContainer<?> mysql = new MySQLContainer<>(DockerImage.MYSQL_IMAGE).withReuse(true);
   @Autowired
   InitialiseDatabase initialiseDatabase;
 

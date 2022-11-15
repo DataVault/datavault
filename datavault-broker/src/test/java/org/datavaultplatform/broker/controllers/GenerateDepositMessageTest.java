@@ -45,7 +45,7 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
   private static final String FILE_STORE_SRC_ID = "FILE-STORE-SRC-ID";
   private static final String FILE_STORE_SRC_LABEL = "FILE_STORE-SRC-LABEL";
 
-  File srcDir = new File(baseDir, "src");
+  final File srcDir = new File(baseDir, "src");
 
   @Captor
   ArgumentCaptor<String> argMessage;

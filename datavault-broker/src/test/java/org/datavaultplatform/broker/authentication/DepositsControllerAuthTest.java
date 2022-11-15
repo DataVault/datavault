@@ -26,7 +26,7 @@ import org.springframework.http.ResponseEntity;
 
 public class DepositsControllerAuthTest extends BaseControllerAuthTest {
 
-  Date dateBeforeTest = new Date();
+  final Date dateBeforeTest = new Date();
 
   @MockBean
   DepositsController controller;

@@ -161,15 +161,15 @@ public class EventListenerTest {
   @Mock
   AuditsService auditsService;
 
-  String homeUrl = "MOCK_HOME_URL";
+  final String homeUrl = "MOCK_HOME_URL";
 
-  String helpUrl = "MOCK_HELP_URL";
+  final String helpUrl = "MOCK_HELP_URL";
 
-  String helpMail = "MOCK_HELP_MAIL";
+  final String helpMail = "MOCK_HELP_MAIL";
 
-  String auditAdminEmail = "MOCK_ADMIN_EMAIL";
-  Clock clock = Clock.fixed(Instant.now(), ZoneId.of("Europe/London"));
-  Date timestamp = new Date(clock.millis());
+  final String auditAdminEmail = "MOCK_ADMIN_EMAIL";
+  final Clock clock = Clock.fixed(Instant.now(), ZoneId.of("Europe/London"));
+  final Date timestamp = new Date(clock.millis());
   private EventListener sut;
 
 
@@ -549,14 +549,14 @@ public class EventListenerTest {
     @Nested
     class Test03StartEvent {
 
-      Start event = new Start();
-      ArgumentCaptor<Deposit.Status> argStatus = ArgumentCaptor.forClass(Deposit.Status.class);
-      ArgumentCaptor<String> argUserTemplate = ArgumentCaptor.forClass(String.class);
-      ArgumentCaptor<String> argAdminTemplate = ArgumentCaptor.forClass(String.class);
+      final Start event = new Start();
+      final ArgumentCaptor<Deposit.Status> argStatus = ArgumentCaptor.forClass(Deposit.Status.class);
+      final ArgumentCaptor<String> argUserTemplate = ArgumentCaptor.forClass(String.class);
+      final ArgumentCaptor<String> argAdminTemplate = ArgumentCaptor.forClass(String.class);
 
-      ArgumentCaptor<Deposit> argDeposit = ArgumentCaptor.forClass(Deposit.class);
-      ArgumentCaptor<Event> argEvent = ArgumentCaptor.forClass(Event.class);
-      ArgumentCaptor<String> argType = ArgumentCaptor.forClass(String.class);
+      final ArgumentCaptor<Deposit> argDeposit = ArgumentCaptor.forClass(Deposit.class);
+      final ArgumentCaptor<Event> argEvent = ArgumentCaptor.forClass(Event.class);
+      final ArgumentCaptor<String> argType = ArgumentCaptor.forClass(String.class);
 
 
       @ParameterizedTest
@@ -1257,8 +1257,8 @@ public class EventListenerTest {
   class ProcessEventTests {
 
     EventListener spy;
-    Deposit deposit = new Deposit();
-    Job job = new Job();
+    final Deposit deposit = new Deposit();
+    final Job job = new Job();
 
     @BeforeEach
     void setup() {
