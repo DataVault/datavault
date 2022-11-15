@@ -42,6 +42,7 @@ pipeline {
     post {
         always {
           junit allowEmptyResults:true, testResults: '**/surefire-reports/*.xml'
+          publishCoverage adapters: [jacoco(mergeToOneReport: true, path: '**/jacoco.xml')]
         }
         success {
             echo "BUILD SUCCESS : Recording Artifacts.."
