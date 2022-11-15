@@ -25,6 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.util.Pair;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * This test checks the relative performance of
@@ -36,6 +38,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
  * </p>
  */
 @Slf4j
+@Testcontainers
 public class SFTPFileSystemPerformanceIT {
 
   static final String TEST_PASSWORD = "testPassword";
@@ -51,7 +54,8 @@ public class SFTPFileSystemPerformanceIT {
   static final double PERFORMANCE_THRESHOLD = 1.2;
   public static final int SIZE_50MB = 50_000_000;
 
-  GenericContainer<?> sftpServerContainer;
+  @Container
+  GenericContainer<?> sftpServerContainer = getSftpTestContainer();
   File bigFile;
   private SFTPFileSystemSSHD sftpSSHD;
   private SFTPFileSystemJSch sftpJSch;
@@ -73,8 +77,6 @@ public class SFTPFileSystemPerformanceIT {
       raf.setLength(SIZE_50MB);
     }
     assertEquals(SIZE_50MB, bigFile.length());
-    sftpServerContainer = getSftpTestContainer();
-    sftpServerContainer.start();
     Map<String, String> props = getStoreProperties();
     this.sftpSSHD = new SFTPFileSystemSSHD("sshd", props);
     this.sftpJSch = new SFTPFileSystemJSch("jsch", props);
