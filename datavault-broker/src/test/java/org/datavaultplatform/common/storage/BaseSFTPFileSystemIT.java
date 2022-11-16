@@ -94,22 +94,6 @@ public abstract class BaseSFTPFileSystemIT {
   /* TESTS BELOW HERE */
 
   @Test
-  public void listDot1() {
-    SFTPFileSystemDriver driver = getSftpDriver();
-    List<FileInfo> items = getSftpDriver().list(".");
-    getLog().info("items 1 {}", items);
-    logContainerId("ONE");
-  }
-
-  @Test
-  public void listDot2() {
-    List<FileInfo> items = getSftpDriver().list(".");
-    getLog().info("items 2 {}", items);
-    logContainerId("TWO");
-  }
-
-
-  @Test
   @SneakyThrows
   void testFileSize() {
     long size = getSftpDriver().getSize("sshd.pid");
@@ -118,9 +102,16 @@ public abstract class BaseSFTPFileSystemIT {
 
   @Test
   @SneakyThrows
-  void testExists() {
+  void testFileExists() {
     assertTrue(getSftpDriver().exists("sshd.pid"));
     assertFalse(getSftpDriver().exists("sshd.pid.nope"));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"/",".","./","/.","/./","","//"})
+  @SneakyThrows
+  void testDirExists(String path) {
+    assertTrue(getSftpDriver().exists(path));
   }
 
   @Test
@@ -149,7 +140,7 @@ public abstract class BaseSFTPFileSystemIT {
   @Test
   @SneakyThrows
   void testUsableSpace() {
-    assertThat(getSftpDriver().getUsableSpace()).isGreaterThan(58_000_000_000L);
+    assertThat(getSftpDriver().getUsableSpace()).isGreaterThan(50_000_000_000L);
   }
 
   @Test

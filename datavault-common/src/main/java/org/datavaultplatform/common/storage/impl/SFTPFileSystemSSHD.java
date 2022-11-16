@@ -165,10 +165,6 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
   @Override
   public void retrieve(String remoteRelativePath, File localFileOrDir, Progress progress) throws Exception {
     try (SFTPConnection con = getConnection()) {
-      // Strip any leading separators (we want a path relative to the current dir)
-      while (remoteRelativePath.startsWith(PATH_SEPARATOR)) {
-        remoteRelativePath = remoteRelativePath.replaceFirst(PATH_SEPARATOR, "");
-      }
 
       String remoteFullPath = getConnection().getFullPath(remoteRelativePath);
 
@@ -181,10 +177,6 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
   @Override
   public String store(String path, File localFileOrDirectory, Progress progress) throws Exception {
     try (SFTPConnection con = getConnection()) {
-      // Strip any leading separators (we want a path relative to the current dir)
-      while (path.startsWith(PATH_SEPARATOR)) {
-        path = path.replaceFirst(PATH_SEPARATOR, "");
-      }
 
       final Path basePath = Paths.get(con.getFullPath(path));
 
