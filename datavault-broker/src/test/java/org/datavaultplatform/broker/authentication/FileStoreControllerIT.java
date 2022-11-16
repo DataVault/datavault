@@ -45,10 +45,11 @@ import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.model.dao.FileStoreDAO;
+import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.UserStore;
-import org.datavaultplatform.common.storage.impl.SFTPFileSystem;
-import org.datavaultplatform.common.storage.impl.SFTPFileSystemJSch;
+import org.datavaultplatform.common.storage.impl.SFTPConnectionInfo;
+import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
 import org.datavaultplatform.common.util.Constants;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.junit.jupiter.api.AfterEach;
@@ -76,7 +77,8 @@ import org.testcontainers.utility.DockerImageName;
 @TestPropertySource(properties = {
     "broker.email.enabled=true",
     "broker.rabbit.enabled=false",
-    "broker.scheduled.enabled=false"
+    "broker.scheduled.enabled=false",
+    "sftp.driver.use.apache.sshd=true"
 })
 @AutoConfigureMockMvc
 public class FileStoreControllerIT extends BaseDatabaseTest {
@@ -212,8 +214,8 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     log.info("properties {}", storedProps);
 
     UserStore us = UserStore.fromFileStore(fsFromDb, resolver);
-    assertTrue(us instanceof SFTPFileSystem);
-    SFTPFileSystem sftp = (SFTPFileSystem) us;
+    assertTrue(us instanceof SFTPFileSystemSSHD);
+    SFTPFileSystemSSHD sftp = (SFTPFileSystemSSHD) us;
     String publicKey = storedProps.get("publicKey");
     log.info("public key [{}]", publicKey);
 
@@ -251,12 +253,15 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   }
 
   @SneakyThrows
-  private void changeSFTPFileSystemPort(SFTPFileSystemJSch sftp, int sftpServerPort) {
+  private void changeSFTPFileSystemPort(SFTPFileSystemSSHD sftp, int sftpServerPort) {
     // Tweak the SFTPFileSystem to change the port to point to embedded sftp server
-    Field fPort = SFTPFileSystemJSch.class.getDeclaredField("port");
+    Field fInfo = sftp.getClass().getDeclaredField("connectionInfo");
+    fInfo.setAccessible(true);
+    SFTPConnectionInfo info = (SFTPConnectionInfo) fInfo.get(sftp);
+    Field fPort = info.getClass().getDeclaredField("port");
     fPort.setAccessible(true);
+    fPort.set(info, sftpServerPort);
     log.info("sftpServerPort {}", sftpServerPort);
-    fPort.set(sftp, sftpServerPort);
   }
 
   @SneakyThrows
@@ -280,7 +285,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     return sftpServer;
   }
 
-  void checkSFTP(SFTPFileSystem sftp) throws Exception {
+  void checkSFTP(SFTPFileSystemDriver sftp) throws Exception {
 
     List<FileInfo> items = sftp.list("FILES").stream().sorted(Comparator.comparing(FileInfo::getName))
         .collect(

@@ -1,8 +1,5 @@
 package org.datavaultplatform.broker.actuator;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,15 +8,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.datavaultplatform.broker.services.FileStoreService;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.FileStore;
-import org.datavaultplatform.common.storage.StorageConstants;
+import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.UserStore;
-import org.datavaultplatform.common.storage.impl.SFTPFileSystem;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
@@ -71,8 +66,8 @@ public class SftpFileStoreEndpoint {
     Future<Boolean> future = EXECUTOR.submit(() -> {
       try {
         UserStore us = UserStore.fromFileStore(fileStore, resolver);
-        SFTPFileSystem sftp = (SFTPFileSystem) us;
-        sftp.Connect();
+        SFTPFileSystemDriver sftp = (SFTPFileSystemDriver) us;
+        sftp.list(".");
         long diff = System.currentTimeMillis() - start;
         log.info("SFTP connection [{}] took [{}]ms", info, diff);
         return true;
