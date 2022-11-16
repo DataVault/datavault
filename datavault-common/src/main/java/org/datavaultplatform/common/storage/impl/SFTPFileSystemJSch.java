@@ -77,7 +77,7 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
         log.info("SFTPFileSystemJSch created...");
     }
 
-    public void Connect() throws Exception {
+    private void Connect() throws Exception {
         JSch jsch = new JSch();
         session = jsch.getSession(username, host, port);
 
@@ -228,14 +228,14 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
     }
 
     @Override
-    public boolean exists(String path) {
+    public boolean exists(String relativePath) {
         
         // TODO: handle symbolic links
-        
+        String path = getFullPath(relativePath);
         try {
             Connect();
             
-            channelSftp.stat(rootPath + PATH_SEPARATOR + path);
+            channelSftp.stat(path);
             return true;
             
         } catch (Exception e) {
@@ -320,17 +320,12 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
     }
 
     @Override
-    public void retrieve(String path, File working, Progress progress) throws Exception {
-        
-        // Strip any leading separators (we want a path relative to the current dir)
-        while (path.startsWith(PATH_SEPARATOR)) {
-            path = path.replaceFirst(PATH_SEPARATOR, "");
-        }
-        
+    public void retrieve(String relativePath, File working, Progress progress) throws Exception {
+
         try {
             Connect();
             
-            path = channelSftp.pwd() + "/" + path;
+            String path = getFullPath(relativePath);
             final SftpATTRS attrs = channelSftp.stat(path);
             
             if (attrs.isDir() && !path.endsWith("/")) {
@@ -350,17 +345,12 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
     }
     
     @Override
-    public String store(String path, File working, Progress progress) throws Exception {
+    public String store(String relativePath, File working, Progress progress) throws Exception {
 
-        // Strip any leading separators (we want a path relative to the current dir)
-        while (path.startsWith(PATH_SEPARATOR)) {
-            path = path.replaceFirst(PATH_SEPARATOR, "");
-        }
-        
+        String path = getFullPath(relativePath);
         try {
             Connect();
 
-            path = Paths.get(channelSftp.pwd()).resolve(path).normalize().toString();
             channelSftp.cd(path);
 
             // Create timestamped folder to avoid overwriting files
@@ -407,4 +397,10 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
             channelSftp.mkdir(dirName);
         }
     }
+
+    @SneakyThrows
+    private String getFullPath(String relativePath) {
+        return SftpUtils.getFullPath(rootPath, relativePath);
+    }
+
 }

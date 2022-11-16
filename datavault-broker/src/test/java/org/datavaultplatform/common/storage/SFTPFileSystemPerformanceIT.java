@@ -86,14 +86,6 @@ public class SFTPFileSystemPerformanceIT {
   @SneakyThrows
   void comparePerformanceOfSftpDrivers() {
 
-    List<FileInfo> list1 = sftpSSHD.list(
-        ".");
-    log.info("sshd list . {}", list1);
-
-    List<FileInfo> list2 = sftpJSch.list(
-        ".");
-    log.info("jsch list . {}", list2);
-
     List<ProgressInfo> infoStoreSSHD = new ArrayList<>();
     List<ProgressInfo> infoStoreSSHDMonitor = new ArrayList<>();
     List<ProgressInfo> infoStoreJSch = new ArrayList<>();

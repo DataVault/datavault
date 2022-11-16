@@ -2,6 +2,7 @@ package org.datavaultplatform.common.storage.impl;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -58,6 +59,25 @@ public class SftpUtilsTest {
       log.info("diff is [{} to {}][{}]", i - 1, i, diff);
       Assertions.assertTrue(diff >= 2000);
     }
+  }
+
+  @Test
+  void testFullPath() {
+    assertEquals("/", SftpUtils.getFullPath("/","/"));
+    assertEquals("/", SftpUtils.getFullPath("/","//"));
+    assertEquals("/", SftpUtils.getFullPath("/","//."));
+    assertEquals("/", SftpUtils.getFullPath("/bob","//../."));
+    assertEquals("/aaa/bbb", SftpUtils.getFullPath("/aaa","/bbb"));
+    assertEquals("/aaa/bbb", SftpUtils.getFullPath("/aaa","bbb"));
+    assertEquals("/aaa/bbb", SftpUtils.getFullPath("/aaa","./bbb"));
+    assertEquals("/tmp/aaa", SftpUtils.getFullPath("/tmp","./aaa"));
+    assertEquals("/tmp", SftpUtils.getFullPath("/tmp",""));
+    assertEquals("/tmp", SftpUtils.getFullPath("/tmp",null));
+
+    IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+      SftpUtils.getFullPath(null, ".");
+    });
+    assertEquals("The rootPath cannot be null", ex.getMessage());
   }
 
 }
