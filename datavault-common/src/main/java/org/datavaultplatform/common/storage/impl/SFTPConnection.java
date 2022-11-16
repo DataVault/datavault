@@ -9,6 +9,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.config.hosts.HostConfigEntryResolver;
 import org.apache.sshd.client.keyverifier.AcceptAllServerKeyVerifier;
@@ -96,6 +97,13 @@ public class SFTPConnection implements AutoCloseable {
     String fullPath = Paths.get(this.rootPath)
         .resolve(relativePath).toFile()
         .getCanonicalPath();
+
+    if (SystemUtils.IS_OS_MAC) {
+      //on macOs - canonical path for /tmp can sometimes be /private/tmp
+      //We want the path on the sftp server - NOT this mac,  best to ditch the /private prefix
+      fullPath = StringUtils.removeStart(fullPath, "/private");
+    }
+
     return fullPath;
   }
 

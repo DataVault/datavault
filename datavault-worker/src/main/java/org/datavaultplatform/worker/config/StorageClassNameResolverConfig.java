@@ -1,4 +1,4 @@
-package org.datavaultplatform.broker.config;
+package org.datavaultplatform.worker.config;
 
 import org.datavaultplatform.common.config.BaseStorageClassNameResolverConfig;
 import org.springframework.context.annotation.Configuration;

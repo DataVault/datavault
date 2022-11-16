@@ -49,9 +49,6 @@ public class ReceiverConfig {
   @Autowired
   RecordingEventSender eventSender;
 
-  @Value("${sftp.driver.use.jsch:true}")
-  private boolean sftpDriverUserJSch;
-
   /*
       <bean id="receiver" class="org.datavaultplatform.worker.queue.Receiver">
         <property name="tempDir" value="${tempDir}"/>
@@ -86,11 +83,6 @@ public class ReceiverConfig {
       Security.addProvider(new BouncyCastleProvider());
     }
     return result;
-  }
-
-  @Bean
-  StorageClassNameResolver createStorageClassNameResolver() {
-    return new StorageClassNameResolver(sftpDriverUserJSch);
   }
 
   @PostConstruct
