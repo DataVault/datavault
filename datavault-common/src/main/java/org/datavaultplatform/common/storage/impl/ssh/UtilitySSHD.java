@@ -31,20 +31,18 @@ public abstract class UtilitySSHD {
     @SuppressWarnings("OctalInteger")
     public static final int FILE_PERMISSION_MASK = 0777;
 
-    public static long calculateSize(final SFTPConnection con,
-                                     String remoteFile) throws IOException {
+    public static long calculateDirSize(final SFTPConnection con,
+                                     String remoteDirFullPath) throws IOException {
         long bytes = 0;
-        String pwd = remoteFile;
+        final String workingDir;
         
-        if (remoteFile.lastIndexOf('/') != -1) {
-            if (remoteFile.length() > 1) {
-                pwd = remoteFile.substring(0, remoteFile.lastIndexOf('/'));
-            }
+        if (remoteDirFullPath.endsWith("/")  && remoteDirFullPath.length() > 1) {
+            workingDir = remoteDirFullPath.substring(0, remoteDirFullPath.lastIndexOf('/'));
+        }else {
+            workingDir = remoteDirFullPath;
         }
 
-        String fullPath = con.getFullPath(pwd);
-
-        for (SftpClient.DirEntry entry : con.sftpClient.readDir(fullPath)) {
+        for (SftpClient.DirEntry entry : con.sftpClient.readDir(workingDir)) {
 
             if (entry.getFilename().equals(".") ||
                 entry.getFilename().equals("..")) {
@@ -52,7 +50,7 @@ public abstract class UtilitySSHD {
             }
 
             if (entry.getAttributes().isDirectory()) {
-                bytes += calculateSize(con, fullPath + "/" + entry.getFilename());
+                bytes += calculateDirSize(con, workingDir + "/" + entry.getFilename());
             } else {
                 bytes += entry.getAttributes().getSize();
             }
