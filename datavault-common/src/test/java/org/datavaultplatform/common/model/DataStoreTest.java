@@ -6,11 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.storage.StorageConstants;
-import org.datavaultplatform.common.storage.impl.LocalFileSystem;
-import org.datavaultplatform.common.storage.impl.OracleObjectStorageClassic;
-import org.datavaultplatform.common.storage.impl.S3Cloud;
-import org.datavaultplatform.common.storage.impl.SFTPFileSystem;
-import org.datavaultplatform.common.storage.impl.TivoliStorageManager;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,13 +17,12 @@ public class DataStoreTest {
 
   static Stream<Arguments> getClassAndTypePairs() {
     return Stream.of (
-            S3Cloud.class,
-            SFTPFileSystem.class,
-            LocalFileSystem.class,
-            TivoliStorageManager.class,
-            OracleObjectStorageClassic.class
+            StorageConstants.CLOUD_AWS_S3,
+            StorageConstants.SFTP_FILE_SYSTEM,
+            StorageConstants.LOCAL_FILE_SYSTEM,
+            StorageConstants.TIVOLI_STORAGE_MANAGER,
+            StorageConstants.CLOUD_ORACLE
         )
-        .map(Class::getName)
         .map(className -> Arguments.of(className.substring(className.lastIndexOf(".") + 1),
             className)
         );

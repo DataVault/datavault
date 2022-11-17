@@ -1,31 +1,29 @@
 package org.datavaultplatform.common.storage.impl;
 
-import java.time.Clock;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * pre dv5, the storageClassName 'org.datavaultplatform.common.storage.impl.SFTPFileSystem' - was used to create instances of this class.
- * This class is now abstract - no instances of this class should now be created.
- * With dv5, StorageClassNameResolver takes 'org.datavaultplatform.common.storage.impl.SFTPFileSystem' and returns an SFTP Driver class name
- * based on configuration.
+ * pre dv5...
+ *
+ * The storageClassName String 'org.datavaultplatform.common.storage.impl.SFTPFileSystem'
+ * - was used to create instances of this class via "reflection". That approach was not flexible.
+ *
+ * with dv5...
+ *
+ * We have to keep using the String 'org.datavaultplatform.common.storage.impl.SFTPFileSystem'
+ * - it will be in the DV database.
+ * This "class" is NOT used but the String representation of its "class name" is.
+ * {@code @See} org.datavaultplatform.common.storage.StorageConstants#SFTP_FILE_SYSTEM
+ *
+ * This class is left here as a placeholder.
+ * You cannot create instances of this class.
+ * You cannot create subclasses of this class.
+ *
+ * With dv5, StorageClassNameResolver takes the String 'org.datavaultplatform.common.storage.impl.SFTPFileSystem'
+ * and decides which SFTP Driver to return based on configuration. This is more flexible.
+ * {@code @See} org.datavaultplatform.common.util.StorageClassNameResolver
  */
 @Slf4j
-public abstract class SFTPFileSystem extends SFTPFileSystemSSHD {
-
-  public SFTPFileSystem(String name, Map<String, String> config) {
-    super(name, config);
-    constructed();
-  }
-
-  /**
-   * Used for testing
-   */
-  public SFTPFileSystem(String name, Map<String, String> config, Clock clock) {
-    super(name, config, clock);
-    constructed();
-  }
-  private void constructed() {
-    log.info("Created SFTPFileSystem which extends [{}]", this.getClass().getSuperclass().getSimpleName());
-  }
+public abstract class SFTPFileSystem {
+  private SFTPFileSystem(){}
 }

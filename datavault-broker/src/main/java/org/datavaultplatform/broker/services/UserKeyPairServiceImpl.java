@@ -11,6 +11,7 @@ import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.crypto.SshRsaKeyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 @Transactional
+@Primary
 public class UserKeyPairServiceImpl implements UserKeyPairService {
 
   static {

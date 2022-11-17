@@ -90,6 +90,9 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   private static final String KEY_NAME = "thekeyname";
 
   private static final String BASE_SFTP_DIR = "/tmp/sftp/root";
+  public static final int SFTP_SERVER_PORT = 2222;
+  public static final String TEMP_SFTP_SERVER_PORT = "9999";
+  public static final String LOCALHOST = "localhost";
 
   final ObjectMapper mapper = new ObjectMapper();
   final String CONTENTS_FILE_1 = UUID.randomUUID().toString();
@@ -161,8 +164,8 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     filestore.setLabel("label-one");
     filestore.setStorageClass(StorageConstants.SFTP_FILE_SYSTEM);
     HashMap<String, String> props = new HashMap<>();
-    props.put(PropNames.HOST, "localhost");
-    props.put(PropNames.PORT, "9999"); //we will replace 9999 later
+    props.put(PropNames.HOST, LOCALHOST);
+    props.put(PropNames.PORT, TEMP_SFTP_SERVER_PORT); //we will replace TEMP_SFTP_PORT/9999 later
     props.put(PropNames.ROOT_PATH, BASE_SFTP_DIR);
     filestore.setProperties(props);
 
@@ -191,7 +194,8 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
 
     FileStore fsFromDb = fileStoreDAO.findById(fileStoreId).get();
     checkFileStores(fsResponse, fsFromDb,
-        "port", "host", "rootPath", "publicKey", "iv", "username");
+        PropNames.PORT, PropNames.HOST, PropNames.ROOT_PATH,
+        PropNames.PUBLIC_KEY, PropNames.IV, PropNames.USERNAME);
     assertEquals(fileStoreId, fsFromDb.getID());
 
     assertEquals(TEST_USER, fsFromDb.getUser().getID());
@@ -201,26 +205,27 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     assertEquals("label-one", fsFromDb.getLabel());
     HashMap<String, String> storedProps = fsFromDb.getProperties();
     assertEquals(new HashSet<>(
-        Arrays.asList("username", "password", "publicKey", "privateKey", "iv", "passphrase", "host",
-            "port", "rootPath")), storedProps.keySet());
-    assertEquals(TEST_USER, storedProps.get("username"));
-    assertEquals("", storedProps.get("password"));
-    assertEquals("localhost", storedProps.get("host"));
-    assertEquals("9999", storedProps.get("port"));
-    assertEquals(passphrase, storedProps.get("passphrase"));
-    assertTrue(storedProps.get("publicKey").startsWith("ssh-rsa"));
-    assertTrue(isBase64(storedProps.get("privateKey")));
-    assertTrue(isBase64(storedProps.get("iv")));
+        Arrays.asList(PropNames.USERNAME, PropNames.PASSWORD, PropNames.PUBLIC_KEY,
+            PropNames.PRIVATE_KEY, PropNames.IV, PropNames.PASSPHRASE, PropNames.HOST,
+            PropNames.PORT, PropNames.ROOT_PATH)), storedProps.keySet());
+    assertEquals(TEST_USER, storedProps.get(PropNames.USERNAME));
+    assertEquals("", storedProps.get(PropNames.PASSWORD));
+    assertEquals(LOCALHOST, storedProps.get(PropNames.HOST));
+    assertEquals(TEMP_SFTP_SERVER_PORT, storedProps.get(PropNames.PORT));
+    assertEquals(passphrase, storedProps.get(PropNames.PASSPHRASE));
+    assertTrue(storedProps.get(PropNames.PUBLIC_KEY).startsWith("ssh-rsa"));
+    assertTrue(isBase64(storedProps.get(PropNames.PRIVATE_KEY)));
+    assertTrue(isBase64(storedProps.get(PropNames.IV)));
     log.info("properties {}", storedProps);
 
     UserStore us = UserStore.fromFileStore(fsFromDb, resolver);
     assertTrue(us instanceof SFTPFileSystemSSHD);
     SFTPFileSystemSSHD sftp = (SFTPFileSystemSSHD) us;
-    String publicKey = storedProps.get("publicKey");
+    String publicKey = storedProps.get(PropNames.PUBLIC_KEY);
     log.info("public key [{}]", publicKey);
 
     this.sftpServer = setupAndStartSFTP(publicKey);
-    int sftpServerPort = this.sftpServer.getMappedPort(2222);
+    int sftpServerPort = this.sftpServer.getMappedPort(SFTP_SERVER_PORT);
 
     changeSFTPFileSystemPort(sftp, sftpServerPort);
 
@@ -232,7 +237,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   @SneakyThrows
   private void checkSftpFileStoreEndpoint(String fileStoreId, int actualPort) {
 
-    Mockito.when(mPortAdjuster.apply("9999")).thenReturn(String.valueOf(actualPort));
+    Mockito.when(mPortAdjuster.apply(TEMP_SFTP_SERVER_PORT)).thenReturn(String.valueOf(actualPort));
 
     List<SftpFileStoreInfo> items = this.sftpFileStoreEndpoint.getSftpFileStoresInfo();
     SftpFileStoreInfo info = items.stream().filter(i -> i.getId().equals(fileStoreId)).findFirst()
@@ -276,7 +281,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     GenericContainer<?> sftpServer = new GenericContainer<>(DockerImageName.parse(DockerImage.OPEN_SSH_8pt6_IMAGE_NAME))
         .withEnv(ENV_USER_NAME, TEST_USER)
         .withEnv(ENV_PUBLIC_KEY, publicKey) //this causes the public key to be added to /config/.ssh/authorized_keys
-        .withExposedPorts(2222)
+        .withExposedPorts(SFTP_SERVER_PORT)
         .withFileSystemBind(tempSftpFolder.toString(), BASE_SFTP_DIR)
         .waitingFor(Wait.forListeningPort());
 
