@@ -88,7 +88,7 @@ public class InitialiseDatabaseLocalFileSystemIT extends BaseDatabaseTest {
     assertEquals(local.getProperties().get(LocalFileSystem.ROOT_PATH), localFsDirectory);
     assertTrue(local.isRetrieveEnabled());
 
-    Device device = local.getDevice(new StorageClassNameResolver(true));
+    Device device = local.getDevice(StorageClassNameResolver.FIXED_SSHD);
     assertThat(device).isInstanceOf(LocalFileSystem.class);
     assertTrue(device instanceof LocalFileSystem);
   }

@@ -12,19 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.storage.impl.JSchLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 /**
  * User: Robin Taylor
  * Date: 04/11/2015
  * Time: 09:54
  */
-@Service
 @Slf4j
-@Transactional
-@Primary
 public class UserKeyPairServiceJSchImpl implements UserKeyPairService {
 
   private final String passphrase;

@@ -3,6 +3,7 @@ package org.datavaultplatform.common.util;
 import static org.junit.Assert.assertEquals;
 
 import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
+import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemJSch;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
 import org.junit.jupiter.api.Nested;
@@ -25,7 +26,7 @@ public class StorageClassNameResolverTest {
     @Test
     void testSftpFileSystem() {
       assertEquals(getExpected().getName(), getResolver().resolveStorageClassName(
-          StorageClassNameResolver.CLASS_NAME_SFTP_FILE_SYSTEM));
+          StorageConstants.SFTP_FILE_SYSTEM));
     }
 
     abstract StorageClassNameResolver getResolver();
