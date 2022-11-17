@@ -35,37 +35,97 @@
     <skip.integration.tests>false</skip.integration.tests>
 
     <!-- dependency versions -->
-    <aws.java.sdk.bom.version>1.12.324</aws.java.sdk.bom.version>
-    <oci.java.sdk.bom.version>2.46.0</oci.java.sdk.bom.version>
-    <testcontainers.version>1.17.5</testcontainers.version>
-    <spring.cloud.version>3.1.4</spring.cloud.version>
-    <mockito.version>4.8.1</mockito.version>
-    <owasp.dependency.check.version>7.3.0</owasp.dependency.check.version>
+    <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
+    <aws.java.sdk.bom.version>1.12.334</aws.java.sdk.bom.version>
+
+    <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
+    <oci.java.sdk.bom.version>3.0.1</oci.java.sdk.bom.version>
+
+    <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
+    <testcontainers.version>1.17.6</testcontainers.version>
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
+    <spring.cloud.version>3.1.5</spring.cloud.version>
+
+    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+    <mockito.version>4.9.0</mockito.version>
+
+    <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
+    <owasp.dependency.check.version>7.3.1</owasp.dependency.check.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+    <commons.compress.version>1.22</commons.compress.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-sftp -->
+    <sshd.sftp.version>2.9.2</sshd.sftp.version>
+
+    <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+    <guava.version>31.1-jre</guava.version>
+
+    <!-- above here, updated 16nov2022-->
+
+    <!-- https://mvnrepository.com/artifact/org.apache.directory.api/api-all -->
     <apache.directory.api.version>2.1.2</apache.directory.api.version>
+
+    <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
     <bouncy.castle.version>1.72</bouncy.castle.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
     <commons.text.version>1.10.0</commons.text.version>
 
+    <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
     <jsoup.version>1.15.3</jsoup.version>
+
+    <!-- https://mvnrepository.com/artifact/com.bettercloud/vault-java-driver -->
     <vault.java.driver.version>5.1.0</vault.java.driver.version>
+
+    <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
     <commons.io.version>2.11.0</commons.io.version>
+
+    <!-- https://mvnrepository.com/artifact/org.jsondoc/jsondoc-core -->
     <jsondoc.core.version>1.2.23</jsondoc.core.version>
+
+    <!-- https://mvnrepository.com/artifact/net.sf.supercsv/super-csv -->
     <super.csv.version>2.4.0</super.csv.version>
+
+    <!-- https://mvnrepository.com/artifact/com.jcraft/jsch -->
     <jcraft.jsch.version>0.1.55</jcraft.jsch.version>
+
+    <!-- https://mvnrepository.com/artifact/gov.loc/bagit -->
     <bagit.version>5.2.0</bagit.version>
+
+    <!-- https://mvnrepository.com/artifact/org.testng/testng -->
     <testng.version>6.14.3</testng.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.velocity/velocity-engine-core -->
     <velocity.version>2.3</velocity.version>
+
+    <!-- https://mvnrepository.com/artifact/oro/oro -->
     <oro.version>2.0.8</oro.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
     <commons.collections4.version>4.4</commons.collections4.version>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-exec -->
     <commons.exec.version>1.3</commons.exec.version>
-    <commons.compress.version>1.21</commons.compress.version>
+
+    <!-- https://mvnrepository.com/artifact/javax.interceptor/javax.interceptor-api -->
     <javax.interceptor.version>1.2.2</javax.interceptor.version>
+
+    <!-- https://mvnrepository.com/artifact/it.burning/cron-expression-descriptor -->
     <cron.expr.desc.version>1.2.6</cron.expr.desc.version>
-    <sshd.sftp.version>2.9.1</sshd.sftp.version>
+
+    <!-- https://mvnrepository.com/artifact/net.i2p.crypto/eddsa -->
     <eddsa.version>0.3.0</eddsa.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-text</artifactId>
@@ -111,15 +171,12 @@
         <artifactId>mockito-junit-jupiter</artifactId>
         <version>${mockito.version}</version>
       </dependency>
-
-      <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers-bom -->
       <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers-bom</artifactId>
         <version>${testcontainers.version}</version>
         <type>pom</type>
       </dependency>
-      <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
       <dependency>
         <groupId>com.amazonaws</groupId>
         <artifactId>aws-java-sdk-bom</artifactId>
@@ -127,8 +184,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-
-      <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
       <dependency>
         <groupId>com.oracle.oci.sdk</groupId>
         <artifactId>oci-java-sdk-bom</artifactId>
@@ -228,7 +283,6 @@
         <version>${commons.collections4.version}</version>
       </dependency>
 
-      <!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-sftp -->
       <dependency>
         <groupId>org.apache.sshd</groupId>
         <artifactId>sshd-sftp</artifactId>
@@ -290,7 +344,6 @@
       <artifactId>spring-boot-configuration-processor</artifactId>
       <optional>true</optional>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/javax.interceptor/javax.interceptor-api -->
     <dependency>
       <groupId>javax.interceptor</groupId>
       <artifactId>javax.interceptor-api</artifactId>

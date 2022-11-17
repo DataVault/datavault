@@ -15,7 +15,7 @@ public abstract class DockerImage {
   public static final DockerImageName MAIL_IMAGE = parse("mailhog/mailhog:v1.0.1");
 
   // https://hub.docker.com/_/rabbitmq?tab=tags
-  public static final String RABBIT_IMAGE_NAME = "rabbitmq:3.10.7-management-alpine";
+  public static final String RABBIT_IMAGE_NAME = "rabbitmq:3.11.3-management-alpine";
 
   // https://hub.docker.com/r/linuxserver/openssh-server/tags
   public static final String OPEN_SSH_8pt6_IMAGE_NAME = "linuxserver/openssh-server:version-8.6_p1-r3";
