@@ -109,12 +109,7 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
       try {
         Attributes attrs = con.sftpClient.lstat(fullPath);
         if (attrs.isDirectory()) {
-
-          if (!path.endsWith("/")) {
-            path = path + "/";
-          }
-
-          return UtilitySSHD.calculateSize(con, path);
+          return UtilitySSHD.calculateDirSize(con, fullPath);
         } else {
           return attrs.getSize();
         }

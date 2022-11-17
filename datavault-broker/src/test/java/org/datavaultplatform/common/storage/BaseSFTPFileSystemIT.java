@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.io.ProgressEvent;
@@ -520,6 +522,81 @@ public abstract class BaseSFTPFileSystemIT {
     assertEquals((TEST_FILE_A_CONTENTS + TEST_FILE_B_CONTENTS + TEST_FILE_C_CONTENTS).length(), getSftpDriver().getSize(retrievePathAsString));
   }
 
+  @Test
+  @SneakyThrows
+  public void testSftpDriverNestedDirectoryStoreAndRetrieve() {
+    final String FROM_DV_DIR_NAME = "fromDir";
+    final String DIR_A = "DIR_AAA";
+    final String DIR_B = "DIR_BBB";
+    final String DIR_C = "DIR_CCC";
+    final String FROM_DV_DIR_FILE_A = "fromDVfileA.txt";
+    final String FROM_DV_DIR_FILE_B = "fromDVfileB.txt";
+    final String FROM_DV_DIR_FILE_C = "fromDVfileC.txt";
+
+    final String TO_DV_DIR_NAME = "toDir";
+    final String TEST_FILE_A_CONTENTS = "aaa-XXXX-AA";
+    final String TEST_FILE_B_CONTENTS = "bbb-XXXX-BBBB";
+    final String TEST_FILE_C_CONTENTS = "ccc-XXXX-CCCCCC";
+
+    File tempFileDir = Files.createTempDirectory(TEMP_PREFIX).toFile();
+    tempFileDir.deleteOnExit();
+    File fromDvDir = new File(tempFileDir, FROM_DV_DIR_NAME);
+    assertTrue(fromDvDir.mkdir());
+
+    File toDvDir = new File(tempFileDir, TO_DV_DIR_NAME);
+    assertTrue(toDvDir.mkdirs());
+
+    File dirA = new File(fromDvDir, DIR_A);
+    dirA.mkdir();
+
+    File dirB = new File(dirA, DIR_B);
+    dirB.mkdir();
+
+    File dirC = new File(dirB, DIR_C);
+    dirC.mkdir();
+
+    File fromDvDirFileA = new File(dirA, FROM_DV_DIR_FILE_A);
+    File fromDvDirFileB = new File(dirB, FROM_DV_DIR_FILE_B);
+    File fromDvDirFileC = new File(dirC, FROM_DV_DIR_FILE_C);
+
+    writeToFile(fromDvDirFileA, TEST_FILE_A_CONTENTS);
+    writeToFile(fromDvDirFileB, TEST_FILE_B_CONTENTS);
+    writeToFile(fromDvDirFileC, TEST_FILE_C_CONTENTS);
+
+    getLog().info("sftpDriver {}", getSftpDriver());
+
+    Progress p1 = new Progress();
+    String pathOnRemote = getSftpDriver().store(".", fromDvDir, p1);
+
+    Path tsPath = Paths.get(SFTP_ROOT_DIR).relativize(Paths.get(pathOnRemote));
+    Path retrievePath = tsPath.resolve(fromDvDir.toPath().getFileName());
+    getLog().info("retrievePath[{}]", retrievePath);
+    String retrievePathAsString = retrievePath.toString();
+
+    assertEquals(0, Files.list(toDvDir.toPath()).count());
+    getSftpDriver().retrieve(retrievePathAsString, toDvDir, new Progress());
+
+    File toDvDirFileA = Paths.get(toDvDir.getAbsolutePath(), DIR_A, FROM_DV_DIR_FILE_A).toFile();
+    File toDvDirFileB = Paths.get(toDvDir.getAbsolutePath(), DIR_A, DIR_B, FROM_DV_DIR_FILE_B).toFile();
+    File toDvDirFileC = Paths.get(toDvDir.getAbsolutePath(), DIR_A, DIR_B, DIR_C, FROM_DV_DIR_FILE_C).toFile();
+
+    // We can check we have got 3 files back from SFTP Server
+    Collection<File> retrievedFilesAndDirs = FileUtils.listFiles(toDvDir,
+        TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+
+    assertEquals(3, retrievedFilesAndDirs.size());
+    assertTrue(retrievedFilesAndDirs.contains(toDvDirFileA));
+    assertTrue(retrievedFilesAndDirs.contains(toDvDirFileB));
+    assertTrue(retrievedFilesAndDirs.contains(toDvDirFileC));
+
+    assertEquals(TEST_FILE_A_CONTENTS, readFile(toDvDirFileA));
+    assertEquals(TEST_FILE_B_CONTENTS, readFile(toDvDirFileB));
+    assertEquals(TEST_FILE_C_CONTENTS, readFile(toDvDirFileC));
+
+    assertEquals((TEST_FILE_A_CONTENTS + TEST_FILE_B_CONTENTS + TEST_FILE_C_CONTENTS).length(), getSftpDriver().getSize(retrievePathAsString));
+  }
+
+
   @SneakyThrows
   private String readFile(File file) {
     return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
@@ -555,6 +632,6 @@ public abstract class BaseSFTPFileSystemIT {
     getLog().info("stderr[{}][{}]", command,result.getStderr());
     getLog().info("stdout[{}][{}]", command,result.getStdout());
   }
-  
+
   abstract Logger getLog();
 }
