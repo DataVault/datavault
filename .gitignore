@@ -32,3 +32,5 @@ docker/config/mail-templates
 docker/mysql-master
 docker/mysql-master-backup
 .gitignore
+## do not check in p12 files
+*.p12

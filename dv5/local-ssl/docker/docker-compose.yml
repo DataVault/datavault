@@ -1,0 +1,64 @@
+version: "3.7"
+services:
+  localdb:
+    container_name: dv-local-mariadb
+    image: mariadb:10.9.3
+    restart: always
+    environment:
+      MARIADB_DATABASE: "local"
+      # So you don't have to use root, but you can if you like
+      MARIADB_USER: "user"
+      # You can use whatever password you like
+      MARIADB_PASSWORD: "passXXXX"
+      # Password for root access
+      MARIADB_ROOT_PASSWORD: "passYYYY"
+    ports:
+      # <Port exposed> : < MariaDB Port running inside container>
+      - "3306:3306"
+    expose:
+      # Opens port 3306 on the container
+      - "3306"
+      # Where our data will be persisted
+    volumes:
+      # mariadb still uses /var/lib/mysql
+      - v-local-mariadb:/var/lib/mysql
+  localrabbit:
+    container_name: dv-local-rabbit
+    image: rabbitmq:3.11.3-management-alpine
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbit
+      - RABBITMQ_DEFAULT_PASS=twin2port
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - v-local-rabbit:/var/lib/rabbitmq
+  localemail:
+    container_name: dv-local-email
+    image: mailhog/mailhog:v1.0.1
+    restart: always
+    ports:
+     - "1025:1025" #SMTP
+     - "8025:8025" #HTTP
+  localldap:
+    container_name: dv-local-ldap
+    image: bitnami/openldap:latest
+    restart: always
+    environment:
+      LDAP_ROOT: "o=myu.ed"
+      LDAP_PASSWORD: "test-password"
+      LDAP_CUSTOM_LDIF_DIR: "/custom"
+    ports:
+      - "1389:1389"
+    expose:
+      - "1389"
+    volumes:
+      # Where our ldif files are stored
+      - $LOCAL_LDAP_DIR/custom:/custom
+      - $LOCAL_LDAP_DIR/schema:/schema
+
+volumes:
+  v-local-rabbit:
+  v-local-mariadb:
+
