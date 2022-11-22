@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_DIR=`dirname $0`
+SCRIPT_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PROJECT_ROOT=$(cd $SCRIPT_DIR/../../..;pwd)
 
 # This script now uses 'java -jar' instead of 'mvnw spring-boot:run'
@@ -10,7 +10,14 @@ java -version
 
 SSL_PASSWORD=thePassword
 
-WEBAPP_P12=$(readlink -f $SCRIPT_DIR/../webapp.p12)
+WEBAPP_P12_DIR=$(cd $SCRIPT_DIR/../; pwd)
+WEBAPP_P12=$WEBAPP_P12_DIR/webapp.p12
+
+if [[ ! -f $WEBAPP_P12 ]]; then
+  echo "ERROR: Webapp PKCS#12 file not found: [$WEBAPP_P12]"
+  exit 1
+fi
+echo "WEBAPP_P12 is [$WEBAPP_P12]"
 
 SSL_SETTINGS=\
 "BROKER_URL=https://broker.dv.local:8443 \

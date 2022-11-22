@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_DIR=`dirname $0`
+SCRIPT_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PROJECT_ROOT=$(cd $SCRIPT_DIR/../../..;pwd)
 
 # This script now uses 'java -jar' instead of 'mvnw spring-boot:run'
@@ -13,7 +13,14 @@ mkdir -p /tmp/as/local
 
 SSL_PASSWORD=thePassword
 
-BROKER_P12=$(readlink -f $SCRIPT_DIR/../broker.p12)
+BROKER_P12_DIR=$(cd $SCRIPT_DIR/../; pwd)
+BROKER_P12=$BROKER_P12_DIR/broker.p12
+
+if [[ ! -f $BROKER_P12 ]]; then
+  echo "ERROR: Broker PKCS#12 file not found: [$BROKER_P12]"
+  exit 1
+fi
+echo "BROKER_P12 is [$BROKER_P12]"
 
 SSL_SETTINGS=\
 "SERVER_PORT=8443 \

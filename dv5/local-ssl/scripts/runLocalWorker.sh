@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_DIR=`dirname $0`
+SCRIPT_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PROJECT_ROOT=$(cd $SCRIPT_DIR/../../..;pwd)
 
 # This script now uses 'java -jar' instead of 'mvnw spring-boot:run'
@@ -12,7 +12,14 @@ APP_NAME=worker-1
 
 SSL_PASSWORD=thePassword
 
-WORKER_P12=$(readlink -f $SCRIPT_DIR/../worker.p12)
+WORKER_P12_DIR=$(cd $SCRIPT_DIR/../; pwd)
+WORKER_P12=$WORKER_P12_DIR/worker.p12
+
+if [[ ! -f $WORKER_P12 ]]; then
+  echo "ERROR: Worker PKCS#12 file not found: [$WORKER_P12]"
+  exit 1
+fi
+echo "WORKER_P12 is [$WORKER_P12]"
 
 SSL_SETTINGS=\
 "SERVER_PORT=9443 \
