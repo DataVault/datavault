@@ -1,6 +1,5 @@
 package org.datavaultplatform.common.storage.impl;
 
-import java.nio.file.Paths;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.NavigableMap;
@@ -64,14 +63,14 @@ public class SFTPConnection implements AutoCloseable {
       sftpClient = new DefaultSftpClient(session, SftpVersionSelector.CURRENT,
           ERROR_HANDLER);
 
-      if(log.isTraceEnabled()) {
+      if(log.isDebugEnabled()) {
         SessionContext ctx = sftpClient.getClientChannel().getSessionContext();
         String clientVersion = ctx.getClientVersion();
         String serverVersion = ctx.getServerVersion();
-        log.trace("client[{}]server[{}]", clientVersion, serverVersion);
+        log.debug("client[{}]server[{}]", clientVersion, serverVersion);
 
         NavigableMap<String, byte[]> extensions = sftpClient.getServerExtensions();
-        log.trace("server extensions[{}]", extensions);
+        log.debug("server extensions[{}]", extensions);
       }
     } finally {
       long diff = System.currentTimeMillis() - start;

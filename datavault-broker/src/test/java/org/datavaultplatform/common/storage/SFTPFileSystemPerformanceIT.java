@@ -3,6 +3,9 @@ package org.datavaultplatform.common.storage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
@@ -18,10 +21,12 @@ import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.docker.DockerImage;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.FileInfo;
+import org.datavaultplatform.common.storage.impl.SFTPConnection;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemJSch;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -72,6 +77,14 @@ public class SFTPFileSystemPerformanceIT {
   @BeforeEach
   @SneakyThrows
   public void setup() {
+
+    //set the SFTPConnection logger level to DEBUG - just for this test
+    LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+    Logger logger = context.getLogger(SFTPConnection.class.getName());
+    if (logger != null) {
+      logger.setLevel(Level.DEBUG);
+    }
+
     bigFile = Files.createTempFile("tempPerf", ".bin").toFile();
     try(RandomAccessFile raf = new RandomAccessFile(bigFile, "rw")) {
       raf.setLength(SIZE_50MB);
