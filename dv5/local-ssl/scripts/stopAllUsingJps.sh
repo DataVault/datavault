@@ -1,9 +1,9 @@
 #!/bin/bash
 
 jps | grep DataVault
-BROKER_PID=$(jps | grep DataVaultBroker | cut -d' ' -f1)
-WEBAPP_PID=$(jps | grep DataVaultWebApp | cut -d' ' -f1)
-WORKER_PID=$(jps | grep DataVaultWorkerInstanceApp | cut -d' ' -f1)
+BROKER_PID=$(jps | grep datavault-broker | cut -d' ' -f1)
+WEBAPP_PID=$(jps | grep datavault-webapp | cut -d' ' -f1)
+WORKER_PID=$(jps | grep datavault-worker | cut -d' ' -f1)
 
 if [ ! -z "$WEBAPP_PID" ]; then
     echo "Stopping WebApp with PID $WEBAPP_PID"

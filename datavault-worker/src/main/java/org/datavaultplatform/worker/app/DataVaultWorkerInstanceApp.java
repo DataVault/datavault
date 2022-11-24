@@ -1,5 +1,8 @@
 package org.datavaultplatform.worker.app;
 
+import java.io.File;
+import java.util.Arrays;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.crypto.EncryptionValidator;
 import org.datavaultplatform.common.monitor.MemoryStats;
@@ -73,6 +76,7 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
   @Autowired
   RabbitListenerEndpointRegistry registry;
 
+  @SneakyThrows
   public static void main(String[] args) {
 
     //setup properties BEFORE spring starts
@@ -83,12 +87,18 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
     System.setProperty("datavault-home", System.getenv(DATAVAULT_HOME));
 
     SpringApplicationBuilder app = new SpringApplicationBuilder(DataVaultWorkerInstanceApp.class);
-    app.build().addListeners(new ApplicationPidFileWriter("./bin/dv-worker-shutdown.pid"));
+    File pidFile = new File("pids/dv-worker-shutdown.pid");
+    log.info("pid file [{}]", pidFile.getCanonicalPath());
+    app.build().addListeners(new ApplicationPidFileWriter(pidFile.getCanonicalPath()));
     app.run(args);
   }
 
   @Override
   public void run(String... args) {
+    log.info("Worker ARGS {}", Arrays.toString(args));
+    log.info("user.home [{}]", env.getProperty("user.home"));
+    log.info("user.dir  [{}]", env.getProperty("user.dir"));
+
     log.info("java.version [{}]", env.getProperty("java.version"));
     log.info("java.vendor [{}]", env.getProperty("java.vendor"));
 

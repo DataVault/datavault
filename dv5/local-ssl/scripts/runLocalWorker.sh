@@ -59,8 +59,8 @@ SETUP_ENV=\
 JAVA_TOOL_OPTS=\
 "-Duser.language=en \
  -Duser.country=GB \
- -Duser.home=$PROJECT_ROOT/dv5/user/home \
- -Duser.dir=$PROJECT_ROOT/dv5/user/dir \
+ -Duser.home=$HOME \
+ -Duser.dir=$SCRIPT_DIR \
  -Duser.timezone=Europe/London \
  -Xdebug \
  -Xms1024M -Xmx2024M \

@@ -5,7 +5,9 @@ java -version
 # The 'local' profile for broker creates a LocalFileSystem in /tmp/as/local
 mkdir -p /tmp/as/local
 
-export PROJECT_ROOT=$(cd ../../../;pwd)
+SCRIPT_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+PROJECT_ROOT=$(cd $SCRIPT_DIR/../../..;pwd)
+
 cd $PROJECT_ROOT
  SERVER_PORT=8080 \
  SPRING_PROFILES_ACTIVE=local \

@@ -3,9 +3,12 @@ package org.datavaultplatform.broker.app;
 
 import it.burning.cron.CronExpressionDescriptor;
 import it.burning.cron.CronExpressionParser.Options;
+import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.actuator.LocalFileStoreEndpoint;
 import org.datavaultplatform.broker.actuator.LocalFileStoreInfo;
@@ -85,14 +88,21 @@ public class DataVaultBrokerApp implements CommandLineRunner {
   @Autowired
   LocalFileStoreEndpoint localFileStoreEndpoint;
 
+  @SneakyThrows
   public static void main(String[] args) {
     SpringApplicationBuilder app = new SpringApplicationBuilder(DataVaultBrokerApp.class);
-    app.build().addListeners(new ApplicationPidFileWriter("./bin/dv-broker-shutdown.pid"));
+    File pidFile = new File("pids/dv-broker-shutdown.pid");
+    log.info("pid file [{}]", pidFile.getCanonicalPath());
+    app.build().addListeners(new ApplicationPidFileWriter(pidFile.getCanonicalPath()));
     app.run(args);
   }
 
   @Override
   public void run(String... args) {
+    log.info("Broker ARGS {}", Arrays.toString(args));
+    log.info("user.home [{}]", env.getProperty("user.home"));
+    log.info("user.dir  [{}]", env.getProperty("user.dir"));
+
     log.info("java.version [{}]", env.getProperty("java.version"));
     log.info("java.vendor [{}]", env.getProperty("java.vendor"));
 
