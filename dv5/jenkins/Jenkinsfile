@@ -46,7 +46,11 @@ pipeline {
         }
         success {
             echo "BUILD SUCCESS : Recording Artifacts.."
-            archiveArtifacts artifacts: 'datavault-webapp/target/datavault-webapp.jar, datavault-worker/target/datavault-worker.jar, datavault-broker/target/datavault-broker.jar', fingerprint: true
+            sh 'mkdir artifacts'
+            sh 'mv datavault-webapp/target/datavault-webapp.jar artifacts/datavault-webapp.jar'
+            sh 'mv datavault-worker/target/datavault-worker.jar artifacts/datavault-worker.jar'
+            sh 'mv datavault-broker/target/datavault-broker.jar artifacts/datavault-broker.jar'
+            archiveArtifacts artifacts: 'artifacts/datavault-webapp.jar, artifacts/datavault-worker.jar, artifacts/datavault-broker.jar', fingerprint: true
         }
     }
 }
