@@ -44,7 +44,7 @@ pipeline {
         }
         success {
             echo "BUILD SUCCESS : Recording Artifacts.."
-            sh 'mkdir artifacts'
+            sh 'mkdir -p artifacts'
             sh 'mv datavault-webapp/target/datavault-webapp.jar artifacts/datavault-webapp.jar'
             sh 'mv datavault-worker/target/datavault-worker.jar artifacts/datavault-worker.jar'
             sh 'mv datavault-broker/target/datavault-broker.jar artifacts/datavault-broker.jar'
