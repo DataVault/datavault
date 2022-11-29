@@ -1,7 +1,7 @@
 pipeline {
     parameters {
-      boolean(name: ENABLE_UNIT_TESTS, defaultValue: true)
-      boolean(name: ENABLE_INTEGRATION_TESTS, defaultValue: true)
+      booleanParam(name: ENABLE_UNIT_TESTS, defaultValue: true)
+      booleanParam(name: ENABLE_INTEGRATION_TESTS, defaultValue: true)
     }
     agent {
       dockerfile {
