@@ -14,8 +14,10 @@ pipeline {
     stages {
         stage('Init') {
           steps {
-            echo 'Unit Tests.. [$ENABLE_UNIT_TESTS]'
-            echo 'Integration Tests.. [$ENABLE_INTEGRATION_TESTS]'
+            echo "A Unit Tests.. [$ENABLE_UNIT_TESTS]"
+            echo "A Integration Tests.. [$ENABLE_INTEGRATION_TESTS]"
+            echo "B Unit Tests.. [${env.ENABLE_UNIT_TESTS}]"
+            echo "B Integration Tests.. [${env.ENABLE_INTEGRATION_TESTS}]"
           }
         }
         stage('Test Docker Socket') {
@@ -32,7 +34,7 @@ pipeline {
         }
         stage('Unit Tests') {
             steps {
-                echo 'Unit Tests.. [$ENABLE_UNIT_TESTS]'
+                echo "Unit Tests.. [${env.ENABLE_UNIT_TESTS}"
                 script {
                   if (env.ENABLE_UNIT_TESTS) {
                     sh './mvnw test'
@@ -44,7 +46,7 @@ pipeline {
         }
         stage('Integration Tests') {
             steps {
-                echo 'Integration Tests.. [$ENABLE_INTEGRATION_TESTS]'
+                echo "Integration Tests.. [${env.ENABLE_INTEGRATION_TESTS}"
                 script {
                   if (env.ENABLE_INTEGRATION_TESTS) {
                     sh './mvnw integration-test -Dskip.unit.tests -Dmaven.main.skip'
