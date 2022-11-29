@@ -1,4 +1,8 @@
 pipeline {
+    parameters {
+      boolean(name: ENABLE_UNIT_TESTS, defaultValue: true)
+      boolean(name: ENABLE_INTEGRATION_TESTS, defaultValue: true)
+    }
     agent {
       dockerfile {
         dir 'dv5/jenkins'
@@ -6,6 +10,11 @@ pipeline {
                 additionalBuildArgs '--build-arg JENKINS_UID=$(id -u) --build-arg JENKINS_GID=$(id -g) --build-arg DOCKER_GID=$(getent group docker | cut -d: -f3)'
         args  '--group-add=docker -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/jenkins/.m2:/home/jenkins/.m2 -e JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8'
       }
+    }
+    def enableUnitTests = env.ENABLE_UNIT_TESTS;
+    def enableIntegrationTests = env.ENABLE_INTEGRATION_TESTS;
+    params.each() { param, value ->
+      print "Parameter: ${param}, Value: ${value}"
     }
     stages {
         stage('Test Docker Socket') {
@@ -23,11 +32,21 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 echo 'Unit Tests..'
+                if (enableUnitTests) {
+                  sh './mvnw test'
+                } else {
+                  echo "Unit Tests Disabled";
+                }
             }
         }
         stage('Integration Tests') {
             steps {
                 echo 'Integration Tests..'
+                if (enableIntegrationTests) {
+                  sh './mvnw integration-test -Dskip.unit.tests -Dmaven.main.skip'
+                } else {
+                  echo "Unit Tests Disabled";
+                }
             }
         }
         stage('Install') {
