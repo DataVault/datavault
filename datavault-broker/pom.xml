@@ -152,12 +152,6 @@
             <scope>test</scope>
             <classifier>tests</classifier>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.sshd</groupId>
-            <artifactId>sshd-sftp</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>

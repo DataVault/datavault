@@ -1,5 +1,6 @@
 package org.datavaultplatform.broker.actuator;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,6 +18,7 @@ import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 
@@ -31,13 +33,23 @@ public class SftpFileStoreEndpoint {
   private final Function<String,String> portAdjuster;
 
   private final StorageClassNameResolver resolver;
+  private final List<String> sftpFileStoreEndpointIdsToIgnore;
 
-  @Autowired
+
   public SftpFileStoreEndpoint(FileStoreService fileStoreService, Function<String,String> portAdjuster,
-      StorageClassNameResolver resolver) {
+      StorageClassNameResolver resolver, List<String> sftpFileStoreEndpointIdsToIgnore
+      ) {
     this.fileStoreService = fileStoreService;
     this.portAdjuster = portAdjuster;
     this.resolver = resolver;
+    this.sftpFileStoreEndpointIdsToIgnore = sftpFileStoreEndpointIdsToIgnore;
+    log.info("sftpFileStoreEndpointIdsToIgnore #[{}]", sftpFileStoreEndpointIdsToIgnore.size());
+    int total = sftpFileStoreEndpointIdsToIgnore.size();
+    for (int i = 0; i < total; i++) {
+      String id = sftpFileStoreEndpointIdsToIgnore.get(i);
+      int number = i + 1;
+      log.info(String.format("#[%d/%d] : Ignoring FileStore with Id[%s]", number, total, id));
+    }
   }
 
   @ReadOperation
@@ -45,6 +57,7 @@ public class SftpFileStoreEndpoint {
     return fileStoreService.getFileStores().stream()
         .filter(FileStore::isSFTPFileSystem)
         .map(this::getFileStoreInfo)
+        .sorted(Comparator.comparing(SftpFileStoreInfo::isIgnored)) //ignored first
         .collect(Collectors.toList());
   }
 
@@ -61,6 +74,11 @@ public class SftpFileStoreEndpoint {
     info.setHost(fileStore.getProperties().get(PropNames.HOST));
     info.setPort(fileStore.getProperties().get(PropNames.PORT));
     info.setRootPath(fileStore.getProperties().get(PropNames.ROOT_PATH));
+
+    if (sftpFileStoreEndpointIdsToIgnore.contains(fileStore.getID())) {
+      info.setIgnored(true);
+      return info;
+    }
 
     long start = System.currentTimeMillis();
     Future<Boolean> future = EXECUTOR.submit(() -> {

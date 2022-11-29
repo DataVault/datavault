@@ -1,5 +1,6 @@
 package org.datavaultplatform.common.storage.impl;
 
+import java.io.IOException;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.NavigableMap;
@@ -22,8 +23,6 @@ import org.apache.sshd.sftp.client.impl.DefaultSftpClient;
 public class SFTPConnection implements AutoCloseable {
 
   private static final long DEFAULT_TIMEOUT_SECONDS = 10;
-  private static final SftpErrorDataHandler ERROR_HANDLER = (buf, start, len) -> log.error(
-      String.format("buf[%s]start[%d]len[%d]", Arrays.toString(buf), start, len));
 
   public final Clock clock;
   public final SshClient client;
@@ -34,6 +33,8 @@ public class SFTPConnection implements AutoCloseable {
 
   @SneakyThrows
   public SFTPConnection(SFTPConnectionInfo info) {
+    SSHDErrorHandler errorHandler = new SSHDErrorHandler(String.format("%s@%s", info.getUsername(), info.getHost()));
+
     long start = System.currentTimeMillis();
     try {
       clock = info.getClock();
@@ -60,8 +61,7 @@ public class SFTPConnection implements AutoCloseable {
       session.auth()
           .verify(DEFAULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
-      sftpClient = new DefaultSftpClient(session, SftpVersionSelector.CURRENT,
-          ERROR_HANDLER);
+      sftpClient = new DefaultSftpClient(session, SftpVersionSelector.CURRENT, errorHandler);
 
       if(log.isDebugEnabled()) {
         SessionContext ctx = sftpClient.getClientChannel().getSessionContext();

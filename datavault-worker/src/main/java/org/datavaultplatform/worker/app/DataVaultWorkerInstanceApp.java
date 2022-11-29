@@ -79,6 +79,9 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
   @SneakyThrows
   public static void main(String[] args) {
 
+    Class<?> clazz = Class.forName("org.apache.sshd.sftp.client.SftpErrorDataHandler");
+    log.info("SftpErrorDataHandler class [{}]", clazz.getName());
+
     //setup properties BEFORE spring starts
     if (System.getenv(DATAVAULT_HOME) == null) {
       log.error("The ENV variable DATAVAULT_HOME must be defined.");

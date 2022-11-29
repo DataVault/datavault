@@ -90,6 +90,8 @@ public class DataVaultBrokerApp implements CommandLineRunner {
 
   @SneakyThrows
   public static void main(String[] args) {
+    Class<?> clazz = Class.forName("org.apache.sshd.sftp.client.SftpErrorDataHandler");
+    log.info("SftpErrorDataHandler class [{}]", clazz.getName());
     SpringApplicationBuilder app = new SpringApplicationBuilder(DataVaultBrokerApp.class);
     File pidFile = new File("pids/dv-broker-shutdown.pid");
     log.info("pid file [{}]", pidFile.getCanonicalPath());
@@ -167,7 +169,7 @@ public class DataVaultBrokerApp implements CommandLineRunner {
     log.info("There are [{}] SFTP connections.", total);
     for (int i = 0; i < total; i++) {
       SftpFileStoreInfo info = infos.get(i);
-      log.info("SFTP[{}/{}] {}", i+1, total, info);
+      log.info("SFTP[{}/{}][ignored?:{}] {}", i+1, total, info.isIgnored(), info);
     }
     log.info("END SFTP CONNECTION INFO");
   }
