@@ -1,13 +1,13 @@
 def GH_TAG="n/a"
-def hello(String message) {
-  return "hello ${message}"
+def isValid(String gitTag) {
+    
 }
 pipeline {
     parameters {
       booleanParam(name: ENABLE_UNIT_TESTS, defaultValue: true)
       booleanParam(name: ENABLE_INTEGRATION_TESTS, defaultValue: true)
-      string(name: 'TAG', defaultValue: '1.0.0', description: 'A tag that will be added to github to link the code to this build.')
-      credentials( credentialType: 'com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl', defaultValue: 'dv-fork-cicd-tag-token', description: 'Credentials for the GitHub repository', name: 'GH_TAG_CREDENTIALS_ID')
+      string(name: 'TAG', defaultValue: '', description: 'A tag that will be added to github to link the code to this build.')
+      credentials( credentialType: 'com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl', defaultValue: null, description: 'Credentials for the GitHub repository', name: 'GH_TAG_CREDENTIALS_ID', required:false)
     }
     agent {
       dockerfile {
@@ -19,15 +19,20 @@ pipeline {
     }
     stages {
         stage('Check Tag has not been used already: before anything else') {
-          //the GH_TAG variable here is used in the stage ''
+          //the GH_TAG variable here is used in the stage 'Tag Build'
           steps {
             script {
-              def hi = hello("world");
-              echo "HI IS[${hi}]"
               GH_TAG = TAG.replaceAll(" ","_")
-              def TAG_EXISTS = sh (script:"git show refs/tags/${GH_TAG} --", returnStatus:true)
-              if (TAG_EXISTS == 0) {
-                throw new Exception("The Tag [${GH_TAG}] has been used already.")
+              if(GH_TAG.trim() != "") {
+                if(!isValid(GH_TAG)) {
+                  error "Tag [${GH_TAG}] is not valid"
+                }
+                def TAG_EXISTS = sh (script:"git show refs/tags/${GH_TAG} --", returnStatus:true)
+                if (TAG_EXISTS == 0) {
+                  error "The Tag [${GH_TAG}] has been used already."
+                }
+              } else {
+                echo "ignoring empty tag"
               }
             }
           }
@@ -79,13 +84,21 @@ pipeline {
         stage('Tag Build') {
           steps {
             script {
-              //The GH_TAG variable is set in an earlier Stage
-              sh "git tag -a '$GH_TAG' -m '${TAG}' ${GIT_COMMIT}"
-              echo "TAG IS [${GH_TAG}]@${GIT_COMMIT}"
-              //We need git credentials to push the tag
-              withCredentials([gitUsernamePassword(credentialsId: GH_TAG_CREDENTIALS_ID)]) {
-                sh "git config --global user.name '$GIT_USERNAME'"
-                sh "git push origin refs/tags/${GH_TAG}"
+              if(GH_TAG.trim() != "") {
+                if(GH_TAG_CREDENTIALS_ID != null){}
+                  //The GH_TAG variable is set in an earlier Stage
+                  sh "git tag -a '$GH_TAG' -m '${TAG}' ${GIT_COMMIT}"
+                  echo "TAG IS [${GH_TAG}]@${GIT_COMMIT}"
+                  //We need git credentials to push the tag
+                  withCredentials([gitUsernamePassword(credentialsId: GH_TAG_CREDENTIALS_ID)]) {
+                    sh "git config --global user.name '$GIT_USERNAME'"
+                    sh "git push origin refs/tags/${GH_TAG}"
+                  }
+                } else {
+                  echo "Not adding tag '$GH_TAG'. No Tag Credentials Provided"
+                }
+              } else {
+                echo "ignoring empty tag"
               }
             }
           }
