@@ -11,7 +11,7 @@ pipeline {
     parameters {
       booleanParam(name: ENABLE_UNIT_TESTS, defaultValue: true)
       booleanParam(name: ENABLE_INTEGRATION_TESTS, defaultValue: true)
-      string(name: 'TAG', defaultValue: '', description: 'A tag that will be added to github to link the code to this build.')
+      string(name: 'TAG', defaultValue: '', description: 'A Tag that will be added to github to link the code to this build.')
       credentials(
         name: 'GH_TAG_CREDENTIALS_ID',
         credentialType: 'com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl',
@@ -27,7 +27,7 @@ pipeline {
       }
     }
     stages {
-        stage('before anything else, check that git Tag has not been used already') {
+        stage('before anything else, check that Git Tag has not been used already') {
           //the GH_TAG variable set here is used in the stage 'Tag Build'
           steps {
             script {
@@ -40,7 +40,7 @@ pipeline {
                   error "The Tag [${GH_TAG}] has been used already."
                 }
               } else {
-                echo "ignoring empty Tag"
+                echo "ignoring empty Git Tag"
               }
             }
           }
@@ -100,16 +100,16 @@ pipeline {
                   echo "Using Credentials Id ${GH_TAG_CREDENTIALS_ID}"
                   //The GH_TAG variable is set in an earlier Stage
                   sh "git tag -a '$GH_TAG' -m '${TAG}' ${GIT_COMMIT}"
-                  echo "TAG IS [${GH_TAG}]@${GIT_COMMIT}"
+                  echo "Git Tag is [${GH_TAG}]@${GIT_COMMIT}"
                   withCredentials([gitUsernamePassword(credentialsId: env.GH_TAG_CREDENTIALS_ID)]) {
                     sh "git config --global user.name '$GIT_USERNAME'"
                     sh "git push origin refs/tags/${GH_TAG}"
                   }
                 } else {
-                  echo "Not adding tag '$GH_TAG'. The value of 'GH_TAG_CREDENTIALS_ID' was empty."
+                  echo "Not adding Git Tag '$GH_TAG'. The value of 'GH_TAG_CREDENTIALS_ID' was empty."
                 }
               } else {
-                echo "ignoring empty tag"
+                echo "ignoring empty Git Tag"
               }
             }
           }
