@@ -3,6 +3,10 @@ def isGitTagValid(String gitTag) {
     def status=sh(script: "git check-ref-format refs/tags/${gitTag}", returnStatus: true)
     return status == 0;
 }
+def hasGitTagBeenUsedAlready(String gitTag) {
+    def status=sh (script:"git show refs/tags/${gitTag} --", returnStatus:true)
+    return status == 0;
+}
 pipeline {
     parameters {
       booleanParam(name: ENABLE_UNIT_TESTS, defaultValue: true)
@@ -23,8 +27,8 @@ pipeline {
       }
     }
     stages {
-        stage('Check Tag has not been used already: before anything else') {
-          //the GH_TAG variable here is used in the stage 'Tag Build'
+        stage('before anything else, check that git Tag has not been used already') {
+          //the GH_TAG variable set here is used in the stage 'Tag Build'
           steps {
             script {
               GH_TAG = TAG.replaceAll(" ","_").trim()
@@ -32,12 +36,11 @@ pipeline {
                 if (!isGitTagValid(GH_TAG)) {
                   error "Tag [${GH_TAG}] is not valid"
                 }
-                def TAG_EXISTS = sh (script:"git show refs/tags/${GH_TAG} --", returnStatus:true)
-                if (TAG_EXISTS == 0) {
+                if (hasGitTagBeenUsedAlready(GH_TAG)) {
                   error "The Tag [${GH_TAG}] has been used already."
                 }
-              } else { //else1
-                echo "ignoring empty tag"
+              } else {
+                echo "ignoring empty Tag"
               }
             }
           }
@@ -93,7 +96,7 @@ pipeline {
                 echo "checking GH_TAG_CREDENTIALS_ID"
                 // We need Git Credentials to push the tag
                 echo "GH_TAG_CREDENTIALS_ID is [${GH_TAG_CREDENTIALS_ID}]"
-                if ( env.GH_TAG_CREDENTIALS_ID && env.GH_TAG_CREDENTIALS_ID != "" ) {
+                if ( env.GH_TAG_CREDENTIALS_ID && env.GH_TAG_CREDENTIALS_ID.trim() != "" ) {
                   echo "Using Credentials Id ${GH_TAG_CREDENTIALS_ID}"
                   //The GH_TAG variable is set in an earlier Stage
                   sh "git tag -a '$GH_TAG' -m '${TAG}' ${GIT_COMMIT}"
@@ -102,10 +105,10 @@ pipeline {
                     sh "git config --global user.name '$GIT_USERNAME'"
                     sh "git push origin refs/tags/${GH_TAG}"
                   }
-                } else { //else2
-                  echo "Not adding tag '$GH_TAG'. No Tag Credentials Provided"
+                } else {
+                  echo "Not adding tag '$GH_TAG'. The value of 'GH_TAG_CREDENTIALS_ID' was empty."
                 }
-              } else { //else3
+              } else {
                 echo "ignoring empty tag"
               }
             }
