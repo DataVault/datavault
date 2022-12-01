@@ -99,7 +99,6 @@ pipeline {
                 if ( env.GH_TAG_CREDENTIALS_ID && env.GH_TAG_CREDENTIALS_ID.trim() != "" ) {
                   //The GH_TAG variable is set in an earlier Stage
                   sh "git tag -a '$GH_TAG' -m '${TAG}' ${GIT_COMMIT}"
-                  echo "Git Tag is [${GH_TAG}]@${GIT_COMMIT}"
                   withCredentials([gitUsernamePassword(credentialsId: env.GH_TAG_CREDENTIALS_ID)]) {
                     sh "git config --global user.name '$GIT_USERNAME'"
                     sh "git push origin refs/tags/${GH_TAG}"
