@@ -15,7 +15,7 @@ pipeline {
       credentials(
         name: 'GH_TAG_CREDENTIALS_ID',
         credentialType: 'com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl',
-        defaultValue: null,
+        defaultValue: '',
         description: 'Credentials for the GitHub repository' )
     }
     agent {
