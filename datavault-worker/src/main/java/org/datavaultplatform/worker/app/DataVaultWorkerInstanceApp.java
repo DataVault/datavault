@@ -1,5 +1,8 @@
 package org.datavaultplatform.worker.app;
 
+import java.io.File;
+import java.util.Arrays;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.crypto.EncryptionValidator;
 import org.datavaultplatform.common.monitor.MemoryStats;
@@ -13,6 +16,7 @@ import org.datavaultplatform.worker.config.QueueConfig;
 import org.datavaultplatform.worker.config.RabbitConfig;
 import org.datavaultplatform.worker.config.ReceiverConfig;
 import org.datavaultplatform.worker.config.SecurityActuatorConfig;
+import org.datavaultplatform.worker.config.StorageClassNameResolverConfig;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +24,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.event.ApplicationStartingEvent;
 import org.springframework.context.annotation.Import;
@@ -35,7 +41,8 @@ import org.springframework.core.env.Environment;
     EventSenderConfig.class,
     ReceiverConfig.class,
     RabbitConfig.class,
-    EncryptionConfig.class
+    EncryptionConfig.class,
+    StorageClassNameResolverConfig.class
 })
 @Slf4j
 public class DataVaultWorkerInstanceApp implements CommandLineRunner {
@@ -57,7 +64,7 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
   @Value("${chunking.size}")
   String chunkingSize;
 
-  @Value("${keystore.sha1:null}")
+  @Value("${keystore.sha1:}")
   String keyStoreSha1;
 
   @Autowired
@@ -69,7 +76,11 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
   @Autowired
   RabbitListenerEndpointRegistry registry;
 
+  @SneakyThrows
   public static void main(String[] args) {
+
+    Class<?> clazz = Class.forName("org.apache.sshd.sftp.client.SftpErrorDataHandler");
+    log.info("SftpErrorDataHandler class [{}]", clazz.getName());
 
     //setup properties BEFORE spring starts
     if (System.getenv(DATAVAULT_HOME) == null) {
@@ -78,11 +89,19 @@ public class DataVaultWorkerInstanceApp implements CommandLineRunner {
     }
     System.setProperty("datavault-home", System.getenv(DATAVAULT_HOME));
 
-    SpringApplication.run(DataVaultWorkerInstanceApp.class, args);
+    SpringApplicationBuilder app = new SpringApplicationBuilder(DataVaultWorkerInstanceApp.class);
+    File pidFile = new File("pids/dv-worker-shutdown.pid");
+    log.info("pid file [{}]", pidFile.getCanonicalPath());
+    app.build().addListeners(new ApplicationPidFileWriter(pidFile.getCanonicalPath()));
+    app.run(args);
   }
 
   @Override
   public void run(String... args) {
+    log.info("Worker ARGS {}", Arrays.toString(args));
+    log.info("user.home [{}]", env.getProperty("user.home"));
+    log.info("user.dir  [{}]", env.getProperty("user.dir"));
+
     log.info("java.version [{}]", env.getProperty("java.version"));
     log.info("java.vendor [{}]", env.getProperty("java.vendor"));
 

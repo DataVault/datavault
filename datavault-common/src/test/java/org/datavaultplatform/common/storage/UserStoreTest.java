@@ -1,6 +1,5 @@
 package org.datavaultplatform.common.storage;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -9,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.io.FileWriter;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import lombok.SneakyThrows;
@@ -18,72 +16,62 @@ import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.model.FileStore;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
 import org.datavaultplatform.common.storage.impl.S3Cloud;
-import org.datavaultplatform.common.storage.impl.SFTPFileSystem;
+import org.datavaultplatform.common.storage.impl.SFTPConnectionInfo;
+import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 public class UserStoreTest {
 
+  private static final StorageClassNameResolver RESOLVER = StorageClassNameResolver.FIXED_SSHD;
+
   @Test
   @SneakyThrows
   void testSFTPFileSystemFromFileStore() {
     HashMap<String, String> props = new HashMap<>();
+    props.put(PropNames.USERNAME, "username-value");
     props.put(PropNames.PASSWORD, "password-value");
-    props.put(PropNames.PASSPHRASE, "passphrase-value");
-    props.put(PropNames.PRIVATE_KEY, toBase64("private-key-value"));
-    props.put(PropNames.IV, toBase64("iv-value"));
     props.put(PropNames.HOST, "host-value");
     props.put(PropNames.PORT, "2112");
     props.put(PropNames.ROOT_PATH, "/root/path");
 
     FileStore fs = new FileStore();
     fs.setProperties(props);
-    fs.setStorageClass(SFTPFileSystem.class.getName());
+    fs.setStorageClass(StorageConstants.SFTP_FILE_SYSTEM);
 
-    UserStore result = UserStore.fromFileStore(fs);
-    assertTrue(result instanceof SFTPFileSystem);
-    SFTPFileSystem sftp = (SFTPFileSystem) result;
-
-    Field f1Password = SFTPFileSystem.class.getDeclaredField("password");
-    Field f2Passphrase = SFTPFileSystem.class.getDeclaredField("passphrase");
-    Field f3PrivateKey = SFTPFileSystem.class.getDeclaredField("encPrivateKey");
-    Field f4EncIV = SFTPFileSystem.class.getDeclaredField("encIV");
-    Field f5Host = SFTPFileSystem.class.getDeclaredField("host");
-    Field f6Port = SFTPFileSystem.class.getDeclaredField("port");
-    Field f7RootPath = SFTPFileSystem.class.getDeclaredField("rootPath");
+    UserStore result = UserStore.fromFileStore(fs, RESOLVER);
+    assertTrue(result instanceof SFTPFileSystemSSHD);
+    SFTPFileSystemSSHD sftp = (SFTPFileSystemSSHD) result;
+    Class<SFTPFileSystemSSHD> clazz = SFTPFileSystemSSHD.class;
+    Class<SFTPConnectionInfo> infoClass = SFTPConnectionInfo.class;
+    Field fConnectionInfo = clazz.getDeclaredField("connectionInfo");
+    fConnectionInfo.setAccessible(true);
+    SFTPConnectionInfo info = (SFTPConnectionInfo) fConnectionInfo.get(sftp);
+    Field f1Password = infoClass.getDeclaredField("password");
+    Field f2Username = infoClass.getDeclaredField("username");
+    Field f5Host = infoClass.getDeclaredField("host");
+    Field f6Port = infoClass.getDeclaredField("port");
+    Field f7RootPath = infoClass.getDeclaredField("rootPath");
 
     f1Password.setAccessible(true);
-    f2Passphrase.setAccessible(true);
-    f3PrivateKey.setAccessible(true);
-    f4EncIV.setAccessible(true);
+    f2Username.setAccessible(true);
     f5Host.setAccessible(true);
     f6Port.setAccessible(true);
     f7RootPath.setAccessible(true);
 
-    String sftpPassword = (String) f1Password.get(sftp);
-    String sftpPassphrase = (String) f2Passphrase.get(sftp);
-    byte[] sftpEncPrivateKey = (byte[]) f3PrivateKey.get(sftp);
-    byte[] sftpEncIV = (byte[]) f4EncIV.get(sftp);
-    String sftpHost = (String) f5Host.get(sftp);
-    int sftpPort = (int) f6Port.get(sftp);
-    String sftpRootPath = (String) f7RootPath.get(sftp);
+    String sftpPassword = (String) f1Password.get(info);
+    String sftpUsername = (String) f2Username.get(info);
+    String sftpHost = (String) f5Host.get(info);
+    int sftpPort = (int) f6Port.get(info);
+    String sftpRootPath = (String) f7RootPath.get(info);
 
     assertEquals(2112, sftpPort);
+    assertEquals("username-value", sftpUsername);
     assertEquals("password-value", sftpPassword);
-    assertEquals("passphrase-value", sftpPassphrase);
     assertEquals("host-value", sftpHost);
     assertEquals("/root/path", sftpRootPath);
-    assertArrayEquals(sftpEncIV, "iv-value".getBytes(StandardCharsets.UTF_8));
-    assertArrayEquals(sftpEncPrivateKey, "private-key-value".getBytes(StandardCharsets.UTF_8));
-  }
-
-  private String toBase64(String raw) {
-    return java.util.Base64.getEncoder().encodeToString(raw.getBytes(StandardCharsets.UTF_8));
-  }
-
-  private String fromBase64(String base64) {
-    return new String(java.util.Base64.getDecoder().decode(base64), StandardCharsets.UTF_8);
   }
 
   @Test
@@ -102,7 +90,7 @@ public class UserStoreTest {
     fs.setProperties(props);
     fs.setStorageClass(LocalFileSystem.class.getName());
 
-    UserStore result = UserStore.fromFileStore(fs);
+    UserStore result = UserStore.fromFileStore(fs, RESOLVER);
     assertTrue(result instanceof LocalFileSystem);
     LocalFileSystem local = (LocalFileSystem) result;
     Field f1RootPath = LocalFileSystem.class.getDeclaredField("rootPath");
@@ -140,7 +128,7 @@ public class UserStoreTest {
     @SneakyThrows
     void testStringIsInvalidStorageClass() {
       IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
-        UserStore.fromFileStore(getFileStore(String.class));
+        UserStore.fromFileStore(getFileStore(String.class), RESOLVER);
       });
       assertEquals(
           "The class [java.lang.String] does not inherit from [org.datavaultplatform.common.storage.UserStore]",
@@ -151,7 +139,7 @@ public class UserStoreTest {
     @SneakyThrows
     void testS3CloudIsInvalidStorageClass() {
       IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
-        UserStore.fromFileStore(getFileStore(S3Cloud.class));
+        UserStore.fromFileStore(getFileStore(S3Cloud.class), StorageClassNameResolver.FIXED_SSHD);
       });
       assertEquals(
           "The class [org.datavaultplatform.common.storage.impl.S3Cloud] does not inherit from [org.datavaultplatform.common.storage.UserStore]",

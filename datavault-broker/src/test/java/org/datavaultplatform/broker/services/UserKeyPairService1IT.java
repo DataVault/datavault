@@ -1,30 +1,18 @@
 package org.datavaultplatform.broker.services;
 
-import static java.nio.file.Files.createTempDirectory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.KeyPair;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.broker.services.UserKeyPairService.KeyPairInfo;
-import org.datavaultplatform.common.docker.DockerImage;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.utility.MountableFile;
+import org.datavaultplatform.common.crypto.SshRsaKeyUtils;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * This test generates a key pair and checks that the keypair is valid by ...
@@ -34,20 +22,15 @@ import org.testcontainers.utility.MountableFile;
 @Slf4j
 public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
 
-  public static final String TEST_PASSPHRASE = "tenet";
-
-  static Path TMP_DIR;
-  static GenericContainer<?> linuxWithOpenSSL;
-
   /**
    * Tests that the key pair is valid by
    * regenerating public key from private key
    */
-  @Test
+  @ParameterizedTest
+  @MethodSource("provideUserKeyPairService")
   @Override
   @SneakyThrows
-  void testKeyPair() {
-    UserKeyPairService service = new UserKeyPairService(TEST_PASSPHRASE);
+  void testKeyPair(UserKeyPairService service) {
     assertEquals(TEST_PASSPHRASE, service.getPassphrase());
     KeyPairInfo info = service.generateNewKeyPair();
 
@@ -67,12 +50,6 @@ public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
     assertTrue(info.getPrivateKey().trim().startsWith("-----BEGIN RSA PRIVATE KEY-----"));
     assertTrue(info.getPrivateKey().trim().endsWith("-----END RSA PRIVATE KEY-----"));
 
-    // just check that we can re-create a key-pair from the private-key and public-key and we get the same fingerprint
-    KeyPair kp2 = getKeyPair(info);
-    assertEquals(info.getFingerPrint(), kp2.getFingerPrint());
-    assertEquals(UserKeyPairService.PUBKEY_COMMENT, kp2.getPublicKeyComment());
-    assertEquals(KeyPair.RSA, kp2.getKeyType());
-
     checkPrivateAndPublicKeyPairing(info);
   }
 
@@ -80,79 +57,20 @@ public class UserKeyPairService1IT extends BaseUserKeyPairServiceTest {
    * We regenerate the public key from the encrypted private key and check we get same public key.
    * This proves that the private key and public key are paired correctly.
    *
-   * @param info
-   * @throws JSchException
+   * @param info the key pair information
    */
-  private void checkPrivateAndPublicKeyPairing(KeyPairInfo info) throws JSchException {
+  private void checkPrivateAndPublicKeyPairing(KeyPairInfo info) {
 
-    //first write the two keys to files within the nginx container which has openssl
-    File tempRSA = writeToFileInTmpDirectory("rsa", info.getPrivateKey());
+    RSAPrivateKey rsaPrivateKey = SshRsaKeyUtils.readPrivateKey(
+        info.getPrivateKey(), TEST_PASSPHRASE);
 
-    linuxWithOpenSSL.copyFileToContainer( MountableFile.forHostPath(tempRSA.getAbsolutePath()), "/tmp/dv5-temp/rsa");
-
-    execInContainer(linuxWithOpenSSL, "ls rsa", "ls -l /tmp/dv5-temp/rsa");
-    execInContainer(linuxWithOpenSSL, "cat rsa", "cat /tmp/dv5-temp/rsa");
-    //we use openssl to decrypt the encrypted private key (easier than doing it in Java)
-    String decrypted = decryptPrivateKey();
-
-    // create a new keypair from the decrypted private key only (private key should contains all public key information)
-    KeyPair keyPair1 = KeyPair.load(new JSch(), decrypted.getBytes(StandardCharsets.UTF_8), null);
-
-    ByteArrayOutputStream publicStream1 = new ByteArrayOutputStream();
-    keyPair1.writePublicKey(publicStream1, UserKeyPairService.PUBKEY_COMMENT);
-    String publicKey1 = new String(publicStream1.toByteArray(), StandardCharsets.UTF_8);
+    RSAPublicKey rsaPublicKey = (RSAPublicKey) SshRsaKeyUtils.getKeyPairFromRSAPrivateKey(rsaPrivateKey).getPublic();
+    String publicKey1 = SshRsaKeyUtils.encodePublicKey(rsaPublicKey, UserKeyPairService.PUBKEY_COMMENT);
 
     //check that the re-created public key is same as original public key
-    //this proves that the original private/public key pair are matchd
+    //this proves that the original private/public key pair are matched
     assertEquals(info.getPublicKey(), publicKey1);
   }
 
-  @SneakyThrows
-  private String decryptPrivateKey() {
 
-    String command = "openssl rsa -in /tmp/dv5-temp/rsa -passin pass:" + TEST_PASSPHRASE +" -out /tmp/dv5-temp/rsa.decrypted";
-    execInContainer(linuxWithOpenSSL, "decrypr private key", command);
-
-    File file = new File(TMP_DIR.toFile(), "rsa.decrypted");
-    file.createNewFile();
-
-    linuxWithOpenSSL.copyFileFromContainer("/tmp/dv5-temp/rsa.decrypted", file.getAbsolutePath());
-    String decryptedPrivateKey = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-
-    return decryptedPrivateKey;
-  }
-
-
-  private KeyPair getKeyPair(KeyPairInfo info) throws JSchException {
-    return KeyPair.load(new JSch(),
-        info.getPrivateKey().getBytes(StandardCharsets.UTF_8),
-        info.getPublicKey().getBytes(StandardCharsets.UTF_8));
-  }
-
-  @SneakyThrows
-  private File writeToFileInTmpDirectory(String filename, String contents) {
-    File file = new File(TMP_DIR.toFile(), filename);
-    try (FileWriter fw = new FileWriter(file)) {
-      fw.write(contents);
-    }
-    return file;
-  }
-
-  @BeforeAll
-  static void setup() {
-    try {
-      TMP_DIR = createTempDirectory("dv-tmp");
-      log.info("TMP_DIR IS {}", TMP_DIR);
-      linuxWithOpenSSL = new GenericContainer<>(DockerImage.NGINX_IMAGE);
-      linuxWithOpenSSL.start();
-      execInContainer(linuxWithOpenSSL, "mk temp dir", "mkdir -p /tmp/dv5-temp");
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @AfterAll
-  static void tearDown() throws IOException {
-    linuxWithOpenSSL.stop();
-  }
 }

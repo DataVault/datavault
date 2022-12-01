@@ -23,6 +23,7 @@ import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
 import org.datavaultplatform.common.model.dao.DepositChunkDAO;
 import org.datavaultplatform.common.model.dao.DepositDAO;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,7 +65,7 @@ public abstract class BaseGenerateMessageTest {
   MetadataService metadataService;
   @Mock
   ExternalMetadataService externalMetadataService;
-  final FilesService filesService = new FilesService();
+  final FilesService filesService = new FilesService(new StorageClassNameResolver(true));
   @Mock
   UsersService usersService;
   @Mock

@@ -288,7 +288,7 @@ class PermissionEvaluatorPreAuthorizeTest {
   @RequestMapping("/test/info")
   static class InfoController {
 
-    Map<Integer,String> info = new HashMap<Integer,String>(){{
+    final Map<Integer,String> info = new HashMap<Integer,String>(){{
       put(1, "info_one");
       put(2, "info_two");
       put(3, "info_three");

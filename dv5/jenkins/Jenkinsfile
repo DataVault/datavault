@@ -1,4 +1,8 @@
 pipeline {
+    parameters {
+      booleanParam(name: ENABLE_UNIT_TESTS, defaultValue: true)
+      booleanParam(name: ENABLE_INTEGRATION_TESTS, defaultValue: true)
+    }
     agent {
       dockerfile {
         dir 'dv5/jenkins'
@@ -9,10 +13,12 @@ pipeline {
     }
     stages {
         stage('Test Docker Socket') {
-            steps {
-                echo 'Testing Docker Socket'
-                sh 'curl --silent -XGET --unix-socket /var/run/docker.sock http://localhost/info | jq'
-            }
+           steps {
+              echo "Unit Tests.. [$ENABLE_UNIT_TESTS]"
+              echo "Integration Tests.. [$ENABLE_INTEGRATION_TESTS]"
+              echo 'Testing Docker Socket'
+              sh 'curl --silent -XGET --unix-socket /var/run/docker.sock http://localhost/info | jq'
+           }
         }
         stage('Compile') {
             steps {
@@ -22,14 +28,26 @@ pipeline {
         }
         stage('Unit Tests') {
             steps {
-                echo 'Unit Tests..'
-                sh './mvnw test'
+                echo "Unit Tests.. [${env.ENABLE_UNIT_TESTS}"
+                script {
+                  if (env.ENABLE_UNIT_TESTS == 'true') {
+                    sh './mvnw test'
+                  } else {
+                    echo "Unit Tests Disabled";
+                  }
+                }
             }
         }
         stage('Integration Tests') {
             steps {
-                echo 'Integration Tests..'
-                sh './mvnw integration-test -Dskip.unit.tests -Dmaven.main.skip'
+                echo "Integration Tests.. [${env.ENABLE_INTEGRATION_TESTS}"
+                script {
+                  if (env.ENABLE_INTEGRATION_TESTS == 'true') {
+                    sh './mvnw integration-test -Dskip.unit.tests -Dmaven.main.skip'
+                  } else {
+                    echo "Unit Tests Disabled";
+                  }
+                }
             }
         }
         stage('Install') {
@@ -40,9 +58,17 @@ pipeline {
         }
     }
     post {
+        always {
+          junit allowEmptyResults:true, testResults: '**/surefire-reports/*.xml'
+          publishCoverage adapters: [jacoco(mergeToOneReport: true, path: '**/jacoco.xml')]
+        }
         success {
             echo "BUILD SUCCESS : Recording Artifacts.."
-            archiveArtifacts artifacts: 'datavault-webapp/target/datavault-webapp.jar, datavault-worker/target/datavault-worker.jar, datavault-broker/target/datavault-broker.jar', fingerprint: true
+            sh 'mkdir -p artifacts'
+            sh 'mv datavault-webapp/target/datavault-webapp.jar artifacts/datavault-webapp.jar'
+            sh 'mv datavault-worker/target/datavault-worker.jar artifacts/datavault-worker.jar'
+            sh 'mv datavault-broker/target/datavault-broker.jar artifacts/datavault-broker.jar'
+            archiveArtifacts artifacts: 'artifacts/datavault-webapp.jar, artifacts/datavault-worker.jar, artifacts/datavault-broker.jar', fingerprint: true
         }
     }
 }

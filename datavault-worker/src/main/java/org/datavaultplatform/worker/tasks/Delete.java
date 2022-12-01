@@ -19,6 +19,7 @@ import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.worker.operations.FileSplitter;
 import org.datavaultplatform.worker.operations.ProgressTracker;
@@ -38,8 +39,8 @@ public class Delete extends Task {
     private EventSender eventSender = null;
     // Maps the model ArchiveStore ID to the storage equivalent
     private final HashMap<String, ArchiveStore> archiveStores = new HashMap<>();
-    
-    @Override
+
+  @Override
     public void performAction(Context context) {
         
         this.eventSender = context.getEventSender();
@@ -62,7 +63,7 @@ public class Delete extends Task {
         logger.info("bagID: " + bagID);
         
         //userStores = this.setupUserFileStores();
-        this.setupArchiveFileStores();
+        this.setupArchiveFileStores(context.getStorageClassNameResolver());
         
         try {
         	String tarFileName = bagID + ".tar";
@@ -106,14 +107,14 @@ public class Delete extends Task {
 	}
     
 
-    private void setupArchiveFileStores() {
+    private void setupArchiveFileStores(StorageClassNameResolver resolver) {
     	// Connect to the archive storage(s). Look out! There are two classes called archiveStore.
     	for (org.datavaultplatform.common.model.ArchiveStore archiveFileStore : archiveFileStores ) {
     		try {
           ArchiveStore archiveStore = StorageClassUtils.createStorage(
               archiveFileStore.getStorageClass(),
               archiveFileStore.getProperties(),
-              ArchiveStore.class);
+              ArchiveStore.class, resolver);
           archiveStores.put(archiveFileStore.getID(), archiveStore);
         } catch (Exception e) {
     			String msg = "Deposit failed: could not access archive filesystem : " + archiveFileStore.getStorageClass();

@@ -3,9 +3,12 @@ package org.datavaultplatform.broker.app;
 
 import it.burning.cron.CronExpressionDescriptor;
 import it.burning.cron.CronExpressionParser.Options;
+import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.actuator.LocalFileStoreEndpoint;
 import org.datavaultplatform.broker.actuator.LocalFileStoreInfo;
@@ -26,6 +29,7 @@ import org.datavaultplatform.broker.config.ScheduleConfig;
 import org.datavaultplatform.broker.config.SecurityActuatorConfig;
 import org.datavaultplatform.broker.config.SecurityConfig;
 import org.datavaultplatform.broker.config.ServiceConfig;
+import org.datavaultplatform.broker.config.StorageClassNameResolverConfig;
 import org.datavaultplatform.common.crypto.EncryptionValidator;
 import org.datavaultplatform.common.monitor.MemoryStats;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
@@ -37,6 +41,8 @@ import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.actuate.scheduling.ScheduledTasksEndpoint;
 import org.springframework.boot.actuate.scheduling.ScheduledTasksEndpoint.CronTaskDescription;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.event.ApplicationStartingEvent;
 import org.springframework.context.annotation.Import;
@@ -49,7 +55,8 @@ import org.springframework.core.env.Environment;
     ScheduleConfig.class, InitialiseConfig.class,
     SecurityActuatorConfig.class, SecurityConfig.class, ControllerConfig.class,
     ServiceConfig.class,  DatabaseConfig.class,
-    LdapConfig.class, EmailConfig.class, EmailLocalConfig.class, RabbitConfig.class
+    LdapConfig.class, EmailConfig.class, EmailLocalConfig.class, RabbitConfig.class,
+    StorageClassNameResolverConfig.class
 })
 @Slf4j
 //@EnableJSONDoc
@@ -61,7 +68,7 @@ public class DataVaultBrokerApp implements CommandLineRunner {
   @Value("${spring.application.name}")
   String applicationName;
 
-  @Value("${keystore.sha1:null}")
+  @Value("${keystore.sha1:}")
   String keyStoreSha1;
   @Autowired
   Environment env;
@@ -81,12 +88,23 @@ public class DataVaultBrokerApp implements CommandLineRunner {
   @Autowired
   LocalFileStoreEndpoint localFileStoreEndpoint;
 
+  @SneakyThrows
   public static void main(String[] args) {
-    SpringApplication.run(DataVaultBrokerApp.class, args);
+    Class<?> clazz = Class.forName("org.apache.sshd.sftp.client.SftpErrorDataHandler");
+    log.info("SftpErrorDataHandler class [{}]", clazz.getName());
+    SpringApplicationBuilder app = new SpringApplicationBuilder(DataVaultBrokerApp.class);
+    File pidFile = new File("pids/dv-broker-shutdown.pid");
+    log.info("pid file [{}]", pidFile.getCanonicalPath());
+    app.build().addListeners(new ApplicationPidFileWriter(pidFile.getCanonicalPath()));
+    app.run(args);
   }
 
   @Override
   public void run(String... args) {
+    log.info("Broker ARGS {}", Arrays.toString(args));
+    log.info("user.home [{}]", env.getProperty("user.home"));
+    log.info("user.dir  [{}]", env.getProperty("user.dir"));
+
     log.info("java.version [{}]", env.getProperty("java.version"));
     log.info("java.vendor [{}]", env.getProperty("java.vendor"));
 
@@ -151,7 +169,7 @@ public class DataVaultBrokerApp implements CommandLineRunner {
     log.info("There are [{}] SFTP connections.", total);
     for (int i = 0; i < total; i++) {
       SftpFileStoreInfo info = infos.get(i);
-      log.info("SFTP[{}/{}] {}", i+1, total, info);
+      log.info("SFTP[{}/{}][ignored?:{}] {}", i+1, total, info.isIgnored(), info);
     }
     log.info("END SFTP CONNECTION INFO");
   }

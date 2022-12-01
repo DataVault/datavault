@@ -30,8 +30,8 @@ public class RestrictURLAccessViaRolesTest extends BaseControllerAuthTest{
   @MockBean
   UsersController userController;
 
-  User user1 = new User();
-  User user2 = new User();
+  final User user1 = new User();
+  final User user2 = new User();
 
   @Test
   void testGetArchiveStores() {

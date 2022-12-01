@@ -221,9 +221,9 @@ public class PermissionDAOIT extends BaseDatabaseTest {
         Arrays.stream(Permission.values()).map(Permission::getId).collect(Collectors.toSet()),
         dao.findAll().stream().map(PermissionModel::getId).collect(Collectors.toSet()));
 
-    int updated1 = template.update("insert into `Permissions` (id,label,type,permission) values (?,?,?,?)","extra1","label-extra1",PermissionType.VAULT,"extra1perm");
-    int updated2 = template.update("insert into `Permissions` (id,label,type,permission) values (?,?,?,?)","extra2","label-extra2",PermissionType.SCHOOL,"extra2perm");
-    int updated3 = template.update("insert into `Permissions` (id,label,type,permission) values (?,?,?,?)","extra3","label-extra3",PermissionType.ADMIN,"extra3perm");
+    int updated1 = template.update("insert into `Permissions` (id,label,type,permission) values (?,?,?,?)","extra1","label-extra1",PermissionType.VAULT.name(),"extra1perm");
+    int updated2 = template.update("insert into `Permissions` (id,label,type,permission) values (?,?,?,?)","extra2","label-extra2",PermissionType.SCHOOL.name(),"extra2perm");
+    int updated3 = template.update("insert into `Permissions` (id,label,type,permission) values (?,?,?,?)","extra3","label-extra3",PermissionType.ADMIN.name(),"extra3perm");
     assertEquals(1, updated1);
     assertEquals(1, updated2);
     assertEquals(1, updated3);

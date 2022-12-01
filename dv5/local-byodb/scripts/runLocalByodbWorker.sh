@@ -2,7 +2,9 @@
 
 java -version
 
-export PROJECT_ROOT=$(cd ../../../;pwd)
+SCRIPT_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+PROJECT_ROOT=$(cd $SCRIPT_DIR/../../..;pwd)
+
 cd $PROJECT_ROOT
  SERVER_PORT=9090 \
  SPRING_APPLICATION_NAME=datavault-worker-1 \

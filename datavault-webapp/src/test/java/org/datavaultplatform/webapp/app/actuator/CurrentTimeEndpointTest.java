@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 public class CurrentTimeEndpointTest {
 
-  ObjectMapper mapper = new ObjectMapper();
+  final ObjectMapper mapper = new ObjectMapper();
 
   @Test
   void testCurrentTimeGMT() {

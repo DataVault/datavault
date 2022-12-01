@@ -57,6 +57,10 @@ public class EncryptionValidator {
       log.warn("Encryption KeyStore is not enabled");
       return;
     }
+    if (StringUtils.isBlank(expectedKeyStoreSha1)) {
+      log.warn("Expected KeyStore SHA1 is blank");
+      return;
+    }
 
     String keyStorePath = Encryption.getKeystorePath();
     File keyStoreFile = new File(keyStorePath);
@@ -66,9 +70,6 @@ public class EncryptionValidator {
 
     String actualKeyStoreSha1 = Verify.getDigest(keyStoreFile);
     log.info("Encryption KeyStore [{}], actual SHA1[{}]", keyStorePath, actualKeyStoreSha1);
-    if (StringUtils.isBlank(expectedKeyStoreSha1)) {
-      return;
-    }
     Assert.isTrue(expectedKeyStoreSha1.equalsIgnoreCase(actualKeyStoreSha1),
           () -> String.format("KeyStore [%s]: actual SHA1[%s] does match expected SHA1[%s]",
             keyStorePath, actualKeyStoreSha1, expectedKeyStoreSha1));

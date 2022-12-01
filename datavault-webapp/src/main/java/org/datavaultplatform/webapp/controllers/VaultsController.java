@@ -246,7 +246,7 @@ public class VaultsController {
         // todo: Get all the review history
 
         ReviewInfo[] reviewInfos = restService.getReviewsListing(vaultID);
-        List<VaultReviewModel> vaultReviewModels = new ArrayList<VaultReviewModel>();
+        List<VaultReviewModel> vaultReviewModels = new ArrayList<>();
 
         for (ReviewInfo reviewInfo : reviewInfos) {
 
@@ -383,7 +383,7 @@ public class VaultsController {
         logger.info("Action is:'" + action + "'");
         logger.info("PendingID is:'" + vault.getPendingID() + "'");
         String buildUrl = "/vaults/buildsteps/";
-        VaultInfo newVault = null;
+        VaultInfo newVault;
         if ("Save".equals(action)) {
             // if the save button has been clicked just save what we have and go back to the same page of the form
             // already have something saved update if not new save

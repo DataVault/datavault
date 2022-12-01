@@ -14,7 +14,7 @@ import org.springframework.util.StreamUtils;
 @Slf4j
 public class LoggingInterceptor implements ClientHttpRequestInterceptor {
 
-  public static Logger LOGGER = log;
+  public static final Logger LOGGER = log;
 
   @Override
   public ClientHttpResponse intercept(HttpRequest request, byte[] body,

@@ -224,7 +224,7 @@ public class AdminPendingVaultsController {
 		String result = userLookupService.checkNewRolesUserExists(vault, pVUrl);
 		
 		// Save the pending vault
-		VaultInfo newVault = null;
+		VaultInfo newVault;
 		newVault = restService.editPendingVault(vault);
         
 		// Redirect back to edit page

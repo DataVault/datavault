@@ -122,7 +122,7 @@ public class FileStoreController {
 
         KeyPairInfo keypair = userKeyPairService.generateNewKeyPair();
 
-        byte[] encrypted = null;
+        byte[] encrypted;
         byte[] iv = Encryption.generateIV();
         try {
             // We got to encrypt the private key before putting it in the database.

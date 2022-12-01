@@ -2,7 +2,7 @@ version: "3.7"
 services:
   rabbit:
     container_name: dv-byodb-rabbit
-    image: rabbitmq:3.10.7-management-alpine
+    image: rabbitmq:3.11.3-management-alpine
     restart: always
     environment:
       - RABBITMQ_DEFAULT_USER=rabbit
@@ -21,7 +21,7 @@ services:
      - "8025:8025" #HTTP
   ldap:
     container_name: dv-byodb-ldap
-    image: bitnami/openldap:latest
+    image: bitnami/openldap@sha256:23ebcaa52331a6521f2e512b971943a3a8b99d15459d59105d6a0eeb31220c86
     restart: always
     environment:
       LDAP_ROOT: "o=myu.ed"

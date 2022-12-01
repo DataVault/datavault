@@ -13,7 +13,7 @@ public class SftpFileStoreInfo {
   private String host;
   private String port;
   private String rootPath;
+  private boolean ignored;
   private boolean canConnect;
   private String connectionException;
-
 }

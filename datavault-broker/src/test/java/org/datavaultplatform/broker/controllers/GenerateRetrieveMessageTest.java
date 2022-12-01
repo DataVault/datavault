@@ -39,8 +39,8 @@ public class GenerateRetrieveMessageTest extends BaseGenerateMessageTest {
   private static final String FILE_STORE_RETRIEVE_LABEL = "FILE_STORE-SRC-LABEL";
   private static final String ARCHIVE_STORE_DEST_ID = "ARCHIVE-STORE-DST-ID";
   private static final String ARCHIVE_STORE_DEST_LABEL = "ARCHIVE-STORE-DST-LABEL";
-  File retrieveDir = new File(baseDir, "retrieved");
-  File destDir = new File(baseDir, "dest");
+  final File retrieveDir = new File(baseDir, "retrieved");
+  final File destDir = new File(baseDir, "dest");
   @Captor
   ArgumentCaptor<String> argMessage;
   private DepositsController dc;

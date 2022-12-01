@@ -47,11 +47,11 @@ public class RestTemplateLoggingTest {
   @Autowired
   private RestTemplate restTemplate;
 
-  ListAppender<ILoggingEvent> logBackListAppender = new ListAppender<>();
+  final ListAppender<ILoggingEvent> logBackListAppender = new ListAppender<>();
 
   MockRestServiceServer server;
 
-  Resource expectedLogEventsResource = new ClassPathResource("logs/expectedLogEvents.txt");
+  final Resource expectedLogEventsResource = new ClassPathResource("logs/expectedLogEvents.txt");
 
   @BeforeEach
   @SneakyThrows

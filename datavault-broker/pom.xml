@@ -73,6 +73,13 @@
             <artifactId>super-csv</artifactId>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client -->
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -105,7 +112,6 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/it.burning/cron-expression-descriptor -->
         <dependency>
             <groupId>it.burning</groupId>
             <artifactId>cron-expression-descriptor</artifactId>
@@ -128,7 +134,7 @@
 
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>mysql</artifactId>
+            <artifactId>mariadb</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -145,14 +151,6 @@
             <version>0.0.1-SNAPSHOT</version>
             <scope>test</scope>
             <classifier>tests</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.sshd</groupId>
-            <artifactId>sshd-core</artifactId>
-            <!-- anything above 2.0.0 does NOT compile with test EmbeddedSftpServer -->
-            <version>1.7.0</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

@@ -92,7 +92,7 @@ public class AdminDepositsController {
                              @RequestParam(value = "sort", required = false, defaultValue = "creationTime") String sort,
                              @RequestParam(value = "order", required = false, defaultValue = "desc") String order) throws Exception {
 
-        List<DepositInfo> deposits = null;
+        List<DepositInfo> deposits;
 
         DepositsData depositData =restService.searchDepositsData(query, sort, order);
         deposits = depositData.getData();

@@ -148,6 +148,10 @@
       <artifactId>logback-classic</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>net.i2p.crypto</groupId>
+      <artifactId>eddsa</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
@@ -165,9 +169,11 @@
               <includes>
                 <include>**/DisabledInsideDocker*</include>
                 <include>**/DockerUtils*</include>
+                <include>**/ProcessUtils*</include>
                 <include>**/DockerImage*</include>
                 <include>**/Base*Test*</include>
                 <include>**/*.ldif</include>
+                <include>**/SshRsaKeyUtils*</include>
               </includes>
             </configuration>
           </execution>

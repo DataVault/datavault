@@ -112,7 +112,7 @@ public class AdminVaultsController {
         if (sort == null) theSort = "creationTime";
         if (order == null) theOrder = "desc";
 
-        List<VaultInfo> vaults = null;
+        List<VaultInfo> vaults;
 
         VaultsData vaultData =  restService.searchVaults(query, theSort, theOrder, 0, Integer.MAX_VALUE);
         vaults = vaultData.getData();

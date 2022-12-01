@@ -212,7 +212,7 @@ public class ValidateService {
     }
 
     public String getDefaultReviewDate(int length) {
-        String retVal = "";
+        String retVal;
         Calendar cal = Calendar.getInstance();
         cal.setTimeZone(TimeZone.getTimeZone("Europe/London"));
         cal.add(Calendar.YEAR, length);

@@ -162,14 +162,14 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
 
     public DepositSize checkDepositSize(String[] filePaths) {
 
-        String parameters = "?";
+        StringBuilder parameters = new StringBuilder("?");
 
         for (int i=0; i< filePaths.length; i++){
             String filePath = filePaths[i];
             if (!filePath.startsWith("/")) {
                 filePath = "/" + filePath;
             }
-            parameters += "filepath=" + filePath + "&";
+            parameters.append("filepath=").append(filePath).append("&");
         }
 
         logger.debug("parameters: " + parameters);

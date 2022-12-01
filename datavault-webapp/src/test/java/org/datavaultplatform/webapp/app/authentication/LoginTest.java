@@ -49,9 +49,9 @@ public class LoginTest {
   @Autowired
   MockMvc mvc;
 
-  String username = "user";
+  final String username = "user";
 
-  String password = "password";
+  final String password = "password";
 
   @Test
   void testUnsecure() throws Exception {

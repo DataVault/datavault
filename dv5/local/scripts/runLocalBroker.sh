@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_DIR=`dirname $0`
+SCRIPT_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PROJECT_ROOT=$(cd $SCRIPT_DIR/../../..;pwd)
 
 # This script now uses 'java -jar' instead of 'mvnw spring-boot:run'
@@ -40,7 +40,8 @@ SETUP_ENV=\
 JAVA_TOOL_OPTS=\
 "-Duser.language=en \
  -Duser.country=GB \
- -Duser.home=$PROJECT_ROOT \
+ -Duser.home=$PROJECT_ROOT/dv5/user/home \
+ -Duser.dir=$PROJECT_ROOT/dv5/user/dir \
  -Duser.timezone=Europe/London \
  -Xdebug \
  -Xms1024M -Xmx2024M \

@@ -2,6 +2,9 @@ package org.datavaultplatform.webapp.app;
 
 import static java.util.Collections.singletonList;
 
+import java.io.File;
+import java.util.Arrays;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.monitor.MemoryStats;
 import org.datavaultplatform.webapp.config.ActutatorConfig;
@@ -22,6 +25,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.event.ApplicationStartingEvent;
 import org.springframework.context.annotation.ComponentScan;
@@ -52,12 +57,21 @@ public class DataVaultWebApp implements CommandLineRunner {
         .setClasspathTlds(singletonList("/META-INF/security.tld"));
   }
 
+  @SneakyThrows
   public static void main(String[] args) {
-    SpringApplication.run(DataVaultWebApp.class, args);
+    SpringApplicationBuilder app = new SpringApplicationBuilder(DataVaultWebApp.class);
+    File pidFile = new File("pids/dv-webapp-shutdown.pid");
+    log.info("pid file [{}]", pidFile.getCanonicalPath());
+    app.build().addListeners(new ApplicationPidFileWriter(pidFile.getCanonicalPath()));
+    app.run(args);
   }
 
   @Override
   public void run(String... args) {
+    log.info("Webapp ARGS {}", Arrays.toString(args));
+    log.info("user.home [{}]", env.getProperty("user.home"));
+    log.info("user.dir  [{}]", env.getProperty("user.dir"));
+
     log.info("java.version [{}]", env.getProperty("java.version"));
     log.info("java.vendor [{}]", env.getProperty("java.vendor"));
 

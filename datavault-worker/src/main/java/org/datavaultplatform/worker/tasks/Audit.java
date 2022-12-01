@@ -10,6 +10,7 @@ import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.worker.operations.FileSplitter;
@@ -69,7 +70,7 @@ public class Audit extends Task {
         eventSender.send(new AuditStart(this.jobID, this.auditId)
             .withNextState(0));
 
-        Device archiveFs = this.setupArchiveFileStores();
+        Device archiveFs = this.setupArchiveFileStores(context.getStorageClassNameResolver());
 
         try {
             eventSender.send(new UpdateProgress(this.jobID, null, 0,
@@ -187,13 +188,13 @@ public class Audit extends Task {
         eventSender.send(new InitStates(this.jobID, this.auditId, states));
 	}
     
-    private Device setupArchiveFileStores() {
+    private Device setupArchiveFileStores(StorageClassNameResolver resolver) {
     	// We get passed a list because it is a parameter common to deposits and retrieves, but for retrieve there should only be one.
         ArchiveStore archiveFileStore = archiveFileStores.get(0);
 
         // Connect to the archive storage
         try {
-            Device archiveFs = StorageClassUtils.createStorage(archiveFileStore.getStorageClass(), archiveFileStore.getProperties(), Device.class);
+            Device archiveFs = StorageClassUtils.createStorage(archiveFileStore.getStorageClass(), archiveFileStore.getProperties(), Device.class, resolver);
             return archiveFs;
         } catch (Exception e) {
             String msg = "Retrieve failed: could not access archive filesystem";

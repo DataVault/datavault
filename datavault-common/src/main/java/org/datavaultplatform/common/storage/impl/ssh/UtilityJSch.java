@@ -29,9 +29,11 @@ import java.nio.file.Path;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.time.Clock;
 import org.datavaultplatform.common.io.Progress;
+import org.springframework.util.Assert;
 
-public class Utility {
+public class UtilityJSch {
 
     @SuppressWarnings("OctalInteger")
     private static final int DEFAULT_DIR_MODE = 0755;
@@ -50,7 +52,7 @@ public class Utility {
         
         channel.cd(pwd);
         
-        final java.util.Vector<ChannelSftp.LsEntry> files = channel.ls(remoteFile);
+        @SuppressWarnings("unchecked") final java.util.Vector<ChannelSftp.LsEntry> files = channel.ls(remoteFile);
         final int size = files.size();
         for (int i = 0; i < size; i++) {
             final ChannelSftp.LsEntry le = files.elementAt(i);
@@ -72,9 +74,11 @@ public class Utility {
     public static class SFTPMonitor implements SftpProgressMonitor {
         
         private final Progress progressTracker;
-        
-        public SFTPMonitor(Progress progressTracker) {
+        private final Clock clock;
+
+        public SFTPMonitor(Progress progressTracker, Clock clock) {
             this.progressTracker = progressTracker;
+            this.clock = clock;
         }
         
         @Override
@@ -86,15 +90,15 @@ public class Utility {
         public boolean count(final long len) {
             
             // Inform the generic progress tracker
-            progressTracker.byteCount += len;
-            progressTracker.timestamp = System.currentTimeMillis();
+            progressTracker.incByteCount(len);
+            progressTracker.setTimestamp(clock.millis());
             
             return true;
         }
         
         @Override
         public void end() {
-        
+            progressTracker.setTimestamp(clock.millis());
         }
     }
     
@@ -117,9 +121,13 @@ public class Utility {
         if (attrs.isDir()) {
             if (!localFile.exists()) {
                 localFile.mkdirs();
+            } else {
+                // you cannot pull remote directory back to a non-directory
+                Assert.isTrue(localFile.isDirectory(), String.format("You cannot retrieve remote directory [%s] back to a non-directory[%s]", pwd, localFile));
             }
         }
-        
+
+        //noinspection unchecked
         final java.util.Vector<ChannelSftp.LsEntry> files = channel.ls(remoteFile);
         final int size = files.size();
         for (int i = 0; i < size; i++) {

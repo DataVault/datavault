@@ -188,7 +188,7 @@ public class AdminController {
     ) {
 
         if (sort == null) sort = "";
-        Long recordsTotal = 0L;
+        long recordsTotal = 0L;
         List<DepositInfo> depositResponses = new ArrayList<>();
         List<Deposit> deposits = depositsService.getDeposits("", userID, sort, null, 0, 10);
         if(CollectionUtils.isNotEmpty(deposits)) {

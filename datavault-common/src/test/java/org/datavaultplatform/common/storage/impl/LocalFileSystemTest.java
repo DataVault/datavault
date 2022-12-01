@@ -65,8 +65,8 @@ public class LocalFileSystemTest {
     Progress pStore = new Progress();
     String storedFileOne = localFileSystem.store("storagePath1", randomFile, pStore);
     log.info("storedFileOne [{}]", storedFileOne);
-    assertEquals(1, pStore.fileCount);
-    assertEquals(14, pStore.byteCount);
+    assertEquals(1, pStore.getFileCount());
+    assertEquals(14, pStore.getByteCount());
     checkProgressFinishedBeforeNow(pStore);
 
     // need to test quick retrieve too and test contents, progress etc
@@ -84,7 +84,7 @@ public class LocalFileSystemTest {
   }
 
   void checkProgressFinishedBeforeNow(Progress progress) {
-    long diff = Instant.now().minus(progress.timestamp, ChronoUnit.MILLIS).toEpochMilli();
+    long diff = Instant.now().minus(progress.getTimestamp(), ChronoUnit.MILLIS).toEpochMilli();
     assertTrue(diff >= 0);
   }
 

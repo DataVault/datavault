@@ -1,6 +1,7 @@
 package org.datavaultplatform.webapp.services;
 
 import com.google.common.collect.Sets;
+import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.request.CreateVault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ public class ForceLogoutService {
     public void logoutRole(long roleId) {
         logger.warn("Forcing a logout for all users assigned to role {}", roleId);
         Set<String> userIds = supportService.getRoleAssignmentsForRole(roleId).stream()
-                .map(roleAssignment -> roleAssignment.getUserId())
+                .map(RoleAssignment::getUserId)
                 .collect(Collectors.toSet());
         logoutUsers(userIds);
     }

@@ -233,8 +233,8 @@ public class FileCopy {
 //                    throw new IOException("Failed during file transfer");
 //                }
                 if(progress != null) {
-                    progress.byteCount += copied;
-                    progress.timestamp = System.currentTimeMillis();
+                    progress.incByteCount(copied);
+                    progress.setTimestamp(System.currentTimeMillis());
                 }
             }
         } finally {
@@ -253,7 +253,7 @@ public class FileCopy {
         }
 
         if(progress != null) {
-            progress.fileCount += 1;
+            progress.incFileCount(1);
         }
     }
 
@@ -536,6 +536,6 @@ public class FileCopy {
             destDir.setLastModified(srcDir.lastModified());
         }
         
-        progress.dirCount += 1;
+        progress.incDirCount(1);
     }
 }

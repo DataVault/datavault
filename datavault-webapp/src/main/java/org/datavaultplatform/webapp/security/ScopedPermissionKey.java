@@ -6,9 +6,9 @@ import java.io.Serializable;
 
 public class ScopedPermissionKey {
     final Serializable id;
-    final Class type;
+    final Class<?> type;
 
-    ScopedPermissionKey(Serializable id, Class type) {
+    ScopedPermissionKey(Serializable id, Class<?> type) {
         this.id = id;
         this.type = type;
     }

@@ -8,7 +8,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class DepositPage extends Page {
-    private String depositName;
+    final private String depositName;
 
     public DepositPage(WebDriver driver, String depositName) {
         super(driver);

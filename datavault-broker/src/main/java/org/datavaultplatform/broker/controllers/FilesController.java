@@ -215,9 +215,9 @@ public class FilesController {
         log.info("Broker postFileChunk for " + user.getID() + " - " + filename);
         
         String relativePath = new String(Base64.decodeBase64(request.getParameter("relativePath").getBytes()));
-        Long chunkNumber = Long.parseLong(request.getParameter("chunkNumber"));
+        long chunkNumber = Long.parseLong(request.getParameter("chunkNumber"));
         Long totalChunks = Long.parseLong(request.getParameter("totalChunks"));
-        Long chunkSize = Long.parseLong(request.getParameter("chunkSize"));
+        long chunkSize = Long.parseLong(request.getParameter("chunkSize"));
         Long totalSize = Long.parseLong(request.getParameter("totalSize"));
         
         log.info("fileUploadHandle =" + fileUploadHandle);
@@ -238,7 +238,7 @@ public class FilesController {
         
         if (!uploadDir.exists()) {
             log.info("Creating uploadDir: " + uploadDir.getPath());
-            Boolean success = uploadDir.mkdir();
+            boolean success = uploadDir.mkdir();
             if (!success && !uploadDir.exists()) {
                 throw new Exception("Unable to create uploadDir");
             }
@@ -249,7 +249,7 @@ public class FilesController {
         File userUploadDir = userUploadDirPath.toFile();
         if (!userUploadDir.exists()) {
             log.info("Creating userUploadDir: " + userUploadDir.getPath());
-            Boolean success = userUploadDir.mkdir();
+            boolean success = userUploadDir.mkdir();
             if (!success && !userUploadDir.exists()) {
                 throw new Exception("Unable to create userUploadDir");
             }
@@ -260,7 +260,7 @@ public class FilesController {
         File handleUploadDir = handleUploadDirPath.toFile();
         if (!handleUploadDir.exists()) {
             log.info("Creating handleUploadDir: " + handleUploadDir.getPath());
-            Boolean success = handleUploadDir.mkdir();
+            boolean success = handleUploadDir.mkdir();
             if (!success && !handleUploadDir.exists()) {
                 throw new Exception("Unable to create handleUploadDir");
             }

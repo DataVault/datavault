@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.common.task.Context.AESMode;
+import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.worker.queue.Receiver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +48,7 @@ public class ReceiverConfig {
 
   @Autowired
   RecordingEventSender eventSender;
+
   /*
       <bean id="receiver" class="org.datavaultplatform.worker.queue.Receiver">
         <property name="tempDir" value="${tempDir}"/>
@@ -64,7 +66,7 @@ public class ReceiverConfig {
 
    */
   @Bean
-  public Receiver receiver() {
+  public Receiver receiver(StorageClassNameResolver resolver) {
     Receiver result = new Receiver(
         this.tempDir,
         this.metaDir,
@@ -74,7 +76,8 @@ public class ReceiverConfig {
         this.encryptionMode,
         this.multipleValidationEnabled,
         this.noChunkThreads,
-        this.eventSender
+        this.eventSender,
+        resolver
     );
     if(result.isEncryptionEnabled() && result.getEncryptionMode() == AESMode.GCM ) {
       Security.addProvider(new BouncyCastleProvider());
