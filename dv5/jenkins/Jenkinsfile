@@ -26,7 +26,7 @@ pipeline {
               echo "HI IS[${hi}]"
               GH_TAG = TAG.replaceAll(" ","_")
               def TAG_EXISTS = sh (script:"git show refs/tags/${GH_TAG} --", returnStatus:true)
-              if (TAG_EXISTS != 0) {
+              if (TAG_EXISTS == 0) {
                 throw new Exception("The Tag [${GH_TAG}] has been used already.")
               }
             }
