@@ -90,7 +90,7 @@ pipeline {
           steps {
             script {
               if (GH_TAG != "") {
-                if (GH_TAG_CREDENTIALS_ID != null){}
+                if (GH_TAG_CREDENTIALS_ID != null) {
                   //The GH_TAG variable is set in an earlier Stage
                   sh "git tag -a '$GH_TAG' -m '${TAG}' ${GIT_COMMIT}"
                   echo "TAG IS [${GH_TAG}]@${GIT_COMMIT}"
