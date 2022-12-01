@@ -97,7 +97,6 @@ pipeline {
                 // We need Git Credentials to push the tag
                 echo "GH_TAG_CREDENTIALS_ID is [${GH_TAG_CREDENTIALS_ID}]"
                 if ( env.GH_TAG_CREDENTIALS_ID && env.GH_TAG_CREDENTIALS_ID.trim() != "" ) {
-                  echo "Using Credentials Id ${GH_TAG_CREDENTIALS_ID}"
                   //The GH_TAG variable is set in an earlier Stage
                   sh "git tag -a '$GH_TAG' -m '${TAG}' ${GIT_COMMIT}"
                   echo "Git Tag is [${GH_TAG}]@${GIT_COMMIT}"
