@@ -1,3 +1,7 @@
+def GH_TAG="n/a"
+def hello(String message) {
+  return "hello ${message}"
+}
 pipeline {
     parameters {
       booleanParam(name: ENABLE_UNIT_TESTS, defaultValue: true)
@@ -14,6 +18,20 @@ pipeline {
       }
     }
     stages {
+        stage('Check Tag has not been used already: before anything else') {
+          //the GH_TAG variable here is used in the stage ''
+          steps {
+            script {
+              def hi = hello("world");
+              echo "HI IS[${hi}]"
+              GH_TAG = TAG.replaceAll(" ","_")
+              def TAG_EXISTS = sh (script="git show ${GH_TAG}", returnStatus: true)
+              if (TAG_EXISTS != 0) {
+                throw new Exception("The Tag [${GH_TAG}] has been used already.")
+              }
+            }
+          }
+        }
         stage('Test Docker Socket') {
            steps {
               echo "Unit Tests.. [$ENABLE_UNIT_TESTS]"
@@ -61,7 +79,7 @@ pipeline {
         stage('Tag Build') {
           steps {
             script {
-              def GH_TAG = TAG.replaceAll(" ","_")
+              //The GH_TAG variable is set in an earlier Stage
               sh "git tag -a '$GH_TAG' -m '${TAG}' ${GIT_COMMIT}"
               echo "TAG IS [${GH_TAG}]@${GIT_COMMIT}"
               //We need git credentials to push the tag
