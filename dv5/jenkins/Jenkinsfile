@@ -91,11 +91,12 @@ pipeline {
             script {
               if (GH_TAG != "") {
                 echo "checking GH_TAG_CREDENTIALS_ID"
-                if (expression { env.GH_TAG_CREDENTIALS_ID != null }) {
+                // We need Git Credentials to push the tag
+                if (expression { env.GH_TAG_CREDENTIALS_ID != "" }) {
+                  echo "Using Credentials Id ${GH_TAG_CREDENTIALS_ID}"
                   //The GH_TAG variable is set in an earlier Stage
                   sh "git tag -a '$GH_TAG' -m '${TAG}' ${GIT_COMMIT}"
                   echo "TAG IS [${GH_TAG}]@${GIT_COMMIT}"
-                  //We need git credentials to push the tag
                   withCredentials([gitUsernamePassword(credentialsId: GH_TAG_CREDENTIALS_ID)]) {
                     sh "git config --global user.name '$GIT_USERNAME'"
                     sh "git push origin refs/tags/${GH_TAG}"
