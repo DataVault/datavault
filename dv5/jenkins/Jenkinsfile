@@ -3,7 +3,7 @@ pipeline {
       booleanParam(name: ENABLE_UNIT_TESTS, defaultValue: true, required: true)
       booleanParam(name: ENABLE_INTEGRATION_TESTS, defaultValue: true, required: true)
       string(name: 'TAG', defaultValue: '1.0.0', description: 'A tag that will be added to github to link the code to this build.', required:true)
-      credentialsId(
+      credentials(
           name: 'GH_TAG_CREDENTIALS_ID',
           description: 'Credentials for the GitHub repository',
           required: true,
