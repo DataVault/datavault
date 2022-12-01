@@ -7,7 +7,7 @@ pipeline {
           name: 'GH_TAG_CREDENTIALS_ID',
           description: 'Credentials for the GitHub repository',
           required: true,
-          type: 'UsernamePassword'
+          type: 'UsernamePassword',
           defaultValue:'dv-fork-cicd-tag-token'
         )
     }
