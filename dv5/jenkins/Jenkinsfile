@@ -11,11 +11,12 @@ pipeline {
     parameters {
       booleanParam(name: ENABLE_UNIT_TESTS, defaultValue: true)
       booleanParam(name: ENABLE_INTEGRATION_TESTS, defaultValue: true)
-      string(name: 'TAG', defaultValue: '', description: 'A Tag that will be added to github to link the code to this build.')
+      string(name: 'TAG', defaultValue: '', description: 'A Tag that will be added to github to link the code to this build.', required:false)
       credentials(
         name: 'GH_TAG_CREDENTIALS_ID',
         credentialType: 'com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl',
         defaultValue: '',
+        required: false,
         description: 'Credentials for the GitHub repository' )
     }
     agent {
