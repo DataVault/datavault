@@ -1,7 +1,22 @@
+def GH_TAG=""
+def isGitTagValid(String gitTag) {
+    def status=sh(script: "git check-ref-format refs/tags/${gitTag}", returnStatus: true)
+    return status == 0;
+}
+def hasGitTagBeenUsedAlready(String gitTag) {
+    def status=sh (script:"git show refs/tags/${gitTag} --", returnStatus:true)
+    return status == 0;
+}
 pipeline {
     parameters {
       booleanParam(name: ENABLE_UNIT_TESTS, defaultValue: true)
       booleanParam(name: ENABLE_INTEGRATION_TESTS, defaultValue: true)
+      string(name: 'TAG', defaultValue: '', description: 'A Tag that will be added to github to link the code to this build.')
+      credentials(
+        name: 'GH_TAG_CREDENTIALS_ID',
+        credentialType: 'com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl',
+        defaultValue: null,
+        description: 'Credentials for the GitHub repository' )
     }
     agent {
       dockerfile {
@@ -12,6 +27,24 @@ pipeline {
       }
     }
     stages {
+        stage('before anything else, check that Git Tag has not been used already') {
+          //the GH_TAG variable set here is used in the stage 'Tag Build'
+          steps {
+            script {
+              GH_TAG = TAG.trim().replaceAll(" ","_")
+              if (GH_TAG != "") {
+                if (!isGitTagValid(GH_TAG)) {
+                  error "Tag [${GH_TAG}] is not valid"
+                }
+                if (hasGitTagBeenUsedAlready(GH_TAG)) {
+                  error "The Tag [${GH_TAG}] has been used already."
+                }
+              } else {
+                echo "ignoring empty Git Tag"
+              }
+            }
+          }
+        }
         stage('Test Docker Socket') {
            steps {
               echo "Unit Tests.. [$ENABLE_UNIT_TESTS]"
@@ -55,6 +88,29 @@ pipeline {
                 echo 'installing locally'
                 sh './mvnw install -Dskip.unit.tests -Dskip.integration.tests -Dmaven.main.skip'
             }
+        }
+        stage('Tag Build') {
+          steps {
+            script {
+              if (GH_TAG != "") {
+                echo "checking GH_TAG_CREDENTIALS_ID"
+                // We need Git Credentials to push the tag
+                echo "GH_TAG_CREDENTIALS_ID is [${GH_TAG_CREDENTIALS_ID}]"
+                if ( env.GH_TAG_CREDENTIALS_ID && env.GH_TAG_CREDENTIALS_ID.trim() != "" ) {
+                  //The GH_TAG variable is set in an earlier Stage
+                  sh "git tag -a '$GH_TAG' -m '${TAG}' ${GIT_COMMIT}"
+                  withCredentials([gitUsernamePassword(credentialsId: env.GH_TAG_CREDENTIALS_ID)]) {
+                    sh "git config --global user.name '$GIT_USERNAME'"
+                    sh "git push origin refs/tags/${GH_TAG}"
+                  }
+                } else {
+                  echo "Not adding Git Tag '$GH_TAG'. The value of 'GH_TAG_CREDENTIALS_ID' was empty."
+                }
+              } else {
+                echo "ignoring empty Git Tag"
+              }
+            }
+          }
         }
     }
     post {
