@@ -1,7 +1,15 @@
 pipeline {
     parameters {
-      booleanParam(name: ENABLE_UNIT_TESTS, defaultValue: true)
-      booleanParam(name: ENABLE_INTEGRATION_TESTS, defaultValue: true)
+      booleanParam(name: ENABLE_UNIT_TESTS, defaultValue: true, required: true)
+      booleanParam(name: ENABLE_INTEGRATION_TESTS, defaultValue: true, required: true)
+      string(name: 'TAG', defaultValue: '1.0.0', description: 'A tag that will be added to github to link the code to this build.', required:true)
+      credentialsId(
+          name: 'GH_TAG_CREDENTIALS_ID',
+          description: 'Credentials for the GitHub repository',
+          required: true,
+          type: 'UsernamePassword'
+          defaultValue:'dv-fork-cicd-tag-token'
+        )
     }
     agent {
       dockerfile {
@@ -55,6 +63,19 @@ pipeline {
                 echo 'installing locally'
                 sh './mvnw install -Dskip.unit.tests -Dskip.integration.tests -Dmaven.main.skip'
             }
+        }
+        stage('Tag Build') {
+          steps {
+            script {
+              def GH_TAG = TAG.replaceAll(" ","_")
+              sh "git tag -a '$GH_TAG' -m '${TAG}' ${GIT_COMMIT}"
+              echo "TAG IS [${GH_TAG}]@${GIT_COMMIT}"
+              withCredentials([gitUsernamePassword(credentialsId: GH_TAG_CREDENTIALS_ID)]) {
+                sh "git config --global user.name '$GIT_USERNAME'"
+                sh "git push origin refs/tags/${GH_TAG}"
+              }
+            }
+          }
         }
     }
     post {
