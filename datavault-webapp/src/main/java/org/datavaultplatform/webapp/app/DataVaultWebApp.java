@@ -7,6 +7,7 @@ import java.util.Arrays;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.monitor.MemoryStats;
+import org.datavaultplatform.common.services.LDAPService;
 import org.datavaultplatform.webapp.config.ActutatorConfig;
 import org.datavaultplatform.webapp.config.LdapConfig;
 import org.datavaultplatform.webapp.config.MailConfig;
@@ -22,7 +23,6 @@ import org.datavaultplatform.webapp.config.standalone.StandaloneProfileConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -95,8 +95,9 @@ public class DataVaultWebApp implements CommandLineRunner {
   }
 
   @EventListener
-  void onEvent(ApplicationReadyEvent event) {
-    log.info("WebApp [{}] ready", applicationName);
+  void onEvent(ApplicationReadyEvent readyEvent) {
+    log.info("WebApp [{}] ready [{}]", applicationName, readyEvent);
+    LDAPService.testLdapConnection(readyEvent.getApplicationContext());
     log.info("{}", MemoryStats.getCurrent().toPretty());
   }
 

@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
@@ -23,6 +24,8 @@ import org.apache.directory.ldap.client.api.EntryCursorImpl;
 import org.apache.directory.ldap.client.api.LdapNetworkConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
 /**
@@ -32,6 +35,7 @@ import org.springframework.util.Assert;
  * 
  * Without Builder, it's easy to get the constructor parameters in the wrong order.
  */
+@Slf4j
 public class LDAPService {
 
     private static final Logger logger = LoggerFactory.getLogger(LDAPService.class);
@@ -322,4 +326,28 @@ public class LDAPService {
         }
     }
 
+    public void testConnection(String ldapConnectionTestSearchTerm) {
+        log.info("ldap.connection.search.term[{}]", ldapConnectionTestSearchTerm);
+        if (StringUtils.isBlank(ldapConnectionTestSearchTerm)) {
+            log.info("ldap.connection.search.term is blank, not testing ldap connection");
+            return;
+        }
+        try {
+            List<String> result = autocompleteUID(ldapConnectionTestSearchTerm);
+            log.info("ldap connection test result for ldap.connection.search.term[{}] is {}", ldapConnectionTestSearchTerm,
+                result);
+        } catch (Exception ex) {
+            log.error("Error Testing Ldap Connection with ldap.connection.search.term[{}]", ldapConnectionTestSearchTerm, ex);
+        }
+    }
+
+    public static void testLdapConnection(ApplicationContext ctx) {
+        try {
+            LDAPService ldapService = ctx.getBean(LDAPService.class);
+            String ldapConnectionTestSearchTerm = ctx.getEnvironment().getProperty("ldap.connection.test.search.term","");
+            ldapService.testConnection(ldapConnectionTestSearchTerm);
+        } catch(NoSuchBeanDefinitionException ex) {
+            log.info("No LDAPService bean found");
+        }
+    }
 }
