@@ -64,6 +64,10 @@ class AjpConnectorIT {
 
   static {
 
+    if(DockerUtils.isRunningInsideDocker()) {
+      org.testcontainers.Testcontainers.exposeHostPorts(springBootAppPort);
+    }
+
     initTempHttpdConf();
 
     MountableFile mountableFile = MountableFile.forHostPath(tempHttpdConf.getAbsolutePath());
@@ -96,7 +100,7 @@ class AjpConnectorIT {
     String content = IOUtils.toString(is, "UTF-8");
     content = content.replaceAll("8009", String.valueOf(springBootAjpPort));
     if (DockerUtils.isRunningInsideDocker()) {
-      content = content.replaceAll("host.docker.interal", "172.17.0.1");
+      content = content.replaceAll("host.docker.internal", "host.testcontainers.internal");
     }
 
     try (OutputStream os = new FileOutputStream(tempHttpdConf)) {
