@@ -95,6 +95,9 @@ class AjpConnectorIT {
     InputStream is = resource.getInputStream();
     String content = IOUtils.toString(is, "UTF-8");
     content = content.replaceAll("8009", String.valueOf(springBootAjpPort));
+    if (DockerUtils.isRunningInsideDocker()) {
+      content = content.replaceAll("host.docker.interal", "172.17.0.1");
+    }
 
     try (OutputStream os = new FileOutputStream(tempHttpdConf)) {
       IOUtils.write(content, os, "UTF-8");
