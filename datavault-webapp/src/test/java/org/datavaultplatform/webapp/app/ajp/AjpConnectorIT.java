@@ -49,14 +49,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.google.common.io.Files;
 import org.testcontainers.utility.MountableFile;
 
+@DisabledInsideDocker
+// Can't get this test to run when CI/CD runs within Docker - because
+// we need to connect from apache docker container to this test which is hard when
+// this test is running within a docker container itself
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @ProfileShib
 @TestPropertySource(properties = {"tomcat.ajp.enabled=true"})
 @Testcontainers(disabledWithoutDocker = true)
-// Can't get this test to run when CI/CD runs within Docker - because
-// we need to connect from apache docker container to this test which is hard when
-// this test is running within a docker container itself
-@DisabledInsideDocker
 @Slf4j
 class AjpConnectorIT {
 
