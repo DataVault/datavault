@@ -1,12 +1,14 @@
 package org.datavaultplatform.webapp.config;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.services.LDAPService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Slf4j
 public class LdapConfig {
 
   @Value("${ldap.host}")
@@ -35,6 +37,13 @@ public class LdapConfig {
 
   @Bean
   LDAPService ldapService() {
+    log.info("ldap.host[{}]", host);
+    log.info("ldap.port[{}]", port);
+    log.info("ldap.useSsl[{}]", useSSL);
+    log.info("ldap.dn[{}]", dn);
+    log.info("ldap.searchContext[{}]", searchContext);
+    log.info("ldap.searchFilter[{}]", searchFilter);
+    log.info("ldap.attrs[{}]", attrs);
     return LDAPService.builder()
         .host(host)
         .port(port)

@@ -7,6 +7,7 @@ import java.util.Arrays;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.monitor.MemoryStats;
+import org.datavaultplatform.common.services.LDAPService;
 import org.datavaultplatform.webapp.config.ActutatorConfig;
 import org.datavaultplatform.webapp.config.LdapConfig;
 import org.datavaultplatform.webapp.config.MailConfig;
@@ -15,6 +16,7 @@ import org.datavaultplatform.webapp.config.PropertiesConfig;
 import org.datavaultplatform.webapp.config.RestTemplateConfig;
 import org.datavaultplatform.webapp.config.SecurityActuatorConfig;
 import org.datavaultplatform.webapp.config.SecurityConfig;
+import org.datavaultplatform.webapp.config.TomcatAjpConfig;
 import org.datavaultplatform.webapp.config.WebConfig;
 import org.datavaultplatform.webapp.config.database.DatabaseProfileConfig;
 import org.datavaultplatform.webapp.config.shib.ShibProfileConfig;
@@ -22,7 +24,6 @@ import org.datavaultplatform.webapp.config.standalone.StandaloneProfileConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -42,7 +43,7 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 @Import({PropertiesConfig.class, WebConfig.class, MvcConfig.class, ActutatorConfig.class,
     SecurityActuatorConfig.class, SecurityConfig.class, MailConfig.class, LdapConfig.class,
         StandaloneProfileConfig.class, DatabaseProfileConfig.class,
-    ShibProfileConfig.class, RestTemplateConfig.class})
+    ShibProfileConfig.class, RestTemplateConfig.class, TomcatAjpConfig.class})
 @Slf4j
 public class DataVaultWebApp implements CommandLineRunner {
 
@@ -95,8 +96,9 @@ public class DataVaultWebApp implements CommandLineRunner {
   }
 
   @EventListener
-  void onEvent(ApplicationReadyEvent event) {
-    log.info("WebApp [{}] ready", applicationName);
+  void onEvent(ApplicationReadyEvent readyEvent) {
+    log.info("WebApp [{}] ready [{}]", applicationName, readyEvent);
+    LDAPService.testLdapConnection(readyEvent.getApplicationContext());
     log.info("{}", MemoryStats.getCurrent().toPretty());
   }
 

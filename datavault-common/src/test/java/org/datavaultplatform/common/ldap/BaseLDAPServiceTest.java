@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
@@ -230,5 +229,34 @@ public abstract class BaseLDAPServiceTest {
     }
   }
 
+  @Nested
+  class LdapConnectionTest {
+
+    @Test
+    void testNullTest() {
+      ldapService.testConnection(null);
+    }
+
+    @Test
+    void testBlankTest() {
+      ldapService.testConnection(null);
+    }
+
+    @Test
+    void testNoResults() {
+      ldapService.testConnection("DoesNotExist");
+    }
+
+    @Test
+    void testSingleResult() {
+      ldapService.testConnection("Joe Bloggs");
+    }
+
+    @Test
+    void testMultipleResults() {
+      ldapService.testConnection("Bond");
+    }
+
+  }
 
 }

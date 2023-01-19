@@ -21,6 +21,7 @@ USER root
 RUN apt update
 RUN apt install -y jq
 RUN apt install -y curl
+RUN apt install -y git
 RUN apt install -y iputils-ping
 #
 # tweak users and groups to ensure 'jenkins' user can access docker socket (/var/run/docker.sock)

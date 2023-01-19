@@ -27,6 +27,7 @@ cd $PROJECT_ROOT
  VALIDATE_ENCRYPTION_CONFIG=true \
  RABBITMQ_DEFINE_QUEUE_WORKER=true \
  RABBITMQ_DEFINE_QUEUE_BROKER=true \
+ LDAP_CONNECTION_TEST_SEARCH_TERM=Bond \
  ./mvnw spring-boot:run  \
  -Dspring-boot.run.jvmArguments="-Xdebug \
  -Xms1024M -Xmx2024M \

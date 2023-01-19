@@ -32,11 +32,11 @@ import org.datavaultplatform.broker.config.ServiceConfig;
 import org.datavaultplatform.broker.config.StorageClassNameResolverConfig;
 import org.datavaultplatform.common.crypto.EncryptionValidator;
 import org.datavaultplatform.common.monitor.MemoryStats;
+import org.datavaultplatform.common.services.LDAPService;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.actuate.scheduling.ScheduledTasksEndpoint;
 import org.springframework.boot.actuate.scheduling.ScheduledTasksEndpoint.CronTaskDescription;
@@ -147,6 +147,7 @@ public class DataVaultBrokerApp implements CommandLineRunner {
     showScheduledTasks();
     showSftpConnectionInfo();
     showLocalFileStoreInfo();
+    LDAPService.testLdapConnection(readyEvent.getApplicationContext());
     log.info("{}", MemoryStats.getCurrent().toPretty());
   }
 

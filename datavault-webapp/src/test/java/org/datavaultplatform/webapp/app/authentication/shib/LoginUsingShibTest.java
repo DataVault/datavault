@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -217,6 +219,7 @@ public class LoginUsingShibTest {
         TimeUnit.MILLISECONDS.sleep(500);
         Mockito.verify(mGA1, atLeast(0)).getAuthority();
         Mockito.verify(mGA2, atLeast(0)).getAuthority();
+        Mockito.verify(mLdapService, atMost(1)).testConnection(any());
         Mockito.verifyNoMoreInteractions(mRestService, mLdapService, mUser, mGA1, mGA2, mAuthListener);
     }
 
