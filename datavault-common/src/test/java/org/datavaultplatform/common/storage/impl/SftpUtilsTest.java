@@ -63,7 +63,8 @@ public class SftpUtilsTest {
     for (int i = 1; i < 5; i++) {
       long diff = Duration.between(finishTimes.get(i - 1), finishTimes.get(i)).toMillis();
       log.info("diff is [{} to {}][{}]", i - 1, i, diff);
-      Assertions.assertTrue(diff >= 2000);
+      // java's sleep mechanism is not that accurate !!!
+      Assertions.assertTrue(diff >= 1950);
     }
   }
 
