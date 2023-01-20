@@ -36,6 +36,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
@@ -57,6 +58,7 @@ import org.testcontainers.utility.MountableFile;
 @ProfileShib
 @TestPropertySource(properties = {"tomcat.ajp.enabled=true"})
 @Testcontainers(disabledWithoutDocker = true)
+@DirtiesContext
 @Slf4j
 class AjpConnectorIT {
 
