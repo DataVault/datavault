@@ -8,6 +8,8 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.net.InetAddress;
+
 @Configuration
 @Slf4j
 public class TomcatAjpConfig {
@@ -16,6 +18,9 @@ public class TomcatAjpConfig {
 
   @Value("${tomcat.ajp.enabled:false}")
   private boolean ajpEnabled;
+
+  @Value("${server.address:0.0.0.0}")
+  private String serverAddress;
 
   @Value("${tomcat.ajp.port:8009}")
   private int ajpPort;
@@ -40,6 +45,7 @@ public class TomcatAjpConfig {
     TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory();
 
     log.info("tomcat.ajp.enabled [{}]", ajpEnabled);
+    log.info("server.address [{}]", serverAddress);
     log.info("tomcat.ajp.port [{}]", ajpPort);
     log.info("tomcat.ajp.scheme [{}]", ajpScheme);
     log.info("tomcat.ajp.redirect.port [{}]", ajpRedirectPort);
@@ -58,7 +64,15 @@ public class TomcatAjpConfig {
 
       ajpProtocol.setSecretRequired(ajpProtocolSecretRequired);
       ajpProtocol.setTomcatAuthentication(false);
-
+      try {
+        log.info("Setting AJP Connector address to [{}]", serverAddress);
+        ajpProtocol.setAddress(InetAddress.getByName(serverAddress));
+      } catch (Exception ex) {
+        log.error("unexpected error trying to set address to [{}]", serverAddress, ex);
+      } finally {
+        log.info("AJP Connector [{}:{}]", ajpProtocol.getAddress().getCanonicalHostName(),
+            ajpProtocol.getPort());
+      }
       tomcat.addAdditionalTomcatConnectors(ajpConnector);
     }
     return tomcat;
