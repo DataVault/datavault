@@ -1,0 +1,19 @@
+# Created by David Hay 20Jan2022
+#
+# We are doing to build this image locally and push it to public dockerhub
+# in advance of the CICD pipeline running.
+#
+# see https://hub.docker.com/r/davidxhay/dv-cicd-base
+# Used as 'davidxhay/dv-cicd-base' in Dockerfile.jenkins2
+#
+FROM eclipse-temurin:8
+USER root
+#
+# install tools
+#
+RUN apt update
+RUN apt upgrade -y
+RUN apt install -y jq
+RUN apt install -y curl
+RUN apt install -y git
+RUN apt install -y iputils-ping

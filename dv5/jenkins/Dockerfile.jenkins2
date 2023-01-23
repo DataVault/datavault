@@ -1,0 +1,17 @@
+# Created by David Hay 20Jan2022
+# Used to workaround problems building images in CICD
+# This Dockerfile is used in Jenkinsfile.workaround
+# This Dockerfile uses a public base image : davidxhay/dv-cicd-base
+FROM davidxhay/dv-cicd-base
+ARG JENKINS_UID
+ARG JENKINS_GID
+ARG DOCKER_GID
+USER root
+#
+# tweak users and groups to ensure 'jenkins' user can access docker socket (/var/run/docker.sock)
+#
+RUN addgroup docker --gid $DOCKER_GID
+RUN addgroup jenkins --gid $JENKINS_GID
+RUN adduser --disabled-password --gecos "Jenkins User" -u $JENKINS_UID --gid $JENKINS_GID jenkins
+RUN gpasswd --add jenkins docker
+USER jenkins
