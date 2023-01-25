@@ -191,6 +191,20 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+        <dependency>
+          <groupId>com.oracle.oci.sdk</groupId>
+          <artifactId>oci-java-sdk-bom</artifactId>
+          <version>${oci.java.sdk.bom.version}</version>
+          <type>pom</type>
+          <scope>import</scope>
+        </dependency>
+        <dependency>
+          <groupId>com.oracle.oci.sdk</groupId>
+          <artifactId>oci-java-sdk-common-httpclient-jersey</artifactId>
+          <version>${oci.java.sdk.bom.version}</version>
+          <type>pom</type>
+          <scope>import</scope>
+        </dependency>
       <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
@@ -352,6 +366,16 @@
       <groupId>javax.interceptor</groupId>
       <artifactId>javax.interceptor-api</artifactId>
       <version>${javax.interceptor.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.oracle.oci.sdk</groupId>
+      <artifactId>oci-java-sdk-common-httpclient-jersey</artifactId>
+      <version>${oci.java.sdk.bom.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.oracle.oci.sdk</groupId>
+      <artifactId>oci-java-sdk-addons-resteasy-client-configurator</artifactId>
+      <version>${oci.java.sdk.bom.version}</version>
     </dependency>
   </dependencies>
 
