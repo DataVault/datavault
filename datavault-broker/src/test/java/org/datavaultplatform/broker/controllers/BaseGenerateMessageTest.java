@@ -84,6 +84,8 @@ public abstract class BaseGenerateMessageTest {
   final File tempDir = new File(baseDir, "temp");
   final File destDir = new File(baseDir, "dest");
 
+  final File optionsDir = new File(baseDir, "options");
+
   @Spy
   final ObjectMapper mapper = new ObjectMapper();
 
@@ -91,6 +93,7 @@ public abstract class BaseGenerateMessageTest {
   void setup() {
     tempDir.mkdir();
     destDir.mkdir();
+    optionsDir.mkdir();
   }
 
   protected DepositsController getDepositController() {
@@ -107,6 +110,7 @@ public abstract class BaseGenerateMessageTest {
         jobsService,
         adminService,
         sender,
+        optionsDir.getAbsolutePath(),
         tempDir.getAbsolutePath(),
         bucketName,
         region,

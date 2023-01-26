@@ -1,6 +1,5 @@
 package org.datavaultplatform.common.storage.impl;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -9,6 +8,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -54,10 +54,17 @@ public class SftpUtilsTest {
     if (!finishedOkay) {
       throw new IllegalStateException("Failed to finished within 12 seconds");
     }
+    assertEquals(5, finishTimes.size());
+
+    //the sorted instances should be at least 2secs apart
+    finishTimes.sort(Comparator.naturalOrder());
+
+    //5 finish times => 4 gaps of 2 seconds between finish times
     for (int i = 1; i < 5; i++) {
       long diff = Duration.between(finishTimes.get(i - 1), finishTimes.get(i)).toMillis();
       log.info("diff is [{} to {}][{}]", i - 1, i, diff);
-      Assertions.assertTrue(diff >= 2000);
+      // java's sleep mechanism is not that accurate !!!
+      Assertions.assertTrue(diff >= 1950);
     }
   }
 

@@ -10,7 +10,9 @@
 #
 # added tools jq, curl and ping to help with testing and diagnostics
 #
-FROM eclipse-temurin:8
+# THIS SPECIFIC VERSION OF eclipse-temurin:8 works - dated 25Jan2023 (had problems with some other versions)
+#https://hub.docker.com/layers/library/eclipse-temurin/8-jdk/images/sha256-513e5bb69a4ab7c53d810340c5d247274aff7fed0021ca0ca8a46d881f5a16ee?context=explore
+FROM eclipse-temurin@sha256:513e5bb69a4ab7c53d810340c5d247274aff7fed0021ca0ca8a46d881f5a16ee
 ARG JENKINS_UID
 ARG JENKINS_GID
 ARG DOCKER_GID
@@ -19,6 +21,7 @@ USER root
 # install tools
 #
 RUN apt update
+RUN apt upgrade -y
 RUN apt install -y jq
 RUN apt install -y curl
 RUN apt install -y git
