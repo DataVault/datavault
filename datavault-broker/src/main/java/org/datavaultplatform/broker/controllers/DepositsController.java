@@ -68,6 +68,7 @@ public class DepositsController {
         ExternalMetadataService externalMetadataService, FilesService filesService,
         UsersService usersService, ArchiveStoreService archiveStoreService, JobsService jobsService,
         AdminService adminService, Sender sender,
+        @Value("${optionsDir:#{null}}") String optionsDir,
         @Value("${tempDir:#{null}}") String tempDir,
         @Value("${s3.bucketName:#{null}}") String bucketName,
         @Value("${s3.region:#{null}}") String region,
@@ -91,6 +92,7 @@ public class DepositsController {
         this.jobsService = jobsService;
         this.adminService = adminService;
         this.sender = sender;
+        this.optionsDir = optionsDir;
         this.tempDir = tempDir;
         this.bucketName = bucketName;
         this.region = region;
