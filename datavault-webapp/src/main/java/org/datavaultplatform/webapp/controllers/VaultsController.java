@@ -65,7 +65,7 @@ public class VaultsController {
         ValidateService validateService,
         @Value("${metadata.system}") String system,
         @Value("${metadata.link}") String link,
-        @Value("${metadata.motd}") String welcome) {
+        @Value("${webapp.motd}") String welcome) {
         this.restService = restService;
         this.userLookupService = userLookupService;
         this.logoutService = logoutService;
