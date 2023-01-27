@@ -103,6 +103,7 @@ pipeline {
                 echo "GH_TAG_CREDENTIALS_ID is [${GH_TAG_CREDENTIALS_ID}]"
                 if ( env.GH_TAG_CREDENTIALS_ID && env.GH_TAG_CREDENTIALS_ID.trim() != "" ) {
                   //The GH_TAG variable is set in an earlier Stage
+                  sh "echo 'user.email should be [jenkins@${MY_JENKINS_HOSTNAME}]'"
                   sh "git -c user.name='Jenkins' -c user.email='jenkins@${MY_JENKINS_HOSTNAME}' tag -a '$GH_TAG' -m '${TAG}' ${GIT_COMMIT}"
                   withCredentials([gitUsernamePassword(credentialsId: env.GH_TAG_CREDENTIALS_ID)]) {
                     sh "git config --global user.name '$GIT_USERNAME'"
