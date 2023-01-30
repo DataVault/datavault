@@ -16,47 +16,22 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
 
 @Slf4j
-public class TarNestedTest {
-
-  File sourceTarDir;
+public class TarNestedTest extends BaseNestedTarTest {
 
   File tempTarFile;
-
-  File expectedTarFile;
 
   @SneakyThrows
   @BeforeEach
   void setup() {
-    //the directory to tar up
-    sourceTarDir = new ClassPathResource("tar/contents/tarContents").getFile();
-    assertTrue(sourceTarDir.exists() && sourceTarDir.isDirectory());
+    initBase();
 
     //the temp file to write the tar to
     tempTarFile = File.createTempFile("tempTarFile", ".tar");
     assertTrue(tempTarFile.exists() && tempTarFile.isFile());
     tempTarFile.deleteOnExit();
 
-    //the expected tar file
-    expectedTarFile = new ClassPathResource("tar/filtered.tar").getFile();
-    assertTrue(expectedTarFile.exists() && expectedTarFile.isFile());
-
-    // we cannot check empty directories into git so we add them during the test
-
-    File empty0 = new File(sourceTarDir, "EMPTY_0/");
-    empty0.mkdir();
-    File empty1 = new File(sourceTarDir, "N1/EMPTY_1/");
-    empty1.mkdir();
-    File empty2 = new File(sourceTarDir, "N1/N2/EMPTY_2/");
-    empty2.mkdir();
-    File empty3 = new File(sourceTarDir, "N1/N2/N3/EMPTY_3/");
-    empty3.mkdir();
-    File empty4 = new File(sourceTarDir, "N1/N2/N3/N4/EMPTY_4/");
-    empty4.mkdir();
-    File empty5 = new File(sourceTarDir, "N1/N2/N3/N4/N5/EMPTY_5/");
-    empty5.mkdir();
   }
 
   @Test
@@ -66,14 +41,14 @@ public class TarNestedTest {
     //NOTE : you cannot add empty directories to git either.
 
     //NOTE : when tarring up a directory, there are entries for each non-empty directory too
-    boolean created = Tar.createTar(sourceTarDir, tempTarFile);
+    boolean created = Tar.createTar(tarContentsDir, tempTarFile);
     assertTrue(created);
     System.out.printf("actual tar [%s]%n", tempTarFile.getAbsolutePath());
 
-    List<TarArchiveEntry> expectedEntries = getEntries(this.expectedTarFile);
+    List<TarArchiveEntry> expectedEntries = getEntries(this.referenceTarFile);
     List<TarArchiveEntry> actualEntries = getEntries(this.tempTarFile);
 
-    //assertEquals(expectedEntries.size(), actualEntries.size());
+    assertEquals(expectedEntries.size(), actualEntries.size());
 
     Map<String,Long> expectedEntryMap = expectedEntries.stream()
         .collect(Collectors.toMap(TarArchiveEntry::getName, TarArchiveEntry::getSize));
