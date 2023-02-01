@@ -216,7 +216,7 @@ public class TarTest {
     @Test
     void testTarBigDataDirectoryIgnoreTarOutput() {
         File directoryToTar = new ClassPathResource("big_data").getFile();
-        Tar2.createTar(directoryToTar, null);
+        Tar.createTar(directoryToTar, null);
     }
 
 }

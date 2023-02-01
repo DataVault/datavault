@@ -1,16 +1,16 @@
 package org.datavaultplatform.worker.operations;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-
 import java.io.File;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.amqp.core.QueueBuilder.Overflow;
 import org.springframework.core.io.ClassPathResource;
 
 @Slf4j
@@ -41,12 +41,12 @@ public class TarSimulateVeryLargeFileTest {
         return new File[]{ proxyBigFile};
       }
     };
-    assertEquals(new File[]{proxyBigFile}, proxyParentDir.listFiles());
+    assertArrayEquals(new File[]{proxyBigFile}, proxyParentDir.listFiles());
 
     Tar.createTarUsingFakeFile(proxyParentDir, null, fakeFileSize);
 
     log.info("fake file size     [{}]", fakeFileSize);
-    log.info("copied to tar [{}]", Tar3.getCopiedToTar());
+    log.info("copied to tar [{}]", Tar.getCopiedToTar());
 
     assertEquals(Tar.getCopiedToTar(), fakeFileSize);
   }
