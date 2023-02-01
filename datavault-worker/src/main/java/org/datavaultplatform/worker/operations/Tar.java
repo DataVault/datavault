@@ -41,7 +41,7 @@ public abstract class Tar {
      */
     private static boolean createTar(boolean isTesting, File dir, File file, TarFileInputStreamFactory inputStreamFactory) throws Exception {
         COPIED_TO_TAR_TL.remove();
-        try (TarArchiveOutputStream tar = new TarArchiveOutputStream(getOutputStream(file))) {
+        try (DatavaultTarArchiveOutputStream tar = new DatavaultTarArchiveOutputStream(getOutputStream(file))) {
             tar.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
             tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
             addFileToTar(isTesting, inputStreamFactory, tar, dir, "");
@@ -66,7 +66,7 @@ public abstract class Tar {
      * @param base The base path
      * @throws Exception if anything unexpected happens
      */
-    private static void addFileToTar(boolean isTesting, TarFileInputStreamFactory inputStreamFactory, TarArchiveOutputStream tar, File f, String base) throws Exception {
+    private static void addFileToTar(boolean isTesting, TarFileInputStreamFactory inputStreamFactory, DatavaultTarArchiveOutputStream tar, File f, String base) throws Exception {
         String entryName = base + f.getName();
         TarArchiveEntry tarEntry = new TarArchiveEntry(f, entryName);
 
