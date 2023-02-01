@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
 
+import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
 
 public class TarTest {
     private static File packagerResourcesDir;
@@ -207,6 +209,14 @@ public class TarTest {
         } catch(IOException ex) {
             fail(ex.getMessage());
         }
+    }
+
+    /** Tar up actual files but do not write output tar file **/
+    @SneakyThrows
+    @Test
+    void testTarBigDataDirectoryIgnoreTarOutput() {
+        File directoryToTar = new ClassPathResource("big_data").getFile();
+        Tar2.createTar(directoryToTar, null);
     }
 
 }
