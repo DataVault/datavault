@@ -111,8 +111,8 @@ public class DatavaultTarArchiveOutputStream extends ArchiveOutputStream {
   private final byte[] recordBuf;
   private int longFileMode = LONGFILE_ERROR;
   private int bigNumberMode = BIGNUMBER_ERROR;
-  private int recordsWritten;
-  private final int recordsPerBlock;
+  private long recordsWritten;
+  private final long recordsPerBlock;
 
   private boolean closed;
 
@@ -444,7 +444,7 @@ public class DatavaultTarArchiveOutputStream extends ArchiveOutputStream {
           + "' before the '" + currSize
           + "' bytes specified in the header were written");
     }
-    recordsWritten = ExactMath.add(recordsWritten, (currSize / RECORD_SIZE));
+    recordsWritten = recordsWritten + (currSize / RECORD_SIZE);
 
     if (0 != currSize % RECORD_SIZE) {
       recordsWritten++;
@@ -597,9 +597,9 @@ public class DatavaultTarArchiveOutputStream extends ArchiveOutputStream {
   }
 
   private void padAsNeeded() throws IOException {
-    final int start = recordsWritten % recordsPerBlock;
+    final long start = recordsWritten % recordsPerBlock;
     if (start != 0) {
-      for (int i = start; i < recordsPerBlock; i++) {
+      for (long i = start; i < recordsPerBlock; i++) {
         writeEOFRecord();
       }
     }
