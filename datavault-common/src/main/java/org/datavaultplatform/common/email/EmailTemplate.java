@@ -25,4 +25,6 @@ public abstract class EmailTemplate {
   public static final String USER_RETRIEVE_COMPLETE = "user-retrieve-complete.vm";
   public static final String USER_RETRIEVE_START = "user-retrieve-start.vm";
   public static final String USER_VAULT_CREATE = "user-vault-create.vm";
+  public static final String GROUP_ADMIN_PV_SUBMITTED = "group-admin-pv-submitted.vm";
+  public static final String GROUP_ADMIN_PV_SUBMISSION = "group-admin-pv-submission.vm";
 }
