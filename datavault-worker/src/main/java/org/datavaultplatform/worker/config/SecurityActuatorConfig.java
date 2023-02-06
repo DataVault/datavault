@@ -44,7 +44,8 @@ public class SecurityActuatorConfig extends WebSecurityConfigurerAdapter {
         .httpBasic().and()
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
         .authorizeRequests()
-          .antMatchers("/actuator/health", "/actuator/info").permitAll()
+          .antMatchers("/actuator/health", "/actuator/info",
+            "/actuator/metrics", "/actuator/metrics/*", "/actuator/memoryinfo").permitAll()
           .anyRequest().authenticated();
   }
 }

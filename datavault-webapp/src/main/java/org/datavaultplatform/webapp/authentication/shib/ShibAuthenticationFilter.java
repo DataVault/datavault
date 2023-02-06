@@ -21,7 +21,8 @@ import org.springframework.util.Assert;
  */
 public class ShibAuthenticationFilter extends AbstractPreAuthenticatedProcessingFilter {
 
-    public static final String[] BYPASS_STARTING_WITH = {"/error", "/resources", "/actuator/info","/actuator/health", "/actuator/customtime"};
+    public static final String[] BYPASS_STARTING_WITH = {"/error", "/resources", "/actuator/info","/actuator/health",
+            "/actuator/customtime", "/actuator/metrics", "/actuator/memoryinfo"};
 
     private String principalRequestHeader;
     private boolean exceptionIfHeaderMissing = true;
