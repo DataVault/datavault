@@ -1,6 +1,7 @@
 package org.datavaultplatform.worker.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.worker.queue.RabbitEventSender;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConditionalOnExpression("${worker.rabbit.enabled:true}")
+@Slf4j
 public class EventSenderConfig {
 
   @Autowired
@@ -39,6 +41,7 @@ public class EventSenderConfig {
     } else {
       result = rabbitEventSender;
     }
+    log.info("using event sender class [{}]", result.getClass().getSimpleName());
     return result;
   }
 }
