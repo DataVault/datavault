@@ -1,18 +1,6 @@
 package org.datavaultplatform.broker.actuator;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
@@ -31,6 +19,17 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
 @Import(TestClockConfig.class)
@@ -67,7 +66,7 @@ public class ActuatorTest extends BaseDatabaseTest {
   @Test
   @SneakyThrows
   void testActuatorPublicAccess() {
-    Stream.of("/actuator/info", "/actuator/health").forEach(this::checkPublic);
+    Stream.of("/actuator/info", "/actuator/health", "/actuator/metrics", "/actuator/memoryinfo").forEach(this::checkPublic);
   }
 
   @Test
@@ -118,4 +117,25 @@ public class ActuatorTest extends BaseDatabaseTest {
     Assertions.assertEquals("Tue Mar 29 14:15:16 BST 2022",ct);
   }
 
+  @Test
+  void testMemoryInfo() throws Exception {
+    MvcResult mvcResult = mvc.perform(
+                    get("/actuator/memoryinfo"))
+            .andExpect(content().contentTypeCompatibleWith("application/vnd.spring-boot.actuator.v3+json"))
+            .andExpect(jsonPath("$.memory").exists())
+            .andReturn();
+
+    String json = mvcResult.getResponse().getContentAsString();
+    Map<String,Object> infoMap = mapper.createParser(json).readValueAs(Map.class);
+
+    String ct = (String)infoMap.get("timestamp");
+    Assertions.assertEquals("2022-03-29T13:15:16.101Z",ct);
+
+    assertTrue(infoMap.containsKey("memory"));
+    Map<String,Object> innerMap = (Map<String,Object>)infoMap.get("memory");
+    assertTrue(innerMap.containsKey("total"));
+    assertTrue(innerMap.containsKey("free"));
+    assertTrue(innerMap.containsKey("max"));
+
+  }
 }

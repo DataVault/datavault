@@ -1,6 +1,7 @@
 package org.datavaultplatform.worker.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.worker.queue.RabbitEventSender;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -27,7 +28,17 @@ public class EventSenderConfig {
   String workerName;
 
   @Bean
-  public RecordingEventSender eventSender(ObjectMapper mapper) {
-    return new RecordingEventSender(new RabbitEventSender(template, brokerQueueName, workerName, sequenceStart, mapper));
+  public EventSender eventSender(ObjectMapper mapper,
+      @Value("${use.recording.event.sender:false}") boolean useRecordingEventSender) {
+    final EventSender result;
+    RabbitEventSender rabbitEventSender = new RabbitEventSender(template, brokerQueueName,
+        workerName,
+        sequenceStart, mapper);
+    if (useRecordingEventSender) {
+      result = new RecordingEventSender(rabbitEventSender);
+    } else {
+      result = rabbitEventSender;
+    }
+    return result;
   }
 }

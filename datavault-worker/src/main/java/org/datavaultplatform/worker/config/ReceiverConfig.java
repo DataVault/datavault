@@ -5,7 +5,7 @@ import java.security.Security;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.datavaultplatform.common.event.RecordingEventSender;
+import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.task.Context.AESMode;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.worker.queue.Receiver;
@@ -47,7 +47,7 @@ public class ReceiverConfig {
   private boolean validateWorkerDirs;
 
   @Autowired
-  RecordingEventSender eventSender;
+  EventSender eventSender;
 
   /*
       <bean id="receiver" class="org.datavaultplatform.worker.queue.Receiver">

@@ -49,7 +49,8 @@ public class SecurityActuatorConfig extends WebSecurityConfigurerAdapter {
             "/actuator",
             "/actuator/info",
             "/actuator/health",
-            "/actuator/customtime").permitAll()
+            "/actuator/customtime",
+            "/actuator/metrics", "/actuator/metrics/*", "/actuator/memoryinfo").permitAll()
         .anyRequest().authenticated();
   }
 
