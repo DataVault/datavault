@@ -54,6 +54,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import javax.crypto.SecretKey;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -121,7 +122,8 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
 
   private GenericContainer userDataSourceContainer;
 
-  private HashMap<String, String> sftpProps;
+  private HashMap<String, String> sftpSrcProps;
+  private HashMap<String, String> sftpTargetProps;
 
   @SneakyThrows
   static Set<Path> getPathsWithinTarFile(File tarFile) {
@@ -274,7 +276,9 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
     log.info("FIN {}", retrieveDir.getCanonicalPath());
     waitUntil(this::foundRetrieveComplete);
     log.info("FIN {}", retrieveDir.getCanonicalPath());
-    File retrieved = new File(this.retrieveDir + "/src-path-1/src-file-1");
+    File[] dvTimestampDirs = retrieveDir.listFiles(file -> file.isDirectory() && file.getName().startsWith("dv_"));
+    File dvLatestTimestampDir = Arrays.stream(dvTimestampDirs).sorted(Comparator.comparing((File::lastModified)).reversed()).findFirst().get();
+    File retrieved = new File(dvLatestTimestampDir + "/src-path-1/src-file-1");
 
     String digestOriginal = Verify.getDigest(this.largeFile.getFile());
     String digestRetrieved = Verify.getDigest(retrieved);
@@ -392,7 +396,19 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
   @SneakyThrows
   private void buildAndSendRetrieveMessage(DepositEvents depositEvents) {
     String retrieveMessage2 = depositEvents.generateRetrieveMessage(this.retrieveBaseDir, this.retrieveDir.getName());
-    sendNormalMessage(retrieveMessage2);
+
+    ObjectNode childNode = mapper.convertValue(this.sftpTargetProps, ObjectNode.class);
+    JsonNode parentNode = mapper.readTree(retrieveMessage2);
+
+    ObjectNode locatedNode1 = (ObjectNode)parentNode.path("userFileStoreProperties");
+    locatedNode1.put("FILE-STORE-SRC-ID", childNode);
+
+    ObjectNode locatedNode2 = (ObjectNode)parentNode.path("userFileStoreClasses");
+    locatedNode2.put("FILE-STORE-SRC-ID", new TextNode(SFTPFileSystem.class.getName()));
+
+    String sftpRetrieveMessage = mapper.writer(SerializationFeature.INDENT_OUTPUT).writeValueAsString(parentNode);
+
+    sendNormalMessage(sftpRetrieveMessage);
   }
 
   @SneakyThrows
@@ -402,7 +418,7 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
     String temp2 = temp1.replaceAll("/tmp/dv/src", sourceDir.getCanonicalPath());
     String localFSresult = temp2.replaceAll("/tmp/dv/dest", destDir.getCanonicalPath());
 
-    ObjectNode childNode = mapper.convertValue(this.sftpProps, ObjectNode.class);
+    ObjectNode childNode = mapper.convertValue(this.sftpSrcProps, ObjectNode.class);
     JsonNode parentNode = mapper.readTree(localFSresult);
 
     ObjectNode locatedNode1 = (ObjectNode)parentNode.path("userFileStoreProperties");
@@ -459,7 +475,8 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
             .withEnv(ENV_USER_NAME, TEST_USER)
             .withEnv(ENV_PUBLIC_KEY, sftpPublicKey) //this causes the public key to be added to /config/.ssh/authorized_keys
             .withExposedPorts(2222)
-            .withFileSystemBind(this.sourceDir.getCanonicalPath(),this.sourceDir.getCanonicalPath())
+            .withFileSystemBind(this.sourceDir.getCanonicalPath(), this.sourceDir.getCanonicalPath())
+            .withFileSystemBind(this.retrieveDir.getCanonicalPath(), this.retrieveDir.getCanonicalPath())
             .waitingFor(Wait.forListeningPort());
 
     userDataSourceContainer.start();
@@ -468,13 +485,18 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
 
     byte[] encSftpPrivateKey = Encryption.encryptSecret(sftpPrivateKey, iv);
 
-    sftpProps = new HashMap<>();
-    sftpProps.put(PropNames.PRIVATE_KEY, Base64.getEncoder().encodeToString(encSftpPrivateKey));
-    sftpProps.put(PropNames.IV, Base64.getEncoder().encodeToString(iv));
-    sftpProps.put(PropNames.PASSPHRASE, TEST_PASSPHRASE);
-    sftpProps.put(PropNames.USERNAME, TEST_USER);
-    sftpProps.put(PropNames.HOST, this.userDataSourceContainer.getHost());
-    sftpProps.put(PropNames.PORT, ""+this.userDataSourceContainer.getMappedPort(2222));
-    sftpProps.put(PropNames.ROOT_PATH, this.sourceDir.getCanonicalPath());
+    sftpSrcProps = new HashMap<>();
+    sftpSrcProps.put(PropNames.PRIVATE_KEY, Base64.getEncoder().encodeToString(encSftpPrivateKey));
+    sftpSrcProps.put(PropNames.IV, Base64.getEncoder().encodeToString(iv));
+    sftpSrcProps.put(PropNames.PASSPHRASE, TEST_PASSPHRASE);
+    sftpSrcProps.put(PropNames.USERNAME, TEST_USER);
+    sftpSrcProps.put(PropNames.HOST, this.userDataSourceContainer.getHost());
+    sftpSrcProps.put(PropNames.PORT, ""+this.userDataSourceContainer.getMappedPort(2222));
+    sftpSrcProps.put(PropNames.ROOT_PATH, this.sourceDir.getCanonicalPath());
+
+    sftpTargetProps = new HashMap<>(sftpSrcProps);
+    sftpTargetProps.put(PropNames.ROOT_PATH, this.retrieveBaseDir.getCanonicalPath());
+
+    assertNotEquals(sftpTargetProps.get(PropNames.ROOT_PATH), sftpSrcProps.get(PropNames.ROOT_PATH));
   }
 }
