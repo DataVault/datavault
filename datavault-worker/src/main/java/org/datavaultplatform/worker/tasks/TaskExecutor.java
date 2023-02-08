@@ -49,6 +49,7 @@ public class TaskExecutor<T> {
         .map(service::submit)
         .collect(Collectors.toList());
 
+    //service will not accept more tasks, and stop when all already submitted tasks have finished.
     service.shutdown();
 
     // service.awaitTermination(1, TimeUnit.MINUTES);

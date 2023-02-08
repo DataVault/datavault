@@ -1,11 +1,8 @@
 package org.datavaultplatform.common.config;
 
-import javax.annotation.PostConstruct;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;

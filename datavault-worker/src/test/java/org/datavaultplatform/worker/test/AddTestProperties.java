@@ -11,7 +11,7 @@ import org.springframework.test.context.TestPropertySource;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @ActiveProfiles("test")
-@TestPropertySource("classpath:datavault-test.properties")
+@TestPropertySource(value="classpath:datavault-test.properties", properties = {"worker.memory.enabled=false"})
 public @interface AddTestProperties {
 
 }

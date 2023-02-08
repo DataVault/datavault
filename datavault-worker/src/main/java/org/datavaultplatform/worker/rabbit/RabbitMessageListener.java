@@ -31,10 +31,18 @@ public class RabbitMessageListener {
     this.applicationName = applicationName;
   }
 
-  @SneakyThrows
   @RabbitListener(queues = QueueConfig.WORKER_QUEUE_NAME)
   void onMessage(Message message, Channel channel,
-      @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) {
+                 @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) {
+    try {
+      onMessageInternal(message, channel, deliveryTag);
+    } finally {
+      Runtime.getRuntime().gc();
+    }
+  }
+
+  @SneakyThrows
+  void onMessageInternal(Message message, Channel channel, long deliveryTag) {
 
     Assert.notNull(message, () -> "The message cannot be null");
     Assert.notNull(channel, () -> "The channel cannot be null");
