@@ -23,7 +23,11 @@ SETUP_ENV=\
  $LOGFILE_SETTINGS"
 
 JAVA_TOOL_OPTS=\
-"-Duser.language=en \
+"-Dcom.sun.management.jmxremote=true
+ -Dcom.sun.management.jmxremote.port=6662
+ -Dcom.sun.management.jmxremote.authenticate=false
+ -Dcom.sun.management.jmxremote.ssl=false
+ -Duser.language=en \
  -Duser.country=GB \
  -Duser.home=$PROJECT_ROOT/dv5/user/home \
  -Duser.dir=$PROJECT_ROOT/dv5/user/dir \
