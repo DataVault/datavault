@@ -48,6 +48,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
+import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
@@ -479,6 +480,9 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
             .waitingFor(Wait.forListeningPort());
 
     userDataSourceContainer.start();
+
+    Container.ExecResult execresult = userDataSourceContainer.execInContainer("chown", "-R", "testuser", "/tmp/retrieve");
+    log.info("chmod exit code [{}]", execresult.getExitCode());
 
     byte[] iv = Encryption.generateIV();
 
