@@ -54,7 +54,6 @@ import org.testcontainers.utility.DockerImageName;
 
 import javax.crypto.SecretKey;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
