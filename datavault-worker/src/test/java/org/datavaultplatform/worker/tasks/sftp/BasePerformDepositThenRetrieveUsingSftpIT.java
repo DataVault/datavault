@@ -51,10 +51,10 @@ import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.utility.MountableFile;
 
 import javax.crypto.SecretKey;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -94,8 +94,7 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
   @Qualifier("workerQueue") //the name of the bean, not the Q
   protected Queue workerQueue;
   String keyStorePath;
-  @Value("${tempDir}")
-  String tempDir;
+
   @Value("${metaDir}")
   String metaDir;
   File sourceDir;
@@ -183,7 +182,7 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
 
   @SneakyThrows
   private void setupDirectoriesAndFiles() {
-    Path baseTemp = Paths.get(this.tempDir);
+    Path baseTemp = Files.createTempDirectory("tmpSftp");
 
     sourceDir = baseTemp.resolve("source").toFile();
     assertTrue(sourceDir.mkdir());
@@ -193,8 +192,7 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
     assertTrue(retrieveBaseDir.mkdir());
     retrieveDir = retrieveBaseDir.toPath().resolve("ret-folder").toFile();
     assertTrue(retrieveDir.mkdir());
-    log.info("meta.dir   [{}]", metaDir);
-    log.info("temp.dir   [{}]", tempDir);
+
     log.info("source dir [{}]", sourceDir);
     log.info("dest   dir [{}]", destDir);
     log.info("retrieve base dir [{}]", retrieveBaseDir);
@@ -213,7 +211,7 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
 
   @SneakyThrows
   void setupKeystore() {
-    Path baseTemp = Paths.get(this.tempDir);
+    Path baseTemp = Files.createTempDirectory("tmpKeyStore");
     Encryption.addBouncyCastleSecurityProvider();
     keyStorePath = baseTemp.resolve("test.ks").toFile().getCanonicalPath();
     log.info("BASE TEMP IS AT [{}]", baseTemp.toFile().getCanonicalPath());
@@ -273,7 +271,7 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
 
   @SneakyThrows
   private void checkRetrieve() {
-    log.info("FIN {}", retrieveDir.getCanonicalPath());
+
     waitUntil(this::foundRetrieveComplete);
     log.info("FIN {}", retrieveDir.getCanonicalPath());
     File[] dvTimestampDirs = retrieveDir.listFiles(file -> file.isDirectory() && file.getName().startsWith("dv_"));
@@ -475,8 +473,9 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
             .withEnv(ENV_USER_NAME, TEST_USER)
             .withEnv(ENV_PUBLIC_KEY, sftpPublicKey) //this causes the public key to be added to /config/.ssh/authorized_keys
             .withExposedPorts(2222)
-            .withFileSystemBind(this.sourceDir.getCanonicalPath(), this.sourceDir.getCanonicalPath())
-            .withFileSystemBind(this.retrieveDir.getCanonicalPath(), this.retrieveDir.getCanonicalPath())
+            //.withFileSystemBind(this.sourceDir.getCanonicalPath(), "/tmp/source")
+            .withFileSystemBind(this.retrieveDir.getCanonicalPath(), "/tmp/retrieve/ret-folder")
+            .withCopyFileToContainer(MountableFile.forHostPath(sourceDir.toPath()),"/tmp/source")
             .waitingFor(Wait.forListeningPort());
 
     userDataSourceContainer.start();
@@ -492,10 +491,10 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
     sftpSrcProps.put(PropNames.USERNAME, TEST_USER);
     sftpSrcProps.put(PropNames.HOST, this.userDataSourceContainer.getHost());
     sftpSrcProps.put(PropNames.PORT, ""+this.userDataSourceContainer.getMappedPort(2222));
-    sftpSrcProps.put(PropNames.ROOT_PATH, this.sourceDir.getCanonicalPath());
+    sftpSrcProps.put(PropNames.ROOT_PATH, "/tmp/source");
 
     sftpTargetProps = new HashMap<>(sftpSrcProps);
-    sftpTargetProps.put(PropNames.ROOT_PATH, this.retrieveBaseDir.getCanonicalPath());
+    sftpTargetProps.put(PropNames.ROOT_PATH, "/tmp/retrieve");
 
     assertNotEquals(sftpTargetProps.get(PropNames.ROOT_PATH), sftpSrcProps.get(PropNames.ROOT_PATH));
   }

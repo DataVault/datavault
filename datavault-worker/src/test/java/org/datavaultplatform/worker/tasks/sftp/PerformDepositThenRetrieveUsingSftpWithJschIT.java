@@ -8,6 +8,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(classes = DataVaultWorkerInstanceApp.class)
+//@EnabledOnOs(OS.MAC)
 @AddTestProperties
 @DirtiesContext
 @TestPropertySource(properties = {"sftp.driver.use.apache.sshd=true"})
