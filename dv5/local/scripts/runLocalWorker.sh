@@ -47,9 +47,12 @@ JAVA_TOOL_OPTS=\
  -Duser.dir=$PROJECT_ROOT/dv5/user/dir \
  -Duser.timezone=Europe/London \
  -Xdebug \
- -Xms1024M -Xmx2024M \
- -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5555"
+ -Xms1024M -Xmx2024M"
 
- eval $SETUP_ENV \
- java $JAVA_TOOL_OPTS -jar $PROJECT_ROOT/datavault-worker/target/datavault-worker.jar
+ eval $SETUP_ENV java $JAVA_TOOL_OPTS \
+ -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5555 \
+ -jar $PROJECT_ROOT/datavault-worker/target/datavault-worker.jar
+
+# NOTE for java 8  - address=5555
+# NOTE for java 9+ - address=*:5555
 
