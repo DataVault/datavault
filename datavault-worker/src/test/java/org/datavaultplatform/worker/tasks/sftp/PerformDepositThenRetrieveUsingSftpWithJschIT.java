@@ -6,8 +6,10 @@ import org.datavaultplatform.worker.test.AddTestProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(classes = DataVaultWorkerInstanceApp.class)
+@Testcontainers(disabledWithoutDocker = true)
 //@EnabledOnOs(OS.MAC)
 @AddTestProperties
 @DirtiesContext

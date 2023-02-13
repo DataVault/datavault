@@ -69,6 +69,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.list;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
@@ -274,6 +275,13 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
   private void checkRetrieve() {
 
     waitUntil(this::foundRetrieveComplete);
+
+    Container.ExecResult execResult = userDataSourceContainer.execInContainer("/tmp/findSrcFile1.sh");
+    assertEquals(0, execResult.getExitCode(), "cannot find 50MB file in container - exit code");
+
+    String filesInContainerStdOut = execResult.getStdout();
+    assertTrue(filesInContainerStdOut.contains("50000000"), "cannot find 50MB file in container - file size");
+
     log.info("FIN {}", retrieveDir.getCanonicalPath());
     File[] dvTimestampDirs = retrieveDir.listFiles(file -> file.isDirectory() && file.getName().startsWith("dv_"));
     File dvLatestTimestampDir = Arrays.stream(dvTimestampDirs).sorted(Comparator.comparing((File::lastModified)).reversed()).findFirst().get();
@@ -477,12 +485,19 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
             //.withFileSystemBind(this.sourceDir.getCanonicalPath(), "/tmp/source")
             .withFileSystemBind(this.retrieveDir.getCanonicalPath(), "/tmp/retrieve/ret-folder")
             .withCopyFileToContainer(MountableFile.forHostPath(sourceDir.toPath()),"/tmp/source")
+            .withCopyFileToContainer(MountableFile.forClasspathResource("docker/findSrcFile1.sh"),"/tmp/findSrcFile1.sh")
             .waitingFor(Wait.forListeningPort());
 
     userDataSourceContainer.start();
 
-    Container.ExecResult execresult = userDataSourceContainer.execInContainer("chown", "-R", "testuser", "/tmp/retrieve");
-    log.info("chmod exit code [{}]", execresult.getExitCode());
+    Container.ExecResult execresult1 = userDataSourceContainer.execInContainer("chown", "-R", "testuser", "/tmp/retrieve");
+    log.info("chown exit code [{}]", execresult1.getExitCode());
+
+    Container.ExecResult execresult2 = userDataSourceContainer.execInContainer("chmod", "a+r", "/tmp/retrieve");
+    log.info("chmod exit code [{}]", execresult2.getExitCode());
+
+    Container.ExecResult execresult3 = userDataSourceContainer.execInContainer("chmod", "+x", "/tmp/findSrcFile1.sh");
+    log.info("chmod exit code [{}]", execresult3.getExitCode());
 
     byte[] iv = Encryption.generateIV();
 
