@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.rabbitmq.client.Channel;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.awaitility.Awaitility;
@@ -55,6 +56,7 @@ import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
 import javax.crypto.SecretKey;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -282,6 +284,19 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
     String filesInContainerStdOut = execResult.getStdout();
     assertTrue(filesInContainerStdOut.contains("50000000"), "cannot find 50MB file in container - file size");
 
+    // we tar up the retrieved files on the container and copy them back to the local file system.
+    // we tried using a shared directory via a bind mount but had problems with it in CI/CD pipeline which uses DockerInDocker
+    Container.ExecResult tarResult = userDataSourceContainer.execInContainer("tar","cvf","retFolder.tar","-C","/tmp/retrieve", "ret-folder");
+    assertEquals(0, tarResult.getExitCode());
+
+    File destination = new File(retrieveDir.toString());
+    assertTrue(destination.isDirectory());
+    assertTrue(destination.exists());
+
+    File localTarFile = new File(retrieveBaseDir.toString(), "retFolder.tar");
+    userDataSourceContainer.copyFileFromContainer("/retFolder.tar", localTarFile.toString());
+    unTar(localTarFile);
+
     log.info("FIN {}", retrieveDir.getCanonicalPath());
     File[] dvTimestampDirs = retrieveDir.listFiles(file -> file.isDirectory() && file.getName().startsWith("dv_"));
     File dvLatestTimestampDir = Arrays.stream(dvTimestampDirs).sorted(Comparator.comparing((File::lastModified)).reversed()).findFirst().get();
@@ -291,6 +306,29 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
     String digestRetrieved = Verify.getDigest(retrieved);
 
     assertEquals(digestOriginal, digestRetrieved);
+  }
+
+  private void unTar(File tarFile) {
+    unTar(tarFile.toPath(), tarFile.toPath().getParent());
+  }
+
+  @SneakyThrows
+  public static void unTar( Path pathInput, Path pathOutput ) {
+    TarArchiveInputStream tararchiveinputstream =
+            new TarArchiveInputStream(                     new BufferedInputStream( Files.newInputStream( pathInput ) )  );
+
+    ArchiveEntry archiveentry = null;
+    while( (archiveentry = tararchiveinputstream.getNextEntry()) != null ) {
+      Path pathEntryOutput = pathOutput.resolve( archiveentry.getName() );
+      if( archiveentry.isDirectory() ) {
+        if( !Files.exists( pathEntryOutput ) )
+          Files.createDirectory( pathEntryOutput );
+      }
+      else
+        Files.copy( tararchiveinputstream, pathEntryOutput );
+    }
+
+    tararchiveinputstream.close();
   }
 
   boolean foundRetrieveComplete() {
@@ -483,12 +521,15 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
             .withEnv(ENV_PUBLIC_KEY, sftpPublicKey) //this causes the public key to be added to /config/.ssh/authorized_keys
             .withExposedPorts(2222)
             //.withFileSystemBind(this.sourceDir.getCanonicalPath(), "/tmp/source")
-            .withFileSystemBind(this.retrieveDir.getCanonicalPath(), "/tmp/retrieve/ret-folder")
+            //.withFileSystemBind(this.retrieveDir.getCanonicalPath(), "/tmp/retrieve/ret-folder")
             .withCopyFileToContainer(MountableFile.forHostPath(sourceDir.toPath()),"/tmp/source")
             .withCopyFileToContainer(MountableFile.forClasspathResource("docker/findSrcFile1.sh"),"/tmp/findSrcFile1.sh")
             .waitingFor(Wait.forListeningPort());
 
     userDataSourceContainer.start();
+
+    Container.ExecResult mkdirResult = userDataSourceContainer.execInContainer("mkdir", "-p", "/tmp/retrieve/ret-folder");
+    log.info("mkdir exit code [{}]", mkdirResult.getExitCode());
 
     Container.ExecResult execresult1 = userDataSourceContainer.execInContainer("chown", "-R", "testuser", "/tmp/retrieve");
     log.info("chown exit code [{}]", execresult1.getExitCode());
