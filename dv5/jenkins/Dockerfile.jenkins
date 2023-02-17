@@ -10,9 +10,9 @@
 #
 # added tools jq, curl and ping to help with testing and diagnostics
 #
-# THIS SPECIFIC VERSION OF eclipse-temurin:8 works - dated 25Jan2023 (had problems with some other versions)
-#https://hub.docker.com/layers/library/eclipse-temurin/8-jdk/images/sha256-513e5bb69a4ab7c53d810340c5d247274aff7fed0021ca0ca8a46d881f5a16ee?context=explore
-FROM eclipse-temurin@sha256:513e5bb69a4ab7c53d810340c5d247274aff7fed0021ca0ca8a46d881f5a16ee
+# THIS SPECIFIC VERSION OF eclipse-temurin:17 works - dated 06Feb2023 (had problems with some other versions)
+#https://hub.docker.com/layers/library/eclipse-temurin/17-jdk/images/sha256-632dbd08304e07b2ba745cb21e996ef3ccb55df26c3709cf6396b3e1b9ed11c2?context=explore
+FROM eclipse-temurin@sha256:632dbd08304e07b2ba745cb21e996ef3ccb55df26c3709cf6396b3e1b9ed11c2
 ARG JENKINS_UID
 ARG JENKINS_GID
 ARG DOCKER_GID
