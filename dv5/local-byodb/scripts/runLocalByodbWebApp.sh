@@ -15,6 +15,8 @@ cd $PROJECT_ROOT
  -Dspring-boot.run.jvmArguments="-Xdebug \
  -Xms1024M -Xmx2024M \
  -Duser.language=en -Duser.country=GB -Duser.timezone=Europe/London \
- -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5050" \
+ -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5050" \
  --projects datavault-webapp
 
+# NOTE for java 8  - address=5050
+# NOTE for java 9+ - address=*:5050

@@ -23,15 +23,21 @@ SETUP_ENV=\
  $LOGFILE_SETTINGS"
 
 JAVA_TOOL_OPTS=\
-"-Duser.language=en \
+"-Dcom.sun.management.jmxremote=true
+ -Dcom.sun.management.jmxremote.port=6662
+ -Dcom.sun.management.jmxremote.authenticate=false
+ -Dcom.sun.management.jmxremote.ssl=false
+ -Duser.language=en \
  -Duser.country=GB \
  -Duser.home=$PROJECT_ROOT/dv5/user/home \
  -Duser.dir=$PROJECT_ROOT/dv5/user/dir \
  -Duser.timezone=Europe/London \
  -Xdebug \
- -Xms1024M -Xmx2024M \
- -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5050"
+ -Xms1024M -Xmx2024M"
 
- eval $SETUP_ENV \
- java $JAVA_TOOL_OPTS -jar $PROJECT_ROOT/datavault-webapp/target/datavault-webapp.jar
+ eval $SETUP_ENV java $JAVA_TOOL_OPTS \
+ -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5050 \
+ -jar $PROJECT_ROOT/datavault-webapp/target/datavault-webapp.jar
 
+# NOTE for java 8  - address=5050
+# NOTE for java 9+ - address=*:5050
