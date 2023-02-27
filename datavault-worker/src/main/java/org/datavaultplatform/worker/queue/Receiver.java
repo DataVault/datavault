@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.datavaultplatform.common.event.Event;
+import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.RecordingEventSender;
 import org.datavaultplatform.common.io.FileUtils;
 import org.datavaultplatform.common.task.Context;
@@ -37,7 +38,7 @@ public class Receiver implements MessageProcessor {
     private final boolean multipleValidationEnabled;
     private final int noChunkThreads;
 
-    private final RecordingEventSender eventSender;
+    private final EventSender eventSender;
 
     private final StorageClassNameResolver storageClassNameResolver;
 
@@ -54,7 +55,7 @@ public class Receiver implements MessageProcessor {
         boolean multipleValidationEnabled,
         int noChunkThreads,
 
-        RecordingEventSender eventSender,
+        EventSender eventSender,
         StorageClassNameResolver storageClassNameResolver) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
@@ -73,15 +74,21 @@ public class Receiver implements MessageProcessor {
     @Override
     public boolean processMessage(MessageInfo messageInfo) {
         try {
-            eventSender.clear();
+            if (eventSender instanceof RecordingEventSender) {
+                ((RecordingEventSender) eventSender).clear();
+            }
             return processMessageInternal(messageInfo);
         } finally {
-            List<Event> events = eventSender.getEvents();
+            if (eventSender instanceof RecordingEventSender) {
+                RecordingEventSender res = (RecordingEventSender) eventSender;
+                List<Event> events = res.getEvents();
 
-            generateRetrieveMessageForDeposit(messageInfo, events, new File("/tmp/retrieve"), "retDir");
+                generateRetrieveMessageForDeposit(messageInfo, events, new File("/tmp/retrieve"),
+                    "retDir");
 
-            if (logger.isTraceEnabled()) {
-                logger.trace("events send by worker: {}", events);
+                if (logger.isTraceEnabled()) {
+                    logger.trace("events send by worker: {}", events);
+                }
             }
         }
     }

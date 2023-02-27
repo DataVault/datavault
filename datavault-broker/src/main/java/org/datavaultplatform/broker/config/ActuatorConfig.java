@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Function;
 import org.datavaultplatform.broker.actuator.CurrentTimeEndpoint;
 import org.datavaultplatform.broker.actuator.LocalFileStoreEndpoint;
+import org.datavaultplatform.broker.actuator.MemoryInfoEndpoint;
 import org.datavaultplatform.broker.actuator.SftpFileStoreEndpoint;
 import org.datavaultplatform.broker.services.ArchiveStoreService;
 import org.datavaultplatform.broker.services.FileStoreService;
@@ -25,6 +26,11 @@ public class ActuatorConfig {
   @Bean
   CurrentTimeEndpoint currentTime(Clock clock){
     return new CurrentTimeEndpoint(clock);
+  }
+
+  @Bean
+  MemoryInfoEndpoint memoryInfoEndpoint(Clock clock) {
+    return new MemoryInfoEndpoint(clock);
   }
 
   @Bean

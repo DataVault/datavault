@@ -2,6 +2,7 @@ package org.datavaultplatform.worker.config;
 
 import java.time.Clock;
 import org.datavaultplatform.worker.actuator.CurrentTimeEndpoint;
+import org.datavaultplatform.worker.actuator.MemoryInfoEndpoint;
 import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,11 @@ public class ActuatorConfig {
   @Bean
   Clock clock() {
     return Clock.systemDefaultZone();
+  }
+
+  @Bean
+  MemoryInfoEndpoint memoryInfoEndpoint(Clock clock) {
+    return new MemoryInfoEndpoint(clock);
   }
 
   @Bean

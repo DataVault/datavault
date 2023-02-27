@@ -2,6 +2,7 @@ package org.datavaultplatform.webapp.config;
 
 import java.time.Clock;
 import org.datavaultplatform.webapp.actuator.CurrentTimeEndpoint;
+import org.datavaultplatform.webapp.actuator.MemoryInfoEndpoint;
 import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +19,11 @@ public class ActutatorConfig {
   @Bean
   CurrentTimeEndpoint currentTime(Clock clock){
       return new CurrentTimeEndpoint(clock);
+  }
+
+  @Bean
+  MemoryInfoEndpoint memoryInfo(Clock clock) {
+    return new MemoryInfoEndpoint(clock);
   }
 
   @Bean

@@ -45,7 +45,7 @@ import org.springframework.test.web.servlet.ResultActions;
 @TestPropertySource(properties = "management.endpoints.web.exposure.include=*")
 public class ActuatorTest {
 
-  private static final List<String> PUBLIC_ENDPOINTS = Arrays.asList("info","health","customtime");
+  private static final List<String> PUBLIC_ENDPOINTS = Arrays.asList("info","health","customtime", "metrics", "memoryinfo");
   private static final List<String> PRIVATE_ENDPOINTS = Arrays.asList("env","loggers","mappings","beans");
 
   @Autowired
@@ -115,6 +115,28 @@ public class ActuatorTest {
     assertTrue(infoMap.containsKey("current-time"));
     String ct = infoMap.get("current-time");
     Assertions.assertEquals("Tue Mar 29 14:15:16 BST 2022",ct);
+  }
+
+  @Test
+  void testMemoryInfo() throws Exception {
+    MvcResult mvcResult = mvc.perform(
+                    get("/actuator/memoryinfo"))
+            .andExpect(content().contentTypeCompatibleWith("application/vnd.spring-boot.actuator.v3+json"))
+            .andExpect(jsonPath("$.memory").exists())
+            .andReturn();
+
+    String json = mvcResult.getResponse().getContentAsString();
+    Map<String,Object> infoMap = mapper.createParser(json).readValueAs(Map.class);
+
+    String ct = (String)infoMap.get("timestamp");
+    Assertions.assertEquals("2022-03-29T13:15:16.101Z",ct);
+
+    assertTrue(infoMap.containsKey("memory"));
+    Map<String,Object> innerMap = (Map<String,Object>)infoMap.get("memory");
+    assertTrue(innerMap.containsKey("total"));
+    assertTrue(innerMap.containsKey("free"));
+    assertTrue(innerMap.containsKey("max"));
+
   }
 
   @Test
