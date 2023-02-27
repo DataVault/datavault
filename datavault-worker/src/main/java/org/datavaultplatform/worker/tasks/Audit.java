@@ -185,7 +185,7 @@ public class Audit extends Task {
     	ArrayList<String> states = new ArrayList<>();
         states.add("Audit Data");    // 0
         states.add("Data Audit complete");  // 1
-        eventSender.send(new InitStates(this.jobID, this.auditId, states));
+        eventSender.send(new InitStates(this.jobID, null, states));
 	}
     
     private Device setupArchiveFileStores(StorageClassNameResolver resolver) {
