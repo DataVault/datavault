@@ -8,6 +8,7 @@ import org.datavaultplatform.common.model.*;
 
 import org.datavaultplatform.common.model.dao.VaultDAO;
 import org.datavaultplatform.common.request.CreateVault;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.datavaultplatform.common.email.EmailTemplate;
@@ -64,7 +65,14 @@ public class VaultsService {
     }
 
     public List<Vault> getVaults() {
-        return vaultDAO.list();
+        List<Vault> vaults = vaultDAO.list();
+        for (Vault v: vaults) {
+            Hibernate.initialize(v.getVaultReviews());
+            for (VaultReview vr : v.getVaultReviews()) {
+                Hibernate.initialize(vr.getDepositReviews());
+            }
+        }
+        return vaults;
     }
 
     public List<Vault> getVaults(String userId, String sort, String order, String offset, String maxResult) {

@@ -227,16 +227,25 @@ public class EventListener implements MessageListener {
     Event event = getConcreteEvent(messageBody);
 
     // Get the related deposit
-    Deposit deposit = getDeposit(event.getDepositId());
-    event.setDeposit(deposit);
+    Deposit deposit = null;
+    String depositId = event.getDepositId();
+
+    if (depositId != null) {
+      deposit = getDeposit(event.getDepositId());
+      event.setDeposit(deposit);
+    }
 
     // Get the related job
     Job job = getJob(event.getJobId());
     event.setJob(job);
 
     // Get the related User
-    User initUser = getUser(event.getUserId());
-    event.setUser(initUser);
+    User initUser = null;
+    String userId = event.getUserId();
+    if (userId != null) {
+      initUser = getUser(event.getUserId());
+      event.setUser(initUser);
+    }
 
     if (event.getPersistent()) {
       // Persist the event properties in the database ...
@@ -338,6 +347,8 @@ public class EventListener implements MessageListener {
   @SneakyThrows
   Event getConcreteEvent(String messageBody) {
     ObjectMapper mapper = new ObjectMapper();
+
+    //Event Mapper using wrong Event constructor for AuditComplete? 4 param v 6 v message?  hopefully using message instead of 6 for audit
     Event commonEvent = mapper.readValue(messageBody, Event.class);
 
     @SuppressWarnings("unchecked")
