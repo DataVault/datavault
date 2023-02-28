@@ -113,7 +113,13 @@ public class DepositsService {
 
     public List<Deposit> inProgress() { return depositDAO.inProgress(); }
 
-    public List<Deposit> completed() { return depositDAO.completed(); }
+    public List<Deposit> completed() {
+        List<Deposit> deposits = depositDAO.completed();
+        for (Deposit deposit : deposits) {
+            Hibernate.initialize(deposit.getDepositChunks());
+        }
+        return deposits;
+    }
 
     public List<Deposit> search(String query, String sort, String order, String userId) {
         return this.depositDAO.search(query, sort, order, userId);
