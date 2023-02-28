@@ -68,6 +68,9 @@ public class VaultsService {
         List<Vault> vaults = vaultDAO.list();
         for (Vault v: vaults) {
             Hibernate.initialize(v.getVaultReviews());
+            for (VaultReview vr : v.getVaultReviews()) {
+                Hibernate.initialize(vr.getDepositReviews());
+            }
         }
         return vaults;
     }
