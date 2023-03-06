@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Slf4j
@@ -101,6 +102,7 @@ public class AuditDepositsChunks implements ScheduledTask {
 
 
     @Scheduled(cron = ScheduledUtils.SCHEDULE_1_AUDIT_DEPOSIT)
+    @Transactional
     public void execute() {
         Date now = new Date();
         log.info("Start Audit Job "+ now);

@@ -6,7 +6,6 @@ import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.AuditChunkStatusDAO;
 import org.datavaultplatform.common.model.dao.DepositChunkDAO;
 import org.datavaultplatform.common.model.dao.DepositDAO;
-import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,9 +114,6 @@ public class DepositsService {
 
     public List<Deposit> completed() {
         List<Deposit> deposits = depositDAO.completed();
-        for (Deposit deposit : deposits) {
-            Hibernate.initialize(deposit.getDepositChunks());
-        }
         return deposits;
     }
 
@@ -182,7 +178,6 @@ public class DepositsService {
         for(Deposit deposit : deposits){
             logger.debug("Total Count: "+totalCount);
             logger.debug("check deposit: "+deposit.getID());
-            Hibernate.initialize(deposit.getArchives());
             List<DepositChunk> depositChunks = deposit.getDepositChunks();
 
             logger.debug("Number of chunks in deposit: " + depositChunks.size());
