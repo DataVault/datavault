@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -26,6 +27,7 @@ public class CheckRetentionPolicies implements ScheduledTask {
     }
 
     @Scheduled(cron = ScheduledUtils.SCHEDULE_5_RETENTION_CHECK)
+    @Transactional
     public void execute() {
         // Start the check
         Date start = new Date();
