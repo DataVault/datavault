@@ -15,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 /**
  * As part of the Review process, deposits can be flagged for deletion at a later date. Check the deposits
  * and delete any that are due for deletion.
@@ -51,6 +53,7 @@ public class CheckForDelete implements ScheduledTask {
 
     @Override
     @Scheduled(cron = ScheduledUtils.SCHEDULE_3_DELETE)
+    @Transactional
     public void execute() throws Exception {
 
         Date today = new Date();
