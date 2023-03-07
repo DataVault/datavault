@@ -16,6 +16,7 @@ import org.datavaultplatform.common.email.EmailTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class CheckForReview implements ScheduledTask {
@@ -65,7 +66,9 @@ public class CheckForReview implements ScheduledTask {
     }
 
 
+    @Override
     @Scheduled(cron = ScheduledUtils.SCHEDULE_4_REVIEW)
+    @Transactional
     public void execute() throws Exception {
 
         Date start = new Date();

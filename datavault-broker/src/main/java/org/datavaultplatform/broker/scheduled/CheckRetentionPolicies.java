@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Created by stuartlewis on 01/06/2016.
@@ -25,7 +26,9 @@ public class CheckRetentionPolicies implements ScheduledTask {
         this.vaultsService = vaultsService;
     }
 
+    @Override
     @Scheduled(cron = ScheduledUtils.SCHEDULE_5_RETENTION_CHECK)
+    @Transactional
     public void execute() {
         // Start the check
         Date start = new Date();
