@@ -113,7 +113,7 @@
                             <label for="update-user-role" class="control-label col-sm-2">Role</label>
                             <div class="col-sm-10">
                                 <select id="update-user-role" name="role" class="form-control">
-                                    <#list roles as role><option value="${role.id}">${role.name}</option></#list>
+                                    <#list roles as role><option value="${role.id?c}">${role.name}</option></#list>
                                 </select>
                             </div>
                         </div>
