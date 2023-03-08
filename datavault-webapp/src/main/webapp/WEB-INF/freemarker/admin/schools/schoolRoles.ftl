@@ -201,8 +201,8 @@
                                 <td class="role-column">${assignment.role.name}</td>
                                 <#if canManageSchoolRoleAssignments>
                                     <td class="action-column">
-                                        <a href="#" class="btn btn-default" data-toggle="modal" data-target="#update-existing-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.userId}" data-user-role="${assignment.role.id}" title="Edit role for ${assignment.userId}."><i class="fa fa-pencil"></i></a>
-                                        <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog" data-assignment-id="${assignment.id}" data-user-name="${assignment.userId}" title="Delete role for ${assignment.userId}."><i class="fa fa-trash"></i></a>
+                                        <a href="#" class="btn btn-default" data-toggle="modal" data-target="#update-existing-dialog" data-assignment-id="${assignment.id?c}" data-user-name="${assignment.userId}" data-user-role="${assignment.role.id}" title="Edit role for ${assignment.userId}."><i class="fa fa-pencil"></i></a>
+                                        <a href="#" class="btn btn-default btn-delete" data-toggle="modal" data-target="#delete-dialog" data-assignment-id="${assignment.id?c}" data-user-name="${assignment.userId}" title="Delete role for ${assignment.userId}."><i class="fa fa-trash"></i></a>
                                     </td>
                                 </#if>
                             </tr>
@@ -249,7 +249,7 @@
         });
         $('[data-target="#update-existing-dialog"]').click(function() {
             var assignmentId = $(this).data('assignment-id');
-            assignmentId = assignmentId.replace(/\,/g,'');
+            //assignmentId = assignmentId.replace(/\,/g,'');
             assignmentId = parseInt(assignmentId,10);
             var userName = $(this).data('user-name');
             var role = $(this).data('user-role');
@@ -260,7 +260,7 @@
         });
         $('[data-target="#delete-dialog"]').click(function() {
             var assignmentId = $(this).data('assignment-id');
-            assignmentId = assignmentId.replace(/\,/g,'');
+            //assignmentId = assignmentId.replace(/\,/g,'');
             assignmentId = parseInt(assignmentId,10);
             var userName = $(this).data('user-name');
             $('#delete-role-assignment-id').val(assignmentId);
