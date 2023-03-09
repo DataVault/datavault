@@ -252,7 +252,7 @@
                         <div class="col-sm-10">
                             <select id="update-user-role" name="role" class="form-control">
                                 <#list roles as role>
-                                    <option value="${role.id}">${role.name}</option></#list>
+                                    <option value="${role.id?c}">${role.name}</option></#list>
                             </select>
                         </div>
                     </div>
