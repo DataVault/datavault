@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import org.bouncycastle.util.encoders.Base64;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Component
@@ -51,6 +52,7 @@ public class CheckEncryptionData implements ScheduledTask {
     private static final Logger log = LoggerFactory.getLogger(CheckEncryptionData.class);
 
     @Scheduled(cron = ScheduledUtils.SCHEDULE_2_ENCRYPTION_CHECK)
+    @Transactional
     public void execute() {
 
         Date start = new Date();
