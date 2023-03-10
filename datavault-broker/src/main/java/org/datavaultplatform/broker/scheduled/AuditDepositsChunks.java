@@ -18,7 +18,6 @@ import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.Audit;
 import org.datavaultplatform.common.model.DepositChunk;
 import org.datavaultplatform.common.model.Job;
-import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -101,6 +100,7 @@ public class AuditDepositsChunks implements ScheduledTask {
     }
 
 
+    @Override
     @Scheduled(cron = ScheduledUtils.SCHEDULE_1_AUDIT_DEPOSIT)
     @Transactional
     public void execute() {

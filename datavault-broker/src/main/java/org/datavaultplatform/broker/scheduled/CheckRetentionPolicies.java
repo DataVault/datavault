@@ -26,6 +26,7 @@ public class CheckRetentionPolicies implements ScheduledTask {
         this.vaultsService = vaultsService;
     }
 
+    @Override
     @Scheduled(cron = ScheduledUtils.SCHEDULE_5_RETENTION_CHECK)
     @Transactional
     public void execute() {
