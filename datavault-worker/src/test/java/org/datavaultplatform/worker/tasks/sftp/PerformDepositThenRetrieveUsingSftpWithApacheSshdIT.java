@@ -10,7 +10,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(classes = DataVaultWorkerInstanceApp.class)
 @Testcontainers(disabledWithoutDocker = true)
-//@EnabledOnOs(OS.MAC)
 @AddTestProperties
 @DirtiesContext
 @TestPropertySource(properties = {"sftp.driver.use.apache.sshd=false"})

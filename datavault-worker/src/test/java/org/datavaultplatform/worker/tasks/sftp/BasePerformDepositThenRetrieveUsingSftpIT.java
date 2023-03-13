@@ -71,7 +71,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.list;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
@@ -123,7 +122,7 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
   private String sftpPublicKey;
   private String sftpPrivateKey;
 
-  private GenericContainer userDataSourceContainer;
+  private GenericContainer<?> userDataSourceContainer;
 
   private HashMap<String, String> sftpSrcProps;
   private HashMap<String, String> sftpTargetProps;
@@ -131,7 +130,7 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
   @SneakyThrows
   static Set<Path> getPathsWithinTarFile(File tarFile) {
     Set<Path> paths = new HashSet<>();
-    try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new FileInputStream(tarFile))) {
+    try (TarArchiveInputStream tarIn = new TarArchiveInputStream(Files.newInputStream(tarFile.toPath()))) {
       TarArchiveEntry entry;
       while ((entry = tarIn.getNextTarEntry()) != null) {
         if (entry.isDirectory()) {
@@ -315,12 +314,12 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
   @SneakyThrows
   public static void unTar( Path pathInput, Path pathOutput ) {
     TarArchiveInputStream tararchiveinputstream =
-            new TarArchiveInputStream(                     new BufferedInputStream( Files.newInputStream( pathInput ) )  );
+            new TarArchiveInputStream(new BufferedInputStream(Files.newInputStream(pathInput)));
 
-    ArchiveEntry archiveentry = null;
-    while( (archiveentry = tararchiveinputstream.getNextEntry()) != null ) {
-      Path pathEntryOutput = pathOutput.resolve( archiveentry.getName() );
-      if( archiveentry.isDirectory() ) {
+    ArchiveEntry archiveEntry;
+    while( (archiveEntry = tararchiveinputstream.getNextEntry()) != null ) {
+      Path pathEntryOutput = pathOutput.resolve( archiveEntry.getName() );
+      if( archiveEntry.isDirectory() ) {
         if( !Files.exists( pathEntryOutput ) )
           Files.createDirectory( pathEntryOutput );
       }
