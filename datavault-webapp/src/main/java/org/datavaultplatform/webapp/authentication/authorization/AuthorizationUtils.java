@@ -1,10 +1,10 @@
-package org.datavaultplatform.webapp.authentication.shib;
+package org.datavaultplatform.webapp.authentication.authorization;
 
 import org.datavaultplatform.common.model.RoleName;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-public abstract class ShibUtils {
+public abstract class AuthorizationUtils {
     public static final GrantedAuthority ROLE_USER = new SimpleGrantedAuthority(RoleName.ROLE_USER);
     public static final GrantedAuthority ROLE_ADMIN = new SimpleGrantedAuthority(RoleName.ROLE_ADMIN);
     public static final GrantedAuthority ROLE_IS_ADMIN = new SimpleGrantedAuthority(RoleName.ROLE_IS_ADMIN);

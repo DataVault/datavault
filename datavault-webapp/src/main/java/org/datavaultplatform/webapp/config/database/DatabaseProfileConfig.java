@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.config.database;
 
+import org.datavaultplatform.webapp.authentication.authorization.GrantedAuthorityService;
 import org.datavaultplatform.webapp.authentication.database.DatabaseAuthenticationProvider;
 import org.datavaultplatform.webapp.services.PermissionsService;
 import org.datavaultplatform.webapp.services.RestService;
@@ -15,7 +16,12 @@ public class DatabaseProfileConfig {
 
   @Bean
   DatabaseAuthenticationProvider databaseAuthenticationProvider(RestService restService, PermissionsService permissionsService){
-    return new DatabaseAuthenticationProvider(restService, permissionsService);
+    return new DatabaseAuthenticationProvider(restService, grantedAuthorityService(restService,permissionsService));
+  }
+
+  @Bean
+  GrantedAuthorityService grantedAuthorityService(RestService restService, PermissionsService permissionsService) {
+    return new GrantedAuthorityService(restService, permissionsService);
   }
 
 }

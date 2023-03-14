@@ -19,7 +19,7 @@ import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.common.services.LDAPService;
 import org.datavaultplatform.common.util.DisabledInsideDocker;
 import org.datavaultplatform.webapp.authentication.shib.ShibAuthenticationListener;
-import org.datavaultplatform.webapp.authentication.shib.ShibGrantedAuthorityService;
+import org.datavaultplatform.webapp.authentication.authorization.GrantedAuthorityService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.test.ProfileShib;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,7 +72,7 @@ class AjpConnectorIT {
   LDAPService mLdapService;
 
   @MockBean
-  ShibGrantedAuthorityService mGrantedAuthorityService;
+  GrantedAuthorityService mGrantedAuthorityService;
 
   @Mock
   User mUser;
