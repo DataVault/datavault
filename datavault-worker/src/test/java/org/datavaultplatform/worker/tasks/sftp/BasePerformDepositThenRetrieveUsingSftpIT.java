@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.rabbitmq.client.Channel;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.awaitility.Awaitility;
@@ -48,11 +49,14 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
+import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.utility.MountableFile;
 
 import javax.crypto.SecretKey;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -93,8 +97,7 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
   @Qualifier("workerQueue") //the name of the bean, not the Q
   protected Queue workerQueue;
   String keyStorePath;
-  @Value("${tempDir}")
-  String tempDir;
+
   @Value("${metaDir}")
   String metaDir;
   File sourceDir;
@@ -119,7 +122,7 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
   private String sftpPublicKey;
   private String sftpPrivateKey;
 
-  private GenericContainer userDataSourceContainer;
+  private GenericContainer<?> userDataSourceContainer;
 
   private HashMap<String, String> sftpSrcProps;
   private HashMap<String, String> sftpTargetProps;
@@ -127,7 +130,7 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
   @SneakyThrows
   static Set<Path> getPathsWithinTarFile(File tarFile) {
     Set<Path> paths = new HashSet<>();
-    try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new FileInputStream(tarFile))) {
+    try (TarArchiveInputStream tarIn = new TarArchiveInputStream(Files.newInputStream(tarFile.toPath()))) {
       TarArchiveEntry entry;
       while ((entry = tarIn.getNextTarEntry()) != null) {
         if (entry.isDirectory()) {
@@ -182,7 +185,7 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
 
   @SneakyThrows
   private void setupDirectoriesAndFiles() {
-    Path baseTemp = Paths.get(this.tempDir);
+    Path baseTemp = Files.createTempDirectory("tmpSftp");
 
     sourceDir = baseTemp.resolve("source").toFile();
     assertTrue(sourceDir.mkdir());
@@ -192,8 +195,7 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
     assertTrue(retrieveBaseDir.mkdir());
     retrieveDir = retrieveBaseDir.toPath().resolve("ret-folder").toFile();
     assertTrue(retrieveDir.mkdir());
-    log.info("meta.dir   [{}]", metaDir);
-    log.info("temp.dir   [{}]", tempDir);
+
     log.info("source dir [{}]", sourceDir);
     log.info("dest   dir [{}]", destDir);
     log.info("retrieve base dir [{}]", retrieveBaseDir);
@@ -212,7 +214,7 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
 
   @SneakyThrows
   void setupKeystore() {
-    Path baseTemp = Paths.get(this.tempDir);
+    Path baseTemp = Files.createTempDirectory("tmpKeyStore");
     Encryption.addBouncyCastleSecurityProvider();
     keyStorePath = baseTemp.resolve("test.ks").toFile().getCanonicalPath();
     log.info("BASE TEMP IS AT [{}]", baseTemp.toFile().getCanonicalPath());
@@ -272,8 +274,28 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
 
   @SneakyThrows
   private void checkRetrieve() {
-    log.info("FIN {}", retrieveDir.getCanonicalPath());
+
     waitUntil(this::foundRetrieveComplete);
+
+    Container.ExecResult execResult = userDataSourceContainer.execInContainer("/tmp/findSrcFile1.sh");
+    assertEquals(0, execResult.getExitCode(), "cannot find 50MB file in container - exit code");
+
+    String filesInContainerStdOut = execResult.getStdout();
+    assertTrue(filesInContainerStdOut.contains("50000000"), "cannot find 50MB file in container - file size");
+
+    // we tar up the retrieved files on the container and copy them back to the local file system.
+    // we tried using a shared directory via a bind mount but had problems with it in CI/CD pipeline which uses DockerInDocker
+    Container.ExecResult tarResult = userDataSourceContainer.execInContainer("tar","cvf","retFolder.tar","-C","/tmp/retrieve", "ret-folder");
+    assertEquals(0, tarResult.getExitCode());
+
+    File destination = new File(retrieveDir.toString());
+    assertTrue(destination.isDirectory());
+    assertTrue(destination.exists());
+
+    File localTarFile = new File(retrieveBaseDir.toString(), "retFolder.tar");
+    userDataSourceContainer.copyFileFromContainer("/retFolder.tar", localTarFile.toString());
+    unTar(localTarFile);
+
     log.info("FIN {}", retrieveDir.getCanonicalPath());
     File[] dvTimestampDirs = retrieveDir.listFiles(file -> file.isDirectory() && file.getName().startsWith("dv_"));
     File dvLatestTimestampDir = Arrays.stream(dvTimestampDirs).sorted(Comparator.comparing((File::lastModified)).reversed()).findFirst().get();
@@ -283,6 +305,29 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
     String digestRetrieved = Verify.getDigest(retrieved);
 
     assertEquals(digestOriginal, digestRetrieved);
+  }
+
+  private void unTar(File tarFile) {
+    unTar(tarFile.toPath(), tarFile.toPath().getParent());
+  }
+
+  @SneakyThrows
+  public static void unTar( Path pathInput, Path pathOutput ) {
+    TarArchiveInputStream tararchiveinputstream =
+            new TarArchiveInputStream(new BufferedInputStream(Files.newInputStream(pathInput)));
+
+    ArchiveEntry archiveEntry;
+    while( (archiveEntry = tararchiveinputstream.getNextEntry()) != null ) {
+      Path pathEntryOutput = pathOutput.resolve( archiveEntry.getName() );
+      if( archiveEntry.isDirectory() ) {
+        if( !Files.exists( pathEntryOutput ) )
+          Files.createDirectory( pathEntryOutput );
+      }
+      else
+        Files.copy( tararchiveinputstream, pathEntryOutput );
+    }
+
+    tararchiveinputstream.close();
   }
 
   boolean foundRetrieveComplete() {
@@ -474,11 +519,25 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
             .withEnv(ENV_USER_NAME, TEST_USER)
             .withEnv(ENV_PUBLIC_KEY, sftpPublicKey) //this causes the public key to be added to /config/.ssh/authorized_keys
             .withExposedPorts(2222)
-            .withFileSystemBind(this.sourceDir.getCanonicalPath(), this.sourceDir.getCanonicalPath())
-            .withFileSystemBind(this.retrieveDir.getCanonicalPath(), this.retrieveDir.getCanonicalPath())
+            //.withFileSystemBind(this.sourceDir.getCanonicalPath(), "/tmp/source")
+            //.withFileSystemBind(this.retrieveDir.getCanonicalPath(), "/tmp/retrieve/ret-folder")
+            .withCopyFileToContainer(MountableFile.forHostPath(sourceDir.toPath()),"/tmp/source")
+            .withCopyFileToContainer(MountableFile.forClasspathResource("docker/findSrcFile1.sh"),"/tmp/findSrcFile1.sh")
             .waitingFor(Wait.forListeningPort());
 
     userDataSourceContainer.start();
+
+    Container.ExecResult mkdirResult = userDataSourceContainer.execInContainer("mkdir", "-p", "/tmp/retrieve/ret-folder");
+    log.info("mkdir exit code [{}]", mkdirResult.getExitCode());
+
+    Container.ExecResult execresult1 = userDataSourceContainer.execInContainer("chown", "-R", "testuser", "/tmp/retrieve");
+    log.info("chown exit code [{}]", execresult1.getExitCode());
+
+    Container.ExecResult execresult2 = userDataSourceContainer.execInContainer("chmod", "a+r", "/tmp/retrieve");
+    log.info("chmod exit code [{}]", execresult2.getExitCode());
+
+    Container.ExecResult execresult3 = userDataSourceContainer.execInContainer("chmod", "+x", "/tmp/findSrcFile1.sh");
+    log.info("chmod exit code [{}]", execresult3.getExitCode());
 
     byte[] iv = Encryption.generateIV();
 
@@ -491,10 +550,10 @@ public abstract class BasePerformDepositThenRetrieveUsingSftpIT extends BaseRabb
     sftpSrcProps.put(PropNames.USERNAME, TEST_USER);
     sftpSrcProps.put(PropNames.HOST, this.userDataSourceContainer.getHost());
     sftpSrcProps.put(PropNames.PORT, ""+this.userDataSourceContainer.getMappedPort(2222));
-    sftpSrcProps.put(PropNames.ROOT_PATH, this.sourceDir.getCanonicalPath());
+    sftpSrcProps.put(PropNames.ROOT_PATH, "/tmp/source");
 
     sftpTargetProps = new HashMap<>(sftpSrcProps);
-    sftpTargetProps.put(PropNames.ROOT_PATH, this.retrieveBaseDir.getCanonicalPath());
+    sftpTargetProps.put(PropNames.ROOT_PATH, "/tmp/retrieve");
 
     assertNotEquals(sftpTargetProps.get(PropNames.ROOT_PATH), sftpSrcProps.get(PropNames.ROOT_PATH));
   }
