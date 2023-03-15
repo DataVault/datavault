@@ -35,6 +35,10 @@
     <skip.integration.tests>false</skip.integration.tests>
 
     <!-- dependency versions -->
+
+    <!-- https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client -->
+    <maria.java.client.version>3.1.2</maria.java.client.version>
+
     <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
     <aws.java.sdk.bom.version>1.12.426</aws.java.sdk.bom.version>
 
