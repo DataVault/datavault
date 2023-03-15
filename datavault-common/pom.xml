@@ -88,7 +88,7 @@
     <dependency>
       <groupId>com.oracle.oci.sdk</groupId>
       <artifactId>oci-java-sdk-objectstorage</artifactId>
-      <!-- we want to pull in latest version of BC - bcpkix-jdk18on, see top level pom.xml -->
+      <!-- we want to pull in the latest version of BC - bcpkix-jdk18on, see top level pom.xml -->
       <exclusions>
         <exclusion>
           <groupId>org.bouncycastle</groupId>
