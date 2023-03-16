@@ -47,7 +47,7 @@ $(document).ready(function(){
 		var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
 
 		if (dateResult === false && grantChecked === true) {
-			// 
+			//
 			var validationMessage = validateDateString($("#billingGrantEndDate").val().trim(), "Grant End Date", startYearsInFutureForGEDNegative);
 			if (validationMessage != "") {
 				$('#invalid-billing-grant-end-date-span').text(validationMessage);
@@ -56,148 +56,16 @@ $(document).ready(function(){
 			$("#grantEndDate").val($("#billingGrantEndDate").val().trim());
 			$("#grantEndDate").prop("disabled", true);
 		} else {
-			var length = calculateReviewLength();
-			var estimatedReviewDateAsISOString = calculateReviewDateForTodayAsISOString(length);
 
 			$("#grantEndDate").prop("disabled", false);
 			// Reset to dbGrantEndDate
 			$("#grantEndDate").val(dbGrantEndDate);
-			$("#reviewDate").val(estimatedReviewDateAsISOString);
+
 		}
 	}).trigger('change');
 
-	$("#billingGrantEndDate, #grantEndDate, #policyInfo").change(function(){
-		// if the ged changes update the suggested review date
-		if($("#grantEndDate").val().trim() !== '') {
-			var grantEndDateValidationMessage = validateDateString($("#grantEndDate").val().trim(), "Grant End Date", startYearsInFutureForGEDNegative);
-			$('#invalid-grant-end-date-span').text(grantEndDateValidationMessage);
-		} else {
-			// clear any validation
-			$('#invalid-grant-end-date-span').text("");	
-		}
-
-		// if no retention policy picked yet ged + 3 years
-
-		// if a retention policy has been picked ged + policy length
-		var noRP = ($("#policyInfo option:selected").val() === '' || $("#policyInfo option:selected").prop("disabled"));
-		var noGED = ($("#grantEndDate").val().trim() === '');
-		var noBillingGED = ($("#billingGrantEndDate").val().trim() === '');
-		var ged = $("#grantEndDate").val().trim();
-		var gedDate = new Date(ged);
-		var gedMm = String(gedDate.getMonth() + 1).padStart(2, '0');
-		var gedDd = String(gedDate.getDate()).padStart(2, '0');
-		var billingGed = $("#billingGrantEndDate").val().trim();
-		var billingGedDate = new Date(billingGed);
-		var billingGedMm = String(billingGedDate.getMonth() + 1).padStart(2, '0');
-		var billingGedDd = String(billingGedDate.getDate()).padStart(2, '0');
-		var defaultLength = 3;
-		var policyLength = calculateReviewLength();
-
-		var today = new Date();
-		var dd = String(today.getDate()).padStart(2, '0');
-		var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0
-		// Default Review Date (3 years from today)
-	        var estimatedReviewDateAsISOString = calculateReviewDateForTodayAsISOString(defaultLength);
-			
-		// GED in future test
-		var grantGEDInFuture = noGED  ? false : (dateDiffInDaysStartingAtMidnight(today, gedDate) > 0);
-		var billingGEDInFuture = noBillingGED ? false : (dateDiffInDaysStartingAtMidnight(today, billingGedDate) > 0);
-
-		if (noRP === false && noGED === true && noBillingGED === true) {
-			// if we only have policy then length + current date = review date
-			estimatedReviewDateAsISOString = String(today.getFullYear() + policyLength) + '-' + mm + '-' + dd;
-		} 
-
-		if (noRP === false && noBillingGED === false && billingGEDInFuture === true) {
-			// if we have both then billing ged + policy length = review date
-			estimatedReviewDateAsISOString = String(billingGedDate.getFullYear() + policyLength) + '-' + billingGedMm + '-' + billingGedDd;
-		} 
-
-		if (noRP === true && noBillingGED === false && billingGEDInFuture === true) {
-			// if we only have a ged in the billing fieldset then ged + 3 = review date
-			estimatedReviewDateAsISOString = String(billingGedDate.getFullYear() + defaultLength) + '-' + billingGedMm + '-' + billingGedDd;
-		} 
-
-		if (noRP === false && noGED === false && grantGEDInFuture === true) {
-			// if we have both then ged + policy length = review date
-			estimatedReviewDateAsISOString = String(gedDate.getFullYear() + policyLength) + '-' + gedMm + '-' + gedDd;
-		} 
-
-		if (noRP === true && noGED === false && grantGEDInFuture === true) {
-			// if we only have ged then ged + 3 = review date
-			estimatedReviewDateAsISOString = String(gedDate.getFullYear() + defaultLength) + '-' + gedMm + '-' + gedDd;
-		} 
-
-		if (noRP === false && noBillingGED === false && billingGEDInFuture === false) {
-			estimatedReviewDateAsISOString = String(billingGedDate.getFullYear() + policyLength) + '-' + billingGedMm + '-' + billingGedDd;
-		} 
-		
-		if (noRP === false && noGED === false && grantGEDInFuture === false) {
-			estimatedReviewDateAsISOString = String(gedDate.getFullYear() + policyLength) + '-' + gedMm + '-' + gedDd;
-		}
-		
-
-		estimatedReviewDateAsISOString = validateOrChangeReviewDateISOString(estimatedReviewDateAsISOString);
-	    $("#reviewDate").val(estimatedReviewDateAsISOString);
-
-		// Clear Error text and update message 
-		$("#invalid-review-date-span").text(""); 
-		var reviewDateUpdatedMsg = "Note the Review Date has been updated based on your selections.";
-		$("#updated-review-date-span").text(reviewDateUpdatedMsg);
 
 
-	}).trigger('change');
-
-	$("#reviewDate").change(function() {
-		var startYearsInFuture  = 3; // Min allowed years in future for  Review Date
-
-		// Clear old messages beside the review date
-		$("#updated-review-date-span").text("");
-		$("#invalid-review-date-span").text(""); 
-
-		var reviewDateString = $("#reviewDate").val().trim();
-		console.log("reviewDateString", reviewDateString);
-
-		var validationMessage = validateDateString(reviewDateString, "Review Date",  startYearsInFuture );
-
-		if(validationMessage.trim() !== '') {
-			console.log(validationMessage);
-			// Add error message     
-			$("#invalid-review-date-span").text(validationMessage);	
-
-		} else {
-			// Clear Error text     
-			$("#invalid-review-date-span").text(""); 
-		}
-
-	}).trigger('change');
-
-
-
-	$("#vaultName, #description, #policyInfo, #groupID, #reviewDate, #grantEndDate").change(function(){
-		// if all the mandatory values in the info field set are non null or empty set the next button
-		// display value to true
-		// name
-		var nameResult = ($( "input[type=text][id=vaultName]").val().trim() === '');
-		// description
-		var descResult = ($( "textarea[type=text][id=description]").val() === '');
-		// retention policy
-		var rpResult = ($("#policyInfo option:selected").val() === '' || $("#policyInfo option:selected").prop("disabled"));
-		// school
-		var schoolResult = ($("#groupID option:selected").val() === '' || $("#groupID option:selected").prop("disabled"));
-		// review date
-		var reviewResult = ($( "input[id=reviewDate]").val().trim() === '' ||  $("#invalid-review-date-span").text().trim() !== '');
-		// Check that there are no validation error of grantEndDate input
-		// as it is not a required field
-		var grantEndResult = ($("#invalid-grant-end-date-span").text().trim() !== '');
-
-		if (nameResult === false && descResult === false && rpResult === false &&
-				schoolResult === false  && reviewResult === false && grantEndResult === false) {
-			$(this).parents("fieldset").children(".next").prop("disabled", false);
-		} else {
-			$(this).parents("fieldset").children(".next").prop("disabled", true);
-		}
-	}).trigger('change');  ;
 
 	$("#pureLink-check").change(function(){
 		var result = $(this).is(":checked");
@@ -292,7 +160,7 @@ $(document).ready(function(){
 	$("#add-ndm-btn").click(function(){
 		const firstEmptyNdm = $("#hidden-empty-ndms > div.empty-ndm").first();
 		firstEmptyNdm.removeClass("empty-ndm")
-		.addClass("extra-ndm");
+			.addClass("extra-ndm");
 		firstEmptyNdm.appendTo("#extra-ndm-list");
 		firstEmptyNdm.show();
 	});
@@ -302,17 +170,17 @@ $(document).ready(function(){
 		// Reset value of input to empty string
 		currentNdm.find("input:first-child").val("");
 		currentNdm.removeClass("extra-ndm")
-		.addClass("empty-ndm");
+			.addClass("empty-ndm");
 		// Prepend element to hidden-empty-ndms
 		currentNdm.prependTo($("#hidden-empty-ndms"));
-		// Clear Error text     
+		// Clear Error text
 		$(this).siblings(".uun-required-error-span").text("");
 	});
 
 	$("#add-depositor-btn").click(function(){
 		const firstEmptyDepositor = $("#hidden-empty-depositors > div.empty-depositor").first();
 		firstEmptyDepositor.removeClass("empty-depositor")
-		.addClass("extra-depositor");
+			.addClass("extra-depositor");
 		firstEmptyDepositor.appendTo("#extra-depositor-list");
 		firstEmptyDepositor.show();
 	});
@@ -322,10 +190,10 @@ $(document).ready(function(){
 		// Reset value of input to empty string
 		currentDepositor.find("input:first-child").val("");
 		currentDepositor.removeClass("extra-depositor")
-		.addClass("empty-depositor");
+			.addClass("empty-depositor");
 		// Prepend element to hidden-empty-depositors
 		currentDepositor.prependTo($("#hidden-empty-depositors"));
-		// Clear Error text     
+		// Clear Error text
 		$(this).siblings(".uun-required-error-span").text("");
 
 	});
@@ -333,7 +201,7 @@ $(document).ready(function(){
 	$("#add-data-creator-btn").click(function(){
 		const firstEmptyDataCreator = $("#hidden-empty-data-creators > div.empty-data-creator").first();
 		firstEmptyDataCreator.removeClass("empty-data-creator")
-		.addClass("extra-data-creator");
+			.addClass("extra-data-creator");
 		firstEmptyDataCreator.appendTo("#extra-data-creator-list");
 		firstEmptyDataCreator.show();
 	});
@@ -343,10 +211,10 @@ $(document).ready(function(){
 		// Reset value of input to empty string
 		currentDataCreator.find("input:first-child").val("");
 		currentDataCreator.removeClass("extra-data-creator")
-		.addClass("empty-data-creator");
+			.addClass("empty-data-creator");
 		// Prepend element to hidden-empty-data-creators
 		currentDataCreator.prependTo($("#hidden-empty-data-creators"));
-		// Clear Error text     
+		// Clear Error text
 		$(this).siblings(".uun-required-error-span").text("");
 
 	});
@@ -426,11 +294,11 @@ $(document).ready(function(){
 	});
 
 
-	// We need to populate the summary page with data from 
+	// We need to populate the summary page with data from
 	// other fieldset pages at start
 	populateSummaryPage();
 	// Set the Progress to go to Billing when we first enter
-    var start = (new URL(window.location.href)).searchParams.get('start');
+	var start = (new URL(window.location.href)).searchParams.get('start');
 	if(start == 2) {
 		$("#progressbar li").eq(1).addClass("active");
 		// Show Summary page
@@ -444,7 +312,7 @@ $(document).ready(function(){
 		console.log("called validateBillingNAFields");
 		if($("#billing-choice-na").is(":checked")) {
 			$("#billing-choice-na").parents("fieldset").children(".next").prop( "disabled", false );
-			console.log("called validateBillingNAFields: ENABLED");	
+			console.log("called validateBillingNAFields: ENABLED");
 		}
 	}
 
@@ -459,18 +327,18 @@ $(document).ready(function(){
 				console.log("called validateBillingSliceFields: DISABLED");
 			}
 
-		}	
+		}
 	}
 
 	function validateBillingGrantFundingFields() {
 		console.log("called validateBillingGrantFundingFields");
 		if($("#billing-choice-grantfunding").is(":checked")) {
 			if($("#authoriser").val().trim() !== '' &&
-					$("#schoolOrUnit").val().trim() !== '' &&
-					$("#subunit").val().trim() !== '' &&
-					$("#projectTitle").val().trim() !== '' &&
-					$("#billingGrantEndDate").val().trim() !== '' &&
-					$("#invalid-billing-grant-end-date-span").text().trim() === '') {
+				$("#schoolOrUnit").val().trim() !== '' &&
+				$("#subunit").val().trim() !== '' &&
+				$("#projectTitle").val().trim() !== '' &&
+				$("#billingGrantEndDate").val().trim() !== '' &&
+				$("#invalid-billing-grant-end-date-span").text().trim() === '') {
 				$("#billing-choice-grantfunding").parents("fieldset").children(".next").prop( "disabled", false );
 				console.log("called validateBillingGrantFundedFields: ENABLED");
 			} else {
@@ -478,15 +346,15 @@ $(document).ready(function(){
 				console.log("called validateBillingGrantFundingFields: DISABLED");
 			}
 
-		}	
+		}
 	}
 
 	function validateBillingBudgetCodeFields() {
 		console.log("called validateBillingBudgetCodeFields");
 		if($("#billing-choice-budgetcode").is(":checked")) {
 			if($("#budget-authoriser").val().trim() !== '' &&
-					$("#budget-schoolOrUnit").val().trim() !== '' &&
-					$("#budget-subunit").val().trim() !== '' ) {
+				$("#budget-schoolOrUnit").val().trim() !== '' &&
+				$("#budget-subunit").val().trim() !== '' ) {
 				$("#billing-choice-budgetcode").parents("fieldset").children(".next").prop( "disabled", false );
 				console.log("called validateBillingBudgetCodeFields: ENABLED");
 			} else {
@@ -494,7 +362,7 @@ $(document).ready(function(){
 				console.log("called validateBillingBudgetCodeFields: DISABLED");
 			}
 
-		}	
+		}
 	}
 
 	// We will call this in $(".next").click()
@@ -515,12 +383,10 @@ $(document).ready(function(){
 			$("#grantEndDate").val($("#billingGrantEndDate").val());
 			$("#grantEndDate").prop("disabled", true);
 		} else {
-			var length = calculateReviewLength();
-			var estimatedReviewDateAsISOString = calculateReviewDateForTodayAsISOString(length);
+
 			$("#grantEndDate").prop("disabled", false);
 			// Reset to dbGrantEndDate
 			$("#grantEndDate").val(dbGrantEndDate);
-			$("#reviewDate").val(estimatedReviewDateAsISOString);
 		}
 
 		// clear the unused fieldsets
@@ -644,50 +510,10 @@ $(document).ready(function(){
 				if(array[i].trim().length > 0) {
 					html += array[i] + "<br>";
 				}
-			} 
+			}
 			return html;
 		}
 
 	}
 
-	function calculateReviewDateForTodayAsISOString(length) {
-		var today = new Date();
-		var dd = String(today.getDate()).padStart(2,'0');
-		var mm = String(today.getMonth() + 1).padStart(2,'0'); // January is 0
-		var yyyy = String(today.getFullYear() + parseInt(length, 10));
-
-		return yyyy + '-' + mm + '-' + dd;
-	}
-
-	function calculateReviewLength() {
-		var noRP = ($("#policyInfo option:selected").val() === '' || $("#policyInfo option:selected").prop("disabled"));
-
-		var length = 3;
-		var policyInfoString = $("#policyInfo option:selected").val();
-		var policyInfoArray = policyInfoString.split("-");
-
-		if (noRP === false && policyInfoString !== '' && policyInfoArray[1] !== '') {
-			var policyLength = parseInt(policyInfoArray[1], 10);
-			if (policyLength > length) {
-				length = policyLength;
-			}
-		}
-
-		return length;
-	}
-	
-	function validateOrChangeReviewDateISOString(reviewDateToCheckISOString) {
-		console.log("validateOrChangeReviewDate - reviewDateToCheckISOString: ", reviewDateToCheckISOString);
-		var reviewDateToCheckObject = new Date(reviewDateToCheckISOString);
-		var today = new Date();
-		var diffInYears = dateDiffInYears(today, reviewDateToCheckObject);
-		// Default Review Date 3 years from today.
-		var defaultLength = 3;
-		if(diffInYears < defaultLength) {
-			return calculateReviewDateForTodayAsISOString(defaultLength);
-		} else {
-			return reviewDateToCheckISOString;
-		}
-	}
 });
-

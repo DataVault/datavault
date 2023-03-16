@@ -1,6 +1,7 @@
 package org.datavaultplatform.broker.services;
 
 
+import org.datavaultplatform.common.email.EmailTemplate;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.PendingVaultDAO;
 import org.datavaultplatform.common.request.CreateVault;
@@ -431,6 +432,6 @@ public class PendingVaultsService {
         model.put(EMAIL_SUBMITTER_ID, vault.getUser().getID());
         LocalDate today = LocalDate.now();
         model.put(EMAIL_TIMESTAMP, today);
-        this.emailService.sendTemplateMail(this.helpMail, "New Pending Vault Submitted", "group-admin-pv-submitted.vm", model);
+        this.emailService.sendTemplateMail(this.helpMail, "New Pending Vault Submitted", EmailTemplate.GROUP_ADMIN_PV_SUBMITTED, model);
     }
 }

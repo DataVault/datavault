@@ -64,7 +64,8 @@ public class VaultsService {
     }
 
     public List<Vault> getVaults() {
-        return vaultDAO.list();
+        List<Vault> vaults = vaultDAO.list();
+        return vaults;
     }
 
     public List<Vault> getVaults(String userId, String sort, String order, String offset, String maxResult) {

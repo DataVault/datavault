@@ -53,6 +53,7 @@ import org.springframework.test.context.TestPropertySource;
     "review.schedule=-",
     "delete.schedule=-",
     "retentioncheck.schedule=-"})
+
 @Import({MockRabbitConfig.class})
 /**
  * This test is NOT checking the scheduling - it is testing the DB access from the scheduled tasks.

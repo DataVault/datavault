@@ -252,7 +252,7 @@
                         <div class="col-sm-10">
                             <select id="update-user-role" name="role" class="form-control">
                                 <#list roles as role>
-                                    <option value="${role.id}">${role.name}</option></#list>
+                                    <option value="${role.id?c}">${role.name}</option></#list>
                             </select>
                         </div>
                     </div>
@@ -370,12 +370,12 @@
                     <td class="action-column">
                         <@sec.authorize access=assignVaultRolesSecurityExpression>
                         <a href="#" class="btn btn-default" data-toggle="modal"
-                           data-target="#update-existing-dialog" data-assignment-id="${assignment.id}"
+                           data-target="#update-existing-dialog" data-assignment-id="${assignment.id?c}"
                            data-user-name="${assignment.userId}"
                            data-user-role="${assignment.role.id}"
                            title="Edit role for ${assignment.userId}."><i class="fa fa-pencil"></i></a>
                         <a href="#" class="btn btn-default btn-delete" data-toggle="modal"
-                           data-target="#delete-dialog" data-assignment-id="${assignment.id}"
+                           data-target="#delete-dialog" data-assignment-id="${assignment.id?c}"
                            data-user-name="${assignment.userId}"
                            title="Delete role for ${assignment.userId}."><i class="fa fa-trash"></i></a>
                         </@sec.authorize>
