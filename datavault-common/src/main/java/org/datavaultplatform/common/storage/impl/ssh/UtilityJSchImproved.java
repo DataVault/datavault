@@ -1,6 +1,7 @@
 package org.datavaultplatform.common.storage.impl.ssh;
 
 import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.ChannelSftp.LsEntry;
 import com.jcraft.jsch.SftpException;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -47,7 +48,13 @@ public abstract class UtilityJSchImproved {
         return bytes;
     }
 
-    public static final Comparator<ChannelSftp.LsEntry> COMPARATOR =
+    private static final Comparator<ChannelSftp.LsEntry> COMPARATOR_DIR =
         Comparator.comparing(entry -> entry.getAttrs().isDir());
+
+    private static final Comparator<ChannelSftp.LsEntry> COMPARATOR_FILENAME =
+        Comparator.comparing(entry -> entry.getFilename());
+
+    public static final Comparator<ChannelSftp.LsEntry> COMPARATOR =
+        COMPARATOR_DIR.thenComparing(COMPARATOR_FILENAME);
 
 }
