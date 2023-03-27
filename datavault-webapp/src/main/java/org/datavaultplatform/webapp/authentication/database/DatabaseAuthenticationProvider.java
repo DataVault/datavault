@@ -1,11 +1,8 @@
 package org.datavaultplatform.webapp.authentication.database;
 
-import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleName;
 import org.datavaultplatform.common.request.ValidateUser;
-import org.datavaultplatform.webapp.security.ScopedGrantedAuthority;
-import org.datavaultplatform.webapp.model.AdminDashboardPermissionsModel;
-import org.datavaultplatform.webapp.services.PermissionsService;
+import org.datavaultplatform.webapp.authentication.authorization.GrantedAuthorityService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +14,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * User: Robin Taylor
@@ -35,11 +29,11 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
 
     private final RestService restService;
 
-    private final PermissionsService permissionsService;
+    private final GrantedAuthorityService grantedAuthorityService;
 
-    public DatabaseAuthenticationProvider(RestService restService, PermissionsService permissionsService) {
+    public DatabaseAuthenticationProvider(RestService restService, GrantedAuthorityService grantedAuthorityService) {
         this.restService = restService;
-        this.permissionsService = permissionsService;
+        this.grantedAuthorityService = grantedAuthorityService;
     }
 
     @Override
@@ -63,40 +57,13 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         logger.info("Authentication success for " + name);
 
         List<GrantedAuthority> grantedAuths = new ArrayList<>();
-        List<RoleAssignment> roles = restService.getRoleAssignmentsForUser(name);
-        List<ScopedGrantedAuthority> scopedAuthorities = ScopedGrantedAuthority.fromRoleAssignments(roles);
 
-        grantedAuths.addAll(scopedAuthorities);
-
-        boolean isAdmin = false;
-        try{
-            isAdmin = restService.isAdmin(new ValidateUser(name, null));
-            if (isAdmin) {
-                grantedAuths.add(new SimpleGrantedAuthority(RoleName.ROLE_IS_ADMIN));
-            }
-        } catch(Exception e){
-            logger.error("Error when trying to check if user is admin with Broker!",e);
-        }
-
-        Collection<GrantedAuthority> adminAuthorities = getAdminAuthorities(authentication);
-        if (!adminAuthorities.isEmpty()) {
-            logger.info("Granting user " + name + " " + RoleName.ROLE_ADMIN);
-            grantedAuths.add(new SimpleGrantedAuthority(RoleName.ROLE_ADMIN));
-            grantedAuths.addAll(adminAuthorities);
-        }
+        List<GrantedAuthority> grantedAuthsForUser = this.grantedAuthorityService.getGrantedAuthoritiesForUser(name, authentication);
+        grantedAuths.addAll(grantedAuthsForUser);
 
         logger.info("Granting user " + name + " " + RoleName.ROLE_USER);
         grantedAuths.add(new SimpleGrantedAuthority(RoleName.ROLE_USER));
         return new UsernamePasswordAuthenticationToken(name, password, grantedAuths);
-
-    }
-
-    private Collection<GrantedAuthority> getAdminAuthorities(Principal principal) {
-        AdminDashboardPermissionsModel adminPermissions = permissionsService.getDashboardPermissions(principal);
-        return adminPermissions.getUnscopedPermissions().stream()
-                .filter(p -> p.getPermission().getRoleName() != null)
-                .map(p -> new SimpleGrantedAuthority(p.getPermission().getRoleName()))
-                .collect(Collectors.toSet());
     }
 
     @Override

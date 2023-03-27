@@ -1,4 +1,4 @@
-package org.datavaultplatform.webapp.authentication.shib;
+package org.datavaultplatform.webapp.authentication.authorization;
 
 import java.security.Principal;
 import java.util.ArrayList;
@@ -17,13 +17,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Slf4j
-public class ShibGrantedAuthorityService {
+public class GrantedAuthorityService {
 
     private final RestService restService;
 
     private final PermissionsService permissionsService;
 
-    public ShibGrantedAuthorityService(RestService restService, PermissionsService permissionsService) {
+    public GrantedAuthorityService(RestService restService, PermissionsService permissionsService) {
         this.restService = restService;
         this.permissionsService = permissionsService;
     }
@@ -40,7 +40,7 @@ public class ShibGrantedAuthorityService {
         try {
             isAdmin = restService.isAdmin(new ValidateUser(name, null));
             if (isAdmin) {
-                grantedAuths.add(ShibUtils.ROLE_IS_ADMIN);
+                grantedAuths.add(AuthorizationUtils.ROLE_IS_ADMIN);
             }
         } catch (Exception ex) {
             log.error("Error when trying to check if user is admin with Broker!", ex);
@@ -49,7 +49,7 @@ public class ShibGrantedAuthorityService {
         Collection<GrantedAuthority> adminAuthorities = getAdminAuthorities(authentication);
         if (!adminAuthorities.isEmpty()) {
             log.info("Granting user {} ROLE_ADMIN", name);
-            grantedAuths.add(ShibUtils.ROLE_ADMIN);
+            grantedAuths.add(AuthorizationUtils.ROLE_ADMIN);
             grantedAuths.addAll(adminAuthorities);
         }
         return grantedAuths;

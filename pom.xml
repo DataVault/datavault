@@ -12,7 +12,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.7.6</version>
+    <version>2.7.9</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -35,23 +35,37 @@
     <skip.integration.tests>false</skip.integration.tests>
 
     <!-- dependency versions -->
+
+    <!-- https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client -->
+    <maria.java.client.version>3.1.2</maria.java.client.version>
+
     <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-    <aws.java.sdk.bom.version>1.12.334</aws.java.sdk.bom.version>
+    <aws.java.sdk.bom.version>1.12.426</aws.java.sdk.bom.version>
 
     <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
-    <oci.java.sdk.bom.version>3.0.1</oci.java.sdk.bom.version>
+    <oci.java.sdk.bom.version>3.7.0</oci.java.sdk.bom.version>
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
+    <spring.cloud.version>3.1.6</spring.cloud.version>
+
+    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+    <mockito.version>4.11.0</mockito.version>
+
+    <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
+    <owasp.dependency.check.version>8.1.2</owasp.dependency.check.version>
+
+    <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+    <jsoup.version>1.15.4</jsoup.version>
+
+    <!-- https://mvnrepository.com/artifact/org.testng/testng -->
+    <!-- Cannot use 7.6.0+ without also using Java 11+ -->
+    <!-- see https://testng.org/doc/ -->
+    <testng.version>7.5</testng.version>
+
+    <!-- above here, updated 15 March 2023 -->
 
     <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
     <testcontainers.version>1.17.6</testcontainers.version>
-
-    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
-    <spring.cloud.version>3.1.5</spring.cloud.version>
-
-    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
-    <mockito.version>4.9.0</mockito.version>
-
-    <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
-    <owasp.dependency.check.version>7.3.1</owasp.dependency.check.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
     <commons.compress.version>1.22</commons.compress.version>
@@ -73,9 +87,6 @@
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
     <commons.text.version>1.10.0</commons.text.version>
 
-    <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
-    <jsoup.version>1.15.3</jsoup.version>
-
     <!-- https://mvnrepository.com/artifact/com.bettercloud/vault-java-driver -->
     <vault.java.driver.version>5.1.0</vault.java.driver.version>
 
@@ -93,9 +104,6 @@
 
     <!-- https://mvnrepository.com/artifact/gov.loc/bagit -->
     <bagit.version>5.2.0</bagit.version>
-
-    <!-- https://mvnrepository.com/artifact/org.testng/testng -->
-    <testng.version>6.14.3</testng.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.velocity/velocity-engine-core -->
     <velocity.version>2.3</velocity.version>
@@ -191,13 +199,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-        <dependency>
-          <groupId>com.oracle.oci.sdk</groupId>
-          <artifactId>oci-java-sdk-bom</artifactId>
-          <version>${oci.java.sdk.bom.version}</version>
-          <type>pom</type>
-          <scope>import</scope>
-        </dependency>
         <dependency>
           <groupId>com.oracle.oci.sdk</groupId>
           <artifactId>oci-java-sdk-common-httpclient-jersey</artifactId>

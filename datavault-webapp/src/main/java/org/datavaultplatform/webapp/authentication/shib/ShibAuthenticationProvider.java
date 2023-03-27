@@ -4,6 +4,8 @@ import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.common.services.LDAPService;
 import org.datavaultplatform.webapp.authentication.AuthenticationSuccess;
+import org.datavaultplatform.webapp.authentication.authorization.AuthorizationUtils;
+import org.datavaultplatform.webapp.authentication.authorization.GrantedAuthorityService;
 import org.datavaultplatform.webapp.services.RestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,18 +37,18 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
     private final RestService restService;
     private final LDAPService ldapService;
 
-    private final ShibGrantedAuthorityService shibGrantedAuthorityService;
+    private final GrantedAuthorityService grantedAuthorityService;
 
     private final boolean ldapEnabled;
 
     @Autowired
     private AuthenticationSuccess authenticationSuccess;
 
-    public ShibAuthenticationProvider(RestService restService, LDAPService ldapService, boolean ldapEnabled, ShibGrantedAuthorityService shibGrantedAuthorityService ) {
+    public ShibAuthenticationProvider(RestService restService, LDAPService ldapService, boolean ldapEnabled, GrantedAuthorityService grantedAuthorityService) {
         this.restService = restService;
         this.ldapService = ldapService;
         this.ldapEnabled = ldapEnabled;
-        this.shibGrantedAuthorityService = shibGrantedAuthorityService;
+        this.grantedAuthorityService = grantedAuthorityService;
     }
 
 
@@ -84,11 +86,11 @@ public class ShibAuthenticationProvider implements AuthenticationProvider {
                 logger.error("Error when trying to add user with Broker!",e);
             }
         } else {
-            List<GrantedAuthority> grantedAuthsForUser = this.shibGrantedAuthorityService.getGrantedAuthoritiesForUser(name, authentication);
+            List<GrantedAuthority> grantedAuthsForUser = this.grantedAuthorityService.getGrantedAuthoritiesForUser(name, authentication);
             grantedAuths.addAll(grantedAuthsForUser);
         }
 
-        grantedAuths.add(ShibUtils.ROLE_USER);
+        grantedAuths.add(AuthorizationUtils.ROLE_USER);
         return new PreAuthenticatedAuthenticationToken(name, password, grantedAuths);
 
     }
