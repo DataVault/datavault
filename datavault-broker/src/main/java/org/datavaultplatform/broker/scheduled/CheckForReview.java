@@ -65,7 +65,7 @@ public class CheckForReview implements ScheduledTask {
         this.helpMail = helpMail;
     }
 
-
+    @Override
     @Scheduled(cron = ScheduledUtils.SCHEDULE_4_REVIEW)
     @Transactional
     public void execute() throws Exception {

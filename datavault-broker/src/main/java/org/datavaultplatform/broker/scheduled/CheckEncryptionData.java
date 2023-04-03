@@ -51,6 +51,7 @@ public class CheckEncryptionData implements ScheduledTask {
 
     private static final Logger log = LoggerFactory.getLogger(CheckEncryptionData.class);
 
+    @Override
     @Scheduled(cron = ScheduledUtils.SCHEDULE_2_ENCRYPTION_CHECK)
     @Transactional
     public void execute() {
