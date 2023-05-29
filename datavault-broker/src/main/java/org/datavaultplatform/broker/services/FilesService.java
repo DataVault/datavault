@@ -30,7 +30,7 @@ public class FilesService {
 
     //TODO - DHAY this does not seem thread safe
     private UserStore userStore;
-    private final long TIMEOUT_SECONDS = 300;
+    private final long TIMEOUT_SECONDS = 6000;
     
     private boolean connect(FileStore fileStore) {
         try {
