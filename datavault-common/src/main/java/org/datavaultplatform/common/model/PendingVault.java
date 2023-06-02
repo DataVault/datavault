@@ -18,18 +18,18 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "PendingVault")
 @Entity
-@Table(name="PendingVaults")
-@NamedEntityGraph(name=PendingVault.EG_PENDING_VAULT, attributeNodes =
-    {
+@Table(name = "PendingVaults")
+@NamedEntityGraph(name = PendingVault.EG_PENDING_VAULT, attributeNodes = {
         @NamedAttributeNode(PendingVault_.GROUP),
         @NamedAttributeNode(PendingVault_.USER),
         @NamedAttributeNode(PendingVault_.RETENTION_POLICY),
         @NamedAttributeNode(PendingVault_.DATA_CREATORS),
-    })
+})
 public class PendingVault {
 
     public static final String EG_PENDING_VAULT = "eg.PendingVault.1";
     private static final String DEFAULT_PENDING_VAULT_NAME = "*** UNNAMED VAULT ***";
+
     public enum Estimate {
         UNDER_100GB,
         UNDER_10TB,
@@ -42,8 +42,31 @@ public class PendingVault {
         GRANT_FUNDING,
         BUDGET_CODE,
         SLICE,
-        ORIG
+        ORIG,
+        FEEWAIVER,
+        WILL_PAY,
+        BUY_NEW_SLICE
     }
+
+    public enum Slice_Query_Choice {
+        YES,
+        NO,
+        DO_NOT_KNOW,
+        BUY_NEW_SLICE
+    };
+
+    public enum Funding_Query_Choice {
+        YES,
+        NO,
+        DO_NOT_KNOW
+    };
+
+    public enum Feewaiver_Query_Choice {
+        YES,
+        NO,
+        DO_NOT_KNOW
+    };
+
     // Vault Identifier
     @Id
     @GeneratedValue(generator = "uuid")
@@ -52,7 +75,7 @@ public class PendingVault {
     private String id;
 
     // Serialise date in ISO 8601 format
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
 
@@ -64,7 +87,7 @@ public class PendingVault {
     private Boolean affirmed = false;
 
     // Name of the vault
-    @Column(name = "name", nullable = true, columnDefinition = "TEXT", length=400)
+    @Column(name = "name", nullable = true, columnDefinition = "TEXT", length = 400)
     private String name;
 
     // Description of the vault
@@ -75,15 +98,16 @@ public class PendingVault {
     @Column(columnDefinition = "TEXT", length = 6000)
     private String notes;
 
-    // NOTE: This field is optional. Always remember to check for null when handling it!
+    // NOTE: This field is optional. Always remember to check for null when handling
+    // it!
     // Serialise date in ISO 8601 format
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
     @Column(name = "grantEndDate", nullable = true)
     private Date grantEndDate;
 
     // Serialise date in ISO 8601 format
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
     @Column(name = "reviewDate", nullable = true)
     private Date reviewDate;
@@ -143,7 +167,7 @@ public class PendingVault {
     private List<User> nominatedDataManagers;
 
     @JsonIgnore
-    @OneToMany(targetEntity=PendingDataCreator.class, mappedBy="pendingVault", orphanRemoval = true, cascade = CascadeType.PERSIST, fetch=FetchType.LAZY)
+    @OneToMany(targetEntity = PendingDataCreator.class, mappedBy = "pendingVault", orphanRemoval = true, cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private final List<PendingDataCreator> dataCreators = new ArrayList<>();
 
     @Column(name = "confirmed", nullable = false)
@@ -151,6 +175,18 @@ public class PendingVault {
 
     @Column(name = "pureLink", nullable = false)
     private Boolean pureLink = false;
+
+    @Column(name = "sliceQueryChoice", nullable = true, columnDefinition = "TEXT", length = 15)
+    private Slice_Query_Choice sliceQueryChoice;
+
+    @Column(name = "fundingQueryChoice", nullable = true, columnDefinition = "TEXT", length = 15)
+    private Funding_Query_Choice fundingQueryChoice;
+
+    @Column(name = "feewaiverQueryChoice", nullable = true, columnDefinition = "TEXT", length = 15)
+    private Feewaiver_Query_Choice feewaiverQueryChoice;
+
+    @Column(name = "paymentDetails", nullable = true, columnDefinition = "TEXT")
+    private String paymentDetails;
 
     public String getId() {
         return this.id;
@@ -185,22 +221,28 @@ public class PendingVault {
     }
 
     public void setName(String name) {
-        this.name = StringUtils.isBlank(name)? DEFAULT_PENDING_VAULT_NAME : name;
+        this.name = StringUtils.isBlank(name) ? DEFAULT_PENDING_VAULT_NAME : name;
     }
 
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
     public void setDescription(String description) {
         this.description = description;
     }
 
-    public String getDescription() { return description; }
+    public String getDescription() {
+        return description;
+    }
 
     public void setNotes(String notes) {
         this.notes = notes;
     }
 
-    public String getNotes() { return this.notes; }
+    public String getNotes() {
+        return this.notes;
+    }
 
     public RetentionPolicy getRetentionPolicy() {
         return this.retentionPolicy;
@@ -226,13 +268,17 @@ public class PendingVault {
         this.estimate = estimate;
     }
 
-    public Estimate getEstimate() { return this.estimate; }
+    public Estimate getEstimate() {
+        return this.estimate;
+    }
 
     public Date getReviewDate() {
         return this.reviewDate;
     }
 
-    public Group getGroup() { return group; }
+    public Group getGroup() {
+        return group;
+    }
 
     public void setGroup(Group group) {
         this.group = group;
@@ -254,7 +300,9 @@ public class PendingVault {
         return creationTime;
     }
 
-    public User getUser() { return this.user; }
+    public User getUser() {
+        return this.user;
+    }
 
     public void setUser(User user) {
         this.user = user;
@@ -284,8 +332,10 @@ public class PendingVault {
         this.subunit = subunit;
     }
 
-    /* TODO: rename this column to Project Title (in the original mock up it was called
-    project id
+    /*
+     * TODO: rename this column to Project Title (in the original mock up it was
+     * called
+     * project id
      */
     public String getProjectTitle() {
         return this.projectTitle;
@@ -302,7 +352,6 @@ public class PendingVault {
     public void setContact(String contact) {
         this.contact = contact;
     }
-
 
     public List<PendingDataCreator> getDataCreators() {
         return this.dataCreators;
@@ -363,7 +412,37 @@ public class PendingVault {
         this.confirmed = confirmed;
     }
 
+    public Slice_Query_Choice getSliceQueryChoice() {
+        return sliceQueryChoice;
+    }
 
+    public void setSliceQueryChoice(Slice_Query_Choice sliceQueryChoice) {
+        this.sliceQueryChoice = sliceQueryChoice;
+    }
+
+    public Funding_Query_Choice getFundingQueryChoice() {
+        return fundingQueryChoice;
+    }
+
+    public void setFundingQueryChoice(Funding_Query_Choice fundingQueryChoice) {
+        this.fundingQueryChoice = fundingQueryChoice;
+    }
+
+    public Feewaiver_Query_Choice getFeewaiverQueryChoice() {
+        return feewaiverQueryChoice;
+    }
+
+    public void setFeewaiverQueryChoice(Feewaiver_Query_Choice feewaiverQueryChoice) {
+        this.feewaiverQueryChoice = feewaiverQueryChoice;
+    }
+
+    public String getPaymentDetails() {
+        return this.paymentDetails;
+    }
+
+    public void setPaymentDetails(String paymentDetails) {
+        this.paymentDetails = paymentDetails;
+    }
 
     public VaultInfo convertToResponse() {
         VaultInfo retVal = new VaultInfo();
@@ -387,12 +466,12 @@ public class PendingVault {
         retVal.setAuthoriser(this.authoriser);
         retVal.setSchoolOrUnit(this.schoolOrUnit);
         retVal.setSubunit(this.subunit);
-        //retVal.setProjectId(this.projectID);
+        // retVal.setProjectId(this.projectID);
         retVal.setProjectTitle(this.projectTitle);
         retVal.setCreationTime(this.creationTime);
         String userId = this.user == null ? null : user.getID();
         retVal.setUserID(userId);
-        String userName = user == null ? null : (user.getFirstname()+" "+user.getLastname());
+        String userName = user == null ? null : (user.getFirstname() + " " + user.getLastname());
         retVal.setUserName(userName);
         if (this.dataCreators != null) {
             List<String> creators = new ArrayList<>();
@@ -426,8 +505,14 @@ public class PendingVault {
         retVal.setPureLink(this.pureLink);
         retVal.setConfirmed(this.confirmed);
 
+        retVal.setSliceQueryChoice(this.sliceQueryChoice);
+        retVal.setFundingQueryChoice(this.fundingQueryChoice);
+        retVal.setFeewaiverQueryChoice(this.feewaiverQueryChoice);
+        retVal.setPaymentDetails(this.getPaymentDetails());
+
         return retVal;
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

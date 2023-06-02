@@ -46,6 +46,10 @@
 					<th scope="col">Amount billed</th>
 					<td><#if billingDetails.getAmountBilled()??>${billingDetails.getAmountBilled()?html}<#else> </#if></td>
 				</tr>
+                 <tr>
+					<th scope="col">Payment Details</th>
+					<td><#if billingDetails.getPaymentDetails()??>${billingDetails.getPaymentDetails()?html}<#else> </#if></td>
+				</tr>
 				<tr>
 					<th scope="col">Special arrangement comments</th>
 					<td><#if billingDetails.getSpecialComments()??>${billingDetails.getSpecialComments()?html}<#else> </#if></td>

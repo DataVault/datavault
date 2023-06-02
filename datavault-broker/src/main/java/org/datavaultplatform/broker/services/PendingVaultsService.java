@@ -1,8 +1,10 @@
 package org.datavaultplatform.broker.services;
 
-
 import org.datavaultplatform.common.email.EmailTemplate;
 import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.model.PendingVault.Feewaiver_Query_Choice;
+import org.datavaultplatform.common.model.PendingVault.Funding_Query_Choice;
+import org.datavaultplatform.common.model.PendingVault.Slice_Query_Choice;
 import org.datavaultplatform.common.model.dao.PendingVaultDAO;
 import org.datavaultplatform.common.request.CreateVault;
 import org.slf4j.Logger;
@@ -28,8 +30,8 @@ public class PendingVaultsService {
     public static final String EMAIL_SUBMITTER_ID = "submitter-id";
     public static final String EMAIL_TIMESTAMP = "timestamp";
 
-	  private final Logger logger = LoggerFactory.getLogger(PendingVaultsService.class);
-	
+    private final Logger logger = LoggerFactory.getLogger(PendingVaultsService.class);
+
     private final PendingVaultDAO pendingVaultDAO;
     private final GroupsService groupsService;
     private final RetentionPoliciesService retentionPoliciesService;
@@ -43,10 +45,10 @@ public class PendingVaultsService {
 
     @Autowired
     public PendingVaultsService(PendingVaultDAO pendingVaultDAO, GroupsService groupsService,
-        RetentionPoliciesService retentionPoliciesService, UsersService usersService,
-        RolesAndPermissionsService permissionsService,
-        PendingDataCreatorsService pendingDataCreatorsService, VaultsService vaultsService,
-        EmailService emailService, @Value("${help.mail}") String helpMail) {
+            RetentionPoliciesService retentionPoliciesService, UsersService usersService,
+            RolesAndPermissionsService permissionsService,
+            PendingDataCreatorsService pendingDataCreatorsService, VaultsService vaultsService,
+            EmailService emailService, @Value("${help.mail}") String helpMail) {
         this.pendingVaultDAO = pendingVaultDAO;
         this.groupsService = groupsService;
         this.retentionPoliciesService = retentionPoliciesService;
@@ -57,6 +59,7 @@ public class PendingVaultsService {
         this.emailService = emailService;
         this.helpMail = helpMail;
     }
+
     public void addOrUpdatePendingVault(PendingVault vault) {
         Date d = new Date();
         vault.setCreationTime(d);
@@ -75,22 +78,23 @@ public class PendingVaultsService {
     public void delete(String id) {
         logger.info("Called delete for '" + id + "'");
         // delete role_assigmnets for id
-        //for each role
+        // for each role
         List<RoleAssignment> roles = permissionsService.getRoleAssignmentsForPendingVault(id);
         for (RoleAssignment role : roles) {
             permissionsService.deleteRoleAssignment(role.getId());
         }
         // delete pending data creators
         // deleted by cascade in PendingVaults hibernate config
-        //for each creator
-        //pendingDataCreatorsService.deletePendingDataCreator(creatorID);
+        // for each creator
+        // pendingDataCreatorsService.deletePendingDataCreator(creatorID);
         // delete pending vault
         pendingVaultDAO.deleteById(id);
     }
+
     public PendingVault getPendingVault(String vaultID) {
         return pendingVaultDAO.findById(vaultID).orElse(null);
     }
-    
+
     public int getTotalNumberOfPendingVaults(String userId, String confirmed) {
         return pendingVaultDAO.getTotalNumberOfPendingVaults(userId, confirmed);
     }
@@ -105,8 +109,8 @@ public class PendingVaultsService {
         return pendingVaultDAO.getTotalNumberOfPendingVaults(userId, query, confirmed);
     }
 
-    
-    public List<PendingVault> search(String userId, String query, String sort, String order, String offset, String maxResult, String confirmed) {
+    public List<PendingVault> search(String userId, String query, String sort, String order, String offset,
+            String maxResult, String confirmed) {
         return this.pendingVaultDAO.search(userId, query, sort, order, offset, maxResult, confirmed);
     }
 
@@ -115,7 +119,8 @@ public class PendingVaultsService {
     }
 
     // Get the specified Vault object and validate it against the current User
-    // DAS copied this from the Vaults service it doesn't appear to do any validation
+    // DAS copied this from the Vaults service it doesn't appear to do any
+    // validation
     // dunno if Digirati handed it in like that or we've changed it yet
     public PendingVault getUserPendingVault(User user, String vaultID) throws Exception {
         PendingVault vault = getPendingVault(vaultID);
@@ -130,7 +135,7 @@ public class PendingVaultsService {
     public void addNDMRoles(CreateVault createVault, String pendingVaultId) {
         List<String> ndms = createVault.getNominatedDataManagers();
         if (ndms != null) {
-            for (String ndm: ndms) {
+            for (String ndm : ndms) {
                 if (ndm != null && !ndm.isEmpty()) {
                     RoleAssignment ra = new RoleAssignment();
                     ra.setPendingVaultId(pendingVaultId);
@@ -148,8 +153,8 @@ public class PendingVaultsService {
         // if vault already has depositors delete them and readd
         List<String> depositors = createVault.getDepositors();
         if (depositors != null) {
-            for (String dep: depositors) {
-                if (dep != null && ! dep.isEmpty()) {
+            for (String dep : depositors) {
+                if (dep != null && !dep.isEmpty()) {
                     RoleAssignment ra = new RoleAssignment();
                     ra.setPendingVaultId(pendingVaultId);
                     ra.setRole(permissionsService.getDepositor());
@@ -181,7 +186,8 @@ public class PendingVaultsService {
     }
 
     public void addCreator(CreateVault createVault, String userID, String pendingVaultId) {
-        // this adds the creator to the full role assignments table as owner (so it is displayed only to the creator while still pending)
+        // this adds the creator to the full role assignments table as owner (so it is
+        // displayed only to the creator while still pending)
         RoleAssignment pendingVaultCreatorRoleAssignment = new RoleAssignment();
         pendingVaultCreatorRoleAssignment.setUserId(userID);
         pendingVaultCreatorRoleAssignment.setPendingVaultId(pendingVaultId);
@@ -190,15 +196,16 @@ public class PendingVaultsService {
         logger.debug("Role userID: '" + userID + "'");
         logger.debug("Role vaultID: '" + pendingVaultId + "'");
         logger.debug("Role type: '" + pendingVaultCreatorRoleAssignment.getRole().getType() + "'");
-        //String pendingId = createVault.getPendingID();
-        //if (pendingId == null || pendingId.isEmpty()) {
-            permissionsService.createRoleAssignment(pendingVaultCreatorRoleAssignment);
-        //} else {
-            /* TODO: once we add the ability to set a different owner this will be required
-                as it will be possible that the people who can see it will have changed
-             */
-            //permissionsService.updateRoleAssignment(dataOwnerRoleAssignment);
-        //}
+        // String pendingId = createVault.getPendingID();
+        // if (pendingId == null || pendingId.isEmpty()) {
+        permissionsService.createRoleAssignment(pendingVaultCreatorRoleAssignment);
+        // } else {
+        /*
+         * TODO: once we add the ability to set a different owner this will be required
+         * as it will be possible that the people who can see it will have changed
+         */
+        // permissionsService.updateRoleAssignment(dataOwnerRoleAssignment);
+        // }
     }
 
     public PendingVault processDataCreatorParams(CreateVault createVault, PendingVault vault) {
@@ -220,7 +227,7 @@ public class PendingVaultsService {
         }
 
         List<PendingDataCreator> creators = vault.getDataCreators();
-        if (creators != null && ! creators.isEmpty()) {
+        if (creators != null && !creators.isEmpty()) {
             pendingDataCreatorsService.addPendingCreators(creators);
         }
 
@@ -274,11 +281,13 @@ public class PendingVaultsService {
 
         String billingType = createVault.getBillingType();
         logger.debug("Billing Type is: '" + billingType + "'");
-        if (billingType != null) {
+        if (billingType != null && !billingType.isEmpty()) {
             PendingVault.Billing_Type enumBT = PendingVault.Billing_Type.valueOf(billingType);
             if (enumBT != null) {
                 vault.setBillingType(enumBT);
             }
+        } else {
+            vault.setBillingType(null);
         }
 
         String policyId = (createVault.getPolicyInfo() != null) ? createVault.getPolicyInfo().split("-")[0] : null;
@@ -311,6 +320,22 @@ public class PendingVaultsService {
         }
 
         if (vault.getBillingType() != null) {
+
+             if (vault.getBillingType().equals(PendingVault.Billing_Type.WILL_PAY)) {
+                String authoriser = createVault.getBudgetAuthoriser();
+                logger.debug("Authoriser is: '" + authoriser + "'");
+                if (authoriser != null) {
+                    vault.setAuthoriser(authoriser);
+                }
+
+                String paymentDetails = createVault.getPaymentDetails();
+                logger.debug("paymentDetails: '" + paymentDetails + "'");
+                if (paymentDetails != null) {
+                    vault.setPaymentDetails(paymentDetails);
+                }
+               
+             }
+
             if (vault.getBillingType().equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
                 String authoriser = createVault.getGrantAuthoriser();
                 logger.debug("Authoriser is: '" + authoriser + "'");
@@ -406,19 +431,44 @@ public class PendingVaultsService {
             vault.setConfirmed(confirmed);
         }
 
+        
+        String sliceQueryChoice = createVault.getSliceQueryChoice();
+        logger.debug("sliceQueryChoice is: '" + sliceQueryChoice + "'");
+        if(sliceQueryChoice != null && !sliceQueryChoice.isEmpty()) {
+            vault.setSliceQueryChoice(Slice_Query_Choice.valueOf(sliceQueryChoice));
+        } else {
+            vault.setSliceQueryChoice(null);
+        }
+
+        String fundingQueryChoice = createVault.getFundingQueryChoice();
+        logger.debug("fundingQueryChoice is: '" + fundingQueryChoice + "'");
+        if(fundingQueryChoice != null && !fundingQueryChoice.isEmpty()) {
+            vault.setFundingQueryChoice(Funding_Query_Choice.valueOf(fundingQueryChoice));
+        } else {
+            vault.setFundingQueryChoice(null);
+        }
+
+        String feewaiverQueryChoice = createVault.getFeewaiverQueryChoice();
+        logger.debug("feewaiverQueryChoice is: '" + feewaiverQueryChoice + "'");
+        if(feewaiverQueryChoice != null && !feewaiverQueryChoice.isEmpty()) {
+            vault.setFeewaiverQueryChoice(Feewaiver_Query_Choice.valueOf(feewaiverQueryChoice));
+        } else {
+             vault.setFeewaiverQueryChoice(null);
+        }
+
         return vault;
     }
-    
+
     public List<PendingVault> getPendingVaults() {
         return pendingVaultDAO.list();
     }
-    
+
     public int getTotalNumberOfPendingVaults() {
-    	return pendingVaultDAO.list() != null ? pendingVaultDAO.list().size() : 0;
+        return pendingVaultDAO.list() != null ? pendingVaultDAO.list().size() : 0;
     }
 
-
-    public List<PendingVault> getPendingVaults(String userId, String sort, String order, String offset, String maxResult) {
+    public List<PendingVault> getPendingVaults(String userId, String sort, String order, String offset,
+            String maxResult) {
         return pendingVaultDAO.list(userId, sort, order, offset, maxResult);
     }
 
@@ -432,6 +482,7 @@ public class PendingVaultsService {
         model.put(EMAIL_SUBMITTER_ID, vault.getUser().getID());
         LocalDate today = LocalDate.now();
         model.put(EMAIL_TIMESTAMP, today);
-        this.emailService.sendTemplateMail(this.helpMail, "New Pending Vault Submitted", EmailTemplate.GROUP_ADMIN_PV_SUBMITTED, model);
+        this.emailService.sendTemplateMail(this.helpMail, "New Pending Vault Submitted",
+                EmailTemplate.GROUP_ADMIN_PV_SUBMITTED, model);
     }
 }

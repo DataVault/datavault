@@ -16,7 +16,8 @@ import java.util.List;
 public class CreateVault {
 
     /*
-    TODO: Make a base Vault class and move everything that is shared between Vault and Pending vault into it
+     * TODO: Make a base Vault class and move everything that is shared between
+     * Vault and Pending vault into it
      */
     @ApiObjectField(description = "An ID for the partially completed pending vault")
     private String pendingID;
@@ -26,7 +27,7 @@ public class CreateVault {
 
     @ApiObjectField(description = "A name for the new vault")
     private String name;
-    
+
     @ApiObjectField(description = "A description of the vault")
     private String description;
 
@@ -38,13 +39,13 @@ public class CreateVault {
 
     @ApiObjectField(description = "How we are billing")
     private String billingType;
-    
+
     @ApiObjectField(description = "The policy that will be applied to this vault the format of the string is policyID-lengthofPolicy")
     private String policyInfo;
-    
+
     @ApiObjectField(description = "The group which is related to this vault")
     private String groupID;
-    
+
     @ApiObjectField(description = "A reference to an external metadata record that describes this vault")
     private String datasetID;
 
@@ -53,7 +54,7 @@ public class CreateVault {
 
     @ApiObjectField(description = "Define the minimum of time the archive will be kept")
     private String grantEndDate;
-    
+
     @ApiObjectField(description = "The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage")
     private String reviewDate;
 
@@ -110,34 +111,53 @@ public class CreateVault {
     @ApiObjectField(description = "Agree to Pure Link")
     private Boolean pureLink;
 
-    public CreateVault() { }
-    /*public CreateVault(String name, String description, String notes, String policyID, String groupID, String datasetID, String grantEndDate,
-                       String reviewDate, Boolean partial, Boolean affirmed, String estimate, String billingType, String sliceID,
-                       String authoriser, String schoolOrUnit, String subunit, String projectID, List<String> dataCreators,
-                       String vaultOwner, List<String> nominatedDataManagers, List<String> depositors, String contactPerson) {
-        this.name = name;
-        this.description = description;
-        this.notes = notes;
-        this.policyID = policyID;
-        this.groupID = groupID;
-        this.datasetID = datasetID;
-        this.grantEndDate = grantEndDate;
-        this.reviewDate = reviewDate;
-        this.partial = partial;
-        this.affirmed = affirmed;
-        this.estimate = estimate;
-        this.billingType = billingType;
-        this.sliceID = sliceID;
-        this.authoriser = authoriser;
-        this.schoolOrUnit = schoolOrUnit;
-        this.subunit = subunit;
-        this.projectID = projectID;
-        this.dataCreators = dataCreators;
-        this.vaultOwner = vaultOwner;
-        this.nominatedDataManagers = nominatedDataManagers;
-        this.depositors = depositors;
-        this.contactPerson = contactPerson;
-    }*/
+    @ApiObjectField(description = "The Billing page sliceQueryChoice radio button value")
+    private String sliceQueryChoice;
+
+    @ApiObjectField(description = "The Billing page fundingQueryChoice radio button value")
+    private String fundingQueryChoice;
+
+    @ApiObjectField(description = "The Billing page feewaiverQueryChoice radio button value")
+    private String feewaiverQueryChoice;
+
+    @ApiObjectField(description = "The Billing payment details.")
+	private String paymentDetails;
+
+    public CreateVault() {
+    }
+    /*
+     * public CreateVault(String name, String description, String notes, String
+     * policyID, String groupID, String datasetID, String grantEndDate,
+     * String reviewDate, Boolean partial, Boolean affirmed, String estimate, String
+     * billingType, String sliceID,
+     * String authoriser, String schoolOrUnit, String subunit, String projectID,
+     * List<String> dataCreators,
+     * String vaultOwner, List<String> nominatedDataManagers, List<String>
+     * depositors, String contactPerson) {
+     * this.name = name;
+     * this.description = description;
+     * this.notes = notes;
+     * this.policyID = policyID;
+     * this.groupID = groupID;
+     * this.datasetID = datasetID;
+     * this.grantEndDate = grantEndDate;
+     * this.reviewDate = reviewDate;
+     * this.partial = partial;
+     * this.affirmed = affirmed;
+     * this.estimate = estimate;
+     * this.billingType = billingType;
+     * this.sliceID = sliceID;
+     * this.authoriser = authoriser;
+     * this.schoolOrUnit = schoolOrUnit;
+     * this.subunit = subunit;
+     * this.projectID = projectID;
+     * this.dataCreators = dataCreators;
+     * this.vaultOwner = vaultOwner;
+     * this.nominatedDataManagers = nominatedDataManagers;
+     * this.depositors = depositors;
+     * this.contactPerson = contactPerson;
+     * }
+     */
 
     public String getName() {
         return name;
@@ -323,43 +343,61 @@ public class CreateVault {
         this.projectTitle = projectTitle;
     }
 
-    public String getVaultOwner() { return this.vaultOwner; }
+    public String getVaultOwner() {
+        return this.vaultOwner;
+    }
 
-    public void setVaultOwner(String vaultOwner) { this.vaultOwner = vaultOwner; }
+    public void setVaultOwner(String vaultOwner) {
+        this.vaultOwner = vaultOwner;
+    }
 
-    public String getVaultCreator() { return this.vaultCreator; }
+    public String getVaultCreator() {
+        return this.vaultCreator;
+    }
 
-    public void setVaultCreator(String vaultCreator) { this.vaultCreator = vaultCreator; }
+    public void setVaultCreator(String vaultCreator) {
+        this.vaultCreator = vaultCreator;
+    }
 
-    public List<String> getNominatedDataManagers() { return this.nominatedDataManagers; }
+    public List<String> getNominatedDataManagers() {
+        return this.nominatedDataManagers;
+    }
 
     public void setNominatedDataManagers(List<String> nominatedDataManagers) {
-    	// Remove all null or empty strings from input
-    	List<String> ndms = new ArrayList<>();
-    	if(nominatedDataManagers != null) {
-    		ndms = nominatedDataManagers;
-    		ndms.removeAll(Arrays.asList("", null));
-    	}
-    	this.nominatedDataManagers = ndms;
+        // Remove all null or empty strings from input
+        List<String> ndms = new ArrayList<>();
+        if (nominatedDataManagers != null) {
+            ndms = nominatedDataManagers;
+            ndms.removeAll(Arrays.asList("", null));
+        }
+        this.nominatedDataManagers = ndms;
     }
 
-    public List<String> getDepositors() { return this.depositors; }
+    public List<String> getDepositors() {
+        return this.depositors;
+    }
 
     public void setDepositors(List<String> depositors) {
-    	// Remove all null or empty strings from input
-    	List<String> deps = new ArrayList<>();
-    	if(depositors != null) {
-    		deps = depositors;
-    		deps.removeAll(Arrays.asList("", null));
-    	}
-    	this.depositors = deps;
+        // Remove all null or empty strings from input
+        List<String> deps = new ArrayList<>();
+        if (depositors != null) {
+            deps = depositors;
+            deps.removeAll(Arrays.asList("", null));
+        }
+        this.depositors = deps;
     }
 
-    public String getContactPerson() { return this.contactPerson; }
+    public String getContactPerson() {
+        return this.contactPerson;
+    }
 
-    public void setContactPerson(String contactPerson) { this.contactPerson = contactPerson; }
+    public void setContactPerson(String contactPerson) {
+        this.contactPerson = contactPerson;
+    }
 
-    public List<String> getDataCreators() { return this.dataCreators; }
+    public List<String> getDataCreators() {
+        return this.dataCreators;
+    }
 
     public String getDataCreatorsAsString() {
 
@@ -379,11 +417,11 @@ public class CreateVault {
     private String getListValueAsString(List<String> value) {
         String retVal = "";
 
-        if (value != null  && ! value.isEmpty()) {
+        if (value != null && !value.isEmpty()) {
             List<String> tmp = new ArrayList<>();
             for (String v : value) {
 
-                if (v != null && ! v.equals("")) {
+                if (v != null && !v.equals("")) {
                     tmp.add(v);
                 }
             }
@@ -393,14 +431,14 @@ public class CreateVault {
     }
 
     public void setDataCreators(List<String> dataCreators) {
-    	// Remove all null or empty strings from input
-    	List<String> dcs = new ArrayList<>();
-    	if(dataCreators != null) {
-    		dcs = dataCreators;
-    		dcs.removeAll(Arrays.asList("", null));
-    	}
-    	this.dataCreators = dcs;
-   }
+        // Remove all null or empty strings from input
+        List<String> dcs = new ArrayList<>();
+        if (dataCreators != null) {
+            dcs = dataCreators;
+            dcs.removeAll(Arrays.asList("", null));
+        }
+        this.dataCreators = dcs;
+    }
 
     public Boolean getIsOwner() {
         return this.isOwner;
@@ -417,4 +455,37 @@ public class CreateVault {
     public void setPureLink(Boolean pureLink) {
         this.pureLink = pureLink;
     }
+
+    public String getSliceQueryChoice() {
+        return sliceQueryChoice;
+    }
+
+    public void setSliceQueryChoice(String sliceQueryChoice) {
+        this.sliceQueryChoice = sliceQueryChoice;
+    }
+
+    public String getFundingQueryChoice() {
+        return fundingQueryChoice;
+    }
+
+    public void setFundingQueryChoice(String fundingQueryChoice) {
+        this.fundingQueryChoice = fundingQueryChoice;
+    }
+
+    public String getFeewaiverQueryChoice() {
+        return feewaiverQueryChoice;
+    }
+
+    public void setFeewaiverQueryChoice(String feewaiverQueryChoice) {
+        this.feewaiverQueryChoice = feewaiverQueryChoice;
+    }
+
+    public String getPaymentDetails() {
+        return this.paymentDetails;
+    }
+
+    public void setPaymentDetails(String paymentDetails) {
+        this.paymentDetails = paymentDetails;
+    }
+
 }

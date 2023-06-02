@@ -1,18 +1,22 @@
 package org.datavaultplatform.common.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import org.datavaultplatform.common.model.BillingInfo;
 import org.datavaultplatform.common.model.PendingVault;
 import org.datavaultplatform.common.request.CreateVault;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
-import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "VaultInfo")
@@ -146,6 +150,18 @@ public class VaultInfo {
     @ApiObjectField(description = "Depositors")
     private List<String> depositorIds;
 
+    @ApiObjectField(description = "The Billing page sliceQueryChoice radio button value")
+	private PendingVault.Slice_Query_Choice sliceQueryChoice;
+
+	@ApiObjectField(description = "The Billing page fundingQueryChoice radio button value")
+	private PendingVault.Funding_Query_Choice fundingQueryChoice;
+
+	@ApiObjectField(description = "The Billing page feewaiverQueryChoice radio button value")
+	private PendingVault.Feewaiver_Query_Choice feewaiverQueryChoice;
+
+    @ApiObjectField(description = "The Billing payment details.")
+	private String paymentDetails;
+
     public VaultInfo() { }
 
     public VaultInfo(String id, String userID, String userName, String datasetID, String crisID, String datasetName,
@@ -175,7 +191,8 @@ public class VaultInfo {
     }
     
     public VaultInfo(String id,String userName, Date creationTime, String name,  
-    		long vaultSize, Date reviewDate,BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId) {
+    		long vaultSize, Date reviewDate,BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId, 
+            String paymentDetails) {
         this.id = id;        
         this.userName = userName;    
         this.creationTime = creationTime;
@@ -185,6 +202,7 @@ public class VaultInfo {
         this.amountToBeBilled = amountToBeBilled;
         this.amountBilled = amountBilled;
         this.projectId = projectId;
+        this.paymentDetails = paymentDetails;
     }
 
 	public String getID() {
@@ -430,6 +448,8 @@ public class VaultInfo {
 		return projectSize;
 	}
 
+
+
 	public void setProjectSize(long projectSize) {
 		this.projectSize = projectSize;
 	}
@@ -570,6 +590,38 @@ public class VaultInfo {
 		this.vaultCreatorId = vaultCreatorId;
 	}
 
+    public PendingVault.Slice_Query_Choice getSliceQueryChoice() {
+		return sliceQueryChoice;
+	}
+
+	public void setSliceQueryChoice(PendingVault.Slice_Query_Choice sliceQueryChoice) {
+		this.sliceQueryChoice = sliceQueryChoice;
+	}
+
+	public PendingVault.Funding_Query_Choice getFundingQueryChoice() {
+		return fundingQueryChoice;
+	}
+
+	public void setFundingQueryChoice(PendingVault.Funding_Query_Choice fundingQueryChoice) {
+		this.fundingQueryChoice = fundingQueryChoice;
+	}
+
+	public PendingVault.Feewaiver_Query_Choice getFeewaiverQueryChoice() {
+		return feewaiverQueryChoice;
+	}
+
+	public void setFeewaiverQueryChoice(PendingVault.Feewaiver_Query_Choice feewaiverQueryChoice) {
+		this.feewaiverQueryChoice = feewaiverQueryChoice;
+	}
+
+    public String getPaymentDetails() {
+        return this.paymentDetails;
+    }
+
+    public void setPaymentDetails(String paymentDetails) {
+        this.paymentDetails = paymentDetails;
+    }
+
 	public CreateVault convertToCreate() {
         /*
         TODO: need to add validation / defend against nulls just a work in progress
@@ -579,11 +631,8 @@ public class VaultInfo {
         cv.setAffirmed(this.getAffirmed());
         if (this.getBillingType() != null) {
             cv.setBillingType(this.getBillingType().toString());
-
-            if (this.getBillingType().equals(PendingVault.Billing_Type.SLICE)) {
-                cv.setSliceID(this.getSliceID());
-            }
-
+            cv.setSliceID(this.getSliceID());
+            
             if (this.getBillingType().equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
                 cv.setGrantAuthoriser(this.getAuthoriser());
                 cv.setGrantSchoolOrUnit(this.getSchoolOrUnit());
@@ -600,6 +649,20 @@ public class VaultInfo {
                 cv.setBudgetSchoolOrUnit(this.getSchoolOrUnit());
                 cv.setBudgetSubunit(this.getSubunit());
             }
+
+            // New Billing types
+            if (this.getBillingType().equals(PendingVault.Billing_Type.WILL_PAY)) {
+                cv.setBudgetAuthoriser(this.getAuthoriser());
+            }
+            
+            if (this.getBillingType().equals(PendingVault.Billing_Type.FEEWAIVER)) {
+               // TBD
+            }
+            
+            if (this.getBillingType().equals(PendingVault.Billing_Type.BUY_NEW_SLICE)) {
+                // TBD
+             }
+
         }
 
         cv.setName(this.getName());
@@ -635,6 +698,19 @@ public class VaultInfo {
         cv.setPureLink(this.getPureLink());
         cv.setConfirmed(this.getConfirmed());
         cv.setVaultCreator(this.getVaultCreatorId());
+
+        // Billing page checkbox information
+        if (this.getSliceQueryChoice() != null) {
+            cv.setSliceQueryChoice(this.getSliceQueryChoice().toString());
+        } 
+        if (this.getFundingQueryChoice() != null) {
+            cv.setFundingQueryChoice(this.getFundingQueryChoice().toString());
+        }
+        if (this.getFeewaiverQueryChoice() != null) {
+            cv.setFeewaiverQueryChoice(this.getFeewaiverQueryChoice().toString());
+        }
+
+        cv.setPaymentDetails(this.paymentDetails);
 
         return cv;
     }

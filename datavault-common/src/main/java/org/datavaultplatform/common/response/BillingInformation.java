@@ -72,15 +72,20 @@ public class BillingInformation {
     
     @ApiObjectField(description = "Owner Name")
 	private String userName;
+
+	@ApiObjectField(description = "The Billing payment details.")
+	private String paymentDetails;
+
     
     public BillingInformation() {
     	
     }
 
+
 	public BillingInformation(String id, String vaultID, String contactName, String school, String subUnit, Boolean budgetCode,
 			String specialComments, BigDecimal amountToBeBilled, BigDecimal amountBilled, long vaultSize, Date reviewDate,
 							  Date creationTime, String vaultName,String projectId,String userName, String sliceID,
-							  String projectTitle, PendingVault.Billing_Type billingType) {
+							  String projectTitle, PendingVault.Billing_Type billingType, String paymentDetails) {
     	this.id = id;        
         this.vaultID = vaultID;    
         this.contactName = contactName; 
@@ -99,11 +104,12 @@ public class BillingInformation {
         this.sliceID = sliceID;
         this.projectTitle = projectTitle;
         this.billingType = billingType;
+		this.paymentDetails = paymentDetails;
 	}
 	
 	public BillingInformation(String id, String vaultID, String contactName, String school, String subUnit, Boolean budgetCode,
 			String specialComments, BigDecimal amountToBeBilled, BigDecimal amountBilled, String projectId, String vaultName,
-							  String sliceID, String projectTitle, PendingVault.Billing_Type billingType) {
+							  String sliceID, String projectTitle, PendingVault.Billing_Type billingType, String paymentDetails) {
     	this.id = id;        
         this.vaultID = vaultID;    
         this.contactName = contactName; 
@@ -118,6 +124,7 @@ public class BillingInformation {
         this.sliceID = sliceID;
         this.projectTitle = projectTitle;
         this.billingType = billingType;
+		this.paymentDetails = paymentDetails;
 	}
 
     public String getUserName() {
@@ -271,6 +278,14 @@ public class BillingInformation {
 	public void setSliceID(String sliceID) {
 		this.sliceID = sliceID;
 	}
+
+	 public String getPaymentDetails() {
+        return this.paymentDetails;
+    }
+
+    public void setPaymentDetails(String paymentDetails) {
+        this.paymentDetails = paymentDetails;
+    }
 	
 	public String getProjectSizeStr() {
         if ( projectSize == 0 ){
@@ -292,4 +307,5 @@ public class BillingInformation {
 		}
 		return Boolean.TRUE.equals(budgetCode) ? "Yes" : "No";
 	}
+
 }

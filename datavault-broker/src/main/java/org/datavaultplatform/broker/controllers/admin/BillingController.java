@@ -115,6 +115,8 @@ public class BillingController {
     		billinginfo.setSpecialComments(billingDetails.getSpecialComments());
     		billinginfo.setSubUnit(billingDetails.getSubUnit());
     		billinginfo.setVault(vault);
+			billinginfo.setPaymentDetails(billingDetails.getPaymentDetails());
+
     		billingService.saveOrUpdateVault(billinginfo);
             
     	}	
