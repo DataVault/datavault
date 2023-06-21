@@ -23,8 +23,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 
     private static final Logger logger = LoggerFactory.getLogger(TivoliStorageManager.class);
     // default locations of TSM option files
-    public static String TSM_SERVER_NODE1_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm1.opt";
-    public static String TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
+    public static String TSM_SERVER_NODE1_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
+    public static String TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm1.opt";
     public static String TEMP_PATH_PREFIX = "/tmp/datavault/temp/";
 
     public final Verify.Method verificationMethod = Verify.Method.COPY_BACK;
