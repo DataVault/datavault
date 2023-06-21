@@ -15,8 +15,8 @@
                     details available thorough the Contact button. If you have a grant
                     and not a reserved slice please select 'no'.
                 </p>
-                <#-- FOR TESTING:  <p>DEBUG VAULT: ${vault?html}
-                </p>  -->
+                <#-- FOR TESTING: <p>DEBUG VAULT: ${vault?html}
+                    </p> -->
             </div>
             <div class="col-md-4 well">
                 <@spring.bind "vault.sliceQueryChoice" />
@@ -163,30 +163,49 @@
             </div>
         </div>
         <div id="payment-details-form" class="row collapse">
+            <h4 class="fs-title">Billing Details</h4>
+            <p>Please provide the details we should use to send your bill to the correct finance team.</p>
             <div class="well">
-                <p>Please provide the details we should use to send your bill to the correct finance team.</p>
-                <div class="form-group required my-2">
+                <div class="form-group mb-3 required">
                     <label class="col-sm-4 control-label">Authoriser:
                         <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                             title="The name of someone in your School/Unit or Sub-Unit who can authorise the payment."></span>
                     </label>
                     <@spring.bind "vault.budgetAuthoriser" />
-                    <input type="text" class="col-sm-6" id="budget-authoriser" name="${spring.status.expression}" value="${spring.status.value!''}"  />
+                    <input type="text" class="col-sm-6" id="budget-authoriser" name="${spring.status.expression}" value="${spring.status.value!''}" />
                 </div>
-                <div class="form-group my-2">
+                <div class="form-group mb-3 required">
+                    <label class="col-sm-4 control-label">School/Unit:</label>
+                    <@spring.bind "vault.grantSchoolOrUnit" />
+                    <input type="text" class="col-sm-6" id="schoolOrUnit" name="${spring.status.expression}" value="${spring.status.value!""}" />
+                </div>
+                <div class="form-group mb-3 required">
+                    <label class="col-sm-4 control-label">Subunit:</label>
+                    <@spring.bind "vault.grantSubunit" />
+                    <input type="text" class="col-sm-6" id="subunit" name="${spring.status.expression}" value="${spring.status.value!""}" />
+                </div>
+                <div class="form-group mb-3 required">
+                    <label class="col-sm-4 control-label">Project Title:
+                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
+                            title="If you are planning to pay the bill from a grant, please enter the Project Title."></span>
+                    </label>
+                    <@spring.bind "vault.projectTitle" />
+                    <input type="text" class="col-sm-6" id="projectTitle" name="${spring.status.expression}" value="${spring.status.value!""}" />
+                </div>
+                <div class="form-group mb-3">
                     <label class="col-sm-4 control-label">
                         Payment details (if known):<br>
                         (see 'Data Vault - Cost' page on university website)
                     </label>
                     <@spring.bind "vault.paymentDetails" />
-                    <textarea id="budget-payment-details" type="text" class="form-control" name="${spring.status.expression}"
-                         rows="4" cols="60">
+                    <textarea id="budget-payment-details" type="text" class="form-control col-sm-6" name="${spring.status.expression}"
+                        rows="4" cols="60">
                         <#if vault.paymentDetails??>
                             ${vault.paymentDetails?html}
                         </#if>
                     </textarea>
                 </div>
-                <div class="form-group my-2">
+                <div class="form-group mb-3">
                     <label for="billingGrantEndDate" class="col-sm-4 control-label">
                         Grant End Date:<span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                             title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;"></span>
@@ -196,9 +215,11 @@
                         value="${spring.status.value!''}" />
                     <span id="invalid-billing-grant-end-date-span" style="font-size: 1.2em; font: bold; color:  #AE0F0F; display: inline;"></span>
                 </div>
-                <button type="button"
-                    class="btn btn-danger my-2 query-choice-clear"
-                    id="payment-details-form-clear">Clear selection and return to the top</button>
+                <div class="mb-3">
+                    <button type="button"
+                        class="btn btn-danger query-choice-clear"
+                        id="payment-details-form-clear">Clear selection and return to the top</button>
+                </div>
             </div>
         </div>
     </div>

@@ -51,29 +51,29 @@
 			<td></td>
 		</tr>
 		<tr>
-			<th scope="col">Funding for this vault will be from</th>
+			<th scope="col">Billing Type</th>
 			<td><span id="summary-billing-type"></span> </td>
 		</tr>
 		<tr class="summary-slice-billing-row">
 			<th scope="col">Slice</th>
 			<td><span id="summary-sliceID"></span> </td>
 		</tr>
-		<tr class="summary-grant-or_budget-billing-row">
-			<th scope="col">Authoriser</th>
-			<td><span id="summary-authoriser"></span> </td>
+		<tr class="summary-budget-authoriser-billing-row">
+			<th scope="col">Budget Authoriser</th>
+			<td><span id="summary-budget-authoriser"></span> </td>
 		</tr>
-		<tr class="summary-grant-or_budget-billing-row">
-			<th scope="col">School/Unit</th>
-			<td><span id="summary-schoolOrUnit"></span> </td>
+		<tr class="summary-payment-details-billing-row">
+			<th scope="col">Payment Details</th>
+			<td><textarea id="summary-payment-details" type="text"
+			            readonly
+                         rows="4" cols="60">
+                    </textarea></td>
 		</tr>
-		<tr class="summary-grant-or_budget-billing-row">
-			<th scope="col">Subunit</th>
-			<td><span id="summary-subunit"></span> </td>
+		<tr class="summary-billing-grant-end-date-billing-row">
+			<th scope="col">Billing Grant End Date</th>
+			<td><span id="summary-billing-grant-end-date"></span> </td>
 		</tr>
-		<tr class="summary-grant-or_budget-billing-row">
-			<th scope="col">ProjectTitle</th>
-			<td><span id="summary-projectTitle"></span> </td>
-		</tr>
+
 		<tr>
 			<th scope="col">
 				<h3 class="fs-title">Vault Access</h3></th>
