@@ -14,7 +14,7 @@
                 </ol>
                 <div class="panel panel-uoe-low">
                     <div class="panel-body">
-                        <h2>Billing Details (Grant): <small>
+                        <h2>Billing Details (FEEWAIVER): <small>
                                 ${billingDetails.vaultName?html}
                             </small></h2>
                         <br />
@@ -135,16 +135,22 @@
                                                     value="${spring.status.value!""}" id="subunit" maxlength="400" />
                                             </div>
                                             <div class="form-group">
-                                                <label class="control-label">ProjectTitle:</label>
-                                                <@spring.bind "billingDetails.projectTitle" />
-                                                <input type="text" class="form-control" name="${spring.status.expression}"
-                                                    value="${spring.status.value!""}" id="projectTitle" maxlength="400" />
-                                            </div>
-                                            <div class="form-group">
                                                 <label class="control-label">ProjectId:</label>
                                                 <@spring.bind "billingDetails.projectId" />
                                                 <input type="text" class="form-control" name="${spring.status.expression}"
                                                     value="${spring.status.value!""}" id="projectId" maxlength="400" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">Project Title:</label>
+                                                <@spring.bind "billingDetails.projectTitle" />
+                                                <input type="text" class="form-control" name="${spring.status.expression}"
+                                                    value="${spring.status.value!""}" id="projectId" maxlength="400" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">Slice ID:</label>
+                                                <@spring.bind "billingDetails.sliceID" />
+                                                <input type="text" class="form-control" name="${spring.status.expression}"
+                                                    value="${spring.status.value!""}" id="slice" maxlength="400" />
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label">Amount to be billed:(Please enter the amount in pounds (and pence if applicable) without any symbols, do not use commas)</label>

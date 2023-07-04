@@ -40,19 +40,20 @@ public class ValidateService {
         List<String> retVal = new ArrayList<>();
 
         // Field set 2 should have completed
-        //Billing type and it should have been one of our controlled options
+        // Billing type and it should have been one of our controlled options
         String type = vault.getBillingType();
         if (type == null || type.isEmpty()) {
             retVal.add("BillingType missing");
             return retVal;
         }
 
-        if (!type.equals("NA") && !type.equals("GRANT_FUNDING") && !type.equals("BUDGET_CODE")  && !type.equals("SLICE")) {
+        if (!type.equals("NA") && !type.equals("GRANT_FUNDING") && !type.equals("BUDGET_CODE") && !type.equals("SLICE")
+                && !type.equals("FEEWAIVER") && !type.equals("WILL_PAY") && !type.equals("BUY_NEW_SLICE")) {
             retVal.add("BillingType invalid (" + type + ")");
             return retVal;
         }
 
-        //If type GRANT_FUNDING or BUDGET_CODE
+        // If type GRANT_FUNDING or BUDGET_CODE
         if (type.equals("GRANT_FUNDING")) {
 
             return this.validateGrantBillingType(vault);
@@ -63,15 +64,29 @@ public class ValidateService {
             return this.validateBudgetBillingType(vault);
         }
 
-        //If type SLICE
+        // If type SLICE
         if (type.equals("SLICE")) {
-            //slice
+            // slice
             String slice = vault.getSliceID();
             if (slice == null || slice.isEmpty()) {
                 retVal.add("Slice ID missing");
             }
         }
 
+        if (type.equals("FEEWAIVER")) {
+            // Currently no further checks
+        }
+
+        if (type.equals("WILL_PAY")) {
+            String authoriser = vault.getBudgetAuthoriser();
+            if (authoriser == null || authoriser.trim().isEmpty()) {
+                retVal.add("Payment authoriser is missing.");
+            }
+        }
+
+        if (type.equals("BUY_NEW_SLICE")) {
+            // Currently no further checks
+        }
 
         return retVal;
     }
@@ -79,17 +94,17 @@ public class ValidateService {
     private List<String> validateBudgetBillingType(CreateVault vault) {
         List<String> retVal = new ArrayList<>();
 
-        //Authoriser
+        // Authoriser
         String authoriser = vault.getBudgetAuthoriser();
         if (authoriser == null || authoriser.isEmpty()) {
             retVal.add("Authoriser missing");
         }
-        //School / Unit
+        // School / Unit
         String schoolOrUnit = vault.getBudgetSchoolOrUnit();
         if (schoolOrUnit == null || schoolOrUnit.isEmpty()) {
             retVal.add("School / Unit missing");
         }
-        //Subunit
+        // Subunit
         String subunit = vault.getBudgetSubunit();
         if (subunit == null || subunit.isEmpty()) {
             retVal.add("Subunit missing");
@@ -97,6 +112,7 @@ public class ValidateService {
         return retVal;
 
     }
+
     private List<String> validateGrantBillingType(CreateVault vault) {
         List<String> retVal = new ArrayList<>();
 
@@ -104,12 +120,12 @@ public class ValidateService {
         if (authoriser == null || authoriser.isEmpty()) {
             retVal.add("Authoriser missing");
         }
-        //School / Unit
+        // School / Unit
         String schoolOrUnit = vault.getGrantSchoolOrUnit();
         if (schoolOrUnit == null || schoolOrUnit.isEmpty()) {
             retVal.add("School / Unit missing");
         }
-        //Subunit
+        // Subunit
         String subunit = vault.getGrantSubunit();
         if (subunit == null || subunit.isEmpty()) {
             retVal.add("Subunit missing");
@@ -129,28 +145,28 @@ public class ValidateService {
 
     private List<String> validateFieldset3(CreateVault vault) {
         List<String> retVal = new ArrayList<>();
-//        Field set 3 should have completed
-//        Name
+        // Field set 3 should have completed
+        // Name
         String name = vault.getName();
         if (name == null || name.isEmpty()) {
             retVal.add("Name missing");
         }
-//        Description
+        // Description
         String description = vault.getDescription();
         if (description == null || description.isEmpty()) {
             retVal.add("Description missing");
         }
-//        Retention policy
+        // Retention policy
         String policy = vault.getPolicyInfo();
         if (policy == null || policy.isEmpty()) {
             retVal.add("Retention policy missing");
         }
-//        School
+        // School
         String school = vault.getGroupID();
         if (school == null || school.isEmpty()) {
             retVal.add("School missing");
         }
-//        Review Date
+        // Review Date
         String reviewDate = vault.getReviewDate();
         if (reviewDate == null || reviewDate.isEmpty()) {
             retVal.add("Review Date missing");
@@ -158,7 +174,8 @@ public class ValidateService {
             // if review date is less than 3 years from today
             int length = 3;
             if (LocalDate.parse(reviewDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                    .isBefore(LocalDate.parse(this.getDefaultReviewDate(length), DateTimeFormatter.ofPattern("yyyy-MM-dd")))) {
+                    .isBefore(LocalDate.parse(this.getDefaultReviewDate(length),
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd")))) {
                 retVal.add("Review Date for selected policy is required to be at least " + length + " years");
             }
 
@@ -174,8 +191,9 @@ public class ValidateService {
     private List<String> validateFieldset4(CreateVault vault, String userID) {
         List<String> retVal = new ArrayList<>();
 
-//        Field set 4 should have only one role per uuid
-        String owner = vault.getVaultOwner() != null && !vault.getVaultOwner().isEmpty() ? vault.getVaultOwner() : userID;
+        // Field set 4 should have only one role per uuid
+        String owner = vault.getVaultOwner() != null && !vault.getVaultOwner().isEmpty() ? vault.getVaultOwner()
+                : userID;
         List<String> ownerList = new ArrayList<>();
         ownerList.add(owner);
         List<String> ndms = vault.getNominatedDataManagers();
@@ -202,8 +220,8 @@ public class ValidateService {
     private List<String> validateFieldset5(CreateVault vault) {
         List<String> retVal = new ArrayList<>();
 
-//        Field set 5 should have completed
-//        Pure link
+        // Field set 5 should have completed
+        // Pure link
         Boolean pureLink = vault.getPureLink();
         if (pureLink == null || pureLink == false) {
             retVal.add("Pure link not accepted");

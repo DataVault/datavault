@@ -14,7 +14,7 @@
                 </ol>
                 <div class="panel panel-uoe-low">
                     <div class="panel-body">
-                        <h2>Billing Details (Grant): <small>
+                        <h2>Billing Details (WILL PAY): <small>
                                 ${billingDetails.vaultName?html}
                             </small></h2>
                         <br />
@@ -47,7 +47,7 @@
                                         </#if>
                                     </td>
                                 </tr>
-                                <tr>
+                                 <tr>
                                     <th scope="col">Project Title</th>
                                     <td>
                                         <#if billingDetails.getProjectTitle()??>
@@ -135,7 +135,7 @@
                                                     value="${spring.status.value!""}" id="subunit" maxlength="400" />
                                             </div>
                                             <div class="form-group">
-                                                <label class="control-label">ProjectTitle:</label>
+                                                <label class="control-label">Project projectTitle:</label>
                                                 <@spring.bind "billingDetails.projectTitle" />
                                                 <input type="text" class="form-control" name="${spring.status.expression}"
                                                     value="${spring.status.value!""}" id="projectTitle" maxlength="400" />

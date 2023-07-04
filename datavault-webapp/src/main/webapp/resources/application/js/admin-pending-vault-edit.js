@@ -77,85 +77,276 @@ $(document).ready(function(){
 	}).trigger('change');
 
 
-	// Initially, disable next on doc initialisation
-	$("input[name=\"billingType\"]").parents("fieldset").children(".next").prop( "disabled", true );
+	
+	// ----------- Billing ------------------------
 
-	$("#billing-choice-na").change(function(){
-		clearBillingOptions();
-		$('.collapse').collapse('hide');
-		validateBillingNA();
-	}).trigger('change');  ;
+	if ($("input[name='sliceQueryChoice']:checked").val() ||
+		$("input[name='fundingQueryChoice']:checked").val() |
+		$("input[name='feewaiverQueryChoice']:checked").val()) {
+		$('#slice-query-box').collapse('show');
 
-	$("#billing-choice-grantfunding").change(function(){
-		clearBillingOptions();
-
-		if($(this).is(":checked")){
-			$('.collapse').not('#grant-billing-form').collapse('hide');
-			$('#grant-billing-form').collapse('show');
-		}
-		validateBillingGrantFundingFields();
-	}).trigger('change');
-
-	$("#authoriser").change(function() {
-		validateBillingGrantFundingFields();
-	});
-
-	$("#schoolOrUnit").change(function() {
-		validateBillingGrantFundingFields();
-	});
-
-	$("#subunit").change(function() {
-		validateBillingGrantFundingFields();
-	});
-
-	$("#projectTitle").change(function() {
-		validateBillingGrantFundingFields();
-	});
-
-	$("#billingGrantEndDate").change(function() {
-		validateBillingGrantFundingFields();
-	});
+		console.log("SliceQueryChoice: ", $("input[name='sliceQueryChoice']:checked").val());
+		console.log("FundingQueryChoice: ", $("input[name='fundingQueryChoice']:checked").val());
+		console.log("FeewaiverQueryChoice: ", $("input[name='feewaiverQueryChoice']:checked").val());
 
 
-	$("#billing-choice-budgetcode").change(function(){
-		clearBillingOptions();
-
-		if($(this).is(":checked")) {
-			$('.collapse').not('#budget-billing-form').collapse('hide');
-			$('#budget-billing-form').collapse('show');
-		}
-
-		validateBillingBudgetCodeFields();
-	}).trigger('change');
-
-	$("#budget-authoriser").change(function() {
-		validateBillingBudgetCodeFields();
-	});
-
-	$("#budget-schoolOrUnit").change(function() {
-		validateBillingBudgetCodeFields();
-	});
-
-	$("#budget-subunit").change(function() {
-		validateBillingBudgetCodeFields();
-	});
-
-
-
-	$("#billing-choice-slice").change(function(){
-		clearBillingOptions();
-		if($(this).is(":checked")) {
-			$('.collapse').not('#slice-form').collapse('hide');
+		if ($("input[name='sliceQueryChoice']:checked").val() === 'YES') {
 			$('#slice-form').collapse('show');
 		}
-		validateBillingSliceFields();
-	}).trigger('change');
 
-	// Validates Slice fields
-	$("#sliceID").change(function() {
-		validateBillingSliceFields();
+		if ($("input[name='sliceQueryChoice']:checked").val() === 'NO' ||
+			$("input[name='sliceQueryChoice']:checked").val() === 'DO_NOT_KNOW') {
+			$('#funding-query-box').collapse('show');
+		}
+
+		if ($('#funding-query-no').is(":checked") || $('#funding-query-do-not-know').is(":checked")) {
+			$('#feewaiver-query-box').collapse('show');
+		}
+
+		if ($('#funding-query-yes').is(":checked")) {
+			$('#payment-details-form').collapse('show');
+		}
+
+		validateBillingFields();
+	}
+
+	$("input[name='sliceQueryChoice']").change(function () {
+		if (!$(this).is(":checked")) {
+			$('.collapse').not('#slice-query-box').collapse('hide');
+			$('#slice-form').collapse('hide');
+			$('#slice-query-box').collapse('show');
+		}
+
+		if ($(this).is(":checked") && $(this).val() === 'YES') {
+			$('.collapse').not('#slice-query-box').not('#slice-form').collapse('hide');
+			$('#slice-query-box').collapse('show');
+			$('#slice-form').collapse('show');
+		}
+
+		if ($(this).is(":checked") && $(this).val() !== 'YES') {
+			$('#sliceID').val('');
+			$('#slice-form').collapse('hide');
+		}
+
+		if ($(this).is(":checked") && ($(this).val() == 'NO' || $(this).val() == 'DO_NOT_KNOW')) {
+			$('#sliceID').val('');
+			$('#slice-form').collapse('hide');
+			$('#slice-query-box').collapse('show');
+			$('#funding-query-box').collapse('show');
+		}
+
+		if ($(this).is(":checked") && $(this).val() == 'BUY_NEW_SLICE') {
+			$('#slice-query-box').collapse('show');
+		}
+
+		validateBillingFields();
 	});
 
+	$("#sliceID").change(function () {
+		validateBillingFields();
+	});
+
+	$("#slice-query-yes").change(function () {
+		if ($(this).is(":checked")) {
+			$('#billingType').val('SLICE');
+
+			$("input[name='feewaiverQueryChoice']").prop('checked', false).removeAttr('checked');
+			$("input[name='fundingQueryChoice']").prop('checked', false).removeAttr('checked');
+			$('#budget-authoriser').val('');
+			$('#schoolOrUnit').val('');
+			$('#subunit').val('');
+			$('#projectTitle').val('');
+			$('#billingGrantEndDate').val('');
+			$('#budget-payment-details').val('');
+
+			$('.collapse').not('#slice-query-box').not('#slice-form').collapse('hide');
+			$('#slice-query-box').collapse('show');
+			$('#slice-form').collapse('show');
+		}
+		validateBillingFields();
+	});
+
+	$("#slice-query-buy").change(function () {
+		if ($(this).is(":checked")) {
+			$('#billingType').val('BUY_NEW_SLICE');
+
+			$("input[name='feewaiverQueryChoice']").prop('checked', false).removeAttr('checked');
+			$("input[name='fundingQueryChoice']").prop('checked', false).removeAttr('checked');
+			$('.collapse').not('#slice-query-box').collapse('hide');
+			$('#sliceID').val('');
+			$('#budget-authoriser').val('');
+			$('#schoolOrUnit').val('');
+			$('#subunit').val('');
+			$('#projectTitle').val('');
+			$('#billingGrantEndDate').val('');
+			$('#budget-payment-details').val('');
+
+			$('#slice-query-box').collapse('show');
+		}
+		validateBillingFields();
+	});
+
+	$("#slice-query-no").change(function () {
+		if ($(this).is(":checked")) {
+			$('#billingType').val('');
+			$('.collapse').not('#slice-query-box').collapse('hide');
+			$("input[name='feewaiverQueryChoice']").prop('checked', false).removeAttr('checked');
+			$("input[name='fundingQueryChoice']").prop('checked', false).removeAttr('checked');
+
+			$('#sliceID').val('');
+			$('#budget-authoriser').val('');
+			$('#schoolOrUnit').val('');
+			$('#subunit').val('');
+			$('#projectTitle').val('');
+			$('#billingGrantEndDate').val('');
+			$('#budget-payment-details').val('');
+
+		}
+		validateBillingFields();
+	});
+
+	$("#slice-query-do-not-know").change(function () {
+		if ($(this).is(":checked")) {
+			$('#billingType').val('');
+			$('.collapse').not('#slice-query-box').collapse('hide');
+			$("input[name='feewaiverQueryChoice']").prop('checked', false).removeAttr('checked');
+			$("input[name='fundingQueryChoice']").prop('checked', false).removeAttr('checked');
+
+			$('#sliceID').val('');
+			$('#budget-authoriser').val('');
+			$('#budget-payment-details').val('');
+			$('#billingGrantEndDate').val('');
+
+		}
+		validateBillingFields();
+	});
+
+	$("input[name='fundingQueryChoice']").change(function () {
+		console.log("fundingQueryChoice change");
+		if ($(this).is(":checked") && $(this).val() === 'YES') {
+			$('.collapse').not('#slice-query-box').not('#funding-query-box').collapse('hide');
+
+			$('#sliceID').val('');
+			$('#budget-authoriser').val('');
+			$('#schoolOrUnit').val('');
+			$('#subunit').val('');
+			$('#projectTitle').val('');
+			$('#billingGrantEndDate').val('');
+			$('#budget-payment-details').val('');
+
+			$('#slice-query-box').collapse('show');
+			$('#funding-query-box').collapse('show');
+			$('#payment-details-form').collapse('show');
+		}
+		if ($(this).is(":checked") && $(this).val() !== 'YES') {
+
+			$('#sliceID').val('');
+			$('#budget-authoriser').val('');
+			$('#schoolOrUnit').val('');
+			$('#subunit').val('');
+			$('#projectTitle').val('');
+			$('#billingGrantEndDate').val('');
+			$('#budget-payment-details').val('');
+
+			$('#slice-query-box').collapse('show');
+			$('#funding-query-box').collapse('show');
+			$('#feewaiver-query-box').collapse('show');
+		}
+		validateBillingFields();
+	});
+
+	$("input[name='feewaiverQueryChoice']").change(function () {
+		console.log("feewaiverQueryChoice change");
+
+		$('#sliceID').val('');
+		$('#budget-authoriser').val('');
+		$('#schoolOrUnit').val('');
+		$('#subunit').val('');
+		$('#projectTitle').val('');
+		$('#billingGrantEndDate').val('');
+		$('#budget-payment-details').val('');
+
+		if ($(this).is(":checked")) {
+			$('#billingType').val('FEEWAIVER');
+		} else {
+			$('#billingType').val('');
+		}
+		validateBillingFields();
+	});
+
+
+	$("#budget-authoriser").change(function () {
+		if (!$(this).val().trim()) {
+			$('#billingType').val('');
+		} else {
+			$('#billingType').val('WILL_PAY');
+		}
+		validateBillingFields();
+	});
+
+	$("#schoolOrUnit").change(function () {
+		validateBillingFields();
+	});
+
+	$("#subunit").change(function () {
+		validateBillingFields();
+	});
+
+	$("#projectTitle").change(function () {
+		validateBillingFields();
+	});
+
+
+
+
+	// Clear all query choices in Billing
+	$(".query-choice-clear").click(function () {
+		console.log("query-choice-clear pressed");
+		// Clear radio button
+		$("input[name='feewaiverQueryChoice']").prop('checked', false).removeAttr('checked');
+		$("input[name='fundingQueryChoice']").prop('checked', false).removeAttr('checked');
+		$("input[name='sliceQueryChoice']").prop('checked', false).removeAttr('checked');
+		$('#sliceID').val('');
+		$('#budget-authoriser').val('');
+		$('#budget-payment-details').val('');
+		$('#billingGrantEndDate').val('');
+		$('.collapse').not('#slice-query-box').collapse('hide');
+		$('#slice-query-box').collapse('show');
+		validateBillingFields();
+	});
+
+	function validateBillingFields() {
+		console.log("Called validateBillingFields");
+
+		$("#billing-section").parents("fieldset").children(".next").prop("disabled", true);
+		console.log("called validateBillingFields - Next: DISABLED");
+		if ($("#slice-query-yes").is(":checked")) {
+			if ($("#sliceID").val().trim() !== '') {
+				$("#billing-section").parents("fieldset").children(".next").prop("disabled", false);
+				console.log("Radio sliceQueryChoice: CHECKED - Next: ENABLED");
+			}
+		}
+
+		if ($("#slice-query-buy").is(":checked")) {
+			$("#billing-section").parents("fieldset").children(".next").prop("disabled", false);
+			console.log("Radio sliceQueryChoice: CHECKED - Next: ENABLED");
+		}
+
+		if ($("input[name='feewaiverQueryChoice']:checked").val()) {
+			$("#billing-section").parents("fieldset").children(".next").prop("disabled", false);
+			console.log("Radio feewaiverQueryChoice: CHECKED - Next: ENABLED");
+		}
+
+		if ($('#budget-authoriser').val().trim() !== '' &&
+			$('#schoolOrUnit').val().trim() !== '' &&
+			$('#subunit').val().trim() !== '' &&
+			$('#projectTitle').val().trim() !== '') {
+			$("#billing-section").parents("fieldset").children(".next").prop("disabled", false);
+			console.log("Budget Authoriser : PRESENT - Next: ENABLED");
+		}
+
+	}
+	//---------------------------------------------
 
 	$("#add-ndm-btn").click(function(){
 		const firstEmptyNdm = $("#hidden-empty-ndms > div.empty-ndm").first();
@@ -307,114 +498,241 @@ $(document).ready(function(){
 	}
 
 
+	// ----------- Billing ------------------------
 
-	function validateBillingNA() {
-		console.log("called validateBillingNAFields");
-		if($("#billing-choice-na").is(":checked")) {
-			$("#billing-choice-na").parents("fieldset").children(".next").prop( "disabled", false );
-			console.log("called validateBillingNAFields: ENABLED");
+	if ($("input[name='sliceQueryChoice']:checked").val() ||
+		$("input[name='fundingQueryChoice']:checked").val() |
+		$("input[name='feewaiverQueryChoice']:checked").val()) {
+		$('#slice-query-box').collapse('show');
+
+		console.log("SliceQueryChoice: ", $("input[name='sliceQueryChoice']:checked").val());
+		console.log("FundingQueryChoice: ", $("input[name='fundingQueryChoice']:checked").val());
+		console.log("FeewaiverQueryChoice: ", $("input[name='feewaiverQueryChoice']:checked").val());
+
+
+		if ($("input[name='sliceQueryChoice']:checked").val() === 'YES') {
+			$('#slice-form').collapse('show');
+		}
+
+		if ($("input[name='sliceQueryChoice']:checked").val() === 'NO' ||
+			$("input[name='sliceQueryChoice']:checked").val() === 'DO_NOT_KNOW') {
+			$('#funding-query-box').collapse('show');
+		}
+
+		if ($('#funding-query-no').is(":checked") || $('#funding-query-do-not-know').is(":checked")) {
+			$('#feewaiver-query-box').collapse('show');
+		}
+
+		if ($('#funding-query-yes').is(":checked")) {
+			$('#payment-details-form').collapse('show');
+		}
+
+	validateBillingFields();
+}
+
+	$("input[name='sliceQueryChoice']").change(function () {
+	if (!$(this).is(":checked")) {
+		$('.collapse').not('#slice-query-box').collapse('hide');
+		$('#slice-form').collapse('hide');
+		$('#slice-query-box').collapse('show');
+	}
+
+	if ($(this).is(":checked") && $(this).val() === 'YES') {
+		$('.collapse').not('#slice-query-box').not('#slice-form').collapse('hide');
+		$('#slice-query-box').collapse('show');
+		$('#slice-form').collapse('show');
+	}
+
+	if ($(this).is(":checked") && $(this).val() !== 'YES') {
+		$('#sliceID').val('');
+		$('#slice-form').collapse('hide');
+	}
+
+	if ($(this).is(":checked") && ($(this).val() == 'NO' || $(this).val() == 'DO_NOT_KNOW')) {
+		$('#sliceID').val('');
+		$('#slice-form').collapse('hide');
+		$('#slice-query-box').collapse('show');
+		$('#funding-query-box').collapse('show');
+	}
+
+	if ($(this).is(":checked") && $(this).val() == 'BUY_NEW_SLICE') {
+		$('#slice-query-box').collapse('show');
+	}
+
+	validateBillingFields();
+});
+
+$("#sliceID").change(function () {
+	validateBillingFields();
+});
+
+$("#slice-query-yes").change(function () {
+	if ($(this).is(":checked")) {
+		$('#billingType').val('SLICE');
+
+		$("input[name='feewaiverQueryChoice']").prop('checked', false).removeAttr('checked');
+		$("input[name='fundingQueryChoice']").prop('checked', false).removeAttr('checked');
+		$('#budget-authoriser').val('');
+		$('#budget-payment-details').val('');
+		$('billingGrantEndDate').val('');
+
+		$('.collapse').not('#slice-query-box').not('#slice-form').collapse('hide');
+		$('#slice-query-box').collapse('show');
+		$('#slice-form').collapse('show');
+	}
+	validateBillingFields();
+});
+
+$("#slice-query-buy").change(function () {
+	if ($(this).is(":checked")) {
+		$('#billingType').val('BUY_NEW_SLICE');
+
+		$("input[name='feewaiverQueryChoice']").prop('checked', false).removeAttr('checked');
+		$("input[name='fundingQueryChoice']").prop('checked', false).removeAttr('checked');
+		$('.collapse').not('#slice-query-box').collapse('hide');
+		$('#sliceID').val('');
+		$('#budget-authoriser').val('');
+		$('#budget-payment-details').val('');
+		$('billingGrantEndDate').val('');
+
+		$('#slice-query-box').collapse('show');
+	}
+	validateBillingFields();
+});
+
+$("#slice-query-no").change(function () {
+	if ($(this).is(":checked")) {
+		$('#billingType').val('');
+		$('.collapse').not('#slice-query-box').collapse('hide');
+		$("input[name='feewaiverQueryChoice']").prop('checked', false).removeAttr('checked');
+		$("input[name='fundingQueryChoice']").prop('checked', false).removeAttr('checked');
+
+		$('#sliceID').val('');
+		$('#budget-authoriser').val('');
+		$('#budget-payment-details').val('');
+		$('billingGrantEndDate').val('');
+
+	}
+	validateBillingFields();
+});
+
+$("#slice-query-do-not-know").change(function () {
+	if ($(this).is(":checked")) {
+		$('#billingType').val('');
+		$('.collapse').not('#slice-query-box').collapse('hide');
+		$("input[name='feewaiverQueryChoice']").prop('checked', false).removeAttr('checked');
+		$("input[name='fundingQueryChoice']").prop('checked', false).removeAttr('checked');
+
+		$('#sliceID').val('');
+		$('#budget-authoriser').val('');
+		$('#budget-payment-details').val('');
+		$('billingGrantEndDate').val('');
+
+	}
+	validateBillingFields();
+});
+
+$("input[name='fundingQueryChoice']").change(function () {
+	console.log("fundingQueryChoice change");
+	if ($(this).is(":checked") && $(this).val() === 'YES') {
+		$('.collapse').not('#slice-query-box').not('#funding-query-box').collapse('hide');
+
+		$('#sliceID').val('');
+		$('#budget-authoriser').val('');
+		$('#budget-payment-details').val('');
+		$('billingGrantEndDate').val('');
+
+		$('#slice-query-box').collapse('show');
+		$('#funding-query-box').collapse('show');
+		$('#payment-details-form').collapse('show');
+	}
+	if ($(this).is(":checked") && $(this).val() !== 'YES') {
+
+		$('#sliceID').val('');
+		$('#budget-authoriser').val('');
+		$('#budget-payment-details').val('');
+		$('billingGrantEndDate').val('');
+
+		$('#slice-query-box').collapse('show');
+		$('#funding-query-box').collapse('show');
+		$('#feewaiver-query-box').collapse('show');
+	}
+	validateBillingFields();
+});
+
+$("input[name='feewaiverQueryChoice']").change(function () {
+	console.log("feewaiverQueryChoice change");
+
+	$('#sliceID').val('');
+	$('#budget-authoriser').val('');
+	$('#budget-payment-details').val('');
+	$('billingGrantEndDate').val('');
+
+	if ($(this).is(":checked")) {
+		$('#billingType').val('FEEWAIVER');
+	} else {
+		$('#billingType').val('');
+	}
+	validateBillingFields();
+});
+
+
+$("#budget-authoriser").change(function () {
+	if (!$(this).val().trim()) {
+		$('#billingType').val('');
+	} else {
+		$('#billingType').val('WILL_PAY');
+	}
+	validateBillingFields();
+});
+
+
+// Clear all query choices in Billing
+$(".query-choice-clear").click(function () {
+	console.log("query-choice-clear pressed");
+	// Clear radio button
+	$("input[name='feewaiverQueryChoice']").prop('checked', false).removeAttr('checked');
+	$("input[name='fundingQueryChoice']").prop('checked', false).removeAttr('checked');
+	$("input[name='sliceQueryChoice']").prop('checked', false).removeAttr('checked');
+	$('#sliceID').val('');
+	$('#budget-authoriser').val('');
+	$('#budget-payment-details').val('');
+	$('billingGrantEndDate').val('');
+	$('.collapse').not('#slice-query-box').collapse('hide');
+	$('#slice-query-box').collapse('show');
+	validateBillingFields();
+});
+
+function validateBillingFields() {
+	console.log("Called validateBillingFields");
+
+	$("#billing-section").parents("fieldset").children(".next").prop("disabled", true);
+	console.log("called validateBillingFields - Next: DISABLED");
+	if ($("#slice-query-yes").is(":checked")) {
+		if ($("#sliceID").val().trim() !== '') {
+			$("#billing-section").parents("fieldset").children(".next").prop("disabled", false);
+			console.log("Radio sliceQueryChoice: CHECKED - Next: ENABLED");
 		}
 	}
 
-	function validateBillingSliceFields() {
-		console.log("called validateBillingSliceFields");
-		if($("#billing-choice-slice").is(":checked")) {
-			if($("#sliceID").val().trim() !== '') {
-				$("#billing-choice-slice").parents("fieldset").children(".next").prop( "disabled", false );
-				console.log("called validateBillingSliceFields: ENABLED");
-			} else {
-				$("#billing-choice-slice").parents("fieldset").children(".next").prop( "disabled", true );
-				console.log("called validateBillingSliceFields: DISABLED");
-			}
-
-		}
+	if ($("#slice-query-buy").is(":checked")) {
+		$("#billing-section").parents("fieldset").children(".next").prop("disabled", false);
+		console.log("Radio sliceQueryChoice: CHECKED - Next: ENABLED");
 	}
 
-	function validateBillingGrantFundingFields() {
-		console.log("called validateBillingGrantFundingFields");
-		if($("#billing-choice-grantfunding").is(":checked")) {
-			if($("#authoriser").val().trim() !== '' &&
-				$("#schoolOrUnit").val().trim() !== '' &&
-				$("#subunit").val().trim() !== '' &&
-				$("#projectTitle").val().trim() !== '' &&
-				$("#billingGrantEndDate").val().trim() !== '' &&
-				$("#invalid-billing-grant-end-date-span").text().trim() === '') {
-				$("#billing-choice-grantfunding").parents("fieldset").children(".next").prop( "disabled", false );
-				console.log("called validateBillingGrantFundedFields: ENABLED");
-			} else {
-				$("#billing-choice-grantfunding").parents("fieldset").children(".next").prop( "disabled", true );
-				console.log("called validateBillingGrantFundingFields: DISABLED");
-			}
-
-		}
+	if ($("input[name='feewaiverQueryChoice']:checked").val()) {
+		$("#billing-section").parents("fieldset").children(".next").prop("disabled", false);
+		console.log("Radio feewaiverQueryChoice: CHECKED - Next: ENABLED");
 	}
 
-	function validateBillingBudgetCodeFields() {
-		console.log("called validateBillingBudgetCodeFields");
-		if($("#billing-choice-budgetcode").is(":checked")) {
-			if($("#budget-authoriser").val().trim() !== '' &&
-				$("#budget-schoolOrUnit").val().trim() !== '' &&
-				$("#budget-subunit").val().trim() !== '' ) {
-				$("#billing-choice-budgetcode").parents("fieldset").children(".next").prop( "disabled", false );
-				console.log("called validateBillingBudgetCodeFields: ENABLED");
-			} else {
-				$("#billing-choice-budgetcode").parents("fieldset").children(".next").prop( "disabled", true );
-				console.log("called validateBillingBudgetCodeFields: DISABLED");
-			}
-
-		}
+	if ($('#budget-authoriser').val().trim() !== '') {
+		$("#billing-section").parents("fieldset").children(".next").prop("disabled", false);
+		console.log("Budget Authoriser : PRESENT - Next: ENABLED");
 	}
 
-	// We will call this in $(".next").click()
-	function validateBillingPageForNextClick() {
-		validateBillingNA();
-		validateBillingSliceFields();
-		validateBillingGrantFundingFields();
-		validateBillingBudgetCodeFields();
-	}
+}
+//---------------------------------------------
 
-	function clearBillingOptions() {
-
-		// enable or disable the grant end date field on the info fieldset
-		var dateResult = ($("#billingGrantEndDate").val().trim() === '');
-		var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
-
-		if (dateResult === false && grantChecked === true) {
-			$("#grantEndDate").val($("#billingGrantEndDate").val());
-			$("#grantEndDate").prop("disabled", true);
-		} else {
-
-			$("#grantEndDate").prop("disabled", false);
-			// Reset to dbGrantEndDate
-			$("#grantEndDate").val(dbGrantEndDate);
-		}
-
-		// clear the unused fieldsets
-		var naChecked = ($("#billing-choice-na").is(":checked"));
-		var grantChecked = ($("#billing-choice-grantfunding").is(":checked"));
-		var budgetChecked = ($("#billing-choice-budgetcode").is(":checked"));
-		var sliceChecked = ($("#billing-choice-slice").is(":checked"));
-		// if billing type is not grant clear fieldset
-		if (naChecked === true) {
-			$("#grant-billing-form input").val("");
-			$("#budget-billing-form input").val("");
-			$("#slice-form input").val("");
-		}
-		if (grantChecked === true) {
-			$("#budget-billing-form input").val("");
-			$("#slice-form input").val("");
-		}
-
-		if (budgetChecked === true) {
-			$("#grant-billing-form input").val("");
-			$("#slice-form input").val("");
-		}
-
-		if (sliceChecked === true) {
-			$("#grant-billing-form input").val("");
-			$("#budget-billing-form input").val("");
-		}
-	}
 
 	function populateSummaryPage() {
 		console.log("populateSummaryPage()");
@@ -443,32 +761,38 @@ $(document).ready(function(){
 			$("#summary-notes").text($("#notes").val());
 
 			// Billing
-			var billingTypeEl = $("input[id^='billing-choice']:checked");
-			if(typeof billingTypeEl !== 'undefined' && billingTypeEl !== null) {
-				var billingType = billingTypeEl.parent().text().replace(/(\r\n|\n|\r)/gm, "").trim();
-				// Hack to ensure text after "[" is not added
-				if(billingType.indexOf("[") > -1) {
-					billingType = billingType.split("[")[0];
-				}
-				$("#summary-billing-type").text(billingType);
-				//Hide or show billing fields
-				if(billingType.startsWith("N/A")) {
-					$(".summary-grant-or_budget-billing-row").hide();
-					$(".summary-slice-billing-row").hide();
-				} else if(billingType.startsWith("A Slice")) {
-					$(".summary-grant-or_budget-billing-row").hide();
-					$(".summary-slice-billing-row").show();
-				} else {
-					$(".summary-slice-billing-row").hide();
-					$(".summary-grant-or_budget-billing-row").show();
-				}
-			}
+			var billingType = $("#billingType").val();
+			console.log("billingType: ", billingType);
+			$(".summary-slice-billing-row").hide();
+			$(".summary-budget-authoriser-billing-row").hide();
+			$(".summary-school-or-unit-billing-row").hide();
+			$(".summary-subunit-billing-row").hide();
+			$(".summary-project-title-billing-row").hide();
+			$(".summary-billing-grant-end-date-billing-row").hide();
+			$(".summary-payment-details-billing-row").hide();
+		
+			// Set text
+			$("#summary-billing-type").text(billingType);
 			$("#summary-sliceID").text($("#sliceID").val());
-			$("#summary-authoriser").text($("#authoriser").val());
-			$("#summary-schoolOrUnit").text($("#schoolOrUnit").val());
-			$("#summary-subunit").text($("#subunit").val());
-			$("#summary-projectTitle").text($("#projectTitle").val());
-
+			$("#summary-budget-authoriser").text($("#budget-authoriser").val());
+			$("#summary-school-or-unit").text($('#schoolOrUnit').val());
+			$("#summary-subunit").text($('#subunit').val());
+			$("#summary-project-title").text($('#projectTitle').val());
+			$("#summary-billing-grant-end-date").text($("#billingGrantEndDate").val())
+			$("#summary-payment-details").text($("#budget-payment-details").val());
+			
+			//Hide or show billing fields
+			if (billingType === "SLICE") {
+				$(".summary-slice-billing-row").show();
+			} else if (billingType === "WILL_PAY") {
+				$(".summary-budget-authoriser-billing-row").show();
+				$(".summary-school-or-unit-billing-row").show();
+			    $(".summary-subunit-billing-row").show();
+			    $(".summary-project-title-billing-row").show();
+				$(".summary-billing-grant-end-date-billing-row").show();
+				$(".summary-payment-details-billing-row").show();
+			}
+			
 			// Vault Users
 
 			// Vault Access

@@ -14,7 +14,7 @@
                 </ol>
                 <div class="panel panel-uoe-low">
                     <div class="panel-body">
-                        <h2>Billing Details (Grant): <small>
+                        <h2>Billing Details (SLICE): <small>
                                 ${billingDetails.vaultName?html}
                             </small></h2>
                         <br />
@@ -25,6 +25,15 @@
                                     <td>
                                         <#if billingDetails.getContactName()??>
                                             ${billingDetails.contactName?html}
+                                            <#else>
+                                        </#if>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="col">Slice ID</th>
+                                    <td>
+                                        <#if billingDetails.getSliceID()??>
+                                            ${billingDetails.sliceID?html}
                                             <#else>
                                         </#if>
                                     </td>
@@ -123,6 +132,12 @@
                                                     value="${spring.status.value!""}" id="contactName" maxlength="400" />
                                             </div>
                                             <div class="form-group">
+                                                <label class="control-label">Slice ID:</label>
+                                                <@spring.bind "billingDetails.sliceID" />
+                                                <input type="text" class="form-control" name="${spring.status.expression}"
+                                                    value="${spring.status.value!""}" id="slice" maxlength="400" />
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="control-label">School/Unit:</label>
                                                 <@spring.bind "billingDetails.school" />
                                                 <input type="text" class="form-control" name="${spring.status.expression}"
@@ -135,7 +150,7 @@
                                                     value="${spring.status.value!""}" id="subunit" maxlength="400" />
                                             </div>
                                             <div class="form-group">
-                                                <label class="control-label">ProjectTitle:</label>
+                                                <label class="control-label">Project projectTitle:</label>
                                                 <@spring.bind "billingDetails.projectTitle" />
                                                 <input type="text" class="form-control" name="${spring.status.expression}"
                                                     value="${spring.status.value!""}" id="projectTitle" maxlength="400" />
@@ -158,7 +173,7 @@
                                                 <input type="text" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?)?" name="${spring.status.expression}"
                                                     value="${spring.status.value!""}" maxlength="400" id="amountBilled" />
                                             </div>
-                                            <div class="form-group">
+                                              <div class="form-group">
                                                 <label class="control-label">Payment Details:</label>
                                                 <@spring.bind "billingDetails.paymentDetails" />
                                                 <textarea type="text" class="form-control" name="${spring.status.expression}"

@@ -140,16 +140,6 @@ public class AdminBillingController {
     	BillingInformation billingDetails = restService.getVaultBillingInfo(vaultId);
         model.addAttribute("billingDetails", billingDetails);
         String billingPage = "admin/billing/billingDetailsNA";
-
-        /*if (billingDetails.getBillingType().equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
-            billingPage = "admin/billing/billingDetailsGrant";
-        }
-        if (billingDetails.getBillingType().equals(PendingVault.Billing_Type.BUDGET_CODE)) {
-            billingPage = "admin/billing/billingDetailsBudget";
-        }
-        if (billingDetails.getBillingType().equals(PendingVault.Billing_Type.SLICE)) {
-            billingPage = "admin/billing/billingDetailsSlice";
-        }*/
         return this.getBillingInfoPage(billingDetails.getBillingType());
     }
    
@@ -182,12 +172,27 @@ public class AdminBillingController {
         if (type.equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
             retVal = "admin/billing/billingDetailsGrant";
         }
+
         if (type.equals(PendingVault.Billing_Type.BUDGET_CODE)) {
             retVal = "admin/billing/billingDetailsBudget";
         }
+        
         if (type.equals(PendingVault.Billing_Type.SLICE)) {
             retVal = "admin/billing/billingDetailsSlice";
         }
+
+        if (type.equals(PendingVault.Billing_Type.FEEWAIVER)) {
+            retVal = "admin/billing/billingDetailsFeewaiver";
+        }
+
+        if (type.equals(PendingVault.Billing_Type.WILL_PAY)) {
+            retVal = "admin/billing/billingDetailsWillPay";
+        }
+
+        if (type.equals(PendingVault.Billing_Type.BUY_NEW_SLICE)) {
+            retVal = "admin/billing/billingDetailsBuyNewSlice";
+        }
+
         return retVal;
     }
 

@@ -403,7 +403,8 @@ public class Vault {
                 reviewDate,              
                 billinginfo != null? billinginfo.getAmountToBeBilled() : null,
                 billinginfo != null? billinginfo.getAmountBilled(): null,
-        		projectId);
+        		projectId,
+                billinginfo != null? billinginfo.getPaymentDetails() : null);
     }
 	
 	public BillingInformation convertToBillingDetailsResponse() {		
@@ -421,7 +422,8 @@ public class Vault {
                 name,
                 billinginfo != null? billinginfo.getSliceID() : null,
                 billinginfo != null? billinginfo.getProjectTitle() : null,
-                billinginfo != null? billinginfo.getBillingType() : null
+                billinginfo != null? billinginfo.getBillingType() : null,
+                billinginfo != null? billinginfo.getPaymentDetails() : null
             );
     }
 
