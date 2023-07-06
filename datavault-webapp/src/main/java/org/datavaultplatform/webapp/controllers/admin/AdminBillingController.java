@@ -102,7 +102,7 @@ public class AdminBillingController {
 
         String[] header = { "Vault name", "Vault Size","Project Id","Project Size","Amount To Be Billed","Amount Billed", "User Name", "Review Date","Creation Time" };
 
-        String[] fieldMapping = { "name",  "sizeStr","projectId","projectSize","amountToBeBilled","amountBilled",  "userName","reviewDate", "CreationTime" };
+        String[] fieldMapping = { "name",  "sizeStr","projectId","projectSize","amountToBeBilled","amountBilled",  "ownerName","reviewDate", "CreationTime" };
 
         try {
             // uses the Super CSV API to generate CSV data from the model data
