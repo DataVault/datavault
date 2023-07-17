@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin
 @Api(name="Users", description = "Interact with DataVault Users")
 public class UsersController {
 

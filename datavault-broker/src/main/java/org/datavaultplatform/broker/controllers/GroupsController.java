@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@CrossOrigin
 @Api(name="Groups", description = "Interact with DataVault Groups")
 public class GroupsController {
     

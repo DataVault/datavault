@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin
 @Api(name="AdminRetentionPolicies", description = "Administrator RetentionPolicies functions")
 public class AdminRetentionPoliciesController {
 

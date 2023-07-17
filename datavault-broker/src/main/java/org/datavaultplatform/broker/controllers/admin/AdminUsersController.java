@@ -22,6 +22,7 @@ import java.util.List;
  */
 
 @RestController
+@CrossOrigin
 @Api(name="AdminUsers", description = "Administrator User functions")
 public class AdminUsersController {
 
