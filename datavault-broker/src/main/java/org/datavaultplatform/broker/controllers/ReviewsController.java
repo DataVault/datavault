@@ -20,6 +20,7 @@ import java.util.List;
 
 
 @RestController
+@CrossOrigin
 @Api(name="Reviews", description = "Review functions")
 public class ReviewsController {
 
