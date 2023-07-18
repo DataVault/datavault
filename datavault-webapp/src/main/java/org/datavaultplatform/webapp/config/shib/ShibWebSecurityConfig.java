@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
@@ -52,7 +53,6 @@ public class ShibWebSecurityConfig extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
 
     // no form login for 'shib'
-    http.cors();
     HttpSecurityUtils.authorizeRequests(http);
 
     HttpSecurityUtils.sessionManagement(http, sessionRegistry);
@@ -87,4 +87,14 @@ public class ShibWebSecurityConfig extends WebSecurityConfigurerAdapter {
     return filter;
   }
 
+  /*@Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.authorizeRequests()
+            .anyRequest()
+            .authenticated()
+            .and()
+            .httpBasic();
+    http.cors();
+    return http.build();
+  }*/
 }

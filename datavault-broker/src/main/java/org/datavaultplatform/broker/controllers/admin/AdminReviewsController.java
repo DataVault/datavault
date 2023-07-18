@@ -24,7 +24,7 @@ import java.util.List;
 
 
 @RestController
-@CrossOrigin
+//@CrossOrigin
 @Api(name="AdminReviews", description = "Administrator Review functions")
 public class AdminReviewsController {
 

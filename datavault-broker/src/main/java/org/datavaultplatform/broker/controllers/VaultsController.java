@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 
 
 @RestController
-@CrossOrigin
+//@CrossOrigin
 @Api(name="Vaults", description = "Interact with DataVault Vaults")
 public class VaultsController {
 

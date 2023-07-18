@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Controller
-@CrossOrigin
+//@CrossOrigin
 @Api(name="Index", description = "Show JSONDOC page", visibility = ApiVisibility.PRIVATE)
 public class IndexController {
 

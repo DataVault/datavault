@@ -17,7 +17,7 @@ import org.datavaultplatform.common.event.client.*;
 import org.datavaultplatform.common.model.Agent;
 
 @RestController
-@CrossOrigin
+//@CrossOrigin
 @Api(name="Notify", description = "Inform the broker about an event")
 @Slf4j
 public class NotifyController {

@@ -33,7 +33,7 @@ import java.util.List;
 
 
 @RestController
-@CrossOrigin
+//@CrossOrigin
 @Slf4j
 public class FilesController {
     

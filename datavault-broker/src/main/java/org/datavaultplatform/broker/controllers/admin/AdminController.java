@@ -44,7 +44,7 @@ import javax.servlet.http.HttpServletRequest;
 
 
 @RestController
-@CrossOrigin
+//@CrossOrigin
 @Api(name="Admin", description = "Administrator functions")
 @Slf4j
 public class AdminController {
