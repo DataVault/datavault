@@ -52,7 +52,7 @@ public class ShibWebSecurityConfig extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
 
     // no form login for 'shib'
-
+    http.cors();
     HttpSecurityUtils.authorizeRequests(http);
 
     HttpSecurityUtils.sessionManagement(http, sessionRegistry);
