@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin
+//@CrossOrigin
 public class MetadataController {
     
     private final ExternalMetadataService externalMetadataService;

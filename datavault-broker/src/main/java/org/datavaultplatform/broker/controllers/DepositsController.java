@@ -31,7 +31,7 @@ import java.util.Map;
 
 
 @RestController
-@CrossOrigin
+//@CrossOrigin
 @Api(name="Deposits", description = "Interact with DataVault Deposits")
 public class DepositsController {
 

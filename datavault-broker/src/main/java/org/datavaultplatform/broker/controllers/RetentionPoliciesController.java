@@ -17,7 +17,7 @@ import java.util.List;
  */
 
 @RestController
-@CrossOrigin
+//@CrossOrigin
 public class RetentionPoliciesController {
     
     private final RetentionPoliciesService retentionPoliciesService;

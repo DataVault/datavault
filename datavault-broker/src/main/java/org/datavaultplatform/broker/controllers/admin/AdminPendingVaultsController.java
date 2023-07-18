@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin
+//@CrossOrigin
 @Api(name="AdminPendingVaults", description = "Administrator pending vault functions.")
 public class AdminPendingVaultsController {
 	

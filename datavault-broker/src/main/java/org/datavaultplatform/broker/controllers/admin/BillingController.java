@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@CrossOrigin
+//@CrossOrigin
 public class BillingController {
 	private final ExternalMetadataService externalMetadataService;
 	private final VaultsService vaultsService;
