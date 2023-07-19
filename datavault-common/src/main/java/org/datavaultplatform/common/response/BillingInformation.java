@@ -76,11 +76,39 @@ public class BillingInformation {
 	@ApiObjectField(description = "The Billing payment details.")
 	private String paymentDetails;
 
+	@ApiObjectField(description = "The grant end Date of the vault")
+	private Date grantEndDate;
     
     public BillingInformation() {
     	
     }
 
+	public BillingInformation(String id, String vaultID, String contactName, String school, String subUnit, Boolean budgetCode,
+			String specialComments, BigDecimal amountToBeBilled, BigDecimal amountBilled, long vaultSize, Date reviewDate,
+							  Date creationTime, String vaultName,String projectId,String userName, String sliceID,
+							  String projectTitle, PendingVault.Billing_Type billingType, String paymentDetails, Date grantEndDate) {
+    	this.id = id;        
+        this.vaultID = vaultID;    
+        this.contactName = contactName; 
+        this.school = school;        
+        this.subUnit = subUnit;        
+        this.budgetCode = budgetCode;       
+        this.specialComments = specialComments;
+        this.amountToBeBilled = amountToBeBilled;       
+        this.amountBilled = amountBilled;
+        this.vaultSize = vaultSize;
+        this.reviewDate = reviewDate;       
+        this.creationTime = creationTime;
+        this.vaultName = vaultName;
+        this.projectId = projectId;
+        this.userName = userName;
+        this.sliceID = sliceID;
+        this.projectTitle = projectTitle;
+        this.billingType = billingType;
+		this.paymentDetails = paymentDetails;
+		this.grantEndDate = grantEndDate;
+	}
+	
 
 	public BillingInformation(String id, String vaultID, String contactName, String school, String subUnit, Boolean budgetCode,
 			String specialComments, BigDecimal amountToBeBilled, BigDecimal amountBilled, long vaultSize, Date reviewDate,
@@ -286,6 +314,15 @@ public class BillingInformation {
     public void setPaymentDetails(String paymentDetails) {
         this.paymentDetails = paymentDetails;
     }
+
+	public Date getGrantEndDate() {
+		return grantEndDate;
+	}
+
+	public void setGrantEndDate(Date grantEndDate) {
+		this.grantEndDate = grantEndDate;
+	}
+
 	
 	public String getProjectSizeStr() {
         if ( projectSize == 0 ){

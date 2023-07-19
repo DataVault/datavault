@@ -57,6 +57,15 @@
                                     </td>
                                 </tr>
                                 <tr>
+                                    <th scope="col">Grant End Date</th>
+                                    <td>
+                                        <#if billingDetails.getGrantEndDate()??>
+                                            ${billingDetails.grantEndDate?date}
+                                            <#else>
+                                        </#if>
+                                    </td>
+                                </tr>
+                                <tr>
                                     <th scope="col">Use Budget code</th>
                                     <td>
                                         <#if billingDetails.getBudgetCodeStr()??>

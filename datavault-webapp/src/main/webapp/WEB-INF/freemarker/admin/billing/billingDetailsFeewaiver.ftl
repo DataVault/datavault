@@ -66,6 +66,15 @@
                                     </td>
                                 </tr>
                                 <tr>
+                                    <th scope="col">Grant End Date</th>
+                                    <td>
+                                        <#if billingDetails.getGrantEndDate()??>
+                                            ${billingDetails.grantEndDate?date}
+                                            <#else>
+                                        </#if>
+                                    </td>
+                                </tr>
+                                <tr>
                                     <th scope="col">Amount to be billed</th>
                                     <td>
                                         <#if billingDetails.getAmountToBeBilled()??>
