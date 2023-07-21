@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @RestController
+//@CrossOrigin
 public class FileStoreController {
 
     private static final Logger logger = LoggerFactory.getLogger(FileStoreController.class);

@@ -9,9 +9,11 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.datavaultplatform.broker.services.BillingService;
 import org.datavaultplatform.broker.services.ExternalMetadataService;
+import org.datavaultplatform.broker.services.RolesAndPermissionsService;
 import org.datavaultplatform.broker.services.VaultsService;
 import org.datavaultplatform.common.model.BillingInfo;
 import org.datavaultplatform.common.model.PendingVault;
+import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.VaultInfo;
@@ -20,29 +22,26 @@ import org.jsondoc.core.annotation.ApiQueryParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
+//@CrossOrigin
 public class BillingController {
 	private final ExternalMetadataService externalMetadataService;
 	private final VaultsService vaultsService;
 	private final BillingService billingService;
+	private final RolesAndPermissionsService permissionsService;
 	private static final Logger LOGGER = LoggerFactory.getLogger(BillingController.class);
 
 	@Autowired
 	public BillingController(ExternalMetadataService externalMetadataService,
-			VaultsService vaultsService, BillingService billingService) {
+							 VaultsService vaultsService, BillingService billingService,
+							 RolesAndPermissionsService permissionsService) {
 		this.externalMetadataService = externalMetadataService;
 		this.vaultsService = vaultsService;
 		this.billingService = billingService;
+		this.permissionsService = permissionsService;
 	}
 
 	@GetMapping("/admin/billing/search")
@@ -68,6 +67,13 @@ public class BillingController {
 	        Map<String, Long> projectSizeMap = vaultsService.getAllProjectsSize();
 	        //update project Size in the response
 	        for(VaultInfo vault: billingResponses) {
+
+				User owner = permissionsService.getVaultOwner(vault.getID());
+				if(owner != null) {
+					vault.setOwnerId(owner.getID());
+					vault.setOwnerName(owner.getFirstname() + " " + owner.getLastname());
+				}
+
 	        	if(vault.getProjectId() != null) {
 	        		vault.setProjectSize(projectSizeMap.get(vault.getProjectId()));
 	        	}

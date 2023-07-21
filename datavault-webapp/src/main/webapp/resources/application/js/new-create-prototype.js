@@ -278,7 +278,7 @@ $(document).ready(function(){
 
 	// Initially, disable next on doc initialisation
 	$("input[name=\"billingType\"]").parents("fieldset").children(".next").prop( "disabled", true );
-	$('#vaultOwner').prop('disabled', true);
+	//$('#vaultOwner').prop('disabled', true);
 
 	$("#billing-choice-na").change(function(){
 		clearBillingOptions();
