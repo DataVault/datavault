@@ -45,26 +45,24 @@ public class PendingVault {
         ORIG,
         FEEWAIVER,
         WILL_PAY,
-        BUY_NEW_SLICE
+        BUY_NEW_SLICE,
+        FUNDING_NO_OR_DO_NOT_KNOW
     }
 
     public enum Slice_Query_Choice {
         YES,
-        NO,
-        DO_NOT_KNOW,
+        NO_OR_DO_NOT_KNOW,
         BUY_NEW_SLICE
     };
 
     public enum Funding_Query_Choice {
         YES,
-        NO,
-        DO_NOT_KNOW
+        FUNDING_NO_OR_DO_NOT_KNOW
     };
 
     public enum Feewaiver_Query_Choice {
         YES,
-        NO,
-        DO_NOT_KNOW
+        NO_OR_DO_NOT_KNOW
     };
 
     // Vault Identifier

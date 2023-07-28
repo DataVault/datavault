@@ -14,7 +14,7 @@
                 </ol>
                 <div class="panel panel-uoe-low">
                     <div class="panel-body">
-                        <h2>Billing Details (Funding: NO or Don't Know): <small>
+                        <h2>Billing Details (FUNDING: NO OR DO NOT KNOW): <small>
                                 ${billingDetails.vaultName?html}
                             </small></h2>
                         <br />

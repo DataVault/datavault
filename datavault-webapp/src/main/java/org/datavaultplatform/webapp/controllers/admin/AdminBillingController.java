@@ -193,6 +193,11 @@ public class AdminBillingController {
             retVal = "admin/billing/billingDetailsBuyNewSlice";
         }
 
+        if (type.equals(PendingVault.Billing_Type.FUNDING_NO_OR_DO_NOT_KNOW)) {
+            retVal = "admin/billing/billingDetailsFundingNoDoNotKnow";
+        }
+
+
         return retVal;
     }
 

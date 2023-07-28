@@ -47,8 +47,10 @@ public class ValidateService {
             return retVal;
         }
 
-        if (!type.equals("NA") && !type.equals("GRANT_FUNDING") && !type.equals("BUDGET_CODE") && !type.equals("SLICE")
-                && !type.equals("FEEWAIVER") && !type.equals("WILL_PAY") && !type.equals("BUY_NEW_SLICE")) {
+        if (!type.equals("NA") && !type.equals("GRANT_FUNDING") &&
+            !type.equals("BUDGET_CODE") && !type.equals("SLICE") && 
+            !type.equals("FEEWAIVER") && !type.equals("WILL_PAY") && 
+            !type.equals("BUY_NEW_SLICE") && !type.equals("FUNDING_NO_OR_DO_NOT_KNOW")) {
             retVal.add("BillingType invalid (" + type + ")");
             return retVal;
         }
@@ -85,6 +87,10 @@ public class ValidateService {
         }
 
         if (type.equals("BUY_NEW_SLICE")) {
+            // Currently no further checks
+        }
+
+        if (type.equals("FUNDING_NO_OR_DO_NOT_KNOW")) {
             // Currently no further checks
         }
 

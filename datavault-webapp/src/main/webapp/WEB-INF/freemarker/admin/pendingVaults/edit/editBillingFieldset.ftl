@@ -6,120 +6,14 @@
             type="hidden"
             name="${spring.status.expression}"
             value="${spring.status.value!''}">
-        <div id="slice-query-box" class="row collapse">
-            <div class="col-md-8">
-                <p>
-                    Will funding for this vault be from reserved DataVault storage (aka a 'slice') that
-                    has already been purchased? A 'slice' is reserved DataVault storage.
-                    If unsure, please ask your PI or the Research Data Support team,
-                    details available thorough the Contact button. If you have a grant
-                    and not a reserved slice please select 'no'.
-                </p>
-                <#-- FOR TESTING: <p>DEBUG VAULT: ${vault?html}
-                    </p> -->
-            </div>
-            <div class="col-md-4 well">
-                <@spring.bind "vault.sliceQueryChoice" />
-                <div class="radio">
-                    <label>
-                        <input type="radio"
-                            id="slice-query-yes"
-                            name="${spring.status.expression}"
-                            value="YES"
-                            <#if spring.status.value?? && spring.status.value?string=="YES">checked</#if>>
-                        Yes
-                    </label>
-                </div>
-                <div class="radio">
-                    <label>
-                        <input type="radio"
-                            id="slice-query-no"
-                            name="${spring.status.expression}"
-                            value="NO"
-                            <#if spring.status.value?? && spring.status.value?string=="NO">checked</#if>>
-                        No
-                    </label>
-                </div>
-                <div class="radio">
-                    <label>
-                        <input type="radio"
-                            id="slice-query-do-not-know"
-                            name="${spring.status.expression}"
-                            value="DO_NOT_KNOW"
-                            <#if spring.status.value?? && spring.status.value?string=="DO_NOT_KNOW">checked</#if>>
-                        Don't know
-                    </label>
-                </div>
-                <div class="radio">
-                    <label>
-                        <input type="radio"
-                            id="slice-query-buy"
-                            name="${spring.status.expression}"
-                            value="BUY_NEW_SLICE"
-                            <#if spring.status.value?? && spring.status.value?string=="BUY_NEW_SLICE">checked</#if>>
-                        I want to buy a new slice of reserved DataVault storage
-                    </label>
-                </div>
-                <button type="button"
-                    class="btn btn-danger query-choice-clear"
-                    id="slice-query-choice-clear">Clear selection</button>
-            </div>
-        </div>
-        <@spring.bind "vault.fundingQueryChoice" />
-        <div id="funding-query-box" class="row collapse">
-            <div class="col-md-8">
-                <p>
-                    Is funding in place for this vault? In other words,
-                    will you be paying for your storage? For example,
-                    do you have a research grant we can charge against,
-                    or a budget such as research centre core funding that
-                    you will pay from?
-                </p>
-            </div>
-            <div class="col-md-4 well">
-                <div class="radio">
-                    <label>
-                        <input type="radio"
-                            id="funding-query-yes"
-                            name="${spring.status.expression}"
-                            value="YES"
-                            <#if spring.status.value?? && spring.status.value?string=="YES">checked</#if>>
-                        Yes
-                    </label>
-                </div>
-                <div class="radio">
-                    <label>
-                        <input type="radio"
-                            id="funding-query-no"
-                            name="${spring.status.expression}"
-                            value="NO"
-                            <#if spring.status.value?? && spring.status.value?string=="NO">checked</#if>>
-                        No
-                    </label>
-                </div>
-                <div class="radio">
-                    <label>
-                        <input type="radio"
-                            id="funding-query-do-not-know"
-                            name="${spring.status.expression}"
-                            value="DO_NOT_KNOW"
-                            <#if spring.status.value?? && spring.status.value?string=="DO_NOT_KNOW">checked</#if>>
-                        Don't know
-                    </label>
-                </div>
-                <button type="button"
-                    class="btn btn-danger my-1 query-choice-clear"
-                    id="funding-query-choice-clear">Clear selections and return to the top</button>
-            </div>
-        </div>
         <@spring.bind "vault.feewaiverQueryChoice" />
         <div id="feewaiver-query-box" class="row collapse">
             <div class="col-md-8">
+                <#-- FOR TESTING: <p>DEBUG VAULT: ${vault?html}
+                    </p> -->
                 <p>
-                    Do you wish to use the fee waiver -
-                    are you confident this vault and any others
-                    from the same project will have a total combined
-                    size of under 100 GB?
+                    Do you wish to use the fee waiver? That is, this vault and any others 
+                    from the same project will have a total combined size of under 100GB.
                 </p>
             </div>
             <div class="col-md-4 well">
@@ -136,11 +30,11 @@
                 <div class="radio">
                     <label>
                         <input type="radio"
-                            id="feewaiver-query-do-not-know"
+                            id="feewaiver-query-no-or-do-not-know"
                             name="${spring.status.expression}"
-                            value="DO_NOT_KNOW"
-                            <#if spring.status.value?? && spring.status.value?string=="DO_NOT_KNOW">checked</#if> />
-                        Don't know
+                            value="NO_OR_DO_NOT_KNOW"
+                            <#if spring.status.value?? && spring.status.value?string=="NO_OR_DO_NOT_KNOW">checked</#if> />
+                        No/Don't know
                     </label>
                 </div>
                 <button type="button"
@@ -148,13 +42,90 @@
                     id="feewaiver-query-choice-clear">Clear selections and return to top</button>
             </div>
         </div>
+        <div id="slice-query-box" class="row collapse">
+            <div class="col-md-8">
+                <p>
+                    Will funding be from prepaid reserved DataVault storage (a slice).
+                </p>
+            </div>
+            <div class="col-md-4 well">
+                <@spring.bind "vault.sliceQueryChoice" />
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="slice-query-yes"
+                            name="${spring.status.expression}"
+                            value="YES"
+                            <#if spring.status.value?? && spring.status.value?string=="YES">checked</#if>>
+                        Yes
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="slice-query-no-or-do-not-know"
+                            name="${spring.status.expression}"
+                            value="NO_OR_DO_NOT_KNOW"
+                            <#if spring.status.value?? && spring.status.value?string=="NO_OR_DO_NOT_KNOW">checked</#if>>
+                        No/Don't know
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="slice-query-buy"
+                            name="${spring.status.expression}"
+                            value="BUY_NEW_SLICE"
+                            <#if spring.status.value?? && spring.status.value?string=="BUY_NEW_SLICE">checked</#if>>
+                        I wish to buy reserved DataVault storage
+                    </label>
+                </div>
+                <button type="button"
+                    class="btn btn-danger query-choice-clear"
+                    id="slice-query-choice-clear">Clear selection</button>
+            </div>
+        </div>
+        <@spring.bind "vault.fundingQueryChoice" />
+        <div id="funding-query-box" class="row collapse">
+            <div class="col-md-8">
+                <p>
+                    Do you have a research grant or budget code to pay for this Vault?
+                </p>
+            </div>
+            <div class="col-md-4 well">
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="funding-query-yes"
+                            name="${spring.status.expression}"
+                            value="YES"
+                            <#if spring.status.value?? && spring.status.value?string=="YES">checked</#if>>
+                        Yes
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="funding-query-no-or-do-not-know"
+                            name="${spring.status.expression}"
+                            value="FUNDING_NO_OR_DO_NOT_KNOW"
+                            <#if spring.status.value?? && spring.status.value?string=="FUNDING_NO_OR_DO_NOT_KNOW">checked</#if>>
+                        No/Don't know
+                    </label>
+                </div>
+                <button type="button"
+                        class="btn btn-danger my-1 query-choice-clear"
+                        id="funding-query-choice-clear">Clear selections and return to the top</button>
+            </div>
+        </div>
+        
         <div id="slice-form" class="row collapse">
             <div class="well">
                 <p>
-                    A slice is reserved DataVault storage. If unsure, please check with your PI whether they have reserved a slice.
-                    If you do have a slice, please enter the name or code such as 'Slice004'.
+                    A slice is reserved DataVault storage. If you know the name of your slice, 
+                    please enter it here (eg Slice001). 
                 </p>
-                <div class="form-group required">
+                <div class="form-group">
                     <label class="col-sm-2 control-label">Slice: </label>
                     <@spring.bind "vault.sliceID" />
                     <input type="text" id="sliceID" name="${spring.status.expression}" value="${spring.status.value!''}" />
@@ -179,7 +150,7 @@
                     <@spring.bind "vault.budgetSchoolOrUnit" />
                     <input type="text" class="col-sm-6" id="schoolOrUnit" name="${spring.status.expression}" value="${spring.status.value!""}" />
                 </div>
-                <div class="form-group required" style="padding-bottom: 1.5rem;">
+                <div class="form-group" style="padding-bottom: 1.5rem;">
                     <label class="col-sm-4 control-label">Subunit:</label>
                     <@spring.bind "vault.budgetSubunit" />
                     <input type="text" class="col-sm-6" id="subunit" name="${spring.status.expression}" value="${spring.status.value!""}" />
@@ -204,8 +175,7 @@
                 </div>
                 <div class="form-group" style="padding-bottom: 1.5rem;">
                     <label class="col-sm-4 control-label">
-                        Payment details (if known):<br>
-                        (see 'Data Vault - Cost' page on university website)
+                       Payment details (if known), <br>for example, Project Number or Accounting String
                     </label>
                     <@spring.bind "vault.paymentDetails" />
                     <textarea id="budget-payment-details" type="text" class="col-sm-6" name="${spring.status.expression}"

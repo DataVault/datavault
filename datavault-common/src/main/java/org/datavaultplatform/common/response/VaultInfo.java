@@ -658,6 +658,11 @@ public class VaultInfo {
                 cv.setBudgetSubunit(this.getSubunit());
                 cv.setProjectTitle(this.getProjectTitle());
                 cv.setPaymentDetails(this.paymentDetails);
+                
+                if (this.getGrantEndDate() != null) {
+                    cv.setBillingGrantEndDate(this.getGrantEndDateAsString());
+                    cv.setGrantEndDate(this.getGrantEndDateAsString());
+                }
             }
             
             if (this.getBillingType().equals(PendingVault.Billing_Type.FEEWAIVER)) {
@@ -667,7 +672,10 @@ public class VaultInfo {
             if (this.getBillingType().equals(PendingVault.Billing_Type.BUY_NEW_SLICE)) {
                 // TBD
              }
-
+            
+            if (this.getBillingType().equals(PendingVault.Billing_Type.FUNDING_NO_OR_DO_NOT_KNOW)) {
+                // TBD
+            }
         }
 
         cv.setName(this.getName());
