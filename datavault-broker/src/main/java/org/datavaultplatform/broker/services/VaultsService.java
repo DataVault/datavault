@@ -44,9 +44,9 @@ public class VaultsService {
 
     @Autowired
     public VaultsService(VaultDAO vaultDAO, RolesAndPermissionsService rolesAndPermissionsService,
-        RetentionPoliciesService retentionPoliciesService, DataCreatorsService dataCreatorsService,
-        BillingService billingService, UsersService usersService, EventService eventService,
-        ClientsService clientsService, EmailService emailService) {
+            RetentionPoliciesService retentionPoliciesService, DataCreatorsService dataCreatorsService,
+            BillingService billingService, UsersService usersService, EventService eventService,
+            ClientsService clientsService, EmailService emailService) {
         this.vaultDAO = vaultDAO;
         this.rolesAndPermissionsService = rolesAndPermissionsService;
         this.retentionPoliciesService = retentionPoliciesService;
@@ -57,7 +57,6 @@ public class VaultsService {
         this.clientsService = clientsService;
         this.emailService = emailService;
     }
-
 
     public RetentionPoliciesService getRetentionPoliciesService() {
         return retentionPoliciesService;
@@ -113,11 +112,13 @@ public class VaultsService {
 
     public void sendVaultNDMsEmail(Vault vault, String homePage, String helpPage, User user) {
         // send mail to ndm
-        this.sendEmail(vault, user.getEmail(), "A new vault you have a role on has been created", "Nominated Data Manager",
+        this.sendEmail(vault, user.getEmail(), "A new vault you have a role on has been created",
+                "Nominated Data Manager",
                 EmailTemplate.USER_VAULT_CREATE, homePage, helpPage);
     }
 
-    private void sendEmail(Vault vault, String email, String subject, String role, String template, String homePage, String helpPage) {
+    private void sendEmail(Vault vault, String email, String subject, String role, String template, String homePage,
+            String helpPage) {
         HashMap<String, Object> model = new HashMap<>();
         model.put(EMAIL_HOME_PAGE, homePage);
         model.put(EMAIL_HELP_PAGE, helpPage);
@@ -171,13 +172,13 @@ public class VaultsService {
         RetentionPoliciesService.setRetention(vault);
 
         // Check the policy
-        //retentionPoliciesService.run(vault);
+        // retentionPoliciesService.run(vault);
 
         // Set the expiry date
-        //vault.setRetentionPolicyExpiry(retentionPoliciesService.getReviewDate(vault));
+        // vault.setRetentionPolicyExpiry(retentionPoliciesService.getReviewDate(vault));
 
         // Record when we checked it
-        //vault.setRetentionPolicyLastChecked(new Date());
+        // vault.setRetentionPolicyLastChecked(new Date());
 
         // Update and return the policy
         vaultDAO.update(vault);
@@ -236,13 +237,14 @@ public class VaultsService {
         rolesAndPermissionsService.createRoleAssignment(newDataOwnerAssignment);
     }
 
-    public void addDepositorRoles(CreateVault createVault, Vault vault, String clientKey, String homePage, String helpPage) {
+    public void addDepositorRoles(CreateVault createVault, Vault vault, String clientKey, String homePage,
+            String helpPage) {
 
         // if vault already has depositors delete them and readd
         List<String> depositors = createVault.getDepositors();
         if (depositors != null) {
-            for (String dep: depositors) {
-                if (dep != null && ! dep.isEmpty()) {
+            for (String dep : depositors) {
+                if (dep != null && !dep.isEmpty()) {
                     RoleAssignment ra = new RoleAssignment();
                     ra.setVaultId(vault.getID());
                     ra.setRole(rolesAndPermissionsService.getDepositor());
@@ -292,7 +294,7 @@ public class VaultsService {
         }
 
         List<DataCreator> creators = vault.getDataCreators();
-        if (creators != null && ! creators.isEmpty()) {
+        if (creators != null && !creators.isEmpty()) {
             dataCreatorsService.addCreators(creators);
         }
 
@@ -302,7 +304,7 @@ public class VaultsService {
     public void addNDMRoles(CreateVault createVault, Vault vault, String clientKey, String homePage, String helpPage) {
         List<String> ndms = createVault.getNominatedDataManagers();
         if (ndms != null) {
-            for (String ndm: ndms) {
+            for (String ndm : ndms) {
                 if (ndm != null && !ndm.isEmpty()) {
                     RoleAssignment ra = new RoleAssignment();
                     ra.setVaultId(vault.getID());
@@ -317,31 +319,40 @@ public class VaultsService {
     }
 
     public void addBillingInfo(CreateVault createVault, Vault vault) {
-        BillingInfo billinginfo =  new BillingInfo();
+        String billingType = createVault.getBillingType();
+        
+        BillingInfo billinginfo = new BillingInfo();
         billinginfo.setAmountBilled(null);
         billinginfo.setAmountToBeBilled(null);
         billinginfo.setVault(vault);
-        String billingType = createVault.getBillingType();
 
         PendingVault.Billing_Type enumBT = PendingVault.Billing_Type.valueOf(billingType);
         billinginfo.setBillingType(enumBT);
 
         if (enumBT.equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
             billinginfo.setContactName(createVault.getGrantAuthoriser());
-            billinginfo.setSchool(createVault.getGrantSchoolOrUnit());
-            billinginfo.setSubUnit(createVault.getGrantSubunit());
-            billinginfo.setProjectTitle(createVault.getProjectTitle());
         }
 
         if (enumBT.equals(PendingVault.Billing_Type.BUDGET_CODE)) {
             billinginfo.setContactName(createVault.getBudgetAuthoriser());
-            billinginfo.setSchool(createVault.getBudgetSchoolOrUnit());
-            billinginfo.setSubUnit(createVault.getBudgetSubunit());
         }
 
         if (enumBT.equals(PendingVault.Billing_Type.SLICE)) {
             billinginfo.setSliceID(createVault.getSliceID());
         }
+
+        if (enumBT.equals(PendingVault.Billing_Type.WILL_PAY)) {
+            billinginfo.setContactName(createVault.getBudgetAuthoriser());
+            billinginfo.setSchool(createVault.getBudgetSchoolOrUnit());
+            billinginfo.setSubUnit(createVault.getBudgetSubunit());
+            billinginfo.setProjectTitle(createVault.getProjectTitle());
+            billinginfo.setPaymentDetails(createVault.getPaymentDetails());
+        }
+
+        billinginfo.setPaymentDetails(createVault.getPaymentDetails());
+        
+
         billingService.saveOrUpdateVault(billinginfo);
     }
+
 }

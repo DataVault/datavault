@@ -14,7 +14,7 @@
                 </ol>
                 <div class="panel panel-uoe-low">
                     <div class="panel-body">
-                        <h2>Billing Details: <small>
+                        <h2>Billing Details (SLICE): <small>
                                 ${billingDetails.vaultName?html}
                             </small></h2>
                         <br />
@@ -25,6 +25,15 @@
                                     <td>
                                         <#if billingDetails.getContactName()??>
                                             ${billingDetails.contactName?html}
+                                            <#else>
+                                        </#if>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="col">Slice ID</th>
+                                    <td>
+                                        <#if billingDetails.getSliceID()??>
+                                            ${billingDetails.sliceID?html}
                                             <#else>
                                         </#if>
                                     </td>
@@ -48,6 +57,15 @@
                                     </td>
                                 </tr>
                                 <tr>
+                                    <th scope="col">Project Title</th>
+                                    <td>
+                                        <#if billingDetails.getProjectTitle()??>
+                                            ${billingDetails.projectTitle}
+                                            <#else>
+                                        </#if>
+                                    </td>
+                                </tr>
+                                <tr>
                                     <th scope="col">Project Id</th>
                                     <td>
                                         <#if billingDetails.getProjectId()??>
@@ -61,15 +79,6 @@
                                     <td>
                                         <#if billingDetails.getGrantEndDate()??>
                                             ${billingDetails.grantEndDate?date}
-                                            <#else>
-                                        </#if>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th scope="col">Use Budget code</th>
-                                    <td>
-                                        <#if billingDetails.getBudgetCodeStr()??>
-                                            ${billingDetails.getBudgetCodeStr()?html}
                                             <#else>
                                         </#if>
                                     </td>
@@ -132,6 +141,12 @@
                                                     value="${spring.status.value!""}" id="contactName" maxlength="400" />
                                             </div>
                                             <div class="form-group">
+                                                <label class="control-label">Slice ID:</label>
+                                                <@spring.bind "billingDetails.sliceID" />
+                                                <input type="text" class="form-control" name="${spring.status.expression}"
+                                                    value="${spring.status.value!""}" id="slice" maxlength="400" />
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="control-label">School/Unit:</label>
                                                 <@spring.bind "billingDetails.school" />
                                                 <input type="text" class="form-control" name="${spring.status.expression}"
@@ -144,23 +159,22 @@
                                                     value="${spring.status.value!""}" id="subunit" maxlength="400" />
                                             </div>
                                             <div class="form-group">
+                                                <label class="control-label">Project projectTitle:</label>
+                                                <@spring.bind "billingDetails.projectTitle" />
+                                                <input type="text" class="form-control" name="${spring.status.expression}"
+                                                    value="${spring.status.value!""}" id="projectTitle" maxlength="400" />
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="control-label">ProjectId:</label>
                                                 <@spring.bind "billingDetails.projectId" />
                                                 <input type="text" class="form-control" name="${spring.status.expression}"
                                                     value="${spring.status.value!""}" id="projectId" maxlength="400" />
                                             </div>
                                             <div class="form-group">
-                                                <label class="control-label">Use BudgetCode:</label>
-                                                <@spring.bind "billingDetails.budgetCode" />
-                                                <input type="hidden" name="_${spring.status.expression}" value="false" />
-                                                <input type="checkbox" id="budgetCode" name="${spring.status.expression}"
-                                                    <#if spring.status.value?? && spring.status.value?string=="true">checked="true"</#if> />
-                                            </div>
-                                            <div class="form-group">
                                                 <label class="control-label">Amount to be billed:(Please enter the amount in pounds (and pence if applicable) without any symbols, do not use commas)</label>
                                                 <@spring.bind "billingDetails.amountToBeBilled" />:
-                                                <input type="text" class="form-control" name="${spring.status.expression}"
-                                                    value="${spring.status.value!""}" id="amountToBeBilled" maxlength="400" pattern="[0-9]+(\.[0-9][0-9]?)?" />
+                                                <input type="text" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?)?" name="${spring.status.expression}"
+                                                    value="${spring.status.value!""}" maxlength="400" id="amountBilled" />
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label">Amount billed:(Please enter the amount in pounds (and pence if applicable) without any symbols, do not use commas)</label>
@@ -168,7 +182,7 @@
                                                 <input type="text" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?)?" name="${spring.status.expression}"
                                                     value="${spring.status.value!""}" maxlength="400" id="amountBilled" />
                                             </div>
-                                            <div class="form-group">
+                                              <div class="form-group">
                                                 <label class="control-label">Payment Details:</label>
                                                 <@spring.bind "billingDetails.paymentDetails" />
                                                 <textarea type="text" class="form-control" name="${spring.status.expression}"
@@ -193,9 +207,7 @@
                                         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                         <input type="hidden" name="vaultID" value="${billingDetails.getVaultID()}" />
                                         <input type="hidden" name="vaultName" value="${billingDetails.getVaultName()}" />
-                                        <#if billingDetails.getBillingType()??>
-                                            <input type="hidden" name="billingType" value="${billingDetails.getBillingType()}" />
-                                        </#if>
+                                        <input type="hidden" name="billingType" value="${billingDetails.getBillingType()}" />
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                                             <button type="submit" id="update-billingDetails-btn" class="btn btn-primary btn-ok">Save</button>

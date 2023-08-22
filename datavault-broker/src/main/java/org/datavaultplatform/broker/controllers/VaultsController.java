@@ -646,7 +646,7 @@ public class VaultsController {
             vault.setReviewDate(formatter.parse(createVault.getReviewDate()));
         } catch (ParseException|NullPointerException ex) {
             logger.error("Review date is not in the right format: "+createVault.getReviewDate());
-            vault.setGrantEndDate(null);
+            vault.setReviewDate(null);
         }
 
 
@@ -676,6 +676,8 @@ public class VaultsController {
             logger.error("Fail to check retention policy: ",e);
             throw e;
         }
+
+
         return vault.convertToResponse();
     }
 
@@ -686,6 +688,7 @@ public class VaultsController {
         User user = usersService.getUser(userID);
         Vault vault = vaultsService.getUserVault(user, vaultID);
         if (vault != null) {
+            logger.debug("getVault: " + vault);
             return vault.convertToResponse();
         } else {
             return null;

@@ -1,128 +1,204 @@
 <fieldset id="billing-fieldset">
-    <div class="form-card">
+    <div id="billing-section" class="form-card">
         <h2 class="fs-title">Billing</h2>
-        Funding for this vault will be from:
         <@spring.bind "vault.billingType" />
-        <div id="billing-selection-box" class="row">
-            <div class="radio">
-                <label>
-                    <input type="radio" name="${spring.status.expression}" id="billing-choice-na" class="billing-choice" value="NA" <#if vault.billingType??>${(vault.billingType == 'NA')?then('checked', '')}</#if>>
-                    N/A – the data volume will be under the project fee waiver threshold (<100GB). ​
-                </label>
+        <input id="billingType"
+            type="hidden"
+            name="${spring.status.expression}"
+            value="${spring.status.value!''}">
+        <@spring.bind "vault.feewaiverQueryChoice" />
+        <div id="feewaiver-query-box" class="row collapse">
+            <div class="col-md-8">
+                <#-- FOR TESTING: <p>DEBUG VAULT: ${vault?html}
+                    </p> -->
+                <p>
+                    Do you wish to use the fee waiver? That is, this vault and any others 
+                    from the same project will have a total combined size of under 100GB.
+                </p>
             </div>
-            <div class="radio">
-                <label>
-                    <input type="radio" name="${spring.status.expression}" id="billing-choice-grantfunding" value="GRANT_FUNDING" <#if vault.billingType??>${(vault.billingType == 'GRANT_FUNDING')?then('checked', '')}</#if>>
-                    Grant funding ​
-                </label>
+            <div class="col-md-4 well">
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="feewaiver-query-yes"
+                            name="${spring.status.expression}"
+                            value="YES"
+                            <#if spring.status.value?? && spring.status.value?string=="YES">checked</#if> />
+                        Yes
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="feewaiver-query-no-or-do-not-know"
+                            name="${spring.status.expression}"
+                            value="NO_OR_DO_NOT_KNOW"
+                            <#if spring.status.value?? && spring.status.value?string=="NO_OR_DO_NOT_KNOW">checked</#if> />
+                        No/Don't know
+                    </label>
+                </div>
+                <button type="button"
+                    class="btn btn-danger my-1 query-choice-clear"
+                    id="feewaiver-query-choice-clear">Clear selections and return to top</button>
             </div>
-            <div class="radio">
-                <label>
-                    <input type="radio" name="${spring.status.expression}" id="billing-choice-budgetcode" value="BUDGET_CODE" <#if vault.billingType??>${(vault.billingType == 'BUDGET_CODE')?then('checked', '')}</#if>>
-                    A budget code. ​
-                </label>
+        </div>
+        <div id="slice-query-box" class="row collapse">
+            <div class="col-md-8">
+                <p>
+                    Will funding be from prepaid reserved DataVault storage (a slice).
+                </p>
             </div>
-            <div class="radio">
-                <label class="col-sm-2 control-label">
-                    <input type="radio" name="${spring.status.expression}" id="billing-choice-slice" value="SLICE" <#if vault.billingType??>${(vault.billingType == 'SLICE')?then('checked', '')}</#if>>
-                    A Slice. ​
+            <div class="col-md-4 well">
+                <@spring.bind "vault.sliceQueryChoice" />
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="slice-query-yes"
+                            name="${spring.status.expression}"
+                            value="YES"
+                            <#if spring.status.value?? && spring.status.value?string=="YES">checked</#if>>
+                        Yes
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="slice-query-no-or-do-not-know"
+                            name="${spring.status.expression}"
+                            value="NO_OR_DO_NOT_KNOW"
+                            <#if spring.status.value?? && spring.status.value?string=="NO_OR_DO_NOT_KNOW">checked</#if>>
+                        No/Don't know
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="slice-query-buy"
+                            name="${spring.status.expression}"
+                            value="BUY_NEW_SLICE"
+                            <#if spring.status.value?? && spring.status.value?string=="BUY_NEW_SLICE">checked</#if>>
+                        I wish to buy reserved DataVault storage
+                    </label>
+                </div>
+                <button type="button"
+                    class="btn btn-danger query-choice-clear"
+                    id="slice-query-choice-clear">Clear selection</button>
+            </div>
+        </div>
+        <@spring.bind "vault.fundingQueryChoice" />
+        <div id="funding-query-box" class="row collapse">
+            <div class="col-md-8">
+                <p>
+                    Do you have a research grant or budget code to pay for this Vault?
+                </p>
+            </div>
+            <div class="col-md-4 well">
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="funding-query-yes"
+                            name="${spring.status.expression}"
+                            value="YES"
+                            <#if spring.status.value?? && spring.status.value?string=="YES">checked</#if>>
+                        Yes
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio"
+                            id="funding-query-no-or-do-not-know"
+                            name="${spring.status.expression}"
+                            value="FUNDING_NO_OR_DO_NOT_KNOW"
+                            <#if spring.status.value?? && spring.status.value?string=="FUNDING_NO_OR_DO_NOT_KNOW">checked</#if>>
+                        No/Don't know
+                    </label>
+                </div>
+                <button type="button"
+                        class="btn btn-danger my-1 query-choice-clear"
+                        id="funding-query-choice-clear">Clear selections and return to the top</button>
+            </div>
+        </div>
+        
+        <div id="slice-form" class="row collapse">
+            <div class="well">
+                <p>
+                    A slice is reserved DataVault storage. If you know the name of your slice, 
+                    please enter it here (eg Slice001). 
+                </p>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Slice: </label>
+                    <@spring.bind "vault.sliceID" />
+                    <input type="text" id="sliceID" name="${spring.status.expression}" value="${spring.status.value!''}" />
+                </div>
                 </label>
             </div>
         </div>
-
-        <div class="row">
-            <div id="slice-form" class="collapse">
-                <div class="well">
-                    <p>
-                        A slice is reserved DataVault storage. If unsure, please check with your PI whether they have reserved a slice.
-                        If you do have a slice, please enter the name or code such as 'Slice004'.
-                    </p>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">Slice: </label>
-                        <@spring.bind "vault.sliceID" />
-                        <input type="text" id="sliceID" name="${spring.status.expression}" value="${spring.status.value!""}"/>
-                    </div>
+        <div id="payment-details-form" class="row collapse">
+            <h4 class="fs-title">Billing Details</h4>
+            <p>Please provide the details we should use to send your bill to the correct finance team.</p>
+            <div class="well">
+                <div class="form-group required" style="padding-bottom: 1.5rem;">
+                    <label class="col-sm-4 control-label">Authoriser:
+                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
+                            title="The name of someone in your School/Unit or Sub-Unit who can authorise the payment."></span>
+                    </label>
+                    <@spring.bind "vault.budgetAuthoriser" />
+                    <input type="text" class="col-sm-6" id="budget-authoriser" name="${spring.status.expression}" value="${spring.status.value!''}" />
                 </div>
-            </div>
-            <div id="grant-billing-form" class="collapse">
-                <div class="well">
-                    <p>Please provide the details we should use to send your bill (your eIT) to the correct finance team.</p>
-                    <div class="form-group required">
-                        <label class="col-sm-2 control-label">Authoriser:
-                            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                                  title="The name of someone in your School/Unit or Sub-Unit who can authorise the payment of the eIT."></span>
-                        </label>
-                        <@spring.bind "vault.grantAuthoriser" />
-                        <input type="text" id="authoriser" name="${spring.status.expression}" value="${spring.status.value!""}"/>
-                    </div>
-                    <div class="form-group required">
-                        <label class="col-sm-2 control-label">School/Unit:</label>
-                        <@spring.bind "vault.grantSchoolOrUnit" />
-                        <input type="text" id="schoolOrUnit" name="${spring.status.expression}" value="${spring.status.value!""}" />
-                    </div>
-                    <div class="form-group required">
-                        <label class="col-sm-2 control-label">Subunit:</label>
-                        <@spring.bind "vault.grantSubunit" />
-                        <input type="text" id="subunit" name="${spring.status.expression}" value="${spring.status.value!""}" />
-                    </div>
-                    <div class="form-group required">
-                        <label class="col-sm-2 control-label">Project Title:
-                            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                                  title="If you are planning to pay the bill from a grant, please enter the Project Title."></span>
-                        </label>
-                        <@spring.bind "vault.projectTitle" />
-                        <input type="text" id="projectTitle" name="${spring.status.expression}" value="${spring.status.value!""}" />
-                    </div>
-                    <div class="form-group required">
-                        <label  for="billingGrantEndDate" class="col-sm-2 control-label">
-                            Grant End Date:<span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                                                 title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;"></span>
-                        </label>
-
-                        <@spring.bind "vault.billingGrantEndDate" />
-                        <input id="billingGrantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd" name="${spring.status.expression}"
-                               value="${spring.status.value!""}"/>
-                         <span id="invalid-billing-grant-end-date-span" style="font-size: 1.2em; font: bold; color: #f00; display: inline;"></span>
-                    </div>
+                <div class="form-group required" style="padding-bottom: 1.5rem;">
+                    <label class="col-sm-4 control-label">School/Unit:</label>
+                    <@spring.bind "vault.budgetSchoolOrUnit" />
+                    <input type="text" class="col-sm-6" id="schoolOrUnit" name="${spring.status.expression}" value="${spring.status.value!""}" />
                 </div>
-            </div>
-            <div id="budget-billing-form" class="collapse">
-                <div class="well">
-                    <p>Please provide the details we should use to send your bill (your eIT) to the correct finance team.</p>
-                    <div class="form-group required">
-                        <label class="col-sm-2 control-label">Authoriser:
-                            <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
-                                  title="The name of someone in your School/Unit or Sub-Unit who can authorise the payment of the eIT."></span>
-                        </label>
-                        <@spring.bind "vault.budgetAuthoriser" />
-                        <input type="text" id="budget-authoriser" name="${spring.status.expression}" value="${spring.status.value!""}"/>
-                    </div>
-                    <div class="form-group required">
-                        <label class="col-sm-2 control-label">School/Unit:</label>
-                        <@spring.bind "vault.budgetSchoolOrUnit" />
-                        <input type="text" id="budget-schoolOrUnit" name="${spring.status.expression}" value="${spring.status.value!""}" />
-                    </div>
-                    <div class="form-group required">
-                        <label class="col-sm-2 control-label">Subunit:</label>
-                        <@spring.bind "vault.budgetSubunit" />
-                        <input type="text" id="budget-subunit" name="${spring.status.expression}" value="${spring.status.value!""}" />
-                    </div>
+                <div class="form-group" style="padding-bottom: 1.5rem;">
+                    <label class="col-sm-4 control-label">Subunit:</label>
+                    <@spring.bind "vault.budgetSubunit" />
+                    <input type="text" class="col-sm-6" id="subunit" name="${spring.status.expression}" value="${spring.status.value!""}" />
+                </div>
+                <div class="form-group required" style="padding-bottom: 1.5rem;">
+                    <label class="col-sm-4 control-label">Project Title:
+                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
+                            title="If you are planning to pay the bill from a grant, please enter the Project Title."></span>
+                    </label>
+                    <@spring.bind "vault.projectTitle" />
+                    <input type="text" class="col-sm-6" id="projectTitle" name="${spring.status.expression}" value="${spring.status.value!""}" />
+                </div>
+                <div class="form-group" style="padding-bottom: 1.5rem;">
+                    <label for="billingGrantEndDate" class="col-sm-4 control-label">
+                        Grant End Date:<span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
+                            title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;"></span>
+                    </label>
+                    <@spring.bind "vault.billingGrantEndDate" />
+                    <input id="billingGrantEndDate" class="date-picker col-sm-6" placeholder="yyyy-mm-dd" name="${spring.status.expression}"
+                        value="${spring.status.value!''}" />
+                    <span id="invalid-billing-grant-end-date-span" style="font-size: 1.2em; font: bold; color:  #AE0F0F; display: inline;"></span>
+                </div>
+                <div class="form-group" style="padding-bottom: 1.5rem;">
+                    <label class="col-sm-4 control-label">
+                       Payment details (if known), <br>for example, Project Number or Accounting String
+                    </label>
+                    <@spring.bind "vault.paymentDetails" />
+                    <textarea id="budget-payment-details" type="text" class="col-sm-6" name="${spring.status.expression}"
+                        rows="4">
+                        <#if vault.paymentDetails??>
+                            ${vault.paymentDetails?html}
+                        </#if>
+                    </textarea>
+                </div>
+                <div class="form-group" style="padding-top: 1.5rem;">
+                    <button type="button"
+                        class="btn btn-danger query-choice-clear"
+                        id="payment-details-form-clear">Clear selection and return to the top</button>
                 </div>
             </div>
         </div>
     </div>
-    <div>
-        Select one of the billing options above.
-    </div>
-  
-    
-    <button type="button" name="previous" class="previous action-button-previous btn btn-default" >&laquo; Previous</button>
+    <button type="button" name="previous" class="previous action-button-previous btn btn-default">&laquo; Previous</button>
     <a name="admin-pending-vault-summary" class="btn btn-primary" style="margin-bottom: 0;"
-          href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/summary/${vaultID}"><< Return Admin Pending Vault Summary</a>
-    <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-success" >
-       <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
-    </button>
-   
-
-    <button type="button" name="next" class="next action-button btn btn-default">Next Step &raquo;</button>
+        href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/summary/${vaultID}">
+        << Return Admin Pending Vault Summary</a>
+            <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-success">
+                <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
+            </button>
+            <button type="button" name="next" class="next action-button btn btn-default">Next Step &raquo;</button>
 </fieldset>

@@ -1,0 +1,1 @@
+ALTER TABLE BillingInfo add column paymentDetails TEXT;
