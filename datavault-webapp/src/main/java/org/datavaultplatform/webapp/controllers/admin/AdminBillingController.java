@@ -75,8 +75,10 @@ public class AdminBillingController {
         model.addAttribute("orderuser", "vault.user.id".equals(sort)?otherOrder:"asc");
         model.addAttribute("ordervaultsize", "vaultSize".equals(sort)?otherOrder:"asc");
         model.addAttribute("orderProjectId", "projectId".equals(sort)?otherOrder:"asc");
+        model.addAttribute("ordergrantEndDate", "grantEndDate".equals(sort)?otherOrder:"asc");
         model.addAttribute("ordercreationtime", "creationTime".equals(sort)?otherOrder:"asc");
         model.addAttribute("orderreviewDate", "reviewDate".equals(sort)?otherOrder:"asc");
+
 
         return "admin/billing/index";
     }

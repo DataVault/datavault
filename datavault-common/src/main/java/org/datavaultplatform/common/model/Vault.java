@@ -441,6 +441,7 @@ public class Vault {
                 name,
                 vaultSize,
                 reviewDate,
+                grantEndDate,
                 billinginfo != null ? billinginfo.getAmountToBeBilled() : null,
                 billinginfo != null ? billinginfo.getAmountBilled() : null,
                 projectId,
