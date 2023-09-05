@@ -92,7 +92,7 @@
                                             </td>
                                             <td>
                                                 <#if vault.grantEndDate??>
-                                                    ${vault.grantEndDate?string('dd/MM/yyyy')}
+                                                    ${vault.grantEndDate?string('dd MMM yyyy')}
                                                     <#else>
                                                 </#if>
                                             </td>
@@ -101,7 +101,7 @@
                                             </td>
                                             <td>
                                                 <#if vault.reviewDate??>
-                                                    ${vault.reviewDate?string('dd/MM/yyyy')}
+                                                    ${vault.reviewDate?string('dd MMM yyyy')}
                                                     <#else>
                                                 </#if>
                                             </td>
