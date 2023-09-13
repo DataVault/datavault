@@ -189,6 +189,22 @@ public class VaultInfo {
         this.projectId = projectId;
         this.crisID = crisID;
     }
+
+     public VaultInfo(String id,String userName, Date creationTime, String name,  
+    		long vaultSize, Date reviewDate, Date grantEndDate, BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId, 
+            String paymentDetails) {
+        this.id = id;        
+        this.userName = userName;    
+        this.creationTime = creationTime;
+        this.name = name;        
+        this.vaultSize = vaultSize;        
+        this.reviewDate = reviewDate;
+        this.grantEndDate = grantEndDate;
+        this.amountToBeBilled = amountToBeBilled;
+        this.amountBilled = amountBilled;
+        this.projectId = projectId;
+        this.paymentDetails = paymentDetails;
+    }
     
     public VaultInfo(String id,String userName, Date creationTime, String name,  
     		long vaultSize, Date reviewDate,BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId, 
