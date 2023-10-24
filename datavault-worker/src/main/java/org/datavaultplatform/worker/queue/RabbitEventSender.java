@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.model.Agent;
+import org.datavaultplatform.worker.WorkerInstance;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -51,7 +52,7 @@ public class RabbitEventSender implements EventSender {
 
         // Set common event properties
         event.setAgentType(Agent.AgentType.WORKER);
-        event.setAgent(workerName);
+        event.setAgent(WorkerInstance.getWorkerName());
         
         try {
             String jsonEvent = mapper.writeValueAsString(event);
