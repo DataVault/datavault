@@ -60,7 +60,7 @@
     <sshd.sftp.version>2.9.2</sshd.sftp.version>
 
     <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
-    <guava.version>31.1-jre</guava.version>
+    <guava.version>32.0.0-jre</guava.version>
 
     <!-- above here, updated 16nov2022-->
 
