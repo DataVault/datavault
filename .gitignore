@@ -34,3 +34,10 @@ docker/mysql-master-backup
 .gitignore
 ## do not check in p12 files
 *.p12
+# VSCode config
+.vscode/
+# Ignore pids folders
+datavault-broker/pids
+datavault-worker/pids
+datavault-webapp/pids
+

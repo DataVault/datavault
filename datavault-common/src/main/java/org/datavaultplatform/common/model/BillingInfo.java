@@ -18,115 +18,125 @@ import org.datavaultplatform.common.response.BillingInformation;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-@Table(name="BillingInfo")
-@NamedEntityGraph(name=BillingInfo.EG_BILLING_INFO,
-		attributeNodes = @NamedAttributeNode(value = BillingInfo_.VAULT, subgraph = "subVault"),
-		subgraphs = @NamedSubgraph(name="subVault", attributeNodes = {
-				@NamedAttributeNode(Vault_.DATASET),
-				@NamedAttributeNode(Vault_.GROUP),
-				@NamedAttributeNode(Vault_.RETENTION_POLICY),
-				@NamedAttributeNode(Vault_.USER)
-		})
-)
+@Table(name = "BillingInfo")
+@NamedEntityGraph(name = BillingInfo.EG_BILLING_INFO, attributeNodes = @NamedAttributeNode(value = BillingInfo_.VAULT, subgraph = "subVault"), subgraphs = @NamedSubgraph(name = "subVault", attributeNodes = {
+		@NamedAttributeNode(Vault_.DATASET),
+		@NamedAttributeNode(Vault_.GROUP),
+		@NamedAttributeNode(Vault_.RETENTION_POLICY),
+		@NamedAttributeNode(Vault_.USER)
+}))
 public class BillingInfo {
 
-		public static final String EG_BILLING_INFO = "eg.BillingInfo.1";
-    @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "id", unique = true, length = 36)
-    private String id;
-    
-    // Hibernate version
-    @Version
-    private long version;
-     
-    @Column(name = "contactName", nullable = true, columnDefinition = "TEXT", length=400)
-    private String contactName;
-   
-	@Column(name = "subUnit", nullable = true, columnDefinition = "TEXT", length=400)
-    private String subUnit;
-    
-    @Column(name = "budgetCode", nullable = true, columnDefinition = "BIT", length = 1)
-    private Boolean budgetCode;
-    
-    @Column(name = "specialComments", nullable = true, columnDefinition = "TEXT", length=400)
-    private String specialComments;
-    
-    @Column(name = "amountToBeBilled", nullable = true, columnDefinition="Decimal(15,2) default '000.00'")
-    private BigDecimal amountToBeBilled;
-    
-    @Column(name = "amountBilled", nullable = true, columnDefinition="Decimal(15,2) default '000.00'")
-    private BigDecimal amountBilled;
-    
-	@Column(name = "school", nullable = true, columnDefinition = "TEXT", length=400)
-    private String school;
+	public static final String EG_BILLING_INFO = "eg.BillingInfo.1";
+	@Id
+	@GeneratedValue(generator = "uuid")
+	@GenericGenerator(name = "uuid", strategy = "uuid2")
+	@Column(name = "id", unique = true, length = 36)
+	private String id;
 
-	@Column(name = "billingType", nullable = false, columnDefinition = "TEXT", length=10)
+	// Hibernate version
+	@Version
+	private long version;
+
+	@Column(name = "contactName", nullable = true, columnDefinition = "TEXT", length = 400)
+	private String contactName;
+
+	@Column(name = "subUnit", nullable = true, columnDefinition = "TEXT", length = 400)
+	private String subUnit;
+
+	@Column(name = "budgetCode", nullable = true, columnDefinition = "BIT", length = 1)
+	private Boolean budgetCode;
+
+	@Column(name = "specialComments", nullable = true, columnDefinition = "TEXT", length = 400)
+	private String specialComments;
+
+	@Column(name = "amountToBeBilled", nullable = true, columnDefinition = "Decimal(15,2) default '000.00'")
+	private BigDecimal amountToBeBilled;
+
+	@Column(name = "amountBilled", nullable = true, columnDefinition = "Decimal(15,2) default '000.00'")
+	private BigDecimal amountBilled;
+
+	@Column(name = "school", nullable = true, columnDefinition = "TEXT", length = 400)
+	private String school;
+
+	@Column(name = "billingType", nullable = false, columnDefinition = "TEXT", length = 10)
 	private PendingVault.Billing_Type billingType;
 
-	@Column(name = "sliceID", nullable = true, columnDefinition = "TEXT", length=40)
+	@Column(name = "sliceID", nullable = true, columnDefinition = "TEXT", length = 40)
 	private String sliceID;
 
-	@Column(name = "projectTitle", nullable = true, columnDefinition = "TEXT", length=400)
+	@Column(name = "projectTitle", nullable = true, columnDefinition = "TEXT", length = 400)
 	private String projectTitle;
-	
+
+	@Column(name = "paymentDetails", nullable = true, columnDefinition = "TEXT")
+	private String paymentDetails;
+
 	@OneToOne
-	@JoinColumn(name="vaultID", nullable = false)
-    private Vault vault;
-    	 
-   
+	@JoinColumn(name = "vaultID", nullable = false)
+	private Vault vault;
+
 	public String getContactName() {
 		return contactName;
 	}
+
 	public void setContactName(String contactName) {
 		this.contactName = contactName;
 	}
-	
-    public String getSchool() {
+
+	public String getSchool() {
 		return school;
 	}
+
 	public void setSchool(String school) {
 		this.school = school;
 	}
+
 	public String getSubUnit() {
 		return subUnit;
 	}
+
 	public void setSubUnit(String subUnit) {
 		this.subUnit = subUnit;
 	}
+
 	public Boolean getBudgetCode() {
 		return budgetCode;
 	}
+
 	public void setBudgetCode(Boolean budgetCode) {
 		this.budgetCode = budgetCode;
 	}
+
 	public String getSpecialComments() {
 		return specialComments;
 	}
+
 	public void setSpecialComments(String specialComments) {
 		this.specialComments = specialComments;
 	}
-	   
-    public BigDecimal getAmountToBeBilled() {
+
+	public BigDecimal getAmountToBeBilled() {
 		return amountToBeBilled;
 	}
+
 	public void setAmountToBeBilled(BigDecimal amountToBeBilled) {
 		this.amountToBeBilled = amountToBeBilled;
 	}
+
 	public BigDecimal getAmountBilled() {
 		return amountBilled;
 	}
+
 	public void setAmountBilled(BigDecimal amountBilled) {
 		this.amountBilled = amountBilled;
 	}
 
-    public Vault getVault() {
+	public Vault getVault() {
 		return vault;
 	}
+
 	public void setVault(Vault vault) {
 		this.vault = vault;
 	}
@@ -155,34 +165,43 @@ public class BillingInfo {
 		this.projectTitle = projectTitle;
 	}
 
-	public BillingInfo() {}
- 
-    public String getID() { 
-    	return id; 
-    }
+	public BillingInfo() {
+	}
 
-    public long getVersion() {
-    	return version; 
-    }
+	public String getID() {
+		return id;
+	}
+
+	public long getVersion() {
+		return version;
+	}
+
+	public String getPaymentDetails() {
+		return this.paymentDetails;
+	}
+
+	public void setPaymentDetails(String paymentDetails) {
+		this.paymentDetails = paymentDetails;
+	}
 
 	public BillingInformation convertToResponse() {
-        return new BillingInformation(
-                id,
-                vault.getID(),
-                contactName,
-                school,
-                subUnit,
-                budgetCode,
-                specialComments,
-                amountToBeBilled,
-                amountBilled,
-                vault.getProjectId(),
-                vault.getName(),
+		return new BillingInformation(
+				id,
+				vault.getID(),
+				contactName,
+				school,
+				subUnit,
+				budgetCode,
+				specialComments,
+				amountToBeBilled,
+				amountBilled,
+				vault.getProjectId(),
+				vault.getName(),
 				sliceID,
 				projectTitle,
-				billingType
-            );
-    }
+				billingType,
+				paymentDetails);
+	}
 
 	@Override
 	public boolean equals(Object o) {

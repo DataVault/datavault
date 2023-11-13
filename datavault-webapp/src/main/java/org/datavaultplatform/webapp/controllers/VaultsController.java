@@ -187,6 +187,7 @@ public class VaultsController {
     @RequestMapping(value = "/vaults/{vaultid}", method = RequestMethod.GET)
     public String getVault(ModelMap model, @PathVariable("vaultid") String vaultID, Principal principal) {
         VaultInfo vault = restService.getVault(vaultID);
+        logger.info("getVault: " + vault);
 
         if (!canAccessVault(vault, principal)) {
             logger.info("getVault no permission.");

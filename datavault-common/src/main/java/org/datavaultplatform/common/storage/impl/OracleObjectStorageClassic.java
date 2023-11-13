@@ -133,7 +133,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 					}
 					HeadObjectResponse getHeadObjectResponse = this.client.headObject(headObjectRequest);
 					LOGGER.debug("Object status is: " + getHeadObjectResponse.getArchivalState());
-					if (getHeadObjectResponse.getArchivalState().equals(OracleObjectStorageClassic.restoredKey)) {
+					if (getHeadObjectResponse.getArchivalState().getValue().equals(OracleObjectStorageClassic.restoredKey)) {
 						break;
 					}
 					attemptCount++;
