@@ -63,8 +63,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 			}
 		}
         locations = new ArrayList<>();
-        locations.add(TivoliStorageManager.TSM_SERVER_NODE2_OPT);
         locations.add(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+        locations.add(TivoliStorageManager.TSM_SERVER_NODE2_OPT);
         super.multipleCopies = true;
         super.depositIdStorageKey = true;
         for (String key : config.keySet()) {
