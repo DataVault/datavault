@@ -48,6 +48,7 @@ public class AuditDepositsChunks implements ScheduledTask {
     private final String occMaxRetries;
     private final String ociNameSpace;
     private final String ociBucketName;
+    private final String tsmReverse;
 
     /*
         <property name="optionsDir" value="${optionsDir:#{null}}" />
@@ -78,7 +79,8 @@ public class AuditDepositsChunks implements ScheduledTask {
         @Value("${tsmMaxRetries:#{null}}") String tsmMaxRetries,
         @Value("${occMaxRetries:#{null}}") String occMaxRetries,
         @Value("${ociNameSpace:#{null}}") String ociNameSpace,
-        @Value("${ociBucketName:#{null}}") String ociBucketName) {
+        @Value("${ociBucketName:#{null}}") String ociBucketName,
+        @Value("${tsmReverse:#{false}}") String tsmReverse) {
         this.archiveStoreService = archiveStoreService;
         this.depositsService = depositsService;
         this.emailService = emailService;
@@ -97,6 +99,7 @@ public class AuditDepositsChunks implements ScheduledTask {
         this.occMaxRetries = occMaxRetries;
         this.ociNameSpace = ociNameSpace;
         this.ociBucketName = ociBucketName;
+        this.tsmReverse = tsmReverse;
     }
 
 
@@ -213,6 +216,9 @@ public class AuditDepositsChunks implements ScheduledTask {
                     }
                     if (this.tsmMaxRetries != null && ! this.tsmMaxRetries.equals("")) {
                         asProps.put(PropNames.TSM_MAX_RETRIES, this.tsmMaxRetries);
+                    }
+                    if (this.tsmReverse != null && ! this.tsmReverse.equals("")) {
+                        asProps.put(PropNames.TSM_REVERSE, this.tsmReverse);
                     }
                     archiveStore.setProperties(asProps);
                 }

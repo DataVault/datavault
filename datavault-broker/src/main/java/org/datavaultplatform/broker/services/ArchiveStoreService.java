@@ -29,6 +29,8 @@ public class ArchiveStoreService {
     private final String ociNameSpace;
     private final String ociBucketName;
 
+    private final String tsmReverse;
+
     private final ArchiveStoreDAO archiveStoreDAO;
 
     @Autowired
@@ -45,6 +47,7 @@ public class ArchiveStoreService {
             @Value("${occMaxRetries:#{null}}") String occMaxRetries,
             @Value("${ociNameSpace:#{null}}") String ociNameSpace,
             @Value("${ociBucketName:#{null}}") String ociBucketName,
+            @Value("${tsmReverse:#{false}}") String tsmReverse,
             ArchiveStoreDAO archiveStoreDAO) {
         this.optionsDir = optionsDir;
         this.tempDir = tempDir;
@@ -58,6 +61,7 @@ public class ArchiveStoreService {
         this.occMaxRetries = occMaxRetries;
         this.ociNameSpace = ociNameSpace;
         this.ociBucketName = ociBucketName;
+        this.tsmReverse = tsmReverse;
         this.archiveStoreDAO = archiveStoreDAO;
     }
 
@@ -107,6 +111,9 @@ public class ArchiveStoreService {
                     }
                     if (this.tsmMaxRetries != null && ! this.tsmMaxRetries.equals("")) {
                         asProps.put(PropNames.TSM_MAX_RETRIES, this.tsmMaxRetries);
+                    }
+                    if (this.tsmReverse != null && ! this.tsmReverse.equals("")) {
+                        asProps.put(PropNames.TSM_REVERSE, this.tsmReverse);
                     }
                     archiveStore.setProperties(asProps);
                 }
