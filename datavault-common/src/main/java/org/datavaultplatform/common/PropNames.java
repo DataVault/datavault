@@ -44,4 +44,6 @@ public interface PropNames {
   String TSM_RETRY_TIME = "tsmRetryTime";
   String USERNAME = "username";
   String MONITOR_SFTP = "monitorSftp";
+
+  String TSM_REVERSE = "tsmReverse";
 }

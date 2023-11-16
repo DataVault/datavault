@@ -27,6 +27,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     public static String TSM_SERVER_NODE2_OPT = "/opt/tivoli/tsm/client/ba/bin/dsm2.opt";
     public static String TEMP_PATH_PREFIX = "/tmp/datavault/temp/";
 
+	public static boolean REVERSE = false;
+
     public final Verify.Method verificationMethod = Verify.Method.COPY_BACK;
     private static final int defaultRetryTime = 30;
 		private static final int defaultMaxRetries = 48; // 24 hours if retry time is 30 minutes
@@ -39,6 +41,8 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
     	String tempKey = "tempDir";
     	String retryKey = "tsmRetryTime";
     	String maxKey = "tsmMaxRetries";
+		String reverseKey = "tsmReverse";
+
         // if we have non default options in datavault.properties use them
         if (config.containsKey(optionsKey)) {
         	String optionsDir = config.get(optionsKey);
@@ -62,9 +66,17 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 				TivoliStorageManager.maxRetries = TivoliStorageManager.defaultMaxRetries;
 			}
 		}
+		if (config.containsKey(reverseKey)){
+			TivoliStorageManager.REVERSE = new Boolean(config.get(reverseKey));
+		}
         locations = new ArrayList<>();
-        locations.add(TivoliStorageManager.TSM_SERVER_NODE2_OPT);
-        locations.add(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+		if (! TivoliStorageManager.REVERSE) {
+			locations.add(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+			locations.add(TivoliStorageManager.TSM_SERVER_NODE2_OPT);
+		} else {
+			locations.add(TivoliStorageManager.TSM_SERVER_NODE2_OPT);
+			locations.add(TivoliStorageManager.TSM_SERVER_NODE1_OPT);
+		}
         super.multipleCopies = true;
         super.depositIdStorageKey = true;
         for (String key : config.keySet()) {

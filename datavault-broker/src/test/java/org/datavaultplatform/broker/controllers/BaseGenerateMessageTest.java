@@ -51,6 +51,8 @@ public abstract class BaseGenerateMessageTest {
   final String ociNameSpace = "OCI-NAMESPACE";
   final String ociBucketName = "OCI-BUCKET-NAME";
 
+  final String tsmReverse = "false";
+
   @Mock
   VaultsService vaultsService;
   @Mock
@@ -122,6 +124,7 @@ public abstract class BaseGenerateMessageTest {
         occMaxRetries,
         ociNameSpace,
         ociBucketName,
+        tsmReverse,
         mapper
     );
     return dc;

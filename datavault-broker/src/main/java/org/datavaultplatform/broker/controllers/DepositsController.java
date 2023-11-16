@@ -59,6 +59,7 @@ public class DepositsController {
     private final String ociNameSpace;
     private final String ociBucketName;
 
+    private final String tsmReverse;
     private final ObjectMapper mapper;
 
     private static final Logger logger = LoggerFactory.getLogger(DepositsController.class);
@@ -80,6 +81,7 @@ public class DepositsController {
         @Value("${tsmMaxRetries:#{null}}") String tsmMaxRetries,
         @Value("${occMaxRetries:#{null}}") String occMaxRetries,
         @Value("${ociNameSpace:#{null}}") String ociNameSpace,
+        @Value("${tsmReverse:#{false}}") String tsmReverse,
         @Value("${ociBucketName:#{null}}") String ociBucketName,
         ObjectMapper mapper) {
         this.vaultsService = vaultsService;
@@ -105,6 +107,7 @@ public class DepositsController {
         this.occMaxRetries = occMaxRetries;
         this.ociNameSpace = ociNameSpace;
         this.ociBucketName = ociBucketName;
+        this.tsmReverse = tsmReverse;
         this.mapper = mapper;
     }
 
@@ -370,6 +373,10 @@ public class DepositsController {
                     if (this.tsmMaxRetries != null && ! this.tsmMaxRetries.equals("")) {
                         asProps.put(PropNames.TSM_MAX_RETRIES, this.tsmMaxRetries);
                     }
+                    if (this.tsmReverse != null && ! this.tsmReverse.equals("")) {
+                        asProps.put(PropNames.TSM_REVERSE, this.tsmReverse);
+                    }
+
 		        	archiveStore.setProperties(asProps);
 		        }
 
