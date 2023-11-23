@@ -53,6 +53,7 @@ import org.datavaultplatform.common.event.deposit.TransferComplete;
 import org.datavaultplatform.common.event.deposit.UploadComplete;
 import org.datavaultplatform.common.event.deposit.ValidationComplete;
 import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
+import org.datavaultplatform.common.event.retrieve.RetrieveError;
 import org.datavaultplatform.common.event.retrieve.RetrieveStart;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.Audit;
@@ -336,6 +337,9 @@ public class EventListener implements MessageListener {
 
     } else if (event instanceof ValidationComplete) {
       process24ValidationComplete((ValidationComplete) event);
+
+    } else if (event instanceof RetrieveError) {
+      process25RetrieveError((RetrieveError) event);
 
     } else {
       throw new Exception(
@@ -785,6 +789,23 @@ public class EventListener implements MessageListener {
 
   void process24ValidationComplete(ValidationComplete event) {
     ignore(event);
+  }
+
+  void process25RetrieveError(RetrieveError event) {
+    Job job = getJob(event.getJobId());
+    Retrieve retrieve = getRetrieve(event.getRetrieveId());
+    retrieve.setStatus(Retrieve.Status.FAILED);
+    retrievesService.updateRetrieve(retrieve);
+
+    processJob(job, $job -> {
+      $job.setError(true);
+      $job.setErrorMessage(event.getMessage());
+      jobsService.updateJob($job);
+    });
+
+    this.sendEmails(getDeposit(event.getDepositId()), event, TYPE_ERROR,
+            EmailTemplate.USER_DEPOSIT_ERROR,
+            EmailTemplate.GROUP_ADMIN_DEPOSIT_ERROR);
   }
 
   String getUserSubject(String type) {

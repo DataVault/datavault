@@ -56,7 +56,8 @@ public class Retrieve {
     public enum Status {
         NOT_STARTED,
         IN_PROGRESS,
-        COMPLETE
+        COMPLETE,
+        FAILED
     }
 
     @Column(columnDefinition = "TEXT")
