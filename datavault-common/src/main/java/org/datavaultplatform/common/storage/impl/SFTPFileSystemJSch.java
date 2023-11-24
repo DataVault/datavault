@@ -2,7 +2,7 @@ package org.datavaultplatform.common.storage.impl;
 
 import com.jcraft.jsch.*;
 import java.io.InputStream;
-import java.nio.file.Paths;
+
 import java.time.Clock;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import org.datavaultplatform.common.storage.impl.ssh.UtilityJSchImproved;
+import org.datavaultplatform.common.storage.impl.ssh.UtilityJSchNonRecurse;
+import org.springframework.util.Assert;
 
 /**
  * An implementation of SFTPFileSystemDriver to use JCraft's Jsch ssh/sftp library.
@@ -259,9 +262,33 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
                 if (!path.endsWith("/")) {
                     path = path + "/";
                 }
-                
-                return UtilityJSch.calculateSize(channelSftp, path);
-                
+
+                Runtime.getRuntime().gc();
+                long t5 = System.currentTimeMillis();
+                long sizeNonRecurse = UtilityJSchNonRecurse.calculateSize(channelSftp, path);
+                long t6 = System.currentTimeMillis();
+                long timeNonRecurse = t6 - t5;
+                log.info("NON RECURSE TIME [{}]", timeNonRecurse);
+
+                Runtime.getRuntime().gc();
+                long t3 = System.currentTimeMillis();
+                long sizeImproved = UtilityJSchImproved.calculateSize(channelSftp, path);
+                long t4 = System.currentTimeMillis();
+                long timeImproved = t4 - t3;
+                log.info("IMPROVED TIME [{}]", timeImproved);
+
+                Runtime.getRuntime().gc();
+                long t1 = System.currentTimeMillis();
+                long sizeOriginal = UtilityJSch.calculateSize(channelSftp, path);
+                long t2 = System.currentTimeMillis();
+                long timeOriginal = t2 - t1;
+                log.info("ORIG TIME [{}]", timeOriginal);
+
+                Assert.isTrue(sizeOriginal == sizeImproved,
+                    String.format("original size[%s] != improved size[%s]", sizeOriginal, sizeImproved));
+                Assert.isTrue(sizeOriginal == sizeNonRecurse,
+                    String.format("original size[%s] != non-recurse size[%s]", sizeOriginal, sizeNonRecurse));
+                return sizeOriginal;
             } else {
                 return attrs.getSize();
             }

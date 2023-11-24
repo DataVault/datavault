@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.services.LDAPService;
 import org.datavaultplatform.webapp.authentication.shib.ShibAuthenticationListener;
 import org.datavaultplatform.webapp.authentication.shib.ShibAuthenticationProvider;
-import org.datavaultplatform.webapp.authentication.shib.ShibGrantedAuthorityService;
+import org.datavaultplatform.webapp.authentication.authorization.GrantedAuthorityService;
 import org.datavaultplatform.webapp.authentication.shib.ShibWebAuthenticationDetailsSource;
 import org.datavaultplatform.webapp.services.PermissionsService;
 import org.datavaultplatform.webapp.services.RestService;
@@ -34,9 +34,9 @@ public class ShibProfileConfig {
       RestService restService,
       LDAPService ldapService,
       @Value("${ldap.enabled}") boolean ldapEnabled,
-      ShibGrantedAuthorityService shibGrantedAuthorityService
+      GrantedAuthorityService grantedAuthorityService
   ){
-    ShibAuthenticationProvider result = new ShibAuthenticationProvider(restService, ldapService, ldapEnabled, shibGrantedAuthorityService);
+    ShibAuthenticationProvider result = new ShibAuthenticationProvider(restService, ldapService, ldapEnabled, grantedAuthorityService);
     return result;
   }
 
@@ -67,8 +67,8 @@ public class ShibProfileConfig {
   }
 
   @Bean
-  ShibGrantedAuthorityService shibGrantedAuthorityService(RestService restService, PermissionsService permissionsService) {
-    return new ShibGrantedAuthorityService(restService, permissionsService);
+  GrantedAuthorityService shibGrantedAuthorityService(RestService restService, PermissionsService permissionsService) {
+    return new GrantedAuthorityService(restService, permissionsService);
   }
 
   @Bean

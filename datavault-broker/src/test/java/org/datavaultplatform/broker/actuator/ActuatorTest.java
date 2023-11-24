@@ -4,14 +4,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
+import org.datavaultplatform.broker.config.MockServicesConfig;
 import org.datavaultplatform.broker.queue.Sender;
 import org.datavaultplatform.broker.services.FileStoreService;
 import org.datavaultplatform.broker.test.AddTestProperties;
-import org.datavaultplatform.broker.test.BaseDatabaseTest;
 import org.datavaultplatform.broker.test.TestClockConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -32,10 +36,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
-@Import(TestClockConfig.class)
+@Import({TestClockConfig.class, MockServicesConfig.class})
 @AddTestProperties
 @Slf4j
 @TestPropertySource(properties = {
+    "broker.services.enabled=false",
+    "broker.database.enabled=false",
     "broker.email.enabled=true",
     "broker.controllers.enabled=true",
     "broker.initialise.enabled=true",
@@ -44,7 +50,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     "management.endpoints.web.exposure.include=*",
     "management.health.rabbit.enabled=false"})
 @AutoConfigureMockMvc
-public class ActuatorTest extends BaseDatabaseTest {
+@EnableAutoConfiguration(exclude= {
+        DataSourceAutoConfiguration.class,
+        DataSourceTransactionManagerAutoConfiguration.class,
+        HibernateJpaAutoConfiguration.class })
+public class ActuatorTest {
 
   @Autowired
   MockMvc mvc;
@@ -55,7 +65,7 @@ public class ActuatorTest extends BaseDatabaseTest {
   @Autowired
   ObjectMapper mapper;
 
-  @MockBean
+  @Autowired
   FileStoreService mFileStoreService;
 
   @Test

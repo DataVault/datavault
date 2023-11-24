@@ -25,8 +25,8 @@ import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.request.ValidateUser;
 import org.datavaultplatform.common.services.LDAPService;
 import org.datavaultplatform.webapp.authentication.shib.ShibAuthenticationListener;
-import org.datavaultplatform.webapp.authentication.shib.ShibGrantedAuthorityService;
-import org.datavaultplatform.webapp.authentication.shib.ShibUtils;
+import org.datavaultplatform.webapp.authentication.authorization.GrantedAuthorityService;
+import org.datavaultplatform.webapp.authentication.authorization.AuthorizationUtils;
 import org.datavaultplatform.webapp.authentication.shib.ShibWebAuthenticationDetails;
 import org.datavaultplatform.webapp.services.RestService;
 import org.datavaultplatform.webapp.test.ProfileShib;
@@ -70,7 +70,7 @@ public class LoginUsingShibTest {
     LDAPService mLdapService;
 
     @MockBean
-    ShibGrantedAuthorityService mGrantedAuthorityService;
+    GrantedAuthorityService mGrantedAuthorityService;
 
     @Mock
     GrantedAuthority mGA1;
@@ -124,7 +124,7 @@ public class LoginUsingShibTest {
         assertEquals("N/A", argAuthentication.getValue().getCredentials());
         Mockito.verify(mGrantedAuthorityService).getGrantedAuthoritiesForUser(argName.getValue(), argAuthentication.getValue());
 
-        checkLoggedInUser(result, sessionId, new HashSet<>(Arrays.asList(ShibUtils.ROLE_USER, mGA1, mGA2)));
+        checkLoggedInUser(result, sessionId, new HashSet<>(Arrays.asList(AuthorizationUtils.ROLE_USER, mGA1, mGA2)));
 
         Mockito.verify(mAuthListener).onApplicationEvent(argAuthSuccessEvent.getValue());
         PreAuthenticatedAuthenticationToken auth = (PreAuthenticatedAuthenticationToken)argAuthSuccessEvent.getValue().getAuthentication();
@@ -171,7 +171,7 @@ public class LoginUsingShibTest {
         assertNull(argUser.getValue().getFileStores());
         assertNull(argUser.getValue().getVaults());
 
-        checkLoggedInUser(result, sessionId, Collections.singleton(ShibUtils.ROLE_USER));
+        checkLoggedInUser(result, sessionId, Collections.singleton(AuthorizationUtils.ROLE_USER));
 
 
         Mockito.verify(mAuthListener).onApplicationEvent(argAuthSuccessEvent.getValue());
@@ -180,7 +180,7 @@ public class LoginUsingShibTest {
     }
 
     void checkLoggedInUser(MvcResult result, String expectedSessionId, Set<GrantedAuthority> expectedAuthorities){
-        SecurityContext sc = (SecurityContext) result.getRequest().getSession().getAttribute(ShibUtils.SPRING_SECURITY_CONTEXT);
+        SecurityContext sc = (SecurityContext) result.getRequest().getSession().getAttribute(AuthorizationUtils.SPRING_SECURITY_CONTEXT);
         Authentication auth = sc.getAuthentication();
 
         assertTrue(auth instanceof PreAuthenticatedAuthenticationToken);
