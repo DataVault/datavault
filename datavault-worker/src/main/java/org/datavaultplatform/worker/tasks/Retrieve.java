@@ -360,7 +360,8 @@ public class Retrieve extends Task {
                     throw e;
                 } else {
                 	logger.info("Current " + location + " has a problem trying next location");
-                	continue LOCATION;
+                    logger.info(e.getMessage());
+                    continue LOCATION;
                 }
             }
         }
