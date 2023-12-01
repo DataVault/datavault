@@ -23,8 +23,8 @@ public class Context {
     private final String vaultSslPEMPath;
     private final boolean multipleValidationEnabled;
     private final int noChunkThreads;
-
     private final StorageClassNameResolver classNameResolver;
+    private final boolean oldRecompose;
 
     public Context(Path tempDir, Path metaDir, EventSender eventSender,
                    Boolean chunkingEnabled, Long chunkingByteSize,
@@ -32,7 +32,8 @@ public class Context {
                    String vaultAddress, String vaultToken,
                    String vaultKeyPath, String vaultKeyName,
                    String vaultSslPEMPath, Boolean multipleValidationEnabled
-                    ,int noChunkThreads, StorageClassNameResolver classNameResolver) {
+                    ,int noChunkThreads, StorageClassNameResolver classNameResolver,
+                   Boolean oldRecompose) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.eventSender = eventSender;
@@ -48,6 +49,7 @@ public class Context {
         this.multipleValidationEnabled = multipleValidationEnabled;
         this.noChunkThreads = noChunkThreads;
         this.classNameResolver = classNameResolver;
+        this.oldRecompose = oldRecompose;
     }
 
     public Path getTempDir() {
@@ -105,4 +107,8 @@ public class Context {
     }
 
     public StorageClassNameResolver getStorageClassNameResolver(){ return this.classNameResolver; }
+
+    public Boolean isOldRecompose() {
+        return oldRecompose;
+    }
 }

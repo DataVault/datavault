@@ -171,7 +171,14 @@ public class Retrieve extends Task {
         }
 
         logger.info("Recomposing tar file from chunk(s)");
-        FileSplitter.recomposeFile(chunks, tarFile);
+
+        if (context.isOldRecompose()) {
+            logger.info("Recomposing tar file using DV4 method");
+            FileSplitter.recomposeFileDV4(chunks, tarFile);
+        } else {
+            logger.info("Recomposing tar file using DV5 method");
+            FileSplitter.recomposeFile(chunks, tarFile);
+        }
 
         // On the assumption that we have the tarfile now, delete the chunks
         logger.info("Deleting the chunks now we have the recomposed tarfile");
