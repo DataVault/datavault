@@ -446,7 +446,8 @@ public class EventListener implements MessageListener {
     }
     if (event instanceof Error ||
         event instanceof RetrieveStart ||
-        event instanceof RetrieveComplete) {
+        event instanceof RetrieveComplete ||
+        event instanceof RetrieveError) {
       model.put(EMAIL_KEY_RETRIEVER_FIRSTNAME, retrieveUser.getFirstname());
       model.put(EMAIL_KEY_RETRIEVER_LASTNAME, retrieveUser.getLastname());
       model.put(EMAIL_KEY_RETRIEVER_ID, retrieveUser.getID());
