@@ -46,6 +46,9 @@ public class ReceiverConfig {
   @Value("${validate.worker.dirs:false}")
   private boolean validateWorkerDirs;
 
+  @Value("${oldRecompose:false}")
+  private boolean oldRecompose;
+
   @Autowired
   EventSender eventSender;
 
@@ -77,7 +80,8 @@ public class ReceiverConfig {
         this.multipleValidationEnabled,
         this.noChunkThreads,
         this.eventSender,
-        resolver
+        resolver,
+        oldRecompose
     );
     if(result.isEncryptionEnabled() && result.getEncryptionMode() == AESMode.GCM ) {
       Security.addProvider(new BouncyCastleProvider());

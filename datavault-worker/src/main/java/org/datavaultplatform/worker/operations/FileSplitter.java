@@ -136,4 +136,37 @@ public class FileSplitter {
         raf.readFully(buf);
         os.write(buf);
     }
+
+    public static File recomposeFileDV4(File[] inputFiles, File outputFile) throws Exception {
+        BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(outputFile));
+
+        for (File inputFile : inputFiles){
+            RandomAccessFile raf = new RandomAccessFile(inputFile, "r");
+            long fileSize = inputFile.length();
+
+            log.debug("Add chunk file: "+inputFile.getName());
+            log.debug("Buffersize: " + BUFFER_SIZE);
+
+            long numReads = fileSize/BUFFER_SIZE;
+            long numRemainingRead = fileSize % BUFFER_SIZE;
+            for(int i=0; i<numReads; i++) {
+                readWrite(raf, bw, BUFFER_SIZE);
+            }
+            if(numRemainingRead > 0) {
+                readWrite(raf, bw, numRemainingRead);
+            }
+            raf.close();
+        }
+        bw.close();
+
+        return outputFile;
+    }
+
+    static void readWrite(RandomAccessFile raf, BufferedOutputStream bw, long numBytes) throws IOException {
+        byte[] buf = new byte[(int) numBytes];
+        int val = raf.read(buf);
+        if(val != -1) {
+            bw.write(buf);
+        }
+    }
 }
