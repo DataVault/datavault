@@ -3,11 +3,11 @@ package org.datavaultplatform.worker.tasks;
 import org.apache.commons.io.FileUtils;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
-import org.datavaultplatform.common.event.Error;
 import org.datavaultplatform.common.event.EventSender;
 import org.datavaultplatform.common.event.InitStates;
 import org.datavaultplatform.common.event.UpdateProgress;
 import org.datavaultplatform.common.event.retrieve.RetrieveComplete;
+import org.datavaultplatform.common.event.retrieve.RetrieveError;
 import org.datavaultplatform.common.event.retrieve.RetrieveStart;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.ArchiveStore;
@@ -80,7 +80,7 @@ public class Retrieve extends Task {
         this.encTarDigest = this.getEncTarDigest();
 
         if (this.isRedeliver()) {
-            eventSender.send(new Error(this.jobID, this.depositId, "Retrieve stopped: the message had been redelivered, please investigate")
+            eventSender.send(new RetrieveError(this.jobID, this.depositId, this.retrieveId,"Retrieve stopped: the message had been redelivered, please investigate")
                 .withUserId(this.userID));
             return;
         }
@@ -121,8 +121,9 @@ public class Retrieve extends Task {
         } catch (Exception e) {
             String msg = "Data retrieve failed: " + e.getMessage();
             logger.error(msg, e);
-            eventSender.send(new Error(jobID, depositId, msg)
+            eventSender.send(new RetrieveError(jobID, depositId, retrieveId, msg)
                 .withUserId(userID));
+
             throw new RuntimeException(e);
         }
     }
@@ -170,7 +171,14 @@ public class Retrieve extends Task {
         }
 
         logger.info("Recomposing tar file from chunk(s)");
-        FileSplitter.recomposeFile(chunks, tarFile);
+
+        if (context.isOldRecompose()) {
+            logger.info("Recomposing tar file using DV4 method");
+            FileSplitter.recomposeFileDV4(chunks, tarFile);
+        } else {
+            logger.info("Recomposing tar file using DV5 method");
+            FileSplitter.recomposeFile(chunks, tarFile);
+        }
 
         // On the assumption that we have the tarfile now, delete the chunks
         logger.info("Deleting the chunks now we have the recomposed tarfile");
@@ -262,9 +270,9 @@ public class Retrieve extends Task {
                 logger.info("Connected to user store: " + storageID + ", class: " + storageClass);
                 break;
             } catch (Exception e) {
-                String msg = "Deposit failed: could not access user filesystem";
+                String msg = "Retrieve failed: could not access user filesystem";
                 logger.error(msg, e);
-                eventSender.send(new Error(this.jobID, this.depositId, msg)
+                eventSender.send(new RetrieveError(this.jobID, this.depositId, this.retrieveId, msg)
                     .withUserId(this.userID));
                 throw new RuntimeException(e);
             }
@@ -288,7 +296,7 @@ public class Retrieve extends Task {
         } catch (Exception e) {
             String msg = "Retrieve failed: could not access archive filesystem";
             logger.error(msg, e);
-            eventSender.send(new Error(this.jobID, this.depositId, msg)
+            eventSender.send(new RetrieveError(this.jobID, this.depositId, this.retrieveId, msg)
                 .withUserId(userID));
 
             throw new RuntimeException(e);
@@ -307,12 +315,13 @@ public class Retrieve extends Task {
             long freespace = userFs.getUsableSpace();
             logger.info("Free space: " + freespace + " bytes (" +  FileUtils.byteCountToDisplaySize(freespace) + ")");
             if (freespace < archiveSize) {
-                eventSender.send(new Error(this.jobID, this.depositId, "Not enough free space to retrieve data!")
-                    .withUserId(this.userID));
+                eventSender.send(new RetrieveError(this.jobID, this.depositId, this.retrieveId,
+                        "Not enough free space to retrieve data!")
+                        .withUserId(this.userID));
             }
         } catch (Exception e) {
             logger.info("Unable to determine free space");
-            eventSender.send(new Error(jobID, depositId, "Unable to determine free space")
+            eventSender.send(new RetrieveError(jobID, depositId, retrieveId, "Unable to determine free space")
                 .withUserId(this.userID));
 
             throw new RuntimeException(e);
@@ -361,7 +370,7 @@ public class Retrieve extends Task {
                 } else {
                 	logger.info("Current " + location + " has a problem trying next location");
                     logger.info(e.getMessage());
-                    continue LOCATION;
+                	continue LOCATION;
                 }
             }
         }

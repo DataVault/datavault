@@ -42,6 +42,8 @@ public class Receiver implements MessageProcessor {
 
     private final StorageClassNameResolver storageClassNameResolver;
 
+    private final boolean oldRecompose;
+
     public Receiver(
         String tempDir,
         String metaDir,
@@ -56,7 +58,8 @@ public class Receiver implements MessageProcessor {
         int noChunkThreads,
 
         EventSender eventSender,
-        StorageClassNameResolver storageClassNameResolver) {
+        StorageClassNameResolver storageClassNameResolver,
+        boolean oldRecompose) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.chunkingEnabled = chunkingEnabled;
@@ -69,6 +72,7 @@ public class Receiver implements MessageProcessor {
         this.noChunkThreads = noChunkThreads;
         this.eventSender = eventSender;
         this.storageClassNameResolver = storageClassNameResolver;
+        this.oldRecompose = oldRecompose;
     }
 
     @Override
@@ -159,7 +163,8 @@ public class Receiver implements MessageProcessor {
                         vaultAddress, vaultToken, 
                         vaultKeyPath, vaultKeyName, vaultSslPEMPath,
                         this.multipleValidationEnabled, this.noChunkThreads,
-                        this.storageClassNameResolver);
+                        this.storageClassNameResolver,
+                        this.oldRecompose);
                 concreteTask.performAction(context);
 
                 // Clean up the temporary directory (if success if failure we need it for retries)
