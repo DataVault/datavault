@@ -57,7 +57,7 @@
     <commons.compress.version>1.22</commons.compress.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-sftp -->
-    <sshd.sftp.version>2.9.2</sshd.sftp.version>
+    <sshd.sftp.version>2.9.3</sshd.sftp.version>
 
     <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
     <guava.version>31.1-jre</guava.version>
