@@ -303,6 +303,11 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
         return response.getBody();
     }
 
+    public DepositsData limitedSearchDepositsData(String query, String sort, String order,  int offset, int maxResult) {
+        ResponseEntity<DepositsData> response = get(brokerURL + "/vaults/deposits/data/limited/search?query=" + query + "&sort=" + sort + "&order=" + order + "&offset=" + offset + "&maxResult" + maxResult, DepositsData.class);
+        return response.getBody();
+    }
+
     public int getRetrievesCount() {
         ResponseEntity<Integer> response = get(brokerURL + "/statistics/retrievecount", Integer.class);
         return response.getBody();
