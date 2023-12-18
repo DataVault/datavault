@@ -34,7 +34,7 @@ public class AdminDepositsController {
 
     private final RestService restService;
     private static final int DEFAULT_RECORDS_PER_PAGE = 10;
-    private static final int MAX_RESULTS_FOR_DEPOSITS_CSV = 750;
+    private static final int MAX_RESULTS_FOR_DEPOSITS_CSV = 300;
 
     private static final Logger logger = LoggerFactory.getLogger(AdminDepositsController.class);
 

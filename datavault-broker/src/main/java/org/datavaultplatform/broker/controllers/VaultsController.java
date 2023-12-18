@@ -434,7 +434,7 @@ public class VaultsController {
                                                      @RequestParam(value = "sort", required = false, defaultValue = "creationTime") String sort,
                                                      @RequestParam(value = "order", required = false, defaultValue = "desc") String order,
                                                      @RequestParam(value = "offset", required = false, defaultValue = "0") int offset,
-                                                     @RequestParam(value = "maxResult", required = false, defaultValue = "750") int maxResult) {
+                                                     @RequestParam(value = "maxResult", required = false, defaultValue = "300") int maxResult) {
 
 
         List<DepositInfo> depositResponses = new ArrayList<>();
