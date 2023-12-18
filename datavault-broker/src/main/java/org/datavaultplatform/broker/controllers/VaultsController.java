@@ -428,6 +428,53 @@ public class VaultsController {
 
     }
 
+    @GetMapping("/vaults/deposits/data/limited/search")
+    public DepositsData limitedSearchDepositsData(@RequestHeader(HEADER_USER_ID) String userID,
+                                                     @RequestParam(value = "query", required = false, defaultValue = "") String query,
+                                                     @RequestParam(value = "sort", required = false, defaultValue = "creationTime") String sort,
+                                                     @RequestParam(value = "order", required = false, defaultValue = "desc") String order,
+                                                     @RequestParam(value = "offset", required = false, defaultValue = "0") int offset,
+                                                     @RequestParam(value = "maxResult", required = false, defaultValue = "750") int maxResult) {
+
+
+        List<DepositInfo> depositResponses = new ArrayList<>();
+
+        List<Deposit> deposits = depositsService.getDeposits( query, userID, sort, order, offset, maxResult);
+        
+        if(CollectionUtils.isNotEmpty(deposits)) {
+            for (Deposit deposit : deposits) {
+                DepositInfo depositInfo = deposit.convertToResponse();
+                User depositor = usersService.getUser(depositInfo.getUserID());
+                depositInfo.setUserName(depositor.getFirstname() + " " + depositor.getLastname());
+                Vault vault = vaultsService.getVault(depositInfo.getVaultID());
+                depositInfo.setVaultName(vault.getName());
+                User vaultOwner = permissionsService.getVaultOwner(vault.getID());
+                if(vaultOwner != null) {
+                    depositInfo.setVaultOwnerID(vaultOwner.getID());
+                    depositInfo.setVaultOwnerName(vaultOwner.getFirstname() + " " + vaultOwner.getLastname());
+                }
+                if(vault.getDataset() != null) {
+                	depositInfo.setDatasetID(vault.getDataset().getID());
+                }
+                if(vault.getGroup() != null) {
+                	depositInfo.setGroupName(vault.getGroup().getName());
+                	depositInfo.setGroupID(vault.getGroup().getID());
+                }
+                if(vault.getReviewDate() != null) {
+                	depositInfo.setVaultReviewDate(vault.getReviewDate().toString());
+                }
+                depositResponses.add(depositInfo);
+            }
+        }
+
+        DepositsData data = new DepositsData();
+        // data.setRecordsTotal(recordsTotal);
+        // data.setRecordsFiltered(recordsFiltered);
+        data.setData(depositResponses);
+        return data;
+
+    }
+
     @PostMapping("/pendingVaults/update")
     public VaultInfo updatePendingVault(@RequestHeader(HEADER_USER_ID) String userID,
                                         @RequestHeader(HEADER_CLIENT_KEY) String clientKey,
