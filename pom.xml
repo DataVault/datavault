@@ -68,7 +68,7 @@
     <apache.directory.api.version>2.1.2</apache.directory.api.version>
 
     <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
-    <bouncy.castle.version>1.72</bouncy.castle.version>
+    <bouncy.castle.version>1.73</bouncy.castle.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
     <commons.text.version>1.10.0</commons.text.version>
