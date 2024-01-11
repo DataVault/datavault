@@ -50,6 +50,7 @@ public class DepositEvents {
     topLevelProps.put(PropNames.ARCHIVE_SIZE, String.valueOf(info.archiveSize));
     topLevelProps.put(PropNames.ARCHIVE_DIGEST, info.archiveDigest);
     topLevelProps.put(PropNames.ARCHIVE_ID, info.archiveId);
+    topLevelProps.put(PropNames.DEPOSIT_CREATION_DATE, "20240111");
 
     retrieve.setProperties(topLevelProps);
     retrieve.setTarIV(info.tarIV);
