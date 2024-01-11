@@ -7,10 +7,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.Archive;
@@ -23,6 +21,7 @@ import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
+import org.joda.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,6 +82,7 @@ public class GenerateRetrieveMessageTest extends BaseGenerateMessageTest {
     deposit.setUser(mockUser);
     deposit.setNumOfChunks(1);
     deposit.setVault(mockVault);
+    deposit.setCreationTime(new Date());
     DepositChunk chunk1 = new DepositChunk();
     chunk1.setDeposit(deposit);
     chunk1.setChunkNum(1);
