@@ -17,6 +17,8 @@ public interface PropNames {
   String CHUNK_NUM = "chunkNum";
   String DEPOSIT_CHUNK = "depositChunk";
   String DEPOSIT_ID = "depositId";
+
+  String DEPOSIT_CREATION_DATE = "depositCreationDate";
   String DEPOSIT_METADATA = "depositMetadata";
   String EXTERNAL_METADATA = "externalMetadata";
   String HOST = "host";
