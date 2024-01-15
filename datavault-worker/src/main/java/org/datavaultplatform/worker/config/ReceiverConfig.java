@@ -49,6 +49,9 @@ public class ReceiverConfig {
   @Value("${oldRecompose:false}")
   private boolean oldRecompose;
 
+  @Value("${recomposeDate:20230309}")
+  private String recomposeDate;
+
   @Autowired
   EventSender eventSender;
 
@@ -81,7 +84,8 @@ public class ReceiverConfig {
         this.noChunkThreads,
         this.eventSender,
         resolver,
-        oldRecompose
+        this.oldRecompose,
+        this.recomposeDate
     );
     if(result.isEncryptionEnabled() && result.getEncryptionMode() == AESMode.GCM ) {
       Security.addProvider(new BouncyCastleProvider());

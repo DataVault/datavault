@@ -24,6 +24,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -300,6 +302,9 @@ public class DepositsController {
         try {
             HashMap<String, String> retrieveProperties = new HashMap<>();
             retrieveProperties.put(PropNames.DEPOSIT_ID, deposit.getID());
+            Format formatter = new SimpleDateFormat("yyyyMMdd");
+            String creationDate = formatter.format(deposit.getCreationTime());
+            retrieveProperties.put(PropNames.DEPOSIT_CREATION_DATE, creationDate);
             retrieveProperties.put(PropNames.RETRIEVE_ID, retrieve.getID());
             retrieveProperties.put(PropNames.BAG_ID, deposit.getBagId());
             retrieveProperties.put(PropNames.RETRIEVE_PATH, retrievePath); // No longer the absolute path

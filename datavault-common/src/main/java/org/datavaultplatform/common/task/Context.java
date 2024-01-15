@@ -26,6 +26,8 @@ public class Context {
     private final StorageClassNameResolver classNameResolver;
     private final boolean oldRecompose;
 
+    private final String recomposeDate;
+
     public Context(Path tempDir, Path metaDir, EventSender eventSender,
                    Boolean chunkingEnabled, Long chunkingByteSize,
                    Boolean encryptionEnabled, AESMode encryptionMode, 
@@ -33,7 +35,7 @@ public class Context {
                    String vaultKeyPath, String vaultKeyName,
                    String vaultSslPEMPath, Boolean multipleValidationEnabled
                     ,int noChunkThreads, StorageClassNameResolver classNameResolver,
-                   Boolean oldRecompose) {
+                   Boolean oldRecompose, String recomposeDate) {
         this.tempDir = tempDir;
         this.metaDir = metaDir;
         this.eventSender = eventSender;
@@ -50,6 +52,7 @@ public class Context {
         this.noChunkThreads = noChunkThreads;
         this.classNameResolver = classNameResolver;
         this.oldRecompose = oldRecompose;
+        this.recomposeDate = recomposeDate;
     }
 
     public Path getTempDir() {
@@ -110,5 +113,9 @@ public class Context {
 
     public Boolean isOldRecompose() {
         return oldRecompose;
+    }
+
+    public String getRecomposeDate() {
+        return recomposeDate;
     }
 }
