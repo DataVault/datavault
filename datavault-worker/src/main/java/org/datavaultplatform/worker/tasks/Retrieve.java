@@ -26,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -45,6 +47,7 @@ public class Retrieve extends Task {
     private String retrievePath = null;
     private String retrieveId = null;
     private String depositId = null;
+    private String depositCreationDate = null;
     private long archiveSize = 0;
     private EventSender eventSender = null;
     
@@ -66,6 +69,7 @@ public class Retrieve extends Task {
         logger.info("Retrieve job - performAction()");
         Map<String, String> properties = getProperties();
         this.depositId = properties.get(PropNames.DEPOSIT_ID);
+        this.depositCreationDate = properties.get(PropNames.DEPOSIT_CREATION_DATE);
         this.retrieveId = properties.get(PropNames.RETRIEVE_ID);
         String bagID = properties.get(PropNames.BAG_ID);
         this.retrievePath = properties.get(PropNames.RETRIEVE_PATH);
@@ -171,19 +175,46 @@ public class Retrieve extends Task {
         }
 
         logger.info("Recomposing tar file from chunk(s)");
-
-        if (context.isOldRecompose()) {
-            logger.info("Recomposing tar file using DV4 method");
-            FileSplitter.recomposeFileDV4(chunks, tarFile);
-        } else {
-            logger.info("Recomposing tar file using DV5 method");
-            FileSplitter.recomposeFile(chunks, tarFile);
-        }
+        this.doRecomposeUsingCorrectVersion(context, chunks, tarFile);
 
         // On the assumption that we have the tarfile now, delete the chunks
         logger.info("Deleting the chunks now we have the recomposed tarfile");
         for (File chunk : chunks) {
             chunk.delete();
+        }
+    }
+
+    private void doRecomposeUsingCorrectVersion(Context context, File[] chunks, File tarFile) throws Exception {
+        // if we have a recompose date, oldRecompose is false and the deposit was created before the date set oldRecompose to true
+        // set oldRecompose to true
+        // if oldRecompose is false
+        Boolean oldRecompose = context.isOldRecompose();
+
+        if (! oldRecompose) {
+            LocalDate recomposeDate = null;
+            LocalDate depositDate = null;
+            if (this.depositCreationDate != null) {
+                depositDate = LocalDate.parse(this.depositCreationDate, DateTimeFormatter.BASIC_ISO_DATE);
+                logger.info("DepositDate is:" + depositDate.toString());
+            }
+            if (context.getRecomposeDate() != null) {
+                recomposeDate = LocalDate.parse(context.getRecomposeDate(), DateTimeFormatter.BASIC_ISO_DATE);
+                logger.info("RecomposeDate is:" + recomposeDate.toString());
+            }
+            // if deposit creation date is before the recomposeDate
+            if ( depositDate.isBefore(recomposeDate)) {
+                // set oldRecompose to true
+                oldRecompose = true;
+            }
+
+        }
+
+        if (oldRecompose) {
+            logger.info("Recomposing tar file using DV4 method");
+            FileSplitter.recomposeFileDV4(chunks, tarFile);
+        } else {
+            logger.info("Recomposing tar file using DV5 method");
+            FileSplitter.recomposeFile(chunks, tarFile);
         }
     }
 

@@ -34,6 +34,7 @@ public class AdminDepositsController {
 
     private final RestService restService;
     private static final int DEFAULT_RECORDS_PER_PAGE = 10;
+    private static final int MAX_RESULTS_FOR_DEPOSITS_CSV = 300;
 
     private static final Logger logger = LoggerFactory.getLogger(AdminDepositsController.class);
 
@@ -94,10 +95,11 @@ public class AdminDepositsController {
 
         List<DepositInfo> deposits;
 
-        DepositsData depositData =restService.searchDepositsData(query, sort, order);
+        DepositsData depositData =restService.limitedSearchDepositsData(query, sort, order, 0, MAX_RESULTS_FOR_DEPOSITS_CSV);
         deposits = depositData.getData();
 
         response.setContentType("text/csv");
+        
 
         // creates mock data
         String headerKey = "Content-Disposition";

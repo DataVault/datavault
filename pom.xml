@@ -39,7 +39,7 @@
     <aws.java.sdk.bom.version>1.12.334</aws.java.sdk.bom.version>
 
     <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
-    <oci.java.sdk.bom.version>3.0.1</oci.java.sdk.bom.version>
+    <oci.java.sdk.bom.version>3.31.1</oci.java.sdk.bom.version>
 
     <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
     <testcontainers.version>1.17.6</testcontainers.version>
@@ -54,13 +54,13 @@
     <owasp.dependency.check.version>7.3.1</owasp.dependency.check.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
-    <commons.compress.version>1.22</commons.compress.version>
+    <commons.compress.version>1.24.0</commons.compress.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-sftp -->
-    <sshd.sftp.version>2.9.2</sshd.sftp.version>
+    <sshd.sftp.version>2.9.3</sshd.sftp.version>
 
     <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
-    <guava.version>31.1-jre</guava.version>
+    <guava.version>32.0.0-jre</guava.version>
 
     <!-- above here, updated 16nov2022-->
 
@@ -68,7 +68,7 @@
     <apache.directory.api.version>2.1.2</apache.directory.api.version>
 
     <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
-    <bouncy.castle.version>1.72</bouncy.castle.version>
+    <bouncy.castle.version>1.74</bouncy.castle.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
     <commons.text.version>1.10.0</commons.text.version>
@@ -95,7 +95,7 @@
     <bagit.version>5.2.0</bagit.version>
 
     <!-- https://mvnrepository.com/artifact/org.testng/testng -->
-    <testng.version>6.14.3</testng.version>
+    <testng.version>7.5.1</testng.version>
 
     <!-- https://mvnrepository.com/artifact/org.apache.velocity/velocity-engine-core -->
     <velocity.version>2.3</velocity.version>
@@ -191,13 +191,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-        <dependency>
-          <groupId>com.oracle.oci.sdk</groupId>
-          <artifactId>oci-java-sdk-bom</artifactId>
-          <version>${oci.java.sdk.bom.version}</version>
-          <type>pom</type>
-          <scope>import</scope>
-        </dependency>
         <dependency>
           <groupId>com.oracle.oci.sdk</groupId>
           <artifactId>oci-java-sdk-common-httpclient-jersey</artifactId>
