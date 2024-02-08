@@ -18,9 +18,7 @@ import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
-import org.datavaultplatform.worker.operations.FileSplitter;
-import org.datavaultplatform.worker.operations.ProgressTracker;
-import org.datavaultplatform.worker.operations.Tar;
+import org.datavaultplatform.worker.operations.*;
 import org.datavaultplatform.worker.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,38 +139,31 @@ public class Retrieve extends Task {
     }
     
     private void recompose(String tarFileName, Context context, Device archiveFs, Progress progress, 
-            File tarFile, boolean singleCopy, String location) throws Exception {
+            File tarFile, boolean multiCopy, String location) throws Exception {
 
         File[] chunks = new File[this.numOfChunks];
         logger.info("Retrieving " + this.numOfChunks + " chunk(s)");
+
+        int noOfThreads = context.getNoChunkThreads();
+        if (noOfThreads < 0 ) {
+            noOfThreads = 25;
+        }
+        logger.debug("Number of threads: " + noOfThreads);
+        TaskExecutor<Object> executor = new TaskExecutor<>(noOfThreads, "Chunk download failed.");
         for( int chunkNum = 1; chunkNum <= this.numOfChunks; chunkNum++) {
             Path chunkPath = context.getTempDir().resolve(tarFileName+FileSplitter.CHUNK_SEPARATOR+chunkNum);
             File chunkFile = chunkPath.toFile();
-            String chunkArchiveId = this.archiveId+FileSplitter.CHUNK_SEPARATOR+chunkNum;
-            if (! singleCopy) {
-                archiveFs.retrieve(chunkArchiveId, chunkFile, progress);
-            } else {
-                archiveFs.retrieve(chunkArchiveId, chunkFile, progress, location);
-            }
+            logger.debug("Creating chunk download task:" + chunkNum);
+            ChunkRetrieveTracker crt = new ChunkRetrieveTracker(
+                    this.archiveId, archiveFs,
+                    context, chunkNum, this.getChunksIVs(), location, multiCopy,
+                    progress, this.chunksDigest, this.encChunksDigest, chunkFile
+            );
+            executor.add(crt);
             chunks[chunkNum-1] = chunkFile;
-
-            byte[] chunkIV = this.getChunksIVs().get(chunkNum);
-            if( chunkIV != null ) {
-                String archivedEncChunkFileHash = this.encChunksDigest.get(chunkNum);
-                
-                // Check encrypted file checksum
-                Utils.checkFileHash("ret-enc-chunk", chunkFile, archivedEncChunkFileHash);
-                Encryption.decryptFile(context, chunkFile, this.getChunksIVs().get(chunkNum));
-            }
-            
-            // Check file
-            String archivedChunkFileHash = this.chunksDigest.get(chunkNum);
-            
-            // TODO: Should we check algorithm each time or assume main tar file algorithm is the same
-            // We might also want to move algorithm check before this loop
-
-            Utils.checkFileHash("ret-chunk", chunkFile, archivedChunkFileHash);
         }
+
+        executor.execute(result -> {});
 
         logger.info("Recomposing tar file from chunk(s)");
         this.doRecomposeUsingCorrectVersion(context, chunks, tarFile);
