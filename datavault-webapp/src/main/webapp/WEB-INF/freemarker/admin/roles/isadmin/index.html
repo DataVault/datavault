@@ -1,8 +1,8 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="admin">
-<@layout.vaultLayout>
-    <#import "/spring.ftl" as spring />
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='admin')}">
+
+<div layout:fragment="content">
 
     <style>
         #add-new {
@@ -39,7 +39,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <form id="create-form" class="form form-horizontal" role="form"
-                      action="${springMacroRequestContext.getContextPath()}/admin/role/op" method="post">
+                      th:action="@{/admin/role/op}" method="post">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
                                     class="fa fa-times" aria-hidden="true"></i></button>
@@ -55,7 +55,7 @@
                         </div>
                     </div>
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
-                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
                         <button type="submit" class="btn btn-primary btn-ok"><i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
@@ -70,7 +70,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <form id="delete-form" class="form form-horizontal" role="form"
-                      action="${springMacroRequestContext.getContextPath()}/admin/roles/deop" method="post">
+                      th:action="@{/admin/roles/deop}" method="post">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
                                     class="fa fa-times" aria-hidden="true"></i></button>
@@ -82,7 +82,7 @@
                     </div>
                     <input type="hidden" id="delete-isadmin-user-id" name="deop-id"/>
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
-                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
                         <button type="submit" class="btn btn-danger btn-delete"><i class="fa fa-trash"></i> Delete</button>
@@ -95,8 +95,8 @@
 
     <div class="container">
         <ol class="breadcrumb">
-            <li><a href="${springMacroRequestContext.getContextPath()}/admin"><b>Administration</b></a></li>
-            <li><a href="${springMacroRequestContext.getContextPath()}/admin/roles"><b>Roles</b></a></li>
+            <li><a th:href="@{/admin}"><b>Administration</b></a></li>
+            <li><a th:href="@{/admin/roles}"><b>Roles</b></a></li>
             <li class="active"><b>IS Admin Management</b></li>
         </ol>
         <h1>IS Admin Management</h1>
@@ -113,33 +113,32 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <#list users as user>
-                            <tr>
-                                <td>${user.getFirstname()} ${user.getLastname()}</td>
+                            <tr th:each="user: ${users}">
+                                <td>[[${user.getFirstname()}]] [[${user.getLastname()}]]</td>
                                 <td class="action-column">
-                                    <#if users?size gt 1>
+                                    <th:block th:if="${users != null && (#lists.size(users) > 1)}">
                                         <a href="#" class="btn btn-default btn-delete" data-toggle="modal"
-                                           data-target="#delete-dialog" data-role-name="${role.name}" data-user-id="${user.getID()}"
-                                           data-user-name="${user.getFirstname()} ${user.getLastname()}" role="button"
-                                           title="Delete role for ${user.getFirstname()} ${user.getLastname()}.">
+                                           data-target="#delete-dialog" th:data-role-name="${role.name}" th:data-user-id="${user.getID()}"
+                                           th:data-user-name="|${user.getFirstname()} ${user.getLastname()}|" role="button"
+                                           th:title="|Delete role for ${user.getFirstname()} ${user.getLastname()}.|">
                                             <i class="fa fa-trash"></i>
                                         </a>
-                                    <#else>
+                                    </th:block>
+                                    <th:block th:unless="${users != null && (#lists.size(users) > 1)}">
                                         <a href="#" class="btn btn-default btn-delete" disabled="disabled" role="button"
-                                           title="This user is the last ${role.name} and cannot be removed.">
+                                           th:title="|This user is the last ${role.name} and cannot be removed.|">
                                             <i class="fa fa-trash"></i>
                                         </a>
-                                    </#if>
+                                    </th:block>
                                 </td>
                             </tr>
-                        </#list>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <script>
+    <script th:inline="javascript">
         $('[data-target="#delete-dialog"]').click(function () {
             var roleName = $(this).data('role-name');
             var userId = $(this).data('user-id');
@@ -153,15 +152,17 @@
         $('#delete-form').submit(function (event) {
             event.preventDefault();
             var formData = $(this).serialize();
+            var baseURL =   /*[[@{/admin/roles/deop}]]*/ 'replaced-by-tl';
+            var windowURL = /*[[@{/admin/roles/isadmin}]]*/ 'replaced-by-tl';
             $.ajax({
                 method: 'POST',
-                url: '${springMacroRequestContext.getContextPath()}/admin/roles/deop',
+                url: baseURL,
                 data: formData,
                 success: function (data) {
                     if (ErrorHandler.isForceLogoutResponse(data)) {
                         return ErrorHandler.handleForceLogoutResponse();
                     }
-                    window.location.href = '${springMacroRequestContext.getContextPath()}/admin/roles/isadmin';
+                    window.location.href = windowURL;
                 },
                 error: function (xhr) {
                     ErrorHandler.handleAjaxError('#delete-error', xhr);
@@ -177,15 +178,17 @@
         $('#create-form').submit(function (event) {
             event.preventDefault();
             var formData = $(this).serialize();
+            var baseURL =   /*[[@{/admin/roles/op/}]]*/ 'replaced-by-tl';
+            var windowURL = /*[[@{/admin/roles/isadmin}]]*/ 'replaced-by-tl';
             $.ajax({
                 method: 'POST',
-                url: '${springMacroRequestContext.getContextPath()}/admin/roles/op/',
+                url: baseURL,
                 data: formData,
                 success: function (data) {
                     if (ErrorHandler.isForceLogoutResponse(data)) {
                         return ErrorHandler.handleForceLogoutResponse();
                     }
-                    window.location.href = '${springMacroRequestContext.getContextPath()}/admin/roles/isadmin';
+                    window.location.href = windowURL;
                 },
                 error: function (xhr) {
                     ErrorHandler.handleAjaxError('#create-error', xhr);
@@ -199,8 +202,9 @@
             minLength: 2,
             source: function (request, response) {
                 var term = request.term;
+                var baseURL = /*[[@{/vaults/autocompleteuun/}]]*/ 'replaced-by-tl';
                 $.ajax({
-                    url: "${springMacroRequestContext.getContextPath()}/vaults/autocompleteuun/" + term,
+                    url: baseURL + term,
                     type: 'GET',
                     dataType: "json",
                     success: function (data) {
@@ -218,5 +222,5 @@
             }
         });
     </script>
-
-</@layout.vaultLayout>
+</div>
+</html>

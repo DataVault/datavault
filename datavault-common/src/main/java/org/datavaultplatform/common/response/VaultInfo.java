@@ -756,4 +756,11 @@ public class VaultInfo {
         return retVal;
 
     }
+
+    /**
+     * see 'freemarker/vaults/security.html'
+     */
+    public static VaultInfo create(){
+        return new VaultInfo();
+    }
 }

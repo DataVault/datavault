@@ -1,9 +1,8 @@
-<#import "*/layout/welcomelayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="home">
-<#import "/spring.ftl" as spring />
-<#assign sec=JspTaglibs["http://www.springframework.org/security/tags"] />
-<@layout.vaultLayout>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='admin')}">
+
+<div layout:fragment="content">
 
     <div class="container">
         <div class="row">
@@ -27,7 +26,7 @@
                         <br/>
 
                         <p class="main">
-                            You must record the details of your dataset in <a href="${link}" target="_blank">${system}</a>.
+                            You must record the details of your dataset in <a th:href="${link}" target="_blank">[[${system}]]</a>.
                             If you haven't yet created a Pure dataset record containing the
                             details of the data you're about to deposit in the vault, please do so.
                             If you have any questions about this step please don’t hesitate to contact
@@ -35,13 +34,13 @@
                         </p>
                         <br/>
 
-                        <#if datasets?size == 0>
+                        <th:block th:if="${datasets == null || (#lists.size(datasets) == 0)}">
                             <div class="alert alert-danger" role="alert">
                                 <strong>No Dataset available!</strong>
                             </div>
-                        </#if>
+                        </th:block>
 
-                        <form id="create-vault" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/vaults/create" method="post" novalidate="novalidate" _lpchecked="1">
+                        <form id="create-vault" class="form" role="form" th:action="@{/vaults/create}" method="post" novalidate="novalidate" _lpchecked="1">
                             <p class="main">
                                 Select the Pure record describing the data that will be contained in this vault from the list below:
                             </p>
@@ -49,15 +48,19 @@
                             <div class="container">
                                 <div class="row form-group required">
                                     <div class="col-sm-5">
-                                        <select id="datasetID" name="datasetID" class="dataset-select selectpicker show-tick form-control form-control-lg" <#if datasets?size == 0> disabled</#if>>
+                                        <select id="datasetID" name="datasetID"
+                                                class="dataset-select selectpicker show-tick form-control form-control-lg"
+                                                th:disabled="${#lists.isEmpty(datasets)}"
+                                        >
                                             <option selected disabled data-hidden="true">Please choose a Dataset</option>
-                                            <#list datasets as dataset>
-                                                <#if dataset.visible == true>
-                                                    <option value="${dataset.getID()}">${dataset.name?html}</option>
-                                                <#else>
-                                                    <option disabled value="${dataset.getID()}">${dataset.name?html}</option>
-                                                </#if>
-                                            </#list>
+                                            <th:block th:each="dataset: ${datasets}">
+                                                <th:block th:if="${dataset.visible}">
+                                                    <option th:value="${dataset.getID()}">[[${dataset.name}]]</option>
+                                                </th:block>
+                                                <th:block th:if="${!dataset.visible}">
+                                                    <option disabled th:value="${dataset.getID()}">[[${dataset.name}]]</option>
+                                                </th:block>
+                                            </th:block>
                                         </select>
                                     </div>
                                     <label class="control-label">
@@ -86,13 +89,13 @@
                                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                                       title="Maximum 400 characters.">
                                 </span>
-                                <@spring.bind "vault.name" />
                                 <input type="text"
                                        class="form-control"
-                                       name="${spring.status.expression}"
-                                       value="${spring.status.value!""}"
                                        id="vaultName"
-                                       placeholder="Enter a descriptive name for the Vault e.g. the project or experiment." <#if datasets?size == 0> disabled</#if>/>
+                                       placeholder="Enter a descriptive name for the Vault e.g. the project or experiment."
+                                       th:disabled="${#lists.isEmpty(datasets)}"
+                                       th:field="*{name}"
+                                />
                             </div>
 
                             <div class="form-group required">
@@ -100,8 +103,11 @@
                                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                                       title="This description should contain information to assist you and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
                                 </span>
-                                <@spring.bind "vault.description" />
-                                <textarea type="text" class="form-control" name="description" id="description" rows="4" cols="60" <#if datasets?size == 0> disabled</#if>></textarea>
+                                <textarea type="text" class="form-control" name="description" id="description" rows="4" cols="60"
+                                    th:disabled="${#lists.isEmpty(datasets)}"
+                                    th:field="*{description}"
+                                >
+                                </textarea>
                             </div>
 
                             <div class="form-group required">
@@ -114,22 +120,23 @@
                                 </a>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <select id="policyID" name="policyID" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick" <#if datasets?size == 0> disabled</#if>>
+                                        <select id="policyID" name="policyID" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick"
+                                                th:disabled="${#lists.isEmpty(datasets)}" >
                                             <option selected disabled data-hidden="true">Please choose a retention policy</option>
-                                            <#list policies as retentionPolicy>
-                                                <#if retentionPolicy.minRetentionPeriod == 0>
-                                                <option value="${retentionPolicy.getID()}"
-                                                        data-subtext="( No minimum period )">${retentionPolicy.name}</option>
-                                                <#else>
-                                                 <option value="${retentionPolicy.getID()}"
-                                                         data-subtext="( Minimum period: ${retentionPolicy.minRetentionPeriod} )">${retentionPolicy.name}</option>
-                                                </#if>
-                                            </#list>
+                                            <th:block th:each="retentionPolicy: ${policies}"></th:block>
+                                                <th:block th:if="${retentionPolicy.minRetentionPeriod == 0}">
+                                                <option th:value="${retentionPolicy.getID()}"
+                                                        data-subtext="( No minimum period )">[[${retentionPolicy.name}]]</option>
+                                                </th:block>
+                                                <th:block th:if="${retentionPolicy.minRetentionPeriod != 0}">
+                                                <option th:value="${retentionPolicy.getID()}"
+                                                         data-subtext="( Minimum period: ${retentionPolicy.minRetentionPeriod} )">[[${retentionPolicy.name}]]</option>
+                                                </th:block>
+                                            </th:block>
                                         </select>
                                     </div>
                                 </div>
                             </div>
-
                             <div class="form-group">
                                 <label  for="grantEndDate" class="control-label">
                                     <strong>Grant End Date</strong>
@@ -137,8 +144,10 @@
                                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                                       title="This information will assist the university in ensuring the archive is kept for at least the minimum amount of time required by the funder(s). This field should be left blank if there is no grant associated with the work.&nbsp;">
                                 </span>
-                                <@spring.bind "vault.grantEndDate" />
-                                <input id="grantEndDate" name="grantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd" <#if datasets?size == 0> disabled</#if>/>
+                                <input id="grantEndDate" name="grantEndDate" class="form-control date-picker" placeholder="yyyy-mm-dd"
+                                    th:disabled="${#lists.isEmpty(datasets)}"
+                                    th:field="*{grantEndDate}"
+                                />
                             </div>
 
                             <div class="alert alert-info" role="alert">
@@ -156,13 +165,13 @@
                                 </span>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <select id="groupID" name="groupID" data-width="auto" class="form-control group-select selectpicker show-tick" <#if datasets?size == 0> disabled</#if>>
+                                        <select id="groupID" name="groupID" data-width="auto" class="form-control group-select selectpicker show-tick"
+                                            th:disabled="${#lists.isEmpty(datasets)}"
+                                        >
                                             <option selected disabled data-hidden="true">Please choose a School</option>
-                                            <#list groups as group>
-                                                <#if group.enabled>
-                                                    <option value="${group.getID()}">${group.name?html}</option>
-                                                </#if>
-                                            </#list>
+                                            <th:block th:each="group: ${groups}">
+                                                <option th:if="${group.enabled}" th:value="${group.getID()}">[[${group.name}]]</option>
+                                            </th:block>
                                         </select>
                                     </div>
                                     <div class="col-md-12">
@@ -186,15 +195,19 @@
                                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
                                       title="The date by which the vault should be reviewed for decision as to whether it should be deleted or whether there are funds available to support continued storage.&nbsp;If you wish to extend the review date further into the future, please contact the support team to discuss the funding of the storage for the vault.">
                                 </span>
-                                <@spring.bind "vault.reviewDate" />
-                                <input class="form-control" id="reviewDate" name="reviewDate" placeholder="yyyy-mm-dd" <#if datasets?size == 0> disabled</#if>/>
+                                <input class="form-control" id="reviewDate" name="reviewDate" placeholder="yyyy-mm-dd"
+                                    th:disabled="${#lists.isEmpty(datasets)}"
+                                    th:field="*{reviewDate}"
+                                />
                             </div>
 
                             <input type="hidden" id="submitAction" name="action" value="submit" />
-                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
                             <div class="btn-toolbar pull-right">
-                                <button type="submit" value="submit" class="btn btn-lg btn-primary"<#if datasets?size == 0> disabled</#if>>
+                                <button type="submit" value="submit" class="btn btn-lg btn-primary"
+                                    th:disabled="${#lists.isEmpty(datasets)}"
+                                >
                                     <span class="glyphicon glyphicon-folder-close"></span>
                                     Create new Vault
                                 </button>
@@ -206,7 +219,7 @@
         </div>
     </div>
 
-    <script>
+    <script type="application/javascript">
         $(document).ready(function () {
             $.datepicker.setDefaults({
                 dateFormat: "yy-mm-dd",
@@ -309,4 +322,5 @@
         }); $('[data-toggle="popover"]').popover();
     </script>
 
-</@layout.vaultLayout>
+</div>
+</html>

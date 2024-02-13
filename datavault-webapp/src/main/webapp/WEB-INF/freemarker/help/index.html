@@ -1,13 +1,10 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="help">
-<@layout.vaultLayout>
-<#import "/spring.ftl" as spring />
-
-<div class="container">
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='user')}">
+<div class="container" layout:fragment="content">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
+        <li><a th:href="@{/}"><b>Home</b></a></li>
         <li class="active"><b>Help</b></li>
     </ol>
 
@@ -30,7 +27,7 @@
                     <li><a href="#deposit">Deposit data</a></li>
                     <li><a href="#retrieve">Retrieve data</a></li>
                 </ol>
-                <p>If you need additional help, please use the <a href="${springMacroRequestContext.getContextPath()}/feedback/">feedback</a> form.</p>
+                <p>If you need additional help, please use the <a th:href="@{/feedback/}">feedback</a> form.</p>
             </div>
 
             <h4><a name="understand">1 - Understand the concepts</a></h4>
@@ -78,8 +75,8 @@
 
             <h4><a name="describe">2 - Describe your data</a></h4>
             <p>
-                Before you put data into the DataVault, you must first describe it.  You should do this by visiting <a href="${link}" target="_blank">${system}</a>.
-                Record a new dataset entry in your ${system} account.  When you create a vault, you will be able to select this dataset from the list
+                Before you put data into the DataVault, you must first describe it.  You should do this by visiting <a th:href="${link}" target="_blank">[[${system}]]</a>.
+                Record a new dataset entry in your [[${system}]] account.  When you create a vault, you will be able to select this dataset from the list
                 of datasets you have.
             </p>
 
@@ -95,7 +92,7 @@
             </p>
             <p>
                 Now that you have given your vault a name and a description, you need to select the dataset description that you previously entered
-                into ${system} (this is done via the 'Relates to' dropdown menu).  By relating your data to this description in ${system}, it means that you won't need to re-enter any of the
+                into [[${system}]] (this is done via the 'Relates to' dropdown menu).  By relating your data to this description in [[${system}]], it means that you won't need to re-enter any of the
                 details about the data again!
             </p>
             <p>
@@ -174,5 +171,4 @@
     </div>
 
 </div>
-
-</@layout.vaultLayout>
+</html>

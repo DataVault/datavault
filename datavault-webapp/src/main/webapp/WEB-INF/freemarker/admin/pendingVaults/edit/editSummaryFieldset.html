@@ -1,4 +1,4 @@
-<fieldset id="summary-fieldset">
+<fieldset id="summary-fieldset" xmlns:th="http://www.thymeleaf.org">
 	<div class="form-card">
 		<h2 class="fs-title">Summary</h2>
 		<div>
@@ -121,7 +121,7 @@
 		</div>
 	</div>
 	<a name="admin-pending-vault-summary" class="btn btn-primary" style="margin-bottom: 0;"
-		href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/summary/${vaultID}">
+		th:href="@{|/admin/pendingVaults/summary/${vaultID}|}">DONE
 		<< Return Admin Pending Vault Summary</a>
 			<button type="submit" name="save" value="Save" class="save action-button-previous btn btn-success">
 				<span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save

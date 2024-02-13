@@ -1,7 +1,7 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="user">
-<@layout.vaultLayout>
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='user')}" >
+<div layout:fragment="content">
 
 <style>
 #copy-ssh-public-key .modal-body {
@@ -60,15 +60,15 @@
                     <div class="form-filestore">
                         <div class="form-group">
                             <label for="hostname">Hostname<br/><small>e.g. cmvm.datastore.ed.ac.uk, chss.datastore.ed.ac.uk, csce.datastore.ed.ac.uk</small></label>
-                            <input type="text" class="form-control" id="hostname" name="hostname" value="${sftpHost}"/>
+                            <input type="text" class="form-control" id="hostname" name="hostname" th:value="${sftpHost}"/>
                         </div>
                         <div class="form-group">
                             <label for="port">Port<br/></label>
-                            <input type="text" class="form-control" id="port" name="port" value="${sftpPort}"/>
+                            <input type="text" class="form-control" id="port" name="port" th:value="${sftpPort}"/>
                         </div>
                         <div class="form-group">
                             <label for="path">Path<br/><small>e.g. /chss/datastore/eca/groups/one-group, /csce/datastore/ph/groups/gelato-group, /cmvm/datastore/edmed/users/person7</small></label>
-                            <input type="text" class="form-control" id="path" name="path" value="${sftpRootPath}"/>
+                            <input type="text" class="form-control" id="path" name="path" th:value="${sftpRootPath}"/>
                         </div>
                     </div>
                 </form>
@@ -94,7 +94,7 @@
                     <div class="form-filestore">
                         <div class="form-group">
                             <label for="path">Path</label>
-                            <input type="text" class="form-control" id="path" name="path" value="${activeDir}" readonly />
+                            <input type="text" class="form-control" id="path" name="path" th:value="${activeDir}" readonly />
                         </div>
                     </div>
                 </form>
@@ -128,7 +128,7 @@
 <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
+        <li><a th:href="@{/}"><b>Home</b></a></li>
         <li class="active"><b>File Locations</b></li>
     </ol>
 
@@ -148,9 +148,9 @@
             <div class="hidden">
                 <h3>Define Your Storage Options</h3>
 
-                <div class="table-responsive storage-table">
-                    <#if filestoresLocal?has_content>
-                    <table class="table table-striped">
+                <div class="table-responsive storage-table" th:with="filestoresLocalNotEmpty=${!#lists.isEmpty(filestoresLocal)}">
+
+                    <table th:if="filestoresLocalNotEmpty}" lass="table table-striped">
 
                         <thead>
                         <tr class="tr">
@@ -161,23 +161,21 @@
                         </thead>
 
                         <tbody id="fileStoresLocal">
-                                <#list filestoresLocal as filestoreLocal>
-                                <tr class="tr">
+                                <tr th:each="filestoreLocal: ${filestoresLocal}" class="tr">
                                     <td>localhost</td>
-                                    <td>${filestoreLocal.properties['rootPath']}</td>
+                                    <td>[[${filestoreLocal.properties['rootPath']}]]</td>
                                     <td>
-                                        <a class="btn btn-xs btn-danger pull-right" href="#" data-filestore="${filestoreLocal.ID}" data-toggle="modal" data-target="#confirm-removal">
+                                        <a class="btn btn-xs btn-danger pull-right" href="#" th:data-filestore="${filestoreLocal.ID}" data-toggle="modal" data-target="#confirm-removal">
                                             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                                         </a>
                                     </td>
                                 </tr>
-                                </#list>
                         </tbody>
                     </table>
 
-                    <#else>
+                    <div th:unless="${filestoresLocalNotEmpty}">
                         <h4>There are currently no Local Filestores configured</h4>
-                    </#if>
+                    </div>
 
                     <form>
                         <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-filestoreLocal">
@@ -191,9 +189,8 @@
 
             <h3><strong>Locations of the folders/directories you want to deposit from or retrieve into</strong></h3>
 
-
-            <#if filestoresSFTP?has_content>
-                <div class="table-responsive storage-table">
+            <div th:with="filestoresSFTPnotEmpty=${!#lists.isEmpty(filestoresSFTP)}">
+                <div th:if="${filestoresSFTPnotEmpty}" class="table-responsive storage-table">
                     <p>After adding your DataStore location details (hostname and path) you will need to use the buttons below to copy the public SSH key over to DataStore (without this step, the DataVault will not be able to authenticate to the location).</p>
                     <p>
                        If your filestore is on a server other than DataStore, in order to allow DataVault to authenticate (i.e. to allow DataVault to connect to the server using your identity), you will have to copy the public SSH key provided here onto your server to the appropriate place, rather than entering a username and password.
@@ -210,37 +207,37 @@
                         </thead>
 
                         <tbody id="fileStoresSFTP">
-                            <#list filestoresSFTP as filestoreSFTP>
-                            <tr class="tr">
-                                <td>${filestoreSFTP.properties['host']}</td>
-                                <td>${filestoreSFTP.properties['port']}</td>
-                                <td>${filestoreSFTP.properties['rootPath']}</td>
+                            <tr th:each="filestoreSFTP,status : ${filestoresSFTP}" class="tr">
+                                <td>[[${filestoreSFTP.properties['host']}]]</td>
+                                <td>[[${filestoreSFTP.properties['port']}]]</td>
+                                <td>[[${filestoreSFTP.properties['rootPath']}]]</td>
                                 <td class="col-md-5">
-                                    <small><textarea id="filestore-sftp-${filestoreSFTP?index}" class="form-control filestore-sftp-key" rows="4" readonly>${filestoreSFTP.properties['publicKey']}</textarea></small>
+                                    <small><textarea th:id="|filestore-sftp-${status.index}|" class="form-control filestore-sftp-key" rows="4" readonly>[[${filestoreSFTP.properties['publicKey']}]]</textarea></small>
                                     <br/>
-                                    <button class="btn btn-sm btn-default pull-right" onclick="copyToClipboard('#filestore-sftp-${filestoreSFTP?index}')">Copy</button>
+                                    <button class="btn btn-sm btn-default pull-right" th:onclick="|copyToClipboard('#filestore-sftp-${status.index}')|">Copy</button>
                                 </td>
                                 <td>
-                                    <a class="btn btn-xs btn-danger pull-right" href="#" data-filestore="${filestoreSFTP.ID}" data-toggle="modal" data-target="#confirm-removal">
+                                    <a class="btn btn-xs btn-danger pull-right" href="#" th:data-filestore="${filestoreSFTP.ID}" data-toggle="modal" data-target="#confirm-removal">
                                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                                     </a>
                                 </td>
                             </tr>
-                            </#list>
                         </tbody>
                     </table>
                     <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-filestoreSFTP">
                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> File store
                     </a>
                 </div>
-            <#else>
+
+                <div th:if="${!filestoresSFTPnotEmpty}">
+
                 <p>There are currently no SFTP Filestores configured</p>
                 <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-filestoreSFTP">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> File store
                 </a>
-            </#if>
+                </div>
 
-            <#if filestoresSFTP?has_content>
+                <div th:if="${filestoresSFTPnotEmpty">
                 <p>To register your public key you need to:</p>
                 <ol>
                     <li>Copy the public key displayed above</li>
@@ -253,21 +250,22 @@
                     <span class="glyphicon glyphicon-modal-window" aria-hidden="true"></span> Open Key Registration Dialog
                 </a>
                 <br/><br/>
-                <p>Go to the <a href="${springMacroRequestContext.getContextPath()}/">homepage</a> to select the vault you want to use (to make a deposit or retrieval) from the list of your current vaults.</p>
+                <p>Go to the <a th:href="@{/}">homepage</a> to select the vault you want to use (to make a deposit or retrieval) from the list of your current vaults.</p>
                 <p><b>It can take several minutes before the connection between Datavault and the location is set, so please reload the page and try again.</b></p>
-            </#if>
+            </div>
 
-        </div>
+            </div>
     </div>
 </div>
 
-<script>
+<script th:inline="javascript">
 
     var localFrm = $('#add-filestoreLocal-form');
     localFrm.submit(function (ev) {
+        var baseURL = /*[[@{/filestores/local}]]*/ 'replaced-by-tl';
         $.ajax({
             method: "POST",
-            url: '${springMacroRequestContext.getContextPath()}/filestores/local',
+            url: baseURL,
             data: localFrm.serialize(),
             success: function (data) {
                 location.reload(true);
@@ -283,9 +281,10 @@
 
     var sftpFrm = $('#add-filestoreSFTP-form');
     sftpFrm.submit(function (ev) {
+        var baseURL = /*[[@{/filestores/sftp]]*/ 'replaced-by-tl';
         $.ajax({
             method: "POST",
-            url: '${springMacroRequestContext.getContextPath()}/filestores/sftp',
+            url: baseURL,
             data: sftpFrm.serialize(),
             success: function (data) {
                 location.reload(true);
@@ -309,10 +308,11 @@
     });
 
     $("button#remove").click(function(){
-        var filestoreId = $(this).data('filestoreId');
+        var filestoreId = $(this).data('filestoreId')
+        var baseURL = /*[[@{/filestores/}]]*/ 'replaced-by-tl';
         $.ajax({
             method: "DELETE",
-            url: '${springMacroRequestContext.getContextPath()}/filestores/' + filestoreId,
+            url: baseURL + filestoreId,
             success: function (data) {
                 location.reload(true);
             },
@@ -344,4 +344,4 @@
 
 </script>
 
-</@layout.vaultLayout>
+</div>

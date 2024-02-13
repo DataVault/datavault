@@ -1,4 +1,4 @@
-<#-- @ftlvariable name="vault" type="org.datavaultplatform.common.response.VaultInfo" -->
+<div xmlns:th="http://www.thymeleaf.org" th:with="vault=${T(org.datavaultplatform.common.response.VaultInfo).create()}">
 <style>
     #add-new {
         margin-top: 2em;
@@ -88,13 +88,12 @@
 
 </style>
 
-<#import "/spring.ftl" as spring />
-<#assign sec=JspTaglibs["http://www.springframework.org/security/tags"] />
-<#assign assignVaultRolesSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'ASSIGN_VAULT_ROLES') or hasPermission('${vault.groupID}', 'GROUP', 'ASSIGN_SCHOOL_VAULT_ROLES')">
-<#assign transferOwnershipSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'CAN_TRANSFER_VAULT_OWNERSHIP') or hasPermission('${vault.groupID}', 'GROUP', 'TRANSFER_SCHOOL_VAULT_OWNERSHIP')">
-<#assign showActionsColumnSecurityExpression = assignVaultRolesSecurityExpression + " or " + transferOwnershipSecurityExpression />
 
-<@sec.authorize access=transferOwnershipSecurityExpression>
+<th:block th:with="assignVaultRolesSecurityExpression=|hasPermission('${vault.ID}', 'vault', 'ASSIGN_VAULT_ROLES') or hasPermission('${vault.groupID}', 'GROUP', 'ASSIGN_SCHOOL_VAULT_ROLES')|">
+<th:block th:with="transferOwnershipSecurityExpression=|hasPermission('${vault.ID}', 'vault', 'CAN_TRANSFER_VAULT_OWNERSHIP') or hasPermission('${vault.groupID}', 'GROUP', 'TRANSFER_SCHOOL_VAULT_OWNERSHIP')|">
+<th:block th:with="showActionsColumnSecurityExpression=|${assignVaultRolesSecurityExpression} or ${transferOwnershipSecurityExpression}|">
+
+<th:block th:if="${#authorization.expression(transferOwnershipSecurityExpression)}" >
 <div id="orphan-dialog" class="modal fade" tabindex="-1" role="dialog"
      aria-labelledby="orphan-user-title"
      aria-hidden="true">
@@ -102,8 +101,8 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form id="transfer-form" class="form form-horizontal" role="form"
-                  action="<@spring.url relativeUrl="/vaults/${vault.ID}/data-owner/update" />"
-                  method="post">
+                  th:action="@{|/vaults/${vault.ID}/data-owner/update|}"
+                  method="post" >
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
                                 class="fa fa-times" aria-hidden="true"></i></button>
@@ -122,45 +121,47 @@
                         </div>
                     </div>
 
-                    <@sec.authorize access=assignVaultRolesSecurityExpression>
+                    <th:block th:if="${#authorization.expression(assignVaultRolesSecurityExpression)}">
                     <div class="col-sm-10 form-group ui-widget">
                         <label for="transfer-role" class="control-label form-label">Vault role to assign to previous
                             Data Owner</label>
                         <div class="form-input">
                             <select id="transfer-role" name="role" class="form-control">
-                                <#list roles as role>
-                                    <option value="${role.id}">${role.name}</option>
-                                </#list>
+                                <th:block th:each="role: ${roles}">
+                                    <option th:value="${role.id}">[[${role.name}]]</option>
+                                </th:block>
                             </select>
                         </div>
                     </div>
 
                     <div class="form-group ui-widget col-sm-10 form-confirm">
                         <div class="checkbox">
-                            <#if dataOwner??>
+                            <th:block th:if="${dataOwner != null}">
                                 <input class="form-check-input" id="confirm-checkbox" type="checkbox" name="assigningRole" checked="checked"/>
-                            <#else>
+                            </th:block>
+                            <th:block th:if="${dataOwner == null}">
                                 <input class="form-check-input" id="confirm-checkbox" type="checkbox"
                                        name="assigningRole" disabled/>
-                            </#if>
+                            </th:block>
                             </div>
-                            <label for="confirm-checkbox" class="control-label">Assign role to previous data
-                                owner?</label>
+                            <label for="confirm-checkbox" class="control-label">Assign role to previous data owner?</label>
                     </div>
-                    </@sec.authorize>
+                    </th:block><!-- assignVaultRolesSecurityExpression -->
 
-                    <@sec.authorize access="hasRole('ROLE_IS_ADMIN') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_ORPHAN_SCHOOL_VAULTS')">
-                        <div class="form-group ui-widget col-sm-10 form-confirm">
+                    <th:block th:with="securityExpression1=|hasRole('ROLE_IS_ADMIN') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_ORPHAN_SCHOOL_VAULTS')|">
+                    <th:block th:if="${#authorization.expression(securityExpression1)}">
+                    <div class="form-group ui-widget col-sm-10 form-confirm">
                             <div class="checkbox">
-                                <#if dataOwner??>
+                                <th:block th:if="${dataOwner != null}">
                                     <input class="form-check-input" id="orphan-checkbox" type="checkbox" name="orphaning"/>
-                                <#else>
+                                </th:block>
+                                <th:block th:if="${dataOwner == null}">
                                     <input class="form-check-input" id="orphan-checkbox" type="checkbox" name="orphaning" disabled/>
-                                </#if>
+                                </th:block>
                             </div>
                             <label for="orphan-checkbox" class="control-label">Temporarily orphan this vault?</label>
-                        </div>
-                    </@sec.authorize>
+                    </div>
+                    </th:block></th:block><!-- securityExpression1 -->
 
                     <div class="col-sm-10 form-group ui-widget control-form--checkbox">
                         <label for="transfer-reason" class="control-label form-label">Transfer reason</label>
@@ -171,7 +172,7 @@
                 </div>
 
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
                     <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
@@ -180,9 +181,9 @@
         </div>
     </div>
 </div>
-</@sec.authorize>
+</th:block><!-- transferOwnershipSecurityExpression -->
 
-<@sec.authorize access=assignVaultRolesSecurityExpression>
+<th:block th:if="${#authorization.expression(assignVaultRolesSecurityExpression)}">
 <div id="add-new-dialog" class="modal fade" tabindex="-1" role="dialog"
      aria-labelledby="add-new-user-title"
      aria-hidden="true">
@@ -190,7 +191,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form id="create-form" class="form form-horizontal" role="form"
-                  action="<@spring.url relativeUrl="/security/roles/vault/${vault.ID}/user" />"
+                  th:action="@{|/security/roles/vault/${vault.ID}/user|}"
                   method="post">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
@@ -210,15 +211,13 @@
                         <div class="col-sm-10">
                             <select id="new-user-role" name="role" class="form-control" >
                                 <option hidden value="" selected disabled>Please select</option>
-                                <#list roles as role>
-                                    <option value="${role.id}">${role.name}</option>
-                                </#list>
+                                <option th:each="role: ${roles}" th:value="${role.id}">[[${role.name}]]</option>
                             </select>
                         </div>
                     </div>
                 </div>
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
                     <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
@@ -234,7 +233,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form id="update-form" class="form form-horizontal" role="form"
-                  action="<@spring.url relativeUrl="/security/roles/vault/${vault.ID}/user/update" />"
+                  th:action="@{|/security/roles/vault/${vault.ID}/user/update|}"
                   method="post">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
@@ -251,15 +250,14 @@
                         <label for="update-user-role" class="control-label col-sm-2">Role</label>
                         <div class="col-sm-10">
                             <select id="update-user-role" name="role" class="form-control">
-                                <#list roles as role>
-                                    <option value="${role.id?c}">${role.name}</option></#list>
+                                    <option th:each="role: ${roles}" th:value="${role.id}">[[${role.name}]]</option>
                             </select>
                         </div>
                     </div>
                 </div>
                 <input type="hidden" id="role-update-assignment-id" name="assignment"/>
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
                     <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
@@ -274,7 +272,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form id="delete-form" class="form form-horizontal" role="form"
-                  action="<@spring.url relativeUrl="/security/roles/vault/${vault.ID}/user/delete" />"
+                  th:action="@{|/security/roles/vault/${vault.ID}/user/delete|}"
                   method="post">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
@@ -287,7 +285,7 @@
                 </div>
                 <input type="hidden" id="delete-role-assignment-id" name="assignment"/>
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
@@ -302,7 +300,7 @@
 <div id="add-new">
     <a href="#" data-toggle="modal" data-target="#add-new-dialog">+ Add new user to vault</a>
 </div>
-</@sec.authorize>
+</th:block><!-- assignVaultRolesSecurityExpression -->
 
 <div class="col-md-8" id="role-assignments">
     <div class="table-responsive">
@@ -313,76 +311,73 @@
                 <th>
                     <span id="role-filter-toggle">Role <i class="filter-toggle-icon fa fa-caret-down"></i></span>
                     <div id="role-filter-panel" class="hidden">
-                        <#list roles as role>
-                            <div>
-                                <input type="checkbox" id="role-filter-${role.id}" name="role-filter"
-                                       value="${role.name}"/>
-                                <label for="role-filter-${role.id}">${role.name}</label>
+                            <div th:each="role: ${roles}">
+                                <input type="checkbox" th:id="|role-filter-${role.id}|" name="role-filter"
+                                       th:value="${role.name}"/>
+                                <label th:for="|role-filter-${role.id}|">[[${role.name}]]</label>
                             </div>
-                        </#list>
                     </div>
                 </th>
-                <@sec.authorize access=showActionsColumnSecurityExpression>
+                <th:block sec:authorize="${showActionsColumnSecurityExpression}">
                 <th class="action-column">Actions</th>
-                </@sec.authorize>
+                </th:block>
             </tr>
             </thead>
             <tbody>
-            <#if dataOwner??>
+            <th:block th:if="${dataOwner != null}">
                 <tr>
-                    <td>${dataOwner.userId}</td>
-                    <td class="role-column">${dataOwner.role.name}</td>
-                    <@sec.authorize access=showActionsColumnSecurityExpression>
+                    <td>[[${dataOwner.userId}]]</td>
+                    <td class="role-column">[[${dataOwner.role.name}]]</td>
+                    <th:block th:if="${#authorization.expression(showActionsColumnSecurityExpression)}">
                     <td class="action-column">
-                        <@sec.authorize access=transferOwnershipSecurityExpression>
+                        <th:block th:if="${#authorization.expression(transferOwnershipSecurityExpression)}">
                         <a href="#" class="btn btn-default" data-toggle="modal"
                            data-target="#orphan-dialog"
                            data-user-name="${dataOwner.userId}"
                            title="Transfer ownership of this vault."><i
                                     class="glyphicon glyphicon-transfer"></i></a>
-                        </@sec.authorize>
+                        </th:block><!-- transferOwnershipSecurityExpression -->
                     </td>
-                    </@sec.authorize>
+                    </th:block><!-- showActionsColumnSecurityExpression -->
                 </tr>
-            <#else>
+            </th:block>
+            <th:block th:if="${dataOwner == null}">
                 <tr>
                     <td>Orphaned</td>
                     <td class="role-column">N/A</td>
-                    <@sec.authorize access=showActionsColumnSecurityExpression>
+                    <th:block th:if="${#authorization.expression(showActionsColumnSecurityExpression)}">
                         <td class="action-column">
-                            <@sec.authorize access=transferOwnershipSecurityExpression>
+                            <th:block th:if="${#authorization.expression(transferOwnershipSecurityExpression)}">
                                 <a href="#" class="btn btn-default" data-toggle="modal"
                                    data-target="#orphan-dialog"
                                    data-user-name=""
                                    title="Transfer ownership of this vault."><i
                                             class="glyphicon glyphicon-transfer"></i></a>
-                            </@sec.authorize>
+                            </th:block><!-- transferOwnershipSecurityExpression -->
                         </td>
-                    </@sec.authorize>
+                    </th:block><!-- showActionsColumnSecurityExpression -->
                 </tr>
-            </#if>
+            </th:block>
 
-            <#list roleAssignments as assignment>
-                <tr>
-                    <td>${assignment.userId}</td>
-                    <td class="role-column">${assignment.role.name}</td>
-                    <@sec.authorize access=showActionsColumnSecurityExpression>
+                <tr th:each="assignment: ${assignments}">
+                    <td>[[${assignment.userId}]]</td>
+                    <td class="role-column">[[${assignment.role.name}]]</td>
+                    <th:block th:if="${#authorization.expression(showActionsColumnSecurityExpression)}">
                     <td class="action-column">
-                        <@sec.authorize access=assignVaultRolesSecurityExpression>
+                        <th:block th:if="${#authorization.expression(assignVaultRolesSecurityExpression)}">
                         <a href="#" class="btn btn-default" data-toggle="modal"
-                           data-target="#update-existing-dialog" data-assignment-id="${assignment.id?c}"
-                           data-user-name="${assignment.userId}"
-                           data-user-role="${assignment.role.id}"
-                           title="Edit role for ${assignment.userId}."><i class="fa fa-pencil"></i></a>
+                           data-target="#update-existing-dialog" th:data-assignment-id="${assignment.id}"
+                           th:data-user-name="${assignment.userId}"
+                           th:data-user-role="${assignment.role.id}"
+                           th:title="|Edit role for ${assignment.userId}.|"><i class="fa fa-pencil"></i></a>
                         <a href="#" class="btn btn-default btn-delete" data-toggle="modal"
-                           data-target="#delete-dialog" data-assignment-id="${assignment.id?c}"
-                           data-user-name="${assignment.userId}"
-                           title="Delete role for ${assignment.userId}."><i class="fa fa-trash"></i></a>
-                        </@sec.authorize>
+                           data-target="#delete-dialog" th:data-assignment-id="${assignment.id}"
+                           th:data-user-name="${assignment.userId}"
+                           th:title="|Delete role for ${assignment.userId}.|"><i class="fa fa-trash"></i></a>
+                        </th:block><!-- assignVaultRolesSecurityExpression -->
                     </td>
-                    </@sec.authorize>
+                    </th:block><!-- showActionsColumnSecurityExpression -->
                 </tr>
-            </#list>
             </tbody>
         </table>
     </div>
@@ -391,15 +386,15 @@
 <div id="role-definitions" class="col-md-4">
     <div class="role-definitions">
         <h3 class="role-definition-title">Role Definitions</h3>
-        <#list roles as role>
+        <th:block th:each="role: ${roles}">
             <div class="definition">
-                <b>${role.name}:</b> ${role.description}
+                <b>[[${role.name}]]:</b> [[${role.description}]]
             </div>
-        </#list>
+        </th:block>
     </div>
 </div>
 
-<script type="text/javascript">
+<script th:inline="javascript">
     $('#role-filter-toggle').click(function () {
         $('.filter-toggle-icon').toggleClass('fa-caret-down').toggleClass('fa-caret-up');
         $('#role-filter-panel').toggleClass('hidden');
@@ -445,7 +440,7 @@
         $('#delete-error').addClass('hidden').text('');
     });
 
-    var redirectUri = '<@spring.url "/vaults/${vault.ID}"/>';
+    var redirectUri = /*[[@{|/vaults/${vault.ID}/|}]]*/ 'replaced-by-tl';
     var forms = [
         '#create-form',
         '#update-form',
@@ -494,8 +489,9 @@
         minLength: 2,
         source: function (request, response) {
             var term = request.term;
+            var baseURL = /*[[@{/vaults/autocompleteuun/}]]*/ 'replaced-by-tl';
             $.ajax({
-                url: '<@spring.url "/vaults/autocompleteuun/"/>' + term,
+                url: baseURL + term,
                 type: 'GET',
                 dataType: "json",
                 success: function (data) {
@@ -519,8 +515,9 @@
         minLength: 2,
         source: function (request, response) {
             var term = request.term;
+            var baseURL = /*[[@{/vaults/autocompleteuun/}]]*/ 'replaced-by-tl';
             $.ajax({
-                url: '<@spring.url "/vaults/autocompleteuun/"/>' + term,
+                url: baseURL + term,
                 type: 'GET',
                 dataType: "json",
                 success: function (data) {
@@ -538,6 +535,9 @@
         }
     });
 </script>
-
+</th:block>
+</th:block>
+</th:block>
+</div>
 
 

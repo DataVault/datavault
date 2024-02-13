@@ -1,104 +1,101 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="admin">
-<@layout.vaultLayout>
-    <#import "/spring.ftl" as spring />
-
-<div class="container">
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<div layout:fragment="content">
+    <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
-        <li><a href="${springMacroRequestContext.getContextPath()}/admin/vaults"><b>Reviews</b></a></li>
-        <li class="active"><b>Vault:</b> ${vault.name?html}</li>
+        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
+        <li><a th:href="@{/admin/vaults}"><b>Reviews</b></a></li>
+        <li class="active"><b>Vault:</b> [[${vault.name}]]</li>
     </ol>
 
-    <form id="create-review" action="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}/reviews/${vaultReviewModel.getVaultReviewId()}" method="post">
+    <form id="create-review" th:object="${vaultReviewModel}" th:action="@{|/admin/vaults/${vault.getID()}/reviews/${vaultReviewModel.getVaultReviewId()}|}" method="post">
 
     <div class="bs-callout">
         <h2>
-            <span class="glyphicon glyphicon-folder-close"></span> ${vault.name?html}
+            <span class="glyphicon glyphicon-folder-close"></span> [[${vault.name}]]
         </h2>
         <h2>
             <small>
-                ${vault.description?html}
+                [[${vault.description}]]
             </small>
         </h2>
         <hr>
         <p>
             <b>Owner:</b>
-            <#if dataOwner?has_content>
-               ${dataOwner.userId}
-            </#if>
+            <th:block th:if="${dataOwner != null}">
+                [[${dataOwner.userId}]]
+            </th:block>
             <br/>
             <b>Data Managers:</b>
-            <#if dataManagers?has_content>
-                <#list dataManagers as dataManager>
-                    ${dataManager.userId}&nbsp;
-                </#list>
-            </#if>
-            <br/>
-            <b>Dataset name:</b> <#if vault.datasetName??>${vault.datasetName?html}<#else> </#if><br/>
-            <#assign aDate = vault.creationTime?date>
-            <b>Created:</b> ${aDate?iso_utc}<br/>
-            <b>Group:</b> ${group.name?html}<br/>
+            <th:block th:if="${dataManagers != null}">
+                <th:block th:each="dataManager: ${dataManagers}">
+                    [[${dataManager.userId}]]
+                </th:block>
+            </th:block>
 
-            <b>Retention Policy:</b> ${createRetentionPolicy.name} :
-            <#if createRetentionPolicy.extendUponRetrieval>
+            <br/>
+            <b>Dataset name:</b> <th:block th:if="${vault.databaseName != null}">[[${vault.datasetName}]]</th:block> <br/>
+            <b>Created:</b> [[${#dates.format(vault.creationTime,'yyyy-MM-dd')}]]<!--/* date */--><br/>
+            <b>Group:</b> [[${group.name}]]<br/>
+
+            <b>Retention Policy:</b> [[${createRetentionPolicy.name}]] :
+            <th:block th:if="${createRetentionPolicy.extendUponRetrieval}">
             This policy does increase the length of time data must be kept if retrieved for an external user. To view retrievals, go to the event log.
-            <#else>
+            </th:block>
+            <th:block th:if="${!createRetentionPolicy.extendUponRetrieval}">
             This policy does not increase the length of time data must be kept if retrieved for an external user. To view retrievals, go to the event log.
-            </#if>
+            </th:block>
             <br/>
 
-            <#assign aDate = vault.policyExpiry?date>
-            <b>Retention Policy expiry date:</b> ${aDate?iso_utc}<br/>
+            <b>Retention Policy expiry date:</b> [[${#dates.format(vault.policyExpiry,'yyyy-MM-dd')}]]<!--/* date */--><br/>
             (Date before which data should not be deleted, according to the funder retention policy, taking into account any extensions caused by retrievals for external users, if applicable. The expiry date is calculated by adding the minimum number of years to the grant end date. Data may be deleted sooner for overriding reason such as data protection, or if the funder counts the retention period as starting from the data creation date.)
             <br/>
 
-            <#if vault.policyStatus == 1>
+            <th:block th:switch="${vault.policyStatus}">
+                <th:block th:case="1">
                 <b>Status as of today's date:</b> The funder's minimum retention period has not yet expired, data should not yet be deleted unless there is an overriding reason.<br/>
-            <#elseif vault.policyStatus == 2>
+                </th:block>
+                <th:block th:case="2">
                 <b>Status as of today's date:</b> The funder's minimum retention period has expired.<br/>
-            </#if>
+                </th:block>
+            </th:block>
 
-            <b>Size:</b> ${vault.getSizeStr()}<br/>
+            <b>Size:</b> [[${vault.getSizeStr()}]]<br/>
 
-            <#if vault.grantEndDate?has_content>
-                <#assign aDate = vault.grantEndDate?date>
-                <b>Grant End Date:</b> ${aDate?iso_utc}<br/>
-            <#else>
+            <th:block th:if="${vault.grantEndDate != null}">
+                <b>Grant End Date:</b> [[${#dates.format(vault.grantEndDate,'yyyy-MM-dd')}]]<!--/* date */--><br/>
+            </th:block>
+            <th:block th:if="${vault.grantEndDate == null}">
                 <b>Grant End Date:</b> N/A<br/>
-            </#if>
+            </th:block>
         </p>
 
 
 
         <p>
-            <#assign aDate = vault.reviewDate?date>
-            <b>Current review date:</b> ${aDate?iso_utc}<br/>
+            <b>Current review date:</b> [[${#dates.format(vault.reviewDate,'yyyy-MM-dd')}]]<!--/* date */--><br/>
         </p>
 
-        <#if error?has_content>
-            <div class="alert alert-danger" role="alert">
-                ${error}
-            </div>
-        </#if>
+
+        <div th:if="${error != null}" class="alert alert-danger" role="alert">
+            [[${error}]]
+        </div>
+
         <div class="form-group">
             <label class="control-label">New Review Date</label>
-            <@spring.bind "vaultReviewModel.newReviewDate"/>
-            <input type="text" class="form-control" id="newReviewDate" name="${spring.status.expression}" value='${spring.status.value!""}'/>
+            <input type="text" class="form-control" id="newReviewDate" th:field="*{newReviewDate}" />
         </div>
 
         <div class="form-group">
             <label class="control-label">Comment</label>
-            <@spring.bind "vaultReviewModel.comment" />
-            <input type="text" class="form-control" name="${spring.status.expression}" value="${spring.status.value!""}"/>
+            <input type="text" class="form-control"th:field="*{comment}" />
         </div>
 
-        <#if vaultReviewModel.depositReviewModels?has_content>
-
-            <div class="table-responsive">
-                <table class="table table-striped">
+        <div th:if="${vaultReviewModel.depositsReviewModel != null}" class="table-responsive">
+            <table class="table table-striped">
                     <thead>
                         <tr class="tr">
                             <th>Deposit</th>
@@ -113,69 +110,76 @@
                     </thead>
 
                     <tbody>
-                        <#list vaultReviewModel.depositReviewModels as drm>
+                        <th:block th:each="drm,drmStatus: ${vaultReviewModel.depositReviewModels}">
 
-                            <input type="hidden" name="depositReviewModels[${drm_index}].depositId" value="${drm.getDepositId()}">
-                            <input type="hidden" name="depositReviewModels[${drm_index}].depositReviewId" value="${drm.getDepositReviewId()}">
+                            <input type="hidden" th:name="|depositReviewModels[${drmStatus.index}].depositId|" th:value="${drm.getDepositId()}">
+                            <input type="hidden" th:name="|depositReviewModels[${drmStatus.index}].depositReviewId|" th:value="${drm.getDepositReviewId()}">
 
                             <tr class="tr">
                                 <td>
-                                    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${drm.depositId}">${drm.name?html}</a>
+                                    <a th:href="@{|/vaults/${vault.getID()}/deposits/${drm.depositId}|}">[[${drm.name}]]</a>
                                 </td>
 
                                 <td>
-                                    <div id="deposit-status" class="job-status">
-                                        <#if drm.statusName == "COMPLETE">
+                                    <div th:switch="${drm.statusName}" id="deposit-status" class="job-status">
+                                        <th:block th:case="COMPLETE">
                                             <div class="text-success">
                                                 <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>&nbsp;Complete
                                             </div>
-                                        <#elseif drm.statusName == "FAILED">
+                                        </th:block>
+                                        <th:block th:case="FAILED">
                                             <div class="text-danger">
                                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>&nbsp;Failed
                                             </div>
-                                        <#elseif drm.statusName == "NOT_STARTED">&nbsp;Queued
-                                        <#elseif drm.statusName == "IN_PROGRESS">
+                                        </th:block>
+                                        <th:block th:case="NOT_STARTED">&nbsp;Queued
+                                        </th:block>
+                                        <th:block th:case="IN_PROGRESS">
                                             <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>&nbsp;In progress
-                                        <#else>
-                                            ${drm.statusName}
-                                        </#if>
+                                        </th:block>
+                                        <:th:block th:case="*">
+                                            [[${drm.statusName}]]
+                                        </:th:block>
                                     </div>
                                 </td>
 
-                                <td> ${drm.getCreationTime()?datetime}</td>
+                                <td>[[${#dates.format(drm.getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
 
-                                <@spring.bind "vaultReviewModel.depositReviewModels[${drm_index}].deleteStatus" />
                                 <td>
-                                    <input type="radio" class="radio-inline" name="${spring.status.expression}" value="0" ${(drm.deleteStatus == 0)?then('checked', '')} />
+                                    <input type="radio" class="radio-inline" value="0"
+                                           th:field="*{depositReviewModels[__${drmStatus.index}__].deleteStatus}"
+                                    />
                                 </td>
                                 <td>
-                                    <input type="radio" class="radio-inline" name="${spring.status.expression}" value="1" ${(drm.deleteStatus == 1)?then('checked', '')} />
+                                    <input type="radio" class="radio-inline" value="1"
+                                           th:field="*{depositReviewModels[__${drmStatus.index}__].deleteStatus}"
+                                    />
                                 </td>
                                 <td>
-                                    <input type="radio" class="radio-inline" name="${spring.status.expression}" value="2" ${(drm.deleteStatus == 2)?then('checked', '')}/>
+                                    <input type="radio" class="radio-inline" value="2"
+                                           th:field="*{depositReviewModels[__${drmStatus.index}__].deleteStatus}"
+                                    />
                                 </td>
                                 <td>
-                                    <input type="radio" class="radio-inline" name="${spring.status.expression}" value="3" ${(drm.deleteStatus == 3)?then('checked', '')}/>
+                                    <input type="radio" class="radio-inline" value="3"
+                                           th:field="*{depositReviewModels[__${drmStatus.index}__].deleteStatus}"
+                                    />
                                 </td>
 
                                 <td>
                                 <div class="form-group">
-                                    <@spring.bind "vaultReviewModel.depositReviewModels[${drm_index}].comment" />
                                     <input type="text"
                                            class="form-control"
-                                           name="${spring.status.expression}"
-                                           value="${spring.status.value!""}"/>
+                                           th:field="*{depositReviewModels[__${drmStatus.index}__].comment}"
+                                    />
                                 </div>
                                 </td>
-
                             </tr>
-                        </#list>
+                        </th:block>
                     </tbody>
                 </table>
-            </div>
-            <#else>
-               <p>No deposits</p>
-         </#if>
+        </div>
+        <p th:if="${vaultReviewModel.depositsReviewModel == null}">No deposits</p>
 
          </div>
 
@@ -192,12 +196,12 @@
         </div>
 
 
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
     </form>
 
 </div>
 
-<script>
+<script type="application/javascript">
     $(document).ready(function () {
 
         $.datepicker.setDefaults({
@@ -276,4 +280,6 @@
     }); $('[data-toggle="popover"]').popover();
 </script>
 
-</@layout.vaultLayout>
+</div>
+</html>
+

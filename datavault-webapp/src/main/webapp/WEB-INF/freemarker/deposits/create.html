@@ -1,9 +1,8 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="home">
-<@layout.vaultLayout>
-    <#import "/spring.ftl" as spring />
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='home')}" >
 
+<div layout:fragment="content">
 <style>
     /* Uploader: border */
     .flow-drop {padding:30px; font-size:13px; text-align:center; color:#666; font-weight:bold;background-color:#eee; border:2px dashed #aaa; border-radius:10px; z-index:9999;}
@@ -70,8 +69,8 @@
 <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
-        <li><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/"><b>Vault:</b> ${vault.name?html}</a></li>
+        <li><a th:href="@{/}"><b>Home</b></a></li>
+        <li><a th:href="@{|/vaults/${vault.getID()}|}"><b>Vault:</b> [[${vault.name}]]</a></li>
         <li class="active">Create new deposit</li>
     </ol>
     
@@ -85,11 +84,11 @@
             <h2>Create a new Deposit</h2>
             <div class="alert alert-info" role="alert">
                 <p>
-                    You must set up the folder from which you want to deposit your files (using the <a href="${springMacroRequestContext.getContextPath()}/filestores">File Locations page</a>) BEFORE you can set the deposit name and description.
+                    You must set up the folder from which you want to deposit your files (using the <a th:href="@{/filestores}">File Locations page</a>) BEFORE you can set the deposit name and description.
                 </p>
             </div>
 
-            <form id="create-deposit" class="form" role="form" action="" method="post">
+            <form id="create-deposit" class="form" role="form" action="" method="post" th:object="${deposit}">
                 <div class="row">
                     <div class="col-sm-10">
     
@@ -98,8 +97,7 @@
                             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                                 title="The deposit name should  help reviewers understand whether this subset of the data needs to be kept longer than other parts of the vault.&nbsp;Maximum 400 characters.">
                             </span>
-                            <@spring.bind "deposit.name" />
-                            <input type="text" class="form-control" name="${spring.status.expression}" value='${spring.status.value!""}'/>
+                            <input type="text" class="form-control" th:field="*{name}" />
                         </div>
                         
                         <div class="form-group">
@@ -107,8 +105,7 @@
                             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                                 title="This description should contain information to assist the vault Owner and any other colleagues who will be part of the review process when the vault retention period expires, in deciding whether the data should be retained or deleted. Maximum 6,000 characters.">
                             </span>
-                            <@spring.bind "deposit.description" />
-                            <input type="text" class="form-control" name="${spring.status.expression}" value='${spring.status.value!""}'/>
+                            <input type="text" class="form-control" th:field="*{description}" />
                         </div>
                     </div>
                 </div>
@@ -122,20 +119,18 @@
                 <br/>
                 <small>Click on the button marked 'Data Storage (SFTP)' to: connect to the location(s) you specified on the File Locations page, and browse to the files you want to upload.</small>
                 <br/><br/>
-                
-                <@spring.bind "deposit.fileUploadHandle" />
+
+
                 <input type="hidden"
                    class="form-control file-upload-handle"
-                   name="${spring.status.expression}"
-                   value="${spring.status.value!""}"/>
+                   th:field="*{fileUploadHandle}" />
                    
-                <@spring.bind "deposit.depositPaths" />
+
                 <select
                        multiple="true"
                        class="file-path"
                        style="display:none;"
-                       name="${spring.status.expression}"
-                       value="${spring.status.value!""}">
+                       th:field="*{depositPaths}" />
                 </select>
         
                 <div class="flow-drop">
@@ -155,20 +150,20 @@
                     <div id="upload-tree" class="fancytree tree-box text-left" style="display:none; margin-top:15px; max-height:25vh; overflow-y:scroll;"></div>
                 </div>
                 
-                <script>
+                <script th:inline="javascript">
                     var filesizeSeq = 0;
-                    
+                    var baseURL = /*[[@{/files}]]*/ 'replaced-by-tl';
                     // Create the tree inside the "tree" element.
                     $("#tree").fancytree({
                         source: {
-                            url: "${springMacroRequestContext.getContextPath()}/files",
+                            url: baseURL,
                             cache: false
                         },
                         lazyLoad: function(event, data){
                             var node = data.node;
                             // Load child nodes via ajax GET /files?mode=children&parent=1234
                             data.result = {
-                                url: "${springMacroRequestContext.getContextPath()}/files",
+                                url: baseURL,
                                 data: {
                                     mode: "children",
                                     parent: node.key
@@ -194,9 +189,9 @@
                             
                             if (node) {
                                 $("#deposit-size").text("Deposit size: calculating ...");
-                                
+                                var fileSizeURL = /*[[@{/filesize}]]*/ 'replaced-by-tl';
                                 $.ajax({
-                                    url: "${springMacroRequestContext.getContextPath()}/filesize",
+                                    url: fileSizeURL,
                                     type: "GET",
                                     data: {filepath: node.key},
                                     dataType: 'text',
@@ -243,12 +238,14 @@
                     </small>
                     <br/>
                     <div class="radio-has-personal-data radio-inline">
-                        <@spring.bind "deposit.hasPersonalData" />
-                        <input type="radio" name="${spring.status.expression}" value="yes"> Yes
+                        <input type="radio"
+                               th:field="*{hasPersonalData}"
+                               value="yes"> Yes
                     </div>
                     <div class="radio-has-personal-data radio-inline">
-                        <@spring.bind "deposit.hasPersonalData" />
-                        <input type="radio" name="${spring.status.expression}" value="No"> No
+                        <input type="radio"
+                               th:field="*{hasPersonalData}"
+                               value="No"> No
                     </div>
                 </div>
                 
@@ -269,8 +266,7 @@
                         <label for="personal-data-statement">Personal Data Statement</label>
                         <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
                             title="Maximum 6,000 characters."></span>
-                        <@spring.bind "deposit.personalDataStatement" />
-                        <textarea class="form-control" id="${spring.status.expression}" name="${spring.status.expression}" rows="3"></textarea>
+                        <textarea class="form-control" th:field="*{personalDataStatement}" rows="3"></textarea>
                     </div>
                 
                 </div>
@@ -280,22 +276,21 @@
                 </div> 
                 
                 <div class="btn-toolbar pull-right">
-                    <a class="btn btn-lg btn-link" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}">Cancel</a>
+                    <a class="btn btn-lg btn-link" th:href="@{|/vaults/${vault.getID()|}">Cancel</a>
                     <button type="submit" value="submit" class="btn btn-lg btn-primary">
                         <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i>
                         Deposit data
                     </button>
                 </div>
-        
+
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-        
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             </form>
         </div>
     </div>
 </div>
 
-<script>
+<script th:inline="javascript">
     $(function () {
 
         $('[data-toggle="popover"]').popover();
@@ -335,9 +330,9 @@
             }
 
             paths.push(node.key);
-
+            var checkDepositSizeURL = /*[[@{/checkdepositsize}]]*/ 'replaced-by-tl';
             $.ajax({
-                url: "${springMacroRequestContext.getContextPath()}/checkdepositsize",
+                url: checkDepositSizeURL,
                 type: "GET",
                 data: {filepath: paths},
                 dataType: 'json',
@@ -478,5 +473,5 @@
     }
 
 </script>
-
-</@layout.vaultLayout>
+<div>
+</html>

@@ -1,23 +1,24 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="admin">
-<#import "/spring.ftl" as spring />
-<@layout.vaultLayout>
-
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<div layout:fragment="content">
 <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
+        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
         <li class="active"><b>Retention Policies</b></li>
     </ol>
 
     <div class="row">
         <div class="col-md-12">
-            <a class="btn btn-primary pull-right" href="${springMacroRequestContext.getContextPath()}/admin/retentionpolicies/add"<span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Retention Policy </a>
+            <a class="btn btn-primary pull-right" th:href="@{/admin/retentionpolicies/add}">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Retention Policy
+            </a>
         </div>
     </div>
 
-    <#if policies?has_content>
+    <th:block th:if="${policies != null}">
         <div class="table-responsive">
             <table class="table table-striped">
 
@@ -31,26 +32,26 @@
                 </thead>
 
                 <tbody>
-                    <#list policies as policy>
-                        <tr id="policy-row-${policy.getID()}" class="tr">
+                    <th:block th:each="policy: ${policies}">
+                        <tr th:id="|policy-row-${policy.getID()}|" class="tr">
                             <td>
-                                ${policy.name!""}
+                                [[${policy.name ?: ''}]]
                             </td>
                             <td>
-                                ${policy.description!""}
+                                [[${policy.description ?: ''}]]
                             </td>
-                            <td><a class="update-btn btn btn-default btn-sm" href="${springMacroRequestContext.getContextPath()}/admin/retentionpolicies/edit/${policy.getID()}"<span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Edit Retention Policy </a></td>
-                            <td><button class="delete-btn btn btn-danger btn-sm" data-policyid="${policy.getID()}">Delete Policy</button></td>
+                            <td><a class="update-btn btn btn-default btn-sm" th:href="@{|/admin/retentionpolicies/edit/${policy.getID()}|}"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Edit Retention Policy </a></td>
+                            <td><button class="delete-btn btn btn-danger btn-sm" th:data-policyid="${policy.getID()}">Delete Policy</button></td>
                         </tr>
-                    </#list>
+                    </th:block>
                 </tbody>
             </table>
         </div>
-    </#if>
+    </th:block>
 
 </div>
 
-<script>
+<script th:inline="javascript">
 $(document).ready(function () {
     $.datepicker.setDefaults({
         dateFormat: "yy-mm-dd",
@@ -76,8 +77,9 @@ $(document).ready(function () {
     $('.delete-btn').click(function () {
         var policy_id = $(this).data('policyid');
 
+        var baseURL = /*[[@{/admin/retentionpolicies/delete/}]]*/ 'replaced-by-tl';
         $.ajax({
-            url: '${springMacroRequestContext.getContextPath()}/admin/retentionpolicies/delete/' + policy_id,
+            url: baseURL + policy_id,
             type: 'DELETE',
             error: function (xhr, ajaxOptions, thrownError) {
                 alert('Error: unable to delete policy');
@@ -88,4 +90,5 @@ $(document).ready(function () {
     });
 });
 </script>
-</@layout.vaultLayout>
+</div>
+</html>

@@ -1,21 +1,22 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-    <#global nav="admin">
-        <#import "/spring.ftl" as spring />
-        <@layout.vaultLayout>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<div layout:fragment="content">
             <div class="container">
                 <ol class="breadcrumb">
                     <li><a
-                            href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
+                            th:href="@{/admin/}"><b>Administration</b></a></li>
                     <li><a
-                            href="${springMacroRequestContext.getContextPath()}/admin/billing"><b>Billing</b></a></li>
+                            th:href="@{/admin/billing}"><b>Billing</b></a></li>
                     <li class="active"><b>BillingDetails:</b>
-                        ${billingDetails.vaultName?html}
+                        [[${billingDetails.vaultName}]]
                     </li>
                 </ol>
                 <div class="panel panel-uoe-low">
                     <div class="panel-body">
                         <h2>Billing Details (Funding: NO or Don't Know): <small>
-                                ${billingDetails.vaultName?html}
+                                [[${billingDetails.vaultName}]]
                             </small></h2>
                         <br />
                         <table class="table table-sm">
@@ -23,91 +24,81 @@
                                 <tr>
                                     <th scope="col">Authoriser</th>
                                     <td>
-                                        <#if billingDetails.getContactName()??>
-                                            ${billingDetails.contactName?html}
-                                            <#else>
-                                        </#if>
+                                        <th:block th:if="${billingDetails.getContactName() != null}">
+                                            [[${billingDetails.contactName}]]
+                                        </th:block>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="col">School/Unit</th>
                                     <td>
-                                        <#if billingDetails.getSchool()??>
-                                            ${billingDetails.school?html}
-                                            <#else>
-                                        </#if>
+                                        <th:block th:if="${billingDetails.getSchool() != null}">
+                                            [[${billingDetails.school}]]
+                                        </th:block>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="col">Subunit</th>
                                     <td>
-                                        <#if billingDetails.getSubUnit()??>
-                                            ${billingDetails.subUnit}
-                                            <#else>
-                                        </#if>
+                                        <th:block th:if="${billingDetails.getSubUnit() != null}">
+                                            [[${billingDetails.subUnit}]]
+                                        </th:block>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="col">Project Title</th>
                                     <td>
-                                        <#if billingDetails.getProjectTitle()??>
-                                            ${billingDetails.projectTitle}
-                                            <#else>
-                                        </#if>
+                                        <th:block th:if="${billingDetails.getProjectTitle() != null}">
+                                            [[${billingDetails.projectTitle}]]
+                                        </th:block>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="col">Project Id</th>
                                     <td>
-                                        <#if billingDetails.getProjectId()??>
-                                            ${billingDetails.projectId}
-                                            <#else>
-                                        </#if>
+                                        <th:block th:if="${billingDetails.getProjectId() != null}">
+                                            [[${billingDetails.projectId}]]
+                                        </th:block>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="col">Grant End Date</th>
                                     <td>
-                                        <#if billingDetails.getGrantEndDate()??>
-                                            ${billingDetails.grantEndDate?date}
-                                            <#else>
-                                        </#if>
+                                        <th:block th:if="${billingDetails.getGrantEndDate() != null}">
+                                            [[${billingDetails.grantEndDate}]]
+                                        </th:block>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="col">Amount to be billed</th>
                                     <td>
-                                        <#if billingDetails.getAmountToBeBilled()??>
-                                            ${billingDetails.getAmountToBeBilled()?html}
-                                            <#else>
-                                        </#if>
+                                        <th:block th:if="${billingDetails.getAmountToBeBilled() != null}">
+                                            [[${billingDetails.getAmountToBeBilled()}]]
+                                        </th:block>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="col">Amount billed</th>
                                     <td>
-                                        <#if billingDetails.getAmountBilled()??>
-                                            ${billingDetails.getAmountBilled()?html}
-                                            <#else>
-                                        </#if>
+                                        <th:block th:if="${billingDetails.getAmountBilled() != null}">
+                                            [[${billingDetails.getAmountBilled()}]]
+                                        </th:block>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="col">Payment Details</th>
                                     <td>
-                                        <#if billingDetails.getPaymentDetails()??>
-                                            ${billingDetails.getPaymentDetails()?html}
-                                            <#else>
-                                        </#if>
+                                        <th:block th:if="${billingDetails.getPaymentDetails() != null}">
+                                            [[${billingDetails.getPaymentDetails()}]]
+                                        </th:block>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="col">Special arrangement comments</th>
                                     <td>
-                                        <#if billingDetails.getSpecialComments()??>
-                                            ${billingDetails.getSpecialComments()?html}
-                                            <#else>
-                                        </#if>
+                                        <th:block th:if="${billingDetails.getSpecialComments() != null}">
+                                            [[${billingDetails.getSpecialComments()}]]
+                                        </th:block>
                                     </td>
                                 </tr>
                             </tbody>
@@ -120,85 +111,89 @@
                         <div id="update-billingDetails" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="updateBillingDetails" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <form id="update-billingDetails-form" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/billing/updateBillingDetails" method="post">
+                                    <form id="update-billingDetails-form" th:object="${billingDetails}" class="form" role="form" th:action="@{/admin/billing/updateBillingDetails}" method="post">
                                         <div class="modal-header">
                                             <h4 class="modal-title" id="addDataManger">Billing Details</h4>
                                         </div>
                                         <div class="modal-body">
                                             <div class="form-group">
                                                 <label class="control-label">Authoriser:</label>
-                                                <@spring.bind "billingDetails.contactName" />
-                                                <input type="text" class="form-control" name="${spring.status.expression}"
-                                                    value="${spring.status.value!""}" id="contactName" maxlength="400" />
+                                                <input type="text" class="form-control"
+                                                    id="contactName" maxlength="400"
+                                                    th:field="*{contactName}"
+                                                />
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label">School/Unit:</label>
-                                                <@spring.bind "billingDetails.school" />
-                                                <input type="text" class="form-control" name="${spring.status.expression}"
-                                                    value="${spring.status.value!""}" id="school" maxlength="400" />
+                                                <input type="text" class="form-control"
+                                                    id="school" maxlength="400"
+                                                    th:field="*{school}"
+                                                />
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label">Subunit:</label>
-                                                <@spring.bind "billingDetails.subUnit" />
-                                                <input type="text" class="form-control" name="${spring.status.expression}"
-                                                    value="${spring.status.value!""}" id="subunit" maxlength="400" />
+                                                <input type="text" class="form-control"
+                                                    id="subunit" maxlength="400"
+                                                    th:field="*{subUnit}"
+                                                />
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label">ProjectId:</label>
-                                                <@spring.bind "billingDetails.projectId" />
-                                                <input type="text" class="form-control" name="${spring.status.expression}"
-                                                    value="${spring.status.value!""}" id="projectId" maxlength="400" />
+                                                <input type="text" class="form-control"
+                                                    id="projectId" maxlength="400"
+                                                    th:field="*{projectId}"
+                                                />
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label">Project Title:</label>
-                                                <@spring.bind "billingDetails.projectTitle" />
-                                                <input type="text" class="form-control" name="${spring.status.expression}"
-                                                    value="${spring.status.value!""}" id="projectId" maxlength="400" />
+                                                <input type="text" class="form-control"
+                                                    id="projectTitle" maxlength="400"
+                                                    th:field="*{projectTitle}"
+                                                />
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label">Slice ID:</label>
-                                                <@spring.bind "billingDetails.sliceID" />
-                                                <input type="text" class="form-control" name="${spring.status.expression}"
-                                                    value="${spring.status.value!""}" id="slice" maxlength="400" />
+                                                <input type="text" class="form-control"
+                                                    id="slice" maxlength="400"
+                                                    th:field="*{sliceID}"
+                                                />
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label">Amount to be billed:(Please enter the amount in pounds (and pence if applicable) without any symbols, do not use commas)</label>
-                                                <@spring.bind "billingDetails.amountToBeBilled" />:
-                                                <input type="text" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?)?" name="${spring.status.expression}"
-                                                    value="${spring.status.value!""}" maxlength="400" id="amountBilled" />
+                                                <input type="text" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?)?"
+                                                    maxlength="400" id="amountToBeBilled"
+                                                    th:field="*{amountToBeBilled}"
+                                                />
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label">Amount billed:(Please enter the amount in pounds (and pence if applicable) without any symbols, do not use commas)</label>
-                                                <@spring.bind "billingDetails.amountBilled" />
-                                                <input type="text" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?)?" name="${spring.status.expression}"
-                                                    value="${spring.status.value!""}" maxlength="400" id="amountBilled" />
+                                                <input type="text" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?)?"
+                                                    maxlength="400" id="amountBilled"
+                                                    th:field="*{amountBilled}"
+                                                />
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label">Payment Details:</label>
-                                                <@spring.bind "billingDetails.paymentDetails" />
-                                                <textarea type="text" class="form-control" name="${spring.status.expression}"
-                                                    value="${spring.status.value!""}" id="paymentDetails" rows="4" cols="60" maxlength="400">
-                                                    <#if billingDetails.getPaymentDetails()??>
-                                                        ${billingDetails.getPaymentDetails()}
-                                                    </#if>
+                                                <textarea type="text" class="form-control"
+                                                    id="paymentDetails" rows="4" cols="60" maxlength="400"
+                                                    th:field="*{paymentDetails}"
+                                                >
                                                 </textarea>
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label">Special arrangements comments:</label>
-                                                <@spring.bind "billingDetails.specialComments" />
-                                                <textarea type="text" class="form-control" name="${spring.status.expression}"
-                                                    value="${spring.status.value!""}" id="comments" rows="4" cols="60" maxlength="400">
-                                                    <#if billingDetails.getSpecialComments()??>
-                                                        ${billingDetails.getSpecialComments()}
-                                                    </#if>
+                                                <textarea type="text" class="form-control"
+                                                    id="comments" rows="4" cols="60" maxlength="400"
+                                                    th:field="*{specialComments}"
+                                                >
                                                 </textarea>
                                             </div>
                                         </div>
                                         <input type="hidden" id="submitAction" name="action" value="submit" />
-                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                                        <input type="hidden" name="vaultID" value="${billingDetails.getVaultID()}" />
-                                        <input type="hidden" name="vaultName" value="${billingDetails.getVaultName()}" />
-                                        <input type="hidden" name="billingType" value="${billingDetails.getBillingType()}" />
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <input type="hidden" name="vaultID" th:value="${billingDetails.getVaultID()}" />
+                                        <input type="hidden" name="vaultName" th:value="${billingDetails.getVaultName()}" />
+                                        <input type="hidden" name="billingType" th:value="${billingDetails.getBillingType()}" />
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                                             <button type="submit" id="update-billingDetails-btn" class="btn btn-primary btn-ok">Save</button>
@@ -209,7 +204,7 @@
                         </div>
                     </div>
                 </div>
-                <input type="hidden" name="${_csrf.parameterName}"
-                    value="${_csrf.token}" />
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             </div>
-        </@layout.vaultLayout>
+</div>
+</html>

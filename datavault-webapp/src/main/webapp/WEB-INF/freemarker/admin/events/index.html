@@ -1,16 +1,16 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="admin">
-<@layout.vaultLayout>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='admin')}">
+
+<div layout:fragment="content">
 
 <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
+        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
         <li class="active"><b>Events</b></li>
     </ol>
-
-    <#if events?has_content>
+    <th:block th:if="${events != null}">
         <div class="table-responsive" style="overflow: scroll; font-family:monospace;">
             <table class="table table-striped text-nowrap">
                 <thead>
@@ -28,31 +28,26 @@
                 </thead>
 
                 <tbody>
-                    <#list events as event>
-                    <tr class="tr">
-                        <td>
-                            <#if event.agentType == "WORKER">
-                                <span class="label label-Warning">${event.agentType}</span>&nbsp${event.agent}
-                            <#elseif event.agentType == "WEB">
-                                <span class="label label-primary">${event.agentType}</span>&nbsp${event.agent}
-                            <#else>
-                                <span class="label label-default">${event.agentType}</span>&nbsp${event.agent}
-                            </#if>
+                    <tr th:list="event: ${events}" class="tr">
+                        <td th:switch="${event:agentType}">
+                            <span th:case="WORKER" class="label label-Warning">[[${event.agentType}]]</span>&nbsp;[[${event.agent}]]
+                            <span th:case="WEB" class="label label-primary">[[${event.agentType}]]</span>&nbsp;[[${event.agent}]]
+                            <span th:case="*" class="label label-default">[[${event.agentType}]]</span>&nbsp;[[${event.agent}]]
                         </td>
-                        <td>${event.userID!}</td>
-                        <td>${event.eventClass?html}</a></td>
-                        <td>${event.timestamp?datetime}</td>
-                        <td>${event.vaultID!}</td>
-                        <td>${event.depositID!}</td>
-                        <td>${event.remoteAddress!?html}</a></td>
-                        <td>${event.userAgent!?html}</a></td>
-                        <td>${event.id}</td>
+                        <td>[[${event?.userID ?: ''}]]</td>
+                        <td>[[${event?.eventClass ?: ''}]]</a></td>
+                        <td>[[${#dates.format(event?.timestamp,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
+                        <td>[[${event?.vaultID ?: ''}]]</td>
+                        <td>[[${event?.depositID ?: ''}]]</td>
+                        <td>[[${event?.remoteAddress ?: ''}]]</a></td>
+                        <td>[[${event?.userAgent ?: ''}]]</a></td>
+                        <td>[[${event?.id ?: ''}]]</td>
                     </tr>
-                    </#list>
                 </tbody>
             </table>
         </div>
-    </#if>
+    </th:block>
 
 </div>
-</@layout.vaultLayout>
+</div>
+</html>

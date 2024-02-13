@@ -1,4 +1,4 @@
-<fieldset id="summary-fieldset">
+<fieldset id="summary-fieldset" xmlns:th="http://www.thymeleaf.org" >
 	<div class="form-card">
 		<h2 class="fs-title">Summary</h2>
 		<div>
@@ -131,21 +131,19 @@
 			<span class="glyphicon glyphicon glyphicon-alert" aria-hidden="true"></span><strong>PLEASE NOTE – this information will be public, and will be linked to the PI’s Pure profile.</strong>
 			<div class="checkbox">
 				<label>
-					<@spring.bind "vault.pureLink" />
-					<input type="hidden" name="_${spring.status.expression}" value="false" />
-					<input id="pureLink-check" type="checkbox" name="${spring.status.expression}"
-						<#if spring.status.value?? && spring.status.value?string=="true">checked="true"</#if> /> I agree
+					<input type="hidden" value="false" name="pureLink"  />
+					<input id="pureLink-check" type="checkbox" th:field="*{pureLink}" > I agree
 				</label>
 			</div>
 		</div>
 	</div>
 	<button type="button" name="previous" class="previous action-button-previous btn btn-default">&laquo; Previous</button>
-	<#if vault.confirmed?c=="false">
+	<th:block th:if="${!vault.confirmed}">
 		<button type="submit" name="save" value="Save" class="save action-button-previous btn btn-default">
 			<span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
 		</button>
 		<button type="submit" id="confirm" name="confirm" value="Confirm" class="action-button btn btn-success" disabled>
 			<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Confirm
 		</button>
-	</#if>
+	</th:block>
 </fieldset>

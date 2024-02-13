@@ -1,13 +1,12 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-	<#-- Specify which navbar element should be flagged as active -->
-		<#global nav="admin">
-			<#import "/spring.ftl" as spring />
-			<#assign sec=JspTaglibs["http://www.springframework.org/security/tags"] />
-			<@layout.vaultLayout>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<div layout:fragment="content">
 				<div class="container">
 					<ol class="breadcrumb">
-						<li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
-						<li><a href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults"><b>Pending Vaults</b></a></li>
+						<li><a th:href="@{/admin/}"><b>Administration</b></a></li>
+						<li><a th:href="@{/admin/pendingVaults}"><b>Pending Vaults</b></a></li>
 						<li class="active"><b>Pending Vault Summary</b></li>
 					</ol>
 					<div class="container whitebackground">
@@ -15,10 +14,10 @@
 						<div class="row">
 							<div class="col-md-12">
 								<a name="previous" class="btn btn-primary"
-									href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults">&laquo; Return</a>
+									th:href="@{/admin/pendingVaults}">&laquo; Return</a>
 							</div>
 						</div>
-						<form id="create-vault" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/upgrade/${pendingVault.ID}" method="get" novalidate="novalidate" _lpchecked="1">
+						<form id="create-vault" class="form" role="form" th:action="@{|/admin/pendingVaults/upgrade/${pendingVault.ID}|}" method="get" novalidate="novalidate" _lpchecked="1">
 							<div class="row">
 								<div class="col-md-12">
 									<table class="table table-sm">
@@ -32,31 +31,31 @@
 											<tr>
 												<th scope="col">Affirmation</th>
 												<td>
-													<#if (pendingVault.affirmed)??>
-														${pendingVault.affirmed?c}
-													</#if>
+													<th:block th:if="${pendingVault.affirmed != null}">
+														[[${pendingVault.affirmed}]]
+													</th:block>
 												</td>
 											</tr>
 											<tr>
 												<th scope="col">Vault Name</th>
 												<td>
-													${pendingVault.name?html}
+													[[${pendingVault.name}]]
 												</td>
 											</tr>
 											<tr>
 												<th scope="col">Description</th>
 												<td>
-													<#if (pendingVault.description)??>
-														${pendingVault.description?html}
-													</#if>
+													<th:block th:if="${pendingVault.description != null}">
+														[[${pendingVault.description}]]
+													</th:block>
 												</td>
 											</tr>
 											<tr>
 												<th scope="col">Creation Date</th>
 												<td>
-													<#if (pendingVault.creationTime)??>
-														${pendingVault.creationTime?date}
-													</#if>
+													<th:block th:if="${pendingVault.creationTime != null}">
+														[[${#dates.format(pendingVault.creationTime,'yyyy-MM-dd')}]]<!--/* date */-->
+													</th:block>
 												</td>
 											</tr>
 											<tr>
@@ -64,63 +63,62 @@
 												<td>
 													<!-- Model attribute createRetentionPolicy is used here. -->
 													<span>
-														<#if (createRetentionPolicy)??>
-															${createRetentionPolicy.name?html} (Minimum period:
-															<#if (createRetentionPolicy.minRetentionPeriod)??>
-																${createRetentionPolicy.minRetentionPeriod?html}
-																<#else>
-																	not stated
-															</#if>
-															)
+														<th:block th:if="${createRetentionPolicy}">
+															[[${createRetentionPolicy.name}]] (Minimum period:
+															<th:block th:if="${createRetentionPolicy.minRetentionPeriod != null}">
+																[[${createRetentionPolicy.minRetentionPeriod}]]
+															</th:block>
+															<th:block th:if="${createRetentionPolicy.minRetentionPeriod == null}">
+																not stated
+															</th:block>
+														</th:block>
 													</span>
-													</#if>
 												</td>
 											</tr>
 											<tr>
 												<th scope="col">Grant End Date</th>
 												<td>
-													<#if (pendingVault.grantEndDate)??>
-														${pendingVault.grantEndDate?date}
-													</#if>
+													<th:block th:if="${pendingVault.grantEndDate != null}">
+														[[${#dates.format(pendingVault.grantEndDate,'yyyy-MM-dd')}]]<!--/* date */-->
+													</th:block>
 												</td>
 											</tr>
 											<tr>
 												<th scope="col">School</th>
 												<td>
 													<!-- Model attribute group used here.-->
-													<#if (group.name)??>
-														${group.name?html}
-													</#if>
+													<th:block th:if="${group?.name != null}">
+														[[${group.name}]]
+													</th:block>
 												</td>
 											</tr>
 											<tr>
 												<th scope="col">Review Date</th>
 												<td>
-													<#if pendingVault.confirmed?c=="true">
+													<th:block th:if="${pendingVault.confirmed}">
 														<input class="form-control" id="reviewDate" placeholder="yyyy-mm-dd" name="reviewDate"
-															value="${pendingVault.getReviewDateAsString()}" />
+															th:value="${pendingVault.getReviewDateAsString()}" />
 														<span id="invalid-review-date-span" style="font-size: 1.2em; font: bold; color:  #AE0F0F; display: inline;"></span>
-														<#else>
-															<#if (pendingVault.reviewDate)??>
-																${pendingVault.reviewDate?date}
-															</#if>
-													</#if>
+													</th:block>
+`													<th:block th:if="${pendingVault.reviewDate != null}">
+														[[${#dates.format(pendingVault.reviewDate,'yyyy-MM-dd')}]]<!--/* date */-->
+													</th:block>
 												</td>
 											</tr>
 											<tr>
 												<th scope="col">Estimate of the amount of data</th>
 												<td>
-													<#if (pendingVault.estimate)??>
-														${pendingVault.estimate?html}
-													</#if>
+													<th:block th:if="${pendingVault.estimate != null}">
+														[[${pendingVault.estimate}]]
+													</th:block>
 												</td>
 											</tr>
 											<tr>
 												<th scope="col">Notes regarding data retention</th>
 												<td>
-													<#if (pendingVault.notes)??>
-														${pendingVault.notes?html}
-													</#if>
+													<th:block th:if="${pendingVault.notes != null}">
+														[[${pendingVault.notes}]]
+													</th:block>
 												</td>
 											</tr>
 											<!-- START OF BILLING SECTION -->
@@ -133,63 +131,67 @@
 											<tr>
 												<th scope="col">Billing Type</th>
 												<td>
-													<#if (pendingVault.billingType)??>
-														${pendingVault.billingType?html}
-													</#if>
+													<th:block th:if="${pendingVault.billingType != null}">
+														[[${pendingVault.billingType}]]
+													</th:block>
 												</td>
 											</tr>
-											<#if (pendingVault.billingType)??>
+
+											<th:block th:if="${!pendingVault.billingType != null}">
+												[[${pendingVault.billingType}]]
+											</th:block>
+											<th:block th:switch="${pendingVault.billingType}"></th:block>
 												<!-- BILLING_TYPE SLICE -->
-												<#if (pendingVault.billingType=="SLICE" )>
+												<th:block th:case="SLICE">
 													<tr>
 														<th scope="col">Slice</th>
 														<td>
-															<#if (pendingVault.sliceID)??>
-																${pendingVault.sliceID?html}
-															</#if>
+															<th:block th:if="${pendingVault.sliceID != null}">
+																[[${pendingVault.billingType}]]
+															</th:block>
 														</td>
 													</tr>
-												</#if>
+												</th:block>
 												<!-- BILLING_TYPE WILL_PAY -->
-												<#if (pendingVault.billingType=="WILL_PAY" )>
+												<th:block th:case="WILL_PAY">
 													<tr>
 														<th scope="col">Authoriser</th>
 														<td>
-															<#if (pendingVault.authoriser)??>
-																${pendingVault.authoriser?html}
-															</#if>
+															<th:block th:if="${pendingVault.authoriser != null}">
+																[[${pendingVault.authoriser}]]
+															</th:block>
 														</td>
 													</tr>
 													<tr>
 														<th scope="col">School/Unit</th>
 														<td>
-															<#if (pendingVault.schoolOrUnit)??>
-																${pendingVault.schoolOrUnit?html}
-															</#if>
+															<th:block th:if="${pendingVault.schoolOrUnit != null}">
+																[[${pendingVault.schoolOrUnit}]]
+															</th:block>
 														</td>
 													</tr>
 													<tr>
 														<th scope="col">Subunit</th>
 														<td>
-															<#if (pendingVault.subunit)??>
-																${pendingVault.subunit?html}
-															</#if>
+															<th:block th:if="${pendingVault.subunit != null}">
+																[[${pendingVault.subunit}]]
+															</th:block>
 														</td>
 													</tr>
 													<tr>
 														<th scope="col">Project Title</th>
 														<td>
-															<#if (pendingVault.projectTitle)??>
-																${pendingVault.projectTitle?html}
-															</#if>
+															<th:block th:if="${pendingVault.projectTitle != null}">
+																[[${pendingVault.projectTitle}]]
+															</th:block>
 														</td>
 													</tr>
 													<tr>
 														<th scope="col">Grant End Date</th>
 														<td>
-															<#if (pendingVault.grantEndDate)??>
-																${pendingVault.grantEndDate?date}
-															</#if>
+															<th:block th:if="${pendingVault.grantEndDate != null}">
+																[[${#dates.format(pendingVault.grantEndDate,'yyyy-MM-dd')}]]<!--/* date */-->
+															</th:block>
 														</td>
 													</tr>
 													<tr>
@@ -197,15 +199,14 @@
 														<td>
 															<textarea id="summary-payment-details" type="text"
 																readonly
-																rows="4" cols="60">
-																<#if (pendingVault.paymentDetails)??>
-																	${pendingVault.paymentDetails?html}
-																</#if>
+																rows="4" cols="60"
+																th:text="${pendingVault.paymentDetails}"
+															>
 															</textarea>
 														</td>
 													</tr>
-												</#if>
-											</#if>
+											</th:block>
+											</th:block>
 											<!-- END OF BILLING SECTION -->
 											<tr>
 												<th scope="col">
@@ -216,31 +217,31 @@
 											<tr>
 												<th scope="col">Owner</th>
 												<td>
-													<#if (pendingVault.ownerId)??>
-														${pendingVault.ownerId?html}
-													</#if>
+													<th:block th:if="${pendingVault.ownerId != null}">
+														[[${pendingVault.ownerId}]]
+													</th:block>
 												</td>
 											</tr>
 											<tr>
 												<th scope="col">NDMs</th>
 												<td>
-													<#if pendingVault.nominatedDataManagerIds?has_content>
-														<#list pendingVault.nominatedDataManagerIds as ndm>
-															${ndm}
+													<th:block th:if="${pendingVault.nominatedDataManagerIds != null}">
+														<th:block th:each="ndm: ${pendingVault.nominatedDataManagerIds}">
+															[[${ndm}]]
 															<br>
-														</#list>
-													</#if>
+														</th:block>
+													</th:block>
 												</td>
 											</tr>
 											<tr>
 												<th scope="col">Depositors</th>
 												<td>
-													<#if pendingVault.depositorIds?has_content>
-														<#list pendingVault.depositorIds as dep>
-															${dep}
+													<th:block th:if="${pendingVault.depositorIds != null}">
+														<th:block th:each="dep: ${pendingVault.depositorIds}">
+															[[${dep}]]
 															<br>
-														</#list>
-													</#if>
+														</th:block>
+													</th:block>
 												</td>
 											</tr>
 											<tr>
@@ -252,20 +253,20 @@
 											<tr>
 												<th scope="col">Contact Person</th>
 												<td>
-													<#if (pendingVault.contact)??>
-														${pendingVault.contact?html}
-													</#if>
+													<th:block th:if="${pendingVault.contact != null}">
+														[[${pendingVault.contact}]]
+													</th:block>
 												</td>
 											</tr>
 											<tr>
 												<th scope="col">Data Creators</th>
 												<td>
-													<#if pendingVault.dataCreators?has_content>
-														<#list pendingVault.dataCreators as dc>
-															${dc}
+													<th:block th:if="${pendingVault.dataCreators != null}">
+														<th:block th:each="dc: ${pendingVault.dataCreators}">
+															[[${dc}]]
 															<br>
-														</#list>
-													</#if>
+														</th:block>
+													</th:block>
 												</td>
 											</tr>
 										</tbody>
@@ -274,21 +275,21 @@
 							</div>
 							<div class="row">
 								<div class="col-md-12 text-center">
-									<#if (pendingVault.ID)??>
+									<th:block th:if="${pendingVault.ID}">
 										<a name="return-confirmed-pending-vaults" class="btn btn-default"
-											href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/confirmed">Cancel</a>
+											th:href="@{/admin/pendingVaults/confirmed}">Cancel</a>
 										<a name="delete-pending-vault" class="btn btn-danger"
-											href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/${pendingVault.getID()}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Delete Pending Vault</a>
+											th:href="@{|/admin/pendingVaults/${pendingVault.getID()}|}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Delete Pending Vault</a>
 										<!-- Note: start=2 added to ensure we go the Billing page of Edit Pending Vault -->
 										<a name="edit-pending-vault" class="btn btn-primary" style="margin-bottom: 0;"
-											href="${springMacroRequestContext.getContextPath()}/admin/pendingVaults/edit/${pendingVault.getID()}?start=2">Edit Pending Vault Metadata</a>
-										<#if pendingVault.confirmed?c=="true">
+											th:href="@{|/admin/pendingVaults/edit/${pendingVault.getID()}?start=2|}">Edit Pending Vault Metadata</a>
+										<th:block th:if="${pendingVault.confirmed}">
 											<button id="create-vault-btn" type="submit" value="submit" class="btn btn-success">
 												<span class="glyphicon glyphicon-folder-close"></span>
 												Create Vault
 											</button>
-										</#if>
-									</#if>
+										</th:block>
+									</th:block>
 								</div>
 							</div>
 						</form>
@@ -296,6 +297,6 @@
 				</div>
 				<!-- Custom javascript -->
 				<!-- import date-validation-utils.j first -->
-				<script src="<@spring.url '/resources/application/js/date-validation-utils.js'/>"></script>
-				<script src="<@spring.url '/resources/application/js/admin-pending-vault-summary.js'/>"></script>
-			</@layout.vaultLayout>
+				<script th:src="@{/resources/application/js/date-validation-utils.js}"></script>
+				<script th:src="@{/resources/application/js/admin-pending-vault-summary.js}"></script>
+</div></html>

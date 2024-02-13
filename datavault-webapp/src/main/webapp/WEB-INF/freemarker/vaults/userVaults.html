@@ -1,16 +1,17 @@
-<#import "*/layout/welcomelayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="home">
-<#import "/spring.ftl" as spring />
-<@layout.vaultLayout>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='home')}">
+
+<div layout:fragment="content">
 
     <div class="container">
-    
-        <#if vaults?has_content>
+
+        <th:block th:if="${vaults != null}">
         <h3>
             Current Vaults
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
-                title="Vaults of which you are either the Owner or the Nominated Data Manager. If you think a vault is missing from this list, please contact the Research Data Service">
+                title="Vaults of which you are either the Owner or the Nominated Data Manager. If you think a vault is missing from this list, please contact the Research Data Service"
+            />
         </h3>
         
         <div class="row">
@@ -28,22 +29,19 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <#list vaults as vault>
-                            <tr>
+
+                            <tr th:each="vault: ${vaults}">
                                 <td>
-                                    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/">
-                                        ${vault.name?html}
+                                    <a th:href="@{|/vaults/${vault.getID()}/|}">
+                                        [[${vault.name}]]
                                     </a>
                                 </td>
-                               
-                                </td>
-                                <td>${vault.getUserName()?html} (${vault.getUserID()?html})</td>
-                                <td></td>
-                                <td>${vault.getVaultSize()}</td>
-                                <td>${vault.getCreationTime()?datetime}</td>
-                                <td class="text-muted">${vault.getReviewDate()?string('dd/MM/yyyy')}</td>
+                                <td>[[${vault.getUserName()}]] ([[${vault.getUserID()}]])</td>
+                                <td>&nbsp;</td>
+                                <td>[[${vault.getVaultSize()}]]</td>
+                                <td>[[${#dates.format(vault.getCreationTime(),'HH:mm:ss dd/MM/yyyy')}]]<!--/* datetime */--></td>
+                                <td class="text-muted">[[${#dates.format(vault.getReviewDate(),'dd/MM/yyyy')}]]<!--/* date */--></td>
                             </tr>
-                            </#list>
                         </tbody>
                     </table>
                 </div>
@@ -51,9 +49,8 @@
         </div>
         <br/>
         <br/>
-        </#if>
-        
-       
-    
+        </th:block>
+    </div>
+</div>
+</html>
 
-</@layout.vaultLayout>

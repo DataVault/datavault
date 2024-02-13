@@ -1,14 +1,14 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="home">
-<#assign sec=JspTaglibs["http://www.springframework.org/security/tags"] />
-<@layout.vaultLayout>
-<div class="container">
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='home')}" >
+
+<div layout:fragment="content">
+    <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/"><b>Home</b></a></li>
-        <li><a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/"><b>Vault:</b> ${vault.name?html}</a></li>
-        <li class="active"><b>Deposit:</b> ${deposit.name?html}</li>
+        <li><a th:href="@{/}"><b>Home</b></a></li>
+        <li><a th:href="@{|/vaults/${vault.getID()}|}"><b>Vault:</b> [[${vault.name}]]</a></li>
+        <li class="active"><b>Deposit:</b> [[${deposit.name}]]</li>
     </ol>
 
     <div class="panel panel-uoe-low">
@@ -18,7 +18,7 @@
 
         <div class="panel-body">
 
-            <h2>View the Deposit: <small>${deposit.name?html}</small></h2>
+            <h2>View the Deposit: <small>[[${deposit.name}]]</small></h2>
             <br/>
 
             <ol id="progtrckr" class="progtrckr" data-progtrckr-steps="0" style="display:none;">
@@ -45,74 +45,77 @@
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
                 <span id="job-info-msq"></span>
             </div>
-
-            <#assign canRetrieveDataExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_RETRIEVE_DATA')">
-            <@sec.authorize access=canRetrieveDataExpression>
-            <#if deposit.status.name() == "COMPLETE">
-                <a id="retrievebtn" class="btn btn-primary pull-right" href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve" disabled='disabled'>
+            <div th:with="canRetrieveDataExpression=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_RETRIEVE_DATA')|">
+            <div th:if="${#authorization.expression(canRetrieveDataExpression)}">
+            <div th:if="${deposit.status.name() == 'COMPLETE'}">
+                <a id="retrievebtn" class="btn btn-primary pull-right" th:href="@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve|}" disabled='disabled'>
                     <i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> Retrieve data
                 </a>
-            </#if>
-            </@sec.authorize>
+            </div>
+            </div>
+            </div>
             
             <table class="table table-sm">
                 <tbody>
                     <tr>
                         <th scope="col">Deposit Name</th>
-                        <td>${deposit.name?html}</td>
+                        <td>[[${deposit.name}]]</td>
                     </tr>
                     <tr>
                         <th scope="col">Deposited By</th>
-                        <td>${deposit.getUserID()}</td>
+                        <td>[[${deposit.getUserID()}]]</td>
                     </tr>
                     <tr>
                         <th scope="col">Deposit Size</th>
                         <td>
-                            <#if deposit.status.name() != "NOT_STARTED">
-                            ${deposit.getSizeStr()}
-                            </#if>
+                            <span th:if="${deposit.status.name() != 'NOT_STARTED'}">
+                            [[${deposit.getSizeStr()}]]
+                            </span>
                         </td>
                     </tr>
                     <tr>
                         <th scope="col">Description</th>
-                        <td>${deposit.getDescription()}</td>
+                        <td>[[${deposit.getDescription()}]]</td>
                     </tr>
                     <tr>
                         <th scope="col">Time and Date of Deposit</th>
-                        <td>${deposit.creationTime?datetime}</td>
+                        <td>[[${#dates.format(deposit.creationTime,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
                     </tr>
                     <tr>
                     <th scope="col">Contains Personal Data</th>
                         <td>
-                        <#if deposit.hasPersonalData>Yes<#else>No</#if>
+                            <span th:if    ="${deposit.hasPersonalData}">Yes</span>
+                            <span th:unless="${deposit.hasPersonalData}">No</span>
                         </td>
                     </tr>
                     <tr>
                         <th scope="col">Personal Data Statement</th>
-                        <td>${deposit.personalDataStatement}</td>
+                        <td>[[${deposit.personalDataStatement}]]</td>
                     </tr>
                     <tr>
                         <th scope="col">Status</th>
                         <td>
                             <div id="deposit-status" class="job-status">
-                                <#if deposit.status.name() == "COMPLETE">
-                                <div class="text-success">
+                              <th:block th:switch="${deposit.status.name()}">
+                                <div th:case="COMPLETE" class="text-success">
                                     <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
                                     Complete
                                 </div>
-                                <#elseif deposit.status.name() == "FAILED">
-                                <div class="text-danger">
+                                <div th:case="FAILED" class="text-danger">
                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                                     Failed
                                 </div>
-                                <#elseif deposit.status.name() == "NOT_STARTED">
+                                <div th:case="NOT_STARTED">
                                 Queued
-                                <#elseif deposit.status.name() == "IN_PROGRESS">
+                                </div>
+                                <div th:case="IN_PROGRESS">
                                 <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
                                 In progress
-                                <#else>
+                                </div>
+                                <dv: th:case="*">
                                 ${deposit.status}
-                                </#if>
+                                </dv:>
+                              </th:block>
                             </div>
                         </td>
                     </tr>
@@ -120,8 +123,8 @@
             </table>
             
             <ul class="nav nav-tabs">
-                <li class="active"><a data-toggle="tab" href="#events">Events <span class="badge">${events?size}</span></a></li>
-                <li><a data-toggle="tab" href="#retrievals">Retrievals <span class="badge">${retrieves?size}</span></a></li>
+                <li class="active"><a data-toggle="tab" href="#events">Events <span class="badge">[[${events == null ? 0 : #lists.size(events)}]]</span></a></li>
+                <li><a data-toggle="tab" href="#retrievals">Retrievals <span class="badge">[[${retrieves == null ? 0 : #lists.size(retrieves)}]]</span></a></li>
             </ul>
             
             <div id="deposit-tab-content" class="tab-content">
@@ -139,14 +142,12 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    <#list events as event>
-                                    <tr class="tr">
-                                        <td>${event.userID!""}</td>
-                                        <td>${event.eventClass?replace('org.datavaultplatform.common.event.', '')?html}</td>
-                                        <td>${event.message?html}</td>
-                                        <td>${event.timestamp?datetime}</td>
+                                    <tr th:each="event: ${events}" class="tr">
+                                        <td>[[${event.userID ?: ''}]]</td>
+                                        <td>[[${#strings.replace(event.eventClass,'org.datavaultplatform.common.event.','')}]]</td>
+                                        <td>[[${event.message}]]</td>
+                                        <td>[[${#dates.format(event.timestamp,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
                                     </tr>
-                                    </#list>
                                 </tbody>
                             </table>
                         </div>
@@ -166,35 +167,33 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    <#list retrieves as retrieve>
-                                    <tr class="tr">
-                                        <td>${retrieve.user.getID()?html}</td>
-                                        <td><#if retrieve.hasExternalRecipients>Yes<#else>No</#if></td>
-                                        <td>${retrieve.timestamp?datetime}</td>
+                                    <tr th:each="retrieve: ${retrieves}" class="tr">
+                                        <td>[[${retrieve.user.getID()}]]}</td>
+                                        <td th:text="${retrieve.hasExternalRecipients} ? 'Yes' : 'No'">dummy</td>
+                                        <td>[[${#dates.format(retrieve.timestamp,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
                                         <td>
-                                            <div class="job-status">
-                                                <#if retrieve.status.name() == "COMPLETE">
-                                                <div class="text-success">
+                                            <div th:switch="${retrieve.status.name()}" class="job-status" >
+                                                <div th:case="COMPLETE" class="text-success">
                                                     <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
                                                     Complete
                                                 </div>
-                                                <#elseif retrieve.status.name() == "FAILED">
-                                                <div class="text-danger">
+                                                <div th:case="FAILED" class="text-danger">
                                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                                                     Failed
                                                 </div>
-                                                <#elseif retrieve.status.name() == "NOT_STARTED">
-                                                Queued
-                                                <#elseif retrieve.status.name() == "IN_PROGRESS">
-                                                <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
-                                                In progress
-                                                <#else>
-                                                ${retrieve.status}
-                                                </#if>
+                                                <div th:case="NOT_STARTED">
+                                                    Queued
+                                                </div>
+                                                <div th:case="IN_PROGRESS">
+                                                    <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                                                    In progress
+                                                </div>
+                                                <div th:case="*">
+                                                    [[${retrieve.status}]]
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
-                                    </#list>
                                 </tbody>
                             </table>
                         </div>
@@ -207,9 +206,9 @@
 
 </div>
 
-<script>
+<script th:inline="javascript">
     
-    var depositStatus = "${deposit.status}"
+    var depositStatus = /*[[${deposit.status}]]*/ 'replaced-by-tl';
     var updateInterval = 500;
     
     var depositInProgress = false
@@ -316,8 +315,9 @@
 
     function load() {
         setTimeout(function () {
+            var baseURL = /*[[@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}/jobs|}]]*/ 'replaced-by-tl';
             $.ajax({
-                url: "${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}/jobs",
+                url: baseURL,
                 type: "GET",
                 dataType: 'json',  
                 success: function (result) {
@@ -362,5 +362,6 @@
         to { transform: scale(1) rotate(360deg);}
     }
 </style>
+</div>
+</html>
 
-</@layout.vaultLayout>

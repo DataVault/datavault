@@ -1,154 +1,156 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-    <#-- Specify which navbar element should be flagged as active -->
-        <#global nav="admin">
-            <@layout.vaultLayout>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='admin')}">
+
+<div layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
                 <div class="container">
                     <ol class="breadcrumb">
-                        <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
+                        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
                         <li class="active"><b>Billing</b></li>
                     </ol>
                     <form id="search-vaults" class="form" role="form" action="" method="get">
                         <div class="input-group">
-                            <input type="text" class="form-control" value="${query?url}" name="query" placeholder="Search for...">
+                            <input type="text" class="form-control" th:value="${queryPARAM}" name="query" placeholder="Search for...">
                             <div class="input-group-btn">
                                 <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
                             </div>
                         </div>
                     </form>
                     <div align="right">
-                        <form id="search-vaults" class="form" role="form" action="${springMacroRequestContext.getContextPath()}/admin/billing/csv" method="get">
+                        <form id="search-vaults" class="form" role="form" th:action="@{/admin/billing/csv}" method="get">
                             <div class="input-group" align="right">
-                                <input type="text" class="form-control hidden" value="${query?url}" name="query" placeholder="Search for...">
+                                <input type="text" class="form-control hidden" th:value="${queryPARAM}" name="query" placeholder="Search for...">
                                 <button class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Download CSV File</button>
                                 <div align="right">
                                 </div>
+                            </div>
                         </form>
                     </div>
-                    <#if vaults?has_content>
+                    <th:block th:if="${vaults != null}">
                         <div class="table-responsive" id="vaultsTable">
                             <table class="table table-striped">
                                 <thead>
                                     <tr class="tr">
-                                        <th><a href="?sort=name&order=${ordername}&query=${query?url}">Vault Name<#if sort=="name">
-                                                    <#if order=="desc"><span class="dropup"><span class="caret"></span></span>
-                                                        <#else><span class="caret"></span>
-                                                    </#if>
-                                                </#if></a></th>
-                                        <th><a href="?sort=projectId&order=${orderProjectId}&query=${query?url}">Project Id<#if sort=="projectId">
-                                                    <#if order=="desc"><span class="dropup"><span class="caret"></span></span>
-                                                        <#else><span class="caret"></span>
-                                                    </#if>
-                                                </#if></a></th>
+                                        <th><a th:href="|?sort=name&order=${ordername}&query=${queryPARAM}|">Vault Name
+                                            <th:block th:if="${sort == 'name'}">
+                                                    <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
+                                                    <span th:if="${order!='desc'}" class="caret"></span>
+                                            </th:block>
+                                        </a></th>
+                                        <th><a th:href="|?sort=projectId&order=${orderProjectId}&query=${queryPARAM}|">Project Id
+                                            <th:block th:if="${sort == 'projectId'}">
+                                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
+                                                <span th:if="${order!='desc'}" class="caret"></span>
+                                            </th:block>
+                                        </a></th>
                                         <th>Project Size</th>
-                                        <th><a href="?sort=vaultSize&order=${ordervaultsize}&query=${query?url}">Vault Size<#if sort=="vaultSize">
-                                                    <#if order=="desc"><span class="dropup"><span class="caret"></span></span>
-                                                        <#else><span class="caret"></span>
-                                                    </#if>
-                                                </#if></a></th>
-                                        <th><a href="?sort=grantEndDate&order=${ordergrantEndDate}&query=${query?url}">Grant End Date<#if sort=="grantEndDateDate">
-                                                    <#if order=="desc"><span class="dropup"><span class="caret"></span></span>
-                                                        <#else><span class="caret"></span>
-                                                    </#if>
-                                                </#if></a></th>
-                                        <th><a href="?sort=creationTime&order=${ordercreationtime}&query=${query?url}">Date created<#if sort=="creationTime">
-                                                    <#if order=="desc"><span class="dropup"><span class="caret"></span></span>
-                                                        <#else><span class="caret"></span>
-                                                    </#if>
-                                                </#if></a></th>
-                                        <th><a href="?sort=reviewDate&order=${orderreviewDate}&query=${query?url}">Review Date<#if sort=="reviewDate">
-                                                    <#if order=="desc"><span class="dropup"><span class="caret"></span></span>
-                                                        <#else><span class="caret"></span>
-                                                    </#if>
-                                                </#if></a></th>
+                                        <th><a th:href="|?sort=vaultSize&order=${ordervaultsize}&query=${queryPARAM}|">Vault Size
+                                            <th:block th:if="${sort == 'vaultSize'}">
+                                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
+                                                <span th:if="${order!='desc'}" class="caret"></span>
+                                            </th:block>
+                                        </a></th>
+                                        <th><a th:href="|?sort=grantEndDate&order=${ordergrantEndDate}&query=${queryPARAM}|">Grant End Date
+                                            <th:block th:if="${sort == 'grantEndDateDate'}">
+                                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
+                                                <span th:if="${order!='desc'}" class="caret"></span>
+                                            </th:block>
+                                        </a></th>
+                                        <th><a th:href="|?sort=creationTime&order=${ordercreationtime}&query=${queryPARAM}|">Date created
+                                            <th:block th:if="${sort == 'creationTime'}">
+                                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
+                                                <span th:if="${order!='desc'}" class="caret"></span>
+                                            </th:block>
+                                        </a></th>
+                                        <th><a th:href="|?sort=reviewDate&order=${orderreviewDate}&query=${queryPARAM}|">Review Date
+                                            <th:block th:if="${sort == 'reviewDate'}">
+                                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
+                                                <span th:if="${order!='desc'}" class="caret"></span>
+                                            </th:block>
+                                        </a></th>
                                         <th>Amount to be Billed</th>
                                         <th>Amount Billed</th>
-                                        <th><a href="?sort=vault.user.id&order=${orderuser}&query=${query?url}">Owner<#if sort=="vault.user.id">
-                                                    <#if order=="desc"><span class="dropup"><span class="caret"></span></span>
-                                                        <#else><span class="caret"></span>
-                                                    </#if>
-                                                </#if></a></th>
+                                        <th><a th:href="|?sort=vault.user.id&order=${orderuser}&query=${queryPARAM}|">Owner
+                                            <th:block th:if="${sort == 'vault.user.id'}">
+                                                <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
+                                                <span th:if="${order!='desc'}" class="caret"></span>
+ d                                            </th:block>
+                                        </a></th>
                                         <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <#list vaults as vault>
-                                        <tr class="tr">
+                                        <tr th:each="vault: ${vaults}" class="tr">
                                             <td>
-                                                <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/">
-                                                    ${vault.name?html}
+                                                <a href="@{|/vaults/${vault.getID()}|}">
+                                                    [[${vault.name}]]
                                                 </a>
                                             </td>
                                             <td>
-                                                <#if vault.getProjectId()??>
-                                                    ${vault.getProjectId()}
-                                                    <#else>
-                                                </#if>
+                                                <span th:if="${vault.getProjectId() != null}">
+                                                    [[${vault.getProjectId()}]]
+                                                </span>
                                             </td>
                                             <td>
-                                                ${vault.getProjectSizeStr()}
+                                                [[${vault.getProjectSizeStr()}]]
                                             </td>
                                             <td>
-                                                ${vault.getSizeStr()}
+                                                [[${vault.getSizeStr()}]]
                                             </td>
                                             <td>
-                                                <#if vault.grantEndDate??>
-                                                    ${vault.grantEndDate?string('dd MMM yyyy')}
-                                                    <#else>
-                                                </#if>
+                                                <span th:if="${vault.grantEndDate != null}">
+                                                    [[${#dates.format(vault.grantEndDate,'dd MMM yyyy')}]]<!--/* date */-->
+                                                </span>
                                             </td>
                                             <td>
-                                                ${vault.getCreationTime()?datetime}
+                                                [[${#dates.format(vault.getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */-->
                                             </td>
                                             <td>
-                                                <#if vault.reviewDate??>
-                                                    ${vault.reviewDate?string('dd MMM yyyy')}
-                                                    <#else>
-                                                </#if>
+                                                <span th:if="${vault.reviewDate != null}">
+                                                    [[${#dates.format(vault.reviewDate,'dd MMM yyyy')}]]<!--/* date */-->
+                                                </span>
                                             </td>
                                             <td>
-                                                <#if vault.getAmountToBeBilled()??>
-                                                    ${vault.getAmountToBeBilled()}
-                                                    <#else>
-                                                </#if>
+                                                <span th:if="${vault.getAmountToBeBilled() != null}">
+                                                    [[${vault.getAmountToBeBilled()}]]
+                                                </span>
                                             </td>
                                             <td>
-                                                <#if vault.getAmountBilled()??>
-                                                    ${vault.getAmountBilled()}
-                                                    <#else>
-                                                </#if>
+                                                <span th:if="${vault.getAmountBilled() != null}">
+                                                    [[${vault.getAmountBilled()}]]
+                                                </span>
                                             </td>
                                             <td>
-                                                <#if vault.getOwnerName()??>
-                                                    ${vault.getOwnerName()}
-                                                </#if>
+                                                <span th:if="${vault.getOwnerName() != null}">
+                                                    [[${vault.getOwnerName()}]]
+                                                </span>
                                             </td>
                                             <td>
-                                                <a href="${springMacroRequestContext.getContextPath()}/admin/billing/${vault.getID()}">Billing Details</a>
+                                                <a href="@{|/admin/billing/${vault.getID()}|}">Billing Details</a>
                                             </td>
                                         </tr>
-                                    </#list>
                                 </tbody>
                             </table>
                         </div>
                         <div align="center">
                             <p class="text-info">
-                                ${recordsInfo}
+                                [[${recordsInfo}]]
                             </p>
                         </div>
                         <div align="center">
                             <nav aria-label="...">
                                 <ul class="pagination pagination-lg" id="paginationButton">
-                                    <#list 1..numberOfPages as page>
-                                        <li <#if page==activePageId>class="page-item active"<#else>class="page-item"
-                    </#if> id="${page}">
-                    <a class="page-link" href="${springMacroRequestContext.getContextPath()}/admin/billing?query=${query?url}&sort=${sort}&order=${order}&pageId=${page}" tabindex="-1">
-                        ${page}
+                                    <th:block th:each="page: ${#numbers.sequence(1,numberOfPages)}">
+                                        <li th:id="${page}" th:class="${page == activePageId ? 'page-item active' : 'page-item' }">
+                    <a class="page-link" th:href="@{|/admin/billing?query=${queryPARAM}&sort=${sort}&order=${order}&pageId=${page}|}" tabindex="-1">
+                        [[${page}]]
                     </a>
                     </li>
-                    </#list>
+                    </th:block>
                     </ul>
                     </nav>
                 </div>
-                </#if>
+                </th:block>
                 </div>
-            </@layout.vaultLayout>
+</div>
+</html>

@@ -1,16 +1,15 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="admin">
-<@layout.vaultLayout>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='admin')}">
 
-<div class="container">
+<div layout:fragment="content">
+    <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
+        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
         <li class="active"><b>Retrievals</b></li>
     </ol>
-
-    <#if retrieves?has_content>
+    <th:block th:if="${retrieves != null && !#lists.isEmpty(retrieves)}">
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
@@ -24,19 +23,18 @@
                 </thead>
 
                 <tbody>
-                    <#list retrieves as retrieve>
-                    <tr class="tr">
-                        <td>${retrieve.getDeposit().getID()?html}</td>
-                        <td>${retrieve.status?html}</td>
-                        <td>${retrieve.timestamp?datetime}</td>
-                        <td>${retrieve.retrievePath?html}</td>
-                        <td>${retrieve.note?html}</td>
+                    <tr th:each="retrieve: ${retrieves}" class="tr">
+                        <td>[[${retrieve.getDeposit().getID()}</td>
+                        <td>[[${retrieve.status}</td>
+                        <td>[[${#dates.format(retrieve.timestamp,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
+                        <td>[[${retrieve.retrievePath}]]</td>
+                        <td>[[${retrieve.note}]]</td>
                     </tr>
-                    </#list>
                 </tbody>
             </table>
         </div>
-    </#if>
+    </th:block>
 
 </div>
-</@layout.vaultLayout>
+</div>
+</html>

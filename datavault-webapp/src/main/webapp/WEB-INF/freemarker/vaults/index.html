@@ -1,13 +1,12 @@
-<#import "*/layout/welcomelayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="home">
-<#import "/spring.ftl" as spring />
-<#assign sec=JspTaglibs["http://www.springframework.org/security/tags"] />
-<@layout.vaultLayout>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='home')}">
+
+<div layout:fragment="content">
 
     <div class="container">
-    
-        <#if vaults?has_content>
+
+        <th:block th:if="${vaults != null}">
         <h3>
             Current Vaults
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" 
@@ -29,26 +28,25 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <#list vaults as vault>
-                            <tr>
+                            <tr th:each="vault: ${vaults}">
                                 <td>
-                                    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/">
-                                        ${vault.name?html}
+                                    <a th:href="@{|/vaults/${vault.getID()}/|}">
+                                        [[${vault.name}]]
                                     </a>
                                 </td>
                                 <td>
-                                    <#assign viewDepositsSecurityExpression = "hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'MANAGE_SCHOOL_VAULT_DEPOSITS')">
-                                    <@sec.authorize access=viewDepositsSecurityExpression>
-                                    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/create" class="btn btn-primary">
+                                    <th:block th:with="viewDepositsSecurityExpression=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'MANAGE_SCHOOL_VAULT_DEPOSITS')|">
+                                    <th:block th:if="${#authorization.expression(viewDepositsSecurityExpression)}">
+                                    <a th:href="@{|/vaults/${vault.getID()}/deposits/create|}" class="btn btn-primary">
                                        <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit
                                     </a>
-                                    </@sec.authorize>
+                                    </th:block>
+                                    </th:block>
                                 </td>
-                                <td><#if vault.getOwnerId()??>${vault.getOwnerId()}</#if></td>
-                                <td>${vault.getCreationTime()?datetime}</td>
-                                <td class="text-muted">${vault.getReviewDateAsString()}</td>
+                                <td><th:block th:if="${vault.getOwnderId() != null}">[[${vault.getOwnerId()}]]</th:block></td>
+                                <td>[[${#dates.format(vault.getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
+                                <td class="text-muted">[[${vault.getReviewDateAsString()}]]</td>
                             </tr>
-                            </#list>
                         </tbody>
                     </table>
                 </div>
@@ -56,8 +54,8 @@
         </div>
         <br/>
         <br/>
-        </#if>
-        <#if pendingVaults?has_content>
+        </th:block><!-- vaults != null -->
+        <th:block th:if="${pendingVaults != null}">
             <h3>
                 Pending Vaults
                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip"
@@ -77,17 +75,15 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <#list pendingVaults as pendingVault>
-                                <tr>
+                                <tr th:each="pendingVault: ${pendingVaults}">
                                     <td>
-                                        <a href="${springMacroRequestContext.getContextPath()}/pendingVaults/${pendingVault.getID()}/">
-                                            ${pendingVault.name?html}
+                                        <a th:href="@{|/pendingVaults/${pendingVault.getID()}/|}">
+                                            [[${pendingVault.name}]]
                                         </a>
                                     </td>
-                                    <td><#if pendingVault.getOwnerId()??>${pendingVault.getOwnerId()}</#if></td>
-                                    <td>${pendingVault.getCreationTime()?datetime}</td>
+                                    <td><th:block th:if="${pendingVault.getOwnerId() != null}">[[${pendingVault.getOwnerId()}]]</th:block></td>
+                                    <td>[[${#dates.format(pendingVault.getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
                                 </tr>
-                            </#list>
                             </tbody>
                         </table>
                     </div>
@@ -95,11 +91,13 @@
             </div>
             <br/>
             <br/>
-        </#if>
+        </th:block><!-- pendingVaults != null -->
         <div class="row">
-            <a href="${springMacroRequestContext.getContextPath()}/vaults/buildsteps" class="btn btn-lg btn-primary">
+            <a th:href="@{/vaults/buildsteps}" class="btn btn-lg btn-primary">
                 <span class="glyphicon glyphicon-folder-close"></span>
                 Create vault
             </a>
         </div>
-</@layout.vaultLayout>
+</div>
+</div>
+</html>

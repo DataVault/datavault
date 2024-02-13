@@ -1,16 +1,16 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="admin">
-<@layout.vaultLayout>
-
-<div class="container">
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<div layout:fragment="content">
+    <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
+        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
         <li class="active"><b>Reviews</b></li>
     </ol>
 
-    <#if vaults?has_content>
+    <th:block th:if="${vaults != null}">
 
         <div class="table-responsive" id="vaultsTable">
             <table class="table table-striped">
@@ -28,34 +28,32 @@
                 </thead>
 
                 <tbody>
-                    <#list vaults as vault>
-                        <tr class="tr">
+                        <tr th:each="vault: ${vaults}" class="tr">
                             <td>
-                                <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/">${vault.name?html}</a>
+                                <a th:href="@{|/vaults/${vault.getID()}/|}">[[${vault.name}]]</a>
                             </td>
-                            <td>${vault.getNumberOfDeposits()}</td>
-                           <td>${vault.getSizeStr()}</td>
+                            <td>[[${vault.getNumberOfDeposits()}]]</td>
+                            <td>[[${vault.getSizeStr()}]]</td>
                             <td>
-                                <#if vault.getUserID()??>
-                                <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/${vault.getUserID()}">${vault.getUserName()?html} (${vault.getUserID()?html})</a>
-                                </#if>
+                                <th:block th:if="${vault.getUserID() != null}">
+                                <a th:href="@{|/vaults/${vault.getID()}/${vault.getUserID()}|}">[[${vault.getUserName()}]] ([[${vault.getUserID()}]])</a>
+                                </th:block>
                             </td>
                             
-                            <td>${vault.groupID?html}</td>
-                            <td>${vault.reviewDate?string('dd/MM/yyyy')}</td>
-                            <td>${vault.getCreationTime()?datetime}</td>
+                            <td>[[${vault.groupID}]]</td>
+                            <td>[[${#dates.format(vault.reviewDate,'dd/MM/yyyy')}]]<!--/* date */--></td>
+                            <td>[[${#dates.format(vault.getCreationTime(),'dd/MM/yyyy')}]]<!--/* date */--></td>
                             <td>
-                                <a href="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}/reviews">Review</a>
+                                <a th:href="@{|/admin/vaults/${vault.getID()}/reviews|}">Review</a>
                             </td>
                         </tr>
-                    </#list>
                 </tbody>
             </table>
         </div>
 
-    </#if>
+    </th:block>
 
 </div>
- 
 
-</@layout.vaultLayout>
+</div>
+</html>

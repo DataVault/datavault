@@ -1,4 +1,4 @@
-<fieldset id="affirmation-fieldset">
+<fieldset xmlns:th="http://www.thymeleaf.org" id="affirmation-fieldset">
     <div class="form-card">
         <p>
             We need some information about your new Vault. You can save your progress at any time before completing this form.
@@ -21,17 +21,15 @@
         </p>
         <div class="checkbox">
             <label>
-                <@spring.bind "vault.affirmed" />
-                <input type="hidden" name="_${spring.status.expression}" value="false"/>
-                <input id="affirmation-check" type="checkbox" name="${spring.status.expression}"
-                       <#if spring.status.value?? && spring.status.value?string=="true">checked="true"</#if> /> Accept
+                <input type="hidden" value="false" name="affirmed"  />
+                <input id="affirmation-check" type="checkbox" th:field="*{affirmed}" /> Accept
             </label>
         </div>
     </div>
-    <#if vault.confirmed?c=="false">
+    <th:block th:if="${!vault.confirmed}">
     <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-default" >
         <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
     </button>
-    </#if>
+    </th:block>
     <button type="button" name="next" class="next action-button btn btn-primary" disabled>Next Step &raquo;</button>
 </fieldset>

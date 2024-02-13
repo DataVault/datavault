@@ -1,9 +1,8 @@
-<#import "*/../../layout/defaultlayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="user">
-<#import "/spring.ftl" as spring />
-<@layout.vaultLayout>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='user')}">
 
+<div layout:fragment="content">
 <div class="container">
 
     <ol class="breadcrumb">
@@ -13,25 +12,23 @@
     <form id="edit-user" class="form" role="form" action="" method="post">
 
         <div class="form-group">
-            <label class="control-label">User ID:</label> ${user.ID}
+            <label class="control-label">User ID:</label> [[${user.ID}]]
         </div>
 
         <div class="form-group">
             <label class="control-label">First Name:</label>
-            <@spring.bind "user.firstname" />
             <input type="text"
                    class="form-control"
-                   name="${spring.status.expression}"
-                   value="${spring.status.value!""}"/>
+                   th:field="*{firstname}"
+            />
         </div>
 
         <div class="form-group">
             <label class="control-label">Last Name:</label>
-            <@spring.bind "user.lastname" />
             <input type="text"
                    class="form-control"
-                   name="${spring.status.expression}"
-                   value="${spring.status.value!""}"/>
+                   th:field="*{lastname}"
+            />
         </div>
 
         <div class="form-group">
@@ -39,10 +36,11 @@
             <button type="submit" name="action" value="cancel" class="btn btn-danger cancel">Cancel</button>
         </div>
 
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
     </form>
 
 </div>
 
-</@layout.vaultLayout>
+</div>
+</html>

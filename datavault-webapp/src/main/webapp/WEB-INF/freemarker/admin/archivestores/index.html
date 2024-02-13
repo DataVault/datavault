@@ -1,8 +1,8 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="admin">
-<@layout.vaultLayout>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='admin')}">
 
+<div layout:fragment="content">
 <div class="modal fade" id="confirm-removal" tabindex="-1" role="dialog" aria-labelledby="confirmRemovalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -78,8 +78,7 @@
     <h3>Storage</h3>
 
     <div class="table-responsive storage-table">
-        <#if archivestores?has_content>
-        <table class="table table-striped">
+        <table th:if="${archivestores != null}" class="table table-striped">
 
             <thead>
             <tr class="tr">
@@ -92,52 +91,55 @@
             </thead>
 
             <tbody id="fileStoresLocal">
-                    <#list archivestores as archivestore>
-                    <tr class="tr">
-                        <td>${archivestore.label}</td>
-                        <td>${archivestore.storageClass}</td>
-                        <td>
-                            <textarea id="${archivestore.ID}-properties" class="form-control" name="${archivestore.ID}-properties" rows="3"><#list archivestore.properties?keys as prop>${prop}=${archivestore.properties[prop]}
-                                </#list>
+            <tr th:each="archivestore: ${archivestores}" class="tr">
+                <td>[[${archivestore.label}]]</td>
+                <td>[[${archivestore.storageClass}]]</td>
+                <td>
+                            <textarea th:id="|${archivestore.ID}-properties|" class="form-control"
+                                      th:name="|${archivestore.ID}-properties|" rows="3">
+                                <th:block th:each="propKey,status: ${archivestore.properties.keySet()}">
+                                [[${propKey}]]=[[${archivestore.properties[__${propKey}__]}]]<th:block th:if="${!status.last}">&#13;&#10;</th:block>
                             </textarea>
-                            <a class="update-properties-btn btn btn-default btn-sm pull-right" href="#" data-archivestore="${archivestore.ID}">Update</a>
-                        </td>
-                        <td>
-                            <input type="checkbox" class="toggleRetrieveEnabled" data-archivestore1="${archivestore.ID}" ${archivestore.retrieveEnabled?then("checked", "")}>
-                        </td>
-                        <td>
-                            <a class="btn btn-xs btn-danger pull-right" href="#" data-archivestore="${archivestore.ID}" data-toggle="modal" data-target="#confirm-removal">
-                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
-                            </a>
-                        </td>
-                    </tr>
-                    </#list>
+                    <a class="update-properties-btn btn btn-default btn-sm pull-right" href="#" th:data-archivestore="${archivestore.ID}">Update</a>
+                </td>
+                <td>
+                    <input type="checkbox" class="toggleRetrieveEnabled" th:data-archivestore1="${archivestore.ID}"
+                           th:checked="${archivestore.retrieveEnabled}"
+                    >
+                </td>
+                <td>
+                    <a class="btn btn-xs btn-danger pull-right" href="#" th:data-archivestore="${archivestore.ID}" data-toggle="modal" data-target="#confirm-removal">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
+                    </a>
+                </td>
+            </tr>
             </tbody>
         </table>
 
-        <#else>
-            <h4>There are currently no Local Archivestores configured</h4>
-        </#if>
 
-        <form>
-            <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-archivestoreLocal">
-                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Archivestore
-            </a>
-        </form>
-
-    </div>
+        <h4 th:if="${archivestores == null}">There are currently no Local Archivestores configured</h4>
 
 
-    <a class="btn btn-primary" href="${springMacroRequestContext.getContextPath()}/">Continue</a>
-    </div>
+    <form>
+        <a class="btn btn-default" href="#" data-toggle="modal" data-target="#add-archivestoreLocal">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Archivestore
+        </a>
+    </form>
 
-<script>
+</div>
+
+
+<a class="btn btn-primary" th:href="@{/}">Continue</a>
+</div>
+
+<script th:inline="javascript">
 
     var localFrm = $('#add-archivestoreLocal-form');
     localFrm.submit(function (ev) {
+        var baseURL = /*[[@{/admin/archivestores/local}]]*/ 'replaced-by-tl';
         $.ajax({
             method: "POST",
-            url: '${springMacroRequestContext.getContextPath()}/admin/archivestores/local',
+            url: baseURL,
             data: localFrm.serialize(),
             success: function (data) {
                 location.reload(true);
@@ -156,8 +158,9 @@
 
         var properties = $("#"+archivestore+"-properties").val();
 
+        var baseURL = /*[[@{/admin/archivestores/}]]*/ 'replaced-by-tl';
         $.ajax({
-            url: '${springMacroRequestContext.getContextPath()}/admin/archivestores/' + archivestore + '/update/properties',
+            url:  baseURL + archivestore + '/update/properties',
             type: 'POST',
             data: { properties : properties },
             error: function(xhr, ajaxOptions, thrownError) {
@@ -177,9 +180,10 @@
 
     $("button#remove").click(function(){
         var archivestoreId = $(this).data('archivestoreId');
+        var baseURL = /*[[@{/admin/archivestores/}]]*/ 'replaced-by-tl';
         $.ajax({
             method: "DELETE",
-            url: '${springMacroRequestContext.getContextPath()}/admin/archivestores/' + archivestoreId,
+            url: baseURL + archivestoreId,
             success: function (data) {
                 location.reload(true);
             },
@@ -201,9 +205,9 @@
         } else {
             command = 'disable';
         }
-
+        var baseURL = /*[[@{/admin/archivestores/}]]*/ 'replaced-by-tl';
         $.ajax({
-            url: '${springMacroRequestContext.getContextPath()}/admin/archivestores/' + archivestore1 + '/' + command,
+            url: baseURL + archivestore1 + '/' + command,
             type: 'POST',
             error: function(xhr, ajaxOptions, thrownError) {
                 alert('Error: unable to update archivestore');
@@ -223,5 +227,5 @@
 
 
 </script>
-
-</@layout.vaultLayout>
+</div>
+</html>

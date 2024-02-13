@@ -1,9 +1,10 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="admin">
-<@layout.vaultLayout>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='admin')}">
 
-    <div class="modal fade" id="confirm-removal" tabindex="-1" role="dialog" aria-labelledby="confirmRemovalLabel" aria-hidden="true">
+<div layout:fragment="content">
+
+<div class="modal fade" id="confirm-removal" tabindex="-1" role="dialog" aria-labelledby="confirmRemovalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -25,7 +26,7 @@
     <div class="container">
 
         <ol class="breadcrumb">
-            <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
+            <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
             <li class="active"><b>Audits</b></li>
         </ol>
         <div class="row">
@@ -36,46 +37,46 @@
             </div>
         </div>
 
-        <#if deposits?has_content>
+        <th:block th:if="${deposits != null}">
 
         <form action="" method="get" class="form-inline">
             <div class="form-group">
                 Sort by:
                 <label class="checkbox-inline">
-                    <input class="form-check-input" type="radio" name="sort" id="date" value="date" <#if sort == "date">checked</#if>> Date
+                    <input class="form-check-input" type="radio" name="sort" id="date" value="date" th:checked="${sort == 'date'}" > Date
                 </label>
                 <label class="checkbox-inline">
-                    <input class="form-check-input" type="radio" name="sort" id="chunkStatus" value="chunkStatus" <#if sort == "chunkStatus">checked</#if>> Chunk Status
+                    <input class="form-check-input" type="radio" name="sort" id="chunkStatus" value="chunkStatus" th:checked="${sort == 'chunkStatus'}" > Chunk Status
                 </label>
                 <label class="checkbox-inline">
-                    <input class="form-check-input" type="radio" name="sort" id="chunkNum" value="chunkNum" <#if sort == "chunkNum">checked</#if>> Chunk Number
+                    <input class="form-check-input" type="radio" name="sort" id="chunkNum" value="chunkNum" th:checked="${sort == 'chunkNum'}" > Chunk Number
                 </label>
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
 
         <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-            <#list deposits as deposit>
+            <th:block th:each="deposit: ${deposits}">
             <div class="panel panel-default">
-                <div class="panel-heading row" role="tab" id="heading-${deposit["deposit"].getID()?html}">
+                <div class="panel-heading row" role="tab" th:id="|heading-${deposit['deposit'].getID()}|">
                     <div class="col-md-6">
                     <h4 class="panel-title">
                         <a role="button" data-toggle="collapse" data-parent="#accordion"
-                           href="#collapse-${deposit["deposit"].getID()?html}"
-                           aria-expanded="true" aria-controls="collapse${deposit["deposit"].getID()?html}">
-                            ${deposit["deposit"].getName()?html} [${deposit["deposit"].getID()?html}]
+                           th:href="|#collapse-${deposit['deposit'].getID()}|"
+                           aria-expanded="true" th:aria-controls="|collapse${deposit['deposit'].getID()}|">
+                            [[${deposit['deposit'].getName()}]] &#91;[[${deposit['deposit'].getID()}]]&#93;
                         </a>
                     </h4>
                     </div>
                     <div class="col-md-3">
-                        ${deposit["deposit"].getCreationTime()?datetime}
+                        [[${#dates.format(deposit['deposit'].getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */-->
                     </div>
                     <div class="col-md-3">
-                        ${deposit["deposit"].getStatus()?html}
+                        [[${deposit['deposit'].getStatus()}]]
                     </div>
                 </div>
-                <div id="collapse-${deposit["deposit"].getID()?html}" class="panel-collapse collapse" role="tabpanel"
-                     aria-labelledby="heading-${deposit["deposit"].getID()?html}">
+                <div th:id="|collapse-${deposit['deposit'].getID()}|" class="panel-collapse collapse" role="tabpanel"
+                     th:aria-labelledby="|heading-${deposit['deposit'].getID()}|">
                     <div class="panel-body">
                         <div class="table-responsive">
                             <table class="table table-striped">
@@ -91,60 +92,60 @@
                                 </thead>
 
                                 <tbody>
-                                    <#list deposit["chunks_info"] as chunkInfo>
-                                    <tr class="tr">
-                                        <td>
-                                            <#if chunkInfo["last_audit_chunk"]??>
-                                            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                                            <#else>
-                                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                                            </#if>
+                                    <tr th:each="chunkInfo: ${deposit['chunks_info']}" class="tr">
+                                        <td th:with="hasLastAuditChunk=${chunkInfo['last_audit_chunk'] != null}">
+                                            <span th:if="${hasLastAuditChunk}"  class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                            <span th:if="${!hasLastAuditChunk}" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                                         </td>
                                         <td>
-                                            ${chunkInfo["deposit_chunk"].getChunkNum()?html}
+                                            [[${chunkInfo['deposit_chunk'].getChunkNum()}]]
                                         </td>
-                                        <#if chunkInfo["last_audit_chunk"]??>
+                                        <th:block th:if="${hasLastAuditChunk}">
+                                            <th:block th:with="lastAuditChunk=${chunkInfo['last_audit_chunk']}">
                                             <td>
-                                            <#if chunkInfo["last_audit_chunk"].getCreationTime()??>
-                                                ${chunkInfo["last_audit_chunk"].getCreationTime()?datetime}
-                                            </#if>
+                                                <th:block th:if="${lastAuditChunk.getCreationTime() != null}">
+                                                [[${#dates.format(lastAuditChunk.getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */-->
+                                                </th:block>
                                             </td>
                                             <td>
-                                            <#if chunkInfo["last_audit_chunk"].getCompletedTime()??>
-                                                ${chunkInfo["last_audit_chunk"].getCompletedTime()?datetime}
-                                            </#if>
+                                                <th:block th:if="${lastAuditChunk.getCompletedTime() != null}">
+                                                    [[${#dates.format(lastAuditChunk.getCompletedTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */-->
+                                                </th:block>
                                             </td>
                                             <td>
-                                            <#if chunkInfo["last_audit_chunk"].getStatus()??>
-                                                ${chunkInfo["last_audit_chunk"].getStatus()?html}
-                                            </#if>
+                                                <th:block th:if="${lastAuditChunk.getStatus() != null}">
+                                                    [[${lastAuditChunk.getStatus()}]]
+                                                </th:block>
                                             </td>
                                             <td>
-                                            <#if chunkInfo["last_audit_chunk"].getNote()??>
-                                                ${chunkInfo["last_audit_chunk"].getNote()?html}
-                                            </#if>
+                                                <th:block th:if="${lastAuditChunk.getNote() != null}">
+                                                    [[${lastAuditChunk.getNote()}]]
+                                                </th:block>
                                             </td>
-                                        <#else>
-                                            <td>-</td><td>-</td><td>-</td><td>-</td>
-                                        </#if>
+                                        </th:block>
+                                        </th:block>
+                                        <th:block th:if="${!hasLastAuditChunk}">
+                                        <td>-</td><td>-</td><td>-</td><td>-</td>
+                                        </th:block>
                                     </tr>
-                                    </#list>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
-            </#list>
+        </th:block><!-- for each deposit -->
         </div>
-        <#else>
+        </th:block><!-- deposits != null -->
+        <th:block th:if="${deposits == null}">
             No Data Available
-        </#if>
+        </th:block>
     </div>
-    <script>
+    <script th:inline="javascript">
         $("button#audit").click(function(){
+            var baseURL = /*[[@{/admin/deposits/audit}]]*/ 'replaced-by-tl';
             $.ajax({
-                url: '${springMacroRequestContext.getContextPath()}/admin/deposits/audit',
+                url: baseURL,
                 type: 'GET',
                 success: function (data) {
                     console.log("----success---");
@@ -164,4 +165,6 @@
             });
         });
     </script>
-</@layout.vaultLayout>
+</div>
+</html>
+

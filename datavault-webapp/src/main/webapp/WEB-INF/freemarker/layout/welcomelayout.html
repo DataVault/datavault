@@ -1,27 +1,21 @@
-<#macro vaultLayout>
-<#import "/spring.ftl" as spring />
-<#assign sec=JspTaglibs["http://www.springframework.org/security/tags"] />
-<@sec.authentication var="principal" property="principal" />
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" th:with="principal=${#authentication.principal}">
 <head>
-
-    <#include "imports.ftl"/>
-
+    <title>LOGIN LAYOUT</title>
+    <div th:replace="~{layout/imports.html}"></div>
 </head>
 <body>
-    <div id="datavault-container">
-        <div id="datavault-header">
-            <#include "header.ftl"/>
-            <#include "headerextra.ftl"/>
-        </div>
-        <div id="datavault-body">
-            <#nested/>
-        </div>
-        <div id="datavault-footer">
-            <#include "footer.ftl"/>
-        </div>
+<div id="datavault-container">
+    <div id="datavault-header">
+        <div th:replace="~{layout/header.html}"></div>
+        <div th:replace="~{layout/headerextra.html}"></div>
     </div>
+    <div id="datavault-body">
+        <div layout:fragment="content">NESTED CONTENT GOES HERE</div>
+    </div>
+    <div id="datavault-footer">
+        <div th:replace="~{layout/footer.html}"></div>
+    </div>
+</div>
 </body>
 </html>
-</#macro>

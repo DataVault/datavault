@@ -1,20 +1,20 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="admin">
-<@layout.vaultLayout>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='admin')}">
+
+<div layout:fragment="content">
 
     <div class="container">
 
         <ol class="breadcrumb">
-            <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
+            <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
             <li class="active"><b>Schools</b></li>
         </ol>
 
-        <#list schools as school>
-            <div>
-                <a href="${springMacroRequestContext.getContextPath()}/admin/schools/${school.getID()}">${school.name}</a>
-            </div>
-        </#list>
+        <div th:each="school: ${schools}">
+            <a th:href="@{|/admin/schools/${school.getID()}|}">[[${school.name}]]</a>
+        </div>
 
     </div>
-</@layout.vaultLayout>
+</div>
+</html>

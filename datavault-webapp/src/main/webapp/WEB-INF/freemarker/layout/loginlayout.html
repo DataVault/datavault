@@ -1,16 +1,10 @@
-<#macro loginLayout>
-<#import "/spring.ftl" as spring />
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
-
-    <#include "imports.ftl"/>
-
+    <title>LOGIN LAYOUT</title>
+    <div th:replace="~{layout/imports.html}"></div>
 </head>
 <body>
-
-    <#nested/>
-
+    <div layout:fragment="content">NESTED CONTENT GOES HERE</div>
 </body>
 </html>
-</#macro>

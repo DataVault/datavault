@@ -1,39 +1,40 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="admin">
-<@layout.vaultLayout>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<div layout:fragment="content">
 <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="${springMacroRequestContext.getContextPath()}/admin/"><b>Administration</b></a></li>
-        <li><a href="${springMacroRequestContext.getContextPath()}/admin/vaults"><b>Vaults</b></a></li>
-        <li class="active"><b>Vault:</b> ${vault.name?html}</li>
+        <li><a th:href="@{/admin/}"><b>Administration</b></a></li>
+        <li><a th:href="@{/admin/vaults}"><b>Vaults</b></a></li>
+        <li class="active"><b>Vault:</b> [[${vault.name}}</li>
     </ol>
 
-    <form action="${springMacroRequestContext.getContextPath()}/admin/vaults/${vault.getID()}/checkretentionpolicy" method="post">
+    <form th:action="@{|/admin/vaults/${vault.getID()}/checkretentionpolicy|}" method="post">
 
     <div class="bs-callout">
         <h2>
-            <span class="glyphicon glyphicon-folder-close"></span> ${vault.name?html}
+            <span class="glyphicon glyphicon-folder-close"></span> [[${vault.name}]]
         </h2>
         <h2>
             <small>
-                ${vault.description?html}
+                [[${vault.description}]]
             </small>
         </h2>
         <hr>
         <p>
-            <b>Owner:</b> ${vault.userID?html}<br/>
-            <b>Retention Policy:</b> ${retentionPolicy.name?html}<br/>
-            <b>Dataset name:</b> ${vault.datasetName?html}<br/>
-            <b>Group:</b> ${group.name?html}<br/>
-            <b>Created:</b> ${vault.creationTime?datetime}<br/>
-            <b>Review date:</b> ${vault.policyExpiry?datetime} (Status: ${vault.policyStatusStr?html})<br/>
-            <b>Last checked:</b> ${vault.policyLastChecked?datetime} <button type="submit" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update</button><br/>
-            <b>Size:</b> ${vault.getSizeStr()}
+            <b>Owner:</b> [[${vault.userID}]]<br/>
+            <b>Retention Policy:</b> [[${retentionPolicy.name}]]<br/>
+            <b>Dataset name:</b> [[${vault.datasetName}]]<br/>
+            <b>Group:</b> [[${group.name}]]<br/>
+            <b>Created:</b> [[${#dates.format(vault.creationTime,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--><br/>
+            <b>Review date:</b> [[${#dates.format(vault.policyExpiry,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--> (Status: [[${vault.policyStatusStr}]])<br/>
+            <b>Last checked:</b> [[${#dates.format(vault.policyLastChecked,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--><button type="submit" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update</button><br/>
+            <b>Size:</b> [[${vault.getSizeStr()}]]
         </p>
 
-        <#if deposits?has_content>
+        <th:block th:if="${deposits != null}">
 
             <div class="table-responsive">
                 <table class="table table-striped">
@@ -49,44 +50,45 @@
                     </thead>
 
                     <tbody>
-                        <#list deposits as deposit>
-                            <tr class="tr">
+                            <tr th:each="deposit: ${deposits}" class="tr">
                                 <td>
-                                    <a href="${springMacroRequestContext.getContextPath()}/vaults/${vault.getID()}/deposits/${deposit.getID()}">${deposit.name?html}</a>
+                                    <a th:href="@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}|}">[[${deposit.name}]]</a>
                                 </td>
-                                <td>${deposit.fileOrigin?html}</td>
-                                <td>${deposit.shortFilePath?html}</td>
+                                <td>[[${deposit.fileOrigin}]]</td>
+                                <td>[[${deposit.shortFilePath}]]</td>
                                 <td>
                                     <div id="deposit-status" class="job-status">
-                                        <#if deposit.status.name() == "COMPLETE">
-                                            <div class="text-success">
+                                        <th:block th:switch="${deposit.status.name()}">
+                                            <div th:case="COMPLETE" class="text-success">
                                                 <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>&nbsp;Complete
                                             </div>
-                                        <#elseif deposit.status.name() == "FAILED">
-                                            <div class="text-danger">
+                                            <div th:case="FAILED" class="text-danger">
                                                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>&nbsp;Failed
                                             </div>
-                                        <#elseif deposit.status.name() == "NOT_STARTED">&nbsp;Queued
-                                        <#elseif deposit.status.name() == "IN_PROGRESS">
-                                            <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>&nbsp;In progress
-                                        <#else>
-                                            ${deposit.status}
-                                        </#if>
+                                            <div th:case="NOT_STARTED">
+                                                &nbsp;Queued
+                                            </div>
+                                            <div th:case="IN_PROGRESS">
+                                                <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>&nbsp;In progress
+                                            </div>
+                                            <div th:case="*">
+                                               [[${deposit.status}]]
+                                            </div>
+                                        </th:block>
                                     </div>
                                 </td>
-                                <td>${deposit.getSizeStr()}</td>
-                                <td>${deposit.getCreationTime()?datetime}</td>
+                                <td>[[${deposit.getSizeStr()}</td>
+                                <td>[[${#dates.format(deposit.getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
                             </tr>
-                        </#list>
                     </tbody>
                 </table>
             </div>
-        </#if>
+        </th:block>
     </div>
 
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
     </form>
 
 </div>
-
-</@layout.vaultLayout>
+</div>
+</html>

@@ -1,8 +1,8 @@
-<#import "*/layout/defaultlayout.ftl" as layout>
-<#-- Specify which navbar element should be flagged as active -->
-<#global nav="admin">
-<@layout.vaultLayout>
-<#import "/spring.ftl" as spring />
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<div layout:fragment="content">
 
 <div class="container">
 
@@ -10,43 +10,39 @@
         <li class="active"><b>Create User</b></li>
     </ol>
 
-    <form id="create-user" class="form" role="form" action="" method="post">
+    <form id="create-user" th:object="${user}" class="form" role="form" action="" method="post">
 
         <div class="form-group">
             <label class="control-label">User ID:</label>
-            <@spring.bind "user.ID" />
             <input type="text"
                    class="form-control"
-                   name="${spring.status.expression}"
-                   value="${spring.status.value!""}"/>
+                   th:field="*{ID}"
+            />
         </div>
 
 
         <div class="form-group">
             <label class="control-label">First Name:</label>
-            <@spring.bind "user.firstname" />
             <input type="text"
                    class="form-control"
-                   name="${spring.status.expression}"
-                   value="${spring.status.value!""}"/>
+                   th:field="*{firstname}"
+            />
         </div>
 
         <div class="form-group">
             <label class="control-label">Last Name:</label>
-            <@spring.bind "user.lastname" />
             <input type="text"
                    class="form-control"
-                   name="${spring.status.expression}"
-                   value="${spring.status.value!""}"/>
+                   th:field="*{lastname}"
+            />
         </div>
 
         <div class="form-group">
             <label class="control-label">Password:</label>
-            <@spring.bind "user.password" />
             <input type="password"
                    class="form-control"
-                   name="${spring.status.expression}"
-                   value="${spring.status.value!""}"/>
+                   th:field="*{password}"
+            />
         </div>
 
         <div class="form-group">
@@ -54,12 +50,12 @@
             <button type="submit" name="action" value="cancel" class="btn btn-danger cancel">Cancel</button>
         </div>
 
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
     </form>
 </div>
 
-<script>
+<script type="application/javascript">
 $(document).ready(function () {
 
 $('#create-user').validate({
@@ -79,4 +75,5 @@ $('#create-user').validate({
 });
 </script>
 
-</@layout.vaultLayout>
+</div>
+</html>
