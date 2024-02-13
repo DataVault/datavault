@@ -85,7 +85,7 @@ public class ThymeleafConfigTest {
 
   @Test
   void testThymeleafHelloPage() throws Exception {
-    ClassPathResource helloResource = new ClassPathResource("WEB-INF/freemarker/test/hello.html");
+    ClassPathResource helloResource = new ClassPathResource("WEB-INF/templates/test/hello.html");
     assertEquals(HELLO_FIRST_LINE, getFirstLine(helloResource));
 
     String helloTemplateHtml = getHtml("test/hello.html", new ModelMap());
@@ -95,7 +95,7 @@ public class ThymeleafConfigTest {
   @Test
   @WithMockUser(roles="MANAGER")
   void testThymeleafErrorPage() throws Exception {
-    ClassPathResource errorResource = new ClassPathResource("WEB-INF/freemarker/error/error.html");
+    ClassPathResource errorResource = new ClassPathResource("WEB-INF/templates/error/error.html");
     assertEquals(ERROR_FIRST_LINE, getFirstLine(errorResource));
 
     ModelMap modelMap = new ModelMap();
@@ -170,7 +170,7 @@ public class ThymeleafConfigTest {
   @Test
   void testViewResolver() {
     assertThat(this.templateResolver.getCheckExistence()).isTrue();
-    assertThat(this.templateResolver.getPrefix()).isEqualTo("classpath:/WEB-INF/freemarker/");
+    assertThat(this.templateResolver.getPrefix()).isEqualTo("classpath:/WEB-INF/templates/");
     assertThat(this.templateResolver.getSuffix()).isEqualTo(".html");
     assertThat(this.templateResolver.getCharacterEncoding()).isEqualTo("UTF-8");
     assertThat(this.templateResolver.isCacheable()).isTrue();
