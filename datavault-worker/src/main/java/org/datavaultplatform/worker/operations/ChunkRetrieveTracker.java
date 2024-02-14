@@ -52,9 +52,6 @@ public class ChunkRetrieveTracker implements Callable<Object> {
 
     @Override
     public Object call() throws Exception {
-
-        //Path chunkPath = this.context.getTempDir().resolve(this.getArchiveId() + FileSplitter.CHUNK_SEPARATOR + this.getChunkNumber());
-        //File chunkFile = chunkPath.toFile();
         String chunkArchiveId = this.getArchiveId() + FileSplitter.CHUNK_SEPARATOR + this.getChunkNumber();
 
         if (! this.getMultipleCopies()) {
