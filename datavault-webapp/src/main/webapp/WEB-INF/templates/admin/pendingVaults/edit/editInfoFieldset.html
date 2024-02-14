@@ -60,9 +60,6 @@
                 <div class="col-md-12">
                     <select id="policyInfo" name="policyInfo" data-width="auto" class="form-control retentionPolicy-select selectpicker show-tick">
                         <option selected disabled data-hidden="true">Please choose a retention policy</option>
-                        <option th:value="|${retentionPolicy.getID()}-${retentionPolicy.minRetentionPeriod}|"
-                            th:selected="${vault?.policyInfo != null && vault?.policyInfo == retentionPolicy.getPolicyInfo()}"
-                        >[[${retentionPolicy.name}]] (Minimum period: [[${retentionPolicy.minRetentionPeriod}]])</option>
                         <th:block th:each="retentionPolicy: ${policies}">
                         <option th:value="|${retentionPolicy.getID()}-${retentionPolicy.minRetentionPeriod}|"
                              th:selected="${vault?.policyInfo != null && vault?.policyInfo == retentionPolicy.getPolicyInfo()}"

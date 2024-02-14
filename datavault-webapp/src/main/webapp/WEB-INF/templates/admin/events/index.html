@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='admin')}">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='admin')}">
 
 <div layout:fragment="content">
 
@@ -28,18 +28,24 @@
                 </thead>
 
                 <tbody>
-                    <tr th:list="event: ${events}" class="tr">
-                        <td th:switch="${event:agentType}">
-                            <span th:case="WORKER" class="label label-Warning">[[${event.agentType}]]</span>&nbsp;[[${event.agent}]]
-                            <span th:case="WEB" class="label label-primary">[[${event.agentType}]]</span>&nbsp;[[${event.agent}]]
-                            <span th:case="*" class="label label-default">[[${event.agentType}]]</span>&nbsp;[[${event.agent}]]
+                    <tr th:each="event: ${events}" class="tr">
+                        <td th:switch="${event.agentType}">
+                            <th:block th:case="WORKER" >
+                                <span class="label label-Warning">[[${event.agentType}]]</span>&nbsp;[[${event.agent}]]
+                            </th:block>
+                            <th:block th:case="WEB" >
+                                <span class="label label-primary">[[${event.agentType}]]</span>&nbsp;[[${event.agent}]]
+                            </th:block>
+                            <th:block th:case="*">
+                                <span  class="label label-default">[[${event.agentType}]]</span>&nbsp;[[${event.agent}]]
+                            </th:block>
                         </td>
                         <td>[[${event?.userID ?: ''}]]</td>
                         <td>[[${event?.eventClass ?: ''}]]</a></td>
                         <td>[[${#dates.format(event?.timestamp,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
                         <td>[[${event?.vaultID ?: ''}]]</td>
                         <td>[[${event?.depositID ?: ''}]]</td>
-                        <td>[[${event?.remoteAddress ?: ''}]]</a></td>
+                        <td>[[${event?.remoteAddress ?: ''}]]</td>
                         <td>[[${event?.userAgent ?: ''}]]</a></td>
                         <td>[[${event?.id ?: ''}]]</td>
                     </tr>

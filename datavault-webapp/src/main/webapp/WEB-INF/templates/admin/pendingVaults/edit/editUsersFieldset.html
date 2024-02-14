@@ -63,7 +63,7 @@
             <div class="empty-ndm form-group col-sm-offset-4 my-1">
                 <input class="autocomplete uun-required unique-uun-required"
                     type="text"  placeholder=""
-                    th:value="|nominatedDataManagers[${index}]|"
+                    th:name="|nominatedDataManagers[${index}]|"
                 />
                 <button type="button" class="remove-ndm-btn btn btn-danger btn-xs">Remove</button>
                 <span class="uun-required-error-span"></span>
@@ -115,12 +115,12 @@
           
         <!-- START: depositors hidden -->
         <div id="hidden-empty-depositors" class="collapse col-sm-offset-4">
-            <th:block th:with="numExisting=${vaults.depositors == null ? 0 :  #lists.size(vault.depositors)}">
+            <th:block th:with="numExisting=${vaults?.depositors == null ? 0 :  #lists.size(vault.depositors)}">
             <th:block th:each="index: ${#numbers.sequence(numExisting,numExisting-1+15)}">
             <div class="empty-depositor form-group col-sm-offset-4 my-1">
                <input class="autocomplete uun-required unique-uun-required"
                 type="text"  placeholder=""
-                th:value="|depositors[${index}]|"
+                th:name="|depositors[${index}]|"
                />
                <button type="button" class="remove-depositor-btn btn btn-danger btn-xs">Remove</button>
                <span class="uun-required-error-span"></span>
@@ -180,12 +180,12 @@
           
         <!-- START: dataCreators hidden -->
         <div id="hidden-empty-data-creators" class="collapse col-sm-offset-4">
-            <th:block th:with="numExisting=${vault?.dataCreators == null ? 0 : #lists.size(vault.dataCreators)}">
+            <th:block th:with="numExisting=${vault?.dataCreators == null ? 0 : #lists.size(vault?.dataCreators)}">
             <th:block th:each="index: ${#numbers.sequence(numExisting,numExisting-1+15)}">
             <div class="empty-data-creator form-group col-sm-offset-4 my-1">
                <input class="autocomplete uun-required"
                 type="text"  placeholder=""
-                th:value="|dataCreators[${index}]|"
+                th:name="|dataCreators[${index}]|"
                />
                <button type="button" class="remove-data-creator-btn btn btn-danger btn-xs">Remove</button>
                <span class="uun-required-error-span"></span>
@@ -206,7 +206,7 @@
     
     <button type="button" name="previous" class="previous action-button-previous btn btn-default" >&laquo; Previous</button>
     <a name="admin-pending-vault-summary" class="btn btn-primary" style="margin-bottom: 0;"
-          th:href="@{|/admin/pendingVaults/summary/${vaultID}|"><< Return Admin Pending Vault Summary</a>
+          th:href="@{|/admin/pendingVaults/summary/${vaultID}|}"><< Return Admin Pending Vault Summary</a>
     <button type="submit" name="save" value="Save" class="save action-button-previous btn btn-success" >
        <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
     </button>

@@ -102,9 +102,11 @@ public class RetentionPolicy {
     }
 
     public Integer getID() { return id; }
-
     public void setId(Integer id) {
         this.id = id;
+    }
+    public void setID(Integer id){
+        setId(id);
     }
 
     public void setName(String name) {

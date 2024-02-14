@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!--admin/retrieves/index.html-->
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='admin')}">
-
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='admin')}">
+<head><title>Admin - Retrievals</title></head>
 <div layout:fragment="content">
     <div class="container">
 
@@ -24,8 +24,8 @@
 
                 <tbody>
                     <tr th:each="retrieve: ${retrieves}" class="tr">
-                        <td>[[${retrieve.getDeposit().getID()}</td>
-                        <td>[[${retrieve.status}</td>
+                        <td>[[${retrieve.getDeposit().getID()}]]</td>
+                        <td>[[${retrieve.status}]]</td>
                         <td>[[${#dates.format(retrieve.timestamp,'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
                         <td>[[${retrieve.retrievePath}]]</td>
                         <td>[[${retrieve.note}]]</td>

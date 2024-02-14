@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!--admin/archivestores/index.html-->
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='admin')}">
-
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='admin')}">
+<head><title>Admin - Archive Stores</title></head>
 <div layout:fragment="content">
 <div class="modal fade" id="confirm-removal" tabindex="-1" role="dialog" aria-labelledby="confirmRemovalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -98,7 +98,7 @@
                             <textarea th:id="|${archivestore.ID}-properties|" class="form-control"
                                       th:name="|${archivestore.ID}-properties|" rows="3">
                                 <th:block th:each="propKey,status: ${archivestore.properties.keySet()}">
-                                [[${propKey}]]=[[${archivestore.properties[__${propKey}__]}]]<th:block th:if="${!status.last}">&#13;&#10;</th:block>
+                                [[${propKey}]]=[[${archivestore.properties['__${propKey}__']}]]<th:block th:if="${!status.last}">&#13;&#10;</th:block>
                             </textarea>
                     <a class="update-properties-btn btn btn-default btn-sm pull-right" href="#" th:data-archivestore="${archivestore.ID}">Update</a>
                 </td>

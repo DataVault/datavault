@@ -1,7 +1,8 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html><!--admin/vaults/index.html-->
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<head><title>Admin - Vaults</title></head>
 <div layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
 
 <div class="container">
@@ -39,10 +40,10 @@
                     <tr class="tr">
                        <th><a th:href="|?sort=name&order=${ordername}&query=${queryPARAM}|">Vault Name
                             <th:block th:if="${sort == 'name'}">
-                                <th:block th:if="{$order == 'desc'"}>
+                                <th:block th:if="${$order == 'desc'}"}>
                                     <span class="dropup"><span class="caret"></span></span>
                                 </th:block>
-                                <th:block th:if="{$order != 'desc'"}>
+                                <th:block th:if="${$order != 'desc'}">
                                     <span class="caret"></span>
                                 </th:block>
                             </th:block>
@@ -147,7 +148,7 @@
         <div align="center">
             <nav aria-label="...">
 			    <ul class="pagination pagination-lg" id="paginationButton">
-                    <th:block th:each="page: ${numbers.sequence(1,numberOfPages)}">
+                    <th:block th:each="page: ${#numbers.sequence(1,numberOfPages)}">
 				    	<li th:id="${page}" th:class="${page == activePageId ? 'page-item active' : 'page_item'}" >
 				     	 <a class="page-link" th:href="@{|/admin/vaults?sort=${sort}&order=${order}&pageId=${page}&query=${query}|}" tabindex="-1">[[${page}]]</a>
 				    	</li>

@@ -1,7 +1,8 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!--admin/pendingVaults/summary.html-->
 <html xmlns:th="http://www.thymeleaf.org"
 	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	  layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<head><title>Admin - Pending Vault Summary</title></head>
 <div layout:fragment="content">
 				<div class="container">
 					<ol class="breadcrumb">
@@ -137,10 +138,8 @@
 												</td>
 											</tr>
 
-											<th:block th:if="${!pendingVault.billingType != null}">
-												[[${pendingVault.billingType}]]
-											</th:block>
-											<th:block th:switch="${pendingVault.billingType}"></th:block>
+											<th:block th:if="${pendingVault.billingType != null}">
+											<th:block th:switch="${pendingVault.billingType}">
 												<!-- BILLING_TYPE SLICE -->
 												<th:block th:case="SLICE">
 													<tr>
@@ -205,6 +204,7 @@
 															</textarea>
 														</td>
 													</tr>
+											</th:block>
 											</th:block>
 											</th:block>
 											<!-- END OF BILLING SECTION -->

@@ -1,7 +1,8 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!--admin/pendingVaults/confirmed.html-->
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<head><title>Admin - Confirmed Pending Vaults</title></head>
 <div layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
 
     <div class="container" >
@@ -56,7 +57,6 @@
                                 <th:block th:if="${pendingVault.ownerId != null}">
                                     [[${pendingVault.ownerId}]]
                                 </th:block>
-
                             </td>
                             <td>
                                 <th:block th:if="${pendingVault.vaultCreatorId != null}">
@@ -88,8 +88,8 @@
                 <nav aria-label="...">
                     <ul class="pagination pagination-lg" id="paginationButton">
                         <th:block th:each="page: ${#numbers.sequence(1,numberOfPages)}">
-                            <li th:class="${page == activePage ? 'page-item active' : 'page-item'}" id="${page}">
-                                <a class="page-link" th:href="@{|/admin/pendingVaults/confirmed?sort=${sort}&order=${order}&pageId=${page}&query=${queryPARAM}|}" tabindex="-1">[[${page}]</a>
+                            <li th:class="${page == activePageId ? 'page-item active' : 'page-item'}" th:id="${page}">
+                                <a class="page-link" th:href="@{|/admin/pendingVaults/confirmed?sort=${sort}&order=${order}&pageId=${page}&query=${queryPARAM}|}" tabindex="-1">[[${page}]]</a>
                             </li>
                         </th:block>
                     </ul>
@@ -98,7 +98,6 @@
 
 
         </th:block>
-
 
     </div>
 

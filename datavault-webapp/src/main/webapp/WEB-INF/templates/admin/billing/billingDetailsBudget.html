@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='admin')}" >
+<head><title>Admin Billing BillingDetails (Budget)</title></head>
 <div layout:fragment="content">
             <div class="container">
                 <ol class="breadcrumb">
@@ -24,7 +25,7 @@
                                 <tr>
                                     <th scope="col">Authoriser</th>
                                     <td>
-                                        <th:block th:if="${ billingDetails.getContactName() != null}">
+                                        <th:block th:if="${billingDetails.getContactName() != null}">
                                             [[${billingDetails.contactName}]]
                                         </th:block>
                                     </td>
@@ -32,7 +33,7 @@
                                 <tr>
                                     <th scope="col">School/Unit</th>
                                     <td>
-                                        <th:block th:if="${ billingDetails.getSchool() != null}">
+                                        <th:block th:if="${billingDetails.getSchool() != null}">
                                             [[${billingDetails.getSchool()}]]
                                         </th:block>
                                     </td>
@@ -40,7 +41,7 @@
                                 <tr>
                                     <th scope="col">Subunit</th>
                                     <td>
-                                        <th:block th:if="${ billingDetails.getSubUnit() != null}">
+                                        <th:block th:if="${billingDetails.getSubUnit() != null}">
                                             [[${billingDetails.subUnit}]]
                                         </th:block>
                                     </td>
@@ -48,7 +49,7 @@
                                 <tr>
                                     <th scope="col">Project Id</th>
                                     <td>
-                                        <th:block th:if="${ billingDetails.getProjectId() != null}">
+                                        <th:block th:if="${billingDetails.getProjectId() != null}">
                                             [[${billingDetails.projectId}]]
                                         </th:block>
                                     </td>
@@ -56,7 +57,7 @@
                                 <tr>
                                     <th scope="col">Grant End Date</th>
                                     <td>
-                                        <th:block th:if="${ billingDetails.getGrantEndDate() != null}">
+                                        <th:block th:if="${billingDetails.getGrantEndDate() != null}">
                                             [[${#dates.format(billingDetails.grantEndDate,'dd MMM yyyy')}]]<!--/* date */-->
                                         </th:block>
                                     </td>
@@ -64,7 +65,7 @@
                                 <tr>
                                     <th scope="col">Amount to be billed</th>
                                     <td>
-                                        <th:block th:if="${ billingDetails.getAmountToBeBilled() != null}">
+                                        <th:block th:if="${billingDetails.getAmountToBeBilled() != null}">
                                             [[${billingDetails.getAmountToBeBilled()}]]
                                         </th:block>
                                     </td>
@@ -72,7 +73,7 @@
                                 <tr>
                                     <th scope="col">Amount billed</th>
                                     <td>
-                                        <th:block th:if="${ billingDetails.getAmountBilled() != null}">
+                                        <th:block th:if="${billingDetails.getAmountBilled() != null}">
                                             [[${billingDetails.getAmountBilled()}]]
                                         </th:block>
                                     </td>
@@ -80,7 +81,7 @@
                                 <tr>
                                     <th scope="col">Payment Details</th>
                                     <td>
-                                        <th:block th:if="${ billingDetails.getPaymentDetails() != null}">
+                                        <th:block th:if="${billingDetails.getPaymentDetails() != null}">
                                             [[${billingDetails.getPaymentDetails()}]]
                                         </th:block>
                                     </td>
@@ -88,7 +89,7 @@
                                 <tr>
                                     <th scope="col">Special arrangement comments</th>
                                     <td>
-                                        <th:block th:if="${ billingDetails.getSpecialComments() != null}">
+                                        <th:block th:if="${billingDetails.getSpecialComments() != null}">
                                             [[${billingDetails.getSpecialComments()}]]
                                         </th:block>
                                     </td>
@@ -138,8 +139,8 @@
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label">Amount to be billed:(Please enter the amount in pounds (and pence if applicable) without any symbols, do not use commas)</label>
-                                                <input type="text" class="form-control"
-                                                    id="amountToBeBilled" maxlength="400" pattern="[0-9]+(\.[0-9][0-9]?)?"
+                                                <input type="text" class="form-control" pattern="[0-9]+(\.[0-9][0-9]?)?"
+                                                    maxlength="400" id="amountToBeBilled"
                                                     th:field="*{amountToBeBilled}"
                                                 />
                                             </div>
@@ -168,7 +169,7 @@
                                             </div>
                                         </div>
                                         <input type="hidden" id="submitAction" name="action" value="submit" />
-                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                                         <input type="hidden" name="vaultID" th:value="${billingDetails.getVaultID()}" />
                                         <input type="hidden" name="vaultName" th:value="${billingDetails.getVaultName()}" />
                                         <input type="hidden" name="billingType" th:value="${billingDetails.getBillingType()}" />
@@ -182,7 +183,7 @@
                         </div>
                     </div>
                 </div>
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
             </div>
 </div>
 </html>

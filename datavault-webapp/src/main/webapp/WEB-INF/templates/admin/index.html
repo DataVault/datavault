@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html><!--admin/index.html-->
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='admin')}">
-
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='admin')}">
+<head><title>Admin</title></head>
 <div layout:fragment="content">
 <style th:inline="css">
     .panel {
@@ -210,7 +210,7 @@
                     <h3 class="panel-title">Archive Stores</h3>
                 </div>
                 <div class="panel-body">
-                    <h1 class="text-center"><a th:href="@{/admin/archivestores"><span class="glyphicon glyphicon-upload"></span> [[${archivestorescount}]]</a></h1>
+                    <h1 class="text-center"><a th:href="@{/admin/archivestores}"><span class="glyphicon glyphicon-upload"></span> [[${archivestorescount}]]</a></h1>
                 </div>
             </div>
         </div>

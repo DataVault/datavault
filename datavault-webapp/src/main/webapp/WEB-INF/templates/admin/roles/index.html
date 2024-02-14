@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!--admin/roles/index.html-->
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='admin')}">
-
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='admin')}">
+<head><title>Admin - Roles</title></head>
 <div layout:fragment="content">
     <style>
         #add-new {
@@ -101,7 +101,7 @@
                         </div>
                     </div>
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
                         <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
@@ -129,7 +129,7 @@
                     </div>
                     <input type="hidden" id="delete-role-id" name="id"/>
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
                         <button type="submit" class="btn btn-danger btn-delete"><i class="fa fa-trash"></i> Delete</button>
@@ -165,6 +165,7 @@
                     </thead>
                     <tbody>
                     <th:block th:if="${isSuperAdmin}">
+                        <!-- IS SUPER ADMIN-->
                         <tr>
                             <td>[[${superAdminRole.getName()}]]</td>
                             <td>[[${superAdminRole.getAssignedUserCount()}]]</td>
@@ -176,6 +177,7 @@
                             </td>
                         </tr>
                     </th:block>
+                        <!-- READ ONLY ROLES -->
                         <tr th:each="role: ${readOnlyRoles}">
                             <td>[[${role.getName()}]]</td>
                             <td>[[${role.getAssignedUserCount()}]]</td>
@@ -189,6 +191,7 @@
                                 </a>
                             </td>
                         </tr>
+                        <!-- ROLES -->
                         <tr th:each="role: ${roles}">
                             <td>[[${role.getName()}]]</td>
                             <td>[[${role.getAssignedUserCount()}]]</td>

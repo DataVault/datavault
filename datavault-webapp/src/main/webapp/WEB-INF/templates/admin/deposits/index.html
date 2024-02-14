@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout(nav='admin')}">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='admin')}">
 
 <div layout:fragment="content" th:with="queryPARAM=${#uris.escapeQueryParam(query)}">
     <div class="modal fade" id="confirm-removal" tabindex="-1" role="dialog" aria-labelledby="confirmRemovalLabel" aria-hidden="true">
@@ -57,7 +57,7 @@
                 <thead>
                     <tr class="tr">
                         <th><a th:href="|?sort=name&order=${orderName}&query=${queryPARAM}|">Deposit Name
-                            <th:block th:if="${sort == 'name'}>
+                            <th:block th:if="${sort == 'name'}">
                                 <span th:if="${order=='desc'}" class="dropup"><span class="caret"></span></span>
                                 <span th:if="${order!='desc'}" class="caret"></span>
                             </th:block>
@@ -117,27 +117,27 @@
                         <td><span th:if="${!#strings.isEmpty(deposit?.getVaultName())}">[[${deposit.getVaultName()}]]</span></td>
                         <td><span th:if="${!#strings.isEmpty(deposit?.getCrisID())}">[[${deposit.getCrisID()}]]</span></td>
                         <td>[[${deposit.groupName}]]</td>
-                        <td><a th:href="@{|/vaults/${deposit.vaultID}/deposits/${deposit.getID()|}">[[${deposit.getID()}]]</a></td>
+                        <td><a th:href="@{|/vaults/${deposit.vaultID}/deposits/${deposit.getID()}|}">[[${deposit.getID()}]]</a></td>
                         <td><a th:href="@{|/vaults/${deposit.vaultID}|}">[[${deposit.vaultID}]]</a></td>
                         <td><span th:if="${!#strings.isEmpty(deposit?.vaultOwnerID)}">[[${deposit.vaultOwnerName}]] ([[${deposit.vaultOwnerID}]])</span></td>
                         <td>[[${deposit.vaultReviewDate}]]</td>
-                        <td th:with="removeDepositSecurityExpression=|hasPermission('${deposit.getGroupID()}','GROUP','DELETE_SCHOOL_VAULT_DEPOSITS')|">
-                            <th:block th:if="${#authorization.expression(removeDepositSecurityExpression)}">">
+                        <div th:with="removeDepositSecurityExpression=|hasPermission('${deposit.getGroupID()}', 'GROUP', 'DELETE_SCHOOL_VAULT_DEPOSITS')|">
+                            <div th:if="${#authorization.expression(removeDepositSecurityExpression)}">
                             <th:block th:if="${deposit.status != 'DELETED'}">
                                 <a class="btn btn-xs btn-danger pull-left" href="#" th:data-vault="${deposit.getVaultID()}" th:data-deposit="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
                                 </a>
                                 <br>
                             </th:block>
-                            </th:block>
+                            </div>
 
                             <th:block th:if="${deposit.status == 'FAILED'}">
                                 <a class="restart-deposit-btn btn btn-default btn-sm"
-                                   th:href="@{|/vaults/${deposit.vaultID}/deposits/${deposit.getID()}/restart|}">
+                                   th:href="@{|/vaults/__${deposit.vaultID}__/deposits/__${deposit.getID()}__/restart|}">
                                     Restart
                                 </a>
                             </th:block>
-                        </td>
+                        </div>
 
 
                     </tr>
@@ -147,7 +147,7 @@
         </div>
 
         <div align="center">
-            <p class="text-info">Showing [[${offset}]] - <span th:text="${totalRecords < offset+recordPerPage} ? ${totalRecords} : ${offset+recordPerPage}" /> deposit of [[${totalRecords}]]</p>
+            <p class="text-info">Showing [[${offset}]] - <span th:text="${totalRecords < (offset + recordPerPage) ? totalRecords : (offset + recordPerPage)}" /> deposit of [[${totalRecords}]]</p>
         </div>
         <th:block align="center">
         <nav aria-label="...">
@@ -157,7 +157,7 @@
                         th:class="${page == activePageId ? 'page-item active' : 'page-item'}"
                     >
                         <a class="page-link"
-                           th:href="@{|/admin/deposits?sort=${sort}&order=${order}&pageId=${page}&query=${queryPARAM}|}" tabindex="-1">[[${page}]]</a>
+                           th:href="@{|/admin/deposits?sort=${sort}&order=${order}&pageId=${page}&query=__${queryPARAM}__|}" tabindex="-1">[[${page}]]</a>
                     </li>
                 </th:block>
             </ul>

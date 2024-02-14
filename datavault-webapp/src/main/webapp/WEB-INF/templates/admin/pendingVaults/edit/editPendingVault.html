@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!--admin/pendingVaults/edit/editPendingVault.html-->
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='home')}"
       xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
       >
-
+<head><title>Admin - Edit Pending Vault</title></head>
 <div layout:fragment="content">
 
 <!--/* ALLOW ONLY ADMIN ACCESS */-->
@@ -28,7 +28,7 @@
                             <div th:if="${!#lists.isEmpty(errors)}" id="create-error" class="alert alert-danger" role="alert">
                                 Your request contains the following errors<br/>
                                 <span th:each="error: ${errors}" >
-                                    [[${error}]]<br/>
+                                    <th:block th:utext="${error}"/><br/>
                                 </span>
                             </div>
                             <div class="row justify-content-center mt-0">
@@ -49,7 +49,7 @@
                                                     <input type="hidden" id="pendingID" th:field="*{pendingID}" />
                                                     <input type="hidden" id="loggedInAs" th:field="*{loggedInAs}" />
                                                     <input type="hidden" id="confirmed" th:field="*{confirmed}"/>
-                                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                                    <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                                                 </form>
                                             </div>
                                         </div>
@@ -68,6 +68,9 @@
    <script th:src="@{/resources/application/js/admin-pending-vault-edit.js}"></script>
 
 </div>
+</div>
+<div sec:authorize="!hasRole('ROLE_IS_ADMIN')">
+    <-- YOU DO NOT HAVE PERMISSION TO VIEW THIS PAGE -->
 </div>
 </div>
 </html>
