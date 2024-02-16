@@ -1,0 +1,15 @@
+<!DOCTYPE html><!--test/dates.html-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><title>Date Formatting Tests</title></head>
+<body>
+<div id="no-format">[[${myDateTime}]]</div>
+<div id="built-in-datetime-format">[[${#dates.format(myDateTime)}]]</div>
+
+<div id="custom-date-format">[[${#dates.format(myDateTime,'dd/MMM/yyyy')}]]</div>
+<div id="custom-datetime-format">[[${#dates.format(myDateTime,'dd/MMM/yyyy HH:mm:ss')}]]</div>
+
+<div id="global-date-format">[[${#dates.format(myDateTime, #vars.globalDateFormat)}]]</div>
+<div id="global-time-format">[[${#dates.format(myDateTime, #vars.globalTimeFormat)}]]</div>
+<div id="global-datetime-format">[[${#dates.format(myDateTime, #vars.globalDateTimeFormat)}]]</div>
+</body>
+</html>

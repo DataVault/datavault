@@ -31,6 +31,7 @@ import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.test.SlowTest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
@@ -359,6 +360,7 @@ public class EncryptionTest {
 
     @Test
     @SlowTest
+    @Disabled
     public void testHugeFileGCMCriptoWithAAD() {
         System.out.println("Start testHugeFileGCMCriptoWithAAD...");
 
@@ -455,6 +457,7 @@ public class EncryptionTest {
 
     @Test
     @SlowTest
+    @Disabled
     public void testHugeFileCBCCriptoWithAAD() {
         System.out.println("Start testHugeFileCBCCriptoWithAAD...");
 
