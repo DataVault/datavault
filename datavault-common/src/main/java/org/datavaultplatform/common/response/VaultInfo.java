@@ -758,7 +758,7 @@ public class VaultInfo {
     }
 
     /**
-     * see 'freemarker/vaults/security.html'
+     * see 'templates/vaults/security.html'
      */
     public static VaultInfo create(){
         return new VaultInfo();

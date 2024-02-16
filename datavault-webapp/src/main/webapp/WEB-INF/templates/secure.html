@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-SECURE PAGE
-<hr/>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head><title>Secure Page</title></head>
+<body>
 <div sec:authorize="isAuthenticated()" th:with="principal=${#authentication.principal}">
   <ul>
     <li><a th:href="@{/auth/logout}">Logout</a></li>
@@ -12,11 +12,11 @@ SECURE PAGE
     <li th:each="auth: ${principal.authorities}">[[${auth}]]</li>
   </ol>
 </div>
-
 <div sec:authorize="! isAuthenticated()">
   <ul>
     <li>NOT logged in</li>
     <li><a th:href="@{/auth/login}">LOGIN</a></li>
   </ul>
 </div>
+</body>
 </html>

@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!--deposits/deposit.html-->
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='home')}" >
-
+<head><title>Deposits - Deposit</title></head>
 <div layout:fragment="content">
     <div class="container">
 
@@ -47,14 +47,14 @@
             </div>
             <div th:with="canRetrieveDataExpression=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'CAN_RETRIEVE_DATA')|">
             <div th:if="${#authorization.expression(canRetrieveDataExpression)}">
+                <!-- CAN RETRIEVE DATA EXPRESSION -->
             <div th:if="${deposit.status.name() == 'COMPLETE'}">
                 <a id="retrievebtn" class="btn btn-primary pull-right" th:href="@{|/vaults/${vault.getID()}/deposits/${deposit.getID()}/retrieve|}" disabled='disabled'>
                     <i class="fa fa-upload fa-rotate-180" aria-hidden="true"></i> Retrieve data
                 </a>
             </div>
             </div>
-            </div>
-            
+
             <table class="table table-sm">
                 <tbody>
                     <tr>
@@ -167,6 +167,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
+                                    <!--RETRIEVES-->
                                     <tr th:each="retrieve: ${retrieves}" class="tr">
                                         <td>[[${retrieve.user.getID()}]]}</td>
                                         <td th:text="${retrieve.hasExternalRecipients} ? 'Yes' : 'No'">dummy</td>

@@ -1,4 +1,4 @@
-<fieldset xmlns:th="http://www.thymeleaf.org" >
+<fieldset xmlns:th="http://www.thymeleaf.org" id="info-fieldset">
     <div class="form-card">
         <h2 class="fs-title">Vault Information</h2>
 
@@ -89,7 +89,7 @@
                     <select id="groupID" name="groupID" data-width="auto" class="form-control group-select selectpicker show-tick">
                         <option selected disabled data-hidden="true">Please choose a School</option>
                         <th:block th:each="group: ${groups}">
-                            <option th:if="${group.enabled}"  th:field="*{group.getID()}">[[${group.name}]]</option>
+                            <option th:if="${group.enabled}"  th:value="${group.getID()}" th:field="*{groupID}">[[${group.name}]]</option>
                         </th:block>
                     </select>
                 </div>

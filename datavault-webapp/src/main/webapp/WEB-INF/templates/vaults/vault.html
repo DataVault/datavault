@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!--vaults/vault.html-->
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='home')}">
-
+<head><title>Vaults - Vault</title></head>
 <div layout:fragment="content">
 <div class="container">
 
@@ -23,7 +23,7 @@
                     </div>
                     
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                     
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -53,7 +53,7 @@
                     </div>
 
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
@@ -85,7 +85,7 @@
                     </div>
 
                     <input type="hidden" id="submitAction" name="action" value="submit"/>
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
@@ -128,7 +128,7 @@
 
         <th:block th:with="viewDepositsSecurityExpression1=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'MANAGE_SCHOOL_VAULT_DEPOSITS') or hasPermission('${vault.groupID}', 'GROUP', 'MANAGE_SCHOOL_VAULT_DEPOSITS')|">
         <th:block th:if="${#authorization.expression(viewDepositsSecurityExpression1)}">
-            <th:block th:if="deposits != null}">
+            <th:block th:if="${deposits != null}">
             <h4><strong>Deposit and Retrieve</strong></h4>
              <th:block th:with="addDepositsSecurityExpression2=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') |">
             <th:block th:if="${#authorization.expression(addDepositsSecurityExpression2)}">
@@ -278,7 +278,7 @@
                             </tr>
                             <tr>
                                 <th scope="col">Review Date</th>
-                                <td>[[${vault.getReviewDateAsString()]]</td>
+                                <td>[[${vault.getReviewDateAsString()}]]</td>
                                 <td>
                                     <button type="button" class="btn btn-default pull-right" disabled>
                                         Edit review date

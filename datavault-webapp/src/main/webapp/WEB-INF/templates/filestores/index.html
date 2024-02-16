@@ -1,6 +1,7 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!--filestores/index.html-->
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='user')}" >
+<head><title>Filestores</title></head>
 <div layout:fragment="content">
 
 <style>
@@ -150,8 +151,8 @@
 
                 <div class="table-responsive storage-table" th:with="filestoresLocalNotEmpty=${!#lists.isEmpty(filestoresLocal)}">
 
-                    <table th:if="filestoresLocalNotEmpty}" lass="table table-striped">
-
+                    <table th:if="${filestoresLocalNotEmpty}" lass="table table-striped">
+                        <!-- FILESTORES LOCAL -->
                         <thead>
                         <tr class="tr">
                             <th>Hostname</th>
@@ -191,6 +192,7 @@
 
             <div th:with="filestoresSFTPnotEmpty=${!#lists.isEmpty(filestoresSFTP)}">
                 <div th:if="${filestoresSFTPnotEmpty}" class="table-responsive storage-table">
+                    <!-- FILESTORES SFTP -->
                     <p>After adding your DataStore location details (hostname and path) you will need to use the buttons below to copy the public SSH key over to DataStore (without this step, the DataVault will not be able to authenticate to the location).</p>
                     <p>
                        If your filestore is on a server other than DataStore, in order to allow DataVault to authenticate (i.e. to allow DataVault to connect to the server using your identity), you will have to copy the public SSH key provided here onto your server to the appropriate place, rather than entering a username and password.
@@ -237,7 +239,7 @@
                 </a>
                 </div>
 
-                <div th:if="${filestoresSFTPnotEmpty">
+                <div th:if="${filestoresSFTPnotEmpty}">
                 <p>To register your public key you need to:</p>
                 <ol>
                     <li>Copy the public key displayed above</li>
@@ -281,7 +283,7 @@
 
     var sftpFrm = $('#add-filestoreSFTP-form');
     sftpFrm.submit(function (ev) {
-        var baseURL = /*[[@{/filestores/sftp]]*/ 'replaced-by-tl';
+        var baseURL = /*[[@{/filestores/sftp}]]*/ 'replaced-by-tl';
         $.ajax({
             method: "POST",
             url: baseURL,
@@ -345,3 +347,5 @@
 </script>
 
 </div>
+</div>
+</html>

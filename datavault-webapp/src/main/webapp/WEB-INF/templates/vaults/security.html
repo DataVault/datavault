@@ -1,4 +1,4 @@
-<div xmlns:th="http://www.thymeleaf.org" th:with="vault=${T(org.datavaultplatform.common.response.VaultInfo).create()}">
+<div xmlns:th="http://www.thymeleaf.org" id="security-div" th:with="vault=${T(org.datavaultplatform.common.response.VaultInfo).create()}">
 <style>
     #add-new {
         margin-top: 2em;
@@ -172,7 +172,7 @@
                 </div>
 
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
                     <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
@@ -217,7 +217,7 @@
                     </div>
                 </div>
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
                     <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
@@ -257,7 +257,7 @@
                 </div>
                 <input type="hidden" id="role-update-assignment-id" name="assignment"/>
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
                     <button type="submit" class="btn btn-primary"><span class="fa fa-floppy-o"></span> Save</button>
@@ -285,7 +285,7 @@
                 </div>
                 <input type="hidden" id="delete-role-assignment-id" name="assignment"/>
                 <input type="hidden" id="submitAction" name="action" value="submit"/>
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Cancel</button>
@@ -318,7 +318,7 @@
                             </div>
                     </div>
                 </th>
-                <th:block sec:authorize="${showActionsColumnSecurityExpression}">
+                <th:block th:if="${#authorization.expression(showActionsColumnSecurityExpression)}">
                 <th class="action-column">Actions</th>
                 </th:block>
             </tr>

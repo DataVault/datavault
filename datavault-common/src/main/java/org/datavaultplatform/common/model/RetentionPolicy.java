@@ -105,6 +105,8 @@ public class RetentionPolicy {
     public void setId(Integer id) {
         this.id = id;
     }
+
+    @JsonIgnore
     public void setID(Integer id){
         setId(id);
     }

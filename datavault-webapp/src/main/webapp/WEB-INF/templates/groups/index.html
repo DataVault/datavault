@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!--groups/index.html-->
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/defaultlayout(nav='groups')}" >
-
+<head><title>Group Vaults</title></head>
 <div layout:fragment="content">
 
 <div class="container">
@@ -36,9 +36,9 @@
                                 </tr>
                             </thead>
 
-                            <tbody th:if="${gStatus.index < vaults.length}"><!--/* just in case groups is larger than vaults array */-->
+                            <tbody th:if="${gStatus.index < #lists.size(vaults)}"><!--/* just in case groups is larger than vaults array */-->
                                     <tr th:each="vault: ${vaults[gStatus.index]}" class="tr">
-                                        <td><a th:href="@{|/vaults/${vault.getID()/}|}">[[${vault.name}]]</a></td>
+                                        <td><a th:href="@{|/vaults/${vault.getID()}/|}">[[${vault.name}]]</a></td>
                                         <td>[[${vault.description}]]</td>
                                         <td>[[${vault.userID}]]</td>
                                         <td>[[${vault.getSizeStr()}]]</td>

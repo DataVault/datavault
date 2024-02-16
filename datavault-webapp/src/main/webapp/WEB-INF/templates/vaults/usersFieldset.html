@@ -1,4 +1,4 @@
-<fieldset xmlns:th="http://www.thymeleaf.org" >
+<fieldset xmlns:th="http://www.thymeleaf.org"  id="users-fieldset">
     <div id="add-role-vault-dialog" class="form-card">
         <h2 class="fs-title text-center">Vault Users</h2> <br><br>
         <div id="autocomplete-error" class="alert alert-danger hidden error" role="alert"></div>
@@ -49,8 +49,8 @@
               />
               <!-- Add  remove button for inputs apart from first for which we add an add button. -->
 
-              <button th:if=${ndmIndex==0}" type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
-              <button th:if=${ndmIndex!=0}" type="button" class="remove-ndm-btn btn btn-danger btn-xs">Remove</button>
+              <button th:if="${ndmIndex == 0}" type="button" id="add-ndm-btn" class="btn btn-default btn-sm">Add a NDM</button>
+              <button th:if="${ndmIndex != 0}" type="button" class="remove-ndm-btn btn btn-danger btn-xs">Remove</button>
               <span class="uun-required-error-span"></span>
             </div>
         </th:block>
@@ -70,7 +70,7 @@
         <!-- START: NDMs hidden -->
         <div id="hidden-empty-ndms" class="collapse col-sm-offset-4" th:with="existingNDM=${vault?.nominatedDataManagers == null ? 0 : #lists.size(vault.nominatedDataManagers)}">
 
-         <th:block th:each="ndmIndex=${#numbers.sequence(existingNDM,existingNDM-1+15)}">
+         <th:block th:each="ndmIndex: ${#numbers.sequence(existingNDM,existingNDM-1+15)}">
             <div class="empty-ndm form-group col-sm-offset-4 my-1">
                <input th:value="|nominatedDataManagers[${ndmIndex}]|" class="autocomplete uun-required unique-uun-required" type="text"  placeholder=""/>
                <button type="button" class="remove-ndm-btn btn btn-danger btn-xs">Remove</button>
@@ -118,7 +118,7 @@
           
         <!-- START: depositors hidden -->
         <div id="hidden-empty-depositors" class="collapse col-sm-offset-4" th:with="existingDepositors=${vault?.depositors == null ? 0 : #lists.size(vault.depositors)}">
-            <th:block th:each="depositorIndex=${#numbers.sequence(existingDepositors,existingDepositors-1+15)}">
+            <th:block th:each="depositorIndex: ${#numbers.sequence(existingDepositors,existingDepositors-1+15)}">
             <div class="empty-depositor form-group col-sm-offset-4 my-1">
                <input th:value="|depositors[${depositorIndex}]|" class="autocomplete uun-required unique-uun-required" type="text"  placeholder=""/>
                <button type="button" class="remove-depositor-btn btn btn-danger btn-xs">Remove</button>

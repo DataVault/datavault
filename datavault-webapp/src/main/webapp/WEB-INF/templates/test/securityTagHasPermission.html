@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!--test/securityTagHasPermission.html-->
 
 
 <html lang="en">
@@ -13,11 +13,6 @@
   <div id="result">
     DOES HAVE PERMISSION
   </div>
-</div>
-<div th:with="removeDepositSecurityExpression=|hasPermission('${targetId}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES')|">
-<div th:if="${#authorization.expression(removeDepositSecurityExpression)}">
-  DOES HAVE PERMISSION V2
-</div>
 </div>
 </div>
 </body>

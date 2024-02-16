@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!--vaults/index.html-->
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/defaultlayout(nav='home')}">
-
+<head><title>Vaults</title></head>
 <div layout:fragment="content">
 
     <div class="container">
@@ -37,13 +37,14 @@
                                 <td>
                                     <th:block th:with="viewDepositsSecurityExpression=|hasPermission('${vault.ID}', 'vault', 'VIEW_DEPOSITS_AND_RETRIEVES') or hasPermission('${vault.groupID}', 'GROUP', 'MANAGE_SCHOOL_VAULT_DEPOSITS')|">
                                     <th:block th:if="${#authorization.expression(viewDepositsSecurityExpression)}">
+                                        <!-- CAN VIEW DEPOSITS -->
                                     <a th:href="@{|/vaults/${vault.getID()}/deposits/create|}" class="btn btn-primary">
                                        <i class="fa fa-download fa-rotate-180" aria-hidden="true"></i> Deposit
                                     </a>
                                     </th:block>
                                     </th:block>
                                 </td>
-                                <td><th:block th:if="${vault.getOwnderId() != null}">[[${vault.getOwnerId()}]]</th:block></td>
+                                <td><th:block th:if="${vault.getOwnerId() != null}">[[${vault.getOwnerId()}]]</th:block></td>
                                 <td>[[${#dates.format(vault.getCreationTime(),'HH:mm:ss yyyy-MM-dd')}]]<!--/* datetime */--></td>
                                 <td class="text-muted">[[${vault.getReviewDateAsString()}]]</td>
                             </tr>
