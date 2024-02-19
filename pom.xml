@@ -28,7 +28,7 @@
 
   <properties>
     <!-- general -->
-    <java.version>1.8</java.version>
+    <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skip.git.commit>false</skip.git.commit>
     <skip.unit.tests>false</skip.unit.tests>
