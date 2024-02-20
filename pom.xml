@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <packaging>pom</packaging>
   <modules>
@@ -12,7 +12,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.7.6</version>
+    <version>3.2.2</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -28,24 +28,27 @@
 
   <properties>
     <!-- general -->
-    <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skip.git.commit>false</skip.git.commit>
     <skip.unit.tests>false</skip.unit.tests>
     <skip.integration.tests>false</skip.integration.tests>
 
     <!-- dependency versions -->
+
+    <!-- https://mvnrepository.com/artifact/pl.project13.maven/git-commit-id-plugin -->
+    <git.commit.id.maven.plugin.version>4.9.10</git.commit.id.maven.plugin.version>
+
     <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
     <aws.java.sdk.bom.version>1.12.334</aws.java.sdk.bom.version>
 
     <!-- https://mvnrepository.com/artifact/com.oracle.oci.sdk/oci-java-sdk-bom -->
-    <oci.java.sdk.bom.version>3.31.1</oci.java.sdk.bom.version>
+    <oci.java.sdk.bom.version>3.0.1</oci.java.sdk.bom.version>
 
     <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
     <testcontainers.version>1.17.6</testcontainers.version>
 
     <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-contract-stub-runner -->
-    <spring.cloud.version>3.1.5</spring.cloud.version>
+    <spring.cloud.version>4.1.1</spring.cloud.version>
 
     <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
     <mockito.version>4.9.0</mockito.version>
@@ -113,10 +116,13 @@
     <javax.interceptor.version>1.2.2</javax.interceptor.version>
 
     <!-- https://mvnrepository.com/artifact/it.burning/cron-expression-descriptor -->
-    <cron.expr.desc.version>1.2.6</cron.expr.desc.version>
+    <cron.expr.desc.version>1.2.8</cron.expr.desc.version>
 
     <!-- https://mvnrepository.com/artifact/net.i2p.crypto/eddsa -->
     <eddsa.version>0.3.0</eddsa.version>
+
+    <hibernate.version>6.4.4.Final</hibernate.version>
+    <jackson.version>2.14.1</jackson.version>
   </properties>
 
   <dependencyManagement>
@@ -191,13 +197,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-        <dependency>
-          <groupId>com.oracle.oci.sdk</groupId>
-          <artifactId>oci-java-sdk-common-httpclient-jersey</artifactId>
-          <version>${oci.java.sdk.bom.version}</version>
-          <type>pom</type>
-          <scope>import</scope>
-        </dependency>
       <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
@@ -333,6 +332,10 @@
           <groupId>org.mockito</groupId>
           <artifactId>mockito-junit-jupiter</artifactId>
         </exclusion>
+          <exclusion>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+          </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -360,16 +363,6 @@
       <artifactId>javax.interceptor-api</artifactId>
       <version>${javax.interceptor.version}</version>
     </dependency>
-    <dependency>
-      <groupId>com.oracle.oci.sdk</groupId>
-      <artifactId>oci-java-sdk-common-httpclient-jersey</artifactId>
-      <version>${oci.java.sdk.bom.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.oracle.oci.sdk</groupId>
-      <artifactId>oci-java-sdk-addons-resteasy-client-configurator</artifactId>
-      <version>${oci.java.sdk.bom.version}</version>
-    </dependency>
   </dependencies>
 
 
@@ -384,6 +377,7 @@
         <plugin>
           <groupId>pl.project13.maven</groupId>
           <artifactId>git-commit-id-plugin</artifactId>
+          <version>${git.commit.id.maven.plugin.version}</version>
           <configuration>
             <offline>true</offline>
             <verbose>false</verbose>
@@ -424,10 +418,6 @@
           <configuration>
             <skipTests>${skip.unit.tests}</skipTests>
             <excludedGroups>slow,org.datavaultplatform.test.TSMTest</excludedGroups>
-              <systemPropertyVariables>
-                <user.language>en</user.language>
-                <user.region>GB</user.region>
-              </systemPropertyVariables>
           </configuration>
         </plugin>
         <plugin>
@@ -527,6 +517,9 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
             <configuration>
+              <source>17</source>
+              <target>17</target>
+              <release>17</release>
               <testExcludes>
                 <testExclude>**/*FT.java</testExclude>
               </testExcludes>
@@ -536,4 +529,14 @@
       </build>
     </profile>
   </profiles>
+  <repositories>
+    <repository>
+      <id>spring-milestones</id>
+      <name>Spring Milestones</name>
+      <url>https://repo.spring.io/milestone</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 </project>

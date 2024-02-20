@@ -1,18 +1,17 @@
 package org.datavaultplatform.common.metadata.impl;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
+import org.datavaultplatform.common.metadata.Provider;
+import org.datavaultplatform.common.model.Dataset;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import lombok.extern.slf4j.Slf4j;
-import org.datavaultplatform.common.model.Dataset;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.LineIterator;
-import org.datavaultplatform.common.metadata.Provider;
 
 // This mock metadata provider is for testing purposes only
 

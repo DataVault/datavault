@@ -1,9 +1,9 @@
 package org.datavaultplatform.webapp.authentication;
 
 import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.request.CreateClientEvent;
 import org.datavaultplatform.common.model.User;
@@ -22,10 +22,17 @@ public class AuthenticationSuccess extends SavedRequestAwareAuthenticationSucces
     public AuthenticationSuccess(NotifyLoginService service){
         this.service = service;
     }
-    
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        
+
+        log.info("AUTHENTICATION SUCCESS {}", authentication);
+
+        String pathInfo = request.getPathInfo();
+        if (pathInfo != null && pathInfo.startsWith("/actuator")) {
+            log.info("Ignoring Authentication Success for [{}]", pathInfo);
+            return;
+        }
         // Get some details from the request
         String remoteAddress = request.getRemoteAddr();
         String userAgent = request.getHeader("User-Agent");
@@ -40,7 +47,7 @@ public class AuthenticationSuccess extends SavedRequestAwareAuthenticationSucces
         } catch(Exception ex){
             log.error("Error when Logging the authentication success with the broker", ex);
         }
-        
+
         // Check whether the user is an owner of any groups
         boolean groupOwner = false;
         Group[] groups = new Group[0];
@@ -60,13 +67,13 @@ public class AuthenticationSuccess extends SavedRequestAwareAuthenticationSucces
                 break;
             }
         }
-        
+
         if (groupOwner) {
             request.getSession().setAttribute("isGroupOwner", "true");
         } else {
             request.getSession().setAttribute("isGroupOwner", "false");
         }
-        
+
         // Continue with request processing
         super.onAuthenticationSuccess(request, response, authentication);
     }

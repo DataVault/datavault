@@ -1,17 +1,15 @@
 package org.datavaultplatform.common.bagish;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.io.FileUtils;
 import org.springframework.util.Assert;
 
-import static org.apache.commons.codec.digest.DigestUtils.md5Hex;
-import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
-import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
-import static org.apache.commons.codec.digest.DigestUtils.sha512Hex;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import static org.apache.commons.codec.digest.DigestUtils.*;
 
 @Slf4j
 public class Checksummer {

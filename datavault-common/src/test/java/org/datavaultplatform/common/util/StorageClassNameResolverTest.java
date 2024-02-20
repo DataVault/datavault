@@ -1,7 +1,5 @@
 package org.datavaultplatform.common.util;
 
-import static org.junit.Assert.assertEquals;
-
 import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemJSch;
@@ -11,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import static org.junit.Assert.assertEquals;
 
 public class StorageClassNameResolverTest {
 

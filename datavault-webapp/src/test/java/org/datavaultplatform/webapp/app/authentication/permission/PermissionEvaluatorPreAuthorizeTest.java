@@ -53,7 +53,7 @@ import org.springframework.web.bind.annotation.RestController;
  * the actual PermissionEvaluator - just that it gets called correctly.
  */
 class PermissionEvaluatorPreAuthorizeTest {
-  
+
   @Autowired
   MockMvc mvc;
 
@@ -134,7 +134,7 @@ class PermissionEvaluatorPreAuthorizeTest {
        * Checks that the PermissionEvaluator.hasPermission with 3 args is called as expected.
        */
       @Nested
-      class PathOneUsesHasPersmissionFourArgs {
+      class PathOneUsesHasPermissionFourArgs {
 
         @Captor
         ArgumentCaptor<Serializable> argTargetId;

@@ -11,6 +11,8 @@ import org.datavaultplatform.broker.test.BaseDatabaseTest;
 import org.datavaultplatform.broker.test.TestClockConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +27,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.clearAllCaches;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -63,25 +66,26 @@ public class ActuatorTest extends BaseDatabaseTest {
     when(mFileStoreService.getFileStores()).thenReturn(Collections.emptyList());
   }
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(strings = {"/actuator/info", "/actuator/health", "/actuator/metrics", "/actuator/memoryinfo"})
   @SneakyThrows
-  void testActuatorPublicAccess() {
-    Stream.of("/actuator/info", "/actuator/health", "/actuator/metrics", "/actuator/memoryinfo").forEach(this::checkPublic);
+  void testActuatorPublicAccess(String url) {
+    checkPublic(url);
   }
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(strings={"/actuator", "/actuator/", "/actuator/env", "/users"})
   @SneakyThrows
-  void testActuatorUnauthorized() {
-    Stream.of("/actuator", "/actuator/", "/actuator/env", "/users")
-        .forEach(this::checkUnauthorized);
+  void testActuatorUnauthorized(String url) {
+    checkUnauthorized(url);
   }
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(strings = {"/actuator", "/actuator/", "/actuator/env", "/actuator/customtime",
+          "/actuator/sftpfilestores", "/actuator/localfilestores"})
   @SneakyThrows
-  void testActuatorAuthorized() {
-    Stream.of("/actuator", "/actuator/", "/actuator/env", "/actuator/customtime",
-            "/actuator/sftpfilestores", "/actuator/localfilestores")
-        .forEach(url -> checkAuthorized(url, "bactor", "bactorpass"));
+  void testActuatorAuthorized(String url) {
+    checkAuthorized(url, "bactor", "bactorpass");
   }
 
   @SneakyThrows

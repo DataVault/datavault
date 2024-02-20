@@ -1,8 +1,9 @@
 package org.datavaultplatform.common.event.deposit;
 
-import java.util.Optional;
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 import org.datavaultplatform.common.event.Event;
+
+import java.util.Optional;
 
 @Entity
 public class CompleteCopyUpload extends Event {

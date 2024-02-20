@@ -2,14 +2,13 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
 
-import javax.persistence.*;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-@Table(
-        name="Role_assignments",
+@Table(name="Role_assignments",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = { "role_id", "user_id", "school_id" }),
                 @UniqueConstraint(columnNames = { "role_id", "user_id", "vault_id" }),
@@ -23,7 +22,8 @@ import java.util.Objects;
 public class RoleAssignment {
     public static final String EG_ROLE_ASSIGNMENT = "eg.RoleAssignment.1";
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @SequenceGenerator(name = "hibSEQ", sequenceName = "hibernate_sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "hibSEQ")
     private Long id;
 
     @ManyToOne(optional = false)

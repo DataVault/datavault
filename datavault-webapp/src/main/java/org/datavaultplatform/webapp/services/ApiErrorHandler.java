@@ -19,7 +19,7 @@ public class ApiErrorHandler extends DefaultResponseErrorHandler {
 
     @Override
     public void handleError(ClientHttpResponse response) throws IOException {
-        HttpStatus statusCode = response.getStatusCode();
+        HttpStatusCode statusCode = response.getStatusCode();
 
         if (statusCode == HttpStatus.FORBIDDEN) {
             logger.error("Attempted to call the broker but received a 403 - Forbidden");

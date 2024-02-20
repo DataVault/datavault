@@ -3,18 +3,16 @@ package org.datavaultplatform.common.storage.impl;
 //import com.dropbox.core.*;
 //import org.apache.commons.io.IOUtils;
 //import org.datavaultplatform.common.io.FileCopy;
+
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
 
-import java.io.*;
-//import java.nio.file.DirectoryStream;
-//import java.nio.file.Files;
+import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-//import java.util.Locale;
 import java.util.Map;
 
 // Documentation:

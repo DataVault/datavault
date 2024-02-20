@@ -1,9 +1,10 @@
 package org.datavaultplatform.common.monitor;
 
-import java.text.CharacterIterator;
-import java.text.StringCharacterIterator;
 import lombok.Builder;
 import lombok.Data;
+
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 
 @Data
 @Builder

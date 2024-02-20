@@ -1,8 +1,6 @@
 package org.datavaultplatform.common.event;
 
-import javax.persistence.Entity;
-
-import static org.datavaultplatform.common.event.Error.Type.*;
+import jakarta.persistence.Entity;
 
 // A fatal error that caused a job to fail
 

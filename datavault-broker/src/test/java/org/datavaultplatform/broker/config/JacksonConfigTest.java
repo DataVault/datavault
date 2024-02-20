@@ -3,7 +3,7 @@ package org.datavaultplatform.broker.config;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
+import com.fasterxml.jackson.datatype.hibernate5.jakarta.Hibernate5JakartaModule;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
@@ -53,6 +53,6 @@ public class JacksonConfigTest {
   void testJacksonHasHibernate5ModuleRegistered() {
     mapper.getRegisteredModuleIds().forEach(System.out::println);
     log.info("moduleIds {}", mapper.getRegisteredModuleIds());
-    assertTrue(mapper.getRegisteredModuleIds().contains(Hibernate5Module.class.getName()));
+    assertTrue(mapper.getRegisteredModuleIds().contains(Hibernate5JakartaModule.class.getName()));
   }
 }

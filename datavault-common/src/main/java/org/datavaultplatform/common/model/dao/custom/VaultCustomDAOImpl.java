@@ -6,13 +6,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.model.Dataset_;
 import org.datavaultplatform.common.model.Group_;
@@ -131,7 +131,7 @@ public class VaultCustomDAOImpl extends BaseCustomDAOImpl implements VaultCustom
             } else {
                 sortExpr = rt.get(sort);
             }
-            javax.persistence.criteria.Order orderBy;
+            jakarta.persistence.criteria.Order orderBy;
             if (asc) {
                 orderBy = cb.asc(sortExpr);
             } else {

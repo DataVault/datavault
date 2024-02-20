@@ -1,8 +1,7 @@
 package org.datavaultplatform.common.event.audit;
 
+import jakarta.persistence.Entity;
 import org.datavaultplatform.common.event.Event;
-
-import javax.persistence.Entity;
 
 @Entity
 public class AuditComplete extends Event{

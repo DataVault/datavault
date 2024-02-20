@@ -1,12 +1,10 @@
 package org.datavaultplatform.common.io;
 
-import static org.junit.Assert.assertEquals;
-
-
-import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ProgressEventListenerTest {
 

@@ -3,14 +3,14 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import org.hibernate.Hibernate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "VaultReview")

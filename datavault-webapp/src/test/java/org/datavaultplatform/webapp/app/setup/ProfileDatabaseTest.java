@@ -12,6 +12,7 @@ import org.datavaultplatform.webapp.authentication.database.DatabaseAuthenticati
 import org.datavaultplatform.webapp.test.ProfileDatabase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProfileDatabaseTest {
 
   @Autowired
+  @Qualifier("databaseAuthenticationProvider")
   AuthenticationProvider authProvider;
 
   @Autowired
@@ -39,8 +41,8 @@ public class ProfileDatabaseTest {
 
   @Test
   void testContextIsCorrect() throws InterruptedException {
-      assertThat(authProvider).isInstanceOf(DatabaseAuthenticationProvider.class);
-      assertTrue(latch.await(3, TimeUnit.SECONDS));
+    assertThat(authProvider).isInstanceOf(DatabaseAuthenticationProvider.class);
+    assertTrue(latch.await(3, TimeUnit.SECONDS));
   }
 
   @Test
@@ -54,7 +56,7 @@ public class ProfileDatabaseTest {
     Set<String> names = toSet(ctx.getBeanNamesForAnnotation(Controller.class));
     Set<String> restNames = toSet(ctx.getBeanNamesForAnnotation(RestController.class));
     assertTrue(names.containsAll(restNames));
-    assertThat(names.size()).isEqualTo(24);
+    assertThat(names.size()).isEqualTo(25);
   }
 
   @TestConfiguration

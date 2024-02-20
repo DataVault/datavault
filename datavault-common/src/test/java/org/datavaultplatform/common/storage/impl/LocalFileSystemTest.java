@@ -1,10 +1,13 @@
 package org.datavaultplatform.common.storage.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.io.FileUtils;
+import org.datavaultplatform.common.io.Progress;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,14 +20,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.datavaultplatform.common.io.FileUtils;
-import org.datavaultplatform.common.io.Progress;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 public class LocalFileSystemTest {

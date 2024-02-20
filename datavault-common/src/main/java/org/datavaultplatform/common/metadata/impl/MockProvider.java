@@ -1,12 +1,12 @@
 package org.datavaultplatform.common.metadata.impl;
 
+import org.datavaultplatform.common.metadata.Provider;
+import org.datavaultplatform.common.model.Dataset;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.datavaultplatform.common.model.Dataset;
-import org.datavaultplatform.common.metadata.Provider;
 
 // This mock metadata provider is for testing purposes only
 

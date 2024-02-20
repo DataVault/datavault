@@ -1,20 +1,17 @@
 package org.datavaultplatform.common.model.dao.custom;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.model.Retrieve.Status;
+import org.datavaultplatform.common.model.dao.SchoolPermissionQueryHelper;
+import org.datavaultplatform.common.util.DaoUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import org.datavaultplatform.common.model.Deposit_;
-import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.Retrieve;
-import org.datavaultplatform.common.model.Retrieve.Status;
-import org.datavaultplatform.common.model.Retrieve_;
-import org.datavaultplatform.common.model.Vault_;
-import org.datavaultplatform.common.model.dao.SchoolPermissionQueryHelper;
-import org.datavaultplatform.common.util.DaoUtils;
 
 
 public class RetrieveCustomDAOImpl extends BaseCustomDAOImpl implements RetrieveCustomDAO {

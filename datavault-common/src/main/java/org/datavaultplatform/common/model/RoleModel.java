@@ -4,14 +4,14 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Sets;
-
-import java.util.ArrayList;
-import java.util.List;
-import javax.persistence.*;
-import java.text.MessageFormat;
-import java.util.Collection;
-import java.util.Objects;
+import jakarta.persistence.*;
 import org.hibernate.Hibernate;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -25,7 +25,8 @@ public class RoleModel {
     public static final String EG_ROLE_MODEL = "eg.RoleModel.1";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @SequenceGenerator(name = "hibSEQ", sequenceName = "hibernate_sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "hibSEQ")
     private Long id;
 
     @Column(name = "name", nullable = false, columnDefinition = "TEXT")

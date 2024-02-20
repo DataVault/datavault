@@ -1,13 +1,12 @@
 package org.datavaultplatform.common.crypto;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
 import org.datavaultplatform.common.crypto.Encryption.KeyStoreInfo;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 public class GenerateKeyStoreFileInfoTest {

@@ -16,6 +16,8 @@ import org.datavaultplatform.worker.test.AddTestProperties;
 import org.datavaultplatform.worker.test.TestClockConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,9 +32,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AddTestProperties
 @Slf4j
 @TestPropertySource(properties = {
-    "worker.rabbit.enabled=false",
-    "management.endpoints.web.exposure.include=*",
-    "management.health.rabbit.enabled=false"})
+        "worker.security.enabled=true",
+        "worker.rabbit.enabled=false",
+        "management.endpoints.web.exposure.include=*",
+        "management.endpoints.web.base-path=/actuator",
+        "management.endpoints.enabled-by-default=true",
+        "management.health.rabbit.enabled=false"})
+
 @AutoConfigureMockMvc
 @Import(TestClockConfig.class)
 public class ActuatorTest {
@@ -46,24 +52,25 @@ public class ActuatorTest {
   @MockBean
   RecordingEventSender eventSender;
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(strings = {"/actuator/info", "/actuator/health", "/actuator/metrics", "/actuator/memoryinfo"})
   @SneakyThrows
-  void testActuatorPublicAccess() {
-    Stream.of("/actuator/info", "/actuator/health", "/actuator/metrics", "/actuator/memoryinfo").forEach(this::checkPublic);
+  void testActuatorPublicAccess(String path) {
+      checkPublic(path);
   }
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(strings={"/actuator", "/actuator/", "/actuator/env"})
   @SneakyThrows
-  void testActuatorUnauthorized() {
-    Stream.of("/actuator", "/actuator/", "/actuator/env")
-        .forEach(this::checkUnauthorized);
+  void testActuatorUnauthorized(String path) {
+    checkUnauthorized(path);
   }
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(strings={"/actuator", "/actuator/", "/actuator/env"})
   @SneakyThrows
-  void testActuatorAuthorized() {
-    Stream.of("/actuator", "/actuator/", "/actuator/env")
-        .forEach(url -> checkAuthorized(url, "wactu", "wactupass"));
+  void testActuatorAuthorized(String path) {
+    checkAuthorized(path, "wactu", "wactupass");
   }
 
   @SneakyThrows

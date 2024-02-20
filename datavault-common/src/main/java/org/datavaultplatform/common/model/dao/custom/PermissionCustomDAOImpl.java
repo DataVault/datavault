@@ -1,17 +1,18 @@
 package org.datavaultplatform.common.model.dao.custom;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import org.datavaultplatform.common.model.Permission;
+import org.datavaultplatform.common.model.PermissionModel;
+import org.datavaultplatform.common.model.PermissionModel_;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.PermissionModel;
-import org.datavaultplatform.common.model.PermissionModel_;
 
 
 public class PermissionCustomDAOImpl extends BaseCustomDAOImpl implements PermissionCustomDAO {

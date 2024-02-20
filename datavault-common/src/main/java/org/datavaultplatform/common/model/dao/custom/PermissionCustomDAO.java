@@ -2,9 +2,9 @@ package org.datavaultplatform.common.model.dao.custom;
 
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.PermissionModel;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import java.util.List;
-import org.springframework.data.jpa.repository.EntityGraph;
 
 
 public interface PermissionCustomDAO extends BaseCustomDAO {

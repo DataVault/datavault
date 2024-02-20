@@ -61,7 +61,7 @@ public class PureProvider implements Provider {
         URLConnection conn = queryURL.openConnection();
 
         if (queryURL.getUserInfo() != null) {
-            String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(queryURL.getUserInfo().getBytes());
+            String basicAuth = "Basic " + jakarta.xml.bind.DatatypeConverter.printBase64Binary(queryURL.getUserInfo().getBytes());
             conn.setRequestProperty("Authorization", basicAuth);
         }
 

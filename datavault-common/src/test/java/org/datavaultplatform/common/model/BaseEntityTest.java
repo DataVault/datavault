@@ -1,16 +1,17 @@
 package org.datavaultplatform.common.model;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Random;
 import java.util.UUID;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import lombok.SneakyThrows;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public abstract class BaseEntityTest<T, ID> {
 
@@ -75,8 +76,8 @@ public abstract class BaseEntityTest<T, ID> {
   void checkEntity(Class<T> clazz, IDGenerator<ID> idGenerator) {
     checkClassIsEntityWithTableName(clazz);
 
-    T entity1 = clazz.newInstance();
-    T entity2 = clazz.newInstance();
+    T entity1 = clazz.getDeclaredConstructor().newInstance();
+    T entity2 = clazz.getDeclaredConstructor().newInstance();
 
     // two 'new' Entities of the same class - should be equal
     checkSame(entity1, entity1);

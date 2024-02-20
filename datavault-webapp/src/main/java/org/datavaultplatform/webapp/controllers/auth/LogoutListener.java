@@ -1,7 +1,7 @@
 package org.datavaultplatform.webapp.controllers.auth;
 
 import java.util.List;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import org.datavaultplatform.common.request.CreateClientEvent;
 import org.datavaultplatform.webapp.services.NotifyLogoutService;
 import org.slf4j.Logger;

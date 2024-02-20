@@ -1,10 +1,12 @@
 package org.datavaultplatform.common.storage;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.security.*;
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+import jakarta.xml.bind.annotation.adapters.HexBinaryAdapter;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.security.MessageDigest;
 
 @Slf4j
 public class Verify {

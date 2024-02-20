@@ -1,15 +1,5 @@
 package org.datavaultplatform.common.storage;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.List;
 import lombok.SneakyThrows;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.FileInfo;
@@ -22,6 +12,14 @@ import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UserStoreTest {
 

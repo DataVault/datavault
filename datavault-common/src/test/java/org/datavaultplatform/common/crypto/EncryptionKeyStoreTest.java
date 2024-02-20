@@ -1,13 +1,14 @@
 package org.datavaultplatform.common.crypto;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
-import javax.crypto.SecretKey;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EncryptionKeyStoreTest {
 

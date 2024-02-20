@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.util.Arrays;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import org.datavaultplatform.broker.controllers.admin.AdminController;
 import org.datavaultplatform.common.model.Permission;
 import org.junit.jupiter.api.Test;

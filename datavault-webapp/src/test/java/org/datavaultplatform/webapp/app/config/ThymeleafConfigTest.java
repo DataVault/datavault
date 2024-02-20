@@ -35,9 +35,12 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.thymeleaf.DialectConfiguration;
 import org.thymeleaf.EngineConfiguration;
-import org.thymeleaf.spring5.SpringTemplateEngine;
-import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
+import org.thymeleaf.spring6.SpringTemplateEngine;
+import org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver;
+import org.thymeleaf.spring6.templateresource.SpringResourceTemplateResource;
+import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
+import org.thymeleaf.templateresolver.TemplateResolution;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -73,7 +76,7 @@ public class ThymeleafConfigTest {
     private SpringResourceTemplateResolver templateResolver;
 
     @Autowired
-    private ViewResolver viewResolver;
+    private ThymeleafViewResolver viewResolver;
 
     EngineConfiguration tlConfig;
 
@@ -85,6 +88,7 @@ public class ThymeleafConfigTest {
     void setup() {
         this.mRequest = new MockHttpServletRequest();
         this.mRequest.setContextPath("/dv");
+        this.mRequest.setRequestURI("/dv/test");
         this.mResponse = new MockHttpServletResponse();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(mRequest));
         assertThat(this.templateEngine.getConfiguration()).isInstanceOf(EngineConfiguration.class);
@@ -112,7 +116,7 @@ public class ThymeleafConfigTest {
     void testThymeleafConfiguration() {
         Set<DialectConfiguration> dialectConfigs = tlConfig.getDialectConfigurations();
         Set<String> dialectNames = dialectConfigs.stream().map(dc -> dc.getDialect().getName()).collect(Collectors.toSet());
-        assertThat(dialectNames).containsAll(Arrays.asList("SpringSecurity", "Layout", "SpringStandard", "java8time"));
+        assertThat(dialectNames).containsAll(Arrays.asList("SpringSecurity", "Layout", "SpringStandard"));
         log.info(tlConfig.toString());
         assertThat(tlConfig.getTemplateResolvers()).hasSize(1);
         ITemplateResolver firstTemplateResolver = tlConfig.getTemplateResolvers().iterator().next();
@@ -120,12 +124,19 @@ public class ThymeleafConfigTest {
     }
 
     @Test
-    void testViewResolver() {
+    void testTemplateResolver() {
         assertThat(this.templateResolver.getCheckExistence()).isTrue();
         assertThat(this.templateResolver.getPrefix()).isEqualTo("classpath:/WEB-INF/templates/");
         assertThat(this.templateResolver.getSuffix()).isEqualTo(".html");
         assertThat(this.templateResolver.getCharacterEncoding()).isEqualTo("UTF-8");
         assertThat(this.templateResolver.isCacheable()).isTrue();
+
+        String template = "test/hello";
+        TemplateResolution templateResolution = templateResolver.resolveTemplate(this.tlConfig, template, template, Collections.emptyMap());
+        assertThat(templateResolution.getTemplateResource().exists()).isTrue();
+        assertThat(templateResolution.isTemplateResourceExistenceVerified()).isTrue();
+        assertThat(templateResolution.getTemplateResource().getDescription()).isEqualTo("class path resource [WEB-INF/templates/test/hello.html]");
+        System.out.println(templateResolution);
     }
 
     @Test
@@ -134,7 +145,7 @@ public class ThymeleafConfigTest {
         assertEquals(HELLO_FIRST_LINE, getFirstLine(helloResource));
         ModelMap modelMap = new ModelMap();
         modelMap.put("name", "user101");
-        String helloTemplateHtml = getHtml("test/hello.html", modelMap);
+        String helloTemplateHtml = getHtml("test/hello", modelMap);
         assertEquals(HELLO_FIRST_LINE, getFirstLine(helloTemplateHtml));
         Document doc = Jsoup.parse(helloTemplateHtml);
         checkTitle(doc, "Hello user101!");
@@ -157,7 +168,7 @@ public class ThymeleafConfigTest {
         store2.getProperties().put("prop2-2", "value2-2");
 
         modelMap.put("archivestores", Arrays.asList(store1, store2));
-        String html = getHtml("admin/archivestores/index.html", modelMap);
+        String html = getHtml("admin/archivestores/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -170,7 +181,7 @@ public class ThymeleafConfigTest {
     void test02AdminAuditsDeposits() throws Exception {
         ModelMap modelMap = new ModelMap();
         modelMap.put("deposits", Collections.emptyList());
-        String html = getHtml("admin/audits/deposits.html", modelMap);
+        String html = getHtml("admin/audits/deposits", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -216,7 +227,7 @@ public class ThymeleafConfigTest {
 
         modelMap.put("audits", Arrays.asList(audit1, audit2));
 
-        String html = getHtml("admin/audits/index.html", modelMap);
+        String html = getHtml("admin/audits/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -230,7 +241,7 @@ public class ThymeleafConfigTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetails.html", modelMap);
+        String html = getHtml("admin/billing/billingDetails", modelMap);
         Document doc = Jsoup.parse(html);
 
 
@@ -257,7 +268,7 @@ public class ThymeleafConfigTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsBudget.html", modelMap);
+        String html = getHtml("admin/billing/billingDetailsBudget", modelMap);
         Document doc = Jsoup.parse(html);
 
 
@@ -283,7 +294,7 @@ public class ThymeleafConfigTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsBuyNewSlice.html", modelMap);
+        String html = getHtml("admin/billing/billingDetailsBuyNewSlice", modelMap);
         Document doc = Jsoup.parse(html);
 
         checkTextInputFieldValue(doc, "projectId", "ID-123");
@@ -307,7 +318,7 @@ public class ThymeleafConfigTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsFeeWaiver.html", modelMap);
+        String html = getHtml("admin/billing/billingDetailsFeeWaiver", modelMap);
         Document doc = Jsoup.parse(html);
 
 
@@ -332,7 +343,7 @@ public class ThymeleafConfigTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsFundingNoDoNotKNow.html", modelMap);
+        String html = getHtml("admin/billing/billingDetailsFundingNoDoNotKNow", modelMap);
         Document doc = Jsoup.parse(html);
 
 
@@ -358,7 +369,7 @@ public class ThymeleafConfigTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsGrant.html", modelMap);
+        String html = getHtml("admin/billing/billingDetailsGrant", modelMap);
         Document doc = Jsoup.parse(html);
 
 
@@ -385,7 +396,7 @@ public class ThymeleafConfigTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsNA.html", modelMap);
+        String html = getHtml("admin/billing/billingDetailsNA", modelMap);
         Document doc = Jsoup.parse(html);
 
 
@@ -410,7 +421,7 @@ public class ThymeleafConfigTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsSlice.html", modelMap);
+        String html = getHtml("admin/billing/billingDetailsSlice", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -425,7 +436,7 @@ public class ThymeleafConfigTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/billingDetailsWilLPay.html", modelMap);
+        String html = getHtml("admin/billing/billingDetailsWilLPay", modelMap);
         Document doc = Jsoup.parse(html);
 
 
@@ -450,7 +461,7 @@ public class ThymeleafConfigTest {
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
-        String html = getHtml("admin/billing/index.html", modelMap);
+        String html = getHtml("admin/billing/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -548,7 +559,7 @@ public class ThymeleafConfigTest {
         modelMap.put("orderId", "order123");
         modelMap.put("orderVaultId", "orderVaultIdABC");
 
-        String html = getHtml("admin/deposits/index.html", modelMap);
+        String html = getHtml("admin/deposits/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -566,7 +577,7 @@ public class ThymeleafConfigTest {
         EventInfo event2 = getEventInfo2();
 
         modelMap.put("events", Arrays.asList(event1, event2));
-        String html = getHtml("admin/events/index.html", modelMap);
+        String html = getHtml("admin/events/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -588,7 +599,7 @@ public class ThymeleafConfigTest {
         modelMap.put("vaultID", "vault-id-123");
         modelMap.put("policies", Arrays.asList(policy1, policy2));
 
-        String html = getHtml("admin/pendingVaults/edit/editPendingVault.html", modelMap);
+        String html = getHtml("admin/pendingVaults/edit/editPendingVault", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -614,7 +625,7 @@ public class ThymeleafConfigTest {
         modelMap.put("ordername", "bob");
         modelMap.put("pendingVaults", Arrays.asList(vault1, vault2));
 
-        String html = getHtml("admin/pendingVaults/confirmed.html", modelMap);
+        String html = getHtml("admin/pendingVaults/confirmed", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -631,7 +642,7 @@ public class ThymeleafConfigTest {
         modelMap.put("savedVaultsTotal", 123);
         modelMap.put("confirmedVaultsTotal", 100);
 
-        String html = getHtml("admin/pendingVaults/index.html", modelMap);
+        String html = getHtml("admin/pendingVaults/index", modelMap);
         Document doc = Jsoup.parse(html);
 
 
@@ -667,7 +678,7 @@ public class ThymeleafConfigTest {
         modelMap.put("ordername", "bob");
         modelMap.put("pendingVaults", Arrays.asList(vault1, vault2));
 
-        String html = getHtml("admin/pendingVaults/saved.html", modelMap);
+        String html = getHtml("admin/pendingVaults/saved", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -696,7 +707,7 @@ public class ThymeleafConfigTest {
         modelMap.put("createRetentionPolicy", createRetentionPolicy);
         modelMap.put("group", group);
 
-        String html = getHtml("admin/pendingVaults/summary.html", modelMap);
+        String html = getHtml("admin/pendingVaults/summary", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -713,7 +724,7 @@ public class ThymeleafConfigTest {
 
         modelMap.put("retentionPolicy", policy1);
 
-        String html = getHtml("admin/retentionpolicies/add.html", modelMap);
+        String html = getHtml("admin/retentionpolicies/add", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -730,7 +741,7 @@ public class ThymeleafConfigTest {
 
         modelMap.put("retentionPolicy", policy1);
 
-        String html = getHtml("admin/retentionpolicies/edit.html", modelMap);
+        String html = getHtml("admin/retentionpolicies/edit", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -749,7 +760,7 @@ public class ThymeleafConfigTest {
 
         modelMap.put("policies", Arrays.asList(policy1, policy2));
 
-        String html = getHtml("admin/retentionpolicies/index.html", modelMap);
+        String html = getHtml("admin/retentionpolicies/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -778,7 +789,7 @@ public class ThymeleafConfigTest {
 
         modelMap.put("retrieves", Arrays.asList(ret1, ret2));
 
-        String html = getHtml("admin/retrieves/index.html", modelMap);
+        String html = getHtml("admin/retrieves/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -846,7 +857,7 @@ public class ThymeleafConfigTest {
         modelMap.put("group", group);
         modelMap.put("createRetentionPolicy", createRetentionPolicy);
 
-        String html = getHtml("admin/reviews/create.html", modelMap);
+        String html = getHtml("admin/reviews/create", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -864,7 +875,7 @@ public class ThymeleafConfigTest {
 
         modelMap.put("vaults", Arrays.asList(vault1, vault2));
 
-        String html = getHtml("admin/reviews/index.html", modelMap);
+        String html = getHtml("admin/reviews/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -877,7 +888,7 @@ public class ThymeleafConfigTest {
 
         ModelMap modelMap = new ModelMap();
 
-        String html = getHtml("admin/roles/isadmin/index.html", modelMap);
+        String html = getHtml("admin/roles/isadmin/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -890,7 +901,7 @@ public class ThymeleafConfigTest {
     void test28AdminRolesIndex() throws Exception {
         ModelMap modelMap = new ModelMap();
 
-        String html = getHtml("admin/roles/index.html", modelMap);
+        String html = getHtml("admin/roles/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -912,7 +923,7 @@ public class ThymeleafConfigTest {
         group2.setEnabled(true);
 
         modelMap.put("schools", Arrays.asList(group1, group2));
-        String html = getHtml("admin/schools/index.html", modelMap);
+        String html = getHtml("admin/schools/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -958,7 +969,7 @@ public class ThymeleafConfigTest {
         modelMap.put("roleAssignments", Arrays.asList(ra1, ra2));
         modelMap.put("canManageSchoolRoleAssignments", true);
 
-        String html = getHtml("admin/schools/schoolRoles.html", modelMap);
+        String html = getHtml("admin/schools/schoolRoles", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -983,7 +994,7 @@ public class ThymeleafConfigTest {
 
         modelMap.put("user", user1);
 
-        String html = getHtml("admin/users/create.html", modelMap);
+        String html = getHtml("admin/users/create", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1008,7 +1019,7 @@ public class ThymeleafConfigTest {
 
         modelMap.put("user", user1);
 
-        String html = getHtml("admin/users/edit.html", modelMap);
+        String html = getHtml("admin/users/edit", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1043,7 +1054,7 @@ public class ThymeleafConfigTest {
         modelMap.put("users", Arrays.asList(user1, user2));
         modelMap.put("query", "admin users");
 
-        String html = getHtml("admin/users/index.html", modelMap);
+        String html = getHtml("admin/users/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1074,7 +1085,7 @@ public class ThymeleafConfigTest {
         modelMap.put("ordercreationtime", "orderCreationTime1");
         modelMap.put("vaults", Arrays.asList(vault1, vault2));
 
-        String html = getHtml("admin/vaults/index.html", modelMap);
+        String html = getHtml("admin/vaults/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1171,7 +1182,7 @@ public class ThymeleafConfigTest {
         modelMap.put("retentionPolicy", createRetentionPolicy);
         modelMap.put("group", group);
 
-        String html = getHtml("admin/vaults/vault.html", modelMap);
+        String html = getHtml("admin/vaults/vault", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1213,7 +1224,7 @@ public class ThymeleafConfigTest {
         modelMap.addAttribute("canManageArchiveStores", true);
         modelMap.addAttribute("archivestorescount", 114);
 
-        String html = getHtml("admin/index.html", modelMap);
+        String html = getHtml("admin/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1225,7 +1236,7 @@ public class ThymeleafConfigTest {
     void test37AuthConfirmation() throws Exception {
         ModelMap modelMap = new ModelMap();
 
-        String html = getHtml("auth/confirmation.html", modelMap);
+        String html = getHtml("auth/confirmation", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1237,7 +1248,7 @@ public class ThymeleafConfigTest {
     void test38AuthDenied() throws Exception {
         ModelMap modelMap = new ModelMap();
 
-        String html = getHtml("auth/denied.html", modelMap);
+        String html = getHtml("auth/denied", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1252,7 +1263,7 @@ public class ThymeleafConfigTest {
         modelMap.put("welcome", "Welcome Message");
         modelMap.put("success", "Success Message");
 
-        String html = getHtml("auth/login.html", modelMap);
+        String html = getHtml("auth/login", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1279,7 +1290,7 @@ public class ThymeleafConfigTest {
         modelMap.put("deposit", deposit);
         modelMap.put("vault", vault1);
 
-        String html = getHtml("deposits/create.html", modelMap);
+        String html = getHtml("deposits/create", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1355,7 +1366,7 @@ public class ThymeleafConfigTest {
         modelMap.put("events", Arrays.asList(event1, event2));
         modelMap.put("retrieves", Arrays.asList(ret1, ret2));
 
-        String html = getHtml("deposits/deposit.html", modelMap);
+        String html = getHtml("deposits/deposit", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1417,7 +1428,7 @@ public class ThymeleafConfigTest {
         modelMap.put("deposit", info1);
         modelMap.put("retrieve", ret1);
 
-        String html = getHtml("deposits/retrieve.html", modelMap);
+        String html = getHtml("deposits/retrieve", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1433,7 +1444,7 @@ public class ThymeleafConfigTest {
 
         ModelMap modelMap = new ModelMap();
         modelMap.put("message", "This is a test error message");
-        String errorTemplateHtml = getHtml("error/error.html", modelMap);
+        String errorTemplateHtml = getHtml("error/error", modelMap);
         //html is a mix of error 'page' and default template.
         assertThat(errorTemplateHtml).startsWith("<!DOCTYPE html><!--error/error.html-->\n<!--layout/defaultLayout.html-->");
 
@@ -1479,7 +1490,7 @@ public class ThymeleafConfigTest {
     void test44FeedbackIndex() throws Exception {
         ModelMap modelMap = new ModelMap();
 
-        String html = getHtml("feedback/index.html", modelMap);
+        String html = getHtml("feedback/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1491,7 +1502,7 @@ public class ThymeleafConfigTest {
     void test45FeedbackSent() throws Exception {
         ModelMap modelMap = new ModelMap();
 
-        String html = getHtml("feedback/sent.html", modelMap);
+        String html = getHtml("feedback/sent", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1539,7 +1550,7 @@ public class ThymeleafConfigTest {
         modelMap.put("filestoresLocal", Arrays.asList(fs1, fs2));
         modelMap.put("filestoresSFTP", Arrays.asList(fs1, fs2));
 
-        String html = getHtml("filestores/index.html", modelMap);
+        String html = getHtml("filestores/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1565,7 +1576,7 @@ public class ThymeleafConfigTest {
         modelMap.put("vaults", Arrays.asList(vault1, vault2));
         modelMap.put("groups", Arrays.asList(group1, group2));
 
-        String html = getHtml("groups/index.html", modelMap);
+        String html = getHtml("groups/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1580,7 +1591,7 @@ public class ThymeleafConfigTest {
         modelMap.put("system", "system-01");
         modelMap.put("link", "link-01");
 
-        String html = getHtml("help/index.html", modelMap);
+        String html = getHtml("help/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1592,7 +1603,7 @@ public class ThymeleafConfigTest {
     void test49VaultsConfirmed() throws Exception {
         ModelMap modelMap = new ModelMap();
 
-        String html = getHtml("vaults/confirmed.html", modelMap);
+        String html = getHtml("vaults/confirmed", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1618,7 +1629,7 @@ public class ThymeleafConfigTest {
         modelMap.put("policies", Arrays.asList(retPol1, retPol2));//RetentionPolicy[]
 
 
-        String html = getHtml("vaults/create.html", modelMap);
+        String html = getHtml("vaults/create", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1667,7 +1678,7 @@ public class ThymeleafConfigTest {
         modelMap.addAttribute("welcome", "WelcomeMessage01");
 
 
-        String html = getHtml("vaults/index.html", modelMap);
+        String html = getHtml("vaults/index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1695,7 +1706,7 @@ public class ThymeleafConfigTest {
         modelMap.put("errors", Arrays.asList(retPol1, retPol2));
         modelMap.put("loggedInAs", "loggedInAs1");
 
-        String html = getHtml("vaults/newCreatePrototype.html", modelMap);
+        String html = getHtml("vaults/newCreatePrototype", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1712,7 +1723,7 @@ public class ThymeleafConfigTest {
         VaultInfo vault2 = getVaultInfo2();
         modelMap.put("vaults", Arrays.asList(vault1, vault2));
 
-        String html = getHtml("vaults/userVaults.html", modelMap);
+        String html = getHtml("vaults/userVaults", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1800,7 +1811,7 @@ public class ThymeleafConfigTest {
 
         modelMap.put("vrhm", vrhm);
 
-        String html = getHtml("vaults/vault.html", modelMap);
+        String html = getHtml("vaults/vault", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1813,7 +1824,7 @@ public class ThymeleafConfigTest {
     void test55Index() throws Exception {
         ModelMap modelMap = new ModelMap();
 
-        String html = getHtml("index.html", modelMap);
+        String html = getHtml("index", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1826,7 +1837,7 @@ public class ThymeleafConfigTest {
     void test56Secure() throws Exception {
         ModelMap modelMap = new ModelMap();
 
-        String html = getHtml("secure.html", modelMap);
+        String html = getHtml("secure", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title
@@ -1842,7 +1853,7 @@ public class ThymeleafConfigTest {
         modelMap.put("link","link01");
         modelMap.put("system","system01");
 
-        String html = getHtml("welcome.html", modelMap);
+        String html = getHtml("welcome", modelMap);
         Document doc = Jsoup.parse(html);
 
         //check title

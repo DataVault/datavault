@@ -16,7 +16,7 @@ public class TarFileInputStreamFactory {
   private final Long fileSize;
 
   public TarFileInputStreamFactory(Long fileSize) {
-    Assert.isTrue(fileSize == null || fileSize >= 0);
+    Assert.isTrue(fileSize == null || fileSize >= 0,"file size cannot be null or negative");
     this.fileSize = fileSize;
   }
 

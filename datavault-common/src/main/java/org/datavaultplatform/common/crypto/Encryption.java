@@ -49,13 +49,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.EnumSet;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.security.Security;
 import java.security.Provider;
 import org.springframework.util.Assert;
 
 import com.google.common.base.Splitter;
-import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -387,9 +386,8 @@ public class Encryption {
         digest.append("-");
 
         // We use md5 here because it's short. We don't need a secure hash
-        String md5 = Splitter.fixedLength(5)
-            .splitToStream(DigestUtils.md5Hex(iv))
-            .collect(Collectors.joining("-"));
+        String md5 = String.join("-",
+            Splitter.fixedLength(5).splitToList(DigestUtils.md5Hex(iv)));
 
         digest.append(md5);
         return digest.toString();
@@ -814,9 +812,8 @@ public class Encryption {
     public static String getKeyDigest(SecretKey key) {
         String encoded =  new BigInteger(1, key.getEncoded()).toString(16).toUpperCase();
         String digest = encoded.substring(0,40);
-        String readableDigest = Splitter.fixedLength(5)
-            .splitToStream(digest)
-            .collect(Collectors.joining("-"));
+        String readableDigest = String.join("-",
+            Splitter.fixedLength(5).splitToList(digest));
         return readableDigest;
     }
 

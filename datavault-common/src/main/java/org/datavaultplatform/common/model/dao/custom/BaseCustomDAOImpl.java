@@ -1,10 +1,10 @@
 package org.datavaultplatform.common.model.dao.custom;
 
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.util.DaoUtils;
 

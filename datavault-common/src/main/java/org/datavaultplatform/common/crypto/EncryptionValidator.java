@@ -1,11 +1,5 @@
 package org.datavaultplatform.common.crypto;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.UUID;
-import javax.crypto.SecretKey;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -14,6 +8,13 @@ import org.bouncycastle.util.Arrays;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.task.Context.AESMode;
 import org.springframework.util.Assert;
+
+import javax.crypto.SecretKey;
+import java.io.File;
+import java.io.FileWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.UUID;
 
 /**
  * Meant to be called from the Worker and Broker on startup to check the Encryption is set up correctly.

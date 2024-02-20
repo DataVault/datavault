@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import java.util.Arrays;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import org.datavaultplatform.broker.controllers.FilesController;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

@@ -1,5 +1,13 @@
 package org.datavaultplatform.common.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.datavaultplatform.common.model.PendingVault;
+import org.datavaultplatform.common.request.CreateVault;
+import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
+import org.jsondoc.core.annotation.ApiObject;
+import org.jsondoc.core.annotation.ApiObjectField;
+
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -7,16 +15,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
-import org.datavaultplatform.common.model.BillingInfo;
-import org.datavaultplatform.common.model.PendingVault;
-import org.datavaultplatform.common.request.CreateVault;
-import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "VaultInfo")
@@ -190,14 +188,14 @@ public class VaultInfo {
         this.crisID = crisID;
     }
 
-     public VaultInfo(String id,String userName, Date creationTime, String name,  
-    		long vaultSize, Date reviewDate, Date grantEndDate, BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId, 
+     public VaultInfo(String id,String userName, Date creationTime, String name,
+    		long vaultSize, Date reviewDate, Date grantEndDate, BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId,
             String paymentDetails) {
-        this.id = id;        
-        this.userName = userName;    
+        this.id = id;
+        this.userName = userName;
         this.creationTime = creationTime;
-        this.name = name;        
-        this.vaultSize = vaultSize;        
+        this.name = name;
+        this.vaultSize = vaultSize;
         this.reviewDate = reviewDate;
         this.grantEndDate = grantEndDate;
         this.amountToBeBilled = amountToBeBilled;
@@ -205,9 +203,9 @@ public class VaultInfo {
         this.projectId = projectId;
         this.paymentDetails = paymentDetails;
     }
-    
-    public VaultInfo(String id,String userName, Date creationTime, String name,  
-    		long vaultSize, Date reviewDate,BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId, 
+
+    public VaultInfo(String id,String userName, Date creationTime, String name,
+    		long vaultSize, Date reviewDate,BigDecimal amountToBeBilled,BigDecimal amountBilled, String projectId,
             String paymentDetails) {
         this.id = id;        
         this.userName = userName;    
@@ -648,7 +646,7 @@ public class VaultInfo {
         if (this.getBillingType() != null) {
             cv.setBillingType(this.getBillingType().toString());
             cv.setSliceID(this.getSliceID());
-            
+
             if (this.getBillingType().equals(PendingVault.Billing_Type.GRANT_FUNDING)) {
                 cv.setGrantAuthoriser(this.getAuthoriser());
                 cv.setGrantSchoolOrUnit(this.getSchoolOrUnit());
@@ -674,21 +672,21 @@ public class VaultInfo {
                 cv.setBudgetSubunit(this.getSubunit());
                 cv.setProjectTitle(this.getProjectTitle());
                 cv.setPaymentDetails(this.paymentDetails);
-                
+
                 if (this.getGrantEndDate() != null) {
                     cv.setBillingGrantEndDate(this.getGrantEndDateAsString());
                     cv.setGrantEndDate(this.getGrantEndDateAsString());
                 }
             }
-            
+
             if (this.getBillingType().equals(PendingVault.Billing_Type.FEEWAIVER)) {
                // TBD
             }
-            
+
             if (this.getBillingType().equals(PendingVault.Billing_Type.BUY_NEW_SLICE)) {
                 // TBD
              }
-            
+
             if (this.getBillingType().equals(PendingVault.Billing_Type.FUNDING_NO_OR_DO_NOT_KNOW)) {
                 // TBD
             }
@@ -731,7 +729,7 @@ public class VaultInfo {
         // Billing page checkbox information
         if (this.getSliceQueryChoice() != null) {
             cv.setSliceQueryChoice(this.getSliceQueryChoice().toString());
-        } 
+        }
         if (this.getFundingQueryChoice() != null) {
             cv.setFundingQueryChoice(this.getFundingQueryChoice().toString());
         }

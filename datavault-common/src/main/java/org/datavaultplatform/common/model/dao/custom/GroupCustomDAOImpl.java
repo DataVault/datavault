@@ -1,14 +1,15 @@
 package org.datavaultplatform.common.model.dao.custom;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Group_;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.dao.SchoolPermissionQueryHelper;
 import org.datavaultplatform.common.util.DaoUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 public class GroupCustomDAOImpl extends BaseCustomDAOImpl implements GroupCustomDAO {

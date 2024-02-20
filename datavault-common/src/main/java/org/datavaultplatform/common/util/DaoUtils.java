@@ -1,17 +1,17 @@
 package org.datavaultplatform.common.util;
 
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
+import jakarta.persistence.EntityGraph;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleType;
+import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 
 @Slf4j
 public abstract class DaoUtils {

@@ -3,10 +3,12 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import javax.persistence.*;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import jakarta.persistence.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import org.datavaultplatform.common.model.custom.HashMapConverter;
 import org.hibernate.Hibernate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -15,6 +17,7 @@ import org.hibernate.Hibernate;
 @NamedEntityGraph(name=User.EG_USER, attributeNodes = {
     @NamedAttributeNode(User_.FILE_STORES)
 })
+@JsonPropertyOrder({"id", "firstname","lastname", "password", "email", "properties" })
 public class User {
     // User Identifier (not a UUID)
     public static final String EG_USER = "eg.User.1";
@@ -39,7 +42,7 @@ public class User {
     private String email;
 
     // Additional properties associated with the user
-    @Lob
+    @Convert(converter = HashMapConverter.class)
     @Column(name="properties", columnDefinition="LONGBLOB")
     private HashMap<String,String> properties = new HashMap<>();
 

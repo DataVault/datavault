@@ -40,7 +40,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.util.SocketUtils;
+import org.springframework.test.util.TestSocketUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
@@ -80,8 +80,8 @@ class AjpConnectorIT {
   @Captor
   ArgumentCaptor<AuthenticationSuccessEvent> argAuthSuccessEvent;
 
-  static int springBootAppPort = SocketUtils.findAvailableTcpPort();
-  static int springBootAjpPort = SocketUtils.findAvailableTcpPort();
+  static int springBootAppPort = TestSocketUtils.findAvailableTcpPort();
+  static int springBootAjpPort = TestSocketUtils.findAvailableTcpPort();
 
   @Container
   static GenericContainer<?> httpdContainer;

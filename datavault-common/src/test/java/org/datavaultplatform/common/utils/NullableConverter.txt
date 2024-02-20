@@ -1,0 +1,4 @@
+package org.datavaultplatform.common.utils;
+
+public final class NullableConverter {
+}

@@ -1,6 +1,6 @@
 package org.datavaultplatform.common.event.deposit;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 import org.datavaultplatform.common.event.Event;
 
 @Entity

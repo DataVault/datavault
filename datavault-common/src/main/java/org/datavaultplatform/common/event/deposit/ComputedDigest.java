@@ -1,13 +1,13 @@
 package org.datavaultplatform.common.event.deposit;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 import org.datavaultplatform.common.event.Event;
 
 @Entity
 public class ComputedDigest extends Event {
     
-    public String digest;
-    public String digestAlgorithm;
+    private String digest;
+    private String digestAlgorithm;
     
     public ComputedDigest() {
     }

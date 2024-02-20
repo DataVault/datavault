@@ -1,9 +1,5 @@
 package org.datavaultplatform.common.storage.impl;
 
-import java.io.File;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
 import com.oracle.bmc.ConfigFileReader;
 import com.oracle.bmc.auth.AuthenticationDetailsProvider;
 import com.oracle.bmc.auth.ConfigFileAuthenticationDetailsProvider;
@@ -11,7 +7,8 @@ import com.oracle.bmc.objectstorage.ObjectStorage;
 import com.oracle.bmc.objectstorage.ObjectStorageClient;
 import com.oracle.bmc.objectstorage.model.RestoreObjectsDetails;
 import com.oracle.bmc.objectstorage.requests.*;
-import com.oracle.bmc.objectstorage.responses.*;
+import com.oracle.bmc.objectstorage.responses.GetObjectResponse;
+import com.oracle.bmc.objectstorage.responses.HeadObjectResponse;
 import com.oracle.bmc.objectstorage.transfer.UploadConfiguration;
 import com.oracle.bmc.objectstorage.transfer.UploadManager;
 import org.apache.commons.io.FileUtils;
@@ -21,6 +18,10 @@ import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.Verify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /*
 This class has been upgraded to use the Gen 2 Oracle Object Storage rather than classic.
@@ -133,7 +134,7 @@ public class OracleObjectStorageClassic extends Device implements ArchiveStore {
 					}
 					HeadObjectResponse getHeadObjectResponse = this.client.headObject(headObjectRequest);
 					LOGGER.debug("Object status is: " + getHeadObjectResponse.getArchivalState());
-					if (getHeadObjectResponse.getArchivalState().getValue().equals(OracleObjectStorageClassic.restoredKey)) {
+					if (getHeadObjectResponse.getArchivalState().equals(OracleObjectStorageClassic.restoredKey)) {
 						break;
 					}
 					attemptCount++;

@@ -7,7 +7,7 @@ import org.datavaultplatform.common.response.DepositSize;
 import org.datavaultplatform.webapp.model.FancytreeNode;
 import org.datavaultplatform.webapp.services.RestService;
 import java.util.ArrayList;
-import javax.servlet.http.*;
+import jakarta.servlet.http.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Controller;

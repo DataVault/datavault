@@ -16,7 +16,7 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.bind.DatatypeConverter;
+import jakarta.xml.bind.DatatypeConverter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.util.DigestUtils;

@@ -1,9 +1,5 @@
 package org.datavaultplatform.common.model;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.storage.StorageConstants;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,6 +7,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @Slf4j
 public class DataStoreTest {

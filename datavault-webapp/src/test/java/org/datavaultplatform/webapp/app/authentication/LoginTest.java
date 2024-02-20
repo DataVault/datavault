@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.RoleName;
 import org.datavaultplatform.common.request.CreateClientEvent;

@@ -321,15 +321,15 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     assertEquals(3, from0.size());
 
     //from 1..
-    List<Vault> from1 = dao.list("allowed", "description", "desc", "1", String.valueOf(Integer.MAX_VALUE));
+    List<Vault> from1 = dao.list("allowed", "description", "desc", "1", String.valueOf(Integer.MAX_VALUE-1));
     assertEquals(2, from1.size());
 
     //from 2..
-    List<Vault> from2 = dao.list("allowed", "description", "desc", "2", String.valueOf(Integer.MAX_VALUE));
+    List<Vault> from2 = dao.list("allowed", "description", "desc", "2", String.valueOf(Integer.MAX_VALUE-2));
     assertEquals(1, from2.size());
 
     //from 3..
-    List<Vault> from3 = dao.list("allowed", "description", "desc", "3", String.valueOf(Integer.MAX_VALUE));
+    List<Vault> from3 = dao.list("allowed", "description", "desc", "3", String.valueOf(Integer.MAX_VALUE-3));
     assertEquals(0, from3.size());
 
     //Max result of 0 is ignored - this is intended
@@ -465,15 +465,15 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
     assertEquals(3, from0.size());
 
     //from 1..
-    List<Vault> from1 = dao.search("allowed", null, "description", "desc", "1", String.valueOf(Integer.MAX_VALUE));
+    List<Vault> from1 = dao.search("allowed", null, "description", "desc", "1", String.valueOf(Integer.MAX_VALUE-1));
     assertEquals(2, from1.size());
 
     //from 2..
-    List<Vault> from2 = dao.search("allowed", null, "description", "desc", "2", String.valueOf(Integer.MAX_VALUE));
+    List<Vault> from2 = dao.search("allowed", null, "description", "desc", "2", String.valueOf(Integer.MAX_VALUE-2));
     assertEquals(1, from2.size());
 
     //from 3..
-    List<Vault> from3 = dao.search("allowed", null, "description", "desc", "3", String.valueOf(Integer.MAX_VALUE));
+    List<Vault> from3 = dao.search("allowed", null, "description", "desc", "3", String.valueOf(Integer.MAX_VALUE-3));
     assertEquals(0, from3.size());
 
     //Max result of 0 is ignored - this is intended

@@ -1,9 +1,6 @@
 package org.datavaultplatform.common.storage.impl;
 
 import com.jcraft.jsch.*;
-import java.io.InputStream;
-import java.nio.file.Paths;
-import java.time.Clock;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
@@ -16,6 +13,8 @@ import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.impl.ssh.UtilityJSch;
 
 import java.io.File;
+import java.io.InputStream;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

@@ -1,8 +1,7 @@
 package org.datavaultplatform.common.event.retrieve;
 
+import jakarta.persistence.Entity;
 import org.datavaultplatform.common.event.Event;
-
-import javax.persistence.Entity;
 
 @Entity
 public class RetrieveComplete extends Event {

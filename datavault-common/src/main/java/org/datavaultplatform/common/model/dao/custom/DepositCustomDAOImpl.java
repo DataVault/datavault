@@ -1,25 +1,19 @@
 package org.datavaultplatform.common.model.dao.custom;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.model.Deposit.Status;
+import org.datavaultplatform.common.model.dao.SchoolPermissionQueryHelper;
+import org.datavaultplatform.common.util.DaoUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Root;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.datavaultplatform.common.model.Deposit;
-import org.datavaultplatform.common.model.Deposit.Status;
-import org.datavaultplatform.common.model.Deposit_;
-import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.User_;
-import org.datavaultplatform.common.model.Vault_;
-import org.datavaultplatform.common.model.dao.SchoolPermissionQueryHelper;
-import org.datavaultplatform.common.util.DaoUtils;
 
 @Slf4j
 public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCustomDAO {
@@ -198,7 +192,7 @@ public class DepositCustomDAOImpl extends BaseCustomDAOImpl implements DepositCu
     Root<Deposit> root = cq.from(Deposit.class);
     cq.where(cb.and(
         cb.lessThanOrEqualTo(root.get(Deposit_.CREATION_TIME), olderThanDate),
-        cb.lessThanOrEqualTo(root.get(Deposit_.STATUS), Deposit.Status.COMPLETE)
+        cb.lessThanOrEqualTo(root.get(Deposit_.STATUS), Status.COMPLETE)
     ));
     cq.orderBy(cb.asc(root.get(Deposit_.CREATION_TIME)));
 

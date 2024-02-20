@@ -1,6 +1,7 @@
 package org.datavaultplatform.common.docker;
 
 import org.testcontainers.utility.DockerImageName;
+
 import static org.testcontainers.utility.DockerImageName.parse;
 
 public abstract class DockerImage {

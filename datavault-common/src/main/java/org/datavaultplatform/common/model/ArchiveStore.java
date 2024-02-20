@@ -5,17 +5,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.NamedEntityGraph;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Convert;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.Table;
 import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.model.custom.HashMapConverter;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
@@ -57,10 +58,10 @@ public class ArchiveStore implements DataStore {
     
     // Properties to use for this storage system
     // NOTE: this is not a secure mechanism for storing credentials!
-    @Lob
+    @Convert(converter = HashMapConverter.class)
     @Column(name="properties", columnDefinition="LONGBLOB")
     private HashMap<String,String> properties = new HashMap<>();
-    
+
     public ArchiveStore() {}
     public ArchiveStore(String storageClass, HashMap<String,String> properties, String label, boolean retrieveEnabled) {
         this.storageClass = storageClass;
