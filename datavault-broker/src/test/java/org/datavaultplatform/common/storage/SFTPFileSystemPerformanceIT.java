@@ -143,6 +143,8 @@ public class SFTPFileSystemPerformanceIT {
     double base = summaryJSch.getAverage();
     double threshold = base * PERFORMANCE_THRESHOLD;
 
+    double actualRatio = summarySSHD.getAverage() / base;
+    log.info("TargetRatio[{}] ActualRation[{}]",PERFORMANCE_THRESHOLD, actualRatio);
     assertTrue(summarySSHD.getAverage() <= threshold, "for " + label + ", SFTP with SSHD without monitoring takes > " + PERFORMANCE_THRESHOLD + " longer than JSch");
     assertTrue(summarySSHD.getAverage() <= threshold, "for " + label + ", SFTP with SSHD with monitoring takes > " + PERFORMANCE_THRESHOLD + " longer than JSch");
   }
