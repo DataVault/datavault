@@ -86,8 +86,7 @@ public class Receiver implements MessageProcessor {
             }
             return processMessageInternal(messageInfo);
         } finally {
-            if (eventSender instanceof RecordingEventSender) {
-                RecordingEventSender res = (RecordingEventSender) eventSender;
+            if (eventSender instanceof RecordingEventSender res) {
                 List<Event> events = res.getEvents();
 
                 generateRetrieveMessageForDeposit(messageInfo, events, new File("/tmp/retrieve"),

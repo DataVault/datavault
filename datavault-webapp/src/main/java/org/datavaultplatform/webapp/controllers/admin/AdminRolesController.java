@@ -160,14 +160,11 @@ public class AdminRolesController {
     }
 
     private List<PermissionModel> getPermissionsByType(String type) {
-        switch (type) {
-            case "VAULT":
-                return restService.getVaultPermissions();
-            case "SCHOOL":
-                return restService.getSchoolPermissions();
-            default:
-                return new ArrayList<>();
-        }
+        return switch (type) {
+            case "VAULT" -> restService.getVaultPermissions();
+            case "SCHOOL" -> restService.getSchoolPermissions();
+            default -> new ArrayList<>();
+        };
     }
 
     private ResponseEntity validationFailed(String message) {

@@ -6,7 +6,7 @@ import org.datavaultplatform.common.model.dao.ArchiveStoreDAO;
 
 import java.util.HashMap;
 import java.util.List;
-import org.datavaultplatform.common.storage.StorageConstants;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

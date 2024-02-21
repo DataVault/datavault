@@ -17,6 +17,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -54,7 +55,7 @@ public class StandaloneWebSecurityConfig {
     if (csrfDisabled) {
       //only for testing 'standalone' profile
       log.warn("CSRF PROTECTION DISABLED!!!!");
-      http.csrf(csrf -> csrf.disable());
+      http.csrf(AbstractHttpConfigurer::disable);
     }
 
     http.authenticationProvider(authenticationProvider);

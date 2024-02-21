@@ -693,7 +693,7 @@ public class EventListenerTest {
         encChunksDigest.put(chunkNumber, encDigest);
       }
 
-      doNothing().when(spy).updateDepositWithChunks(argDeposit.capture(), argEvent.capture());
+      doNothing().when(spy).updateDepositWithChunks(any(), any());
       doNothing().when(depositsService).updateDeposit(argDeposit.capture());
       spy.process06ComputedEncryption(event, deposit);
 
@@ -716,6 +716,8 @@ public class EventListenerTest {
       assertEquals(3, chunk3.getChunkNum());
       assertEquals("3", new String(chunk3.getEncIV(), StandardCharsets.UTF_8));
       assertEquals("enc-digest-3", chunk3.getEcnArchiveDigest());
+
+      assertThat(argDeposit.getValue()).isEqualTo(deposit);
 
       verify(spy).updateDepositWithChunks(deposit, event);
       verify(depositsService).updateDeposit(deposit);

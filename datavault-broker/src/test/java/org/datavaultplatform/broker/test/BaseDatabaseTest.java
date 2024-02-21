@@ -1,26 +1,21 @@
 package org.datavaultplatform.broker.test;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.datavaultplatform.common.docker.DockerImage;
-import org.datavaultplatform.common.model.Permission;
-import org.datavaultplatform.common.model.PermissionModel;
-import org.datavaultplatform.common.model.RoleAssignment;
-import org.datavaultplatform.common.model.RoleModel;
-import org.datavaultplatform.common.model.RoleType;
-import org.datavaultplatform.common.model.User;
+import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.model.dao.PermissionDAO;
 import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
 import org.datavaultplatform.common.model.dao.RoleDAO;
 import org.datavaultplatform.common.model.dao.UserDAO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @DirtiesContext
 @Testcontainers(disabledWithoutDocker = true)
@@ -40,15 +35,9 @@ public abstract class BaseDatabaseTest {
   PermissionDAO permissionDAO;
 
   @Container
+  @ServiceConnection
   // This container is once per class - not once per method. Methods can 'dirty' the database.
   static final MariaDBContainer<?> mariadb = new MariaDBContainer<>(DockerImage.MARIADB_IMAGE);
-
-  @DynamicPropertySource
-  public static void setupProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.datasource.username", mariadb::getUsername);
-    registry.add("spring.datasource.password", mariadb::getPassword);
-    registry.add("spring.datasource.url", mariadb::getJdbcUrl);
-  }
 
   protected User createTestUser(String userId, String schoolId, Permission... permissions){
     return createUserWithPermissions(userDAO, permissionDAO, roleDAO, roleAssignmentDAO,  userId, schoolId, permissions);

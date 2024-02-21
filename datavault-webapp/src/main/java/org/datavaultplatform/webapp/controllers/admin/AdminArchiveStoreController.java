@@ -1,6 +1,5 @@
 package org.datavaultplatform.webapp.controllers.admin;
 
-import java.util.Optional;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.webapp.services.RestService;

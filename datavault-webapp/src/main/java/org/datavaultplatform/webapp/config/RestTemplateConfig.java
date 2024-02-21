@@ -2,8 +2,9 @@ package org.datavaultplatform.webapp.config;
 
 import java.time.Duration;
 import java.util.Collections;
-import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
+
+import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;

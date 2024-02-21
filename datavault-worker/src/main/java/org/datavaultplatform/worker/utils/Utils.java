@@ -19,15 +19,13 @@ public class Utils {
    */
   public static void handleExecutionException(ExecutionException ee, String label) throws Exception {
     Throwable cause = ee.getCause();
-    if (cause instanceof Exception) {
-      Exception ex = (Exception) cause;
-      log.error(label + " " + ex.getMessage());
+    if (cause instanceof Exception ex) {
+        log.error(label + " " + ex.getMessage());
       throw ex;
     }
     log.error("unexpected non-Exception", cause);
-    if (cause instanceof java.lang.Error) {
-      java.lang.Error error = (java.lang.Error) cause;
-      log.error(label + " " + error.getMessage());
+    if (cause instanceof Error error) {
+        log.error(label + " " + error.getMessage());
       throw error;
     }
   }

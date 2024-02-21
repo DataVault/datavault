@@ -11,7 +11,6 @@ import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 import org.bouncycastle.openssl.jcajce.JcePEMEncryptorBuilder;
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.StreamUtils;
 
 import java.io.*;
@@ -79,7 +78,7 @@ public class SshRsaKeyUtils {
     String[] parts = sshRsaPublicKeySingleLine.split(" ");
     for (String part : parts) {
       if (part.startsWith("AAAA")) {
-        byte[] decodeBuffer = Base64Utils.decode(part.getBytes());
+        byte[] decodeBuffer = Base64.getDecoder().decode(part.getBytes());
         ByteBuffer bb = ByteBuffer.wrap(decodeBuffer);
         // using 4 bytes from bb to generate integer which gives us length of key -
         // format type, in this case len=7 as "ssh-rsa" has 7 chars

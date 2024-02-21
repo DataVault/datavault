@@ -78,8 +78,7 @@ public class ShibAuthenticationFilter extends AbstractPreAuthenticatedProcessing
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        if (request instanceof HttpServletRequest) {
-            HttpServletRequest req = (HttpServletRequest) request;
+        if (request instanceof HttpServletRequest req) {
             String path = req.getRequestURI();
 
             //We allow the error page and resources to bypass this filter

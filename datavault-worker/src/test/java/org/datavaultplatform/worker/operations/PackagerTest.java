@@ -222,8 +222,8 @@ public class PackagerTest {
                 assertEquals(EXT_META, FileUtils.readFileToString(ef, StandardCharsets.UTF_8));
                 
                 // validate checksum is tagmanifest  
-                List<String> lines = FileUtils.readLines(
-                        new File(dir.getAbsolutePath() + File.separator + "tagmanifest-md5.txt"));
+                List<String> lines = Files.readAllLines(
+                        new File(dir.getAbsolutePath() + File.separator + "tagmanifest-md5.txt").toPath());
                 assertTrue(lines.contains(DigestUtils.md5Hex(DEPOSIT_META) + "  metadata" +
                         File.separator + Packager.depositMetaFileName));
                 assertTrue(lines.contains(DigestUtils.md5Hex(VAULT_META) + "  metadata" +

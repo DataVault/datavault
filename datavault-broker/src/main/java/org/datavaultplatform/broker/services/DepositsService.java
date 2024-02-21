@@ -182,16 +182,14 @@ public class DepositsService {
 
             logger.debug("Number of chunks in deposit: " + depositChunks.size());
 
-            depositChunks.sort(new Comparator<DepositChunk>() {
-                public int compare(DepositChunk c1, DepositChunk c2) {
-                    if (auditChunkStatusDAO.getLastChunkAuditTime(c1) == null) {
-                        return -1;
-                    } else if (auditChunkStatusDAO.getLastChunkAuditTime(c2) == null) {
-                        return 1;
-                    } else {
-                        return auditChunkStatusDAO.getLastChunkAuditTime(c1).getTimestamp().compareTo(
-                                auditChunkStatusDAO.getLastChunkAuditTime(c2).getTimestamp());
-                    }
+            depositChunks.sort((DepositChunk c1, DepositChunk c2) -> {
+                if (auditChunkStatusDAO.getLastChunkAuditTime(c1) == null) {
+                    return -1;
+                } else if (auditChunkStatusDAO.getLastChunkAuditTime(c2) == null) {
+                    return 1;
+                } else {
+                    return auditChunkStatusDAO.getLastChunkAuditTime(c1).getTimestamp().compareTo(
+                            auditChunkStatusDAO.getLastChunkAuditTime(c2).getTimestamp());
                 }
             });
 

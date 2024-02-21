@@ -51,10 +51,11 @@ public class RoleAssignmentCustomDAOImpl extends BaseCustomDAOImpl implements
     @Override
     public Set<Permission> findUserPermissions(String userId) {
 
-      Query query = em.createQuery("SELECT DISTINCT role.permissions \n" +
-        "FROM org.datavaultplatform.common.model.RoleAssignment ra\n" +
-        "INNER JOIN ra.role as role\n" +
-        "WHERE ra.userId = :userId");
+      Query query = em.createQuery("""
+              SELECT DISTINCT role.permissions
+              FROM org.datavaultplatform.common.model.RoleAssignment ra
+              INNER JOIN ra.role as role
+              WHERE ra.userId = :userId""");
       query.setParameter("userId", userId);
 
       return ((List<PermissionModel>) query.getResultList())

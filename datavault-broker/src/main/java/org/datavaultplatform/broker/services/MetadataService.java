@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MetadataService {
 
     private static final TypeReference<HashMap<String, String>> TYPE_REF =
-        new TypeReference<HashMap<String, String>>() {};
+        new TypeReference<>() {};
 
     private final String metaDir;
 

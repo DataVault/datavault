@@ -1,7 +1,5 @@
 package org.datavaultplatform.webapp.app;
 
-import static java.util.Collections.singletonList;
-
 import java.io.File;
 import java.util.Arrays;
 import lombok.SneakyThrows;
