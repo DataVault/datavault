@@ -1,5 +1,12 @@
 package org.datavaultplatform.common.ldap;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.List;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
@@ -18,14 +25,6 @@ import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.startupcheck.MinimumDurationRunningStartupCheckStrategy;
 import org.testcontainers.junit.jupiter.Container;
-
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /*
  The LDAPService is defined in datavault-commons but we have to test it in broker AND Webapp because are not just testing LDAPService functionality
@@ -107,33 +106,33 @@ public abstract class BaseLDAPServiceTest {
     log.info("OPENLDAP PASSWORD [{}]", ldapPassword);
 
     List<String> info = ldapService.autocompleteUID("Bond");
-    assertEquals(Arrays.asList("bbond - Basildon Bond", "jamesbond - James Bond"), info);
+    assertEquals(List.of("bbond - Basildon Bond", "jamesbond - James Bond"), info);
   }
 
   @Test
   void testAutoCompleteBasedOnFirstName() throws CursorException, LdapException {
     List<String> info = ldapService.autocompleteUID("Basildon");
-    assertEquals(Collections.singletonList("bbond - Basildon Bond"), info);
+    assertEquals(List.of("bbond - Basildon Bond"), info);
   }
 
   @Test
   void testAutoCompleteBasedOnUID() throws CursorException, LdapException {
     List<String> info = ldapService.autocompleteUID("jamesbond");
-    assertEquals(Collections.singletonList("jamesbond - James Bond"), info);
+    assertEquals(List.of("jamesbond - James Bond"), info);
   }
 
 
   @Test
   void testAutoCompleteBasedOnPartialUID() throws CursorException, LdapException {
     List<String> info = ldapService.autocompleteUID("jamesbo");
-    assertEquals(Collections.singletonList("jamesbond - James Bond"), info);
+    assertEquals(List.of("jamesbond - James Bond"), info);
   }
 
   @Test
   void testAutoCompleteBasedOnPartialSurname()
       throws CursorException, LdapException {
     List<String> info = ldapService.autocompleteUID("Blog");
-    assertEquals(Collections.singletonList("joebloggs - Joe Bloggs"), info);
+    assertEquals(List.of("joebloggs - Joe Bloggs"), info);
   }
 
 

@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +64,7 @@ public class MultiPartUploadWithCsrfTest {
     String expectedResult = String.format("name[file]type[image/jpeg]size[%d]", expectedFile1Size);
 
     HttpEntity<MultiValueMap<String, Object>> requestEntity = getRequestEntity(
-        new HashMap<String, Object>() {{
+        new HashMap<>() {{
           put("file", dvLogo);
         }});
     ResponseEntity<String> response = template.postForEntity(uploadURL, requestEntity, String.class);
@@ -79,7 +79,7 @@ public class MultiPartUploadWithCsrfTest {
     String expectedResult = String.format("name[file]type[image/jpeg]size[%d]first[James]last[Bond]", expectedFile1Size);
 
     HttpEntity<MultiValueMap<String, Object>> requestEntity = getRequestEntity(
-        new HashMap<String, Object>() {{
+        new HashMap<>() {{
           put("file", dvLogo);
           put("person", person);
         }});
@@ -97,13 +97,11 @@ public class MultiPartUploadWithCsrfTest {
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-    headers.setAccept(Collections.singletonList(MediaType.ALL));
+    headers.setAccept(List.of(MediaType.ALL));
     csrfInfo.addJSessionIdCookie(headers);
 
     MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-    multiPartFormData.entrySet().forEach(entry -> {
-      body.add(entry.getKey(), entry.getValue());
-    });
+    multiPartFormData.forEach(body::add);
     csrfInfo.addCsrfParam(body);
 
     return new HttpEntity<>(body, headers);

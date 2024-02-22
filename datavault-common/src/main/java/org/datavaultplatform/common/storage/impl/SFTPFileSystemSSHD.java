@@ -1,5 +1,15 @@
 package org.datavaultplatform.common.storage.impl;
 
+import static org.datavaultplatform.common.storage.impl.SFTPConnectionInfo.PATH_SEPARATOR;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Clock;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.sshd.sftp.client.SftpClient;
@@ -15,17 +25,6 @@ import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.impl.ssh.UtilitySSHD;
 import org.datavaultplatform.common.storage.impl.ssh.UtilitySSHD.SFTPMonitorSSHD;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Clock;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static org.datavaultplatform.common.storage.impl.SFTPConnectionInfo.PATH_SEPARATOR;
 
 /**
  * An implementation of SFTPFileSystemDriver to use Apache sshd's sftp-client library.

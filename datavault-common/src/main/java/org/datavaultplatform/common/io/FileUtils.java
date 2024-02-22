@@ -41,7 +41,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
                 // identifier followed by "iB" then use Binary size i.e. GiB, MiB, KiB ect...
                 si = false;
             }
-            
+
             for (int i = 0; i <= units_index; i++) {
                 value = value * (si ? 1000 : 1024);
             }

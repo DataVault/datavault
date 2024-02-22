@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
+
 import org.datavaultplatform.worker.utils.Utils;
 import org.springframework.util.Assert;
 
@@ -47,7 +47,7 @@ public class TaskExecutor<T> {
 
     List<Future<T>> futures = tasks.stream()
         .map(service::submit)
-        .collect(Collectors.toList());
+        .toList();
 
     service.shutdown();
 

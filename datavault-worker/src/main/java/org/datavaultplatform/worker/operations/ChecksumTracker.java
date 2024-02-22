@@ -8,15 +8,7 @@ import java.io.File;
 import java.util.concurrent.Callable;
 
 @Slf4j
-public class ChecksumTracker implements Callable<ChecksumHelper> {
-
-    private final File chunk;
-    private final int chunkNumber;
-
-    public ChecksumTracker(File chunk, int chunkNumber) {
-        this.chunk = chunk;
-        this.chunkNumber = chunkNumber;
-    }
+public record ChecksumTracker(File chunk, int chunkNumber) implements Callable<ChecksumHelper> {
 
     @Override
     public ChecksumHelper call() throws Exception {
@@ -32,13 +24,5 @@ public class ChecksumTracker implements Callable<ChecksumHelper> {
 //        logger.info("Checksum: " + chunksHash[i]);
 //
 //        chunksDigest.put(i+1, chunksHash[i]);
-    }
-
-    public File getChunk() {
-        return this.chunk;
-    }
-
-    public int getChunkNumber() {
-        return this.chunkNumber;
     }
 }

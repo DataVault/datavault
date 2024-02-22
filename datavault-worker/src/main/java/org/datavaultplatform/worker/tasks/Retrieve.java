@@ -195,11 +195,11 @@ public class Retrieve extends Task {
             LocalDate depositDate = null;
             if (this.depositCreationDate != null) {
                 depositDate = LocalDate.parse(this.depositCreationDate, DateTimeFormatter.BASIC_ISO_DATE);
-                logger.info("DepositDate is:" + depositDate.toString());
+                logger.info("DepositDate is:" + depositDate);
             }
             if (context.getRecomposeDate() != null) {
                 recomposeDate = LocalDate.parse(context.getRecomposeDate(), DateTimeFormatter.BASIC_ISO_DATE);
-                logger.info("RecomposeDate is:" + recomposeDate.toString());
+                logger.info("RecomposeDate is:" + recomposeDate);
             }
             // if deposit creation date is before the recomposeDate
             if ( depositDate.isBefore(recomposeDate)) {
@@ -252,7 +252,7 @@ public class Retrieve extends Task {
         trackerThread.start();
 
         try {
-            ArrayList<File> contents = new ArrayList<>(Arrays.asList(payloadDir.listFiles()));
+            List<File> contents = List.of(payloadDir.listFiles());
             for(File content: contents){
                 userFs.store(this.retrievePath, content, progress);
             }

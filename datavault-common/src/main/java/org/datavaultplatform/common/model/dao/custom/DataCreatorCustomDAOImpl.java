@@ -1,9 +1,8 @@
 package org.datavaultplatform.common.model.dao.custom;
 
+import java.util.List;
 import jakarta.persistence.EntityManager;
 import org.datavaultplatform.common.model.DataCreator;
-
-import java.util.List;
 
 public class DataCreatorCustomDAOImpl
     extends BaseCustomDAOImpl implements DataCreatorCustomDAO {

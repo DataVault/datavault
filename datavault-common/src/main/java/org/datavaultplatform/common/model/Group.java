@@ -2,13 +2,12 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Pattern;
-import org.hibernate.Hibernate;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import org.hibernate.Hibernate;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -75,11 +74,7 @@ public class Group {
     }
 
     public List<Vault> getVaults() {
-        if (vaults == null) {
-            return new ArrayList<>();
-        } else {
-            return vaults;
-        }
+        return Objects.requireNonNullElseGet(vaults, ArrayList::new);
     }
 
     @Override

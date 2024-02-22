@@ -1,9 +1,10 @@
 package org.datavaultplatform.worker.operations;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -11,7 +12,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -416,14 +417,12 @@ public class PackagerV2Test {
       @Test
       @SneakyThrows
       void testPackagerV2AsProcessSuccess() {
-        ProcessBuilder builder = ProcessUtils.exec(PackagerV2.class, Collections.emptyList(), Collections.singletonList(tempDir.getCanonicalPath()));
+        ProcessBuilder builder = ProcessUtils.exec(PackagerV2.class, Collections.emptyList(), List.of(tempDir.getCanonicalPath()));
         builder.environment().remove(JAVA_TOOL_OPTIONS);
         Process p  = builder.start();
         int status = p.waitFor();
-        String output = IOUtils.readLines(p.getInputStream(), StandardCharsets.UTF_8).stream().collect(
-            Collectors.joining());
-        String error = IOUtils.readLines(p.getErrorStream(), StandardCharsets.UTF_8).stream().collect(
-            Collectors.joining());
+        String output = String.join("", IOUtils.readLines(p.getInputStream(), StandardCharsets.UTF_8));
+        String error = String.join("", IOUtils.readLines(p.getErrorStream(), StandardCharsets.UTF_8));
         log.info("output[{}]", output);
         log.info("error[{}]", error);
         assertEquals(0, status);
@@ -437,14 +436,12 @@ public class PackagerV2Test {
       @Test
       @SneakyThrows
       void testPackagerV2AsProcessFail() {
-        ProcessBuilder builder = ProcessUtils.exec(PackagerV2.class, Collections.emptyList(), Collections.singletonList(dataDir.getCanonicalPath()));
+        ProcessBuilder builder = ProcessUtils.exec(PackagerV2.class, Collections.emptyList(), List.of(dataDir.getCanonicalPath()));
         builder.environment().remove(JAVA_TOOL_OPTIONS);
         Process p  = builder.start();
         int status = p.waitFor();
-        String output = IOUtils.readLines(p.getInputStream(), StandardCharsets.UTF_8).stream().collect(
-            Collectors.joining());
-        String error = IOUtils.readLines(p.getErrorStream(), StandardCharsets.UTF_8).stream().collect(
-            Collectors.joining());
+        String output = String.join("", IOUtils.readLines(p.getInputStream(), StandardCharsets.UTF_8));
+        String error = String.join("", IOUtils.readLines(p.getErrorStream(), StandardCharsets.UTF_8));
         log.info("output[{}]", output);
         log.info("error[{}]", error);
         assertNotEquals(0, status);

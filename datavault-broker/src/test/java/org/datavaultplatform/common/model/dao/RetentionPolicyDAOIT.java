@@ -1,11 +1,10 @@
 package org.datavaultplatform.common.model.dao;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
@@ -61,17 +60,17 @@ public class RetentionPolicyDAOIT extends BaseReuseDatabaseTest {
 
     RetentionPolicy retentionPolicy3 = getRetentionPolicy3();
 
-    assertEquals(null, retentionPolicy1.getID());
+    assertNull(retentionPolicy1.getID());
     dao.save(retentionPolicy1);
     assertTrue(retentionPolicy1.getID() > 0);
     assertEquals(1, count());
 
-    assertEquals(null, retentionPolicy2.getID());
+    assertNull(retentionPolicy2.getID());
     dao.save(retentionPolicy2);
     assertTrue(retentionPolicy2.getID() > 0);
     assertEquals(2, count());
 
-    assertEquals(null, retentionPolicy3.getID());
+    assertNull(retentionPolicy3.getID());
     dao.save(retentionPolicy3);
     assertTrue(retentionPolicy3.getID() > 0);
     assertEquals(3, count());
@@ -84,11 +83,11 @@ public class RetentionPolicyDAOIT extends BaseReuseDatabaseTest {
 
     // The RetentionPolicy should be ordered by Ascending Name
     assertEquals(
-        Arrays.asList(
+        List.of(
             retentionPolicy3.getID(),
             retentionPolicy1.getID(),
             retentionPolicy2.getID()),
-        items.stream().map(RetentionPolicy::getID).collect(Collectors.toList()));
+        items.stream().map(RetentionPolicy::getID).toList());
   }
 
 

@@ -1,7 +1,6 @@
 package org.datavaultplatform.webapp.app.setup;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.datavaultplatform.webapp.test.TestUtils.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -11,10 +10,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import jakarta.servlet.Filter;
 import lombok.SneakyThrows;
-import org.assertj.core.api.Assertions;
 import org.datavaultplatform.webapp.authentication.shib.ShibAuthenticationFilter;
 import org.datavaultplatform.webapp.authentication.shib.ShibAuthenticationProvider;
 import org.datavaultplatform.webapp.test.ProfileShib;
@@ -63,14 +60,14 @@ public class ProfileShibTest {
 
     @Test
     void testServiceBeans(ApplicationContext ctx) {
-        Set<String> serviceNames = toSet(ctx.getBeanNamesForAnnotation(Service.class));
-        assertEquals(toSet("forceLogoutService", "restService", "permissionsService","userLookupService","validateService"), serviceNames);
+        Set<String> serviceNames = Set.of(ctx.getBeanNamesForAnnotation(Service.class));
+        assertEquals(Set.of("forceLogoutService", "restService", "permissionsService","userLookupService","validateService"), serviceNames);
     }
 
     @Test
     void testControllerBeans(ApplicationContext ctx) {
-        Set<String> names = toSet(ctx.getBeanNamesForAnnotation(Controller.class));
-        Set<String> restNames = toSet(ctx.getBeanNamesForAnnotation(RestController.class));
+        Set<String> names = Set.of(ctx.getBeanNamesForAnnotation(Controller.class));
+        Set<String> restNames = Set.of(ctx.getBeanNamesForAnnotation(RestController.class));
         assertTrue(names.containsAll(restNames));
         assertThat(names.size()).isEqualTo(25);
     }
@@ -107,17 +104,17 @@ public class ProfileShibTest {
         assertThat(chains.size()).isEqualTo(2);
         SecurityFilterChain anyRequestChain = chains.stream().filter(chain -> !chain.toString().contains("/actuator/**")).findFirst().get();
 
-        Optional<Integer> optIdxLogout = findFilter(anyRequestChain, LogoutFilter.class);
-        Optional<Integer> optIdxSession = findFilter(anyRequestChain, ConcurrentSessionFilter.class);
-        Optional<Integer> optIdxShib = findFilter(anyRequestChain, ShibAuthenticationFilter.class);
+      Optional<Integer> optIdxLogout = findFilter(anyRequestChain, LogoutFilter.class);
+      Optional<Integer> optIdxSession = findFilter(anyRequestChain, ConcurrentSessionFilter.class);
+      Optional<Integer> optIdxShib = findFilter(anyRequestChain, ShibAuthenticationFilter.class);
 
-        int idxLogout = optIdxLogout.get();
-        int idxShib = optIdxShib.get();
-        int idxSession = optIdxSession.get();
+      int idxLogout = optIdxLogout.get();
+      int idxShib = optIdxShib.get();
+      int idxSession = optIdxSession.get();
 
-        //check that the filter chain contain LogoutFilter, then ShibFilter, then SessionFilter
-        assertThat(idxShib).isEqualTo(idxLogout + 1);
-        assertThat(idxShib).isEqualTo(idxSession -1);
+      //check that the filter chain contain LogoutFilter, then ShibFilter, then SessionFilter
+      assertThat(idxShib).isEqualTo(idxLogout + 1);
+      assertThat(idxShib).isEqualTo(idxSession -1);
     }
 
     Optional<Integer> findFilter(SecurityFilterChain chain, Class<? extends Filter> filter) {
@@ -131,18 +128,18 @@ public class ProfileShibTest {
         return Optional.empty();
     }
 
-    @TestConfiguration
-    static class TestConfig implements ApplicationListener<ApplicationStartedEvent> {
+  @TestConfiguration
+  static class TestConfig implements ApplicationListener<ApplicationStartedEvent> {
 
-        @Bean
-        CountDownLatch latch() {
-            return new CountDownLatch(1);
-        }
-
-        @Override
-        public void onApplicationEvent(ApplicationStartedEvent event) {
-            latch().countDown();
-        }
+    @Bean
+    CountDownLatch latch() {
+      return new CountDownLatch(1);
     }
+
+    @Override
+    public void onApplicationEvent(ApplicationStartedEvent event) {
+      latch().countDown();
+    }
+  }
 
 }

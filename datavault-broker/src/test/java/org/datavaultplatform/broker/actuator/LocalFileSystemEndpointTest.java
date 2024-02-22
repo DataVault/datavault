@@ -1,13 +1,13 @@
 package org.datavaultplatform.broker.actuator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.SneakyThrows;
@@ -46,7 +46,7 @@ public class LocalFileSystemEndpointTest {
   @Test
   void testNoLocalFileStores2() {
     ArchiveStore as1 = new ArchiveStore();
-     when(mArchiveStoreService.getArchiveStores()).thenReturn(Arrays.asList(as1));
+    when(mArchiveStoreService.getArchiveStores()).thenReturn(List.of(as1));
     List<LocalFileStoreInfo> result = endpoint.getLocalFileStoresInfo();
     assertTrue(result.isEmpty());
     Mockito.verify(mArchiveStoreService).getArchiveStores();
@@ -57,15 +57,15 @@ public class LocalFileSystemEndpointTest {
   void testSparseLocalFileStores() {
     ArchiveStore as1 = new ArchiveStore();
     as1.setStorageClass(LocalFileSystem.class.getName());
-    when(mArchiveStoreService.getArchiveStores()).thenReturn(Arrays.asList(as1));
+    when(mArchiveStoreService.getArchiveStores()).thenReturn(List.of(as1));
     List<LocalFileStoreInfo> result = endpoint.getLocalFileStoresInfo();
     assertEquals(1,result.size());
 
     LocalFileStoreInfo info = result.get(0);
-    assertEquals(null, info.getId());
-    assertEquals(null, info.getLabel());
-    assertEquals(false, info.isValid());
-    assertEquals(false, info.isRetrieveEnabled());
+    assertNull(info.getId());
+    assertNull(info.getLabel());
+    assertFalse(info.isValid());
+    assertFalse(info.isRetrieveEnabled());
     assertTrue(info.getValidationException().contains("IllegalArgumentException"));
     assertTrue(info.getValidationException().contains("cannot be null"));
     Mockito.verify(mArchiveStoreService).getArchiveStores();
@@ -83,15 +83,15 @@ public class LocalFileSystemEndpointTest {
     Field fId = ArchiveStore.class.getDeclaredField("id");
     fId.setAccessible(true);
     fId.set(as1, "test-id");
-    when(mArchiveStoreService.getArchiveStores()).thenReturn(Arrays.asList(as1));
+    when(mArchiveStoreService.getArchiveStores()).thenReturn(List.of(as1));
     List<LocalFileStoreInfo> result = endpoint.getLocalFileStoresInfo();
     assertEquals(1,result.size());
 
     LocalFileStoreInfo info = result.get(0);
     assertEquals("test-id", info.getId());
     assertEquals("test-label", info.getLabel());
-    assertEquals(true, info.isValid());
-    assertEquals(true, info.isRetrieveEnabled());
+    assertTrue(info.isValid());
+    assertTrue(info.isRetrieveEnabled());
     assertNull(info.getValidationException());
     Mockito.verify(mArchiveStoreService).getArchiveStores();
     Mockito.verifyNoMoreInteractions(mArchiveStoreService);

@@ -1,17 +1,18 @@
 package org.datavaultplatform.common.metadata.impl;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.LineIterator;
-import org.datavaultplatform.common.metadata.Provider;
-import org.datavaultplatform.common.model.Dataset;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.model.Dataset;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
+import org.datavaultplatform.common.metadata.Provider;
 
 // This mock metadata provider is for testing purposes only
 
@@ -149,11 +150,8 @@ public class PureFlatFileProvider implements Provider {
 					    		ds.setID(dsUUID);
 					    		String status = info.get(1);
 					    		ds.setName(info.get(0) + " (" + status + ")");
-					    		boolean visible = true;
-					    		if (! status.equals(PureFlatFileProvider.PURE_VALIDATED)) {
-					    			visible = false;
-					    		}
-					    		ds.setVisible(visible);
+					    		boolean visible = status.equals(PureFlatFileProvider.PURE_VALIDATED);
+                                ds.setVisible(visible);
 					    		retVal.add(ds);
 				    		}
 				    	}

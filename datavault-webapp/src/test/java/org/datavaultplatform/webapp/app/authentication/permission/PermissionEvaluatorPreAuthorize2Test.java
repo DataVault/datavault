@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -187,7 +186,7 @@ class PermissionEvaluatorPreAuthorize2Test {
 
         private void checkEvaluatorWasCalledWithExpectedArgs() {
           assertEquals("testuser", argAuth.getValue().getName());
-          assertEquals(Integer.valueOf(1), argTargetId.getValue());
+          assertEquals(1, argTargetId.getValue());
 
           assertEquals("java.lang.String", argTargetType.getValue());
 
@@ -298,11 +297,11 @@ class PermissionEvaluatorPreAuthorize2Test {
   @RequestMapping("/test/info")
   static class InfoController {
 
-    final Map<Integer,String> info = new HashMap<Integer,String>(){{
-      put(1, "info_one");
-      put(2, "info_two");
-      put(3, "info_three");
-    }};
+    final Map<Integer,String> info = Map.of(
+        1, "info_one",
+        2, "info_two",
+        3, "info_three"
+    );
 
     @GetMapping("/unsecure/{id}")
     String getInfoUnsecure(@PathVariable int id) {

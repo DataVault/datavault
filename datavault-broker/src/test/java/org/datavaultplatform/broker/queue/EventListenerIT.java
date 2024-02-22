@@ -1,10 +1,10 @@
 package org.datavaultplatform.broker.queue;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
@@ -157,12 +157,12 @@ public class EventListenerIT extends BaseDatabaseTest {
 
   @Test
   void test00EventListener() {
-    assertTrue(eventListener != null);
-    assertTrue(usersService != null);
-    assertTrue(jobsService != null);
-    assertTrue(vaultsService != null);
-    assertTrue(depositsService != null);
-    assertTrue(groupService != null);
+    assertNotNull(eventListener);
+    assertNotNull(usersService);
+    assertNotNull(jobsService);
+    assertNotNull(vaultsService);
+    assertNotNull(depositsService);
+    assertNotNull(groupService);
   }
 
   @Test
@@ -195,7 +195,7 @@ public class EventListenerIT extends BaseDatabaseTest {
     assertEquals(InitStates.class, event.getClass());
 
     Job job = jobsService.getJob(jobId);
-    assertEquals(Arrays.asList(
+    assertEquals(List.of(
              "Calculating size",
              "Transferring",
              "Packaging",
@@ -291,7 +291,7 @@ public class EventListenerIT extends BaseDatabaseTest {
         + "      \"agentType\": \"WORKER\""
         + "    }";
 
-    assertEquals(null, job.getState());
+    assertNull(job.getState());
     Event event = eventListener.onMessageInternal(message);
     assertEquals(Start.class, event.getClass());
 

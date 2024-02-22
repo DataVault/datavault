@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class ValidationExceptionHandler {
 
     @ExceptionHandler({BindException.class})
-    public ResponseEntity handle(BindException ex) {
+    public ResponseEntity<?> handle(BindException ex) {
         String errorMessage = ex.getBindingResult().getFieldErrors()
                 .stream()
                 .map(FieldError::getDefaultMessage)

@@ -28,7 +28,7 @@ import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -49,7 +49,7 @@ import org.springframework.web.filter.GenericFilterBean;
 @Configuration
 @EnableWebSecurity
 @Slf4j
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class SecurityConfig {
 
   @Value("${spring.security.debug:false}")
@@ -100,6 +100,7 @@ public class SecurityConfig {
    <property name="filterProcessesUrl" value="/**" />
    </bean>
    */
+
   private RestAuthenticationFilter restFilter(
           AuthenticationManager authenticationManager) throws Exception {
     RequestMatcher matcher = request -> {

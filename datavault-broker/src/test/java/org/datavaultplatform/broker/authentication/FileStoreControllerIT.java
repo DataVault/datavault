@@ -1,6 +1,7 @@
 package org.datavaultplatform.broker.authentication;
 
 
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.Set;
 import java.util.Base64;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -25,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -205,7 +205,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     assertEquals("label-one", fsFromDb.getLabel());
     HashMap<String, String> storedProps = fsFromDb.getProperties();
     assertEquals(new HashSet<>(
-        Arrays.asList(PropNames.USERNAME, PropNames.PASSWORD, PropNames.PUBLIC_KEY,
+        List.of(PropNames.USERNAME, PropNames.PASSWORD, PropNames.PUBLIC_KEY,
             PropNames.PRIVATE_KEY, PropNames.IV, PropNames.PASSPHRASE, PropNames.HOST,
             PropNames.PORT, PropNames.ROOT_PATH)), storedProps.keySet());
     assertEquals(TEST_USER, storedProps.get(PropNames.USERNAME));
@@ -219,7 +219,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     log.info("properties {}", storedProps);
 
     UserStore us = UserStore.fromFileStore(fsFromDb, resolver);
-    assertTrue(us instanceof SFTPFileSystemSSHD);
+    assertInstanceOf(SFTPFileSystemSSHD.class, us);
     SFTPFileSystemSSHD sftp = (SFTPFileSystemSSHD) us;
     String publicKey = storedProps.get(PropNames.PUBLIC_KEY);
     log.info("public key [{}]", publicKey);
@@ -254,7 +254,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
     for (String prop : props) {
       assertEquals(resProps.get(prop), dbProps.get(prop));
     }
-    assertEquals(fsResponse.getProperties().keySet(), new HashSet<>(Arrays.asList(props)));
+    assertEquals(fsResponse.getProperties().keySet(), Set.of(props));
   }
 
   @SneakyThrows
@@ -293,8 +293,7 @@ public class FileStoreControllerIT extends BaseDatabaseTest {
   void checkSFTP(SFTPFileSystemDriver sftp) throws Exception {
 
     List<FileInfo> items = sftp.list("FILES").stream().sorted(Comparator.comparing(FileInfo::getName))
-        .collect(
-            Collectors.toList());
+        .toList();
 
     FileInfo aaa = items.get(0);
     assertEquals("AAA", aaa.getName());

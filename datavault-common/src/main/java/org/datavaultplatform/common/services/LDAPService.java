@@ -1,5 +1,12 @@
 package org.datavaultplatform.common.services;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,9 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * User: Robin Taylor
@@ -240,7 +244,7 @@ public class LDAPService {
             }
             logger.info("LDAP found [{}] results.", entries.size());
             //sort by alphabetical order - more consistent for testing
-            return entries.stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
+            return entries.stream().sorted(Comparator.naturalOrder()).toList();
         } finally {
             IOUtils.closeQuietly(cursor);
             closeConnection(connection);

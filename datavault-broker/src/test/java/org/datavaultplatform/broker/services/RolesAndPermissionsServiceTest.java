@@ -7,7 +7,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -227,7 +226,7 @@ public class RolesAndPermissionsServiceTest {
         PermissionModel school2 = aPermission(Permission.CAN_VIEW_IN_PROGRESS, PermissionModel.PermissionType.SCHOOL);
         PermissionModel school3 = aPermission(Permission.CAN_VIEW_QUEUES, PermissionModel.PermissionType.SCHOOL);
 
-        List<PermissionModel> permissionModels = Arrays.asList(
+        List<PermissionModel> permissionModels = List.of(
                 school1,
                 school2,
                 school3);
@@ -249,7 +248,7 @@ public class RolesAndPermissionsServiceTest {
         PermissionModel vault2 = aPermission(Permission.VIEW_VAULT_ROLES, PermissionModel.PermissionType.VAULT);
         PermissionModel vault3 = aPermission(Permission.VIEW_VAULT_ROLES, PermissionModel.PermissionType.VAULT);
 
-        List<PermissionModel> allPermissions = Arrays.asList(
+        List<PermissionModel> allPermissions = List.of(
                 vault1,
                 vault2,
                 vault3);
@@ -272,13 +271,13 @@ public class RolesAndPermissionsServiceTest {
         RoleModel vaultRole = aRole(RoleType.VAULT);
         RoleModel adminRole = aRole(RoleType.ADMIN);
 
-        given(mockRoleDao.findAllEditableRoles()).willReturn(Arrays.asList(schoolRole, vaultRole, adminRole));
+        given(mockRoleDao.findAllEditableRoles()).willReturn(List.of(schoolRole, vaultRole, adminRole));
 
         // When
         List<RoleModel> actual = underTest.getEditableRoles();
 
         // Then
-        List<RoleModel> expected = Arrays.asList(schoolRole, vaultRole, adminRole);
+        List<RoleModel> expected = List.of(schoolRole, vaultRole, adminRole);
         assertEquals(expected, actual);
         verify(mockRoleDao).findAllEditableRoles();
         verifyNoMoreMockInteractions();

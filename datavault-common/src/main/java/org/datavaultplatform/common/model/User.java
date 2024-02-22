@@ -2,14 +2,14 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import jakarta.persistence.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import org.datavaultplatform.common.model.custom.HashMapConverter;
 import org.hibernate.Hibernate;
+import org.datavaultplatform.common.model.custom.HashMapConverter;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity

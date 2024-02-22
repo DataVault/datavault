@@ -32,12 +32,10 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.ViewResolver;
 import org.thymeleaf.DialectConfiguration;
 import org.thymeleaf.EngineConfiguration;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver;
-import org.thymeleaf.spring6.templateresource.SpringResourceTemplateResource;
 import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 import org.thymeleaf.templateresolver.TemplateResolution;
@@ -116,7 +114,7 @@ public class ThymeleafConfigTest {
     void testThymeleafConfiguration() {
         Set<DialectConfiguration> dialectConfigs = tlConfig.getDialectConfigurations();
         Set<String> dialectNames = dialectConfigs.stream().map(dc -> dc.getDialect().getName()).collect(Collectors.toSet());
-        assertThat(dialectNames).containsAll(Arrays.asList("SpringSecurity", "Layout", "SpringStandard"));
+        assertThat(dialectNames).containsAll(List.of("SpringSecurity", "Layout", "SpringStandard"));
         log.info(tlConfig.toString());
         assertThat(tlConfig.getTemplateResolvers()).hasSize(1);
         ITemplateResolver firstTemplateResolver = tlConfig.getTemplateResolvers().iterator().next();
@@ -167,7 +165,7 @@ public class ThymeleafConfigTest {
         store2.getProperties().put("prop2-1", "value2-1");
         store2.getProperties().put("prop2-2", "value2-2");
 
-        modelMap.put("archivestores", Arrays.asList(store1, store2));
+        modelMap.put("archivestores", List.of(store1, store2));
         String html = getHtml("admin/archivestores/index", modelMap);
         Document doc = Jsoup.parse(html);
 
@@ -222,10 +220,10 @@ public class ThymeleafConfigTest {
         info2.setNote("note-2");
         info2.setDepositChunk(dc2);
 
-        audit1.setAuditChunks(Arrays.asList(info1, info2));
-        audit2.setAuditChunks(Arrays.asList(info1, info2));
+        audit1.setAuditChunks(List.of(info1, info2));
+        audit2.setAuditChunks(List.of(info1, info2));
 
-        modelMap.put("audits", Arrays.asList(audit1, audit2));
+        modelMap.put("audits", List.of(audit1, audit2));
 
         String html = getHtml("admin/audits/index", modelMap);
         Document doc = Jsoup.parse(html);
@@ -482,14 +480,14 @@ public class ThymeleafConfigTest {
         DepositChunk dc2 = getDepositChunk("dc-002");
         dc1.setDeposit(deposit1);
         dc2.setDeposit(deposit1);
-        deposit1.setDepositChunks(Arrays.asList(dc1, dc2));
+        deposit1.setDepositChunks(List.of(dc1, dc2));
 
         Deposit deposit2 = getDeposit("dep-id-002");
         DepositChunk dc3 = getDepositChunk("dc-003");
         DepositChunk dc4 = getDepositChunk("dc-004");
         dc3.setDeposit(deposit2);
         dc4.setDeposit(deposit2);
-        deposit2.setDepositChunks(Arrays.asList(dc3, dc4));
+        deposit2.setDepositChunks(List.of(dc3, dc4));
 
         dc1.setChunkNum(1);
 
@@ -542,7 +540,7 @@ public class ThymeleafConfigTest {
         info2.setPersonalDataStatement("personalDataStatement2");
         info2.setShortFilePath("short-file-path-2");
         info2.setHasPersonalData(true);
-        modelMap.put("deposits", Arrays.asList(info1, info2));
+        modelMap.put("deposits", List.of(info1, info2));
         modelMap.put("totalRecords", 15);
         modelMap.put("totalPages", 1);
         modelMap.put("recordPerPage", 20);
@@ -576,7 +574,7 @@ public class ThymeleafConfigTest {
 
         EventInfo event2 = getEventInfo2();
 
-        modelMap.put("events", Arrays.asList(event1, event2));
+        modelMap.put("events", List.of(event1, event2));
         String html = getHtml("admin/events/index", modelMap);
         Document doc = Jsoup.parse(html);
 
@@ -594,10 +592,10 @@ public class ThymeleafConfigTest {
         RetentionPolicy policy1 = getRetentionPolicy1();
         RetentionPolicy policy2 = getRetentionPolicy2();
 
-        modelMap.put("errors", Arrays.asList("error1", "error2"));
+        modelMap.put("errors", List.of("error1", "error2"));
         modelMap.put("vault", vault);
         modelMap.put("vaultID", "vault-id-123");
-        modelMap.put("policies", Arrays.asList(policy1, policy2));
+        modelMap.put("policies", List.of(policy1, policy2));
 
         String html = getHtml("admin/pendingVaults/edit/editPendingVault", modelMap);
         Document doc = Jsoup.parse(html);
@@ -623,7 +621,7 @@ public class ThymeleafConfigTest {
         modelMap.put("sort", "name");
         modelMap.put("order", "ORDER");
         modelMap.put("ordername", "bob");
-        modelMap.put("pendingVaults", Arrays.asList(vault1, vault2));
+        modelMap.put("pendingVaults", List.of(vault1, vault2));
 
         String html = getHtml("admin/pendingVaults/confirmed", modelMap);
         Document doc = Jsoup.parse(html);
@@ -676,7 +674,7 @@ public class ThymeleafConfigTest {
         modelMap.put("sort", "name");
         modelMap.put("order", "ORDER");
         modelMap.put("ordername", "bob");
-        modelMap.put("pendingVaults", Arrays.asList(vault1, vault2));
+        modelMap.put("pendingVaults", List.of(vault1, vault2));
 
         String html = getHtml("admin/pendingVaults/saved", modelMap);
         Document doc = Jsoup.parse(html);
@@ -758,7 +756,7 @@ public class ThymeleafConfigTest {
         RetentionPolicy policy1 = getRetentionPolicy1();
         RetentionPolicy policy2 = getRetentionPolicy2();
 
-        modelMap.put("policies", Arrays.asList(policy1, policy2));
+        modelMap.put("policies", List.of(policy1, policy2));
 
         String html = getHtml("admin/retentionpolicies/index", modelMap);
         Document doc = Jsoup.parse(html);
@@ -787,7 +785,7 @@ public class ThymeleafConfigTest {
         ret2.setNote("note-2");
         ret2.setRetrievePath("/d/e/f");
 
-        modelMap.put("retrieves", Arrays.asList(ret1, ret2));
+        modelMap.put("retrieves", List.of(ret1, ret2));
 
         String html = getHtml("admin/retrieves/index", modelMap);
         Document doc = Jsoup.parse(html);
@@ -820,7 +818,7 @@ public class ThymeleafConfigTest {
         drm2.setName("drm2-name");
         drm2.setComment("drm2-comment");
 
-        vrModel.setDepositReviewModels(Arrays.asList(drm1, drm2));
+        vrModel.setDepositReviewModels(List.of(drm1, drm2));
 
         VaultInfo vault1 = getVaultInfo1();
 
@@ -851,7 +849,7 @@ public class ThymeleafConfigTest {
         createRetentionPolicy.setId(111);
         createRetentionPolicy.setDescription("crp-description");
 
-        modelMap.put("dataManagers", Arrays.asList(ra1, ra2));
+        modelMap.put("dataManagers", List.of(ra1, ra2));
         modelMap.put("vault", vault1);
         modelMap.put("vaultReviewModel", vrModel);
         modelMap.put("group", group);
@@ -873,7 +871,7 @@ public class ThymeleafConfigTest {
         VaultInfo vault1 = getVaultInfo1();
         VaultInfo vault2 = getVaultInfo2();
 
-        modelMap.put("vaults", Arrays.asList(vault1, vault2));
+        modelMap.put("vaults", List.of(vault1, vault2));
 
         String html = getHtml("admin/reviews/index", modelMap);
         Document doc = Jsoup.parse(html);
@@ -922,7 +920,7 @@ public class ThymeleafConfigTest {
         group2.setName("school-name-2");
         group2.setEnabled(true);
 
-        modelMap.put("schools", Arrays.asList(group1, group2));
+        modelMap.put("schools", List.of(group1, group2));
         String html = getHtml("admin/schools/index", modelMap);
         Document doc = Jsoup.parse(html);
 
@@ -965,8 +963,8 @@ public class ThymeleafConfigTest {
         ra2.setVaultId("vault-id-2");
 
         modelMap.put("school", group1);
-        modelMap.put("roles", Arrays.asList(roleModel1, roleModel2));
-        modelMap.put("roleAssignments", Arrays.asList(ra1, ra2));
+        modelMap.put("roles", List.of(roleModel1, roleModel2));
+        modelMap.put("roleAssignments", List.of(ra1, ra2));
         modelMap.put("canManageSchoolRoleAssignments", true);
 
         String html = getHtml("admin/schools/schoolRoles", modelMap);
@@ -985,7 +983,7 @@ public class ThymeleafConfigTest {
         user1.setFirstname("user1-first");
         user1.setLastname("user1-last");
         user1.setPassword("XXXX");
-        user1.setProperties(new HashMap<String, String>() {{
+        user1.setProperties(new HashMap<>() {{
             put("prop-1", "value-1");
             put("prop-2", "value-2");
         }});
@@ -1010,7 +1008,7 @@ public class ThymeleafConfigTest {
         user1.setFirstname("user1-first");
         user1.setLastname("user1-last");
         user1.setPassword("XXXX");
-        user1.setProperties(new HashMap<String, String>() {{
+        user1.setProperties(new HashMap<>() {{
             put("prop-1", "value-1");
             put("prop-2", "value-2");
         }});
@@ -1036,7 +1034,7 @@ public class ThymeleafConfigTest {
         user1.setLastname("user1-last");
         user1.setPassword("XXXX");
         user1.setEmail("user.one@example.com");
-        user1.setProperties(new HashMap<String, String>() {{
+        user1.setProperties(new HashMap<>() {{
             put("prop-A", "value-1");
             put("prop-B", "value-2");
         }});
@@ -1046,12 +1044,12 @@ public class ThymeleafConfigTest {
         user2.setLastname("user2-last");
         user2.setPassword("XXXX");
         user2.setEmail("user.two@example.com");
-        user2.setProperties(new HashMap<String, String>() {{
+        user2.setProperties(new HashMap<>() {{
             put("prop-C", "value-3");
             put("prop-D", "value-4");
         }});
 
-        modelMap.put("users", Arrays.asList(user1, user2));
+        modelMap.put("users", List.of(user1, user2));
         modelMap.put("query", "admin users");
 
         String html = getHtml("admin/users/index", modelMap);
@@ -1083,7 +1081,7 @@ public class ThymeleafConfigTest {
         modelMap.put("orderGroupId", "orderGroupId1");
         modelMap.put("orderreviewDate", "orderReviewDate1");
         modelMap.put("ordercreationtime", "orderCreationTime1");
-        modelMap.put("vaults", Arrays.asList(vault1, vault2));
+        modelMap.put("vaults", List.of(vault1, vault2));
 
         String html = getHtml("admin/vaults/index", modelMap);
         Document doc = Jsoup.parse(html);
@@ -1106,14 +1104,14 @@ public class ThymeleafConfigTest {
         DepositChunk dc2 = getDepositChunk("dc-002");
         dc1.setDeposit(deposit1);
         dc2.setDeposit(deposit1);
-        deposit1.setDepositChunks(Arrays.asList(dc1, dc2));
+        deposit1.setDepositChunks(List.of(dc1, dc2));
 
         Deposit deposit2 = getDeposit("dep-id-002");
         DepositChunk dc3 = getDepositChunk("dc-003");
         DepositChunk dc4 = getDepositChunk("dc-004");
         dc3.setDeposit(deposit2);
         dc4.setDeposit(deposit2);
-        deposit2.setDepositChunks(Arrays.asList(dc3, dc4));
+        deposit2.setDepositChunks(List.of(dc3, dc4));
 
         dc1.setChunkNum(1);
 
@@ -1178,7 +1176,7 @@ public class ThymeleafConfigTest {
         group.setEnabled(true);
 
         modelMap.put("vault", vault1);
-        modelMap.put("deposits", Arrays.asList(info1, info2));
+        modelMap.put("deposits", List.of(info1, info2));
         modelMap.put("retentionPolicy", createRetentionPolicy);
         modelMap.put("group", group);
 
@@ -1279,7 +1277,7 @@ public class ThymeleafConfigTest {
         CreateDeposit deposit = new CreateDeposit();
         deposit.setFileUploadHandle("file-upload-handle-1");
         deposit.setName("deposit-name-1");
-        deposit.setDepositPaths(Arrays.asList("path1", "path2", "path3"));
+        deposit.setDepositPaths(List.of("path1", "path2", "path3"));
         deposit.setVaultID("vault-id-1");
         deposit.setDescription("deposit-description");
         deposit.setHasPersonalData("hasPersonalData1");
@@ -1316,7 +1314,7 @@ public class ThymeleafConfigTest {
         DepositChunk dc2 = getDepositChunk("dc-002");
         dc1.setDeposit(deposit1);
         dc2.setDeposit(deposit1);
-        deposit1.setDepositChunks(Arrays.asList(dc1, dc2));
+        deposit1.setDepositChunks(List.of(dc1, dc2));
         deposit1.setStatus(Deposit.Status.COMPLETE);
 
         DepositInfo info1 = getDepositInfo("dep-id-001");
@@ -1363,8 +1361,8 @@ public class ThymeleafConfigTest {
 
         modelMap.put("vault", vault1);
         modelMap.put("deposit", info1);
-        modelMap.put("events", Arrays.asList(event1, event2));
-        modelMap.put("retrieves", Arrays.asList(ret1, ret2));
+        modelMap.put("events", List.of(event1, event2));
+        modelMap.put("retrieves", List.of(ret1, ret2));
 
         String html = getHtml("deposits/deposit", modelMap);
         Document doc = Jsoup.parse(html);
@@ -1388,7 +1386,7 @@ public class ThymeleafConfigTest {
         DepositChunk dc2 = getDepositChunk("dc-002");
         dc1.setDeposit(deposit1);
         dc2.setDeposit(deposit1);
-        deposit1.setDepositChunks(Arrays.asList(dc1, dc2));
+        deposit1.setDepositChunks(List.of(dc1, dc2));
         deposit1.setStatus(Deposit.Status.COMPLETE);
 
         DepositInfo info1 = getDepositInfo("dep-id-001");
@@ -1526,7 +1524,7 @@ public class ThymeleafConfigTest {
         modelMap.put("sftpRootPath", "sftpRootPath4");
 
         FileStore fs1 = getFileStore("fs-id-1");
-        fs1.setProperties(new HashMap<String, String>() {{
+        fs1.setProperties(new HashMap<>() {{
             put("host", "host1");
             put("port", "port1");
             put("rootPath", "rootPath1");
@@ -1537,7 +1535,7 @@ public class ThymeleafConfigTest {
         fs1.setUser(user);
 
         FileStore fs2 = getFileStore("fs-id-2");
-        fs2.setProperties(new HashMap<String, String>() {{
+        fs2.setProperties(new HashMap<>() {{
             put("host", "host2");
             put("port", "port2");
             put("rootPath", "rootPath2");
@@ -1547,8 +1545,8 @@ public class ThymeleafConfigTest {
         fs2.setStorageClass("storage-class-2");
         fs2.setUser(user);
 
-        modelMap.put("filestoresLocal", Arrays.asList(fs1, fs2));
-        modelMap.put("filestoresSFTP", Arrays.asList(fs1, fs2));
+        modelMap.put("filestoresLocal", List.of(fs1, fs2));
+        modelMap.put("filestoresSFTP", List.of(fs1, fs2));
 
         String html = getHtml("filestores/index", modelMap);
         Document doc = Jsoup.parse(html);
@@ -1573,8 +1571,8 @@ public class ThymeleafConfigTest {
         VaultInfo vault1 = getVaultInfo1();
         VaultInfo vault2 = getVaultInfo2();
 
-        modelMap.put("vaults", Arrays.asList(vault1, vault2));
-        modelMap.put("groups", Arrays.asList(group1, group2));
+        modelMap.put("vaults", List.of(vault1, vault2));
+        modelMap.put("groups", List.of(group1, group2));
 
         String html = getHtml("groups/index", modelMap);
         Document doc = Jsoup.parse(html);
@@ -1624,9 +1622,9 @@ public class ThymeleafConfigTest {
 
         RetentionPolicy retPol2 = getRetentionPolicy2();
 
-        modelMap.put("datasets", Arrays.asList(dataset1, dataset2));
+        modelMap.put("datasets", List.of(dataset1, dataset2));
         modelMap.put("vault", vault);
-        modelMap.put("policies", Arrays.asList(retPol1, retPol2));//RetentionPolicy[]
+        modelMap.put("policies", List.of(retPol1, retPol2));//RetentionPolicy[]
 
 
         String html = getHtml("vaults/create", modelMap);
@@ -1660,17 +1658,17 @@ public class ThymeleafConfigTest {
         group2.setName("group-name-2");
         group2.setEnabled(true);
 
-        modelMap.addAttribute("vaults", Arrays.asList(vault1, vault2));//VaultInfo[]
-        modelMap.addAttribute("pendingVaults", Arrays.asList(vault1, vault2));//VaultInfo[]
+        modelMap.addAttribute("vaults", List.of(vault1, vault2));//VaultInfo[]
+        modelMap.addAttribute("pendingVaults", List.of(vault1, vault2));//VaultInfo[]
 
         // pass the view an empty Vault since the form expects it
         modelMap.addAttribute("vault", getCreateVault());
 
-        modelMap.addAttribute("datasets", Arrays.asList(dataset1, dataset2));//Dataset[]
+        modelMap.addAttribute("datasets", List.of(dataset1, dataset2));//Dataset[]
 
-        modelMap.addAttribute("policies", Arrays.asList(retPol1, retPol2));//RetentionPolicy[]
+        modelMap.addAttribute("policies", List.of(retPol1, retPol2));//RetentionPolicy[]
 
-        modelMap.addAttribute("groups", Arrays.asList(group1, group2));//Group[]
+        modelMap.addAttribute("groups", List.of(group1, group2));//Group[]
 
         modelMap.put("system", "system-01");
         modelMap.put("link", "link-01");
@@ -1698,12 +1696,12 @@ public class ThymeleafConfigTest {
         group2.setName("group-name-2");
         group2.setEnabled(true);
 
-        modelMap.put("groups", Arrays.asList(group1, group2));
+        modelMap.put("groups", List.of(group1, group2));
         modelMap.put("vault", getCreateVault());
-        modelMap.put("errors", Arrays.asList("error1", "error2"));
+        modelMap.put("errors", List.of("error1", "error2"));
         RetentionPolicy retPol1 = getRetentionPolicy1();
         RetentionPolicy retPol2 = getRetentionPolicy2();
-        modelMap.put("errors", Arrays.asList(retPol1, retPol2));
+        modelMap.put("errors", List.of(retPol1, retPol2));
         modelMap.put("loggedInAs", "loggedInAs1");
 
         String html = getHtml("vaults/newCreatePrototype", modelMap);
@@ -1721,7 +1719,7 @@ public class ThymeleafConfigTest {
 
         VaultInfo vault1 = getVaultInfo1();
         VaultInfo vault2 = getVaultInfo2();
-        modelMap.put("vaults", Arrays.asList(vault1, vault2));
+        modelMap.put("vaults", List.of(vault1, vault2));
 
         String html = getHtml("vaults/userVaults", modelMap);
         Document doc = Jsoup.parse(html);
@@ -1745,8 +1743,8 @@ public class ThymeleafConfigTest {
         Group group = new Group();
 
         modelMap.addAttribute("vault", getVaultInfo1());
-        modelMap.addAttribute("roles", Arrays.asList(roleModel1, roleModel2));
-        modelMap.addAttribute("roleAssignments", Arrays.asList(roleAssignment1, roleAssignment2));
+        modelMap.addAttribute("roles", List.of(roleModel1, roleModel2));
+        modelMap.addAttribute("roleAssignments", List.of(roleAssignment1, roleAssignment2));
         modelMap.addAttribute("retentionPolicy", retentionPolicy);//String
         modelMap.addAttribute("group", group);
 
@@ -1756,7 +1754,7 @@ public class ThymeleafConfigTest {
         Retrieve deposit2Retrieve = getRetrieve("deposit1-ret-2");
 
         DepositInfo deposit2 = getDepositInfo("deposit-id-2");
-        modelMap.put("deposit", Arrays.asList(deposit1, deposit2));
+        modelMap.put("deposit", List.of(deposit1, deposit2));
 
         Map<String, Retrieve[]> depositNameToRetrievalsMap = new HashMap<>();
         depositNameToRetrievalsMap.put(deposit1.getName(), new Retrieve[]{deposit1Retrieve});
@@ -1765,12 +1763,12 @@ public class ThymeleafConfigTest {
 
         User user1 = getUser1();
         User user2 = getUser2();
-        modelMap.put("dataManages", Arrays.asList(user1, user2));
+        modelMap.put("dataManages", List.of(user1, user2));
 
         EventInfo eventInfo1 = getEventInfo1();
         EventInfo eventInfo2 = getEventInfo2();
 
-        modelMap.put("roleEvents", Arrays.asList(eventInfo1, eventInfo2));
+        modelMap.put("roleEvents", List.of(eventInfo1, eventInfo2));
 
         DepositReviewModel drm1 = new DepositReviewModel();
         drm1.setComment("drm1-comment");
@@ -1797,17 +1795,17 @@ public class ThymeleafConfigTest {
         vrm1.setComment("vrm1 - comment");
         vrm1.setVaultReviewId("vault-review-id-1");
         vrm1.setNewReviewDate(now.toString());
-        vrm1.setDepositReviewModels(Arrays.asList(drm1, drm2));
+        vrm1.setDepositReviewModels(List.of(drm1, drm2));
 
         VaultReviewModel vrm2 = new VaultReviewModel();
         vrm2.setActionedDate(now);
         vrm2.setComment("vrm2 - comment");
         vrm2.setVaultReviewId("vault-review-id-2");
         vrm2.setNewReviewDate(now.toString());
-        vrm2.setDepositReviewModels(Arrays.asList(drm1, drm2));
+        vrm2.setDepositReviewModels(List.of(drm1, drm2));
 
         VaultReviewHistoryModel vrhm = new VaultReviewHistoryModel();
-        vrhm.setVaultReviewModels(Arrays.asList(vrm1, vrm2));
+        vrhm.setVaultReviewModels(List.of(vrm1, vrm2));
 
         modelMap.put("vrhm", vrhm);
 
@@ -2040,7 +2038,7 @@ public class ThymeleafConfigTest {
         vault1.setConfirmed(true);
         vault1.setContact("vault1-contact");
         vault1.setCreationTime(now);
-        vault1.setDataCreators(Arrays.asList("Tom", "Dick", "Harry"));
+        vault1.setDataCreators(List.of("Tom", "Dick", "Harry"));
         vault1.setDescription("vault1-description");
         vault1.setEstimate(PendingVault.Estimate.UNDER_10TB);
         vault1.setGrantEndDate(now);
@@ -2062,7 +2060,7 @@ public class ThymeleafConfigTest {
         vault2.setConfirmed(true);
         vault2.setContact("vault2-contact");
         vault2.setCreationTime(now);
-        vault2.setDataCreators(Arrays.asList("Geddy", "Neil", "Alex"));
+        vault2.setDataCreators(List.of("Geddy", "Neil", "Alex"));
         vault2.setDescription("vault2-description");
         vault2.setEstimate(PendingVault.Estimate.OVER_10TB);
         vault2.setGrantEndDate(now);
@@ -2101,7 +2099,7 @@ public class ThymeleafConfigTest {
         user.setFirstname("user1-first");
         user.setLastname("user1-last");
         user.setPassword("XXXX");
-        user.setProperties(new HashMap<String, String>() {{
+        user.setProperties(new HashMap<>() {{
             put("prop-A", "value-1");
             put("prop-B", "value-2");
         }});
@@ -2114,7 +2112,7 @@ public class ThymeleafConfigTest {
         user.setFirstname("user2-first");
         user.setLastname("user2-last");
         user.setPassword("XXXX");
-        user.setProperties(new HashMap<String, String>() {{
+        user.setProperties(new HashMap<>() {{
             put("prop-C", "value-3");
             put("prop-D", "value-4");
         }});
@@ -2198,8 +2196,8 @@ public class ThymeleafConfigTest {
         vault.setContactPerson("contact-person-1");
 
         vault.setDatasetID("data-set-id-1");
-        vault.setDataCreators(Arrays.asList("creator1", "creator2"));
-        vault.setDepositors(Arrays.asList("Neil", "Geddy", "Alex"));
+        vault.setDataCreators(List.of("creator1", "creator2"));
+        vault.setDepositors(List.of("Neil", "Geddy", "Alex"));
         vault.setDescription("description-1");
         vault.setEstimate("estimate-1");
 
@@ -2213,7 +2211,7 @@ public class ThymeleafConfigTest {
         vault.setLoggedInAs("user-one");
 
         vault.setName("vault-name");
-        vault.setNominatedDataManagers(Arrays.asList("Tom", "Dick", "Harry"));
+        vault.setNominatedDataManagers(List.of("Tom", "Dick", "Harry"));
         vault.setNotes("notes-one");
 
         vault.setPaymentDetails("project-details");

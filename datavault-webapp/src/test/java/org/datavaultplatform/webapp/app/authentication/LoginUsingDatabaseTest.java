@@ -2,6 +2,7 @@ package org.datavaultplatform.webapp.app.authentication;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.times;
 
 import java.util.Collections;
@@ -81,7 +82,7 @@ public class LoginUsingDatabaseTest {
     assertEquals("dbpassword", argValidateUser.getValue().getPassword());
 
     assertEquals("dbuser", argValidateUser2.getValue().getUserid());
-    assertEquals(null, argValidateUser2.getValue().getPassword());
+    assertNull(argValidateUser2.getValue().getPassword());
 
     assertEquals(sessionId, argCreateClientEvent.getValue().getSessionId());
 

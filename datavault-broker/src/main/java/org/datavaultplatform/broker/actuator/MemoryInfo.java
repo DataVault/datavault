@@ -6,16 +6,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class MemoryInfo {
+public record MemoryInfo(Map<String, Object> memDetails) {
 
-  private final Map<String, Object> memDetails;
-
-  public MemoryInfo(Map<String, Object> memDetails) {
-    this.memDetails = memDetails;
-  }
-
+  @Override
   @JsonAnyGetter
-  public Map<String, Object> getMemDetails() {
+  public Map<String, Object> memDetails() {
     return this.memDetails;
   }
 }

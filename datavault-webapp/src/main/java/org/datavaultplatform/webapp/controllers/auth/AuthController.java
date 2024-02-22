@@ -23,7 +23,7 @@ public class AuthController {
     public AuthController(
         @Value("${webapp.welcome}") String welcome,
         @Value("${webapp.logout.url}") String logoutUrl) {
-        if (logoutUrl == null || logoutUrl.equals("")) {
+        if (logoutUrl == null || logoutUrl.isEmpty()) {
             logoutUrl = AuthController.DEFAULT_LOGOUT_URL;
         }
         this.welcome = welcome;

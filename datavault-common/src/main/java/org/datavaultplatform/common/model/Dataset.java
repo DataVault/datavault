@@ -2,10 +2,9 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.Objects;
 import jakarta.persistence.*;
 import org.hibernate.Hibernate;
-
-import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity

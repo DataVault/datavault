@@ -6,9 +6,7 @@ import static org.datavaultplatform.broker.test.TestUtils.TWO_WEEKS_AGO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
@@ -84,11 +82,11 @@ public class AuditDAOIT extends BaseReuseDatabaseTest {
 
     // The Audit should be ordered by Ascending Timestamp
     assertEquals(
-        Arrays.asList(
+        List.of(
             audit3.getID(),
             audit1.getID(),
             audit2.getID()),
-        items.stream().map(Audit::getID).collect(Collectors.toList()));
+        items.stream().map(Audit::getID).toList());
   }
 
 

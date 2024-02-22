@@ -23,7 +23,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Controller
@@ -68,7 +67,7 @@ public class AdminReviewsController {
 
         List<RoleAssignment> dataManagers = roleAssignmentsForVault.stream()
                 .filter(roleAssignment -> RoleUtils.isRoleOfName(roleAssignment, "Nominated Data Manager"))
-                .collect(Collectors.toList());
+                .toList();
         model.addAttribute("dataManagers", dataManagers);
 
         roleAssignmentsForVault.stream()

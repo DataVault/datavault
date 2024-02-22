@@ -54,7 +54,7 @@ public class DepositEvents {
 
     retrieve.setProperties(topLevelProps);
     retrieve.setTarIV(info.tarIV);
-    retrieve.setArchiveFileStores(Collections.singletonList(getArchiveStoreForRetrieve()));
+    retrieve.setArchiveFileStores(List.of(getArchiveStoreForRetrieve()));
     //CHUNKS
     retrieve.setChunkFilesDigest(info.chunkDigests);
     retrieve.setEncChunksDigest(info.chunkEncDigests);

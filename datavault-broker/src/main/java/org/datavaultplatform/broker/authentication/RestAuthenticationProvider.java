@@ -71,7 +71,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         logger.debug("preAuthenticatedPrincipal = " + name + ", trying to authenticate");
 
         // Note: name may be empty in some circumstances eg. a request to add a new user for a first time Shibboleth authenticated user.
-        if ((name != null) && (!name.equals(""))) {
+        if ((name != null) && (!name.isEmpty())) {
             User user = usersService.getUser(name);
             if (user == null) {
                 logger.debug("No matching User record found for Id " + name);

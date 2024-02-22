@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @ConditionalOnBean(RestService.class)
@@ -28,12 +27,12 @@ public class PermissionsService {
 
         List<RoleAssignment> dashboardRoleAssignments = restService.getRoleAssignmentsForUser(principal.getName()).stream()
                 .filter(this::isDashboardRoleAssignment)
-                .collect(Collectors.toList());
+                .toList();
 
         for (RoleAssignment roleAssignment : dashboardRoleAssignments) {
             List<PermissionModel> permissions = roleAssignment.getRole().getPermissions().stream()
                     .filter(p -> p.getPermission().isDashboardPermission())
-                    .collect(Collectors.toList());
+                    .toList();
             for (PermissionModel permission : permissions) {
                 if (isGlobalPermission(roleAssignment, permission)) {
                     permissionsModel.addGlobalPermission(permission);

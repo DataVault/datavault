@@ -14,11 +14,10 @@ public class ScopedPermissionMapBuilder {
                 .build();
 
         for (GrantedAuthority authority : authentication.getAuthorities()) {
-            if (!(authority instanceof ScopedGrantedAuthority)) {
+            if (!(authority instanceof ScopedGrantedAuthority scopedAuthority)) {
                 continue;
             }
 
-            ScopedGrantedAuthority scopedAuthority = (ScopedGrantedAuthority) authority;
             ScopedPermissionKey key = new ScopedPermissionKey(scopedAuthority.getId(), scopedAuthority.getType());
 
             permissionMap.putAll(key, scopedAuthority.getPermissions());

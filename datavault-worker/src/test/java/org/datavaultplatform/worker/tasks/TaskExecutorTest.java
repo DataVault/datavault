@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -75,7 +74,7 @@ public class TaskExecutorTest {
     executor.add(() -> "two");
     executor.add(() -> "three");
     executor.execute(results::add);
-    assertEquals(Arrays.asList("one", "two", "three"), results);
+    assertEquals(List.of("one", "two", "three"), results);
   }
 
   @Test

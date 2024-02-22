@@ -5,16 +5,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class CurrentTime {
+public record CurrentTime(Map<String, Object> timeDetails) {
 
-  private final Map<String, Object> timeDetails;
-
-  public CurrentTime(Map<String, Object> timeDetails) {
-    this.timeDetails = timeDetails;
-  }
-
+  @Override
   @JsonAnyGetter
-  public Map<String, Object> getTimeDetails() {
+  public Map<String, Object> timeDetails() {
     return this.timeDetails;
   }
 }

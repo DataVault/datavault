@@ -1,7 +1,7 @@
 package org.datavaultplatform.broker.authentication;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Date;
 import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.model.DataManager;
@@ -110,19 +110,19 @@ public class AuthTestData {
     vaultInfo2.setID("vaultInfo2");
 
     VAULTS_DATA = new VaultsData();
-    VAULTS_DATA.setData(Arrays.asList(vaultInfo1, vaultInfo2));
+    VAULTS_DATA.setData(List.of(vaultInfo1, vaultInfo2));
     VAULTS_DATA.setRecordsTotal(2);
     VAULTS_DATA.setRecordsFiltered(123);
 
     REVIEW_INFO_1 = new ReviewInfo();
     REVIEW_INFO_1.setVaultReviewId("2112");
-    REVIEW_INFO_1.setDepositIds(Arrays.asList("d1", "d2"));
-    REVIEW_INFO_1.setDepositReviewIds(Arrays.asList("dr1", "dr2"));
+    REVIEW_INFO_1.setDepositIds(List.of("d1", "d2"));
+    REVIEW_INFO_1.setDepositReviewIds(List.of("dr1", "dr2"));
 
     REVIEW_INFO_2 = new ReviewInfo();
     REVIEW_INFO_2.setVaultReviewId("2222");
-    REVIEW_INFO_2.setDepositIds(Arrays.asList("d3", "d4"));
-    REVIEW_INFO_2.setDepositReviewIds(Arrays.asList("dr3", "dr4"));
+    REVIEW_INFO_2.setDepositIds(List.of("d3", "d4"));
+    REVIEW_INFO_2.setDepositReviewIds(List.of("dr3", "dr4"));
 
     VAULT_REVIEW_1 = new VaultReview();
     VAULT_REVIEW_1.setId("vault-review-1");
@@ -159,7 +159,7 @@ public class AuthTestData {
     DEPOSIT_INFO_2.setID("deposit-info-2");
 
     DEPOSIT_DATA_1 = new DepositsData();
-    DEPOSIT_DATA_1.setData(Arrays.asList(DEPOSIT_INFO_1, DEPOSIT_INFO_2));
+    DEPOSIT_DATA_1.setData(List.of(DEPOSIT_INFO_1, DEPOSIT_INFO_2));
     DEPOSIT_DATA_1.setRecordsTotal(1234);
     DEPOSIT_DATA_1.setRecordsFiltered(123);
 

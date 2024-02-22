@@ -48,7 +48,7 @@ public class ExternalMetadataService {
     this.datasetDAO = datasetDAO;
     this.usersService = usersService;
 
-    if (metadataURL.equals("")) {
+    if (metadataURL.isEmpty()) {
       this.metadataProvider = new MockProvider();
     } else {
       PureFlatFileProvider prov = new PureFlatFileProvider();

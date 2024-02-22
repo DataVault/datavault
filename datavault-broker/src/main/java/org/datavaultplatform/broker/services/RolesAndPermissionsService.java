@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -133,7 +133,7 @@ public class RolesAndPermissionsService {
     }
 
     public List<RoleModel> getViewableRoles() {
-        return Collections.singletonList(roleDao.getDataOwner());
+        return List.of(roleDao.getDataOwner());
     }
 
     public List<RoleModel> getSchoolRoles() {
@@ -200,7 +200,7 @@ public class RolesAndPermissionsService {
         List<RoleAssignment> assignments = roleAssignmentDao.findByPendingVaultId(pendingVaultId);
         List<RoleAssignment> ndmAssignments = assignments.stream()
                 .filter(RoleUtils::isNominatedDataManager)
-                .collect(Collectors.toList());
+                .toList();
         List<User> retVal = new ArrayList<>();
         if(ndmAssignments == null){
             return null;
@@ -221,7 +221,7 @@ public class RolesAndPermissionsService {
         List<RoleAssignment> assignments = roleAssignmentDao.findByPendingVaultId(pendingVaultId);
         List<RoleAssignment> ndmAssignments = assignments.stream()
                 .filter(RoleUtils::isDepositor)
-                .collect(Collectors.toList());
+                .toList();
         List<User> retVal = new ArrayList<>();
         if(ndmAssignments == null){
             return null;

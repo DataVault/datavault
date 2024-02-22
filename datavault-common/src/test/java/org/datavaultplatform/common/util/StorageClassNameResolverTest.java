@@ -1,5 +1,7 @@
 package org.datavaultplatform.common.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.StorageConstants;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemJSch;
@@ -10,11 +12,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.junit.Assert.assertEquals;
-
 public class StorageClassNameResolverTest {
 
-  abstract class BaseTest {
+  abstract static class BaseTest {
 
     @ParameterizedTest
     @NullSource
@@ -34,7 +34,7 @@ public class StorageClassNameResolverTest {
     abstract Class<? extends SFTPFileSystemDriver> getExpected();
   }
 
-  abstract class BaseExpectJschTest extends BaseTest {
+  abstract static class BaseExpectJschTest extends BaseTest {
 
     @Override
     Class<? extends SFTPFileSystemDriver> getExpected() {
@@ -42,7 +42,7 @@ public class StorageClassNameResolverTest {
     }
   }
 
-  abstract class BaseExpectSSHDTest extends BaseTest {
+  abstract static class BaseExpectSSHDTest extends BaseTest {
 
     @Override
     Class<? extends SFTPFileSystemDriver> getExpected() {

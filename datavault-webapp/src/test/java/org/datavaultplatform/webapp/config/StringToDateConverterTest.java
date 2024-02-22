@@ -10,7 +10,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class StringToDateConverterTest {
 
-    StringToDateConverter sut = new StringToDateConverter();
+    final StringToDateConverter sut = new StringToDateConverter();
 
     @Test
     void testNull(){

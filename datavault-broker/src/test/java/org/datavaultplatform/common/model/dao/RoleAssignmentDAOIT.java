@@ -137,12 +137,12 @@ public class RoleAssignmentDAOIT extends BaseReuseDatabaseTest {
       assertTrue(dao.findByPendingVaultId("pv0").isEmpty());
 
       assertEquals(
-          Arrays.asList(ra2.getId(),ra3.getId()),
-          dao.findByPendingVaultId("pv1").stream().map(RoleAssignment::getId).collect(Collectors.toList()));
+        List.of(ra2.getId(),ra3.getId()),
+        dao.findByPendingVaultId("pv1").stream().map(RoleAssignment::getId).toList());
 
       assertEquals(
-        Arrays.asList(ra4.getId()),
-        dao.findByPendingVaultId("pv2").stream().map(RoleAssignment::getId).collect(Collectors.toList()));
+        List.of(ra4.getId()),
+        dao.findByPendingVaultId("pv2").stream().map(RoleAssignment::getId).toList());
   }
 
   @Test
@@ -169,12 +169,12 @@ public class RoleAssignmentDAOIT extends BaseReuseDatabaseTest {
     assertEquals(4,dao.count());
 
     assertEquals(
-        Arrays.asList(ra1.getId(), ra4.getId()),
-        dao.findByRoleId(role1.getId()).stream().map(RoleAssignment::getId).collect(Collectors.toList()));
+        List.of(ra1.getId(), ra4.getId()),
+        dao.findByRoleId(role1.getId()).stream().map(RoleAssignment::getId).toList());
 
     assertEquals(
-        Arrays.asList(ra2.getId(), ra3.getId()),
-        dao.findByRoleId(role2.getId()).stream().map(RoleAssignment::getId).collect(Collectors.toList()));
+        List.of(ra2.getId(), ra3.getId()),
+        dao.findByRoleId(role2.getId()).stream().map(RoleAssignment::getId).toList());
   }
 
   @Test
@@ -201,12 +201,12 @@ public class RoleAssignmentDAOIT extends BaseReuseDatabaseTest {
     assertEquals(4,dao.count());
 
     assertEquals(
-        Arrays.asList(ra1.getId(), ra4.getId()),
-        dao.findBySchoolId("school-one").stream().map(RoleAssignment::getId).collect(Collectors.toList()));
+        List.of(ra1.getId(), ra4.getId()),
+        dao.findBySchoolId("school-one").stream().map(RoleAssignment::getId).toList());
 
     assertEquals(
-        Arrays.asList(ra2.getId(), ra3.getId()),
-        dao.findBySchoolId("school-two").stream().map(RoleAssignment::getId).collect(Collectors.toList()));
+        List.of(ra2.getId(), ra3.getId()),
+        dao.findBySchoolId("school-two").stream().map(RoleAssignment::getId).toList());
   }
 
   @Test
@@ -230,20 +230,20 @@ public class RoleAssignmentDAOIT extends BaseReuseDatabaseTest {
     assertEquals(5, dao.count());
 
     assertEquals(
-        Arrays.asList(ra1.getId(), ra5.getId()),
-        dao.findByUserId("user-id-1").stream().map(RoleAssignment::getId).collect(Collectors.toList()));
+        List.of(ra1.getId(), ra5.getId()),
+        dao.findByUserId("user-id-1").stream().map(RoleAssignment::getId).toList());
 
     assertEquals(
-        Arrays.asList(ra2.getId()),
-        dao.findByUserId("user-id-2").stream().map(RoleAssignment::getId).collect(Collectors.toList()));
+        List.of(ra2.getId()),
+        dao.findByUserId("user-id-2").stream().map(RoleAssignment::getId).toList());
 
     assertEquals(
-        Arrays.asList(ra3.getId()),
-        dao.findByUserId("user-id-3").stream().map(RoleAssignment::getId).collect(Collectors.toList()));
+        List.of(ra3.getId()),
+        dao.findByUserId("user-id-3").stream().map(RoleAssignment::getId).toList());
 
     assertEquals(
-        Arrays.asList(ra4.getId()),
-        dao.findByUserId("user-id-4").stream().map(RoleAssignment::getId).collect(Collectors.toList()));
+        List.of(ra4.getId()),
+        dao.findByUserId("user-id-4").stream().map(RoleAssignment::getId).toList());
   }
 
   @Test
@@ -267,20 +267,20 @@ public class RoleAssignmentDAOIT extends BaseReuseDatabaseTest {
     assertEquals(5, dao.count());
 
     assertEquals(
-        Arrays.asList(ra1.getId()),
-        dao.findByVaultId("vault-id-one").stream().map(RoleAssignment::getId).collect(Collectors.toList()));
+        List.of(ra1.getId()),
+        dao.findByVaultId("vault-id-one").stream().map(RoleAssignment::getId).toList());
 
     assertEquals(
-        Arrays.asList(ra2.getId()),
-        dao.findByVaultId("vault-id-two").stream().map(RoleAssignment::getId).collect(Collectors.toList()));
+        List.of(ra2.getId()),
+        dao.findByVaultId("vault-id-two").stream().map(RoleAssignment::getId).toList());
 
     assertEquals(
-        Arrays.asList(ra3.getId()),
-        dao.findByVaultId("vault-id-three").stream().map(RoleAssignment::getId).collect(Collectors.toList()));
+        List.of(ra3.getId()),
+        dao.findByVaultId("vault-id-three").stream().map(RoleAssignment::getId).toList());
 
     assertEquals(
-        Arrays.asList(ra4.getId(), ra5.getId()),
-        dao.findByVaultId("vault-id-four").stream().map(RoleAssignment::getId).collect(Collectors.toList()));
+        List.of(ra4.getId(), ra5.getId()),
+        dao.findByVaultId("vault-id-four").stream().map(RoleAssignment::getId).toList());
   }
 
   @Test
@@ -381,11 +381,11 @@ public class RoleAssignmentDAOIT extends BaseReuseDatabaseTest {
     dao.save(ra4);
     assertEquals(4, dao.count());
 
-    List<Permission> permissionsToCheck = Collections.unmodifiableList(Arrays.asList(
+    List<Permission> permissionsToCheck = List.of(
         Permission.CAN_MANAGE_VAULTS,
         Permission.CAN_MANAGE_DEPOSITS,
         Permission.CAN_VIEW_EVENTS,
-        Permission.CAN_VIEW_QUEUES));
+        Permission.CAN_VIEW_QUEUES);
 
       //check permissions from role1
       checkUserHasPermission(permissionsToCheck, "user-id-1", Permission.CAN_MANAGE_VAULTS, Permission.CAN_MANAGE_DEPOSITS);
@@ -403,7 +403,7 @@ public class RoleAssignmentDAOIT extends BaseReuseDatabaseTest {
     RoleAssignment ra3 = getRoleAssignment3();
     RoleAssignment ra4 = getRoleAssignment4();
 
-    dao.saveAll(Arrays.asList(ra1,ra3));
+    dao.saveAll(List.of(ra1,ra3));
 
     assertTrue(dao.roleAssignmentExists(ra1));
     assertFalse(dao.roleAssignmentExists(ra2));
@@ -415,9 +415,7 @@ public class RoleAssignmentDAOIT extends BaseReuseDatabaseTest {
 
     //check we don't have permissions we're NOT meant to have
     List<Permission> doesNotHavePermissions = new ArrayList<>(permissionsToCheck);
-    Arrays.stream(expectedUserPermissions).forEach( expectedPermission ->
-        doesNotHavePermissions.remove(expectedPermission)
-    );
+    Arrays.stream(expectedUserPermissions).forEach(doesNotHavePermissions::remove);
     doesNotHavePermissions.forEach( doesNotHavePermission ->
         assertFalse(dao.hasPermission(userId, doesNotHavePermission))
     );
@@ -530,12 +528,12 @@ public class RoleAssignmentDAOIT extends BaseReuseDatabaseTest {
     PermissionModel pm2 = getPm2();
     PermissionModel pm3 = getPm3();
     PermissionModel pm4 = getPm4();
-    permissionDAO.saveAll(Arrays.asList(pm1, pm2, pm3, pm4));
+    permissionDAO.saveAll(List.of(pm1, pm2, pm3, pm4));
 
-    role1.setPermissions(Arrays.asList(pm1, pm4));
+    role1.setPermissions(List.of(pm1, pm4));
     roleDAO.update(role1);
 
-    role2.setPermissions(Arrays.asList(pm2, pm3));
+    role2.setPermissions(List.of(pm2, pm3));
     roleDAO.update(role2);
   }
 

@@ -2,10 +2,9 @@ package org.datavaultplatform.common.response;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
-
+import lombok.Data;
 import java.util.List;
 
 /*

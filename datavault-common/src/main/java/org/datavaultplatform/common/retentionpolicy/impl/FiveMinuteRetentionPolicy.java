@@ -1,8 +1,8 @@
 package org.datavaultplatform.common.retentionpolicy.impl;
 
 import org.datavaultplatform.common.model.Vault;
-import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
+import org.datavaultplatform.common.retentionpolicy.RetentionPolicy;
 
 import java.util.Calendar;
 import java.util.Date;

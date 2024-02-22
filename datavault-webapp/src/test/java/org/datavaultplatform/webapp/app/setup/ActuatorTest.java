@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
@@ -45,8 +45,8 @@ import org.springframework.test.web.servlet.ResultActions;
 @TestPropertySource(properties = "management.endpoints.web.exposure.include=*")
 public class ActuatorTest {
 
-  private static final List<String> PUBLIC_ENDPOINTS = Arrays.asList("info","health","customtime", "metrics", "memoryinfo");
-  private static final List<String> PRIVATE_ENDPOINTS = Arrays.asList("env","loggers","mappings","beans");
+  private static final List<String> PUBLIC_ENDPOINTS = List.of("info","health","customtime", "metrics", "memoryinfo");
+  private static final List<String> PRIVATE_ENDPOINTS = List.of("env","loggers","mappings","beans");
 
   @Autowired
   ObjectMapper mapper;
@@ -89,7 +89,7 @@ public class ActuatorTest {
 
     List<String> elements = Arrays.stream(classpath.split(sep))
         .filter(elem -> elem.endsWith("classes"))
-        .collect(Collectors.toList());
+        .toList();
 
     elements.forEach(el -> log.info("path element [{}]", el));
 

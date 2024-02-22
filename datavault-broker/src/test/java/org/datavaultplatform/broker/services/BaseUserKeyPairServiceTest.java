@@ -23,11 +23,11 @@ public abstract class BaseUserKeyPairServiceTest {
   public static final String TEST_PASSPHRASE = "tenet";
   
   @SneakyThrows
-  final static void execInContainer(GenericContainer<?> container, String label, String command) {
+  static void execInContainer(GenericContainer<?> container, String label, String command) {
     execInContainer(container, label, command.split(" "));
   }
 
-  final static void execInContainer(GenericContainer<?> container, String label, String... commands) {
+  static void execInContainer(GenericContainer<?> container, String label, String... commands) {
     try {
       Container.ExecResult result = container.execInContainer(commands);
       if (result.getExitCode() != 0) {
@@ -45,13 +45,13 @@ public abstract class BaseUserKeyPairServiceTest {
     }
   }
 
-  final static void copyScriptToContainer(GenericContainer<?> container, String contents,
+  static void copyScriptToContainer(GenericContainer<?> container, String contents,
       String path) {
     container.copyFileToContainer(Transferable.of(contents), path);
     execInContainer(container, "chmod for " + path, "chmod +x " + path);
   }
 
-  final static String readFileFromContainer(GenericContainer<?> container, String path) {
+  static String readFileFromContainer(GenericContainer<?> container, String path) {
     return container.copyFileFromContainer(path, is -> StreamUtils.copyToString(is, UTF_8));
   }
 

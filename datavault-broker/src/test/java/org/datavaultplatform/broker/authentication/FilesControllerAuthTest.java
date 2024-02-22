@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
-import java.util.Arrays;
+import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
 import org.datavaultplatform.broker.controllers.FilesController;
 import org.junit.jupiter.api.AfterEach;
@@ -57,11 +57,11 @@ public class FilesControllerAuthTest extends BaseControllerAuthTest {
 
     when(controller.getFilesListing(argUserId.capture(), argRequest.capture(),
         argStorageId.capture())).thenReturn(
-        Arrays.asList(AuthTestData.FILE_INFO_1, AuthTestData.FILE_INFO_2));
+        List.of(AuthTestData.FILE_INFO_1, AuthTestData.FILE_INFO_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/files/{storageid}", "storage-id-xxx"),
-        Arrays.asList(AuthTestData.FILE_INFO_1, AuthTestData.FILE_INFO_2));
+        List.of(AuthTestData.FILE_INFO_1, AuthTestData.FILE_INFO_2));
 
     verify(controller).getFilesListing(argUserId.getValue(), argRequest.getValue(),
         argStorageId.getValue());
@@ -89,11 +89,11 @@ public class FilesControllerAuthTest extends BaseControllerAuthTest {
   void testGetStorageListing() {
 
     when(controller.getStorageListing(argUserId.capture(), argRequest.capture())).thenReturn(
-        Arrays.asList(FILE_INFO_1, FILE_INFO_2));
+        List.of(FILE_INFO_1, FILE_INFO_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/files"),
-        Arrays.asList(FILE_INFO_1, FILE_INFO_2));
+        List.of(FILE_INFO_1, FILE_INFO_2));
 
     verify(controller).getStorageListing(argUserId.getValue(), argRequest.getValue());
     assertEquals(USER_ID_1, argUserId.getValue());

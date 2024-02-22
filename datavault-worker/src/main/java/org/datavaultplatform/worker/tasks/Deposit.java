@@ -132,8 +132,8 @@ public class Deposit extends Task {
         userStores = this.setupUserFileStores(resolver);
         this.setupArchiveFileStores(resolver);
         DepositTransferHelper uploadHelper = this.initialTransferStep(context,lastEventClass);
-        Path bagDataPath = uploadHelper.getBagDataPath();
-        File bagDir = uploadHelper.getBagDir();
+        Path bagDataPath = uploadHelper.bagDataPath();
+        File bagDir = uploadHelper.bagDir();
 
         try {
             if (lastEventClass == null || RESTART_FROM_TRANSFER.contains(lastEventClass)) {
@@ -716,11 +716,11 @@ public class Deposit extends Task {
         }
 
       executor.execute( result -> {
-            int chunkNumber = result.getChunkNumber();
+            int chunkNumber = result.chunkNumber();
             int i = chunkNumber - 1;
-            chunksHash[i] = result.getChunkHash();
+            chunksHash[i] = result.chunkHash();
             chunksDigest.put(chunkNumber, chunksHash[i]);
-            File chunk = result.getChunk();
+            File chunk = result.chunk();
             long chunkSize = chunk.length();
             logger.info("Chunk file " + chunkNumber + ": " + chunkSize + " bytes");
             logger.info("Chunk file location: " + chunk.getAbsolutePath());
@@ -904,11 +904,11 @@ public class Deposit extends Task {
             Path bagPath = context.getTempDir().resolve(bagID);
             logger.debug("The is the bagPath " + bagPath);
             retVal = new DepositTransferHelper(bagPath.resolve("data"), this.createDir(bagPath));
-            logger.debug("The is the bagDataPath " + retVal.getBagDataPath().toString());
+            logger.debug("The is the bagDataPath " + retVal.bagDataPath().toString());
 
-            this.createDir(retVal.getBagDataPath());
+            this.createDir(retVal.bagDataPath());
 
-            this.copySelectedUserDataToBagDir(retVal.getBagDataPath());
+            this.copySelectedUserDataToBagDir(retVal.bagDataPath());
         } else {
             logger.debug("Last event is: " + lastEventClass + " skipping initial File copy");
             Path bagPath = context.getTempDir().resolve(bagID);
@@ -918,7 +918,7 @@ public class Deposit extends Task {
 
             // depending on how far the previous attempt got this dir
             // may have been deleted
-            this.createDir(retVal.getBagDataPath());
+            this.createDir(retVal.bagDataPath());
         }
 
         return retVal;

@@ -1,14 +1,30 @@
 package org.datavaultplatform.common.event;
 
+import java.util.Date;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedSubgraph;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+import jakarta.persistence.ManyToOne;
+import org.hibernate.annotations.GenericGenerator;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.response.EventInfo;
-import org.hibernate.annotations.GenericGenerator;
-
-import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity

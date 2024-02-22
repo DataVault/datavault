@@ -20,12 +20,12 @@ public class Utils {
   public static void handleExecutionException(ExecutionException ee, String label) throws Exception {
     Throwable cause = ee.getCause();
     if (cause instanceof Exception ex) {
-        log.error(label + " " + ex.getMessage());
+      log.error(label + " " + ex.getMessage());
       throw ex;
     }
     log.error("unexpected non-Exception", cause);
     if (cause instanceof Error error) {
-        log.error(label + " " + error.getMessage());
+      log.error(label + " " + error.getMessage());
       throw error;
     }
   }

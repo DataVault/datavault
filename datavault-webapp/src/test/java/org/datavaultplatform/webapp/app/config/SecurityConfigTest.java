@@ -9,7 +9,6 @@ import java.util.Map;
 import lombok.SneakyThrows;
 import org.datavaultplatform.webapp.test.ProfileStandalone;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.converter.DefaultArgumentConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;

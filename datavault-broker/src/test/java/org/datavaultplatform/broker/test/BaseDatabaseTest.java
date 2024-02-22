@@ -1,21 +1,25 @@
 package org.datavaultplatform.broker.test;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.datavaultplatform.common.docker.DockerImage;
-import org.datavaultplatform.common.model.*;
+import org.datavaultplatform.common.model.Permission;
+import org.datavaultplatform.common.model.PermissionModel;
+import org.datavaultplatform.common.model.RoleAssignment;
+import org.datavaultplatform.common.model.RoleModel;
+import org.datavaultplatform.common.model.RoleType;
+import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.dao.PermissionDAO;
 import org.datavaultplatform.common.model.dao.RoleAssignmentDAO;
 import org.datavaultplatform.common.model.dao.RoleDAO;
 import org.datavaultplatform.common.model.dao.UserDAO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @DirtiesContext
 @Testcontainers(disabledWithoutDocker = true)
@@ -71,7 +75,7 @@ public abstract class BaseDatabaseTest {
         pm.setLabel(p.getRoleName());
         permissionDAO.save(pm);
         return pm;
-      }).collect(Collectors.toList());
+      }).toList();
 
       // create role with associated permissions
       RoleModel role = new RoleModel();

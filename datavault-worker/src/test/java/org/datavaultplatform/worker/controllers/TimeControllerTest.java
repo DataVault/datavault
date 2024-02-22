@@ -35,7 +35,7 @@ public class TimeControllerTest {
     @Autowired
     MockMvc mvc;
 
-    private String EXPECTED_TIME_INFO = """
+    private final String EXPECTED_TIME_INFO = """
             {"time":"blah"}
             """;
     @ParameterizedTest

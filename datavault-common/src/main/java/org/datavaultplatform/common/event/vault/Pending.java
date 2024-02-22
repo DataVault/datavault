@@ -1,7 +1,8 @@
 package org.datavaultplatform.common.event.vault;
 
-import jakarta.persistence.Entity;
 import org.datavaultplatform.common.event.Event;
+
+import jakarta.persistence.Entity;
 
 @Entity
 public class Pending extends Event {

@@ -1,9 +1,8 @@
 package org.datavaultplatform.webapp.config;
 
 import java.time.Duration;
-import java.util.Collections;
+import java.util.List;
 import javax.net.ssl.SSLContext;
-
 import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -74,13 +73,12 @@ public class RestTemplateConfig {
     RestTemplate restTemplate = tBuilder
             .requestFactory(() -> factory)
             //.setBufferRequestBody(true)
-            .interceptors(Collections.singletonList(new LoggingInterceptor()))
+            .interceptors(List.of(new LoggingInterceptor()))
             .errorHandler(new ApiErrorHandler())
             .build();
 
     return restTemplate;
   }
-
 
   @PostConstruct
   void init() {

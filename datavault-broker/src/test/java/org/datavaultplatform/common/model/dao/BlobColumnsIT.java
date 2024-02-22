@@ -60,7 +60,7 @@ public class BlobColumnsIT extends BaseDatabaseTest {
   }
 
   private byte[] getRandomBytes(int length){
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     for(int i=0;i<length;i++){
       sb.append(getRandomLetter());
     }

@@ -7,11 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.RoleAssignment;
 import org.datavaultplatform.common.model.RoleType;
-import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 
 @Slf4j
 public abstract class DaoUtils {

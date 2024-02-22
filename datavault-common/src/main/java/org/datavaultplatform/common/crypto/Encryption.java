@@ -325,9 +325,9 @@ public class Encryption {
                 .token(getVaultToken());
 
         logger.info("Vault PEM path: '"+getVaultSslPEMPath()+"'");
-        logger.info("context.getVaultSslPEMPath().trim().equals(\"\"): "+getVaultSslPEMPath().equals(""));
+        logger.info("context.getVaultSslPEMPath().trim().equals(\"\"): "+getVaultSslPEMPath().isEmpty());
 
-        if(getVaultSslPEMPath().trim().equals("")) {
+        if(getVaultSslPEMPath().trim().isEmpty()) {
             logger.debug("Won't use SSL Certificate.");
         } else {
             logger.debug("Use PEM file: '"+getVaultSslPEMPath().trim()+"'");
@@ -404,14 +404,10 @@ public class Encryption {
             logger.info("Decrypting [{}] using iv-byte[] with digest [{}]/bas64[{}]", file, ivDigest, base64iv);
         }
 
-        final Cipher cipher;
-        switch (aesMode) {
-            case CBC:
-                cipher = Encryption.initCBCCipher(getVaultDataEncryptionKeyName(), encryptMode, iv); break;
-            case GCM:
-            default:
-                cipher = Encryption.initGCMCipher(getVaultDataEncryptionKeyName(), encryptMode, iv); break;
-        }
+        final Cipher cipher = switch (aesMode) {
+            case CBC -> Encryption.initCBCCipher(getVaultDataEncryptionKeyName(), encryptMode, iv);
+            default  -> Encryption.initGCMCipher(getVaultDataEncryptionKeyName(), encryptMode, iv);
+        };
 
         File tempFile = new File(file.getAbsoluteFile() + ".temp");
         String action = encryptMode == Cipher.ENCRYPT_MODE ? "encrypting" : "decrypting";

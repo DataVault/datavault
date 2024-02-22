@@ -29,7 +29,7 @@ public class MetadataServiceTest {
     assertEquals(6, result.size());
 
     Map<String,FileFixity> ffByName = result.stream()
-        .collect(Collectors.toMap(ff -> ff.getFile(), ff -> ff));
+        .collect(Collectors.toMap(FileFixity::getFile, ff -> ff));
 
     FileFixity ff1 = ffByName.get("item1.pdf");
     assertEquals("item1.pdf", ff1.getFile());

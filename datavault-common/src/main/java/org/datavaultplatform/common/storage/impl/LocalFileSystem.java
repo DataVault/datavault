@@ -167,7 +167,7 @@ public class LocalFileSystem extends Device implements UserStore, ArchiveStore {
         Path absolute;
         
         try {
-            if (filePath.equals("")) {
+            if (filePath.isEmpty()) {
                 absolute = base;
             } else {
                 // A leading '/' would cause the path to be treated as absolute

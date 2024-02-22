@@ -40,7 +40,7 @@ public class AdminDashboardPermissionsModel {
     }
 
     public boolean canSeeAdminDashboard() {
-        return scopedPermissions.size() > 0;
+        return !scopedPermissions.isEmpty();
     }
 
     public boolean hasPermission(Permission permissionToCheckFor, String resourceId) {
@@ -49,7 +49,7 @@ public class AdminDashboardPermissionsModel {
     }
 
     public boolean hasPermission(Permission permissionToCheckFor) {
-        return getScope(permissionToCheckFor).size() > 0;
+        return !getScope(permissionToCheckFor).isEmpty();
     }
 
     public Set<String> getScope(Permission permission) {

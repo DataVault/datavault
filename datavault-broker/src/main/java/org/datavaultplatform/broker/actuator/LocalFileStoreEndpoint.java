@@ -1,7 +1,7 @@
 package org.datavaultplatform.broker.actuator;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -28,7 +28,7 @@ public class LocalFileStoreEndpoint {
     return archiveStoreService.getArchiveStores().stream()
         .filter(ArchiveStore::isLocalFileSystem)
         .map(this::getLocalFileStoreInfo)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private LocalFileStoreInfo getLocalFileStoreInfo(ArchiveStore store) {

@@ -63,7 +63,7 @@ public class AdminBillingController {
         model.addAttribute("vaults", filteredBillingData.getData());
         model.addAttribute("query", query);
 
-        boolean isFiltered = !query.equals("");
+        boolean isFiltered = !query.isEmpty();
         model.addAttribute("recordsInfo",
                 constructTableRecordsInfo(offset, filteredBillingData.getRecordsTotal(),
                         filteredRecordsTotal, filteredBillingData.getData().size(), isFiltered));

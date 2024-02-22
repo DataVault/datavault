@@ -13,7 +13,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpServletRequest;
@@ -143,10 +142,6 @@ public abstract class BaseControllerAuthTest {
 
   }
 
-  protected Set<Permission> getPermissions(Permission... permissions) {
-    return new HashSet<>(Arrays.asList(permissions));
-  }
-
   @SneakyThrows
   protected void checkSuccessWhenAuthenticated(MockHttpServletRequestBuilder builder,
       Object expectedSuccessResponse, HttpStatus expectedSuccessStatus, boolean isAdminUser,
@@ -157,7 +152,7 @@ public abstract class BaseControllerAuthTest {
     when(mAdminService.isAdminUser(mLoginUser)).thenReturn(isAdminUser);
     when(mLoginUser.getID()).thenReturn(USER_ID_1);
     when(mRolesAndPermissionService.getUserPermissions(USER_ID_1)).thenReturn(
-        getPermissions(permissions));
+        Set.of(permissions));
 
     ResultActions resultActions = mvc.perform(setupAuthentication(builder))
         .andDo(print())

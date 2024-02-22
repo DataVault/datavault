@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
-//@CrossOrigin
 @Api(name="Index", description = "Show JSONDOC page", visibility = ApiVisibility.PRIVATE)
 public class IndexController {
 

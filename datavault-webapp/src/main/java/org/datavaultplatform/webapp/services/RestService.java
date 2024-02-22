@@ -21,7 +21,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -739,11 +738,11 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
     }
 
     public List<PermissionModel> getSchoolPermissions() {
-        return Arrays.asList(get(brokerURL + "/permissions/school", PermissionModel[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/school", PermissionModel[].class).getBody());
     }
 
     public List<PermissionModel> getVaultPermissions() {
-        return Arrays.asList(get(brokerURL + "/permissions/vault", PermissionModel[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/vault", PermissionModel[].class).getBody());
     }
 
     public Optional<RoleModel> getRole(long id) {
@@ -755,19 +754,19 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
     }
 
     public List<RoleModel> getEditableRoles() {
-        return Arrays.asList(get(brokerURL + "/permissions/roles", RoleModel[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/roles", RoleModel[].class).getBody());
     }
 
     public List<RoleModel> getViewableRoles() {
-        return Arrays.asList(get(brokerURL + "/permissions/roles/readOnly", RoleModel[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/roles/readOnly", RoleModel[].class).getBody());
     }
 
     public List<RoleModel> getSchoolRoles() {
-        return Arrays.asList(get(brokerURL + "/permissions/roles/school", RoleModel[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/roles/school", RoleModel[].class).getBody());
     }
 
     public List<RoleModel> getVaultRoles() {
-        return Arrays.asList(get(brokerURL + "/permissions/roles/vault", RoleModel[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/roles/vault", RoleModel[].class).getBody());
     }
 
     public Optional<RoleAssignment> getRoleAssignment(Long id) {
@@ -775,19 +774,19 @@ public class RestService implements NotifyLogoutService, NotifyLoginService, Eva
     }
 
     public List<RoleAssignment> getRoleAssignmentsForSchool(String schoolId) {
-        return Arrays.asList(get(brokerURL + "/permissions/roleAssignments/school/" + schoolId, RoleAssignment[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/roleAssignments/school/" + schoolId, RoleAssignment[].class).getBody());
     }
 
     public List<RoleAssignment> getRoleAssignmentsForVault(String vaultId) {
-        return Arrays.asList(get(brokerURL + "/permissions/roleAssignments/vault/" + vaultId, RoleAssignment[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/roleAssignments/vault/" + vaultId, RoleAssignment[].class).getBody());
     }
 
     public List<RoleAssignment> getRoleAssignmentsForUser(String userId) {
-        return Arrays.asList(get(brokerURL + "/permissions/roleAssignments/user/" + userId, RoleAssignment[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/roleAssignments/user/" + userId, RoleAssignment[].class).getBody());
     }
 
     public List<RoleAssignment> getRoleAssignmentsForRole(long roleId) {
-        return Arrays.asList(get(brokerURL + "/permissions/roleAssignments/role/" + roleId, RoleAssignment[].class).getBody());
+        return List.of(get(brokerURL + "/permissions/roleAssignments/role/" + roleId, RoleAssignment[].class).getBody());
     }
 
     public RoleModel updateRole(RoleModel role) {

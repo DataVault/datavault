@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
@@ -14,7 +14,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -104,7 +104,7 @@ public class LoginUsingShibTest {
 
         when(mRestService.userExists(argValidateUser.capture())).thenReturn(true);
 
-        when(mGrantedAuthorityService.getGrantedAuthoritiesForUser(argName.capture(), argAuthentication.capture())).thenReturn(Arrays.asList(mGA1, mGA2));
+        when(mGrantedAuthorityService.getGrantedAuthoritiesForUser(argName.capture(), argAuthentication.capture())).thenReturn(List.of(mGA1, mGA2));
 
         MockHttpSession session = new MockHttpSession();
         String sessionId = session.changeSessionId();
@@ -124,7 +124,7 @@ public class LoginUsingShibTest {
         assertEquals("N/A", argAuthentication.getValue().getCredentials());
         Mockito.verify(mGrantedAuthorityService).getGrantedAuthoritiesForUser(argName.getValue(), argAuthentication.getValue());
 
-        checkLoggedInUser(result, sessionId, new HashSet<>(Arrays.asList(ShibUtils.ROLE_USER, mGA1, mGA2)));
+        checkLoggedInUser(result, sessionId, Set.of(ShibUtils.ROLE_USER, mGA1, mGA2));
 
         Mockito.verify(mAuthListener).onApplicationEvent(argAuthSuccessEvent.getValue());
         PreAuthenticatedAuthenticationToken auth = (PreAuthenticatedAuthenticationToken)argAuthSuccessEvent.getValue().getAuthentication();
@@ -183,14 +183,14 @@ public class LoginUsingShibTest {
         SecurityContext sc = (SecurityContext) result.getRequest().getSession().getAttribute(ShibUtils.SPRING_SECURITY_CONTEXT);
         Authentication auth = sc.getAuthentication();
 
-        assertTrue(auth instanceof PreAuthenticatedAuthenticationToken);
+        assertInstanceOf(PreAuthenticatedAuthenticationToken.class, auth);
 
         PreAuthenticatedAuthenticationToken token = (PreAuthenticatedAuthenticationToken)auth;
         assertEquals("shib-user-1", token.getName());
         assertEquals("shib-user-1", token.getPrincipal());
         assertEquals("N/A", token.getCredentials());
 
-        assertTrue(token.getDetails() instanceof ShibWebAuthenticationDetails);
+        assertInstanceOf(ShibWebAuthenticationDetails.class, token.getDetails());
         ShibWebAuthenticationDetails details = (ShibWebAuthenticationDetails)token.getDetails();
         assertEquals(expectedSessionId, details.getSessionId());
         assertEquals("james.bond@test.com", details.getEmail());

@@ -1,7 +1,6 @@
 package org.datavaultplatform.webapp.app.setup;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.datavaultplatform.webapp.test.TestUtils.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -41,20 +40,20 @@ public class ProfileDatabaseTest {
 
   @Test
   void testContextIsCorrect() throws InterruptedException {
-    assertThat(authProvider).isInstanceOf(DatabaseAuthenticationProvider.class);
-    assertTrue(latch.await(3, TimeUnit.SECONDS));
+      assertThat(authProvider).isInstanceOf(DatabaseAuthenticationProvider.class);
+      assertTrue(latch.await(3, TimeUnit.SECONDS));
   }
 
   @Test
   void testServiceBeans(ApplicationContext ctx) {
-    Set<String> serviceNames = toSet(ctx.getBeanNamesForAnnotation(Service.class));
-    assertEquals(toSet("forceLogoutService", "restService", "permissionsService","userLookupService","validateService"), serviceNames);
+    Set<String> serviceNames = Set.of(ctx.getBeanNamesForAnnotation(Service.class));
+    assertEquals(Set.of("forceLogoutService", "restService", "permissionsService","userLookupService","validateService"), serviceNames);
   }
 
   @Test
   void testControllerBeans(ApplicationContext ctx) {
-    Set<String> names = toSet(ctx.getBeanNamesForAnnotation(Controller.class));
-    Set<String> restNames = toSet(ctx.getBeanNamesForAnnotation(RestController.class));
+    Set<String> names = Set.of(ctx.getBeanNamesForAnnotation(Controller.class));
+    Set<String> restNames = Set.of(ctx.getBeanNamesForAnnotation(RestController.class));
     assertTrue(names.containsAll(restNames));
     assertThat(names.size()).isEqualTo(25);
   }

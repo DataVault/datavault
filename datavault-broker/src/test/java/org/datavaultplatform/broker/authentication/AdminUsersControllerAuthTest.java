@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.util.Arrays;
+import java.util.List;
 import org.datavaultplatform.broker.controllers.admin.AdminUsersController;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -24,12 +24,12 @@ public class AdminUsersControllerAuthTest extends BaseControllerAuthTest {
   void testGetAdminUsers() {
 
     when(controller.getUsers(
-        USER_ID_1, "query123")).thenReturn(Arrays.asList(AuthTestData.USER_1, AuthTestData.USER_2));
+        USER_ID_1, "query123")).thenReturn(List.of(AuthTestData.USER_1, AuthTestData.USER_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/admin/users/search")
             .param("query", "query123"),
-        Arrays.asList(AuthTestData.USER_1, AuthTestData.USER_2),
+        List.of(AuthTestData.USER_1, AuthTestData.USER_2),
         HttpStatus.OK,
         true);
 

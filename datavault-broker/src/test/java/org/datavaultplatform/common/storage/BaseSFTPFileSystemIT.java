@@ -261,7 +261,7 @@ public abstract class BaseSFTPFileSystemIT {
     getSftpDriver().retrieve(retrievePath, toDirectory, new Progress());
     List<File> files = Files.list(toDirectory.toPath())
         .map(Path::toFile)
-        .collect(Collectors.toList());
+        .toList();
 
     File expected = new File(toDirectory, FROM_DV_FILE_NAME);
     assertEquals(expected, files.get(0));
@@ -599,12 +599,12 @@ public abstract class BaseSFTPFileSystemIT {
 
   @SneakyThrows
   private String readFile(File file) {
-    return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+    return Files.readString(file.toPath(), StandardCharsets.UTF_8);
   }
 
   @SneakyThrows
   private void writeToFile(File file, String contents) {
-    Files.write(file.toPath(), contents.getBytes(StandardCharsets.UTF_8));
+    Files.writeString(file.toPath(), contents, StandardCharsets.UTF_8);
   }
 
   @AfterEach

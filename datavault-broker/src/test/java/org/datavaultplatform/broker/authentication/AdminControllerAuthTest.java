@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-import java.util.Arrays;
+import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
 import org.datavaultplatform.broker.controllers.admin.AdminController;
 import org.datavaultplatform.common.model.Permission;
@@ -41,11 +41,11 @@ public class AdminControllerAuthTest extends BaseControllerAuthTest {
   void testGetAuditsAll() {
 
     when(controller.getAuditsAll(USER_ID_1)).thenReturn(
-        Arrays.asList(AuthTestData.AUDIT_INFO_1, AuthTestData.AUDIT_INFO_2));
+        List.of(AuthTestData.AUDIT_INFO_1, AuthTestData.AUDIT_INFO_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/admin/audits"),
-        Arrays.asList(AuthTestData.AUDIT_INFO_1, AuthTestData.AUDIT_INFO_2));
+        List.of(AuthTestData.AUDIT_INFO_1, AuthTestData.AUDIT_INFO_2));
 
     verify(controller).getAuditsAll(USER_ID_1);
     checkHasSecurityUserAndClientUserRolesOnly();
@@ -55,7 +55,7 @@ public class AdminControllerAuthTest extends BaseControllerAuthTest {
   void testGetDepositsAll() {
 
     when(controller.getDepositsAll(USER_ID_1, "query1", "sort1", "order1", 123, 1234)).thenReturn(
-        Arrays.asList(AuthTestData.DEPOSIT_INFO_1, AuthTestData.DEPOSIT_INFO_2));
+        List.of(AuthTestData.DEPOSIT_INFO_1, AuthTestData.DEPOSIT_INFO_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/admin/deposits")
@@ -64,7 +64,7 @@ public class AdminControllerAuthTest extends BaseControllerAuthTest {
             .queryParam("order", "order1")
             .queryParam("offset", "123")
             .queryParam("maxResult", "1234"),
-        Arrays.asList(AuthTestData.DEPOSIT_INFO_1, AuthTestData.DEPOSIT_INFO_2),
+        List.of(AuthTestData.DEPOSIT_INFO_1, AuthTestData.DEPOSIT_INFO_2),
         Permission.CAN_MANAGE_DEPOSITS);
 
     verify(controller).getDepositsAll(USER_ID_1, "query1", "sort1", "order1", 123, 1234);
@@ -102,12 +102,12 @@ public class AdminControllerAuthTest extends BaseControllerAuthTest {
   void testGetAdminEvents() {
 
     when(controller.getEventsAll(USER_ID_1, "sort1")).thenReturn(
-        Arrays.asList(AuthTestData.EVENT_INFO_1, AuthTestData.EVENT_INFO_2));
+        List.of(AuthTestData.EVENT_INFO_1, AuthTestData.EVENT_INFO_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/admin/events")
             .queryParam("sort", "sort1"),
-        Arrays.asList(AuthTestData.EVENT_INFO_1, AuthTestData.EVENT_INFO_2),
+        List.of(AuthTestData.EVENT_INFO_1, AuthTestData.EVENT_INFO_2),
         Permission.CAN_VIEW_EVENTS);
 
     verify(controller).getEventsAll(USER_ID_1, "sort1");
@@ -117,12 +117,12 @@ public class AdminControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetRetrievesAll() {
 
-    when(controller.getRetrievesAll(USER_ID_1)).thenReturn(Arrays.asList(AuthTestData.RETRIEVE_1,
+    when(controller.getRetrievesAll(USER_ID_1)).thenReturn(List.of(AuthTestData.RETRIEVE_1,
         AuthTestData.RETRIEVE_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/admin/retrieves"),
-        Arrays.asList(AuthTestData.RETRIEVE_1, AuthTestData.RETRIEVE_2),
+        List.of(AuthTestData.RETRIEVE_1, AuthTestData.RETRIEVE_2),
         Permission.CAN_VIEW_RETRIEVES);
 
     verify(controller).getRetrievesAll(USER_ID_1);

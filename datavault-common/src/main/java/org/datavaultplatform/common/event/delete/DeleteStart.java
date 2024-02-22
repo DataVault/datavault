@@ -1,6 +1,7 @@
 package org.datavaultplatform.common.event.delete;
 
 import jakarta.persistence.Entity;
+
 import org.datavaultplatform.common.event.Event;
 
 @Entity

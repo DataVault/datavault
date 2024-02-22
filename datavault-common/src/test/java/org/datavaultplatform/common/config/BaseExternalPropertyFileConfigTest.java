@@ -1,10 +1,20 @@
 package org.datavaultplatform.common.config;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
@@ -12,16 +22,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.util.FileSystemUtils;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The Broker AND WebApp will read from external properties files.
@@ -57,6 +57,9 @@ public abstract class BaseExternalPropertyFileConfigTest {
   @Value("${prop.override.test}")
   String overrideTest;
 
+  @Autowired
+  ApplicationContext ctx;
+
   @BeforeAll
   static void setupFiles() throws IOException {
     parentDir = Files.createTempDirectory("test").normalize();
@@ -75,7 +78,7 @@ public abstract class BaseExternalPropertyFileConfigTest {
   static void createFile(Path parentDir, String relativePath, String... lines) throws IOException {
     Path filePath = parentDir.resolve(relativePath);
     Files.createDirectories(filePath.getParent());
-    Files.write(filePath, Arrays.asList(lines), StandardCharsets.UTF_8);
+    Files.write(filePath, List.of(lines), StandardCharsets.UTF_8);
   }
 
   /**
@@ -92,7 +95,7 @@ public abstract class BaseExternalPropertyFileConfigTest {
    * This is just to be extra sure
    */
   @BeforeEach
-  void preCheck(ApplicationContext ctx) {
+  void preCheck() {
     assertTrue(Files.isDirectory(dvHomeDir));
     assertTrue(Files.isDirectory(etcDir));
     assertTrue(Files.isDirectory(homeDir));

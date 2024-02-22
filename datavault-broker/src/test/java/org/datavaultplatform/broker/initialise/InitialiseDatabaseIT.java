@@ -17,7 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ApplicationListener;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
+import org.awaitility.Awaitility;
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
 @AddTestProperties

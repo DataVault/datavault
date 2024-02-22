@@ -100,19 +100,19 @@ public class ArchiveStoreService {
 
                 if (archiveStore.isTivoliStorageManager()) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
-                    if (this.optionsDir != null && ! this.optionsDir.equals("")) {
+                    if (this.optionsDir != null && !this.optionsDir.isEmpty()) {
                         asProps.put(PropNames.OPTIONS_DIR, this.optionsDir);
                     }
-                    if (this.tempDir != null && ! this.tempDir.equals("")) {
+                    if (this.tempDir != null && !this.tempDir.isEmpty()) {
                         asProps.put(PropNames.TEMP_DIR, this.tempDir);
                     }
-                    if (this.tsmRetryTime != null && ! this.tsmRetryTime.equals("")) {
+                    if (this.tsmRetryTime != null && !this.tsmRetryTime.isEmpty()) {
                         asProps.put(PropNames.TSM_RETRY_TIME, this.tsmRetryTime);
                     }
-                    if (this.tsmMaxRetries != null && ! this.tsmMaxRetries.equals("")) {
+                    if (this.tsmMaxRetries != null && !this.tsmMaxRetries.isEmpty()) {
                         asProps.put(PropNames.TSM_MAX_RETRIES, this.tsmMaxRetries);
                     }
-                    if (this.tsmReverse != null && ! this.tsmReverse.equals("")) {
+                    if (this.tsmReverse != null && !this.tsmReverse.isEmpty()) {
                         asProps.put(PropNames.TSM_REVERSE, this.tsmReverse);
                     }
                     archiveStore.setProperties(asProps);
@@ -120,16 +120,16 @@ public class ArchiveStoreService {
 
                 if (archiveStore.isOracle()) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
-                    if (this.occRetryTime != null && ! this.occRetryTime.equals("")) {
+                    if (this.occRetryTime != null && !this.occRetryTime.isEmpty()) {
                         asProps.put(PropNames.OCC_RETRY_TIME, this.occRetryTime);
                     }
-                    if (this.occMaxRetries != null && ! this.occMaxRetries.equals("")) {
+                    if (this.occMaxRetries != null && !this.occMaxRetries.isEmpty()) {
                         asProps.put(PropNames.OCC_MAX_RETRIES, this.occMaxRetries);
                     }
-                    if (this.ociBucketName != null && ! this.ociBucketName.equals("")) {
+                    if (this.ociBucketName != null && !this.ociBucketName.isEmpty()) {
                         asProps.put(PropNames.OCI_BUCKET_NAME, this.ociBucketName);
                     }
-                    if (this.ociNameSpace != null && ! this.ociNameSpace.equals("")) {
+                    if (this.ociNameSpace != null && !this.ociNameSpace.isEmpty()) {
                         asProps.put(PropNames.OCI_NAME_SPACE, this.ociNameSpace);
                     }
                     archiveStore.setProperties(asProps);
@@ -137,16 +137,16 @@ public class ArchiveStoreService {
 
                 if (archiveStore.isAmazonS3()) {
                     HashMap<String, String> asProps = archiveStore.getProperties();
-                    if (this.bucketName != null && ! this.bucketName.equals("")) {
+                    if (this.bucketName != null && !this.bucketName.isEmpty()) {
                         asProps.put(PropNames.AWS_S3_BUCKET_NAME, this.bucketName);
                     }
-                    if (this.region != null && ! this.region.equals("")) {
+                    if (this.region != null && !this.region.isEmpty()) {
                         asProps.put(PropNames.AWS_S3_REGION, this.region);
                     }
-                    if (this.awsAccessKey != null && ! this.awsAccessKey.equals("")) {
+                    if (this.awsAccessKey != null && !this.awsAccessKey.isEmpty()) {
                         asProps.put(PropNames.AWS_ACCESS_KEY, this.awsAccessKey);
                     }
-                    if (this.awsSecretKey != null && ! this.awsSecretKey.equals("")) {
+                    if (this.awsSecretKey != null && !this.awsSecretKey.isEmpty()) {
                         asProps.put(PropNames.AWS_SECRET_KEY, this.awsSecretKey);
                     }
 

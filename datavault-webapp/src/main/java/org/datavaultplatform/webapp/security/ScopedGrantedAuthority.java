@@ -11,7 +11,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ScopedGrantedAuthority implements GrantedAuthority {
 
@@ -52,7 +51,7 @@ public class ScopedGrantedAuthority implements GrantedAuthority {
             Collection<Permission> permissions = assignment.getRole().getPermissions()
                     .stream()
                     .map(PermissionModel::getPermission)
-                    .collect(Collectors.toList());
+                    .toList();
 
             if (vaultId != null) {
                 authorities.add(new ScopedGrantedAuthority(Vault.class, vaultId, permissions));

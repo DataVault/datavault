@@ -42,6 +42,7 @@ public class OutputStreamAdapter extends OutputStream {
     return this.os.toString();
   }
 
+  @SuppressWarnings("com.haulmont.jpb.EqualsDoesntCheckParameterClass")
   @Override
   public boolean equals(Object value) {
     return this.os.equals(value);

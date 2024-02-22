@@ -66,7 +66,7 @@ public class AdminSchoolsController {
     public ModelAndView getSchoolRoleAssignmentsPage(@PathVariable("school") String schoolId, Principal principal) {
 
         Optional<Group> school = getGroup(schoolId);
-        if (!school.isPresent()) {
+        if (school.isEmpty()) {
             logger.error("Attempted to access school role management page for group {} but no such group was found",
                     schoolId);
             throw new EntityNotFoundException(Group.class, schoolId);
@@ -87,7 +87,7 @@ public class AdminSchoolsController {
 
     @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS')")
     @PostMapping("/admin/schools/{school}/user")
-    public ResponseEntity addNewRoleAssignment(@PathVariable("school") String schoolId,
+    public ResponseEntity<?> addNewRoleAssignment(@PathVariable("school") String schoolId,
                                                @RequestParam("user") String userId,
                                                @RequestParam("role") Long roleId) {
 
@@ -104,12 +104,12 @@ public class AdminSchoolsController {
         Optional<User> user = getUser(userId);
         Optional<RoleModel> role = getRole(roleId);
 
-        if (!school.isPresent()) {
+        if (school.isEmpty()) {
             logger.error("Attempted to add a new school role assignment to group {} but no such group was found",
                     schoolId);
             throw new EntityNotFoundException(Group.class, schoolId);
 
-        } else if (!role.isPresent()) {
+        } else if (role.isEmpty()) {
             logger.error("Attempted to add a new school role assignment with role {} but no such role was found",
                     roleId);
             throw new EntityNotFoundException(RoleModel.class, String.valueOf(roleId));
@@ -119,7 +119,7 @@ public class AdminSchoolsController {
                     roleId);
             return validationFailed("Role " + role.get().getName() + " is not a school role");
 
-        } else if (!user.isPresent()) {
+        } else if (user.isEmpty()) {
             logger.debug("Attempted to add a new school role assignment to user {} but no such user was found", userId);
             return validationFailed("Could not find user with ID=" + userId);
         }
@@ -149,13 +149,13 @@ public class AdminSchoolsController {
         return ResponseEntity.ok().build();
     }
 
-    private ResponseEntity validationFailed(String message) {
+    private ResponseEntity<?> validationFailed(String message) {
         return ResponseEntity.status(422).body(message);
     }
 
     @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS')")
     @PostMapping("/admin/schools/{school}/user/update")
-    public ResponseEntity updateExistingRoleAssignment(@PathVariable("school") String schoolId,
+    public ResponseEntity<?> updateExistingRoleAssignment(@PathVariable("school") String schoolId,
                                                @RequestParam("assignment") Long assignmentId,
                                                @RequestParam("role") Long roleId) {
 
@@ -171,7 +171,7 @@ public class AdminSchoolsController {
         Optional<RoleModel> role = getRole(roleId);
         Optional<RoleAssignment> userRoleAssignment = getRoleAssignment(assignmentId);
 
-        if (!role.isPresent()) {
+        if (role.isEmpty()) {
             logger.error("Attempted to update a school role assignment to role {} but no such role was found",
                     roleId);
             throw new EntityNotFoundException(RoleModel.class, String.valueOf(roleId));
@@ -181,7 +181,7 @@ public class AdminSchoolsController {
                     roleId);
             return validationFailed("Role " + role.get().getName() + " is not a school role");
 
-        } else if (!userRoleAssignment.isPresent()) {
+        } else if (userRoleAssignment.isEmpty()) {
             logger.error("Attempted to update a school role assignment [userId={},groupId={}] but no such role assignment was found",
                     assignmentId,
                     schoolId);
@@ -199,7 +199,7 @@ public class AdminSchoolsController {
 
     @PreAuthorize("hasPermission(#schoolId, 'GROUP', 'CAN_MANAGE_SCHOOL_ROLE_ASSIGNMENTS')")
     @PostMapping("/admin/schools/{school}/user/delete")
-    public ResponseEntity deleteRoleAssignment(@PathVariable("school") String schoolId,
+    public ResponseEntity<?> deleteRoleAssignment(@PathVariable("school") String schoolId,
                                        @RequestParam("assignment") Long assignmentId) {
 
         if (assignmentId == null) {
@@ -208,7 +208,7 @@ public class AdminSchoolsController {
         }
 
         Optional<RoleAssignment> userRoleAssignment = getRoleAssignment(assignmentId);
-        if (!userRoleAssignment.isPresent()) {
+        if (userRoleAssignment.isEmpty()) {
             logger.error("Attempted to delete a school role assignment {} but no such role assignment was found", assignmentId);
             throw new EntityNotFoundException(RoleAssignment.class, String.valueOf(assignmentId));
 

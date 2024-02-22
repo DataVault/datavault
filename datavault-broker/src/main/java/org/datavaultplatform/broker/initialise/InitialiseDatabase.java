@@ -95,9 +95,7 @@ public class InitialiseDatabase {
         }
         boolean hasLocal = archiveStores
             .stream()
-            .filter(ArchiveStore::isLocalFileSystem)
-            .findFirst()
-            .isPresent();
+            .anyMatch(ArchiveStore::isLocalFileSystem);
         if (hasLocal) {
             return;
         }

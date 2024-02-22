@@ -1,13 +1,13 @@
 package org.datavaultplatform.common.event.deposit;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
+import java.util.HashMap;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Lob;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.custom.HashMapConverter;
-
-import java.util.HashMap;
 
 @Entity
 public class ComputedEncryption extends Event implements ChunksDigestEvent {

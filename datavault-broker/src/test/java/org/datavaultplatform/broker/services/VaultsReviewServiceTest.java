@@ -73,7 +73,7 @@ public class VaultsReviewServiceTest {
 
         VaultReview vaultReview = new VaultReview();
         vaultReview.setActionedDate(actionedDate);
-        List<VaultReview> vaultReviews = Collections.singletonList(vaultReview);
+        List<VaultReview> vaultReviews = List.of(vaultReview);
 
         Vault vault = new Vault();
         vault.setReviewDate(reviewDate);
@@ -97,7 +97,7 @@ public class VaultsReviewServiceTest {
         if (actioned) {
             vaultReview.setActionedDate(actionedDate);
         }
-        List<VaultReview> vaultReviews = Collections.singletonList(vaultReview);
+        List<VaultReview> vaultReviews = List.of(vaultReview);
 
         Vault vault = new Vault();
         vault.setReviewDate(reviewDate);

@@ -12,7 +12,6 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import lombok.SneakyThrows;
@@ -78,7 +77,7 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
     cd.setVaultID("vault-123");
     cd.setPersonalDataStatement("personal-data-statement");
     cd.setHasPersonalData("yes");
-    cd.setDepositPaths(Arrays.asList(FILE_STORE_SRC_ID + "/src-path-1"));
+    cd.setDepositPaths(List.of(FILE_STORE_SRC_ID + "/src-path-1"));
     cd.setFileUploadHandle("src-file-upload-handle");
 
     User mockUser = mock(User.class);
@@ -92,11 +91,11 @@ public class GenerateDepositMessageTest extends BaseGenerateMessageTest {
 
     when(usersService.getUser("user123")).thenReturn(mockUser);
 
-    when(mockUser.getFileStores()).thenReturn(Arrays.asList(getSourceFileStore()));
+    when(mockUser.getFileStores()).thenReturn(List.of(getSourceFileStore()));
 
     when(vaultsService.getUserVault(mockUser, "vault-123")).thenReturn(mockVault);
 
-    List<ArchiveStore> destStores = Arrays.asList(getDestinationArchiveStore());
+    List<ArchiveStore> destStores = List.of(getDestinationArchiveStore());
     when(archiveStoreService.getArchiveStores()).thenReturn(destStores);
 
     when(depositDao.save(any())).thenAnswer(invocation -> {

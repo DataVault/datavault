@@ -6,10 +6,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import jakarta.persistence.Converter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@Converter
 public class HashMapConverter<K,V> implements AttributeConverter<HashMap<K,V>,byte[]> {
 
   @Override

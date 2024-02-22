@@ -1,13 +1,13 @@
 package org.datavaultplatform.common.io;
 
-import org.junit.jupiter.api.Test;
-
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.junit.jupiter.api.Test;
 
 public class OutputAdapterTest {
 

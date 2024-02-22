@@ -19,7 +19,7 @@ public abstract class BaseRabbitTCTest extends BaseRabbitTest {
 
   @PostConstruct
   void init() {
-    log.info("RABBIT HTTP URL [ {} ]", RABBIT.getHttpUrl());
+    log.info("RABBIT HTTP URL [ {} ]",RABBIT.getHttpUrl());
   }
 
 }

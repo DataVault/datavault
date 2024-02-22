@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.Map;
-import java.util.stream.Stream;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.event.RecordingEventSender;
@@ -32,13 +32,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AddTestProperties
 @Slf4j
 @TestPropertySource(properties = {
-        "worker.security.enabled=true",
-        "worker.rabbit.enabled=false",
-        "management.endpoints.web.exposure.include=*",
-        "management.endpoints.web.base-path=/actuator",
-        "management.endpoints.enabled-by-default=true",
-        "management.health.rabbit.enabled=false"})
-
+    "worker.rabbit.enabled=false",
+    "management.endpoints.web.exposure.include=*",
+    "worker.security.enabled=true",
+    "management.endpoints.web.base-path=/actuator",
+    "management.endpoints.enabled-by-default=true",
+    "management.health.rabbit.enabled=false"})
 @AutoConfigureMockMvc
 @Import(TestClockConfig.class)
 public class ActuatorTest {
@@ -56,7 +55,7 @@ public class ActuatorTest {
   @ValueSource(strings = {"/actuator/info", "/actuator/health", "/actuator/metrics", "/actuator/memoryinfo"})
   @SneakyThrows
   void testActuatorPublicAccess(String path) {
-      checkPublic(path);
+    checkPublic(path);
   }
 
   @ParameterizedTest

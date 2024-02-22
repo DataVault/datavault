@@ -3,7 +3,6 @@ package org.datavaultplatform.common.model.dao;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
@@ -120,7 +119,7 @@ public class PendingDataCreatorDAOIT extends BaseReuseDatabaseTest {
 
     PendingDataCreator pendingDataCreator2 = getPendingDataCreator2();
 
-    dao.save(Arrays.asList(pendingDataCreator1,pendingDataCreator2));
+    dao.save(List.of(pendingDataCreator1,pendingDataCreator2));
 
     assertNotNull(pendingDataCreator1.getId());
     assertNotNull(pendingDataCreator2.getId());

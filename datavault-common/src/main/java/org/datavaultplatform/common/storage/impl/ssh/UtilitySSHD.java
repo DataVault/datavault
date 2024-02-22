@@ -1,5 +1,13 @@
 package org.datavaultplatform.common.storage.impl.ssh;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Clock;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -13,15 +21,6 @@ import org.datavaultplatform.common.io.OutputStreamAdapter;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.impl.SFTPConnection;
 import org.springframework.util.Assert;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Clock;
 
 @Slf4j
 public abstract class UtilitySSHD {

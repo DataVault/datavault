@@ -5,7 +5,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-import java.util.Arrays;
 import java.util.List;
 import org.datavaultplatform.broker.controllers.UsersController;
 import org.datavaultplatform.broker.controllers.admin.AdminArchiveStoreController;
@@ -37,11 +36,11 @@ public class RestrictURLAccessViaRolesTest extends BaseControllerAuthTest{
   void testGetArchiveStores() {
 
     ResponseEntity<List<ArchiveStore>> result = ResponseEntity.ok(
-        Arrays.asList(ARCHIVE_STORE_1, AuthTestData.ARCHIVE_STORE_2));
+        List.of(ARCHIVE_STORE_1, AuthTestData.ARCHIVE_STORE_2));
 
     when(archiveStoreController.getArchiveStores(USER_ID_1)).thenReturn(result);
 
-    checkSuccessWhenAuthenticated(get("/admin/archivestores"), Arrays.asList(
+    checkSuccessWhenAuthenticated(get("/admin/archivestores"), List.of(
             ARCHIVE_STORE_1, AuthTestData.ARCHIVE_STORE_2), HttpStatus.OK,
         false, Permission.CAN_MANAGE_ARCHIVE_STORES);
 
@@ -53,11 +52,11 @@ public class RestrictURLAccessViaRolesTest extends BaseControllerAuthTest{
   @Test
   void testAdminUserSearch() {
 
-    List<User> result = Arrays.asList(user1, user2);
+    List<User> result = List.of(user1, user2);
 
     when(adminUsersController.getUsers(USER_ID_1,"")).thenReturn(result);
 
-    checkSuccessWhenAuthenticated(get("/admin/users/search?query="), Arrays.asList(user1, user2), HttpStatus.OK,
+    checkSuccessWhenAuthenticated(get("/admin/users/search?query="), List.of(user1, user2), HttpStatus.OK,
         true);
 
     verify(adminUsersController).getUsers(USER_ID_1, "");
@@ -68,11 +67,11 @@ public class RestrictURLAccessViaRolesTest extends BaseControllerAuthTest{
   @Test
   void testUserSearch() {
 
-    List<User> result = Arrays.asList(user1, user2);
+    List<User> result = List.of(user1, user2);
 
     when(userController.getUsers(USER_ID_1)).thenReturn(result);
 
-    checkSuccessWhenAuthenticated(get("/users"), Arrays.asList(user1, user2), HttpStatus.OK,
+    checkSuccessWhenAuthenticated(get("/users"), List.of(user1, user2), HttpStatus.OK,
         false);
 
     verify(userController).getUsers(USER_ID_1);

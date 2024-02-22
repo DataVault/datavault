@@ -1,9 +1,8 @@
 package org.datavaultplatform.common.model.dao.custom;
 
+import java.util.List;
 import org.datavaultplatform.common.model.Retrieve;
 import org.springframework.data.jpa.repository.EntityGraph;
-
-import java.util.List;
 
 public interface RetrieveCustomDAO extends BaseCustomDAO {
 

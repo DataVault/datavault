@@ -146,7 +146,6 @@
             <classifier>tests</classifier>
         </dependency>
 
-
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>

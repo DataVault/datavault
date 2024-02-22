@@ -25,7 +25,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Controller
 @ConditionalOnBean(RestService.class)
@@ -63,7 +62,7 @@ public class AdminRolesController {
         List<User> superAdminUsers = restService.getRoleAssignmentsForRole(superAdminRole.getId())
                 .stream()
                 .map(roleAssignment -> restService.getUser(roleAssignment.getUserId()))
-                .collect(Collectors.toList());
+                .toList();
 
         ModelAndView mav = new ModelAndView();
         mav.setViewName("admin/roles/isadmin/index");
@@ -73,7 +72,7 @@ public class AdminRolesController {
     }
 
     @PostMapping("/admin/roles/save")
-    public ResponseEntity save(@RequestParam(value = "id") long id,
+    public ResponseEntity<?> save(@RequestParam(value = "id") long id,
                                @RequestParam(value = "name") String name,
                                @RequestParam(value = "type") String type,
                                @RequestParam(value = "status") String status,
@@ -81,7 +80,7 @@ public class AdminRolesController {
                                @RequestParam(value = "permissions", required = false) String[] permissions) {
 
         Optional<RoleModel> stored = restService.getRole(id);
-        if (!stored.isPresent()) {
+        if (stored.isEmpty()) {
             logger.debug("No existing role was found with ID={} - preparing to store new role.", id);
             return createNewRole(name, type, description, permissions, status);
         }
@@ -90,7 +89,7 @@ public class AdminRolesController {
         return updateRole(id, name, type, description, permissions, status);
     }
 
-    private ResponseEntity createNewRole(String name,
+    private ResponseEntity<?> createNewRole(String name,
                                          String type,
                                          String description,
                                          String[] permissions,
@@ -117,7 +116,7 @@ public class AdminRolesController {
             logger.debug("Could not create role - no description provided");
             return validationFailed("Roles must have a description.");
 
-        } else if (selectedPermissions.size() < 1) {
+        } else if (selectedPermissions.isEmpty()) {
             logger.debug("Could not create role - no permissions selected");
             return validationFailed("Roles must have at least one permission.");
         } else if (RoleType.valueOf(type).equals(RoleType.VAULT) && StringUtils.isEmpty(status)) {
@@ -153,10 +152,10 @@ public class AdminRolesController {
         if (permIds == null) {
             return new ArrayList<>();
         }
-        Set<String> permissionIds = new HashSet<>(Arrays.asList(permIds));
+        Set<String> permissionIds = Set.of(permIds);
         return getPermissionsByType(type).stream()
                 .filter(permission -> permissionIds.contains(permission.getId()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<PermissionModel> getPermissionsByType(String type) {
@@ -167,11 +166,11 @@ public class AdminRolesController {
         };
     }
 
-    private ResponseEntity validationFailed(String message) {
+    private ResponseEntity<?> validationFailed(String message) {
         return ResponseEntity.status(422).body(message);
     }
 
-    private ResponseEntity updateRole(long id,
+    private ResponseEntity<?> updateRole(long id,
                                       String name,
                                       String type,
                                       String description,
@@ -208,7 +207,7 @@ public class AdminRolesController {
             logger.debug("Could not update role - no description provided");
             return validationFailed("Roles must have a description.");
 
-        } else if (selectedPermissions.size() < 1) {
+        } else if (selectedPermissions.isEmpty()) {
             logger.debug("Could not update role - no permissions selected");
             return validationFailed("Roles must have at least one permission.");
 
@@ -248,11 +247,11 @@ public class AdminRolesController {
     }
 
     @PostMapping("/admin/roles/delete")
-    public ResponseEntity deleteRole(@RequestParam("id") long roleId) {
+    public ResponseEntity<?> deleteRole(@RequestParam("id") long roleId) {
 
         logger.debug("Preparing to delete role with ID={}", roleId);
         Optional<RoleModel> role = restService.getRole(roleId);
-        if (!role.isPresent()) {
+        if (role.isEmpty()) {
             logger.error("Could not delete role with ID={} - no such role found", roleId);
             return validationFailed("Role does not exist Role Id: " + roleId);
 
@@ -267,7 +266,7 @@ public class AdminRolesController {
     }
 
     @PostMapping("/admin/roles/op")
-    public ResponseEntity addSuperAdmin(@RequestParam("op-id") String userId) {
+    public ResponseEntity<?> addSuperAdmin(@RequestParam("op-id") String userId) {
 
         logger.debug("Preparing to add user ID={} to IS ADMIN role", userId);
         if (StringUtils.isEmpty(userId)) {
@@ -304,7 +303,7 @@ public class AdminRolesController {
     }
 
     @PostMapping("/admin/roles/deop")
-    public ResponseEntity deleteSuperAdmin(Principal principal, HttpServletRequest request, @RequestParam("deop-id") String userId) throws ServletException {
+    public ResponseEntity<?> deleteSuperAdmin(Principal principal, HttpServletRequest request, @RequestParam("deop-id") String userId) throws ServletException {
 
         logger.debug("Preparing to remove user ID={} from IS ADMIN role", userId);
         RoleModel superAdminRole = restService.getIsAdmin();
@@ -320,7 +319,7 @@ public class AdminRolesController {
                 .filter(ra -> ra.getRole().equals(superAdminRole))
                 .collect(MoreCollectors.toOptional());
 
-        if (!roleAssignment.isPresent()) {
+        if (roleAssignment.isEmpty()) {
             logger.warn("Cannot remove the user ID={} from IS Admin Role ID={} because they don't have it.", userId, superAdminRole.getId());
             return validationFailed("User is not an IS Admin.");
         }
@@ -337,7 +336,7 @@ public class AdminRolesController {
     public ResponseEntity<RoleViewModel> getRole(@PathVariable("id") long roleId) {
 
         Optional<RoleModel> role = restService.getRole(roleId);
-        if (!role.isPresent()) {
+        if (role.isEmpty()) {
             logger.error("Could not find role with ID={}", roleId);
             throw new EntityNotFoundException(RoleModel.class, String.valueOf(roleId));
         }
@@ -345,7 +344,7 @@ public class AdminRolesController {
         List<PermissionModel> allPermissions = getPermissionsByType(role.get().getType().name());
         List<PermissionModel> unsetPermissions = allPermissions.stream()
                 .filter(p -> !role.get().hasPermission(p.getPermission()))
-                .collect(Collectors.toList());
+                .toList();
 
         return ResponseEntity.ok(new RoleViewModel(role.get(), unsetPermissions));
     }

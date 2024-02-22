@@ -3,9 +3,7 @@ package org.datavaultplatform.common.model.dao;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
@@ -82,11 +80,11 @@ public class GroupDAOIT extends BaseReuseDatabaseTest {
 
     // The Groups should be ordered by Ascending Name
     assertEquals(
-        Arrays.asList(
+        List.of(
             group3.getID(),
             group1.getID(),
             group2.getID()),
-        items.stream().map(Group::getID).collect(Collectors.toList()));
+        items.stream().map(Group::getID).toList());
   }
 
 

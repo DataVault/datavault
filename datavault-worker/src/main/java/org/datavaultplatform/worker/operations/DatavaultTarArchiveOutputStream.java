@@ -66,7 +66,7 @@ import org.apache.commons.compress.utils.FixedLengthBlockOutputStream;
  * This code is copy of TarArchiveOutputStream which contains a workaround.
  * By changing a couple of variables from ints to longs - we can avoid the 'integer overflow'
  */
-public class DatavaultTarArchiveOutputStream extends ArchiveOutputStream {
+public class DatavaultTarArchiveOutputStream extends ArchiveOutputStream<ArchiveEntry> {
 
   /**
    * Fail if a long file name is required in the archive.

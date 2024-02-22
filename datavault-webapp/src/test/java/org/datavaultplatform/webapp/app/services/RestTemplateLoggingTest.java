@@ -8,7 +8,7 @@ import ch.qos.logback.core.read.ListAppender;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.stream.Collectors;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -81,7 +81,7 @@ public class RestTemplateLoggingTest {
 
     Thread.sleep(5000);
 
-    List<String> actualLogEvents = logBackListAppender.list.stream().map(Object::toString).collect(Collectors.toList());
+    List<String> actualLogEvents = logBackListAppender.list.stream().map(Object::toString).toList();
     List<String> expectedLogEvents = IOUtils.readLines(this.expectedLogEventsResource.getInputStream(), StandardCharsets.UTF_8);
     assertTrue(actualLogEvents.containsAll(expectedLogEvents));
   }

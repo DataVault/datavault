@@ -1,9 +1,5 @@
 package org.datavaultplatform.common.bagish;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.datavaultplatform.common.io.FileUtils;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -12,6 +8,9 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.datavaultplatform.common.io.FileUtils;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 

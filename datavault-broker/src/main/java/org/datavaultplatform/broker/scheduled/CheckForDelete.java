@@ -125,7 +125,7 @@ public class CheckForDelete implements ScheduledTask {
         }
 
         List<ArchiveStore> archiveStores = archiveStoreService.getArchiveStores();
-        if (archiveStores.size() == 0) {
+        if (archiveStores.isEmpty()) {
             throw new Exception("No configured archive storage");
         }
 

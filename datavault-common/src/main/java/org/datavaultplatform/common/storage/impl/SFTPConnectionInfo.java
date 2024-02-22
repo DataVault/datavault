@@ -1,5 +1,11 @@
 package org.datavaultplatform.common.storage.impl;
 
+import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.time.Clock;
+import java.util.Map;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -7,13 +13,6 @@ import org.bouncycastle.util.encoders.Base64;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.crypto.SshRsaKeyUtils;
-
-import java.nio.charset.StandardCharsets;
-import java.security.KeyPair;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.time.Clock;
-import java.util.Map;
 
 @Slf4j
 public class SFTPConnectionInfo {

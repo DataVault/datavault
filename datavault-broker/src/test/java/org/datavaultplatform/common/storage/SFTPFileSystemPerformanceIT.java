@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.docker.DockerImage;
 import org.datavaultplatform.common.io.Progress;
-import org.datavaultplatform.common.model.FileInfo;
 import org.datavaultplatform.common.storage.impl.SFTPConnection;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemJSch;
 import org.datavaultplatform.common.storage.impl.SFTPFileSystemSSHD;
@@ -60,7 +59,7 @@ public class SFTPFileSystemPerformanceIT {
   public static final int SIZE_50MB = 50_000_000;
 
   @Container
-  GenericContainer<?> sftpServerContainer = getSftpTestContainer();
+  final GenericContainer<?> sftpServerContainer = getSftpTestContainer();
   File bigFile;
   private SFTPFileSystemSSHD sftpSSHD;
   private SFTPFileSystemJSch sftpJSch;
@@ -184,18 +183,10 @@ public class SFTPFileSystemPerformanceIT {
     return props;
   }
 
-  static class ProgressInfo {
+  record ProgressInfo(String label, long time, Progress progress) {
 
-    final String label;
-    final long time;
-
-    final Progress progress;
-
-    ProgressInfo(String label, long time, Progress progress) {
-      this.label = label;
-      this.time = time;
-      this.progress = progress;
-      log.info("byteCount[{}][{}]", label, progress.getByteCount());
+      ProgressInfo {
+        log.info("byteCount[{}][{}]", label, progress.getByteCount());
+      }
     }
-  }
 }

@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.util.Arrays;
+import java.util.List;
 import org.datavaultplatform.broker.controllers.VaultsController;
 import org.datavaultplatform.common.request.CreateVault;
 import org.junit.jupiter.api.AfterEach;
@@ -38,11 +38,11 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
   void testGetDataManagers() throws Exception {
 
     when(controller.getDataManagers(USER_ID_1, "vault-id-1")).thenReturn(
-        Arrays.asList(AuthTestData.DATA_MANAGER_1, AuthTestData.DATA_MANAGER_2));
+        List.of(AuthTestData.DATA_MANAGER_1, AuthTestData.DATA_MANAGER_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/vaults/{vaultid}/dataManagers", "vault-id-1"),
-        Arrays.asList(AuthTestData.DATA_MANAGER_1, AuthTestData.DATA_MANAGER_2));
+        List.of(AuthTestData.DATA_MANAGER_1, AuthTestData.DATA_MANAGER_2));
 
     verify(controller).getDataManagers(USER_ID_1, "vault-id-1");
   }
@@ -50,11 +50,11 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetDeposits() throws Exception {
     when(controller.getDeposits(USER_ID_1, "vault-id-2")).thenReturn(
-        Arrays.asList(AuthTestData.DEPOSIT_INFO_1, AuthTestData.DEPOSIT_INFO_2));
+        List.of(AuthTestData.DEPOSIT_INFO_1, AuthTestData.DEPOSIT_INFO_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/vaults/{vaultid}/deposits", "vault-id-2"),
-        Arrays.asList(AuthTestData.DEPOSIT_INFO_1, AuthTestData.DEPOSIT_INFO_2));
+        List.of(AuthTestData.DEPOSIT_INFO_1, AuthTestData.DEPOSIT_INFO_2));
 
     verify(controller).getDeposits(USER_ID_1, "vault-id-2");
   }
@@ -62,11 +62,11 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetRoleEvents() throws Exception {
     when(controller.getRoleEvents(USER_ID_1, "vault-id-3")).thenReturn(
-        Arrays.asList(AuthTestData.EVENT_INFO_1, AuthTestData.EVENT_INFO_2));
+        List.of(AuthTestData.EVENT_INFO_1, AuthTestData.EVENT_INFO_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/vaults/{vaultid}/roleEvents", "vault-id-3"),
-        Arrays.asList(AuthTestData.EVENT_INFO_1, AuthTestData.EVENT_INFO_2));
+        List.of(AuthTestData.EVENT_INFO_1, AuthTestData.EVENT_INFO_2));
 
     verify(controller).getRoleEvents(USER_ID_1, "vault-id-3");
   }
@@ -74,10 +74,10 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetVaults() {
     when(controller.getVaults(USER_ID_1)).thenReturn(
-        Arrays.asList(AuthTestData.VAULT_INFO_1, AuthTestData.VAULT_INFO_2));
+        List.of(AuthTestData.VAULT_INFO_1, AuthTestData.VAULT_INFO_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(get("/vaults"),
-        Arrays.asList(AuthTestData.VAULT_INFO_1, AuthTestData.VAULT_INFO_2));
+        List.of(AuthTestData.VAULT_INFO_1, AuthTestData.VAULT_INFO_2));
 
     verify(controller).getVaults(USER_ID_1);
   }
@@ -85,12 +85,12 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetVaultsForUser() {
     when(controller.getVaultsForUser("user123")).thenReturn(
-        Arrays.asList(AuthTestData.VAULT_INFO_1, AuthTestData.VAULT_INFO_2));
+        List.of(AuthTestData.VAULT_INFO_1, AuthTestData.VAULT_INFO_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/vaults/user")
             .queryParam("userID", "user123"),
-        Arrays.asList(AuthTestData.VAULT_INFO_1, AuthTestData.VAULT_INFO_2));
+        List.of(AuthTestData.VAULT_INFO_1, AuthTestData.VAULT_INFO_2));
 
     verify(controller).getVaultsForUser("user123");
   }
@@ -98,14 +98,14 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetSearchAllDeposits() {
     when(controller.searchAllDeposits(USER_ID_1, "query1", "sort1", "order1")).thenReturn(
-        Arrays.asList(AuthTestData.DEPOSIT_INFO_1, AuthTestData.DEPOSIT_INFO_2));
+        List.of(AuthTestData.DEPOSIT_INFO_1, AuthTestData.DEPOSIT_INFO_2));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/vaults/deposits/search")
             .queryParam("query", "query1")
             .queryParam("sort", "sort1")
             .queryParam("order", "order1"),
-        Arrays.asList(AuthTestData.DEPOSIT_INFO_1, AuthTestData.DEPOSIT_INFO_2));
+        List.of(AuthTestData.DEPOSIT_INFO_1, AuthTestData.DEPOSIT_INFO_2));
 
     verify(controller).searchAllDeposits(USER_ID_1, "query1", "sort1", "order1");
   }
@@ -211,11 +211,11 @@ public class VaultsControllerAuthTest extends BaseControllerAuthTest {
   @Test
   void testGetPendingVaults() {
     when(controller.getPendingVaults(USER_ID_1)).thenReturn(
-        Arrays.asList(AuthTestData.VAULT_INFO_1));
+        List.of(AuthTestData.VAULT_INFO_1));
 
     checkWorksWhenAuthenticatedFailsOtherwise(
         get("/pendingVaults"),
-        Arrays.asList(AuthTestData.VAULT_INFO_1));
+        List.of(AuthTestData.VAULT_INFO_1));
 
     verify(controller).getPendingVaults(USER_ID_1);
   }

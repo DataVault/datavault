@@ -79,8 +79,8 @@ public abstract class TestUtils {
         .limit(100)
         .collect(Collectors.toMap(
             Function.identity(),
-            (item) -> item.toString(), (
-            k1,k2)->k2,
+            Object::toString,
+            (k1,k2) ->k2,
             HashMap::new));
   }
 

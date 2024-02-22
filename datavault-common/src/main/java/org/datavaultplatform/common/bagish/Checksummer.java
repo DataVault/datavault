@@ -1,15 +1,17 @@
 package org.datavaultplatform.common.bagish;
 
-import lombok.extern.slf4j.Slf4j;
-import org.datavaultplatform.common.io.FileUtils;
-import org.springframework.util.Assert;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
+import org.datavaultplatform.common.io.FileUtils;
+import org.springframework.util.Assert;
 
-import static org.apache.commons.codec.digest.DigestUtils.*;
+import static org.apache.commons.codec.digest.DigestUtils.md5Hex;
+import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
+import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
+import static org.apache.commons.codec.digest.DigestUtils.sha512Hex;
 
 @Slf4j
 public class Checksummer {
@@ -31,22 +33,13 @@ public class Checksummer {
 
         try (FileInputStream fis = new FileInputStream(file)) {
 
-            switch (alg) {
-                case MD5:
-                    hash = md5Hex(fis);
-                    break;
-                case SHA1:
-                    hash = sha1Hex(fis);
-                    break;
-                case SHA256:
-                    hash = sha256Hex(fis);
-                    break;
-                case SHA512:
-                    hash = sha512Hex(fis);
-                    break;
-                default:
-                    throw new Exception(String.format("Unsupported checksum algorithm [%s]", alg));
-            }
+            hash = switch (alg) {
+                case MD5 -> md5Hex(fis);
+                case SHA1 -> sha1Hex(fis);
+                case SHA256 -> sha256Hex(fis);
+                case SHA512 -> sha512Hex(fis);
+                default -> throw new Exception(String.format("Unsupported checksum algorithm [%s]", alg));
+            };
         } catch (IOException ex) {
             log.trace("Error computing checksum for [{}]", file, ex);
             throw ex;

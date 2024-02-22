@@ -1,17 +1,16 @@
 package org.datavaultplatform.common.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import lombok.SneakyThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Random;
 import java.util.UUID;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.SneakyThrows;
 
 public abstract class BaseEntityTest<T, ID> {
 

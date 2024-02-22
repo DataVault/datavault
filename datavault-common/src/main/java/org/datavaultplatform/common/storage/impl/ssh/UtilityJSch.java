@@ -24,15 +24,14 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import com.jcraft.jsch.SftpProgressMonitor;
-import org.datavaultplatform.common.io.Progress;
-import org.springframework.util.Assert;
-
 import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Clock;
+import org.datavaultplatform.common.io.Progress;
+import org.springframework.util.Assert;
 
 public class UtilityJSch {
 

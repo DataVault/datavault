@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
@@ -49,7 +49,7 @@ public class UserLookupService {
                         user.getFirstname().replace(" - ", " – "),
                         user.getLastname().replace(" - ", " – ")
                     )
-            ).collect(Collectors.toList());
+            ).toList();
         }
         return result;
     }
@@ -64,7 +64,7 @@ public class UserLookupService {
             } catch (LdapException | CursorException e) {
                 throw new InvalidUunException(uun, e);
             }
-            if (attributes.size() < 1){
+            if (attributes.isEmpty()){
                 throw new InvalidUunException(uun);
             }
 
@@ -98,7 +98,7 @@ public class UserLookupService {
     		logger.info("isUUN - uun: {} ", uun);
     		logger.info("isUUN - ATTRIBUTES: {} ", attributes);
     		logger.info("isUUN - attributes.size(): {} ", attributes.size());
-            if (attributes.size() > 0){
+            if (!attributes.isEmpty()){
             	exists = true;
             }
             
@@ -128,7 +128,7 @@ public class UserLookupService {
     private String checkUser(String user, String errorUrl) {
         String retVal = "";
         // exclude the empty dummy user
-        if (user != null && ! user.equals("")) {
+        if (user != null && !user.isEmpty()) {
             try {
                 this.ensureUserExists(user);
             } catch (InvalidUunException e) {

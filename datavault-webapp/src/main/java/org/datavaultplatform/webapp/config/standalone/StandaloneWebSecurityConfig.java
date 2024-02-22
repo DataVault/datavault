@@ -25,10 +25,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Slf4j
-@Configuration
 @EnableWebSecurity
+@Slf4j
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@Configuration
 public class StandaloneWebSecurityConfig {
 
   @Value("${datavault.csrf.disabled:false}")

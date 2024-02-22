@@ -2,13 +2,21 @@ package org.datavaultplatform.common.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+import java.util.Objects;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedSubgraph;
+import jakarta.persistence.Table;
+import jakarta.persistence.ManyToOne;
+
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
-
-import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "DataManager")

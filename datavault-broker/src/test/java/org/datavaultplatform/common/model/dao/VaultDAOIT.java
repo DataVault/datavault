@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -94,11 +93,11 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
 
     // The Vaults should be ordered by Ascending Creation Time
     assertEquals(
-        Arrays.asList(
+        List.of(
             vault3.getID(),
             vault1.getID(),
             vault2.getID()),
-        items.stream().map(Vault::getID).collect(Collectors.toList()));
+        items.stream().map(Vault::getID).toList());
   }
 
 

@@ -39,7 +39,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import java.security.Principal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Controller
 @ConditionalOnBean(RestService.class)
@@ -77,7 +76,7 @@ public class VaultsController {
 
     @PreAuthorize("hasPermission(#vaultId, 'VAULT', 'CAN_TRANSFER_VAULT_OWNERSHIP') or hasPermission(#vaultId, 'GROUP_VAULT', 'TRANSFER_SCHOOL_VAULT_OWNERSHIP')")
     @PostMapping(value = "/vaults/{vaultid}/data-owner/update")
-    public ResponseEntity transferOwnership(
+    public ResponseEntity<?> transferOwnership(
             @PathVariable("vaultid") String vaultId,
             @Valid VaultTransferRequest request) {
 
@@ -197,7 +196,7 @@ public class VaultsController {
         List<RoleAssignment> roleAssignmentsForVault = restService.getRoleAssignmentsForVault(vaultID);
         List<RoleAssignment> vaultUsers = roleAssignmentsForVault.stream()
                 .filter(roleAssignment -> !RoleUtils.isDataOwner(roleAssignment))
-                .collect(Collectors.toList());
+                .toList();
         roleAssignmentsForVault.stream()
                 .filter(RoleUtils::isDataOwner)
                 .findFirst()

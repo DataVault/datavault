@@ -1,15 +1,26 @@
 package org.datavaultplatform.common.model.dao;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Group_;
 import org.datavaultplatform.common.util.DaoUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class SchoolPermissionQueryHelper<T> {
@@ -69,7 +80,7 @@ public class SchoolPermissionQueryHelper<T> {
     }
     if (this.predicateHelper != null) {
       List<Predicate> additional = this.predicateHelper.getPredicates(this.cb, root);
-      result.addAll(additional.stream().filter(Objects::nonNull).collect(Collectors.toList()));
+      result.addAll(additional.stream().filter(Objects::nonNull).toList());
     }
     if (this.singlePredicateHelper != null) {
       Predicate single = this.singlePredicateHelper.getPredicate(this.cb, root);

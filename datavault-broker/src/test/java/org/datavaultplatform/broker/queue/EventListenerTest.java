@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
@@ -55,14 +56,12 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -214,14 +213,14 @@ public class EventListenerTest {
       };
 
       boolean processed = sut.processWithRefresh(1, supplier, processor);
-      assertEquals(false, processed);
+      assertFalse(processed);
     }
 
     @ParameterizedTest
     @CsvSource(value = {"1", "2", "3", "4", "5", "6"})
     void testWorksAfterNAttempts(int attemptToWork) {
       Supplier<Integer> supplier = () -> 1;
-      Consumer<Integer> consumer = new Consumer<Integer>() {
+      Consumer<Integer> consumer = new Consumer<>() {
         int attempt = 0;
 
         @Override
@@ -670,7 +669,7 @@ public class EventListenerTest {
         DepositChunk chunk = new DepositChunk();
         chunk.setChunkNum(chunkNum);
         return chunk;
-      }).collect(Collectors.toList()));
+      }).toList());
 
       ComputedEncryption event = new ComputedEncryption();
 
@@ -1008,7 +1007,7 @@ public class EventListenerTest {
       doNothing().when(mDeposit).setStatus(argStatus.capture());
       doNothing().when(depositsService).updateDeposit(argDeposit.capture());
 
-      assertEquals(null, sut.preDeletionStatus);
+      assertNull(sut.preDeletionStatus);
       sut.process13DeleteStart(null, mDeposit);
 
       assertEquals(initialStatus, sut.preDeletionStatus);
@@ -1157,14 +1156,14 @@ public class EventListenerTest {
       void testAuditCompleteSuccess(AuditChunkStatus.Status status) {
         AuditChunkStatus auditChunkStatus = new AuditChunkStatus();
         auditChunkStatus.setStatus(status);
-        checkAuditComplete(false, Arrays.asList(auditChunkStatus));
+        checkAuditComplete(false, List.of(auditChunkStatus));
       }
 
       @Test
       void testAuditCompleteError() {
         AuditChunkStatus auditChunkStatus = new AuditChunkStatus();
         auditChunkStatus.setStatus(AuditChunkStatus.Status.ERROR);
-        checkAuditComplete(true, Arrays.asList(auditChunkStatus));
+        checkAuditComplete(true, List.of(auditChunkStatus));
       }
 
       void checkAuditComplete(boolean errorExpected, List<AuditChunkStatus> items) {
@@ -1678,7 +1677,7 @@ public class EventListenerTest {
       ArgumentCaptor<String> argTo = ArgumentCaptor.forClass(String.class);
       ArgumentCaptor<String> argSubject = ArgumentCaptor.forClass(String.class);
       ArgumentCaptor<String> argTemplate = ArgumentCaptor.forClass(String.class);
-      ArgumentCaptor<Map> argModel = ArgumentCaptor.forClass(Map.class);
+      ArgumentCaptor<Map<String,Object>> argModel = ArgumentCaptor.forClass(Map.class);
 
       EventListener spy = spy(sut);
 
@@ -1758,7 +1757,7 @@ public class EventListenerTest {
       doReturn(userSubject).when(spy).getUserSubject(type);
       doReturn(adminSubject).when(spy).getAdminSubject(type);
 
-      doReturn(Arrays.asList(admin1, admin2, admin3)).when(group).getOwners();
+      doReturn(List.of(admin1, admin2, admin3)).when(group).getOwners();
 
       doNothing().when(spy)
           .sendTemplateEmail(argTo.capture(), argSubject.capture(), argTemplate.capture(),
@@ -1770,19 +1769,19 @@ public class EventListenerTest {
       // NOW VERIFY
       verify(spy, times(4)).sendTemplateEmail(any(), any(), any(), any());
 
-      assertEquals(Arrays.asList(
+      assertEquals(List.of(
               "admin1@test.com", "admin2@test.com", "admin3@test.com", "user1@test.com"),
           argTo.getAllValues());
 
-      assertEquals(Arrays.asList(
+      assertEquals(List.of(
               adminSubject, adminSubject, adminSubject, userSubject),
           argSubject.getAllValues());
 
-      assertEquals(Arrays.asList(
+      assertEquals(List.of(
               adminTemplate, adminTemplate, adminTemplate, userTemplate),
           argTemplate.getAllValues());
 
-      assertEquals(Arrays.asList(model, model, model, model),
+      assertEquals(List.of(model, model, model, model),
           argModel.getAllValues());
 
       verify(deposit).getUser();
@@ -1825,7 +1824,7 @@ public class EventListenerTest {
     @Test
     void testValidateTypes() {
 
-      List<String> validTypes = Arrays.asList(
+      List<String> validTypes = List.of(
           TYPE_START,
           TYPE_COMPLETE,
           TYPE_RETRIEVE_START,
@@ -1946,7 +1945,7 @@ public class EventListenerTest {
   class ProcessDepositJobAndVaultTests {
 
     private <T> Consumer<T> getFailsFirstTimeConsumer() {
-      return new Consumer<T>() {
+      return new Consumer<>() {
         int count = 0;
 
         @Override

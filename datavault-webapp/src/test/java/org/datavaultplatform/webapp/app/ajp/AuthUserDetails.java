@@ -1,9 +1,10 @@
 package org.datavaultplatform.webapp.app.ajp;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 import lombok.Data;
 import org.datavaultplatform.webapp.authentication.shib.ShibWebAuthenticationDetails;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
 @Data
@@ -22,7 +23,6 @@ public class AuthUserDetails {
     this.email = details.getEmail();
     this.firstname = details.getFirstname();
     this.lastname = details.getLastname();
-    this.grantedAuthorities = authentication.getAuthorities().stream().map(ga -> ga.getAuthority()).sorted().collect(
-        Collectors.toList());
+    this.grantedAuthorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).sorted().toList();
   }
 }

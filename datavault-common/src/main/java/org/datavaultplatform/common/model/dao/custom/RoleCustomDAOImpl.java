@@ -236,7 +236,7 @@ public class RoleCustomDAOImpl extends BaseCustomDAOImpl implements RoleCustomDA
         cq.select(root);
         if (roleType == null) {
             cq.where(cb.isNull(root.get(RoleModel_.type)));
-        }else{
+        } else {
             cq.where(cb.equal(root.get(RoleModel_.type), roleType));
         }
         List<RoleModel> roles = getResults(cq);

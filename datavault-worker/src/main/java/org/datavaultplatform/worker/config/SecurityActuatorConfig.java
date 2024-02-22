@@ -9,16 +9,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 @ConditionalOnExpression("${worker.security.enabled:true}")
-//@EnableWebSecurity
+@EnableWebSecurity
 @Slf4j
 @Order(1)
 @Configuration
@@ -33,11 +34,10 @@ public class SecurityActuatorConfig {
   @Value("${worker.actuator.password:wactupass}")
   String password;
 
-  //@Bean
-  //public WebSecurityCustomizer webSecurityCustomizer() {
-  //  return web -> web.debug(securityDebug);
-  //}
-
+  @Bean
+  public WebSecurityCustomizer webSecurityCustomizer() {
+    return web -> web.debug(securityDebug);
+  }
 
   @Bean
   public UserDetailsService userDetailsService(){
@@ -69,6 +69,6 @@ public class SecurityActuatorConfig {
 
   @PostConstruct
   void init() {
-    System.out.println("Security Actuator Config!!!");
+    log.info("Security Actuator Config!!!");
   }
 }

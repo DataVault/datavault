@@ -1,12 +1,12 @@
 package org.datavaultplatform.common.event.deposit;
 
+import java.util.HashMap;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.custom.HashMapConverter;
-
-import java.util.HashMap;
 
 @Entity
 public class ComputedChunks extends Event implements ChunksDigestEvent {

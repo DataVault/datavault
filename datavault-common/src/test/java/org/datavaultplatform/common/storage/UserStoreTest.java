@@ -1,5 +1,16 @@
 package org.datavaultplatform.common.storage;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.List;
 import lombok.SneakyThrows;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.model.FileInfo;
@@ -12,14 +23,6 @@ import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class UserStoreTest {
 
@@ -40,7 +43,7 @@ public class UserStoreTest {
     fs.setStorageClass(StorageConstants.SFTP_FILE_SYSTEM);
 
     UserStore result = UserStore.fromFileStore(fs, RESOLVER);
-    assertTrue(result instanceof SFTPFileSystemSSHD);
+    assertInstanceOf(SFTPFileSystemSSHD.class, result);
     SFTPFileSystemSSHD sftp = (SFTPFileSystemSSHD) result;
     Class<SFTPFileSystemSSHD> clazz = SFTPFileSystemSSHD.class;
     Class<SFTPConnectionInfo> infoClass = SFTPConnectionInfo.class;
@@ -89,7 +92,7 @@ public class UserStoreTest {
     fs.setStorageClass(LocalFileSystem.class.getName());
 
     UserStore result = UserStore.fromFileStore(fs, RESOLVER);
-    assertTrue(result instanceof LocalFileSystem);
+    assertInstanceOf(LocalFileSystem.class, result);
     LocalFileSystem local = (LocalFileSystem) result;
     Field f1RootPath = LocalFileSystem.class.getDeclaredField("rootPath");
     f1RootPath.setAccessible(true);

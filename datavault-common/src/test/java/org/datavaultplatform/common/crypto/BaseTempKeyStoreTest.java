@@ -1,16 +1,15 @@
 package org.datavaultplatform.common.crypto;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import java.io.File;
+import javax.crypto.SecretKey;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
-
-import javax.crypto.SecretKey;
-import java.io.File;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 abstract public class BaseTempKeyStoreTest {

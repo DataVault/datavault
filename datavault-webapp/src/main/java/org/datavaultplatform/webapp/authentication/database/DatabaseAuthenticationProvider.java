@@ -68,9 +68,8 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
 
         grantedAuths.addAll(scopedAuthorities);
 
-        boolean isAdmin = false;
         try{
-            isAdmin = restService.isAdmin(new ValidateUser(name, null));
+            boolean isAdmin = restService.isAdmin(new ValidateUser(name, null));
             if (isAdmin) {
                 grantedAuths.add(new SimpleGrantedAuthority(RoleName.ROLE_IS_ADMIN));
             }

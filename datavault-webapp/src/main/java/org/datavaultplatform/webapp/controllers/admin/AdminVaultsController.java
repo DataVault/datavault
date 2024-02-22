@@ -63,7 +63,7 @@ public class AdminVaultsController {
         model.addAttribute("vaults", filteredVaultsData.getData());
         model.addAttribute("query", query);
 
-        boolean isFiltered = query != null  && !query.equals("");
+        boolean isFiltered = query != null  && !query.isEmpty();
         model.addAttribute("recordsInfo",
                 constructTableRecordsInfo(
                         offset,

@@ -1,13 +1,5 @@
 package org.datavaultplatform.common.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.datavaultplatform.common.model.PendingVault;
-import org.datavaultplatform.common.request.CreateVault;
-import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
-import org.jsondoc.core.annotation.ApiObject;
-import org.jsondoc.core.annotation.ApiObjectField;
-
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -15,6 +7,15 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import org.datavaultplatform.common.model.PendingVault;
+import org.datavaultplatform.common.request.CreateVault;
+import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
+import org.jsondoc.core.annotation.ApiObject;
+import org.jsondoc.core.annotation.ApiObjectField;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "VaultInfo")
@@ -712,10 +713,7 @@ public class VaultInfo {
         // if vault owner is null set isowner to true
         // if vault owner is the same as the logged in user set isowner to true
         // if vault owner is different ot hte logged in user set to false
-        boolean isOwner = true;
-        if (this.getOwnerId() != null && ! this.getOwnerId().equals(this.getUserID())) {
-            isOwner = false;
-        }
+        boolean isOwner = this.getOwnerId() == null || this.getOwnerId().equals(this.getUserID());
         cv.setIsOwner(isOwner);
         cv.setVaultOwner(this.getOwnerId());
         cv.setNominatedDataManagers(this.getNominatedDataManagerIds());

@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Set;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -124,7 +124,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
 
     List<Deposit> completed = dao.completed();
     assertEquals(
-        new HashSet<>(Arrays.asList(deposit1.getID(),deposit3.getID())),
+        Set.of(deposit1.getID(),deposit3.getID()),
         completed.stream().map(Deposit::getID).collect(Collectors.toSet()));
   }
 
@@ -280,18 +280,15 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
 
     List<Deposit> items4 = dao.list("name3","allowed2","name","asc",0,Integer.MAX_VALUE);
     assertEquals(3, items4.size());
-    assertEquals(Arrays.asList("name3","name34","name345"),items4.stream().map(Deposit::getName).collect(
-            Collectors.toList()));
+    assertEquals(List.of("name3","name34","name345"),items4.stream().map(Deposit::getName).toList());
 
     List<Deposit> items5 = dao.list("name3","allowed2","name","asc",1,Integer.MAX_VALUE);
     assertEquals(2, items5.size());
-    assertEquals(Arrays.asList("name34","name345"),items5.stream().map(Deposit::getName).collect(
-        Collectors.toList()));
+    assertEquals(List.of("name34","name345"),items5.stream().map(Deposit::getName).toList());
 
     List<Deposit> items6 = dao.list("name3","allowed2","name","desc",1,Integer.MAX_VALUE);
     assertEquals(2, items6.size());
-    assertEquals(Arrays.asList("name34","name345"),items5.stream().map(Deposit::getName).collect(
-        Collectors.toList()));
+    assertEquals(List.of("name34","name345"),items5.stream().map(Deposit::getName).toList());
 
     List<Deposit> items7 = dao.list("name1","allowed1","name","asc",1,1);
     assertEquals(1, items7.size());
@@ -643,8 +640,8 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
 
   void checkSameDepositNames(Collection<Deposit> actual, Deposit... expected){
     assertEquals(
-        Arrays.stream(expected).map(Deposit::getName).sorted().collect(Collectors.toList()),
-        actual.stream().map(Deposit::getName).sorted().collect(Collectors.toList()));
+        Arrays.stream(expected).map(Deposit::getName).sorted().toList(),
+        actual.stream().map(Deposit::getName).sorted().toList());
   }
 
   @BeforeEach

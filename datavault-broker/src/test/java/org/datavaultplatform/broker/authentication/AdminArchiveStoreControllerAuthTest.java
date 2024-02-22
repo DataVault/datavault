@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.util.Arrays;
+
 import java.util.List;
 import org.datavaultplatform.broker.controllers.admin.AdminArchiveStoreController;
 import org.datavaultplatform.common.model.ArchiveStore;
@@ -36,11 +36,11 @@ public class AdminArchiveStoreControllerAuthTest extends BaseControllerAuthTest 
   void testGetArchiveStores() {
 
     ResponseEntity<List<ArchiveStore>> result = ResponseEntity.ok(
-        Arrays.asList(ARCHIVE_STORE_1, AuthTestData.ARCHIVE_STORE_2));
+        List.of(ARCHIVE_STORE_1, AuthTestData.ARCHIVE_STORE_2));
 
     when(controller.getArchiveStores(USER_ID_1)).thenReturn(result);
 
-    checkWorksWhenAuthenticatedFailsOtherwise(get("/admin/archivestores"), Arrays.asList(
+    checkWorksWhenAuthenticatedFailsOtherwise(get("/admin/archivestores"), List.of(
             ARCHIVE_STORE_1, AuthTestData.ARCHIVE_STORE_2),
         Permission.CAN_MANAGE_ARCHIVE_STORES);
 

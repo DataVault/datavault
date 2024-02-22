@@ -21,7 +21,6 @@ import org.datavaultplatform.common.model.User;
 import org.datavaultplatform.common.model.Vault;
 import org.datavaultplatform.common.storage.Verify;
 import org.datavaultplatform.common.storage.impl.LocalFileSystem;
-import org.joda.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,7 +67,7 @@ public class GenerateRetrieveMessageTest extends BaseGenerateMessageTest {
   void testRetrieveDepositToGenerateRetrieveMessage() {
     User mockUser = mock(User.class);
     when(mockUser.getID()).thenReturn("used-id-one");
-    when(mockUser.getFileStores()).thenReturn(Arrays.asList(getRetrieveFileStore()));
+    when(mockUser.getFileStores()).thenReturn(List.of(getRetrieveFileStore()));
 
     Vault mockVault = mock(Vault.class);
     when(mockVault.getID()).thenReturn("vault-123");
@@ -89,7 +88,7 @@ public class GenerateRetrieveMessageTest extends BaseGenerateMessageTest {
     chunk1.setEncIV(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16});
     chunk1.setEcnArchiveDigest("enc-chunk-1-digest");
     chunk1.setArchiveDigestAlgorithm(Verify.SHA_1_ALGORITHM);
-    deposit.setDepositChunks(Arrays.asList(chunk1));
+    deposit.setDepositChunks(List.of(chunk1));
 
     Archive archive = new Archive();
     archive.setArchiveStore(getDestinationArchiveStore());
@@ -99,7 +98,7 @@ public class GenerateRetrieveMessageTest extends BaseGenerateMessageTest {
 
     Field fArchives = Deposit.class.getDeclaredField("archives");
     fArchives.setAccessible(true);
-    fArchives.set(deposit, Arrays.asList(archive));
+    fArchives.set(deposit, List.of(archive));
 
     when(depositDao.findById("deposit-id-123")).thenReturn(Optional.of(deposit));
 

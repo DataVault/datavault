@@ -1,7 +1,7 @@
 package org.datavaultplatform.common.model.dao.custom;
 
 import java.util.ArrayList;
-import java.util.Collections;
+
 import java.util.List;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -107,7 +107,7 @@ public class PendingVaultCustomDAOImpl extends BaseCustomDAOImpl implements
   private void order(String sort, String direction,
       SchoolPermissionQueryHelper<PendingVault> helper) {
     // Default to ascending order
-    boolean asc = "desc".equals(direction) ? false : true;
+    boolean asc = !"desc".equals(direction);
 
 //        // See if there is a valid sort option
 
@@ -126,7 +126,7 @@ public class PendingVaultCustomDAOImpl extends BaseCustomDAOImpl implements
       String confirmed) {
     helper.setPredicateHelper((cb, rt) -> {
       List<Predicate> predicates = new ArrayList<>();
-      if (!(query == null || query.equals(""))) {
+      if (!(query == null || query.isEmpty())) {
         String lowerQuery = getQueryLower(query);
         predicates.add(
             cb.or(
@@ -144,7 +144,7 @@ public class PendingVaultCustomDAOImpl extends BaseCustomDAOImpl implements
 
   private void addConfirmed(List<Predicate> predicates, String confirmed, CriteriaBuilder cb,
       Root<PendingVault> rt) {
-    if (confirmed != null && !confirmed.equals("null") && !confirmed.equals("")) {
+    if (confirmed != null && !confirmed.equals("null") && !confirmed.isEmpty()) {
       Boolean conf = Boolean.valueOf(confirmed);
       predicates.add(
           cb.equal(rt.get(PendingVault_.CONFIRMED), conf)
@@ -152,6 +152,6 @@ public class PendingVaultCustomDAOImpl extends BaseCustomDAOImpl implements
     }
   }
   private static List<Order> getSingletonOrderList(CriteriaBuilder cb, boolean asc, Path<?> sortPath) {
-    return Collections.singletonList(asc ? cb.asc(sortPath) : cb.desc(sortPath));
+    return List.of(asc ? cb.asc(sortPath) : cb.desc(sortPath));
   }
 }

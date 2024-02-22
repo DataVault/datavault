@@ -8,10 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Set;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -108,11 +106,11 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
 
     // The AuditChunkStatus should be ordered by Ascending Timestamp
     assertEquals(
-        Arrays.asList(
+        List.of(
             auditChunkStatus3.getID(),
             auditChunkStatus1.getID(),
             auditChunkStatus2.getID()),
-        items.stream().map(AuditChunkStatus::getID).collect(Collectors.toList()));
+        items.stream().map(AuditChunkStatus::getID).toList());
   }
 
   @Test
@@ -196,12 +194,12 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
 
     List<AuditChunkStatus> byAudit1 = dao.findByAudit(audit1);
     assertEquals(2, byAudit1.size());
-    assertTrue(byAudit1.stream().map(AuditChunkStatus::getID).collect(Collectors.toList()).contains(item1.getID()));
-    assertTrue(byAudit1.stream().map(AuditChunkStatus::getID).collect(Collectors.toList()).contains(item3.getID()));
+    assertTrue(byAudit1.stream().map(AuditChunkStatus::getID).toList().contains(item1.getID()));
+    assertTrue(byAudit1.stream().map(AuditChunkStatus::getID).toList().contains(item3.getID()));
 
     List<AuditChunkStatus> byAudit2 = dao.findByAudit(audit2);
     assertEquals(1, byAudit2.size());
-    assertTrue(byAudit2.stream().map(AuditChunkStatus::getID).collect(Collectors.toList()).contains(item2.getID()));
+    assertTrue(byAudit2.stream().map(AuditChunkStatus::getID).toList().contains(item2.getID()));
   }
 
   @Test
@@ -234,12 +232,12 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
 
     List<AuditChunkStatus> byDepositChunk1 = dao.findByDepositChunk(depositChunk1);
     assertEquals(2, byDepositChunk1.size());
-    assertTrue(byDepositChunk1.stream().map(AuditChunkStatus::getID).collect(Collectors.toList()).contains(item1.getID()));
-    assertTrue(byDepositChunk1.stream().map(AuditChunkStatus::getID).collect(Collectors.toList()).contains(item3.getID()));
+    assertTrue(byDepositChunk1.stream().map(AuditChunkStatus::getID).toList().contains(item1.getID()));
+    assertTrue(byDepositChunk1.stream().map(AuditChunkStatus::getID).toList().contains(item3.getID()));
 
     List<AuditChunkStatus> byDepositChunk2 = dao.findByDepositChunk(depositChunk2);
     assertEquals(1, byDepositChunk2.size());
-    assertTrue(byDepositChunk2.stream().map(AuditChunkStatus::getID).collect(Collectors.toList()).contains(item2.getID()));
+    assertTrue(byDepositChunk2.stream().map(AuditChunkStatus::getID).toList().contains(item2.getID()));
   }
 
   @Test
@@ -312,39 +310,39 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
 
     assertEquals(3, dao.findAll().size());
 
-    assertEquals(item1.getID(), dao.findBy(new HashMap<String, Object>(){
+    assertEquals(item1.getID(), dao.findBy(new HashMap<>(){
       {
         this.put(PropNames.STATUS, Status.COMPLETE);
       }
     }).get(0).getID());
 
-    assertEquals(item2.getID(), dao.findBy(new HashMap<String, Object>(){
+    assertEquals(item2.getID(), dao.findBy(new HashMap<>(){
       {
         this.put(PropNames.STATUS, Status.ERROR);
       }
     }).get(0).getID());
 
 
-    assertEquals(item3.getID(), dao.findBy(new HashMap<String, Object>(){
+    assertEquals(item3.getID(), dao.findBy(new HashMap<>(){
       {
         this.put(PropNames.STATUS, Status.IN_PROGRESS);
       }
     }).get(0).getID());
 
-    assertEquals(new HashSet<>(Arrays.asList(item1.getID(), item2.getID())), dao.findBy(new HashMap<String, Object>(){
+    assertEquals(Set.of(item1.getID(), item2.getID()), dao.findBy(new HashMap<>(){
       {
         this.put("note", "noteA");
       }
     }).stream().map(AuditChunkStatus::getID).collect(Collectors.toSet()));
 
-    assertEquals(new HashSet<>(Collections.singletonList(item3.getID())), dao.findBy(new HashMap<String, Object>(){
+    assertEquals(Set.of(item3.getID()), dao.findBy(new HashMap<>() {
       {
         this.put("note", "noteB");
       }
     }).stream().map(AuditChunkStatus::getID).collect(Collectors.toSet()));
 
 
-    assertEquals(new HashSet<>(Collections.singletonList(item1.getID())), dao.findBy(new HashMap<String, Object>(){
+    assertEquals(Set.of(item1.getID()), dao.findBy(new HashMap<>(){
       {
         this.put("note", "noteA");
         this.put(PropNames.STATUS, Status.COMPLETE);
@@ -380,9 +378,9 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
 
     assertEquals(item3.getID(), dao.findBy(PropNames.STATUS, Status.IN_PROGRESS).get(0).getID());
 
-    assertEquals(new HashSet<>(Arrays.asList(item1.getID(), item2.getID())), dao.findBy("note", "noteA").stream().map(AuditChunkStatus::getID).collect(Collectors.toSet()));
+    assertEquals(Set.of(item1.getID(), item2.getID()), dao.findBy("note", "noteA").stream().map(AuditChunkStatus::getID).collect(Collectors.toSet()));
 
-    assertEquals(new HashSet<>(Collections.singletonList(item3.getID())), dao.findBy("note", "noteB").stream().map(AuditChunkStatus::getID).collect(Collectors.toSet()));
+    assertEquals(Set.of(item3.getID()), dao.findBy("note", "noteB").stream().map(AuditChunkStatus::getID).collect(Collectors.toSet()));
   }
 
   @Test
@@ -415,12 +413,12 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
 
     List<AuditChunkStatus> byDepositChunk1 = dao.findByDepositChunkId(depositChunk1.getID());
     assertEquals(2, byDepositChunk1.size());
-    assertTrue(byDepositChunk1.stream().map(AuditChunkStatus::getID).collect(Collectors.toList()).contains(item1.getID()));
-    assertTrue(byDepositChunk1.stream().map(AuditChunkStatus::getID).collect(Collectors.toList()).contains(item3.getID()));
+    assertTrue(byDepositChunk1.stream().map(AuditChunkStatus::getID).toList().contains(item1.getID()));
+    assertTrue(byDepositChunk1.stream().map(AuditChunkStatus::getID).toList().contains(item3.getID()));
 
     List<AuditChunkStatus> byDepositChunk2 = dao.findByDepositChunkId(depositChunk2.getID());
     assertEquals(1, byDepositChunk2.size());
-    assertTrue(byDepositChunk2.stream().map(AuditChunkStatus::getID).collect(Collectors.toList()).contains(item2.getID()));
+    assertTrue(byDepositChunk2.stream().map(AuditChunkStatus::getID).toList().contains(item2.getID()));
   }
 
 
@@ -443,10 +441,10 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
     deposit2.setHasPersonalData(true);
     deposit2.setName("deposit-2");
 
-    deposit1.setDepositChunks(Collections.singletonList(depositChunk1));
+    deposit1.setDepositChunks(List.of(depositChunk1));
     depositChunk1.setDeposit(deposit1);
 
-    deposit2.setDepositChunks(Collections.singletonList(depositChunk2));
+    deposit2.setDepositChunks(List.of(depositChunk2));
     depositChunk2.setDeposit(deposit2);
 
     assertEquals(0, depositChunkDAO.findAll().size());
@@ -496,20 +494,20 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
 
     List<AuditChunkStatus> byDeposit1 = dao.findByDeposit(deposit1);
     assertEquals(2, byDeposit1.size());
-    assertTrue(byDeposit1.stream().map(AuditChunkStatus::getID).collect(Collectors.toList()).contains(item1.getID()));
-    assertTrue(byDeposit1.stream().map(AuditChunkStatus::getID).collect(Collectors.toList()).contains(item3.getID()));
+    assertTrue(byDeposit1.stream().map(AuditChunkStatus::getID).toList().contains(item1.getID()));
+    assertTrue(byDeposit1.stream().map(AuditChunkStatus::getID).toList().contains(item3.getID()));
 
     List<AuditChunkStatus> byDeposit2 = dao.findByDeposit(deposit2);
     assertEquals(1, byDeposit2.size());
-    assertTrue(byDeposit2.stream().map(AuditChunkStatus::getID).collect(Collectors.toList()).contains(item2.getID()));
+    assertTrue(byDeposit2.stream().map(AuditChunkStatus::getID).toList().contains(item2.getID()));
 
     List<AuditChunkStatus> byDepositId1 = dao.findByDepositId(deposit1.getID());
     assertEquals(2, byDepositId1.size());
-    assertTrue(byDepositId1.stream().map(AuditChunkStatus::getID).collect(Collectors.toList()).contains(item1.getID()));
-    assertTrue(byDepositId1.stream().map(AuditChunkStatus::getID).collect(Collectors.toList()).contains(item3.getID()));
+    assertTrue(byDepositId1.stream().map(AuditChunkStatus::getID).toList().contains(item1.getID()));
+    assertTrue(byDepositId1.stream().map(AuditChunkStatus::getID).toList().contains(item3.getID()));
 
     List<AuditChunkStatus> byDepositId2 = dao.findByDepositId(deposit2.getID());
     assertEquals(1, byDeposit2.size());
-    assertTrue(byDepositId2.stream().map(AuditChunkStatus::getID).collect(Collectors.toList()).contains(item2.getID()));
+    assertTrue(byDepositId2.stream().map(AuditChunkStatus::getID).toList().contains(item2.getID()));
   }
 }

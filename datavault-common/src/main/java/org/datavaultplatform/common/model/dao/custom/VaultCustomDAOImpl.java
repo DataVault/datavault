@@ -137,7 +137,7 @@ public class VaultCustomDAOImpl extends BaseCustomDAOImpl implements VaultCustom
             } else {
                 orderBy= cb.desc(sortExpr);
             }
-            return Collections.singletonList(orderBy);
+            return List.of(orderBy);
         });
     }
 

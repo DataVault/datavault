@@ -4,14 +4,14 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Sets;
-import jakarta.persistence.*;
-import org.hibernate.Hibernate;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import jakarta.persistence.*;
+import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Objects;
+import org.hibernate.Hibernate;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -13,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +54,7 @@ public class PackagerTest {
         final String TEST_FILE = "item.pdf";
         
         // files expected in bag
-        final List<String> expectFiles = Arrays.asList(
+        final List<String> expectFiles = List.of(
                 "bagit.txt",
                 "bag-info.txt",
                 "manifest-md5.txt",

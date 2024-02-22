@@ -63,7 +63,7 @@ public class TarNestedTest extends BaseNestedTarTest {
         .map(Object::toString)
         .map(this::removeTrailingSlash)
         .sorted()
-        .collect(Collectors.toList());
+        .toList();
 
     List<String> expectedPaths = Stream.of(
 
@@ -117,7 +117,7 @@ public class TarNestedTest extends BaseNestedTarTest {
         "tarContents/N1/N2/N3/N4/EMPTY_4",
         "tarContents/N1/N2/N3/N4/N5/EMPTY_5"
 
-    ).map(this::removeTrailingSlash).sorted().collect(Collectors.toList());
+    ).map(this::removeTrailingSlash).sorted().toList();
 
 
     assertEquals(expectedPaths, actualPaths);

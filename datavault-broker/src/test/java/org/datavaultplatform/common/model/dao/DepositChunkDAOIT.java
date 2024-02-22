@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.broker.app.DataVaultBrokerApp;
@@ -104,19 +103,19 @@ public class DepositChunkDAOIT extends BaseReuseDatabaseTest {
     assertEquals(2, dao.count());
 
     assertEquals(
-        Stream.of(depositChunk1, depositChunk2).map(DepositChunk::getID).sorted().collect(Collectors.toList()),
-        dao.list("id").stream().map(DepositChunk::getID).collect(Collectors.toList())
+        Stream.of(depositChunk1, depositChunk2).map(DepositChunk::getID).sorted().toList(),
+        dao.list("id").stream().map(DepositChunk::getID).toList()
     );
 
     assertEquals(
-        Stream.of(depositChunk2, depositChunk1).map(DepositChunk::getID).collect(Collectors.toList()),
-        dao.list("chunkNum").stream().map(DepositChunk::getID).collect(Collectors.toList())
+        Stream.of(depositChunk2, depositChunk1).map(DepositChunk::getID).toList(),
+        dao.list("chunkNum").stream().map(DepositChunk::getID).toList()
     );
 
     // Anything other than id will be sorted by chunkNum ASC
     assertEquals(
-        Stream.of(depositChunk2, depositChunk1).map(DepositChunk::getID).collect(Collectors.toList()),
-        dao.list("XXX").stream().map(DepositChunk::getID).collect(Collectors.toList())
+        Stream.of(depositChunk2, depositChunk1).map(DepositChunk::getID).toList(),
+        dao.list("XXX").stream().map(DepositChunk::getID).toList()
     );
   }
 

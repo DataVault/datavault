@@ -1,8 +1,9 @@
 package org.datavaultplatform.common.event.roles;
 
-import jakarta.persistence.Entity;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.Vault;
+
+import jakarta.persistence.Entity;
 
 @Entity
 public class OrphanVault extends Event {

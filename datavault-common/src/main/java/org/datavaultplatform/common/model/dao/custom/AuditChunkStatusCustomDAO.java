@@ -1,12 +1,11 @@
 package org.datavaultplatform.common.model.dao.custom;
 
+import java.util.HashMap;
+import java.util.List;
 import org.datavaultplatform.common.model.Audit;
 import org.datavaultplatform.common.model.AuditChunkStatus;
 import org.datavaultplatform.common.model.DepositChunk;
 import org.springframework.data.jpa.repository.EntityGraph;
-
-import java.util.HashMap;
-import java.util.List;
 
 public interface AuditChunkStatusCustomDAO extends BaseCustomDAO {
 

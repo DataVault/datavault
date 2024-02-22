@@ -82,7 +82,7 @@ public class UserKeyPairServiceJSchImpl implements UserKeyPairService {
   public String convert(Consumer<OutputStream> consumer) {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     consumer.accept(baos);
-    return new String(baos.toByteArray(), StandardCharsets.UTF_8);
+    return baos.toString(StandardCharsets.UTF_8);
   }
 
 }

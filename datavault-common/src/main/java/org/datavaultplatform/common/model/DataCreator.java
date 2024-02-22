@@ -2,12 +2,12 @@ package org.datavaultplatform.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+import java.util.Objects;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 
-import java.util.Objects;
+import jakarta.persistence.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "DataCreator")

@@ -3,24 +3,23 @@ package org.datavaultplatform.common.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiObject(name = "PendingVault")
 @Entity
-@Table(name="PendingVaults")
-@NamedEntityGraph(name=PendingVault.EG_PENDING_VAULT, attributeNodes =
-    {
+@Table(name = "PendingVaults")
+@NamedEntityGraph(name = PendingVault.EG_PENDING_VAULT, attributeNodes = {
         @NamedAttributeNode(PendingVault_.GROUP),
         @NamedAttributeNode(PendingVault_.USER),
         @NamedAttributeNode(PendingVault_.RETENTION_POLICY),
@@ -54,17 +53,17 @@ public class PendingVault {
         YES,
         NO_OR_DO_NOT_KNOW,
         BUY_NEW_SLICE
-    };
+    }
 
     public enum Funding_Query_Choice {
         YES,
         FUNDING_NO_OR_DO_NOT_KNOW
-    };
+    }
 
     public enum Feewaiver_Query_Choice {
         YES,
         NO_OR_DO_NOT_KNOW
-    };
+    }
 
     // Vault Identifier
     @Id

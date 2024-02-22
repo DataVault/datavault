@@ -1,5 +1,7 @@
 package org.datavaultplatform.common.model.dao;
 
+import java.util.List;
+import java.util.Optional;
 import org.datavaultplatform.common.model.Audit;
 import org.datavaultplatform.common.model.Audit_;
 import org.springframework.data.domain.Sort;
@@ -7,9 +9,6 @@ import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 @Transactional
