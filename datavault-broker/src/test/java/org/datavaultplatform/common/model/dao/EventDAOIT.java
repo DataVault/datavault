@@ -21,6 +21,7 @@ import org.datavaultplatform.common.event.deposit.ComputedEncryption;
 import org.datavaultplatform.common.event.deposit.UploadComplete;
 import org.datavaultplatform.common.model.Vault;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,58 +48,66 @@ public class EventDAOIT extends BaseDatabaseTest {
   @Autowired
   JdbcTemplate template;
 
-  @Test
-  public void testComputedChunksChunksDigestBLOB() {
-    ComputedChunks event = getEvent1_ComputedChunkEvent();
-    dao.save(event);
+  @Nested
+  class BlobTests {
 
-    Event foundEvent = dao.findById(event.getID()).get();
-    assertInstanceOf(ComputedChunks.class, foundEvent);
-    ComputedChunks foundCCEvent = (ComputedChunks) foundEvent;
 
-    assertEquals(event.getChunksDigest(), foundCCEvent.getChunksDigest());
-  }
+    @Test
+    public void testComputedChunksChunksDigestBLOB() {
+      ComputedChunks event = getEvent1_ComputedChunkEvent();
+      dao.save(event);
 
-  @Test
-  public void testCompleteArchiveIdsBLOB() {
-    Complete event = getEvent2_CompleteEvent();
-    dao.save(event);
+      Event foundEvent = dao.findById(event.getID()).get();
+      assertInstanceOf(ComputedChunks.class, foundEvent);
+      ComputedChunks foundCCEvent = (ComputedChunks) foundEvent;
 
-    Event foundEvent = dao.findById(event.getID()).get();
-    assertInstanceOf(Complete.class, foundEvent);
-    Complete foundCompleteEvent = (Complete) foundEvent;
-
-    assertEquals(event.getArchiveIds(), foundCompleteEvent.getArchiveIds());
-  }
-
-  @Test
-  public void testComputedEncryptionEventBLOBS() {
-    ComputedEncryption event = getEvent3_ComputedEncryption();
-    dao.save(event);
-
-    Event foundEvent = dao.findById(event.getID()).get();
-    assertInstanceOf(ComputedEncryption.class, foundEvent);
-    ComputedEncryption foundComputedEncryptionEvent = (ComputedEncryption) foundEvent;
-
-    assertEquals(event.getChunksDigest(), foundComputedEncryptionEvent.getChunksDigest());
-    assertEquals(event.getEncChunkDigests(), foundComputedEncryptionEvent.getEncChunkDigests());
-    assertEquals(event.getChunkIVs().keySet(), foundComputedEncryptionEvent.getChunkIVs().keySet());
-
-    for(Integer key : event.getChunkIVs().keySet()){
-      assertArrayEquals(event.getChunkIVs().get(key), foundComputedEncryptionEvent.getChunkIVs().get(key));
+      assertEquals(event.getChunksDigest(), foundCCEvent.getChunksDigest());
     }
-  }
 
-  @Test
-  public void testUploadCompleteArchiveIdsBLOB() {
-    UploadComplete event = getEvent4_UploadComplete();
-    dao.save(event);
+    @Test
+    public void testCompleteArchiveIdsBLOB() {
+      Complete event = getEvent2_CompleteEvent();
+      dao.save(event);
 
-    Event foundEvent = dao.findById(event.getID()).get();
-    assertInstanceOf(UploadComplete.class, foundEvent);
-    UploadComplete foundCompleteEvent = (UploadComplete) foundEvent;
+      Event foundEvent = dao.findById(event.getID()).get();
+      assertInstanceOf(Complete.class, foundEvent);
+      Complete foundCompleteEvent = (Complete) foundEvent;
 
-    assertEquals(event.getArchiveIds(), foundCompleteEvent.getArchiveIds());
+      assertEquals(event.getArchiveIds(), foundCompleteEvent.getArchiveIds());
+    }
+
+    @Test
+    public void testComputedEncryptionEventBLOBS() {
+      ComputedEncryption event = getEvent3_ComputedEncryption();
+      dao.save(event);
+
+      Event foundEvent = dao.findById(event.getID()).get();
+      assertInstanceOf(ComputedEncryption.class, foundEvent);
+      ComputedEncryption foundComputedEncryptionEvent = (ComputedEncryption) foundEvent;
+
+      assertEquals(event.getMessage(), foundComputedEncryptionEvent.getMessage());
+      assertArrayEquals(event.getTarIV(), foundComputedEncryptionEvent.getTarIV());
+
+      assertEquals(event.getChunksDigest(), foundComputedEncryptionEvent.getChunksDigest());
+      assertEquals(event.getEncChunkDigests(), foundComputedEncryptionEvent.getEncChunkDigests());
+      assertEquals(event.getChunkIVs().keySet(), foundComputedEncryptionEvent.getChunkIVs().keySet());
+
+      for (Integer key : event.getChunkIVs().keySet()) {
+        assertArrayEquals(event.getChunkIVs().get(key), foundComputedEncryptionEvent.getChunkIVs().get(key));
+      }
+    }
+
+    @Test
+    public void testUploadCompleteArchiveIdsBLOB() {
+      UploadComplete event = getEvent4_UploadComplete();
+      dao.save(event);
+
+      Event foundEvent = dao.findById(event.getID()).get();
+      assertInstanceOf(UploadComplete.class, foundEvent);
+      UploadComplete foundCompleteEvent = (UploadComplete) foundEvent;
+
+      assertEquals(event.getArchiveIds(), foundCompleteEvent.getArchiveIds());
+    }
   }
 
   @Test

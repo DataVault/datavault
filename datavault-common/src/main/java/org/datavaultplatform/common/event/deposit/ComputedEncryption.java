@@ -12,10 +12,12 @@ import org.datavaultplatform.common.model.custom.HashMapConverter;
 @Entity
 public class ComputedEncryption extends Event implements ChunksDigestEvent {
 
+    @Lob
     @Convert(converter = HashMapConverter.class)
     @Column(name="chunkIVs", columnDefinition="LONGBLOB")
     private HashMap<Integer, byte[]> chunkIVs = new HashMap<>();
 
+    @Lob
     @Convert(converter = HashMapConverter.class)
     @Column(name="encChunkDigests", columnDefinition="LONGBLOB")
     private HashMap<Integer, String> encChunkDigests = new HashMap<>();
@@ -26,6 +28,7 @@ public class ComputedEncryption extends Event implements ChunksDigestEvent {
     private String encTarDigest;
     private String aesMode;
 
+    @Lob
     @Convert(converter = HashMapConverter.class)
     @Column(name="chunksDigest", columnDefinition="LONGBLOB")
     private HashMap<Integer, String> chunksDigest = new HashMap<>();

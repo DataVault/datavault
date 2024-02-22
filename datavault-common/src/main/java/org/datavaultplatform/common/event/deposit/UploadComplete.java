@@ -3,6 +3,7 @@ package org.datavaultplatform.common.event.deposit;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
 import org.datavaultplatform.common.event.Event;
 import org.datavaultplatform.common.model.custom.HashMapConverter;
 
@@ -12,6 +13,7 @@ import java.util.HashMap;
 public class UploadComplete extends Event {
 
     // Maps the model ArchiveStore Id to the generated Archive Id
+    @Lob
     @Convert(converter = HashMapConverter.class)
     @Column(name="archiveIds", columnDefinition="TINYBLOB")
     HashMap<String, String> archiveIds = new HashMap<>();

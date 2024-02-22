@@ -10,12 +10,15 @@ import org.datavaultplatform.broker.app.DataVaultBrokerApp;
 import org.datavaultplatform.broker.test.AddTestProperties;
 import org.datavaultplatform.broker.test.BaseReuseDatabaseTest;
 import org.datavaultplatform.common.model.DepositChunk;
+import org.datavaultplatform.common.model.MariaDBConstants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
+import java.security.SecureRandom;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = DataVaultBrokerApp.class)
 @AddTestProperties
@@ -52,6 +55,20 @@ public class DepositChunkDAOIT extends BaseReuseDatabaseTest {
     DepositChunk foundById2 = dao.findById(depositChunk2.getID()).get();
     assertEquals(depositChunk2.getArchiveDigest(), foundById2.getArchiveDigest());
   }
+
+  @Test
+  void testWriteThenReadBLOB() {
+    DepositChunk depositChunk1 = getDepositChunkWithRandomEncIV(MariaDBConstants.MARIADB_MAX_BLOB_SIZE);
+
+    dao.save(depositChunk1);
+    assertNotNull(depositChunk1.getID());
+
+    DepositChunk foundById1 = dao.findById(depositChunk1.getID()).get();
+    assertNotSame(depositChunk1, foundById1);
+    assertEquals(depositChunk1.getArchiveDigest(), foundById1.getArchiveDigest());
+    assertArrayEquals(depositChunk1.getEncIV(), foundById1.getEncIV());
+  }
+
 
   @Test
   void testList() {
@@ -136,6 +153,16 @@ public class DepositChunkDAOIT extends BaseReuseDatabaseTest {
     result.setArchiveDigest("ad1");
     return result;
   }
+
+  DepositChunk getDepositChunkWithRandomEncIV(int length) {
+    DepositChunk result = getDepositChunk1();
+    SecureRandom random = new SecureRandom();
+    byte[] randomBytes = new byte[length];
+    random.nextBytes(randomBytes);
+    result.setEncIV(randomBytes);
+    return result;
+  }
+
 
   DepositChunk getDepositChunk2(){
     DepositChunk result = new DepositChunk();

@@ -51,6 +51,7 @@ public class DepositChunk {
     private String archiveDigestAlgorithm;
     
     // Encryption
+    @Lob
     @Column(columnDefinition = "BLOB")
     private byte[] encIV;
     @Column(columnDefinition = "TEXT")

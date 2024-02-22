@@ -4,9 +4,11 @@ import static org.datavaultplatform.broker.test.TestUtils.NOW;
 import static org.datavaultplatform.broker.test.TestUtils.ONE_YEAR_AGO;
 import static org.datavaultplatform.broker.test.TestUtils.THREE_YEARS_AGO;
 import static org.datavaultplatform.broker.test.TestUtils.TWO_YEARS_AGO;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
@@ -22,6 +24,7 @@ import org.datavaultplatform.common.model.Deposit.Status;
 import org.datavaultplatform.common.model.Group;
 import org.datavaultplatform.common.model.Permission;
 import org.datavaultplatform.common.model.Vault;
+import org.datavaultplatform.common.model.MariaDBConstants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,6 +75,19 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
 
     Deposit foundById2 = dao.findById(depositReview2.getID()).get();
     assertEquals(depositReview2.getName(), foundById2.getName());
+  }
+
+  @Test
+  void testWriteThenReadBLOB() {
+    Deposit depositReview1 = getDepositWithRandomEncIV(MariaDBConstants.MARIADB_MAX_BLOB_SIZE);
+
+    dao.save(depositReview1);
+    assertNotNull(depositReview1.getID());
+
+    Deposit foundById1 = dao.findById(depositReview1.getID()).get();
+    assertNotSame(depositReview1, foundById1);
+    assertEquals(depositReview1.getName(), foundById1.getName());
+    assertArrayEquals(depositReview1.getEncIV(), foundById1.getEncIV());
   }
 
   @Test
@@ -662,6 +678,15 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
     result.setCreationTime(NOW);
     result.setHasPersonalData(false);
     result.setStatus(Status.COMPLETE);
+    return result;
+  }
+
+  Deposit getDepositWithRandomEncIV(int length) {
+    Deposit result = getDeposit1();
+    SecureRandom random = new SecureRandom();
+    byte[] randomBytes = new byte[length];
+    random.nextBytes(randomBytes);
+    result.setEncIV(randomBytes);
     return result;
   }
 

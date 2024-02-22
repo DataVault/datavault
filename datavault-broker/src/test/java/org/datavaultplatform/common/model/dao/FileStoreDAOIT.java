@@ -109,6 +109,10 @@ public class FileStoreDAOIT extends BaseReuseDatabaseTest {
 
   private FileStore getFileStore1() {
     FileStore fileStore = new FileStore();
+    fileStore.getProperties().put("key-1", "value-1");
+    fileStore.getProperties().put("key-2", "value-2");
+    fileStore.getProperties().put("key-3", null);
+    fileStore.getProperties().put(null, "TEST");
     fileStore.setLabel("111");
     return fileStore;
   }

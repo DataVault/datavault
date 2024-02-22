@@ -112,6 +112,11 @@ public class JobDAOIT extends BaseReuseDatabaseTest {
 
   private Job getJob1() {
     Job archive = new Job();
+    archive.getStates().add(null);
+    archive.getStates().addAll(List.of("state1","state2"));
+    archive.getStates().add(null);
+    archive.getStates().addAll(List.of("state3","state4"));
+    archive.getStates().add(null);
     archive.setTaskClass("111");
     return archive;
   }
