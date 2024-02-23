@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -61,6 +60,7 @@ public class PendingVaultDAOIT extends BaseDatabaseTest {
 
     dao.save(pendingVault1);
     assertNotNull(pendingVault1.getId());
+    UUIDUtils.assertIsUUID(pendingVault1.getId());
     assertEquals(1, count());
 
     dao.save(pendingVault2);

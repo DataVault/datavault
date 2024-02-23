@@ -55,6 +55,7 @@ public class VaultDAOIT extends BaseReuseDatabaseTest {
 
     dao.save(vault1);
     assertNotNull(vault1.getID());
+    UUIDUtils.assertIsUUID(vault1.getID());
     assertEquals(1, count());
 
     dao.save(vault2);

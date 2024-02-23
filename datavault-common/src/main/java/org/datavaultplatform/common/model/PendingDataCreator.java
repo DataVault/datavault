@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedAttributeNode;
@@ -14,7 +13,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -34,8 +33,7 @@ public class PendingDataCreator {
 
     // PDC Identifier
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @UuidGenerator
     @Column(name = "id", unique = true, length = 36)
     private String id;
 

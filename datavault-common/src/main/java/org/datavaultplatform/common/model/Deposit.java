@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.*;
 
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
@@ -37,8 +37,7 @@ public class Deposit {
     // Deposit Identifier
     @Id
     @ApiObjectField(description = "Universally Unique Identifier for the Deposit", name="Deposit")
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @UuidGenerator
     @Column(name = "id", unique = true, length = 36)
     private String id;
 

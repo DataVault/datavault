@@ -41,6 +41,7 @@ public class AuditDAOIT extends BaseReuseDatabaseTest {
 
     dao.save(audit1);
     assertNotNull(audit1.getID());
+    UUIDUtils.assertIsUUID(audit1.getID());
     assertEquals(1, count());
 
     dao.save(audit2);

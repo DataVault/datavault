@@ -44,6 +44,7 @@ public class ArchiveStoreDAOIT extends BaseDatabaseTest {
 
     dao.save(archiveStore1);
     assertNotNull(archiveStore1.getID());
+    UUIDUtils.assertIsUUID(archiveStore1.getID());
     assertEquals(1, count());
 
     dao.save(archiveStore2);

@@ -50,6 +50,7 @@ public class BillingDAOIT extends BaseReuseDatabaseTest {
 
     dao.save(billingInfo1);
     assertNotNull(billingInfo1.getID());
+    UUIDUtils.assertIsUUID(billingInfo1.getID());
     assertEquals(1, count());
 
     dao.save(billingInfo2);

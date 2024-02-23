@@ -13,7 +13,7 @@ import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
 import org.datavaultplatform.common.util.StorageClassUtils;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -25,8 +25,7 @@ public class ArchiveStore implements DataStore {
 
     // Storage Identifier
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @UuidGenerator
     @Column(name = "id", unique = true, length = 36)
     private String id;
 

@@ -67,7 +67,7 @@ public class TivoliStorageManager extends Device implements ArchiveStore {
 			}
 		}
 		if (config.containsKey(reverseKey)){
-			TivoliStorageManager.REVERSE = Boolean.valueOf(config.get(reverseKey));
+			TivoliStorageManager.REVERSE = Boolean.parseBoolean(config.get(reverseKey));
 		}
         locations = new ArrayList<>();
 		if (! TivoliStorageManager.REVERSE) {

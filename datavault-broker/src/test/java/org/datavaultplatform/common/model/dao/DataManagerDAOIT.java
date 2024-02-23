@@ -38,6 +38,7 @@ public class DataManagerDAOIT extends BaseReuseDatabaseTest {
 
     dao.save(dataManager1);
     assertNotNull(dataManager1.getID());
+    UUIDUtils.assertIsUUID(dataManager1.getID());
     assertEquals(1, count());
 
     dao.save(dataManager2);

@@ -114,7 +114,7 @@ public class ActuatorTest {
 
     assertTrue(infoMap.containsKey("current-time"));
     String ct = infoMap.get("current-time");
-    Assertions.assertEquals("Tue Mar 29 14:15:16 BST 2022",ct);
+    assertEquals("Tue Mar 29 14:15:16 BST 2022",ct);
   }
 
   @Test
@@ -129,7 +129,7 @@ public class ActuatorTest {
     Map<String,Object> infoMap = mapper.createParser(json).readValueAs(Map.class);
 
     String ct = (String)infoMap.get("timestamp");
-    Assertions.assertEquals("2022-03-29T13:15:16.101Z",ct);
+    assertEquals("2022-03-29T13:15:16.101Z",ct);
 
     assertTrue(infoMap.containsKey("memory"));
     Map<String,Object> innerMap = (Map<String,Object>)infoMap.get("memory");

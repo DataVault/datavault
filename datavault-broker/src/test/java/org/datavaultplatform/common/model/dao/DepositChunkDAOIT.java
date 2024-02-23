@@ -43,6 +43,7 @@ public class DepositChunkDAOIT extends BaseReuseDatabaseTest {
 
     dao.save(depositChunk1);
     assertNotNull(depositChunk1.getID());
+    UUIDUtils.assertIsUUID(depositChunk1.getID());
     assertEquals(1, dao.count());
 
     dao.save(depositChunk2);

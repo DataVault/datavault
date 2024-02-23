@@ -40,6 +40,7 @@ public class JobDAOIT extends BaseReuseDatabaseTest {
 
     dao.save(job1);
     assertNotNull(job1.getID());
+    UUIDUtils.assertIsUUID(job1.getID());
     assertEquals(1, count());
 
     dao.save(job2);

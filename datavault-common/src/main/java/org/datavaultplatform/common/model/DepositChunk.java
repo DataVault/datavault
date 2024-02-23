@@ -6,7 +6,7 @@ import java.util.Objects;
 import jakarta.persistence.*;
 
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 import org.jsondoc.core.annotation.ApiObjectField;
 
@@ -30,8 +30,7 @@ public class DepositChunk {
     // Deposit Identifier
     @Id
     @ApiObjectField(description = "Universally Unique Identifier for the Deposit Path", name="Deposit Path")
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @UuidGenerator
     @Column(name = "id", unique = true, length = 36)
     private String id;
     

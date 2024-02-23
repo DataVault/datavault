@@ -38,6 +38,7 @@ public class PendingDataCreatorDAOIT extends BaseReuseDatabaseTest {
 
     dao.save(pendingDataCreator1);
     assertNotNull(pendingDataCreator1.getId());
+    UUIDUtils.assertIsUUID(pendingDataCreator1.getId());
     assertEquals(1, count());
 
     dao.save(pendingDataCreator2);

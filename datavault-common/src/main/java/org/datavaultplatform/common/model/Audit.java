@@ -8,7 +8,6 @@ import java.util.Objects;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
@@ -18,7 +17,7 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import org.datavaultplatform.common.response.AuditInfo;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -29,8 +28,7 @@ public class Audit {
     public static final String EG_AUDIT = "eg.Audit.1";
     // Deposit Identifier
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @UuidGenerator
     @Column(name = "id", unique = true, length = 36)
     private String id;
 

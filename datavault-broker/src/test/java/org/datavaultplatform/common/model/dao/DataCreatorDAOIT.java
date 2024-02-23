@@ -38,6 +38,7 @@ public class DataCreatorDAOIT extends BaseReuseDatabaseTest {
 
     dao.save(dataCreator1);
     assertNotNull(dataCreator1.getId());
+    UUIDUtils.assertIsUUID(dataCreator1.getId());
     assertEquals(1, count());
 
     dao.save(dataCreator2);

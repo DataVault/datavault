@@ -7,7 +7,7 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 import org.jsondoc.core.annotation.ApiObject;
 
 import jakarta.persistence.*;
@@ -67,8 +67,7 @@ public class PendingVault {
 
     // Vault Identifier
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @UuidGenerator
     @Column(name = "id", unique = true, length = 36)
     private String id;
 

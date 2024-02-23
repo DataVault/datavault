@@ -11,7 +11,6 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
@@ -28,7 +27,7 @@ import org.hibernate.Hibernate;
 import org.datavaultplatform.common.response.BillingInformation;
 import org.datavaultplatform.common.response.VaultInfo;
 import org.datavaultplatform.common.retentionpolicy.RetentionPolicyStatus;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 
 /**
  * User: Tom Higgins
@@ -52,8 +51,7 @@ public class Vault {
     private static final long ZERO = 0L;
     // Vault Identifier
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @UuidGenerator
     @Column(name = "id", unique = true, length = 36)
     private String id;
 

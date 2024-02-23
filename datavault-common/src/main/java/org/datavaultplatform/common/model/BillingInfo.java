@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import java.util.Objects;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.NamedAttributeNode;
@@ -16,7 +15,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import org.datavaultplatform.common.response.BillingInformation;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -31,8 +30,7 @@ public class BillingInfo {
 
 	public static final String EG_BILLING_INFO = "eg.BillingInfo.1";
 	@Id
-	@GeneratedValue(generator = "uuid")
-	@GenericGenerator(name = "uuid", strategy = "uuid2")
+	@UuidGenerator
 	@Column(name = "id", unique = true, length = 36)
 	private String id;
 

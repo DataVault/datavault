@@ -65,6 +65,7 @@ public class AuditChunkStatusDAOIT extends BaseReuseDatabaseTest {
 
     dao.save(auditChunkStatus1);
     assertNotNull(auditChunkStatus1.getID());
+    UUIDUtils.assertIsUUID(auditChunkStatus1.getID());
     assertEquals(1, count());
 
     dao.save(auditChunkStatus2);

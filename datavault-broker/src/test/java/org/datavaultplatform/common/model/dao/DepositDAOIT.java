@@ -64,6 +64,7 @@ public class DepositDAOIT extends BaseReuseDatabaseTest {
 
     dao.save(depositReview1);
     assertNotNull(depositReview1.getID());
+    UUIDUtils.assertIsUUID(depositReview1.getID());
     assertEquals(1, dao.count());
 
     dao.save(depositReview2);

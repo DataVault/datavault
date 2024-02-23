@@ -39,6 +39,7 @@ public class FileStoreDAOIT extends BaseReuseDatabaseTest {
 
     dao.save(fileStore1);
     assertNotNull(fileStore1.getID());
+    UUIDUtils.assertIsUUID(fileStore1.getID());
     assertEquals(1, count());
 
     dao.save(fileStore2);

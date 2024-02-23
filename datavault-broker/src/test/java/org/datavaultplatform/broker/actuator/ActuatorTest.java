@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
@@ -116,7 +117,7 @@ public class ActuatorTest extends BaseDatabaseTest {
 
     assertTrue(infoMap.containsKey("current-time"));
     String ct = infoMap.get("current-time");
-    Assertions.assertEquals("Tue Mar 29 14:15:16 BST 2022",ct);
+    assertEquals("Tue Mar 29 14:15:16 BST 2022",ct);
   }
 
   @Test
@@ -131,7 +132,7 @@ public class ActuatorTest extends BaseDatabaseTest {
     Map<String,Object> infoMap = mapper.createParser(json).readValueAs(Map.class);
 
     String ct = (String)infoMap.get("timestamp");
-    Assertions.assertEquals("2022-03-29T13:15:16.101Z",ct);
+    assertEquals("2022-03-29T13:15:16.101Z",ct);
 
     assertTrue(infoMap.containsKey("memory"));
     Map<String,Object> innerMap = (Map<String,Object>)infoMap.get("memory");

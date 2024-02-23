@@ -56,6 +56,7 @@ public class RetrieveDAOIT extends BaseReuseDatabaseTest {
 
     dao.save(retrieve1);
     assertNotNull(retrieve1.getID());
+    UUIDUtils.assertIsUUID(retrieve1.getID());
     assertEquals(1, count());
 
     dao.save(retrieve2);
