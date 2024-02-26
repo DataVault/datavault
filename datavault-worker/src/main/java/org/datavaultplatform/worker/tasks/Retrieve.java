@@ -92,7 +92,7 @@ public class Retrieve extends Task {
         eventSender.send(new RetrieveStart(this.jobID, this.depositId, this.retrieveId)
             .withUserId(this.userID)
             .withNextState(0));
-        
+
         logger.info("bagID: " + bagID);
         logger.info("retrievePath: " + this.retrievePath);
 
@@ -149,7 +149,7 @@ public class Retrieve extends Task {
             noOfThreads = 25;
         }
         logger.debug("Number of threads: " + noOfThreads);
-        TaskExecutor<Object> executor = new TaskExecutor<>(noOfThreads, "Chunk download failed.");
+        TaskExecutor<File> executor = new TaskExecutor<>(noOfThreads, "Chunk download failed.");
         for( int chunkNum = 1; chunkNum <= this.numOfChunks; chunkNum++) {
             Path chunkPath = context.getTempDir().resolve(tarFileName+FileSplitter.CHUNK_SEPARATOR+chunkNum);
             File chunkFile = chunkPath.toFile();

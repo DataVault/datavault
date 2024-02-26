@@ -3,36 +3,34 @@ package org.datavaultplatform.worker.operations;
 import lombok.extern.slf4j.Slf4j;
 import org.datavaultplatform.common.crypto.Encryption;
 import org.datavaultplatform.common.io.Progress;
-import org.datavaultplatform.common.storage.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.worker.utils.Utils;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
 @Slf4j
-public class ChunkRetrieveTracker implements Callable<Object> {
+public class ChunkRetrieveTracker implements Callable<File> {
     private final Context context;
     private final String archiveId;
-    private final Boolean multipleCopies;
+    private final boolean multipleCopies;
     private final String location;
     private final Device archiveStore;
     private final int chunkNumber;
     private final Map<Integer, byte[]> ivs;
     private final Progress progress;
-    private Map<Integer, String> chunksDigest = null;
-    private Map<Integer, String> encChunksDigest = null;
-    private File chunkFile;
+    private final Map<Integer, String> chunksDigest;
+    private final Map<Integer, String> encChunksDigest;
+    private final File chunkFile;
 
 
     public ChunkRetrieveTracker(String archiveId, Device archiveStore,
                                 Context context,
                                 int chunkNumber,
                                 Map<Integer, byte[]> ivs,
-                                String location, Boolean multipleCopies,
+                                String location, boolean multipleCopies,
                                 Progress progress,
                                 Map<Integer, String> chunksDigest,
                                 Map<Integer, String> encChunksDigest,
@@ -51,13 +49,13 @@ public class ChunkRetrieveTracker implements Callable<Object> {
     }
 
     @Override
-    public Object call() throws Exception {
+    public File call() throws Exception {
         String chunkArchiveId = this.getArchiveId() + FileSplitter.CHUNK_SEPARATOR + this.getChunkNumber();
 
-        if (! this.getMultipleCopies()) {
-            this.getArchiveStore().retrieve(chunkArchiveId, this.getChunkFile(), this.getProgress());
-        } else {
+        if (this.getMultipleCopies()) {
             this.getArchiveStore().retrieve(chunkArchiveId, this.getChunkFile(), this.getProgress(), this.getLocation());
+        } else {
+            this.getArchiveStore().retrieve(chunkArchiveId, this.getChunkFile(), this.getProgress());
         }
 
         byte[] chunkIV = this.ivs.get(this.getChunkNumber());
@@ -66,7 +64,7 @@ public class ChunkRetrieveTracker implements Callable<Object> {
 
             // Check encrypted file checksum
             Utils.checkFileHash("ret-enc-chunk", this.getChunkFile(), archivedEncChunkFileHash);
-            Encryption.decryptFile(this.getContext(), this.getChunkFile(), this.getIvs().get(this.getChunkNumber()));
+            Encryption.decryptFile(this.getContext(), this.getChunkFile(), chunkIV);
         }
 
         // Check file
