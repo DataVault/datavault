@@ -122,7 +122,7 @@
                         <td><a th:href="@{|/vaults/${deposit.vaultID}|}">[[${deposit.vaultID}]]</a></td>
                         <td><span th:if="${!#strings.isEmpty(deposit?.vaultOwnerID)}">[[${deposit.vaultOwnerName}]] ([[${deposit.vaultOwnerID}]])</span></td>
                         <td>[[${deposit.vaultReviewDate}]]</td>
-                        <div th:with="removeDepositSecurityExpression=|hasPermission('${deposit.getGroupID()}', 'GROUP', 'DELETE_SCHOOL_VAULT_DEPOSITS')|">
+                        <td th:with="removeDepositSecurityExpression=|hasPermission('${deposit.getGroupID()}', 'GROUP', 'DELETE_SCHOOL_VAULT_DEPOSITS')|">
                             <div th:if="${#authorization.expression(removeDepositSecurityExpression)}">
                             <th:block th:if="${deposit.status != 'DELETED'}">
                                 <a class="btn btn-xs btn-danger pull-left" href="#" th:data-vault="${deposit.getVaultID()}" th:data-deposit="${deposit.getID()}" data-toggle="modal" data-target="#confirm-removal">
@@ -138,7 +138,7 @@
                                     Restart
                                 </a>
                             </th:block>
-                        </div>
+                        </td>
 
 
                     </tr>

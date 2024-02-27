@@ -16,6 +16,7 @@ import org.jsoup.nodes.Comment;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.TextNode;
+import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -42,11 +44,13 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
@@ -90,8 +94,21 @@ public class ThymeleafConfigTest {
         assertThat(this.templateEngine.getConfiguration()).isInstanceOf(EngineConfiguration.class);
         tlConfig = (EngineConfiguration) this.templateEngine.getConfiguration();
 
-        lenient().doAnswer(invocation -> true).when(mEvaluator).hasPermission(any(), any(), any(), any());
-        lenient().doAnswer(invocation -> true).when(mEvaluator).hasPermission(any(), any(), any());
+        lenient().doAnswer(invocation -> {
+            Authentication auth = invocation.getArgument(0);
+            Serializable targetId = invocation.getArgument(1);
+            String targetType = invocation.getArgument(2);
+            Object permission = invocation.getArgument(3);
+            System.out.printf("hasPermission4[%s][%s][%s][%s]%n",auth.getName(), targetId, targetType, permission);
+            return true;
+        }).when(mEvaluator).hasPermission(any(), any(), any(), any());
+        lenient().doAnswer(invocation -> {
+            Authentication auth = invocation.getArgument(0);
+            Object targetDomainObject = invocation.getArgument(1);
+            Object permission = invocation.getArgument(2);
+            System.out.printf("hasPermission3[%s][%s][%s]%n",auth.getName(), targetDomainObject, permission);
+            return true;
+        }).when(mEvaluator).hasPermission(any(), any(), any());
     }
 
     private View getView(String viewName) throws Exception {
@@ -591,9 +608,21 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/pendingVaults/edit/editPendingVault.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc);
+
         //check title
         checkTitle(doc, "Admin - Edit Pending Vault");
         outputHtml(html);
+
+    }
+
+    private void displayFormFields(Document doc){
+        Elements items = doc.selectXpath("//form[1]//input");
+        for(int i=0; i< items.size(); i++) {
+            Element item = items.get(i);
+            System.out.printf("input type[%s] name[%s] value[%s] id[%s] %n", item.attr("type"), item.attr("name"), item.attr("value"), item.id());
+        }
+
     }
 
 

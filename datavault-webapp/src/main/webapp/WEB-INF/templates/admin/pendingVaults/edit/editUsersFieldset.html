@@ -58,7 +58,7 @@
           
         <!-- START: NDMs hidden -->
         <div id="hidden-empty-ndms" class="collapse col-sm-offset-4">
-            <th:block th:with="numExisting=${vault?.nominatedDataManagers == null ? 0 : #lists.size(vault.nominatedDataManagers)}">
+            <th:block th:with="numExisting=${vault?.nominatedDataManagers == null ? 1 : #lists.size(vault.nominatedDataManagers)}">
             <th:block th:each="index: ${#numbers.sequence(numExisting,numExisting-1+15)}">
             <div class="empty-ndm form-group col-sm-offset-4 my-1">
                 <input class="autocomplete uun-required unique-uun-required"
@@ -115,7 +115,7 @@
           
         <!-- START: depositors hidden -->
         <div id="hidden-empty-depositors" class="collapse col-sm-offset-4">
-            <th:block th:with="numExisting=${vaults?.depositors == null ? 0 :  #lists.size(vault.depositors)}">
+            <th:block th:with="numExisting=${vault?.depositors == null ? 1 :  #lists.size(vault.depositors)}">
             <th:block th:each="index: ${#numbers.sequence(numExisting,numExisting-1+15)}">
             <div class="empty-depositor form-group col-sm-offset-4 my-1">
                <input class="autocomplete uun-required unique-uun-required"
@@ -180,7 +180,7 @@
           
         <!-- START: dataCreators hidden -->
         <div id="hidden-empty-data-creators" class="collapse col-sm-offset-4">
-            <th:block th:with="numExisting=${vault?.dataCreators == null ? 0 : #lists.size(vault?.dataCreators)}">
+            <th:block th:with="numExisting=${vault?.dataCreators == null ? 1 : #lists.size(vault?.dataCreators)}">
             <th:block th:each="index: ${#numbers.sequence(numExisting,numExisting-1+15)}">
             <div class="empty-data-creator form-group col-sm-offset-4 my-1">
                <input class="autocomplete uun-required"

@@ -74,7 +74,7 @@
                         <strong>Date Guidance Review</strong>
                     </label>
                     <input id="dateGuidanceReviewed" name="dateGuidanceReviewed" class="form-control date-picker" placeholder="yyyy-mm-dd"
-                           th:field="*{dataGuidanceReviewed}"
+                           th:field="*{dateGuidanceReviewed}"
                     />
                 </div>
 
@@ -86,7 +86,7 @@
             <input type="hidden" th:name="${_csrf?.parameterName ?: ''}" th:value="${_csrf?.token ?: ''}" />
         </div>
     </form>
-
+    </div>
 </div>
 
 <script type="application/javascript">
@@ -102,5 +102,4 @@
 
     });
 </script>
-</div>
 </html>
