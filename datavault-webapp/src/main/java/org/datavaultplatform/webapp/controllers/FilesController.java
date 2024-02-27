@@ -100,8 +100,9 @@ public class FilesController {
         DepositSize result = restService.checkDepositSize(filePaths);
         Boolean success = result.getResult();
         String max = FileUtils.getGibibyteSizeStr(result.getMax());
+        String sizeWithUnits = result.getSizeWithUnits();
         log.info("Max deposit (web): " + max);
-        return "{ \"success\":\"" + success + "\", \"max\":\"" + max + "\"}";
+        return "{ \"success\":\"" + success + "\", \"max\":\"" + max + "\", \"sizeWithUnits\":\"" + sizeWithUnits + "\"}";
     }
     
     @RequestMapping(value = "/fileupload", method = RequestMethod.POST)
@@ -139,5 +140,18 @@ public class FilesController {
         response.setStatus(HttpServletResponse.SC_OK);
         wr.flush();
         wr.close();
+    }
+
+    @RequestMapping(value = "/sizeofselectedfiles")
+    public @ResponseBody String sizeOfSelectedFiles(HttpServletRequest request) throws Exception{
+        log.info("WEBAPP: Called sizeOfSelectedFiles");
+
+        String[] filePaths = request.getParameterValues("filepath[]");
+
+        for(String filePath : filePaths){
+            log.info("filePaths: " + filePath);
+        }
+
+        return restService.sizeOfSelectedFiles(filePaths);
     }
 }
