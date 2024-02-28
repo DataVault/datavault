@@ -18,9 +18,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,14 +53,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 
 @WebMvcTest
 @ProfileStandalone
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class ThymeleafConfigTest {
 
     public static final String HELLO_FIRST_LINE = "<!DOCTYPE html><!--test/hello.html-->";
@@ -157,6 +157,9 @@ public class ThymeleafConfigTest {
         String helloTemplateHtml = getHtml("test/hello.html", modelMap);
         assertEquals(HELLO_FIRST_LINE, getFirstLine(helloTemplateHtml));
         Document doc = Jsoup.parse(helloTemplateHtml);
+
+        noFormFields(doc);
+
         checkTitle(doc, "Hello user101!");
     }
 
@@ -364,6 +367,7 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/billing/billingDetailsFundingNoDoNotKNow.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc,"update-billingDetails-form");
 
         checkTextInputFieldValue(doc, "projectId", "ID-123");
         checkTextInputFieldValue(doc, "amountToBeBilled", "234.56");
@@ -390,6 +394,7 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/billing/billingDetailsGrant.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc,"update-billingDetails-form");
 
         checkTextInputFieldValue(doc, "contactName", "James Bond");
         checkTextInputFieldValue(doc, "school", "Informatics");
@@ -417,6 +422,7 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/billing/billingDetailsNA.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc, "update-billingDetails-form");
 
         checkTextInputFieldValue(doc, "projectId", "ID-123");
         checkTextInputFieldValue(doc, "amountToBeBilled", "234.56");
@@ -442,6 +448,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/billing/billingDetailsSlice.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc, "update-billingDetails-form");
+
         //check title
         checkTitle(doc, "Admin - Billing Details (SLICE)");
         outputHtml(html);
@@ -457,6 +465,7 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/billing/billingDetailsWilLPay.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc, "update-billingDetails-form");
 
         checkTextInputFieldValue(doc, "projectId", "ID-123");
         checkTextInputFieldValue(doc, "amountToBeBilled", "234.56");
@@ -481,6 +490,8 @@ public class ThymeleafConfigTest {
         modelMap.put("billingDetails", info);
         String html = getHtml("admin/billing/index.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        displayFormFields(doc, "search-vaults");
 
         //check title
         checkTitle(doc, "Admin - Billing Details");
@@ -580,6 +591,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/deposits/index.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc, "search-vaults");
+
         //check title
         checkTitle(doc, "Admin - Deposits");
         outputHtml(html);
@@ -597,6 +610,8 @@ public class ThymeleafConfigTest {
         modelMap.put("events", Arrays.asList(event1, event2));
         String html = getHtml("admin/events/index.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        noFormFields(doc);
 
         //check title
         checkTitle(doc, "Admin - Events");
@@ -682,6 +697,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/pendingVaults/confirmed.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc, "search-pendingvaults");
+
         //check title
         checkTitle(doc, "Admin - Confirmed Pending Vaults");
         outputHtml(html);
@@ -699,6 +716,7 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/pendingVaults/index.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        noFormFields(doc);
 
         String hrefAdministration = getHrefMatchedOnText(doc, "Administration");
         assertThat(hrefAdministration).isEqualTo("/dv/admin/");
@@ -735,6 +753,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/pendingVaults/saved.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc, "search-pendingvaults");
+
         //check title
         checkTitle(doc, "Admin - Saved Pending Vaults");
         outputHtml(html);
@@ -764,6 +784,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/pendingVaults/summary.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc, "create-vault");
+
         //check title
         checkTitle(doc, "Admin - Pending Vault Summary");
         outputHtml(html);
@@ -780,6 +802,8 @@ public class ThymeleafConfigTest {
 
         String html = getHtml("admin/retentionpolicies/add.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        displayFormFields(doc, "add-rentention-policy-form");
 
         //check title
         checkTitle(doc, "Admin - Add Retention Policy");
@@ -819,6 +843,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/retentionpolicies/index.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        noFormFields(doc);
+
         //check title
         checkTitle(doc, "Admin - Retention Policies");
         outputHtml(html);
@@ -847,6 +873,8 @@ public class ThymeleafConfigTest {
 
         String html = getHtml("admin/retrieves/index.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        noFormFields(doc);
 
         //check title
         checkTitle(doc, "Admin - Retrievals");
@@ -916,6 +944,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/reviews/create.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc, "create-review");
+
         //check title
         checkTitle(doc, "Admin - Review");
         outputHtml(html);
@@ -934,6 +964,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/reviews/index.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        noFormFields(doc);
+
         //check title
         checkTitle(doc, "Admin - Reviews");
         outputHtml(html);
@@ -947,6 +979,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/roles/isadmin/index.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc, "create-form");
+
         //check title
         checkTitle(doc, "Admin - IS Admin");
         outputHtml(html);
@@ -959,6 +993,8 @@ public class ThymeleafConfigTest {
 
         String html = getHtml("admin/roles/index.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        displayFormFields(doc, "create-role");
 
         //check title
         checkTitle(doc, "Admin - Roles");
@@ -981,6 +1017,8 @@ public class ThymeleafConfigTest {
         modelMap.put("schools", Arrays.asList(group1, group2));
         String html = getHtml("admin/schools/index.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        noFormFields(doc);
 
         //check title
         checkTitle(doc, "Admin - Schools");
@@ -1028,6 +1066,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/schools/schoolRoles.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc, "create-form");
+
         //check title
         checkTitle(doc, "Admin - School Roles");
         outputHtml(html);
@@ -1053,6 +1093,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/users/create.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc, "create-user");
+
         //check title
         checkTitle(doc, "Admin - Create User");
         outputHtml(html);
@@ -1077,6 +1119,8 @@ public class ThymeleafConfigTest {
 
         String html = getHtml("admin/users/edit.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        displayFormFields(doc,"edit-user");
 
         //check title
         checkTitle(doc, "Admin - Edit Profile");
@@ -1113,6 +1157,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/users/index.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc, "search-users");
+
         //check title
         checkTitle(doc, "Admin - Users");
         outputHtml(html);
@@ -1143,6 +1189,8 @@ public class ThymeleafConfigTest {
 
         String html = getHtml("admin/vaults/index.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        displayFormFields(doc, "search-vaults");
 
         //check title
         checkTitle(doc, "Admin - Vaults");
@@ -1241,6 +1289,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/vaults/vault.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc, "");
+
         //check title
         checkTitle(doc, "Admin - Vault");
         outputHtml(html);
@@ -1248,7 +1298,7 @@ public class ThymeleafConfigTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void test36dminIndex() throws Exception {
+    void test36adminIndex() throws Exception {
         ModelMap modelMap = new ModelMap();
         modelMap.addAttribute("canViewVaultsSize", true);
         modelMap.addAttribute("vaultsize", 123_456_789);
@@ -1283,6 +1333,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/index.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        noFormFields(doc);
+
         //check title
         checkTitle(doc, "Admin");
         outputHtml(html);
@@ -1295,6 +1347,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("auth/confirmation.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        noFormFields(doc);
+
         //check title
         checkTitle(doc, "Authentication - Confirmation");
         outputHtml(html);
@@ -1306,6 +1360,8 @@ public class ThymeleafConfigTest {
 
         String html = getHtml("auth/denied.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        noFormFields(doc);
 
         //check title
         checkTitle(doc, "Authentication - Access Denied");
@@ -1321,6 +1377,8 @@ public class ThymeleafConfigTest {
 
         String html = getHtml("auth/login.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        displayFormFields(doc, "");
 
         //check title
         checkTitle(doc, "Authentication - Login");
@@ -1348,6 +1406,8 @@ public class ThymeleafConfigTest {
 
         String html = getHtml("deposits/create.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        displayFormFields(doc,"add-from-storage-form");
 
         //check title
         checkTitle(doc, "Deposits - Create");
@@ -1425,6 +1485,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("deposits/deposit.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        noFormFields(doc);
+
         //check title
         checkTitle(doc, "Deposits - Deposit");
         outputHtml(html);
@@ -1487,6 +1549,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("deposits/retrieve.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc, "retrieve-deposit");
+
         //check title
         checkTitle(doc, "Deposits - Retrieve");
         outputHtml(html);
@@ -1507,6 +1571,8 @@ public class ThymeleafConfigTest {
         outputHtml(errorTemplateHtml);
 
         Document doc = Jsoup.parse(errorTemplateHtml);
+
+        noFormFields(doc);
 
         //check 1st css link
         List<Element> linkElements = doc.selectXpath("//link", Element.class);
@@ -1549,6 +1615,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("feedback/index.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc,"feedback");
+
         //check title
         checkTitle(doc, "Feedback");
         outputHtml(html);
@@ -1560,6 +1628,8 @@ public class ThymeleafConfigTest {
 
         String html = getHtml("feedback/sent.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        noFormFields(doc);
 
         //check title
         checkTitle(doc, "Feedback - Sent");
@@ -1609,6 +1679,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("filestores/index.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc, "add-filestoreSFTP-form");
+
         //check title
         checkTitle(doc, "Filestores");
         outputHtml(html);
@@ -1635,6 +1707,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("groups/index.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        noFormFields(doc);
+
         //check title
         checkTitle(doc, "Group Vaults");
         outputHtml(html);
@@ -1650,6 +1724,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("help/index.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        noFormFields(doc);
+
         //check title
         checkTitle(doc, "Help");
         outputHtml(html);
@@ -1661,6 +1737,8 @@ public class ThymeleafConfigTest {
 
         String html = getHtml("vaults/confirmed.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        noFormFields(doc);
 
         //check title
         checkTitle(doc, "Vaults - Confirmed");
@@ -1687,6 +1765,8 @@ public class ThymeleafConfigTest {
 
         String html = getHtml("vaults/create.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        displayFormFields(doc, "create-vault");
 
         //check title
         checkTitle(doc, "Vaults - Create");
@@ -1737,6 +1817,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("vaults/index.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        noFormFields(doc);
+
         //check title
         checkTitle(doc, "Vaults");
         outputHtml(html);
@@ -1765,6 +1847,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("vaults/newCreatePrototype.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc,"vault-creation-form");
+
         //check title
         checkTitle(doc, "Vaults - Create");
         outputHtml(html);
@@ -1781,6 +1865,8 @@ public class ThymeleafConfigTest {
 
         String html = getHtml("vaults/userVaults.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        noFormFields(doc);
 
         //check title
         checkTitle(doc, "Vaults - User Vaults");
@@ -1870,6 +1956,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("vaults/vault.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc,"add-data-manager-form");
+
         //check title
         checkTitle(doc, "Vaults - Vault");
         outputHtml(html);
@@ -1883,6 +1971,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("index.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        noFormFields(doc);
+
         //check title
         checkTitle(doc, "Index");
         outputHtml(html);
@@ -1895,6 +1985,8 @@ public class ThymeleafConfigTest {
 
         String html = getHtml("secure.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        noFormFields(doc);
 
         //check title
         checkTitle(doc, "Secure Page");
@@ -1911,6 +2003,8 @@ public class ThymeleafConfigTest {
 
         String html = getHtml("welcome.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        noFormFields(doc);
 
         //check title
         checkTitle(doc, "Welcome");
