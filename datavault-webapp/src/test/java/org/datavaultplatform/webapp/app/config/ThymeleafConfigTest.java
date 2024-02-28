@@ -485,9 +485,16 @@ public class ThymeleafConfigTest {
     void test13BillingDetailsIndex() throws Exception {
         ModelMap modelMap = new ModelMap();
         
+        VaultInfo vault1 = getVaultInfo1();
+        VaultInfo vault2 = getVaultInfo2();
+
+        modelMap.put("vaults", Arrays.asList(vault1, vault2));
+
         BillingInformation info = getInfo(now);
 
         modelMap.put("billingDetails", info);
+        modelMap.put("numberOfPages",2);
+
         String html = getHtml("admin/billing/index.html", modelMap);
         Document doc = Jsoup.parse(html);
 

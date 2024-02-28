@@ -82,7 +82,7 @@
                                 <tbody>
                                         <tr th:each="vault: ${vaults}" class="tr">
                                             <td>
-                                                <a href="@{|/vaults/${vault.getID()}|}">
+                                                <a th:href="@{|/vaults/${vault.getID()}|}">
                                                     [[${vault.name}]]
                                                 </a>
                                             </td>
@@ -126,7 +126,7 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <a href="@{|/admin/billing/${vault.getID()}|}">Billing Details</a>
+                                                <a th:href="@{|/admin/billing/${vault.getID()}|}">Billing Details</a>
                                             </td>
                                         </tr>
                                 </tbody>
