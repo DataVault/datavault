@@ -1,5 +1,6 @@
 package org.datavaultplatform.webapp.app.config;
 
+import org.apache.commons.lang3.StringUtils;
 import org.datavaultplatform.common.model.*;
 import org.datavaultplatform.common.request.CreateDeposit;
 import org.datavaultplatform.common.request.CreateRetentionPolicy;
@@ -17,6 +18,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -52,6 +54,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 
@@ -177,6 +180,7 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/archivestores/index.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc,"add-archivestoreLocal-form");
         //check title
         checkTitle(doc, "Admin - Archive Stores");
         outputHtml(html);
@@ -189,6 +193,7 @@ public class ThymeleafConfigTest {
         modelMap.put("deposits", Collections.emptyList());
         String html = getHtml("admin/audits/deposits.html", modelMap);
         Document doc = Jsoup.parse(html);
+        displayFormFields(doc, "");
 
         //check title
         checkTitle(doc, "Admin Audits Deposits");
@@ -236,6 +241,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/audits/index.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        noFormFields(doc);
+
         //check title
         checkTitle(doc, "Admin - Audits");
         outputHtml(html);
@@ -250,6 +257,7 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/billing/billingDetails.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc,"update-billingDetails-form");
 
         checkTextInputFieldValue(doc, "contactName", "James Bond");
         checkTextInputFieldValue(doc, "school", "Informatics");
@@ -277,6 +285,7 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/billing/billingDetailsBudget.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc,"update-billingDetails-form");
 
         checkTextInputFieldValue(doc, "projectId", "ID-123");
         checkTextInputFieldValue(doc, "amountToBeBilled", "234.56");
@@ -303,6 +312,8 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/billing/billingDetailsBuyNewSlice.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc,"update-billingDetails-form");
+
         checkTextInputFieldValue(doc, "projectId", "ID-123");
         checkTextInputFieldValue(doc, "amountToBeBilled", "234.56");
         checkTextInputFieldValue(doc, "amountBilled", "123.45");
@@ -327,6 +338,7 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/billing/billingDetailsFeeWaiver.html", modelMap);
         Document doc = Jsoup.parse(html);
 
+        displayFormFields(doc,"update-billingDetails-form");
 
         checkTextInputFieldValue(doc, "projectId", "ID-123");
         checkTextInputFieldValue(doc, "amountToBeBilled", "234.56");
@@ -608,7 +620,7 @@ public class ThymeleafConfigTest {
         String html = getHtml("admin/pendingVaults/edit/editPendingVault.html", modelMap);
         Document doc = Jsoup.parse(html);
 
-        displayFormFields(doc);
+        displayFormFields(doc, "pendingvault-edit-form");
 
         //check title
         checkTitle(doc, "Admin - Edit Pending Vault");
@@ -616,10 +628,34 @@ public class ThymeleafConfigTest {
 
     }
 
-    private void displayFormFields(Document doc){
-        Elements items = doc.selectXpath("//form[1]//input");
-        for(int i=0; i< items.size(); i++) {
-            Element item = items.get(i);
+    private void displayFormFields(Document doc) {
+        displayFormFields(doc, null);
+    }
+    private void noFormFields(Document doc){
+        Elements forms = doc.selectXpath("//form[1]");
+        assertThat(forms.size() == 0);
+    }
+
+    private void displayFormFields(Document doc, String expectedFormId) {
+        Elements forms = doc.selectXpath("//form[1]");
+        Element form = forms.get(0);
+        String formMethod = form.attr("method");
+        String formAction = form.attr("action");
+        String formId = form.attr("id");
+        if (expectedFormId != null) {
+            assertThat(formId).isEqualTo(expectedFormId);
+        } else {
+            System.out.println("WE HAVE A FORM NOT EXPECTED WITT ID [" + formId  + "]");
+        }
+        if(StringUtils.isNotBlank(formAction)){
+            assertThat(formAction).startsWith("/dv");
+        }
+        System.out.printf("FORM method[%s] id[%s] action[%s]%n", formMethod, formId, formAction);
+
+        Elements inputs = doc.selectXpath("//form[1]//input");
+
+        for(int i=0; i< inputs.size(); i++) {
+            Element item = inputs.get(i);
             System.out.printf("input type[%s] name[%s] value[%s] id[%s] %n", item.attr("type"), item.attr("name"), item.attr("value"), item.id());
         }
 
@@ -761,6 +797,8 @@ public class ThymeleafConfigTest {
 
         String html = getHtml("admin/retentionpolicies/edit.html", modelMap);
         Document doc = Jsoup.parse(html);
+
+        displayFormFields(doc,"add-rentention-policy-form");
 
         //check title
         checkTitle(doc, "Admin - Edit Retention Policy");
