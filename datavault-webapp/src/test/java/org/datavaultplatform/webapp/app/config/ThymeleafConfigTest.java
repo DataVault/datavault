@@ -484,7 +484,7 @@ public class ThymeleafConfigTest {
     @Test
     void test13BillingDetailsIndex() throws Exception {
         ModelMap modelMap = new ModelMap();
-        
+
         VaultInfo vault1 = getVaultInfo1();
         VaultInfo vault2 = getVaultInfo2();
 
@@ -659,6 +659,10 @@ public class ThymeleafConfigTest {
     }
 
     private void displayFormFields(Document doc, String expectedFormId) {
+        //the old freemarker templates had hidden false values for checboxes - no need for this with Thymeleaf
+        Elements hiddenFalseValues = doc.selectXpath("//form[1]//input[@type='hidden'][@value='false']");
+        assertThat(hiddenFalseValues.size()).isZero();
+
         Elements forms = doc.selectXpath("//form[1]");
         Element form = forms.get(0);
         String formMethod = form.attr("method");
