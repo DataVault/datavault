@@ -22,6 +22,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +71,10 @@ public class ThymeleafConfigTest {
     private final Date now = new Date();
 
     final Logger log = LoggerFactory.getLogger(getClass());
+
+    enum ListState {
+        NULL, EMPTY, NON_EMPTY
+    }
 
     @MockBean
     PermissionEvaluator mEvaluator;
@@ -625,14 +631,29 @@ public class ThymeleafConfigTest {
         outputHtml(html);
     }
 
-    @Test
     @WithMockUser(roles = "IS_ADMIN")
-    void test16AdminPendingVaultsEditPendingVault() throws Exception {
+    @ParameterizedTest
+    @EnumSource(value = ListState.class)
+    void test16AdminPendingVaultsEditPendingVault(ListState listState) throws Exception {
         ModelMap modelMap = new ModelMap();
 
         CreateVault vault = getCreateVault();
         RetentionPolicy policy1 = getRetentionPolicy1();
         RetentionPolicy policy2 = getRetentionPolicy2();
+
+        switch (listState) {
+            case NULL:
+                vault.setDataCreators(null);
+                vault.setDepositors(null);
+                vault.setNominatedDataManagers(null);
+                break;
+            case EMPTY:
+                vault.setDataCreators(Collections.emptyList());
+                vault.setDepositors(Collections.emptyList());
+                vault.setNominatedDataManagers(Collections.emptyList());
+                break;
+            default:
+        }
 
         modelMap.put("errors", Arrays.asList("error1", "error2"));
         modelMap.put("vault", vault);
@@ -650,12 +671,13 @@ public class ThymeleafConfigTest {
 
     }
 
+    @SuppressWarnings("unused")
     private void displayFormFields(Document doc) {
         displayFormFields(doc, null);
     }
     private void noFormFields(Document doc){
         Elements forms = doc.selectXpath("//form[1]");
-        assertThat(forms.size() == 0);
+        assertThat(forms).isEmpty();
     }
 
     private void displayFormFields(Document doc, String expectedFormId) {
@@ -680,11 +702,37 @@ public class ThymeleafConfigTest {
 
         Elements inputs = doc.selectXpath("//form[1]//input");
 
-        for(int i=0; i< inputs.size(); i++) {
-            Element item = inputs.get(i);
-            System.out.printf("input type[%s] name[%s] value[%s] id[%s] %n", item.attr("type"), item.attr("name"), item.attr("value"), item.id());
+        for (Element input : inputs) {
+            System.out.printf("input type[%s] name[%s] value[%s] id[%s] %n", input.attr("type"), input.attr("name"), input.attr("value"), input.id());
         }
 
+        //select tag and options
+        Elements selects = doc.selectXpath("//form[1]//select");
+        for (Element select : selects) {
+            System.out.printf("select name[%s] id[%s] %n", select.attr("name"), select.id());
+            Elements options = select.getElementsByTag("option");
+            for (Element option : options) {
+                boolean selected = option.hasAttr("selected");
+                System.out.printf("select-option value[%s] selected[%s] %n", option.attr("value"), selected);
+            }
+        }
+
+        //datalist tag and options
+        Elements datalists = doc.selectXpath("//form[1]//datalist");
+        for (Element datalist : datalists) {
+            System.out.printf("datalist name[%s] id[%s] %n", datalist.attr("name"), datalist.id());
+            Elements options = datalist.getElementsByTag("option");
+            for (Element option : options) {
+                boolean selected = option.hasAttr("selected");
+                System.out.printf("datalist-option value[%s] selected[%s] %n", option.attr("value"), selected);
+            }
+        }
+
+        //textareas
+        Elements textareas = doc.selectXpath("//form[1]//textarea");
+        for (Element textarea : textareas) {
+            System.out.printf("textarea name[%s] id[%s] text[%s]%n", textarea.attr("name"), textarea.id(), textarea.text());
+        }
     }
 
 
@@ -1835,8 +1883,10 @@ public class ThymeleafConfigTest {
         outputHtml(html);
     }
 
-    @Test
-    void test52VaultsNewCreatePrototype() throws Exception {
+    @WithMockUser(roles = "IS_ADMIN")
+    @ParameterizedTest
+    @EnumSource(value = ListState.class)
+    void test52VaultsNewCreatePrototype(ListState listState) throws Exception {
         ModelMap modelMap = new ModelMap();
 
         Group group1 = getGroup("group-id-1");
@@ -1847,8 +1897,22 @@ public class ThymeleafConfigTest {
         group2.setName("group-name-2");
         group2.setEnabled(true);
 
+        CreateVault vault = getCreateVault();
+        switch (listState) {
+            case NULL:
+                vault.setDataCreators(null);
+                vault.setDepositors(null);
+                vault.setNominatedDataManagers(null);
+                break;
+            case EMPTY:
+                vault.setDataCreators(Collections.emptyList());
+                vault.setDepositors(Collections.emptyList());
+                vault.setNominatedDataManagers(Collections.emptyList());
+                break;
+            default:
+        }
         modelMap.put("groups", Arrays.asList(group1, group2));
-        modelMap.put("vault", getCreateVault());
+        modelMap.put("vault", vault);
         modelMap.put("errors", Arrays.asList("error1", "error2"));
         RetentionPolicy retPol1 = getRetentionPolicy1();
         RetentionPolicy retPol2 = getRetentionPolicy2();
@@ -2103,6 +2167,7 @@ public class ThymeleafConfigTest {
         };
     }
 
+    @SuppressWarnings("unused")
     public Audit getAudit(String id) {
         return new Audit() {
             @Override
