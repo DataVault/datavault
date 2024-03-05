@@ -25,6 +25,7 @@ import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.SFTPFileSystemDriver;
 import org.datavaultplatform.common.storage.impl.ssh.UtilitySSHD;
 import org.datavaultplatform.common.storage.impl.ssh.UtilitySSHD.SFTPMonitorSSHD;
+import org.slf4j.Logger;
 
 /**
  * An implementation of SFTPFileSystemDriver to use Apache sshd's sftp-client library.
@@ -209,4 +210,8 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
   }
 
 
+  @Override
+  public Logger getLogger() {
+    return log;
+  }
 }

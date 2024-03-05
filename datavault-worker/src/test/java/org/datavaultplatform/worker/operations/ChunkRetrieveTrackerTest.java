@@ -14,7 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,7 +59,7 @@ class ChunkRetrieveTrackerTest {
     ArgumentCaptor<Progress> argProgress;
 
     @Captor
-    ArgumentCaptor<String> argLocation;
+    ArgumentCaptor<List<String>> argLocations;
 
     @Test
     void testRetrieveSingleCopyNotEncrypted() {
@@ -111,14 +113,14 @@ class ChunkRetrieveTrackerTest {
                     encChunksDigest.put(TEST_CHUNK_NUMBER, TEST_ENC_CHUNKS_DIGEST);
                 }
                 if (isMulti) {
-                    Mockito.doNothing().when(mDevice).retrieve(argArchiveId.capture(), argChunkFile.capture(), argProgress.capture(), argLocation.capture());
+                    Mockito.doNothing().when(mDevice).retrieve(argArchiveId.capture(), argChunkFile.capture(), argProgress.capture(), argLocations.capture());
                 } else {
                     Mockito.doNothing().when(mDevice).retrieve(argArchiveId.capture(), argChunkFile.capture(), argProgress.capture());
                 }
 
                 ChunkRetrieveTracker retriever = new ChunkRetrieveTracker(
                         TEST_ARCHIVE_ID, mDevice, mContext, TEST_CHUNK_NUMBER,
-                        ivs, TEST_LOCATION, isMulti, progress, chunksDigest, encChunksDigest,
+                        ivs, Arrays.asList(TEST_LOCATION), isMulti, progress, chunksDigest, encChunksDigest,
                         chunkFile);
                 File result = retriever.call();
                 assertThat(result).isEqualTo(chunkFile);
@@ -127,9 +129,9 @@ class ChunkRetrieveTrackerTest {
                     assertThat(argArchiveId.getValue()).isEqualTo(TEST_ARCHIVE_ID_WITH_CHUNK);
                     assertThat(argChunkFile.getValue()).isEqualTo(chunkFile);
                     assertThat(argProgress.getValue()).isEqualTo(progress);
-                    assertThat(argLocation.getValue()).isEqualTo(TEST_LOCATION);
+                    assertThat(argLocations.getValue()).isEqualTo(Arrays.asList(TEST_LOCATION));
 
-                    Mockito.verify(mDevice).retrieve(TEST_ARCHIVE_ID_WITH_CHUNK, chunkFile, progress, TEST_LOCATION);
+                    Mockito.verify(mDevice).retrieve(TEST_ARCHIVE_ID_WITH_CHUNK, chunkFile, progress, Arrays.asList(TEST_LOCATION));
                 } else {
                     assertThat(argArchiveId.getValue()).isEqualTo(TEST_ARCHIVE_ID_WITH_CHUNK);
                     assertThat(argChunkFile.getValue()).isEqualTo(chunkFile);
