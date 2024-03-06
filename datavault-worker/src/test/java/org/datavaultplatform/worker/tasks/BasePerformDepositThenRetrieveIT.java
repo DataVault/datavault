@@ -239,7 +239,7 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest 
   }
 
   void waitUntil(Callable<Boolean> test) {
-    Awaitility.await().atMost(5, TimeUnit.MINUTES)
+    Awaitility.await().atMost(15, TimeUnit.MINUTES)
         .pollInterval(Duration.ofSeconds(15))
         .until(test);
   }

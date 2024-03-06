@@ -89,7 +89,12 @@ public class MultiLocalFileSystem extends Device implements ArchiveStore {
 
         return working.getName();
     }
-    
+
+    @Override
+    public String store(String path, File working, Progress progress, String timeStampDirname) throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public Verify.Method getVerifyMethod() {
         // Return the default verification method (copy back and check)

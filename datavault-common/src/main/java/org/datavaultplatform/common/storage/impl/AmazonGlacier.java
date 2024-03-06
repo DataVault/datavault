@@ -175,7 +175,12 @@ public class AmazonGlacier extends Device implements ArchiveStore {
         // Glacier generates a new ID which is required retrieve data.
         return archiveId;
     }
-    
+
+    @Override
+    public String store(String path, File working, Progress progress, String timeStampDirname) throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public Verify.Method getVerifyMethod() {
         return verificationMethod;
