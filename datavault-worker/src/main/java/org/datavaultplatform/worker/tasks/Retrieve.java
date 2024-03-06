@@ -23,14 +23,13 @@ import org.datavaultplatform.worker.retry.TwoSpeedRetry;
 import org.datavaultplatform.worker.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.retry.support.RetryTemplate;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import org.springframework.retry.support.RetryTemplate;
 
 /**
  * A class that extends Task which is used to handle Retrievals from the vault
@@ -91,7 +90,7 @@ public class Retrieve extends Task {
         this.encChunksDigest = this.getEncChunksDigest();
         this.encTarDigest = this.getEncTarDigest();
 
-        this.userFsTwoSpeedRetry = getUserFsTwoSpeedRetry(properties);
+        setupUserFsTwoSpeedRetry(properties);
 
         if (this.isRedeliver()) {
             eventSender.send(new RetrieveError(this.jobID, this.depositId, this.retrieveId,"Retrieve stopped: the message had been redelivered, please investigate")
@@ -141,29 +140,7 @@ public class Retrieve extends Task {
             throw new RuntimeException(e);
         }
     }
-    protected void setupUserFsTwoSpeedRetry(Map<String,String> properties) {
-        this.userFsTwoSpeedRetry = getUserFsTwoSpeedRetry(properties);
-    }
 
-    private TwoSpeedRetry getUserFsTwoSpeedRetry(Map<String, String> properties) {
-
-        int userFsRetrieveMaxAttempts = DEFAULT_USERFS_RETRIEVE_ATTEMPTS;
-        long userFsRetrieveDelayMs1 = TimeUnit.SECONDS.toMillis(DEFAULT_USERFS_DELAY_SECS_1);
-        long userFsRetrieveDelayMs2 = TimeUnit.SECONDS.toMillis(DEFAULT_USERFS_DELAY_SECS_2);
-
-        if (properties.containsKey(PropNames.USER_FS_RETRIEVE_ATTEMPTS)) {
-            userFsRetrieveMaxAttempts = Integer.parseInt(properties.get(PropNames.USER_FS_RETRIEVE_ATTEMPTS));
-        }
-        if (properties.containsKey(PropNames.USER_FS_RETRIEVE_DELAY_MS_1)) {
-            userFsRetrieveDelayMs1 = Long.parseLong(properties.get(PropNames.USER_FS_RETRIEVE_DELAY_MS_1));
-        }
-        if (properties.containsKey(PropNames.USER_FS_RETRIEVE_DELAY_MS_2)) {
-            userFsRetrieveDelayMs2 = Long.parseLong(properties.get(PropNames.USER_FS_RETRIEVE_DELAY_MS_2));
-        }
-
-        return new TwoSpeedRetry(userFsRetrieveMaxAttempts, userFsRetrieveDelayMs1, userFsRetrieveDelayMs2);
-    }
-    
     private void recomposeSingle(String tarFileName, Context context, Device archiveFs, Progress progress, File tarFile) throws Exception {
         recompose(tarFileName, context, archiveFs, progress, tarFile, false, null);
     }
@@ -287,27 +264,6 @@ public class Retrieve extends Task {
             .withUserId(this.userID));
     }
 
-    protected void copyFilesToUserFs(Progress progress, File payloadDir, Device userFs, long bagDirSize) throws Exception {
-        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, bagDirSize, this.eventSender);
-        Thread trackerThread = new Thread(tracker);
-        trackerThread.start();
-
-        try {
-            Path basePath = payloadDir.toPath();
-            File[] contents = payloadDir.listFiles();
-            Arrays.sort(contents);
-            for(File content: contents){
-                String taskDesc = basePath.relativize(content.toPath()).toString();
-                RetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("toUserFs - %s",taskDesc));
-                template.execute(context -> userFs.store(this.retrievePath, content, progress));
-            }
-        } finally {
-            // Stop the tracking thread
-            tracker.stop();
-            trackerThread.join();
-        }
-    }
-    
     private void initStates() {
     	ArrayList<String> states = new ArrayList<>();
         states.add("Computing free space");    // 0
@@ -472,5 +428,49 @@ public class Retrieve extends Task {
         );
         logger.error(msg);
         throw new Exception(msg);
+    }
+
+    protected void setupUserFsTwoSpeedRetry(Map<String, String> properties) {
+        this.userFsTwoSpeedRetry = getUserFsTwoSpeedRetry(properties);
+    }
+
+    private TwoSpeedRetry getUserFsTwoSpeedRetry(Map<String, String> properties) {
+
+        int userFsRetrieveMaxAttempts = DEFAULT_USERFS_RETRIEVE_ATTEMPTS;
+        long userFsRetrieveDelayMs1 = TimeUnit.SECONDS.toMillis(DEFAULT_USERFS_DELAY_SECS_1);
+        long userFsRetrieveDelayMs2 = TimeUnit.SECONDS.toMillis(DEFAULT_USERFS_DELAY_SECS_2);
+
+        if (properties.containsKey(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS)) {
+            userFsRetrieveMaxAttempts = Integer.parseInt(properties.get(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS));
+        }
+        if (properties.containsKey(PropNames.USER_FS_RETRIEVE_DELAY_MS_1)) {
+            userFsRetrieveDelayMs1 = Long.parseLong(properties.get(PropNames.USER_FS_RETRIEVE_DELAY_MS_1));
+        }
+        if (properties.containsKey(PropNames.USER_FS_RETRIEVE_DELAY_MS_2)) {
+            userFsRetrieveDelayMs2 = Long.parseLong(properties.get(PropNames.USER_FS_RETRIEVE_DELAY_MS_2));
+        }
+
+        return new TwoSpeedRetry(userFsRetrieveMaxAttempts, userFsRetrieveDelayMs1, userFsRetrieveDelayMs2);
+    }
+
+    protected void copyFilesToUserFs(Progress progress, File payloadDir, Device userFs, long bagDirSize) throws Exception {
+        ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, bagDirSize, this.eventSender);
+        Thread trackerThread = new Thread(tracker);
+        trackerThread.start();
+
+        try {
+            Path basePath = payloadDir.toPath();
+            File[] contents = payloadDir.listFiles();
+            Arrays.sort(contents);
+            for (File content : contents) {
+                String taskDesc = basePath.relativize(content.toPath()).toString();
+                RetryTemplate template = userFsTwoSpeedRetry.getRetryTemplate(String.format("toUserFs - %s", taskDesc));
+                template.execute(context -> userFs.store(this.retrievePath, content, progress));
+            }
+        } finally {
+            // Stop the tracking thread
+            tracker.stop();
+            trackerThread.join();
+        }
     }
 }

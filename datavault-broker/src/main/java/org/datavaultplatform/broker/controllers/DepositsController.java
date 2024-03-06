@@ -62,6 +62,10 @@ public class DepositsController {
     private final String ociBucketName;
 
     private final String tsmReverse;
+    private final int userFsRetrieveMaxAttempts;
+    private final long userFsRetrieveDelaySeconds1;
+    private final long userFsRetrieveDelaySeconds2;
+
     private final ObjectMapper mapper;
 
     private static final Logger logger = LoggerFactory.getLogger(DepositsController.class);
@@ -85,6 +89,9 @@ public class DepositsController {
         @Value("${ociNameSpace:#{null}}") String ociNameSpace,
         @Value("${tsmReverse:#{false}}") String tsmReverse,
         @Value("${ociBucketName:#{null}}") String ociBucketName,
+        @Value("${userFsRetrieveMaxAttempts:10}") int userFsRetrieveMaxAttempts,
+        @Value("${userFsRetrieveDelaySeconds1:60}") long userFsRetrieveDelaySeconds1,
+        @Value("${userFsRetrieveDelaySeconds2:60}") long userFsRetrieveDelaySeconds2,
         ObjectMapper mapper) {
         this.vaultsService = vaultsService;
         this.depositsService = depositsService;
@@ -110,6 +117,9 @@ public class DepositsController {
         this.ociNameSpace = ociNameSpace;
         this.ociBucketName = ociBucketName;
         this.tsmReverse = tsmReverse;
+        this.userFsRetrieveMaxAttempts = userFsRetrieveMaxAttempts;
+        this.userFsRetrieveDelaySeconds1 = userFsRetrieveDelaySeconds1;
+        this.userFsRetrieveDelaySeconds2 = userFsRetrieveDelaySeconds2;
         this.mapper = mapper;
     }
 
@@ -314,7 +324,10 @@ public class DepositsController {
             retrieveProperties.put(PropNames.ARCHIVE_DIGEST, deposit.getArchiveDigest());
             retrieveProperties.put(PropNames.ARCHIVE_DIGEST_ALGORITHM, deposit.getArchiveDigestAlgorithm());
             retrieveProperties.put(PropNames.NUM_OF_CHUNKS, Integer.toString(deposit.getNumOfChunks()));
-            
+            retrieveProperties.put(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS, String.valueOf(this.userFsRetrieveMaxAttempts));
+            retrieveProperties.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_1, String.valueOf(this.userFsRetrieveDelaySeconds1));
+            retrieveProperties.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_2, String.valueOf(this.userFsRetrieveDelaySeconds2));
+
             // Add a single entry for the user file storage
             Map<String, String> userFileStoreClasses = new HashMap<>();
             Map<String, Map<String, String>> userFileStoreProperties = new HashMap<>();

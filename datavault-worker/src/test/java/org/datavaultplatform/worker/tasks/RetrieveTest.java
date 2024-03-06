@@ -1,9 +1,13 @@
 package org.datavaultplatform.worker.tasks;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import lombok.SneakyThrows;
 import org.datavaultplatform.common.PropNames;
 import org.datavaultplatform.common.io.Progress;
 import org.datavaultplatform.common.storage.Device;
+import org.datavaultplatform.worker.retry.TwoSpeedRetry;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,12 +17,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -28,6 +36,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class RetrieveTest {
+
     @Test
     @SneakyThrows
     void testThrowCheckSumError() {
@@ -41,14 +50,30 @@ public class RetrieveTest {
     @Nested
     class UserFsRetrieveTests {
 
+        private static final int MAX_ATTEMPTS = 4;
+
         @TempDir
         private File payloadDir;
+
+
+        ch.qos.logback.classic.Logger getRetryLogger() {
+            @SuppressWarnings("UnnecessaryLocalVariable")
+            ch.qos.logback.classic.Logger result = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(TwoSpeedRetry.class);
+            return result;
+        }
+
+        final ListAppender<ILoggingEvent> logBackListAppender = new ListAppender<>();
 
         @Mock
         Device mUserFs;
 
         @BeforeEach
         void setup() throws Exception {
+
+            logBackListAppender.start();
+            getRetryLogger().addAppender(logBackListAppender);
+
+
             assertThat(payloadDir).exists();
 
             File file1 = new File(payloadDir, "file1.txt");
@@ -61,6 +86,12 @@ public class RetrieveTest {
 
         }
 
+        @AfterEach
+        void tearDown() {
+            logBackListAppender.stop();
+            getRetryLogger().detachAppender(logBackListAppender);
+        }
+
         private void writeToFile(File file, String contents) throws Exception {
             try (FileWriter fw = new FileWriter(file)) {
                 fw.write(contents);
@@ -69,23 +100,61 @@ public class RetrieveTest {
         }
 
         @ParameterizedTest
-        @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
+        @ValueSource(ints = {1, 2, 3, 4})
         void testSucceedsIfNthAttemptWorks(int attemptThatCopyFilesWorks) throws Exception {
             checkCopyFilesToUserFs(attemptThatCopyFilesWorks);
+
+            if (attemptThatCopyFilesWorks == MAX_ATTEMPTS) {
+                List<String> logMessages = this.logBackListAppender.list.stream()
+                        .map(ILoggingEvent::getFormattedMessage)
+                        .collect(Collectors.toList());
+
+                assertThat(logMessages).isEqualTo(Arrays.asList(
+                        "Task[toUserFs - file1.txt] Initial attempt",
+                        "Task[toUserFs - file1.txt] Backoff! attempts so far [1], retry in [010ms]",
+                        "Task[toUserFs - file1.txt] Sleeping for [010ms]",
+                        // CHANGE TO 2nd Backoff Delay of 20ms
+                        "Task[toUserFs - file1.txt] Backoff! attempts so far [2], retry in [020ms]",
+                        "Task[toUserFs - file1.txt] Sleeping for [020ms]",
+                        "Task[toUserFs - file1.txt] Backoff! attempts so far [3], retry in [020ms]",
+                        "Task[toUserFs - file1.txt] Sleeping for [020ms]",
+                        "Task[toUserFs - file1.txt] Succeeded after [4] attempts",
+
+                        "Task[toUserFs - file2.txt] Initial attempt",
+                        "Task[toUserFs - file2.txt] Backoff! attempts so far [1], retry in [010ms]",
+                        "Task[toUserFs - file2.txt] Sleeping for [010ms]",
+                        // CHANGE TO 2nd Backoff Delay of 20ms
+                        "Task[toUserFs - file2.txt] Backoff! attempts so far [2], retry in [020ms]",
+                        "Task[toUserFs - file2.txt] Sleeping for [020ms]",
+                        "Task[toUserFs - file2.txt] Backoff! attempts so far [3], retry in [020ms]",
+                        "Task[toUserFs - file2.txt] Sleeping for [020ms]",
+
+                        "Task[toUserFs - file2.txt] Succeeded after [4] attempts",
+                        "Task[toUserFs - file3.txt] Initial attempt",
+                        "Task[toUserFs - file3.txt] Backoff! attempts so far [1], retry in [010ms]",
+                        "Task[toUserFs - file3.txt] Sleeping for [010ms]",
+                        // CHANGE TO 2nd Backoff Delay of 20ms
+                        "Task[toUserFs - file3.txt] Backoff! attempts so far [2], retry in [020ms]",
+                        "Task[toUserFs - file3.txt] Sleeping for [020ms]",
+                        "Task[toUserFs - file3.txt] Backoff! attempts so far [3], retry in [020ms]",
+                        "Task[toUserFs - file3.txt] Sleeping for [020ms]",
+                        "Task[toUserFs - file3.txt] Succeeded after [4] attempts"
+                ));
+            }
         }
 
         @SuppressWarnings("CodeBlock2Expr")
         @Test
-        void testFailsAfter10FailedAttempts() {
+        void testFailsAfter4FailedAttempts() {
             assertThatThrownBy(() -> {
-                checkCopyFilesToUserFs(11);
-            }).isInstanceOf(Exception.class).hasMessage("Failing on [file1.txt] attempt[10]");
+                checkCopyFilesToUserFs(5);
+            }).isInstanceOf(Exception.class).hasMessage("Failing on [file1.txt] attempt[4]");
         }
 
         void checkCopyFilesToUserFs(int attemptThatCopyWorksOn) throws Exception {
             Progress progress = new Progress();
             Map<String, String> properties = new HashMap<>();
-            properties.put(PropNames.USER_FS_RETRIEVE_ATTEMPTS, "10");
+            properties.put(PropNames.USER_FS_RETRIEVE_MAX_ATTEMPTS, String.valueOf(MAX_ATTEMPTS));
             properties.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_1, "10");
             properties.put(PropNames.USER_FS_RETRIEVE_DELAY_MS_2, "20");
             Retrieve ret = new Retrieve();

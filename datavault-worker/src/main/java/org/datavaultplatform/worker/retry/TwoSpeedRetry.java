@@ -10,7 +10,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.retry.support.RetryTemplateBuilder;
 import org.springframework.util.Assert;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 @Slf4j
@@ -29,8 +29,8 @@ public class TwoSpeedRetry {
     }
 
     @SneakyThrows
-    void defaultSleep(long delayMs) {
-        log.info("Sleeping for [{}]", DurationHelper.formatHoursMinutesSeconds(delayMs));
+    void defaultSleep(String taskLabel, long delayMs) {
+        log.info("Task[{}] Sleeping for [{}]", taskLabel, DurationHelper.formatHoursMinutesSeconds(delayMs));
         Thread.sleep(delayMs);
     }
 
@@ -38,11 +38,11 @@ public class TwoSpeedRetry {
         return getRetryTemplate(taskLabel, this::defaultSleep);
     }
 
-    public RetryTemplate getRetryTemplate(String taskLabel, Consumer<Long> sleeper) {
+    public RetryTemplate getRetryTemplate(String taskLabel, BiConsumer<String,Long> sleeper) {
         return getRetryTemplate( taskLabel, sleeper, CountAttemptsBackoffContext::new);
     }
 
-    public RetryTemplate getRetryTemplate(String taskLabel, Consumer<Long> sleeper, Supplier<CountAttemptsBackoffContext> ctxSupplier) {
+    public RetryTemplate getRetryTemplate(String taskLabel, BiConsumer<String,Long> sleeper, Supplier<CountAttemptsBackoffContext> ctxSupplier) {
         BackOffPolicy bop = new TwoSpeedBackoffPolicy(taskLabel, delay1, delay2, totalNumberOfAttempts / 2, sleeper, ctxSupplier);
         RetryTemplate template = new RetryTemplateBuilder()
                 .customBackoff(bop)

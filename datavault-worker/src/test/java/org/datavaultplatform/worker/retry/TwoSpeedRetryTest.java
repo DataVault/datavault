@@ -1,19 +1,21 @@
 package org.datavaultplatform.worker.retry;
 
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.support.RetryTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@Slf4j
 public class TwoSpeedRetryTest {
+
+    private final Logger log = LoggerFactory.getLogger(TwoSpeedRetry.class);
 
     private static final ThreadLocal<CountAttemptsBackoffContext> CTX = ThreadLocal.withInitial(CountAttemptsBackoffContext::new);
 
@@ -25,8 +27,8 @@ public class TwoSpeedRetryTest {
     private TwoSpeedRetry templateHelper;
 
     @SneakyThrows
-    void simulateSleep(long delayMs) {
-        log.info("Simulate Sleeping for [{}]", DurationHelper.formatHoursMinutesSeconds(delayMs));
+    void simulateSleep(String taskLabel, long delayMs) {
+        log.info("Task[{}] Simulate Sleeping for [{}]", taskLabel, DurationHelper.formatHoursMinutesSeconds(delayMs));
     }
 
     @BeforeEach
