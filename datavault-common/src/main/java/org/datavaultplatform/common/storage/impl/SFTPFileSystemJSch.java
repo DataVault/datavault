@@ -343,9 +343,14 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
             Disconnect();
         }
     }
-    
+
     @Override
-    public String store(String relativePath, File working, Progress progress) throws Exception {
+    public String store(String path, File working, Progress progress) throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String store(String relativePath, File working, Progress progress, String timestampDirName) throws Exception {
 
         String path = getFullPath(relativePath);
         try {
@@ -354,7 +359,7 @@ public class SFTPFileSystemJSch extends Device implements SFTPFileSystemDriver {
             channelSftp.cd(path);
 
             // Create timestamped folder to avoid overwriting files
-            String timestampDirName = SftpUtils.getTimestampedDirectoryName(clock);
+            //String timestampDirName = SftpUtils.getTimestampedDirectoryName(clock);
             path = path + PATH_SEPARATOR + timestampDirName;
 
             mkdir(channelSftp, timestampDirName);

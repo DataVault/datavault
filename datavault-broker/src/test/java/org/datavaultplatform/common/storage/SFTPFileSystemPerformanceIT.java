@@ -153,7 +153,7 @@ public class SFTPFileSystemPerformanceIT {
 
     Progress progressStore = new Progress();
     long start1 = System.currentTimeMillis();
-    String storedPath = sftpFileSystemDriver.store(".", bigFile, progressStore);
+    String storedPath = sftpFileSystemDriver.store(".", bigFile, progressStore, "20240305142225");
     long diff1 = System.currentTimeMillis() - start1;
     ProgressInfo pInfoStore = new ProgressInfo("store", diff1, progressStore);
 

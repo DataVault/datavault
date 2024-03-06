@@ -14,6 +14,7 @@ import org.datavaultplatform.common.model.ArchiveStore;
 import org.datavaultplatform.common.storage.Device;
 import org.datavaultplatform.common.storage.UserStore;
 import org.datavaultplatform.common.storage.Verify;
+import org.datavaultplatform.common.storage.impl.SftpUtils;
 import org.datavaultplatform.common.task.Context;
 import org.datavaultplatform.common.task.Task;
 import org.datavaultplatform.common.util.StorageClassNameResolver;
@@ -24,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.nio.file.Path;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -99,9 +101,10 @@ public class Retrieve extends Task {
         StorageClassNameResolver resolver = context.getStorageClassNameResolver();
         Device userFs = this.setupUserFileStores(resolver);
         Device archiveFs = this.setupArchiveFileStores(resolver);
+        String timestampDirName = SftpUtils.getTimestampedDirectoryName(Clock.systemDefaultZone());
         
         try {
-        	this.checkUserStoreFreeSpace(userFs);
+        	this.checkUserStoreFreeSpaceAndPermissions(userFs, timestampDirName);
 
             // Retrieve the archived data
             String tarFileName = bagID + ".tar";
@@ -115,9 +118,9 @@ public class Retrieve extends Task {
                 .withNextState(1));
             
             if (archiveFs.hasMultipleCopies()) {
-            	this.multipleCopies(context, tarFileName, tarFile, archiveFs, userFs);
+            	this.multipleCopies(context, tarFileName, tarFile, archiveFs, userFs, timestampDirName);
             } else {
-            	this.singleCopy(context, tarFileName, tarFile, archiveFs, userFs);
+            	this.singleCopy(context, tarFileName, tarFile, archiveFs, userFs, timestampDirName);
             }
             
         } catch (Exception e) {
@@ -209,8 +212,10 @@ public class Retrieve extends Task {
         }
     }
 
-    private void doRetrieve(Context context, Device userFs, File tarFile, Progress progress) throws Exception{
-        logger.info("Copied: " + progress.getDirCount() + " directories, " + progress.getFileCount() + " files, " + progress.getByteCount() + " bytes");
+    private void doRetrieve(Context context, Device userFs, File tarFile, Progress progress,
+                            String timeStampDirName) throws Exception{
+        logger.info("Copied: " + progress.getDirCount() + " directories, " + progress.getFileCount() + " files, "
+                + progress.getByteCount() + " bytes");
         
         logger.info("Validating data ...");
         eventSender.send(new UpdateProgress(this.jobID, this.depositId).withNextState(2)
@@ -245,7 +250,7 @@ public class Retrieve extends Task {
         try {
             ArrayList<File> contents = new ArrayList<>(Arrays.asList(payloadDir.listFiles()));
             for(File content: contents){
-                userFs.store(this.retrievePath, content, progress);
+                userFs.store(this.retrievePath, content, progress, timeStampDirName);
             }
         } finally {
             // Stop the tracking thread
@@ -325,7 +330,7 @@ public class Retrieve extends Task {
         }
     }
     
-    private void checkUserStoreFreeSpace(Device userFs) throws Exception {
+    private void checkUserStoreFreeSpaceAndPermissions(Device userFs, String timeStampDirName) throws Exception {
     	UserStore userStore = ((UserStore)userFs);
         if (!userStore.exists(retrievePath) || !userStore.isDirectory(retrievePath)) {
             // Target path must exist and be a directory
@@ -341,6 +346,12 @@ public class Retrieve extends Task {
                         "Not enough free space to retrieve data!")
                         .withUserId(this.userID));
             }
+
+            // copy .datavault file to test we can actually write
+            File hiddenDV = new File("src/main/resources/.datavault");
+
+            userFs.store(this.retrievePath, hiddenDV, new Progress(), timeStampDirName);
+
         } catch (Exception e) {
             logger.info("Unable to determine free space");
             eventSender.send(new RetrieveError(jobID, depositId, retrieveId, "Unable to determine free space")
@@ -350,7 +361,8 @@ public class Retrieve extends Task {
         }
     }
     
-    private void multipleCopies(Context context, String tarFileName, File tarFile, Device archiveFs, Device userFs) throws Exception {
+    private void multipleCopies(Context context, String tarFileName, File tarFile, Device archiveFs, Device userFs,
+                                String timeStampDirName) throws Exception {
     	logger.info("Device has multiple copies");
         Progress progress = new Progress();
         ProgressTracker tracker = new ProgressTracker(progress, this.jobID, this.depositId, this.archiveSize, this.eventSender);
@@ -380,7 +392,7 @@ public class Retrieve extends Task {
                 }
 
                 logger.info("Attempting retrieve on archive from " + location);
-                this.doRetrieve(context, userFs, tarFile, progress);
+                this.doRetrieve(context, userFs, tarFile, progress, timeStampDirName);
                 logger.info("Completed retrieve on archive from " + location);
                 break LOCATION;
             } catch (Exception e) {
@@ -398,7 +410,8 @@ public class Retrieve extends Task {
         }
     }
     
-    private void singleCopy(Context context, String tarFileName, File tarFile, Device archiveFs, Device userFs) throws Exception {
+    private void singleCopy(Context context, String tarFileName, File tarFile, Device archiveFs,
+                            Device userFs, String timeStampDirName) throws Exception {
     	logger.info("Single copy device");
         // Progress tracking (threaded)
         Progress progress = new Progress();
@@ -434,7 +447,7 @@ public class Retrieve extends Task {
             trackerThread.join();
         }
 
-        this.doRetrieve(context, userFs, tarFile, progress);
+        this.doRetrieve(context, userFs, tarFile, progress, timeStampDirName);
     }
 
     protected static void throwChecksumError(

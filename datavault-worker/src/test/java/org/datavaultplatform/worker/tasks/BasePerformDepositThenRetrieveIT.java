@@ -247,6 +247,7 @@ public abstract class BasePerformDepositThenRetrieveIT extends BaseRabbitTCTest 
   @SneakyThrows
   private void checkRetrieve() {
     log.info("FIN {}", retrieveDir.getCanonicalPath());
+    log.info("FIN {}", retrieveDir.getCanonicalPath());
     waitUntil(this::foundRetrieveComplete);
     log.info("FIN {}", retrieveDir.getCanonicalPath());
     File retrieved = new File(this.retrieveDir + "/src-path-1/src-file-1");

@@ -170,13 +170,18 @@ public class SFTPFileSystemSSHD extends Device implements SFTPFileSystemDriver {
   }
 
   @Override
-  public String store(String path, File localFileOrDirectory, Progress progress) throws Exception {
+  public String store(String path, File working, Progress progress) throws Exception {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public String store(String path, File localFileOrDirectory, Progress progress, String timestampDirName) throws Exception {
     try (SFTPConnection con = getConnection()) {
 
       final Path basePath = Paths.get(con.getFullPath(path));
 
       // Create timestamped folder to avoid overwriting files
-      String timestampDirName = SftpUtils.getTimestampedDirectoryName(connectionInfo.getClock());
+      //String timestampDirName = SftpUtils.getTimestampedDirectoryName(connectionInfo.getClock());
       Path tsDirPath = basePath.resolve(timestampDirName);
 
       UtilitySSHD.createDir(con.sftpClient, tsDirPath);

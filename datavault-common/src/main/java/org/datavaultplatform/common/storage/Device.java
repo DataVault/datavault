@@ -44,6 +44,10 @@ public abstract class Device {
     // Copy an object (file/dir) from the working space
     // Progress information should be updated for monitoring as the copy occurs
     public abstract String store(String path, File working, Progress progress) throws Exception;
+
+    public String store(String path, File working, Progress progress, String timeStampDirname) throws Exception {
+        throw new UnsupportedOperationException();
+    }
     
     //public String store(String path, File working, Progress progress, String depositId) throws Exception {
     //		throw new UnsupportedOperationException();
